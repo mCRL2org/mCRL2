@@ -59,11 +59,11 @@ static gsSystem gssystem;
 static ATermList list_minus(ATermList l, ATermList m)
 {
   ATermList n = ATmakeList0();
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  for (; !l.empty(); l=ATgetNext(l))
   {
-    if (ATindexOf(m,ATgetFirst(l)) == ATERM_NON_EXISTING_POSITION)
+    if (ATindexOf(m,l.front()) == ATERM_NON_EXISTING_POSITION)
     {
-      n = ATinsert(n,ATgetFirst(l));
+      n = ATinsert(n,l.front());
     }
   }
   return reverse(n);
@@ -290,7 +290,7 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
         {
           mCRL2log(debug) << "type checking transform VarConst phase finished" << std::endl;
 
-          Result = ATsetArgument(data_spec, gsMakeDataEqnSpec(body.equations),3);
+          Result = data_spec.set_argument(gsMakeDataEqnSpec(body.equations),3);
 
           Result = gstcFoldSortRefs(Result);
 
@@ -344,10 +344,10 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
                   mCRL2log(debug) << "type checking transform ActProc+VarConst phase finished" << std::endl;
 
                   data_spec=ATAgetArgument(proc_spec,0);
-                  data_spec=ATsetArgument(data_spec, gsMakeDataEqnSpec(body.equations),3);
-                  Result=ATsetArgument(proc_spec,data_spec,0);
-                  Result=ATsetArgument(Result,gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(proc_spec,3),0))),3);
-                  Result=ATsetArgument(Result,gsMakeProcessInit(ATAtableGet(body.proc_bodies,INIT_KEY())),4);
+                  data_spec=data_spec.set_argument(gsMakeDataEqnSpec(body.equations),3);
+                  Result=proc_spec.set_argument(data_spec,0);
+                  Result=Result.set_argument(gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(proc_spec,3),0))),3);
+                  Result=Result.set_argument(gsMakeProcessInit(ATAtableGet(body.proc_bodies,INIT_KEY())),4);
 
                   Result=gstcFoldSortRefs(Result);
 
@@ -528,7 +528,7 @@ ATermAppl type_check_mult_act(
     {
       ATermTable Vars=ATtableCreate(63,50);
       ATermList r=ATmakeList0();
-      for (ATermList l=ATLgetArgument(mult_act,0); !ATisEmpty(l); l=ATgetNext(l))
+      for (ATermList l=ATLgetArgument(mult_act,0); !l.empty(); l=ATgetNext(l))
       {
         ATermAppl o=ATAgetFirst(l);
         assert(gsIsParamId(o));
@@ -541,7 +541,7 @@ ATermAppl type_check_mult_act(
         }
         r=ATinsert(r,o);
       }
-      Result=ATsetArgument(mult_act,reverse(r),0);
+      Result=mult_act.set_argument(reverse(r),0);
     }
     else
     {
@@ -586,12 +586,12 @@ ATermList type_check_mult_actions(
   {
     mCRL2log(debug) << "type checking of multiactions read-in phase finished" << std::endl;
 
-    for (; !ATisEmpty(mult_actions); mult_actions=ATgetNext(mult_actions))
+    for (; !mult_actions.empty(); mult_actions=ATgetNext(mult_actions))
     {
       ATermTable Vars=ATtableCreate(63,50);
       ATermList r=ATmakeList0();
 
-      for (ATermList l=(ATermList)ATgetFirst(mult_actions) ; !ATisEmpty(l); l=ATgetNext(l))
+      for (ATermList l=(ATermList)(mult_actions.front()) ; !l.empty(); l=ATgetNext(l))
       {
         ATermAppl o=ATAgetFirst(l);
         assert(gsIsParamId(o));
@@ -767,8 +767,8 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
         }
         mCRL2log(debug) << "type checking transform VarConstTypeData phase finished" << std::endl;
 
-        data_spec=ATsetArgument(data_spec, gsMakeDataEqnSpec(body.equations),3);
-        Result=ATsetArgument(ar_spec,data_spec,0);
+        data_spec=data_spec.set_argument(gsMakeDataEqnSpec(body.equations),3);
+        Result=ar_spec.set_argument(data_spec,0);
         Result=gstcFoldSortRefs(Result);
 
 
@@ -781,7 +781,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
 
         bool b = true;
 
-        for (ATermList l=ATLgetArgument(ActionRenameRules,0); !ATisEmpty(l); l=ATgetNext(l))
+        for (ATermList l=ATLgetArgument(ActionRenameRules,0); !l.empty(); l=ATgetNext(l))
         {
           ATermAppl Rule=ATAgetFirst(l);
           assert(gsIsActionRenameRule(Rule));
@@ -844,8 +844,8 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
           goto finally;
         }
 
-        ActionRenameRules=ATsetArgument(ActionRenameRules,reverse(NewRules),0);
-        Result=ATsetArgument(Result,ActionRenameRules,2);
+        ActionRenameRules=ActionRenameRules.set_argument(reverse(NewRules),0);
+        Result=Result.set_argument(ActionRenameRules,2);
         mCRL2log(debug) << "type checking transform VarConstTypeData phase finished" << std::endl;
       }
       else
@@ -935,14 +935,14 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   }
   mCRL2log(debug) << "type checking transform Data+PBES phase finished" << std::endl;
 
-  data_spec=ATsetArgument(data_spec,gsMakeDataEqnSpec(body.equations),3);
-  Result=ATsetArgument(pbes_spec,data_spec,0);
+  data_spec=data_spec.set_argument(gsMakeDataEqnSpec(body.equations),3);
+  Result=pbes_spec.set_argument(data_spec,0);
 
-  pb_eqn_spec=ATsetArgument(pb_eqn_spec,gstcWritePBES(ATLgetArgument(pb_eqn_spec,0)),0);
-  Result=ATsetArgument(Result,pb_eqn_spec,2);
+  pb_eqn_spec=pb_eqn_spec.set_argument(gstcWritePBES(ATLgetArgument(pb_eqn_spec,0)),0);
+  Result=Result.set_argument(pb_eqn_spec,2);
 
-  pb_init=ATsetArgument(pb_init,ATAtableGet(body.proc_bodies,INIT_KEY()),0);
-  Result=ATsetArgument(Result,pb_init,3);
+  pb_init=pb_init.set_argument(ATAtableGet(body.proc_bodies,INIT_KEY()),0);
+  Result=Result.set_argument(pb_init,3);
 
   Result=gstcFoldSortRefs(Result);
 
@@ -1008,7 +1008,7 @@ void gstcSplitSortDecls(ATermList SortDecls, ATermList* PSortIds,
 {
   ATermList SortIds = ATmakeList0();
   ATermList SortRefs = ATmakeList0();
-  while (!ATisEmpty(SortDecls))
+  while (!SortDecls.empty())
   {
     ATermAppl SortDecl = ATAgetFirst(SortDecls);
     if (gsIsSortRef(SortDecl))
@@ -1031,13 +1031,13 @@ ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
   assert(gsIsSortSpec(SortSpec));
   if (gsIsDataSpec(Spec))
   {
-    Spec = ATsetArgument(Spec, SortSpec, 0);
+    Spec = Spec.set_argument( SortSpec, 0);
   }
   else
   {
     ATermAppl DataSpec = ATAgetArgument(Spec, 0);
-    DataSpec = ATsetArgument(DataSpec, SortSpec, 0);
-    Spec = ATsetArgument(Spec, DataSpec, 0);
+    DataSpec = DataSpec.set_argument( SortSpec, 0);
+    Spec = Spec.set_argument( DataSpec, 0);
   }
   return Spec;
 }
@@ -1068,9 +1068,9 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
   //(a) remove sort references from Spec
   Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(SortIds));
   //(b) build substitution table
-  ATermTable Substs = ATtableCreate(2*ATgetLength(SortRefs),50);
+  ATermTable Substs = ATtableCreate(2*SortRefs.size(),50);
   ATermList l = SortRefs;
-  while (!ATisEmpty(l))
+  while (!l.empty())
   {
     ATermAppl SortRef = ATAgetFirst(l);
     //add substitution for SortRef
@@ -1109,7 +1109,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
   //fold sort references in SortRefs by means of repeated forward and backward
   //substitution
   ATermList NewSortRefs = SortRefs;
-  size_t n = ATgetLength(SortRefs);
+  size_t n = SortRefs.size();
   //perform substitutions until the list of sort references becomes stable
   do
   {
@@ -1134,7 +1134,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
         //make backward substitution
         Subst = gsMakeSubst_Appl(RHS, LHS);
       }
-      mCRL2log(debug) << "performing substition " << core::pp_deprecated(ATgetArgument(Subst, 0)) << " := " << core::pp_deprecated(ATgetArgument(Subst, 1)) << "" << std::endl;
+      mCRL2log(debug) << "performing substition " << core::pp_deprecated(Subst(0)) << " := " << core::pp_deprecated(Subst(1)) << "" << std::endl;
       //perform Subst on all elements of NewSortRefs except for the i'th
       ATermList Substs = ATmakeList1(Subst);
       for (size_t j = 0; j < n; j++)
@@ -1155,7 +1155,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
   while (NewSortRefs!=SortRefs);
   //remove self references
   ATermList l = ATmakeList0();
-  while (!ATisEmpty(SortRefs))
+  while (!SortRefs.empty())
   {
     ATermAppl SortRef = ATAgetFirst(SortRefs);
     if (gsMakeSortId(ATAgetArgument(SortRef, 0))!=ATAgetArgument(SortRef, 1))
@@ -1452,7 +1452,7 @@ static bool gstcReadInSorts(ATermList Sorts)
 {
   bool nnew;
   bool Result=true;
-  for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
+  for (; !Sorts.empty(); Sorts=ATgetNext(Sorts))
   {
     ATermAppl Sort=ATAgetFirst(Sorts);
     ATermAppl SortName=ATAgetArgument(Sort,0);
@@ -1511,14 +1511,14 @@ static bool gstcReadInSorts(ATermList Sorts)
   for (; sort_aliases!=aterm_list() ; sort_aliases=ATgetNext(sort_aliases))
   {
     std::set < basic_sort > visited;
-    const basic_sort s(core::identifier_string((ATermAppl)ATgetFirst(sort_aliases)));
+    const basic_sort s(core::identifier_string((ATermAppl)(sort_aliases.front())));
     ATermAppl aterm_reference=(ATermAppl)ATtableGet(context.defined_sorts,
                               static_cast<ATermAppl>(s.name()));
     assert(aterm_reference!=ATermAppl());
     const sort_expression ar(aterm_reference);
     if (gstc_check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
     {
-      mCRL2log(error) << "sort " << core::pp_deprecated(ATgetFirst(sort_aliases)) << " is recursively defined via a function sort, or a set or a bag type container" << std::endl;
+      mCRL2log(error) << "sort " << core::pp_deprecated(sort_aliases.front()) << " is recursively defined via a function sort, or a set or a bag type container" << std::endl;
       return false;
     }
   }
@@ -1533,9 +1533,9 @@ static bool gstcReadInConstructors(ATermList NewSorts)
   {
     Sorts=ATtableKeys(context.defined_sorts);
   }
-  for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
+  for (; !Sorts.empty(); Sorts=ATgetNext(Sorts))
   {
-    ATermAppl SortExpr=ATAtableGet(context.defined_sorts,ATgetFirst(Sorts));
+    ATermAppl SortExpr=ATAtableGet(context.defined_sorts,Sorts.front());
     if (!gstcIsSortExprDeclared(SortExpr))
     {
       return false;
@@ -1693,7 +1693,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
     for (ATermList constructor_list_walker=constructor_list;
          constructor_list_walker!=aterm_list(); constructor_list_walker=ATgetNext(constructor_list_walker))
     {
-      const sort_expression s=data::function_symbol(ATgetFirst(constructor_list_walker)).sort();
+      const sort_expression s=data::function_symbol(constructor_list_walker.front()).sort();
       if (is_function_sort(s))
       {
         // if s is a constant sort, nothing needs to be added.
@@ -1709,7 +1709,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
       for (ATermList constructor_list_walker=constructor_list;
            constructor_list_walker!=aterm_list(); constructor_list_walker=ATgetNext(constructor_list_walker))
       {
-        const sort_expression s=data::function_symbol(ATgetFirst(constructor_list_walker)).sort();
+        const sort_expression s=data::function_symbol(constructor_list_walker.front()).sort();
         if (!is_function_sort(s))
         {
           if (possibly_empty_constructor_sorts.erase(mapping(s,normalised_aliases))==1) // True if one element has been removed.
@@ -1771,8 +1771,8 @@ static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
   mCRL2log(debug) << "Start Read-in Func" << std::endl;
   bool Result=true;
 
-  size_t constr_number=ATgetLength(Cons);
-  for (ATermList Funcs=ATconcat(Cons,Maps); !ATisEmpty(Funcs); Funcs=ATgetNext(Funcs))
+  size_t constr_number=Cons.size();
+  for (ATermList Funcs=ATconcat(Cons,Maps); !Funcs.empty(); Funcs=ATgetNext(Funcs))
   {
     ATermAppl Func=ATAgetFirst(Funcs);
     ATermAppl FuncName=ATAgetArgument(Func,0);
@@ -1859,7 +1859,7 @@ static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
 static bool gstcReadInActs(ATermList Acts)
 {
   bool Result=true;
-  for (; !ATisEmpty(Acts); Acts=ATgetNext(Acts))
+  for (; !Acts.empty(); Acts=ATgetNext(Acts))
   {
     ATermAppl Act=ATAgetFirst(Acts);
     ATermAppl ActName=ATAgetArgument(Act,0);
@@ -1899,7 +1899,7 @@ static bool gstcReadInActs(ATermList Acts)
 static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
 {
   bool Result=true;
-  for (; !ATisEmpty(Procs); Procs=ATgetNext(Procs))
+  for (; !Procs.empty(); Procs=ATgetNext(Procs))
   {
     ATermAppl Proc=ATAgetFirst(Procs);
     ATermAppl ProcName=ATAgetArgument(ATAgetArgument(Proc,0),0);
@@ -1963,7 +1963,7 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
   //ATermList PBFreeVars=ATLgetArgument(GlobVarSpec,0);
   ATermList PBEqns=ATLgetArgument(PBEqnSpec,0);
 
-  for (; !ATisEmpty(PBEqns); PBEqns=ATgetNext(PBEqns))
+  for (; !PBEqns.empty(); PBEqns=ATgetNext(PBEqns))
   {
     ATermAppl PBEqn=ATAgetFirst(PBEqns);
     ATermAppl PBName=ATAgetArgument(ATAgetArgument(PBEqn,1),0);
@@ -1971,7 +1971,7 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
     ATermList PBVars=ATLgetArgument(ATAgetArgument(PBEqn,1),1);
 
     ATermList PBType=ATmakeList0();
-    for (ATermList l=PBVars; !ATisEmpty(l); l=ATgetNext(l))
+    for (ATermList l=PBVars; !l.empty(); l=ATgetNext(l))
     {
       PBType=ATinsert(PBType,ATAgetArgument(ATAgetFirst(l),1));
     }
@@ -2026,7 +2026,7 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
 static ATermList gstcWriteProcs(ATermList oldprocs)
 {
   ATermList Result=ATmakeList0();
-  for (ATermList l=oldprocs; !ATisEmpty(l); l=ATgetNext(l))
+  for (ATermList l=oldprocs; !l.empty(); l=ATgetNext(l))
   {
     ATermAppl ProcVar=ATAgetArgument(ATAgetFirst(l),0);
     if (ProcVar==INIT_KEY())
@@ -2046,13 +2046,13 @@ static ATermList gstcWriteProcs(ATermList oldprocs)
 static ATermList gstcWritePBES(ATermList oldPBES)
 {
   ATermList Result=ATmakeList0();
-  for (ATermList PBEqns=oldPBES; !ATisEmpty(PBEqns); PBEqns=ATgetNext(PBEqns))
+  for (ATermList PBEqns=oldPBES; !PBEqns.empty(); PBEqns=ATgetNext(PBEqns))
   {
     ATermAppl PBEqn=ATAgetFirst(PBEqns);
     ATermAppl PBESVar=ATAgetArgument(PBEqn,1);
 
     ATermList PBType=ATmakeList0();
-    for (ATermList l=ATLgetArgument(PBESVar,1); !ATisEmpty(l); l=ATgetNext(l))
+    for (ATermList l=ATLgetArgument(PBESVar,1); !l.empty(); l=ATgetNext(l))
     {
       PBType=ATinsert(PBType,ATAgetArgument(ATAgetFirst(l),1));
     }
@@ -2064,7 +2064,7 @@ static ATermList gstcWritePBES(ATermList oldPBES)
     {
       continue;
     }
-    Result=ATinsert(Result,ATsetArgument(PBEqn,ATAtableGet(body.proc_bodies,Index),2));
+    Result=ATinsert(Result,PBEqn.set_argument(ATAtableGet(body.proc_bodies,Index),2));
   }
   return reverse(Result);
 }
@@ -2079,7 +2079,7 @@ static bool gstcTransformVarConsTypeData(void)
   //data terms in equations
   ATermList NewEqns=ATmakeList0();
   bool b = true;
-  for (ATermList Eqns=body.equations; !ATisEmpty(Eqns); Eqns=ATgetNext(Eqns))
+  for (ATermList Eqns=body.equations; !Eqns.empty(); Eqns=ATgetNext(Eqns))
   {
     ATermAppl Eqn=ATAgetFirst(Eqns);
     ATermList VarList=ATLgetArgument(Eqn,0);
@@ -2195,7 +2195,7 @@ static bool gstcTransformActProcVarConst(void)
   ATermTable Vars=ATtableCreate(63,50);
 
   //process and data terms in processes and init
-  for (ATermList ProcVars=ATtableKeys(body.proc_pars); !ATisEmpty(ProcVars); ProcVars=ATgetNext(ProcVars))
+  for (ATermList ProcVars=ATtableKeys(body.proc_pars); !ProcVars.empty(); ProcVars=ATgetNext(ProcVars))
   {
     ATermAppl ProcVar=ATAgetFirst(ProcVars);
     Vars.reset();
@@ -2230,7 +2230,7 @@ static bool gstcTransformPBESVarConst(void)
   ATermTable Vars=ATtableCreate(63,50);
 
   //PBEs and data terms in PBEqns and init
-  for (ATermList PBVars=ATtableKeys(body.proc_pars); !ATisEmpty(PBVars); PBVars=ATgetNext(PBVars))
+  for (ATermList PBVars=ATtableKeys(body.proc_pars); !PBVars.empty(); PBVars=ATgetNext(PBVars))
   {
     ATermAppl PBVar=ATAgetFirst(PBVars);
     Vars.reset();
@@ -2263,7 +2263,7 @@ static bool gstcTransformPBESVarConst(void)
 // ======== Auxiliary functions
 static bool gstcInTypesA(ATermAppl Type, ATermList Types)
 {
-  for (; !ATisEmpty(Types); Types=ATgetNext(Types))
+  for (; !Types.empty(); Types=ATgetNext(Types))
     if (gstcEqTypesA(Type,ATAgetFirst(Types)))
     {
       return true;
@@ -2288,7 +2288,7 @@ static bool gstcEqTypesA(ATermAppl Type1, ATermAppl Type2)
 
 static bool gstcInTypesL(ATermList Type, ATermList Types)
 {
-  for (; !ATisEmpty(Types); Types=ATgetNext(Types))
+  for (; !Types.empty(); Types=ATgetNext(Types))
     if (gstcEqTypesL(Type,ATLgetFirst(Types)))
     {
       return true;
@@ -2306,11 +2306,11 @@ static bool gstcEqTypesL(ATermList Type1, ATermList Type2)
   {
     return false;
   }
-  if (ATgetLength(Type1)!=ATgetLength(Type2))
+  if (Type1.size()!=Type2.size())
   {
     return false;
   }
-  for (; !ATisEmpty(Type1); Type1=ATgetNext(Type1),Type2=ATgetNext(Type2))
+  for (; !Type1.empty(); Type1=ATgetNext(Type1),Type2=ATgetNext(Type2))
     if (!gstcEqTypesA(ATAgetFirst(Type1),ATAgetFirst(Type2)))
     {
       return false;
@@ -2373,12 +2373,12 @@ static bool gstcIsSortExprDeclared(ATermAppl SortExpr)
 
   if (gsIsSortStruct(SortExpr))
   {
-    for (ATermList Constrs=ATLgetArgument(SortExpr,0); !ATisEmpty(Constrs); Constrs=ATgetNext(Constrs))
+    for (ATermList Constrs=ATLgetArgument(SortExpr,0); !Constrs.empty(); Constrs=ATgetNext(Constrs))
     {
       ATermAppl Constr=ATAgetFirst(Constrs);
 
       ATermList Projs=ATLgetArgument(Constr,1);
-      for (; !ATisEmpty(Projs); Projs=ATgetNext(Projs))
+      for (; !Projs.empty(); Projs=ATgetNext(Projs))
       {
         ATermAppl Proj=ATAgetFirst(Projs);
         ATermAppl ProjSort=ATAgetArgument(Proj,1);
@@ -2400,7 +2400,7 @@ static bool gstcIsSortExprDeclared(ATermAppl SortExpr)
 
 static bool gstcIsSortExprListDeclared(ATermList SortExprList)
 {
-  for (; !ATisEmpty(SortExprList); SortExprList=ATgetNext(SortExprList))
+  for (; !SortExprList.empty(); SortExprList=ATgetNext(SortExprList))
     if (!gstcIsSortExprDeclared(ATAgetFirst(SortExprList)))
     {
       return false;
@@ -2435,7 +2435,7 @@ static bool gstcReadInSortStruct(ATermAppl SortExpr)
     {
       return false;
     }
-    for (ATermList Sorts=ATLgetArgument(SortExpr,0); !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
+    for (ATermList Sorts=ATLgetArgument(SortExpr,0); !Sorts.empty(); Sorts=ATgetNext(Sorts))
     {
       if (!gstcReadInSortStruct(ATAgetFirst(Sorts)))
       {
@@ -2447,7 +2447,7 @@ static bool gstcReadInSortStruct(ATermAppl SortExpr)
 
   if (gsIsSortStruct(SortExpr))
   {
-    for (ATermList Constrs=ATLgetArgument(SortExpr,0); !ATisEmpty(Constrs); Constrs=ATgetNext(Constrs))
+    for (ATermList Constrs=ATLgetArgument(SortExpr,0); !Constrs.empty(); Constrs=ATgetNext(Constrs))
     {
       ATermAppl Constr=ATAgetFirst(Constrs);
 
@@ -2462,7 +2462,7 @@ static bool gstcReadInSortStruct(ATermAppl SortExpr)
       // constructor type and projections
       ATermList Projs=ATLgetArgument(Constr,1);
       Name=ATAgetArgument(Constr,0);
-      if (ATisEmpty(Projs))
+      if (Projs.empty())
       {
         if (!gstcAddConstant(gsMakeOpId(Name,SortExpr),"constructor constant"))
         {
@@ -2475,7 +2475,7 @@ static bool gstcReadInSortStruct(ATermAppl SortExpr)
       }
 
       ATermList ConstructorType=ATmakeList0();
-      for (; !ATisEmpty(Projs); Projs=ATgetNext(Projs))
+      for (; !Projs.empty(); Projs=ATgetNext(Projs))
       {
         ATermAppl Proj=ATAgetFirst(Projs);
         ATermAppl ProjSort=ATAgetArgument(Proj,1);
@@ -2557,7 +2557,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
     ATermList L=ATLtableGet(gssystem.functions, Name);
     for (; L!=ATerm() && L!=aterm_list() ; L=ATgetNext(L))
     {
-      if (gstcTypeMatchA(Sort,(ATermAppl)ATgetFirst(L))!=ATerm())
+      if (gstcTypeMatchA(Sort,(ATermAppl)L.front())!=ATerm())
       {
         // f matches a predefined function
         mCRL2log(error) << "attempt to redeclare a system function with " << msg << " " << core::pp_deprecated(OpId) << ":" << core::pp_deprecated(Sort) << std::endl;
@@ -2630,9 +2630,9 @@ static void gstcAddSystemFunction(ATermAppl OpId)
 
 static void gstcATermTableCopy(const ATermTable &Orig, ATermTable &Copy)
 {
-  for (ATermList Keys=ATtableKeys(Orig); !ATisEmpty(Keys); Keys=ATgetNext(Keys))
+  for (ATermList Keys=ATtableKeys(Orig); !Keys.empty(); Keys=ATgetNext(Keys))
   {
-    ATerm Key=ATgetFirst(Keys);
+    ATerm Key=Keys.front();
     Copy.put(Key,ATtableGet(Orig,Key));
   }
 }
@@ -2643,7 +2643,7 @@ static bool gstcVarsUnique(ATermList VarDecls)
   bool Result=true;
   ATermIndexedSet Temp=ATindexedSetCreate(63,50);
 
-  for (; !ATisEmpty(VarDecls); VarDecls=ATgetNext(VarDecls))
+  for (; !VarDecls.empty(); VarDecls=ATgetNext(VarDecls))
   {
     ATermAppl VarDecl=ATAgetFirst(VarDecls);
     ATermAppl VarName=ATAgetArgument(VarDecl,0);
@@ -2665,7 +2665,7 @@ final:
 
 static bool gstcAddVars2Table(ATermTable &Vars, ATermList VarDecls, ATermTable &result)
 {
-  for (; !ATisEmpty(VarDecls); VarDecls=ATgetNext(VarDecls))
+  for (; !VarDecls.empty(); VarDecls=ATgetNext(VarDecls))
   {
     ATermAppl VarDecl=ATAgetFirst(VarDecls);
     ATermAppl VarName=ATAgetArgument(VarDecl,0);
@@ -2686,7 +2686,7 @@ static bool gstcAddVars2Table(ATermTable &Vars, ATermList VarDecls, ATermTable &
 
 static ATermTable gstcRemoveVars(ATermTable &Vars, ATermList VarDecls)
 {
-  for (; !ATisEmpty(VarDecls); VarDecls=ATgetNext(VarDecls))
+  for (; !VarDecls.empty(); VarDecls=ATgetNext(VarDecls))
   {
     ATermAppl VarDecl=ATAgetFirst(VarDecls);
     ATermAppl VarName=ATAgetArgument(VarDecl,0);
@@ -2733,18 +2733,18 @@ static ATermAppl gstcRewrActProc(const ATermTable &Vars, ATermAppl ProcTerm, boo
       return aterm_appl();
     }
   }
-  assert(!ATisEmpty(ParList));
+  assert(!ParList.empty());
 
-  size_t nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
+  size_t nFactPars=ATLgetArgument(ProcTerm,1).size();
   const char* msg=(is_pbes)?"propositional variable":((action)?"action":"process");
 
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
   {
     ATermList NewParList=ATmakeList0();
-    for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
+    for (; !ParList.empty(); ParList=ATgetNext(ParList))
     {
       ATermList Par=ATLgetFirst(ParList);
-      if (ATgetLength(Par)==nFactPars)
+      if (Par.size()==nFactPars)
       {
         NewParList=ATinsert(NewParList,Par);
       }
@@ -2752,7 +2752,7 @@ static ATermAppl gstcRewrActProc(const ATermTable &Vars, ATermAppl ProcTerm, boo
     ParList=reverse(NewParList);
   }
 
-  if (ATisEmpty(ParList))
+  if (ParList.empty())
   {
     mCRL2log(error) << "no " << msg << " " << core::pp_deprecated(Name)
                     << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"")
@@ -2760,7 +2760,7 @@ static ATermAppl gstcRewrActProc(const ATermTable &Vars, ATermAppl ProcTerm, boo
     return aterm_appl();
   }
 
-  if (ATgetLength(ParList)==1)
+  if (ParList.size()==1)
   {
     Result=gstcMakeActionOrProc(action,Name,ATLgetFirst(ParList),ATLgetArgument(ProcTerm,1));
   }
@@ -2778,7 +2778,7 @@ static ATermAppl gstcRewrActProc(const ATermTable &Vars, ATermAppl ProcTerm, boo
 
   ATermList NewPars=ATmakeList0();
   ATermList NewPosTypeList=ATmakeList0();
-  for (ATermList Pars=ATLgetArgument(ProcTerm,1); !ATisEmpty(Pars); Pars=ATgetNext(Pars),PosTypeList=ATgetNext(PosTypeList))
+  for (ATermList Pars=ATLgetArgument(ProcTerm,1); !Pars.empty(); Pars=ATgetNext(Pars),PosTypeList=ATgetNext(PosTypeList))
   {
     ATermAppl Par=ATAgetFirst(Pars);
     ATermAppl PosType=ATAgetFirst(PosTypeList);
@@ -2804,7 +2804,7 @@ static ATermAppl gstcRewrActProc(const ATermTable &Vars, ATermAppl ProcTerm, boo
     ATermList Pars=NewPars;
     NewPars=ATmakeList0();
     ATermList CastedPosTypeList=ATmakeList0();
-    for (; !ATisEmpty(Pars); Pars=ATgetNext(Pars),PosTypeList=ATgetNext(PosTypeList),NewPosTypeList=ATgetNext(NewPosTypeList))
+    for (; !Pars.empty(); Pars=ATgetNext(Pars),PosTypeList=ATgetNext(PosTypeList),NewPosTypeList=ATgetNext(NewPosTypeList))
     {
       ATermAppl Par=ATAgetFirst(Pars);
       ATermAppl PosType=ATAgetFirst(PosTypeList);
@@ -2846,7 +2846,7 @@ static ATermAppl gstcRewrActProc(const ATermTable &Vars, ATermAppl ProcTerm, boo
 
   if (is_pbes)
   {
-    Result=ATsetArgument(ProcTerm,NewPars,1);
+    Result=ProcTerm.set_argument(NewPars,1);
   }
 
   return Result;
@@ -2882,7 +2882,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
 
     // Put the assignments into a table
     ATermTable As=ATtableCreate(63,50);
-    for (ATermList l=ATLgetArgument(ProcTerm,1); !ATisEmpty(l); l=ATgetNext(l))
+    for (ATermList l=ATLgetArgument(ProcTerm,1); !l.empty(); l=ATgetNext(l))
     {
       ATermAppl a=ATAgetFirst(l);
       ATerm existing_rhs = ATtableGet(As,ATAgetArgument(a,0));
@@ -2902,9 +2902,9 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     {
       // Now filter the ParList to contain only the processes with parameters in this process call with assignments
       ATermList NewParList=ATmakeList0();
-      assert(!ATisEmpty(ParList));
+      assert(!ParList.empty());
       ATermAppl Culprit; // Variable used for more intelligible error messages.
-      for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
+      for (; !ParList.empty(); ParList=ATgetNext(ParList))
       {
         ATermList Par=ATLgetFirst(ParList);
 
@@ -2912,13 +2912,13 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
         ATermList FormalPars=ATLtableGet(body.proc_pars,gsMakeProcVarId(Name,Par));
         // we only need the names of the parameters, not the types
         ATermList FormalParNames=ATmakeList0();
-        for (; !ATisEmpty(FormalPars); FormalPars=ATgetNext(FormalPars))
+        for (; !FormalPars.empty(); FormalPars=ATgetNext(FormalPars))
         {
           FormalParNames=ATinsert(FormalParNames,ATAgetArgument(ATAgetFirst(FormalPars),0));
         }
 
         ATermList l=list_minus(ATtableKeys(As),FormalParNames);
-        if (ATisEmpty(l))
+        if (l.empty())
         {
           NewParList=ATinsert(NewParList,Par);
         }
@@ -2929,14 +2929,14 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       }
       ParList=reverse(NewParList);
 
-      if (ATisEmpty(ParList))
+      if (ParList.empty())
       {
         mCRL2log(error) << "no process " << core::pp_deprecated(Name) << " containing all assignments in "
                         << core::pp_deprecated(ProcTerm) << "." << std::endl
                         << "Problematic variable is " << core::pp_deprecated(Culprit) << "." << std::endl;
         return aterm_appl();
       }
-      if (!ATisEmpty(ATgetNext(ParList)))
+      if (!(ATgetNext(ParList).empty()))
       {
         mCRL2log(error) << "ambiguous process " << core::pp_deprecated(Name) << " containing all assignments in " << core::pp_deprecated(ProcTerm) << "." << std::endl;
         return aterm_appl();
@@ -2948,7 +2948,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     ATermList FormalPars=ATLtableGet(body.proc_pars,gsMakeProcVarId(Name,ATLgetFirst(ParList)));
     {
       // we only need the names of the parameters, not the types
-      for (ATermList l=FormalPars; !ATisEmpty(l); l=ATgetNext(l))
+      for (ATermList l=FormalPars; !l.empty(); l=ATgetNext(l))
       {
         ATermAppl FormalParName=ATAgetArgument(ATAgetFirst(l),0);
         ATermAppl ActualPar=ATAtableGet(As,FormalParName);
@@ -2970,7 +2970,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
 
     //reverse the assignments
     As.reset();
-    for (ATermList l=ATLgetArgument(TypeCheckedProcTerm,1),m=FormalPars; !ATisEmpty(l); l=ATgetNext(l),m=ATgetNext(m))
+    for (ATermList l=ATLgetArgument(TypeCheckedProcTerm,1),m=FormalPars; !l.empty(); l=ATgetNext(l),m=ATgetNext(m))
     {
       ATermAppl act_par=ATAgetFirst(l);
       ATermAppl form_par=ATAgetFirst(m);
@@ -2982,7 +2982,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     }
 
     ATermList TypedAssignments=ATmakeList0();
-    for (ATermList l=ATLgetArgument(ProcTerm,1); !ATisEmpty(l); l=ATgetNext(l))
+    for (ATermList l=ATLgetArgument(ProcTerm,1); !l.empty(); l=ATgetNext(l))
     {
       ATermAppl a=ATAgetFirst(l);
       a=ATAtableGet(As,ATAgetArgument(a,0));
@@ -3015,13 +3015,13 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     {
       const char* msg=gsIsBlock(ProcTerm)?"Blocking":"Hiding";
       ATermList ActList=ATLgetArgument(ProcTerm,0);
-      if (ATisEmpty(ActList))
+      if (ActList.empty())
       {
         mCRL2log(warning) << msg << " empty set of actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
 
       ATermIndexedSet Acts=ATindexedSetCreate(63,50);
-      for (; !ATisEmpty(ActList); ActList=ATgetNext(ActList))
+      for (; !ActList.empty(); ActList=ATgetNext(ActList))
       {
         ATermAppl Act=ATAgetFirst(ActList);
 
@@ -3046,14 +3046,14 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     {
       ATermList RenList=ATLgetArgument(ProcTerm,0);
 
-      if (ATisEmpty(RenList))
+      if (RenList.empty())
       {
         mCRL2log(warning) << "renaming empty set of actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
 
       ATermIndexedSet ActsFrom=ATindexedSetCreate(63,50);
 
-      for (; !ATisEmpty(RenList); RenList=ATgetNext(RenList))
+      for (; !RenList.empty(); RenList=ATgetNext(RenList))
       {
         ATermAppl Ren=ATAgetFirst(RenList);
         ATermAppl ActFrom=ATAgetArgument(Ren,0);
@@ -3078,7 +3078,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
         }
 
         TypesTo=gstcTypeListsIntersect(TypesFrom,TypesTo);
-        if (TypesTo==aterm() || ATisEmpty(TypesTo))
+        if (TypesTo==aterm() || TypesTo.empty())
         {
           mCRL2log(error) << "renaming action " << core::pp_deprecated(ActFrom) << " into action " << core::pp_deprecated(ActTo) << ": these two have no common type (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
           return aterm_appl();
@@ -3100,7 +3100,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     {
       ATermList CommList=ATLgetArgument(ProcTerm,0);
 
-      if (ATisEmpty(CommList))
+      if (CommList.empty())
       {
         mCRL2log(warning) << "synchronizing empty set of (multi)actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
@@ -3108,17 +3108,17 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       {
         ATermList ActsFrom=ATmakeList0();
 
-        for (; !ATisEmpty(CommList); CommList=ATgetNext(CommList))
+        for (; !CommList.empty(); CommList=ATgetNext(CommList))
         {
           ATermAppl Comm=ATAgetFirst(CommList);
           ATermList MActFrom=ATLgetArgument(ATAgetArgument(Comm,0),0);
           ATermList BackupMActFrom=MActFrom;
-          assert(!ATisEmpty(MActFrom));
+          assert(!MActFrom.empty());
           ATermAppl ActTo=ATAgetArgument(Comm,1);
 
-          if (ATgetLength(MActFrom)==1)
+          if (MActFrom.size()==1)
           {
-            mCRL2log(error) << "using synchronization as renaming/hiding of action " << core::pp_deprecated(ATgetFirst(MActFrom))
+            mCRL2log(error) << "using synchronization as renaming/hiding of action " << core::pp_deprecated(MActFrom.front())
                             << " into " << core::pp_deprecated(ActTo) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
             return aterm_appl();
           }
@@ -3136,7 +3136,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
             }
           }
 
-          for (; !ATisEmpty(MActFrom); MActFrom=ATgetNext(MActFrom))
+          for (; !MActFrom.empty(); MActFrom=ATgetNext(MActFrom))
           {
             ATermAppl Act=ATAgetFirst(MActFrom);
             ATermList Types=ATLtableGet(context.actions,Act);
@@ -3146,7 +3146,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
               return aterm_appl();
             }
             ResTypes=(ResTypes!=aterm())?gstcTypeListsIntersect(ResTypes,Types):Types;
-            if (ResTypes==aterm() || ATisEmpty(ResTypes))
+            if (ResTypes==aterm() || ResTypes.empty())
             {
               mCRL2log(error) << "synchronizing action " << core::pp_deprecated(Act) << " from (multi)action " << core::pp_deprecated(BackupMActFrom)
                               << " into action " << core::pp_deprecated(ActTo) << ": these have no common type (typechecking " << core::pp_deprecated(ProcTerm) << "), ResTypes: " << atermpp::aterm(ResTypes) << std::endl;
@@ -3158,7 +3158,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
           //the multiactions in the lhss of comm should not intersect.
           //make the list of unique actions
           ATermList Acts=ATmakeList0();
-          for (; !ATisEmpty(MActFrom); MActFrom=ATgetNext(MActFrom))
+          for (; !MActFrom.empty(); MActFrom=ATgetNext(MActFrom))
           {
             ATermAppl Act=ATAgetFirst(MActFrom);
             if (ATindexOf(Acts,Act)==ATERM_NON_EXISTING_POSITION)
@@ -3166,7 +3166,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
               Acts=ATinsert(Acts,Act);
             }
           }
-          for (; !ATisEmpty(Acts); Acts=ATgetNext(Acts))
+          for (; !Acts.empty(); Acts=ATgetNext(Acts))
           {
             ATermAppl Act=ATAgetFirst(Acts);
             if (ATindexOf(ActsFrom,Act)!=ATERM_NON_EXISTING_POSITION)
@@ -3188,7 +3188,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     {
       ATermList MActList=ATLgetArgument(ProcTerm,0);
 
-      if (ATisEmpty(MActList))
+      if (MActList.empty())
       {
         mCRL2log(warning) << "allowing empty set of (multi) actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
@@ -3196,12 +3196,12 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       {
         ATermList MActs=ATmakeList0();
 
-        for (; !ATisEmpty(MActList); MActList=ATgetNext(MActList))
+        for (; !MActList.empty(); MActList=ATgetNext(MActList))
         {
           ATermList MAct=ATLgetArgument(ATAgetFirst(MActList),0);
 
           //Actions must be declared
-          for (; !ATisEmpty(MAct); MAct=ATgetNext(MAct))
+          for (; !MAct.empty(); MAct=ATgetNext(MAct))
           {
             ATermAppl Act=ATAgetFirst(MAct);
             if (aterm()==ATLtableGet(context.actions,Act))
@@ -3229,7 +3229,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     {
       return aterm_appl();
     }
-    return ATsetArgument(ProcTerm,NewProc,1);
+    return ProcTerm.set_argument(NewProc,1);
   }
 
   if (gsIsSync(ProcTerm) || gsIsSeq(ProcTerm) || gsIsBInit(ProcTerm) ||
@@ -3246,7 +3246,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
     {
       return aterm_appl();
     }
-    ATermAppl a=ATsetArgument(ATsetArgument(ProcTerm,NewLeft,0),NewRight,1);
+    ATermAppl a=ProcTerm.set_argument(NewLeft,0).set_argument(NewRight,1);
     return a;
   }
 
@@ -3332,7 +3332,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
       mCRL2log(error) << "while typechecking " << core::pp_deprecated(ProcTerm) << std::endl;
       return aterm_appl();
     }
-    return ATsetArgument(ProcTerm,NewProc,1);
+    return ProcTerm.set_argument(NewProc,1);
   }
 
   assert(0);
@@ -3365,7 +3365,7 @@ static ATermAppl gstcTraversePBESVarConstPB(const ATermTable &Vars, ATermAppl PB
     {
       return aterm_appl();
     }
-    return ATsetArgument(PBESTerm,NewArg,0);
+    return PBESTerm.set_argument(NewArg,0);
   }
 
   if (gsIsPBESAnd(PBESTerm) || gsIsPBESOr(PBESTerm) || gsIsPBESImp(PBESTerm))
@@ -3380,7 +3380,7 @@ static ATermAppl gstcTraversePBESVarConstPB(const ATermTable &Vars, ATermAppl PB
     {
       return aterm_appl();
     }
-    return ATsetArgument(ATsetArgument(PBESTerm,NewLeft,0),NewRight,1);
+    return PBESTerm.set_argument(NewLeft,0).set_argument(NewRight,1);
   }
 
   if (gsIsPBESForall(PBESTerm)||gsIsPBESExists(PBESTerm))
@@ -3400,7 +3400,7 @@ static ATermAppl gstcTraversePBESVarConstPB(const ATermTable &Vars, ATermAppl PB
       mCRL2log(error) << "while typechecking " << core::pp_deprecated(PBESTerm) << std::endl;
       return aterm_appl();
     }
-    return ATsetArgument(PBESTerm,NewPBES,1);
+    return PBESTerm.set_argument(NewPBES,1);
   }
 
   if (gsIsPropVarInst(PBESTerm))
@@ -3490,17 +3490,17 @@ static ATermAppl gstcTraverseVarConsTypeD(
       if (aterm()!=gstcTypeMatchA(sort_bool::bool_(),ResType))
       {
         NewType=sort_set::set_(sort_expression(NewType));
-        *DataTerm = ATsetArgument(*DataTerm, gsMakeSetComp(), 0);
+        *DataTerm = DataTerm->set_argument(gsMakeSetComp(), 0);
       }
       else if (aterm()!=gstcTypeMatchA(sort_nat::nat(),ResType))
       {
         NewType=sort_bag::bag(sort_expression(NewType));
-        *DataTerm = ATsetArgument(*DataTerm, gsMakeBagComp(), 0);
+        *DataTerm = DataTerm->set_argument(gsMakeBagComp(), 0);
       }
       else if (aterm()!=gstcTypeMatchA(sort_pos::pos(),ResType))
       {
         NewType=sort_bag::bag(sort_expression(NewType));
-        *DataTerm = ATsetArgument(*DataTerm,gsMakeBagComp(), 0);
+        *DataTerm = DataTerm->set_argument(gsMakeBagComp(), 0);
         Data=gsMakeDataAppl(sort_nat::cnat(),ATmakeList1(Data));
       }
       else
@@ -3520,7 +3520,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         gstcRemoveVars(FreeVars,VarList);
       }
-      *DataTerm=ATsetArgument(*DataTerm,Data,2);
+      *DataTerm=DataTerm->set_argument(Data,2);
       return NewType;
     }
 
@@ -3558,7 +3558,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         gstcRemoveVars(FreeVars,VarList);
       }
-      *DataTerm=ATsetArgument(*DataTerm,Data,2);
+      *DataTerm=DataTerm->set_argument(Data,2);
       return sort_bool::bool_();
     }
 
@@ -3597,7 +3597,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         return aterm_appl();
       }
-      *DataTerm=ATsetArgument(*DataTerm,Data,2);
+      *DataTerm=DataTerm->set_argument(Data,2);
       return gsMakeSortArrow(ArgTypes,NewType);
     }
   }
@@ -3606,7 +3606,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
   {
     ATermList WhereVarList=ATmakeList0();
     ATermList NewWhereList=ATmakeList0();
-    for (ATermList WhereList=ATLgetArgument(*DataTerm,1); !ATisEmpty(WhereList); WhereList=ATgetNext(WhereList))
+    for (ATermList WhereList=ATLgetArgument(*DataTerm,1); !WhereList.empty(); WhereList=ATgetNext(WhereList))
     {
       ATermAppl WhereElem=ATAgetFirst(WhereList);
       ATermAppl WhereTerm=ATAgetArgument(WhereElem,1);
@@ -3669,7 +3669,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
   {
     //arguments
     ATermList Arguments=ATLgetArgument(*DataTerm,1);
-    size_t nArguments=ATgetLength(Arguments);
+    size_t nArguments=Arguments.size();
 
     //The following is needed to check enumerations
     ATermAppl Arg0 = ATAgetArgument(*DataTerm,0);
@@ -3690,7 +3690,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         //First time to determine the common type only!
         ATermList NewArguments=ATmakeList0();
         bool Type_is_stable=true;
-        for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
+        for (; !Arguments.empty(); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,false);
@@ -3714,7 +3714,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         if (!Type_is_stable)
         {
           NewArguments=ATmakeList0();
-          for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
+          for (; !Arguments.empty(); Arguments=ATgetNext(Arguments))
           {
             ATermAppl Argument=ATAgetFirst(Arguments);
             ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
@@ -3745,7 +3745,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
         //First time to determine the common type only (which will be NewType)!
         ATermAppl NewType;
-        for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
+        for (; !Arguments.empty(); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
@@ -3779,7 +3779,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
         //Second time to do the real work.
         ATermList NewArguments=ATmakeList0();
-        for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
+        for (; !Arguments.empty(); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
@@ -3809,7 +3809,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
         //First time to determine the common type only!
         ATermAppl NewType;
-        for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
+        for (; !Arguments.empty(); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument0=ATAgetFirst(Arguments);
           Arguments=ATgetNext(Arguments);
@@ -3847,7 +3847,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
         //Second time to do the real work.
         ATermList NewArguments=ATmakeList0();
-        for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
+        for (; !Arguments.empty(); Arguments=ATgetNext(Arguments))
         {
           ATermAppl Argument0=ATAgetFirst(Arguments);
           Arguments=ATgetNext(Arguments);
@@ -3877,7 +3877,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     ATermList NewArgumentTypes=ATmakeList0();
     ATermList NewArguments=ATmakeList0();
 
-    for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments))
+    for (; !Arguments.empty(); Arguments=ATgetNext(Arguments))
     {
       ATermAppl Arg=ATAgetFirst(Arguments);
       ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,data::unknown_sort(),FreeVars,false,warn_upcasting,print_cast_error);
@@ -3923,7 +3923,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     {
       ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
 
-      if (ATgetLength(NeededArgumentTypes)!=ATgetLength(Arguments))
+      if (NeededArgumentTypes.size()!=Arguments.size())
       {
          mCRL2log(error) << "need argumens of sorts " << core::pp_deprecated(NeededArgumentTypes) << 
                          " which does not match the number of provided arguments "
@@ -3935,11 +3935,11 @@ static ATermAppl gstcTraverseVarConsTypeD(
       //arguments again
       ATermList NewArgumentTypes=ATmakeList0();
       ATermList NewArguments=ATmakeList0();
-      for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments),
+      for (; !Arguments.empty(); Arguments=ATgetNext(Arguments),
            ArgumentTypes=ATgetNext(ArgumentTypes),NeededArgumentTypes=ATgetNext(NeededArgumentTypes))
       {
-        assert(!ATisEmpty(Arguments));
-        assert(!ATisEmpty(NeededArgumentTypes));
+        assert(!Arguments.empty());
+        assert(!NeededArgumentTypes.empty());
         ATermAppl Arg=ATAgetFirst(Arguments);
         ATermAppl NeededType=ATAgetFirst(NeededArgumentTypes);
         ATermAppl Type=ATAgetFirst(ArgumentTypes);
@@ -4010,7 +4010,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
       ATermList NewArgumentTypes=ATmakeList0();
       ATermList NewArguments=ATmakeList0();
-      for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments),
+      for (; !Arguments.empty(); Arguments=ATgetNext(Arguments),
            ArgumentTypes=ATgetNext(ArgumentTypes),NeededArgumentTypes=ATgetNext(NeededArgumentTypes))
       {
         ATermAppl Arg=ATAgetFirst(Arguments);
@@ -4172,7 +4172,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     if (aterm()!=ParList)
     {
       ATermList NewParList=ATmakeList0();
-      for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
+      for (; !ParList.empty(); ParList=ATgetNext(ParList))
       {
         ATermAppl Par=ATAgetFirst(ParList);
         if (aterm()!=(Par=gstcTypeMatchA(Par,PosType)))
@@ -4181,13 +4181,13 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
       }
       ParList=reverse(NewParList);
-      if (ATisEmpty(ParList))
+      if (ParList.empty())
       {
         mCRL2log(error) << "no system constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
         return aterm_appl();
       }
 
-      if (ATgetLength(ParList)==1)
+      if (ParList.size()==1)
       {
         Type=ATAgetFirst(ParList);
         *DataTerm=gsMakeOpId(Name,Type);
@@ -4217,7 +4217,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       return aterm_appl();
     }
 
-    if (ATgetLength(ParList)==1)
+    if (ParList.size()==1)
     {
       ATermAppl Type=ATAgetFirst(ParList);
       *DataTerm=gsMakeOpId(Name,Type);
@@ -4314,7 +4314,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       {
         if (aterm()!=(ParList=ATLtableGet(gssystem.constants,Name)))
         {
-          if (ATgetLength(ParList)==1)
+          if (ParList.size()==1)
           {
             ATermAppl Type=ATAgetFirst(ParList);
             *DataTerm=gsMakeOpId(Name,Type);
@@ -4376,14 +4376,14 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       if (nFactPars!=ATERM_NON_EXISTING_POSITION)
       {
         NewParList=ATmakeList0();
-        for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
+        for (; !ParList.empty(); ParList=ATgetNext(ParList))
         {
           ATermAppl Par=ATAgetFirst(ParList);
           if (!gsIsSortArrow(Par))
           {
             continue;
           }
-          if ((ATgetLength(ATLgetArgument(Par,0))!=nFactPars))
+          if (ATLgetArgument(Par,0).size()!=nFactPars)
           {
             continue;
           }
@@ -4392,7 +4392,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         ParList=reverse(NewParList);
       }
 
-      if (!ATisEmpty(ParList))
+      if (!ParList.empty())
       {
         CandidateParList=ParList;
       }
@@ -4400,7 +4400,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       // filter ParList keeping only functions of the right type
       ATermList BackupParList=ParList;
       NewParList=ATmakeList0();
-      for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
+      for (; !ParList.empty(); ParList=ATgetNext(ParList))
       {
         ATermAppl Par=ATAgetFirst(ParList);
         if (aterm()!=(Par=gstcTypeMatchA(Par,PosType)))
@@ -4412,7 +4412,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       mCRL2log(debug) << "Possible matches w/o casting for Op/Var " << core::pp_deprecated(Name) << " with "<< nFactPars <<               " argument are (ParList: " << core::pp_deprecated(NewParList) << "; PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
 
-      if (ATisEmpty(NewParList))
+      if (NewParList.empty())
       {
         //Ok, this looks like a type error. We are not that strict.
         //Pos can be Nat, or even Int...
@@ -4423,7 +4423,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         ParList=BackupParList;
         mCRL2log(debug) << "Trying casting for Op " << core::pp_deprecated(Name) << " with " << nFactPars << " argument (ParList: " <<                             core::pp_deprecated(ParList) << "; PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
         PosType=gstcExpandNumTypesUp(PosType);
-        for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
+        for (; !ParList.empty(); ParList=ATgetNext(ParList))
         {
           ATermAppl Par=ATAgetFirst(ParList);
           if (aterm()!=(Par=gstcTypeMatchA(Par,PosType)))
@@ -4433,13 +4433,13 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         }
         NewParList=reverse(NewParList);
         mCRL2log(debug) << "The result of casting is (1) " << core::pp_deprecated(NewParList) << "" << std::endl;
-        if (ATgetLength(NewParList)>1)
+        if (NewParList.size()>1)
         {
           NewParList=ATmakeList1(gstcMinType(NewParList));
         }
       }
 
-      if (ATisEmpty(NewParList))
+      if (NewParList.empty())
       {
         //Ok, casting of the arguments did not help.
         //Let's try to be more relaxed about the result, e.g. returning Pos or Nat is not a bad idea for int.
@@ -4447,7 +4447,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         ParList=BackupParList;
         mCRL2log(debug) << "Trying result casting for Op " << core::pp_deprecated(Name) << " with " << nFactPars << " argument (ParList: "                       << "; PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
         PosType=gstcExpandNumTypesDown(gstcExpandNumTypesUp(PosType));
-        for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
+        for (; !ParList.empty(); ParList=ATgetNext(ParList))
         {
           ATermAppl Par=ATAgetFirst(ParList);
           if (aterm()!=(Par=gstcTypeMatchA(Par,PosType)))
@@ -4457,7 +4457,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         }
         NewParList=reverse(NewParList);
         mCRL2log(debug) << "The result of casting is (2)" << core::pp_deprecated(NewParList) << "" << std::endl;
-        if (ATgetLength(NewParList)>1)
+        if (NewParList.size()>1)
         {
           NewParList=ATmakeList1(gstcMinType(NewParList));
         }
@@ -4465,11 +4465,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       ParList=NewParList;
     }
-    if (ATisEmpty(ParList))
+    if (ParList.empty())
     {
       //provide some information to the upper layer for a better error message
       ATermAppl Sort;
-      if (ATgetLength(CandidateParList)==1)
+      if (CandidateParList.size()==1)
       {
         Sort=ATAgetFirst(CandidateParList);
       }
@@ -4492,7 +4492,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       return aterm_appl();
     }
 
-    if (ATgetLength(ParList)==1)
+    if (ParList.size()==1)
     {
       // replace PossibleSorts by a single possibility.
       ATermAppl Type=ATAgetFirst(ParList);
@@ -4759,7 +4759,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList)
   //0..nFormPars-1
 
   ATermList Result=ATmakeList0();
-  size_t nFormPars=ATgetLength((ATermList)ATgetFirst(TypeListList));
+  size_t nFormPars=((ATermList)TypeListList.front()).size();
   std::vector<ATermList> Pars(nFormPars);
   /* if (nFormPars > 0)
   {
@@ -4771,7 +4771,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList)
     Pars[i]=ATmakeList0();
   }
 
-  for (; !ATisEmpty(TypeListList); TypeListList=ATgetNext(TypeListList))
+  for (; !TypeListList.empty(); TypeListList=ATgetNext(TypeListList))
   {
     ATermList TypeList=ATLgetFirst(TypeListList);
     for (size_t i=0; i<nFormPars; TypeList=ATgetNext(TypeList),i++)
@@ -4783,7 +4783,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList)
   for (size_t i=nFormPars; i>0; i--)
   {
     ATermAppl Sort;
-    if (ATgetLength(Pars[i-1])==1)
+    if (Pars[i-1].size()==1)
     {
       Sort=ATAgetFirst(Pars[i-1]);
     }
@@ -4950,7 +4950,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type)
 {
-  for (ATermList OldTypeList=TypeList; !ATisEmpty(OldTypeList); OldTypeList=ATgetNext(OldTypeList))
+  for (ATermList OldTypeList=TypeList; !OldTypeList.empty(); OldTypeList=ATgetNext(OldTypeList))
   {
     if (gstcEqTypesA(ATAgetFirst(OldTypeList),Type))
     {
@@ -4966,7 +4966,7 @@ static ATermList gstcTypeListsIntersect(ATermList TypeListList1, ATermList TypeL
 
   ATermList Result=ATmakeList0();
 
-  for (; !ATisEmpty(TypeListList2); TypeListList2=ATgetNext(TypeListList2))
+  for (; !TypeListList2.empty(); TypeListList2=ATgetNext(TypeListList2))
   {
     ATermList TypeList2=ATLgetFirst(TypeListList2);
     if (gstcInTypesL(TypeList2,TypeListList1))
@@ -5000,7 +5000,7 @@ static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList Type
 
   //Filter TypeListList to contain only compatible with TypeList lists of parameters.
   ATermList NewTypeListList=ATmakeList0();
-  for (; !ATisEmpty(TypeListList); TypeListList=ATgetNext(TypeListList))
+  for (; !TypeListList.empty(); TypeListList=ATgetNext(TypeListList))
   {
     ATermList TypeList=ATLgetFirst(TypeListList);
     if (gstcIsTypeAllowedL(TypeList,PosTypeList))
@@ -5008,11 +5008,11 @@ static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList Type
       NewTypeListList=ATinsert(NewTypeListList,TypeList);
     }
   }
-  if (ATisEmpty(NewTypeListList))
+  if (NewTypeListList.empty())
   {
     return aterm_list(aterm());
   }
-  if (ATgetLength(NewTypeListList)==1)
+  if (NewTypeListList.size()==1)
   {
     return ATLgetFirst(NewTypeListList);
   }
@@ -5024,8 +5024,8 @@ static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList Type
 static bool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList)
 {
   //Checks if TypeList is allowed by PosTypeList (each respective element)
-  assert(ATgetLength(TypeList)==ATgetLength(PosTypeList));
-  for (; !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList))
+  assert(TypeList.size()==PosTypeList.size());
+  for (; !TypeList.empty(); TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList))
     if (!gstcIsTypeAllowedA(ATAgetFirst(TypeList),ATAgetFirst(PosTypeList)))
     {
       return false;
@@ -5074,7 +5074,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
   if (gsIsSortsPossible(PosType))
   {
     ATermList NewTypeList=ATmakeList0();
-    for (ATermList PosTypeList=ATLgetArgument(PosType,0); !ATisEmpty(PosTypeList); PosTypeList=ATgetNext(PosTypeList))
+    for (ATermList PosTypeList=ATLgetArgument(PosType,0); !PosTypeList.empty(); PosTypeList=ATgetNext(PosTypeList))
     {
       ATermAppl NewPosType=ATAgetFirst(PosTypeList);
       mCRL2log(debug) << "Matching candidate gstcTypeMatchA Type: " << core::pp_deprecated(Type) << ";    PosType: "
@@ -5087,13 +5087,13 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
         NewTypeList=ATinsert(NewTypeList,NewPosType);
       }
     }
-    if (ATisEmpty(NewTypeList))
+    if (NewTypeList.empty())
     {
       mCRL2log(debug) << "No match gstcTypeMatchA Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << " " << std::endl;
       return aterm_appl();
     }
 
-    if (ATisEmpty(ATgetNext(NewTypeList)))
+    if (ATgetNext(NewTypeList).empty())
     {
       return ATAgetFirst(NewTypeList);
     }
@@ -5197,13 +5197,13 @@ static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList)
   mCRL2log(debug) << "gstcTypeMatchL TypeList: " << core::pp_deprecated(TypeList) << ";    PosTypeList: " <<
               core::pp_deprecated(PosTypeList) << "" << std::endl;
 
-  if (ATgetLength(TypeList)!=ATgetLength(PosTypeList))
+  if (TypeList.size()!=PosTypeList.size())
   {
     return aterm_list(aterm_appl());
   }
 
   ATermList Result=ATmakeList0();
-  for (; !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList))
+  for (; !TypeList.empty(); TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList))
   {
     ATermAppl Type=gstcTypeMatchA(ATAgetFirst(TypeList),ATAgetFirst(PosTypeList));
     if (aterm()==Type)
@@ -5217,7 +5217,7 @@ static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList)
 
 static bool gstcIsNotInferredL(ATermList TypeList)
 {
-  for (; !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
+  for (; !TypeList.empty(); TypeList=ATgetNext(TypeList))
   {
     ATermAppl Type=ATAgetFirst(TypeList);
     if (is_unknown_sort(Type) || is_multiple_possible_sorts(Type))
@@ -5232,19 +5232,19 @@ static ATermAppl gstcUnwindType(ATermAppl Type)
 {
   if (gsIsSortCons(Type))
   {
-    return ATsetArgument(Type,gstcUnwindType(ATAgetArgument(Type,1)),1);
+    return Type.set_argument(gstcUnwindType(ATAgetArgument(Type,1)),1);
   }
   if (gsIsSortArrow(Type))
   {
-    Type=ATsetArgument(Type,gstcUnwindType(ATAgetArgument(Type,1)),1);
+    Type=Type.set_argument(gstcUnwindType(ATAgetArgument(Type,1)),1);
     ATermList Args=ATLgetArgument(Type,0);
     ATermList NewArgs=ATmakeList0();
-    for (; !ATisEmpty(Args); Args=ATgetNext(Args))
+    for (; !Args.empty(); Args=ATgetNext(Args))
     {
       NewArgs=ATinsert(NewArgs,gstcUnwindType(ATAgetFirst(Args)));
     }
     NewArgs=reverse(NewArgs);
-    Type=ATsetArgument(Type,NewArgs,0);
+    Type=Type.set_argument(NewArgs,0);
     return Type;
   }
 
@@ -5280,7 +5280,7 @@ static ATermAppl gstcUnSet(ATermAppl PosType)
   ATermList NewPosTypes=ATmakeList0();
   if (gsIsSortsPossible(PosType))
   {
-    for (ATermList PosTypes=ATLgetArgument(PosType,0); !ATisEmpty(PosTypes); PosTypes=ATgetNext(PosTypes))
+    for (ATermList PosTypes=ATLgetArgument(PosType,0); !PosTypes.empty(); PosTypes=ATgetNext(PosTypes))
     {
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if (gsIsSortId(NewPosType))
@@ -5323,7 +5323,7 @@ static ATermAppl gstcUnBag(ATermAppl PosType)
   ATermList NewPosTypes=ATmakeList0();
   if (gsIsSortsPossible(PosType))
   {
-    for (ATermList PosTypes=ATLgetArgument(PosType,0); !ATisEmpty(PosTypes); PosTypes=ATgetNext(PosTypes))
+    for (ATermList PosTypes=ATLgetArgument(PosType,0); !PosTypes.empty(); PosTypes=ATgetNext(PosTypes))
     {
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if (gsIsSortId(NewPosType))
@@ -5366,7 +5366,7 @@ static ATermAppl gstcUnList(ATermAppl PosType)
   ATermList NewPosTypes=ATmakeList0();
   if (gsIsSortsPossible(PosType))
   {
-    for (ATermList PosTypes=ATLgetArgument(PosType,0); !ATisEmpty(PosTypes); PosTypes=ATgetNext(PosTypes))
+    for (ATermList PosTypes=ATLgetArgument(PosType,0); !PosTypes.empty(); PosTypes=ATgetNext(PosTypes))
     {
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if (gsIsSortId(NewPosType))
@@ -5403,7 +5403,7 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType)
   {
     ATermList PosArgTypes=ATLgetArgument(PosType,0);
 
-    if (ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes))
+    if (PosArgTypes.size()!=ArgTypes.size())
     {
       return aterm_appl();
     }
@@ -5420,7 +5420,7 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType)
   ATermList NewPosTypes=ATmakeList0();
   if (gsIsSortsPossible(PosType))
   {
-    for (ATermList PosTypes=ATLgetArgument(PosType,0); !ATisEmpty(PosTypes); PosTypes=ATgetNext(PosTypes))
+    for (ATermList PosTypes=ATLgetArgument(PosType,0); !PosTypes.empty(); PosTypes=ATgetNext(PosTypes))
     {
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if (gsIsSortId(NewPosType))
@@ -5430,7 +5430,7 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType)
       if (gsIsSortArrow(PosType))
       {
         ATermList PosArgTypes=ATLgetArgument(PosType,0);
-        if (ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes))
+        if (PosArgTypes.size()!=ArgTypes.size())
         {
           continue;
         }
@@ -5455,7 +5455,7 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType)
 static ATermList gstcGetVarTypes(ATermList VarDecls)
 {
   ATermList Result=ATmakeList0();
-  for (; !ATisEmpty(VarDecls); VarDecls=ATgetNext(VarDecls))
+  for (; !VarDecls.empty(); VarDecls=ATgetNext(VarDecls))
   {
     Result=ATinsert(Result,ATAgetArgument(ATAgetFirst(VarDecls),1));
   }
@@ -5480,7 +5480,7 @@ static ATermAppl replace_possible_sorts(ATermAppl Type)
   }
   if (gsIsSortCons(Type)) 
   {
-    return ATsetArgument(Type,replace_possible_sorts(ATAgetArgument(Type,1)),1);
+    return Type.set_argument(replace_possible_sorts(ATAgetArgument(Type,1)),1);
   }
 
   if (gsIsSortStruct(Type))
@@ -5491,7 +5491,7 @@ static ATermAppl replace_possible_sorts(ATermAppl Type)
   if (gsIsSortArrow(Type))
   {
     ATermList NewTypeList=ATmakeList0();
-    for (ATermList TypeList=ATLgetArgument(Type,0); !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
+    for (ATermList TypeList=ATLgetArgument(Type,0); !TypeList.empty(); TypeList=ATgetNext(TypeList))
     {
       NewTypeList=ATinsert(NewTypeList,replace_possible_sorts(ATAgetFirst(TypeList)));
     }
@@ -5524,7 +5524,7 @@ static bool gstcHasUnknown(ATermAppl Type)
 
   if (gsIsSortArrow(Type))
   {
-    for (ATermList TypeList=ATLgetArgument(Type,0); !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
+    for (ATermList TypeList=ATLgetArgument(Type,0); !TypeList.empty(); TypeList=ATgetNext(TypeList))
       if (gstcHasUnknown(ATAgetFirst(TypeList)))
       {
         return true;
@@ -5659,7 +5659,7 @@ static ATermAppl gstcExpandNumTypesUp(ATermAppl Type)
   }
   if (gsIsSortCons(Type))
   {
-    return ATsetArgument(Type,gstcExpandNumTypesUp(ATAgetArgument(Type,1)),1);
+    return Type.set_argument(gstcExpandNumTypesUp(ATAgetArgument(Type,1)),1);
   }
   if (gsIsSortStruct(Type))
   {
@@ -5670,14 +5670,14 @@ static ATermAppl gstcExpandNumTypesUp(ATermAppl Type)
   {
     //the argument types, and if the resulting type is SortArrow -- recursively
     ATermList NewTypeList=ATmakeList0();
-    for (ATermList TypeList=ATLgetArgument(Type,0); !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
+    for (ATermList TypeList=ATLgetArgument(Type,0); !TypeList.empty(); TypeList=ATgetNext(TypeList))
     {
       NewTypeList=ATinsert(NewTypeList,gstcExpandNumTypesUp(gstcUnwindType(ATAgetFirst(TypeList))));
     }
     ATermAppl ResultType=ATAgetArgument(Type,1);
     if (!gsIsSortArrow(ResultType))
     {
-      return ATsetArgument(Type,reverse(NewTypeList),0);
+      return Type.set_argument(reverse(NewTypeList),0);
     }
     else
     {
@@ -5735,7 +5735,7 @@ static ATermAppl gstcMinType(ATermList TypeList)
 static bool gstcMActIn(ATermList MAct, ATermList MActs)
 {
   //returns true if MAct is in MActs
-  for (; !ATisEmpty(MActs); MActs=ATgetNext(MActs))
+  for (; !MActs.empty(); MActs=ATgetNext(MActs))
     if (gstcMActEq(MAct,ATLgetFirst(MActs)))
     {
       return true;
@@ -5747,11 +5747,11 @@ static bool gstcMActIn(ATermList MAct, ATermList MActs)
 static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
 {
   //returns true if the two multiactions are equal.
-  if (ATgetLength(MAct1)!=ATgetLength(MAct2))
+  if (MAct1.size()!=MAct2.size())
   {
     return false;
   }
-  if (ATisEmpty(MAct1))
+  if (MAct1.empty())
   {
     return true;
   }
@@ -5760,7 +5760,7 @@ static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
 
   //remove Act1 once from MAct2. if not there -- return ATfalse.
   ATermList NewMAct2=ATmakeList0();
-  for (; !ATisEmpty(MAct2); MAct2=ATgetNext(MAct2))
+  for (; !MAct2.empty(); MAct2=ATgetNext(MAct2))
   {
     ATermAppl Act2=ATAgetFirst(MAct2);
     if (Act1==Act2)
@@ -5810,7 +5810,7 @@ static ATermAppl gstcMatchIf(ATermAppl Type)
   assert(gsIsSortArrow(Type));
   ATermList Args=ATLgetArgument(Type,0);
   ATermAppl Res=ATAgetArgument(Type,1);
-  assert((ATgetLength(Args)==3));
+  assert((Args.size()==3));
   //assert(gsIsBool(ATAgetFirst(Args)));
   Args=ATgetNext(Args);
 
@@ -5834,7 +5834,7 @@ static ATermAppl gstcMatchEqNeqComparison(ATermAppl Type)
 
   assert(gsIsSortArrow(Type));
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  assert((Args.size()==2));
   ATermAppl Arg1=ATAgetFirst(Args);
   Args=ATgetNext(Args);
   ATermAppl Arg2=ATAgetFirst(Args);
@@ -5862,7 +5862,7 @@ static ATermAppl gstcMatchListOpCons(ATermAppl Type)
   assert(sort_list::is_list(sort_expression(gstcUnwindType(Res))));
   Res=ATAgetArgument(Res,1);
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  assert((Args.size()==2));
   ATermAppl Arg1=ATAgetFirst(Args);
   Args=ATgetNext(Args);
   ATermAppl Arg2=ATAgetFirst(Args);
@@ -5902,7 +5902,7 @@ static ATermAppl gstcMatchListOpSnoc(ATermAppl Type)
   assert(sort_list::is_list(sort_expression(Res)));
   Res=ATAgetArgument(Res,1);
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  assert((Args.size()==2));
   ATermAppl Arg1=ATAgetFirst(Args);
   if (gsIsSortId(Arg1))
   {
@@ -5943,7 +5943,7 @@ static ATermAppl gstcMatchListOpConcat(ATermAppl Type)
   assert(sort_list::is_list(sort_expression(Res)));
   Res=ATAgetArgument(Res,1);
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  assert((Args.size()==2));
 
   ATermAppl Arg1=ATAgetFirst(Args);
   if (gsIsSortId(Arg1))
@@ -5987,7 +5987,7 @@ static ATermAppl gstcMatchListOpEltAt(ATermAppl Type)
   assert(gsIsSortArrow(Type));
   ATermAppl Res=ATAgetArgument(Type,1);
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  assert((Args.size()==2));
 
   ATermAppl Arg1=ATAgetFirst(Args);
   if (gsIsSortId(Arg1))
@@ -6017,7 +6017,7 @@ static ATermAppl gstcMatchListOpHead(ATermAppl Type)
   assert(gsIsSortArrow(Type));
   ATermAppl Res=ATAgetArgument(Type,1);
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==1));
+  assert((Args.size()==1));
   ATermAppl Arg=ATAgetFirst(Args);
   if (gsIsSortId(Arg))
   {
@@ -6049,7 +6049,7 @@ static ATermAppl gstcMatchListOpTail(ATermAppl Type)
   assert(sort_list::is_list(sort_expression(Res)));
   Res=ATAgetArgument(Res,1);
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==1));
+  assert((Args.size()==1));
   ATermAppl Arg=ATAgetFirst(Args);
   if (gsIsSortId(Arg))
   {
@@ -6085,7 +6085,7 @@ static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type)
   Res=ATAgetArgument(Res,1);
 
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==1));
+  assert((Args.size()==1));
 
   ATermAppl Arg=ATAgetFirst(Args);
   if (gsIsSortId(Arg))
@@ -6113,7 +6113,7 @@ static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type)
   assert(gsIsSortArrow(Type));
   //assert(gsIsBool(ATAgetArgument(Type,1)));
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  assert((Args.size()==2));
 
   ATermAppl Arg1=ATAgetFirst(Args);
 
@@ -6132,7 +6132,7 @@ static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(Arg,ATsetArgument(Arg2,Arg,1)),sort_bool::bool_());
+  return gsMakeSortArrow(ATmakeList2(Arg,Arg2.set_argument(Arg,1)),sort_bool::bool_());
 }
 
 static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type)
@@ -6154,7 +6154,7 @@ static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type)
   }
   assert(sort_set::is_set(sort_expression(Res))||sort_bag::is_bag(sort_expression(Res)));
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  assert((Args.size()==2));
 
   ATermAppl Arg1=ATAgetFirst(Args);
   if (gsIsSortId(Arg1))
@@ -6213,7 +6213,7 @@ static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type)
   assert(sort_set::is_set(sort_expression(Res)));
   Res=ATAgetArgument(Res,1);
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==1));
+  assert((Args.size()==1));
 
   ATermAppl Arg=ATAgetFirst(Args);
   if (gsIsSortId(Arg))
@@ -6253,7 +6253,7 @@ static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type)
   Res=ATAgetArgument(Res,1);
 
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==1));
+  assert((Args.size()==1));
 
   ATermAppl Arg=ATAgetFirst(Args);
   if (gsIsSortId(Arg))
@@ -6285,7 +6285,7 @@ static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type)
   }
   //assert(gsIsNat(ATAgetArgument(Type,1)));
   ATermList Args=ATLgetArgument(Type,0);
-  if (!(ATgetLength(Args)==2))
+  if (!(Args.size()==2))
   {
     return Type;
   }
@@ -6321,7 +6321,7 @@ static ATermAppl gstcMatchFuncUpdate(ATermAppl Type)
 
   assert(gsIsSortArrow(Type));
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==3));
+  assert((Args.size()==3));
   ATermAppl Arg1=ATAgetFirst(Args);
   assert(gsIsSortArrow(Arg1));
   Args=ATgetNext(Args);
@@ -6339,7 +6339,7 @@ static ATermAppl gstcMatchFuncUpdate(ATermAppl Type)
 
   // determine A and B from Arg1:
   ATermList LA=ATLgetArgument(Arg1,0);
-  assert((ATgetLength(LA)==1));
+  assert((LA.size()==1));
   ATermAppl A=ATAgetFirst(LA);
   ATermAppl B=ATAgetArgument(Arg1,1);
 
@@ -6359,7 +6359,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
 {
   //prints more information about impossible cast.
   //at this point we know that Arguments cannot be cast to CandidateType. We need to find out why and print.
-  assert(ATgetLength(Arguments)==ATgetLength(ArgumentTypes));
+  assert(Arguments.size()==ArgumentTypes.size());
 
   ATermList CandidateList;
   if (gsIsSortsPossible(CandidateType))
@@ -6372,7 +6372,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
   }
 
   ATermList NewCandidateList=ATmakeList0();
-  for (ATermList l=CandidateList; !ATisEmpty(l); l=ATgetNext(l))
+  for (ATermList l=CandidateList; !l.empty(); l=ATgetNext(l))
   {
     ATermAppl Candidate=ATAgetFirst(l);
     if (!gsIsSortArrow(Candidate))
@@ -6390,10 +6390,10 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
   {
     ATermList NewCurrentCandidateList=ATmakeList0();
     ATermList NewList=ATmakeList0();
-    for (ATermList l=CurrentCandidateList; !ATisEmpty(l); l=ATgetNext(l))
+    for (ATermList l=CurrentCandidateList; !l.empty(); l=ATgetNext(l))
     {
       ATermList List=ATLgetFirst(l);
-      if (!ATisEmpty(List))
+      if (!List.empty())
       {
         NewList=ATinsert(NewList,ATAgetFirst(List));
         NewCurrentCandidateList=ATinsertUnique(NewCurrentCandidateList,ATgetNext(List));
@@ -6403,7 +6403,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
         NewCurrentCandidateList=ATinsert(NewCurrentCandidateList,ATmakeList0());
       }
     }
-    if (ATisEmpty(NewList))
+    if (NewList.empty())
     {
       break;
     }
@@ -6412,12 +6412,12 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
   }
   CandidateList=reverse(CandidateList);
 
-  for (ATermList l=Arguments, m=ArgumentTypes, n=CandidateList; !(ATisEmpty(l)||ATisEmpty(m)||ATisEmpty(n)); l=ATgetNext(l), m=ATgetNext(m), n=ATgetNext(n))
+  for (ATermList l=Arguments, m=ArgumentTypes, n=CandidateList; !(l.empty()||m.empty()||n.empty()); l=ATgetNext(l), m=ATgetNext(m), n=ATgetNext(n))
   {
     ATermList PosTypes=ATLgetFirst(n);
     ATermAppl NeededType=ATAgetFirst(m);
     bool found=true;
-    for (ATermList k=PosTypes; !ATisEmpty(k); k=ATgetNext(k))
+    for (ATermList k=PosTypes; !k.empty(); k=ATgetNext(k))
     {
       if (aterm()!=gstcTypeMatchA(ATAgetFirst(k),NeededType))
       {
@@ -6428,7 +6428,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
     if (found)
     {
       ATermAppl Sort;
-      if (ATgetLength(PosTypes)==1)
+      if (PosTypes.size()==1)
       {
         Sort=ATAgetFirst(PosTypes);
       }
@@ -6463,7 +6463,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     {
       return aterm_appl();
     }
-    return ATsetArgument(StateFrm,NewArg,0);
+    return StateFrm.set_argument(NewArg,0);
   }
 
   if (gsIsStateAnd(StateFrm) || gsIsStateOr(StateFrm) || gsIsStateImp(StateFrm))
@@ -6478,7 +6478,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     {
       return aterm_appl();
     }
-    return ATsetArgument(ATsetArgument(StateFrm,NewArg1,0),NewArg2,1);
+    return StateFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
   }
 
   if (gsIsStateForall(StateFrm) || gsIsStateExists(StateFrm))
@@ -6499,7 +6499,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
       return aterm_appl();
     }
 
-    return ATsetArgument(StateFrm,NewArg2,1);
+    return StateFrm.set_argument(NewArg2,1);
   }
 
   if (gsIsStateMust(StateFrm) || gsIsStateMay(StateFrm))
@@ -6514,7 +6514,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     {
       return aterm_appl();
     }
-    return ATsetArgument(ATsetArgument(StateFrm,RegFrm,0),NewArg2,1);
+    return StateFrm.set_argument(RegFrm,0).set_argument(NewArg2,1);
   }
 
   if (gsIsStateDelayTimed(StateFrm) || gsIsStateYaledTimed(StateFrm))
@@ -6536,7 +6536,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
         return aterm_appl();
       }
     }
-    return ATsetArgument(StateFrm,Time,0);
+    return StateFrm.set_argument(Time,0);
   }
 
   if (gsIsStateVar(StateFrm))
@@ -6550,7 +6550,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     }
 
     ATermList Pars=ATLgetArgument(StateFrm,1);
-    if (ATgetLength(TypeList)!=ATgetLength(Pars))
+    if (TypeList.size()!=Pars.size())
     {
       mCRL2log(error) << "incorrect number of parameters for state variable " << core::pp_deprecated(StateVarName) << " (typechecking state formula " << core::pp_deprecated(StateFrm) << ")" << std::endl;
       return aterm_appl();
@@ -6558,7 +6558,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
 
     ATermList r=ATmakeList0();
     bool success=true;
-    for (; !ATisEmpty(Pars); Pars=ATgetNext(Pars),TypeList=ATgetNext(TypeList))
+    for (; !Pars.empty(); Pars=ATgetNext(Pars),TypeList=ATgetNext(TypeList))
     {
       ATermAppl Par=ATAgetFirst(Pars);
       ATermAppl ParType=ATAgetFirst(TypeList);
@@ -6590,7 +6590,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
       return aterm_appl();
     }
 
-    return ATsetArgument(StateFrm,reverse(r),1);
+    return StateFrm.set_argument(reverse(r),1);
 
   }
 
@@ -6604,7 +6604,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
     ATermList r=ATmakeList0();
     ATermList t=ATmakeList0();
     bool success=true;
-    for (ATermList l=ATLgetArgument(StateFrm,1); !ATisEmpty(l); l=ATgetNext(l))
+    for (ATermList l=ATLgetArgument(StateFrm,1); !l.empty(); l=ATgetNext(l))
     {
       ATermAppl o=ATAgetFirst(l);
 
@@ -6647,7 +6647,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
         }
       }
 
-      r=ATinsert(r,ATsetArgument(o,VarInit,1));
+      r=ATinsert(r,o.set_argument(VarInit,1));
       t=ATinsert(t,VarType);
     }
 
@@ -6656,7 +6656,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
       return aterm_appl();
     }
 
-    StateFrm=ATsetArgument(StateFrm,reverse(r),1);
+    StateFrm=StateFrm.set_argument(reverse(r),1);
     ATermTable CopyVars=ATtableCreate(63,50);
     gstcATermTableCopy(Vars,CopyVars);
     gstcATermTableCopy(FormPars,CopyVars);
@@ -6668,7 +6668,7 @@ static ATermAppl gstcTraverseStateFrm(const ATermTable &Vars, const ATermTable &
       mCRL2log(error) << "while typechecking " << core::pp_deprecated(StateFrm) << std::endl;
       return aterm_appl();
     }
-    return ATsetArgument(StateFrm,NewArg,2);
+    return StateFrm.set_argument(NewArg,2);
   }
 
   if (gsIsDataExpr(StateFrm))
@@ -6705,7 +6705,7 @@ static ATermAppl gstcTraverseRegFrm(const ATermTable &Vars, ATermAppl RegFrm)
     {
       return aterm_appl();
     }
-    return ATsetArgument(ATsetArgument(RegFrm,NewArg1,0),NewArg2,1);
+    return RegFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
   }
 
   if (gsIsRegTrans(RegFrm) || gsIsRegTransOrNil(RegFrm))
@@ -6715,7 +6715,7 @@ static ATermAppl gstcTraverseRegFrm(const ATermTable &Vars, ATermAppl RegFrm)
     {
       return aterm_appl();
     }
-    return ATsetArgument(RegFrm,NewArg,0);
+    return RegFrm.set_argument(NewArg,0);
   }
 
   if (gsIsActFrm(RegFrm))
@@ -6743,7 +6743,7 @@ static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
     {
       return aterm_appl();
     }
-    return ATsetArgument(ActFrm,NewArg,0);
+    return ActFrm.set_argument(NewArg,0);
   }
 
   if (gsIsActAnd(ActFrm) || gsIsActOr(ActFrm) || gsIsActImp(ActFrm))
@@ -6758,7 +6758,7 @@ static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
     {
       return aterm_appl();
     }
-    return ATsetArgument(ATsetArgument(ActFrm,NewArg1,0),NewArg2,1);
+    return ActFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
   }
 
   if (gsIsActForall(ActFrm) || gsIsActExists(ActFrm))
@@ -6779,7 +6779,7 @@ static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
       return aterm_appl();
     }
 
-    return ATsetArgument(ActFrm,NewArg2,1);
+    return ActFrm.set_argument(NewArg2,1);
   }
 
   if (gsIsActAt(ActFrm))
@@ -6807,13 +6807,13 @@ static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
         return aterm_appl();
       }
     }
-    return ATsetArgument(ATsetArgument(ActFrm,NewArg1,0),Time,1);
+    return ActFrm.set_argument(NewArg1,0).set_argument(Time,1);
   }
 
   if (gsIsMultAct(ActFrm))
   {
     ATermList r=ATmakeList0();
-    for (ATermList l=ATLgetArgument(ActFrm,0); !ATisEmpty(l); l=ATgetNext(l))
+    for (ATermList l=ATLgetArgument(ActFrm,0); !l.empty(); l=ATgetNext(l))
     {
       ATermAppl o=ATAgetFirst(l);
       assert(gsIsParamId(o));
@@ -6824,7 +6824,7 @@ static ATermAppl gstcTraverseActFrm(const ATermTable &Vars, ATermAppl ActFrm)
       }
       r=ATinsert(r,o);
     }
-    return ATsetArgument(ActFrm,reverse(r),0);
+    return ActFrm.set_argument(reverse(r),0);
   }
 
   if (gsIsDataExpr(ActFrm))

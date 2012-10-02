@@ -418,7 +418,7 @@ static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nest
       OutStream <<  "(\n";
       for (size_t i = 0; i < arity; i++)
       {
-        IndentedATerm(OutStream, ATgetArgument(appl, i), nesting+1);
+        IndentedATerm(OutStream, appl(i), nesting+1);
         if (i+1 < arity)
         {
           OutStream <<  ",\n";
@@ -441,7 +441,7 @@ static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nest
       OutStream <<  "[\n";
       for (ATermList l = (ATermList) term; !l.empty(); l = ATgetNext(l))
       {
-        IndentedATerm(OutStream, ATgetFirst(l), nesting+1);
+        IndentedATerm(OutStream, l.front(), nesting+1);
         if (!(ATgetNext(l)).empty())
         {
           OutStream <<  ",\n";
@@ -1250,7 +1250,7 @@ void PrintDecls(std::ostream& OutStream, const ATermList Decls,
     ATermList NextDecls = ATgetNext(Decls);
     while (!NextDecls.empty())
     {
-      if (ATgetArgument(Decl, 1)==ATgetArgument(ATAgetFirst(NextDecls), 1))
+      if (Decl(1)==ATAgetFirst(NextDecls)(1))
       {
         PrintDecl(OutStream, Decl, pp_format, false);
         OutStream <<  ",";
@@ -2962,7 +2962,7 @@ ATermList GetAssignmentsRHS(ATermList Assignments)
   ATermList l = ATmakeList0();
   while (!Assignments.empty())
   {
-    l = ATinsert(l, ATgetArgument(ATAgetFirst(Assignments), 1));
+    l = ATinsert(l, ATAgetFirst(Assignments)(1));
     Assignments = ATgetNext(Assignments);
   }
   return reverse(l);
@@ -2993,7 +2993,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     while (!DeclSorts.empty())
     {
       Result = ATconcat(
-                 ATLtableGet(SortDeclsTable, ATgetFirst(DeclSorts)),
+                 ATLtableGet(SortDeclsTable, DeclSorts.front()),
                  Result);
       DeclSorts = ATgetNext(DeclSorts);
     }
@@ -3020,7 +3020,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
       //check consistency of variable VarDecls(j) with VarDeclTable
       ATermAppl VarDecl = ATAelementAt(VarDecls, i);
       ATermAppl CorVarDecl =
-        ATAtableGet(DataVarDecls, ATgetArgument(VarDecl, 0));
+        ATAtableGet(DataVarDecls, VarDecl(0));
       if (CorVarDecl != ATerm())
       {
         //check consistency of VarDecl with CorVarDecl
@@ -3032,7 +3032,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
   {
     //Part may be an operation; check that its name does not occur in
     //DataVarDecls
-    Result = (ATtableGet(DataVarDecls, ATgetArgument(Part, 0)) == ATerm());
+    Result = (ATtableGet(DataVarDecls, Part(0)) == ATerm());
   }
   //check consistency in the arguments of Part
   if (Result)
@@ -3041,7 +3041,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
     size_t NrArgs = Head.arity();
     for (size_t i = 0; i < NrArgs && Result; i++)
     {
-      ATerm Arg = ATgetArgument(Part, i);
+      ATerm Arg = Part(i);
       if (Arg.type() == AT_APPL)
       {
         Result = gsHasConsistentContext(DataVarDecls, (ATermAppl) Arg);

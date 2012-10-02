@@ -113,7 +113,7 @@ static bool is_domain(ATermList args, ATermAppl sort)
     {
       for (; !dom.empty(); dom=ATgetNext(dom),args=ATgetNext(args))
       {
-        if (static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(args)).sort())!=ATgetFirst(dom))
+        if (static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(args)).sort())!=dom.front())
         {
           return false;
         }
@@ -248,7 +248,7 @@ static ATermList get_substs(ATermList ids)
 
     used.insert((ATerm) new_id);
 
-    substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) new_id));
+    substs = ATinsert(substs,(ATerm) gsMakeSubst(ids.front(),(ATerm) new_id));
   }
 
   return substs;

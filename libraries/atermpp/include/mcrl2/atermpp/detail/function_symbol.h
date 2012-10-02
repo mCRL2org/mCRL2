@@ -9,7 +9,7 @@ namespace atermpp
 namespace detail
 {
 
-/* The type _SymEntry is used to store information about function_symbols. */
+/* The type _function_symbol is used to store information about function_symbols. */
 struct _function_symbol
 {
   public:

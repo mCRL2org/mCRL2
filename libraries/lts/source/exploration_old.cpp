@@ -263,10 +263,10 @@ bool lps2lts_algorithm::savetrace(
   trace.setState(nstate->make_new_state_vector(s));
   for (; !tr.empty(); tr=ATgetNext(tr))
   {
-    ATermList e = (ATermList) ATgetFirst(tr);
-    trace.addAction(multi_action(ATgetFirst(e)));
+    ATermList e = (ATermList) tr.front();
+    trace.addAction(multi_action(e.front()));
     e = ATgetNext(e);
-    trace.setState(nstate->make_new_state_vector(ATgetFirst(e)));
+    trace.setState(nstate->make_new_state_vector(e.front()));
   }
 
   delete nsgen;
@@ -564,7 +564,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
     }
     else
     {
-      ATerm u = ATgetFirst(nextl);
+      ATerm u = nextl.front();
       repr_next[v]=ATgetNext(nextl);
       const size_t nu = repr_number[u];
       if (nu == 0)
@@ -769,13 +769,13 @@ bool lps2lts_algorithm::generate_lts()
             const action_list multi_action_list=*tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
+              ATermAppl first_action=(ATermAppl)multi_action_list.front();
+              ATermList action_arguments=(ATermList)first_action(1);
+              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                ATermAppl first_argument=(ATermAppl)action_arguments.front();
+                ATermAppl first_sort=(ATermAppl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
                   if (lowest_first_action_parameter==atermpp::aterm_appl())
@@ -809,18 +809,18 @@ bool lps2lts_algorithm::generate_lts()
           ATermList tmp_state_walker = tmp_states;
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
-            ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
+            ATermAppl state=(ATermAppl)tmp_state_walker.front();
             tmp_state_walker=ATgetNext(tmp_state_walker);
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
+              ATermAppl first_action=(ATermAppl)multi_action_list.front();
+              ATermList action_arguments=(ATermList)first_action(1);
+              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                ATermAppl first_argument=(ATermAppl)action_arguments.front();
+                ATermAppl first_sort=(ATermAppl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
                   ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
@@ -872,12 +872,12 @@ bool lps2lts_algorithm::generate_lts()
 
             if (num_states-current_state <= lgopts->todo_max)
             {
-              add_transition(state,multi_action(*tmp_trans_walker),ATgetFirst(tmp_states));
+              add_transition(state,multi_action(*tmp_trans_walker),tmp_states.front());
             }
             else if (rand()%2==0)  // with 50 % probability
             {
               current_state++;    // ignore the current state
-              add_transition(state,multi_action(*tmp_trans_walker),ATgetFirst(tmp_states));
+              add_transition(state,multi_action(*tmp_trans_walker),tmp_states.front());
             }
             else
             {
@@ -947,13 +947,13 @@ bool lps2lts_algorithm::generate_lts()
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
+              ATermAppl first_action=(ATermAppl)multi_action_list.front();
+              ATermList action_arguments=(ATermList)first_action(1);
+              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                ATermAppl first_argument=(ATermAppl)action_arguments.front();
+                ATermAppl first_sort=(ATermAppl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
                   if (lowest_first_action_parameter==atermpp::aterm_appl())
@@ -989,18 +989,18 @@ bool lps2lts_algorithm::generate_lts()
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
             // const multi_action ma= *tmp_trans_walker;
-            ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
+            ATermAppl state=(ATermAppl)tmp_state_walker.front();
             tmp_state_walker=ATgetNext(tmp_state_walker);
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-              ATermList action_sorts=(ATermList)ATgetArgument(ATAgetArgument(first_action,0),1);
+              ATermAppl first_action=(ATermAppl)multi_action_list.front();
+              ATermList action_arguments=(ATermList)first_action(1);
+              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                ATermAppl first_argument=(ATermAppl)action_arguments.front();
+                ATermAppl first_sort=(ATermAppl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
                   ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
@@ -1060,8 +1060,8 @@ bool lps2lts_algorithm::generate_lts()
           state_t new_state;
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
-            add_transition(state,multi_action(*tmp_trans_walker),ATgetFirst(tmp_states));
-            new_state = ATgetFirst(tmp_states);
+            add_transition(state,multi_action(*tmp_trans_walker),tmp_states.front());
+            new_state = tmp_states.front();
 
             tmp_states = ATgetNext(tmp_states);
           }

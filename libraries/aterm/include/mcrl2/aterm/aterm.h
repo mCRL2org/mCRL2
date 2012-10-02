@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/indexed_set.h
-/// \brief Indexed set.
+/// \file mcrl2/aterm/aterm.h
+/// \brief Classical ATerm functions still used in the mCRL2 toolset
 
 #ifndef MCRL2_ATERM_ATERM_H
 #define MCRL2_ATERM_ATERM_H
@@ -141,11 +141,11 @@ ATermAppl ATmakeApplList(const AFun &sym, const ATermList args)
   return term_appl<aterm>(sym,args.begin(), args.end());
 } */
 
-inline
+/* inline
 const ATerm &ATgetArgument(const ATermAppl &appl, const size_t idx)
 {
   return appl(idx);
-}
+} */
 
 /* inline
 ATermAppl ATsetArgument(ATermAppl appl, const ATerm &arg, const size_t n)
@@ -161,11 +161,11 @@ size_t ATgetLength(const ATermList &list)
   return list.size();
 } */
 
-inline
+/* inline
 const ATerm &ATgetFirst(const ATermList &l)
 {
   return l->head;
-}
+} */
 
 inline
 ATermList &ATgetNext(const ATermList &l)
@@ -257,7 +257,7 @@ ATermList ATreplace(const ATermList &list_in, const ATerm &el, const size_t idx)
 
   for (i=0; i<idx; i++)
   {
-    buffer[i] = &*ATgetFirst(list);
+    buffer[i] = &*list.front();
     list = ATgetNext(list);
   }
   /* Skip the old element */
@@ -284,7 +284,7 @@ ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' t
   /* Collect all elements of list in buffer */
   for (i=0; i<len; i++)
   {
-    buffer[i] = &*ATgetFirst(list);
+    buffer[i] = &*list.front();
     list = ATgetNext(list);
   }
 
@@ -345,7 +345,7 @@ ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t 
 
   for (i=0; i<size; i++)
   {
-    buffer[i] = &*ATgetFirst(list);
+    buffer[i] = &*list.front();
     list = ATgetNext(list);
   }
 
@@ -459,10 +459,6 @@ ATerm ATreadFromString(const char* s)
 {
   return read_from_string(std::string(s));
 }
-
-/* int
-ATfprintf(FILE* stream, const char* format,...);
-*/
 
 /* ATerm extensions */
 /**

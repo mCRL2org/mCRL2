@@ -130,18 +130,18 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         }
         else
         {
-          data::data_specification data_spec(atermpp::aterm_appl(ATgetArgument((ATermAppl)data,0)));
+          data::data_specification data_spec(atermpp::aterm_appl(((ATermAppl)data)(0)));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
-          if (!gsIsNil((ATermAppl)ATgetArgument((ATermAppl)data,1)))
+          if (!gsIsNil((ATermAppl)((ATermAppl)data)(1)))
           {
             // The parameters below have the structure "ParamSpec(variable list);
-            l.set_process_parameters(data::variable_list(ATgetArgument(ATAgetArgument((ATermAppl)data,1),0)));
+            l.set_process_parameters(data::variable_list((ATAgetArgument((ATermAppl)data,1))(0)));
           }
-          if (!gsIsNil((ATermAppl)ATgetArgument((ATermAppl)data,2)))
+          if (!gsIsNil((ATermAppl)((ATermAppl)data)(2)))
           {
             // The parameters below have the structure "ActSpec(variable list);
-            l.set_action_labels(lps::action_label_list(ATgetArgument(ATAgetArgument((ATermAppl)data,2),0)));
+            l.set_action_labels(lps::action_label_list((ATAgetArgument((ATermAppl)data,2))(0)));
           }
         }
       }

@@ -35,7 +35,7 @@ void test_plain_aterm_construction()
 
   const ATermAppl a1=aterm_appl(f1,a0);
   BOOST_CHECK(a1.function()==f1.number());
-  BOOST_CHECK(ATgetArgument(a1,0)==a0);
+  BOOST_CHECK(a1(0)==a0);
 
   const char *s2="f0"; // Intentionally reuse string "f0".
   const AFun f2(s2,2);
@@ -45,8 +45,8 @@ void test_plain_aterm_construction()
 
   const ATermAppl a2=aterm_appl(f2,a0,a1);
   BOOST_CHECK(a2.function()==f2.number());
-  BOOST_CHECK(ATgetArgument(a2,0)==a0);
-  BOOST_CHECK(ATgetArgument(a2,1)==a1);
+  BOOST_CHECK(a2(0)==a0);
+  BOOST_CHECK(a2(1)==a1);
 
 }
 

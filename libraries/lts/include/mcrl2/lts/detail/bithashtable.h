@@ -95,7 +95,7 @@ class bit_hash_table
             size_t len = t.function().arity();
             for (size_t i=0; i<len; i++)
             {
-              calc_hash_aterm(ATgetArgument((ATermAppl) t, i),sh_a,sh_b,sh_c,sh_i);
+              calc_hash_aterm(((ATermAppl) t)(i),sh_a,sh_b,sh_c,sh_i);
             }
           }
           break;
@@ -103,7 +103,7 @@ class bit_hash_table
           calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
           for (ATermList l=(ATermList) t; !l.empty(); l=ATgetNext(l))
           {
-            calc_hash_aterm(ATgetFirst(l),sh_a,sh_b,sh_c,sh_i);
+            calc_hash_aterm(l.front(),sh_a,sh_b,sh_c,sh_i);
           }
           break;
         case AT_INT:

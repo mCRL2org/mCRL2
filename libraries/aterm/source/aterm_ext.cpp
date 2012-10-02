@@ -30,19 +30,19 @@ ATermAppl gsMakeSubst(const ATerm &OldValue, const ATerm &NewValue)
     substafun = AFun("subst", 2);
     substafun_notset = false;
   }
-  return ATmakeAppl2(substafun, OldValue, NewValue);
+  return aterm_appl(substafun, OldValue, NewValue);
 }
 
 ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
 {
   ATerm Term=t;
   ATermList l = Substs;
-  while (!ATisEmpty(l))
+  while (!l.empty())
   {
     ATermAppl Subst = ATAgetFirst(l);
-    if (ATgetArgument(Subst, 0)==Term)
+    if (Subst(0)==Term)
     {
-      return ATgetArgument(Subst, 1);
+      return Subst(1);
     }
     l = ATgetNext(l);
   }
@@ -64,7 +64,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
         // std::vector<ATerm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; ++i)
         {
-          new (&Args[i]) aterm(gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive));
+          new (&Args[i]) aterm(gsSubstValues(Substs, ((ATermAppl) Term)(i), Recursive));
         }
         const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
         for (size_t i = 0; i < NrArgs; ++i)
@@ -82,10 +82,10 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
     {
       //Term is an ATermList; distribute substitutions over the elements
       ATermList Result = ATmakeList0();
-      while (!ATisEmpty((ATermList) Term))
+      while (!((ATermList) Term).empty())
       {
         Result = ATinsert(Result,
-                          gsSubstValues(Substs, ATgetFirst((ATermList) Term), Recursive));
+                          gsSubstValues(Substs, ((ATermList) Term).front(), Recursive));
         Term = ATgetNext((ATermList) Term);
       }
       return reverse(Result);
@@ -123,7 +123,7 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
         // std::vector <ATerm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
-           new (&Args[i]) aterm(gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive));
+           new (&Args[i]) aterm(gsSubstValuesTable(Substs, ((ATermAppl) Term)(i), Recursive));
         }
         const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
@@ -141,10 +141,10 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
     {
       //Term is an ATermList; distribute substitutions over the elements
       ATermList Result = ATmakeList0();
-      while (!ATisEmpty((ATermList) Term))
+      while (!((ATermList) Term).empty())
       {
         Result = ATinsert(Result,
-                          gsSubstValuesTable(Substs, ATgetFirst((ATermList) Term), Recursive));
+                          gsSubstValuesTable(Substs, ((ATermList) Term).front(), Recursive));
         Term = ATgetNext((ATermList) Term);
       }
       return reverse(Result);
@@ -176,14 +176,14 @@ bool gsOccurs(const ATerm &Elt, const ATerm &t)
       const size_t NrArgs = Head.arity();
       for (size_t i = 0; i < NrArgs && !Result; i++)
       {
-        Result = gsOccurs(Elt, ATgetArgument((ATermAppl) Term, i));
+        Result = gsOccurs(Elt, ((ATermAppl) Term)(i));
       }
     }
     else if (Term.type() == AT_LIST)
     {
-      while (!ATisEmpty((ATermList) Term) && !Result)
+      while (!((ATermList) Term).empty() && !Result)
       {
-        Result = gsOccurs(Elt, ATgetFirst((ATermList) Term));
+        Result = gsOccurs(Elt, ((ATermList) Term).front());
         Term = ATgetNext((ATermList) Term);
       }
     }
