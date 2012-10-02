@@ -10,7 +10,7 @@
 /// \brief Test for the pins class that connects mCRL2 with LTSMin (http://fmt.cs.utwente.nl/tools/ltsmin/).
 
 #include <iostream>
-#include <cstdio> 
+#include <cstdio>
 
 #include <boost/test/minimal.hpp>
 
@@ -87,7 +87,7 @@ static void test_data_type(lps::pins_data_type& type)
   for (lps::pins_data_type::index_iterator i = type.index_begin(); i != type.index_end(); ++i)
   {
     std::cout << "iterator " << (i - type.index_begin()) << " -> " << *i << std::endl;
-    BOOST_CHECK(*i == i - type.index_begin());
+    BOOST_CHECK(*i == static_cast<size_t>(i - type.index_begin()));
   }
 }
 
