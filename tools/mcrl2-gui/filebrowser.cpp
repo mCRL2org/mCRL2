@@ -249,7 +249,7 @@ void FileBrowser::keyPressEvent(QKeyEvent *event)
     }
     else
     {
-        FileBrowser::keyPressEvent(event);
+        QTreeView::keyPressEvent(event);
     }
 }
 
