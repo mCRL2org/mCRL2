@@ -56,6 +56,16 @@ const std::string l4 =
   "(1,\"b\",2)\n"
   "(1,\"b\",3)\n";
 
+// a
+const std::string a =
+  "des (0,1,2)\n"
+  "(0,\"a\",1)\n";
+
+// b
+const std::string b =
+  "des (0,1,2)\n"
+  "(0,\"b\",1)\n";
+
 static inline
 bool compare(const std::string& s1, const std::string& s2, lts_equivalence eq, bool counterexample=false)
 {
@@ -92,6 +102,12 @@ BOOST_AUTO_TEST_CASE(test_symmetric_weak_trace_3_4)
 {
   BOOST_CHECK(!compare(l4,l3,lts_eq_weak_trace));
   BOOST_CHECK(!compare(l3,l4,lts_eq_weak_trace));
+}
+
+// Regression test for bug #1082
+BOOST_AUTO_TEST_CASE(test_bisim_a_b)
+{
+  BOOST_CHECK(!compare(a,b,lts_eq_bisim, true));
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
