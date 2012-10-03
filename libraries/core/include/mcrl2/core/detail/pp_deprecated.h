@@ -439,10 +439,10 @@ static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nest
     else
     {
       OutStream <<  "[\n";
-      for (ATermList l = (ATermList) term; !l.empty(); l = ATgetNext(l))
+      for (ATermList l = (ATermList) term; !l.empty(); l = l.tail())
       {
         IndentedATerm(OutStream, l.front(), nesting+1);
-        if (!(ATgetNext(l)).empty())
+        if (!l.tail().empty())
         {
           OutStream <<  ",\n";
         }
@@ -846,7 +846,7 @@ void PrintPart_Appl(std::ostream& OutStream,
         }
         PrintLinearProcessSummand(OutStream, ATAgetFirst(l),
                                               pp_format, ShowSorts);
-        l = ATgetNext(l);
+        l = l.tail();
       }
       OutStream <<  ";\n";
     }
@@ -1096,7 +1096,7 @@ void PrintPart_List(std::ostream& OutStream,
     {
       OutStream <<  Terminator;
     }
-    l = ATgetNext(l);
+    l = l.tail();
   }
 }
 
@@ -1113,7 +1113,7 @@ void PrintPart_BagEnum(std::ostream& OutStream,
     }
     PrintPart_Appl(OutStream, ATAgetFirst(l),
                                pp_format, ShowSorts, PrecLevel);
-    l = ATgetNext(l);
+    l = l.tail();
     OutStream <<  ": ";
     PrintPart_Appl(OutStream, ATAgetFirst(l),
                                pp_format, ShowSorts, PrecLevel);
@@ -1121,7 +1121,7 @@ void PrintPart_BagEnum(std::ostream& OutStream,
     {
       OutStream <<  Terminator;
     }
-    l = ATgetNext(l);
+    l = l.tail();
   }
 }
 
@@ -1156,7 +1156,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
       PrintPart_Appl(OutStream, Eqn,
                                  pp_format, ShowSorts, PrecLevel);
       OutStream <<  ";\n";
-      l = ATgetNext(l);
+      l = l.tail();
       if (!l.empty())
       {
         OutStream <<  "\n";
@@ -1247,7 +1247,7 @@ void PrintDecls(std::ostream& OutStream, const ATermList Decls,
   if (!Decls.empty())
   {
     ATermAppl Decl = ATAgetFirst(Decls);
-    ATermList NextDecls = ATgetNext(Decls);
+    ATermList NextDecls = Decls.tail();
     while (!NextDecls.empty())
     {
       if (Decl(1)==ATAgetFirst(NextDecls)(1))
@@ -1268,7 +1268,7 @@ void PrintDecls(std::ostream& OutStream, const ATermList Decls,
         }
       }
       Decl = ATAgetFirst(NextDecls);
-      NextDecls = ATgetNext(NextDecls);
+      NextDecls = NextDecls.tail();
     }
     PrintDecl(OutStream, Decl, pp_format, true);
     if (Terminator  != NULL)
@@ -2962,8 +2962,8 @@ ATermList GetAssignmentsRHS(ATermList Assignments)
   ATermList l = ATmakeList0();
   while (!Assignments.empty())
   {
-    l = ATinsert(l, ATAgetFirst(Assignments)(1));
-    Assignments = ATgetNext(Assignments);
+    l = push_front(l, ATAgetFirst(Assignments)(1));
+    Assignments = Assignments.tail();
   }
   return reverse(l);
 }
@@ -2983,9 +2983,9 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
       SortDeclsTable.put(DeclSort,
                  (CorDecls == ATerm())
                  ?ATmakeList1(Decl)
-                 :ATinsert(CorDecls, Decl)
+                 :push_front(CorDecls, aterm(Decl))
                 );
-      Decls = ATgetNext(Decls);
+      Decls = Decls.tail();
     }
     //Return the hash table as a list of variable declarations
     ATermList DeclSorts = ATtableKeys(SortDeclsTable);
@@ -2995,7 +2995,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
       Result = ATconcat(
                  ATLtableGet(SortDeclsTable, DeclSorts.front()),
                  Result);
-      DeclSorts = ATgetNext(DeclSorts);
+      DeclSorts = DeclSorts.tail();
     }
     return reverse(Result);
   }
@@ -3063,7 +3063,7 @@ bool gsHasConsistentContextList(const ATermTable &DataVarDecls,
   while (!l.empty() && Result)
   {
     Result = gsHasConsistentContext(DataVarDecls, ATAgetFirst(l));
-    l = ATgetNext(l);
+    l = l.tail();
   }
   return Result;
 }

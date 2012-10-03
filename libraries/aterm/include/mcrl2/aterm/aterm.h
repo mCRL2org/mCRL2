@@ -167,11 +167,11 @@ const ATerm &ATgetFirst(const ATermList &l)
   return l->head;
 } */
 
-inline
+/* inline
 ATermList &ATgetNext(const ATermList &l)
 {
   return l->tail;
-}
+} */
 
 /* inline
 bool ATisEmpty(const ATermList &l)
@@ -182,11 +182,11 @@ bool ATisEmpty(const ATermList &l)
 ATermList &ATgetTail(const ATermList &list, const int &start);
 ATermList ATgetSlice(const ATermList &list, const size_t start, const size_t end);
 
-inline
+/* inline
 ATermList ATinsert(const ATermList &list, const ATerm &el)
 {
   return push_front(list,el);
-}
+} */
 
 inline
 ATermList ATmakeList0()
@@ -197,37 +197,37 @@ ATermList ATmakeList0()
 inline
 ATermList ATmakeList1(const ATerm &el0)
 {
-  return ATinsert(term_list<ATerm>(),el0);
+  return push_front(term_list<ATerm>(),el0);
 }
 
 inline
 ATermList ATmakeList2(const ATerm &el0, const ATerm &el1)
 {
-  return ATinsert(ATmakeList1(el1), el0);
+  return push_front(ATmakeList1(el1), el0);
 }
 
 inline
 ATermList ATmakeList3(const ATerm &el0, const ATerm &el1, const ATerm &el2)
 {
-  return ATinsert(ATmakeList2(el1, el2), el0);
+  return push_front(ATmakeList2(el1, el2), el0);
 }
 
 inline
 ATermList ATmakeList4(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3)
 {
-  return ATinsert(ATmakeList3(el1, el2, el3), el0);
+  return push_front(ATmakeList3(el1, el2, el3), el0);
 }
 
 inline
 ATermList ATmakeList5(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3, const ATerm &el4)
 {
-  return ATinsert(ATmakeList4(el1, el2, el3, el4), el0);
+  return push_front(ATmakeList4(el1, el2, el3, el4), el0);
 }
 
 inline
 ATermList ATmakeList6(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3, const ATerm &el4, const ATerm &el5)
 {
-  return ATinsert(ATmakeList5(el1, el2, el3, el4, el5), el0);
+  return push_front(ATmakeList5(el1, el2, el3, el4, el5), el0);
 }
 
 inline
@@ -258,16 +258,16 @@ ATermList ATreplace(const ATermList &list_in, const ATerm &el, const size_t idx)
   for (i=0; i<idx; i++)
   {
     buffer[i] = &*list.front();
-    list = ATgetNext(list);
+    list = list.tail();
   }
   /* Skip the old element */
-  list = ATgetNext(list);
+  list = list.tail();
   /* Add the new element */
-  list = ATinsert(list, el);
+  list = push_front(list, el);
   /* Add the prefix */
   for (i=idx; i>0; i--)
   {
-    list = ATinsert(list, buffer[i-1]);
+    list = push_front(list, aterm(buffer[i-1]));
   }
 
   return list;
@@ -285,7 +285,7 @@ ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' t
   for (i=0; i<len; i++)
   {
     buffer[i] = &*list.front();
-    list = ATgetNext(list);
+    list = list.tail();
   }
 
   result = ATmakeList1(el);
@@ -293,7 +293,7 @@ ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' t
   /* Insert elements at the front of the list */
   for (i=len; i>0; i--)
   {
-    result = ATinsert(result, buffer[i-1]);
+    result = push_front(result, aterm(buffer[i-1]));
   }
 
   return result;
@@ -340,18 +340,18 @@ ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t 
   ATermList list=list_in;
   for (i=0; i<start; i++)
   {
-    list = ATgetNext(list);
+    list = list.tail();
   }
 
   for (i=0; i<size; i++)
   {
     buffer[i] = &*list.front();
-    list = ATgetNext(list);
+    list = list.tail();
   }
 
   for (i=size; i>0; i--)
   {
-    result = ATinsert(result, buffer[i-1]);
+    result = push_front(result, aterm(buffer[i-1]));
   }
 
   return result;
@@ -586,7 +586,7 @@ inline const ATermList &ATLtableGet(const ATermTable &Table, const ATerm &Key)
 inline
 ATermList ATinsertA(const ATermList &l, const ATermAppl &t)
 {
-  return ATinsert(l, t);
+  return push_front(l, aterm_cast<aterm>(t));
 }
 
 //Substitutions on ATerm's

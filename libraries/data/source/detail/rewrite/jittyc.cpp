@@ -421,17 +421,17 @@ static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_a
   aterm_list l;
   aterm_list h = ATLgetFirst(stack);
 
-  for (; !seqs.empty(); seqs=ATgetNext(seqs))
+  for (; !seqs.empty(); seqs=seqs.tail())
   {
     aterm_list e = ATLgetFirst(seqs);
 
     if (isD(ATAgetFirst(e)))
     {
-      l = push_front<aterm>(l,ATgetNext(e));
+      l = push_front<aterm>(l,e.tail());
     }
     else if (isN(ATAgetFirst(e)))
     {
-      h = push_front<aterm>(h,ATgetNext(e));
+      h = push_front<aterm>(h,e.tail());
     }
     else if (isRe(ATAgetFirst(e)))
     {
@@ -443,14 +443,14 @@ static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_a
     }
   }
 
-  return push_front<aterm>(add_to_stack(ATgetNext(stack),l,r,cr),h);
+  return push_front<aterm>(add_to_stack(stack.tail(),l,r,cr),h);
 }
 
 static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, aterm_list* cr)
 {
   aterm_list l;
 
-  for (; !seqs.empty(); seqs=ATgetNext(seqs))
+  for (; !seqs.empty(); seqs=seqs.tail())
   {
     aterm_list e = ATLgetFirst(seqs);
 
@@ -498,7 +498,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
   }
 
   aterm_appl head = (aterm_appl) l.front();
-  l = ATgetNext(l);
+  l = l.tail();
 
   if (isM(head))
   {
@@ -511,7 +511,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
   {
     aterm_list l = (aterm_list) head(2);
     aterm_list m ;
-    for (; !l.empty(); l=ATgetNext(l))
+    for (; !l.empty(); l=l.tail())
     {
       if (l.front()==old)
       {
@@ -524,7 +524,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
     }
     l = (aterm_list) head(3);
     aterm_list n;
-    for (; !l.empty(); l=ATgetNext(l))
+    for (; !l.empty(); l=l.tail())
     {
       if (l.front()==old)
       {
@@ -541,7 +541,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
   {
     aterm_list l = (aterm_list) head(1);
     aterm_list m ;
-    for (; !l.empty(); l=ATgetNext(l))
+    for (; !l.empty(); l=l.tail())
     {
       if (l.front()==old)
       {
@@ -562,7 +562,7 @@ static size_t* treevars_usedcnt;
 
 static void inc_usedcnt(aterm_list l)
 {
-  for (; !l.empty(); l=ATgetNext(l))
+  for (; !l.empty(); l=l.tail())
   {
     aterm first=l.front();
     if (first.type_is_int())
@@ -584,14 +584,14 @@ static aterm_appl build_tree(build_pars pars, size_t i)
 
     l = aterm_list();
     m = aterm_list();
-    for (; !pars.Slist.empty(); pars.Slist=ATgetNext(pars.Slist))
+    for (; !pars.Slist.empty(); pars.Slist=pars.Slist.tail())
     {
       aterm_list e = ATLgetFirst(pars.Slist);
 
       e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0), v,aterm_int(k),ATmakeList1(gsMakeSubst(ATAgetFirst(e)(0),v)));
 
       l = push_front<aterm>(l,e.front());
-      m = push_front<aterm>(m,ATgetNext(e));
+      m = push_front<aterm>(m,e.tail());
     }
 
     aterm_appl r;
@@ -604,7 +604,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
       aterm_appl tree;
 
       tree = build_tree(pars,i);
-      for (; !readies.empty(); readies=ATgetNext(readies))
+      for (; !readies.empty(); readies=readies.tail())
       {
         inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
         inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
@@ -633,11 +633,11 @@ static aterm_appl build_tree(build_pars pars, size_t i)
 
     aterm_list l;
     aterm_list m;
-    for (; !pars.Mlist.empty(); pars.Mlist=ATgetNext(pars.Mlist))
+    for (; !pars.Mlist.empty(); pars.Mlist=pars.Mlist.tail())
     {
       if (M==ATLgetFirst(pars.Mlist).front())
       {
-        l = push_front<aterm>(l,ATgetNext(ATLgetFirst(pars.Mlist)));
+        l = push_front<aterm>(l,ATLgetFirst(pars.Mlist).tail());
       }
       else
       {
@@ -658,7 +658,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       pars.stack = newstack;
       true_tree = build_tree(pars,i);
-      for (; !readies.empty(); readies=ATgetNext(readies))
+      for (; !readies.empty(); readies=readies.tail())
       {
         inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
         inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
@@ -689,11 +689,11 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     aterm_list newupstack = pars.upstack;
     aterm_list l;
 
-    for (; !pars.Flist.empty(); pars.Flist=ATgetNext(pars.Flist))
+    for (; !pars.Flist.empty(); pars.Flist=pars.Flist.tail())
     {
       if (ATLgetFirst(pars.Flist).front()==F.front())
       {
-        newupstack = push_front<aterm>(newupstack, ATgetNext(ATLgetFirst(pars.Flist)));
+        newupstack = push_front<aterm>(newupstack, ATLgetFirst(pars.Flist).tail());
       }
       else
       {
@@ -733,7 +733,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       aterm_appl t = build_tree(pars,i);
 
-      for (; !readies.empty(); readies=ATgetNext(readies))
+      for (; !readies.empty(); readies=readies.tail())
       {
         inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
         inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
@@ -752,13 +752,13 @@ static aterm_appl build_tree(build_pars pars, size_t i)
   {
     if (ATLgetFirst(pars.stack).empty())
     {
-      if (ATgetNext(pars.stack).empty())
+      if (pars.stack.tail().empty())
       {
         return atermpp::aterm_appl(afunX);
       }
       else
       {
-        pars.stack = ATgetNext(pars.stack);
+        pars.stack = pars.stack.tail();
         return atermpp::aterm_appl(afunD,build_tree(pars,i));
       }
     }
@@ -768,14 +768,14 @@ static aterm_appl build_tree(build_pars pars, size_t i)
       aterm_appl r ;
       aterm_list readies;
 
-      pars.stack = push_front<aterm>(ATgetNext(pars.stack),aterm_list());
+      pars.stack = push_front<aterm>(pars.stack.tail(),aterm_list());
       add_to_build_pars(&pars,l,&r,&readies);
 
       aterm_appl tree;
       if (r==aterm_appl())
       {
         tree = build_tree(pars,i);
-        for (; !readies.empty(); readies=ATgetNext(readies))
+        for (; !readies.empty(); readies=readies.tail())
         {
           inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
           inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
@@ -830,7 +830,7 @@ static aterm_appl create_tree(const data_equation_list &rules, size_t /*opid*/, 
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,size_t,total_rule_vars);
     treevars_usedcnt = a;
     tree = build_tree(init_pars,0);
-    for (; !readies.empty(); readies=ATgetNext(readies))
+    for (; !readies.empty(); readies=readies.tail())
     {
       tree = atermpp::aterm_appl(afunC,ATAgetFirst(readies)(0),atermpp::aterm_appl(afunR,ATAgetFirst(readies)(1)), tree);
     }
@@ -915,7 +915,7 @@ static aterm_list get_vars(const aterm &a)
   else if (ATisList(a))
   {
     aterm_list l;
-    for (aterm_list m=(aterm_list) a; !m.empty(); m=ATgetNext(m))
+    for (aterm_list m=(aterm_list) a; !m.empty(); m=m.tail())
     {
       l = ATconcat(get_vars(m.front()),l);
     }
@@ -960,10 +960,10 @@ static aterm_list dep_vars(const data_equation &eqn)
       // Argument is not a variable, so it needs to be rewritten
       bs[i] = true;
       aterm_list evars = get_vars(pars(i+1));
-      for (; !evars.empty(); evars=ATgetNext(evars))
+      for (; !evars.empty(); evars=evars.tail())
       {
-        int j=i-1; // ATgetNext(vars).size()-1
-        for (aterm_list o=ATgetNext(vars); !o.empty(); o=ATgetNext(o))
+        int j=i-1; // vars.tail().size()-1
+        for (aterm_list o=vars.tail(); !o.empty(); o=o.tail())
         {
           if (ATindexOf(ATLgetFirst(o),evars.front()) != ATERM_NON_EXISTING_POSITION)
           {
@@ -978,7 +978,7 @@ static aterm_list dep_vars(const data_equation &eqn)
       // Argument is a variable; check whether it occurred before
       int j = i-1; // vars.size()-1-1
       bool b = false;
-      for (aterm_list o=vars; !o.empty(); o=ATgetNext(o))
+      for (aterm_list o=vars; !o.empty(); o=o.tail())
       {
         if (ATindexOf(ATLgetFirst(o),pars(i+1)) != ATERM_NON_EXISTING_POSITION)
         {
@@ -1104,10 +1104,10 @@ static aterm_list create_strategy(
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
         aterm_list evars = get_vars(pars(i+1));
-        for (; !evars.empty(); evars=ATgetNext(evars))
+        for (; !evars.empty(); evars=evars.tail())
         {
           int j=i-1;
-          for (aterm_list o=vars; !o.tail().empty(); o=ATgetNext(o))
+          for (aterm_list o=vars; !o.tail().empty(); o=o.tail())
           {
             if (ATindexOf(ATLgetFirst(o),evars.front()) != ATERM_NON_EXISTING_POSITION)
             {
@@ -1122,7 +1122,7 @@ static aterm_list create_strategy(
         // Argument is a variable; check whether it occurred before
         int j = i-1; // vars.size()-1-1
         bool b = false;
-        for (aterm_list o=vars; !o.empty(); o=ATgetNext(o))
+        for (aterm_list o=vars; !o.empty(); o=o.tail())
         {
           if (ATindexOf(ATLgetFirst(o),pars(i+1)) != ATERM_NON_EXISTING_POSITION)
           {
@@ -1170,11 +1170,11 @@ static aterm_list create_strategy(
     // First collect rules without dependencies to the strategy
     data_equation_list no_deps = data_equation_list(aterm_list());
     aterm_list has_deps;
-    for (; !dep_list.empty(); dep_list=ATgetNext(dep_list))
+    for (; !dep_list.empty(); dep_list=dep_list.tail())
     {
       if (ATLgetFirst(ATLgetFirst(dep_list)).empty())
       {
-        no_deps = push_front<aterm>(no_deps, data_equation(ATgetNext(ATLgetFirst(dep_list)).front()));
+        no_deps = push_front<aterm>(no_deps, data_equation(ATLgetFirst(dep_list).tail().front()));
       }
       else
       {
@@ -1218,9 +1218,9 @@ static aterm_list create_strategy(
       strat = push_front<aterm>(strat, rewr_arg);
 
       aterm_list l;
-      for (; !dep_list.empty(); dep_list=ATgetNext(dep_list))
+      for (; !dep_list.empty(); dep_list=dep_list.tail())
       {
-        l = push_front<aterm>(l, push_front<aterm>(ATgetNext(ATLgetFirst(dep_list)),
+        l = push_front<aterm>(l, push_front<aterm>(ATLgetFirst(dep_list).tail(),
                     remove_one_element<aterm>(ATLgetFirst(ATLgetFirst(dep_list)), rewr_arg)));
       }
       dep_list = reverse(l);
@@ -1253,7 +1253,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const atermpp::aterm_int
   while (!strat.empty() && strat.front().type_is_int())
   {
     nfs.set(static_cast<aterm_int>(strat.front()).value());
-    strat = ATgetNext(strat);
+    strat = strat.tail();
   }
 }
 
@@ -1296,7 +1296,7 @@ void RewriterCompilingJitty::calc_nfs_list(nfs_array &nfs, size_t arity, aterm_l
   }
 
   nfs.set(arity-args.size(),calc_nfs(args.front(),startarg,nnfvars));
-  calc_nfs_list(nfs,arity,ATgetNext(args),startarg+1,nnfvars);
+  calc_nfs_list(nfs,arity,args.tail(),startarg+1,nnfvars);
 }
 
 bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
@@ -1309,7 +1309,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
       if (opid_is_nf(static_cast<aterm_int>(((aterm_list) t).front()),arity) && arity != 0)
       {
         nfs_array args(arity);
-        calc_nfs_list(args,arity,ATgetNext((aterm_list) t),startarg,nnfvars);
+        calc_nfs_list(args,arity,((aterm_list) t).tail(),startarg,nnfvars);
         bool b = args.is_filled(arity);
         return b;
       }
@@ -1365,7 +1365,7 @@ string RewriterCompilingJitty::calc_inner_terms(nfs_array &nfs, size_t arity, at
 
   pair<bool,string> head = calc_inner_term(args.front(),startarg,nnfvars,rewr?(rewr->get(arity-args.size())):false,arity);
   nfs.set(arity-args.size(),head.first);
-  string tail = calc_inner_terms(nfs,arity,ATgetNext(args),startarg+1,nnfvars,rewr);
+  string tail = calc_inner_terms(nfs,arity,args.tail(),startarg+1,nnfvars,rewr);
   return head.second+(args.tail().empty()?"":",")+tail;
 }
 
@@ -1435,7 +1435,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // arity != 0
         nfs_array args_nfs(arity);
-        calc_nfs_list(args_nfs,arity,ATgetNext((aterm_list) t),startarg,nnfvars);
+        calc_nfs_list(args_nfs,arity,((aterm_list) t).tail(),startarg,nnfvars);
         if (!(b || !rewr))
         {
             ss << "rewr_";
@@ -1516,7 +1516,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         {
           args_nfs.fill(arity);
         }
-        string args_second = calc_inner_terms(args_first,arity,ATgetNext((aterm_list) t),startarg,nnfvars,&args_nfs);
+        string args_second = calc_inner_terms(args_first,arity,((aterm_list) t).tail(),startarg,nnfvars,&args_nfs);
         // The assert is not valid anymore, bcause lambda are sometimes returned in normal form, although not strictly
         // asked for...
         assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first.equals(args_nfs,arity));
@@ -1563,7 +1563,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
         b = rewr;
         nfs_array args_nfs(arity);
-        calc_nfs_list(args_nfs,arity,ATgetNext((aterm_list) t),startarg,nnfvars);
+        calc_nfs_list(args_nfs,arity,((aterm_list) t).tail(),startarg,nnfvars);
         if (arity > NF_MAX_ARITY)
         {
           args_nfs.clear(arity);
@@ -1583,7 +1583,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
 
         ss << calc_inner_appl_head(arity) << head.second << "," <<
-                 calc_inner_terms(args_first,arity,ATgetNext((aterm_list) t),startarg,nnfvars,&args_nfs) << ")";
+                 calc_inner_terms(args_first,arity,((aterm_list) t).tail(),startarg,nnfvars,&args_nfs) << ")";
         if (rewr)
         {
           ss << ")";
@@ -1597,7 +1597,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         b = rewr;
         pair<bool,string> head = calc_inner_term(((aterm_list) t).front(),startarg,nnfvars,false,arity);
         nfs_array tail_first(arity);
-        string tail_second = calc_inner_terms(tail_first,arity,ATgetNext((aterm_list) t),startarg,nnfvars,NULL);
+        string tail_second = calc_inner_terms(tail_first,arity,((aterm_list) t).tail(),startarg,nnfvars,NULL);
         /* if (arity>5)
         {
           ss << "(aterm_appl)";
@@ -1630,7 +1630,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           tail_first.clear(arity);
           nfs_array rewrall(arity);
           rewrall.fill(arity);
-          tail_second = calc_inner_terms(tail_first,arity,ATgetNext((aterm_list) t),startarg,nnfvars,&rewrall);
+          tail_second = calc_inner_terms(tail_first,arity,((aterm_list) t).tail(),startarg,nnfvars,&rewrall);
         }
         ss << tail_second << ")";
         {
@@ -1807,7 +1807,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         ss << "push_front<aterm>(";
       }
       ss << "ATempty";
-      for( ; !assignments.empty() ; assignments=ATgetNext(assignments))
+      for( ; !assignments.empty() ; assignments=assignments.tail())
       {
         aterm_appl assignment=ATAgetFirst(assignments);
         pair<bool,string> r=calc_inner_term(assignment(1),startarg,nnfvars,true,total_arity);
@@ -1832,7 +1832,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         ss << "push_front<aterm>(";
       }
       ss << "ATempty";
-      for( ; !assignments.empty() ; assignments=ATgetNext(assignments))
+      for( ; !assignments.empty() ; assignments=assignments.tail())
       {
         aterm_appl assignment=ATAgetFirst(assignments);
         pair<bool,string> r=calc_inner_term(assignment(1),startarg,nnfvars,true,total_arity);
@@ -2279,7 +2279,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, size_
       fprintf(f,"%s}\n",whitespace(2*d));
     }
 
-    strat = ATgetNext(strat);
+    strat = strat.tail();
   }
 
   finish_function(f,arity,opid,used);
@@ -2312,9 +2312,9 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
 
   aterm_appl result = make_ar_false();
 
-  aterm_list args = ATgetNext((aterm_list) expr);
+  aterm_list args = ((aterm_list) expr).tail();
   size_t arity = args.size();
-  for (size_t i=0; i<arity; i++, args=ATgetNext(args))
+  for (size_t i=0; i<arity; i++, args=args.tail())
   {
     const size_t idx = int2ar_idx[atermpp::aterm_int(head).value()] + ((arity-1)*arity)/2 + i;
     aterm_appl t = build_ar_expr(args.front(),var);

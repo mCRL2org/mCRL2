@@ -342,7 +342,7 @@ ATerm NextState::parse_state_vector_new(const mcrl2::lps::state &s, const mcrl2:
       break;
     }
     stateargs[i] = info.m_rewriter.convert_to((data_expression)(ATermAppl) stateargs[i]);
-    l = ATgetNext(l);
+    l = l.tail();
   }
   if (valid)
   {
@@ -390,7 +390,7 @@ ATerm NextState::parseStateVector(const ATermAppl &state, const ATerm &match)
         break;
       }
       stateargs[i] = info.m_rewriter.convert_to((data_expression)(ATermAppl) stateargs[i]);
-      l = ATgetNext(l);
+      l = l.tail();
     }
     if (valid)
     {
@@ -424,7 +424,7 @@ ATerm NextState::SetVars(const ATerm &a, const ATermList &free_vars)
   {
     ATermList l(a);
     ATermList m;
-    for (; !l.empty(); l=ATgetNext(l))
+    for (; !l.empty(); l=l.tail())
     {
       m = push_front(m,SetVars(l.front(),free_vars));
     }
@@ -460,7 +460,7 @@ ATermList NextState::ListToFormat(const ATermList &l, const ATermList &free_vars
   }
   else
   {
-    return ATinsert(ListToFormat(ATgetNext(l),free_vars),info.m_rewriter.convert_to((data_expression)(ATermAppl) SetVars(l.front(),free_vars)));
+    return push_front<aterm>(ListToFormat(l.tail(),free_vars),info.m_rewriter.convert_to((data_expression)(ATermAppl) SetVars(l.front(),free_vars)));
   }
 }
 
@@ -472,7 +472,7 @@ ATermList NextState::ListFromFormat(const ATermList &l)
   }
   else
   {
-    return ATinsert(ListFromFormat(ATgetNext(l)),info.m_rewriter.convert_from(atermpp::aterm_appl(l.front())));
+    return push_front<aterm>(ListFromFormat(l.tail()),info.m_rewriter.convert_from(atermpp::aterm_appl(l.front())));
   }
 }
 
@@ -484,7 +484,7 @@ ATermList NextStateGenerator::ListFromFormat(const ATermList &l)
   }
   else
   {
-    return ATinsert(ListFromFormat(ATgetNext(l)),info.m_rewriter.convert_from(atermpp::aterm_appl(l.front())));
+    return push_front<aterm>(ListFromFormat(l.tail()),info.m_rewriter.convert_from(atermpp::aterm_appl(l.front())));
   }
 }
 
@@ -499,11 +499,11 @@ ATermAppl NextState::ActionToRewriteFormat(const ATermAppl &act, const ATermList
   ATermList l = ATLgetArgument(act,0);
   ATermList m = ATmakeList0();
 
-  for (; !l.empty(); l=ATgetNext(l))
+  for (; !l.empty(); l=l.tail())
   {
     ATermAppl a = ATAgetFirst(l);
     a = gsMakeAction(ATAgetArgument(a,0),ListToFormat(ATLgetArgument(a,1),free_vars));
-    m = ATinsert(m, a);
+    m = push_front<aterm>(m, a);
   }
   m = reverse(m);
 
@@ -519,12 +519,12 @@ ATermList NextState::AssignsToRewriteFormat(const ATermList &assigns, const ATer
             "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
   size_t i = 0;
-  for (ATermList l=pars; !l.empty(); l=ATgetNext(l),i++)
+  for (ATermList l=pars; !l.empty(); l=l.tail(),i++)
   {
     bool set = false;
 
     assert(stateargs.size() == pars.size());
-    for (ATermList m=assigns; !m.empty(); m=ATgetNext(m))
+    for (ATermList m=assigns; !m.empty(); m=m.tail())
     {
       if (ATAgetArgument(ATAgetFirst(m),0)==ATAgetFirst(l))
       {
@@ -544,7 +544,7 @@ ATermList NextState::AssignsToRewriteFormat(const ATermList &assigns, const ATer
   while (i != 0)
   {
     i--;
-    r = ATinsert(r,stateargs[i]);
+    r = push_front(r,stateargs[i]);
   }
   return r;
 }
@@ -628,7 +628,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   smndAFun = AFun("@SMND@",4);
   ATermList sums = mcrl2::lps::deprecated::linear_process_summands(spec.process());
   l = ATmakeList0();
-  for (bool b=true; !sums.empty(); sums=ATgetNext(sums))
+  for (bool b=true; !sums.empty(); sums=sums.tail())
   {
     if (b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)))   // Summand is timed
     {
@@ -637,7 +637,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     }
     if (!gsIsDelta(ATAgetArgument(ATAgetFirst(sums),2)))
     {
-      l = ATinsert(l,sums.front());
+      l = push_front(l,sums.front());
     }
   }
   sums = reverse(l);
@@ -645,7 +645,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   info.num_prioritised = 0;
   info.summands = std::vector < ATermAppl> (sums.size());
   
-  for (size_t i=0; !sums.empty(); sums=ATgetNext(sums),i++)
+  for (size_t i=0; !sums.empty(); sums=sums.tail(),i++)
   {
     info.summands[i] =
       aterm_appl(
@@ -659,11 +659,11 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   l = pars;
   m = spec.initial_process().assignments();
 
-  for (size_t i=0; !l.empty(); l=ATgetNext(l), i++)
+  for (size_t i=0; !l.empty(); l=l.tail(), i++)
   {
     n = m;
     bool set = false;
-    for (; !n.empty(); n=ATgetNext(n))
+    for (; !n.empty(); n=n.tail())
     {
       if (ATAgetArgument(ATAgetFirst(n),0)==ATAgetFirst(l))
       {
@@ -901,12 +901,12 @@ ATermAppl NextStateGenerator::rewrActionArgs(const ATermAppl &act)
   ATermList l = ATLgetArgument(act,0);
   ATermList m = ATmakeList0();
 
-  for (; !l.empty(); l=ATgetNext(l))
+  for (; !l.empty(); l=l.tail())
   {
     ATermAppl a = ATAgetFirst(l);
     const atermpp::term_list <atermpp::aterm_appl> l(ATLgetArgument(a,1));
     a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal_list(l,current_substitution)));
-    m = ATinsert(m, a);
+    m = push_front<aterm>(m, a);
   }
   m = reverse(m);
 
@@ -978,7 +978,7 @@ void NextStateGenerator::set_substitutions()
   switch (info.stateformat)
   {
     case GS_STATE_VECTOR:
-      for (size_t i=0; !l.empty(); l=ATgetNext(l),i++)
+      for (size_t i=0; !l.empty(); l=l.tail(),i++)
       {
         atermpp::aterm_appl a (atermpp::aterm_cast<const atermpp::aterm_appl>(cur_state)(i));
         if (a!=info.nil)

@@ -44,7 +44,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
     {
       return Subst(1);
     }
-    l = ATgetNext(l);
+    l = l.tail();
   }
   if (!Recursive)
   {
@@ -86,7 +86,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
       {
         Result = ATinsert(Result,
                           gsSubstValues(Substs, ((ATermList) Term).front(), Recursive));
-        Term = ATgetNext((ATermList) Term);
+        Term = ((ATermList) Term).tail();
       }
       return reverse(Result);
     }
@@ -145,7 +145,7 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
       {
         Result = ATinsert(Result,
                           gsSubstValuesTable(Substs, ((ATermList) Term).front(), Recursive));
-        Term = ATgetNext((ATermList) Term);
+        Term = ((ATermList) Term).tail();
       }
       return reverse(Result);
     }
@@ -184,7 +184,7 @@ bool gsOccurs(const ATerm &Elt, const ATerm &t)
       while (!((ATermList) Term).empty() && !Result)
       {
         Result = gsOccurs(Elt, ((ATermList) Term).front());
-        Term = ATgetNext((ATermList) Term);
+        Term = ((ATermList) Term).tail();
       }
     }
   }

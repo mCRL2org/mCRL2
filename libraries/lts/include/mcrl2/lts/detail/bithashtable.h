@@ -101,7 +101,7 @@ class bit_hash_table
           break;
         case AT_LIST:
           calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
-          for (ATermList l=(ATermList) t; !l.empty(); l=ATgetNext(l))
+          for (ATermList l=(ATermList) t; !l.empty(); l=l.tail())
           {
             calc_hash_aterm(l.front(),sh_a,sh_b,sh_c,sh_i);
           }

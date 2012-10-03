@@ -231,7 +231,7 @@ bool lps2lts_algorithm::savetrace(
 
   if (extra_state != state_t())
   {
-    tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(extra_transition),extra_state));
+    tr = push_front(tr,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(extra_transition),extra_state));
   }
 
   while ((ns = backpointers.find(s)) != backpointers.end())
@@ -255,17 +255,17 @@ bool lps2lts_algorithm::savetrace(
       delete nsgen;
       throw e;
     }
-    tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(trans),s));
+    tr = push_front(tr, (ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(trans),s));
     s = ns->second;
   }
 
   Trace trace;
   trace.setState(nstate->make_new_state_vector(s));
-  for (; !tr.empty(); tr=ATgetNext(tr))
+  for (; !tr.empty(); tr=tr.tail())
   {
     ATermList e = (ATermList) tr.front();
     trace.addAction(multi_action(e.front()));
-    e = ATgetNext(e);
+    e = e.tail();
     trace.setState(nstate->make_new_state_vector(e.front()));
   }
 
@@ -527,7 +527,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
       bool prioritised_action;
       while (repr_nsgen->next(Transition,&NewState,&prioritised_action) && prioritised_action)
       {
-        nextl = ATinsert(nextl,NewState);
+        nextl = push_front(nextl,NewState);
         if (repr_number.count(NewState) == 0)   // This condition was missing in the report
         {
           repr_number[NewState]=0;
@@ -565,7 +565,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
     else
     {
       ATerm u = nextl.front();
-      repr_next[v]=ATgetNext(nextl);
+      repr_next[v]=nextl.tail();
       const size_t nu = repr_number[u];
       if (nu == 0)
       {
@@ -751,7 +751,7 @@ bool lps2lts_algorithm::generate_lts()
             if (!priority)   // don't store confluent self loops
             {
               tmp_trans = push_front(tmp_trans,Transition.actions());
-              tmp_states = ATinsert(tmp_states,NewState);
+              tmp_states = push_front(tmp_states,NewState);
             }
           }
 
@@ -810,7 +810,7 @@ bool lps2lts_algorithm::generate_lts()
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
             ATermAppl state=(ATermAppl)tmp_state_walker.front();
-            tmp_state_walker=ATgetNext(tmp_state_walker);
+            tmp_state_walker=tmp_state_walker.tail();
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
@@ -827,7 +827,7 @@ bool lps2lts_algorithm::generate_lts()
                   if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   {
                     new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                    new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                    new_tmp_states=push_front(new_tmp_states,(ATerm)state);
                   }
                   else
                   {
@@ -838,19 +838,19 @@ bool lps2lts_algorithm::generate_lts()
                 else
                 {
                   new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                  new_tmp_states=push_front(new_tmp_states,(ATerm)state);
                 }
               }
               else
               {
                 new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                new_tmp_states=push_front(new_tmp_states,(ATerm)state);
               }
             }
             else
             {
               new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-              new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+              new_tmp_states=push_front(new_tmp_states,(ATerm)state);
             }
           }
           tmp_trans=reverse(new_tmp_trans);
@@ -884,7 +884,7 @@ bool lps2lts_algorithm::generate_lts()
               // Ignore the new state.
             }
 
-            tmp_states = ATgetNext(tmp_states);
+            tmp_states = tmp_states.tail();
           }
         }
 
@@ -929,7 +929,7 @@ bool lps2lts_algorithm::generate_lts()
             if (!priority)   // don't store confluent self loops
             {
               tmp_trans = push_front(tmp_trans,Transition.actions());
-              tmp_states = ATinsert(tmp_states,NewState);
+              tmp_states = push_front(tmp_states,NewState);
             }
           }
 
@@ -990,7 +990,7 @@ bool lps2lts_algorithm::generate_lts()
           {
             // const multi_action ma= *tmp_trans_walker;
             ATermAppl state=(ATermAppl)tmp_state_walker.front();
-            tmp_state_walker=ATgetNext(tmp_state_walker);
+            tmp_state_walker=tmp_state_walker.tail();
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
@@ -1007,7 +1007,7 @@ bool lps2lts_algorithm::generate_lts()
                   if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   {
                     new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                    new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                    new_tmp_states=push_front(new_tmp_states,(ATerm)state);
                   }
                   else
                   {
@@ -1017,19 +1017,19 @@ bool lps2lts_algorithm::generate_lts()
                 else
                 {
                   new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                  new_tmp_states=push_front(new_tmp_states,(ATerm)state);
                 }
               }
               else
               {
                 new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                new_tmp_states=push_front(new_tmp_states,(ATerm)state);
               }
             }
             else
             {
               new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-              new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+              new_tmp_states=push_front(new_tmp_states,(ATerm)state);
             }
           }
 
@@ -1063,7 +1063,7 @@ bool lps2lts_algorithm::generate_lts()
             add_transition(state,multi_action(*tmp_trans_walker),tmp_states.front());
             new_state = tmp_states.front();
 
-            tmp_states = ATgetNext(tmp_states);
+            tmp_states = tmp_states.tail();
           }
           state = new_state;
         }
