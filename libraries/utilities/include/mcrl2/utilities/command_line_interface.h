@@ -942,7 +942,7 @@ class command_line_parser
     {
       std::istringstream in(option_argument(long_identifier));
 
-      T result;
+      T result = T();
 
       in >> result;
 

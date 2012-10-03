@@ -62,7 +62,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                                  ForwardIterator vertices_end )
 {
     // FIXME: determine which cut-off value works best:
-    if (std::distance(vertices_begin, vertices_end) < graph.V()/static_cast<verti>(3))
+    if (static_cast<size_t>(std::distance(vertices_begin, vertices_end)) < graph.V()/static_cast<verti>(3))
     {
         HASH_MAP(verti, verti) map;
         return make_subgraph(graph, vertices_begin, vertices_end, map);

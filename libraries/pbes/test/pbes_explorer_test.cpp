@@ -223,7 +223,7 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
   int state_length = info->get_lts_type().get_state_length();
   BOOST_CHECK(num_parts==state_length);
   //std::clog << state_length << " parts" << std::endl;
-  int num_rows = info->get_number_of_groups();
+  //int num_rows = info->get_number_of_groups();
   //std::clog << num_rows << " groups" << std::endl;
   //BOOST_CHECK(num_groups==num_rows);
   std::map<int,std::vector<bool> > matrix = info->get_dependency_matrix();
@@ -250,7 +250,7 @@ void run_pbes_explorer_file(std::string filename, int num_parts, int num_groups,
   int state_length = info->get_lts_type().get_state_length();
   BOOST_CHECK(num_parts==state_length);
   //std::clog << state_length << " parts" << std::endl;
-  int num_rows = info->get_number_of_groups();
+  //int num_rows = info->get_number_of_groups();
   //std::clog << num_rows << " groups" << std::endl;
   //BOOST_CHECK(num_groups==num_rows);
   std::map<int,std::vector<bool> > matrix = info->get_dependency_matrix();
