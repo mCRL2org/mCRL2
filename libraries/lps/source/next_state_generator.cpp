@@ -470,15 +470,29 @@ void next_state_generator::iterator::increment()
   }
   else
   {
+    valuation = *m_enumeration_iterator;
+
     // If we failed to exactly rewrite the condition to true, nextstate generation fails.
     if(!m_enumeration_iterator.solution_is_exact())
     {
+      // Integrate the valuation in the substitution, to generate a more meaningful error message.
+      valuation_t::iterator v = valuation.begin();
+      for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
+      {
+        (*m_substitution)[*i] = *v;
+      }
+
+      // Reduce condition as much as possible, and give a hint of the original condition in the error message.
       rewriter_expression_t reduced_condition(m_generator->m_rewriter.rewrite_internal(m_summand->condition, *m_substitution));
-      throw mcrl2::runtime_error("Expression " + data::pp(m_generator->m_rewriter.convert_from(m_summand->condition))
-                                 + " rewrites to " + data::pp(m_generator->m_rewriter.convert_from(reduced_condition))
-                                 + " instead of true");
+      std::string printed_condition(data::pp(m_generator->m_rewriter.convert_from(m_summand->condition)).substr(0, 80));
+
+      throw mcrl2::runtime_error("Expression " + data::pp(m_generator->m_rewriter.convert_from(reduced_condition)) +
+                                 " does not rewrite to true or false in the condition "
+                                 + printed_condition
+                                 + (printed_condition.size() > 80?"...":""));
     }
-    valuation = *m_enumeration_iterator++;
+
+    m_enumeration_iterator++;
   }
 
   if (m_caching)
