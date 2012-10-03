@@ -252,8 +252,8 @@ void pbesstategraph(const std::string& input_filename,
   q.save(output_filename, true, true);
   if (!q.is_well_typed())
   {
-    std::cerr << "pbesstategraph error: not well typed!" << std::endl;
-    std::cerr << pbes_system::pp(q) << std::endl;
+    mCRL2log(log::error) << "pbesstategraph error: not well typed!" << std::endl;
+    mCRL2log(log::error) << pbes_system::pp(q) << std::endl;
   }
 }
 
