@@ -1101,6 +1101,26 @@ BOOST_AUTO_TEST_CASE(test_bug_alphabet_reduction1)
   run_linearisation_test_case(spec);
 }
 
+// The testcase below is added because the typechecker could not deal with this
+// case. The three options for the action a caused it to become confused.
+BOOST_AUTO_TEST_CASE(test_multiple_action_types)
+{
+  const std::string spec =
+     "sort Id = Pos;\n"
+     "\n"
+     "map FALSE: Id -> Bool;\n"
+     "var n: Id;\n"
+     "eqn FALSE(n) = false;\n"
+     "\n"
+     "act a: (Id -> Bool);\n"
+     "    a: Bool;\n"
+     "    a: Pos;\n"
+     "\n"
+     "proc P = a(FALSE) . delta;\n"
+     "init P;\n";
+
+  run_linearisation_test_case(spec);
+}
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
