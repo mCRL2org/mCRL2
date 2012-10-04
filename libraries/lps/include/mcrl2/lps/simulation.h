@@ -35,6 +35,7 @@ class simulation
       state destination;
       multi_action action;
     };
+
     struct state_t
     {
       state source_state;

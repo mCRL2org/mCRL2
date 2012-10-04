@@ -487,7 +487,6 @@ class specification_basic_type:public boost::noncopyable
         // of getparameters.
         const data_expression_list templist=getparameters(multiAction);
         objectdata[n].parameters=templist;
-        objectdata[n].objectname=identifier_string((ATermAppl)(ATermList)actionnames);
         objectdata[n].object=multiact;
         // must separate assignment below as
         // objectdata may change as a side effect of make
@@ -7037,8 +7036,7 @@ class specification_basic_type:public boost::noncopyable
 
         if ((objectdata[n].processstatus==GNF)||
             (objectdata[n].processstatus==pCRL)||
-            (objectdata[n].processstatus==GNFalpha)||
-            (objectdata[n].processstatus==multiAction))
+            (objectdata[n].processstatus==GNFalpha))
         {
           t3=make_parameters_and_sum_variables_unique(t3,pars,init,std::string(objectdata[n].objectname));
         }
