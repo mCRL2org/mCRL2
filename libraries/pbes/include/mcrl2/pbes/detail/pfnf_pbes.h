@@ -397,6 +397,7 @@ class pfnf_pbes
   protected:
     data::data_specification m_data;
     atermpp::vector<pfnf_equation> m_equations;
+    atermpp::set<data::variable> m_global_variables;
     pbes_expression m_initial_state;
 
   public:
@@ -406,7 +407,7 @@ class pfnf_pbes
     /// \brief Constructor
     /// \pre The pbes p must be in PFNF format
     pfnf_pbes(const pbes<>& p)
-      : m_data(p.data()), m_initial_state(p.initial_state())
+      : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
       pbes<> q = p;
       if (!pbes_system::detail::is_pfnf(p))
@@ -431,6 +432,16 @@ class pfnf_pbes
     atermpp::vector<pfnf_equation>& equations()
     {
       return m_equations;
+    }
+
+    const atermpp::set<data::variable>& global_variables() const
+    {
+      return m_global_variables;
+    }
+
+    atermpp::set<data::variable>& global_variables()
+    {
+      return m_global_variables;
     }
 
     const pbes_expression& initial_state() const

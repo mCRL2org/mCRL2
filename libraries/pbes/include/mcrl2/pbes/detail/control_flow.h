@@ -925,6 +925,7 @@ class pbes_control_flow_algorithm
       pbes<> result;
       result.initial_state() = m_pbes.initial_state();
       result.data() = m_pbes.data();
+      result.global_variables() = m_pbes.global_variables();
       data::rewriter datar(m_pbes.data());
       simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_pbes.data());
 
