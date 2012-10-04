@@ -2713,7 +2713,7 @@ std::string gsATermAppl2String(const ATermAppl &term)
 {
   // if (gsIsString(term))
   {
-    return ATgetName(term.function());
+    return term.function().name();
   }
   // else
   // {

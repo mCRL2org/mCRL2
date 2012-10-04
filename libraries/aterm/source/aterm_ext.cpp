@@ -81,10 +81,10 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
     else if (Term.type() == AT_LIST)
     {
       //Term is an ATermList; distribute substitutions over the elements
-      ATermList Result = ATmakeList0();
+      ATermList Result;
       while (!((ATermList) Term).empty())
       {
-        Result = ATinsert(Result,
+        Result = push_front(Result,
                           gsSubstValues(Substs, ((ATermList) Term).front(), Recursive));
         Term = ((ATermList) Term).tail();
       }
@@ -140,10 +140,10 @@ ATerm gsSubstValuesTable(const ATermTable &Substs, const ATerm &t, const bool Re
     else if (Term.type() == AT_LIST)
     {
       //Term is an ATermList; distribute substitutions over the elements
-      ATermList Result = ATmakeList0();
+      ATermList Result;
       while (!((ATermList) Term).empty())
       {
-        Result = ATinsert(Result,
+        Result = push_front<aterm>(Result,
                           gsSubstValuesTable(Substs, ((ATermList) Term).front(), Recursive));
         Term = ((ATermList) Term).tail();
       }

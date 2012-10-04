@@ -226,7 +226,7 @@ bool lps2lts_algorithm::savetrace(
 {
   atermpp::aterm s = state;
   std::map<atermpp::aterm,atermpp::aterm>::iterator ns;
-  ATermList tr = ATmakeList0();
+  ATermList tr;
   NextStateGenerator* nsgen = NULL;
 
   if (extra_state != state_t())
@@ -520,7 +520,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
       count++;
       repr_number[v]=count;
       repr_low[v]=count;
-      ATermList nextl = ATmakeList0();
+      ATermList nextl;
       repr_nsgen = nstate->getNextStates(v,repr_nsgen);
       multi_action Transition;
       ATerm NewState;
@@ -736,7 +736,7 @@ bool lps2lts_algorithm::generate_lts()
                              (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         atermpp::term_list < action_list > tmp_trans;
-        ATermList tmp_states = ATmakeList0();
+        ATermList tmp_states;
         multi_action Transition;
         ATerm NewState;
         state = states.get(current_state);
@@ -805,7 +805,7 @@ bool lps2lts_algorithm::generate_lts()
 
           // Now carry out the actual filtering;
           atermpp::term_list < action_list > new_tmp_trans;
-          ATermList new_tmp_states = ATmakeList0();
+          ATermList new_tmp_states;
           ATermList tmp_state_walker = tmp_states;
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
@@ -912,7 +912,7 @@ bool lps2lts_algorithm::generate_lts()
       while (!must_abort && (current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         atermpp::term_list < action_list > tmp_trans;
-        ATermList tmp_states = ATmakeList0();
+        ATermList tmp_states;
         multi_action Transition;
         ATerm NewState;
 
@@ -984,7 +984,7 @@ bool lps2lts_algorithm::generate_lts()
 
           // Now carry out the actual filtering;
           atermpp::term_list < action_list >  new_tmp_trans;
-          ATermList new_tmp_states = ATmakeList0();
+          ATermList new_tmp_states;
           ATermList tmp_state_walker = tmp_states;
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {

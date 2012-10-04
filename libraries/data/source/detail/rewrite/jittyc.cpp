@@ -1983,18 +1983,19 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
       if (used[cur_arg])
       {
         fprintf(f,"%sconst atermpp::aterm_appl &%s = arg%lu; // S1\n",whitespace(d*2),
-                ATgetName(ATAgetArgument(ATAgetArgument(tree,0),0).function())+1,cur_arg);
+                ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,cur_arg);
       }
       else
       {
         fprintf(f,"%sconst atermpp::aterm_appl &%s = arg_not_nf%lu; // S1\n",whitespace(d*2),
-                ATgetName(ATAgetArgument(ATAgetArgument(tree,0),0).function())+1,cur_arg);
+                ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,cur_arg);
         nnfvars = push_front<aterm>(nnfvars,tree(0));
       }
     }
     else
     {
-      fprintf(f,"%sconst atermpp::aterm_appl &%s = reinterpret_cast<const atermpp::aterm_appl &>(%s%lu(%lu)); // S2\n",whitespace(d*2),ATgetName(ATAgetArgument(ATAgetArgument(tree,0),0).function())+1,(level==1)?"arg":"t",parent,cur_arg);
+      fprintf(f,"%sconst atermpp::aterm_appl &%s = reinterpret_cast<const atermpp::aterm_appl &>(%s%lu(%lu)); // S2\n",whitespace(d*2),
+              ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg);
     }
     implement_tree_aux(f,ATAgetArgument(tree,1),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
     return;
@@ -2005,7 +2006,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     {
       fprintf(f,"%sif (%s==arg%lu) // M\n"
               "%s{\n",
-              whitespace(d*2),ATgetName(ATAgetArgument(ATAgetArgument(tree,0),0).function())+1,cur_arg,
+              whitespace(d*2),ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,cur_arg,
               whitespace(d*2)
              );
     }
@@ -2013,7 +2014,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     {
       fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%lu(%lu))) // M\n"
               "%s{\n",
-              whitespace(d*2),ATgetName(ATAgetArgument(ATAgetArgument(tree,0),0).function())+1,(level==1)?"arg":"t",parent,cur_arg,
+              whitespace(d*2),ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
               whitespace(d*2)
              );
     }

@@ -90,10 +90,12 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
   aterm_list rules=aterm_list();
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
-    rules = push_front(rules,aterm_cast<const aterm>(ATmakeList4(aterm_cast<const aterm_list>(j->variables()),
-                                         rewriter->toRewriteFormat(j->condition()),
-                                         rewriter->toRewriteFormat(j->lhs()),
-                                         rewriter->toRewriteFormat(j->rhs()))));
+    rules = push_front<aterm>(rules,
+                       push_front<aterm>(push_front<aterm>(push_front<aterm>(push_front<aterm>(aterm_list(),
+                                         rewriter->toRewriteFormat(j->rhs())),
+                                         rewriter->toRewriteFormat(j->lhs())),
+                                         rewriter->toRewriteFormat(j->condition())),
+                                         aterm_cast<const aterm_list>(j->variables())));
   }
   rules = reverse(rules);
 
@@ -189,7 +191,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
         }
         deps = reverse(deps);
 
-        m = push_front(m,static_cast<const aterm>(ATmakeList2(deps,rules.front())));
+        m = push_front<aterm>(m,push_front<aterm>(push_front<aterm>(aterm_list(),rules.front()),deps));
       }
       else
       {

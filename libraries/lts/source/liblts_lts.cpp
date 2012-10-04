@@ -262,7 +262,7 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
   assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
   SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()) : (ATerm)aterm_int(l.initial_state()) ,&b));
 
-  SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
+  SVCparameterIndex param = SVCnewParameter(&f,(ATerm)aterm_list(),&b);
 
   const std::vector < transition> &trans=l.get_transitions();
   for (std::vector < transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)

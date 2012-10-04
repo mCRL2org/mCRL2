@@ -61,10 +61,10 @@ static inline
 ATermAppl gsMakeEmptyDataSpec()
 {
   return gsMakeDataSpec(
-           gsMakeSortSpec(ATmakeList0()),
-           gsMakeConsSpec(ATmakeList0()),
-           gsMakeMapSpec(ATmakeList0()),
-           gsMakeDataEqnSpec(ATmakeList0())
+           gsMakeSortSpec(aterm_list()),
+           gsMakeConsSpec(aterm_list()),
+           gsMakeMapSpec(aterm_list()),
+           gsMakeDataEqnSpec(aterm_list())
          );
 }
 
@@ -392,15 +392,7 @@ inline static void dbg_prints(const char* Value)
 
 static void PrintAFun(std::ostream& OutStream, const AFun fun)
 {
-  // if (ATisQuoted(fun))
-  {
-    OutStream <<  "\"";
-  }
-  OutStream <<  ATgetName(fun);
-  // if (ATisQuoted(fun))
-  {
-    OutStream <<  "\"";
-  }
+  OutStream <<  "\"" << fun.name() << "\"";
 }
 
 static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nesting)
@@ -1067,7 +1059,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsString(Part))
   {
     //print string
-    OutStream <<  ATgetName(Part.function());
+    OutStream <<  Part.function().name();
   }
   else
   {
@@ -1424,7 +1416,7 @@ ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
 static
 ATermList gsGetDataExprArgs(ATermAppl DataExpr)
 {
-  ATermList l = ATmakeList0();
+  ATermList l;
   while (gsIsDataAppl(DataExpr))
   {
     l = ATconcat(ATLgetArgument(DataExpr, 1), l);
@@ -1900,7 +1892,7 @@ void PrintDataExpr(std::ostream& OutStream,
       if (!gsIsDataAppl(DataExpr))
       {
         Head = DataExpr;
-        Args = ATmakeList0();
+        Args = aterm_list();
       }
       else
       {
@@ -1908,7 +1900,7 @@ void PrintDataExpr(std::ostream& OutStream,
         Args = ATLgetArgument(DataExpr, 1);
       }
       size_t ArgsLength = Args.size();
-      if (gsIsBinder(Head) && Args == ATmakeList0())
+      if (gsIsBinder(Head) && Args == aterm_list())
       {
         // A binder could be introduced by reconstructing a container expression
         // just print recursively.
@@ -2959,7 +2951,7 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
 
 ATermList GetAssignmentsRHS(ATermList Assignments)
 {
-  ATermList l = ATmakeList0();
+  ATermList l;
   while (!Assignments.empty())
   {
     l = push_front(l, ATAgetFirst(Assignments)(1));
@@ -2989,7 +2981,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     }
     //Return the hash table as a list of variable declarations
     ATermList DeclSorts = ATtableKeys(SortDeclsTable);
-    ATermList Result = ATmakeList0();
+    ATermList Result;
     while (!DeclSorts.empty())
     {
       Result = ATconcat(

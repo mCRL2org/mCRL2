@@ -497,7 +497,7 @@ ATermAppl NextState::ActionToRewriteFormat(const ATermAppl &act, const ATermList
             "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
   ATermList l = ATLgetArgument(act,0);
-  ATermList m = ATmakeList0();
+  ATermList m;
 
   for (; !l.empty(); l=l.tail())
   {
@@ -539,7 +539,7 @@ ATermList NextState::AssignsToRewriteFormat(const ATermList &assigns, const ATer
     }
   }
 
-  ATermList r = ATmakeList0();
+  ATermList r;
   i=info.statelen;
   while (i != 0)
   {
@@ -627,7 +627,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
 
   smndAFun = AFun("@SMND@",4);
   ATermList sums = mcrl2::lps::deprecated::linear_process_summands(spec.process());
-  l = ATmakeList0();
+  l = aterm_list();
   for (bool b=true; !sums.empty(); sums=sums.tail())
   {
     if (b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)))   // Summand is timed
@@ -899,7 +899,7 @@ ATermAppl NextStateGenerator::rewrActionArgs(const ATermAppl &act)
             "  act = " << atermpp::aterm_appl(act) << std::endl;
 #endif
   ATermList l = ATLgetArgument(act,0);
-  ATermList m = ATmakeList0();
+  ATermList m;
 
   for (; !l.empty(); l=l.tail())
   {
@@ -1017,7 +1017,7 @@ void NextStateGenerator::reset(const ATerm &State, size_t SummandIndex)
   if (info.summands.size() == 0)
   {
     enumerated_variables=variable_list();
-    valuations = info.get_sols(ATmakeList0(),info.m_rewriter.convert_to(mcrl2::data::sort_bool::false_()),current_substitution);
+    valuations = info.get_sols(aterm_list(),info.m_rewriter.convert_to(mcrl2::data::sort_bool::false_()),current_substitution);
   }
   else
   {

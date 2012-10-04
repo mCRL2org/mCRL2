@@ -39,11 +39,11 @@ typedef aterm_list ATermList;
 typedef aterm_int ATermInt;
 
 /* AFun related functions */
-inline
+/* inline
 const char* ATgetName(const AFun &sym)
 {
   return sym.name().c_str();
-}
+} */
 
 /* inline
 size_t ATgetArity(const AFun &sym)
@@ -188,11 +188,11 @@ ATermList ATinsert(const ATermList &list, const ATerm &el)
   return push_front(list,el);
 } */
 
-inline
+/* inline
 ATermList ATmakeList0()
 {
   return term_list<ATerm>();
-}
+} */
 
 inline
 ATermList ATmakeList1(const ATerm &el0)
@@ -218,17 +218,17 @@ ATermList ATmakeList4(const ATerm &el0, const ATerm &el1, const ATerm &el2, cons
   return push_front(ATmakeList3(el1, el2, el3), el0);
 }
 
-inline
+/* inline
 ATermList ATmakeList5(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3, const ATerm &el4)
 {
   return push_front(ATmakeList4(el1, el2, el3, el4), el0);
-}
+} */
 
-inline
+/* inline
 ATermList ATmakeList6(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3, const ATerm &el4, const ATerm &el5)
 {
   return push_front(ATmakeList5(el1, el2, el3, el4, el5), el0);
-}
+} */
 
 inline
 const ATerm &ATelementAt(const ATermList &l, size_t m)
@@ -327,7 +327,7 @@ inline
 ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t end)
 {
   size_t i, size;
-  ATermList result = ATmakeList0();
+  ATermList result;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,(end<=start?0:end-start));
 
   if (end<=start)
