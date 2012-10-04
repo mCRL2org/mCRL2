@@ -30,6 +30,33 @@ namespace mcrl2
 namespace lps
 {
 
+// Compute base 2 logarithm of n, by checking which is the leftmost
+// bit that has been set.
+size_t ceil_log2(size_t n)
+{
+  assert(n>0);
+  size_t result = 0;
+  while(n != 0)
+  {
+    n = n >> 1;
+    ++result;
+  }
+  return result;
+}
+
+// Compute the number of booleans needed to represent a set of size n.
+size_t nr_of_booleans_for_elements(size_t n)
+{
+  if(n == 1)
+  {
+    return 1;
+  }
+  else
+  {
+    return ceil_log2(n-1);
+  }
+}
+
 /// \brief Algorithm class that can be used to apply the binary algorithm
 ///
 /// All parameters of finite data types are replaced with a vector of
@@ -136,7 +163,9 @@ class binary_algorithm: public lps::detail::lps_algorithm
           m_enumerated_elements[par] = enumerated_elements;
 
           //Calculate the number of booleans needed to encode par
-          int n = static_cast< int >(ceil(::log(static_cast< double >(enumerated_elements.size())) / ::log(static_cast< double >(2))));
+          //The first variation is not accurate!
+          //int n = static_cast< int >(ceil(::log(static_cast< double >(enumerated_elements.size())) / ::log(static_cast< double >(2))));
+          size_t n = nr_of_booleans_for_elements(enumerated_elements.size());
 
           //Set hint for fresh variable names
           std::string par_name = par.name();
@@ -144,7 +173,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           // Temp list for storage
           data::variable_vector new_pars;
           //Create new parameters and add them to the parameter list.
-          for (int i = 0; i<n; ++i)
+          for (size_t i = 0; i<n; ++i)
           {
             data::variable v(generator(par_name), data::sort_bool::bool_());
             new_parameters.push_back(v);
