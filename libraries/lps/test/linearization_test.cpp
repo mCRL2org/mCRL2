@@ -1122,6 +1122,17 @@ BOOST_AUTO_TEST_CASE(test_multiple_action_types)
   run_linearisation_test_case(spec);
 }
 
+// Test case for bug #1085
+BOOST_AUTO_TEST_CASE(bug_1085)
+{
+  const std::string spec =
+    "proc P = tau. a | b | c;\n"
+    "act a,b,c;\n"
+    "init P;\n";
+
+  run_linearisation_test_case(spec);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
