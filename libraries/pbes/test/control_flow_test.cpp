@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_control_flow1)
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::pbes_control_flow_algorithm algorithm(p);
-  algorithm.run();
+  algorithm.run(true, true);
 }
 
 BOOST_AUTO_TEST_CASE(test_control_flow)
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_control_flow)
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::pbes_control_flow_algorithm algorithm(p);
-  algorithm.run();
+  algorithm.run(true, true);
 }
 
 BOOST_AUTO_TEST_CASE(test_control_flow2)
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_control_flow2)
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::pbes_control_flow_algorithm algorithm(p);
-  algorithm.run();
+  algorithm.run(true, true);
 }
 
 BOOST_AUTO_TEST_CASE(test_source_dest1)
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_source_dest1)
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::pbes_control_flow_algorithm algorithm(p);
-  algorithm.run();
+  algorithm.run(true, true);
 }
 
 BOOST_AUTO_TEST_CASE(test_running_example)
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_running_example)
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::pbes_control_flow_algorithm algorithm(p);
-  algorithm.run();
+  algorithm.run(true, true);
 }
 
 BOOST_AUTO_TEST_CASE(test_simplify)
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph1)
   pbes<> p = txt2pbes(text, true);
   bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
-  pbes<> q = algorithm.run();
+  pbes<> q = algorithm.run(true, true);
   BOOST_CHECK(q.is_well_typed());
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph2)
   pbes<> p = txt2pbes(text, true);
   bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
-  pbes<> q = algorithm.run();
+  pbes<> q = algorithm.run(true, true);
   BOOST_CHECK(q.is_well_typed());
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph3)
   pbes<> p = txt2pbes(text, true);
   bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
-  pbes<> q = algorithm.run();
+  pbes<> q = algorithm.run(true, true);
   BOOST_CHECK(q.is_well_typed());
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph4)
   pbes<> p = txt2pbes(text, true);
   bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
-  pbes<> q = algorithm.run();
+  pbes<> q = algorithm.run(true, true);
   BOOST_CHECK(q.is_well_typed());
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(test_stategraph4)
   pbes<> p = txt2pbes(text, true);
   bool answer1 = solve_pbes(p);
   detail::pbes_control_flow_algorithm algorithm(p);
-  pbes<> q = algorithm.run();
+  pbes<> q = algorithm.run(true, true);
   BOOST_CHECK(q.is_well_typed());
   bool answer2 = solve_pbes(q);
   BOOST_CHECK(answer1 == answer2);

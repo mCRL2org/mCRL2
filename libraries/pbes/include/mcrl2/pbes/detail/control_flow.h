@@ -33,7 +33,7 @@
 #include "mcrl2/pbes/detail/pfnf_pbes.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 #include "mcrl2/pbes/detail/control_flow_influence.h"
-#include "mcrl2/pbes/detail/control_flow_source_dest.h"
+#include "mcrl2/pbes/detail/control_flow_destination.h"
 #include "mcrl2/pbes/detail/control_flow_utility.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -1024,27 +1024,39 @@ class pbes_control_flow_algorithm
   public:
 
     /// \brief Runs the control_flow algorithm
-    pbes<> run(bool simplify = true, bool print_output = true)
+    pbes<> run(bool simplify = true, bool verbose = false)
     {
-      //control_flow_influence_graph_algorithm ialgo(m_pbes);
-      //ialgo.run();
+      if (verbose)
+      {
+        control_flow_influence_graph_algorithm ialgo(m_pbes);
+        ialgo.run();
+      }
 
-      control_flow_source_dest_algorithm sdalgo(m_pbes);
-      sdalgo.compute_source_destination();
-      // sdalgo.print_source_destination();
+      control_flow_destination_algorithm sdalgo(m_pbes);
+      sdalgo.compute_source();
+      if (verbose)
+      {
+        sdalgo.print_source();
+      }
       sdalgo.rewrite_propositional_variables();
       // N.B. This modifies m_pbes. It is needed as a precondition for the
       // function compute_control_flow_parameters().
 
+      if (verbose)
+      {
+        sdalgo.compute_destination();
+        sdalgo.print_destination();
+      }
+
       compute_control_flow_graph();
-      if (print_output)
+      if (verbose)
       {
         print_control_flow_parameters();
         print_control_flow_graph();
       }
 
       compute_control_flow_marking();
-      if (print_output)
+      if (verbose)
       {
         print_control_flow_marking();
       }
