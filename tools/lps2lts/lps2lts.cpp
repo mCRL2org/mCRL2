@@ -239,7 +239,7 @@ class lps2lts_tool : public lps2lts_base
                  "for visualisation purposes, for instance, but can cause the OUTFILE "
                  "to grow considerably. Note that this option is implicit when writing "
                  "in the AUT format.").
-      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions"
+      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions. "
                  "For large state spaces the number of progress messages can be quite "
                  "horrendous. This feature helps to suppress those. Other verbose messages, "
                  "such as the total number of states explored, just remain visible.").
