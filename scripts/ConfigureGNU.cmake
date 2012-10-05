@@ -78,12 +78,16 @@ endif()
 ## Set linker flags
 ##---------------------------------------------------
 
-if(NOT APPLE)
+if(APPLE)
+  # On the Mac, do never, ever, strip the executables, since this is bound to break the
+  # compiling rewriter.
+  # The symptoms when stripping, are that the rewriter cannot find some of the symbols
+  # that should be included in the executable.
+  ## set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-dead_strip")
+  ## set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dead_strip")
+else()
   set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
-else()
-  set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-dead_strip")
-  set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dead_strip")
 endif()
 
 set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"

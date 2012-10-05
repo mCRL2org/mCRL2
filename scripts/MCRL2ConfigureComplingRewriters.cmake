@@ -70,12 +70,10 @@ set(R_LDFLAGS "${R_LDFLAGS} ${R_MCRL2_OSX_ARCH}")
 
 # Configure including/linking the mcrl2 libraries and Boost.
 if( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" )
-  set(R_LDFLAGS "${R_LDFLAGS} -L\"../lib/mcrl2\"")
   set(R_LDFLAGS "${R_LDFLAGS} -L\"${BOOST_LIB}\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"../include\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${BOOST_INCLUDE}\"")
-else()
-  set(R_LDFLAGS "${R_LDFLAGS} -L\"${CMAKE_INSTALL_PREFIX}/lib/mcrl2\"")
+  else()
   set(R_LDFLAGS "${R_LDFLAGS} -L\"${Boost_LIBRARY_DIRS}\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_INSTALL_PREFIX}/include\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${Boost_INCLUDE_DIRS}\"")
@@ -89,14 +87,9 @@ if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/utilities/include\"" )
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/core/include\"" )
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_CURRENT_SOURCE_DIR}/libraries/data/include\"" )
-  set(R_LDFLAGS "${R_LDFLAGS} -L\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"")
 else()
   set( MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/mcrl2compilerewriter" )
 endif()
-
-# Link against the aterm library; these symbols are not always exported by the
-# calling executable
-set(R_LDFLAGS "${R_LDFLAGS} -lmcrl2_aterm")
 
 # Finally, include all the information in the mcrl2compilerewriter script
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/mcrl2compilerewriter.in" "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}" @ONLY )
