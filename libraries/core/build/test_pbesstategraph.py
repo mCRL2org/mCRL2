@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 #~ Copyright 2012 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
@@ -12,14 +14,17 @@ def test_pbesstategraph(p, filename):
     pbesfile1 = filename + 'a.pbes'
     pbesfile2 = filename + 'b.pbes'
     pbesfile3 = filename + 'c.pbes'
+    pbesfile4 = filename + 'd.pbes'
     run_txt2pbes(txtfile, pbesfile1)
     run_pbesstategraph(pbesfile1, pbesfile2)
     run_pbesstategraph(pbesfile1, pbesfile3, '-s0')
+    run_pbesstategraph(pbesfile1, pbesfile4, '-s0 -a1')
     answer1 = run_pbes2bool(pbesfile1)
     answer2 = run_pbes2bool(pbesfile2)
     answer3 = run_pbes2bool(pbesfile3)
-    print filename, answer1, answer2, answer3
-    answers = [answer1, answer2, answer3]
+    answer4 = run_pbes2bool(pbesfile4)
+    print filename, answer1, answer2, answer3, answer4
+    answers = [answer1, answer2, answer3, answer4]
     return not (True in answers and False in answers)
 
 def main():

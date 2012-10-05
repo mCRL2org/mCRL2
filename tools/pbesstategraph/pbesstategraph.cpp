@@ -27,17 +27,20 @@ class pbes_stategraph_tool: public input_output_tool
 
   protected:
     bool m_simplify;
+    bool m_apply_to_original;
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
       m_simplify = parser.option_argument_as<bool>("simplify");
+      m_apply_to_original = parser.option_argument_as<bool>("apply-to-original");
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
       desc.add_option("simplify", make_optional_argument("NAME", "1"), "simplify the PBES during reduction", 's');
+      desc.add_option("apply-to-original", make_optional_argument("NAME", "0"), "apply reduction on the original PBES", 'a');
     }
 
   public:
@@ -59,7 +62,8 @@ class pbes_stategraph_tool: public input_output_tool
 
       pbesstategraph(input_filename(),
                      output_filename(),
-                     simplify
+                     m_simplify,
+                     m_apply_to_original
                     );
       return true;
     }

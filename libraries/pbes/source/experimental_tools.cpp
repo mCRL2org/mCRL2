@@ -242,13 +242,15 @@ void pbespareqelm(const std::string& input_filename,
 
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
-                    bool simplify
+                    bool simplify,
+                    bool apply_to_original
                    )
 {
   pbes<> p;
   load_pbes(p, input_filename);
-  pbes_system::detail::pbes_control_flow_algorithm algorithm(p);
-  pbes<> q = algorithm.run(simplify, true);
+  pbes_system::detail::control_flow_algorithm algorithm;
+  bool verbose = true;
+  pbes<> q = algorithm.run(p, simplify, apply_to_original, verbose);
   q.save(output_filename, true, true);
   if (!q.is_well_typed())
   {
