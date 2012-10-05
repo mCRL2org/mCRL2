@@ -32,6 +32,7 @@ namespace lps
 
 // Compute base 2 logarithm of n, by checking which is the leftmost
 // bit that has been set.
+inline
 size_t ceil_log2(size_t n)
 {
   assert(n>0);
@@ -45,6 +46,7 @@ size_t ceil_log2(size_t n)
 }
 
 // Compute the number of booleans needed to represent a set of size n.
+inline
 size_t nr_of_booleans_for_elements(size_t n)
 {
   if(n == 1)
