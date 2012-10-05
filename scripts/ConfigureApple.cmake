@@ -24,12 +24,6 @@ set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
 option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF) 
 
 ##---------------------------------------------------
-## Add definitions
-##---------------------------------------------------
-
-add_definitions( -D__WXMAC__)
-
-##---------------------------------------------------
 ## Toggle profile build
 ##---------------------------------------------------
 
