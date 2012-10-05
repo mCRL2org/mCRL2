@@ -550,6 +550,7 @@ void parse_dot_specification(const std::string& text, lts_dot_t& result)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   dot_actions(parser_tables_dot, result).parse_graph(node);
   p.destroy_parse_node(node);
+  result.set_initial_state(0);
 }
 
 inline
