@@ -68,6 +68,9 @@ endif( CMAKE_OSX_DEPLOYMENT_TARGET )
 set(R_CXXFLAGS "${R_CXXFLAGS} ${R_MCRL2_OSX_ARCH}")
 set(R_LDFLAGS "${R_LDFLAGS} ${R_MCRL2_OSX_ARCH}")
 
+# Include configuration of Apple specific hacks for boost libraries.
+include(MCRL2MacOSXCopyBoostHeaders)
+
 # Configure including/linking the mcrl2 libraries and Boost.
 if( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" )
   set(R_LDFLAGS "${R_LDFLAGS} -L\"${BOOST_LIB}\"")
