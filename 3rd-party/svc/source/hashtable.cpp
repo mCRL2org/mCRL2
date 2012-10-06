@@ -46,7 +46,7 @@ using namespace aterm_deprecated;
 int HTinit(HTable* table)
 {
 
-  new (&table->terms) aterm_deprecated::ATermIndexedSet(PT_INITIALSIZE, 75); // Placement new.
+  new (&table->terms) atermpp::indexed_set(PT_INITIALSIZE, 75); // Placement new.
   PTinit(&table->pointers);
 
   return 0;
@@ -55,7 +55,6 @@ int HTinit(HTable* table)
 void HTfree(HTable* table)
 {
 
-  ATindexedSetDestroy(table->terms);
   PTfree(&table->pointers);
 }
 
@@ -74,7 +73,7 @@ unsigned int HTinsert(HTable* table, ATerm a, void* ptr)
 int HTmember(HTable* table, ATerm a, long* pn)
 {
   int index;
-  index=(int)ATindexedSetGetIndex(table->terms,a);
+  index=(int)table->terms.index(a);
 
   if (index!=-1)
   {
@@ -94,7 +93,7 @@ int HTmember(HTable* table, ATerm a, long* pn)
 ATerm HTgetTerm(HTable* table, long n)
 {
 
-  return ATindexedSetGetElem(table->terms,n);
+  return table->terms.get(n);
 
 }
 

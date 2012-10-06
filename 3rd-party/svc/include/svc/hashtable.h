@@ -28,7 +28,7 @@
 
   typedef struct
   {
-    aterm_deprecated::ATermIndexedSet terms;
+    atermpp::indexed_set terms;
     PTable pointers;
   } HTable;
 

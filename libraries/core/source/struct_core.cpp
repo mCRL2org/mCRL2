@@ -27,6 +27,39 @@ namespace core
 namespace detail
 {
 
+bool gsOccurs(const ATerm &Elt, const ATerm &t)
+{
+  ATerm Term=t;
+  bool Result = false;
+  if (Elt==Term)
+  {
+    Result = true;
+  }
+  else
+  {
+    // check occurrences of Elt in the arguments/elements of Term
+    if (Term.type() == AT_APPL)
+    {
+      AFun Head = Term.function();
+      const size_t NrArgs = Head.arity();
+      for (size_t i = 0; i < NrArgs && !Result; i++)
+      {
+        Result = gsOccurs(Elt, ((ATermAppl) Term)(i));
+      }
+    }
+    else if (Term.type() == AT_LIST)
+    {
+      while (!((ATermList) Term).empty() && !Result)
+      {
+        Result = gsOccurs(Elt, ((ATermList) Term).front());
+        Term = ((ATermList) Term).tail();
+      }
+    }
+  }
+  return Result;
+}
+
+
 ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSuffix)
 {
   bool found = false;

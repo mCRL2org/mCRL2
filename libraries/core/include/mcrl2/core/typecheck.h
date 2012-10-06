@@ -105,7 +105,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec);
  *             an appropriate error message is printed and NULL is
  *             returned.
  **/
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, const ATermTable &Vars=ATermTable());
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, const table &Vars=table());
 
 
 /** \brief     Type check a parsed mCRL2 multiaction with respect to a

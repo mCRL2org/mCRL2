@@ -34,9 +34,9 @@ namespace mcrl2
 
       static AFun afunPair;
 
-      static ATermAppl Pair_allow(atermpp::term_list < core::identifier_string_list > ma1, process_identifier ma2)
+      static aterm_appl Pair_allow(atermpp::term_list < core::identifier_string_list > ma1, process_identifier ma2)
       {
-        return aterm_appl(afunPair,(ATerm)(ATermList)ma1,(ATerm)(ATermAppl)ma2);
+        return aterm_appl(afunPair,(aterm)(aterm_list)ma1,(aterm)(aterm_appl)ma2);
       }
 
       
@@ -1727,18 +1727,6 @@ namespace mcrl2
         {
           return alphas[a];
         }
-
-/*        // MAYBE CACHING OF THESE VALUES MUST BE REESTABLISHED....
-        if (length)
-        {
-          assert(length<(size_t)1 << (sizeof(int)*8-1));
-          // Rare truuk. Hier moet nog naar gekeken worden.
-          if (alphas_length.count(ATmakeList3((ATerm)(ATermAppl)a,(ATerm)aterm_int(length),(ATerm)(ATermList)allowed))>0)
-          {
-            return alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)aterm_int(length),(ATerm)(ATermList)allowed)];
-          }
-        }
-*/
       }
 
       if (is_delta(a))
@@ -1902,7 +1890,7 @@ namespace mcrl2
         assert(0);
       }
 
-      assert(l!=ATerm());  // This cannot be done comparing to action_label_list_list, as in this case
+      assert(l!=aterm());  // This cannot be done comparing to action_label_list_list, as in this case
                            // the default constructor is empty;
 
       if (all_stable)
@@ -1910,13 +1898,6 @@ namespace mcrl2
         if (!length)
         {
           alphas[a]=l;
-        }
-        else
-        {
-/*        // MAYBE CACHING OF THESE VALUES MUST BE REESTABLISHED....
-          assert(length<(size_t)1 << (sizeof(int)*8-1));
-          alphas_length[ATmakeList3((ATerm)(ATermAppl)a,(ATerm)aterm_int(length),(ATerm)(ATermList)allowed)]=l;
- */
         }
       }
 

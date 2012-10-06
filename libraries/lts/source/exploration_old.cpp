@@ -226,12 +226,12 @@ bool lps2lts_algorithm::savetrace(
 {
   atermpp::aterm s = state;
   std::map<atermpp::aterm,atermpp::aterm>::iterator ns;
-  ATermList tr;
+  aterm_list tr;
   NextStateGenerator* nsgen = NULL;
 
   if (extra_state != state_t())
   {
-    tr = push_front(tr,(ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(extra_transition),extra_state));
+    tr = push_front<aterm>(tr,ATmakeList2((ATerm)(aterm_appl)mcrl2::lps::detail::multi_action_to_aterm(extra_transition),extra_state));
   }
 
   while ((ns = backpointers.find(s)) != backpointers.end())
@@ -255,7 +255,7 @@ bool lps2lts_algorithm::savetrace(
       delete nsgen;
       throw e;
     }
-    tr = push_front(tr, (ATerm) ATmakeList2((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(trans),s));
+    tr = push_front<aterm>(tr, ATmakeList2((ATerm)(aterm_appl)mcrl2::lps::detail::multi_action_to_aterm(trans),s));
     s = ns->second;
   }
 
@@ -263,7 +263,7 @@ bool lps2lts_algorithm::savetrace(
   trace.setState(nstate->make_new_state_vector(s));
   for (; !tr.empty(); tr=tr.tail())
   {
-    ATermList e = (ATermList) tr.front();
+    aterm_list e = (aterm_list) tr.front();
     trace.addAction(multi_action(e.front()));
     e = e.tail();
     trace.setState(nstate->make_new_state_vector(e.front()));
@@ -520,14 +520,14 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
       count++;
       repr_number[v]=count;
       repr_low[v]=count;
-      ATermList nextl;
+      aterm_list nextl;
       repr_nsgen = nstate->getNextStates(v,repr_nsgen);
       multi_action Transition;
       ATerm NewState;
       bool prioritised_action;
       while (repr_nsgen->next(Transition,&NewState,&prioritised_action) && prioritised_action)
       {
-        nextl = push_front(nextl,NewState);
+        nextl = push_front<aterm>(nextl,NewState);
         if (repr_number.count(NewState) == 0)   // This condition was missing in the report
         {
           repr_number[NewState]=0;
@@ -539,7 +539,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
       }
       repr_next[v]=nextl;
     }
-    ATermList nextl = repr_next[v];
+    aterm_list nextl = repr_next[v];
     if (nextl.empty())
     {
       assert(repr_number.count(v)>0);
@@ -736,7 +736,7 @@ bool lps2lts_algorithm::generate_lts()
                              (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         atermpp::term_list < action_list > tmp_trans;
-        ATermList tmp_states;
+        aterm_list tmp_states;
         multi_action Transition;
         ATerm NewState;
         state = states.get(current_state);
@@ -750,8 +750,8 @@ bool lps2lts_algorithm::generate_lts()
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
             {
-              tmp_trans = push_front(tmp_trans,Transition.actions());
-              tmp_states = push_front(tmp_states,NewState);
+              tmp_trans = push_front<aterm>(tmp_trans,Transition.actions());
+              tmp_states = push_front<aterm>(tmp_states,NewState);
             }
           }
 
@@ -762,20 +762,20 @@ bool lps2lts_algorithm::generate_lts()
           //
           // First find the lowest index.
 
-          ATermAppl lowest_first_action_parameter;
+          aterm_appl lowest_first_action_parameter;
 
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
             const action_list multi_action_list=*tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)multi_action_list.front();
-              ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
+              aterm_appl first_action=(aterm_appl)multi_action_list.front();
+              aterm_list action_arguments=(aterm_list)first_action(1);
+              aterm_list action_sorts=(aterm_list)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)action_arguments.front();
-                ATermAppl first_sort=(ATermAppl)action_sorts.front();
+                aterm_appl first_argument=(aterm_appl)action_arguments.front();
+                aterm_appl first_sort=(aterm_appl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
                   if (lowest_first_action_parameter==atermpp::aterm_appl())
@@ -785,7 +785,7 @@ bool lps2lts_algorithm::generate_lts()
                   else
                   {
                     using namespace mcrl2::data;
-                    ATermAppl result=rewriter(greater(
+                    aterm_appl result=rewriter(greater(
                                                 data_expression(lowest_first_action_parameter),
                                                 data_expression(first_argument)));
                     if (sort_bool::is_true_function_symbol(data_expression(result)))
@@ -805,29 +805,29 @@ bool lps2lts_algorithm::generate_lts()
 
           // Now carry out the actual filtering;
           atermpp::term_list < action_list > new_tmp_trans;
-          ATermList new_tmp_states;
-          ATermList tmp_state_walker = tmp_states;
+          aterm_list new_tmp_states;
+          aterm_list tmp_state_walker = tmp_states;
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
-            ATermAppl state=(ATermAppl)tmp_state_walker.front();
+            aterm_appl state=(aterm_appl)tmp_state_walker.front();
             tmp_state_walker=tmp_state_walker.tail();
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)multi_action_list.front();
-              ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
+              aterm_appl first_action=(aterm_appl)multi_action_list.front();
+              aterm_list action_arguments=(aterm_list)first_action(1);
+              aterm_list action_sorts=(aterm_list)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)action_arguments.front();
-                ATermAppl first_sort=(ATermAppl)action_sorts.front();
+                aterm_appl first_argument=(aterm_appl)action_arguments.front();
+                aterm_appl first_sort=(aterm_appl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
-                  ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                  aterm_appl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
                   if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   {
-                    new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                    new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+                    new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                    new_tmp_states=push_front<aterm>(new_tmp_states,state);
                   }
                   else
                   {
@@ -837,20 +837,20 @@ bool lps2lts_algorithm::generate_lts()
                 }
                 else
                 {
-                  new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                  new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+                  new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                  new_tmp_states=push_front<aterm>(new_tmp_states,state);
                 }
               }
               else
               {
-                new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+                new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                new_tmp_states=push_front<aterm>(new_tmp_states,state);
               }
             }
             else
             {
-              new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-              new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+              new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+              new_tmp_states=push_front<aterm>(new_tmp_states,state);
             }
           }
           tmp_trans=reverse(new_tmp_trans);
@@ -912,7 +912,7 @@ bool lps2lts_algorithm::generate_lts()
       while (!must_abort && (current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         atermpp::term_list < action_list > tmp_trans;
-        ATermList tmp_states;
+        aterm_list tmp_states;
         multi_action Transition;
         ATerm NewState;
 
@@ -920,7 +920,6 @@ bool lps2lts_algorithm::generate_lts()
 
         try
         {
-          // state = ATindexedSetGetElem(states,current_state);
           nsgen = nstate->getNextStates(state,nsgen);
           bool priority;
           while (!must_abort && nsgen->next(Transition,&NewState,&priority))
@@ -928,8 +927,8 @@ bool lps2lts_algorithm::generate_lts()
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
             {
-              tmp_trans = push_front(tmp_trans,Transition.actions());
-              tmp_states = push_front(tmp_states,NewState);
+              tmp_trans = push_front<aterm>(tmp_trans,Transition.actions());
+              tmp_states = push_front<aterm>(tmp_states,NewState);
             }
           }
 
@@ -940,20 +939,20 @@ bool lps2lts_algorithm::generate_lts()
           //
           // First find the lowest index.
 
-          ATermAppl lowest_first_action_parameter;
+          aterm_appl lowest_first_action_parameter;
 
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)multi_action_list.front();
-              ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
+              aterm_appl first_action=(aterm_appl)multi_action_list.front();
+              aterm_list action_arguments=(aterm_list)first_action(1);
+              aterm_list action_sorts=(aterm_list)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)action_arguments.front();
-                ATermAppl first_sort=(ATermAppl)action_sorts.front();
+                aterm_appl first_argument=(aterm_appl)action_arguments.front();
+                aterm_appl first_sort=(aterm_appl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
                   if (lowest_first_action_parameter==atermpp::aterm_appl())
@@ -963,7 +962,7 @@ bool lps2lts_algorithm::generate_lts()
                   else
                   {
                     using namespace mcrl2::data;
-                    ATermAppl result=rewriter(greater(
+                    aterm_appl result=rewriter(greater(
                                                 data_expression(lowest_first_action_parameter),
                                                 data_expression(first_argument)));
                     if (sort_bool::is_true_function_symbol(data_expression(result)))
@@ -984,30 +983,30 @@ bool lps2lts_algorithm::generate_lts()
 
           // Now carry out the actual filtering;
           atermpp::term_list < action_list >  new_tmp_trans;
-          ATermList new_tmp_states;
-          ATermList tmp_state_walker = tmp_states;
+          aterm_list new_tmp_states;
+          aterm_list tmp_state_walker = tmp_states;
           for (atermpp::term_list < action_list >::const_iterator tmp_trans_walker=tmp_trans.begin(); tmp_trans_walker!=tmp_trans.end(); ++tmp_trans_walker)
           {
             // const multi_action ma= *tmp_trans_walker;
-            ATermAppl state=(ATermAppl)tmp_state_walker.front();
+            aterm_appl state=(aterm_appl)tmp_state_walker.front();
             tmp_state_walker=tmp_state_walker.tail();
             const action_list multi_action_list= *tmp_trans_walker;
             if (multi_action_list.size()==1)
             {
-              ATermAppl first_action=(ATermAppl)multi_action_list.front();
-              ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
+              aterm_appl first_action=(aterm_appl)multi_action_list.front();
+              aterm_list action_arguments=(aterm_list)first_action(1);
+              aterm_list action_sorts=(aterm_list)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
-                ATermAppl first_argument=(ATermAppl)action_arguments.front();
-                ATermAppl first_sort=(ATermAppl)action_sorts.front();
+                aterm_appl first_argument=(aterm_appl)action_arguments.front();
+                aterm_appl first_sort=(aterm_appl)action_sorts.front();
                 if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
-                  ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                  aterm_appl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
                   if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   {
-                    new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                    new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+                    new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                    new_tmp_states=push_front<aterm>(new_tmp_states,state);
                   }
                   else
                   {
@@ -1016,20 +1015,20 @@ bool lps2lts_algorithm::generate_lts()
                 }
                 else
                 {
-                  new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                  new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+                  new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                  new_tmp_states=push_front<aterm>(new_tmp_states,state);
                 }
               }
               else
               {
-                new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-                new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+                new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                new_tmp_states=push_front<aterm>(new_tmp_states,state);
               }
             }
             else
             {
-              new_tmp_trans=push_front(new_tmp_trans,multi_action_list);
-              new_tmp_states=push_front(new_tmp_states,(ATerm)state);
+              new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+              new_tmp_states=push_front<aterm>(new_tmp_states,state);
             }
           }
 
@@ -1108,7 +1107,7 @@ bool lps2lts_algorithm::generate_lts()
         if (lgopts->bithashing)
         {
           state = state_queue.get_from_queue();
-          assert(state != ATermAppl());
+          assert(state != aterm_appl());
         }
         else
         {

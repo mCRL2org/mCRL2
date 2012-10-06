@@ -1878,7 +1878,7 @@ static aterm add_args(aterm a, size_t num)
 
     while (num > 0)
     {
-      l = ATappend(l, gsMakeNil());
+      l = l+push_front<aterm>(aterm_list(),gsMakeNil());
       num--;
     }
     return  l;

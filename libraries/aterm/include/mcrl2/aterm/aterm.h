@@ -205,11 +205,11 @@ ATermList ATmakeList2(const ATerm &el0, const ATerm &el1)
   return push_front(ATmakeList1(el1), el0);
 }
 
-inline
+/* inline
 ATermList ATmakeList3(const ATerm &el0, const ATerm &el1, const ATerm &el2)
 {
   return push_front(ATmakeList2(el1, el2), el0);
-}
+} */
 
 /* inline
 ATermList ATmakeList4(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3)
@@ -380,15 +380,15 @@ size_t ATindexOf(const ATermList &list_in, const ATerm &el)
 
 /* ATtable and ATindexedSet */
 
-typedef table ATermTable;
+// typedef table ATermTable;
 
-inline
+/* inline
 ATermTable ATtableCreate(const size_t initial_size, const size_t max_load_pct)
 {
   return table(initial_size,max_load_pct);
-}
+} */
 
-inline
+/* inline
 const ATerm &ATtableGet(const ATermTable &table, const ATerm &key)
 {
   return table.get(key);
@@ -398,52 +398,52 @@ inline
 ATermList  ATtableKeys(const ATermTable &table)
 {
   return table.keys();
-} 
+}  */
 
-typedef indexed_set ATermIndexedSet;
+// typedef indexed_set ATermIndexedSet;
 
-inline
+/* inline
 ATermIndexedSet ATindexedSetCreate(size_t initial_size, const size_t max_load_pct)
 {
   return indexed_set(initial_size,max_load_pct);
-}
+} */
 
-inline
+/* inline
 void       ATindexedSetDestroy(ATermIndexedSet &)
 {
-}
+} */
 
-inline
+/* inline
 void       ATindexedSetReset(ATermIndexedSet &set)
 {
   set.reset();
-}
+} */
 
 inline
-size_t     ATindexedSetPut(ATermIndexedSet &set, const ATerm &elem, bool* isnew)
+size_t     ATindexedSetPut(indexed_set &set, const ATerm &elem, bool* isnew)
 {
   std::pair<size_t, bool> p= set.put(elem);
   *isnew=p.second;
   return p.first;
 }
 
-inline
-ssize_t    ATindexedSetGetIndex(const ATermIndexedSet &set, const ATerm &elem) /* A negative value represents non existence. */
+/* inline
+ssize_t    ATindexedSetGetIndex(const ATermIndexedSet &set, const ATerm &elem) / * A negative value represents non existence. * /
 {
   return set.index(elem);
-}
+} */
 
-inline
-bool     ATindexedSetRemove(ATermIndexedSet &set, const ATerm &elem)   /* Returns true if removal was successful. */
+/* inline
+bool     ATindexedSetRemove(ATermIndexedSet &set, const ATerm &elem)   / * Returns true if removal was successful. * /
 {
   return set.remove(elem);
-}
+} */
 
-inline
+/* inline
 const ATerm      &ATindexedSetGetElem(const ATermIndexedSet &set, size_t index)
 {
   return set.get(index);
-}
+} */
 
 /* File and string IO */
 
@@ -610,10 +610,10 @@ ATermAppl gsMakeSubst(const ATerm &old_value, const ATerm &new_value);
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermAppl variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_Appl(const ATermAppl &old_value, const ATermAppl &new_value)
+/* inline ATermAppl gsMakeSubst_Appl(const ATermAppl &old_value, const ATermAppl &new_value)
 {
   return gsMakeSubst(old_value, new_value);
-}
+} */
 
 /**
  * \brief Creates a new substitution
@@ -624,10 +624,10 @@ inline ATermAppl gsMakeSubst_Appl(const ATermAppl &old_value, const ATermAppl &n
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermList variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_List(const ATermList &old_value, const ATermList &new_value)
+/* inline ATermAppl gsMakeSubst_List(const ATermList &old_value, const ATermList &new_value)
 {
   return gsMakeSubst(old_value, new_value);
-}
+} */
 
 /**
  * \brief Applies a list of substitutions to a term
@@ -658,10 +658,10 @@ ATerm gsSubstValues(const ATermList &substs, const ATerm &term, const bool recur
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermAppl variant of gsSubstValues
  **/
-inline ATermAppl gsSubstValues_Appl(const ATermList &substs, const ATermAppl &appl, bool recursive)
+/* inline ATermAppl gsSubstValues_Appl(const ATermList &substs, const ATermAppl &appl, bool recursive)
 {
   return aterm_cast<ATermAppl>(gsSubstValues(substs, appl, recursive));
-}
+} */
 
 /**
  * \brief Applies a list of substitutions to a term
@@ -677,10 +677,10 @@ inline ATermAppl gsSubstValues_Appl(const ATermList &substs, const ATermAppl &ap
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermList variant of gsSubstValues
  **/
-inline ATermList gsSubstValues_List(const ATermList &substs, const ATermList &list, const bool recursive)
+/* inline ATermList gsSubstValues_List(const ATermList &substs, const ATermList &list, const bool recursive)
 {
   return aterm_cast<ATermList>(gsSubstValues(substs, list, recursive));
-}
+} */
 
 /**
  * \brief Adds a substitution to a list of substitutions
@@ -692,7 +692,7 @@ inline ATermList gsSubstValues_List(const ATermList &substs, const ATermList &li
  *     Term is an ATerm consisting of ATermAppl's and ATermList's only
  * \return Term in which all substitutions from substs are performed recursively
  **/
-ATerm gsSubstValuesTable(const ATermTable &substs, const ATerm &t, const bool recursive);
+/* ATerm gsSubstValuesTable(const table &substs, const ATerm &t, const bool recursive); */
 
 //Occurrences of ATerm's
 //----------------------
@@ -706,7 +706,7 @@ ATerm gsSubstValuesTable(const ATermTable &substs, const ATerm &t, const bool re
  * \note that this is a faster implementation than gsCount(elt, term) > 0 because
  *       it is used at a crucial point in the rewriter
  **/
-bool gsOccurs(const ATerm &elt, const ATerm &term);
+/* bool gsOccurs(const ATerm &elt, const ATerm &term); */
 
 } // namespace aterm_deprecated
 

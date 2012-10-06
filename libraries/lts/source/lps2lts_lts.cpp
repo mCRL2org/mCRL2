@@ -57,8 +57,8 @@ void lps2lts_lts::open_lts(const char* filename, lps2lts_lts_options& opts)
       generic_lts.set_data(lts_opts.spec->data());
       generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
       generic_lts.set_action_labels(lts_opts.spec->action_labels());
-      aterm2state = ATindexedSetCreate(10000,50);
-      aterm2label = ATindexedSetCreate(100,50);
+      aterm2state = indexed_set(10000,50);
+      aterm2label = indexed_set(100,50);
       break;
   }
 }
@@ -204,8 +204,6 @@ void lps2lts_lts::close_lts(size_t num_states, size_t num_trans)
           assert(0); // lts_aut and lts_none cannot occur.
       }
 
-      ATindexedSetDestroy(aterm2label);
-      ATindexedSetDestroy(aterm2state);
       break;
     }
   }
@@ -224,8 +222,6 @@ void lps2lts_lts::remove_lts()
     case lts_none:
       break;
     default:
-      ATindexedSetDestroy(aterm2label);
-      ATindexedSetDestroy(aterm2state);
       break;
   }
   remove(lts_filename.c_str());

@@ -364,7 +364,7 @@ static ATermList gsGroupDeclsBySort(ATermList Decls);
        same sort are placed in sequence
 */
 
-static bool gsHasConsistentContext(const ATermTable &DataVarDecls,
+static bool gsHasConsistentContext(const table &DataVarDecls,
                                    const ATermAppl Part);
 /*Pre: DataVarDecls represents the variables from an equation section, where
        the keys are the variable names and the values are the corresponding
@@ -375,7 +375,7 @@ static bool gsHasConsistentContext(const ATermTable &DataVarDecls,
        the context
  */
 
-static bool gsHasConsistentContextList(const ATermTable &DataVarDecls,
+static bool gsHasConsistentContextList(const table &DataVarDecls,
                                        const ATermList Parts);
 /*Pre: DataVarDecls represents the variables from an equation section, where
        the keys are the variable names and the values are the
@@ -1207,7 +1207,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
     if (EqnsLength > 0)
     {
       size_t StartPrefix = 0;
-      ATermTable VarDeclTable = ATtableCreate(63, 50);
+      table VarDeclTable(63, 50);
       //VarDeclTable is a hash table with variable declarations as values, where
       //the name of each variable declaration is used a key.
       //Note that the hash table will be increased if at least 32 values are added,
@@ -1232,7 +1232,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
           {
             ATermAppl VarDecl = ATAelementAt(VarDecls, j);
             ATermAppl VarDeclName = ATAgetArgument(VarDecl, 0);
-            if (ATtableGet(VarDeclTable, VarDeclName) == ATerm())
+            if (VarDeclTable.get(VarDeclName) == ATerm())
             {
               VarDeclTable.put(VarDeclName, VarDecl);
             }
@@ -3011,14 +3011,14 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
   using namespace atermpp;
   if (!Decls.empty())
   {
-    ATermTable SortDeclsTable = ATtableCreate(2*Decls.size(), 50);
+    table SortDeclsTable(2*Decls.size(), 50);
     //Add all variable declarations from Decls to hash table
     //SortDeclsTable
     while (!Decls.empty())
     {
       ATermAppl Decl = ATAgetFirst(Decls);
       ATermAppl DeclSort = ATAgetArgument(Decl, 1);
-      ATermList CorDecls = aterm_cast<aterm_list>(ATtableGet(SortDeclsTable, DeclSort));
+      ATermList CorDecls = aterm_cast<aterm_list>(SortDeclsTable.get(DeclSort));
       SortDeclsTable.put(DeclSort,
                  (CorDecls == ATerm())
                  ?ATmakeList1(Decl)
@@ -3027,11 +3027,11 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
       Decls = Decls.tail();
     }
     //Return the hash table as a list of variable declarations
-    ATermList DeclSorts = ATtableKeys(SortDeclsTable);
+    ATermList DeclSorts = SortDeclsTable.keys();
     ATermList Result;
     while (!DeclSorts.empty())
     {
-      Result = aterm_cast<aterm_list>(ATtableGet(SortDeclsTable, DeclSorts.front()))+ Result;
+      Result = aterm_cast<aterm_list>(SortDeclsTable.get(DeclSorts.front()))+ Result;
       DeclSorts = DeclSorts.tail();
     }
     return reverse(Result);
@@ -3043,7 +3043,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
   }
 }
 
-bool gsHasConsistentContext(const ATermTable &DataVarDecls,
+bool gsHasConsistentContext(const table &DataVarDecls,
                             const ATermAppl Part)
 {
   bool Result = true;
@@ -3057,7 +3057,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
       //check consistency of variable VarDecls(j) with VarDeclTable
       ATermAppl VarDecl = ATAelementAt(VarDecls, i);
       ATermAppl CorVarDecl =
-        aterm_cast<aterm_appl>(ATtableGet(DataVarDecls, VarDecl(0)));
+        aterm_cast<aterm_appl>(DataVarDecls.get(VarDecl(0)));
       if (CorVarDecl != ATerm())
       {
         //check consistency of VarDecl with CorVarDecl
@@ -3069,7 +3069,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
   {
     //Part may be an operation; check that its name does not occur in
     //DataVarDecls
-    Result = (ATtableGet(DataVarDecls, Part(0)) == ATerm());
+    Result = (DataVarDecls.get(Part(0)) == ATerm());
   }
   //check consistency in the arguments of Part
   if (Result)
@@ -3092,7 +3092,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
   return Result;
 }
 
-bool gsHasConsistentContextList(const ATermTable &DataVarDecls,
+bool gsHasConsistentContextList(const table &DataVarDecls,
                                 const ATermList Parts)
 {
   bool Result = true;

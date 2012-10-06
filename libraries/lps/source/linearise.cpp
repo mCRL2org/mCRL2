@@ -192,7 +192,7 @@ class specification_basic_type:public boost::noncopyable
     bool timeIsBeingUsed;
     std::vector < objectdatatype > objectdata;
 
-    ATermIndexedSet objectIndexTable;
+    indexed_set objectIndexTable;
     set_identifier_generator fresh_identifier_generator;
     std::vector < enumeratedtype > enumeratedtypes;
     stackoperations* stack_operations_list;
@@ -212,7 +212,7 @@ class specification_basic_type:public boost::noncopyable
       options(opt),
       timeIsBeingUsed(false)
     {
-      objectIndexTable=ATindexedSetCreate(1024,75);
+      objectIndexTable=indexed_set(1024,75);
 
       // find_identifiers does not find the identifiers in the enclosed data specification.
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
@@ -255,7 +255,6 @@ class specification_basic_type:public boost::noncopyable
         stack_operations_list=temp;
       }
 
-      ATindexedSetDestroy(objectIndexTable);
     }
 
   private:
@@ -310,7 +309,7 @@ class specification_basic_type:public boost::noncopyable
     size_t objectIndex(ATermAppl o)
     {
       // assert(existsObjectIndex(o) >= 0);
-      size_t result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
+      size_t result=objectIndexTable.index(o);
       assert(result!=ATERM_NON_EXISTING_POSITION); /* object index must always return the index
                             of an existing object, because at the
                             places where objectIndex is used, no
