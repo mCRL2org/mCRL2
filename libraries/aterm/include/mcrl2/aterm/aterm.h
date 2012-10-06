@@ -212,11 +212,11 @@ ATermList ATmakeList3(const ATerm &el0, const ATerm &el1, const ATerm &el2)
   return push_front(ATmakeList2(el1, el2), el0);
 }
 
-inline
+/* inline
 ATermList ATmakeList4(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3)
 {
   return push_front(ATmakeList3(el1, el2, el3), el0);
-}
+} */
 
 /* inline
 ATermList ATmakeList5(const ATerm &el0, const ATerm &el1, const ATerm &el2, const ATerm &el3, const ATerm &el4)
@@ -230,17 +230,17 @@ ATermList ATmakeList6(const ATerm &el0, const ATerm &el1, const ATerm &el2, cons
   return push_front(ATmakeList5(el1, el2, el3, el4, el5), el0);
 } */
 
-inline
+/* inline
 const ATerm &ATelementAt(const ATermList &l, size_t m)
 {
   return element_at(l,m);
-} 
+} */
 
-inline
+/* inline
 ATermList ATconcat(const ATermList &l1, const ATermList &l2)
 {
   return l1+l2;
-}
+} */
 
 /* inline
 ATermList ATreverse(const ATermList &l)
@@ -366,7 +366,7 @@ ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t 
  *     * Note that 'start' must indicate a valid position in 'list'.
  *      */
 
-inline
+/* inline
 size_t ATindexOf(const ATermList &list_in, const ATerm &el)
 {
   size_t count=0;
@@ -377,7 +377,7 @@ size_t ATindexOf(const ATermList &list_in, const ATerm &el)
     ++count;
   }
   return (i==list_in.end() ? ATERM_NON_EXISTING_POSITION : count);
-}
+} */
 
 /* ATtable and ATindexedSet */
 
@@ -481,47 +481,47 @@ inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
  * \param[in] t an ATerm
  * \return t is an ATermAppl
  */
-inline bool ATisAppl(const ATerm &t)
+/* inline bool ATisAppl(const ATerm &t)
 {
   return t.type() == AT_APPL;
-}
+} */
 
 /**
  * \brief Condition on an ATerm
  * \param[in] t an ATerm
  * \return t is an ATermList
  */
-inline bool ATisList(const ATerm &t)
+/* inline bool ATisList(const ATerm &t)
 {
   return t.type() == AT_LIST;
-}
+} */
 
 /**
  * \brief Condition on an Aterm
  * \param[in] t an ATerm
  * \return t is the undefined ATerm or an ATermAppl
  **/
-inline bool ATisApplOrNull(const ATerm &t)
+/* inline bool ATisApplOrNull(const ATerm &t)
 {
-  return (t == ATerm()) || ATisAppl(t);
-}
+  return (t == ATerm()) || t.type() == AT_APPL;
+} */
 
 /**
  * \brief Condition on an Aterm
  * \param[in] t an ATerm
  * \return t is the undefined ATerm or an ATermList
  **/
-inline bool ATisListOrNull(const ATerm &t)
+/* inline bool ATisListOrNull(const ATerm &t)
 {
-  return (t == ATerm()) || ATisList(t);
-}
+  return (t == ATerm()) || t.type()==AT_LIST;
+} */
 
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
 inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
 {
-  return aterm_cast<const ATermAppl>(ATelementAt(List, Index));
+  return aterm_cast<const ATermAppl>(element_at(List, Index));
 } 
 
 /**
@@ -530,7 +530,7 @@ inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
 inline const ATermAppl &ATAgetArgument(const ATermAppl Appl, const size_t Nr)
 {
   const ATerm &Result = Appl(Nr);
-  assert(ATisApplOrNull(Result));
+  // assert(ATisApplOrNull(Result));
   return aterm_cast<const ATermAppl>(Result);
 }
 
@@ -540,7 +540,7 @@ inline const ATermAppl &ATAgetArgument(const ATermAppl Appl, const size_t Nr)
 inline const ATermList &ATLgetArgument(const ATermAppl &Appl, const size_t Nr)
 {
   const ATerm &Result = Appl(Nr);
-  assert(ATisListOrNull(Result));
+  // assert(ATisListOrNull(Result));
   return aterm_cast<const ATermList>(Result);
 }
 
@@ -550,7 +550,7 @@ inline const ATermList &ATLgetArgument(const ATermAppl &Appl, const size_t Nr)
 inline const ATermAppl &ATAgetFirst(const ATermList &List)
 {
   const ATerm &Result = List.front();
-  assert(ATisApplOrNull(Result));
+  // assert(ATisApplOrNull(Result));
   return aterm_cast<const ATermAppl>(Result);
 }
 
@@ -560,7 +560,7 @@ inline const ATermAppl &ATAgetFirst(const ATermList &List)
 inline const ATermList &ATLgetFirst(const ATermList &List)
 {
   const ATerm &Result = List.front();
-  assert(ATisListOrNull(Result));
+  // assert(ATisListOrNull(Result));
   return aterm_cast<const ATermList>(Result);
 }
 
@@ -579,7 +579,7 @@ inline const ATermAppl &ATAtableGet(const ATermTable &Table, const ATerm &Key)
 inline const ATermList &ATLtableGet(const ATermTable &Table, const ATerm &Key)
 {
   const ATerm &Result = ATtableGet(Table, Key);
-  assert(ATisListOrNull(Result));
+  // assert(ATisListOrNull(Result));
   return aterm_cast<const ATermList>(Result);
 }
 

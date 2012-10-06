@@ -579,7 +579,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     aterm_list l,m;
 
     size_t k = i;
-    aterm_appl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i);
+    aterm_appl v = createFreshVar(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(ATAgetFirst(ATLgetFirst(pars.Slist))(0))(1)),&i);
     treevars_usedcnt[k] = 0;
 
     l = aterm_list();
@@ -588,7 +588,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       aterm_list e = ATLgetFirst(pars.Slist);
 
-      e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0), v,aterm_int(k),ATmakeList1(gsMakeSubst(ATAgetFirst(e)(0),v)));
+      e = subst_var(e,aterm_cast<aterm_appl>(ATAgetFirst(e)(0)), v,aterm_int(k),ATmakeList1(gsMakeSubst(ATAgetFirst(e)(0),v)));
 
       l = push_front<aterm>(l,e.front());
       m = push_front<aterm>(m,e.tail());
@@ -908,26 +908,26 @@ static aterm_list get_vars(const aterm &a)
   {
     return aterm_list();
   }
-  else if (ATisAppl(a) && gsIsDataVarId((aterm_appl) a))
+  else if (a.type() == AT_APPL && gsIsDataVarId((aterm_appl) a))
   {
     return ATmakeList1(a);
   }
-  else if (ATisList(a))
+  else if (a.type()==AT_LIST)
   {
     aterm_list l;
     for (aterm_list m=(aterm_list) a; !m.empty(); m=m.tail())
     {
-      l = ATconcat(get_vars(m.front()),l);
+      l = get_vars(m.front())+l;
     }
     return l;
   }
-  else     // ATisAppl(a)
+  else     // a.type() == AT_APPL
   {
     aterm_list l;
     size_t arity = a.function().arity();
     for (size_t i=0; i<arity; ++i)
     {
-      l = ATconcat(get_vars(((aterm_appl) a)(i)),l);
+      l = get_vars(((aterm_appl) a)(i))+l;
     }
     return l;
   }
@@ -939,10 +939,8 @@ static aterm_list dep_vars(const data_equation &eqn)
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
 
   aterm_appl pars = toInner(eqn.lhs(),true); // pars is actually the lhs of the equation.
-  aterm_list vars = ATmakeList1( ATconcat(
-                                 get_doubles(eqn.rhs()),
-                                 get_vars(eqn.condition())
-                               )); // List of variables occurring in each argument of the lhs
+  aterm_list vars = ATmakeList1( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
+                               ); // List of variables occurring in each argument of the lhs
                                    // (except the first element which contains variables from the
                                    // condition and variables which occur more than once in the result)
 
@@ -955,7 +953,7 @@ static aterm_list dep_vars(const data_equation &eqn)
   // Check all arguments
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (!gsIsDataVarId(ATAgetArgument(pars,i+1)))
+    if (!gsIsDataVarId(aterm_cast<aterm_appl>(pars(i+1))))
     {
       // Argument is not a variable, so it needs to be rewritten
       bs[i] = true;
@@ -965,7 +963,8 @@ static aterm_list dep_vars(const data_equation &eqn)
         int j=i-1; // vars.tail().size()-1
         for (aterm_list o=vars.tail(); !o.empty(); o=o.tail())
         {
-          if (ATindexOf(ATLgetFirst(o),evars.front()) != ATERM_NON_EXISTING_POSITION)
+          const aterm_list l=ATLgetFirst(o);
+          if (std::find(l.begin(),l.end(),evars.front()) != l.end())
           {
             bs[j] = true;
           }
@@ -980,7 +979,8 @@ static aterm_list dep_vars(const data_equation &eqn)
       bool b = false;
       for (aterm_list o=vars; !o.empty(); o=o.tail())
       {
-        if (ATindexOf(ATLgetFirst(o),pars(i+1)) != ATERM_NON_EXISTING_POSITION)
+        const aterm_list l=ATLgetFirst(o);
+        if (std::find(o.begin(),o.end(),pars(i+1)) != o.end())
         {
           // Same variable, mark it
           if (j >= 0)
@@ -1004,7 +1004,7 @@ static aterm_list dep_vars(const data_equation &eqn)
   aterm_list deps;
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (bs[i] && gsIsDataVarId(ATAgetArgument(pars,i+1)))
+    if (bs[i] && gsIsDataVarId(aterm_cast<aterm_appl>(pars(i+1))))
     {
       deps = push_front<aterm>(deps,pars(i+1));
     }
@@ -1083,10 +1083,8 @@ static aterm_list create_strategy(
     }
 
     aterm_appl pars = toInner(it->lhs(),true);  // the lhs, pars is an odd name.
-    aterm_list vars = ATmakeList1( ATconcat(
-                                   get_doubles(it->rhs()),
-                                   get_vars(it->condition())
-                                 )); // List of variables occurring in each argument of the lhs
+    aterm_list vars = ATmakeList1( get_doubles(it->rhs())+ get_vars(it->condition())
+                                 ); // List of variables occurring in each argument of the lhs
                                      // (except the first element which contains variables from the
                                      // condition and variables which occur more than once in the result)
 
@@ -1099,7 +1097,7 @@ static aterm_list create_strategy(
     // Check all arguments
     for (size_t i = 0; i < rule_arity; i++)
     {
-      if (!gsIsDataVarId(ATAgetArgument(pars,i+1)))
+      if (!gsIsDataVarId(aterm_cast<aterm_appl>(pars(i+1))))
       {
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
@@ -1109,7 +1107,8 @@ static aterm_list create_strategy(
           int j=i-1;
           for (aterm_list o=vars; !o.tail().empty(); o=o.tail())
           {
-            if (ATindexOf(ATLgetFirst(o),evars.front()) != ATERM_NON_EXISTING_POSITION)
+            const aterm_list l=ATLgetFirst(o);
+            if (std::find(l.begin(),l.end(),evars.front()) != l.end())
             {
               bs[j] = true;
             }
@@ -1124,7 +1123,8 @@ static aterm_list create_strategy(
         bool b = false;
         for (aterm_list o=vars; !o.empty(); o=o.tail())
         {
-          if (ATindexOf(ATLgetFirst(o),pars(i+1)) != ATERM_NON_EXISTING_POSITION)
+          const aterm_list l=ATLgetFirst(o);
+          if (std::find(l.begin(),l.end(),pars(i+1)) != l.end())
           {
             // Same variable, mark it
             if (j >= 0)
@@ -1301,7 +1301,7 @@ void RewriterCompilingJitty::calc_nfs_list(nfs_array &nfs, size_t arity, aterm_l
 
 bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
 {
-  if (ATisList(t))
+  if (t.type()==AT_LIST)
   {
     int arity = ((aterm_list) t).size()-1;
     if (((aterm_list) t).front().type_is_int())
@@ -1332,25 +1332,25 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   {
     return opid_is_nf(static_cast<aterm_int>(t),0);
   }
-  else if (/*ATisAppl(t) && */ gsIsNil((aterm_appl) t))
+  else if (/*t.type() == AT_APPL && */ gsIsNil((aterm_appl) t))
   {
     assert(startarg>=0);
-    return (nnfvars==aterm_list(aterm())) || (ATindexOf(nnfvars, aterm_int(startarg)) == ATERM_NON_EXISTING_POSITION);
+    return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) == nnfvars.end());
   }
-  else if (/* ATisAppl(t) && */ gsIsDataVarId((aterm_appl) t))
+  else if (/* t.type() == AT_APPL && */ gsIsDataVarId((aterm_appl) t))
   {
-    assert(ATisAppl(t) && gsIsDataVarId((aterm_appl) t));
-    return (nnfvars==aterm_list(aterm())) || (ATindexOf(nnfvars,t) == ATERM_NON_EXISTING_POSITION);
+    assert(t.type() == AT_APPL && gsIsDataVarId((aterm_appl) t));
+    return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(),t) == nnfvars.end());
   }
   else if (is_abstraction(atermpp::aterm_appl(t)))
   {
-    assert(ATisAppl(t));
+    assert(t.type() == AT_APPL);
     return false; // I assume that lambda, forall and exists are not in normal form by default.
                   // This might be too weak, and may require to be reinvestigated later.
   }
   else
   {
-    assert(ATisAppl(t) && is_where_clause(atermpp::aterm_appl(t)));
+    assert(t.type() == AT_APPL && is_where_clause(atermpp::aterm_appl(t)));
     return false; // I assume that a where clause is not in normal form by default.
                   // This might be too weak, and may require to be reinvestigated later.
   }
@@ -1400,7 +1400,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const bool rewr,
                   const size_t total_arity)
 {
-  if (ATisList(t))
+  if (t.type()==AT_LIST)
   {
     stringstream ss;
     bool b;
@@ -1615,7 +1615,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         ss << ":";
         bool c = rewr;
         assert(startarg>=0);
-        if (rewr && (nnfvars!=aterm_list(aterm())) && (ATindexOf(nnfvars, aterm_int(startarg)) != ATERM_NON_EXISTING_POSITION))
+        if (rewr && (nnfvars!=aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) != nnfvars.end()))
         {
           ss << "rewrite(";
           c = false;
@@ -1675,7 +1675,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     } */
     assert(nnfvars!=aterm_list(aterm()));
     assert(startarg>=0);
-    bool b = (ATindexOf(nnfvars, aterm_int(startarg)) != ATERM_NON_EXISTING_POSITION);
+    bool b = (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) != nnfvars.end());
     if (rewr && b)
     {
       ss << "rewrite(arg_not_nf" << startarg << ")";
@@ -1693,13 +1693,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (gsIsDataVarId((aterm_appl)t))
   {
-    assert(ATisAppl(t));
+    assert(t.type() == AT_APPL);
     stringstream ss;
     /* if (total_arity>5)
     {
       ss << "(aterm_appl)";
     } */
-    const bool b = (nnfvars!=aterm_list(aterm())) && (ATindexOf(nnfvars,t) != ATERM_NON_EXISTING_POSITION);
+    const bool b = (nnfvars!=aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),t) != nnfvars.end());
     const variable v=variable((aterm_appl)t);
     string variable_name=v.name();
     // Remove the initial @ if it is present in the variable name, because then it is an variable introduced
@@ -1724,7 +1724,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   else if (is_abstraction(atermpp::aterm_appl(t)))
   {
     stringstream ss;
-    if (ATAgetArgument((aterm_appl)t,0)==gsMakeLambda())
+    if (((aterm_appl)t)(0)==gsMakeLambda())
     {
       if (rewr)
       {
@@ -1744,7 +1744,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         return pair<bool,string>(false,ss.str());
       }
     }
-    else if (ATAgetArgument((aterm_appl)t,0)==gsMakeForall())
+    else if (((aterm_appl)t)(0)==gsMakeForall())
     {
       if (rewr)
       {
@@ -1765,7 +1765,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         return pair<bool,string>(false,ss.str());
       }
     }
-    else if (ATAgetArgument((aterm_appl)t,0)==gsMakeExists())
+    else if (((aterm_appl)t)(0)==gsMakeExists())
     {
       if (rewr)
       {
@@ -1812,7 +1812,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         aterm_appl assignment=ATAgetFirst(assignments);
         pair<bool,string> r=calc_inner_term(assignment(1),startarg,nnfvars,true,total_arity);
         ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
-                 "this_rewriter->bound_variable_get(" << bound_variable_index(variable(ATAgetArgument(assignment,0))) << ")," <<
+                 "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment(0))) << ")," <<
                  r.second << "))";
       }
 
@@ -1837,7 +1837,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         aterm_appl assignment=ATAgetFirst(assignments);
         pair<bool,string> r=calc_inner_term(assignment(1),startarg,nnfvars,true,total_arity);
         ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
-                 "this_rewriter->bound_variable_get(" << bound_variable_index(variable(ATAgetArgument(assignment,0))) << ")," <<
+                 "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment(0))) << ")," <<
                  r.second << "))";
       }
 
@@ -1867,7 +1867,7 @@ static aterm add_args(aterm a, size_t num)
   {
     aterm_list l;
 
-    if (ATisList(a))
+    if (a.type()==AT_LIST)
     {
       l = (aterm_list) a;
     }
@@ -1887,7 +1887,7 @@ static aterm add_args(aterm a, size_t num)
 
 static int get_startarg(aterm a, int n)
 {
-  if (ATisList(a))
+  if (a.type()==AT_LIST)
   {
     return n-((aterm_list) a).size()+1;
   }
@@ -1983,21 +1983,21 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
       if (used[cur_arg])
       {
         fprintf(f,"%sconst atermpp::aterm_appl &%s = arg%lu; // S1\n",whitespace(d*2),
-                ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,cur_arg);
+                aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,cur_arg);
       }
       else
       {
         fprintf(f,"%sconst atermpp::aterm_appl &%s = arg_not_nf%lu; // S1\n",whitespace(d*2),
-                ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,cur_arg);
+                aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,cur_arg);
         nnfvars = push_front<aterm>(nnfvars,tree(0));
       }
     }
     else
     {
       fprintf(f,"%sconst atermpp::aterm_appl &%s = reinterpret_cast<const atermpp::aterm_appl &>(%s%lu(%lu)); // S2\n",whitespace(d*2),
-              ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg);
+              aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg);
     }
-    implement_tree_aux(f,ATAgetArgument(tree,1),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(1)),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
     return;
   }
   else if (isM(tree))
@@ -2006,7 +2006,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     {
       fprintf(f,"%sif (%s==arg%lu) // M\n"
               "%s{\n",
-              whitespace(d*2),ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,cur_arg,
+              whitespace(d*2),aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,cur_arg,
               whitespace(d*2)
              );
     }
@@ -2014,13 +2014,13 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     {
       fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%lu(%lu))) // M\n"
               "%s{\n",
-              whitespace(d*2),ATAgetArgument(ATAgetArgument(tree,0),0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
+              whitespace(d*2),aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
               whitespace(d*2)
              );
     }
-    implement_tree_aux(f,ATAgetArgument(tree,1),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(1)),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,ATAgetArgument(tree,2),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(2)),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n",whitespace(d*2));
     return;
   }
@@ -2051,11 +2051,11 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     }
     push_st(cur_arg);
     push_st(parent);
-    implement_tree_aux(f,ATAgetArgument(tree,1),1,(level==0)?cur_arg:cnt,level+1,cnt+1,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(1)),1,(level==0)?cur_arg:cnt,level+1,cnt+1,d+1,arity,used,nnfvars);
     pop_st();
     pop_st();
     fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,ATAgetArgument(tree,2),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(2)),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n",whitespace(d*2));
     return;
   }
@@ -2063,14 +2063,14 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
   {
     int i = pop_st();
     int j = pop_st();
-    implement_tree_aux(f,ATAgetArgument(tree,0),j,i,level-1,cnt,d,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(0)),j,i,level-1,cnt,d,arity,used,nnfvars);
     push_st(j);
     push_st(i);
     return;
   }
   else if (isN(tree))
   {
-    implement_tree_aux(f,ATAgetArgument(tree,0),cur_arg+1,parent,level,cnt,d,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(0)),cur_arg+1,parent,level,cnt,d,arity,used,nnfvars);
     return;
   }
   else if (isC(tree))
@@ -2089,9 +2089,9 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
             true_num,
             whitespace(d*2)
            ); */
-    implement_tree_aux(f,ATAgetArgument(tree,1),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(1)),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n%selse\n%s{\n",whitespace(d*2),whitespace(d*2),whitespace(d*2));
-    implement_tree_aux(f,ATAgetArgument(tree,2),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
+    implement_tree_aux(f,aterm_cast<aterm_appl>(tree(2)),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s}\n",whitespace(d*2));
     return;
   }
@@ -2152,12 +2152,12 @@ void RewriterCompilingJitty::implement_tree(
             whitespace(d*2),
             whitespace(d*2)
            ); */
-    assert(isR(ATAgetArgument(tree,1)));
-    calcTerm(f,add_args((ATAgetArgument(tree,1))(0),arity),get_startarg(ATAgetArgument(tree,1)(0),0),nnfvars);
+    assert(isR(aterm_cast<aterm_appl>(tree(1))));
+    calcTerm(f,add_args((aterm_cast<aterm_appl>(tree(1)))(0),arity),get_startarg(aterm_cast<aterm_appl>(tree(1))(0),0),nnfvars);
     fprintf(f,";\n"
             "%s}\n%selse\n%s{\n", whitespace(d*2),whitespace(d*2),whitespace(d*2)
            );
-    tree = ATAgetArgument(tree,2);
+    tree = aterm_cast<aterm_appl>(tree(2));
     d++;
     l++;
   }
@@ -2293,7 +2293,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
     return make_ar_false();
   }
 
-  if (ATisAppl(expr) && gsIsDataVarId((aterm_appl) expr))
+  if (expr.type() == AT_APPL && gsIsDataVarId((aterm_appl) expr))
   {
     if (expr==var)
     {
@@ -2342,7 +2342,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
       const size_t idx = int2ar_idx[atermpp::aterm_int(rhs).value()] + ((arity-1)*arity)/2 + arg;
       return make_ar_var(idx);
     }
-    else if (ATisList(rhs) && ((aterm_list) rhs).front().type_is_int())
+    else if (rhs.type()==AT_LIST && ((aterm_list) rhs).front().type_is_int())
     {
       int rhs_arity = ((aterm_list) rhs).size()-1;
       size_t diff_arity = arity-eqn_arity;
@@ -2357,13 +2357,14 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
     }
   }
 
-  aterm_appl arg_term = ATAgetArgument(lhs,arg+1);
+  aterm_appl arg_term = aterm_cast<aterm_appl>(lhs(arg+1));
   if (!gsIsDataVarId(arg_term))
   {
     return make_ar_true();
   }
 
-  if (ATindexOf(dep_vars(eqn), arg_term) != ATERM_NON_EXISTING_POSITION)
+  const aterm_list l=dep_vars(eqn);
+  if (std::find(l.begin(),l.end(), arg_term) != l.end())
   {
     return make_ar_true();
   }
@@ -2403,11 +2404,11 @@ bool RewriterCompilingJitty::calc_ar(const aterm_appl &expr)
   }
   else if (is_ar_and(expr))
   {
-    return calc_ar(ATAgetArgument(expr,0)) && calc_ar(ATAgetArgument(expr,1));
+    return calc_ar(aterm_cast<aterm_appl>(expr(0))) && calc_ar(aterm_cast<aterm_appl>(expr(1)));
   }
-  else if (is_ar_and(expr))
+  else if (is_ar_or(expr))
   {
-    return calc_ar(ATAgetArgument(expr,0)) || calc_ar(ATAgetArgument(expr,1));
+    return calc_ar(aterm_cast<aterm_appl>(expr(0))) || calc_ar(aterm_cast<aterm_appl>(expr(1)));
   }
   else     // is_ar_var(expr)
   {

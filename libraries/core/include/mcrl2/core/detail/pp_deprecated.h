@@ -1419,7 +1419,7 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr)
   ATermList l;
   while (gsIsDataAppl(DataExpr))
   {
-    l = ATconcat(ATLgetArgument(DataExpr, 1), l);
+    l = ATLgetArgument(DataExpr, 1)+l;
     DataExpr = ATAgetArgument(DataExpr, 0);
   }
   return l;
@@ -2984,9 +2984,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     ATermList Result;
     while (!DeclSorts.empty())
     {
-      Result = ATconcat(
-                 ATLtableGet(SortDeclsTable, DeclSorts.front()),
-                 Result);
+      Result = ATLtableGet(SortDeclsTable, DeclSorts.front())+ Result;
       DeclSorts = DeclSorts.tail();
     }
     return reverse(Result);

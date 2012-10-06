@@ -432,7 +432,7 @@ ATerm NextState::SetVars(const ATerm &a, const ATermList &free_vars)
   }
   else if (gsIsDataVarId((ATermAppl) a))
   {
-    if (ATindexOf(free_vars,a) != ATERM_NON_EXISTING_POSITION)
+    if (std::find(free_vars.begin(),free_vars.end(),a) != free_vars.end())
     {
       return static_cast< ATerm >(static_cast< ATermAppl >(
                                          generator(mcrl2::data::sort_expression(ATAgetArgument((ATermAppl) a,1)))));

@@ -61,7 +61,7 @@ static ATermList list_minus(ATermList l, ATermList m)
   ATermList n;
   for (; !l.empty(); l=l.tail())
   {
-    if (ATindexOf(m,l.front()) == ATERM_NON_EXISTING_POSITION)
+    if (std::find(m.begin(),m.end(),l.front()) == m.end())
     {
       n = push_front(n,l.front());
     }
@@ -143,14 +143,7 @@ static ATermAppl gstcTraverseVarConsTypeD(const ATermTable &DeclaredVars, const 
         dummy_table, true, false, true);
 }
 static ATermAppl gstcTraverseVarConsTypeDN(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* , ATermAppl, 
-               ATermTable &FreeVars, bool strict_ambiguous=true, size_t nPars = ATERM_NON_EXISTING_POSITION, const bool warn_upcasting=false, const bool print_cast_error=true);
-
-/* static ATermAppl gstcTraverseVarConsTypeDN(const ATermTable &DeclaredVars, const ATermTable &AllowedVars, ATermAppl* t1, ATermAppl t2)
-{
-  ATermTable dummy_empty_table;
-  return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, t1, t2, dummy_empty_table, true, ATERM_NON_EXISTING_POSITION, false, true);
-} */
-
+               ATermTable &FreeVars, bool strict_ambiguous=true, size_t nPars = std::string::npos, const bool warn_upcasting=false, const bool print_cast_error=true);
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
@@ -1099,7 +1092,7 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
   while (NewSpec!=Spec);
 
   //add the removed sort references back to Spec
-  Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(ATconcat(SortIds, SortRefs)));
+  Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(SortIds+ SortRefs));
   mCRL2log(debug) << "specification after folding:\n" << core::pp_deprecated(Spec) << "\n" ;
   return Spec;
 }
@@ -1772,7 +1765,7 @@ static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
   bool Result=true;
 
   size_t constr_number=Cons.size();
-  for (ATermList Funcs=ATconcat(Cons,Maps); !Funcs.empty(); Funcs=Funcs.tail())
+  for (ATermList Funcs=Cons+Maps; !Funcs.empty(); Funcs=Funcs.tail())
   {
     ATermAppl Func=ATAgetFirst(Funcs);
     ATermAppl FuncName=ATAgetArgument(Func,0);
@@ -2006,9 +1999,6 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
       }
     }
     context.PBs.put(PBName,Types);
-
-    //check that all formal parameters of the PBES are unique.
-    //if(!gstcVarsUnique(ATconcat(PBVars,PBFreeVars))){ gsErrorMsg("the formal and/or global variables in PBES %P are not unique\n",PBEqn); return ATfalse;}
 
     //This is a fake ProcVarId (There is no PBVarId)
     ATermAppl Index=gsMakeProcVarId(PBName,PBType);
@@ -3161,7 +3151,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
           for (; !MActFrom.empty(); MActFrom=MActFrom.tail())
           {
             ATermAppl Act=ATAgetFirst(MActFrom);
-            if (ATindexOf(Acts,Act)==ATERM_NON_EXISTING_POSITION)
+            if (std::find(Acts.begin(),Acts.end(),Act)==Acts.end())
             {
               Acts=push_front<aterm>(Acts,Act);
             }
@@ -3169,7 +3159,7 @@ static ATermAppl gstcTraverseActProcVarConstP(const ATermTable &Vars, ATermAppl 
           for (; !Acts.empty(); Acts=Acts.tail())
           {
             ATermAppl Act=ATAgetFirst(Acts);
-            if (ATindexOf(ActsFrom,Act)!=ATERM_NON_EXISTING_POSITION)
+            if (std::find(ActsFrom.begin(),ActsFrom.end(),Act)!=ActsFrom.end())
             {
               mCRL2log(error) << "synchronizing action " << core::pp_deprecated(Act) << " in different ways (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
               return aterm_appl();
@@ -4208,7 +4198,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     }
     else if (aterm()!=ParListS)
     {
-      ParList=ATconcat(ParListS,ParList);
+      ParList=ParListS+ParList;
     }
 
     if (aterm()==ParList)
@@ -4231,7 +4221,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     }
     else
     {
-      return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, ATERM_NON_EXISTING_POSITION, warn_upcasting,print_cast_error);
+      return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, std::string::npos, warn_upcasting,print_cast_error);
     }
   }
 
@@ -4253,7 +4243,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
   const bool warn_upcasting,
   const bool print_cast_error)
 {
-  // ATERM_NON_EXISTING_POSITION for nFactPars means the number of arguments is not known.
+  // std::string::npos for nFactPars means the number of arguments is not known.
   mCRL2log(debug) << "gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(*DataTerm)
                   << " with PosType " << core::pp_deprecated(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
   if (gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
@@ -4349,13 +4339,13 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
       else if (aterm()!=ParListS)
       {
-        ParList=ATconcat(ParListS,ParList);
+        ParList=ParListS+ParList;
       }
     }
 
     if (aterm()==ParList)
     {
-      if (nFactPars!=ATERM_NON_EXISTING_POSITION)
+      if (nFactPars!=std::string::npos)
       {
         mCRL2log(error) << "unknown operation " << core::pp_deprecated(Name) << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"") << std::endl;
       }
@@ -4373,7 +4363,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
     {
       // filter ParList keeping only functions A_0#...#A_nFactPars->A
       ATermList NewParList;
-      if (nFactPars!=ATERM_NON_EXISTING_POSITION)
+      if (nFactPars!=std::string::npos)
       {
         NewParList=aterm_list();
         for (; !ParList.empty(); ParList=ParList.tail())
@@ -4479,7 +4469,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         Sort=multiple_possible_sorts(sort_expression_list(CandidateParList));
       }
       *DataTerm=gsMakeOpId(Name,Sort);
-      if (nFactPars!=ATERM_NON_EXISTING_POSITION)
+      if (nFactPars!=std::string::npos)
       {
         mCRL2log(error) << "unknown operation/variable " << core::pp_deprecated(Name)
                         << " with " << nFactPars << " argument" << ((nFactPars != 1)?"s":"")
@@ -4722,7 +4712,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       if (strict_ambiguous)
       {
         mCRL2log(debug) << "ambiguous operation " << core::pp_deprecated(Name) << " (ParList " << core::pp_deprecated(ParList) << ")" << std::endl;
-        if (nFactPars!=ATERM_NON_EXISTING_POSITION)
+        if (nFactPars!=std::string::npos)
         {
           mCRL2log(error) << "ambiguous operation " << core::pp_deprecated(Name) << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"") << std::endl;
         }
@@ -5765,7 +5755,7 @@ static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
     ATermAppl Act2=ATAgetFirst(MAct2);
     if (Act1==Act2)
     {
-      MAct2=ATconcat(reverse(NewMAct2),MAct2.tail());
+      MAct2=reverse(NewMAct2)+MAct2.tail();
       return gstcMActEq(MAct1,MAct2);
     }
     else
