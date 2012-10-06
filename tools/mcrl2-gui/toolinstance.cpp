@@ -80,8 +80,10 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
     if (option.argument.type != EnumArgument)
     {
-        cbOpt = new QCheckBox(option.nameLong, this);
+        cbOpt = new QCheckBox(option.nameLong+": ", this);
         cbOpt->setChecked(option.standard);
+        QFont font("" , cbOpt->font().family().size() , QFont::Bold);
+        cbOpt->setFont(font);
     }
 
     QLabel *lblOpt = new QLabel(option.description, this);
@@ -95,7 +97,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     else
     {
       QVBoxLayout *lytOpt = new QVBoxLayout();
-      lytOpt->setSpacing(10);
+      lytOpt->setSpacing(20);
 
       lytOpt->addWidget(lblOpt);
 
@@ -247,7 +249,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
       }
       else
       {
-        m_ui.frmOptions->addRow(option.nameLong, lytOpt);
+        m_ui.frmOptions->addRow("<b>"+option.nameLong+": </b>", lytOpt);
       }
     }
   }
