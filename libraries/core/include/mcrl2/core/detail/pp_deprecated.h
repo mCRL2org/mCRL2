@@ -48,6 +48,52 @@ typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
 namespace detail
 {
 
+/**
+ *  * \brief Gets an ATermAppl at a specified position in a list
+ *   **/
+inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
+{
+  return aterm_cast<const ATermAppl>(element_at(List, Index));
+}
+
+/**
+ *  * \brief Gets the argument as ATermAppl at the specified position
+ *   **/
+inline const ATermAppl &ATAgetArgument(const ATermAppl &Appl, const size_t Nr)
+{
+  const ATerm &Result = Appl(Nr);
+  // assert(ATisApplOrNull(Result));
+  return aterm_cast<const ATermAppl>(Result);
+}  
+  
+/* 
+   \brief Gets the argument as ATermList at the specified position
+*/
+inline const ATermList &ATLgetArgument(const ATermAppl &Appl, const size_t Nr)
+{
+  const ATerm &Result = Appl(Nr);
+  // assert(ATisListOrNull(Result));
+  return aterm_cast<const ATermList>(Result);
+}
+
+/**
+ *  * \brief Gets the first argument as ATermAppl
+ *   **/
+inline const ATermAppl &ATAgetFirst(const ATermList &List)
+{
+  const ATerm &Result = List.front();
+  return aterm_cast<const ATermAppl>(Result);
+}
+
+/**
+ * \brief Gets the first argument as ATermList
+ **/
+inline const ATermList &ATLgetFirst(const ATermList &List)
+{
+  const ATerm &Result = List.front();
+  return aterm_cast<const ATermList>(Result);
+}
+
 /// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
 /// \return if(BoolExpr, 1, 0) of sort SortExpr
@@ -2962,6 +3008,7 @@ ATermList GetAssignmentsRHS(ATermList Assignments)
 
 ATermList gsGroupDeclsBySort(ATermList Decls)
 {
+  using namespace atermpp;
   if (!Decls.empty())
   {
     ATermTable SortDeclsTable = ATtableCreate(2*Decls.size(), 50);
@@ -2971,7 +3018,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     {
       ATermAppl Decl = ATAgetFirst(Decls);
       ATermAppl DeclSort = ATAgetArgument(Decl, 1);
-      ATermList CorDecls = ATLtableGet(SortDeclsTable, DeclSort);
+      ATermList CorDecls = aterm_cast<aterm_list>(ATtableGet(SortDeclsTable, DeclSort));
       SortDeclsTable.put(DeclSort,
                  (CorDecls == ATerm())
                  ?ATmakeList1(Decl)
@@ -2984,7 +3031,7 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     ATermList Result;
     while (!DeclSorts.empty())
     {
-      Result = ATLtableGet(SortDeclsTable, DeclSorts.front())+ Result;
+      Result = aterm_cast<aterm_list>(ATtableGet(SortDeclsTable, DeclSorts.front()))+ Result;
       DeclSorts = DeclSorts.tail();
     }
     return reverse(Result);
@@ -3010,7 +3057,7 @@ bool gsHasConsistentContext(const ATermTable &DataVarDecls,
       //check consistency of variable VarDecls(j) with VarDeclTable
       ATermAppl VarDecl = ATAelementAt(VarDecls, i);
       ATermAppl CorVarDecl =
-        ATAtableGet(DataVarDecls, VarDecl(0));
+        aterm_cast<aterm_appl>(ATtableGet(DataVarDecls, VarDecl(0)));
       if (CorVarDecl != ATerm())
       {
         //check consistency of VarDecl with CorVarDecl

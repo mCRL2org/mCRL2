@@ -124,7 +124,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
           position = (position << 8) + buf[7-i];
         }
         if ((fseek(g,position,SEEK_SET) != 0) ||
-            ((data = ATreadFromFile(g)) == aterm()))
+            ((data = read_from_file(g)) == aterm()))
         {
           throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
         }

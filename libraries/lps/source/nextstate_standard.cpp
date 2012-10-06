@@ -435,7 +435,7 @@ ATerm NextState::SetVars(const ATerm &a, const ATermList &free_vars)
     if (std::find(free_vars.begin(),free_vars.end(),a) != free_vars.end())
     {
       return static_cast< ATerm >(static_cast< ATermAppl >(
-                                         generator(mcrl2::data::sort_expression(ATAgetArgument((ATermAppl) a,1)))));
+                                         generator(mcrl2::data::sort_expression(aterm_cast<aterm_appl>((ATermAppl) a)(1)))));
     }
     else
     {
@@ -496,13 +496,13 @@ ATermAppl NextState::ActionToRewriteFormat(const ATermAppl &act, const ATermList
             "  act (human readable): " << core::pp_deprecated(atermpp::aterm_appl(act)) << std::endl <<
             "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
-  ATermList l = ATLgetArgument(act,0);
+  ATermList l = aterm_cast<aterm_list>(act(0));
   ATermList m;
 
   for (; !l.empty(); l=l.tail())
   {
     ATermAppl a = ATAgetFirst(l);
-    a = gsMakeAction(ATAgetArgument(a,0),ListToFormat(ATLgetArgument(a,1),free_vars));
+    a = gsMakeAction(aterm_cast<aterm_appl>(a(0)),ListToFormat(aterm_cast<aterm_list>(a(1)),free_vars));
     m = push_front<aterm>(m, a);
   }
   m = reverse(m);
@@ -526,7 +526,7 @@ ATermList NextState::AssignsToRewriteFormat(const ATermList &assigns, const ATer
     assert(stateargs.size() == pars.size());
     for (ATermList m=assigns; !m.empty(); m=m.tail())
     {
-      if (ATAgetArgument(ATAgetFirst(m),0)==ATAgetFirst(l))
+      if (aterm_cast<aterm_appl>(ATAgetFirst(m)(0))==ATAgetFirst(l))
       {
         stateargs[i] = info.m_rewriter.convert_to((data_expression)(ATermAppl) SetVars((ATAgetFirst(m))(1),free_vars));
         set = true;
@@ -630,12 +630,12 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   l = aterm_list();
   for (bool b=true; !sums.empty(); sums=sums.tail())
   {
-    if (b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)))   // Summand is timed
+    if (b && !gsIsNil(aterm_cast<aterm_appl>(ATAgetFirst(sums)(3))))   // Summand is timed
     {
       mCRL2log(warning) << "specification uses time, which is (currently) not supported; ignoring timing" << std::endl;
       b = false;
     }
-    if (!gsIsDelta(ATAgetArgument(ATAgetFirst(sums),2)))
+    if (!gsIsDelta(aterm_cast<aterm_appl>(ATAgetFirst(sums)(2))))
     {
       l = push_front(l,sums.front());
     }
@@ -652,8 +652,8 @@ NextState::NextState(mcrl2::lps::specification const& spec,
         smndAFun,
         ATAgetFirst(sums)(0),
         info.m_rewriter.convert_to((data_expression)SetVars(ATAgetFirst(sums)(1),free_vars)),
-        ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),
-        AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
+        ActionToRewriteFormat(aterm_cast<aterm_appl>(ATAgetFirst(sums)(2)),free_vars),
+        AssignsToRewriteFormat(aterm_cast<aterm_list>(ATAgetFirst(sums)(4)),free_vars));
   }
 
   l = pars;
@@ -665,7 +665,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     bool set = false;
     for (; !n.empty(); n=n.tail())
     {
-      if (ATAgetArgument(ATAgetFirst(n),0)==ATAgetFirst(l))
+      if (aterm_cast<aterm_appl>(ATAgetFirst(n)(0))==ATAgetFirst(l))
       {
         stateargs[i] = info.m_rewriter.convert_to((data_expression)SetVars(ATAgetFirst(n)(1),free_vars));
         set = true;
@@ -748,7 +748,7 @@ void NextState::prioritise(const char* action)
   while (pos < info.summands.size())
   {
     ATermAppl s = info.summands[pos];
-    ATermList ma = ATLgetArgument(ATAgetArgument(s,2),0);
+    ATermList ma = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(s(2))(0));
     if ((is_tau && ma.empty()) || (!is_tau && only_action(ma,action)))
     {
       //if ( rest < pos )
@@ -898,14 +898,14 @@ ATermAppl NextStateGenerator::rewrActionArgs(const ATermAppl &act)
   std::clog << "NextStateGenerator::rewrActionArgs(act) called, with " << std::endl <<
             "  act = " << atermpp::aterm_appl(act) << std::endl;
 #endif
-  ATermList l = ATLgetArgument(act,0);
+  ATermList l = aterm_cast<aterm_list>(act(0));
   ATermList m;
 
   for (; !l.empty(); l=l.tail())
   {
     ATermAppl a = ATAgetFirst(l);
-    const atermpp::term_list <atermpp::aterm_appl> l(ATLgetArgument(a,1));
-    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal_list(l,current_substitution)));
+    const atermpp::term_list <atermpp::aterm_appl> l(aterm_cast<aterm_list>(a(1)));
+    a = gsMakeAction(aterm_cast<aterm_appl>(a(0)),ListFromFormat(info.m_rewriter.rewrite_internal_list(l,current_substitution)));
     m = push_front<aterm>(m, a);
   }
   m = reverse(m);
@@ -1024,8 +1024,8 @@ void NextStateGenerator::reset(const ATerm &State, size_t SummandIndex)
     assert(SummandIndex < info.summands.size());
 #ifdef MCRL2_NEXTSTATE_DEBUG
     std::clog << "Getting solutions for this summand" << std::endl <<
-              "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0)) << std::endl <<
-              "                 " << core::pp_deprecated(atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0))) << std::endl <<
+              "  Sum variables: " << atermpp::aterm(aterm_cast<aterm_list>(info.summands[SummandIndex](0))) << std::endl <<
+              "                 " << core::pp_deprecated(atermpp::aterm(aterm_cast<aterm_list>(info.summands[SummandIndex](0)))) << std::endl <<
               "  Condition: " << atermpp::aterm(info.summands[SummandIndex](1)) << std::endl <<
               "             " << core::pp_deprecated(atermpp::aterm_appl(info.m_rewriter.convert_from(info.summands[SummandIndex](1)))) << std::endl;
 #endif
@@ -1034,7 +1034,7 @@ void NextStateGenerator::reset(const ATerm &State, size_t SummandIndex)
     cur_nextstate = (ATermList) info.summands[SummandIndex](3);
 
     enumerated_variables=atermpp::aterm_cast<const variable_list>(info.summands[SummandIndex](0));
-    valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
+    valuations = info.get_sols(aterm_cast<aterm_list>(info.summands[SummandIndex](0)),
                                info.summands[SummandIndex](1),
                                current_substitution);
   }
@@ -1069,8 +1069,8 @@ bool NextStateGenerator::next(mcrl2::lps::multi_action &Transition, ATerm* State
 
 #ifdef MCRL2_NEXTSTATE_DEBUG
     std::clog << "Getting solutions for summand " << sum_idx << std::endl <<
-              "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0)) << std::endl <<
-              "                 " << core::pp_deprecated(atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0))) << std::endl <<
+              "  Sum variables: " << atermpp::aterm(aterm_cast<aterm_list>(info.summands[sum_idx](0))) << std::endl <<
+              "                 " << core::pp_deprecated(atermpp::aterm(aterm_cast<aterm_list>(info.summands[sum_idx](0)))) << std::endl <<
               "  Condition: " << atermpp::aterm(info.summands[sum_idx](1)) << std::endl <<
               "             " << core::pp_deprecated(atermpp::aterm_appl(info.m_rewriter.convert_from(info.summands[sum_idx](1)))) << std::endl;
 #endif

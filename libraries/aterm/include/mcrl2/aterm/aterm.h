@@ -179,8 +179,7 @@ bool ATisEmpty(const ATermList &l)
   return l.empty();
 } */
 
-ATermList &ATgetTail(const ATermList &list, const int &start);
-ATermList ATgetSlice(const ATermList &list, const size_t start, const size_t end);
+// ATermList &ATgetTail(const ATermList &list, const int &start);
 
 /* inline
 ATermList ATinsert(const ATermList &list, const ATerm &el)
@@ -248,7 +247,7 @@ ATermList ATreverse(const ATermList &l)
   return reverse(l);
 } */
 
-inline
+/* inline
 ATermList ATreplace(const ATermList &list_in, const ATerm &el, const size_t idx) // Replace one element of a list.
 {
   ATermList list=list_in;
@@ -260,20 +259,20 @@ ATermList ATreplace(const ATermList &list_in, const ATerm &el, const size_t idx)
     buffer[i] = &*list.front();
     list = list.tail();
   }
-  /* Skip the old element */
+  / * Skip the old element * /
   list = list.tail();
-  /* Add the new element */
+  / * Add the new element * /
   list = push_front(list, el);
-  /* Add the prefix */
+  / * Add the prefix * /
   for (i=idx; i>0; i--)
   {
     list = push_front(list, aterm(buffer[i-1]));
   }
 
   return list;
-}
+} */
 
-inline
+/* inline
 ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' to the end of 'list'
 {
   ATermList list=list_in;
@@ -281,7 +280,7 @@ ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' t
   ATermList result;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
 
-  /* Collect all elements of list in buffer */
+  / * Collect all elements of list in buffer * /
   for (i=0; i<len; i++)
   {
     buffer[i] = &*list.front();
@@ -290,21 +289,21 @@ ATermList ATappend(const ATermList &list_in, const ATerm &el)   // Append 'el' t
 
   result = ATmakeList1(el);
 
-  /* Insert elements at the front of the list */
+  / * Insert elements at the front of the list * /
   for (i=len; i>0; i--)
   {
     result = push_front(result, aterm(buffer[i-1]));
   }
 
   return result;
-}
+} */
 
 /**
  *  * Retrieve the list of arguments of a function application.
  *   * This function facilitates porting of old aterm-lib or ToolBus code.
  *    */
 
-inline
+/* inline
 ATermList ATgetArguments(const ATermAppl &appl)
 {
   ATermList result;
@@ -315,7 +314,7 @@ ATermList ATgetArguments(const ATermAppl &appl)
   }
 
   return result;
-}
+} */
 
 /**
  *  * Retrieve a slice of elements from list.
@@ -448,7 +447,7 @@ const ATerm      &ATindexedSetGetElem(const ATermIndexedSet &set, size_t index)
 
 /* File and string IO */
 
-inline
+/* inline
 ATerm ATreadFromFile(FILE* file)
 {
   return read_from_file(file);
@@ -458,7 +457,7 @@ inline
 ATerm ATreadFromString(const char* s)
 {
   return read_from_string(std::string(s));
-}
+} */
 
 /* ATerm extensions */
 /**
@@ -467,14 +466,14 @@ ATerm ATreadFromString(const char* s)
  * \param[in] el the aterm to prepend
  * \return el ++ list if not el in list, list if el in list
  **/
-inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
+/* inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
 {
   if (std::find(list.begin(),list.end(), el) == list.end())
   {
     return push_front(list, el);
   }
   return list;
-}
+} */
 
 /**
  * \brief Condition on an ATerm
@@ -519,75 +518,75 @@ inline ATermList ATinsertUnique(const ATermList &list, const ATerm &el)
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
-inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
+/* inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
 {
   return aterm_cast<const ATermAppl>(element_at(List, Index));
-} 
+}  */
 
 /**
  * \brief Gets the argument as ATermAppl at the specified position
  **/
-inline const ATermAppl &ATAgetArgument(const ATermAppl Appl, const size_t Nr)
+/* inline const ATermAppl &ATAgetArgument(const ATermAppl &Appl, const size_t Nr)
 {
   const ATerm &Result = Appl(Nr);
   // assert(ATisApplOrNull(Result));
   return aterm_cast<const ATermAppl>(Result);
-}
+} */
 
 /**
  * \brief Gets the argument as ATermList at the specified position
  **/
-inline const ATermList &ATLgetArgument(const ATermAppl &Appl, const size_t Nr)
+/* inline const ATermList &ATLgetArgument(const ATermAppl &Appl, const size_t Nr)
 {
   const ATerm &Result = Appl(Nr);
   // assert(ATisListOrNull(Result));
   return aterm_cast<const ATermList>(Result);
-}
+} */
 
 /**
  * \brief Gets the first argument as ATermAppl
  **/
-inline const ATermAppl &ATAgetFirst(const ATermList &List)
+/* inline const ATermAppl &ATAgetFirst(const ATermList &List)
 {
   const ATerm &Result = List.front();
   // assert(ATisApplOrNull(Result));
   return aterm_cast<const ATermAppl>(Result);
-}
+} */
 
 /**
  * \brief Gets the first argument as ATermList
  **/
-inline const ATermList &ATLgetFirst(const ATermList &List)
+/* inline const ATermList &ATLgetFirst(const ATermList &List)
 {
   const ATerm &Result = List.front();
   // assert(ATisListOrNull(Result));
   return aterm_cast<const ATermList>(Result);
-}
+} */
 
 /**
  * \brief Gets the term associated with a key as ATermAppl
  **/
-inline const ATermAppl &ATAtableGet(const ATermTable &Table, const ATerm &Key)
+/* inline const ATermAppl &ATAtableGet(const ATermTable &Table, const ATerm &Key)
 {
   const ATerm &Result = ATtableGet(Table, Key);
   return aterm_cast<const ATermAppl>(Result);
-}
+} */
 
 /**
  * \brief Gets the term associated with a key as ATermList
  **/
-inline const ATermList &ATLtableGet(const ATermTable &Table, const ATerm &Key)
+/* inline const ATermList &ATLtableGet(const ATermTable &Table, const ATerm &Key)
 {
   const ATerm &Result = ATtableGet(Table, Key);
   // assert(ATisListOrNull(Result));
   return aterm_cast<const ATermList>(Result);
-}
+} */
 
-inline
+/* inline
 ATermList ATinsertA(const ATermList &l, const ATermAppl &t)
 {
   return push_front(l, aterm_cast<aterm>(t));
-}
+} */
 
 //Substitutions on ATerm's
 //------------------------

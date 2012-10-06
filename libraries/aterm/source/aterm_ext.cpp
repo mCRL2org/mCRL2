@@ -39,7 +39,7 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
   ATermList l = Substs;
   while (!l.empty())
   {
-    ATermAppl Subst = ATAgetFirst(l);
+    ATermAppl Subst = aterm_cast<aterm_appl>(l.front());
     if (Subst(0)==Term)
     {
       return Subst(1);

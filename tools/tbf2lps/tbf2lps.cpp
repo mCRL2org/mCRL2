@@ -60,7 +60,7 @@ class tbf2lps_tool: public input_output_tool
       {
         mCRL2log(verbose) << "reading mCRL LPS from stdin..." << std::endl;
 
-        mcrl_spec = (aterm_appl) ATreadFromFile(stdin);
+        mcrl_spec = (aterm_appl) read_from_file(stdin);
 
         if (mcrl_spec == 0)
         {
@@ -82,7 +82,7 @@ class tbf2lps_tool: public input_output_tool
           throw mcrl2::runtime_error("could not open input file '" + input_filename() + "' for reading");
         }
 
-        mcrl_spec = (aterm_appl) ATreadFromFile(in_stream);
+        mcrl_spec = (aterm_appl) read_from_file(in_stream);
 
         fclose(in_stream);
 

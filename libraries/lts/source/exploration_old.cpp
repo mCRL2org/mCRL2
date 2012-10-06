@@ -771,7 +771,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)multi_action_list.front();
               ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
+              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)action_arguments.front();
@@ -816,7 +816,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)multi_action_list.front();
               ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
+              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)action_arguments.front();
@@ -949,7 +949,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)multi_action_list.front();
               ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
+              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)action_arguments.front();
@@ -996,7 +996,7 @@ bool lps2lts_algorithm::generate_lts()
             {
               ATermAppl first_action=(ATermAppl)multi_action_list.front();
               ATermList action_arguments=(ATermList)first_action(1);
-              ATermList action_sorts=(ATermList)ATAgetArgument(first_action,0)(1);
+              ATermList action_sorts=(ATermList)aterm_cast<aterm_appl>(first_action(0))(1);
               if (action_arguments.size()>0)
               {
                 ATermAppl first_argument=(ATermAppl)action_arguments.front();

@@ -419,23 +419,23 @@ static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_a
   }
 
   aterm_list l;
-  aterm_list h = ATLgetFirst(stack);
+  aterm_list h = aterm_cast<aterm_list>(stack.front());
 
   for (; !seqs.empty(); seqs=seqs.tail())
   {
-    aterm_list e = ATLgetFirst(seqs);
+    aterm_list e = aterm_cast<aterm_list>(seqs.front());
 
-    if (isD(ATAgetFirst(e)))
+    if (isD(aterm_cast<aterm_appl>(e.front())))
     {
       l = push_front<aterm>(l,e.tail());
     }
-    else if (isN(ATAgetFirst(e)))
+    else if (isN(aterm_cast<aterm_appl>(e.front())))
     {
       h = push_front<aterm>(h,e.tail());
     }
-    else if (isRe(ATAgetFirst(e)))
+    else if (isRe(aterm_cast<aterm_appl>(e.front())))
     {
-      *r = ATAgetFirst(e);
+      *r = aterm_cast<aterm_appl>(e.front());
     }
     else
     {
@@ -452,27 +452,27 @@ static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, 
 
   for (; !seqs.empty(); seqs=seqs.tail())
   {
-    aterm_list e = ATLgetFirst(seqs);
+    aterm_list e = aterm_cast<aterm_list>(seqs.front());
 
-    if (isD(ATAgetFirst(e)) || isN(ATAgetFirst(e)))
+    if (isD(aterm_cast<aterm_appl>(e.front())) || isN(aterm_cast<aterm_appl>(e.front())))
     {
       l = push_front<aterm>(l,e);
     }
-    else if (isS(ATAgetFirst(e)))
+    else if (isS(aterm_cast<aterm_appl>(e.front())))
     {
       pars->Slist = push_front<aterm>(pars->Slist,e);
     }
-    else if (isMe(ATAgetFirst(e)))     // M should not appear at the head of a seq
+    else if (isMe(aterm_cast<aterm_appl>(e.front())))     // M should not appear at the head of a seq
     {
       pars->Mlist = push_front<aterm>(pars->Mlist,e);
     }
-    else if (isF(ATAgetFirst(e)))
+    else if (isF(aterm_cast<aterm_appl>(e.front())))
     {
       pars->Flist = push_front<aterm>(pars->Flist,e);
     }
-    else if (isRe(ATAgetFirst(e)))
+    else if (isRe(aterm_cast<aterm_appl>(e.front())))
     {
-      *r = ATAgetFirst(e);
+      *r = aterm_cast<aterm_appl>(e.front());
     }
     else
     {
@@ -579,16 +579,16 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     aterm_list l,m;
 
     size_t k = i;
-    aterm_appl v = createFreshVar(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(ATAgetFirst(ATLgetFirst(pars.Slist))(0))(1)),&i);
+    aterm_appl v = createFreshVar(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(aterm_cast<aterm_list>(pars.Slist.front()).front())(0))(1)),&i);
     treevars_usedcnt[k] = 0;
 
     l = aterm_list();
     m = aterm_list();
     for (; !pars.Slist.empty(); pars.Slist=pars.Slist.tail())
     {
-      aterm_list e = ATLgetFirst(pars.Slist);
+      aterm_list e = aterm_cast<aterm_list>(pars.Slist.front());
 
-      e = subst_var(e,aterm_cast<aterm_appl>(ATAgetFirst(e)(0)), v,aterm_int(k),ATmakeList1(gsMakeSubst(ATAgetFirst(e)(0),v)));
+      e = subst_var(e,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(e.front())(0)), v,aterm_int(k),ATmakeList1(gsMakeSubst(aterm_cast<aterm_appl>(e.front())(0),v)));
 
       l = push_front<aterm>(l,e.front());
       m = push_front<aterm>(m,e.tail());
@@ -606,9 +606,9 @@ static aterm_appl build_tree(build_pars pars, size_t i)
       tree = build_tree(pars,i);
       for (; !readies.empty(); readies=readies.tail())
       {
-        inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
-        inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
-        tree = atermpp::aterm_appl(afunC,ATAgetFirst(readies)(0),atermpp::aterm_appl(afunR,ATAgetFirst(readies)(1)),tree);
+        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(2));
+        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(3));
+        tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())(0),atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())(1)),tree);
       }
       r = tree;
     }
@@ -629,15 +629,15 @@ static aterm_appl build_tree(build_pars pars, size_t i)
   }
   else if (!pars.Mlist.empty())
   {
-    aterm M = ATLgetFirst(pars.Mlist).front();
+    aterm M = aterm_cast<aterm_list>(pars.Mlist.front()).front();
 
     aterm_list l;
     aterm_list m;
     for (; !pars.Mlist.empty(); pars.Mlist=pars.Mlist.tail())
     {
-      if (M==ATLgetFirst(pars.Mlist).front())
+      if (M==aterm_cast<aterm_list>(pars.Mlist.front()).front())
       {
-        l = push_front<aterm>(l,ATLgetFirst(pars.Mlist).tail());
+        l = push_front<aterm>(l,aterm_cast<aterm_list>(pars.Mlist.front()).tail());
       }
       else
       {
@@ -660,9 +660,9 @@ static aterm_appl build_tree(build_pars pars, size_t i)
       true_tree = build_tree(pars,i);
       for (; !readies.empty(); readies=readies.tail())
       {
-        inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
-        inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
-        true_tree = atermpp::aterm_appl(afunC,ATAgetFirst(readies)(0),atermpp::aterm_appl(afunR,ATAgetFirst(readies)(1)),true_tree);
+        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(2));
+        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(3));
+        true_tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())(0),atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())(1)),true_tree);
       }
     }
     else
@@ -683,7 +683,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
   }
   else if (!pars.Flist.empty())
   {
-    aterm_list F = ATLgetFirst(pars.Flist);
+    aterm_list F = aterm_cast<aterm_list>(pars.Flist.front());
     aterm_appl true_tree,false_tree;
 
     aterm_list newupstack = pars.upstack;
@@ -691,9 +691,9 @@ static aterm_appl build_tree(build_pars pars, size_t i)
 
     for (; !pars.Flist.empty(); pars.Flist=pars.Flist.tail())
     {
-      if (ATLgetFirst(pars.Flist).front()==F.front())
+      if (aterm_cast<aterm_list>(pars.Flist.front()).front()==F.front())
       {
-        newupstack = push_front<aterm>(newupstack, ATLgetFirst(pars.Flist).tail());
+        newupstack = push_front<aterm>(newupstack, aterm_cast<aterm_list>(pars.Flist.front()).tail());
       }
       else
       {
@@ -713,7 +713,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     else
     {
-      return atermpp::aterm_appl(afunF,ATAgetFirst(F)(0),true_tree,false_tree);
+      return atermpp::aterm_appl(afunF,aterm_cast<aterm_appl>(F.front())(0),true_tree,false_tree);
     }
   }
   else if (!pars.upstack.empty())
@@ -735,9 +735,9 @@ static aterm_appl build_tree(build_pars pars, size_t i)
 
       for (; !readies.empty(); readies=readies.tail())
       {
-        inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
-        inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
-        t = atermpp::aterm_appl(afunC,ATAgetFirst(readies)(0),atermpp::aterm_appl(afunR,ATAgetFirst(readies)(1)),t);
+        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(2));
+        inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(3));
+        t = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())(0),atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())(1)),t);
       }
 
       return t;
@@ -750,7 +750,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
   }
   else
   {
-    if (ATLgetFirst(pars.stack).empty())
+    if (aterm_cast<aterm_list>(pars.stack.front()).empty())
     {
       if (pars.stack.tail().empty())
       {
@@ -764,7 +764,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     else
     {
-      aterm_list l = ATLgetFirst(pars.stack);
+      aterm_list l = aterm_cast<aterm_list>(pars.stack.front());
       aterm_appl r ;
       aterm_list readies;
 
@@ -777,9 +777,9 @@ static aterm_appl build_tree(build_pars pars, size_t i)
         tree = build_tree(pars,i);
         for (; !readies.empty(); readies=readies.tail())
         {
-          inc_usedcnt((aterm_list) ATAgetFirst(readies)(2));
-          inc_usedcnt((aterm_list) ATAgetFirst(readies)(3));
-          tree = atermpp::aterm_appl(afunC,ATAgetFirst(readies)(0),atermpp::aterm_appl(afunR,ATAgetFirst(readies)(1)),tree);
+          inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(2));
+          inc_usedcnt((aterm_list) aterm_cast<aterm_appl>(readies.front())(3));
+          tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())(0),atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())(1)),tree);
         }
       }
       else
@@ -832,7 +832,7 @@ static aterm_appl create_tree(const data_equation_list &rules, size_t /*opid*/, 
     tree = build_tree(init_pars,0);
     for (; !readies.empty(); readies=readies.tail())
     {
-      tree = atermpp::aterm_appl(afunC,ATAgetFirst(readies)(0),atermpp::aterm_appl(afunR,ATAgetFirst(readies)(1)), tree);
+      tree = atermpp::aterm_appl(afunC,aterm_cast<aterm_appl>(readies.front())(0),atermpp::aterm_appl(afunR,aterm_cast<aterm_appl>(readies.front())(1)), tree);
     }
   }
   else
@@ -963,7 +963,7 @@ static aterm_list dep_vars(const data_equation &eqn)
         int j=i-1; // vars.tail().size()-1
         for (aterm_list o=vars.tail(); !o.empty(); o=o.tail())
         {
-          const aterm_list l=ATLgetFirst(o);
+          const aterm_list l=aterm_cast<aterm_list>(o.front());
           if (std::find(l.begin(),l.end(),evars.front()) != l.end())
           {
             bs[j] = true;
@@ -979,7 +979,7 @@ static aterm_list dep_vars(const data_equation &eqn)
       bool b = false;
       for (aterm_list o=vars; !o.empty(); o=o.tail())
       {
-        const aterm_list l=ATLgetFirst(o);
+        const aterm_list l=aterm_cast<aterm_list>(o.front());
         if (std::find(o.begin(),o.end(),pars(i+1)) != o.end())
         {
           // Same variable, mark it
@@ -1107,7 +1107,7 @@ static aterm_list create_strategy(
           int j=i-1;
           for (aterm_list o=vars; !o.tail().empty(); o=o.tail())
           {
-            const aterm_list l=ATLgetFirst(o);
+            const aterm_list l=aterm_cast<aterm_list>(o.front());
             if (std::find(l.begin(),l.end(),evars.front()) != l.end())
             {
               bs[j] = true;
@@ -1123,7 +1123,7 @@ static aterm_list create_strategy(
         bool b = false;
         for (aterm_list o=vars; !o.empty(); o=o.tail())
         {
-          const aterm_list l=ATLgetFirst(o);
+          const aterm_list l=aterm_cast<aterm_list>(o.front());
           if (std::find(l.begin(),l.end(),pars(i+1)) != l.end())
           {
             // Same variable, mark it
@@ -1172,9 +1172,9 @@ static aterm_list create_strategy(
     aterm_list has_deps;
     for (; !dep_list.empty(); dep_list=dep_list.tail())
     {
-      if (ATLgetFirst(ATLgetFirst(dep_list)).empty())
+      if (aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()).empty())
       {
-        no_deps = push_front<aterm>(no_deps, data_equation(ATLgetFirst(dep_list).tail().front()));
+        no_deps = push_front<aterm>(no_deps, data_equation(aterm_cast<aterm_list>(dep_list.front()).tail().front()));
       }
       else
       {
@@ -1220,8 +1220,8 @@ static aterm_list create_strategy(
       aterm_list l;
       for (; !dep_list.empty(); dep_list=dep_list.tail())
       {
-        l = push_front<aterm>(l, push_front<aterm>(ATLgetFirst(dep_list).tail(),
-                    remove_one_element<aterm>(ATLgetFirst(ATLgetFirst(dep_list)), rewr_arg)));
+        l = push_front<aterm>(l, push_front<aterm>(aterm_cast<aterm_list>(dep_list.front()).tail(),
+                    remove_one_element<aterm>(aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()), rewr_arg)));
       }
       dep_list = reverse(l);
     }
@@ -1801,7 +1801,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       // TODO REMOVE gsMakeWhr.
       ss << "this_rewriter->rewrite_where(mcrl2::core::detail::gsMakeWhr(" << r.second << ",";
 
-      aterm_list assignments=ATLgetArgument(w,1);
+      aterm_list assignments=aterm_cast<aterm_list>(w(1));
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
       {
         ss << "push_front<aterm>(";
@@ -1809,7 +1809,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       ss << "ATempty";
       for( ; !assignments.empty() ; assignments=assignments.tail())
       {
-        aterm_appl assignment=ATAgetFirst(assignments);
+        aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
         pair<bool,string> r=calc_inner_term(assignment(1),startarg,nnfvars,true,total_arity);
         ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
                  "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment(0))) << ")," <<
@@ -1826,7 +1826,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       pair<bool,string> r=calc_inner_term(w(0),startarg,nnfvars,false,total_arity);
       ss << "mcrl2::core::detail::gsMakeWhr(" << r.second << ",";
 
-      aterm_list assignments=ATLgetArgument(w,1);
+      aterm_list assignments=aterm_cast<aterm_list>(w(1));
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
       {
         ss << "push_front<aterm>(";
@@ -1834,7 +1834,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       ss << "ATempty";
       for( ; !assignments.empty() ; assignments=assignments.tail())
       {
-        aterm_appl assignment=ATAgetFirst(assignments);
+        aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
         pair<bool,string> r=calc_inner_term(assignment(1),startarg,nnfvars,true,total_arity);
         ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
                  "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment(0))) << ")," <<
