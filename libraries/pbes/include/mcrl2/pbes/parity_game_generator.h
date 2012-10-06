@@ -492,7 +492,7 @@ class parity_game_generator
     virtual
     void print_variable_mapping()
     {
-      std::cerr << "--- variable mapping ---" << std::endl;
+      mCRL2log(log::info) << "--- variable mapping ---" << std::endl;
       std::map<size_t, pbes_expression> m;
       for (atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
       {
@@ -500,12 +500,12 @@ class parity_game_generator
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        std::cerr << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
+        mCRL2log(log::info) << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
       }
-      std::cerr << "--- priorities ---" << std::endl;
+      mCRL2log(log::info) << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
       {
-        std::cerr << core::pp(i->first) << " " << i->second << std::endl;
+        mCRL2log(log::info) << core::pp(i->first) << " " << i->second << std::endl;
       }
     }
 };

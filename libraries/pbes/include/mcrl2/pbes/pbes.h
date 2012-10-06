@@ -483,7 +483,7 @@ class pbes
           )
          )
       {
-        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables "
+        mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the free variables "
                   << data::pp(declared_global_variables)
                   << " are not declared in the data specification "
                   << data::pp(data().sorts())
@@ -502,7 +502,7 @@ class pbes
             )
            )
         {
-          std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
+          mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
                     << data::pp(i->variable())
                     << " are not declared in the data specification "
                     << data::pp(data().sorts())
@@ -519,7 +519,7 @@ class pbes
           )
          )
       {
-        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables "
+        mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables "
                   << data::pp(quantifier_variables)
                   << " are not declared in the data specification "
                   << data::pp(data().sorts())
@@ -534,7 +534,7 @@ class pbes
           )
          )
       {
-        std::cerr << "pbes::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
+        mCRL2log(log::error) << "pbes::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
         return false;
       }
 
@@ -546,7 +546,7 @@ class pbes
                         )
          )
       {
-        std::cerr << "pbes::is_well_typed() failed: not all of the free variables are declared\n"
+        mCRL2log(log::error) << "pbes::is_well_typed() failed: not all of the free variables are declared\n"
                   << "free variables: " << data::pp(occurring_global_variables) << "\n"
                   << "declared free variables: " << data::pp(declared_global_variables)
                   << std::endl;
@@ -560,14 +560,14 @@ class pbes
           )
          )
       {
-        std::cerr << "pbes::is_well_typed() failed: the free variables have no unique names" << std::endl;
+        mCRL2log(log::error) << "pbes::is_well_typed() failed: the free variables have no unique names" << std::endl;
         return false;
       }
 
       // check 7)
       if (!data::detail::set_intersection(declared_global_variables, quantifier_variables).empty())
       {
-        std::cerr << "pbes::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
+        mCRL2log(log::error) << "pbes::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
         return false;
       }
 
@@ -576,7 +576,7 @@ class pbes
       {
         if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
         {
-          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << data::pp(*i) << " conflicts with its declaration!" << std::endl;
+          mCRL2log(log::error) << "pbes::is_well_typed() failed: the occurring variable " << data::pp(*i) << " conflicts with its declaration!" << std::endl;
           return false;
         }
       }
@@ -584,7 +584,7 @@ class pbes
       // check 9)
       if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), initial_state()))
       {
-        std::cerr << "pbes::is_well_typed() failed: the initial state " << pbes_system::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
+        mCRL2log(log::error) << "pbes::is_well_typed() failed: the initial state " << pbes_system::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
         return false;
       }
 

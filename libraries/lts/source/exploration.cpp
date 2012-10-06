@@ -756,7 +756,7 @@ atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_alg
   }
   catch (mcrl2::runtime_error& e)
   {
-    std::cerr << "Error while exploring state space: " << e.what() << "\n";
+    mCRL2log(error) << "Error while exploring state space: " << e.what() << "\n";
     save_error(state);
     exit(EXIT_FAILURE);
   }

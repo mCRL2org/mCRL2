@@ -289,9 +289,9 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
   }
   catch (std::runtime_error e)
   {
-    std::cerr << "parse_pbes_expression: parse error detected in the generated specification\n"
-              << pbesspec
-              << std::endl;
+    mCRL2log(log::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
+                         << pbesspec
+                         << std::endl;
     throw e;
   }
 
@@ -331,7 +331,7 @@ pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "
 template <typename SubstitutionFunction>
 void parse_substitutions(std::string text, data::data_specification const& data_spec, SubstitutionFunction& sigma)
 {
-  std::cerr << "SSSSWWW" << text << std::endl;
+  //mCRL2log(log::verbose) << "SSSSWWW" << text << std::endl;
   std::vector<std::string> substitutions = utilities::split(text, ";");
   for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
   {
@@ -396,9 +396,9 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
   }
   catch (std::runtime_error e)
   {
-    std::cerr << "parse_pbes_expression: parse error detected in the generated specification\n"
-              << pbesspec
-              << std::endl;
+    mCRL2log(log::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
+                         << pbesspec
+                         << std::endl;
     throw e;
   }
 

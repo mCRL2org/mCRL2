@@ -41,7 +41,7 @@ void Invariant_Checker::print_counter_example()
   {
     data_expression v_counter_example(f_bdd_prover.get_counter_example());
     assert(v_counter_example!=0);
-    std::cerr << "  Counter example: " << data::pp(v_counter_example) << "\n";
+    mCRL2log(info) << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
 

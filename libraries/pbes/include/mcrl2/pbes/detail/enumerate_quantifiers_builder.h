@@ -221,7 +221,7 @@ class quantifier_enumerator
       {
         PbesTerm c = r_(phi_, sigma_);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        std::cerr << "        Z = Z + " << pbes_system::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
+        mCRL2log(log::verbose) << "        Z = Z + " << pbes_system::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
         if (stop_(c))
         {
@@ -230,7 +230,7 @@ class quantifier_enumerator
         else if (empty_intersection(c.variables(), v_))
         {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-          std::cerr << "        A = A + " << pbes_system::pp(c) << std::endl;
+          mCRL2log(log::verbose) << "        A = A + " << pbes_system::pp(c) << std::endl;
 #endif
           A_.insert(c);
         }
@@ -269,11 +269,11 @@ class quantifier_enumerator
     template <typename SubstitutionFunction>
     void print_arguments(variable_sequence_type x, const term_type& phi, SubstitutionFunction& sigma, term_type stop_value) const
     {
-      std::cerr << "<enumerate>"
-                << (tr::is_false(stop_value) ? "forall " : "exists ")
-                << data::pp(x) << ". "
-                << pbes_system::pp(phi)
-                << data::print_substitution(sigma) << std::endl;
+      mCRL2log(log::verbose) << "<enumerate>"
+                             << (tr::is_false(stop_value) ? "forall " : "exists ")
+                             << data::pp(x) << ". "
+                             << pbes_system::pp(phi)
+                             << data::print_substitution(sigma) << std::endl;
     }
 
     /// \brief Returns a string representation of D[i]
@@ -293,7 +293,7 @@ class quantifier_enumerator
     {
       for (size_t i = 0; i < D.size(); i++)
       {
-        std::cerr << "  " << print_D_element(D[i], i);
+        mCRL2log(log::verbose) << "  " << print_D_element(D[i], i);
       }
     }
 
@@ -312,12 +312,12 @@ class quantifier_enumerator
     /// \param todo A todo list
     void print_todo_list(const std::deque<boost::tuple<variable_type, data_term_type, size_t> >& todo) const
     {
-      std::cerr << "  todo = [";
+      mCRL2log(log::verbose) << "  todo = [";
       for (typename std::deque<boost::tuple<variable_type, data_term_type, size_t> >::const_iterator i = todo.begin(); i != todo.end(); ++i)
       {
-        std::cerr << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
+        mCRL2log(log::verbose) << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
       }
-      std::cerr << "]" << std::endl;
+      mCRL2log(log::verbose) << "]" << std::endl;
     }
 
     template <typename SubstitutionFunction, typename VariableMap>
@@ -391,7 +391,7 @@ class quantifier_enumerator
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
           print_D(D);
           print_todo_list(todo);
-          std::cerr << "    (y, k) = " << print_todo_list_element(front) << std::endl;
+          mCRL2log(log::verbose) << "    (y, k) = " << print_todo_list_element(front) << std::endl;
 #endif
           todo.pop_front();
           const variable_type& xk = boost::get<0>(front);
@@ -412,7 +412,7 @@ class quantifier_enumerator
           for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
           {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-            std::cerr << "      e = " << data::pp(*i) << std::endl;
+            mCRL2log(log::verbose) << "      e = " << data::pp(*i) << std::endl;
 #endif
             dependencies.insert(i->variables().begin(), i->variables().end());
             sigma[xk] = *i;
@@ -427,7 +427,7 @@ class quantifier_enumerator
             {
               Dk.push_back(*i);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-              std::cerr << "        " << print_D_element(Dk, k) << std::endl;
+              mCRL2log(log::verbose) << "        " << print_D_element(Dk, k) << std::endl;
 #endif
               if (!core::term_traits<data_term_type>::is_constant(*i))
               {
@@ -457,7 +457,7 @@ class quantifier_enumerator
           sigma[*j] = *j; // erase *j
         }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        std::cerr << "<return>stop early: " << pbes_system::pp(stop_value) << std::endl;
+        mCRL2log(log::verbose) << "<return>stop early: " << pbes_system::pp(stop_value) << std::endl;
 #endif
         redo_substitutions(sigma, undo);
         return stop_value;
@@ -470,7 +470,7 @@ class quantifier_enumerator
       }
       term_type result = join(A.begin(), A.end());
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-      std::cerr << "<return> " << pbes_system::pp(result) << std::endl;
+      mCRL2log(log::verbose) << "<return> " << pbes_system::pp(result) << std::endl;
 #endif
       redo_substitutions(sigma, undo);
       return result;
@@ -546,7 +546,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   term_type visit_forall(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    std::cerr << "<visit_forall>" << tr::pp(forall(variables, phi)) << std::endl;
+    mCRL2log(log::verbose) << "<visit_forall>" << tr::pp(forall(variables, phi)) << std::endl;
 #endif
     term_type result;
     if (m_enumerate_infinite_sorts)
@@ -568,7 +568,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       }
     }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    std::cerr << "<visit_forall_result>" << tr::pp(result) << std::endl;
+    mCRL2log(log::verbose) << "<visit_forall_result>" << tr::pp(result) << std::endl;
 #endif
     return result;
   }
@@ -583,7 +583,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   term_type visit_exists(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    std::cerr << "<visit_exists>" << tr::pp(exists(variables, phi)) << std::endl;
+    mCRL2log(log::verbose) << "<visit_exists>" << tr::pp(exists(variables, phi)) << std::endl;
 #endif
     term_type result;
     if (m_enumerate_infinite_sorts)
@@ -605,7 +605,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       }
     }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-    std::cerr << "<visit_exists_result>" << tr::pp(result) << std::endl;
+    mCRL2log(log::verbose) << "<visit_exists_result>" << tr::pp(result) << std::endl;
 #endif
     return result;
   }

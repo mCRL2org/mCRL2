@@ -207,7 +207,7 @@ class ltscompare_tool : public ltscompare_base
           return lts_compare<lts_lts_t>();
         }
         case lts_none:
-          cerr << "No input format is specified. Assuming .aut format.\n";
+          mCRL2log(mcrl2::log::warning) << "No input format is specified. Assuming .aut format.\n";
         case lts_aut:
         {
           return lts_compare<lts_aut_t>();

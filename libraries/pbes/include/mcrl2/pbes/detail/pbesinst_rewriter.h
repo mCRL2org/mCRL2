@@ -140,7 +140,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << pbes_system::pp(x) << " [default]-> " << pbes_system::pp(result) << std::endl;
+        mCRL2log(log::info) << pbes_system::pp(x) << " [default]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }
@@ -155,7 +155,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << pbes_system::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << pbes_system::pp(result) << std::endl;
+        mCRL2log(log::info) << pbes_system::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }

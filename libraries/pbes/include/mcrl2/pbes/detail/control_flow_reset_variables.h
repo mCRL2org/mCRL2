@@ -233,7 +233,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
         pbes_equation eqn = k->apply_implication(phi);
         if (!eqn.is_well_typed())
         {
-          std::cerr << "<eqn not well typed>" << pbes_system::pp(eqn) << std::endl;
+          mCRL2log(warning) << "<eqn not well typed>" << pbes_system::pp(eqn) << std::endl;
         }
         result.equations().push_back(eqn);
       }
