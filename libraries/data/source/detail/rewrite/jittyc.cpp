@@ -2380,7 +2380,7 @@ bool RewriterCompilingJitty::calc_ar(ATermAppl expr)
   {
     return calc_ar(ATAgetArgument(expr,0)) && calc_ar(ATAgetArgument(expr,1));
   }
-  else if (is_ar_and(expr))
+  else if (is_ar_or(expr))
   {
     return calc_ar(ATAgetArgument(expr,0)) || calc_ar(ATAgetArgument(expr,1));
   }
