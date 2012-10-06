@@ -549,16 +549,16 @@ bool EnumeratorSolutionsStandard::next(
             }
             else if (used_vars > max_vars)
             {
-              mCRL2log(log::warning) << "need more than " << max_vars << " variables to find all valuations of ";
+              mCRL2log(log::info) << "need more than " << max_vars << " variables to find all valuations of ";
               for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
               {
                 if (k != enum_vars.begin())
                 {
-                  mCRL2log(log::warning) << ", ";
+                  mCRL2log(log::info) << ", ";
                 }
-                mCRL2log(log::warning) << data::pp(*k) << ":" << data::pp(k->sort());
+                mCRL2log(log::info) << data::pp(*k) << ":" << data::pp(k->sort());
               }
-              mCRL2log(log::warning) << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
+              mCRL2log(log::info) << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
               max_vars *= MAX_VARS_FACTOR;
             }
           }

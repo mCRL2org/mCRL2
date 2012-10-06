@@ -27,10 +27,12 @@
 #include <cstring>
 #include <cassert>
 #include <sstream>
+#include <sys/stat.h>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/basename.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
@@ -2692,7 +2694,16 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   if (env_compile_script != NULL)
     compile_script = env_compile_script;
   else
-    compile_script = "mcrl2compilerewriter";
+  {
+      //If "mcrl2compilerewriter" and executable are in the same directory.
+      struct stat buf;
+      if (stat((mcrl2::utilities::get_executable_basename() + "/mcrl2compilerewriter").c_str(), &buf) != -1)
+        compile_script = mcrl2::utilities::get_executable_basename() + "/mcrl2compilerewriter";
+      else
+        //Assuming that script is in path
+        compile_script = "mcrl2compilerewriter";
+  }
+
   rewriter_so = new uncompiled_library(compile_script);
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
 
