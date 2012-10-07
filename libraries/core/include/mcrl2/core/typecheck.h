@@ -12,7 +12,8 @@
 #ifndef PARSER_TYPECHECK_H
 #define PARSER_TYPECHECK_H
 
-#include "mcrl2/aterm/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/table.h"
 
 namespace mcrl2
 {

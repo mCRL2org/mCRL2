@@ -34,7 +34,7 @@
     struct HFnode* high, *low, *parent, *next, *previous;
     tBlock*  block;
     unsigned long frequency;
-    aterm_deprecated::aterm        term;
+    atermpp::aterm        term;
   };
 
   typedef struct
@@ -50,9 +50,9 @@
   int HFinit(HFtree*, HTable*);
   void HFfree(HFtree*);
 
-  int HFencodeATerm(BitStream*, HFtree*, aterm_deprecated::aterm);
+  int HFencodeATerm(BitStream*, HFtree*, atermpp::aterm);
   int HFencodeIndex(BitStream*, HFtree*, long);
-  int HFdecodeATerm(BitStream*, HFtree*, aterm_deprecated::aterm*);
+  int HFdecodeATerm(BitStream*, HFtree*, atermpp::aterm*);
   int HFdecodeIndex(BitStream*, HFtree*, long*);
 
 

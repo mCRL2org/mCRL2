@@ -17,10 +17,9 @@
 #include <iostream>
 
 #include <assert.h>
-#include "mcrl2/aterm/aterm.h"
-// #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/bool.h"

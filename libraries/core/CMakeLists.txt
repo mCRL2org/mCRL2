@@ -95,7 +95,7 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  mcrl2_aterm
+  mcrl2_atermpp
   mcrl2_utilities
   mcrl2_syntax
 )

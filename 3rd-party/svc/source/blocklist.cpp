@@ -27,7 +27,7 @@
 #include <svc/blocklist.h>
 #include <svc/huffman.h>
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 // void BLdump(FILE*, BList*);
 

@@ -15,7 +15,6 @@
 #include "mcrl2gen_validate.h"
 
 #include <sstream>
-#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/core/detail/struct_core.h"        // ATerm building blocks.
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.

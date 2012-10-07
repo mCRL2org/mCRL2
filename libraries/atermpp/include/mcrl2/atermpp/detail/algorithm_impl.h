@@ -25,7 +25,7 @@ namespace detail
 /// \param f A function on terms
 /// \return The transformed sequence
 template <typename Term, typename Function>
-aterm_list list_apply(term_list<Term> l, const Function f)
+aterm_list list_apply(const term_list<Term> &l, const Function f)
 {
   if (l.size() == 0)
   {
@@ -44,7 +44,7 @@ aterm_list list_apply(term_list<Term> l, const Function f)
 /// \param f A function on terms
 /// \return The transformed term
 template <typename Term, typename Function>
-aterm_appl appl_apply(term_appl<Term> a, const Function f)
+aterm_appl appl_apply(const term_appl<Term> &a, const Function f)
 {
   return  term_appl<Term>(a.function(), a.begin(),a.end(),f);
 }
@@ -82,7 +82,7 @@ struct found_term_exception
 {
   aterm_appl t;
 
-  found_term_exception(aterm_appl t_)
+  found_term_exception(const aterm_appl &t_)
     : t(t_)
   {}
 };
@@ -92,7 +92,7 @@ struct found_term_exception
 /// \param op A unary function on terms
 /// \return The result of the algorithm
 template <typename UnaryFunction>
-UnaryFunction for_each_impl(aterm t, UnaryFunction op)
+UnaryFunction for_each_impl(const aterm &t, UnaryFunction op)
 {
   if (t.type_is_list())
   {
@@ -120,7 +120,7 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 /// \param t A term
 /// \param match A predicate function on terms
 template <typename MatchPredicate>
-void find_if_impl(aterm t, MatchPredicate match)
+void find_if_impl(const aterm &t, MatchPredicate match)
 {
   if (t.type() == AT_APPL)
   {
@@ -148,7 +148,7 @@ void find_if_impl(aterm t, MatchPredicate match)
 /// \param op A predicate function on terms
 /// \param destBegin The beginning of a range to where the results are written
 template <typename MatchPredicate, typename OutputIterator>
-void find_all_if_impl(aterm t, MatchPredicate op, OutputIterator& destBegin)
+void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBegin)
 {
   typedef typename iterator_value<OutputIterator>::type value_type;
 
@@ -186,7 +186,7 @@ void find_all_if_impl(aterm t, MatchPredicate op, OutputIterator& destBegin)
 /// \param match A predicate function on terms
 /// \param stop A predicate function on terms
 template <typename MatchPredicate, typename StopPredicate>
-void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
+void partial_find_if_impl(const aterm &t, MatchPredicate match, StopPredicate stop)
 {
   if (t.type() == AT_APPL)
   {
@@ -219,7 +219,7 @@ void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
 /// \param stop A predicate function on terms
 /// \param destBegin The beginning of a range to where the results are written
 template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
-void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
+void partial_find_all_if_impl(const aterm &t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
 {
   if (t.type() == AT_APPL)
   {
@@ -249,7 +249,7 @@ void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop,
 //--- replace -------------------------------------------------------------//
 
 template <typename ReplaceFunction>
-aterm replace_impl(aterm t, ReplaceFunction replace);
+aterm replace_impl(const aterm &t, ReplaceFunction replace);
 
 template <typename ReplaceFunction>
 struct replace_helper
@@ -263,10 +263,9 @@ struct replace_helper
   /// \brief Function call operator.
   /// \param t A term
   /// \return The function result
-  aterm operator()(aterm t) const
+  aterm operator()(const aterm &t) const
   {
-    aterm result=replace_impl(t, m_replace);
-    return result;
+    return replace_impl(t, m_replace);
   }
 };
 
@@ -275,29 +274,28 @@ struct replace_helper
 /// \param f A replace function on terms
 /// \return The result of the algorithm
 template <typename ReplaceFunction>
-aterm replace_impl(aterm t, ReplaceFunction f)
+aterm replace_impl(const aterm &t, ReplaceFunction f)
 {
-  aterm result = t;
-  if (t.type() == AT_APPL)
+  if (t.type_is_appl())
   {
-    aterm_appl a(t);
-    aterm_appl fa = f(a);
-    result = (a == fa) ? appl_apply(f(a), replace_helper<ReplaceFunction>(f)) : fa;
+    const aterm_appl a(t);
+    const aterm fa = f(a);
+    return (a == fa) ? appl_apply(a, replace_helper<ReplaceFunction>(f)) : fa;
   }
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    result = list_apply(l, replace_helper<ReplaceFunction>(f));
+    return list_apply(l, replace_helper<ReplaceFunction>(f));
   }
-  return result;
+  return t;
 }
 
 struct default_replace
 {
-  aterm_appl m_src;
-  aterm_appl m_dest;
+  const aterm m_src;
+  const aterm m_dest;
 
-  default_replace(aterm_appl src, aterm_appl dest)
+  default_replace(const aterm &src, const aterm &dest)
     : m_src(src),
       m_dest(dest)
   { }
@@ -305,7 +303,7 @@ struct default_replace
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result
-  aterm_appl operator()(aterm_appl t) const
+  const aterm &operator()(const aterm &t) const
   {
     return (t == m_src) ? m_dest : t;
   }
@@ -314,7 +312,7 @@ struct default_replace
 //--- partial replace -----------------------------------------------------//
 
 template <typename ReplaceFunction>
-aterm partial_replace_impl(aterm t, ReplaceFunction replace);
+aterm partial_replace_impl(const aterm &t, ReplaceFunction replace);
 
 template <typename ReplaceFunction>
 struct partial_replace_helpsr
@@ -328,7 +326,7 @@ struct partial_replace_helpsr
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result
-  aterm operator()(aterm t) const
+  aterm operator()(const aterm &t) const
   {
     return partial_replace_impl(t, m_replace);
   }
@@ -339,34 +337,33 @@ struct partial_replace_helpsr
 /// \param f A replace function on terms
 /// \return The result of the algorithm
 template <typename ReplaceFunction>
-aterm partial_replace_impl(aterm t, ReplaceFunction f)
+aterm partial_replace_impl(const aterm &t, ReplaceFunction f)
 {
-  aterm result = t;
-  if (t.type() == AT_APPL)
+  if (t.type_is_appl())
   {
     aterm_appl a(t);
     std::pair<aterm_appl, bool> fa = f(a);
     if (fa.second) // continue recursion
     {
-      result = appl_apply(fa.first, partial_replace_helpsr<ReplaceFunction>(f));
+      return appl_apply(fa.first, partial_replace_helpsr<ReplaceFunction>(f));
     }
     else
     {
-      result = fa.first;
+      return fa.first;
     }
   }
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    result = list_apply(l, partial_replace_helpsr<ReplaceFunction>(f));
+    return list_apply(l, partial_replace_helpsr<ReplaceFunction>(f));
   }
-  return result;
+  return t;
 }
 
 //--- bottom-up replace ---------------------------------------------------//
 
 template <typename ReplaceFunction>
-aterm bottom_up_replace_impl(aterm t, ReplaceFunction bottom_up_replace);
+aterm bottom_up_replace_impl(const aterm &t, ReplaceFunction bottom_up_replace);
 
 template <typename ReplaceFunction>
 struct bottom_up_replace_helpsr
@@ -380,7 +377,7 @@ struct bottom_up_replace_helpsr
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result
-  aterm operator()(aterm t) const
+  aterm operator()(const aterm &t) const
   {
     return bottom_up_replace_impl(t, m_bottom_up_replace);
   }
@@ -391,28 +388,27 @@ struct bottom_up_replace_helpsr
 /// \param f A replace function on terms
 /// \return The result of the algorithm
 template <typename ReplaceFunction>
-aterm bottom_up_replace_impl(aterm t, ReplaceFunction f)
+aterm bottom_up_replace_impl(const aterm &t, ReplaceFunction f)
 {
-  aterm result = t;
-  if (t.type() == AT_APPL)
+  if (t.type_is_appl())
   {
     aterm_appl a(t);
-    result = f(appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f)));
+    return f(appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f)));
   }
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    result = list_apply(l, bottom_up_replace_helpsr<ReplaceFunction>(f));
+    return list_apply(l, bottom_up_replace_helpsr<ReplaceFunction>(f));
   }
-  return result;
+  return t;
 }
 
 struct default_bottom_up_replace
 {
-  aterm_appl m_src;
-  aterm_appl m_dest;
+  const aterm_appl m_src;
+  const aterm_appl m_dest;
 
-  default_bottom_up_replace(aterm_appl src, aterm_appl dest)
+  default_bottom_up_replace(const aterm_appl &src, const aterm_appl &dest)
     : m_src(src),
       m_dest(dest)
   { }
@@ -420,7 +416,7 @@ struct default_bottom_up_replace
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result
-  aterm_appl operator()(aterm_appl t) const
+  aterm_appl operator()(const aterm_appl &t) const
   {
     return (t == m_src) ? m_dest : t;
   }

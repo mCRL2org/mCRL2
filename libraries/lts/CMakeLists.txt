@@ -115,7 +115,6 @@ install(TARGETS dot_syntax fsm_syntax DESTINATION ${MCRL2_LIB_DIR})
 # ##### End generate parser tables ######
 
 target_link_libraries(${PROJECT_NAME}
-  mcrl2_aterm
   svc
   mcrl2_data
   mcrl2_lps

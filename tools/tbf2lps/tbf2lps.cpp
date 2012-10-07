@@ -28,7 +28,7 @@
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 class tbf2lps_tool: public input_output_tool
 {

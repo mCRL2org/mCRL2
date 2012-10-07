@@ -24,7 +24,7 @@
 #include <limits.h>
 #include <svc/huffman.h>
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 static aterm ESCAPE_SEQUENCE;
 static aterm NO_ATERM;

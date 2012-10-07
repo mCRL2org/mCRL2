@@ -13,7 +13,6 @@
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
-#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/lps/simbase.h"
 
 //----------------------------------------------------------------------------

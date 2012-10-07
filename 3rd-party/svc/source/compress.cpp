@@ -21,6 +21,7 @@
    $Id$ */
 
 #include <limits.h>
+#include "mcrl2/atermpp/aterm_io.h"
 #include <svc/compress.h>
 
 using namespace atermpp;

@@ -27,8 +27,9 @@
 #include <stdlib.h>
 #include <string>
 #include <svc/lz.h>
+#include "mcrl2/atermpp/aterm_io.h"
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char* _strdup(const char* s);

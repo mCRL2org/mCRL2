@@ -13,7 +13,7 @@
 #define INDUCTION_H
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
@@ -133,33 +133,20 @@ class Induction
     data_expression apply_induction_one()
     {
       using namespace atermpp;
-      variable v_induction_variable;
-      sort_expression v_induction_variable_sort;
-      variable v_dummy_variable;
-      sort_expression v_dummy_sort;
-      aterm_appl v_substitution;
-      aterm_list v_substitution_list;
-      data_expression v_base_case;
-      data_expression v_induction_step;
-      data_expression v_result;
 
-      v_induction_variable = f_list_variables.front();
-      v_induction_variable_sort = v_induction_variable.sort();
+      const variable v_induction_variable = f_list_variables.front();
+      const sort_expression v_induction_variable_sort = v_induction_variable.sort();
 
-      v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
-      v_dummy_variable = get_fresh_dummy(v_dummy_sort);
+      const sort_expression v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
+      const variable v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      v_substitution = aterm_deprecated::gsMakeSubst(v_induction_variable, sort_list::nil(sort_expression(v_induction_variable_sort)));
-      v_substitution_list = make_list<aterm>(v_substitution);
-      v_base_case = data_expression(aterm_deprecated::gsSubstValues(v_substitution_list, f_formula, true));
+      const substitution v_substitution1(v_induction_variable, sort_list::nil(sort_expression(v_induction_variable_sort)));
+      const data_expression v_base_case = aterm_cast<data_expression>(v_substitution1(f_formula));
 
-      v_substitution = aterm_deprecated::gsMakeSubst(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
-      v_substitution_list = make_list<aterm>(v_substitution);
-      v_induction_step = data_expression(aterm_deprecated::gsSubstValues(v_substitution_list, f_formula, true));
-      v_induction_step = sort_bool::implies(data_expression(f_formula), data_expression(v_induction_step));
+      substitution v_substitution2 = substitution(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
+      const data_expression v_induction_step = sort_bool::implies(data_expression(f_formula), aterm_cast<data_expression>(v_substitution2(f_formula)));
 
-      v_result = sort_bool::and_(data_expression(v_base_case), data_expression(v_induction_step));
-      return v_result;
+      return sort_bool::and_(data_expression(v_base_case), data_expression(v_induction_step));
     }
 
     /// \brief
@@ -184,9 +171,8 @@ class Induction
             a_list_of_variables = pop_front(a_list_of_variables);
             data_expression v_dummy(a_list_of_dummies.front());
             a_list_of_dummies = pop_front(a_list_of_dummies);
-            aterm_appl v_substitution = aterm_deprecated::gsMakeSubst(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
-            aterm_list v_substitution_list=push_front(aterm_list(),aterm(v_substitution));
-            v_clause = sort_bool::and_(v_clause, data_expression(aterm_deprecated::gsSubstValues(v_substitution_list, a_hypothesis, true)));
+            const substitution v_substitution(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
+            v_clause = sort_bool::and_(v_clause, aterm_cast<data_expression>(v_substitution(a_hypothesis)));
           }
         }
 
@@ -209,13 +195,11 @@ class Induction
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_variable);
       const variable v_dummy = get_fresh_dummy(v_dummy_sort);
       const variable_list v_list_of_dummies = push_front(a_list_of_dummies, v_dummy);
-      aterm_appl v_substitution = aterm_deprecated::gsMakeSubst(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
-      aterm_list v_substitution_list = make_list<aterm>(v_substitution);
-      data_expression v_formula_1 = data_expression(aterm_deprecated::gsSubstValues(v_substitution_list, a_formula, true));
-      v_substitution = aterm_deprecated::gsMakeSubst(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
-      v_substitution_list = make_list<aterm>(v_substitution);
-      data_expression v_formula_2 = data_expression(aterm_deprecated::gsSubstValues(v_substitution_list, a_formula, true));
-      data_expression v_hypothesis = data_expression(aterm_deprecated::gsSubstValues(v_substitution_list, a_hypothesis, true));
+      const substitution v_substitution1(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
+      const data_expression v_formula_1 = aterm_cast<data_expression>(v_substitution1(a_formula));
+      const substitution v_substitution2(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
+      const data_expression v_formula_2 = aterm_cast<data_expression>(v_substitution2(a_formula));
+      const data_expression v_hypothesis = aterm_cast<data_expression>(v_substitution2(a_hypothesis));
 
       if (a_variable_number < a_number_of_variables - 1)
       {

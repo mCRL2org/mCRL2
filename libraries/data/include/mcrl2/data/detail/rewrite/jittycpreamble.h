@@ -1,12 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "mcrl2/aterm/aterm.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
-using namespace aterm_deprecated;
 using namespace mcrl2::data::detail;
 using namespace atermpp;
 

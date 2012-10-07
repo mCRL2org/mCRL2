@@ -16,7 +16,7 @@
 #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/aterm/aterm.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -300,7 +300,7 @@ aterm_list ATreplace(const aterm_list &list_in, const aterm &el, const size_t id
   return list;
 }
 
-aterm gsSubstValuesTable(const table &Substs, const aterm &t, const bool Recursive)
+static aterm gsSubstValuesTable(const table &Substs, const aterm &t)
 {
   aterm Term=t;
   aterm Result = Substs.get(Term);
@@ -308,55 +308,50 @@ aterm gsSubstValuesTable(const table &Substs, const aterm &t, const bool Recursi
   {
     return Result;
   }
-  if (!Recursive)
+  
+  //distribute substitutions over the arguments/elements of Term
+  if (Term.type() == AT_APPL)
   {
-    return Term;
-  }
-  else
-  {
-    //Recursive; distribute substitutions over the arguments/elements of Term
-    if (Term.type() == AT_APPL)
+    //Term is an aterm_appl; distribute substitutions over the arguments
+    atermpp::function_symbol Head = Term.function();
+    const size_t NrArgs = Head.arity();
+    if (NrArgs > 0)
     {
-      //Term is an aterm_appl; distribute substitutions over the arguments
-      atermpp::function_symbol Head = Term.function();
-      const size_t NrArgs = Head.arity();
-      if (NrArgs > 0)
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
+      // std::vector <aterm> Args(NrArgs);
+      for (size_t i = 0; i < NrArgs; i++)
       {
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
-        // std::vector <aterm> Args(NrArgs);
-        for (size_t i = 0; i < NrArgs; i++)
-        {
-           new (&Args[i]) aterm(gsSubstValuesTable(Substs, ((aterm_appl) Term)(i), Recursive));
-        }
-        const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
-        for (size_t i = 0; i < NrArgs; i++)
-        {
-          Args[i].~aterm(); 
-        }
-        return a;
+         new (&Args[i]) aterm(gsSubstValuesTable(Substs, ((aterm_appl) Term)(i)));
       }
-      else
+      const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
+      for (size_t i = 0; i < NrArgs; i++)
       {
-        return Term;
+        Args[i].~aterm(); 
       }
-    }
-    else if (Term.type() == AT_LIST)
-    {
-      //Term is an aterm_list; distribute substitutions over the elements
-      aterm_list Result;
-      while (!((aterm_list) Term).empty())
-      {
-        Result = push_front<aterm>(Result,
-                          gsSubstValuesTable(Substs, ((aterm_list) Term).front(), Recursive));
-        Term = ((aterm_list) Term).tail();
-      }
-      return reverse(Result);
+      return a;
     }
     else
     {
       return Term;
     }
   }
+  else if (Term.type() == AT_LIST)
+  {
+    //Term is an aterm_list; distribute substitutions over the elements
+    aterm_list Result;
+    while (!((aterm_list) Term).empty())
+    {
+      Result = push_front<aterm>(Result,
+                        gsSubstValuesTable(Substs, ((aterm_list) Term).front()));
+      Term = ((aterm_list) Term).tail();
+    }
+    return reverse(Result);
+  }
+  else
+  {
+    return Term;
+  }
+  
 }
 
 
@@ -1196,7 +1191,7 @@ aterm_appl gstcFoldSortRefs(aterm_appl Spec)
   {
     mCRL2log(debug) << "substituting sort references in specification" << std::endl;
     Spec = NewSpec;
-    NewSpec = (aterm_appl) gsSubstValuesTable(Substs, Spec, true);
+    NewSpec = (aterm_appl) gsSubstValuesTable(Substs, Spec);
   }
   while (NewSpec!=Spec);
 
@@ -1225,26 +1220,15 @@ aterm_list gstcFoldSortRefsInSortRefs(aterm_list SortRefs)
       //turn SortRef into a substitution
       aterm_appl LHS = gsMakeSortId(aterm_cast<aterm_appl>(SortRef(0)));
       aterm_appl RHS = aterm_cast<aterm_appl>(SortRef(1));
-      aterm_appl Subst;
-      if (gsIsSortId(RHS) || gsIsSortArrow(RHS))
-      {
-        //make forward substitution
-        Subst = aterm_deprecated::gsMakeSubst(LHS, RHS);
-      }
-      else
-      {
-        //make backward substitution
-        Subst = aterm_deprecated::gsMakeSubst(RHS, LHS);
-      }
-      mCRL2log(debug) << "performing substition " << core::pp_deprecated(Subst(0)) << " := " << core::pp_deprecated(Subst(1)) << "" << std::endl;
+      const substitution Subst=((gsIsSortId(RHS) || gsIsSortArrow(RHS))?substitution(LHS, RHS):substitution(RHS, LHS));
+      // mCRL2log(debug) << "performing substition " << core::pp_deprecated(Subst(0)) << " := " << core::pp_deprecated(Subst(1)) << "" << std::endl;
       //perform Subst on all elements of NewSortRefs except for the i'th
-      aterm_list Substs = make_list<aterm>(Subst);
       for (size_t j = 0; j < n; j++)
       {
         if (i != j)
         {
           aterm_appl OldSortRef = ATAelementAt(NewSortRefs, j);
-          aterm_appl NewSortRef = aterm_cast<aterm_appl>(aterm_deprecated::gsSubstValues(Substs, OldSortRef, true));
+          aterm_appl NewSortRef = aterm_cast<aterm_appl>(Subst(OldSortRef));
           if (NewSortRef!=OldSortRef)
           {
             NewSortRefs = ATreplace(NewSortRefs, NewSortRef, j);

@@ -16,7 +16,6 @@
 #include <string>
 #include <cassert>
 #include <signal.h>
-// #include "mcrl2/aterm/aterm2.h"
 
 #include "boost/lexical_cast.hpp"
 

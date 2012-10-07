@@ -123,7 +123,7 @@ Term replace(Term t, ReplaceFunction r)
 /// \param new_value The value that will be substituted.
 /// \return The result of the replacement.
 template <typename Term>
-Term replace(Term t, aterm_appl old_value, aterm_appl new_value)
+Term replace(Term t, const aterm &old_value, const aterm new_value)
 {
   return replace(t, detail::default_replace(old_value, new_value));
 }

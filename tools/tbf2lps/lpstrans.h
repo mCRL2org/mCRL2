@@ -8,7 +8,8 @@
 //
 /// \file lpstrans.h
 
-#include "mcrl2/aterm/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_io.h"
 
 
 atermpp::aterm_appl translate(atermpp::aterm_appl spec, bool convert_bools, bool convert_funcs);

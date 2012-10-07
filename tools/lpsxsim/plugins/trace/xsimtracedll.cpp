@@ -21,7 +21,6 @@
 #endif
 
 #include <sstream>
-#include "mcrl2/aterm/aterm.h"
 #include "simbasegui.h"
 #include "xsimtracedll.h"
 #include "mcrl2/utilities/logger.h"

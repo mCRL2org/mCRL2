@@ -23,7 +23,8 @@
 #ifndef __HASH_TABLE_H
 #define __HASH_TABLE_H
 
-#include "mcrl2/aterm/aterm.h"
+#include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "ptable.h"
 
   typedef struct

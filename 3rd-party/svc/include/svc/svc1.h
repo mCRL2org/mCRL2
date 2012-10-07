@@ -25,12 +25,8 @@
 #ifndef _SVC1_H
 #define _SVC1_H
 
-#include "mcrl2/aterm/aterm.h"
-
 #include "compress.h"
-
 #include "string.h"
-
 #include <string>
 
 #define SVC_VERSION  "1.2 beta"

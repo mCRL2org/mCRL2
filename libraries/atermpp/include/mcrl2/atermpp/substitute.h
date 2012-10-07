@@ -32,7 +32,7 @@ struct substitution
   /// \brief Constructor.
   /// \param src A value.
   /// \param dest A replacement.
-  substitution(aterm src, aterm dest)
+  substitution(const aterm &src, const aterm &dest)
     : m_src(src), m_dest(dest)
   {}
 

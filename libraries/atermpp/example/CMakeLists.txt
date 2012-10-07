@@ -30,7 +30,6 @@ add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
 )
 
 target_link_libraries(${PROJECT_NAME}
-   mcrl2_aterm 
 )
 
 build_and_run_test_example_target( ${PROJECT_NAME} )

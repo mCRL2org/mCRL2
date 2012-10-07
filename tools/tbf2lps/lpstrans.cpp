@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "mcrl2/aterm/aterm.h"
 #include <assert.h>
 #include <string>
 #include <sstream>
@@ -36,6 +35,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/substitutions.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::core;
@@ -199,10 +199,10 @@ static aterm_list get_lps_acts(aterm_appl lps, aterm_list* ids)
   return reverse(acts);
 }
 
-static aterm_list get_substs(aterm_list ids)
+static std::map<aterm,aterm> get_substs(aterm_list ids)
 {
   std::set < aterm > used;
-  aterm_list substs;
+  std::map<aterm,aterm> substs;
 
   used.insert((aterm) aterm_appl(atermpp::function_symbol("if",0)));
 
@@ -245,7 +245,7 @@ static aterm_list get_substs(aterm_list ids)
 
     used.insert((aterm) new_id);
 
-    substs = push_front<aterm>(substs,aterm_deprecated::gsMakeSubst(ids.front(),(aterm) new_id));
+    substs[ids.front()]=new_id;
   }
 
   return substs;
@@ -301,8 +301,8 @@ static aterm_list convert_funcs(aterm_list funcs, aterm_list* ids, bool funcs_ar
       sort = mcrl2::data::function_sort(atermpp::convert<mcrl2::data::sort_expression_list>(sorts), mcrl2::data::sort_expression(sort));
     }
 
-    aterm f = (aterm) static_cast<aterm_appl>(mcrl2::data::function_symbol(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())(0))),
-                            mcrl2::data::sort_expression(sort)));
+    aterm f = mcrl2::data::function_symbol(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())(0))),
+                            mcrl2::data::sort_expression(sort));
 
     if (!remove_func_decl(aterm_cast<aterm_appl>(funcs.front())))
     {
@@ -373,8 +373,8 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
   {
     aterm_appl v = aterm_cast<aterm_appl>(vars.front());
     pars = push_front<aterm>(pars,
-                    (aterm) static_cast<aterm_appl>(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(0))),
-                                    mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(1))))))
+                    mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(0))),
+                                    mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(1)))))
                    );
     add_id(ids,aterm_cast<aterm_appl>(v(0)));
   }
@@ -389,8 +389,8 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
     for (; !l.empty(); l=l.tail())
     {
       m = push_front<aterm>(m,
-                   (aterm) static_cast<aterm_appl>(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
-                               mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1))))))
+                   mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
+                               mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1)))))
                   );
       add_id(ids,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0)));
     }
@@ -400,8 +400,8 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
     for (; !l.empty(); l=l.tail())
     {
       o = push_front<aterm>(o,
-                   (aterm) static_cast<aterm_appl>(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
-                        mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1))))))
+                   mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
+                        mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1)))))
                   );
     }
     aterm_appl c = dataterm2ATermAppl(aterm_cast<aterm_appl>(s(4)),o);
@@ -421,10 +421,8 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
     aterm_list as;
     for (; !l.empty(); l=l.tail())
     {
-      al = push_front<aterm>(al,
-                    (aterm) dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o)
-                   );
-      as = push_front<aterm>(as,(aterm) static_cast<aterm_appl>(mcrl2::data::data_expression(aterm_cast<aterm_appl>(al.front())).sort()));
+      al = push_front<aterm>(al, dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o));
+      as = push_front<aterm>(as,mcrl2::data::data_expression(aterm_cast<aterm_appl>(al.front())).sort());
     }
     aterm_appl a = gsMakeAction(gsMakeActId(aterm_cast<aterm_appl>(s(1)),as),al);
     if (as.empty() && "tau"==aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(a(0))(0)).function().name())
@@ -445,7 +443,7 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
       aterm_appl val = dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o);
       if (par!=val)
       {
-        n = push_front<aterm>(n,(aterm) static_cast<aterm_appl>(mcrl2::data::assignment(mcrl2::data::variable(par),mcrl2::data::data_expression(val))));
+        n = push_front<aterm>(n,mcrl2::data::assignment(mcrl2::data::variable(par),mcrl2::data::data_expression(val)));
       }
     }
     n = reverse(n);
@@ -466,10 +464,9 @@ static aterm_list convert_init(aterm_appl spec, aterm_list* /*ids*/)
   {
     aterm_appl v = aterm_cast<aterm_appl>(vars.front());
     l = push_front<aterm>(l,
-                 (aterm) static_cast<aterm_appl>(mcrl2::data::assignment(
+                 mcrl2::data::assignment(
                        mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(0))),mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(1))))),
                        mcrl2::data::data_expression(dataterm2ATermAppl(aterm_cast<aterm_appl>(vals.front()),aterm_list())))
-                                               )
                 );
   }
 
@@ -493,7 +490,6 @@ aterm_appl translate(aterm_appl spec, bool convert_bools, bool convert_funcs)
   remove_standard_functions = convert_funcs;
   has_func_T = false;
   typelist = aterm_list();
-  // ATprotectList(&typelist);
 
   mCRL2log(verbose) << "converting sort declarations..." << std::endl;
   sort_spec = gsMakeSortSpec(convert_sorts(spec,&ids));
@@ -520,54 +516,34 @@ aterm_appl translate(aterm_appl spec, bool convert_bools, bool convert_funcs)
 
   aterm_appl r = gsMakeLinProcSpec(data_spec, act_spec, gsMakeGlobVarSpec(aterm_list()), lps, init);
 
-  aterm_list substs;
+  std::map<aterm,aterm> substs;
 
   if (convert_bools)
   {
-    substs = push_front<aterm>(substs,
-                      (aterm) aterm_deprecated::gsMakeSubst(
-                        (aterm) static_cast<aterm_appl>(mcrl2::data::function_symbol("F#",mcrl2::data::sort_bool::bool_())),
-                        (aterm) static_cast<aterm_appl>(mcrl2::data::sort_bool::false_())
-                      )
-                     );
-    substs = push_front<aterm>(substs,
-                      (aterm) aterm_deprecated::gsMakeSubst(
-                        (aterm) static_cast<aterm_appl>(mcrl2::data::function_symbol("T#", mcrl2::data::sort_bool::bool_())),
-                        (aterm) static_cast<aterm_appl>(mcrl2::data::sort_bool::true_())
-                      )
-                     );
+    substs[mcrl2::data::function_symbol("F#",mcrl2::data::sort_bool::bool_())]= mcrl2::data::sort_bool::false_();
+    substs[mcrl2::data::function_symbol("T#", mcrl2::data::sort_bool::bool_())]=mcrl2::data::sort_bool::true_();
   }
 
   if (convert_funcs)
   {
     aterm_appl bool_func_sort = mcrl2::data::sort_bool::and_().sort();
 
-    substs = push_front<aterm>(substs,
-                      (aterm) aterm_deprecated::gsMakeSubst(
-                        (aterm) static_cast<aterm_appl>(mcrl2::data::function_symbol("and#Bool#Bool",mcrl2::data::sort_expression(bool_func_sort))),
-                        (aterm) static_cast<aterm_appl>(mcrl2::data::sort_bool::and_())
-                      )
-                     );
+    substs[mcrl2::data::function_symbol("and#Bool#Bool",mcrl2::data::sort_expression(bool_func_sort))]=mcrl2::data::sort_bool::and_();
 
     mcrl2::data::sort_expression s_bool(mcrl2::data::sort_bool::bool_());
     for (aterm_list l=aterm_cast<aterm_list>(sort_spec(0)); !l.empty(); l=l.tail())
     {
       mcrl2::data::sort_expression s(aterm_cast<aterm_appl>(l.front()));
       const char* sort_name = aterm_cast<aterm_appl>(s(0)).function().name().c_str();
-      substs = push_front<aterm>(substs,(aterm) aterm_deprecated::gsMakeSubst(
-                          (aterm) static_cast<aterm_appl>(mcrl2::data::function_symbol(std::string("eq#")+sort_name+"#"+sort_name,
-                              mcrl2::data::make_function_sort(s,s,s_bool))),
-                          (aterm) static_cast<aterm_appl>(mcrl2::data::equal_to(s))
-                        ));
+      substs[mcrl2::data::function_symbol(std::string("eq#")+sort_name+"#"+sort_name,
+                              mcrl2::data::make_function_sort(s,s,s_bool))]=mcrl2::data::equal_to(s);
     }
   }
 
-  r = (aterm_appl) aterm_deprecated::gsSubstValues(substs,(aterm) r,true);
+  r = aterm_cast<aterm_appl>(make_map_substitution(substs)(r));
 
 
   substs = get_substs(ids);
 
-  r = (aterm_appl) aterm_deprecated::gsSubstValues(substs,(aterm) r,true);
-
-  return r;
+  return aterm_cast<aterm_appl>(make_map_substitution(substs)(r));
 }

@@ -30,6 +30,7 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
@@ -490,7 +491,8 @@ static aterm_appl createFreshVar(aterm_appl sort, size_t* i)
   return gsMakeDataVarId(gsString2ATermAppl(tree_var_str),sort);
 }
 
-static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &new_val, const aterm &num, const aterm_list &substs)
+// static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &new_val, const aterm &num, const aterm_list &substs)
+static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &new_val, const aterm &num, const substitution &substs)
 {
   if (l.empty())
   {
@@ -535,7 +537,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
         n = push_front<aterm>(n,l.front());
       }
     }
-    head = atermpp::aterm_appl(afunCRe,aterm_deprecated::gsSubstValues(substs,head(0),true),aterm_deprecated::gsSubstValues(substs,head(1),true),m, n);
+    head = atermpp::aterm_appl(afunCRe,substs(head(0)),substs(head(1)),m, n);
   }
   else if (isRe(head))
   {
@@ -552,7 +554,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
         m = push_front<aterm>(m,l.front());
       }
     }
-    head = atermpp::aterm_appl(afunRe,aterm_deprecated::gsSubstValues(substs,head(0),true),m);
+    head = atermpp::aterm_appl(afunRe,substs(head(0)),m);
   }
 
   return push_front<aterm>(subst_var(l,old,new_val,num,substs), head);
@@ -588,7 +590,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       aterm_list e = aterm_cast<aterm_list>(pars.Slist.front());
 
-      e = subst_var(e,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(e.front())(0)), v,aterm_int(k),make_list<aterm>(aterm_deprecated::gsMakeSubst(aterm_cast<aterm_appl>(e.front())(0),v)));
+      e = subst_var(e,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(e.front())(0)), v,aterm_int(k),substitution(aterm_cast<aterm_appl>(e.front())(0),v));
 
       l = push_front<aterm>(l,e.front());
       m = push_front<aterm>(m,e.tail());
