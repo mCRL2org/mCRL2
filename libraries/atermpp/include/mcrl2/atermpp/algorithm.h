@@ -28,7 +28,7 @@ namespace atermpp
 /// The function op must have the signature bool op(aterm_appl t).
 /// When op(t) is false, the children of t are skipped.
 template <typename UnaryFunction, typename Term>
-UnaryFunction for_each(Term t, UnaryFunction op)
+UnaryFunction for_each(const Term &t, UnaryFunction op)
 {
   return detail::for_each_impl< typename boost::add_reference< UnaryFunction >::type >(t, op);
 }
@@ -38,7 +38,7 @@ UnaryFunction for_each(Term t, UnaryFunction op)
 /// \param match The predicate that determines if a subterm is a match
 /// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
 template <typename Term, typename MatchPredicate>
-aterm_appl find_if(Term t, MatchPredicate match)
+aterm_appl find_if(const Term &t, MatchPredicate match)
 {
   try
   {
@@ -59,7 +59,7 @@ aterm_appl find_if(Term t, MatchPredicate match)
 /// \param stop The predicate that determines if the recursion should not be continued in a subterm
 /// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
 template <typename Term, typename MatchPredicate, typename StopPredicate>
-aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
+aterm_appl partial_find_if(const Term &t, MatchPredicate match, StopPredicate stop)
 {
   try
   {
@@ -78,7 +78,7 @@ aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
 /// \param match The predicate that determines if a subterm is a match
 /// \param destBegin The iterator range to which output is written.
 template <typename Term, typename MatchPredicate, typename OutputIterator>
-void find_all_if(Term t, MatchPredicate match, OutputIterator destBegin)
+void find_all_if(const Term &t, MatchPredicate match, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
   detail::find_all_if_impl< typename boost::add_reference< MatchPredicate >::type >(t, match, i);
@@ -93,7 +93,7 @@ void find_all_if(Term t, MatchPredicate match, OutputIterator destBegin)
 /// \param stop The predicate that determines if the recursion should not be continued in a subterm
 /// \param destBegin The iterator range to which output is written.
 template <typename Term, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
-void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin)
+void partial_find_all_if(const Term &t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
   detail::partial_find_all_if_impl< typename boost::add_reference< MatchPredicate >::type,
@@ -109,10 +109,9 @@ void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, Outpu
 /// \param r The replace function that is applied to subterms.
 /// \return The result of the replacement.
 template <typename Term, typename ReplaceFunction>
-Term replace(Term t, ReplaceFunction r)
+Term replace(const Term &t, ReplaceFunction r)
 {
-  aterm x = detail::replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r);
-  return Term(static_cast<aterm_appl>(x));
+  return aterm_cast<Term>(detail::replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -123,7 +122,7 @@ Term replace(Term t, ReplaceFunction r)
 /// \param new_value The value that will be substituted.
 /// \return The result of the replacement.
 template <typename Term>
-Term replace(Term t, const aterm &old_value, const aterm new_value)
+Term replace(const Term &t, const aterm &old_value, const aterm &new_value)
 {
   return replace(t, detail::default_replace(old_value, new_value));
 }
@@ -138,10 +137,9 @@ Term replace(Term t, const aterm &old_value, const aterm new_value)
 /// \param r The replace function that is applied to subterms.
 /// \return The result of the replacement.
 template <typename Term, typename ReplaceFunction>
-Term bottom_up_replace(Term t, ReplaceFunction r)
+Term bottom_up_replace(const Term &t, ReplaceFunction r)
 {
-  aterm x = detail::bottom_up_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r);
-  return Term(static_cast<aterm_appl>(x));
+  return aterm_cast<Term>(detail::bottom_up_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -152,7 +150,7 @@ Term bottom_up_replace(Term t, ReplaceFunction r)
 /// \param new_value The value that is substituted.
 /// \return The result of the replacement.
 template <typename Term>
-Term bottom_up_replace(Term t, aterm_appl old_value, aterm_appl new_value)
+Term bottom_up_replace(const Term &t, const aterm_appl &old_value, const aterm_appl &new_value)
 {
   return bottom_up_replace(t, detail::default_replace(old_value, new_value));
 }
@@ -169,10 +167,9 @@ Term bottom_up_replace(Term t, aterm_appl old_value, aterm_appl new_value)
 /// \param r The replace function that is applied to subterms.
 /// \return The result of the replacement.
 template <typename Term, typename ReplaceFunction>
-Term partial_replace(Term t, ReplaceFunction r)
+Term partial_replace(const Term &t, ReplaceFunction r)
 {
-  aterm x = detail::partial_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r);
-  return Term(static_cast<aterm_appl>(x));
+  return aterm_cast<Term>(detail::partial_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(t, r));
 }
 
 } // namespace atermpp

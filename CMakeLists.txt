@@ -313,7 +313,7 @@ add_subdirectory ( tools/mcrl2parse )
 ## Library dependencies
 ##---------------------------------------------------
 
-add_subdirectory ( libraries/aterm )
+# add_subdirectory ( libraries/aterm )
 add_subdirectory ( libraries/atermpp )
 add_subdirectory ( libraries/bes )
 add_subdirectory ( libraries/core )
@@ -475,7 +475,7 @@ message(STATUS "MCRL2_INSTALL_HEADERS: ${MCRL2_INSTALL_HEADERS}" )
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
-    libraries/aterm/include/
+#    libraries/aterm/include/
     libraries/atermpp/include/
     libraries/core/include/
     libraries/data/include/

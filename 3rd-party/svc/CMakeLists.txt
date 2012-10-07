@@ -26,7 +26,7 @@ add_library(${PROJECT_NAME}
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
