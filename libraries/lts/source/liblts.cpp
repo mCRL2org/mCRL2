@@ -44,7 +44,7 @@ namespace lts
 namespace detail
 {
 
-std::vector < ATermAppl > state_label_lts::vector_templates;
+std::vector < aterm_appl > state_label_lts::vector_templates;
 
 lts_type guess_format(string const& s)
 {

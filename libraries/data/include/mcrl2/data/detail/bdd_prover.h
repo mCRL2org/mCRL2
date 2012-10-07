@@ -163,6 +163,7 @@ class BDD_Prover: public Prover
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
     atermpp::aterm_appl bdd_down(atermpp::aterm_appl a_formula, std::string& a_indent)
     {
+      using namespace atermpp;
       a_indent.append("  ");
 
       if (f_time_limit != 0 && (f_deadline - time(0)) <= 0)
@@ -180,14 +181,14 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      const std::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
+      const std::map < aterm_appl, aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
       if (i!=f_formula_to_bdd.end()) // found
       {
         return i->second;
       }
 
-      atermpp::aterm_appl v_guard = smallest(a_formula);
-      if (v_guard==ATerm())
+      aterm_appl v_guard = smallest(a_formula);
+      if (v_guard==aterm())
       {
         return a_formula;
       }
@@ -196,7 +197,7 @@ class BDD_Prover: public Prover
         mCRL2log(log::debug) << a_indent << "Smallest guard: " << data::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
       }
 
-      atermpp::aterm_appl v_term1, v_term2;
+      aterm_appl v_term1, v_term2;
 
       v_term1 = f_manipulator.set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewrite_internal(v_term1,bdd_sigma);
@@ -206,13 +207,13 @@ class BDD_Prover: public Prover
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
 
       v_term2 = f_manipulator.set_false(a_formula, v_guard);
-      v_term2 = m_rewriter->rewrite_internal(atermpp::aterm_appl(v_term2),bdd_sigma);
+      v_term2 = m_rewriter->rewrite_internal(aterm_appl(v_term2),bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
 
-      atermpp::aterm_appl v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
+      aterm_appl v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
 
       a_indent.erase(a_indent.size() - 2);

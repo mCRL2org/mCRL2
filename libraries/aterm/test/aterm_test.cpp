@@ -16,34 +16,34 @@
 #include "mcrl2/aterm/aterm.h"
 
 using namespace std;
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 void test_plain_aterm_construction()
 {
   const string s0="f0";
-  const AFun f0(s0,0);
+  const function_symbol f0(s0,0);
   BOOST_CHECK(f0.arity()==0);
   BOOST_CHECK(f0.name()==s0);
 
-  const ATermAppl a0=aterm_appl(f0);
+  const aterm_appl a0=aterm_appl(f0);
   BOOST_CHECK(a0.function()==f0.number());
 
   const string s1="f1";
-  const AFun f1(s1,1);
+  const function_symbol f1(s1,1);
   BOOST_CHECK(f1.arity()==1);
   BOOST_CHECK(f1.name()==s1);
 
-  const ATermAppl a1=aterm_appl(f1,a0);
+  const aterm_appl a1=aterm_appl(f1,a0);
   BOOST_CHECK(a1.function()==f1.number());
   BOOST_CHECK(a1(0)==a0);
 
   const string s2="f0"; // Intentionally reuse string "f0".
-  const AFun f2(s2,2);
+  const function_symbol f2(s2,2);
   BOOST_CHECK(f2.arity()==2);
   BOOST_CHECK(f2.name()==s0);
   BOOST_CHECK(f2.name()==s2);
 
-  const ATermAppl a2=aterm_appl(f2,a0,a1);
+  const aterm_appl a2=aterm_appl(f2,a0,a1);
   BOOST_CHECK(a2.function()==f2.number());
   BOOST_CHECK(a2(0)==a0);
   BOOST_CHECK(a2(1)==a1);

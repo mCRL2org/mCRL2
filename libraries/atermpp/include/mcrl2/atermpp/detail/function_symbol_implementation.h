@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote, based on the ATerm library.
+// Author(s): Jan Friso Groote, based on the aterm library.
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //

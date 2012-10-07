@@ -11,11 +11,11 @@
 #include "mcrl2/aterm/aterm.h"
 
 
-aterm_deprecated::ATermAppl translate(aterm_deprecated::ATermAppl spec, bool convert_bools, bool convert_funcs);
+atermpp::aterm_appl translate(atermpp::aterm_appl spec, bool convert_bools, bool convert_funcs);
 //Pre: spec is an mCRL LPE
 //Ret: an equivalent mCRL2 LPS, in which sort Bool is converted based on the
 //     values of convert_bools and convert_funcs
 
-bool is_mCRL_spec(aterm_deprecated::ATermAppl spec);
+bool is_mCRL_spec(atermpp::aterm_appl spec);
 //Ret: spec is a mCRL LPE
 

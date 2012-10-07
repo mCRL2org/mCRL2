@@ -43,7 +43,7 @@ variable_list remove_elements(variable_list l, const std::set<Term>& to_be_remov
   return reverse(result);
 }
 
-/// \brief Returns the intersection of two unordered sets, that are stored in ATerm lists.
+/// \brief Returns the intersection of two unordered sets, that are stored in aterm lists.
 /// \param x A sequence of data variables
 /// \param y A sequence of data variables
 /// \return The intersection of two sets.
@@ -70,7 +70,7 @@ variable_list set_intersection(variable_list x, variable_list y)
   return remove_elements(x, to_be_removed);
 }
 
-/// \brief Returns the difference of two unordered sets, that are stored in ATerm lists.
+/// \brief Returns the difference of two unordered sets, that are stored in aterm lists.
 /// \param x A sequence of data variables
 /// \param y A sequence of data variables
 /// \return The difference of two sets.

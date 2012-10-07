@@ -32,11 +32,11 @@ using namespace atermpp;
 
 /* Typedefs */
 
-typedef function_symbol AFun;
+/* typedef function_symbol AFun;
 typedef aterm ATerm;
 typedef aterm_appl ATermAppl;
 typedef aterm_list ATermList;
-typedef aterm_int ATermInt;
+typedef aterm_int ATermInt; */
 
 /* AFun related functions */
 /* inline
@@ -193,7 +193,7 @@ ATermList ATmakeList0()
   return term_list<ATerm>();
 } */
 
-inline
+/* inline
 ATermList ATmakeList1(const ATerm &el0)
 {
   return push_front(term_list<ATerm>(),el0);
@@ -203,7 +203,7 @@ inline
 ATermList ATmakeList2(const ATerm &el0, const ATerm &el1)
 {
   return push_front(ATmakeList1(el1), el0);
-}
+} */
 
 /* inline
 ATermList ATmakeList3(const ATerm &el0, const ATerm &el1, const ATerm &el2)
@@ -322,7 +322,7 @@ ATermList ATgetArguments(const ATermAppl &appl)
  *    * The last element is the element at end-1.
  *     */
 
-inline
+/* inline
 ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t end)
 {
   size_t i, size;
@@ -354,7 +354,7 @@ ATermList ATgetSlice(const ATermList &list_in, const size_t start, const size_t 
   }
 
   return result;
-}
+} */
 
 
 
@@ -419,13 +419,13 @@ void       ATindexedSetReset(ATermIndexedSet &set)
   set.reset();
 } */
 
-inline
+/* inline
 size_t     ATindexedSetPut(indexed_set &set, const ATerm &elem, bool* isnew)
 {
   std::pair<size_t, bool> p= set.put(elem);
   *isnew=p.second;
   return p.first;
-}
+} */
 
 /* inline
 ssize_t    ATindexedSetGetIndex(const ATermIndexedSet &set, const ATerm &elem) / * A negative value represents non existence. * /
@@ -599,7 +599,7 @@ ATermList ATinsertA(const ATermList &l, const ATermAppl &t)
  *
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  **/
-ATermAppl gsMakeSubst(const ATerm &old_value, const ATerm &new_value);
+aterm_appl gsMakeSubst(const aterm &old_value, const aterm &new_value);
 
 /**
  * \brief Creates a new substitution
@@ -642,7 +642,7 @@ ATermAppl gsMakeSubst(const ATerm &old_value, const ATerm &new_value);
  *     from head to tail; if recursive and there was no match, the
  *     substitutions are distributed over the arguments/elements of term
  **/
-ATerm gsSubstValues(const ATermList &substs, const ATerm &term, const bool recursive);
+aterm gsSubstValues(const aterm_list &substs, const aterm &term, const bool recursive);
 
 /**
  * \brief Applies a list of substitutions to a term

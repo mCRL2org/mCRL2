@@ -25,7 +25,7 @@ using namespace mcrl2::log;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::core;
 
-//Global precondition: the ATerm library has been initialised
+//Global precondition: the aterm library has been initialised
 
 //external declarations
 int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
@@ -35,7 +35,7 @@ extern int mcrl2yydebug;         /* declared in mcrl2parser.cpp */
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */
 void mcrl2yyerror(const char *s);/* error function */
-ATerm mcrl2_spec_tree = NULL;      /* the parse tree */
+aterm mcrl2_spec_tree = NULL;      /* the parse tree */
 ATermIndexedSet mcrl2_parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
@@ -45,7 +45,7 @@ public:
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
-  ATerm parse_streams(std::vector<std::istream*> &streams);
+  aterm parse_streams(std::vector<std::istream*> &streams);
 protected:
   std::vector<std::istream*> *cur_streams;/* current input streams */
   int cur_index;                 /* current index in current streams */
@@ -189,9 +189,9 @@ nil        { process_string(); return NIL; }
 
 //Implementation of parse_streams
 
-ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors) {
+aterm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors) {
   an_mcrl2_lexer = new mcrl2_lexer(print_parse_errors);
-  ATerm result = an_mcrl2_lexer->parse_streams(streams);
+  aterm result = an_mcrl2_lexer->parse_streams(streams);
   delete an_mcrl2_lexer;
   return result;
 }
@@ -255,13 +255,13 @@ void mcrl2_lexer::process_string(void) {
   mcrl2yylval.appl = gsString2ATermAppl(YYText());
   // Protect the contents of mcrl2yylval.appl by adding it to an indexed set.
   bool dummy;
-  ATindexedSetPut(mcrl2_parser_protect_table,(ATerm)mcrl2yylval.appl,&dummy);
+  ATindexedSetPut(mcrl2_parser_protect_table,(aterm)mcrl2yylval.appl,&dummy);
 }
 
-ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
+aterm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   //uncomment the line below to let bison generate debug information
   //mcrl2yydebug = 1;
-  ATerm result = NULL;
+  aterm result = NULL;
   if (streams.size() == 0) {
     return result;
   }

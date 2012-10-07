@@ -104,7 +104,7 @@ class term_list:public aterm
     } 
     
 
-    /// Explicit construction from ATerm. 
+    /// Explicit construction from aterm. 
     ///  \param t An aterm.
     explicit term_list(const aterm &t):aterm(t)
     {
@@ -254,16 +254,6 @@ static const size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(s
 // typedef term_list<aterm> aterm_list;
 typedef term_list<aterm> aterm_list;
 
-/// \brief Returns the first element of the list l.
-/// \param l A list
-/// \return The first element of the list.
-/* template <typename Term>
-inline
-const Term &front(const term_list<Term> &l)
-{
-  return l.front(); 
-}  */
-
 /// \brief Returns the list obtained by inserting a new element at the beginning.
 /// \param l A list.
 /// \param elem A term
@@ -271,6 +261,7 @@ const Term &front(const term_list<Term> &l)
 template <typename Term>
 inline
 term_list<Term> push_front(const term_list<Term> &l, const Term &elem);
+
 
 /// \brief Returns the list obtained by inserting a new element at the end. Note
 /// that the complexity of this function is O(n), with n the number of

@@ -278,7 +278,7 @@ static void term2seq(const aterm &t, aterm_list* s, size_t *var_cnt)
 {
   if (t.type_is_int())
   {
-    term2seq(ATmakeList1(t),s,var_cnt);
+    term2seq(make_list<aterm>(t),s,var_cnt);
   }
   else if (t.type()==AT_APPL)
   {
@@ -407,7 +407,7 @@ static void initialise_build_pars(build_pars* p)
   p->Flist = aterm_list();
   p->Slist = aterm_list();
   p->Mlist = aterm_list();
-  p->stack = ATmakeList1(aterm_list());
+  p->stack = make_list<aterm>(aterm_list());
   p->upstack = aterm_list();
 }
 
@@ -535,7 +535,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
         n = push_front<aterm>(n,l.front());
       }
     }
-    head = atermpp::aterm_appl(afunCRe,gsSubstValues(substs,head(0),true),gsSubstValues(substs,head(1),true),m, n);
+    head = atermpp::aterm_appl(afunCRe,aterm_deprecated::gsSubstValues(substs,head(0),true),aterm_deprecated::gsSubstValues(substs,head(1),true),m, n);
   }
   else if (isRe(head))
   {
@@ -552,7 +552,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
         m = push_front<aterm>(m,l.front());
       }
     }
-    head = atermpp::aterm_appl(afunRe,gsSubstValues(substs,head(0),true),m);
+    head = atermpp::aterm_appl(afunRe,aterm_deprecated::gsSubstValues(substs,head(0),true),m);
   }
 
   return push_front<aterm>(subst_var(l,old,new_val,num,substs), head);
@@ -588,7 +588,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       aterm_list e = aterm_cast<aterm_list>(pars.Slist.front());
 
-      e = subst_var(e,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(e.front())(0)), v,aterm_int(k),ATmakeList1(gsMakeSubst(aterm_cast<aterm_appl>(e.front())(0),v)));
+      e = subst_var(e,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(e.front())(0)), v,aterm_int(k),make_list<aterm>(aterm_deprecated::gsMakeSubst(aterm_cast<aterm_appl>(e.front())(0),v)));
 
       l = push_front<aterm>(l,e.front());
       m = push_front<aterm>(m,e.tail());
@@ -910,7 +910,7 @@ static aterm_list get_vars(const aterm &a)
   }
   else if (a.type() == AT_APPL && gsIsDataVarId((aterm_appl) a))
   {
-    return ATmakeList1(a);
+    return make_list<aterm>(a);
   }
   else if (a.type()==AT_LIST)
   {
@@ -939,7 +939,7 @@ static aterm_list dep_vars(const data_equation &eqn)
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
 
   aterm_appl pars = toInner(eqn.lhs(),true); // pars is actually the lhs of the equation.
-  aterm_list vars = ATmakeList1( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
+  aterm_list vars = make_list<aterm>( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
                                ); // List of variables occurring in each argument of the lhs
                                    // (except the first element which contains variables from the
                                    // condition and variables which occur more than once in the result)
@@ -1083,7 +1083,7 @@ static aterm_list create_strategy(
     }
 
     aterm_appl pars = toInner(it->lhs(),true);  // the lhs, pars is an odd name.
-    aterm_list vars = ATmakeList1( get_doubles(it->rhs())+ get_vars(it->condition())
+    aterm_list vars = make_list<aterm>( get_doubles(it->rhs())+ get_vars(it->condition())
                                  ); // List of variables occurring in each argument of the lhs
                                      // (except the first element which contains variables from the
                                      // condition and variables which occur more than once in the result)
@@ -1161,7 +1161,7 @@ static aterm_list create_strategy(
     deps = reverse(deps);
 
     // Add rule with its dependencies
-    dep_list = push_front<aterm>(dep_list, ATmakeList2( deps, (aterm_appl)*it));
+    dep_list = push_front<aterm>(dep_list, make_list<aterm>( deps, (aterm_appl)*it));
   }
 
   // Process all rules with their dependencies
@@ -1491,14 +1491,14 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                  The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
                  which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
                  to recalculate the normal form. TODO: this needs to be reconstructed. */
-              /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((ATermInt) ((aterm_list) t).front()).value()
+              /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((aterm_int) ((aterm_list) t).front()).value()
                                + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ")"; */
               ss << "atermpp::aterm((atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(OpId2Int(f).value()) << ")";
             /* }
             else
             {
               / * See the remark above. * /
-              / * ss << "(aterm_appl) " << (void*) get_int2aterm_value(((ATermInt) ((aterm_list) t).front()).value()
+              / * ss << "(aterm_appl) " << (void*) get_int2aterm_value(((aterm_int) ((aterm_list) t).front()).value()
                                  + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ""; * /
               ss << "(aterm_appl)(atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(OpId2Int(f)).value()) << "";
             } */
@@ -1507,7 +1507,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           else
           {
             // QUE?! Dit stond er vroeger // Sjoerd
-            //   ss << (((ATermInt) ((aterm_list) t).front()).value()+((1 << arity)-arity-1)+args_nfs);
+            //   ss << (((aterm_int) ((aterm_list) t).front()).value()+((1 << arity)-arity-1)+args_nfs);
             ss << (static_cast<aterm_int>(((aterm_list) t).front()).value()+((1 << arity)-arity-1)+args_nfs.getraw(0));
           }
         }
@@ -1873,7 +1873,7 @@ static aterm add_args(aterm a, size_t num)
     }
     else
     {
-      l = ATmakeList1(a);
+      l = make_list<aterm>(a);
     }
 
     while (num > 0)

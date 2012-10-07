@@ -83,7 +83,7 @@
 
   struct ltsTransition
   {
-    aterm_deprecated::ATerm fromState,    /* label of source state */
+    atermpp::aterm fromState,    /* label of source state */
           toState,      /* label of destination state */
           label,        /* label of transition */
           parameters;   /* parameters of the transition */

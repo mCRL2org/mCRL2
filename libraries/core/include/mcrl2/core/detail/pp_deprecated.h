@@ -40,7 +40,7 @@ namespace mcrl2 {
 
 namespace core {
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 /// \brief t_pp_format represents the available pretty print formats
 typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
@@ -49,50 +49,85 @@ namespace detail
 {
 
 /**
- *  * \brief Gets an ATermAppl at a specified position in a list
+ *  * \brief Gets an aterm_appl at a specified position in a list
  *   **/
-inline const ATermAppl &ATAelementAt(const ATermList &List, const size_t Index)
+inline const aterm_appl &ATAelementAt(const aterm_list &List, const size_t Index)
 {
-  return aterm_cast<const ATermAppl>(element_at(List, Index));
+  return aterm_cast<const aterm_appl>(element_at(List, Index));
 }
 
 /**
- *  * \brief Gets the argument as ATermAppl at the specified position
+ *  * \brief Gets the argument as aterm_appl at the specified position
  *   **/
-inline const ATermAppl &ATAgetArgument(const ATermAppl &Appl, const size_t Nr)
+inline const aterm_appl &ATAgetArgument(const aterm_appl &Appl, const size_t Nr)
 {
-  const ATerm &Result = Appl(Nr);
+  const aterm &Result = Appl(Nr);
   // assert(ATisApplOrNull(Result));
-  return aterm_cast<const ATermAppl>(Result);
+  return aterm_cast<const aterm_appl>(Result);
 }  
   
 /* 
-   \brief Gets the argument as ATermList at the specified position
+   \brief Gets the argument as aterm_list at the specified position
 */
-inline const ATermList &ATLgetArgument(const ATermAppl &Appl, const size_t Nr)
+inline const aterm_list &ATLgetArgument(const aterm_appl &Appl, const size_t Nr)
 {
-  const ATerm &Result = Appl(Nr);
+  const aterm &Result = Appl(Nr);
   // assert(ATisListOrNull(Result));
-  return aterm_cast<const ATermList>(Result);
+  return aterm_cast<const aterm_list>(Result);
 }
 
 /**
- *  * \brief Gets the first argument as ATermAppl
+ *  * \brief Gets the first argument as aterm_appl
  *   **/
-inline const ATermAppl &ATAgetFirst(const ATermList &List)
+inline const aterm_appl &ATAgetFirst(const aterm_list &List)
 {
-  const ATerm &Result = List.front();
-  return aterm_cast<const ATermAppl>(Result);
+  const aterm &Result = List.front();
+  return aterm_cast<const aterm_appl>(Result);
 }
 
 /**
- * \brief Gets the first argument as ATermList
+ * \brief Gets the first argument as aterm_list
  **/
-inline const ATermList &ATLgetFirst(const ATermList &List)
+inline const aterm_list &ATLgetFirst(const aterm_list &List)
 {
-  const ATerm &Result = List.front();
-  return aterm_cast<const ATermList>(Result);
+  const aterm &Result = List.front();
+  return aterm_cast<const aterm_list>(Result);
 }
+
+inline
+aterm_list ATgetSlice(const aterm_list &list_in, const size_t start, const size_t end)
+{
+  size_t i, size;
+  aterm_list result;
+  std::vector<aterm> buffer(end<=start?0:end-start);
+
+  if (end<=start)
+  {
+    return result;
+  }
+
+  size = end-start;
+
+  aterm_list list=list_in;
+  for (i=0; i<start; i++)
+  {
+    list = list.tail();
+  }
+
+  for (i=0; i<size; i++)
+  {
+    buffer[i] = list.front();
+    list = list.tail();
+  }
+
+  for (i=size; i>0; i--)
+  {
+    result = push_front(result, aterm(buffer[i-1]));
+  }
+
+  return result;
+}
+
 
 /// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
@@ -104,7 +139,7 @@ inline data::data_expression bool_to_numeric(data::data_expression const& e, dat
 }
 
 static inline
-ATermAppl gsMakeEmptyDataSpec()
+aterm_appl gsMakeEmptyDataSpec()
 {
   return gsMakeDataSpec(
            gsMakeSortSpec(aterm_list()),
@@ -119,18 +154,18 @@ ATermAppl gsMakeEmptyDataSpec()
 
 //The internal format mentioned below can be found in specs/mcrl2.internal.txt
 
-static void PrintPart__CXX(std::ostream& OutStream, const ATerm Part,
+static void PrintPart__CXX(std::ostream& OutStream, const aterm Part,
                                    t_pp_format pp_format);
 /*Pre: OutStream points to a stream to which can be written
-       Part is an ATerm containing a part of the internal format
+       Part is an aterm containing a part of the internal format
   Post:A textual representation of Part is written to OutStream, using method
        pp_format
 */
 
 static void PrintPart_Appl(std::ostream& OutStream,
-                                       const ATermAppl Part, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                       const aterm_appl Part, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       Part is an ATermAppl containing a part of the internal format
+       Part is an aterm_appl containing a part of the internal format
        pp_format != ppInternal
        ShowSorts indicates if sorts should be shown for the part
        PrecLevel indicates the precedence level of the context of the part
@@ -144,10 +179,10 @@ static void PrintPart_Appl(std::ostream& OutStream,
 */
 
 static void PrintPart_List(std::ostream& OutStream,
-                                       const ATermList Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
+                                       const aterm_list Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
                                        const char* Terminator, const char* Separator);
 /*Pre: OutStream points to a stream to which can be written
-       Parts is an ATermList containing parts of the internal format
+       Parts is an aterm_list containing parts of the internal format
        pp_format != ppInternal
        ShowSorts indicates if sorts should be shown for the part
        PrecLevel indicates the precedence level of the context of the parts
@@ -160,7 +195,7 @@ static void PrintPart_List(std::ostream& OutStream,
 */
 
 static void PrintPart_BagEnum(std::ostream& OutStream,
-    const ATermList Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
+    const aterm_list Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
     const char* Terminator, const char* Separator);
 /*Pre: OutStream points to a stream to which can be written
        Parts is a Bag Enumeration containing parts of the internal format
@@ -177,9 +212,9 @@ static void PrintPart_BagEnum(std::ostream& OutStream,
 
 
 static void PrintEqns(std::ostream& OutStream,
-                                  const ATermList Eqns, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                  const aterm_list Eqns, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       Eqns is an ATermList containing data or rename equations in the
+       Eqns is an aterm_list containing data or rename equations in the
        internal format
        pp_format != ppInternal
        ShowSorts indicates if sorts should be shown for each equation
@@ -193,9 +228,9 @@ static void PrintEqns(std::ostream& OutStream,
 */
 
 static void PrintDecls(std::ostream& OutStream,
-                                   const ATermList Decls, t_pp_format pp_format,
+                                   const aterm_list Decls, t_pp_format pp_format,
                                    const char* Terminator, const char* Separator);
-/*Pre: Decls is an ATermList containing action, operation, or variable
+/*Pre: Decls is an aterm_list containing action, operation, or variable
        declarations from the internal format
        pp_format != ppInternal
   Ret: A textual representation of the declarations is written to OutStream,
@@ -209,8 +244,8 @@ static void PrintDecls(std::ostream& OutStream,
 */
 
 static void PrintDecl(std::ostream& OutStream,
-                                  const ATermAppl Decl, t_pp_format pp_format, const bool ShowSorts);
-/*Pre: Decl is an ATermAppl that represents an action, operation, or variable
+                                  const aterm_appl Decl, t_pp_format pp_format, const bool ShowSorts);
+/*Pre: Decl is an aterm_appl that represents an action, operation, or variable
        declaration from the internal format
        pp_format != ppInternal
        ShowSorts indicates if the sort of the declaration should be shown
@@ -221,7 +256,7 @@ static void PrintDecl(std::ostream& OutStream,
 */
 
 static void PrintSortExpr(std::ostream& OutStream,
-                                      const ATermAppl SortExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                      const aterm_appl SortExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        SortExprOrUnknown is a sort expression or unknown
        pp_format != ppInternal
@@ -237,7 +272,7 @@ static void PrintSortExpr(std::ostream& OutStream,
 */
 
 static void PrintDataExpr(std::ostream& OutStream,
-                                      const ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                      const aterm_appl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        DataExpr is a data expression
        pp_format != ppInternal
@@ -253,7 +288,7 @@ static void PrintDataExpr(std::ostream& OutStream,
 */
 
 static void PrintProcExpr(std::ostream& OutStream,
-                                      const ATermAppl ProcExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                      const aterm_appl ProcExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        ProcExpr is a process expression
        pp_format != ppInternal
@@ -269,7 +304,7 @@ static void PrintProcExpr(std::ostream& OutStream,
 */
 
 static void PrintStateFrm(std::ostream& OutStream,
-                                      const ATermAppl StateFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                      const aterm_appl StateFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        StateFrm is a state formula
        pp_format != ppInternal
@@ -285,7 +320,7 @@ static void PrintStateFrm(std::ostream& OutStream,
 */
 
 static void PrintRegFrm(std::ostream& OutStream,
-                                    const ATermAppl RegFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                    const aterm_appl RegFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        RegFrm is a regular formula
        pp_format != ppInternal
@@ -301,7 +336,7 @@ static void PrintRegFrm(std::ostream& OutStream,
 */
 
 static void PrintActFrm(std::ostream& OutStream,
-                                    const ATermAppl ActFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                    const aterm_appl ActFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        ActFrm is an action formula
        pp_format != ppInternal
@@ -317,7 +352,7 @@ static void PrintActFrm(std::ostream& OutStream,
 */
 
 static void PrintPBExpr(std::ostream& OutStream,
-                                    const ATermAppl StateFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+                                    const aterm_appl StateFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        PBExpr is a parameterised boolean expression
        pp_format != ppInternal
@@ -333,7 +368,7 @@ static void PrintPBExpr(std::ostream& OutStream,
 */
 
 static void PrintLinearProcessSummand(std::ostream& OutStream,
-    const ATermAppl LinearProcessSummand, t_pp_format pp_format, bool ShowSorts);
+    const aterm_appl LinearProcessSummand, t_pp_format pp_format, bool ShowSorts);
 /*Pre: OutStream points to a stream to which can be written
        LinearProcessSummand is a linear process summand
        pp_format != ppInternal
@@ -342,84 +377,84 @@ static void PrintLinearProcessSummand(std::ostream& OutStream,
        which ShowSorts is taken into account
 */
 
-static void IndentedATerm(std::ostream& OutStream, const ATerm Term, size_t Nesting = 0);
-//Pre:  Term is an ATerm containing applications and lists only
+static void IndentedATerm(std::ostream& OutStream, const aterm Term, size_t Nesting = 0);
+//Pre:  Term is an aterm containing applications and lists only
 //      Nesting indicates the nesting depth of Term in its context
-//Post: A string representation of the ATerm is written to OutStream,
-//      such that each element part of the ATerm is indented by Nesting + its nesting depth
+//Post: A string representation of the aterm is written to OutStream,
+//      such that each element part of the aterm is indented by Nesting + its nesting depth
 
-static void PrintAFun(std::ostream& OutStream, const AFun Fun);
+static void PrintAFun(std::ostream& OutStream, const function_symbol Fun);
 //Post: The string representation Fun is written to OutStream
 
-static ATermList GetAssignmentsRHS(ATermList Assignments);
+static aterm_list GetAssignmentsRHS(aterm_list Assignments);
 /*Pre: Assignments is a list of assignments of data expressions to data
        variables
   Ret: The right-hand sides the assignments
 */
 
-static ATermList gsGroupDeclsBySort(ATermList Decls);
-/*Pre: Decls is an ATermList containing declarations of the form
+static aterm_list gsGroupDeclsBySort(aterm_list Decls);
+/*Pre: Decls is an aterm_list containing declarations of the form
        Decl(Name, Sort) from the internal format
   Ret: a list containing the declarations from Decls, where declarations of the
        same sort are placed in sequence
 */
 
 static bool gsHasConsistentContext(const table &DataVarDecls,
-                                   const ATermAppl Part);
+                                   const aterm_appl Part);
 /*Pre: DataVarDecls represents the variables from an equation section, where
        the keys are the variable names and the values are the corresponding
        variables
-       Part is an ATermAppl containing an equation of the internal format,
+       Part is an aterm_appl containing an equation of the internal format,
        or the elements it consists of
   Ret: all operations occurring in Part are consistent with the variables from
        the context
  */
 
 static bool gsHasConsistentContextList(const table &DataVarDecls,
-                                       const ATermList Parts);
+                                       const aterm_list Parts);
 /*Pre: DataVarDecls represents the variables from an equation section, where
        the keys are the variable names and the values are the
        corresponding variables
-       Parts is an ATermList containing elements of an equation of the internal
+       Parts is an aterm_list containing elements of an equation of the internal
        format
   Ret: all operations occurring in Parts are consistent with the variables from
        the context
  */
 
-static bool gsIsOpIdNumericUpCast(ATermAppl DataExpr);
+static bool gsIsOpIdNumericUpCast(aterm_appl DataExpr);
 //Ret: DataExpr is an operation identifier for a numeric upcast
 
-static bool gsIsIdListEnum(ATermAppl DataExpr);
+static bool gsIsIdListEnum(aterm_appl DataExpr);
 //Ret: DataExpr is a list enumeration identifier
 
-static bool gsIsIdSetEnum(ATermAppl DataExpr);
+static bool gsIsIdSetEnum(aterm_appl DataExpr);
 //Ret: DataExpr is a set enumeration identifier
 
-static bool gsIsIdBagEnum(ATermAppl DataExpr);
+static bool gsIsIdBagEnum(aterm_appl DataExpr);
 //Ret: DataExpr is a bag enumeration identifier
 
-static bool gsIsIdFuncUpdate(ATermAppl DataExpr);
+static bool gsIsIdFuncUpdate(aterm_appl DataExpr);
 //Ret: DataExpr is a function update identifier
 
-static bool gsIsIdPrefix(ATermAppl DataExpr, size_t ArgsLength);
+static bool gsIsIdPrefix(aterm_appl DataExpr, size_t ArgsLength);
 //Ret: DataExpr is a prefix identifier and ArgsLength == 1
 
-static bool gsIsIdInfix(ATermAppl DataExpr, size_t ArgsLength);
+static bool gsIsIdInfix(aterm_appl DataExpr, size_t ArgsLength);
 //Ret: DataExpr is an infix identifier and ArgsLength == 2
 
 static int gsPrecIdPrefix();
 //Ret: Precedence of prefix operators
 //     (higher than all infix operators and arguments thereof)
 
-static int gsPrecIdInfix(ATermAppl IdName);
+static int gsPrecIdInfix(aterm_appl IdName);
 //Pre: IdName is the name of an infix identifier
 //Ret: Precedence of the operation itself
 
-static int gsPrecIdInfixLeft(ATermAppl IdName);
+static int gsPrecIdInfixLeft(aterm_appl IdName);
 //Pre: IdInfix is the name of an infix identifier
 //Ret: Precedence of the left argument of the operation
 
-static int gsPrecIdInfixRight(ATermAppl IdName);
+static int gsPrecIdInfixRight(aterm_appl IdName);
 //Pre: IdInfix is the name of an infix identifier
 //Ret: Precedence of the right argument of the operation
 
@@ -436,19 +471,19 @@ inline static void dbg_prints(const char* Value)
   mCRL2log(log::debug2, "pretty printer") << Value << std::endl;
 }
 
-static void PrintAFun(std::ostream& OutStream, const AFun fun)
+static void PrintAFun(std::ostream& OutStream, const function_symbol fun)
 {
   OutStream <<  "\"" << fun.name() << "\"";
 }
 
-static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nesting)
+static void IndentedATerm(std::ostream& OutStream, const aterm term, size_t nesting)
 {
   std::string prefix(2*nesting, ' ');
   if (term.type() == AT_APPL)
   {
     OutStream <<  prefix.c_str();
-    ATermAppl appl = (ATermAppl) term;
-    AFun fun = appl.function();
+    aterm_appl appl = (aterm_appl) term;
+    function_symbol fun = appl.function();
     PrintAFun(OutStream, fun);
     size_t arity = fun.arity();
     if (arity > 0)
@@ -470,14 +505,14 @@ static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nest
   else if (term.type() == AT_LIST)
   {
     OutStream <<  prefix;
-    if (((ATermList) term).empty())
+    if (((aterm_list) term).empty())
     {
       OutStream <<  "[]";
     }
     else
     {
       OutStream <<  "[\n";
-      for (ATermList l = (ATermList) term; !l.empty(); l = l.tail())
+      for (aterm_list l = (aterm_list) term; !l.empty(); l = l.tail())
       {
         IndentedATerm(OutStream, l.front(), nesting+1);
         if (!l.tail().empty())
@@ -492,11 +527,11 @@ static void IndentedATerm(std::ostream& OutStream, const ATerm term, size_t nest
   }
   else
   {
-    OutStream <<  "ERROR: term is not an ATermAppl or ATermList";
+    OutStream <<  "ERROR: term is not an aterm_appl or aterm_list";
   }
 }
 
-void PrintPart__CXX(std::ostream& OutStream, const ATerm Part,
+void PrintPart__CXX(std::ostream& OutStream, const aterm Part,
                             t_pp_format pp_format)
 {
   if (pp_format == ppInternal)
@@ -511,26 +546,26 @@ void PrintPart__CXX(std::ostream& OutStream, const ATerm Part,
   {
     if (Part.type() == AT_APPL)
     {
-      PrintPart_Appl(OutStream, (ATermAppl) Part, pp_format,
+      PrintPart_Appl(OutStream, (aterm_appl) Part, pp_format,
                                  false, 0);
     }
     else if (Part.type() == AT_LIST)
     {
       OutStream <<  "[";
-      PrintPart_List(OutStream, (ATermList) Part,
+      PrintPart_List(OutStream, (aterm_list) Part,
                                  pp_format, false, 0, "", ", ");
       OutStream <<  "]";
     }
     else
     {
-      mCRL2log(log::error)  << "ATerm Part is not an ATermAppl or an ATermList" << std::endl;
+      mCRL2log(log::error)  << "aterm Part is not an aterm_appl or an aterm_list" << std::endl;
       assert(false);
     }
   }
 }
 
 void PrintPart_Appl(std::ostream& OutStream,
-                                const ATermAppl Part, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                                const aterm_appl Part, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   if (gsIsSortExpr(Part))
   {
@@ -544,7 +579,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing structured sort constructor" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermList StructProjs = ATLgetArgument(Part, 1);
+    aterm_list StructProjs = ATLgetArgument(Part, 1);
     if (StructProjs.size() > 0)
     {
       OutStream <<  "(";
@@ -552,7 +587,7 @@ void PrintPart_Appl(std::ostream& OutStream,
                                  pp_format, ShowSorts, PrecLevel, NULL, ", ");
       OutStream <<  ")";
     }
-    ATermAppl Recogniser = ATAgetArgument(Part, 2);
+    aterm_appl Recogniser = ATAgetArgument(Part, 2);
     if (!gsIsNil(Recogniser))
     {
       OutStream <<  "?";
@@ -564,7 +599,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print structured sort projection
     mCRL2log(log::debug2, "pretty printer") << "printing structured sort projection" << std::endl;
-    ATermAppl Projection = ATAgetArgument(Part, 0);
+    aterm_appl Projection = ATAgetArgument(Part, 0);
     if (!gsIsNil(Projection))
     {
       PrintPart_Appl(OutStream, Projection,
@@ -601,7 +636,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print multiaction
     mCRL2log(log::debug2, "pretty printer") << "printing multiaction" << std::endl;
-    ATermList Actions = ATLgetArgument(Part, 0);
+    aterm_list Actions = ATLgetArgument(Part, 0);
     size_t ActionsLength = Actions.size();
     if (ActionsLength == 0)
     {
@@ -630,7 +665,7 @@ void PrintPart_Appl(std::ostream& OutStream,
                                pp_format, ShowSorts, PrecLevel);
     if (ShowSorts)
     {
-      ATermList SortExprs = ATLgetArgument(Part, 1);
+      aterm_list SortExprs = ATLgetArgument(Part, 1);
       if (SortExprs.size() > 0)
       {
         OutStream <<  ": ";
@@ -653,7 +688,7 @@ void PrintPart_Appl(std::ostream& OutStream,
                                pp_format, ShowSorts, PrecLevel);
     if (ShowSorts)
     {
-      ATermList SortExprs = ATLgetArgument(Part, 1);
+      aterm_list SortExprs = ATLgetArgument(Part, 1);
       if (SortExprs.size() > 0)
       {
         OutStream <<  ": ";
@@ -685,7 +720,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing communication expression" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermAppl CommResult = ATAgetArgument(Part, 1);
+    aterm_appl CommResult = ATAgetArgument(Part, 1);
     if (!gsIsNil(CommResult))
     {
       OutStream <<  " -> ";
@@ -697,15 +732,15 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print process specification or LPS
     mCRL2log(log::debug2, "pretty printer") << "printing process specification or LPS" << std::endl;
-    ATermAppl DataSpec = ATAgetArgument(Part, 0);
+    aterm_appl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
-    ATermAppl ActSpec = ATAgetArgument(Part, 1);
+    aterm_appl ActSpec = ATAgetArgument(Part, 1);
     bool ActSpecEmpty = (ATLgetArgument(ActSpec, 0)).empty();
-    ATermAppl GlobVarSpec = ATAgetArgument(Part, 2);
+    aterm_appl GlobVarSpec = ATAgetArgument(Part, 2);
     bool GlobVarSpecEmpty = (ATLgetArgument(GlobVarSpec, 0)).empty();
-    ATermAppl ProcEqnSpec = ATAgetArgument(Part, 3);
+    aterm_appl ProcEqnSpec = ATAgetArgument(Part, 3);
     bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?(bool)(ATLgetArgument(ProcEqnSpec, 0)).empty():false;
-    ATermAppl ProcInit = ATAgetArgument(Part, 4);
+    aterm_appl ProcInit = ATAgetArgument(Part, 4);
     PrintPart_Appl(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!ActSpecEmpty && !DataSpecEmpty)
     {
@@ -732,13 +767,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print data specification
     mCRL2log(log::debug2, "pretty printer") << "printing data specification" << std::endl;
-    ATermAppl SortSpec = ATAgetArgument(Part, 0);
+    aterm_appl SortSpec = ATAgetArgument(Part, 0);
     bool SortSpecEmpty = (ATLgetArgument(SortSpec, 0)).empty();
-    ATermAppl ConsSpec = ATAgetArgument(Part, 1);
+    aterm_appl ConsSpec = ATAgetArgument(Part, 1);
     bool ConsSpecEmpty = (ATLgetArgument(ConsSpec, 0)).empty();
-    ATermAppl MapSpec = ATAgetArgument(Part, 2);
+    aterm_appl MapSpec = ATAgetArgument(Part, 2);
     bool MapSpecEmpty = (ATLgetArgument(MapSpec, 0)).empty();
-    ATermAppl DataEqnSpec = ATAgetArgument(Part, 3);
+    aterm_appl DataEqnSpec = ATAgetArgument(Part, 3);
     bool DataEqnSpecEmpty = (ATLgetArgument(DataEqnSpec, 0)).empty();
     PrintPart_Appl(OutStream, SortSpec, pp_format, ShowSorts, PrecLevel);
     if (!ConsSpecEmpty && !SortSpecEmpty)
@@ -761,7 +796,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print sort specification
     mCRL2log(log::debug2, "pretty printer") << "printing sort specification" << std::endl;
-    ATermList SortDecls = ATLgetArgument(Part, 0);
+    aterm_list SortDecls = ATLgetArgument(Part, 0);
     if (SortDecls.size() > 0)
     {
       OutStream <<  "sort ";
@@ -773,7 +808,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print operation specification
     mCRL2log(log::debug2, "pretty printer") << "printing operation specification" << std::endl;
-    ATermList OpIds = ATLgetArgument(Part, 0);
+    aterm_list OpIds = ATLgetArgument(Part, 0);
     if (OpIds.size() > 0)
     {
       OutStream <<  (gsIsConsSpec(Part)?"cons ":"map  ");
@@ -791,7 +826,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print action specification
     mCRL2log(log::debug2, "pretty printer") << "printing action specification" << std::endl;
-    ATermList ActIds = ATLgetArgument(Part, 0);
+    aterm_list ActIds = ATLgetArgument(Part, 0);
     if (ActIds.size() > 0)
     {
       OutStream <<  "act  ";
@@ -812,7 +847,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print data equation (without variables)
     mCRL2log(log::debug2, "pretty printer") << "printing data equation" << std::endl;
-    ATermAppl Condition = ATAgetArgument(Part, 1);
+    aterm_appl Condition = ATAgetArgument(Part, 1);
     if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
     {
       PrintPart_Appl(OutStream, Condition,
@@ -829,7 +864,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print global variable specification
     mCRL2log(log::debug2, "pretty printer") << "printing global variable specification" << std::endl;
-    ATermList Vars = ATLgetArgument(Part, 0);
+    aterm_list Vars = ATLgetArgument(Part, 0);
     if (Vars.size() > 0)
     {
       OutStream <<  "glob ";
@@ -841,7 +876,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print process equation specification
     mCRL2log(log::debug2, "pretty printer") << "printing process equation specification" << std::endl;
-    ATermList ProcEqns = ATLgetArgument(Part, 0);
+    aterm_list ProcEqns = ATLgetArgument(Part, 0);
     if (ProcEqns.size() > 0)
     {
       OutStream <<  "proc ";
@@ -854,7 +889,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print linear process
     mCRL2log(log::debug2, "pretty printer") << "printing linear process" << std::endl;
     //print process name and variable declarations
-    ATermList VarDecls = ATLgetArgument(Part, 0);
+    aterm_list VarDecls = ATLgetArgument(Part, 0);
     size_t VarDeclsLength = VarDecls.size();
     OutStream <<  "proc P";
     if (VarDeclsLength > 0)
@@ -865,7 +900,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     }
     OutStream <<  " =";
     //print summations
-    ATermList Summands = ATLgetArgument(Part, 1);
+    aterm_list Summands = ATLgetArgument(Part, 1);
     size_t SummandsLength = Summands.size();
     if (SummandsLength == 0)
     {
@@ -875,7 +910,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     {
       //SummandsLength > 0
       OutStream <<  "\n       ";
-      ATermList l = Summands;
+      aterm_list l = Summands;
       while (!l.empty())
       {
         if (l!=Summands)
@@ -895,7 +930,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing process equation" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermList DataVarIds = ATLgetArgument(Part, 1);
+    aterm_list DataVarIds = ATLgetArgument(Part, 1);
     if (DataVarIds.size() > 0)
     {
       OutStream <<  "(";
@@ -925,7 +960,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print linear process initialisation
     mCRL2log(log::debug2, "pretty printer") << "printing LPS initialisation" << std::endl;
     OutStream <<  "init P";
-    ATermList Args = ATLgetArgument(Part, 0);
+    aterm_list Args = ATLgetArgument(Part, 0);
     if (Args.size() > 0)
     {
       OutStream <<  "(";
@@ -965,13 +1000,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print PBES specification
     mCRL2log(log::debug2, "pretty printer") << "printing PBES specification" << std::endl;
-    ATermAppl DataSpec = ATAgetArgument(Part, 0);
+    aterm_appl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
-    ATermAppl GlobVarSpec = ATAgetArgument(Part, 1);
+    aterm_appl GlobVarSpec = ATAgetArgument(Part, 1);
     bool GlobVarSpecEmpty = (ATLgetArgument(GlobVarSpec, 0)).empty();
-    ATermAppl PBEqnSpec = ATAgetArgument(Part, 2);
+    aterm_appl PBEqnSpec = ATAgetArgument(Part, 2);
     bool PBEqnSpecEmpty = (ATLgetArgument(PBEqnSpec, 0)).empty();
-    ATermAppl PBInit = ATAgetArgument(Part, 3);
+    aterm_appl PBInit = ATAgetArgument(Part, 3);
     PrintPart_Appl(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!GlobVarSpecEmpty && !DataSpecEmpty)
     {
@@ -993,7 +1028,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print parameterised boolean equation specification
     mCRL2log(log::debug2, "pretty printer") << "printing parameterised boolean equation specification" << std::endl;
-    ATermList PBEqns = ATLgetArgument(Part, 0);
+    aterm_list PBEqns = ATLgetArgument(Part, 0);
     if (PBEqns.size() > 0)
     {
       OutStream <<  "pbes ";
@@ -1042,7 +1077,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing propositional variable declaration" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermList DataVarIds = ATLgetArgument(Part, 1);
+    aterm_list DataVarIds = ATLgetArgument(Part, 1);
     if (DataVarIds.size() > 0)
     {
       OutStream <<  "(";
@@ -1060,11 +1095,11 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print action rename specification
     mCRL2log(log::debug2, "pretty printer") << "printing action rename specification" << std::endl;
-    ATermAppl DataSpec = ATAgetArgument(Part, 0);
+    aterm_appl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = DataSpec==gsMakeEmptyDataSpec();
-    ATermAppl ActSpec = ATAgetArgument(Part, 1);
+    aterm_appl ActSpec = ATAgetArgument(Part, 1);
     bool ActSpecEmpty = (ATLgetArgument(ActSpec, 0)).empty();
-    ATermAppl ActionRenameRules = ATAgetArgument(Part, 2);
+    aterm_appl ActionRenameRules = ATAgetArgument(Part, 2);
     bool ActionRenameRulesEmpty = (ATLgetArgument(ActionRenameRules, 0)).empty();
     PrintPart_Appl(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!ActSpecEmpty && !DataSpecEmpty)
@@ -1082,7 +1117,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     //print action rename rule (without variables)
     mCRL2log(log::debug2, "pretty printer") << "printing action rename rule" << std::endl;
-    ATermAppl Condition = ATAgetArgument(Part, 1);
+    aterm_appl Condition = ATAgetArgument(Part, 1);
     if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
     {
       PrintPart_Appl(OutStream, Condition,
@@ -1118,10 +1153,10 @@ void PrintPart_Appl(std::ostream& OutStream,
 }
 
 void PrintPart_List(std::ostream& OutStream,
-                                const ATermList Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
+                                const aterm_list Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
                                 const char* Terminator, const char* Separator)
 {
-  ATermList l = Parts;
+  aterm_list l = Parts;
   while (!l.empty())
   {
     if (l!=Parts && Separator != NULL)
@@ -1139,10 +1174,10 @@ void PrintPart_List(std::ostream& OutStream,
 }
 
 void PrintPart_BagEnum(std::ostream& OutStream,
-                                   const ATermList Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
+                                   const aterm_list Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
                                    const char* Terminator, const char* Separator)
 {
-  ATermList l = Parts;
+  aterm_list l = Parts;
   while (!l.empty())
   {
     if (l!=Parts && Separator != NULL)
@@ -1163,16 +1198,16 @@ void PrintPart_BagEnum(std::ostream& OutStream,
   }
 }
 
-void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
+void PrintEqns(std::ostream& OutStream, const aterm_list Eqns,
                            t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   if (pp_format == ppDebug)
   {
-    ATermList l = Eqns;
+    aterm_list l = Eqns;
     while (!l.empty())
     {
-      ATermAppl Eqn = ATAgetFirst(l);
-      ATermList DataDecls = ATLgetArgument(Eqn, 0);
+      aterm_appl Eqn = ATAgetFirst(l);
+      aterm_list DataDecls = ATLgetArgument(Eqn, 0);
       if (!DataDecls.empty())
       {
         OutStream <<  "var  ";
@@ -1221,18 +1256,18 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
         //StartPrefix up to i.
         //Check consistency of Eqns(i) with VarDeclTable and add newly declared
         //variables to VarDeclTable.
-        ATermAppl Eqn = ATAelementAt(Eqns, i);
+        aterm_appl Eqn = ATAelementAt(Eqns, i);
         bool Consistent = gsHasConsistentContext(VarDeclTable, Eqn);
         if (Consistent)
         {
           //add new variables from Eqns(i) to VarDeclTable
-          ATermList VarDecls = ATLgetArgument(Eqn, 0);
+          aterm_list VarDecls = ATLgetArgument(Eqn, 0);
           size_t VarDeclsLength = VarDecls.size();
           for (size_t j = 0; j < VarDeclsLength; j++)
           {
-            ATermAppl VarDecl = ATAelementAt(VarDecls, j);
-            ATermAppl VarDeclName = ATAgetArgument(VarDecl, 0);
-            if (VarDeclTable.get(VarDeclName) == ATerm())
+            aterm_appl VarDecl = ATAelementAt(VarDecls, j);
+            aterm_appl VarDeclName = ATAgetArgument(VarDecl, 0);
+            if (VarDeclTable.get(VarDeclName) == aterm())
             {
               VarDeclTable.put(VarDeclName, VarDecl);
             }
@@ -1245,7 +1280,7 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
           //declarations of Eqns starting at StartPrefix. Print this prefixa and
           //the corresponding equations,and if necessary, update StartPrefix and
           //reset VarDeclTable.
-          ATermList VarDecls = VarDeclTable.values();
+          aterm_list VarDecls = VarDeclTable.values();
           if (VarDecls.size() > 0)
           {
             OutStream <<  "var  ";
@@ -1279,13 +1314,13 @@ void PrintEqns(std::ostream& OutStream, const ATermList Eqns,
   }
 }
 
-void PrintDecls(std::ostream& OutStream, const ATermList Decls,
+void PrintDecls(std::ostream& OutStream, const aterm_list Decls,
                             t_pp_format pp_format, const char* Terminator, const char* Separator)
 {
   if (!Decls.empty())
   {
-    ATermAppl Decl = ATAgetFirst(Decls);
-    ATermList NextDecls = Decls.tail();
+    aterm_appl Decl = ATAgetFirst(Decls);
+    aterm_list NextDecls = Decls.tail();
     while (!NextDecls.empty())
     {
       if (Decl(1)==ATAgetFirst(NextDecls)(1))
@@ -1316,7 +1351,7 @@ void PrintDecls(std::ostream& OutStream, const ATermList Decls,
   }
 }
 
-void PrintDecl(std::ostream& OutStream, const ATermAppl Decl,
+void PrintDecl(std::ostream& OutStream, const aterm_appl Decl,
                            t_pp_format pp_format, const bool ShowSorts)
 {
   PrintPart_Appl(OutStream, ATAgetArgument(Decl, 0),
@@ -1325,7 +1360,7 @@ void PrintDecl(std::ostream& OutStream, const ATermAppl Decl,
   {
     if (gsIsActId(Decl))
     {
-      ATermList SortExprs = ATLgetArgument(Decl, 1);
+      aterm_list SortExprs = ATLgetArgument(Decl, 1);
       if (SortExprs.size() > 0)
       {
         OutStream <<  ": ";
@@ -1343,7 +1378,7 @@ void PrintDecl(std::ostream& OutStream, const ATermAppl Decl,
 }
 
 static void PrintSortExpr(std::ostream& OutStream,
-                                      const ATermAppl SortExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                                      const aterm_appl SortExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsSortExpr(SortExpr));
   if (gsIsSortId(SortExpr))
@@ -1450,7 +1485,7 @@ static void PrintSortExpr(std::ostream& OutStream,
 }
 
 static
-ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
+aterm_appl gsGetDataExprHead(aterm_appl DataExpr)
 {
   while (gsIsDataAppl(DataExpr))
   {
@@ -1460,9 +1495,9 @@ ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
 }
 
 static
-ATermList gsGetDataExprArgs(ATermAppl DataExpr)
+aterm_list gsGetDataExprArgs(aterm_appl DataExpr)
 {
-  ATermList l;
+  aterm_list l;
   while (gsIsDataAppl(DataExpr))
   {
     l = ATLgetArgument(DataExpr, 1)+l;
@@ -1472,10 +1507,10 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr)
 }
 
 // Copied from data reconstruction
-static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, std::vector<char>& Mult)
+static aterm_appl reconstruct_pos_mult(const aterm_appl PosExpr, std::vector<char>& Mult)
 {
-  ATermAppl Head = gsGetDataExprHead(PosExpr);
-  ATermList Args = gsGetDataExprArgs(PosExpr);
+  aterm_appl Head = gsGetDataExprHead(PosExpr);
+  aterm_list Args = gsGetDataExprArgs(PosExpr);
   if (data::sort_pos::is_c1_function_symbol(data::data_expression(PosExpr)))
   {
     //PosExpr is 1; return Mult
@@ -1484,8 +1519,8 @@ static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, std::vector<char>
   else if (data::sort_pos::is_cdub_function_symbol(data::data_expression(Head)))
   {
     //PosExpr is of the form cDub(b,p); return (Mult*2)*v(p) + Mult*v(b)
-    ATermAppl BoolArg = ATAelementAt(Args, 0);
-    ATermAppl PosArg = ATAelementAt(Args, 1);
+    aterm_appl BoolArg = ATAelementAt(Args, 0);
+    aterm_appl PosArg = ATAelementAt(Args, 1);
     std::vector<char> DoubleMult=Mult;
     data::detail::decimal_number_multiply_by_two(DoubleMult);
     PosArg = reconstruct_pos_mult(data::data_expression(PosArg), DoubleMult);
@@ -1527,7 +1562,7 @@ static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, std::vector<char>
   }
 }
 
-static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
+static aterm_appl reconstruct_numeric_expression(aterm_appl Part)
 {
   if (data::sort_pos::is_c1_function_symbol(data::data_expression(Part)) || data::sort_pos::is_cdub_application(data::data_expression(Part)))
   {
@@ -1552,12 +1587,12 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
            && (data::sort_pos::is_pos(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
     //    mCRL2log(log::debug) << "Reconstructing implementation of CNat or Pos2Nat (" << atermpp::aterm( Part) << ")" << std::endl;
-    ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+    aterm_appl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_nat::pos2nat(data::data_expression(value));
     if (gsIsOpId(value))
     {
-      ATermAppl name = ATAgetArgument(value, 0);
+      aterm_appl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name)))
       {
         Part = data::function_symbol(atermpp::aterm_string(name), data::sort_nat::nat());
@@ -1577,12 +1612,12 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
            && (data::sort_nat::is_nat(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
     //    mCRL2log(log::debug) << "Reconstructing implementation of CInt or Nat2Int (" << atermpp::aterm( Part) << ")" << std::endl;
-    ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+    aterm_appl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_int::nat2int(data::data_expression(value));
     if (gsIsOpId(value))
     {
-      ATermAppl name = ATAgetArgument(value, 0);
+      aterm_appl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name)))
       {
         Part = data::function_symbol(atermpp::aterm_string(name), data::sort_int::int_());
@@ -1593,12 +1628,12 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
            && (data::sort_int::is_int(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
     //    mCRL2log(log::debug) << "Reconstructing implementation of Int2Real (" << atermpp::aterm( Part) << ")" << std::endl;
-    ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+    aterm_appl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_real::int2real(data::data_expression(value));
     if (gsIsOpId(value))
     {
-      ATermAppl name = ATAgetArgument(value, 0);
+      aterm_appl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name)))
       {
         Part = data::function_symbol(atermpp::aterm_string(name), data::sort_real::real_());
@@ -1608,15 +1643,15 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   else if (data::sort_real::is_creal_application(data::data_expression(Part)))
   {
 //    mCRL2log(log::debug) << "Reconstructing implementation of CReal (" << atermpp::aterm( Part) << ")" << std::endl;
-    ATermList Args = ATLgetArgument(Part, 1);
-    ATermAppl ArgNumerator = reconstruct_numeric_expression(ATAelementAt(Args, 0));
-    ATermAppl ArgDenominator = reconstruct_numeric_expression(ATAelementAt(Args, 1));
-    if (ArgDenominator==static_cast<ATermAppl>(data::function_symbol("1", data::sort_pos::pos())))
+    aterm_list Args = ATLgetArgument(Part, 1);
+    aterm_appl ArgNumerator = reconstruct_numeric_expression(ATAelementAt(Args, 0));
+    aterm_appl ArgDenominator = reconstruct_numeric_expression(ATAelementAt(Args, 1));
+    if (ArgDenominator==static_cast<aterm_appl>(data::function_symbol("1", data::sort_pos::pos())))
     {
       Part = data::sort_real::int2real(data::data_expression(ArgNumerator));
       if (gsIsOpId(ArgNumerator))
       {
-        ATermAppl name = ATAgetArgument(ArgNumerator, 0);
+        aterm_appl name = ATAgetArgument(ArgNumerator, 0);
         if (gsIsNumericString(gsATermAppl2String(name)))
         {
           Part = data::function_symbol(atermpp::aterm_string(name), data::sort_real::real_());
@@ -1629,7 +1664,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
                                       data::sort_int::pos2int(data::data_expression(ArgDenominator)));
       if (gsIsOpId(ArgDenominator))
       {
-        ATermAppl name = ATAgetArgument(ArgDenominator, 0);
+        aterm_appl name = ATAgetArgument(ArgDenominator, 0);
         if (gsIsNumericString(gsATermAppl2String(name)))
         {
           Part = data::sort_real::divides(data::data_expression(ArgNumerator),
@@ -1648,8 +1683,8 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   return Part;
 }
 
-static ATermAppl
-reconstruct_container_expression(ATermAppl Part)
+static aterm_appl
+reconstruct_container_expression(aterm_appl Part)
 {
   using namespace mcrl2::data;
 
@@ -1695,19 +1730,19 @@ reconstruct_container_expression(ATermAppl Part)
     sort_expression element_sort(*function_sort(sort_set::left(expr).sort()).domain().begin());
     if (sort_set::is_false_function_function_symbol(sort_set::left(expr)))
     {
-      Part = reconstruct_container_expression(static_cast<ATermAppl>(sort_set::set_fset(element_sort, sort_set::right(expr))));
+      Part = reconstruct_container_expression(static_cast<aterm_appl>(sort_set::set_fset(element_sort, sort_set::right(expr))));
     }
     else if (sort_set::is_true_function_function_symbol(sort_set::left(expr)))
     {
-      Part = static_cast<ATermAppl>(sort_set::complement(element_sort, sort_set::set_fset(element_sort, sort_set::right(expr))));
+      Part = static_cast<aterm_appl>(sort_set::complement(element_sort, sort_set::set_fset(element_sort, sort_set::right(expr))));
     }
     else
     {
-      ATermAppl se_func = sort_set::left(expr).sort();
-      ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
-      ATermAppl var = gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                      static_cast<ATermAppl>(expr), true), se_func_dom);
-      ATermAppl body;
+      aterm_appl se_func = sort_set::left(expr).sort();
+      aterm_appl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
+      aterm_appl var = gsMakeDataVarId(gsFreshString2ATermAppl("x",
+                                      static_cast<aterm_appl>(expr), true), se_func_dom);
+      aterm_appl body;
       if (data::sort_fset::is_empty_function_symbol(sort_set::right(expr)))
       {
         body = sort_set::left(expr)(data::variable(var));
@@ -1727,9 +1762,9 @@ reconstruct_container_expression(ATermAppl Part)
       {
         data_expression lhs(sort_set::left(expr)(data::variable(var)));
         data_expression rhs(sort_set::in(element_sort, data_expression(var), sort_set::set_fset(element_sort, sort_set::right(expr))));
-        body = static_cast<ATermAppl>(data::not_equal_to(lhs,rhs));
+        body = static_cast<aterm_appl>(data::not_equal_to(lhs,rhs));
       }
-      Part = gsMakeBinder(gsMakeSetComp(), ATmakeList1(var), body);
+      Part = gsMakeBinder(gsMakeSetComp(), make_list<aterm>(var), body);
     }
   }
   else if (sort_set::is_set_fset_application(expr))
@@ -1740,12 +1775,12 @@ reconstruct_container_expression(ATermAppl Part)
     data_expression result(reconstruct_container_expression(de_fset));
     if (sort_set::is_set_enumeration_application(result) || sort_set::is_set_enumeration_function_symbol(result))
     {
-      Part = static_cast<ATermAppl>(result);
+      Part = static_cast<aterm_appl>(result);
     }
   }
   else if (sort_fset::is_empty_function_symbol(expr))
   {
-    Part = static_cast<ATermAppl>(sort_set::set_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
+    Part = static_cast<aterm_appl>(sort_set::set_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
   }
   else if (sort_fset::is_cons_application(expr) || sort_fset::is_insert_application(expr))
   {
@@ -1771,7 +1806,7 @@ reconstruct_container_expression(ATermAppl Part)
     }
     if (elts_is_consistent)
     {
-      Part = static_cast<ATermAppl>(sort_set::set_enumeration(expr.sort(), elements));
+      Part = static_cast<aterm_appl>(sort_set::set_enumeration(expr.sort(), elements));
     }
   }
   else if (sort_set::is_set_comprehension_application(expr))
@@ -1785,7 +1820,7 @@ reconstruct_container_expression(ATermAppl Part)
          i != domain_of_body_sort.end(); ++i)
     {
       variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                    static_cast<ATermList>(context), true), static_cast<ATermAppl>(*i)));
+                                    static_cast<aterm_list>(context), true), static_cast<aterm_appl>(*i)));
       context = atermpp::push_front(context, data_expression(var));
       variables.push_back(var);
     }
@@ -1801,14 +1836,14 @@ reconstruct_container_expression(ATermAppl Part)
     sort_expression element_sort = *function_sort(sort_bag::left(expr).sort()).domain().begin();
     if (sort_bag::is_zero_function_function_symbol(sort_bag::left(expr)))
     {
-      Part = reconstruct_container_expression(static_cast<ATermAppl>(sort_bag::bag_fbag(element_sort, sort_bag::right(expr))));
+      Part = reconstruct_container_expression(static_cast<aterm_appl>(sort_bag::bag_fbag(element_sort, sort_bag::right(expr))));
     }
     else
     {
-      ATermAppl se_func = sort_bag::left(expr).sort();
-      ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
+      aterm_appl se_func = sort_bag::left(expr).sort();
+      aterm_appl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
       data_expression var(gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                          static_cast<ATermAppl>(expr), true), se_func_dom));
+                                          static_cast<aterm_appl>(expr), true), se_func_dom));
       data_expression body;
 
       if (sort_bag::is_one_function_function_symbol(sort_bag::left(expr)))
@@ -1845,12 +1880,12 @@ reconstruct_container_expression(ATermAppl Part)
     data_expression result(reconstruct_container_expression(de_fbag));
     if (sort_bag::is_bag_enumeration_application(result) || sort_bag::is_bag_enumeration_function_symbol(result))
     {
-      Part = static_cast<ATermAppl>(result);
+      Part = static_cast<aterm_appl>(result);
     }
   }
   else if (sort_fbag::is_empty_function_symbol(expr))
   {
-    Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
+    Part = static_cast<aterm_appl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
   }
   else if (sort_fbag::is_cons_application(expr) || sort_fbag::is_insert_application(expr) || sort_fbag::is_cinsert_application(expr))
   {
@@ -1884,7 +1919,7 @@ reconstruct_container_expression(ATermAppl Part)
     }
     if (elts_is_consistent)
     {
-      Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), elements));
+      Part = static_cast<aterm_appl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), elements));
     }
   }
   else if (sort_bag::is_bag_comprehension_application(expr))
@@ -1898,7 +1933,7 @@ reconstruct_container_expression(ATermAppl Part)
          i != domain_of_body_sort.end(); ++i)
     {
       variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
-                                    static_cast<ATermList>(context), true), static_cast<ATermAppl>(*i)));
+                                    static_cast<aterm_list>(context), true), static_cast<aterm_appl>(*i)));
       context = atermpp::push_front(context, data_expression(var));
       variables.push_back(var);
     }
@@ -1910,7 +1945,7 @@ reconstruct_container_expression(ATermAppl Part)
 }
 
 void PrintDataExpr(std::ostream& OutStream,
-                               ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                               aterm_appl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsDataExpr(DataExpr));
   if (gsIsId(DataExpr) || gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr) ||
@@ -1933,8 +1968,8 @@ void PrintDataExpr(std::ostream& OutStream,
     {
       //print data expression in the external format, if possible
       DataExpr = reconstruct_container_expression(DataExpr);
-      ATermAppl Head;
-      ATermList Args;
+      aterm_appl Head;
+      aterm_list Args;
       if (!gsIsDataAppl(DataExpr))
       {
         Head = DataExpr;
@@ -2014,7 +2049,7 @@ void PrintDataExpr(std::ostream& OutStream,
       {
         //print infix expression
         mCRL2log(log::debug2, "pretty printer") << "printing infix expression" << std::endl;
-        ATermAppl HeadName = ATAgetArgument(Head, 0);
+        aterm_appl HeadName = ATAgetArgument(Head, 0);
         if (PrecLevel > gsPrecIdInfix(HeadName))
         {
           OutStream <<  "(";
@@ -2040,7 +2075,7 @@ void PrintDataExpr(std::ostream& OutStream,
       }
       else if (gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr))
       {
-        ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
+        aterm_appl Reconstructed(reconstruct_numeric_expression(DataExpr));
         //print data variable or operation identifier
         if (Reconstructed == DataExpr)
         {
@@ -2061,7 +2096,7 @@ void PrintDataExpr(std::ostream& OutStream,
       }
       else
       {
-        ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
+        aterm_appl Reconstructed(reconstruct_numeric_expression(DataExpr));
         if (Reconstructed == DataExpr)
         {
           //print data application
@@ -2082,7 +2117,7 @@ void PrintDataExpr(std::ostream& OutStream,
   else if (gsIsBinder(DataExpr))
   {
     mCRL2log(log::debug2, "pretty printer") << "printing binder" << std::endl;
-    ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
+    aterm_appl BindingOperator = ATAgetArgument(DataExpr, 0);
     if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
         || gsIsBagComp(BindingOperator))
     {
@@ -2142,7 +2177,7 @@ void PrintDataExpr(std::ostream& OutStream,
 }
 
 static void PrintProcExpr(std::ostream& OutStream,
-                                      const ATermAppl ProcExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                                      const aterm_appl ProcExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsProcExpr(ProcExpr));
   if (gsIsParamId(ProcExpr) || gsIsAction(ProcExpr) || gsIsProcess(ProcExpr))
@@ -2151,7 +2186,7 @@ static void PrintProcExpr(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing action or process reference" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(ProcExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermList Args = ATLgetArgument(ProcExpr, 1);
+    aterm_list Args = ATLgetArgument(ProcExpr, 1);
     if (Args.size() > 0)
     {
       OutStream <<  "(";
@@ -2294,7 +2329,7 @@ static void PrintProcExpr(std::ostream& OutStream,
     OutStream <<  " -> ";
     PrintProcExpr(OutStream, ATAgetArgument(ProcExpr, 1),
                               pp_format, ShowSorts, 5);
-    ATermAppl ProcExprElse = ATAgetArgument(ProcExpr, 2);
+    aterm_appl ProcExprElse = ATAgetArgument(ProcExpr, 2);
     OutStream <<  " <> ";
     PrintProcExpr(OutStream, ProcExprElse,
                               pp_format, ShowSorts, 5);
@@ -2393,7 +2428,7 @@ static void PrintProcExpr(std::ostream& OutStream,
 }
 
 static void PrintStateFrm(std::ostream& OutStream,
-                                      const ATermAppl StateFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                                      const aterm_appl StateFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsStateFrm(StateFrm));
   if (gsIsDataExpr(StateFrm))
@@ -2450,7 +2485,7 @@ static void PrintStateFrm(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing fixpoint variable" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(StateFrm, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermList Args = ATLgetArgument(StateFrm, 1);
+    aterm_list Args = ATLgetArgument(StateFrm, 1);
     if (Args.size() > 0)
     {
       OutStream <<  "(";
@@ -2503,7 +2538,7 @@ static void PrintStateFrm(std::ostream& OutStream,
     }
     PrintPart_Appl(OutStream, ATAgetArgument(StateFrm, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermList DataVarInits = ATLgetArgument(StateFrm, 1);
+    aterm_list DataVarInits = ATLgetArgument(StateFrm, 1);
     if (DataVarInits.size() > 0)
     {
       OutStream <<  "(";
@@ -2614,7 +2649,7 @@ static void PrintStateFrm(std::ostream& OutStream,
 }
 
 static void PrintRegFrm(std::ostream& OutStream,
-                                    const ATermAppl RegFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                                    const aterm_appl RegFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsRegFrm(RegFrm));
   if (gsIsActFrm(RegFrm))
@@ -2691,7 +2726,7 @@ static void PrintRegFrm(std::ostream& OutStream,
 }
 
 static void PrintActFrm(std::ostream& OutStream,
-                                    const ATermAppl ActFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                                    const aterm_appl ActFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsActFrm(ActFrm));
   if (gsIsDataExpr(ActFrm))
@@ -2825,7 +2860,7 @@ static void PrintActFrm(std::ostream& OutStream,
 }
 
 static void PrintPBExpr(std::ostream& OutStream,
-                                    const ATermAppl PBExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+                                    const aterm_appl PBExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsPBExpr(PBExpr));
   if (gsIsDataExpr(PBExpr))
@@ -2854,7 +2889,7 @@ static void PrintPBExpr(std::ostream& OutStream,
     mCRL2log(log::debug2, "pretty printer") << "printing propositional variable instance" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(PBExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
-    ATermList Args = ATLgetArgument(PBExpr, 1);
+    aterm_list Args = ATLgetArgument(PBExpr, 1);
     if (Args.size() > 0)
     {
       OutStream <<  "(";
@@ -2951,12 +2986,12 @@ static void PrintPBExpr(std::ostream& OutStream,
 }
 
 void PrintLinearProcessSummand(std::ostream& OutStream,
-    const ATermAppl Summand, t_pp_format pp_format, bool ShowSorts)
+    const aterm_appl Summand, t_pp_format pp_format, bool ShowSorts)
 {
   assert(gsIsLinearProcessSummand(Summand));
   mCRL2log(log::debug2, "pretty printer") << "printing LPS summand" << std::endl;
   //print data summations
-  ATermList SumVarDecls = ATLgetArgument(Summand, 0);
+  aterm_list SumVarDecls = ATLgetArgument(Summand, 0);
   if (SumVarDecls.size() > 0)
   {
     OutStream <<  "sum ";
@@ -2964,15 +2999,15 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
     OutStream <<  ".\n         ";
   }
   //print condition
-  ATermAppl Cond = ATAgetArgument(Summand, 1);
+  aterm_appl Cond = ATAgetArgument(Summand, 1);
   if (/*!gsIsNil(Cond) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Cond)))   // JK 15/10/2009 condition is always a data expression
   {
     PrintDataExpr(OutStream, Cond, pp_format, ShowSorts, gsPrecIdPrefix());
     OutStream <<  " ->\n         ";
   }
   //print multiaction
-  ATermAppl MultAct = ATAgetArgument(Summand, 2);
-  ATermAppl Time = ATAgetArgument(Summand, 3);
+  aterm_appl MultAct = ATAgetArgument(Summand, 2);
+  aterm_appl Time = ATAgetArgument(Summand, 3);
   bool IsTimed = !gsIsNil(Time);
   PrintPart_Appl(OutStream, MultAct, pp_format, ShowSorts,
                              (IsTimed)?6:5);
@@ -2987,7 +3022,7 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
   {
     OutStream <<  " .\n         ";
     OutStream <<  "P";
-    ATermList Assignments = ATLgetArgument(Summand, 4);
+    aterm_list Assignments = ATLgetArgument(Summand, 4);
     OutStream <<  "(";
     PrintPart_List(OutStream, Assignments,
                                pp_format, ShowSorts, 0, NULL, ", ");
@@ -2995,9 +3030,9 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
   }
 }
 
-ATermList GetAssignmentsRHS(ATermList Assignments)
+aterm_list GetAssignmentsRHS(aterm_list Assignments)
 {
-  ATermList l;
+  aterm_list l;
   while (!Assignments.empty())
   {
     l = push_front(l, ATAgetFirst(Assignments)(1));
@@ -3006,7 +3041,7 @@ ATermList GetAssignmentsRHS(ATermList Assignments)
   return reverse(l);
 }
 
-ATermList gsGroupDeclsBySort(ATermList Decls)
+aterm_list gsGroupDeclsBySort(aterm_list Decls)
 {
   using namespace atermpp;
   if (!Decls.empty())
@@ -3016,19 +3051,19 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
     //SortDeclsTable
     while (!Decls.empty())
     {
-      ATermAppl Decl = ATAgetFirst(Decls);
-      ATermAppl DeclSort = ATAgetArgument(Decl, 1);
-      ATermList CorDecls = aterm_cast<aterm_list>(SortDeclsTable.get(DeclSort));
+      aterm_appl Decl = ATAgetFirst(Decls);
+      aterm_appl DeclSort = ATAgetArgument(Decl, 1);
+      aterm_list CorDecls = aterm_cast<aterm_list>(SortDeclsTable.get(DeclSort));
       SortDeclsTable.put(DeclSort,
-                 (CorDecls == ATerm())
-                 ?ATmakeList1(Decl)
+                 (CorDecls == aterm())
+                 ?make_list<aterm>(Decl)
                  :push_front(CorDecls, aterm(Decl))
                 );
       Decls = Decls.tail();
     }
     //Return the hash table as a list of variable declarations
-    ATermList DeclSorts = SortDeclsTable.keys();
-    ATermList Result;
+    aterm_list DeclSorts = SortDeclsTable.keys();
+    aterm_list Result;
     while (!DeclSorts.empty())
     {
       Result = aterm_cast<aterm_list>(SortDeclsTable.get(DeclSorts.front()))+ Result;
@@ -3044,21 +3079,21 @@ ATermList gsGroupDeclsBySort(ATermList Decls)
 }
 
 bool gsHasConsistentContext(const table &DataVarDecls,
-                            const ATermAppl Part)
+                            const aterm_appl Part)
 {
   bool Result = true;
   if (gsIsDataEqn(Part) || gsIsProcEqn(Part))
   {
     //check consistency of DataVarDecls with the variable declarations
-    ATermList VarDecls = ATLgetArgument(Part, 0);
+    aterm_list VarDecls = ATLgetArgument(Part, 0);
     size_t n = VarDecls.size();
     for (size_t i = 0; i < n && Result; i++)
     {
       //check consistency of variable VarDecls(j) with VarDeclTable
-      ATermAppl VarDecl = ATAelementAt(VarDecls, i);
-      ATermAppl CorVarDecl =
+      aterm_appl VarDecl = ATAelementAt(VarDecls, i);
+      aterm_appl CorVarDecl =
         aterm_cast<aterm_appl>(DataVarDecls.get(VarDecl(0)));
-      if (CorVarDecl != ATerm())
+      if (CorVarDecl != aterm())
       {
         //check consistency of VarDecl with CorVarDecl
         Result = (VarDecl==CorVarDecl);
@@ -3069,23 +3104,23 @@ bool gsHasConsistentContext(const table &DataVarDecls,
   {
     //Part may be an operation; check that its name does not occur in
     //DataVarDecls
-    Result = (DataVarDecls.get(Part(0)) == ATerm());
+    Result = (DataVarDecls.get(Part(0)) == aterm());
   }
   //check consistency in the arguments of Part
   if (Result)
   {
-    AFun Head = Part.function();
+    function_symbol Head = Part.function();
     size_t NrArgs = Head.arity();
     for (size_t i = 0; i < NrArgs && Result; i++)
     {
-      ATerm Arg = Part(i);
+      aterm Arg = Part(i);
       if (Arg.type() == AT_APPL)
       {
-        Result = gsHasConsistentContext(DataVarDecls, (ATermAppl) Arg);
+        Result = gsHasConsistentContext(DataVarDecls, (aterm_appl) Arg);
       }
       else //Arg.type() == AT_LIST
       {
-        Result = gsHasConsistentContextList(DataVarDecls, (ATermList) Arg);
+        Result = gsHasConsistentContextList(DataVarDecls, (aterm_list) Arg);
       }
     }
   }
@@ -3093,10 +3128,10 @@ bool gsHasConsistentContext(const table &DataVarDecls,
 }
 
 bool gsHasConsistentContextList(const table &DataVarDecls,
-                                const ATermList Parts)
+                                const aterm_list Parts)
 {
   bool Result = true;
-  ATermList l = Parts;
+  aterm_list l = Parts;
   while (!l.empty() && Result)
   {
     Result = gsHasConsistentContext(DataVarDecls, ATAgetFirst(l));
@@ -3105,7 +3140,7 @@ bool gsHasConsistentContextList(const table &DataVarDecls,
   return Result;
 }
 
-bool gsIsOpIdNumericUpCast(ATermAppl DataExpr)
+bool gsIsOpIdNumericUpCast(aterm_appl DataExpr)
 {
   if (!gsIsOpId(DataExpr))
   {
@@ -3121,7 +3156,7 @@ bool gsIsOpIdNumericUpCast(ATermAppl DataExpr)
     ;
 }
 
-bool gsIsIdListEnum(ATermAppl DataExpr)
+bool gsIsIdListEnum(aterm_appl DataExpr)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr)))
   {
@@ -3130,7 +3165,7 @@ bool gsIsIdListEnum(ATermAppl DataExpr)
   return ATAgetArgument(DataExpr, 0) == data::sort_list::list_enumeration_name();
 }
 
-bool gsIsIdSetEnum(ATermAppl DataExpr)
+bool gsIsIdSetEnum(aterm_appl DataExpr)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr)))
   {
@@ -3139,7 +3174,7 @@ bool gsIsIdSetEnum(ATermAppl DataExpr)
   return ATAgetArgument(DataExpr, 0) == data::sort_set::set_enumeration_name();
 }
 
-bool gsIsIdBagEnum(ATermAppl DataExpr)
+bool gsIsIdBagEnum(aterm_appl DataExpr)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr)))
   {
@@ -3148,7 +3183,7 @@ bool gsIsIdBagEnum(ATermAppl DataExpr)
   return ATAgetArgument(DataExpr, 0) == data::sort_bag::bag_enumeration_name();
 }
 
-bool gsIsIdFuncUpdate(ATermAppl DataExpr)
+bool gsIsIdFuncUpdate(aterm_appl DataExpr)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr)))
   {
@@ -3157,7 +3192,7 @@ bool gsIsIdFuncUpdate(ATermAppl DataExpr)
   return ATAgetArgument(DataExpr, 0) == data::function_update_name();
 }
 
-bool gsIsIdPrefix(ATermAppl DataExpr, size_t ArgsLength)
+bool gsIsIdPrefix(aterm_appl DataExpr, size_t ArgsLength)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr)))
   {
@@ -3167,7 +3202,7 @@ bool gsIsIdPrefix(ATermAppl DataExpr, size_t ArgsLength)
   {
     return false;
   }
-  ATermAppl IdName = ATAgetArgument(DataExpr, 0);
+  aterm_appl IdName = ATAgetArgument(DataExpr, 0);
   return
     (IdName == data::sort_bool::not_name())      ||
     (IdName == data::sort_int::negate_name())      ||
@@ -3175,7 +3210,7 @@ bool gsIsIdPrefix(ATermAppl DataExpr, size_t ArgsLength)
     (IdName == data::sort_set::complement_name());
 }
 
-bool gsIsIdInfix(ATermAppl DataExpr, size_t ArgsLength)
+bool gsIsIdInfix(aterm_appl DataExpr, size_t ArgsLength)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr)))
   {
@@ -3185,7 +3220,7 @@ bool gsIsIdInfix(ATermAppl DataExpr, size_t ArgsLength)
   {
     return false;
   }
-  ATermAppl IdName = ATAgetArgument(DataExpr, 0);
+  aterm_appl IdName = ATAgetArgument(DataExpr, 0);
   return
     (IdName == data::sort_bool::implies_name())          ||
     (IdName == data::sort_bool::and_name())          ||
@@ -3220,7 +3255,7 @@ int gsPrecIdPrefix()
   return 13;
 }
 
-int gsPrecIdInfix(ATermAppl IdName)
+int gsPrecIdInfix(aterm_appl IdName)
 {
   if (IdName == data::sort_bool::implies_name())
   {
@@ -3282,7 +3317,7 @@ int gsPrecIdInfix(ATermAppl IdName)
   }
 }
 
-int gsPrecIdInfixLeft(ATermAppl IdName)
+int gsPrecIdInfixLeft(aterm_appl IdName)
 {
   if (IdName == data::sort_bool::implies_name())
   {
@@ -3344,7 +3379,7 @@ int gsPrecIdInfixLeft(ATermAppl IdName)
   }
 }
 
-int gsPrecIdInfixRight(ATermAppl IdName)
+int gsPrecIdInfixRight(aterm_appl IdName)
 {
   if (IdName == data::sort_bool::implies_name())
   {
@@ -3409,23 +3444,23 @@ int gsPrecIdInfixRight(ATermAppl IdName)
 } // namespace detail
 
 inline
-void PrintPart_CXX(std::ostream& out_stream, const ATerm part,
+void PrintPart_CXX(std::ostream& out_stream, const aterm part,
                    t_pp_format pp_format)
 {
   detail::PrintPart__CXX(out_stream, part, pp_format);
 }
 
 inline
-std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format)
+std::string PrintPart_CXX(const aterm part, t_pp_format pp_format)
 {
   std::stringstream ss;
   PrintPart_CXX(ss, part, pp_format);
   return ss.str();
 }
 
-/** \brief Return a textual description of an ATerm representation of an
+/** \brief Return a textual description of an aterm representation of an
  *         mCRL2 specification or expression.
- *  \param[in] part An ATerm representation of a part of an mCRL2
+ *  \param[in] part An aterm representation of a part of an mCRL2
  *             specification or expression.
  *  \param[in] pp_format A pretty print format.
  *  \return A textual representation of part according to method pp_format.

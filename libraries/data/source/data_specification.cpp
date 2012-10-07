@@ -24,7 +24,13 @@ namespace detail
 {
 
 /**
- * \param[in] compatible whether the produced ATerm is compatible with the `format after type checking'
+ * \param[in/\<aterm\>/aterm/g
+ * :%s/\<aterm_int\>/aterm_int/g
+ * :%s/\<aterm_appl\>/aterm_appl/g
+ * :%s/\<aterm_list\>/aterm_list/g
+ * :%s/\<function_symbol\>/function_symbol/g
+ * :%s/\<atermpp\>/atermpp/g
+ *  compatible whether the produced aterm is compatible with the `format after type checking'
  *
  * The compatible transformation should eventually disappear, it is only
  * here for compatibility with the old parser, type checker and pretty

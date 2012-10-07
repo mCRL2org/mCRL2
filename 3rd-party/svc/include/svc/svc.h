@@ -44,21 +44,21 @@
 
   /* Datatype 'SVClabel' */
 
-  SVClabelIndex SVCnewLabel(SVCfile*, aterm_deprecated::ATerm, SVCbool*);
-  SVClabelIndex SVCaterm2Label(SVCfile*, aterm_deprecated::ATerm);
-  aterm_deprecated::ATerm SVClabel2ATerm(SVCfile*, SVClabelIndex);
+  SVClabelIndex SVCnewLabel(SVCfile*, atermpp::aterm, SVCbool*);
+  SVClabelIndex SVCaterm2Label(SVCfile*, atermpp::aterm);
+  atermpp::aterm SVClabel2ATerm(SVCfile*, SVClabelIndex);
 
   /* Datatype 'SVCstate' */
 
-  SVCstateIndex SVCnewState(SVCfile*, aterm_deprecated::ATerm, SVCbool*);
-  SVCstateIndex SVCaterm2State(SVCfile*, aterm_deprecated::ATerm);
-  aterm_deprecated::ATerm SVCstate2ATerm(SVCfile*, SVCstateIndex);
+  SVCstateIndex SVCnewState(SVCfile*, atermpp::aterm, SVCbool*);
+  SVCstateIndex SVCaterm2State(SVCfile*, atermpp::aterm);
+  atermpp::aterm SVCstate2ATerm(SVCfile*, SVCstateIndex);
 
   /* Datatype 'SVCparameter' */
 
-  SVCparameterIndex SVCnewParameter(SVCfile*, aterm_deprecated::ATerm, SVCbool*);
-  SVCparameterIndex SVCaterm2Parameter(SVCfile*, aterm_deprecated::ATerm);
-  aterm_deprecated::ATerm SVCparameter2ATerm(SVCfile*, SVCparameterIndex);
+  SVCparameterIndex SVCnewParameter(SVCfile*, atermpp::aterm, SVCbool*);
+  SVCparameterIndex SVCaterm2Parameter(SVCfile*, atermpp::aterm);
+  atermpp::aterm SVCparameter2ATerm(SVCfile*, SVCparameterIndex);
 
   /* Datatype 'SVCTransition' */
 

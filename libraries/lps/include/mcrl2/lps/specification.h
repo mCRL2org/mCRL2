@@ -76,7 +76,7 @@ class specification
     /// \brief The initial state of the specification
     process_initializer m_initial_process;
 
-    /// \brief Initializes the specification with an ATerm.
+    /// \brief Initializes the specification with an aterm.
     /// \param t A term
     void construct_from_aterm(atermpp::aterm_appl t)
     {
@@ -264,8 +264,8 @@ void complete_data_specification(lps::specification& spec)
   spec.data().add_context_sorts(s);
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The specification converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The specification converted to aterm format.
 inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {

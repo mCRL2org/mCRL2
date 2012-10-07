@@ -42,7 +42,7 @@ class pbes_expression_with_propositional_variables: public pbes_expression_with_
 
     /// \brief Constructor. Creates a pbes expression with empty sequences of data and propositional variables.
     /// \param term A term
-    /* pbes_expression_with_propositional_variables(ATermAppl term)
+    /* pbes_expression_with_propositional_variables(aterm_appl term)
       : pbes_expression_with_variables(term)
     {} */
 

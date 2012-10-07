@@ -11,7 +11,7 @@
 //
 //For reasons of efficiency recursive grammar rules are left-recursive if
 //possible. This implies that lists are parsed from right to left. For the
-//efficient use of the ATerm library parsed lists are stored in an ATermList
+//efficient use of the aterm library parsed lists are stored in an aterm_list
 //in reverse order. When the lists are completely parsed they are reversed
 //once.
 
@@ -33,12 +33,12 @@ using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-//Global precondition: the ATerm library has been initialised
+//Global precondition: the aterm library has been initialised
 
 //external declarations from mcrl2lexer.ll
 void mcrl2yyerror(const char *s);
 int mcrl2yylex(void);
-extern ATerm mcrl2_spec_tree;
+extern aterm mcrl2_spec_tree;
 extern ATermIndexedSet mcrl2_parser_protect_table;
 
 #ifdef _MSC_VER
@@ -48,13 +48,13 @@ extern ATermIndexedSet mcrl2_parser_protect_table;
 
 #define YYMAXDEPTH 640000
 
-#define safe_assign(lhs, rhs) { bool b; lhs = rhs; ATindexedSetPut(mcrl2_parser_protect_table, (ATerm) lhs, &b); }
+#define safe_assign(lhs, rhs) { bool b; lhs = rhs; ATindexedSetPut(mcrl2_parser_protect_table, (aterm) lhs, &b); }
 %}
 
 %union {
-  aterm::ATerm term;
-  aterm::ATermAppl appl;
-  aterm::ATermList list;
+  aterm::aterm term;
+  aterm::aterm_appl appl;
+  aterm::aterm_list list;
 };
 
 //generate a GLR parser
@@ -192,57 +192,57 @@ extern ATermIndexedSet mcrl2_parser_protect_table;
 start:
   TAG_IDENTIFIER ID
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_SORT_EXPR sort_expr
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_DATA_EXPR data_expr
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_DATA_SPEC data_spec
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_MULT_ACT mult_act
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_PROC_EXPR proc_expr
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_PROC_SPEC proc_spec
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_STATE_FRM state_frm
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_ACTION_RENAME action_rename_spec
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_PBES_SPEC pbes_spec
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   | TAG_DATA_VARS data_vars_decls_scs
     {
-      safe_assign($$, (ATerm) $2);
+      safe_assign($$, (aterm) $2);
       mcrl2_spec_tree = $$;
     }
   ;
@@ -285,12 +285,12 @@ domain_no_arrow:
 domain_no_arrow_elts_hs:
   domain_no_arrow_elt
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed non-arrow domain elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | domain_no_arrow_elts_hs HASH domain_no_arrow_elt
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed non-arrow domain elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -321,12 +321,12 @@ sort_expr_struct:
 struct_constructors_bs:
   struct_constructor
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed structured sort constructors\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | struct_constructors_bs BAR struct_constructor
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed structured sort constructors\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -363,12 +363,12 @@ recogniser:
 struct_projections_cs:
   struct_projection
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed structured sort projections\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | struct_projections_cs COMMA struct_projection
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed structured sort projections\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -479,12 +479,12 @@ data_expr_whr:
 id_inits_cs:
   id_init
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed identifier initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | id_inits_cs COMMA id_init
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed identifier initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -543,7 +543,7 @@ data_vars_decl:
       safe_assign($$, ATmakeList0());
       size_t n = ATgetLength($1);
       for (size_t i = 0; i < n; i++) {
-        safe_assign($$, ATinsert($$, (ATerm) gsMakeDataVarId(ATAelementAt($1, i), $3)));
+        safe_assign($$, ATinsert($$, (aterm) gsMakeDataVarId(ATAelementAt($1, i), $3)));
       }
       mCRL2log(debug) << "parsed data variable declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
@@ -558,7 +558,7 @@ data_expr_imp:
   | data_expr_and IMP data_expr_imp_rhs
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed implication\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -590,13 +590,13 @@ data_expr_and:
   | data_expr_eq AND data_expr_and_rhs
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed conjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_eq BARS data_expr_and_rhs
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed disjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -628,13 +628,13 @@ data_expr_eq:
   | data_expr_rel EQ data_expr_eq_rhs
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed equality expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_rel NEQ data_expr_eq_rhs
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed equality expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -671,31 +671,31 @@ data_expr_rel:
   | data_expr_cons GTE data_expr_cons
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons LTE data_expr_cons
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons RANG data_expr_cons
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons LANG data_expr_cons
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons IN data_expr_cons
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -709,7 +709,7 @@ data_expr_cons:
   | data_expr_add CONS data_expr_cons
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed list cons expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -723,7 +723,7 @@ data_expr_snoc:
   | data_expr_snoc SNOC data_expr_add
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed list snoc expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -737,7 +737,7 @@ data_expr_concat:
   | data_expr_concat CONCAT data_expr_add
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed list concat expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -751,13 +751,13 @@ data_expr_add:
   | data_expr_add PLUS data_expr_div
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed addition or set union\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_add MINUS data_expr_div
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed subtraction or set difference\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -771,19 +771,19 @@ data_expr_div:
   | data_expr_div DIV data_expr_mult
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed div expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_div MOD data_expr_mult
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed mod expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_div SLASH data_expr_mult
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed division expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -797,13 +797,13 @@ data_expr_mult:
   | data_expr_mult STAR data_expr_prefix
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed multiplication or set intersection\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_mult DOT data_expr_prefix
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((aterm) $1, (aterm) $3)));
       mCRL2log(debug) << "parsed list at expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -816,17 +816,17 @@ data_expr_prefix:
     }
   | EXCLAM data_expr_quant_prefix
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((ATerm) $2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((aterm) $2)));
       mCRL2log(debug) << "parsed prefix data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | MINUS data_expr_prefix
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((ATerm) $2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((aterm) $2)));
       mCRL2log(debug) << "parsed prefix data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | HASH data_expr_prefix
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((ATerm) $2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((aterm) $2)));
       mCRL2log(debug) << "parsed prefix data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -863,7 +863,7 @@ data_expr_postfix:
     | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId(mcrl2::data::function_update_name()), ATmakeList3((ATerm) $1, (ATerm) $3, (ATerm) $5)));
+        gsMakeDataAppl(gsMakeId(mcrl2::data::function_update_name()), ATmakeList3((aterm) $1, (aterm) $3, (aterm) $5)));
       mCRL2log(debug) << "parsed postfix data expression (function update)\n  " << atermpp::aterm( $$) << "" << std::endl;
     } 
   ;
@@ -872,12 +872,12 @@ data_expr_postfix:
 data_exprs_cs:
   data_expr
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed data expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_exprs_cs COMMA data_expr
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed data expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -978,7 +978,7 @@ bag_enum_elts_cs:
 bag_enum_elt:
   data_expr COLON data_expr
     {
-      safe_assign($$, ATmakeList2((ATerm) $3, (ATerm) $1));
+      safe_assign($$, ATmakeList2((aterm) $3, (aterm) $1));
       mCRL2log(debug) << "parsed bag enumeration element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -987,7 +987,7 @@ bag_enum_elt:
 data_comprehension:
   LBRACE data_var_decl BAR data_expr RBRACE
     {
-      safe_assign($$, gsMakeBinder(gsMakeSetBagComp(), ATmakeList1((ATerm) $2), $4));
+      safe_assign($$, gsMakeBinder(gsMakeSetBagComp(), ATmakeList1((aterm) $2), $4));
       mCRL2log(debug) << "parsed data comprehension\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1017,12 +1017,12 @@ data_spec:
 data_spec_elts:
   data_spec_elt
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed data specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | data_spec_elts data_spec_elt
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed data specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
@@ -1081,13 +1081,13 @@ sorts_decl:
       safe_assign($$, ATmakeList0());
       size_t n = ATgetLength($1);
       for (size_t i = 0; i < n; i++) {
-        safe_assign($$, ATinsert($$, (ATerm) gsMakeSortId(ATAelementAt($1, i))));
+        safe_assign($$, ATinsert($$, (aterm) gsMakeSortId(ATAelementAt($1, i))));
       }
       mCRL2log(debug) << "parsed standard sort declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ID EQUALS sort_expr
     {
-      safe_assign($$, ATmakeList1((ATerm) gsMakeSortRef($1, $3)));
+      safe_assign($$, ATmakeList1((aterm) gsMakeSortRef($1, $3)));
       mCRL2log(debug) << "parsed reference sort declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1096,12 +1096,12 @@ sorts_decl:
 ids_cs:
   ID
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ids_cs COMMA ID
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1115,7 +1115,7 @@ domain:
     }
   | domain_no_arrow ARROW sort_expr
     {
-      safe_assign($$, ATmakeList1((ATerm) gsMakeSortArrow($1, $3)));
+      safe_assign($$, ATmakeList1((aterm) gsMakeSortArrow($1, $3)));
       mCRL2log(debug) << "parsed domain\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1160,7 +1160,7 @@ ops_decl:
       safe_assign($$, ATmakeList0());
       size_t n = ATgetLength($1);
       for (size_t i = 0; i < n; i++) {
-        safe_assign($$, ATinsert($$, (ATerm) gsMakeOpId(ATAelementAt($1, i), $3)));
+        safe_assign($$, ATinsert($$, (aterm) gsMakeOpId(ATAelementAt($1, i), $3)));
       }
       mCRL2log(debug) << "parsed operation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
@@ -1187,9 +1187,9 @@ data_eqn_sect:
       safe_assign($$, ATmakeList0());
       size_t n = ATgetLength($4);
       for (size_t i = 0; i < n; i++) {
-        ATermAppl DataEqn = ATAelementAt($4, i);
+        aterm_appl DataEqn = ATAelementAt($4, i);
         safe_assign($$,
-          ATinsert($$, (ATerm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
+          ATinsert($$, (aterm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
             ATAgetArgument(DataEqn, 2), ATAgetArgument(DataEqn, 3))));
       }
       mCRL2log(debug) << "parsed data equation section\n  " << atermpp::aterm( $$) << "" << std::endl;
@@ -1200,12 +1200,12 @@ data_eqn_sect:
 data_eqn_decls_scs:
   data_eqn_decl SEMICOLON
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed data equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_eqn_decls_scs data_eqn_decl SEMICOLON
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1260,12 +1260,12 @@ mult_act:
 param_ids_bs:
   param_id
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed parameterised id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | param_ids_bs BAR param_id
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed parameterised id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1675,12 +1675,12 @@ ren_expr_set:
 ren_exprs_cs:
   ren_expr
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed renaming expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ren_exprs_cs COMMA ren_expr
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed renaming expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1712,12 +1712,12 @@ comm_expr_set:
 comm_exprs_cs:
   comm_expr
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed communication expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | comm_exprs_cs COMMA comm_expr
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed communication expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1745,7 +1745,7 @@ comm_expr:
 comm_expr_lhs:
   ID BAR ids_bs
     {
-      safe_assign($$, gsMakeMultActName(ATinsert(ATreverse($3), (ATerm) $1)));
+      safe_assign($$, gsMakeMultActName(ATinsert(ATreverse($3), (aterm) $1)));
       mCRL2log(debug) << "parsed left-hand side of communication expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1754,12 +1754,12 @@ comm_expr_lhs:
 ids_bs:
   ID
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ids_bs BAR ID
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1782,12 +1782,12 @@ mult_act_names_set:
 mult_act_names_cs:
   mult_act_name
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed multi action names\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | mult_act_names_cs COMMA mult_act_name
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed multi action names\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1817,12 +1817,12 @@ proc_spec:
 proc_spec_elts:
   proc_spec_elt
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed process specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | proc_spec_elts proc_spec_elt
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed process specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
@@ -1887,7 +1887,7 @@ acts_decl:
       size_t n = ATgetLength($1);
       for (size_t i = 0; i < n; i++) {
         safe_assign($$,
-          ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), ATmakeList0())));
+          ATinsert($$, (aterm) gsMakeActId(ATAelementAt($1, i), ATmakeList0())));
       }
       mCRL2log(debug) << "parsed action declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
@@ -1896,7 +1896,7 @@ acts_decl:
       safe_assign($$, ATmakeList0());
       size_t n = ATgetLength($1);
       for (size_t i = 0; i < n; i++) {
-        safe_assign($$, ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), $3)));
+        safe_assign($$, ATinsert($$, (aterm) gsMakeActId(ATAelementAt($1, i), $3)));
       }
       mCRL2log(debug) << "parsed action declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
@@ -1924,12 +1924,12 @@ proc_eqn_spec:
 proc_eqn_decls_scs:
   proc_eqn_decl SEMICOLON
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed process equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | proc_eqn_decls_scs proc_eqn_decl SEMICOLON
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed process equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -1944,7 +1944,7 @@ proc_eqn_decl:
     }
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
     {
-      ATermList SortExprs = ATmakeList0();
+      aterm_list SortExprs = ATmakeList0();
       size_t n = ATgetLength($3);
       for (size_t i = 0; i < n; i++) {
         SortExprs = ATinsert(SortExprs, ATgetArgument(ATAelementAt($3, i), 1));
@@ -2023,12 +2023,12 @@ fixpoint_params:
 data_var_decl_inits_cs:
   data_var_decl_init
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed data variable declaration and initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_var_decl_inits_cs COMMA data_var_decl_init
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATinsert($1, (aterm) $3));
       mCRL2log(debug) << "parsed data variable declaration and initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -2543,12 +2543,12 @@ action_rename_spec:
 action_rename_spec_elts:
   action_rename_spec_elt
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed action rename specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | action_rename_spec_elts action_rename_spec_elt
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed action rename specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
@@ -2593,9 +2593,9 @@ action_rename_rule_sect:
       safe_assign($$, ATmakeList0());
       size_t n = ATgetLength($4);
       for (size_t i = 0; i < n; i++) {
-        ATermAppl ActionRenameRule = ATAelementAt($4, i);
+        aterm_appl ActionRenameRule = ATAelementAt($4, i);
   safe_assign($$, ATinsert($$,
-          (ATerm) gsMakeActionRenameRule($2,
+          (aterm) gsMakeActionRenameRule($2,
             ATAgetArgument(ActionRenameRule, 1),
             ATAgetArgument(ActionRenameRule, 2),
             ATAgetArgument(ActionRenameRule, 3))));
@@ -2608,12 +2608,12 @@ action_rename_rule_sect:
 action_rename_rules_scs:
   action_rename_rule SEMICOLON
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed action rename rules\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | action_rename_rules_scs action_rename_rule SEMICOLON
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed action rename rules\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
@@ -2819,12 +2819,12 @@ pbes_spec:
 pbes_spec_elts:
   pbes_spec_elt
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed PBES specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | pbes_spec_elts pbes_spec_elt
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed PBES specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
@@ -2866,12 +2866,12 @@ pb_eqn_spec:
 pb_eqn_decls_scs:
   pb_eqn_decl SEMICOLON
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, ATmakeList1((aterm) $1));
       mCRL2log(debug) << "parsed parameterised boolean equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | pb_eqn_decls_scs pb_eqn_decl SEMICOLON
     {
-      safe_assign($$, ATinsert($1, (ATerm) $2));
+      safe_assign($$, ATinsert($1, (aterm) $2));
       mCRL2log(debug) << "parsed parameterised boolean equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;

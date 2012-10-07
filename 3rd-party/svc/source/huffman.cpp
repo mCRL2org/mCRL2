@@ -26,10 +26,10 @@
 
 using namespace aterm_deprecated;
 
-static ATerm ESCAPE_SEQUENCE;
-static ATerm NO_ATERM;
+static aterm ESCAPE_SEQUENCE;
+static aterm NO_ATERM;
 
-static struct HFnode* HFadd(HFtree*, ATerm);
+static struct HFnode* HFadd(HFtree*, aterm);
 static void          HFwriteCode(BitStream*, struct HFnode*);
 static void          HFfreeLoop(struct HFnode*);
 
@@ -46,12 +46,12 @@ int HFinit(HFtree* tree, HTable* terms)
 {
   /* Protect and assign constants */
 
-  ESCAPE_SEQUENCE=ATerm();
-  NO_ATERM=ATerm();
+  ESCAPE_SEQUENCE=aterm();
+  NO_ATERM=aterm();
   // ATprotect(&ESCAPE_SEQUENCE);
   // ATprotect(&NO_ATERM);
-  ESCAPE_SEQUENCE=aterm_appl(AFun("ESC",1),aterm_appl(AFun("NEW",0)));
-  NO_ATERM       =aterm_appl(AFun("ESC",1),aterm_appl(AFun("NIL",0)));
+  ESCAPE_SEQUENCE=aterm_appl(function_symbol("ESC",1),aterm_appl(function_symbol("NEW",0)));
+  NO_ATERM       =aterm_appl(function_symbol("ESC",1),aterm_appl(function_symbol("NIL",0)));
 
   /* Init LZ buffer */
 
@@ -68,7 +68,7 @@ int HFinit(HFtree* tree, HTable* terms)
   tree->codes->high=NULL;
   tree->codes->parent=NULL;
   tree->codes->frequency=0L;
-  tree->codes->term=ATerm();
+  tree->codes->term=aterm();
   // ATprotect(&tree->codes->term);
 
   /* Create the leaf for the escape code */
@@ -319,7 +319,7 @@ static void HFupdate(HFtree* tree, struct HFnode* current)
 
 
 
-int HFdecodeATerm(BitStream* fp, HFtree* tree, ATerm* term)
+int HFdecodeATerm(BitStream* fp, HFtree* tree, aterm* term)
 {
   Bit bit;
   struct HFnode* current;
@@ -353,7 +353,7 @@ int HFdecodeATerm(BitStream* fp, HFtree* tree, ATerm* term)
 
       if (*term==NO_ATERM)
       {
-        *term=ATerm();
+        *term=aterm();
         return 0;
       }
       else
@@ -390,7 +390,7 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
 {
   Bit bit;
   struct HFnode* current;
-  ATerm term;
+  aterm term;
 
 
   current=tree->codes;
@@ -420,7 +420,7 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
       else
       {
         HFupdate(tree,current);
-        *index=((ATermInt)term).value();
+        *index=((aterm_int)term).value();
         return *index!=NO_INT;
       }
     }
@@ -449,7 +449,7 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
 
 /* Insert 'term' into tree */
 
-int HFencodeATerm(BitStream* bs, HFtree* tree, ATerm term)
+int HFencodeATerm(BitStream* bs, HFtree* tree, aterm term)
 {
   struct HFnode* tmp;
   long index;
@@ -492,7 +492,7 @@ int HFencodeATerm(BitStream* bs, HFtree* tree, ATerm term)
 int HFencodeIndex(BitStream* bs, HFtree* tree, long index)
 {
   struct HFnode* tmp;
-  ATerm term;
+  aterm term;
   long n;
 
 
@@ -567,7 +567,7 @@ void HFwriteCode(BitStream* fp, struct HFnode* node)
 
 /* Add 'term' to 'tree' */
 
-static struct HFnode* HFadd(HFtree* tree, ATerm term)
+static struct HFnode* HFadd(HFtree* tree, aterm term)
 {
   struct HFnode* newNode, *tmp;
   long index;
@@ -615,7 +615,7 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
     newNode=new struct HFnode;
     newNode->parent=tmp->parent;
     newNode->frequency=tmp->frequency;
-    newNode->term=ATerm();
+    newNode->term=aterm();
     // ATprotect(&newNode->term);
     if (tmp->parent->low==tmp)
     {

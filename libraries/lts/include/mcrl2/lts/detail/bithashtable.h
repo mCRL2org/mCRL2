@@ -21,7 +21,7 @@ namespace mcrl2
 namespace lts
 {
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 class bit_hash_table
 {
@@ -81,7 +81,7 @@ class bit_hash_table
       }
     }
 
-    void calc_hash_aterm(ATerm t,
+    void calc_hash_aterm(aterm t,
                          size_t& sh_a,
                          size_t& sh_b,
                          size_t& sh_c,
@@ -95,19 +95,19 @@ class bit_hash_table
             size_t len = t.function().arity();
             for (size_t i=0; i<len; i++)
             {
-              calc_hash_aterm(((ATermAppl) t)(i),sh_a,sh_b,sh_c,sh_i);
+              calc_hash_aterm(((aterm_appl) t)(i),sh_a,sh_b,sh_c,sh_i);
             }
           }
           break;
         case AT_LIST:
           calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
-          for (ATermList l=(ATermList) t; !l.empty(); l=l.tail())
+          for (aterm_list l=(aterm_list) t; !l.empty(); l=l.tail())
           {
             calc_hash_aterm(l.front(),sh_a,sh_b,sh_c,sh_i);
           }
           break;
         case AT_INT:
-          calc_hash_add(((ATermInt) t).value(),sh_a,sh_b,sh_c,sh_i);
+          calc_hash_add(((aterm_int) t).value(),sh_a,sh_b,sh_c,sh_i);
           break;
         default:
           calc_hash_add(0xaa143f06,sh_a,sh_b,sh_c,sh_i);
@@ -130,7 +130,7 @@ class bit_hash_table
              ((sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff));
     }
 
-    size_t calc_hash(ATerm state)
+    size_t calc_hash(aterm state)
     {
       assert(m_bit_hash_table.size()>0);
       size_t sh_a = 0x9e3779b9;
@@ -143,7 +143,7 @@ class bit_hash_table
     }
 
   public:
-    void remove_state_from_bithash(const ATerm state)
+    void remove_state_from_bithash(const aterm state)
     {
       size_t i = calc_hash(state);
       m_bit_hash_table[i] = false;
@@ -151,10 +151,10 @@ class bit_hash_table
 
     /* void remove_state_from_bithash(atermpp::aterm state)
     {
-      remove_state_from_bithash((const ATerm)state);
+      remove_state_from_bithash((const aterm)state);
     } */
 
-    size_t add_state(ATerm state, bool& is_new)
+    size_t add_state(aterm state, bool& is_new)
     {
       size_t i = calc_hash(state);
       is_new = !m_bit_hash_table[i];
@@ -169,7 +169,7 @@ class bit_hash_table
       return output;
     }
 
-    size_t state_index(ATerm state)
+    size_t state_index(aterm state)
     {
       assert(m_bit_hash_table[calc_hash(state)]);
       return calc_hash(state);

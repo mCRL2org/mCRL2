@@ -42,8 +42,8 @@
 
 
   void LZinit(LZbuffer* buffer);
-  int LZwriteATerm(BitStream* fp, LZbuffer* buffer, aterm_deprecated::ATerm term);
-  int LZreadATerm(BitStream* fp, LZbuffer* buffer, aterm_deprecated::ATerm* term);
+  int LZwriteATerm(BitStream* fp, LZbuffer* buffer, aterm_deprecated::aterm term);
+  int LZreadATerm(BitStream* fp, LZbuffer* buffer, aterm_deprecated::aterm* term);
   int LZwriteString(BitStream* fp, LZbuffer* buffer, char* str);
   int LZreadString(BitStream* fp, LZbuffer* buffer, char** str);
   int LZwriteInt(BitStream* fp, LZbuffer* buffer, long n);

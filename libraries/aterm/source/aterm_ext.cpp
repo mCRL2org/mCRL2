@@ -18,28 +18,28 @@
 namespace aterm_deprecated
 {
 
-//Substitutions on ATerm's
+//Substitutions on aterm's
 //------------------------
 
-static AFun substafun;
+static function_symbol substafun;
 static bool substafun_notset = true;
-ATermAppl gsMakeSubst(const ATerm &OldValue, const ATerm &NewValue)
+aterm_appl gsMakeSubst(const aterm &OldValue, const aterm &NewValue)
 {
   if (substafun_notset)
   {
-    substafun = AFun("subst", 2);
+    substafun = function_symbol("subst", 2);
     substafun_notset = false;
   }
   return aterm_appl(substafun, OldValue, NewValue);
 }
 
-ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
+aterm gsSubstValues(const aterm_list &Substs, const aterm &t, bool Recursive)
 {
-  ATerm Term=t;
-  ATermList l = Substs;
+  aterm Term=t;
+  aterm_list l = Substs;
   while (!l.empty())
   {
-    ATermAppl Subst = aterm_cast<aterm_appl>(l.front());
+    aterm_appl Subst = aterm_cast<aterm_appl>(l.front());
     if (Subst(0)==Term)
     {
       return Subst(1);
@@ -55,21 +55,21 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
     //Recursive; distribute substitutions over the arguments/elements of Term
     if (Term.type() == AT_APPL)
     {
-      //Term is an ATermAppl; distribute substitutions over the arguments
-      AFun Head = Term.function();
+      //Term is an aterm_appl; distribute substitutions over the arguments
+      function_symbol Head = Term.function();
       const size_t NrArgs = Head.arity();
       if (NrArgs > 0)
       {
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
-        // std::vector<ATerm> Args(NrArgs);
+        // std::vector<aterm> Args(NrArgs);
         for (size_t i = 0; i < NrArgs; ++i)
         {
-          new (&Args[i]) aterm(gsSubstValues(Substs, ((ATermAppl) Term)(i), Recursive));
+          new (&Args[i]) aterm(gsSubstValues(Substs, ((aterm_appl) Term)(i), Recursive));
         }
         const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
         for (size_t i = 0; i < NrArgs; ++i)
         {
-          Args[i].~ATerm();
+          Args[i].~aterm();
         }
         return a;
       }
@@ -80,13 +80,13 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
     }
     else if (Term.type() == AT_LIST)
     {
-      //Term is an ATermList; distribute substitutions over the elements
-      ATermList Result;
-      while (!((ATermList) Term).empty())
+      //Term is an aterm_list; distribute substitutions over the elements
+      aterm_list Result;
+      while (!((aterm_list) Term).empty())
       {
         Result = push_front(Result,
-                          gsSubstValues(Substs, ((ATermList) Term).front(), Recursive));
-        Term = ((ATermList) Term).tail();
+                          gsSubstValues(Substs, ((aterm_list) Term).front(), Recursive));
+        Term = ((aterm_list) Term).tail();
       }
       return reverse(Result);
     }
@@ -97,5 +97,5 @@ ATerm gsSubstValues(const ATermList &Substs, const ATerm &t, bool Recursive)
   }
 }
 
-} // namespace aterm_deprecated
+} // namespace atermpp
 

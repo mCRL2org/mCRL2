@@ -267,6 +267,15 @@ inline aterm_list ATinsertUnique(const aterm_list &list, const aterm &el)
 }
 
 inline
+size_t     ATindexedSetPut(indexed_set &set, const aterm &elem, bool* isnew)
+{
+  std::pair<size_t, bool> p= set.put(elem);
+  *isnew=p.second;
+  return p.first;
+}
+
+
+inline
 aterm_list ATreplace(const aterm_list &list_in, const aterm &el, const size_t idx) // Replace one element of a list.
 {
   aterm_list list=list_in;
@@ -309,7 +318,7 @@ aterm gsSubstValuesTable(const table &Substs, const aterm &t, const bool Recursi
     if (Term.type() == AT_APPL)
     {
       //Term is an aterm_appl; distribute substitutions over the arguments
-      AFun Head = Term.function();
+      atermpp::function_symbol Head = Term.function();
       const size_t NrArgs = Head.arity();
       if (NrArgs > 0)
       {
@@ -1220,22 +1229,22 @@ aterm_list gstcFoldSortRefsInSortRefs(aterm_list SortRefs)
       if (gsIsSortId(RHS) || gsIsSortArrow(RHS))
       {
         //make forward substitution
-        Subst = gsMakeSubst(LHS, RHS);
+        Subst = aterm_deprecated::gsMakeSubst(LHS, RHS);
       }
       else
       {
         //make backward substitution
-        Subst = gsMakeSubst(RHS, LHS);
+        Subst = aterm_deprecated::gsMakeSubst(RHS, LHS);
       }
       mCRL2log(debug) << "performing substition " << core::pp_deprecated(Subst(0)) << " := " << core::pp_deprecated(Subst(1)) << "" << std::endl;
       //perform Subst on all elements of NewSortRefs except for the i'th
-      aterm_list Substs = ATmakeList1(Subst);
+      aterm_list Substs = make_list<aterm>(Subst);
       for (size_t j = 0; j < n; j++)
       {
         if (i != j)
         {
           aterm_appl OldSortRef = ATAelementAt(NewSortRefs, j);
-          aterm_appl NewSortRef = aterm_cast<aterm_appl>(gsSubstValues(Substs, OldSortRef, true));
+          aterm_appl NewSortRef = aterm_cast<aterm_appl>(aterm_deprecated::gsSubstValues(Substs, OldSortRef, true));
           if (NewSortRef!=OldSortRef)
           {
             NewSortRefs = ATreplace(NewSortRefs, NewSortRef, j);
@@ -1959,7 +1968,7 @@ static bool gstcReadInActs(aterm_list Acts)
     aterm_list Types=aterm_cast<aterm_list>(context.actions.get(ActName));
     if (aterm()==Types)
     {
-      Types=ATmakeList1(ActType);
+      Types=make_list<aterm>(ActType);
     }
     else
     {
@@ -2006,7 +2015,7 @@ static bool gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
     aterm_list Types=aterm_cast<aterm_list>(context.processes.get(ProcName));
     if (aterm()==Types)
     {
-      Types=ATmakeList1(ProcType);
+      Types=make_list<aterm>(ProcType);
     }
     else
     {
@@ -2070,7 +2079,7 @@ static bool gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
     aterm_list Types=aterm_cast<aterm_list>(context.PBs.get(PBName));
     if (aterm()==Types)
     {
-      Types=ATmakeList1(PBType);
+      Types=make_list<aterm>(PBType);
     }
     else
     {
@@ -2536,7 +2545,7 @@ static bool gstcReadInSortStruct(aterm_appl SortExpr)
       // recognizer -- if present -- a function from SortExpr to Bool
       aterm_appl Name=aterm_cast<aterm_appl>(Constr(2));
       if (!gsIsNil(Name) &&
-          !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATmakeList1(SortExpr),sort_bool::bool_())),"recognizer"))
+          !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(make_list<aterm>(SortExpr),sort_bool::bool_())),"recognizer"))
       {
         return false;
       }
@@ -2570,7 +2579,7 @@ static bool gstcReadInSortStruct(aterm_appl SortExpr)
 
         aterm_appl ProjName=aterm_cast<aterm_appl>(Proj(0));
         if (!gsIsNil(ProjName) &&
-            !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrow(ATmakeList1(SortExpr),ProjSort)),"projection",true))
+            !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrow(make_list<aterm>(SortExpr),ProjSort)),"projection",true))
         {
           return false;
         }
@@ -3543,7 +3552,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
       }
 
       aterm_appl NewType=aterm_cast<aterm_appl>(VarDecl(1));
-      aterm_list VarList=ATmakeList1(VarDecl);
+      aterm_list VarList=make_list<aterm>(VarDecl);
       table NewAllowedVars;
       if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
@@ -3577,7 +3586,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         NewType=sort_bag::bag(sort_expression(NewType));
         *DataTerm = DataTerm->set_argument(gsMakeBagComp(), 0);
-        Data=gsMakeDataAppl(sort_nat::cnat(),ATmakeList1(Data));
+        Data=gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(Data));
       }
       else
       {
@@ -4413,7 +4422,7 @@ static aterm_appl gstcTraverseVarConsTypeDN(
 
     if (aterm()!=Type)
     {
-      ParList=ATmakeList1(gstcUnwindType(Type));
+      ParList=make_list<aterm>(gstcUnwindType(Type));
     }
     else
     {
@@ -4511,7 +4520,7 @@ static aterm_appl gstcTraverseVarConsTypeDN(
         mCRL2log(debug) << "The result of casting is (1) " << core::pp_deprecated(NewParList) << "" << std::endl;
         if (NewParList.size()>1)
         {
-          NewParList=ATmakeList1(gstcMinType(NewParList));
+          NewParList=make_list<aterm>(gstcMinType(NewParList));
         }
       }
 
@@ -4535,7 +4544,7 @@ static aterm_appl gstcTraverseVarConsTypeDN(
         mCRL2log(debug) << "The result of casting is (2)" << core::pp_deprecated(NewParList) << "" << std::endl;
         if (NewParList.size()>1)
         {
-          NewParList=ATmakeList1(gstcMinType(NewParList));
+          NewParList=make_list<aterm>(gstcMinType(NewParList));
         }
       }
 
@@ -4927,7 +4936,7 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     if (aterm()!=gstcTypeMatchA(Type,sort_pos::pos()))
     {
       aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_nat::cnat(),ATmakeList1(*Par));
+      *Par=gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(*Par));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4947,7 +4956,7 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     if (aterm()!=gstcTypeMatchA(Type,sort_pos::pos()))
     {
       aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_int::cint(),ATmakeList1(gsMakeDataAppl(sort_nat::cnat(),ATmakeList1(*Par))));
+      *Par=gsMakeDataAppl(sort_int::cint(),make_list<aterm>(gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(*Par))));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4958,7 +4967,7 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     if (aterm()!=gstcTypeMatchA(Type,sort_nat::nat()))
     {
       aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_int::cint(),ATmakeList1(*Par));
+      *Par=gsMakeDataAppl(sort_int::cint(),make_list<aterm>(*Par));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4978,8 +4987,8 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     if (aterm()!=gstcTypeMatchA(Type,sort_pos::pos()))
     {
       aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2(gsMakeDataAppl(sort_int::cint(),
-                          ATmakeList1(gsMakeDataAppl(sort_nat::cnat(),ATmakeList1(*Par)))),
+      *Par=gsMakeDataAppl(sort_real::creal(),make_list<aterm>(gsMakeDataAppl(sort_int::cint(),
+                          make_list<aterm>(gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(*Par)))),
                           (aterm_appl)sort_pos::c1()));
       if (warn_upcasting)
       {
@@ -4991,7 +5000,7 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     if (aterm()!=gstcTypeMatchA(Type,sort_nat::nat()))
     {
       aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2(gsMakeDataAppl(sort_int::cint(),ATmakeList1(*Par)),
+      *Par=gsMakeDataAppl(sort_real::creal(),make_list<aterm>(gsMakeDataAppl(sort_int::cint(),make_list<aterm>(*Par)),
                           (aterm_appl)(sort_pos::c1())));
       if (warn_upcasting)
       {
@@ -5003,7 +5012,7 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     if (aterm()!=gstcTypeMatchA(Type,sort_int::int_()))
     {
       aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2(*Par,
+      *Par=gsMakeDataAppl(sort_real::creal(),make_list<aterm>(*Par,
                           (aterm_appl)data_expression(sort_pos::c1())));
       if (warn_upcasting)
       {
@@ -5896,9 +5905,7 @@ static aterm_appl gstcMatchIf(aterm_appl Type)
     return aterm_appl();
   }
 
-  // Note that the push_fronts below reverse the type, which is bool#Res#Res.
-  return gsMakeSortArrow(push_front<aterm>(push_front<aterm>(push_front<aterm>(aterm_list(),Res),Res),sort_bool::bool_()),
-                         Res);
+  return gsMakeSortArrow(make_list<aterm>(sort_bool::bool_(),Res,Res),Res);
 }
 
 static aterm_appl gstcMatchEqNeqComparison(aterm_appl Type)
@@ -5919,7 +5926,7 @@ static aterm_appl gstcMatchEqNeqComparison(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(Arg,Arg),sort_bool::bool_());
+  return gsMakeSortArrow(make_list<aterm>(Arg,Arg),sort_bool::bool_());
 }
 
 static aterm_appl gstcMatchListOpCons(aterm_appl Type)
@@ -5959,7 +5966,7 @@ static aterm_appl gstcMatchListOpCons(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(Res,static_cast<aterm_appl>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
+  return gsMakeSortArrow(make_list<aterm>(Res,static_cast<aterm_appl>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
 }
 
 static aterm_appl gstcMatchListOpSnoc(aterm_appl Type)
@@ -6000,7 +6007,7 @@ static aterm_appl gstcMatchListOpSnoc(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(static_cast<aterm_appl>(sort_list::list(sort_expression(Res))),Res),sort_list::list(sort_expression(Res)));
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_list::list(sort_expression(Res))),Res),sort_list::list(sort_expression(Res)));
 }
 
 static aterm_appl gstcMatchListOpConcat(aterm_appl Type)
@@ -6049,7 +6056,7 @@ static aterm_appl gstcMatchListOpConcat(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(static_cast<aterm_appl>(sort_list::list(sort_expression(Res))),
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_list::list(sort_expression(Res))),
        static_cast<aterm_appl>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
 }
 
@@ -6079,7 +6086,7 @@ static aterm_appl gstcMatchListOpEltAt(aterm_appl Type)
 
   //assert((gsIsSortNat(ATAgetFirst(Args.tail())));
 
-  return gsMakeSortArrow(ATmakeList2(static_cast<aterm_appl>(sort_list::list(sort_expression(Res))),
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_list::list(sort_expression(Res))),
                static_cast<aterm_appl>(sort_nat::nat())),Res);
 }
 
@@ -6106,7 +6113,7 @@ static aterm_appl gstcMatchListOpHead(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList1(static_cast<aterm_appl>(sort_list::list(sort_expression(Res)))),Res);
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_list::list(sort_expression(Res)))),Res);
 }
 
 static aterm_appl gstcMatchListOpTail(aterm_appl Type)
@@ -6138,7 +6145,7 @@ static aterm_appl gstcMatchListOpTail(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList1(static_cast<aterm_appl>(sort_list::list(sort_expression(Res)))),
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_list::list(sort_expression(Res)))),
                    sort_list::list(sort_expression(Res)));
 }
 
@@ -6175,7 +6182,7 @@ static aterm_appl gstcMatchSetOpSet2Bag(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList1(static_cast<aterm_appl>(sort_set::set_(sort_expression(Arg)))),
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_set::set_(sort_expression(Arg)))),
                   sort_bag::bag(sort_expression(Arg)));
 }
 
@@ -6206,7 +6213,7 @@ static aterm_appl gstcMatchListSetBagOpIn(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(Arg,Arg2.set_argument(Arg,1)),sort_bool::bool_());
+  return gsMakeSortArrow(make_list<aterm>(Arg,Arg2.set_argument(Arg,1)),sort_bool::bool_());
 }
 
 static aterm_appl gstcMatchSetBagOpUnionDiffIntersect(aterm_appl Type)
@@ -6266,7 +6273,7 @@ static aterm_appl gstcMatchSetBagOpUnionDiffIntersect(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(Res,Res),Res);
+  return gsMakeSortArrow(make_list<aterm>(Res,Res),Res);
 }
 
 static aterm_appl gstcMatchSetOpSetCompl(aterm_appl Type)
@@ -6307,7 +6314,7 @@ static aterm_appl gstcMatchSetOpSetCompl(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList1(static_cast<aterm_appl>(sort_set::set_(sort_expression(Res)))),sort_set::set_(sort_expression(Res)));
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_set::set_(sort_expression(Res)))),sort_set::set_(sort_expression(Res)));
 }
 
 //Bags
@@ -6343,7 +6350,7 @@ static aterm_appl gstcMatchBagOpBag2Set(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList1(static_cast<aterm_appl>(sort_bag::bag(sort_expression(Arg)))),sort_set::set_(sort_expression(Arg)));
+  return gsMakeSortArrow(make_list<aterm>(static_cast<aterm_appl>(sort_bag::bag(sort_expression(Arg)))),sort_set::set_(sort_expression(Arg)));
 }
 
 static aterm_appl gstcMatchBagOpBagCount(aterm_appl Type)
@@ -6384,7 +6391,7 @@ static aterm_appl gstcMatchBagOpBagCount(aterm_appl Type)
     return aterm_appl();
   }
 
-  return gsMakeSortArrow(ATmakeList2(Arg,static_cast<aterm_appl>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
+  return gsMakeSortArrow(make_list<aterm>(Arg,static_cast<aterm_appl>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
 }
 
 
@@ -6426,8 +6433,7 @@ static aterm_appl gstcMatchFuncUpdate(aterm_appl Type)
     return aterm_appl();
   }
 
-  // The push_fronts in the line below reverse the order. The type is Arg1#B#A.
-  return gsMakeSortArrow(push_front<aterm>(push_front<aterm>(push_front<aterm>(aterm_list(),B),A),Arg1),Arg1);
+  return gsMakeSortArrow(make_list<aterm>(Arg1,A,B),Arg1);
 }
 
 static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Arguments, aterm_list ArgumentTypes)
@@ -6443,7 +6449,7 @@ static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Argument
   }
   else
   {
-    CandidateList=ATmakeList1(CandidateType);
+    CandidateList=make_list<aterm>(CandidateType);
   }
 
   aterm_list NewCandidateList;

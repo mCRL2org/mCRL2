@@ -45,12 +45,12 @@ void save_pbes(const pbes<>& pbes_spec,
     {
       if (aterm_ascii)
       {
-        mCRL2log(log::verbose) << "Saving result in ATerm ascii format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in aterm ascii format..." << std::endl;
         pbes_spec.save(outfilename, false);
       }
       else
       {
-        mCRL2log(log::verbose) << "Saving result in ATerm binary format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in aterm binary format..." << std::endl;
         pbes_spec.save(outfilename, true);
       }
       break;

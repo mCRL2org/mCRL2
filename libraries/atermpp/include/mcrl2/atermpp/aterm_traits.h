@@ -26,9 +26,9 @@ namespace atermpp
 template < typename T >
 struct non_aterm_traits
 {
-  /// \brief Returns the ATerm that corresponds to the term t.
+  /// \brief Returns the aterm that corresponds to the term t.
   /// \param t A term
-  /// \return The ATerm that corresponds to the term t.
+  /// \return The aterm that corresponds to the term t.
   static T term(const T& t)
   {
     return t;
@@ -42,7 +42,7 @@ struct select_traits_base
 };
 
 /// \brief Traits class for terms. It is used to specify how the term interacts
-/// with the garbage collector, and how it can be converted to an ATerm.
+/// with the garbage collector, and how it can be converted to an aterm.
 template <typename T>
 struct aterm_traits: public select_traits_base< T >::base_type
   {};

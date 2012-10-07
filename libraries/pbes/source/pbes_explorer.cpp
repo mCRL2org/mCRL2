@@ -1108,8 +1108,8 @@ std::string explorer::data_to_string(const data::data_expression& e) {
 
 
 data::data_expression explorer::string_to_data(const std::string& s) {
-    ATerm t = atermpp::read_from_string(s);
-    data::data_expression value = atermpp::aterm_appl(static_cast<ATermAppl>(t));
+    aterm t = atermpp::read_from_string(s);
+    data::data_expression value = atermpp::aterm_appl(static_cast<aterm_appl>(t));
     return pgg->rewrite_and_simplify_expression(value);
 }
 

@@ -115,7 +115,7 @@ std::string unquote(aterm_string t)
 /* template <>
 struct aterm_traits<aterm_string>
 {
-  static ATerm term(const aterm_string& t)
+  static aterm term(const aterm_string& t)
   {
     return t.term();
   }

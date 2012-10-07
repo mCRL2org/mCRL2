@@ -328,7 +328,7 @@ bool StandardSimulator::match_trace_recursively(const size_t pos, size_t &culpri
   // outgoing transitions of the current states in local data structures.
   std::vector < state > local_states;
   std::vector < multi_action > local_actions;
-  ATerm NewState;
+  aterm NewState;
   while (nextstategen->next(ma,&NewState))
   {
     local_states.push_back(nextstate->make_new_state_vector(NewState));
@@ -413,7 +413,7 @@ void StandardSimulator::UpdateTransitions()
   next_states.clear();
   next_actions.clear();
   mcrl2::lps::multi_action ma;
-  ATerm NewState;
+  aterm NewState;
   while (nextstategen->next(ma,&NewState))
   {
     next_states.push_back(nextstate->make_new_state_vector(NewState));

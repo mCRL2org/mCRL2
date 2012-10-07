@@ -677,7 +677,7 @@ bool isValidRewriteRule(const data_equation &data_eqn)
   return false; // compiler warning
 }
 
-std::vector <AFun> apples;
+std::vector <atermpp::function_symbol> apples;
 
 /*************  Below the functions toInner and fromInner are being defined *********************/
 

@@ -191,7 +191,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
   {
     mCRL2log(log::debug1) << "visit " << data::pp(x) << "\n";
 
-    // TODO: this code contains too much conversion between vectors and ATerm lists
+    // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
     split_parameters(v, m_index_map, finite_parameters, infinite_parameters);

@@ -158,7 +158,7 @@ struct builder
 #ifdef BOOST_MSVC
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #else
-  // ATerm traversal
+  // aterm traversal
   template <typename T>
   T operator()(const T& x,
                typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
@@ -168,7 +168,7 @@ struct builder
     return visit_copy(x);
   }
 
-  // non-ATerm traversal
+  // non-aterm traversal
   template <typename T>
   void operator()(T& x,
                   typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0

@@ -29,7 +29,7 @@ using std::cout;
 
 using namespace mcrl2::lts;
 
-//Global precondition: the ATerm library has been initialised
+//Global precondition: the aterm library has been initialised
 
 //external declarations
 int fsmyyparse(void);          /* declared in fsmparser.cpp */
@@ -106,7 +106,7 @@ Number     [0]|([1-9][0-9]*)
 void concrete_fsm_lexer::processId()
 {
   posNo += YYLeng();
-  // fsmyylval.result_string = ATmakeAppl0( AFun( YYText(), 0, ATtrue ) );
+  // fsmyylval.result_string = ATmakeAppl0( function_symbol( YYText(), 0, ATtrue ) );
   // fsmyylval.result_string = YYText();
   fsmyylval = static_cast<std::string>(YYText());
 }
@@ -118,7 +118,7 @@ void concrete_fsm_lexer::processQuoted()
   value = value.substr( 1, value.length() - 2 );
   fsmyylval = value;
   // fsmyylval.result_string = value;
-  // fsmyylval.result_string = ATmakeAppl0( AFun( value.c_str(), 0, ATtrue ) );
+  // fsmyylval.result_string = ATmakeAppl0( function_symbol( value.c_str(), 0, ATtrue ) );
 }
 
 void concrete_fsm_lexer::processNumber()
@@ -182,8 +182,8 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts_fsm_t &l)
 
   /* protect_table = ATindexedSetCreate(10000,50);
 
-  const_ATtype = AFun( "Type", 2, ATfalse );
-  const_ATvalue = AFun( "Value", 2, ATfalse );
+  const_ATtype = function_symbol( "Type", 2, ATfalse );
+  const_ATvalue = function_symbol( "Value", 2, ATfalse );
   // stateVector = ATempty;
   valueTable = ATempty;
   stateId = ATempty;

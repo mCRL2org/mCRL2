@@ -48,7 +48,7 @@ class pbes_expression_with_variables: public pbes_expression
 
     /// \brief Constructor. Creates a data expression with an empty sequence of variables.
     /// \param term A term
-    /* pbes_expression_with_variables(ATermAppl term)
+    /* pbes_expression_with_variables(aterm_appl term)
       : pbes_expression(term)
     {} */
 

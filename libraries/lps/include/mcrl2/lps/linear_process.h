@@ -199,8 +199,8 @@ class linear_process
     }
 };
 
-/// \brief Conversion to ATermAppl.
-/// \return The action summand converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The action summand converted to aterm format.
 inline
 atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 {

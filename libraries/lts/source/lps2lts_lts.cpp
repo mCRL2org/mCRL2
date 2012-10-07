@@ -63,7 +63,7 @@ void lps2lts_lts::open_lts(const char* filename, lps2lts_lts_options& opts)
   }
 }
 
-void lps2lts_lts::save_initial_state(size_t idx, ATerm state)
+void lps2lts_lts::save_initial_state(size_t idx, aterm state)
 {
   initial_state = idx;
   switch (lts_opts.outformat)
@@ -75,21 +75,21 @@ void lps2lts_lts::save_initial_state(size_t idx, ATerm state)
       break;
     default:
     {
-      bool is_new;
-      const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
-      if (is_new /* && lts_opts.outinfo */)
+      // const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
+      std::pair<size_t, bool> t= aterm2state.put(state);
+      if (t.second /* && lts_opts.outinfo */)
       {
         const size_t u = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(state)));
-        assert(u==t);
+        assert(u==t.first);
         static_cast <void>(u); // Avoid a warning when compiling in non debug mode.
       }
-      generic_lts.set_initial_state(t);
+      generic_lts.set_initial_state(t.first);
     }
     break;
   }
 }
 
-void lps2lts_lts::save_transition(size_t idx_from, ATerm from, const mcrl2::lps::multi_action action, size_t idx_to, ATerm to)
+void lps2lts_lts::save_transition(size_t idx_from, aterm from, const mcrl2::lps::multi_action action, size_t idx_to, aterm to)
 {
   switch (lts_opts.outformat)
   {
@@ -110,29 +110,31 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, const mcrl2::lps:
       break;
     default:
     {
-      bool is_new;
-      const size_t from_state = ATindexedSetPut(aterm2state,from,&is_new);
-      if (is_new /* && lts_opts.outinfo */)
+      // const size_t from_state = ATindexedSetPut(aterm2state,from,&is_new);
+      std::pair<size_t, bool> from_state = aterm2state.put(from);
+      if (from_state.second /* && lts_opts.outinfo */)
       {
         const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(from)));
-        assert(t==from_state);
+        assert(t==from_state.first);
         static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
       }
-      const size_t to_state = ATindexedSetPut(aterm2state,to,&is_new);
-      if (is_new /* && lts_opts.outinfo */)
+      // const size_t to_state = ATindexedSetPut(aterm2state,to,&is_new);
+      std::pair<size_t, bool> to_state = aterm2state.put(to);
+      if (to_state.second /* && lts_opts.outinfo */)
       {
         const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(to)));
-        assert(t==to_state);
+        assert(t==to_state.first);
         static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
       }
-      const size_t label = ATindexedSetPut(aterm2label,(ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(action),&is_new);
-      if (is_new)
+      // const size_t label = ATindexedSetPut(aterm2label,(aterm)(aterm_appl)mcrl2::lps::detail::multi_action_to_aterm(action),&is_new);
+      std::pair<size_t, bool> label = aterm2label.put(mcrl2::lps::detail::multi_action_to_aterm(action));
+      if (label.second)
       {
-        const size_t t = generic_lts.add_action((ATerm)(ATermAppl)mcrl2::lps::detail::multi_action_to_aterm(action), action.actions().empty());
-        assert(t==label);
+        const size_t t = generic_lts.add_action((aterm)(aterm_appl)mcrl2::lps::detail::multi_action_to_aterm(action), action.actions().empty());
+        assert(t==label.first);
         static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
       }
-      generic_lts.add_transition(transition(from_state,label,to_state));
+      generic_lts.add_transition(transition(from_state.first,label.first,to_state.first));
     }
     break;
   }

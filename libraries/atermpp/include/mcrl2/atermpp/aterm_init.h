@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_init.h
-/// \brief Initialization of the ATerm Library.
+/// \brief Initialization of the aterm Library.
 
 #ifndef MCRL2_ATERMPP_ATERM_INIT_H
 #define MCRL2_ATERMPP_ATERM_INIT_H
@@ -18,7 +18,7 @@
 
 namespace atermpp
 {
-/// \brief Initialize the ATerm++ Library. The specified argument t is used to mark the
+/// \brief Initialize the aterm++ Library. The specified argument t is used to mark the
 /// the bottom of the program stack.
 
 void aterm_init();

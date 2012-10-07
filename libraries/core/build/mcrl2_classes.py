@@ -3,7 +3,7 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 # This file contains tables that are used to generate classes and traversal functions
-# for these classes. A prerequisite is that each class has a corresponding ATerm
+# for these classes. A prerequisite is that each class has a corresponding aterm
 # representation (the first column of each table). The second column contains the
 # constructor of the classes.
 
@@ -238,7 +238,7 @@ def indent_text(text, indent):
 # const core::identifier_string& name
 #
 # self.modifiers: ['const', '&', '*'] etc.
-# self.aterm: The corresponding ATerm (default: None)
+# self.aterm: The corresponding aterm (default: None)
 class Parameter:
     def __init__(self, name, type, modifiers, namespace):
         self.name_ = name
@@ -254,7 +254,7 @@ class Parameter:
 
     # Returns true if the type is a list
     #
-    # TODO: make this test accurate using the ATerm grammar
+    # TODO: make this test accurate using the aterm grammar
     def is_list(self):
         return self.type(False).endswith('_list')
 
@@ -289,7 +289,7 @@ class Parameter:
     def name(self):
         return self.name_
 
-    # Returns the corresponding ATerm of the parameter, or None if no such term exists
+    # Returns the corresponding aterm of the parameter, or None if no such term exists
     #
     def aterm(self):
         return self.aterm_
@@ -537,7 +537,7 @@ class OverloadedConstructor(Constructor):
             text = re.sub('<INLINE>', '', text)
         return self.expand_text(text)
 
-# Represents a class constructor taking an ATerm as argument
+# Represents a class constructor taking an aterm as argument
 class ATermConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
@@ -585,7 +585,7 @@ class ATermConstructor(Constructor):
 #
 # ActTrue   | true_()  | The value true for action formulas
 #
-# self.aterm:       the name of the corresponding ATerm
+# self.aterm:       the name of the corresponding aterm
 # self.constructor: the constructor of the class
 # self.description: a string description of the class
 class Class:
@@ -734,7 +734,7 @@ class Class:
             return_type = extract_type(p[0].strip())
             name = p[2].strip()
             arg = 'arg' + str(n)
-            # TODO: this check for a list is unsafe; the ATerm grammar should be used to make it precise
+            # TODO: this check for a list is unsafe; the aterm grammar should be used to make it precise
             if return_type.endswith('list'):
                 arg = 'list_' + arg
             result.append(MemberFunction(self.classname(), return_type, name, arg))

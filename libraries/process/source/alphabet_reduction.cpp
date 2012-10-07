@@ -32,7 +32,7 @@ namespace mcrl2
     namespace detail
     {
 
-      static AFun afunPair;
+      static atermpp::function_symbol afunPair;
 
       static aterm_appl Pair_allow(atermpp::term_list < core::identifier_string_list > ma1, process_identifier ma2)
       {
@@ -2296,7 +2296,7 @@ namespace mcrl2
     {
       mCRL2log(verbose) << "applying alphabet reductions...\n";
       //create the tables
-      detail::afunPair=AFun("p_allow",2);
+      detail::afunPair=atermpp::function_symbol("p_allow",2);
 
       //fill in tables
       for (process_equation_list::const_iterator pr=equations.begin(); pr!=equations.end(); ++pr)

@@ -159,8 +159,8 @@ class boolean_equation_system
       core::detail::save_aterm(t, filename, binary);
     }
 
-    /// \brief Conversion to ATermAppl.
-    /// \return An ATerm representation of the boolean equation system
+    /// \brief Conversion to aterm_appl.
+    /// \return An aterm representation of the boolean equation system
     operator atermpp::aterm_appl() const
     {
       atermpp::aterm_list equations(m_equations.begin(), m_equations.end());
@@ -211,8 +211,8 @@ bool operator==(const boolean_equation_system<Container>& x, const boolean_equat
 	return x.equations() == y.equations() && x.initial_state() == y.initial_state();
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The boolean equation system converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The boolean equation system converted to aterm format.
 template <typename Container>
 atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system<Container>& p)
 {

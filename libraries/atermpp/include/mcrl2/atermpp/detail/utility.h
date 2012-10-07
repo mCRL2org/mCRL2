@@ -22,7 +22,7 @@ namespace atermpp
 namespace detail
 {
 
-/// \brief Converts a string to an ATerm string
+/// \brief Converts a string to an aterm string
 /// \param s A string
 /// \return The converted string
 inline

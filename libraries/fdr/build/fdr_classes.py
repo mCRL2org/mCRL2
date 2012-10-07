@@ -3,7 +3,7 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 # This file contains tables that are used to generate classes and traversal functions
-# for these classes. A prerequisite is that each class has a corresponding ATerm
+# for these classes. A prerequisite is that each class has a corresponding aterm
 # representation (the first column of each table). The second column contains the
 # constructor of the classes. If the name of the class has a postfix between brackets
 # like variable[_base] then the generated class will be called variable_base, but the

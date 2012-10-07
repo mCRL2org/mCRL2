@@ -27,9 +27,9 @@ namespace core
 namespace detail
 {
 
-bool gsOccurs(const ATerm &Elt, const ATerm &t)
+bool gsOccurs(const aterm &Elt, const aterm &t)
 {
-  ATerm Term=t;
+  aterm Term=t;
   bool Result = false;
   if (Elt==Term)
   {
@@ -40,19 +40,19 @@ bool gsOccurs(const ATerm &Elt, const ATerm &t)
     // check occurrences of Elt in the arguments/elements of Term
     if (Term.type() == AT_APPL)
     {
-      AFun Head = Term.function();
+      function_symbol Head = Term.function();
       const size_t NrArgs = Head.arity();
       for (size_t i = 0; i < NrArgs && !Result; i++)
       {
-        Result = gsOccurs(Elt, ((ATermAppl) Term)(i));
+        Result = gsOccurs(Elt, ((aterm_appl) Term)(i));
       }
     }
     else if (Term.type() == AT_LIST)
     {
-      while (!((ATermList) Term).empty() && !Result)
+      while (!((aterm_list) Term).empty() && !Result)
       {
-        Result = gsOccurs(Elt, ((ATermList) Term).front());
-        Term = ((ATermList) Term).tail();
+        Result = gsOccurs(Elt, ((aterm_list) Term).front());
+        Term = ((aterm_list) Term).tail();
       }
     }
   }
@@ -60,10 +60,10 @@ bool gsOccurs(const ATerm &Elt, const ATerm &t)
 }
 
 
-ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSuffix)
+aterm_appl gsFreshString2ATermAppl(const char* s, const aterm &Term, bool TryNoSuffix)
 {
   bool found = false;
-  ATermAppl NewTerm = gsString2ATermAppl(s);
+  aterm_appl NewTerm = gsString2ATermAppl(s);
   if (TryNoSuffix)
   {
     //try "s"
@@ -86,9 +86,9 @@ ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSu
   }
   else
   {
-    //there is no fresh ATermAppl "si", with 0 <= i < INT_MAX
-    mCRL2log(log::error) << "cannot generate fresh ATermAppl with prefix " << s << std::endl;
-    return ATermAppl();
+    //there is no fresh aterm_appl "si", with 0 <= i < INT_MAX
+    mCRL2log(log::error) << "cannot generate fresh aterm_appl with prefix " << s << std::endl;
+    return aterm_appl();
   }
 }
 

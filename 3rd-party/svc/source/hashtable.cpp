@@ -22,9 +22,9 @@
 /*
  * This module implements a hash table for storing mCRL states,
  * represented as term-number pairs. All the states stored in a
- * table are protected by being inserted in a protected ATerm
+ * table are protected by being inserted in a protected aterm
  * list constructed with "ins" and "emt". The hashing function
- * assumes that each ATerm address is unique. The operations
+ * assumes that each aterm address is unique. The operations
  * provided are insertion and membership.
  */
 
@@ -35,11 +35,11 @@
    - hash table is parameter instead of global variable
    - errors are flagged by return value instead of error message
    Changes per 1/5/00 by Izak van Langevelde:
-   - use the new ATerm lib with indexed sets*/
+   - use the new aterm lib with indexed sets*/
 
 #include <svc/hashtable.h>
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 
 /* ======= Initialize the hash table ======= */
@@ -58,19 +58,20 @@ void HTfree(HTable* table)
   PTfree(&table->pointers);
 }
 
-unsigned int HTinsert(HTable* table, ATerm a, void* ptr)
+unsigned int HTinsert(HTable* table, aterm a, void* ptr)
 {
-  bool _new;
-  unsigned int ret;
 
-  ret= (unsigned int)ATindexedSetPut(table->terms, a, &_new);
+  // ret= (unsigned int)ATindexedSetPut(table->terms, a, &_new);
+
+  unsigned int ret= (unsigned int)table->terms.put(a).first; 
+
   PTput(&table->pointers,ret,ptr);
 
   return ret;
 }
 
 
-int HTmember(HTable* table, ATerm a, long* pn)
+int HTmember(HTable* table, aterm a, long* pn)
 {
   int index;
   index=(int)table->terms.index(a);
@@ -90,7 +91,7 @@ int HTmember(HTable* table, ATerm a, long* pn)
 /*----------------------------------------------------------*/
 /* Get the term belonging to an index */
 
-ATerm HTgetTerm(HTable* table, long n)
+aterm HTgetTerm(HTable* table, long n)
 {
 
   return table->terms.get(n);

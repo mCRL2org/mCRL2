@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/detail/aterm_io.h
-/// \brief Load a file containing an ATerm.
+/// \brief Load a file containing an aterm.
 
 #ifndef MCRL2_CORE_DETAIL_ATERM_IO_H
 #define MCRL2_CORE_DETAIL_ATERM_IO_H
@@ -31,7 +31,7 @@ namespace detail
 
 using namespace atermpp;
 
-/// \brief Loads an ATerm from the given file, or from stdin if filename is the empty string.
+/// \brief Loads an aterm from the given file, or from stdin if filename is the empty string.
 /// If reading fails an exception is thrown.
 /// \param filename A string
 /// \return The loaded term
@@ -65,12 +65,12 @@ aterm load_aterm(const std::string& filename)
   }
   if (term == aterm())
   {
-    throw mcrl2::runtime_error("could not read a valid ATerm from " + ((stream == stdin)?"stdin":("'" + filename + "'")));
+    throw mcrl2::runtime_error("could not read a valid aterm from " + ((stream == stdin)?"stdin":("'" + filename + "'")));
   }
   return term;
 }
 
-/// \brief Saves an ATerm to the given file, or to stdout if filename is the empty string.
+/// \brief Saves an aterm to the given file, or to stdout if filename is the empty string.
 /// If writing fails an exception is thrown.
 /// \param term A term
 /// \param filename A string
@@ -113,7 +113,7 @@ void save_aterm(aterm term, const std::string& filename, bool binary = true)
   }
   if (result == false)
   {
-    throw mcrl2::runtime_error("could not write ATerm to " + ((stream == stdout)?"stdout":("'" + filename + "'")));
+    throw mcrl2::runtime_error("could not write aterm to " + ((stream == stdout)?"stdout":("'" + filename + "'")));
   }
 }
 

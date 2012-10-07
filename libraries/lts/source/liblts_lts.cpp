@@ -52,7 +52,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
   {
     using namespace mcrl2::data;
     using namespace mcrl2::lts::detail;
-    ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f));
+    aterm_appl state_label=(aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f));
     l.add_state(state_label_lts(state_label));
   }
   else
@@ -74,7 +74,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
       {
         using namespace mcrl2::data;
         using namespace mcrl2::lts::detail;
-        ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i);
+        aterm_appl state_label=(aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) i);
         l.add_state(state_label_lts(state_label));
       }
       else
@@ -85,8 +85,8 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 
     for (size_t i=l.num_action_labels(); i<=(size_t)label; i++)
     {
-      ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-      l.add_action((ATerm) lab,((ATLgetArgument(lab,0)).empty())?true:false);
+      aterm_appl lab = (aterm_appl) SVClabel2ATerm(&f,(SVClabelIndex) i);
+      l.add_action((aterm) lab,((ATLgetArgument(lab,0)).empty())?true:false);
     }
 
     l.add_transition(transition((size_t) from,
@@ -117,7 +117,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
     {
       if (!strncmp(((char*) buf)+8,"   1STL2LRCm",12))
       {
-        ATerm data;
+        aterm data;
         long position = 0;
         for (unsigned char i=0; i<8; i++)
         {
@@ -130,18 +130,18 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         }
         else
         {
-          data::data_specification data_spec(atermpp::aterm_appl(((ATermAppl)data)(0)));
+          data::data_specification data_spec(atermpp::aterm_appl(((aterm_appl)data)(0)));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
-          if (!gsIsNil((ATermAppl)((ATermAppl)data)(1)))
+          if (!gsIsNil((aterm_appl)((aterm_appl)data)(1)))
           {
             // The parameters below have the structure "ParamSpec(variable list);
-            l.set_process_parameters(data::variable_list((ATAgetArgument((ATermAppl)data,1))(0)));
+            l.set_process_parameters(data::variable_list((ATAgetArgument((aterm_appl)data,1))(0)));
           }
-          if (!gsIsNil((ATermAppl)((ATermAppl)data)(2)))
+          if (!gsIsNil((aterm_appl)((aterm_appl)data)(2)))
           {
             // The parameters below have the structure "ActSpec(variable list);
-            l.set_action_labels(lps::action_label_list((ATAgetArgument((ATermAppl)data,2))(0)));
+            l.set_action_labels(lps::action_label_list((ATAgetArgument((aterm_appl)data,2))(0)));
           }
         }
       }
@@ -167,11 +167,11 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 static void add_extra_mcrl2_lts_data(
   const std::string& filename,
   const bool has_data_spec,
-  const ATermAppl data_spec,
+  const aterm_appl data_spec,
   const bool has_params,
-  const ATermList params,
+  const aterm_list params,
   const bool has_act_labels,
-  const ATermList act_labels)
+  const aterm_list act_labels)
 {
   FILE* f = fopen(filename.c_str(),"ab");
   if (f == NULL)
@@ -180,10 +180,10 @@ static void add_extra_mcrl2_lts_data(
     return;
   }
 
-  ATerm arg1 = (ATerm)(has_data_spec?data_spec:gsMakeNil());
-  ATerm arg2 = (ATerm)(has_params?aterm_appl(AFun("ParamSpec",1),(ATerm) params):gsMakeNil());
-  ATerm arg3 = (ATerm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
-  ATerm data = (ATerm) aterm_appl(AFun("mCRL2LTS1",3),arg1,arg2,arg3);
+  aterm arg1 = (aterm)(has_data_spec?data_spec:gsMakeNil());
+  aterm arg2 = (aterm)(has_params?aterm_appl(function_symbol("ParamSpec",1),(aterm) params):gsMakeNil());
+  aterm arg3 = (aterm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
+  aterm data = (aterm) aterm_appl(function_symbol("mCRL2LTS1",3),arg1,arg2,arg3);
 
   /* From the remarks on MSDN:
    *
@@ -260,27 +260,27 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
   SVCsetCreator(&f,const_cast < char* >("liblts (mCRL2)"));
 
   assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
-  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()) : (ATerm)aterm_int(l.initial_state()) ,&b));
+  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (aterm)(aterm_appl)l.state_label(l.initial_state()) : (aterm)aterm_int(l.initial_state()) ,&b));
 
-  SVCparameterIndex param = SVCnewParameter(&f,(ATerm)aterm_list(),&b);
+  SVCparameterIndex param = SVCnewParameter(&f,(aterm)aterm_list(),&b);
 
   const std::vector < transition> &trans=l.get_transitions();
   for (std::vector < transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
   {
     assert(t->from()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->from()) : (ATerm) aterm_int(t->from()) ,&b);
-    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t->label()).aterm_without_time(), &b);
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (aterm)(aterm_appl)l.state_label(t->from()) : (aterm) aterm_int(t->from()) ,&b);
+    SVClabelIndex label = SVCnewLabel(&f, (aterm)l.action_label(t->label()).aterm_without_time(), &b);
     assert(t->to()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->to()) : (ATerm) aterm_int(t->to()) ,&b);
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (aterm)(aterm_appl)l.state_label(t->to()) : (aterm) aterm_int(t->to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 
   SVCclose(&f);
 
 
-  ATermAppl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
-  ATermList params = l.process_parameters();
-  ATermList act_spec = l.action_labels();
+  aterm_appl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
+  aterm_list params = l.process_parameters();
+  aterm_list act_spec = l.action_labels();
   add_extra_mcrl2_lts_data(filename,l.has_data(),data_spec,l.has_process_parameters(),params,l.has_action_labels(),act_spec);
 }
 

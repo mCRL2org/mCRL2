@@ -689,7 +689,7 @@ boolean_expression join_and(FwdIt first, FwdIt last)
 /* inline bool
 operator<(const boolean_expression& x, const boolean_expression& y)
 {
-  return ATermAppl(x) < ATermAppl(y);
+  return aterm_appl(x) < aterm_appl(y);
 } */
 
 /// \brief Splits a disjunction into a sequence of operands

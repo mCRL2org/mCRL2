@@ -25,7 +25,7 @@ bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 '''
 
 LIBSTRUCT_MAKE_FUNCTION = '''inline
-ATermAppl gsMake%(name)s(%(parameters)s)
+aterm_appl gsMake%(name)s(%(parameters)s)
 {
   return term_appl<aterm>(function_symbol_%(name)s()%(arguments)s);
 }
@@ -221,7 +221,7 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
         ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
         name  = f.name()
         arity = f.arity()
-#        args = map(lambda x: 'reinterpret_cast<ATerm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<ATerm>(constructList())', f.arguments)
+#        args = map(lambda x: 'reinterpret_cast<aterm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<aterm>(constructList())', f.arguments)
         args = []
         for x in f.arguments:
             if x.repetitions == '':
@@ -331,19 +331,19 @@ def parse_ebnf(filename):
 #---------------------------------------------------------------#
 def postprocess_libstruct(filename):
     src = '''inline
-ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
+aterm_appl gsMakeProcess\(aterm_appl ProcVarId_0, aterm_list DataExpr_1\)
 \{
-  return aterm_appl\(gsAFunProcess\(\), \(ATerm\) ProcVarId_0, \(ATerm\) DataExpr_1\);
+  return aterm_appl\(gsAFunProcess\(\), \(aterm\) ProcVarId_0, \(aterm\) DataExpr_1\);
 \}
 '''
     dest = '''inline
-ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
+aterm_appl gsMakeProcess(aterm_appl ProcVarId_0, aterm_list DataExpr_1)
 {
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  return term_appl<aterm>(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+  assert(ATgetLength((aterm_list)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  return term_appl<aterm>(gsAFunProcess(), (aterm) ProcVarId_0, (aterm) DataExpr_1);
 }
 '''
     text = path(filename).text()

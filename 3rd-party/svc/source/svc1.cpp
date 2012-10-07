@@ -36,7 +36,7 @@
 extern char* _strdup(const char* s);
 #endif
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 int svcErrno;
 
@@ -393,11 +393,11 @@ int svcWriteHeader(ltsFile* file,  struct ltsHeader* header)
 
   if (file->indexFlag)
   {
-    CSwriteIndex(file->csStates, ATerm());
+    CSwriteIndex(file->csStates, aterm());
   }
   else
   {
-    CSwriteATerm(file->csStates, ATerm());
+    CSwriteATerm(file->csStates, aterm());
   }
 
   CSflush(file->csStates);

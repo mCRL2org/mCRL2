@@ -40,7 +40,7 @@ typedef struct _ATermMapping
   aterm term;
   size_t subTermIndex;
   size_t nrOfSubTerms;
-  aterm_list nextPartOfList; /* This is for a ATermList 'nextTerm' optimalization only. */
+  aterm_list nextPartOfList; /* This is for a aterm_list 'nextTerm' optimalization only. */
 } ATermMapping;
 
 typedef struct _BinaryWriter

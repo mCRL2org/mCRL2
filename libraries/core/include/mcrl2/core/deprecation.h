@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/deprecation.h
-/// \brief Function to force garbage collection of the ATerm Library.
+/// \brief Function to force garbage collection of the aterm Library.
 
 #ifndef MCRL2_CORE_DEPRECATION_H__
 #define MCRL2_CORE_DEPRECATION_H__

@@ -48,7 +48,7 @@ std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expre
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v) { return pbes_system::search_variable< pbes_system::pbes_expression >(x, v); }
 //--- end generated pbes_system overloads ---//
 
-// TODO: These should be removed when the ATerm code has been replaced.
+// TODO: These should be removed when the aterm code has been replaced.
 std::string pp(const atermpp::aterm& x) { return x.to_string(); }
 std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
 std::string pp(const core::identifier_string& x) { return core::pp(x); }

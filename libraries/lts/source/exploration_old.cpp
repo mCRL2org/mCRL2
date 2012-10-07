@@ -42,6 +42,41 @@ namespace lts
 namespace old
 {
 
+inline
+aterm_list ATgetSlice(const aterm_list &list_in, const size_t start, const size_t end)
+{
+  size_t i, size;
+  aterm_list result;
+  std::vector<aterm> buffer(end<=start?0:end-start);
+
+  if (end<=start)
+  {
+    return result;
+  }
+
+  size = end-start;
+
+  aterm_list list=list_in;
+  for (i=0; i<start; i++)
+  {
+    list = list.tail();
+  }
+
+  for (i=0; i<size; i++)
+  {
+    buffer[i] = list.front();
+    list = list.tail();
+  }
+
+  for (i=size; i>0; i--)
+  {
+    result = push_front(result, aterm(buffer[i-1]));
+  }
+
+  return result;
+}
+
+
 bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
 {
   using namespace mcrl2;
@@ -231,13 +266,13 @@ bool lps2lts_algorithm::savetrace(
 
   if (extra_state != state_t())
   {
-    tr = push_front<aterm>(tr,ATmakeList2((ATerm)(aterm_appl)mcrl2::lps::detail::multi_action_to_aterm(extra_transition),extra_state));
+    tr = push_front<aterm>(tr,make_list<aterm>(mcrl2::lps::detail::multi_action_to_aterm(extra_transition),extra_state));
   }
 
   while ((ns = backpointers.find(s)) != backpointers.end())
   {
     multi_action trans;
-    ATerm t;
+    aterm t;
     bool priority;
     nsgen = nstate->getNextStates(ns->second,nsgen);
     try
@@ -255,7 +290,7 @@ bool lps2lts_algorithm::savetrace(
       delete nsgen;
       throw e;
     }
-    tr = push_front<aterm>(tr, ATmakeList2((ATerm)(aterm_appl)mcrl2::lps::detail::multi_action_to_aterm(trans),s));
+    tr = push_front<aterm>(tr, make_list<aterm>(mcrl2::lps::detail::multi_action_to_aterm(trans),s));
     s = ns->second;
   }
 
@@ -423,7 +458,7 @@ bool lps2lts_algorithm::search_divergence_recursively(
   vector < state_t > new_states;
   repr_nsgen = nstate->getNextStates(current_state,repr_nsgen);
   multi_action Transition;
-  ATerm NewState;
+  aterm NewState;
   while (repr_nsgen->next(Transition,&NewState))
   {
     if (Transition.actions().empty()) // This is a tau transition.
@@ -523,7 +558,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
       aterm_list nextl;
       repr_nsgen = nstate->getNextStates(v,repr_nsgen);
       multi_action Transition;
-      ATerm NewState;
+      aterm NewState;
       bool prioritised_action;
       while (repr_nsgen->next(Transition,&NewState,&prioritised_action) && prioritised_action)
       {
@@ -549,7 +584,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
         break;
       }
       assert(repr_back.count(v)>0);
-      ATerm backv = repr_back[v];
+      aterm backv = repr_back[v];
       const size_t a = repr_low[backv];
       const size_t b = repr_low[v];
       if (a < b)
@@ -564,7 +599,7 @@ lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
     }
     else
     {
-      ATerm u = nextl.front();
+      aterm u = nextl.front();
       repr_next[v]=nextl.tail();
       const size_t nu = repr_number[u];
       if (nu == 0)
@@ -681,7 +716,7 @@ bool lps2lts_algorithm::generate_lts()
           nsgen = nstate->getNextStates(state,nsgen);
           bool priority;
           multi_action tempTransition;
-          ATerm tempNewState;
+          aterm tempNewState;
           while (!must_abort && nsgen->next(tempTransition,&tempNewState,&priority))
           {
             if (!priority)   // don't store confluent self loops
@@ -738,7 +773,7 @@ bool lps2lts_algorithm::generate_lts()
         atermpp::term_list < action_list > tmp_trans;
         aterm_list tmp_states;
         multi_action Transition;
-        ATerm NewState;
+        aterm NewState;
         state = states.get(current_state);
         check_divergence(state);
         try
@@ -914,7 +949,7 @@ bool lps2lts_algorithm::generate_lts()
         atermpp::term_list < action_list > tmp_trans;
         aterm_list tmp_states;
         multi_action Transition;
-        ATerm NewState;
+        aterm NewState;
 
         check_divergence(state);
 
@@ -1122,7 +1157,7 @@ bool lps2lts_algorithm::generate_lts()
         {
           nsgen = nstate->getNextStates(state,nsgen);
           multi_action Transition;
-          ATerm NewState;
+          aterm NewState;
           bool priority;
           while (!must_abort && nsgen->next(Transition,&NewState,&priority))
           {
@@ -1220,7 +1255,7 @@ bool lps2lts_algorithm::generate_lts()
         state = nsgen->get_state();
         check_divergence(state);
         multi_action Transition;
-        ATerm NewState;
+        aterm NewState;
         bool new_state = false;
         bool add_new_states = (current_state < lgopts->max_states);
         bool state_is_deadlock = !top_trans_seen /* && !nsgen->next(...) */ ;

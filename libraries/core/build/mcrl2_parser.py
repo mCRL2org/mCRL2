@@ -145,9 +145,9 @@ class Argument:
 
     def type(self):
         if self.repetitions == '*' or self.repetitions == '+':
-            return 'ATermList'
+            return 'aterm_list'
         else:
-            return 'ATermAppl'
+            return 'aterm_appl'
 
     def name(self):
         return self.expressions[0].name()

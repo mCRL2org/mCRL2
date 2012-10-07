@@ -193,7 +193,7 @@ int LZwriteInt(BitStream* bs, LZbuffer*, long n)
 }
 
 
-int LZwriteATerm(BitStream* bs, LZbuffer* buffer, ATerm term)
+int LZwriteATerm(BitStream* bs, LZbuffer* buffer, aterm term)
 {
   char* buf;
 
@@ -205,7 +205,7 @@ int LZwriteATerm(BitStream* bs, LZbuffer* buffer, ATerm term)
 }
 
 
-int LZreadATerm(BitStream* bs, LZbuffer* buffer, ATerm* term)
+int LZreadATerm(BitStream* bs, LZbuffer* buffer, aterm* term)
 {
   char* str;
 

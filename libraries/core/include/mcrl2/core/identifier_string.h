@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/identifier_string.h
-/// \brief ATerm representations of identifier strings.
+/// \brief aterm representations of identifier strings.
 
 #ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
 #define MCRL2_BASIC_IDENTIFIER_STRING_H

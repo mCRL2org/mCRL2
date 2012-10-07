@@ -23,14 +23,14 @@ namespace lts
 class queue
 {
   private:
-    std::deque <ATerm> queue_get;
-    std::deque <ATerm> queue_put;
+    std::deque <aterm> queue_get;
+    std::deque <aterm> queue_put;
     size_t queue_size_max;        // This is the maximal allowed size of a queue
     size_t queue_put_count_extra; // This represents the number of elements that
     // did not fit in the queue.
     bool queue_size_fixed;
 
-    ATerm add_to_full_queue(ATerm state)
+    aterm add_to_full_queue(aterm state)
     {
       /* We wish that every state has equal chance of being in the queue.
        * Let N be the size of the queue and M the number of states from which
@@ -68,7 +68,7 @@ class queue
       if ((rand() % (queue_put.size() + queue_put_count_extra)) < queue_put.size())
       {
         size_t pos = rand() % queue_put.size();
-        ATerm old_state = queue_put[pos];
+        aterm old_state = queue_put[pos];
         queue_put[pos] = state;
         return old_state;
       }
@@ -110,7 +110,7 @@ class queue
     }
 
     // Queue
-    ATerm add_to_queue(ATerm state)
+    aterm add_to_queue(aterm state)
     {
       if ((queue_size_fixed) && queue_put.size()>=queue_size_max)
       {
@@ -123,7 +123,7 @@ class queue
       return aterm();
     }
 
-    ATerm get_from_queue()
+    aterm get_from_queue()
     {
       if (queue_get.size()==0)
       {
@@ -131,7 +131,7 @@ class queue
       }
       else
       {
-        ATerm result=queue_get.front();
+        aterm result=queue_get.front();
         queue_get.pop_front();
         return result;
       }

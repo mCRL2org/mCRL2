@@ -294,19 +294,19 @@ class specification_basic_type:public boost::noncopyable
 
     /*****************  store and retrieve basic objects  ******************/
 
-    size_t addObject(ATermAppl o, bool& b)
+    size_t addObject(aterm_appl o, bool& b)
     {
-      bool isnew=false;
-      size_t result=ATindexedSetPut(objectIndexTable,(ATerm)o,&isnew);
-      if (objectdata.size()<=result)
+      // size_t result=ATindexedSetPut(objectIndexTable,(aterm)o,&isnew);
+      std::pair<size_t, bool> result=objectIndexTable.put(o);
+      if (objectdata.size()<=result.first)
       {
-        objectdata.resize(result+1);
+        objectdata.resize(result.first+1);
       }
-      b=isnew?true:false;
-      return result;
+      b=result.second; 
+      return result.first;
     }
 
-    size_t objectIndex(ATermAppl o)
+    size_t objectIndex(aterm_appl o)
     {
       // assert(existsObjectIndex(o) >= 0);
       size_t result=objectIndexTable.index(o);
@@ -445,7 +445,7 @@ class specification_basic_type:public boost::noncopyable
     size_t addMultiAction(const process_expression multiAction, bool& isnew)
     {
       const action_label_list actionnames=getnames(multiAction);
-      size_t n=addObject((ATermAppl)(ATermList)actionnames,isnew);
+      size_t n=addObject((aterm_appl)(aterm_list)actionnames,isnew);
 
       if (isnew)
       {
@@ -453,7 +453,7 @@ class specification_basic_type:public boost::noncopyable
         // of getparameters.
         const variable_list templist=getparameters(multiAction);
         objectdata[n].parameters=templist;
-        // objectdata[n].objectname=identifier_string((ATermAppl)(ATermList)actionnames);
+        // objectdata[n].objectname=identifier_string((aterm_appl)(aterm_list)actionnames);
         objectdata[n].multi_action_names=actionnames;
         objectdata[n].object=multiact;
         // must separate assignment below as

@@ -11,7 +11,7 @@
 #ifndef MCRL2_LIBSTRUCT_CORE_H
 #define MCRL2_LIBSTRUCT_CORE_H
 
-//This file describes the functions that can be used for the internal ATerm
+//This file describes the functions that can be used for the internal aterm
 //structure.
 
 #include <string.h>
@@ -27,16 +27,16 @@ namespace core
 namespace detail
 {
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 inline
 bool operator==(const size_t x, const atermpp::function_symbol& y)
 {
   // return x.name() == y.name() && x.arity() == y.arity() && x.is_quoted() == y.is_quoted();
-  return x == AFun(y).number();
+  return x == function_symbol(y).number();
 }
 
-//Global precondition: the ATerm library has been initialised
+//Global precondition: the aterm library has been initialised
 
 //--- start generated code ---//
 // ActAnd
@@ -1888,809 +1888,809 @@ bool gsIsWhr(const atermpp::aterm_appl& Term)
 }
 
 inline
-ATermAppl gsMakeActAnd(const ATermAppl& ActFrm_0, const ATermAppl& ActFrm_1)
+aterm_appl gsMakeActAnd(const aterm_appl& ActFrm_0, const aterm_appl& ActFrm_1)
 {
   return term_appl<aterm>(function_symbol_ActAnd(), aterm_cast<aterm>(ActFrm_0), aterm_cast<aterm>(ActFrm_1));
 }
 
 inline
-ATermAppl gsMakeActAt(const ATermAppl& ActFrm_0, const ATermAppl& DataExpr_1)
+aterm_appl gsMakeActAt(const aterm_appl& ActFrm_0, const aterm_appl& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_ActAt(), aterm_cast<aterm>(ActFrm_0), aterm_cast<aterm>(DataExpr_1));
 }
 
 inline
-ATermAppl gsMakeActExists(const ATermList& DataVarId_0, const ATermAppl& ActFrm_1)
+aterm_appl gsMakeActExists(const aterm_list& DataVarId_0, const aterm_appl& ActFrm_1)
 {
   return term_appl<aterm>(function_symbol_ActExists(), aterm_cast<aterm>(DataVarId_0), aterm_cast<aterm>(ActFrm_1));
 }
 
 inline
-ATermAppl gsMakeActFalse()
+aterm_appl gsMakeActFalse()
 {
   return term_appl<aterm>(function_symbol_ActFalse());
 }
 
 inline
-ATermAppl gsMakeActForall(const ATermList& DataVarId_0, const ATermAppl& ActFrm_1)
+aterm_appl gsMakeActForall(const aterm_list& DataVarId_0, const aterm_appl& ActFrm_1)
 {
   return term_appl<aterm>(function_symbol_ActForall(), DataVarId_0, ActFrm_1);
 }
 
 inline
-ATermAppl gsMakeActId(const ATermAppl& String_0, const ATermList& SortExpr_1)
+aterm_appl gsMakeActId(const aterm_appl& String_0, const aterm_list& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_ActId(), String_0, SortExpr_1);
 }
 
 inline
-ATermAppl gsMakeActImp(const ATermAppl& ActFrm_0, const ATermAppl& ActFrm_1)
+aterm_appl gsMakeActImp(const aterm_appl& ActFrm_0, const aterm_appl& ActFrm_1)
 {
   return term_appl<aterm>(function_symbol_ActImp(), aterm_cast<aterm>(ActFrm_0), aterm_cast<aterm>(ActFrm_1));
 }
 
 inline
-ATermAppl gsMakeActNot(const ATermAppl& ActFrm_0)
+aterm_appl gsMakeActNot(const aterm_appl& ActFrm_0)
 {
   return term_appl<aterm>(function_symbol_ActNot(), ActFrm_0);
 }
 
 inline
-ATermAppl gsMakeActOr(const ATermAppl& ActFrm_0, const ATermAppl& ActFrm_1)
+aterm_appl gsMakeActOr(const aterm_appl& ActFrm_0, const aterm_appl& ActFrm_1)
 {
   return term_appl<aterm>(function_symbol_ActOr(), aterm_cast<aterm>(ActFrm_0), aterm_cast<aterm>(ActFrm_1));
 }
 
 inline
-ATermAppl gsMakeActSpec(const ATermList& ActId_0)
+aterm_appl gsMakeActSpec(const aterm_list& ActId_0)
 {
   return term_appl<aterm>(function_symbol_ActSpec(), ActId_0);
 }
 
 inline
-ATermAppl gsMakeActTrue()
+aterm_appl gsMakeActTrue()
 {
   return term_appl<aterm>(function_symbol_ActTrue());
 }
 
 inline
-ATermAppl gsMakeAction(const ATermAppl& ActId_0, const ATermList& DataExpr_1)
+aterm_appl gsMakeAction(const aterm_appl& ActId_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_Action(), ActId_0, DataExpr_1);
 }
 
 inline
-ATermAppl gsMakeActionRenameRule(const ATermList& DataVarId_0, const ATermAppl& DataExpr_1, const ATermAppl& ParamIdOrAction_2, const ATermAppl& ActionRenameRuleRHS_3)
+aterm_appl gsMakeActionRenameRule(const aterm_list& DataVarId_0, const aterm_appl& DataExpr_1, const aterm_appl& ParamIdOrAction_2, const aterm_appl& ActionRenameRuleRHS_3)
 {
   return term_appl<aterm>(function_symbol_ActionRenameRule(), DataVarId_0, DataExpr_1, ParamIdOrAction_2, ActionRenameRuleRHS_3);
 }
 
 inline
-ATermAppl gsMakeActionRenameRules(const ATermList& ActionRenameRule_0)
+aterm_appl gsMakeActionRenameRules(const aterm_list& ActionRenameRule_0)
 {
   return term_appl<aterm>(function_symbol_ActionRenameRules(), ActionRenameRule_0);
 }
 
 inline
-ATermAppl gsMakeActionRenameSpec(const ATermAppl& DataSpec_0, const ATermAppl& ActSpec_1, const ATermAppl& ActionRenameRules_2)
+aterm_appl gsMakeActionRenameSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpec_1, const aterm_appl& ActionRenameRules_2)
 {
   return term_appl<aterm>(function_symbol_ActionRenameSpec(), aterm_cast<aterm>(DataSpec_0), aterm_cast<aterm>(ActSpec_1), aterm_cast<aterm>(ActionRenameRules_2));
 }
 
 inline
-ATermAppl gsMakeAllow(const ATermList& MultActName_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeAllow(const aterm_list& MultActName_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Allow(), MultActName_0, ProcExpr_1);
 }
 
 inline
-ATermAppl gsMakeAtTime(const ATermAppl& ProcExpr_0, const ATermAppl& DataExpr_1)
+aterm_appl gsMakeAtTime(const aterm_appl& ProcExpr_0, const aterm_appl& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_AtTime(), aterm_cast<aterm>(ProcExpr_0), aterm_cast<aterm>(DataExpr_1));
 }
 
 inline
-ATermAppl gsMakeBES(const ATermList& BooleanEquation_0, const ATermAppl& BooleanExpression_1)
+aterm_appl gsMakeBES(const aterm_list& BooleanEquation_0, const aterm_appl& BooleanExpression_1)
 {
   return term_appl<aterm>(function_symbol_BES(), BooleanEquation_0, BooleanExpression_1);
 }
 
 inline
-ATermAppl gsMakeBInit(const ATermAppl& ProcExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeBInit(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_BInit(), aterm_cast<aterm>(ProcExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeBagComp()
+aterm_appl gsMakeBagComp()
 {
   return term_appl<aterm>(function_symbol_BagComp());
 }
 
 inline
-ATermAppl gsMakeBinder(const ATermAppl& BindingOperator_0, const ATermList& DataVarId_1, const ATermAppl& DataExpr_2)
+aterm_appl gsMakeBinder(const aterm_appl& BindingOperator_0, const aterm_list& DataVarId_1, const aterm_appl& DataExpr_2)
 {
   return term_appl<aterm>(function_symbol_Binder(), BindingOperator_0, DataVarId_1, DataExpr_2);
 }
 
 inline
-ATermAppl gsMakeBlock(const ATermList& String_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeBlock(const aterm_list& String_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Block(), String_0, ProcExpr_1);
 }
 
 inline
-ATermAppl gsMakeBooleanAnd(const ATermAppl& BooleanExpression_0, const ATermAppl& BooleanExpression_1)
+aterm_appl gsMakeBooleanAnd(const aterm_appl& BooleanExpression_0, const aterm_appl& BooleanExpression_1)
 {
   return term_appl<aterm>(function_symbol_BooleanAnd(), aterm_cast<aterm>(BooleanExpression_0), aterm_cast<aterm>(BooleanExpression_1));
 }
 
 inline
-ATermAppl gsMakeBooleanEquation(const ATermAppl& FixPoint_0, const ATermAppl& BooleanVariable_1, const ATermAppl& BooleanExpression_2)
+aterm_appl gsMakeBooleanEquation(const aterm_appl& FixPoint_0, const aterm_appl& BooleanVariable_1, const aterm_appl& BooleanExpression_2)
 {
   return term_appl<aterm>(function_symbol_BooleanEquation(), aterm_cast<aterm>(FixPoint_0), aterm_cast<aterm>(BooleanVariable_1), aterm_cast<aterm>(BooleanExpression_2));
 }
 
 inline
-ATermAppl gsMakeBooleanFalse()
+aterm_appl gsMakeBooleanFalse()
 {
   return term_appl<aterm>(function_symbol_BooleanFalse());
 }
 
 inline
-ATermAppl gsMakeBooleanImp(const ATermAppl& BooleanExpression_0, const ATermAppl& BooleanExpression_1)
+aterm_appl gsMakeBooleanImp(const aterm_appl& BooleanExpression_0, const aterm_appl& BooleanExpression_1)
 {
   return term_appl<aterm>(function_symbol_BooleanImp(), aterm_cast<aterm>(BooleanExpression_0), aterm_cast<aterm>(BooleanExpression_1));
 }
 
 inline
-ATermAppl gsMakeBooleanNot(const ATermAppl& BooleanExpression_0)
+aterm_appl gsMakeBooleanNot(const aterm_appl& BooleanExpression_0)
 {
   return term_appl<aterm>(function_symbol_BooleanNot(), BooleanExpression_0);
 }
 
 inline
-ATermAppl gsMakeBooleanOr(const ATermAppl& BooleanExpression_0, const ATermAppl& BooleanExpression_1)
+aterm_appl gsMakeBooleanOr(const aterm_appl& BooleanExpression_0, const aterm_appl& BooleanExpression_1)
 {
   return term_appl<aterm>(function_symbol_BooleanOr(), aterm_cast<aterm>(BooleanExpression_0), aterm_cast<aterm>(BooleanExpression_1));
 }
 
 inline
-ATermAppl gsMakeBooleanTrue()
+aterm_appl gsMakeBooleanTrue()
 {
   return term_appl<aterm>(function_symbol_BooleanTrue());
 }
 
 inline
-ATermAppl gsMakeBooleanVariable(const ATermAppl& String_0)
+aterm_appl gsMakeBooleanVariable(const aterm_appl& String_0)
 {
   return term_appl<aterm>(function_symbol_BooleanVariable(), String_0);
 }
 
 inline
-ATermAppl gsMakeChoice(const ATermAppl& ProcExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeChoice(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Choice(), aterm_cast<aterm>(ProcExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeComm(const ATermList& CommExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeComm(const aterm_list& CommExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Comm(), aterm_cast<aterm>(CommExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeCommExpr(const ATermAppl& MultActName_0, const ATermAppl& StringOrNil_1)
+aterm_appl gsMakeCommExpr(const aterm_appl& MultActName_0, const aterm_appl& StringOrNil_1)
 {
   return term_appl<aterm>(function_symbol_CommExpr(), aterm_cast<aterm>(MultActName_0), aterm_cast<aterm>(StringOrNil_1));
 }
 
 inline
-ATermAppl gsMakeConsSpec(const ATermList& OpId_0)
+aterm_appl gsMakeConsSpec(const aterm_list& OpId_0)
 {
   return term_appl<aterm>(function_symbol_ConsSpec(), OpId_0);
 }
 
 inline
-ATermAppl gsMakeDataAppl(const ATermAppl& DataExpr_0, const ATermList& DataExpr_1)
+aterm_appl gsMakeDataAppl(const aterm_appl& DataExpr_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_DataAppl(), aterm_cast<aterm>(DataExpr_0), aterm_cast<aterm>(DataExpr_1));
 }
 
 inline
-ATermAppl gsMakeDataEqn(const ATermList& DataVarId_0, const ATermAppl& DataExpr_1, const ATermAppl& DataExpr_2, const ATermAppl& DataExpr_3)
+aterm_appl gsMakeDataEqn(const aterm_list& DataVarId_0, const aterm_appl& DataExpr_1, const aterm_appl& DataExpr_2, const aterm_appl& DataExpr_3)
 {
   return term_appl<aterm>(function_symbol_DataEqn(), DataVarId_0, DataExpr_1, DataExpr_2, DataExpr_3);
 }
 
 inline
-ATermAppl gsMakeDataEqnSpec(const ATermList& DataEqn_0)
+aterm_appl gsMakeDataEqnSpec(const aterm_list& DataEqn_0)
 {
   return term_appl<aterm>(function_symbol_DataEqnSpec(), DataEqn_0);
 }
 
 inline
-ATermAppl gsMakeDataSpec(const ATermAppl& SortSpec_0, const ATermAppl& ConsSpec_1, const ATermAppl& MapSpec_2, const ATermAppl& DataEqnSpec_3)
+aterm_appl gsMakeDataSpec(const aterm_appl& SortSpec_0, const aterm_appl& ConsSpec_1, const aterm_appl& MapSpec_2, const aterm_appl& DataEqnSpec_3)
 {
   return term_appl<aterm>(function_symbol_DataSpec(), SortSpec_0, ConsSpec_1, MapSpec_2, DataEqnSpec_3);
 }
 
 inline
-ATermAppl gsMakeDataVarId(const ATermAppl& String_0, const ATermAppl& SortExpr_1)
+aterm_appl gsMakeDataVarId(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_DataVarId(), aterm_cast<aterm>(String_0), aterm_cast<aterm>(SortExpr_1));
 }
 
 inline
-ATermAppl gsMakeDataVarIdInit(const ATermAppl& DataVarId_0, const ATermAppl& DataExpr_1)
+aterm_appl gsMakeDataVarIdInit(const aterm_appl& DataVarId_0, const aterm_appl& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_DataVarIdInit(), aterm_cast<aterm>(DataVarId_0), aterm_cast<aterm>(DataExpr_1));
 }
 
 inline
-ATermAppl gsMakeDelta()
+aterm_appl gsMakeDelta()
 {
   return term_appl<aterm>(function_symbol_Delta());
 }
 
 inline
-ATermAppl gsMakeExists()
+aterm_appl gsMakeExists()
 {
   return term_appl<aterm>(function_symbol_Exists());
 }
 
 inline
-ATermAppl gsMakeForall()
+aterm_appl gsMakeForall()
 {
   return term_appl<aterm>(function_symbol_Forall());
 }
 
 inline
-ATermAppl gsMakeGlobVarSpec(const ATermList& DataVarId_0)
+aterm_appl gsMakeGlobVarSpec(const aterm_list& DataVarId_0)
 {
   return term_appl<aterm>(function_symbol_GlobVarSpec(), DataVarId_0);
 }
 
 inline
-ATermAppl gsMakeHide(const ATermList& String_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeHide(const aterm_list& String_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Hide(), String_0, ProcExpr_1);
 }
 
 inline
-ATermAppl gsMakeId(const ATermAppl& String_0)
+aterm_appl gsMakeId(const aterm_appl& String_0)
 {
   return term_appl<aterm>(function_symbol_Id(), String_0);
 }
 
 inline
-ATermAppl gsMakeIdAssignment(const ATermAppl& String_0, const ATermList& IdInit_1)
+aterm_appl gsMakeIdAssignment(const aterm_appl& String_0, const aterm_list& IdInit_1)
 {
   return term_appl<aterm>(function_symbol_IdAssignment(), String_0, IdInit_1);
 }
 
 inline
-ATermAppl gsMakeIdInit(const ATermAppl& String_0, const ATermAppl& DataExpr_1)
+aterm_appl gsMakeIdInit(const aterm_appl& String_0, const aterm_appl& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_IdInit(), aterm_cast<aterm>(String_0), aterm_cast<aterm>(DataExpr_1));
 }
 
 inline
-ATermAppl gsMakeIfThen(const ATermAppl& DataExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeIfThen(const aterm_appl& DataExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_IfThen(), aterm_cast<aterm>(DataExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeIfThenElse(const ATermAppl& DataExpr_0, const ATermAppl& ProcExpr_1, const ATermAppl& ProcExpr_2)
+aterm_appl gsMakeIfThenElse(const aterm_appl& DataExpr_0, const aterm_appl& ProcExpr_1, const aterm_appl& ProcExpr_2)
 {
   return term_appl<aterm>(function_symbol_IfThenElse(), aterm_cast<aterm>(DataExpr_0), aterm_cast<aterm>(ProcExpr_1), aterm_cast<aterm>(ProcExpr_2));
 }
 
 inline
-ATermAppl gsMakeLMerge(const ATermAppl& ProcExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeLMerge(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_LMerge(), aterm_cast<aterm>(ProcExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeLambda()
+aterm_appl gsMakeLambda()
 {
   return term_appl<aterm>(function_symbol_Lambda());
 }
 
 inline
-ATermAppl gsMakeLinProcSpec(const ATermAppl& DataSpec_0, const ATermAppl& ActSpec_1, const ATermAppl& GlobVarSpec_2, const ATermAppl& LinearProcess_3, const ATermAppl& LinearProcessInit_4)
+aterm_appl gsMakeLinProcSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpec_1, const aterm_appl& GlobVarSpec_2, const aterm_appl& LinearProcess_3, const aterm_appl& LinearProcessInit_4)
 {
   return term_appl<aterm>(function_symbol_LinProcSpec(), DataSpec_0, ActSpec_1, GlobVarSpec_2, LinearProcess_3, LinearProcessInit_4);
 }
 
 inline
-ATermAppl gsMakeLinearProcess(const ATermList& DataVarId_0, const ATermList& LinearProcessSummand_1)
+aterm_appl gsMakeLinearProcess(const aterm_list& DataVarId_0, const aterm_list& LinearProcessSummand_1)
 {
   return term_appl<aterm>(function_symbol_LinearProcess(), aterm_cast<aterm>(DataVarId_0), aterm_cast<aterm>(LinearProcessSummand_1));
 }
 
 inline
-ATermAppl gsMakeLinearProcessInit(const ATermList& DataVarIdInit_0)
+aterm_appl gsMakeLinearProcessInit(const aterm_list& DataVarIdInit_0)
 {
   return term_appl<aterm>(function_symbol_LinearProcessInit(), DataVarIdInit_0);
 }
 
 inline
-ATermAppl gsMakeLinearProcessSummand(const ATermList& DataVarId_0, const ATermAppl& DataExpr_1, const ATermAppl& MultActOrDelta_2, const ATermAppl& DataExprOrNil_3, const ATermList& DataVarIdInit_4)
+aterm_appl gsMakeLinearProcessSummand(const aterm_list& DataVarId_0, const aterm_appl& DataExpr_1, const aterm_appl& MultActOrDelta_2, const aterm_appl& DataExprOrNil_3, const aterm_list& DataVarIdInit_4)
 {
   return term_appl<aterm>(function_symbol_LinearProcessSummand(), DataVarId_0, DataExpr_1, MultActOrDelta_2, DataExprOrNil_3, DataVarIdInit_4);
 }
 
 inline
-ATermAppl gsMakeMapSpec(const ATermList& OpId_0)
+aterm_appl gsMakeMapSpec(const aterm_list& OpId_0)
 {
   return term_appl<aterm>(function_symbol_MapSpec(), OpId_0);
 }
 
 inline
-ATermAppl gsMakeMerge(const ATermAppl& ProcExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeMerge(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Merge(), aterm_cast<aterm>(ProcExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeMu()
+aterm_appl gsMakeMu()
 {
   return term_appl<aterm>(function_symbol_Mu());
 }
 
 inline
-ATermAppl gsMakeMultAct(const ATermList& ParamIdOrAction_0)
+aterm_appl gsMakeMultAct(const aterm_list& ParamIdOrAction_0)
 {
   return term_appl<aterm>(function_symbol_MultAct(), ParamIdOrAction_0);
 }
 
 inline
-ATermAppl gsMakeMultActName(const ATermList& String_0)
+aterm_appl gsMakeMultActName(const aterm_list& String_0)
 {
   return term_appl<aterm>(function_symbol_MultActName(), String_0);
 }
 
 inline
-ATermAppl gsMakeNil()
+aterm_appl gsMakeNil()
 {
   return term_appl<aterm>(function_symbol_Nil());
 }
 
 inline
-ATermAppl gsMakeNu()
+aterm_appl gsMakeNu()
 {
   return term_appl<aterm>(function_symbol_Nu());
 }
 
 inline
-ATermAppl gsMakeOpId(const ATermAppl& String_0, const ATermAppl& SortExpr_1)
+aterm_appl gsMakeOpId(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_OpId(), aterm_cast<aterm>(String_0), aterm_cast<aterm>(SortExpr_1));
 }
 
 inline
-ATermAppl gsMakePBES(const ATermAppl& DataSpec_0, const ATermAppl& GlobVarSpec_1, const ATermAppl& PBEqnSpec_2, const ATermAppl& PBInit_3)
+aterm_appl gsMakePBES(const aterm_appl& DataSpec_0, const aterm_appl& GlobVarSpec_1, const aterm_appl& PBEqnSpec_2, const aterm_appl& PBInit_3)
 {
   return term_appl<aterm>(function_symbol_PBES(), DataSpec_0, GlobVarSpec_1, PBEqnSpec_2, PBInit_3);
 }
 
 inline
-ATermAppl gsMakePBESAnd(const ATermAppl& PBExpr_0, const ATermAppl& PBExpr_1)
+aterm_appl gsMakePBESAnd(const aterm_appl& PBExpr_0, const aterm_appl& PBExpr_1)
 {
   return term_appl<aterm>(function_symbol_PBESAnd(), aterm_cast<aterm>(PBExpr_0), aterm_cast<aterm>(PBExpr_1));
 }
 
 inline
-ATermAppl gsMakePBESExists(const ATermList& DataVarId_0, const ATermAppl& PBExpr_1)
+aterm_appl gsMakePBESExists(const aterm_list& DataVarId_0, const aterm_appl& PBExpr_1)
 {
   return term_appl<aterm>(function_symbol_PBESExists(), aterm_cast<aterm>(DataVarId_0), aterm_cast<aterm>(PBExpr_1));
 }
 
 inline
-ATermAppl gsMakePBESFalse()
+aterm_appl gsMakePBESFalse()
 {
   return term_appl<aterm>(function_symbol_PBESFalse());
 }
 
 inline
-ATermAppl gsMakePBESForall(const ATermList& DataVarId_0, const ATermAppl& PBExpr_1)
+aterm_appl gsMakePBESForall(const aterm_list& DataVarId_0, const aterm_appl& PBExpr_1)
 {
   return term_appl<aterm>(function_symbol_PBESForall(), aterm_cast<aterm>(DataVarId_0), aterm_cast<aterm>(PBExpr_1));
 }
 
 inline
-ATermAppl gsMakePBESImp(const ATermAppl& PBExpr_0, const ATermAppl& PBExpr_1)
+aterm_appl gsMakePBESImp(const aterm_appl& PBExpr_0, const aterm_appl& PBExpr_1)
 {
   return term_appl<aterm>(function_symbol_PBESImp(), aterm_cast<aterm>(PBExpr_0), aterm_cast<aterm>(PBExpr_1));
 }
 
 inline
-ATermAppl gsMakePBESNot(const ATermAppl& PBExpr_0)
+aterm_appl gsMakePBESNot(const aterm_appl& PBExpr_0)
 {
   return term_appl<aterm>(function_symbol_PBESNot(), PBExpr_0);
 }
 
 inline
-ATermAppl gsMakePBESOr(const ATermAppl& PBExpr_0, const ATermAppl& PBExpr_1)
+aterm_appl gsMakePBESOr(const aterm_appl& PBExpr_0, const aterm_appl& PBExpr_1)
 {
   return term_appl<aterm>(function_symbol_PBESOr(), aterm_cast<aterm>(PBExpr_0), aterm_cast<aterm>(PBExpr_1));
 }
 
 inline
-ATermAppl gsMakePBESTrue()
+aterm_appl gsMakePBESTrue()
 {
   return term_appl<aterm>(function_symbol_PBESTrue());
 }
 
 inline
-ATermAppl gsMakePBEqn(const ATermAppl& FixPoint_0, const ATermAppl& PropVarDecl_1, const ATermAppl& PBExpr_2)
+aterm_appl gsMakePBEqn(const aterm_appl& FixPoint_0, const aterm_appl& PropVarDecl_1, const aterm_appl& PBExpr_2)
 {
   return term_appl<aterm>(function_symbol_PBEqn(), aterm_cast<aterm>(FixPoint_0), aterm_cast<aterm>(PropVarDecl_1), aterm_cast<aterm>(PBExpr_2));
 }
 
 inline
-ATermAppl gsMakePBEqnSpec(const ATermList& PBEqn_0)
+aterm_appl gsMakePBEqnSpec(const aterm_list& PBEqn_0)
 {
   return term_appl<aterm>(function_symbol_PBEqnSpec(), PBEqn_0);
 }
 
 inline
-ATermAppl gsMakePBInit(const ATermAppl& PropVarInst_0)
+aterm_appl gsMakePBInit(const aterm_appl& PropVarInst_0)
 {
   return term_appl<aterm>(function_symbol_PBInit(), PropVarInst_0);
 }
 
 inline
-ATermAppl gsMakeParamId(const ATermAppl& String_0, const ATermList& DataExpr_1)
+aterm_appl gsMakeParamId(const aterm_appl& String_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_ParamId(), String_0, DataExpr_1);
 }
 
 inline
-ATermAppl gsMakeProcEqn(const ATermAppl& ProcVarId_0, const ATermList& DataVarId_1, const ATermAppl& ProcExpr_2)
+aterm_appl gsMakeProcEqn(const aterm_appl& ProcVarId_0, const aterm_list& DataVarId_1, const aterm_appl& ProcExpr_2)
 {
   return term_appl<aterm>(function_symbol_ProcEqn(), ProcVarId_0, DataVarId_1, ProcExpr_2);
 }
 
 inline
-ATermAppl gsMakeProcEqnSpec(const ATermList& ProcEqn_0)
+aterm_appl gsMakeProcEqnSpec(const aterm_list& ProcEqn_0)
 {
   return term_appl<aterm>(function_symbol_ProcEqnSpec(), ProcEqn_0);
 }
 
 inline
-ATermAppl gsMakeProcSpec(const ATermAppl& DataSpec_0, const ATermAppl& ActSpec_1, const ATermAppl& GlobVarSpec_2, const ATermAppl& ProcEqnSpec_3, const ATermAppl& ProcInit_4)
+aterm_appl gsMakeProcSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpec_1, const aterm_appl& GlobVarSpec_2, const aterm_appl& ProcEqnSpec_3, const aterm_appl& ProcInit_4)
 {
   return term_appl<aterm>(function_symbol_ProcSpec(), DataSpec_0, ActSpec_1, GlobVarSpec_2, ProcEqnSpec_3, ProcInit_4);
 }
 
 inline
-ATermAppl gsMakeProcVarId(const ATermAppl& String_0, const ATermList& SortExpr_1)
+aterm_appl gsMakeProcVarId(const aterm_appl& String_0, const aterm_list& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_ProcVarId(), String_0, SortExpr_1);
 }
 
 inline
-ATermAppl gsMakeProcess(const ATermAppl& ProcVarId_0, const ATermList& DataExpr_1)
+aterm_appl gsMakeProcess(const aterm_appl& ProcVarId_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_Process(), ProcVarId_0, DataExpr_1);
 }
 
 inline
-ATermAppl gsMakeProcessAssignment(const ATermAppl& ProcVarId_0, const ATermList& DataVarIdInit_1)
+aterm_appl gsMakeProcessAssignment(const aterm_appl& ProcVarId_0, const aterm_list& DataVarIdInit_1)
 {
   return term_appl<aterm>(function_symbol_ProcessAssignment(), ProcVarId_0, DataVarIdInit_1);
 }
 
 inline
-ATermAppl gsMakeProcessInit(const ATermAppl& ProcExpr_0)
+aterm_appl gsMakeProcessInit(const aterm_appl& ProcExpr_0)
 {
   return term_appl<aterm>(function_symbol_ProcessInit(), ProcExpr_0);
 }
 
 inline
-ATermAppl gsMakePropVarDecl(const ATermAppl& String_0, const ATermList& DataVarId_1)
+aterm_appl gsMakePropVarDecl(const aterm_appl& String_0, const aterm_list& DataVarId_1)
 {
   return term_appl<aterm>(function_symbol_PropVarDecl(), String_0, DataVarId_1);
 }
 
 inline
-ATermAppl gsMakePropVarInst(const ATermAppl& String_0, const ATermList& DataExpr_1)
+aterm_appl gsMakePropVarInst(const aterm_appl& String_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_PropVarInst(), String_0, DataExpr_1);
 }
 
 inline
-ATermAppl gsMakeRegAlt(const ATermAppl& RegFrm_0, const ATermAppl& RegFrm_1)
+aterm_appl gsMakeRegAlt(const aterm_appl& RegFrm_0, const aterm_appl& RegFrm_1)
 {
   return term_appl<aterm>(function_symbol_RegAlt(), aterm_cast<aterm>(RegFrm_0), aterm_cast<aterm>(RegFrm_1));
 }
 
 inline
-ATermAppl gsMakeRegNil()
+aterm_appl gsMakeRegNil()
 {
   return term_appl<aterm>(function_symbol_RegNil());
 }
 
 inline
-ATermAppl gsMakeRegSeq(const ATermAppl& RegFrm_0, const ATermAppl& RegFrm_1)
+aterm_appl gsMakeRegSeq(const aterm_appl& RegFrm_0, const aterm_appl& RegFrm_1)
 {
   return term_appl<aterm>(function_symbol_RegSeq(), aterm_cast<aterm>(RegFrm_0), aterm_cast<aterm>(RegFrm_1));
 }
 
 inline
-ATermAppl gsMakeRegTrans(const ATermAppl& RegFrm_0)
+aterm_appl gsMakeRegTrans(const aterm_appl& RegFrm_0)
 {
   return term_appl<aterm>(function_symbol_RegTrans(), RegFrm_0);
 }
 
 inline
-ATermAppl gsMakeRegTransOrNil(const ATermAppl& RegFrm_0)
+aterm_appl gsMakeRegTransOrNil(const aterm_appl& RegFrm_0)
 {
   return term_appl<aterm>(function_symbol_RegTransOrNil(), RegFrm_0);
 }
 
 inline
-ATermAppl gsMakeRename(const ATermList& RenameExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeRename(const aterm_list& RenameExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Rename(), aterm_cast<aterm>(RenameExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeRenameExpr(const ATermAppl& String_0, const ATermAppl& String_1)
+aterm_appl gsMakeRenameExpr(const aterm_appl& String_0, const aterm_appl& String_1)
 {
   return term_appl<aterm>(function_symbol_RenameExpr(), aterm_cast<aterm>(String_0), aterm_cast<aterm>(String_1));
 }
 
 inline
-ATermAppl gsMakeSeq(const ATermAppl& ProcExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeSeq(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Seq(), aterm_cast<aterm>(ProcExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeSetBagComp()
+aterm_appl gsMakeSetBagComp()
 {
   return term_appl<aterm>(function_symbol_SetBagComp());
 }
 
 inline
-ATermAppl gsMakeSetComp()
+aterm_appl gsMakeSetComp()
 {
   return term_appl<aterm>(function_symbol_SetComp());
 }
 
 inline
-ATermAppl gsMakeSortArrow(const ATermList& SortExpr_0, const ATermAppl& SortExpr_1)
+aterm_appl gsMakeSortArrow(const aterm_list& SortExpr_0, const aterm_appl& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_SortArrow(), SortExpr_0, SortExpr_1);
 }
 
 inline
-ATermAppl gsMakeSortBag()
+aterm_appl gsMakeSortBag()
 {
   return term_appl<aterm>(function_symbol_SortBag());
 }
 
 inline
-ATermAppl gsMakeSortCons(const ATermAppl& SortConsType_0, const ATermAppl& SortExpr_1)
+aterm_appl gsMakeSortCons(const aterm_appl& SortConsType_0, const aterm_appl& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_SortCons(), aterm_cast<aterm>(SortConsType_0), aterm_cast<aterm>(SortExpr_1));
 }
 
 inline
-ATermAppl gsMakeSortFBag()
+aterm_appl gsMakeSortFBag()
 {
   return term_appl<aterm>(function_symbol_SortFBag());
 }
 
 inline
-ATermAppl gsMakeSortFSet()
+aterm_appl gsMakeSortFSet()
 {
   return term_appl<aterm>(function_symbol_SortFSet());
 }
 
 inline
-ATermAppl gsMakeSortId(const ATermAppl& String_0)
+aterm_appl gsMakeSortId(const aterm_appl& String_0)
 {
   return term_appl<aterm>(function_symbol_SortId(), String_0);
 }
 
 inline
-ATermAppl gsMakeSortList()
+aterm_appl gsMakeSortList()
 {
   return term_appl<aterm>(function_symbol_SortList());
 }
 
 inline
-ATermAppl gsMakeSortRef(const ATermAppl& String_0, const ATermAppl& SortExpr_1)
+aterm_appl gsMakeSortRef(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_SortRef(), aterm_cast<aterm>(String_0), aterm_cast<aterm>(SortExpr_1));
 }
 
 inline
-ATermAppl gsMakeSortSet()
+aterm_appl gsMakeSortSet()
 {
   return term_appl<aterm>(function_symbol_SortSet());
 }
 
 inline
-ATermAppl gsMakeSortSpec(const ATermList& SortDecl_0)
+aterm_appl gsMakeSortSpec(const aterm_list& SortDecl_0)
 {
   return term_appl<aterm>(function_symbol_SortSpec(), SortDecl_0);
 }
 
 inline
-ATermAppl gsMakeSortStruct(const ATermList& StructCons_0)
+aterm_appl gsMakeSortStruct(const aterm_list& StructCons_0)
 {
   return term_appl<aterm>(function_symbol_SortStruct(), StructCons_0);
 }
 
 inline
-ATermAppl gsMakeSortUnknown()
+aterm_appl gsMakeSortUnknown()
 {
   return term_appl<aterm>(function_symbol_SortUnknown());
 }
 
 inline
-ATermAppl gsMakeSortsPossible(const ATermList& SortExpr_0)
+aterm_appl gsMakeSortsPossible(const aterm_list& SortExpr_0)
 {
   return term_appl<aterm>(function_symbol_SortsPossible(), SortExpr_0);
 }
 
 inline
-ATermAppl gsMakeStateAnd(const ATermAppl& StateFrm_0, const ATermAppl& StateFrm_1)
+aterm_appl gsMakeStateAnd(const aterm_appl& StateFrm_0, const aterm_appl& StateFrm_1)
 {
   return term_appl<aterm>(function_symbol_StateAnd(), aterm_cast<aterm>(StateFrm_0), aterm_cast<aterm>(StateFrm_1));
 }
 
 inline
-ATermAppl gsMakeStateDelay()
+aterm_appl gsMakeStateDelay()
 {
   return term_appl<aterm>(function_symbol_StateDelay());
 }
 
 inline
-ATermAppl gsMakeStateDelayTimed(const ATermAppl& DataExpr_0)
+aterm_appl gsMakeStateDelayTimed(const aterm_appl& DataExpr_0)
 {
   return term_appl<aterm>(function_symbol_StateDelayTimed(), DataExpr_0);
 }
 
 inline
-ATermAppl gsMakeStateExists(const ATermList& DataVarId_0, const ATermAppl& StateFrm_1)
+aterm_appl gsMakeStateExists(const aterm_list& DataVarId_0, const aterm_appl& StateFrm_1)
 {
   return term_appl<aterm>(function_symbol_StateExists(), DataVarId_0, StateFrm_1);
 }
 
 inline
-ATermAppl gsMakeStateFalse()
+aterm_appl gsMakeStateFalse()
 {
   return term_appl<aterm>(function_symbol_StateFalse());
 }
 
 inline
-ATermAppl gsMakeStateForall(const ATermList& DataVarId_0, const ATermAppl& StateFrm_1)
+aterm_appl gsMakeStateForall(const aterm_list& DataVarId_0, const aterm_appl& StateFrm_1)
 {
   return term_appl<aterm>(function_symbol_StateForall(), DataVarId_0, StateFrm_1);
 }
 
 inline
-ATermAppl gsMakeStateImp(const ATermAppl& StateFrm_0, const ATermAppl& StateFrm_1)
+aterm_appl gsMakeStateImp(const aterm_appl& StateFrm_0, const aterm_appl& StateFrm_1)
 {
   return term_appl<aterm>(function_symbol_StateImp(), aterm_cast<aterm>(StateFrm_0), aterm_cast<aterm>(StateFrm_1));
 }
 
 inline
-ATermAppl gsMakeStateMay(const ATermAppl& RegFrm_0, const ATermAppl& StateFrm_1)
+aterm_appl gsMakeStateMay(const aterm_appl& RegFrm_0, const aterm_appl& StateFrm_1)
 {
   return term_appl<aterm>(function_symbol_StateMay(), aterm_cast<aterm>(RegFrm_0), aterm_cast<aterm>(StateFrm_1));
 }
 
 inline
-ATermAppl gsMakeStateMu(const ATermAppl& String_0, const ATermList& DataVarIdInit_1, const ATermAppl& StateFrm_2)
+aterm_appl gsMakeStateMu(const aterm_appl& String_0, const aterm_list& DataVarIdInit_1, const aterm_appl& StateFrm_2)
 {
   return term_appl<aterm>(function_symbol_StateMu(), String_0, DataVarIdInit_1, StateFrm_2);
 }
 
 inline
-ATermAppl gsMakeStateMust(const ATermAppl& RegFrm_0, const ATermAppl& StateFrm_1)
+aterm_appl gsMakeStateMust(const aterm_appl& RegFrm_0, const aterm_appl& StateFrm_1)
 {
   return term_appl<aterm>(function_symbol_StateMust(), aterm_cast<aterm>(RegFrm_0), aterm_cast<aterm>(StateFrm_1));
 }
 
 inline
-ATermAppl gsMakeStateNot(const ATermAppl& StateFrm_0)
+aterm_appl gsMakeStateNot(const aterm_appl& StateFrm_0)
 {
   return term_appl<aterm>(function_symbol_StateNot(), StateFrm_0);
 }
 
 inline
-ATermAppl gsMakeStateNu(const ATermAppl& String_0, const ATermList& DataVarIdInit_1, const ATermAppl& StateFrm_2)
+aterm_appl gsMakeStateNu(const aterm_appl& String_0, const aterm_list& DataVarIdInit_1, const aterm_appl& StateFrm_2)
 {
   return term_appl<aterm>(function_symbol_StateNu(), String_0, DataVarIdInit_1, StateFrm_2);
 }
 
 inline
-ATermAppl gsMakeStateOr(const ATermAppl& StateFrm_0, const ATermAppl& StateFrm_1)
+aterm_appl gsMakeStateOr(const aterm_appl& StateFrm_0, const aterm_appl& StateFrm_1)
 {
   return term_appl<aterm>(function_symbol_StateOr(), aterm_cast<aterm>(StateFrm_0), aterm_cast<aterm>(StateFrm_1));
 }
 
 inline
-ATermAppl gsMakeStateTrue()
+aterm_appl gsMakeStateTrue()
 {
   return term_appl<aterm>(function_symbol_StateTrue());
 }
 
 inline
-ATermAppl gsMakeStateVar(const ATermAppl& String_0, const ATermList& DataExpr_1)
+aterm_appl gsMakeStateVar(const aterm_appl& String_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_StateVar(), String_0, DataExpr_1);
 }
 
 inline
-ATermAppl gsMakeStateYaled()
+aterm_appl gsMakeStateYaled()
 {
   return term_appl<aterm>(function_symbol_StateYaled());
 }
 
 inline
-ATermAppl gsMakeStateYaledTimed(const ATermAppl& DataExpr_0)
+aterm_appl gsMakeStateYaledTimed(const aterm_appl& DataExpr_0)
 {
   return term_appl<aterm>(function_symbol_StateYaledTimed(), DataExpr_0);
 }
 
 inline
-ATermAppl gsMakeStructCons(const ATermAppl& String_0, const ATermList& StructProj_1, const ATermAppl& StringOrNil_2)
+aterm_appl gsMakeStructCons(const aterm_appl& String_0, const aterm_list& StructProj_1, const aterm_appl& StringOrNil_2)
 {
   return term_appl<aterm>(function_symbol_StructCons(), String_0, StructProj_1, StringOrNil_2);
 }
 
 inline
-ATermAppl gsMakeStructProj(const ATermAppl& StringOrNil_0, const ATermAppl& SortExpr_1)
+aterm_appl gsMakeStructProj(const aterm_appl& StringOrNil_0, const aterm_appl& SortExpr_1)
 {
   return term_appl<aterm>(function_symbol_StructProj(), aterm_cast<aterm>(StringOrNil_0), aterm_cast<aterm>(SortExpr_1));
 }
 
 inline
-ATermAppl gsMakeSum(const ATermList& DataVarId_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeSum(const aterm_list& DataVarId_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Sum(), aterm_cast<aterm>(DataVarId_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeSync(const ATermAppl& ProcExpr_0, const ATermAppl& ProcExpr_1)
+aterm_appl gsMakeSync(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Sync(), aterm_cast<aterm>(ProcExpr_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline
-ATermAppl gsMakeTau()
+aterm_appl gsMakeTau()
 {
   return term_appl<aterm>(function_symbol_Tau());
 }
 
 inline
-ATermAppl gsMakeWhr(const ATermAppl& DataExpr_0, const ATermList& WhrDecl_1)
+aterm_appl gsMakeWhr(const aterm_appl& DataExpr_0, const aterm_list& WhrDecl_1)
 {
   return term_appl<aterm>(function_symbol_Whr(), aterm_cast<aterm>(DataExpr_0), aterm_cast<aterm>(WhrDecl_1));
 }
 //--- end generated code ---//
 
-//Conversion between strings and quoted ATermAppl's
+//Conversion between strings and quoted aterm_appl's
 //-------------------------------------------------
 
 inline
-ATermAppl gsString2ATermAppl(const char* s)
+aterm_appl gsString2ATermAppl(const char* s)
 //Ret: quoted constant s, if s != NULL
 //     unquoted constant Nil, if s == NULL
 {
   if (s != NULL)
   {
-    return aterm_appl(AFun(s, 0));
+    return aterm_appl(function_symbol(s, 0));
   }
   else
   {
@@ -2699,15 +2699,15 @@ ATermAppl gsString2ATermAppl(const char* s)
 }
 
 inline
-bool gsIsString(const ATermAppl &term)
+bool gsIsString(const aterm_appl &term)
 //Ret: term is a quoted constant
 {
-  AFun head = term.function();
+  function_symbol head = term.function();
   return ((head.arity() == 0) /* && (ATisQuoted(head) == true) */ );
 }
 
 inline
-std::string gsATermAppl2String(const ATermAppl &term)
+std::string gsATermAppl2String(const aterm_appl &term)
 //Ret: string s, if term is a quoted constant s
 //     NULL, otherwise
 {
@@ -2758,11 +2758,11 @@ bool gsIsNumericString(std::string s)
   return true;
 }
 
-ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSuffix);
-//Pre: Term is an ATerm containing ATermAppl's and ATermList's only
+aterm_appl gsFreshString2ATermAppl(const char* s, const aterm &Term, bool TryNoSuffix);
+//Pre: Term is an aterm containing aterm_appl's and aterm_list's only
 //     s is not NULL
 //Ret: "s", if it does not occur in Term, and TryNoSuffix holds
-//     "sk" as a quoted ATermAppl constant, where k is the smallest natural
+//     "sk" as a quoted aterm_appl constant, where k is the smallest natural
 //     number such that "sk" does not occur in Term, otherwise
 
 // ----------------- gsIsDataExpr and gsIsSortExpr ---------------------- //
@@ -2770,7 +2770,7 @@ ATermAppl gsFreshString2ATermAppl(const char* s, const ATerm &Term, bool TryNoSu
 ///\pre Term is not NULL
 ///\return Term is a sort expression
 inline
-bool gsIsSortExpr(const ATermAppl &Term)
+bool gsIsSortExpr(const aterm_appl &Term)
 {
   return
     gsIsSortId(Term)        || gsIsSortCons(Term)     ||
@@ -2781,7 +2781,7 @@ bool gsIsSortExpr(const ATermAppl &Term)
 ///\pre Term is not NULL
 ///\return Term is a data expression
 inline
-bool gsIsDataExpr(const ATermAppl &Term)
+bool gsIsDataExpr(const aterm_appl &Term)
 {
   return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
          gsIsDataAppl(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
@@ -2789,7 +2789,7 @@ bool gsIsDataExpr(const ATermAppl &Term)
 
 ///\return Term is a state formula
 inline
-bool gsIsStateFrm(const ATermAppl &Term)
+bool gsIsStateFrm(const aterm_appl &Term)
 {
   return gsIsDataExpr(Term)
          || gsIsStateTrue(Term)
@@ -2814,7 +2814,7 @@ bool gsIsStateFrm(const ATermAppl &Term)
 ///\pre Term is not NULL
 ///\return Term is a action formula
 inline
-bool gsIsActFrm(const ATermAppl &Term)
+bool gsIsActFrm(const aterm_appl &Term)
 {
   return
     gsIsMultAct(Term) || gsIsDataExpr(Term) || gsIsActTrue(Term) ||
@@ -2826,7 +2826,7 @@ bool gsIsActFrm(const ATermAppl &Term)
 ///\pre Term is not NULL
 ///\return Term is a regular formula
 inline
-bool gsIsRegFrm(const ATermAppl &Term)
+bool gsIsRegFrm(const aterm_appl &Term)
 {
   return
     gsIsActFrm(Term) || gsIsRegNil(Term) || gsIsRegSeq(Term) ||
@@ -2836,7 +2836,7 @@ bool gsIsRegFrm(const ATermAppl &Term)
 ///\pre Term is not NULL
 ///\return Term is a process expression
 inline
-bool gsIsProcExpr(const ATermAppl &Term)
+bool gsIsProcExpr(const aterm_appl &Term)
 {
   return gsIsParamId(Term)
          || gsIsIdAssignment(Term)
@@ -2868,7 +2868,7 @@ bool gsIsProcExpr(const ATermAppl &Term)
 ///\pre Term is not NULL
 ///\return Term is a Parameterised Boolean Expression
 inline
-bool gsIsPBExpr(const ATermAppl &Term)
+bool gsIsPBExpr(const aterm_appl &Term)
 {
   return gsIsDataExpr(Term)
          || gsIsPBESTrue(Term)
@@ -2886,7 +2886,7 @@ bool gsIsPBExpr(const ATermAppl &Term)
 ///\pre Term is not NULL
 ///\return Term is a fixpoint
 inline
-bool gsIsFixpoint(const ATermAppl &Term)
+bool gsIsFixpoint(const aterm_appl &Term)
 {
   return gsIsMu(Term) || gsIsNu(Term);
 }

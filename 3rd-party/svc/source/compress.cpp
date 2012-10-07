@@ -23,7 +23,7 @@
 #include <limits.h>
 #include <svc/compress.h>
 
-using namespace aterm_deprecated;
+using namespace atermpp;
 
 static char buffer[102400];
 static void calcDelta(CompressedStream*, long*);
@@ -65,7 +65,7 @@ void CSfree(CompressedStream* cs)
 
 }
 
-int CSreadIndex(CompressedStream* cs, ATerm* term)
+int CSreadIndex(CompressedStream* cs, aterm* term)
 {
   long index;
   if (HFdecodeIndex(cs->bs, &cs->tree, &index))
@@ -82,7 +82,7 @@ int CSreadIndex(CompressedStream* cs, ATerm* term)
 }
 
 
-int CSreadATerm(CompressedStream* cs, ATerm* term)
+int CSreadATerm(CompressedStream* cs, aterm* term)
 {
 
   if (HFdecodeATerm(cs->bs, &cs->tree, term))
@@ -104,7 +104,7 @@ int CSreadATerm(CompressedStream* cs, ATerm* term)
 
 }
 
-int CSureadATerm(CompressedStream* cs, ATerm* term)
+int CSureadATerm(CompressedStream* cs, aterm* term)
 {
 
   if (BSreadString(cs->bs,buffer))
@@ -120,7 +120,7 @@ int CSureadATerm(CompressedStream* cs, ATerm* term)
 
 int CSreadString(CompressedStream* cs)
 {
-  ATerm term;
+  aterm term;
 
   HFdecodeATerm(cs->bs, &cs->tree, &term); 
   return 0;
@@ -144,12 +144,12 @@ int CSureadString(CompressedStream* cs, char** str)
 
 int CSreadInt(CompressedStream* cs, long* n)
 {
-  ATerm term;
+  aterm term;
 
   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<int>", &n)) */
   if (HFdecodeATerm(cs->bs, &cs->tree, &term) && term.type()==AT_INT)
   {
-    *n =((ATermInt)term).value();
+    *n =((aterm_int)term).value();
     return 1;
   }
   else
@@ -178,7 +178,7 @@ int CSureadInt(CompressedStream* cs, long* n)
 
 
 
-int CSwriteIndex(CompressedStream* cs, ATerm term)
+int CSwriteIndex(CompressedStream* cs, aterm term)
 {
   long index;
 
@@ -200,13 +200,13 @@ int CSwriteIndex(CompressedStream* cs, ATerm term)
 }
 
 
-int CSwriteATerm(CompressedStream* cs, ATerm term)
+int CSwriteATerm(CompressedStream* cs, aterm term)
 {
 
   return HFencodeATerm(cs->bs, &cs->tree, term);
 }
 
-int CSuwriteATerm(CompressedStream* cs, ATerm term)
+int CSuwriteATerm(CompressedStream* cs, aterm term)
 {
 
   BSwriteString(cs->bs,term.to_string().c_str());
@@ -215,7 +215,7 @@ int CSuwriteATerm(CompressedStream* cs, ATerm term)
 int CSwriteString(CompressedStream* cs, const char* str)
 {
 
-  return HFencodeATerm(cs->bs, &cs->tree, aterm_appl(AFun(str,0)));
+  return HFencodeATerm(cs->bs, &cs->tree, aterm_appl(function_symbol(str,0)));
 }
 
 int CSuwriteString(CompressedStream* cs, const char* str)

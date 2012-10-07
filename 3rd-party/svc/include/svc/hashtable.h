@@ -34,9 +34,9 @@
 
   int HTinit(HTable*);
   void HTfree(HTable*);
-  unsigned int HTinsert(HTable*, aterm_deprecated::ATerm, void*);
-  int HTmember(HTable*, aterm_deprecated::ATerm, long*);
-  aterm_deprecated::ATerm HTgetTerm(HTable*, long);
+  unsigned int HTinsert(HTable*, atermpp::aterm, void*);
+  int HTmember(HTable*, atermpp::aterm, long*);
+  atermpp::aterm HTgetTerm(HTable*, long);
   void* HTgetPtr(HTable*, long);
   void HTsetPtr(HTable*, long, void*);
 
