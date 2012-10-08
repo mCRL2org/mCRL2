@@ -168,11 +168,11 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 static void add_extra_mcrl2_lts_data(
   const std::string& filename,
   const bool has_data_spec,
-  const ATermAppl data_spec,
+  const ATermAppl& data_spec,
   const bool has_params,
-  const ATermList params,
+  const ATermList& params,
   const bool has_act_labels,
-  const ATermList act_labels)
+  const ATermList& act_labels)
 {
   FILE* f = fopen(filename.c_str(),"ab");
   if (f == NULL)
@@ -280,9 +280,7 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
 
 
   ATermAppl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
-  ATermList params = l.process_parameters();
-  ATermList act_spec = l.action_labels();
-  add_extra_mcrl2_lts_data(filename,l.has_data(),data_spec,l.has_process_parameters(),params,l.has_action_labels(),act_spec);
+  add_extra_mcrl2_lts_data(filename,l.has_data(),data_spec,l.has_process_parameters(),l.process_parameters(),l.has_action_labels(),l.action_labels());
 }
 
 namespace mcrl2
