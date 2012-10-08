@@ -532,6 +532,76 @@ void test_elevator()
   core::garbage_collect();
 }
 
+// Test for bug #1092, simple P=a.b.P example with [a]<a>true, which should be false
+void test_ab()
+{
+  std::string SPEC =
+    "act  a,b;\n"
+    "proc P(s3_P: Pos) =\n"
+    "       (s3_P == 2) ->\n"
+    "         b .\n"
+    "         P(s3_P = 1)\n"
+    "     + (s3_P == 1) ->\n"
+    "         a .\n"
+    "         P(s3_P = 2)\n"
+    "     + delta;\n"
+    "init P(1);\n"
+    ;
+
+  std::string FORMULA = "[a]<a>true";
+
+  pbes<> p;
+  bool timed = false;
+  p = lps2pbes(SPEC, FORMULA, timed);
+  BOOST_CHECK(p.is_well_typed());
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
+
+  bool result = pbes2_bool_test(p);
+  BOOST_CHECK(result == false);
+
+  core::garbage_collect();
+}
+
+// Test for bug #1092, fairness example derived from alternating bit protocol.
+void test_unfair()
+{
+  std::string SPEC =
+    "act  r1,s4,i,e;\n"
+    "proc P(s3_P: Pos) =\n"
+    "       (s3_P == 4) ->\n"
+    "         e .\n"
+    "         P(s3_P = 2)\n"
+    "     + (s3_P == 3) ->\n"
+    "         s4 .\n"
+    "         P(s3_P = 1)\n"
+    "     + sum e1_P: Bool.\n"
+    "         (s3_P == 2) ->\n"
+    "         i .\n"
+    "         P(s3_P = if(e1_P, 4, 3))\n"
+    "     + (s3_P == 1) ->\n"
+    "         r1 .\n"
+    "         P(s3_P = 2)\n"
+    "     + delta;\n"
+    "init P(1);\n"
+    ;
+
+  lps::specification s = lps::parse_linear_process_specification(SPEC);
+
+  std::string FORMULA = "[r1](nu X. mu Y. ([s4]X && [!s4]Y))";
+
+  state_formula f = parse_state_formula(FORMULA, s);
+
+  pbes<> p;
+  p = lps2pbes(s, f);
+  BOOST_CHECK(p.is_well_typed());
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
+
+  bool result = pbes2_bool_test(p);
+  BOOST_CHECK(result == false);
+
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -545,6 +615,8 @@ int test_main(int argc, char* argv[])
   test_trivial();
   test_formulas();
   test_timed();
+  test_ab();
+  test_unfair();
 
 #ifdef MCRL2_EXTENDED_TESTS
   test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA1);
