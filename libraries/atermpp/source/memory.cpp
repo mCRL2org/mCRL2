@@ -596,6 +596,7 @@ void detail::at_free_afun(const size_t n)
     // this afun anymore.
     return;
   }
+  assert(n<detail::at_lookup_table.size());
   const detail::_function_symbol &sym=detail::at_lookup_table[n];
 
   assert(!sym.name.empty());

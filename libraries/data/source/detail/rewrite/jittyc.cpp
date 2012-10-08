@@ -169,7 +169,6 @@ static size_t num_int2aterms = 0;
 static atermpp::detail::_aterm** int2aterms = NULL; // An array with prepared aterm_int's.
 static atermpp::detail::_aterm* get_int2aterm_value(size_t i)
 {
-  assert(i >= 0);
   if (((size_t) i) >= num_int2aterms)
   {
     size_t old_num = num_int2aterms;

@@ -119,14 +119,14 @@ int CSureadATerm(CompressedStream* cs, aterm* term)
   }
 }
 
-int CSreadString(CompressedStream* cs)
+/* static int CSreadString(CompressedStream* cs)
 {
   aterm term;
 
   HFdecodeATerm(cs->bs, &cs->tree, &term); 
   return 0;
 
-}
+} */
 
 int CSureadString(CompressedStream* cs, char** str)
 {

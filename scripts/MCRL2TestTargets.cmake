@@ -46,7 +46,7 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
     set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
   endmacro( build_and_run_test_target TARGET )
 
-  add_subdirectory( libraries/aterm/test)
+  # add_subdirectory( libraries/aterm/test)
   add_subdirectory( libraries/lps/test)
   add_subdirectory( libraries/bes/test)
   add_subdirectory( libraries/pbes/test)

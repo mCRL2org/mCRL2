@@ -41,7 +41,7 @@ template <typename Term>
 class term_appl_iterator: public boost::iterator_facade<
   term_appl_iterator<Term>,         // Derived
   const Term,                       // Value
-  boost::forward_traversal_tag,     // CategoryOrTraversal
+  boost::random_access_traversal_tag,     // CategoryOrTraversal
   const Term&                       // Reference
   >
 {

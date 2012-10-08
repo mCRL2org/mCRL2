@@ -26,7 +26,7 @@ namespace core
 namespace detail
 {
 
-bool gsOccurs(const aterm &Elt, const aterm &t)
+static bool gsOccurs(const aterm &Elt, const aterm &t)
 {
   aterm Term=t;
   bool Result = false;

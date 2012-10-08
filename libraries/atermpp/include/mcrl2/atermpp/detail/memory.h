@@ -83,7 +83,7 @@ t
   assert(t->function().name().size()!=0);
 }
 
-inline size_t detail::term_size(const detail::_aterm *t)
+inline size_t term_size(const detail::_aterm *t)
 {
   if (t->function().number()==detail::function_adm.AS_INT.number())
   {
@@ -92,7 +92,7 @@ inline size_t detail::term_size(const detail::_aterm *t)
   return TERM_SIZE_APPL(t->function().arity());
 }
 
-inline HashNumber detail::hash_number(const detail::_aterm *t, const size_t size)
+inline HashNumber hash_number(const detail::_aterm *t, const size_t size)
 {
   HashNumber hnr = t->function().number();
   for (size_t i=TERM_SIZE_APPL(0); i<size; i++)
