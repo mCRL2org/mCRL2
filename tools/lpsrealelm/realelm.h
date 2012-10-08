@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPSREALELM_REALELM_H
 #define MCRL2_LPSREALELM_REALELM_H
 
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
 
@@ -143,7 +144,7 @@ class summand_information
       smd.protect();
       real_summation_variables.protect();
       non_real_summation_variables.protect();
-      // mCRL2log(debug) << "NEW REAL SUMMATION VARIABLES " << pp(rsv) << "\n";
+      // std::cerr  << "NEW REAL SUMMATION VARIABLES " << pp(rsv) << "    " << pp_vector(nextstate_context_combinations[0]) << "\n";
     }
 
     summand_information(const summand_information& s)
@@ -255,7 +256,7 @@ class summand_information
       data_expression xi_u=new_xi_variable.get_upperbound();
       data_expression substituted_lowerbound = replace_free_variables(xi_t,summand_real_nextstate_map);
       data_expression substituted_upperbound = replace_free_variables(xi_u,summand_real_nextstate_map);
-      // mCRL2log(debug) << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
+      // mCRL2log(mcrl2::log::verbose) << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.
       // I do not know whether optimisation below is correct.
