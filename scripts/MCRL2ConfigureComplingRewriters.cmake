@@ -72,12 +72,15 @@ set(R_LDFLAGS "${R_LDFLAGS} ${R_MCRL2_OSX_ARCH}")
 include(MCRL2MacOSXCopyBoostHeaders)
 
 # Configure including/linking the mcrl2 libraries and Boost.
-if( APPLE AND MCRL2_SINGLE_BUNDLE AND CMAKE_INSTALL_PREFIX STREQUAL "/" )
-  set(R_LDFLAGS "${R_LDFLAGS} -L\"${BOOST_LIB}\"")
-  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"../include\"")
-  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${BOOST_INCLUDE}\"")
+# On Apple, if we build a single bundle application, we know that header files
+# are installed relative to the mcrl2compilerewriter script, and the
+# mcrl2compilerewriter script is always called with an absolute path,
+# see jittyc.cpp. The dirname statement takes the directory of the mcrl2compilerewriter
+# script, and uses that path to search for the header files.
+if( APPLE AND MCRL2_SINGLE_BUNDLE )
+
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"`dirname $0`/../include\"")
   else()
-  set(R_LDFLAGS "${R_LDFLAGS} -L\"${Boost_LIBRARY_DIRS}\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_INSTALL_PREFIX}/include\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${Boost_INCLUDE_DIRS}\"")
 endif()

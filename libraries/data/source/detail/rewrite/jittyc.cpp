@@ -27,10 +27,13 @@
 #include <cstring>
 #include <cassert>
 #include <sstream>
+#include <sys/stat.h>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/basename.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
@@ -2685,14 +2688,30 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   FILE* f;
   CleanupRewriteSystem();
 
-  // Try to find out from environment which compile script to use. Use
-  // default script called "mcrl2compilerewriter" if not set.
+  // Try to find out from environment which compile script to use.
+  // If not set, choose one of the following two:
+  // * if "mcrl2compilerewriter" is in the same directory as the executable,
+  //   this is the version we favour. This is especially needed for single
+  //   bundle applications on MacOSX. Furthermore, it is the more foolproof
+  //   approach on other platforms.
+  // * by default, fall back to the system provided mcrl2compilerewriter script.
+  //   in this case, we rely on the script being available in the user's
+  //   $PATH environment variable.
   std::string compile_script;
   char* env_compile_script = getenv("MCRL2_COMPILEREWRITER");
   if (env_compile_script != NULL)
+  {
     compile_script = env_compile_script;
+  }
+  else if(mcrl2::utilities::file_exists(mcrl2::utilities::get_executable_basename() + "/mcrl2compilerewriter"))
+  {
+    compile_script = mcrl2::utilities::get_executable_basename() + "/mcrl2compilerewriter";
+  }
   else
+  {
     compile_script = "mcrl2compilerewriter";
+  }
+
   rewriter_so = new uncompiled_library(compile_script);
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
 

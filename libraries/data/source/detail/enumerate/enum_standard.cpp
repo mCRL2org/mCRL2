@@ -549,7 +549,7 @@ bool EnumeratorSolutionsStandard::next(
             }
             else if (used_vars > max_vars)
             {
-              cerr << "need more than " << max_vars << " variables to find all valuations of ";
+              mCRL2log(log::info) << "need more than " << max_vars << " variables to find all valuations of ";
               for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
               {
                 if (k != enum_vars.begin())
