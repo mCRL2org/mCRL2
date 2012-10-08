@@ -129,6 +129,16 @@ rewriter_with_substitution<Rewriter> make_rewriter_with_substitution(Rewriter& R
   return rewriter_with_substitution<Rewriter>(R, sigma);
 }
 
+// default PBES expression parser
+class default_parser
+{
+  public:
+    pbes_expression operator()(const std::string& expr)
+    {
+      return pbes_system::parse_pbes_expression(expr);
+    }
+};
+
 // PBES expression parser
 class parser
 {
@@ -585,8 +595,24 @@ void test_substitutions3()
     ;
 
   pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
-  pbes_system::pbes_expression x = r(phi, sigma);
+  /* pbes_system::pbes_expression x = */ r(phi, sigma);
   core::garbage_collect();
+}
+
+void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
+{
+  one_point_rule_rewriter R;
+  utilities::detail::test_operation(
+    expr1,
+    expr2,
+    default_parser(),
+    printer<pbes_expression>,
+    std::equal_to<pbes_expression>(),
+    R,
+    "R1",
+    &utilities::detail::identity<pbes_expression>,
+    "R2"
+  );
 }
 
 void test_one_point_rule_rewriter()
@@ -608,11 +634,7 @@ void test_one_point_rule_rewriter()
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
 
-  x = pbes_system::parse_pbes_expression("forall c: Bool. forall b: Bool. val(b) => val(b || c)");
-  y = R(x);
-  std::clog << "x = " << pbes_system::pp(x) << std::endl;
-  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-  BOOST_CHECK(pbes_system::pp(y) == "forall c: Bool. val(false) || val(c)");
+  test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "forall c: Bool. val(false) || val(c)");
 }
 
 void test_data2pbes()
