@@ -24,7 +24,7 @@ namespace pbes_system {
 
 namespace detail {
 
-pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x);
+pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x, data::set_identifier_generator& id_generator);
 
 template <typename Derived>
 struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
@@ -39,10 +39,11 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 #endif
 
   const lps::multi_action& a;
+  data::set_identifier_generator& id_generator;
   atermpp::vector<pbes_expression> result_stack;
 
-  sat_traverser(const lps::multi_action& a_)
-    : a(a_)
+  sat_traverser(const lps::multi_action& a_, data::set_identifier_generator& id_generator_)
+    : a(a_), id_generator(id_generator_)
   {}
 
   Derived& derived()
@@ -89,7 +90,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   void operator()(const action_formulas::not_& x)
   {
-    push(not_(Sat(a, x.operand())));
+    push(not_(Sat(a, x.operand(), id_generator)));
   }
 
   void leave(const action_formulas::and_&)
@@ -115,22 +116,16 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   void operator()(const action_formulas::forall& x)
   {
-    data::set_identifier_generator id_generator;
-    id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(a)));
-    id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(x)));
     data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
     action_formulas::action_formula alpha = x.body();
-    push(forall(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)))));
+    push(forall(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)), id_generator)));
   }
 
   void operator()(const action_formulas::exists& x)
   {
-    data::set_identifier_generator id_generator;
-    id_generator.add_identifiers(data::detail::variable_names(lps::find_variables(a)));
-    id_generator.add_identifiers(data::detail::variable_names(action_formulas::find_variables(x)));
     data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
     action_formulas::action_formula alpha = x.body();
-    push(exists(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)))));
+    push(exists(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)), id_generator)));
   }
 
   void operator()(const action_formulas::at& x)
@@ -138,7 +133,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     data::data_expression t = a.time();
     action_formulas::action_formula alpha = x.operand();
     data::data_expression u = x.time_stamp();
-    push(and_(Sat(a, alpha), data::equal_to(t, u)));
+    push(and_(Sat(a, alpha, id_generator), data::equal_to(t, u)));
   }
 };
 
@@ -151,8 +146,8 @@ struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser> >
   using super::operator();
   using super::top;
 
-  apply_sat_traverser(const lps::multi_action& a)
-    : super(a)
+  apply_sat_traverser(const lps::multi_action& a, data::set_identifier_generator& id_generator)
+    : super(a, id_generator)
   {}
 
 #ifdef BOOST_MSVC
@@ -161,9 +156,9 @@ struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser> >
 };
 
 inline
-pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x)
+pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x, data::set_identifier_generator& id_generator)
 {
-  apply_sat_traverser<sat_traverser> f(a);
+  apply_sat_traverser<sat_traverser> f(a, id_generator);
   f(x);
   return f.top();
 }

@@ -192,7 +192,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
       gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
       data::data_expression ti = ai.time();
-      pbes_expression p1 = Sat(ai, alpha);
+      pbes_expression p1 = Sat(ai, alpha, id_generator);
       pbes_expression p2 = ci;
       rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
       pbes_expression p = tr::and_(p1, p2);
@@ -473,7 +473,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
       lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
       gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
       data::data_expression ti = ai.time();
-      pbes_expression p1 = Sat(ai, alpha);
+      pbes_expression p1 = Sat(ai, alpha, id_generator);
       pbes_expression p2 = ci;
       rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
       pbes_expression p = tr::and_(p1, p2);
