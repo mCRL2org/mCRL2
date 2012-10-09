@@ -605,6 +605,30 @@ BOOST_AUTO_TEST_CASE(test_unfair)
   test_lps2pbes_and_solve(SPEC, FORMULA, false);
 }
 
+// Test for bug #1090
+BOOST_AUTO_TEST_CASE(test_1090)
+{
+  const std::string SPEC =
+      "sort D = struct d1 | d2;\n"
+      "act  a: D;\n"
+      "proc P =\n"
+      "       a(d1) .\n"
+      "         P()\n"
+      "     + delta;\n"
+      "init P;\n"
+    ;
+
+  const std::string FORMULA = "[!exists d:D . a(d)]false";
+  pbes<> p = test_lps2pbes(SPEC, FORMULA);
+
+  std::set<data::variable> vars(pbes_system::find_variables(p));
+  for(std::set<data::variable>::const_iterator i = vars.begin(); i != vars.end(); ++i)
+  {
+    BOOST_CHECK_NE(i->name(), core::identifier_string("d1"));
+    BOOST_CHECK_NE(i->name(), core::identifier_string("d2"));
+  }
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
