@@ -423,7 +423,7 @@ const std::string MACHINE_SPECIFICATION =
     "         P(s3_User = 2, s1_Mach = 2)\n"
     "     + delta;\n"
     "\n"
-    "init P(1, 1);\n
+    "init P(1, 1);\n"
   ;
 
 const std::string MACHINE_FORMULA1 =
