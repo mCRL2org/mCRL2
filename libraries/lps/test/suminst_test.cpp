@@ -37,8 +37,8 @@ void test_case_1()
   suminst_algorithm<rewriter>(s1,r).run();
   std::clog << lps::pp(s0) << std::endl;
   std::clog << lps::pp(s1) << std::endl;
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -61,11 +61,9 @@ void test_case_2()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  std::cerr << "SUMMANDS " << summands1 << "\n";
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-    std::cerr << "LEEG " << i->summation_variables() << "\n";
     BOOST_CHECK(i->summation_variables().empty());
   }
 
@@ -87,9 +85,9 @@ void test_case_3()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool sum_occurs = false;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_occurs = sum_occurs || !i->summation_variables().empty();
   }
@@ -114,10 +112,10 @@ void test_case_4()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, finite_sorts(s1.data()), true).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (i->is_tau())
     {
@@ -152,10 +150,10 @@ void test_case_5()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (i->is_tau())
     {
@@ -181,8 +179,8 @@ void test_case_6()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -201,9 +199,9 @@ void test_case_7()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sum_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_count += i->summation_variables().size();
   }
