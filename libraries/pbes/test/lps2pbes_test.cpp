@@ -44,7 +44,7 @@ using mcrl2::utilities::collect_after_test_case;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-pbes<> test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool timed=false)
+pbes<> test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool expect_success = true, const bool timed=false)
 {
   using namespace pbes_system;
 
@@ -59,22 +59,32 @@ pbes<> test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula
 
   lps::specification spec = lps::parse_linear_process_specification(lps_spec);
   state_formulas::state_formula formula = state_formulas::parse_state_formula(mcf_formula, spec);
-  pbes<> p = lps2pbes(spec, formula, timed);
 
-  std::cerr << "Results in the following PBES:" << std::endl
-            << "---------------------------------------------------------------"
-            << std::endl
-            << "p = " << pbes_system::pp(p) << std::endl
-            << "---------------------------------------------------------------"
-            << std::endl;
+  if(expect_success)
+  {
+    pbes<> p = lps2pbes(spec, formula, timed);
 
-  BOOST_CHECK(p.is_well_typed());
-  return p;
+    std::cerr << "Results in the following PBES:" << std::endl
+              << "---------------------------------------------------------------"
+              << std::endl
+              << "p = " << pbes_system::pp(p) << std::endl
+              << "---------------------------------------------------------------"
+              << std::endl;
+
+    BOOST_CHECK(p.is_well_typed());
+    return p;
+  }
+  else
+  {
+    BOOST_CHECK_THROW(lps2pbes(spec, formula, timed), mcrl2::runtime_error);
+
+    return pbes<>();
+  }
 }
 
 void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf_formula, const bool expected_solution, const bool timed=false)
 {
-  pbes<> p = test_lps2pbes(lps_spec, mcf_formula, timed);
+  pbes<> p = test_lps2pbes(lps_spec, mcf_formula, true, timed);
 
   BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_solution);
 }
@@ -304,7 +314,7 @@ void test_directory(int argc, char** argv)
         {
           try
           {
-            pbes<> result = lps2pbes(SPEC1, formula, false);
+            pbes<> result = lps2pbes(SPEC1, formula, true, false);
             BOOST_CHECK(result.is_well_typed());
             pbes<> expected_result;
             expected_result.load(untimed_result_file);
@@ -356,8 +366,8 @@ BOOST_AUTO_TEST_CASE(test_formulas)
 
   for (std::vector<string>::iterator i = formulas.begin(); i != formulas.end(); ++i)
   {
-    test_lps2pbes(SPEC, *i, false);
-    test_lps2pbes(SPEC, *i, true);
+    test_lps2pbes(SPEC, *i, true, false);
+    test_lps2pbes(SPEC, *i, true, true);
   }
 }
 
@@ -627,6 +637,40 @@ BOOST_AUTO_TEST_CASE(test_1090)
     BOOST_CHECK_NE(i->name(), core::identifier_string("d1"));
     BOOST_CHECK_NE(i->name(), core::identifier_string("d2"));
   }
+}
+
+// Test for bug #1094
+BOOST_AUTO_TEST_CASE(test_1094)
+{
+  const std::string SPEC =
+      "act  a,b,c,d;\n"
+      "\n"
+      "proc P(s3_X: Pos) =\n"
+      "       (s3_X == 1) ->\n"
+      "         a .\n"
+      "         P(s3_X = 2)\n"
+      "     + (s3_X == 2) ->\n"
+      "         b .\n"
+      "         P(s3_X = 3)\n"
+      "     + (s3_X == 3) ->\n"
+      "         a .\n"
+      "         P(s3_X = 4)\n"
+      "     + (s3_X == 3) ->\n"
+      "         a .\n"
+      "         P(s3_X = 5)\n"
+      "     + (s3_X == 4) ->\n"
+      "         c .\n"
+      "         P(s3_X = 1)\n"
+      "     + (s3_X == 5) ->\n"
+      "         d .\n"
+      "         P(s3_X = 1)\n"
+      "     + delta;\n"
+      "\n"
+      "init P(1);\n"
+    ;
+
+  const std::string FORMULA = "[true*]([b] nu X. mu X.( [!c]X && [!c]Y))";
+  test_lps2pbes(SPEC, FORMULA, false);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
