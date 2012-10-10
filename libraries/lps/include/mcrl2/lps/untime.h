@@ -63,24 +63,21 @@ class untime_algorithm: public lps::detail::lps_algorithm
 
       assert(j == time_variable_candidates.end());
 
-      const lps::deprecated::summand_list summands = deprecated::linear_process_summands(m_spec.process());
-      for (lps::deprecated::summand_list::const_iterator i = summands.begin(); i != summands.end(); ++i)
+      const lps::action_summand_vector& summands = m_spec.process().action_summands();
+      for (lps::action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); ++i)
       {
-        if (!(i->is_delta()))
+        const data::data_expression_list summand_arguments = i->next_state(m_spec.process().process_parameters());
+        std::vector <bool>::iterator j = time_variable_candidates.begin();
+        data::variable_list::const_iterator l=m_spec.process().process_parameters().begin();
+        for (data::data_expression_list::const_iterator k=summand_arguments.begin() ;
+             k!=summand_arguments.end(); ++j, ++k, l++)
         {
-          const data::data_expression_list summand_arguments = i->next_state(m_spec.process().process_parameters());
-          std::vector <bool>::iterator j = time_variable_candidates.begin();
-          data::variable_list::const_iterator l=m_spec.process().process_parameters().begin();
-          for (data::data_expression_list::const_iterator k=summand_arguments.begin() ;
-               k!=summand_arguments.end(); ++j, ++k, l++)
+          if ((*k!=real_zero)&&(*k!=*l)&&(*k!=i->multi_action().time()))
           {
-            if ((*k!=real_zero)&&(*k!=*l)&&(*k!=i->time()))
-            {
-              (*j)=false;
-            }
+            (*j)=false;
           }
-          assert(j==time_variable_candidates.end());
         }
+        assert(j==time_variable_candidates.end());
       }
 
       data::data_expression time_invariant(data::sort_bool::true_());

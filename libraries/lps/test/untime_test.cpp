@@ -37,8 +37,8 @@ void test_case_1()
   specification s0 = linearise(text);
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
   }
@@ -69,10 +69,10 @@ void test_case_2()
   specification s0 = linearise(text);
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
-  deprecated::summand_list summands0 = deprecated::linear_process_summands(s0.process());
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  const action_summand_vector& summands0 = s0.process().action_summands();
+  const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
   }
@@ -98,11 +98,11 @@ void test_case_3()
   specification s0 = linearise(text);
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
-  deprecated::summand_list summands0 = deprecated::linear_process_summands(s0.process());
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  const action_summand_vector& summands0 = s0.process().action_summands();
+  const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
   int sumvar_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
     sumvar_count += i->summation_variables().size();
@@ -130,11 +130,11 @@ void test_case_4()
   specification s0 = linearise(text);
   specification s1 = s0;
   lps::untime_algorithm(s1).run();
-  deprecated::summand_list summands0 = deprecated::linear_process_summands(s0.process());
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  const action_summand_vector& summands0 = s0.process().action_summands();
+  const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
   int sumvar_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
     sumvar_count += i->summation_variables().size();
