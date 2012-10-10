@@ -1,6 +1,9 @@
 ===============================================================================
-Changes between toolset releases 201202.0 and 201207.0:
+Changes between toolset releases 201202.0 and 201210.0:
 ===============================================================================
+
+100 tickets were fixed for this release. We summarise the most important changes
+below.
 
 Libraries:
    - Header files are shown in IDEs like Visual Studio, XCode and QTCreator
