@@ -639,40 +639,6 @@ BOOST_AUTO_TEST_CASE(test_1090)
   }
 }
 
-// Test for bug #1094
-BOOST_AUTO_TEST_CASE(test_1094)
-{
-  const std::string SPEC =
-      "act  a,b,c,d;\n"
-      "\n"
-      "proc P(s3_X: Pos) =\n"
-      "       (s3_X == 1) ->\n"
-      "         a .\n"
-      "         P(s3_X = 2)\n"
-      "     + (s3_X == 2) ->\n"
-      "         b .\n"
-      "         P(s3_X = 3)\n"
-      "     + (s3_X == 3) ->\n"
-      "         a .\n"
-      "         P(s3_X = 4)\n"
-      "     + (s3_X == 3) ->\n"
-      "         a .\n"
-      "         P(s3_X = 5)\n"
-      "     + (s3_X == 4) ->\n"
-      "         c .\n"
-      "         P(s3_X = 1)\n"
-      "     + (s3_X == 5) ->\n"
-      "         d .\n"
-      "         P(s3_X = 1)\n"
-      "     + delta;\n"
-      "\n"
-      "init P(1);\n"
-    ;
-
-  const std::string FORMULA = "[true*]([b] nu X. mu X.( [!c]X && [!c]Y))";
-  test_lps2pbes(SPEC, FORMULA, false);
-}
-
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
