@@ -122,7 +122,7 @@ Furthermore, integration with CADP and LTSmin must be tested on Linux::
     
 *LTSmin support*
 
-  Run the following commands:
+  Run the following commands::
   
     $ mkdir /tmp/mcrl2-ltsmin-build
     $ cd /tmp/mcrl2-ltsmin-build
