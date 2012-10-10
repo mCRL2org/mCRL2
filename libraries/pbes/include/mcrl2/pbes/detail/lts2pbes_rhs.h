@@ -164,7 +164,8 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     {
       lts2pbes_state_type t = i->second;
       const lps::multi_action& a = lts1.action_labels()[i->first];
-      v.push_back(imp(detail::Sat(a, alpha), RHS(phi0, phi, lts0, lts1, t, m_progress_meter)));
+      data::set_identifier_generator id_generator;
+      v.push_back(imp(detail::Sat(a, alpha, id_generator), RHS(phi0, phi, lts0, lts1, t, m_progress_meter)));
     }
     push(pbes_expr_optimized::join_and(v.begin(), v.end()));
   }
@@ -181,7 +182,8 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     {
       lts2pbes_state_type t = i->second;
       const lps::multi_action& a = lts1.action_labels()[i->first];
-      v.push_back(and_(detail::Sat(a, alpha), RHS(phi0, phi, lts0, lts1, t, m_progress_meter)));
+      data::set_identifier_generator id_generator;
+      v.push_back(and_(detail::Sat(a, alpha, id_generator), RHS(phi0, phi, lts0, lts1, t, m_progress_meter)));
     }
     push(pbes_expr_optimized::join_or(v.begin(), v.end()));
   }

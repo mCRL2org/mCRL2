@@ -14,11 +14,13 @@
 
 #include <string>
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
@@ -69,6 +71,16 @@ class lps2pbes_algorithm
       }
       assert(state_formulas::is_normalized(f));
 
+      data::set_identifier_generator id_generator;
+      std::set<core::identifier_string> ids = lps::find_identifiers(spec);
+      id_generator.add_identifiers(ids);
+      ids = data::find_identifiers(spec.data().constructors());
+      id_generator.add_identifiers(ids);
+      ids = data::find_identifiers(spec.data().mappings());
+      id_generator.add_identifiers(ids);
+      ids = state_formulas::find_identifiers(f);
+      id_generator.add_identifiers(ids);
+
       // compute the equations
       atermpp::vector<pbes_equation> eqn;
       if (structured)
@@ -78,22 +90,22 @@ class lps2pbes_algorithm
         propvar_generator.add_identifiers(names);
         if (unoptimized)
         {
-          eqn = detail::E_structured(f, f, spec.process(), propvar_generator, T, core::term_traits<pbes_expression>());
+          eqn = detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, core::term_traits<pbes_expression>());
         }
         else
         {
-          eqn = detail::E_structured(f, f, spec.process(), propvar_generator, T, core::term_traits_optimized<pbes_expression>());
+          eqn = detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, core::term_traits_optimized<pbes_expression>());
         }
       }
       else
       {
         if (unoptimized)
         {
-          eqn = detail::E(f, f, spec.process(), T, core::term_traits<pbes_expression>());
+          eqn = detail::E(f, f, spec.process(), id_generator, T, core::term_traits<pbes_expression>());
         }
         else
         {
-          eqn = detail::E(f, f, spec.process(), T, core::term_traits_optimized<pbes_expression>());
+          eqn = detail::E(f, f, spec.process(), id_generator, T, core::term_traits_optimized<pbes_expression>());
         }
       }
 

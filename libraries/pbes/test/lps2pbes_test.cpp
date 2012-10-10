@@ -16,8 +16,9 @@
 
 #include <iostream>
 #include <iterator>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <boost/algorithm/string.hpp>
+#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
@@ -28,7 +29,6 @@
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "test_specifications.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
@@ -40,117 +40,134 @@ using namespace mcrl2::lps::detail;
 using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
+using mcrl2::utilities::collect_after_test_case;
 
-const std::string TIMED_SPECIFICATION =
-  "act a;\n"
-  "proc P = a@1 . P;\n"
-  "init P;\n"
-;
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
+pbes<> test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool timed=false)
+{
+  using namespace pbes_system;
+
+  std::cerr << "==============================================================="
+            << std::endl
+            << "Specification: " << std::endl
+            << lps_spec << std::endl
+            << "Combined with formula: " << std::endl
+            << mcf_formula << std::endl
+            << "using the " << (timed?"timed":"untimed") << " transformation"
+            << std::endl;
+
+  lps::specification spec = lps::parse_linear_process_specification(lps_spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(mcf_formula, spec);
+  pbes<> p = lps2pbes(spec, formula, timed);
+
+  std::cerr << "Results in the following PBES:" << std::endl
+            << "---------------------------------------------------------------"
+            << std::endl
+            << "p = " << pbes_system::pp(p) << std::endl
+            << "---------------------------------------------------------------"
+            << std::endl;
+
+  BOOST_CHECK(p.is_well_typed());
+  return p;
+}
+
+void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf_formula, const bool expected_solution, const bool timed=false)
+{
+  pbes<> p = test_lps2pbes(lps_spec, mcf_formula, timed);
+
+  BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_solution);
+}
 
 const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
-void test_trivial()
+BOOST_AUTO_TEST_CASE(test_trivial)
 {
-  specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
-  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
-  bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
-  core::garbage_collect();
+  test_lps2pbes(lps::detail::LINEAR_ABP_SPECIFICATION(), TRIVIAL_FORMULA);
 }
 
-void test_timed()
+BOOST_AUTO_TEST_CASE(test_timed)
 {
-  specification spec = linearise(TIMED_SPECIFICATION);
-  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
-  bool timed = true;
-  pbes<> p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
+  const std::string TIMED_SPECIFICATION =
+    "act a;\n"
+    "proc P = a@1 . P;\n"
+    "init P;\n"
+  ;
+
+  pbes<> p = test_lps2pbes(TIMED_SPECIFICATION, TRIVIAL_FORMULA);
+
   const atermpp::vector<sort_expression> user_def_sorts(p.data().user_defined_sorts());
   BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
 
   const atermpp::vector<sort_expression> sorts(p.data().sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), sort_real::real_()) != sorts.end());
-  core::garbage_collect();
 }
 
-void test_lps2pbes()
+BOOST_AUTO_TEST_CASE(test_true_implies_false)
 {
-  std::string SPECIFICATION;
-  std::string FORMULA;
-  specification spec;
-  state_formula formula;
-  pbes<> p;
-  bool timed = false;
-
-  SPECIFICATION =
+  const std::string SPECIFICATION =
     "act a;                                  \n"
     "proc X(n : Nat) = (n > 2) -> a. X(n+1); \n"
     "init X(3);                              \n"
     ;
-  FORMULA = "true => false";
-  spec    = linearise(SPECIFICATION);
-  formula = state_formulas::parse_state_formula(FORMULA, spec);
-  p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
 
-  SPECIFICATION =
+  const std::string FORMULA = "true => false";
+  test_lps2pbes(SPECIFICATION, FORMULA);
+}
+
+BOOST_AUTO_TEST_CASE(test_forall_nat)
+{
+  const std::string SPECIFICATION =
     "act a : Nat;                           \n"
     "proc X(n:Nat) = (n>2) -> a(n). X(n+1); \n"
     "init X(3);                             \n"
     ;
-  FORMULA = "nu X. (X && forall m:Nat. [a(m)]false)";
-  spec    = linearise(SPECIFICATION);
-  formula = state_formulas::parse_state_formula(FORMULA, spec);
-  p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
+  const std::string FORMULA = "nu X. (X && forall m:Nat. [a(m)]false)";
+  test_lps2pbes(SPECIFICATION, FORMULA);
+}
 
-  SPECIFICATION =
+BOOST_AUTO_TEST_CASE(test_mu_or_mu)
+{
+  const std::string SPECIFICATION =
     "act a;         \n"
     "proc X = a. X; \n"
     "init X;        \n"
     ;
-  FORMULA =
+  const std::string FORMULA =
     "(                                 \n"
     "  ( mu A. [!a]A)                  \n"
     "||                                \n"
     "  ( mu B. exists t3:Pos . [!a]B ) \n"
     ")                                 \n"
     ;
-  spec    = linearise(SPECIFICATION);
-  formula = state_formulas::parse_state_formula(FORMULA, spec);
-  p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
 
-  SPECIFICATION =
-    "sort Closure = List(Bool);                                                   \n"
-    "sort State = struct state(closure: Closure, copy: Nat);                      \n"
-    "                                                                             \n"
-    "map initial: State -> Bool;                                                  \n"
-    "var q: State;                                                                \n"
-    "eqn initial(q) = closure(q).0 && (copy(q) == 0);                             \n"
-    "                                                                             \n"
-    "map accept: State -> Bool;                                                   \n"
-    "var q: State;                                                                \n"
-    "eqn accept(q) = ((copy(q) == 0) && (closure(q).0 => closure(q).2));          \n"
-    "                                                                             \n"
-    "map nextstate: State # State -> Bool;                                        \n"
-    "var q, q': State;                                                            \n"
-    "eqn nextstate(q, q') =                                                       \n"
-    "      (#closure(q) == #closure(q')) &&                                       \n"
-    "      (accept(q) => (copy(q') == (copy(q) + 1) mod 1)) &&                    \n"
-    "      (!accept(q) => (copy(q') == copy(q))) &&                               \n"
-    "      (closure(q).0 == (closure(q).2 || (closure(q).1 && closure(q').0))) && \n"
-    "      (closure(q').0 => closure(q').1 || closure(q').2) &&                   \n"
-    "      (closure(q').2 => closure(q').0);                                      \n"
-    "                                                                             \n"
-    "act a, b;                                                                    \n"
-    "proc P(s: Bool) =  s -> (a . P(false)) <> delta +                            \n"
-    "                  !s -> (b . P(s)) <> delta;                                 \n"
-    "init P(true);                                                                \n"
+  test_lps2pbes(SPECIFICATION, FORMULA);
+}
+
+BOOST_AUTO_TEST_CASE(test_mixed_complex)
+{
+  const std::string SPECIFICATION =
+      "sort Closure = List(Bool);\n"
+      "     State = struct state(closure: Closure, copy: Nat);\n"
+      "map  initial,accept: State -> Bool;\n"
+      "     nextstate: State # State -> Bool;\n"
+      "var  q,q': State;\n"
+      "eqn  initial(q)  =  closure(q) . 0 && copy(q) == 0;\n"
+      "     accept(q)  =  copy(q) == 0 && (closure(q) . 0 => closure(q) . 2);\n"
+      "     nextstate(q, q')  =  #closure(q) == #closure(q') && (accept(q) => copy(q') == (copy(q) + 1) mod 1) && (!accept(q) => copy(q') == copy(q)) && closure(q) . 0 == (closure(q) . 2 || closure(q) . 1 && closure(q') . 0) && (closure(q') . 0 => closure(q') . 1 || closure(q') . 2) && (closure(q') . 2 => closure(q') . 0);\n"
+      "act  a,b;\n"
+      "proc P(s_P: Bool) =\n"
+      "       !s_P ->\n"
+      "         b .\n"
+      "         P()\n"
+      "     + s_P ->\n"
+      "         a .\n"
+      "         P(s_P = false)\n"
+      "     + delta;\n"
+      "init P(true);\n"
     ;
 
-  FORMULA =
+  const std::string FORMULA =
     "forall c1: State .                                                                                                                                            \n"
     " (exists c0: State .                                                                                                                                          \n"
     "   (val(initial(c0) && nextstate(c0, c1)) &&                                                                                                                  \n"
@@ -171,45 +188,33 @@ void test_lps2pbes()
     " )                                                                                                                                                            \n"
     ;
 
-  spec    = linearise(SPECIFICATION);
-  formula = state_formulas::parse_state_formula(FORMULA, spec);
-  p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
-
-  core::garbage_collect();
+  test_lps2pbes(SPECIFICATION, FORMULA);
 }
 
-void test_lps2pbes2()
+BOOST_AUTO_TEST_CASE(test_abp)
 {
   std::string FORMULA;
-  pbes<> p;
-  bool timed = false;
 
   FORMULA = "mu X. !!X";
-  p = lps2pbes(lps::detail::ABP_SPECIFICATION(), FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  test_lps2pbes(lps::detail::LINEAR_ABP_SPECIFICATION(), FORMULA);
 
   FORMULA = "nu X. ([true]X && <true>true)";
-  p = lps2pbes(lps::detail::ABP_SPECIFICATION(), FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  test_lps2pbes(lps::detail::LINEAR_ABP_SPECIFICATION(), FORMULA);
 
   FORMULA = "nu X. ([true]X && forall d:D. [r1(d)] mu Y. (<true>Y || <s4(d)>true))";
-  p = lps2pbes(lps::detail::ABP_SPECIFICATION(), FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  test_lps2pbes(lps::detail::LINEAR_ABP_SPECIFICATION(), FORMULA);
 
   FORMULA = "forall d:D. nu X. (([!r1(d)]X && [s4(d)]false))";
-  p = lps2pbes(lps::detail::ABP_SPECIFICATION(), FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  test_lps2pbes(lps::detail::LINEAR_ABP_SPECIFICATION(), FORMULA);
 
   FORMULA = "nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))";
-  p = lps2pbes(lps::detail::ABP_SPECIFICATION(), FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
-  core::garbage_collect();
+  test_lps2pbes(lps::detail::LINEAR_ABP_SPECIFICATION(), FORMULA);
 }
 
-void test_lps2pbes3()
+BOOST_AUTO_TEST_CASE(test_delta_mu_true_or_mu_true)
 {
-  std::string SPEC = "init delta;";
+  std::string SPEC = "proc P = delta;\n"
+                     "init P\n;";
 
   std::string FORMULA =
     "(mu X(n:Nat = 0) . true) \n"
@@ -227,17 +232,11 @@ void test_lps2pbes3()
   //        true;
   //
   // init X1;
-
-  pbes<> p;
-  bool timed = false;
-  p = lps2pbes(SPEC, FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
-  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
-  core::garbage_collect();
+  test_lps2pbes(SPEC, FORMULA);
 }
 
 // Trac ticket #841, example supplied by Tim Willemse.
-void test_lps2pbes4()
+BOOST_AUTO_TEST_CASE(bug_841)
 {
   std::string SPEC =
     "act  a: Nat;                    \n"
@@ -258,14 +257,7 @@ void test_lps2pbes4()
 
   std::string FORMULA = "nu X(n :Nat=0). X(n+1)";
 
-  lps::specification spec = lps::parse_linear_process_specification(SPEC);
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
-  std::cout << "formula = " << state_formulas::pp(formula) << std::endl;
-  bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
-  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
-  BOOST_CHECK(p.is_well_typed());
-  core::garbage_collect();
+  test_lps2pbes(SPEC, FORMULA);
 }
 
 #ifdef MCRL2_USE_BOOST_FILESYSTEM
@@ -335,7 +327,7 @@ void test_directory(int argc, char** argv)
 }
 #endif
 
-void test_formulas()
+BOOST_AUTO_TEST_CASE(test_formulas)
 {
   std::string SPEC =
     "act a:Nat;                             \n"
@@ -364,50 +356,74 @@ void test_formulas()
 
   for (std::vector<string>::iterator i = formulas.begin(); i != formulas.end(); ++i)
   {
-    std::cout << "<formula>" << *i << std::flush;
-    pbes<> result1 = lps2pbes(SPEC, *i, false);
-    std::cout << " <timed>" << std::flush;
-    pbes<> result2 = lps2pbes(SPEC, *i, true);
-    std::cout << " <untimed>" << std::endl;
+    test_lps2pbes(SPEC, *i, false);
+    test_lps2pbes(SPEC, *i, true);
   }
-  core::garbage_collect();
 }
 
+#ifdef MCRL2_EXTENDED_TESTS
 const std::string MACHINE_SPECIFICATION =
-  "%% file machine.mcrl2                                             \n"
-  "                                                                  \n"
-  "act                                                               \n"
-  "                                                                  \n"
-  "  ch_tea, ch_cof, insq, insd, take_tea, take_cof, want_change,    \n"
-  "  sel_tea, sel_cof, accq, accd, put_tea, put_cof, put_change,     \n"
-  "  ok_tea, ok_coffee, quarter, dollar, tea, coffee, change ;       \n"
-  "                                                                  \n"
-  "proc                                                              \n"
-  "                                                                  \n"
-  "  User = ch_tea.UserTea + ch_cof.UserCof ;                        \n"
-  "  UserTea =                                                       \n"
-  "    insq.insq.take_tea.User  +                                    \n"
-  "    insd.take_tea.( take_tea + want_change ).User ;               \n"
-  "  UserCof = ( insq.insq.insq.insq + insd ).take_cof.User ;        \n"
-  "                                                                  \n"
-  "  Mach = sel_tea.MachTea + sel_cof.MachCof ;                      \n"
-  "  MachTea =                                                       \n"
-  "    accq.accq.put_tea.Mach +                                      \n"
-  "    accd.put_tea.( put_tea + put_change ).Mach ;                  \n"
-  "  MachCof =                                                       \n"
-  "    ( accq.accq.accq.accq + accd ).put_cof.Mach ;                 \n"
-  "                                                                  \n"
-  "init                                                              \n"
-  "                                                                  \n"
-  "  allow(                                                          \n"
-  "    { ok_tea, ok_coffee, quarter, dollar, tea, coffee, change } , \n"
-  "    comm(                                                         \n"
-  "       { ch_tea|sel_tea -> ok_tea, ch_cof|sel_cof -> ok_coffee,   \n"
-  "         insq|accq -> quarter, insd|accd -> dollar,               \n"
-  "         take_tea|put_tea -> tea, take_cof|put_cof -> coffee,     \n"
-  "         want_change|put_change -> change } ,                     \n"
-  "       User || Mach                                               \n"
-  "    ) ) ;                                                         \n"
+    "sort Enum6 = struct e5_6 | e4_6 | e3_6 | e2_6 | e1_6 | e0_6;\n"
+    "     Enum3 = struct e2_3 | e1_3 | e0_3;\n"
+    "map  C6_: Enum6 # Pos # Pos # Pos # Pos # Pos # Pos -> Pos;\n"
+    "     C6_1: Enum6 # Bool # Bool # Bool # Bool # Bool # Bool -> Bool;\n"
+    "     C3_: Enum3 # Pos # Pos # Pos -> Pos;\n"
+    "     C3_1: Enum3 # Bool # Bool # Bool -> Bool;\n"
+    "var  x1,y6,y5,y4,y3,y2,y1,x3,y15,y14,y13: Pos;\n"
+    "     e1,e2: Enum6;\n"
+    "     x2,y12,y11,y10,y9,y8,y7,x4,y18,y17,y16: Bool;\n"
+    "     e5,e6: Enum3;\n"
+    "eqn  C6_(e1, x1, x1, x1, x1, x1, x1)  =  x1;\n"
+    "     C6_(e5_6, y6, y5, y4, y3, y2, y1)  =  y6;\n"
+    "     C6_(e4_6, y6, y5, y4, y3, y2, y1)  =  y5;\n"
+    "     C6_(e3_6, y6, y5, y4, y3, y2, y1)  =  y4;\n"
+    "     C6_(e2_6, y6, y5, y4, y3, y2, y1)  =  y3;\n"
+    "     C6_(e1_6, y6, y5, y4, y3, y2, y1)  =  y2;\n"
+    "     C6_(e0_6, y6, y5, y4, y3, y2, y1)  =  y1;\n"
+    "     C6_1(e2, x2, x2, x2, x2, x2, x2)  =  x2;\n"
+    "     C6_1(e5_6, y12, y11, y10, y9, y8, y7)  =  y12;\n"
+    "     C6_1(e4_6, y12, y11, y10, y9, y8, y7)  =  y11;\n"
+    "     C6_1(e3_6, y12, y11, y10, y9, y8, y7)  =  y10;\n"
+    "     C6_1(e2_6, y12, y11, y10, y9, y8, y7)  =  y9;\n"
+    "     C6_1(e1_6, y12, y11, y10, y9, y8, y7)  =  y8;\n"
+    "     C6_1(e0_6, y12, y11, y10, y9, y8, y7)  =  y7;\n"
+    "     C3_(e5, x3, x3, x3)  =  x3;\n"
+    "     C3_(e2_3, y15, y14, y13)  =  y15;\n"
+    "     C3_(e1_3, y15, y14, y13)  =  y14;\n"
+    "     C3_(e0_3, y15, y14, y13)  =  y13;\n"
+    "     C3_1(e6, x4, x4, x4)  =  x4;\n"
+    "     C3_1(e2_3, y18, y17, y16)  =  y18;\n"
+    "     C3_1(e1_3, y18, y17, y16)  =  y17;\n"
+    "     C3_1(e0_3, y18, y17, y16)  =  y16;\n"
+    "act  ch_tea,ch_cof,insq,insd,take_tea,take_cof,want_change,sel_tea,sel_cof,accq,accd,put_tea,put_cof,put_change,ok_tea,ok_coffee,quarter,dollar,tea,coffee,change;\n"
+    "proc P(s3_User,s1_Mach: Pos) =\n"
+    "       (s3_User == 11 && s1_Mach == 11) ->\n"
+    "         coffee .\n"
+    "         P(s3_User = 1, s1_Mach = 1)\n"
+    "     + sum e_User,e7_Mach: Enum6.\n"
+    "         (C6_1(e_User, true, true, true, true, true, true) && C6_1(e_User, s3_User == 2, s3_User == 3, s3_User == 7, s3_User == 8, s3_User == 9, s3_User == 10) && C6_1(e7_Mach, true, true, true, true, true, true) && C6_1(e7_Mach, s1_Mach == 2, s1_Mach == 3, s1_Mach == 7, s1_Mach == 8, s1_Mach == 9, s1_Mach == 10)) ->\n"
+    "         quarter .\n"
+    "         P(s3_User = C6_(e_User, 3, 4, 8, 9, 10, 11), s1_Mach = C6_(e7_Mach, 3, 4, 8, 9, 10, 11))\n"
+    "     + sum e3_User,e8_Mach: Bool.\n"
+    "         (if(e3_User, s3_User == 7, s3_User == 2) && if(e8_Mach, s1_Mach == 7, s1_Mach == 2)) ->\n"
+    "         dollar .\n"
+    "         P(s3_User = if(e3_User, 11, 5), s1_Mach = if(e8_Mach, 11, 5))\n"
+    "     + (s3_User == 6 && s1_Mach == 6) ->\n"
+    "         change .\n"
+    "         P(s3_User = 1, s1_Mach = 1)\n"
+    "     + sum e4_User,e9_Mach: Enum3.\n"
+    "         (C3_1(e4_User, true, true, true) && C3_1(e4_User, s3_User == 4, s3_User == 5, s3_User == 6) && C3_1(e9_Mach, true, true, true) && C3_1(e9_Mach, s1_Mach == 4, s1_Mach == 5, s1_Mach == 6)) ->\n"
+    "         tea .\n"
+    "         P(s3_User = C3_(e4_User, 1, 6, 1), s1_Mach = C3_(e9_Mach, 1, 6, 1))\n"
+    "     + (s3_User == 1 && s1_Mach == 1) ->\n"
+    "         ok_coffee .\n"
+    "         P(s3_User = 7, s1_Mach = 7)\n"
+    "     + (s3_User == 1 && s1_Mach == 1) ->\n"
+    "         ok_tea .\n"
+    "         P(s3_User = 2, s1_Mach = 2)\n"
+    "     + delta;\n"
+    "\n"
+    "init P(1, 1);\n"
   ;
 
 const std::string MACHINE_FORMULA1 =
@@ -425,95 +441,108 @@ const std::string MACHINE_FORMULA3 =
   " [ true* . quarter . change ] false          \n"
   ;
 
-void test_lps2pbes(std::string lps_spec, std::string mcf_formula)
+BOOST_AUTO_TEST_CASE(test_machine_formula1)
 {
-  using namespace pbes_system;
-
-  lps::specification spec = lps::linearise(lps_spec);
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(mcf_formula, spec);
-  bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
-  core::garbage_collect();
+  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA1);
 }
 
+BOOST_AUTO_TEST_CASE(test_machine_formula2)
+{
+  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA2);
+}
+
+BOOST_AUTO_TEST_CASE(test_machine_formula3)
+{
+  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA3);
+}
+#endif
+
 // Submitted by Tim, 2-9-2010
-void test_example()
+BOOST_AUTO_TEST_CASE(test_example)
 {
   std::string SPEC =
-    "act a,b;                                         \n"
-    "                                                 \n"
-    "proc S = sum n:Nat. (n < 3) -> a.X(n);           \n"
-    "                                                 \n"
-    "proc X(n:Nat) = (n == 0) -> ( (a+b).X(n))        \n"
-    "               +(n > 0 ) -> b.a.X(Int2Nat(n-1)); \n"
-    "                                                 \n"
-    "init S;                                          \n"
+      "sort Enum3 = struct e2_3 | e1_3 | e0_3;\n"
+      "map  C3_: Enum3 # Pos # Pos # Pos -> Pos;\n"
+      "     C3_1: Enum3 # Nat # Nat # Nat -> Nat;\n"
+      "     C3_2: Enum3 # Bool # Bool # Bool -> Bool;\n"
+      "var  x1,y3,y2,y1: Pos;\n"
+      "     e1,e2,e3: Enum3;\n"
+      "     x2,y6,y5,y4: Nat;\n"
+      "     x3,y9,y8,y7: Bool;\n"
+      "eqn  C3_(e1, x1, x1, x1)  =  x1;\n"
+      "     C3_(e2_3, y3, y2, y1)  =  y3;\n"
+      "     C3_(e1_3, y3, y2, y1)  =  y2;\n"
+      "     C3_(e0_3, y3, y2, y1)  =  y1;\n"
+      "     C3_1(e2, x2, x2, x2)  =  x2;\n"
+      "     C3_1(e2_3, y6, y5, y4)  =  y6;\n"
+      "     C3_1(e1_3, y6, y5, y4)  =  y5;\n"
+      "     C3_1(e0_3, y6, y5, y4)  =  y4;\n"
+      "     C3_2(e3, x3, x3, x3)  =  x3;\n"
+      "     C3_2(e2_3, y9, y8, y7)  =  y9;\n"
+      "     C3_2(e1_3, y9, y8, y7)  =  y8;\n"
+      "     C3_2(e0_3, y9, y8, y7)  =  y7;\n"
+      "act  a,b;\n"
+      "glob dc: Nat;\n"
+      "proc P(s3_S: Pos, n_S: Nat) =\n"
+      "       sum e_S: Enum3,n1_S: Nat.\n"
+      "         (C3_2(e_S, n1_S == 0, n1_S == 0, true) && C3_2(e_S, s3_S == 3, s3_S == 2 && n_S == 0, s3_S == 1 && n1_S < 3)) ->\n"
+      "         a .\n"
+      "         P(s3_S = 2, n_S = C3_1(e_S, Int2Nat(n_S - 1), n_S, n1_S))\n"
+      "     + sum e4_S: Bool.\n"
+      "         if(e4_S, s3_S == 2 && n_S == 0, s3_S == 2 && 0 < n_S) ->\n"
+      "         b .\n"
+      "         P(s3_S = if(e4_S, 2, 3))\n"
+      "     + delta;\n"
+      "init P(1, dc);\n"
     ;
 
   std::string FORMULA = "<a>([a]false)";
-
-  pbes<> p;
-  bool timed = false;
-  p = lps2pbes(SPEC, FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
-  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
-
-  bool result = pbes2_bool_test(p);
-  BOOST_CHECK(result == true);
-
-  core::garbage_collect();
+  test_lps2pbes_and_solve(SPEC, FORMULA, true);
 }
 
 // Submitted by Jeroen Keiren, 10-09-2010
 // Formula 2 and 3 give normalization errors.
-void test_elevator()
+BOOST_AUTO_TEST_CASE(test_elevator)
 {
   std::string SPEC =
-    "% Model of an elevator for n floors.                                                                                           \n"
-    "% Originally described in 'Solving Parity Games in Practice' by Oliver                                                         \n"
-    "% Friedmann and Martin Lange.                                                                                                  \n"
-    "%                                                                                                                              \n"
-    "% This is the version with a first in first out policy                                                                         \n"
-    "                                                                                                                               \n"
-    "sort Floor = Pos;                                                                                                              \n"
-    "     DoorStatus = struct open | closed;                                                                                        \n"
-    "     Requests = List(Floor);                                                                                                   \n"
-    "                                                                                                                               \n"
-    "map maxFloor: Floor;                                                                                                           \n"
-    "eqn maxFloor = 3;                                                                                                              \n"
-    "                                                                                                                               \n"
-    "map addRequest : Requests # Floor -> Requests;                                                                                 \n"
-    "                                                                                                                               \n"
-    "var r: Requests;                                                                                                               \n"
-    "    f,g: Floor;                                                                                                                \n"
-    "    % FIFO behaviour!                                                                                                          \n"
-    "eqn addRequest([], f) = [f];                                                                                                   \n"
-    "    (f == g) -> addRequest(g |> r, f) = g |> r;                                                                                \n"
-    "    (f != g) -> addRequest(g |> r, f) = g |> addRequest(r, f);                                                                 \n"
-    "                                                                                                                               \n"
-    "map removeRequest : Requests -> Requests;                                                                                      \n"
-    "var r: Requests;                                                                                                               \n"
-    "    f: Floor;                                                                                                                  \n"
-    "eqn removeRequest(f |> r) = r;                                                                                                 \n"
-    "                                                                                                                               \n"
-    "map getNext : Requests -> Floor;                                                                                               \n"
-    "var r: Requests;                                                                                                               \n"
-    "    f: Floor;                                                                                                                  \n"
-    "eqn getNext(f |> r) = f;                                                                                                       \n"
-    "                                                                                                                               \n"
-    "act isAt: Floor;                                                                                                               \n"
-    "    request: Floor;                                                                                                            \n"
-    "    close, open, up, down;                                                                                                     \n"
-    "                                                                                                                               \n"
-    "proc Elevator(at: Floor, status: DoorStatus, reqs: Requests, moving: Bool) =                                                   \n"
-    "       isAt(at) . Elevator()                                                                                                   \n"
-    "     + sum f: Floor. (f <= maxFloor) -> request(f) . Elevator(reqs = addRequest(reqs, f))                                      \n"
-    "     + (status == open) -> close . Elevator(status = closed)                                                                   \n"
-    "     + (status == closed && reqs != [] && getNext(reqs) > at) -> up . Elevator(at = at + 1, moving = true)                     \n"
-    "     + (status == closed && reqs != [] && getNext(reqs) < at) -> down . Elevator(at = Int2Pos(at - 1), moving = true)          \n"
-    "     + (status == closed && getNext(reqs) == at) -> open. Elevator(status = open, reqs = removeRequest(reqs), moving = false); \n"
-    "                                                                                                                               \n"
-    "init Elevator(1, open, [], false);                                                                                             \n"
+      "sort Floor = Pos;\n"
+      "     DoorStatus = struct open | closed;\n"
+      "     Requests = List(Pos);\n"
+      "map  maxFloor: Pos;\n"
+      "     addRequest: Requests # Pos -> Requests;\n"
+      "     removeRequest: Requests -> Requests;\n"
+      "     getNext: Requests -> Pos;\n"
+      "var  r: Requests;\n"
+      "     f,g: Pos;\n"
+      "eqn  maxFloor  =  3;\n"
+      "     addRequest([], f)  =  [f];\n"
+      "     f == g  ->  addRequest(g |> r, f)  =  g |> r;\n"
+      "     f != g  ->  addRequest(g |> r, f)  =  g |> addRequest(r, f);\n"
+      "     removeRequest(f |> r)  =  r;\n"
+      "     getNext(f |> r)  =  f;\n"
+      "act  isAt,request: Pos;\n"
+      "     close,open,up,down;\n"
+      "proc P(at_Elevator: Pos, status_Elevator: DoorStatus, reqs_Elevator: List(Pos), moving_Elevator: Bool) =\n"
+      "       (status_Elevator == closed && getNext(reqs_Elevator) == at_Elevator) ->\n"
+      "         open .\n"
+      "         P(status_Elevator = open, reqs_Elevator = removeRequest(reqs_Elevator), moving_Elevator = false)\n"
+      "     + (status_Elevator == closed && !(reqs_Elevator == []) && getNext(reqs_Elevator) < at_Elevator) ->\n"
+      "         down .\n"
+      "         P(at_Elevator = Nat2Pos(pred(at_Elevator)), moving_Elevator = true)\n"
+      "     + (status_Elevator == closed && !(reqs_Elevator == []) && at_Elevator < getNext(reqs_Elevator)) ->\n"
+      "         up .\n"
+      "         P(at_Elevator = succ(at_Elevator), moving_Elevator = true)\n"
+      "     + (status_Elevator == open) ->\n"
+      "         close .\n"
+      "         P(status_Elevator = closed)\n"
+      "     + sum f_Elevator: Pos.\n"
+      "         (f_Elevator <= 3) ->\n"
+      "         request(f_Elevator) .\n"
+      "         P(reqs_Elevator = addRequest(reqs_Elevator, f_Elevator))\n"
+      "     + isAt(at_Elevator) .\n"
+      "         P()\n"
+      "     + delta;\n"
+      "init P(1, open, [], false);\n                                                                                          \n"
     ;
 
   std::string formula1 = "nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))";
@@ -522,35 +551,87 @@ void test_elevator()
   std::string formula4 = "(nu V . mu W. V) => true";
   std::string formula5 = "!(nu V . mu W. V)";
 
-  pbes<> p;
-  bool timed = false;
-  p = lps2pbes(SPEC, formula1, timed);
-  p = lps2pbes(SPEC, formula2, timed);
-  p = lps2pbes(SPEC, formula3, timed);
-  p = lps2pbes(SPEC, formula4, timed);
-
-  core::garbage_collect();
+  test_lps2pbes(SPEC, formula1);
+  test_lps2pbes(SPEC, formula2);
+  test_lps2pbes(SPEC, formula3);
+  test_lps2pbes(SPEC, formula4);
+  test_lps2pbes(SPEC, formula5);
 }
 
-int test_main(int argc, char* argv[])
+// Test for bug #1092, simple P=a.b.P example with [a]<a>true, which should be false
+BOOST_AUTO_TEST_CASE(test_ab)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  std::string SPEC =
+    "act  a,b;\n"
+    "proc P(s3_P: Pos) =\n"
+    "       (s3_P == 2) ->\n"
+    "         b .\n"
+    "         P(s3_P = 1)\n"
+    "     + (s3_P == 1) ->\n"
+    "         a .\n"
+    "         P(s3_P = 2)\n"
+    "     + delta;\n"
+    "init P(1);\n"
+    ;
 
-  test_elevator();
-  test_example();
-  test_lps2pbes();
-  test_lps2pbes2();
-  test_lps2pbes3();
-  test_lps2pbes4();
-  test_trivial();
-  test_formulas();
-  test_timed();
+  std::string FORMULA = "[a]<a>true";
+  test_lps2pbes_and_solve(SPEC, FORMULA, false);
+}
 
-#ifdef MCRL2_EXTENDED_TESTS
-  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA1);
-  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA2);
-  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA3);
-#endif
+// Test for bug #1092, fairness example derived from alternating bit protocol.
+BOOST_AUTO_TEST_CASE(test_unfair)
+{
+  const std::string SPEC =
+    "act  r1,s4,i,e;\n"
+    "proc P(s3_P: Pos) =\n"
+    "       (s3_P == 4) ->\n"
+    "         e .\n"
+    "         P(s3_P = 2)\n"
+    "     + (s3_P == 3) ->\n"
+    "         s4 .\n"
+    "         P(s3_P = 1)\n"
+    "     + sum e1_P: Bool.\n"
+    "         (s3_P == 2) ->\n"
+    "         i .\n"
+    "         P(s3_P = if(e1_P, 4, 3))\n"
+    "     + (s3_P == 1) ->\n"
+    "         r1 .\n"
+    "         P(s3_P = 2)\n"
+    "     + delta;\n"
+    "init P(1);\n"
+    ;
+
+  const std::string FORMULA = "[r1](nu X. mu Y. ([s4]X && [!s4]Y))";
+  test_lps2pbes_and_solve(SPEC, FORMULA, false);
+}
+
+// Test for bug #1090
+BOOST_AUTO_TEST_CASE(test_1090)
+{
+  const std::string SPEC =
+      "sort D = struct d1 | d2;\n"
+      "act  a: D;\n"
+      "proc P =\n"
+      "       a(d1) .\n"
+      "         P()\n"
+      "     + delta;\n"
+      "init P;\n"
+    ;
+
+  const std::string FORMULA = "[!exists d:D . a(d)]false";
+  pbes<> p = test_lps2pbes(SPEC, FORMULA);
+
+  std::set<data::variable> vars(pbes_system::find_variables(p));
+  for(std::set<data::variable>::const_iterator i = vars.begin(); i != vars.end(); ++i)
+  {
+    BOOST_CHECK_NE(i->name(), core::identifier_string("d1"));
+    BOOST_CHECK_NE(i->name(), core::identifier_string("d2"));
+  }
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   return 0;
 }
