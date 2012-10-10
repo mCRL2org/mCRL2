@@ -42,7 +42,7 @@ if compiler != 'default':
 # Package for a proper mCRL2 release
 #
 packageflags = []
-if package = "official-release":
+if package == "official-release":
   packageflags = ['-DMCRL2_PACKAGE_RELEASE=ON']
 
 #
