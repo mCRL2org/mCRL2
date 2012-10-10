@@ -39,6 +39,13 @@ if compiler != 'default':
     sys.exit(1)
 
 #
+# Package for a proper mCRL2 release
+#
+packageflags = []
+if package = "official-release":
+  packageflags = ['-DMCRL2_PACKAGE_RELEASE=ON']
+
+#
 # Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
 #
 testflags = []
@@ -64,7 +71,8 @@ cmake_command = ['cmake', \
                  '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), \
                  '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)] \
                  + compilerflags \
-                 + testflags
+                 + testflags \
+                 + packageflags
 if call('CMake', cmake_command):
   log('CMake failed.')
   sys.exit(1)
