@@ -1481,11 +1481,11 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         calc_nfs_list(args_nfs,arity,ATgetNext((ATermList) t),startarg,nnfvars);
         if (!(b || !rewr))
         {
-          if (arity<=5)
+          /* if (arity<=5)
           {
-            ss << "rewr_";
+            ss << "/ *" << arity <<  "* / rewr_";
           }
-          else
+          else */
           {
             ss << "(ATermAppl)rewr_";
           }
