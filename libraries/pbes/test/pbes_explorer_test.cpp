@@ -105,12 +105,12 @@ public:
         std::string varname = this->get_string_value(s[0]);
         if (label==0)
         {
-            int priority = this->get_info()->get_variable_priorities().at(varname);
+            int priority = map_at(this->get_info()->get_variable_priorities(), varname);
             return priority;
         }
         else if (label==1)
         {
-            lts_info::operation_type type = this->get_info()->get_variable_types().at(varname);
+            lts_info::operation_type type = map_at(this->get_info()->get_variable_types(), varname);
             return type==parity_game_generator::PGAME_AND ? 1 : 0;
         }
         return 0;
