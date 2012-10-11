@@ -23,11 +23,13 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/convert.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 
+using namespace mcrl2;
 
 const std::string case_no_influenced_parameters(
   "act a;\n\n"
@@ -74,17 +76,46 @@ class group_information
 {
 
   private:
-
     mcrl2::lps::specification const&     m_model;
-
     std::vector< std::vector< size_t > > m_group_indices;
 
   private:
 
-    void gather(mcrl2::lps::specification const& l);
+    template <typename SummandVector>
+    void gather_summands(const SummandVector& summands, const data::variable_list& parameter_list, const std::set<data::variable>& parameter_set, std::size_t& summand_index)
+    {
+      for (typename SummandVector::const_iterator i = summands.begin(); i != summands.end(); ++i)
+      {
+        std::set<data::variable> used_variables = lps::find_free_variables(*i);
+        std::set<data::variable> used_parameters;
+        std::set_intersection(used_variables.begin(), used_variables.end(), parameter_set.begin(), parameter_set.end(), std::inserter(used_parameters, used_parameters.begin()));
+
+        std::size_t j_index = 0;
+        for (data::variable_list::const_iterator j = parameter_list.begin(); j != parameter_list.end(); ++j)
+        {
+          if (used_parameters.find(*j) != used_parameters.end())
+          {
+            m_group_indices[summand_index++].push_back(j_index);
+          }
+          j_index++;
+        }
+      }
+    }
+
+    void gather(lps::specification const& l)
+    {
+      lps::linear_process specification(l.process());
+
+      std::size_t size = specification.action_summands().size() + specification.deadlock_summands().size();
+      m_group_indices.resize(size);
+
+      std::set<data::variable> parameter_set = data::find_variables(specification.process_parameters());
+      std::size_t summand_index = 0;
+      gather_summands(specification.action_summands(), specification.process_parameters(), parameter_set, summand_index);
+      gather_summands(specification.deadlock_summands(), specification.process_parameters(), parameter_set, summand_index);
+    }
 
   public:
-
     /**
      * \brief constructor from an mCRL2 lps
      **/
@@ -118,71 +149,6 @@ class group_information
     }
 };
 
-void group_information::gather(mcrl2::lps::specification const& l)
-{
-  using namespace mcrl2;
-
-  using data::find_variables;
-  using data::variable;
-
-  struct local
-  {
-    static void add_used_variables(std::set< variable >& r, std::set< variable > const& c)
-    {
-      r.insert(c.begin(), c.end());
-    }
-  };
-
-  lps::linear_process specification(l.process());
-
-  // the set with process parameters
-  std::set< variable > parameters = find_variables(specification.process_parameters());
-
-  // the list of summands
-  std::vector< lps::deprecated::summand > summands = atermpp::convert<std::vector<lps::deprecated::summand> >(lps::deprecated::linear_process_summands(specification));
-
-  m_group_indices.resize(summands.size());
-
-  for (std::vector< lps::deprecated::summand >::const_iterator i = summands.begin(); i != summands.end(); ++i)
-  {
-    std::set< variable > used_variables;
-
-    local::add_used_variables(used_variables, find_variables(i->condition()));
-    local::add_used_variables(used_variables, lps::find_variables(i->actions()));
-
-    if (i->has_time())
-    {
-      local::add_used_variables(used_variables, find_variables(i->time()));
-    }
-
-    data::assignment_list assignments(i->assignments());
-
-    for (data::assignment_list::const_iterator j = assignments.begin(); j != assignments.end(); ++j)
-    {
-      if (j->lhs() != j->rhs())
-      {
-        local::add_used_variables(used_variables, find_variables(j->lhs()));
-        local::add_used_variables(used_variables, find_variables(j->rhs()));
-      }
-    }
-
-    // process parameters used in condition or action of summand
-    std::set< variable > used_parameters;
-
-    std::set_intersection(used_variables.begin(), used_variables.end(),
-                          parameters.begin(), parameters.end(), std::inserter(used_parameters, used_parameters.begin()));
-
-    std::vector< variable > parameters_list(specification.process_parameters().begin(), specification.process_parameters().end());
-
-    for (std::vector< variable >::const_iterator j = parameters_list.begin(); j != parameters_list.end(); ++j)
-    {
-      if (used_parameters.find(*j) != used_parameters.end())
-      {
-        m_group_indices[i - summands.begin()].push_back(j - parameters_list.begin());
-      }
-    }
-  }
-}
 
 void check_info(mcrl2::lps::specification const& model)
 {
