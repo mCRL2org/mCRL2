@@ -297,6 +297,6 @@ BOOST_AUTO_TEST_CASE(test_stategraph4)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  log::mcrl2_logger::set_reporting_level(log::debug, "control_flow");
+  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "control_flow");
   return 0;
 }

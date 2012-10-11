@@ -539,7 +539,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  log::mcrl2_logger::set_reporting_level(log::debug, "symbolic");
+  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "symbolic");
 
   test_pbesinst_symbolic();
   pbes_system::detail::set_bes_equation_limit(100000);
