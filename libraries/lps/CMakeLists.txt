@@ -37,7 +37,6 @@ set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/next_state_generator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/simulation.cpp
 )
