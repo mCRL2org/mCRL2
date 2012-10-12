@@ -44,22 +44,6 @@ class multi_action
     /// the multi action has no time.
     data::data_expression m_time;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_time.protect();
-      m_actions.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_time.unprotect();
-      m_actions.unprotect();
-    }
-
     /// \brief Mark the term for not being garbage collected.
     void mark() const
     {
@@ -160,6 +144,22 @@ class multi_action
     bool operator<(const multi_action& other) const
     {
       return m_actions < other.m_actions || (m_actions == other.m_actions && m_time < other.m_time);
+    }
+
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect() const
+    {
+      m_time.protect();
+      m_actions.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect() const
+    {
+      m_time.unprotect();
+      m_actions.unprotect();
     }
 };
 

@@ -393,22 +393,6 @@ class summand_base
     /// \brief The condition of the summand
     data::data_expression m_condition;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_summation_variables.protect();
-      m_condition.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_summation_variables.unprotect();
-      m_condition.unprotect();
-    }
-
     /// \brief Mark the term for not being garbage collected.
     void mark() const
     {
@@ -453,6 +437,22 @@ class summand_base
     data::data_expression& condition()
     {
       return m_condition;
+    }
+    
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect() const
+    {
+      m_summation_variables.protect();
+      m_condition.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect() const
+    {
+      m_summation_variables.unprotect();
+      m_condition.unprotect();
     }
 };
 
@@ -565,23 +565,6 @@ class action_summand: public summand_base
     /// \brief The assignments of the next state
     data::assignment_list m_assignments;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      super::protect();
-      m_multi_action.protect();
-      m_assignments.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      super::unprotect();
-      m_multi_action.unprotect();
-      m_assignments.unprotect();
-    }
 
     /// \brief Mark the term for not being garbage collected.
     void mark() const
@@ -655,6 +638,24 @@ class action_summand: public summand_base
     data::data_expression_list next_state(const data::variable_list& process_parameters) const
     {
       return data::replace_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+    }
+
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect() const
+    {
+      super::protect();
+      m_multi_action.protect();
+      m_assignments.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect() const
+    {
+      super::unprotect();
+      m_multi_action.unprotect();
+      m_assignments.unprotect();
     }
 };
 

@@ -35,20 +35,6 @@ class deadlock
     /// the multi action has no time.
     data::data_expression m_time;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_time.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_time.unprotect();
-    }
-
     /// \brief Mark the term for not being garbage collected.
     void mark() const
     {
@@ -98,6 +84,20 @@ class deadlock
     bool operator!=(const deadlock& other)
     {
       return !(*this == other);
+    }
+
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect() const
+    {
+      m_time.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect() const
+    {
+      m_time.unprotect();
     }
 };
 
