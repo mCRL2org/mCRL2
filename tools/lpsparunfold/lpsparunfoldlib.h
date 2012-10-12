@@ -265,6 +265,8 @@ class lpsparunfold
              ;
     }
 
+    // Applies 'process unfolding' to a sequence of summands.
+    void unfold_summands(mcrl2::lps::action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi);
 };
 
 

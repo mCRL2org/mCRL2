@@ -394,6 +394,53 @@ mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_na
   return idstr;
 }
 
+void lpsparunfold::unfold_summands(mcrl2::lps::action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi)
+{
+  for (mcrl2::lps::action_summand_vector::iterator j = summands.begin(); j != summands.end(); ++j)
+  {
+    mcrl2::data::assignment_list ass = j->assignments();
+    //Create new left-hand assignment_list & right-hand assignment_list
+    mcrl2::data::data_expression_vector new_ass_left;
+    mcrl2::data::data_expression_vector new_ass_right;
+    for (mcrl2::data::assignment_list::iterator k = ass.begin(); k != ass.end(); ++k)
+    {
+      if (proc_par_to_proc_par_inj.find(k->lhs()) != proc_par_to_proc_par_inj.end())
+      {
+        for (mcrl2::data::variable_vector::iterator l =  proc_par_to_proc_par_inj[ k -> lhs() ].begin()
+             ; l != proc_par_to_proc_par_inj[ k -> lhs() ].end()
+             ; ++l)
+        {
+          new_ass_left.push_back(*l);
+        }
+
+        mcrl2::data::data_expression_vector ins = unfold_constructor(k -> rhs(), determine_function, pi);
+        //Replace unfold parameters in affected assignments
+        new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
+      }
+      else
+      {
+        new_ass_left.push_back(k-> lhs());
+        new_ass_right.push_back(k-> rhs());
+      }
+    }
+
+    //cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
+    //cout << mcrl2::data::pp(*j) << endl;
+    //cout << mcrl2::data::pp(new_ass_left)  << endl;
+    //cout << mcrl2::data::pp(new_ass_right)  << endl;
+
+    assert(new_ass_left.size() == new_ass_right.size());
+    mcrl2::data::assignment_vector new_ass;
+    while (!new_ass_left.empty())
+    {
+      new_ass.push_back(mcrl2::data::assignment(new_ass_left.front(), new_ass_right.front()));
+      new_ass_left.erase(new_ass_left.begin());
+      new_ass_right.erase(new_ass_right.begin());
+    }
+    j->assignments() = mcrl2::data::assignment_list(new_ass.begin(), new_ass.end());
+  }
+}
+
 mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol case_function , function_symbol_vector affected_constructors, function_symbol determine_function, size_t parameter_at_index, function_symbol_vector pi)
 {
   /* Get process parameters from lps */
@@ -482,70 +529,18 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   }
   mCRL2log(debug) << "- New LPS process parameters: " <<  mcrl2::data::pp(new_process_parameters) << std::endl;
 
-  /* Reconstruct summands */
-  mcrl2::lps::summand_vector new_summands;
-
   //Prepare parameter substitution
   atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
 
-  mcrl2::lps::deprecated::summand_list s = mcrl2::lps::deprecated::linear_process_summands(m_lps);
-  for (mcrl2::lps::deprecated::summand_list::iterator j = s.begin()
-       ; j != s.end()
-       ; ++j)
-
-    //Traversing summands for process unfolding
-  {
-
-    mcrl2::data::assignment_list ass = j-> assignments();
-    //Create new left-hand assignment_list & right-hand assignment_list
-    mcrl2::data::data_expression_vector new_ass_left;
-    mcrl2::data::data_expression_vector new_ass_right;
-    for (mcrl2::data::assignment_list::iterator k = ass.begin()
-         ; k != ass.end()
-         ; ++k)
-    {
-      if (proc_par_to_proc_par_inj.find(k-> lhs()) != proc_par_to_proc_par_inj.end())
-      {
-        for (mcrl2::data::variable_vector::iterator l =  proc_par_to_proc_par_inj[ k -> lhs() ].begin()
-             ; l != proc_par_to_proc_par_inj[ k -> lhs() ].end()
-             ; ++l)
-        {
-          new_ass_left.push_back(*l);
-        }
-
-        mcrl2::data::data_expression_vector ins = unfold_constructor(k -> rhs(), determine_function, pi);
-        //Replace unfold parameters in affected assignments
-        new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
-
-      }
-      else
-      {
-        new_ass_left.push_back(k-> lhs());
-        new_ass_right.push_back(k-> rhs());
-      }
-    }
-
-    //cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
-    //cout << mcrl2::data::pp(*j) << endl;
-    //cout << mcrl2::data::pp(new_ass_left)  << endl;
-    //cout << mcrl2::data::pp(new_ass_right)  << endl;
-
-    assert(new_ass_left.size() == new_ass_right.size());
-    mcrl2::data::assignment_vector new_ass;
-    while (!new_ass_left.empty())
-    {
-      new_ass.push_back(mcrl2::data::assignment(new_ass_left.front(), new_ass_right.front()));
-      new_ass_left.erase(new_ass_left.begin());
-      new_ass_right.erase(new_ass_right.begin());
-    }
-
-    mcrl2::lps::deprecated::summand new_summand = set_assignments(*j, mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()));
-    new_summands.push_back(new_summand);
-  }
-
+  // TODO: avoid unnecessary copies of the LPS
   mcrl2::lps::linear_process new_lps;
+  new_lps.action_summands() = m_lps.action_summands();
+  new_lps.deadlock_summands() = m_lps.deadlock_summands();
+
+  // update the summands in new_lps
+  unfold_summands(new_lps.action_summands(), determine_function, pi);
+
   new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
-  mcrl2::lps::deprecated::set_linear_process_summands(new_lps, mcrl2::lps::deprecated::summand_list(new_summands.begin(), new_summands.end()));
 
   for (atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
        ; i != parsub.end()
