@@ -78,7 +78,7 @@ inline std::string pp(const rewrite_strategy s)
 #ifdef MCRL2_JITTYC_AVAILABLE
     case jitty_compiling_prover: return "jittycp";
 #endif
-    default: throw mcrl2::runtime_error("unkown rewrite_strategy");
+    default: throw mcrl2::runtime_error("unknown rewrite_strategy");
   }
 }
 
@@ -102,7 +102,7 @@ inline std::string description(const rewrite_strategy s)
 #ifdef MCRL2_JITTYC_AVAILABLE
     case jitty_compiling_prover: return "compiled jitty rewriting with prover";
 #endif
-    default: throw mcrl2::runtime_error("unkown rewrite_strategy");
+    default: throw mcrl2::runtime_error("unknown rewrite_strategy");
   }
 }
 
