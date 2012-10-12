@@ -26,14 +26,6 @@
 #include <boost/range/iterator_range.hpp>
 #include "mcrl2/lps/specification.h"
 
-namespace mcrl2
-{
-namespace lps
-{
-typedef atermpp::vector< mcrl2::lps::deprecated::summand >     summand_vector;
-}
-}
-
 namespace lspparunfold
 {
 	struct unfold_cache_element{
