@@ -352,7 +352,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       }
       else
       {
-        mCRL2log(log::warning) << "ACCESSING UNIMPLEMENTED CONTAINER SORT" << endl;
+        mCRL2log(mcrl2::log::warning) << "ACCESSING UNIMPLEMENTED CONTAINER SORT" << endl;
       }
 
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
@@ -509,8 +509,8 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
         }
         if (!processed)
         {
-          mCRL2log(log::debug) << data::pp(*j) << " is not processed" << endl;
-          mCRL2log(log::debug) << *j << endl;
+          mCRL2log(mcrl2::log::debug) << data::pp(*j) << " is not processed" << endl;
+          mCRL2log(mcrl2::log::debug) << *j << endl;
           abort();
         }
       }
@@ -722,7 +722,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
   mCRL2log(verbose) << "Unfolding process parameter at index: " <<  parameter_at_index << "" << std::endl;
   if (lps_proc_pars.size() <= parameter_at_index)
   {
-    mCRL2log(log::error) << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << endl;
+    mCRL2log(mcrl2::log::error) << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << endl;
     abort();
   }
 
