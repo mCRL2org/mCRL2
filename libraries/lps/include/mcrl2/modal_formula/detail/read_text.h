@@ -17,6 +17,7 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
