@@ -47,44 +47,6 @@ class linear_process
     /// \brief The action summands of the process
     action_summand_vector m_action_summands;
 
-    /// \brief Set the summands of the linear process
-    /// \deprecated
-    void set_summands(const deprecated::summand_list& summands)
-    {
-      m_deadlock_summands.clear();
-      m_action_summands  .clear();
-      for (deprecated::summand_list::iterator j = summands.begin(); j != summands.end(); ++j)
-      {
-        if (j->is_delta())
-        {
-          m_deadlock_summands.push_back(deadlock_summand(j->summation_variables(), j->condition(), j->deadlock()));
-        }
-        else
-        {
-          m_action_summands.push_back(action_summand(j->summation_variables(), j->condition(), j->multi_action(), j->assignments()));
-        }
-      }
-    }
-
-    /// \brief Returns the sequence of LPS summands.
-    /// \return The sequence of LPS summands.
-    /// \deprecated
-    deprecated::summand_list summands() const
-    {
-      deprecated::summand_list result;
-      for (deadlock_summand_vector::const_reverse_iterator i = m_deadlock_summands.rbegin(); i != m_deadlock_summands.rend(); ++i)
-      {
-        deprecated::summand s = atermpp::aterm_appl(deadlock_summand_to_aterm(*i));
-        result = atermpp::push_front(result, s);
-      }
-      for (action_summand_vector::const_reverse_iterator i = m_action_summands.rbegin(); i != m_action_summands.rend(); ++i)
-      {
-        deprecated::summand s = atermpp::aterm_appl(action_summand_to_aterm(*i));
-        result = atermpp::push_front(result, s);
-      }
-      return result;
-    }
-
   public:
     /// \brief Constructor.
     linear_process()
@@ -116,15 +78,33 @@ class linear_process
 
     /// \brief Constructor.
     /// \param lps A term
-    linear_process(atermpp::aterm_appl lps)
+    linear_process(const atermpp::aterm_appl& lps)
     {
       assert(core::detail::check_term_LinearProcess(lps));
-
-      // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
       m_process_parameters = *i++;
       m_process_parameters.protect();
-      set_summands(*i);
+      atermpp::aterm_list summands = *i;
+      for (atermpp::aterm_list::iterator j = summands.begin(); j != summands.end(); ++j)
+      {
+        assert(core::detail::check_rule_LinearProcessSummand(*j));
+        atermpp::aterm_appl t = *j;
+        
+        data::variable_list summation_variables = t(0);
+        data::data_expression condition         = data::data_expression(t(1));
+        data::data_expression time              = data::data_expression(t(3));
+        data::assignment_list assignments       = t(4);
+        if (core::detail::gsIsDelta(t(2)))
+        {
+          m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
+        }
+        else
+        {
+          assert(core::detail::gsIsMultAct(t(2)));
+          action_list actions = atermpp::aterm_appl(t(2))(0);
+          m_action_summands.push_back(action_summand(summation_variables, condition, multi_action(actions, time), assignments));
+        }
+      }
     }
 
     /// \brief Destructor
@@ -209,55 +189,23 @@ class linear_process
 inline
 atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 {
-  return core::detail::gsMakeLinearProcess(
-           p.process_parameters(),
-           p.summands()
-         );
-}
-
-namespace deprecated
-{
-/// \brief Set the summands of the linear process
-/// \deprecated
-inline
-void set_linear_process_summands(linear_process& p, const summand_list& summands)
-{
-  p.deadlock_summands().clear();
-  p.action_summands().clear();
-  for (summand_list::iterator j = summands.begin(); j != summands.end(); ++j)
-  {
-    if (j->is_delta())
-    {
-      p.deadlock_summands().push_back(deadlock_summand(j->summation_variables(), j->condition(), j->deadlock()));
-    }
-    else
-    {
-      p.action_summands().push_back(action_summand(j->summation_variables(), j->condition(), j->multi_action(), j->assignments()));
-    }
-  }
-}
-
-/// \brief Returns the sequence of LPS summands.
-/// \return The sequence of LPS summands.
-/// \deprecated
-inline
-summand_list linear_process_summands(const linear_process& p)
-{
-  summand_list result;
+  atermpp::term_list<atermpp::aterm_appl> summands;
   for (deadlock_summand_vector::const_reverse_iterator i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
   {
-    summand s = atermpp::aterm_appl(deadlock_summand_to_aterm(*i));
-    result = atermpp::push_front(result, s);
+    atermpp::aterm_appl s = deadlock_summand_to_aterm(*i);
+    summands = atermpp::push_front(summands, s);
   }
   for (action_summand_vector::const_reverse_iterator i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
   {
-    summand s = atermpp::aterm_appl(action_summand_to_aterm(*i));
-    result = atermpp::push_front(result, s);
+    atermpp::aterm_appl s = action_summand_to_aterm(*i);
+    summands = atermpp::push_front(summands, s);
   }
-  return result;
-}
 
-} // namespace deprecated
+  return core::detail::gsMakeLinearProcess(
+           p.process_parameters(),
+           summands
+         );
+}
 
 // template function overloads
 std::string pp(const linear_process& x);
