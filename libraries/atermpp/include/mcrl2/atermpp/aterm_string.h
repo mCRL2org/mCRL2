@@ -26,64 +26,37 @@ using detail::str2appl;
 class aterm_string: public aterm_appl
 {
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     aterm_string()
     {}
 
     /// \brief Constructor.
-    /// \param t A term
+    /// \param t A term without arguments of type AT_APPL
     explicit aterm_string(const aterm &t)
       : aterm_appl(t)
     {
+      assert(t.type_is_appl());
       assert(aterm_appl(t).size() == 0);
     }
 
-    /// \brief Constructor.
-    /// \param t A term containing a string.
-    aterm_string(aterm_appl t)
-      : aterm_appl(t)
-    {
-      assert(t.size() == 0);
-    }
-
-    /*
-          /// \brief Constructor.
-          /// \param t A term containing a string.
-          aterm_string(const aterm_string& t)
-            : aterm_appl(t)
-          {
-            assert(t.size() == 0);
-          }
-
-          /// Allow construction from an aterm. The aterm must be of the right type, and may have no children.
-          /// \param t A term containing a string.
-          aterm_string(aterm t)
-            : aterm_appl(t)
-          {
-            assert(t.type() == AT_APPL);
-            assert(aterm_appl(t).size() == 0);
-          }
-    */
-
-    /// Allow construction from a string.
+    /// \brief Constructor that allows construction from a string.
     /// \param s A string.
-    /// \param quoted A boolean indicating if the string is quoted.
-    aterm_string(std::string const& s, bool quoted = true)
-      : aterm_appl(quoted ? str2appl(s) : make_term(s))
+    aterm_string(const std::string& s)
+      : aterm_appl(str2appl(s))
     {
       assert(type() == AT_APPL);
       assert(aterm_appl(m_term).size() == 0);
     }
 
-    /// Assignment operator.
-    /// \param t A term.
-    aterm_string& operator=(const aterm &t)
+    /// Assignment operator. 
+    /// \param t An aterm_string.
+    aterm_string& operator=(const aterm_string &t)
     {
       assert(t.type() == AT_APPL);
       assert(t.function().arity() == 0);
       copy_term(&*t); 
       return *this;
-    }
+    } 
 
     /// \brief Conversion operator
     /// \return The term converted to string
@@ -91,36 +64,7 @@ class aterm_string: public aterm_appl
     {
       return function().name();
     }
-
-    /// \brief Conversion operator
-    /// \return The term converted to string
-    /* bool operator==(char const* const other) const
-    {
-      return std::string(function().name()) == other;
-    } */
 };
-
-/// \brief Remove leading and trailing quotes from a quoted aterm_string.
-/// \param t A term containing a quoted string.
-/// \return The string without quotes.
-inline
-std::string unquote(aterm_string t)
-{
-  std::string s(t);
-  assert(s.size() >= 2 && *s.begin() == '"' && *s.rbegin() == '"');
-  return std::string(s, 1, s.size() - 2);
-}
-
-/// \cond INTERNAL_DOCS
-/* template <>
-struct aterm_traits<aterm_string>
-{
-  static aterm term(const aterm_string& t)
-  {
-    return t.term();
-  }
-}; */
-/// \endcond
 
 } // namespace atermpp
 

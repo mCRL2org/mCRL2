@@ -55,12 +55,12 @@ class function_symbol: public data_expression
 
     core::identifier_string name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
     sort_expression sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<sort_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated class function_symbol ---//

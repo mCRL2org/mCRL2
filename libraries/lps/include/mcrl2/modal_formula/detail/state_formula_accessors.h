@@ -96,33 +96,33 @@ data::variable_list var(const state_formula& t)
 /// \param t A modal formula
 /// \return The time of a delay or yaled expression
 inline
-data::data_expression time(const state_formula& t)
+const data::data_expression &time(const state_formula& t)
 {
   assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
-  return data::data_expression(atermpp::arg1(t));
+  return atermpp::aterm_cast<data::data_expression>(atermpp::arg1(t));
 }
 
 /// \brief Returns the name of a variable expression
 /// \param t A modal formula
 /// \return The name of a variable expression
 inline
-core::identifier_string name(const state_formula& t)
+const core::identifier_string &name(const state_formula& t)
 {
   assert(core::detail::gsIsStateVar(t) ||
          core::detail::gsIsStateMu(t)  ||
          core::detail::gsIsStateNu(t)
         );
-  return atermpp::arg1(t);
+  return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(t));
 }
 
 /// \brief Returns the parameters of a variable expression
 /// \param t A modal formula
 /// \return The parameters of a variable expression
 inline
-data::data_expression_list param(const state_formula& t)
+const data::data_expression_list &param(const state_formula& t)
 {
   assert(core::detail::gsIsStateVar(t));
-  return data::data_expression_list(t(1));
+  return atermpp::aterm_cast<data::data_expression_list>(t(1));
   /* return data::data_expression_list(
            atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
            atermpp::term_list_iterator< data::data_expression >()); */
@@ -132,10 +132,10 @@ data::data_expression_list param(const state_formula& t)
 /// \param t A modal formula
 /// \return The parameters of a mu or nu expression
 inline
-data::assignment_list ass(const state_formula& t)
+const data::assignment_list &ass(const state_formula& t)
 {
   assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
-  return data::assignment_list(t(1));
+  return atermpp::aterm_cast<data::assignment_list>(t(1));
   /* return data::assignment_list(
            atermpp::term_list_iterator< data::assignment >(atermpp::list_arg2(t)),
            atermpp::term_list_iterator< data::assignment >()); */

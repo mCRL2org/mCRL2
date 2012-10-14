@@ -39,7 +39,7 @@ class identifier: public data_expression
 
     core::identifier_string name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 };
 //--- end generated class identifier ---//

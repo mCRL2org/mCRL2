@@ -626,14 +626,14 @@ class variable: public state_formula
       : state_formula(core::detail::gsMakeStateVar(core::identifier_string(name), arguments))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::data_expression_list arguments() const
+    const data::data_expression_list &arguments() const
     {
-      return data::data_expression_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<data::data_expression_list>(atermpp::list_arg2(*this));
     }
 };
 
@@ -674,19 +674,19 @@ class nu: public state_formula
       : state_formula(core::detail::gsMakeStateNu(core::identifier_string(name), assignments, operand))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::assignment_list assignments() const
+    const data::assignment_list &assignments() const
     {
-      return data::assignment_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<data::assignment_list>(atermpp::list_arg2(*this));
     }
 
-    state_formula operand() const
+    const state_formula &operand() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<state_formula>(atermpp::arg3(*this));
     }
 };
 
@@ -727,19 +727,19 @@ class mu: public state_formula
       : state_formula(core::detail::gsMakeStateMu(core::identifier_string(name), assignments, operand))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::assignment_list assignments() const
+    const data::assignment_list &assignments() const
     {
-      return data::assignment_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<data::assignment_list>(atermpp::list_arg2(*this));
     }
 
-    state_formula operand() const
+    const state_formula &operand() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<state_formula>(atermpp::arg3(*this));
     }
 };
 

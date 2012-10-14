@@ -58,16 +58,16 @@ class process_identifier: public atermpp::aterm_appl
 
     /// \brief Returns the name of the process identifier
     /// \return The name of the process identifier
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
     /// \brief Returns the sorts of the process identifier
     /// \return The sorts of the process identifier
-    data::sort_expression_list sorts() const
+    const data::sort_expression_list &sorts() const
     {
-      return data::sort_expression_list((*this)(1)); 
+      return atermpp::aterm_cast<data::sort_expression_list>((*this)(1)); 
     }
 };
 

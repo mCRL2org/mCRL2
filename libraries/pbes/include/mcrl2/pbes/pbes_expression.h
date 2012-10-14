@@ -106,14 +106,14 @@ class propositional_variable_instantiation: public pbes_expression
       : pbes_expression(core::detail::gsMakePropVarInst(core::identifier_string(name), parameters))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::data_expression_list parameters() const
+    const data::data_expression_list &parameters() const
     {
-      return data::data_expression_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<data::data_expression_list>(atermpp::list_arg2(*this));
     }
 //--- start user section propositional_variable_instantiation ---//
     /// \brief Type of the parameters.
@@ -710,10 +710,10 @@ pbes_expression data_right(const pbes_expression& t)
 /// \param t A PBES expression
 /// \return The variables of a quantification expression
 inline
-data::variable_list var(const pbes_expression& t)
+const data::variable_list &var(const pbes_expression& t)
 {
   assert(is_forall(t) || is_exists(t));
-  return data::variable_list(t(0));
+  return atermpp::aterm_cast<data::variable_list>(t(0));
   /* return data::variable_list(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
                              atermpp::term_list_iterator< data::variable >()); */
 }
@@ -722,10 +722,10 @@ data::variable_list var(const pbes_expression& t)
 /// \param t A PBES expression
 /// \return The name of a propositional variable expression
 inline
-core::identifier_string name(const pbes_expression& t)
+const core::identifier_string &name(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
-  return atermpp::arg1(t);
+  return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(t));
 }
 
 /// \brief Returns the parameters of a propositional variable instantiation.
@@ -1452,10 +1452,10 @@ struct term_traits<pbes_system::pbes_expression>
   /// \param t A term
   /// \return The name of the propositional variable instantiation
   static inline
-  string_type name(const term_type& t)
+  const string_type &name(const term_type& t)
   {
     assert(is_prop_var(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<string_type>(atermpp::arg1(t));
   }
 
   /// \brief Returns the parameter list of a propositional variable instantiation

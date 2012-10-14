@@ -57,16 +57,16 @@ class communication_expression: public atermpp::aterm_appl
 
     /// \brief Returns the name of the action
     /// \return The name of the action
-    action_name_multiset action_name() const
+    const action_name_multiset &action_name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<action_name_multiset>(atermpp::arg1(*this));
     }
 
     /// \brief Returns the name of the communication expression
     /// \return The name of the communication expression
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg2(*this));
     }
 };
 

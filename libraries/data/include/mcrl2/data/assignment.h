@@ -167,7 +167,7 @@ class identifier_assignment: public assignment_expression
 
     core::identifier_string lhs() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
     data_expression rhs() const

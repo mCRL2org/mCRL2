@@ -59,16 +59,16 @@ class rename_expression: public atermpp::aterm_appl
 
     /// \brief Returns the source of the rename rule
     /// \return The source of the rename rule
-    core::identifier_string source() const
+    const core::identifier_string &source() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
     /// \brief Returns the target of the rename rule
     /// \return The target of the rename rule
-    core::identifier_string target() const
+    const core::identifier_string &target() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg2(*this));
     }
 };
 

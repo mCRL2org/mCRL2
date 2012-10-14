@@ -57,7 +57,7 @@ class basic_sort: public sort_expression
 
     core::identifier_string name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<atermpp::aterm_string>(atermpp::arg1(*this));
     }
 };
 //--- end generated class basic_sort ---//

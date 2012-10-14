@@ -104,7 +104,7 @@ class pbes_eqelm_algorithm
         {
           out << ", ";
         }
-        out << print(*i);
+        out << print(atermpp::aterm_cast<core::identifier_string>(*i));
       }
       return out.str();
     }

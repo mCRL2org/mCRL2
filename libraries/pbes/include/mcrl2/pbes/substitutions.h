@@ -161,21 +161,21 @@ class propositional_variable_substitution: public std::unary_function<propositio
     }
 
     /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
-    iterator find(variable_type const& v)
+    iterator find(const variable_type &v)
     {
-      return this->m_map.find(v);
+      return this->m_map.find(atermpp::aterm_cast<core::identifier_string>(v));
     }
 
     /// \brief Removes the substitution to the propositional variable v.
     map_type::size_type erase(const propositional_variable& v)
     {
-      return m_map.erase(v);
+      return m_map.erase(atermpp::aterm_cast<core::identifier_string>(v));
     }
 
     /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
     const_iterator find(variable_type const& v) const
     {
-      return m_map.find(v);
+      return m_map.find(atermpp::aterm_cast<core::identifier_string>(v));
     }
 
     /// \brief Returns true if the sequence of assignments is empty

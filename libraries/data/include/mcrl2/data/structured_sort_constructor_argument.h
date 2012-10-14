@@ -63,12 +63,12 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
 
     core::identifier_string name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
     sort_expression sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<sort_expression>(atermpp::arg2(*this));
     }
 };
 
