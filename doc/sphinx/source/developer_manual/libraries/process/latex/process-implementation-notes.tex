@@ -1,6 +1,7 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
+%%\input{tcilatex}
 
 
 \documentclass{article}
@@ -14,7 +15,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Tuesday, September 25, 2012 10:14:15}
+%TCIDATA{LastRevised=Monday, October 15, 2012 16:51:46}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -46,39 +47,148 @@
 \font \aap cmmi10
 \newcommand{\at}{\mathbin{\mbox{\aap ,}}}
 \newcommand{\leftm}{\mathbin{\mathrel{\llfloor}}}
+%\input{tcilatex}
 
 \begin{document}
 
 
 \section{Process Library Implementation Notes}
 
+\subsection{Processes}
+
+Process expressions in mCRL2 are expressions built according to the
+following syntax:%
+\[
+\begin{array}{ccc}
+\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
+a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\ 
+P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\ 
+P(d:=e) & \text{process\_assignment(}P\text{,}d:=e\text{)} & \text{%
+ProcessAssignment} \\ 
+\delta  & \text{delta()} & \text{Delta} \\ 
+\tau  & \text{tau()} & \text{Tau} \\ 
+\dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\ 
+\partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\ 
+\tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\ 
+\rho _{R}(x) & \text{rename(}R\text{,}x\text{)} & \text{Rename} \\ 
+\Gamma _{C}(x) & \text{comm(}C\text{,}x\text{)} & \text{Comm} \\ 
+\bigtriangledown _{V}(x) & \text{allow(}V\text{,}x\text{)} & \text{Allow} \\ 
+x\mid y & \text{sync(}x\text{,}y\text{)} & \text{Sync} \\ 
+x\mbox{\aap ,}t & \text{at\_time(}x\text{,}t\text{)} & \text{AtTime} \\ 
+x\cdot y & \text{seq(}x\text{,}y\text{)} & \text{Seq} \\ 
+c\rightarrow x & \text{if\_then(}c\text{,}x\text{)} & \text{IfThen} \\ 
+c\rightarrow x\diamond y & \text{if\_then\_else(}c\text{,}x\text{,}y\text{)}
+& \text{IfThenElse} \\ 
+x\ll y & \text{binit(}x\text{,}y\text{)} & \text{BInit} \\ 
+x\ \parallel \ y & \text{merge(}x\text{,}y\text{)} & \text{Merge} \\ 
+x\ \mathbin{\mathrel{\llfloor}}\ y & \text{lmerge(}x\text{,}y\text{)} & 
+\text{LMerge} \\ 
+x+y & \text{choice(}x\text{,}y\text{)} & \text{Choice}%
+\end{array}%
+\]
+
+where the types of the symbols are as follows:%
+\[
+\begin{array}{cl}
+a,b & \text{strings (action names)} \\ 
+P & \text{a process identifier} \\ 
+e & \text{a sequence of data expressions} \\ 
+d & \text{a sequence of data variables} \\ 
+B & \text{a set of strings (action names) } \\ 
+R & \text{a sequence of rename expressions} \\ 
+C & \text{a sequence of communication expressions} \\ 
+V & \text{a sequence of multi actions} \\ 
+t & \text{a data expression of type real} \\ 
+x,y & \text{process expressions} \\ 
+c & \text{ a data expression of type bool}%
+\end{array}%
+\]%
+A rename expression is of the form $a\rightarrow b$, with $a$ and $b$ action
+names. A multi action is of the form $a_{1}\ |\ \cdots \ |\ a_{n}$, with $%
+a_{i}$ actions. A communication expression is of the form $b_{1}\ |\ \cdots
+\ |\ b_{n}\rightarrow b$, with $b$ and $b_{i}$ action names.
+
+\subsubsection{Restrictions}
+
+A multi action is a multi set of actions. The left hand sides of the
+communication expressions in $C$ must be unique. Also the left hand sides of
+the rename expressions in $R$ must be unique.
+
+\newpage
+
+\subsubsection{Linear process expressions}
+
+Linear process expressions are a subset of process expresions satisfying the
+following grammar:
+\begin{verbatim}
+<linear process expression> ::= choice(<linear process expression>, <linear process expression>)
+                              | <summand>
+ 
+<summand>                   ::= sum(<variables>, <alternative>)
+                              | <conditional action prefix>
+                              | <conditional deadlock>
+ 
+<conditional action prefix> ::= if_then(<condition>, <action prefix>)
+                              | <action prefix>
+ 
+<action prefix>             ::= seq(<timed multiaction>, <process reference>)
+                              | <timed multiaction>
+ 
+<timed multiaction>         ::= at_time(<multiaction>, <time stamp>)
+                              | <multiaction>
+ 
+<multiaction>               ::= tau()
+                              | <action>
+                              | sync(<multiaction>, <multiaction>)
+ 
+<conditional deadlock>      ::= if_then(<condition>, <timed deadlock>)
+                              | <timed deadlock>
+ 
+<timed deadlock>            ::= delta()
+                              | at_time(delta(), <time stamp>)
+ 
+<process reference>         ::= process(<process identifier>, <data expressions>)
+                              | process_assignment(<process identifier>, <data assignments>)
+\end{verbatim}
+
+\newpage
+
 \subsection{Guarded process expressions}
 
-We define the predicate $is\_guarded$ for process expressions as follows:%
+We define the predicate $is\_guarded$ for process expressions as follows: $%
+is\_guarded(p)=is\_guarded(p,\emptyset )$%
 \[
 \begin{array}{lll}
-is\_guarded(a(e)) & = & true \\ 
-is\_guarded(\delta ) & = & true \\ 
-is\_guarded(\tau ) & = & true \\ 
-is\_guarded(P(e)) & = & false \\ 
-is\_guarded(P(d:=e)) & = & false \\ 
-is\_guarded(p+q) & = & is\_guarded(p)\wedge is\_guarded(q) \\ 
-is\_guarded(p\cdot q) & = & is\_guarded(p) \\ 
-is\_guarded(c\rightarrow p) & = & is\_guarded(p) \\ 
-is\_guarded(c\rightarrow p\diamond q) & = & is\_guarded(p)\wedge
-is\_guarded(q) \\ 
-is\_guarded(\Sigma _{d:D}\ p) & = & is\_guarded(p) \\ 
-is\_guarded(p^{\mathbin{\mbox{\aap ,}}}t) & = & is\_guarded(p) \\ 
-is\_guarded(p\ll q) & = & is\_guarded(p) \\ 
-is\_guarded(p\parallel q) & = & is\_guarded(p)\wedge is\_guarded(q) \\ 
-is\_guarded(p\mathbin{\mathrel{\llfloor}}q) & = & is\_guarded(p)\wedge
-is\_guarded(q) \\ 
-is\_guarded(p\mid q) & = & is\_guarded(p)\wedge is\_guarded(q) \\ 
-is\_guarded(\rho _{R}(p)) & = & is\_guarded(p) \\ 
-is\_guarded(\partial _{B}(p)) & = & is\_guarded(p) \\ 
-is\_guarded(\tau _{I}(p)) & = & is\_guarded(p) \\ 
-is\_guarded(\Gamma _{C}(p)) & = & is\_guarded(p) \\ 
-is\_guarded(\nabla _{V}(p)) & = & is\_guarded(p)%
+is\_guarded(a(e),V) & = & true \\ 
+is\_guarded(\delta ,V) & = & true \\ 
+is\_guarded(\tau ,V) & = & true \\ 
+is\_guarded(P(e),V) & = & 
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+false & \text{if }P(d)\in V \\ 
+is\_guarded(p,V\cup \{P(d)\}) & \text{if }P(d)\notin V%
+\end{array}%
+\right.  \\ 
+\text{where }P(d)=p\text{ is the equation corresponding to }P(e)%
+\end{array}
+\\ 
+is\_guarded(p+q,V) & = & is\_guarded(p,V)\wedge is\_guarded(q,V) \\ 
+is\_guarded(p\cdot q,V) & = & is\_guarded(p,V) \\ 
+is\_guarded(c\rightarrow p,V) & = & is\_guarded(p,V) \\ 
+is\_guarded(c\rightarrow p\diamond q,V) & = & is\_guarded(p,V)\wedge
+is\_guarded(q,V) \\ 
+is\_guarded(\Sigma _{d:D}\ p,V) & = & is\_guarded(p,V) \\ 
+is\_guarded(p^{\mathbin{\mbox{\aap ,}}}t,V) & = & is\_guarded(p,V) \\ 
+is\_guarded(p\ll q,V) & = & is\_guarded(p,V) \\ 
+is\_guarded(p\parallel q,V) & = & is\_guarded(p,V)\wedge is\_guarded(q,V) \\ 
+is\_guarded(p\mathbin{\mathrel{\llfloor}}q,V) & = & is\_guarded(p,V) \\ 
+is\_guarded(p\mid q,V) & = & is\_guarded(p,V)\wedge is\_guarded(q,V) \\ 
+is\_guarded(\rho _{R}(p),V) & = & is\_guarded(p,V) \\ 
+is\_guarded(\partial _{B}(p),V) & = & is\_guarded(p,V) \\ 
+is\_guarded(\tau _{I}(p),V) & = & is\_guarded(p,V) \\ 
+is\_guarded(\Gamma _{C}(p),V) & = & is\_guarded(p,V) \\ 
+is\_guarded(\nabla _{V}(p),V) & = & is\_guarded(p,V)%
 \end{array}%
 \]%
 \newpage 
