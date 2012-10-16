@@ -1,7 +1,8 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
-%%\input{tcilatex}
+%%%%\input{tcilatex}
+%%%\input{tcilatex}
 
 
 \documentclass{article}
@@ -15,7 +16,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Monday, October 15, 2012 16:51:46}
+%TCIDATA{LastRevised=Tuesday, October 16, 2012 10:59:15}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -47,7 +48,7 @@
 \font \aap cmmi10
 \newcommand{\at}{\mathbin{\mbox{\aap ,}}}
 \newcommand{\leftm}{\mathbin{\mathrel{\llfloor}}}
-%\input{tcilatex}
+%%\input{tcilatex}
 
 \begin{document}
 
@@ -65,8 +66,8 @@ a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\
 P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\ 
 P(d:=e) & \text{process\_assignment(}P\text{,}d:=e\text{)} & \text{%
 ProcessAssignment} \\ 
-\delta  & \text{delta()} & \text{Delta} \\ 
-\tau  & \text{tau()} & \text{Tau} \\ 
+\delta & \text{delta()} & \text{Delta} \\ 
+\tau & \text{tau()} & \text{Tau} \\ 
 \dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\ 
 \partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\ 
 \tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\ 
@@ -159,39 +160,45 @@ We define the predicate $is\_guarded$ for process expressions as follows: $%
 is\_guarded(p)=is\_guarded(p,\emptyset )$%
 \[
 \begin{array}{lll}
-is\_guarded(a(e),V) & = & true \\ 
-is\_guarded(\delta ,V) & = & true \\ 
-is\_guarded(\tau ,V) & = & true \\ 
-is\_guarded(P(e),V) & = & 
+is\_guarded(a(e),W) & = & true \\ 
+is\_guarded(\delta ,W) & = & true \\ 
+is\_guarded(\tau ,W) & = & true \\ 
+is\_guarded(P(e),W) & = & 
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-false & \text{if }P(d)\in V \\ 
-is\_guarded(p,V\cup \{P(d)\}) & \text{if }P(d)\notin V%
+false & \text{if }P\in W \\ 
+is\_guarded(p,W\cup \{P\}) & \text{if }P\notin W%
 \end{array}%
 \right.  \\ 
 \text{where }P(d)=p\text{ is the equation corresponding to }P(e)%
 \end{array}
 \\ 
-is\_guarded(p+q,V) & = & is\_guarded(p,V)\wedge is\_guarded(q,V) \\ 
-is\_guarded(p\cdot q,V) & = & is\_guarded(p,V) \\ 
-is\_guarded(c\rightarrow p,V) & = & is\_guarded(p,V) \\ 
-is\_guarded(c\rightarrow p\diamond q,V) & = & is\_guarded(p,V)\wedge
-is\_guarded(q,V) \\ 
-is\_guarded(\Sigma _{d:D}\ p,V) & = & is\_guarded(p,V) \\ 
-is\_guarded(p^{\mathbin{\mbox{\aap ,}}}t,V) & = & is\_guarded(p,V) \\ 
-is\_guarded(p\ll q,V) & = & is\_guarded(p,V) \\ 
-is\_guarded(p\parallel q,V) & = & is\_guarded(p,V)\wedge is\_guarded(q,V) \\ 
-is\_guarded(p\mathbin{\mathrel{\llfloor}}q,V) & = & is\_guarded(p,V) \\ 
-is\_guarded(p\mid q,V) & = & is\_guarded(p,V)\wedge is\_guarded(q,V) \\ 
-is\_guarded(\rho _{R}(p),V) & = & is\_guarded(p,V) \\ 
-is\_guarded(\partial _{B}(p),V) & = & is\_guarded(p,V) \\ 
-is\_guarded(\tau _{I}(p),V) & = & is\_guarded(p,V) \\ 
-is\_guarded(\Gamma _{C}(p),V) & = & is\_guarded(p,V) \\ 
-is\_guarded(\nabla _{V}(p),V) & = & is\_guarded(p,V)%
+is\_guarded(p+q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(p\cdot q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(c\rightarrow p,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(c\rightarrow p\diamond q,W) & = & is\_guarded(p,W)\wedge
+is\_guarded(q,W) \\ 
+is\_guarded(\Sigma _{d:D}\ p,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p^{\mathbin{\mbox{\aap ,}}}t,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\ll q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\parallel q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(p\mathbin{\mathrel{\llfloor}}q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\mid q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(\rho _{R}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\partial _{B}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\tau _{I}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\Gamma _{C}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\nabla _{V}(p),W) & = & is\_guarded(p,W)%
 \end{array}%
 \]%
-\newpage 
+\newline
+N.B. This specification assumes that process names are unique. In mCRL2
+process names can be overloaded, therefore in the implemenation $W$
+contains \emph{process identifiers} (i.e. both the process name and the
+sorts of the arguments) instead of process names.
+
+\newpage
 
 \subsection{Alphabet reduction}
 
@@ -252,37 +259,31 @@ where $I^{\ast }$ is the transitive reflexive closure of $I$.\newpage
 
 We define the mapping $push_{\odot }$, with $\odot \in \{\bigtriangledown
 ,\subseteq ,\partial \}$ as follows, where $\left\langle p^{\prime
-},A_{p}^{\prime }\right\rangle =$ $push_{\odot }(p,A)$ and $\left\langle
-q^{\prime },A_{q}^{\prime }\right\rangle =push_{\odot }(q,A)$, unless told
-otherwise. Note that this specification is only valid for pCRL expressions.%
+},A_{p}^{\prime }\right\rangle =$ $push_{\odot }(p,A,W)$ and $\left\langle
+q^{\prime },A_{q}^{\prime }\right\rangle =push_{\odot }(q,A,W)$, unless told
+otherwise. Note that this specification is only valid for pCRL expressions%
 \[
 \begin{tabular}{ll}
-$x$ & \multicolumn{1}{|l}{$push_{\odot }(x,A)$} \\ \cline{1-2}
+$x$ & \multicolumn{1}{|l}{$push_{\odot }(x,A,W)$} \\ \hline
 $\delta $ & \multicolumn{1}{|l}{$\left\langle \delta ,\emptyset
 \right\rangle $} \\ 
 $P(e_{1},\cdots ,e_{n})$ & \multicolumn{1}{|l}{$%
 \begin{array}{l}
-\left\langle Q(e_{1},\cdots ,e_{n}),A_{p}^{\prime }\right\rangle \\ 
-\text{where }\left\{ \text{ }%
-\begin{array}{lll}
-p & = & \text{the body of process }P \\ 
-Q(e_{1},\cdots ,e_{n})=p^{\prime } & = & \text{a possibly new process
-equation}%
+\left\{ 
+\begin{array}{ll}
+\left\langle Q_{P,A,\odot }(e_{1},\cdots ,e_{n}),\emptyset \right\rangle  & 
+\text{if }P\in W \\ 
+push_{\odot }(p^{\prime }[d_{1}:=e_{1},\cdots ,d_{n}:=e_{n}],A,W) & \text{if 
+}P\notin W%
 \end{array}%
-\right.%
-\end{array}%
-$} \\ 
-$P(d_{i_{1}}=e_{i_{1}},\cdots ,d_{i_{k}}=e_{i_{k}})$ & \multicolumn{1}{|l}{$%
+\right.  \\ 
+\qquad \text{where }\left\{ \text{ }%
 \begin{array}{l}
-\left\langle Q(d_{i_{1}}=e_{i_{1}},\cdots
-,d_{i_{k}}=e_{i_{k}}),A_{p}^{\prime }\right\rangle \\ 
-\text{where }\left\{ \text{ }%
-\begin{array}{lll}
-p & = & \text{the body of process }P \\ 
-Q(e_{1},\cdots ,e_{n})=p^{\prime } & = & \text{a possibly new process
+P(d_{1},\cdots ,d_{n})=p^{\prime }\text{ is the equation of process }P \\ 
+Q_{P,A,\odot }(d_{1},\cdots ,d_{n})=p^{\prime }\text{ is an added process
 equation}%
 \end{array}%
-\right.%
+\right. 
 \end{array}%
 $} \\ 
 $p+q$ & \multicolumn{1}{|l}{$\left\langle f_{\odot }(x,A),A_{p}^{\prime
@@ -297,8 +298,8 @@ $\Sigma _{d:D}p$ & \multicolumn{1}{|l}{$\left\langle f_{\odot
 }(x,A),A_{p}^{\prime }\right\rangle $} \\ 
 $p^{\mathbin{\mbox{\aap ,}}}t$ & \multicolumn{1}{|l}{$\left\langle f_{\odot
 }(x,A),A_{p}^{\prime }\right\rangle $} \\ 
-$p\ll q$ & \multicolumn{1}{|l}{$push_{\odot }(p,A)$} \\ 
-$\rho _{R}(p)$ & \multicolumn{1}{|l}{$push_{\odot }(p,A^{\prime })\text{
+$p\ll q$ & \multicolumn{1}{|l}{$push_{\odot }(p,A,W)$} \\ 
+$\rho _{R}(p)$ & \multicolumn{1}{|l}{$push_{\odot }(p,A^{\prime },W)\text{
 where }A^{\prime }=\{R(\alpha )\mid \alpha \in R^{-1}(A)\},$}%
 \end{tabular}%
 \]%
@@ -315,11 +316,11 @@ f_{\partial }(p,A) &=&\partial _{A}(x)
 
 We define the mapping $push_{\bigtriangledown }$ as follows, where $%
 \left\langle p^{\prime },A_{p}^{\prime }\right\rangle =$ $%
-push_{\bigtriangledown }(p,A)$ and $\left\langle q^{\prime },A_{q}^{\prime
-}\right\rangle =push_{\bigtriangledown }(q,A)$, unless told otherwise.%
+push_{\bigtriangledown }(p,A,W)$ and $\left\langle q^{\prime },A_{q}^{\prime
+}\right\rangle =push_{\bigtriangledown }(q,A,W)$, unless told otherwise.%
 \[
 \begin{tabular}{l|l}
-$x$ & $push_{\bigtriangledown }(x,A)$ \\ \hline
+$x$ & $push_{\bigtriangledown }(x,A,W)$ \\ \hline
 $a(e_{1},\cdots ,e_{n})$ & $\left\langle \nabla _{A^{\prime }}(x),A^{\prime
 }\right\rangle \text{ where }A^{\prime }=A\cap \{a\}$ \\ 
 $\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
@@ -328,10 +329,10 @@ $p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
 \}}(p^{\prime }\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where}%
 \left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A) \\ 
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime }) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & push_{\subseteq
+}(p,A,W) \\ 
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle  & = & 
+push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime },W) \\ 
 A^{\prime } & = & A\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
 A_{p}^{\prime }\times A_{q}^{\prime })%
 \end{array}%
@@ -340,10 +341,10 @@ $p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle \nabla _{A^{\prime
 }\setminus \{\tau \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
 }),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A) \\ 
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime }) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & push_{\subseteq
+}(p,A,W) \\ 
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle  & = & 
+push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime },W) \\ 
 A^{\prime } & = & A\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
 A_{p}^{\prime }\times A_{q}^{\prime })%
 \end{array}%
@@ -351,38 +352,38 @@ A_{p}^{\prime }\times A_{q}^{\prime })%
 $p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
 }\mid q^{\prime }),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A) \\ 
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime }) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & push_{\subseteq
+}(p,A,W) \\ 
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle  & = & 
+push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime },W) \\ 
 A^{\prime } & = & A\cap (A_{p}^{\prime }\times A_{q}^{\prime })%
 \end{array}%
 \right. $ \\ 
-$\rho _{R}(p)$ & $push_{\bigtriangledown }(p,A^{\prime })\text{ where }%
+$\rho _{R}(p)$ & $push_{\bigtriangledown }(p,A^{\prime },W)\text{ where }%
 A^{\prime }=R(R^{-1}(A))$ \\ 
-$\partial _{B}(p)$ & $push_{\bigtriangledown }(p,\partial _{B}(A))$ \\ 
+$\partial _{B}(p)$ & $push_{\bigtriangledown }(p,\partial _{B}(A),W)$ \\ 
 $\tau _{I}(p)$ & $\left\langle \nabla _{A\setminus \{\tau \}}(\tau
 _{I}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(p,Act) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & 
+push_{\bigtriangledown }(p,Act,W) \\ 
 A^{\prime } & = & A\cap \tau _{I}(A_{p}^{\prime })%
 \end{array}%
 \right. $ \\ 
 $\Gamma _{C}(p)$ & $\left\langle \nabla _{A\setminus \{\tau \}}(\Gamma
 _{C}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(p,A\cup C^{-1}(A)) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & 
+push_{\bigtriangledown }(p,A\cup C^{-1}(A),W) \\ 
 A^{\prime } & = & A\cap C(A_{p}^{\prime })%
 \end{array}%
 \right. $ \\ 
-$\nabla _{V}(p)$ & $push_{\bigtriangledown }(p,A\cap V)$%
+$\nabla _{V}(p)$ & $push_{\bigtriangledown }(p,A\cap V,W)$%
 \end{tabular}%
 \]%
 \[
 \begin{tabular}{l|l}
-$x$ & $push_{\bigtriangledown }(x,Act)$ \\ \hline
+$x$ & $push_{\bigtriangledown }(x,Act,W)$ \\ \hline
 $p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
 \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }),A^{\prime
 }\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime
@@ -394,7 +395,7 @@ A_{q}^{\prime }\cup A_{p}^{\prime }\times A_{q}^{\prime }$ \\
 $p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
 }\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where }A^{\prime
 }=A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
-$\partial _{B}(p)$ & $push_{\partial }(p,B)$%
+$\partial _{B}(p)$ & $push_{\partial }(p,B,W)$%
 \end{tabular}%
 \]
 
@@ -403,12 +404,12 @@ $\partial _{B}(p)$ & $push_{\partial }(p,B)$%
 \subsubsection{The mapping $push_{\subseteq }$}
 
 We define the mapping $push_{\subseteq }$ as follows, where $\left\langle
-p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\subseteq }(p,A)$ and $%
+p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\subseteq }(p,A,W)$ and $%
 \left\langle q^{\prime },A_{q}^{\prime }\right\rangle =push_{\subseteq
-}(q,A) $, unless told otherwise.%
+}(q,A,W)$, unless told otherwise.%
 \[
 \begin{tabular}{l|l}
-$x$ & $push_{\subseteq }(x,A)$ \\ \hline
+$x$ & $push_{\subseteq }(x,A,W)$ \\ \hline
 $a(e_{1},\cdots ,e_{n})$ & $\left\langle \nabla _{A^{\prime
 }}(a(e_{1},\cdots ,e_{n})),A^{\prime }\right\rangle \text{ where }A^{\prime
 }=A^{\subseteq }\cap \{a\}$ \\ 
@@ -436,8 +437,8 @@ _{I}(p^{\prime })),A^{\prime }\right\rangle \text{ where }A^{\prime }=A\cap
 $\Gamma _{C}(p)$ & $\left\langle \nabla _{A^{\prime }}(\Gamma _{C}(p^{\prime
 })),A^{\prime \prime }\right\rangle \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A\cup C^{-1}(A)) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & push_{\subseteq
+}(p,A\cup C^{-1}(A),W) \\ 
 A^{\prime } & = & A\cap C(A_{p}^{\prime }) \\ 
 A^{\prime \prime } & = & A^{\subseteq }\cap C(A_{p}^{\prime })%
 \end{array}%
@@ -450,12 +451,12 @@ $\nabla _{V}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }A^{\prime
 \subsubsection{The mapping $push_{\partial }$}
 
 We define the mapping $push_{\partial }$ as follows, where $\left\langle
-p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\partial }(p,A)$ and $%
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle =push_{\partial }(q,A)$%
-, unless told otherwise.%
+p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\partial }(p,A,W)$ and $%
+\left\langle q^{\prime },A_{q}^{\prime }\right\rangle =push_{\partial
+}(q,A,W)$, unless told otherwise.%
 \[
 \begin{tabular}{l|l}
-$x$ & $push_{\partial }(x,A)$ \\ \hline
+$x$ & $push_{\partial }(x,A,W)$ \\ \hline
 $a(e_{1},\cdots ,e_{n})$ & $\left\langle \partial _{A}(a(e_{1},\cdots
 ,e_{n})),A^{\prime }\right\rangle \text{ where }A^{\prime }=A\cap \{a\}$ \\ 
 $\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
@@ -473,18 +474,18 @@ $p\mid q$ & $\left\langle p^{\prime }\mid q^{\prime },A^{\prime
 $\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),A^{\prime
 }\right\rangle \text{ where }\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
-}(p,R^{-1}(A)) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & push_{\partial
+}(p,R^{-1}(A),W) \\ 
 A^{\prime } & = & R(A_{p}^{\prime })%
 \end{array}%
 \right. $ \\ 
-$\partial _{B}(p)$ & $push_{\partial }(p,A^{\prime })\text{ where }A^{\prime
-}=A\cup B$ \\ 
+$\partial _{B}(p)$ & $push_{\partial }(p,A^{\prime },W)\text{ where }%
+A^{\prime }=A\cup B$ \\ 
 $\tau _{I}(p)$ & $\left\langle \tau _{I}(p^{\prime }),A^{\prime
 }\right\rangle \text{ where }\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
-}(p,A\setminus I) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & push_{\partial
+}(p,A\setminus I,W) \\ 
 A^{\prime } & = & \tau _{I}(A)%
 \end{array}%
 \right. $ \\ 
@@ -493,14 +494,14 @@ _{C^{\prime }}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{
 \text{ }%
 \begin{array}{lll}
 A^{\prime \prime } & = & \overline{C}(A) \\ 
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
-}(p,A\setminus A^{\prime \prime }) \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle  & = & push_{\partial
+}(p,A\setminus A^{\prime \prime },W) \\ 
 A^{\prime } & = & \partial _{A}(C(A_{p}^{\prime })) \\ 
 C^{\prime } & = & C\setminus A%
 \end{array}%
 \right. $ \\ 
-$\nabla _{V}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }A^{\prime
-}=A^{\subseteq }\cap V$%
+$\nabla _{V}(p)$ & $push_{\subseteq }(p,A^{\prime },W)\text{ where }%
+A^{\prime }=A^{\subseteq }\cap V$%
 \end{tabular}%
 \]
 
