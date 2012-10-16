@@ -20,10 +20,11 @@ namespace process {
 
 namespace detail {
 
-template <typename Derived>
-struct is_guarded_traverser: public process_expression_traverser<Derived>
+bool is_guarded(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W);
+
+struct is_guarded_traverser: public process_expression_traverser<is_guarded_traverser>
 {
-  typedef process_expression_traverser<Derived> super;
+  typedef process_expression_traverser<is_guarded_traverser> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -32,51 +33,87 @@ struct is_guarded_traverser: public process_expression_traverser<Derived>
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
+  typedef atermpp::vector<process_equation>::const_iterator equation_iterator;
+
+  const atermpp::vector<process_equation>& equations;
+  std::set<process_identifier>& W;
   bool result;
 
-  Derived& derived()
+  process_equation find_equation(const process_identifier& id) const
   {
-    return static_cast<Derived&>(*this);
+    for (equation_iterator i = equations.begin(); i != equations.end(); ++i)
+    {
+      if (i->identifier() == id)
+      {
+        return *i;
+      }
+    }
+    throw mcrl2::runtime_error("is_guarded: unknown process identifier " + process::pp(id));
+    return process_equation();
   }
 
-  is_guarded_traverser()
-    : result(true)
+  is_guarded_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_)
+    : equations(equations_), W(W_), result(true)
   {}
 
   // P(e1, ..., en)
   void enter(const process::process_instance& x)
   {
-    result = false;
+    if (W.find(x.identifier()) == W.end())
+    {
+      W.insert(x.identifier());
+      process_equation eqn = find_equation(x.identifier());
+      result = result && is_guarded(eqn.expression(), equations, W);
+    }
+    else
+    {
+      result = false;
+    }
   }
 
   // P(d1 = e1, ..., dn = en)
   void enter(const process::process_instance_assignment& x)
   {
-    result = false;
+    if (W.find(x.identifier()) == W.end())
+    {
+      W.insert(x.identifier());
+      process_equation eqn = find_equation(x.identifier());
+      result = result && is_guarded(eqn.expression(), equations, W);
+    }
+    else
+    {
+      result = false;
+    }
   }
-
 
   // p . q
   void operator()(const process::seq& x)
   {
-    derived()(x.left()); // only p needs to be guarded
+    (*this)(x.left()); // only p needs to be guarded
   }
 
   // p << q
   void operator()(const process::bounded_init& x)
   {
-    derived()(x.left()); // only p needs to be guarded
+    (*this)(x.left()); // only p needs to be guarded
   }
 };
+
+inline
+bool is_guarded(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
+{
+  detail::is_guarded_traverser f(equations, W);
+  f(x);
+  return f.result;
+}
 
 } // detail
 
 inline
-bool is_guarded(const process_expression& x)
+bool is_guarded(const process_expression& x, const atermpp::vector<process_equation>& equations)
 {
-  core::apply_traverser<detail::is_guarded_traverser> f;
-  f(x);
-  return f.result;
+  std::set<process_identifier> W;
+  return detail::is_guarded(x, equations, W);
 }
 
 } // namespace process
