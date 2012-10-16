@@ -201,7 +201,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 //            lblArg->setMinimumWidth(100);
 //            lytArg->addWidget(lblArg);
 
-            FilePicker *edtArg = new FilePicker(m_fileDialog, this);
+            FilePicker *edtArg = new FilePicker(m_fileDialog, this, false);
             lytArg->addWidget(edtArg);
             m_optionValues.append(OptionValue(option, cbOpt, edtArg));
 
