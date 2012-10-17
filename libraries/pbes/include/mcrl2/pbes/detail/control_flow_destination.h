@@ -159,7 +159,7 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
     {
       const pfnf_equation& eqn = m_pbes.equations()[k];
       const pfnf_implication& g = eqn.implications()[i];
-      const data::variable d_n = eqn.parameters()[n];
+      // const data::variable d_n = eqn.parameters()[n];
       if (source(k, i, n) == data::data_expression())
       {
         return false;

@@ -122,21 +122,23 @@ class control_flow_source_algorithm
       }
     }
 
-    void print_source(const pfnf_equation& eqn, const std::vector<data::mutable_map_substitution<> >& src) const
+    std::string print_source(const pfnf_equation& eqn, const std::vector<data::mutable_map_substitution<> >& src) const
     {
+      std::ostringstream out;
       propositional_variable X(eqn.variable().name(), data::variable_list(eqn.parameters().begin(), eqn.parameters().end()));
-      std::cout << "- predicate variable " << pbes_system::pp(X) << std::endl;
+      out << "- predicate variable " << pbes_system::pp(X) << std::endl;
 
-      std::cout << "h     = " << pbes_system::pp(eqn.h()) << std::endl;
+      out << "h     = " << pbes_system::pp(eqn.h()) << std::endl;
 
       const std::vector<pfnf_implication>& g = eqn.implications();
       for (std::size_t i = 0; i < src.size(); i++)
       {
         const data::mutable_map_substitution<>& sigma = src[i];
-        std::cout << "g[" << std::setw(2) << (i + 1) << "] = " << g[i] << std::endl;
-        std::cout << "        source = " << data::print_substitution(sigma) << std::endl;
-        std::cout << std::endl;
+        out << "g[" << std::setw(2) << (i + 1) << "] = " << g[i] << std::endl;
+        out << "        source = " << data::print_substitution(sigma) << std::endl;
+        out << std::endl;
       }
+      return out.str();
     }
 
     data::data_expression source(std::size_t k, std::size_t i, std::size_t n) const
@@ -170,13 +172,15 @@ class control_flow_source_algorithm
       }
     }
 
-    void print_source() const
+    std::string print_source() const
     {
+      std::ostringstream out;
       std::size_t N = m_pbes.equations().size();
       for (std::size_t i = 0; i < N; i++)
       {
-        print_source(m_pbes.equations()[i], m_source[i]);
+        out << print_source(m_pbes.equations()[i], m_source[i]);
       }
+      return out.str();
     }
 
     // rewrite the parameters of the propositional variables, using the substitutions of the source function

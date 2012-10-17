@@ -665,24 +665,18 @@ class control_flow_graph_algorithm
     }
 
     /// \brief Computes the control flow graph
-    void run(const pbes<>& p, bool verbose = true)
+    void run(const pbes<>& p)
     {
       m_pbes = pfnf_pbes(p);
       m_datar = data::rewriter(p.data());
       simplify(m_pbes);
 
-      if (verbose)
-      {
-        control_flow_influence_graph_algorithm ialgo(m_pbes);
-        ialgo.run();
-      }
+      control_flow_influence_graph_algorithm ialgo(m_pbes);
+      ialgo.run();
 
       control_flow_destination_algorithm sdalgo(m_pbes);
       sdalgo.compute_source();
-      if (verbose)
-      {
-        sdalgo.print_source();
-      }
+      mCRL2log(log::debug) << sdalgo.print_source();
       sdalgo.rewrite_propositional_variables();
       // N.B. This modifies m_pbes. It is needed as a precondition for the
       // function compute_control_flow_parameters().
