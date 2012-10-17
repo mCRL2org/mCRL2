@@ -43,7 +43,7 @@ class aterm
     static detail::_aterm *undefined_aterm();
     static detail::_aterm *empty_aterm_list();
  
-    void free_term();
+    void free_term() const;
 
     void decrease_reference_count()
     {
@@ -57,18 +57,18 @@ class aterm
     }
 
     template <bool CHECK>
-    static void increase_reference_count(detail::_aterm* t)
+    void increase_reference_count() const
     {
-      assert(t!=NULL);
-      if (CHECK) assert(t->reference_count()>0);
-      t->reference_count()++;
+      assert(m_term!=NULL);
+      if (CHECK) assert(m_term->reference_count()>0);
+      m_term->reference_count()++;
     }
 
-    void copy_term(detail::_aterm* t)
+    void copy_term(const aterm &t)
     {
-      increase_reference_count<true>(t);
+      t.increase_reference_count<true>();
       decrease_reference_count();
-      m_term=t;
+      m_term=t.m_term;
     }
 
   public: // Should be protected;
@@ -97,7 +97,7 @@ class aterm
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
       assert(t!=NULL);
-      increase_reference_count<false>(m_term);
+      increase_reference_count<false>();
     }
 
   public:
@@ -105,14 +105,14 @@ class aterm
     /// \brief Default constructor
     aterm():m_term(undefined_aterm())
     {
-      increase_reference_count<false>(m_term);
+      increase_reference_count<false>();
     }
 
     /// \brief Copy constructor
     aterm (const aterm &t):m_term(t.m_term)
     {
       assert(t.address()!=NULL);
-      increase_reference_count<true>(m_term);
+      increase_reference_count<true>();
     }
 
     /// \brief Assignment operator.
@@ -255,10 +255,10 @@ class aterm
     /// \details This address will be stable as long as this aterm
     ///          exists, i.e., has a reference count larger than 0.
     /// \return A void* pointer, representing the machine address of the current aterm.
-    void * address() const
+    detail::_aterm* address() const
     {
       assert(m_term!=NULL && m_term->reference_count()>0);
-      return &* *this;
+      return m_term;
     }
 
     /// \brief Returns true if this term is not equal to the term assigned by

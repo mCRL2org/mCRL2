@@ -167,7 +167,7 @@ static void remove_from_hashtable(const detail::_aterm *t)
   bool check_that_all_objects_are_free();
 #endif
 
-void aterm::free_term()
+void aterm::free_term() const
 {
   detail::_aterm* t=this->m_term;
   assert(t->reference_count()==0);
@@ -386,7 +386,7 @@ aterm::aterm(const function_symbol &sym)
       }
 
       m_term=cur;
-      increase_reference_count<false>(m_term);
+      increase_reference_count<false>();
       return;
     }
     prev = cur;
@@ -402,7 +402,7 @@ aterm::aterm(const function_symbol &sym)
   detail::aterm_hashtable[hnr] = cur;
 
   m_term=cur;
-  increase_reference_count<false>(m_term);
+  increase_reference_count<false>();
 }
 
 

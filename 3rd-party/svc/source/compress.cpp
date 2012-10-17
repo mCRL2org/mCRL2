@@ -89,7 +89,7 @@ int CSreadATerm(CompressedStream* cs, aterm* term)
   if (HFdecodeATerm(cs->bs, &cs->tree, term))
   {
 
-    if (&**term==NULL)
+    if (term->address()==NULL)
     {
       return 0;
     }
@@ -184,7 +184,7 @@ int CSwriteIndex(CompressedStream* cs, aterm term)
   long index;
 
 
-  if (&*term==NULL)
+  if (term.address()==NULL)
   {
     return HFencodeIndex(cs->bs, &cs->tree, NO_INT);
   }

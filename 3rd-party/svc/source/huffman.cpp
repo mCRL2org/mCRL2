@@ -454,7 +454,7 @@ int HFencodeATerm(BitStream* bs, HFtree* tree, aterm term)
   struct HFnode* tmp;
   long index;
 
-  if (&*term==NULL)
+  if (term.address()==NULL)
   {
     term=NO_ATERM;
   }

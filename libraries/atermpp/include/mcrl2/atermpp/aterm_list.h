@@ -131,7 +131,7 @@ class term_list:public aterm
         result = push_front(result, t);
       }
       m_term=&*result;
-      increase_reference_count<false>(m_term);
+      increase_reference_count<false>();
     }
     
     /// Creates an term_list with a copy of a range.
@@ -158,7 +158,7 @@ class term_list:public aterm
         result=push_front(result, *i); 
       }
       m_term=&*result;
-      increase_reference_count<false>(m_term);
+      increase_reference_count<false>();
     }
 
     /// Assigment operator.
