@@ -250,8 +250,7 @@ void pbesstategraph(const std::string& input_filename,
   load_pbes(p, input_filename);
   pbes_system::normalize(p);
   pbes_system::detail::control_flow_algorithm algorithm;
-  bool verbose = true;
-  pbes<> q = algorithm.run(p, simplify, apply_to_original, verbose);
+  pbes<> q = algorithm.run(p, simplify, apply_to_original);
   q.save(output_filename, true, true);
   if (!q.is_well_typed())
   {

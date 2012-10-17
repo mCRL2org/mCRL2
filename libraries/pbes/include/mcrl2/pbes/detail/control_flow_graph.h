@@ -280,9 +280,10 @@ class control_flow_graph_algorithm
       return propositional_variable();
     }
 
-    void print_control_flow_parameters()
+    std::string print_control_flow_parameters()
     {
-      std::cout << "--- control flow parameters ---" << std::endl;
+      std::ostringstream out;
+      out << "--- control flow parameters ---" << std::endl;
       const atermpp::vector<pfnf_equation>& equations = m_pbes.equations();
       for (atermpp::vector<pfnf_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
@@ -290,16 +291,17 @@ class control_flow_graph_algorithm
         const atermpp::vector<data::variable>& d_X = k->parameters();
         const std::vector<bool>& cf = m_is_control_flow[X.name()];
 
-        std::cout << core::pp(X.name()) << " ";
+        out << core::pp(X.name()) << " ";
         for (std::size_t i = 0; i < cf.size(); ++i)
         {
           if (cf[i])
           {
-            std::cout << data::pp(d_X[i]) << " ";
+            out << data::pp(d_X[i]) << " ";
           }
         }
-        std::cout << std::endl;
+        out << std::endl;
       }
+      return out.str();
     }
 
     std::string print_propvar_parameter(const core::identifier_string& X, std::size_t index) const
@@ -651,13 +653,15 @@ class control_flow_graph_algorithm
       }
     }
 
-    void print_control_flow_graph() const
+    std::string print_control_flow_graph() const
     {
-      std::cout << "--- control flow graph ---" << std::endl;
+      std::ostringstream out;
+      out << "--- control flow graph ---" << std::endl;
       for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
-        std::cout << "vertex " << i->second.print() << std::endl;
+        out << "vertex " << i->second.print() << std::endl;
       }
+      return out.str();
     }
 
     /// \brief Computes the control flow graph
@@ -683,18 +687,12 @@ class control_flow_graph_algorithm
       // N.B. This modifies m_pbes. It is needed as a precondition for the
       // function compute_control_flow_parameters().
 
-      if (verbose)
-      {
-        sdalgo.compute_destination();
-        sdalgo.print_destination();
-      }
+      sdalgo.compute_destination();
+      mCRL2log(log::debug) << sdalgo.print_destination();
 
       compute_control_flow_graph();
-      if (verbose)
-      {
-        print_control_flow_parameters();
-        print_control_flow_graph();
-      }
+      mCRL2log(log::debug) << print_control_flow_parameters();
+      mCRL2log(log::verbose) << print_control_flow_graph();
     }
 };
 

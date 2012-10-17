@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_CONTROL_FLOW_DESTINATION_H
 #define MCRL2_PBES_DETAIL_CONTROL_FLOW_DESTINATION_H
 
+#include <sstream>
 #include "mcrl2/pbes/detail/control_flow_source.h"
 
 namespace mcrl2 {
@@ -83,45 +84,49 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
       }
     }
 
-    void print_destination_array(const propositional_variable_instantiation& X, const destination_array& a) const
+    std::string print_destination_array(const propositional_variable_instantiation& X, const destination_array& a) const
     {
-      std::cout << "        dest(" << pbes_system::pp(X) << ") = [";
+      std::ostringstream out;
+      out << "        dest(" << pbes_system::pp(X) << ") = [";
       for (destination_array::const_iterator i = a.begin(); i != a.end(); ++i)
       {
         if (i != a.begin())
         {
-          std::cout << ", ";
+          out << ", ";
         }
         if (*i == data::data_expression())
         {
-          std::cout << "-";
+          out << "-";
         }
         else
         {
-          std::cout << data::pp(*i);
+          out << data::pp(*i);
         }
       }
-      std::cout << "]" << std::endl;
+      out << "]" << std::endl;
+      return out.str();
     }
 
-    void print_destination(const pfnf_equation& eqn, const std::vector<data::mutable_map_substitution<> >& src, const std::vector<destination_map>& dest) const
+    std::string print_destination(const pfnf_equation& eqn, const std::vector<data::mutable_map_substitution<> >& src, const std::vector<destination_map>& dest) const
     {
+      std::ostringstream out;
       propositional_variable X(eqn.variable().name(), data::variable_list(eqn.parameters().begin(), eqn.parameters().end()));
-      std::cout << "- predicate variable " << pbes_system::pp(X) << std::endl;
+      out << "- predicate variable " << pbes_system::pp(X) << std::endl;
 
-      std::cout << "h     = " << pbes_system::pp(eqn.h()) << std::endl;
+      out << "h     = " << pbes_system::pp(eqn.h()) << std::endl;
 
       const std::vector<pfnf_implication>& g = eqn.implications();
       for (std::size_t i = 0; i < src.size(); i++)
       {
         const destination_map& dmap = dest[i];
-        std::cout << "g[" << std::setw(2) << (i + 1) << "] = " << g[i] << std::endl;
+        out << "g[" << std::setw(2) << (i + 1) << "] = " << g[i] << std::endl;
         for (destination_map::const_iterator j = dmap.begin(); j != dmap.end(); ++j)
         {
-          print_destination_array(j->first, j->second);
+          out << print_destination_array(j->first, j->second);
         }
-        std::cout << std::endl;
+        out << std::endl;
       }
+      return out.str();
     }
 
     // returns the constant value fij[n] of equation k, or data::data_expression() if it does not exist,
@@ -166,7 +171,7 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
           return false;
         }
       }
-      std::cout << "parameter " << data::pp(d_n) << " rules conjunct " << i << std::endl;
+      // std::cout << "parameter " << data::pp(d_n) << " rules conjunct " << i << std::endl;
       return true;
     }
 
@@ -216,13 +221,15 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
       }
     }
 
-    void print_destination() const
+    std::string print_destination() const
     {
+      std::ostringstream out;
       std::size_t N = m_pbes.equations().size();
       for (std::size_t i = 0; i < N; i++)
       {
-        print_destination(m_pbes.equations()[i], m_source[i], m_destination[i]);
+        out << print_destination(m_pbes.equations()[i], m_source[i], m_destination[i]);
       }
+      return out.str();
     }
 };
 

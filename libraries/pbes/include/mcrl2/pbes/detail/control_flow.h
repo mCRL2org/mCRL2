@@ -27,10 +27,10 @@ class control_flow_algorithm: public control_flow_reset_variables_algorithm
     /// \brief Runs the control_flow algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the PFNF one
-    pbes<> run(const pbes<>& p, bool simplify = true, bool apply_to_original_pbes = false, bool verbose = true)
+    pbes<> run(const pbes<>& p, bool simplify = true, bool apply_to_original_pbes = false)
     {
-      control_flow_graph_algorithm::run(p, verbose);
-      return control_flow_reset_variables_algorithm::run(p, simplify, apply_to_original_pbes, verbose);
+      control_flow_graph_algorithm::run(p);
+      return control_flow_reset_variables_algorithm::run(p, simplify, apply_to_original_pbes);
     }
 };
 

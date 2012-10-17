@@ -63,14 +63,16 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       return out.str();
     }
 
-    void print_control_flow_marking() const
+    std::string print_control_flow_marking() const
     {
-      std::cout << "--- control flow marking ---" << std::endl;
+      std::ostringstream out;
+      out << "--- control flow marking ---" << std::endl;
       for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         const control_flow_vertex& v = i->second;
-        std::cout << print_control_flow_marking(v) << std::endl;
+        out << print_control_flow_marking(v) << std::endl;
       }
+      return out.str();
     }
 
     void compute_control_flow_marking()
@@ -258,15 +260,12 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     /// \brief Runs the control_flow algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the PFNF one
-    pbes<> run(const pbes<>& p, bool simplify = true, bool apply_to_original_pbes = false, bool verbose = true)
+    pbes<> run(const pbes<>& p, bool simplify = true, bool apply_to_original_pbes = false)
     {
       m_simplify = simplify;
 
       compute_control_flow_marking();
-      if (verbose)
-      {
-        print_control_flow_marking();
-      }
+      mCRL2log(log::verbose) << print_control_flow_marking();
 
       if (apply_to_original_pbes)
       {

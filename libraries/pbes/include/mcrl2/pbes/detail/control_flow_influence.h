@@ -81,14 +81,14 @@ class control_flow_influence_graph_algorithm
 
     void print_influence_graph() const
     {
-      std::cout << "--- influence graph ---\n";
+      mCRL2log(log::debug) << "--- influence graph ---\n";
       for (std::vector<influence_vertex>::const_iterator i = m_influence_vertices.begin(); i != m_influence_vertices.end(); ++i)
       {
-        std::cout << i->print() << std::endl;
+        mCRL2log(log::debug) << i->print() << std::endl;
       }
       for (std::vector<influence_edge>::const_iterator i = m_influence_edges.begin(); i != m_influence_edges.end(); ++i)
       {
-        std::cout << i->print() << std::endl;
+        mCRL2log(log::debug) << i->print() << std::endl;
       }
     }
 
@@ -112,7 +112,6 @@ class control_flow_influence_graph_algorithm
           return i;
         }
       }
-      std::cout << "<error>" << core::pp(X) << " " << data::pp(v) << std::endl;
       return m_influence_vertices.end();
     }
 
