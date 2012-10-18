@@ -54,7 +54,7 @@ class aterm_string: public aterm_appl
     {
       assert(t.type() == AT_APPL);
       assert(t.function().arity() == 0);
-      copy_term(&*t); 
+      copy_term(t); 
       return *this;
     } 
 

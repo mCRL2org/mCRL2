@@ -79,12 +79,12 @@ class aterm
     aterm(const function_symbol &sym);
   
     // Functions below should become protected.
-    detail::_aterm & operator *() const
+    /* detail::_aterm & operator *() const
     {
       assert(m_term!=NULL);
       assert(m_term->reference_count()>0);
       return *m_term;
-    }
+    } */
 
     detail::_aterm * operator ->() const
     {

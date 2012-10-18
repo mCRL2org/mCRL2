@@ -27,13 +27,13 @@ class aterm_int:public aterm
     } 
 
   public:  // These should be protected, but that is currently not yet possible.
-    detail::_aterm_int & operator *() const
+    /* detail::_aterm_int & operator *() const
     {
       // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
       // which is done quite commonly.
       assert(m_term->reference_count()>0);
       return *reinterpret_cast<detail::_aterm_int*>(m_term); 
-    }
+    } */
 
     detail::_aterm_int *operator ->() const
     {

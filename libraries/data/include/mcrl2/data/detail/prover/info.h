@@ -61,8 +61,8 @@ class InternalFormatInfo
               const atermpp::aterm &a_term1, 
               const atermpp::aterm &a_term2)
     {
-      long v_address1 = reinterpret_cast < long >(&*(atermpp::aterm)a_term1);
-      long v_address2 = reinterpret_cast < long >(&*(atermpp::aterm)a_term2);
+      long v_address1 = reinterpret_cast < long >(a_term1.address());
+      long v_address2 = reinterpret_cast < long >(a_term2.address());
 
       if (v_address1 < v_address2)
       {

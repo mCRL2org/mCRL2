@@ -126,7 +126,7 @@ class propositional_variable_instantiation: public pbes_expression
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       core::identifier_string name(p.first);
       data::variable_list parameters = atermpp::convert<data::variable_list>(p.second);
-      this->copy_term(&*static_cast<atermpp::aterm>(core::detail::gsMakePropVarInst(name, parameters)));
+      copy_term(core::detail::gsMakePropVarInst(name, parameters));
     }
 //--- end user section propositional_variable_instantiation ---//
 };

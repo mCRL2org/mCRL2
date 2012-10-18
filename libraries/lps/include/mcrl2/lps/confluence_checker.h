@@ -142,7 +142,7 @@ inline action_label make_ctau_act_id()
 {
   static atermpp::aterm_appl ctau_act_id = mcrl2::core::detail::gsMakeActId(atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
 
-  assert(&*ctau_act_id);
+  assert(ctau_act_id.address());
 
   return action_label(ctau_act_id);
 }
@@ -154,7 +154,7 @@ inline action make_ctau_action()
 {
   static atermpp::aterm_appl ctau_action = mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), atermpp::aterm_list());
 
-  assert(&*ctau_action);
+  assert(ctau_action.address());
 
   return action(ctau_action);
 }

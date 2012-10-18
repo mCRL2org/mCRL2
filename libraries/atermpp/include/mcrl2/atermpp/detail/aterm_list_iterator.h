@@ -51,7 +51,7 @@ class term_list_iterator: public boost::iterator_facade<
     /// \brief Constructor.
     /// \param l A sequence of terms
     term_list_iterator(const aterm &l)
-      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(&*l))
+      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l.address()))
     { 
       assert(l.type()==AT_LIST);
     } 
@@ -86,7 +86,7 @@ class term_list_iterator: public boost::iterator_facade<
     /// \brief Increments the iterator
     void increment()
     {
-      m_list = &*m_list->tail;
+      m_list = reinterpret_cast<detail::_aterm_list<Term>*>(m_list->tail.address());
     }
 
     detail::_aterm_list<Term>* m_list;

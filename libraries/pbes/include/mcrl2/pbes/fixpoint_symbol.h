@@ -57,7 +57,7 @@ class fixpoint_symbol: public atermpp::aterm_appl
     /// \brief Assignment operator.
     fixpoint_symbol& operator=(atermpp::aterm t)
     {
-      this->copy_term(&*t); 
+      this->copy_term(t); 
       return *this;
     }
 

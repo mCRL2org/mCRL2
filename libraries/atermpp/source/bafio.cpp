@@ -732,7 +732,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
   */
 static void add_term(sym_entry* entry, const aterm &t)
 {
-  size_t hnr = hash_number(&*t,detail::term_size(&*t)) % entry->termtable_size;
+  size_t hnr = hash_number(t.address(),detail::term_size(t.address())) % entry->termtable_size;
   entry->terms[entry->cur_index].t = t;
   entry->terms[entry->cur_index].next = entry->termtable[hnr];
   entry->termtable[hnr] = &entry->terms[entry->cur_index];
@@ -852,7 +852,7 @@ static bool write_symbols(byte_writer* writer)
 
 static size_t find_term(sym_entry* entry, const aterm t)
 {
-  size_t hnr = hash_number(&*t,detail::term_size(&*t)) % entry->termtable_size;
+  size_t hnr = hash_number(t.address(),detail::term_size(t.address())) % entry->termtable_size;
   trm_bucket* cur = entry->termtable[hnr];
 
   assert(cur);

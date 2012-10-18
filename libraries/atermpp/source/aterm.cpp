@@ -674,7 +674,7 @@ readFromTextFile(int* c, FILE* file)
 
   term = fparse_term(c, file);
 
-  if (&*term)
+  if (term.address())
   {
     ungetc(*c, file);
   }

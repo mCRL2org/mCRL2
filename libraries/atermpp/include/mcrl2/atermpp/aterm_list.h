@@ -29,11 +29,11 @@ template <typename Term>
 class term_list:public aterm
 {
   public: // Should become protected.
-    detail::_aterm_list<Term> & operator *() const
+    /* detail::_aterm_list<Term> & operator *() const
     {
       assert(m_term!=NULL && m_term->reference_count()>0);
       return *reinterpret_cast<detail::_aterm_list<Term>*>(m_term); 
-    }
+    } */
 
     detail::_aterm_list<Term> *operator ->() const
     {
@@ -75,9 +75,9 @@ class term_list:public aterm
 
     /// \brief Copy construction.
     /// \param l A list.
-    term_list(const term_list<Term> &t):aterm(reinterpret_cast<detail::_aterm *>(&*t))
+    term_list(const term_list<Term> &t):aterm(reinterpret_cast<detail::_aterm *>(t.address()))
     {
-      assert(m_term==&*aterm() || type() == AT_LIST); // term list can be NULL.
+      assert(m_term==aterm().m_term || type() == AT_LIST); // term list can be NULL.
     }
 
     /// \brief Constructor from _aterm_list*.
@@ -86,7 +86,7 @@ class term_list:public aterm
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      assert(t==&*aterm() || type() == AT_LIST); // term list can be the undefined aterm(). This is generally used to indicate a faulty
+      assert(t==aterm().m_term || type() == AT_LIST); // term list can be the undefined aterm(). This is generally used to indicate a faulty
                                             // situation. This used should be discouraged.
     }
 
@@ -110,7 +110,7 @@ class term_list:public aterm
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      assert(m_term==&*aterm() || t.type()==AT_LIST); // Term list can be the undefined aterm(); Generally, this is used to indicate a faulty situation.
+      assert(m_term==aterm().m_term || t.type()==AT_LIST); // Term list can be the undefined aterm(); Generally, this is used to indicate a faulty situation.
                                                  // This use should be discouraged.
     }
 
@@ -130,7 +130,7 @@ class term_list:public aterm
         const Term t=*(--last);
         result = push_front(result, t);
       }
-      m_term=&*result;
+      m_term=result.address();
       increase_reference_count<false>();
     }
     
@@ -157,7 +157,7 @@ class term_list:public aterm
       { 
         result=push_front(result, *i); 
       }
-      m_term=&*result;
+      m_term=result.address();
       increase_reference_count<false>();
     }
 
@@ -197,7 +197,8 @@ class term_list:public aterm
     {
       size_t size=0;
       for(detail::_aterm_list<Term>* m_list=reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
-                 m_list->function()!=detail::function_adm.AS_EMPTY_LIST; m_list=&*(m_list->tail))
+                 m_list->function()!=detail::function_adm.AS_EMPTY_LIST; 
+                 m_list=reinterpret_cast<detail::_aterm_list<Term>*>(m_list->tail.address()))
       {
         size++;
       }
@@ -279,7 +280,7 @@ term_list<Term> push_back(term_list<Term> list, const Term &elem)
   /* Collect all elements of list in buffer */
   for (size_t i=0; i<len; i++)
   {
-    buffer[i] = &*list.front();
+    buffer[i] = list.front().address();
     list = list.tail();
   }
 
@@ -337,7 +338,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
     {
       break;
     }
-    buffer[i++] = &*l.front();
+    buffer[i++] = l.front().address();
     l = l.tail();
   }
 
@@ -402,7 +403,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   term_list<Term> list1=l;
   for (size_t i=0; i<len; i++)
   {
-    buffer[i] = &*list1.front();
+    buffer[i] = list1.front().address();
     list1 = list1.tail();
   }
 

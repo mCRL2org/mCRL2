@@ -68,7 +68,7 @@ size_t COMBINE(const HashNumber hnr, const size_t w)
 inline
 size_t COMBINE(const HashNumber hnr, const aterm &w)
 {
-  return COMBINE(hnr,reinterpret_cast<size_t>(&*w));
+  return COMBINE(hnr,reinterpret_cast<size_t>(w.address()));
 }
 
 inline
@@ -172,6 +172,19 @@ _aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIt
   return cur;
 }
 
+// The functions below are used to obtain an address of objects that due to
+// template arguments can have different types.
+
+inline const _aterm* ADDRESS(const _aterm* a)
+{
+  return a;
+}
+
+inline _aterm* ADDRESS(const aterm &a)
+{
+  return a.address();
+}
+
 template <class Term, class ForwardIterator>
 _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
 {
@@ -182,7 +195,7 @@ _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin,
   {
     assert(j<arity);
     CHECK_TERM(*i);
-    hnr = COMBINE(hnr, reinterpret_cast<size_t>(&* *i));
+    hnr = COMBINE(hnr, reinterpret_cast<size_t>(ADDRESS(*i)));
   }
   assert(j==arity);
 
@@ -195,7 +208,7 @@ _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin,
       ForwardIterator i=begin;
       for (size_t j=0; j<arity; ++i,++j)
       {
-        if (&*reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[j] != &* *i)
+        if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[j].address() != detail::ADDRESS(*i)) 
         {
           found = false;
           break;

@@ -20,7 +20,7 @@ inline
 std::string to_string(const aterm t)
 {
   std::ostringstream oss;
-  oss << &*t;
+  oss << t.address();
   return oss.str();
 } 
 

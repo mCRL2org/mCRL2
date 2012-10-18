@@ -462,8 +462,8 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
 
   while (currentTerm != aterm() && ATgetRemainingBufferSpace(byteBuffer) >= MINIMUMFREEBUFFERSPACE)
   {
-    size_t termHash = (size_t)(&*currentTerm);
-    size_t id = IMgetID(binaryWriter->sharedTerms, &*currentTerm, termHash);
+    size_t termHash = (size_t)(currentTerm.address());
+    size_t id = IMgetID(binaryWriter->sharedTerms, currentTerm.address(), termHash);
     if (id != ATERM_NON_EXISTING_POSITION)
     {
       *(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
@@ -497,7 +497,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
       if (binaryWriter->indexInTerm == 0)
       {
         id = binaryWriter->currentSharedTermKey++;
-        IMmakeIDMapping(binaryWriter->sharedTerms, &*currentTerm, termHash, id);
+        IMmakeIDMapping(binaryWriter->sharedTerms, currentTerm.address(), termHash, id);
       }
       else
       {

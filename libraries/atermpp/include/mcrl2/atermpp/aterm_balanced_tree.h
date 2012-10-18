@@ -137,7 +137,7 @@ class term_balanced_tree: public aterm
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const ForwardTraversalIterator last)
     {
-      copy_term(&*make_tree(first,get_distance(first,last)));
+      copy_term(make_tree(first,get_distance(first,last)));
     }
 
     /// \brief Creates an term_balanced_tree with a copy of a range. 
@@ -146,7 +146,7 @@ class term_balanced_tree: public aterm
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const size_t size)
     {
-      copy_term(&*make_tree(first,size));
+      copy_term(make_tree(first,size));
     }
 
     /// \brief Get the left branch of the tree
@@ -292,8 +292,8 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
         m_trees.pop();
         do 
         {
-          m_trees.push(&*(reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[1]));
-          current=&*reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[0];
+          m_trees.push((reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[1]).address());
+          current=reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[0].address();
         }
         while (current->function()==term_balanced_tree < Value >::tree_node());
 
@@ -303,12 +303,12 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     void initialise(const aterm &tree)
     {
-        detail::_aterm_appl<aterm>* current = reinterpret_cast<detail::_aterm_appl<aterm> *>(&*tree);
+        detail::_aterm_appl<aterm>* current = reinterpret_cast<detail::_aterm_appl<aterm> *>(tree.address());
 
       while (current->function()==term_balanced_tree< Value >::tree_node())
       {
-        m_trees.push(&*(current->arg[1]));
-        current=reinterpret_cast<detail::_aterm_appl<aterm > *>(&*(current->arg[0]));
+        m_trees.push(current->arg[1].address());
+        current=reinterpret_cast<detail::_aterm_appl<aterm > *>(current->arg[0].address());
       }
       m_trees.push(current);
     }
