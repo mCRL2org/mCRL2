@@ -48,6 +48,7 @@ class ToolInstance : public QWidget
     QProcess m_process;
 
     FilePicker* m_pckFileOut;
+    FilePicker* m_pckFileIn;
     mcrl2::utilities::qt::PersistentFileDialog* m_fileDialog;
 
   signals:
