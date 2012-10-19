@@ -44,9 +44,9 @@ class txt2lps_tool : public input_output_tool
 
     bool run()
     {
-      lps::txtlps(input_filename(),
-                  output_filename()
-                 );
+      lps::txt2lps(input_filename(),
+                   output_filename()
+                  );
       return true;
     }
 

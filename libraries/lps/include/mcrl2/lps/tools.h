@@ -83,9 +83,9 @@ void lpssuminst(const std::string& input_filename,
 void lpsuntime(const std::string& input_filename,
                const std::string& output_filename);
 
-void txtlps(const std::string& input_filename,
-            const std::string& output_filename
-           );
+void txt2lps(const std::string& input_filename,
+             const std::string& output_filename
+            );
 
 } // namespace lps
 

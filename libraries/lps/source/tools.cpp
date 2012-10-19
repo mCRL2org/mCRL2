@@ -305,9 +305,9 @@ void lpsuntime(const std::string& input_filename,
   spec.save(output_filename);
 }
 
-void txtlps(const std::string& input_filename,
-            const std::string& output_filename
-           )
+void txt2lps(const std::string& input_filename,
+             const std::string& output_filename
+            )
 {
   lps::specification spec;
   if (input_filename.empty())
