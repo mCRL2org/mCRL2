@@ -67,7 +67,6 @@ void test_alphabet_allow()
   BOOST_CHECK(lps::pp(B) == lps::pp(C));
 }
 
-#ifdef MCRL2_NEW_ALPHABET_REDUCE
 void test_alphabet()
 {
   std::string text =
@@ -78,7 +77,6 @@ void test_alphabet()
   process_specification procspec = parse_process_specification(text);
   alphabet_reduce(procspec);
 }
-#endif
 
 int test_main(int argc, char* argv[])
 {
@@ -86,9 +84,7 @@ int test_main(int argc, char* argv[])
 
   log::mcrl2_logger::set_reporting_level(log::debug);
 
-#ifdef MCRL2_NEW_ALPHABET_REDUCE
   test_alphabet();
-#endif
   test_action_parse();
   test_alphabet_allow();
 
