@@ -28,20 +28,6 @@ namespace atermpp
 template <typename Term>
 class term_list:public aterm
 {
-  public: // Should become protected.
-    /* detail::_aterm_list<Term> & operator *() const
-    {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      return *reinterpret_cast<detail::_aterm_list<Term>*>(m_term); 
-    } */
-
-    detail::_aterm_list<Term> *operator ->() const
-    {
-      assert(m_term!=NULL);
-      assert(m_term->reference_count()>0);
-      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
-    }
-
   public:
 
     /// The type of object, T stored in the term_list.

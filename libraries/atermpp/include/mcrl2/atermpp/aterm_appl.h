@@ -36,22 +36,6 @@ class term_appl:public aterm
       assert(sizeof(Term)==sizeof(size_t));
     } 
     
-  public: // Should become protected.
-    /* detail::_aterm_appl<Term> & operator *() const
-    {
-      // Note that this operator can be applied on a NULL pointer, i.e., in the case &*m_term is checked,
-      // which is done quite commonly.
-      assert(m_term->reference_count()>0);
-      return *reinterpret_cast<detail::_aterm_appl<Term>*>(m_term); 
-    } */
-
-    detail::_aterm_appl<Term> *operator ->() const
-    {
-      assert(m_term!=NULL);
-      assert(m_term->reference_count()>0);
-      return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term);
-    }
-
   public:
     /// The type of object, T stored in the term_appl.
     typedef Term value_type;

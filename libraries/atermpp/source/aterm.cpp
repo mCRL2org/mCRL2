@@ -129,7 +129,7 @@ writeToTextFile(const aterm &t, FILE* f)
   aterm_list      list;
   std::string     name;
 
-  assert(t->reference_count()>0);
+  assert(t.address()->reference_count()>0);
   switch (t.type())
   {
     case AT_INT:

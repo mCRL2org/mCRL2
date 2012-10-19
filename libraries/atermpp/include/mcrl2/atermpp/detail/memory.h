@@ -79,8 +79,8 @@ t
 )
 {
   assert(t != aterm());
-  assert(t->reference_count()>0);
-  assert(t->function().name().size()!=0);
+  assert(t.address()->reference_count()>0);
+  assert(t.function().name().size()!=0);
 }
 
 inline size_t term_size(const detail::_aterm *t)
@@ -507,12 +507,12 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
   size_t arity = function().arity();
   assert(n < arity);
 
-  HashNumber hnr = (*this)->function().number();
+  HashNumber hnr = function().number();
   for (size_t i=0; i<arity; i++)
   {
     if (i!=n)
     {
-      hnr = detail::COMBINE(hnr, ((*this)->arg[i]));
+      hnr = detail::COMBINE(hnr, (*this)(i));
     }
     else
     {
@@ -524,14 +524,14 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
   detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
   {
-    if (cur->function()==(*this)->function())
+    if (cur->function()==function())
     {
       found = true;
       for (size_t i=0; i<arity; i++)
       {
         if (i!=n)
         {
-          if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i]!=(*this)->arg[i])  
+          if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i]!=(*this)(i))  
           {
             found = false;
             break;
@@ -559,12 +559,12 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
     cur = detail::allocate_term(detail::TERM_SIZE_APPL(arity));
     /* Delay masking until after allocate_term */
     hnr &= detail::aterm_table_mask;
-    new (&cur->function()) function_symbol((*this)->function());
+    new (&cur->function()) function_symbol((*this).function());
     for (size_t i=0; i<arity; i++)
     {
       if (i!=n)
       {
-        new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term((*this)->arg[i]);
+        new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term((*this)(i));
       }
       else
       {
