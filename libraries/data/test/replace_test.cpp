@@ -140,6 +140,54 @@ void test_replace_with_binders()
   core::garbage_collect();
 }
 
+inline
+variable make_bool(const std::string& s)
+{
+  return variable(s, sort_bool::bool_());
+}
+
+void test_variables()
+{
+  variable d1 = make_bool("d1");
+  variable d2 = make_bool("d2");
+  variable d3 = make_bool("d3");
+  variable e1 = make_bool("e1");
+  variable e2 = make_bool("e2");
+  variable e3 = make_bool("e3");
+
+  mutable_map_substitution<> sigma;
+  sigma[d1] = e1;
+  sigma[d2] = e2;
+  sigma[d3] = e3;
+
+  // the variable in an assignment is not replaced by replace_free_variables
+  assignment a(d1, e1);
+  assignment b = replace_free_variables(a, sigma);
+  BOOST_CHECK(b == a);
+
+  // the variable in an assignment is not replaced by replace_variables
+  assignment c = replace_variables(a, sigma);
+  BOOST_CHECK(c == a);
+
+  // the variable d1 in the right hand side is not replaced by replace_free_variables
+  a = assignment(d1, sort_bool::and_(d1, d2));
+  b = replace_free_variables(a, sigma);
+  BOOST_CHECK(b == assignment(d1, sort_bool::and_(d1, e2)));
+
+  // the variable d1 in the right hand side is replaced by replace_free_variables
+  c = replace_variables(a, sigma);
+  BOOST_CHECK(c == assignment(d1, sort_bool::and_(e1, e2)));
+
+  // this will lead to an assertion failure, because an attempt will be made to store
+  // a data expression in a variable
+  sigma[d1] = sort_bool::and_(d1, d2);
+  // data_expression d = replace_variables(d1, sigma);
+
+  // therefore one should first convert d1 to a data expression:
+  data_expression d = replace_variables(data_expression(d1), sigma);
+  BOOST_CHECK(d == sort_bool::and_(d1, d2));
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -147,6 +195,7 @@ int test_main(int argc, char** argv)
   test_assignment_list();
   test_variable_replace();
   test_replace_with_binders();
+  test_variables();
 
   return 0;
 }
