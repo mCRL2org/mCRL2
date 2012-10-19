@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_control_flow1)
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 
   detail::control_flow_algorithm algorithm;
-  algorithm.
+  algorithm.run(p, true, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_control_flow)
