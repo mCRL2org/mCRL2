@@ -5139,7 +5139,7 @@ class specification_basic_type:public boost::noncopyable
       const enumtype& e,
       size_t n,
       const deadlock_summand_vector &deadlock_summands,
-      const variable_list &gsorts)
+      const variable_list & /* gsorts */)
     {
       /* This function gets a list of summands, with
          the same multiaction and time
@@ -5671,14 +5671,14 @@ class specification_basic_type:public boost::noncopyable
          quickly as possible */
       deadlock_summand_vector result;
 
-      const variable_list sumvars=s.summation_variables();
+      // const variable_list sumvars=s.summation_variables();
       const data_expression cond=s.condition();
       const data_expression actiontime=s.deadlock().time();
 
       // First check whether the delta summand is subsumed by an action summands.
       for (action_summand_vector::const_iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
       {
-        const action_summand smmnd=*i;
+        // const action_summand smmnd=*i;
         const data_expression cond1=i->condition();
         if ((!options.add_delta) &&
             ((actiontime==i->multi_action().time()) || (!i->multi_action().has_time())) &&
