@@ -1395,63 +1395,6 @@ class specification_basic_type:public boost::noncopyable
 
     /******************* substitute *****************************************/
 
-    /* data_expression_list substitute_datalist(
-      const data_expression_list terms,
-      const variable_list vars,
-      const  data_expression_list tl)
-    {
-      atermpp::map < variable, data_expression > sigma;
-      data_expression_list::const_iterator j=terms.begin();
-      for (variable_list::const_iterator i=vars.begin();
-           i!=vars.end(); ++i, ++j)
-      {
-        / * Substitutions are carried out from left to right. The first applicable substitution counts * /
-        if (sigma.count(*i)==0)
-        {
-          sigma[*i]=*j;
-        }
-      }
-      return data::replace_free_variables(atermpp::convert<data::data_expression_list>(tl), data::make_map_substitution(sigma));
-    } */
-
-    /* data_expression substitute_data(
-      const data_expression_list terms,
-      const variable_list vars,
-      const data_expression t)
-    {
-      / * The code below could be replaced by the code below, but this is too inefficient,
-         as the reverse operator is expensive:
-         <snip>
-      * /
-      atermpp::map < variable, data_expression > sigma;
-      data_expression_list::const_iterator j=terms.begin();
-      for (variable_list::const_iterator i=vars.begin();
-           i!=vars.end(); ++i, ++j)
-      {
-        / * Substitutions are carried out from left to right. The first applicable substitution counts * /
-        if (sigma.count(*i)==0)
-        {
-          sigma[*i]=*j;
-        }
-      }
-      const data_expression result=data::replace_free_variables(t, make_map_substitution(sigma));
-      return result;
-    } */
-
-    template <class Substitution>
-    action_list substitute_multiaction(
-      const action_list multiAction,
-      const Substitution &sigma)
-    {
-      if (multiAction.empty())
-      {
-        return multiAction;
-      }
-      const action act=multiAction.front();
-      return push_front(substitute_multiaction(pop_front(multiAction),sigma),
-                        action(act.label(),
-                               data::replace_free_variables(act.arguments(),sigma)));
-    } 
 
     template <class Substitution>
     assignment_list substitute_assignmentlist(
@@ -1565,13 +1508,9 @@ class specification_basic_type:public boost::noncopyable
                assignment(lhs,rhs));
     }
 
-    /* data_expression substitute_time(
-      const data_expression_list terms,
-      const variable_list vars,
-      const data_expression time)
-    {
-      return substitute_data(terms,vars,time);
-    } */
+    /* The function below calculates sigma(p) and replaces
+       all variables that are bound by a sum in p by unique
+       variables */
 
     process_expression substitute_pCRLproc(
       const process_expression p,
@@ -1637,7 +1576,7 @@ class specification_basic_type:public boost::noncopyable
           terms=push_back(terms,i->second);
         }
         
-         atermpp::map < variable, data_expression > local_sigma=sigma;
+        atermpp::map < variable, data_expression > local_sigma=sigma;
         alphaconvert(sumargs,local_sigma,terms,vars);
 
         const process_expression result=sum(sumargs,
@@ -5037,7 +4976,6 @@ class specification_basic_type:public boost::noncopyable
             const data_expression_list auxargs= *auxrename_list_args;
             ++auxrename_list_args;
 
-            // const data_expression auxresult1=substitute_time(auxargs,auxpars,actiontime);
             atermpp::map < variable, data_expression > sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
@@ -5360,7 +5298,6 @@ class specification_basic_type:public boost::noncopyable
             const data_expression_list auxargs= *auxrename_list_args;
             ++auxrename_list_args;
 
-            // const data_expression auxresult1=substitute_time(auxargs,auxpars,actiontime);
             atermpp::map < variable, data_expression > sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
@@ -7000,8 +6937,7 @@ class specification_basic_type:public boost::noncopyable
       atermpp::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
       const variable_list unique_pars=data::replace_free_variables(pars,make_map_substitution(sigma));
 
-      init=substitute_assignmentlist(init,pars,true,false, make_map_substitution(sigma));  // Only substitute the variables
-      // the variables at the lhs.
+      init=substitute_assignmentlist(init,pars,true,false, make_map_substitution(sigma));  // Only substitute the variables at the lhs.
       for (action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
         const action_summand smmnd= *s;
@@ -7014,24 +6950,13 @@ class specification_basic_type:public boost::noncopyable
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-        /* condition=substitute_data(unique_pars,pars,condition);
-        condition=substitute_data(unique_sumvars,sumvars,condition);
-
-        actiontime=substitute_time(unique_pars,pars,actiontime);
-        actiontime=substitute_time(unique_sumvars,sumvars,actiontime);
-        multiaction=substitute_multiaction(unique_pars,pars,multiaction),
-        multiaction=substitute_multiaction(unique_sumvars,sumvars,multiaction),
-
-        nextstate=substitute_assignmentlist(unique_pars,pars,nextstate,pars,1,1);
-        nextstate=substitute_assignmentlist(unique_sumvars,sumvars,nextstate,unique_pars,0,1); */
-
         condition=data::replace_free_variables(condition,make_map_substitution(sigma));
         condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
 
         actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
         actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
-        multiaction=substitute_multiaction(multiaction,make_map_substitution(sigma));
-        multiaction=substitute_multiaction(multiaction,make_map_substitution(sigma_sumvars));
+        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma));
+        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma_sumvars));
 
         nextstate=substitute_assignmentlist(nextstate,pars,true,true,make_map_substitution(sigma));
         nextstate=substitute_assignmentlist(nextstate,unique_pars,false,true,make_map_substitution(sigma_sumvars));
@@ -7058,12 +6983,6 @@ class specification_basic_type:public boost::noncopyable
         assert(unique_sumvars.size()==sumvars.size());
         data_expression condition=smmnd.condition();
         data_expression actiontime=smmnd.deadlock().time();
-
-        /* condition=substitute_data(unique_pars,pars,condition);
-        condition=substitute_data(unique_sumvars,sumvars,condition);
-
-        actiontime=substitute_time(unique_pars,pars,actiontime);
-        actiontime=substitute_time(unique_sumvars,sumvars,actiontime); */
 
         condition=data::replace_free_variables(condition,make_map_substitution(sigma));
         condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
