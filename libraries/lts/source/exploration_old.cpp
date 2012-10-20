@@ -785,7 +785,7 @@ bool lps2lts_algorithm::generate_lts()
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
             {
-              tmp_trans = push_front<aterm>(tmp_trans,Transition.actions());
+              tmp_trans = push_front<action_list>(tmp_trans,Transition.actions());
               tmp_states = push_front<aterm>(tmp_states,NewState);
             }
           }
@@ -861,7 +861,7 @@ bool lps2lts_algorithm::generate_lts()
                   aterm_appl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
                   if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   {
-                    new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                    new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
                     new_tmp_states=push_front<aterm>(new_tmp_states,state);
                   }
                   else
@@ -872,19 +872,19 @@ bool lps2lts_algorithm::generate_lts()
                 }
                 else
                 {
-                  new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                  new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
                   new_tmp_states=push_front<aterm>(new_tmp_states,state);
                 }
               }
               else
               {
-                new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
                 new_tmp_states=push_front<aterm>(new_tmp_states,state);
               }
             }
             else
             {
-              new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+              new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
               new_tmp_states=push_front<aterm>(new_tmp_states,state);
             }
           }
@@ -962,7 +962,7 @@ bool lps2lts_algorithm::generate_lts()
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
             {
-              tmp_trans = push_front<aterm>(tmp_trans,Transition.actions());
+              tmp_trans = push_front<action_list>(tmp_trans,Transition.actions());
               tmp_states = push_front<aterm>(tmp_states,NewState);
             }
           }
@@ -1040,7 +1040,7 @@ bool lps2lts_algorithm::generate_lts()
                   aterm_appl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
                   if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   {
-                    new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                    new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
                     new_tmp_states=push_front<aterm>(new_tmp_states,state);
                   }
                   else
@@ -1050,19 +1050,19 @@ bool lps2lts_algorithm::generate_lts()
                 }
                 else
                 {
-                  new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                  new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
                   new_tmp_states=push_front<aterm>(new_tmp_states,state);
                 }
               }
               else
               {
-                new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+                new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
                 new_tmp_states=push_front<aterm>(new_tmp_states,state);
               }
             }
             else
             {
-              new_tmp_trans=push_front<aterm>(new_tmp_trans,multi_action_list);
+              new_tmp_trans=push_front<action_list>(new_tmp_trans,multi_action_list);
               new_tmp_states=push_front<aterm>(new_tmp_states,state);
             }
           }

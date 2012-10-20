@@ -54,7 +54,7 @@ void function_sort_test()
   basic_sort s1("S1");
   basic_sort s("S");
 
-  sort_expression_list s01 = atermpp::make_list(s0, s1);
+  sort_expression_list s01 = atermpp::aterm_cast<sort_expression_list>(atermpp::make_list(s0, s1));
   function_sort fs(s01, s);
   BOOST_CHECK(!is_basic_sort(fs));
   BOOST_CHECK(is_function_sort(fs));

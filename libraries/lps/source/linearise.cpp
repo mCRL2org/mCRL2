@@ -4218,7 +4218,7 @@ class specification_basic_type:public boost::noncopyable
 
             //store new declarations in return value w
             sortId = sort_id;
-            elementnames = atermpp::convert< data::function_symbol_list >(spec.data.constructors(sort_id));
+            elementnames = atermpp::convert< data::data_expression_list >(spec.data.constructors(sort_id));
           }
         }
 
@@ -5547,7 +5547,7 @@ class specification_basic_type:public boost::noncopyable
 
         if (!i->is_delta() &&
             ((is_allow && allow_(allowlist,smmnd.actions())) ||
-             (!is_allow && !encap(allowlist,smmnd.actions()))))
+             (!is_allow && !encap(aterm_cast<identifier_string_list>(allowlist),smmnd.actions()))))
         {
           resultactionsumlist=push_front(
                                 resultactionsumlist,
@@ -6632,13 +6632,13 @@ class specification_basic_type:public boost::noncopyable
 
       const variable_list unique_pars=make_unique_variables(pars,hint);
       assert(unique_pars.size()==pars.size());
-      init=substitute_assignmentlist(unique_pars,pars,init,pars,1,0);  // Only substitute the variables
+      init=substitute_assignmentlist(aterm_cast<data_expression_list>(unique_pars),pars,init,pars,1,0);  // Only substitute the variables
       // the variables at the lhs.
       for (deprecated::summand_list::const_iterator s=summands.begin(); s!=summands.end(); ++s)
       {
         const deprecated::summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
-        variable_list unique_sumvars=make_unique_variables(sumvars,hint);
+        const variable_list unique_sumvars=make_unique_variables(sumvars,hint);
         assert(unique_sumvars.size()==sumvars.size());
         data_expression condition=smmnd.condition();
         action_list multiaction;
@@ -6649,16 +6649,16 @@ class specification_basic_type:public boost::noncopyable
         data_expression actiontime=smmnd.time();
         assignment_list nextstate=smmnd.assignments();
 
-        condition=substitute_data(unique_pars,pars,condition);
-        condition=substitute_data(unique_sumvars,sumvars,condition);
+        condition=substitute_data(aterm_cast<data_expression_list>(unique_pars),pars,condition);
+        condition=substitute_data(aterm_cast<data_expression_list>(unique_sumvars),sumvars,condition);
 
-        actiontime=substitute_time(unique_pars,pars,actiontime);
-        actiontime=substitute_time(unique_sumvars,sumvars,actiontime);
-        multiaction=substitute_multiaction(unique_pars,pars,multiaction),
-        multiaction=substitute_multiaction(unique_sumvars,sumvars,multiaction),
+        actiontime=substitute_time(aterm_cast<data_expression_list>(unique_pars),pars,actiontime);
+        actiontime=substitute_time(aterm_cast<data_expression_list>(unique_sumvars),sumvars,actiontime);
+        multiaction=substitute_multiaction(aterm_cast<data_expression_list>(unique_pars),pars,multiaction),
+        multiaction=substitute_multiaction(aterm_cast<data_expression_list>(unique_sumvars),sumvars,multiaction),
 
-        nextstate=substitute_assignmentlist(unique_pars,pars,nextstate,pars,1,1);
-        nextstate=substitute_assignmentlist(unique_sumvars,sumvars,nextstate,unique_pars,0,1);
+        nextstate=substitute_assignmentlist(aterm_cast<data_expression_list>(unique_pars),pars,nextstate,pars,1,1);
+        nextstate=substitute_assignmentlist(aterm_cast<data_expression_list>(unique_sumvars),sumvars,nextstate,unique_pars,0,1);
 
         result_summands=push_front(result_summands,
                                    summand_(unique_sumvars,condition,s->is_delta(),multiaction,
@@ -7103,7 +7103,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const deprecated::summand_list t2=generateLPEmCRLterm(block(t).operand(),
                               regular,rename_variables,pars,init);
-        return allowblockcomposition(block(t).block_set(),t2,false);
+        return allowblockcomposition(aterm_cast<action_name_multiset_list>(block(t).block_set()),t2,false);
       }
 
       if (is_rename(t))
@@ -7227,7 +7227,7 @@ class specification_basic_type:public boost::noncopyable
         variable_list sumvars=sum(t).bound_variables();
         variable_list varlist1(varlist);
         data_expression_list tl1(tl);
-        alphaconvert(sumvars,varlist1,tl1,variable_list(),parameters);
+        alphaconvert(sumvars,varlist1,tl1,variable_list(),aterm_cast<data_expression_list>(parameters));
         const process_expression  result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,varlist1,tl1));
         return result;
       }
@@ -7803,13 +7803,13 @@ class specification_basic_type:public boost::noncopyable
                                                 pCRL,
                                                 0,
                                                 true);
-          result=process_instance(p,objectdata[objectIndex(p)].parameters);
+          result=process_instance(p,aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
           visited_proc[t]=result;
         }
         else
         {
           const process_identifier p=newprocess(parameters,t,pCRL,0,true);
-          result=process_instance(p,objectdata[objectIndex(p)].parameters);
+          result=process_instance(p,aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
           visited_proc[t]=result;
         }
       }
@@ -7969,9 +7969,9 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   s.insert(sort_real::real_());
   data_spec.add_context_sorts(s);
 
-  specification_basic_type spec(type_checked_spec.action_labels(),
+  specification_basic_type spec(aterm_cast<action_label_list>(type_checked_spec.action_labels()),
                                 type_checked_spec.equations(),
-                                action_label_list(atermpp::convert<data::variable_list>(type_checked_spec.global_variables())),
+                                convert<data::variable_list>(type_checked_spec.global_variables()),
                                 data_spec,
                                 type_checked_spec.global_variables(),
                                 lin_options,

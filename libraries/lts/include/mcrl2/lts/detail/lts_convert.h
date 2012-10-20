@@ -357,7 +357,7 @@ class aut_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_data,m_action_labels);
+        al=parse_lts_action(l,m_data,atermpp::aterm_cast<lps::action_list>(m_action_labels));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -594,7 +594,7 @@ class fsm_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_lts_out.data(),m_lts_out.action_labels());
+        al=parse_lts_action(l,m_lts_out.data(),atermpp::aterm_cast<lps::action_list>(m_lts_out.action_labels()));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -1098,7 +1098,7 @@ class dot_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,lts_out.data(),lts_out.action_labels());
+        al=parse_lts_action(l,lts_out.data(),atermpp::aterm_cast<lps::action_list>(lts_out.action_labels()));
       }
       catch (mcrl2::runtime_error& e)
       {

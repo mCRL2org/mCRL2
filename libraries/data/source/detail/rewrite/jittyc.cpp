@@ -884,7 +884,7 @@ static variable_list get_doubles(const data_expression &t)
   {
     if (i->second>1)
     {
-      result=atermpp::push_front<aterm>(result,i->first);
+      result=atermpp::push_front<variable>(result,i->first);
     }
   }
   return result;
@@ -897,7 +897,7 @@ static variable_list get_vars(const data_expression &t)
   variable_list result;
   for(std::set < variable >::const_iterator i=s.begin(); i!=s.end(); ++i)
   {
-    result=atermpp::push_front<aterm>(result,*i);
+    result=atermpp::push_front<variable>(result,*i);
   }
   return result;
 }
@@ -1175,7 +1175,7 @@ static aterm_list create_strategy(
     {
       if (aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()).empty())
       {
-        no_deps = push_front<aterm>(no_deps, data_equation(aterm_cast<aterm_list>(dep_list.front()).tail().front()));
+        no_deps = push_front<data_equation>(no_deps, data_equation(aterm_cast<aterm_list>(dep_list.front()).tail().front()));
       }
       else
       {
@@ -2724,7 +2724,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     {
       jittyc_eqns.resize(main_op_id_index+1);
     }
-    jittyc_eqns[main_op_id_index] = push_front<aterm>(jittyc_eqns[main_op_id_index],*it);
+    jittyc_eqns[main_op_id_index] = push_front<data_equation>(jittyc_eqns[main_op_id_index],*it);
   }
   fill_always_rewrite_array();
 

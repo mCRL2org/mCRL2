@@ -59,39 +59,15 @@ class term_list:public aterm
     {
     }
 
-    /// \brief Copy construction.
+    /// \brief Copy constructor.
     /// \param l A list.
-    term_list(const term_list<Term> &t):aterm(reinterpret_cast<detail::_aterm *>(t.address()))
+    term_list(const term_list<Term> &t):aterm(t)
     {
-      assert(m_term==aterm().m_term || type() == AT_LIST); // term list can be NULL.
+      assert(m_term==aterm().m_term || type() == AT_LIST); 
     }
 
-    /// \brief Constructor from _aterm_list*.
-    /// \param l A list.
-    term_list(detail::_aterm_list<Term> *t):aterm(reinterpret_cast<detail::_aterm *>(t))
-    {
-      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      assert(t==aterm().m_term || type() == AT_LIST); // term list can be the undefined aterm(). This is generally used to indicate a faulty
-                                            // situation. This used should be discouraged.
-    }
-
-    /// Construction from aterm_list.
-    /// \param t A term containing a list.
-    //  \deprecated This conversion should be removed. Conversions
-    //  between lists must be explicit.
-    //  \return The same list of a different type.
-    template <typename SpecificTerm>
-    term_list<Term>(const term_list<SpecificTerm> &t): aterm(t)
-    {
-      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-      BOOST_STATIC_ASSERT(sizeof(SpecificTerm)==sizeof(aterm));
-      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-    } 
-    
-
-    /// Explicit construction from aterm. 
-    ///  \param t An aterm.
+    /// \brief Explicit construction from an aterm. 
+    /// \param t An aterm.
     explicit term_list(const aterm &t):aterm(t)
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
@@ -100,7 +76,8 @@ class term_list:public aterm
                                                  // This use should be discouraged.
     }
 
-    /// Creates an term_list with a copy of a range.
+    /// \brief Creates a term_list with the elements from first to last.
+    /// \details It is assumed that the range can be traversed from last to first.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
@@ -120,7 +97,10 @@ class term_list:public aterm
       increase_reference_count<false>();
     }
     
-    /// Creates an term_list with a copy of a range.
+    /// \brief Creates a term_list from the elements from first to last.
+    /// \details The range is traversed from first to last. This requires
+    //           to copy the elements internally, which is less efficient
+    //           than this function with random access iterators as arguments.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
@@ -156,11 +136,12 @@ class term_list:public aterm
     }
 
     /// \brief Conversion to aterm_list.
-    /// \return The wrapped _aterm_list pointer.
+    /// \deprecated.
+    /// \return This list as an aterm_list.
     operator term_list<aterm>() const
     {
-      return static_cast<detail::_aterm_list<aterm>* >(m_term);
-    }
+      return atermpp::aterm_cast<term_list<aterm> >(m_term);
+    } 
 
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
@@ -182,11 +163,9 @@ class term_list:public aterm
     size_type size() const
     {
       size_t size=0;
-      for(detail::_aterm_list<Term>* m_list=reinterpret_cast<detail::_aterm_list<Term>*>(m_term);
-                 m_list->function()!=detail::function_adm.AS_EMPTY_LIST; 
-                 m_list=reinterpret_cast<detail::_aterm_list<Term>*>(m_list->tail.address()))
+      for(const_iterator i=begin(); i!=end(); ++i)
       {
-        size++;
+        ++size;
       }
       return size;
     }

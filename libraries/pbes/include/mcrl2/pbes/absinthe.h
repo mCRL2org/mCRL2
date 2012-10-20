@@ -409,11 +409,11 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), variables)));
+        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::aterm_cast<data::data_expression_list>(variables))));
       }
       else
       {
-        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
+        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::aterm_cast<data::data_expression_list>(variables))));
       }
       return result;
     }

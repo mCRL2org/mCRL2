@@ -45,7 +45,7 @@ using namespace mcrl2::data;
 static bool remove_bools = true;
 static bool remove_standard_functions = true;
 static bool has_func_T = false;
-static aterm_list typelist = NULL;
+static aterm_list typelist;
 
 bool is_mCRL_spec(aterm_appl spec)
 {
@@ -129,9 +129,9 @@ static bool is_domain(aterm_list args, aterm_appl sort)
   }
 }
 
-static aterm_appl find_type(aterm_appl a, aterm_list args, aterm_list types = NULL)
+static aterm_appl find_type(aterm_appl a, aterm_list args, aterm_list types = aterm_list(aterm()))
 {
-  if (types == NULL)
+  if (types == aterm_list(aterm()))
   {
     types = typelist;
   }

@@ -1462,19 +1462,19 @@ struct term_traits<pbes_system::pbes_expression>
   /// \param t A term
   /// \return The parameter list of the propositional variable instantiation
   static inline
-  data_term_sequence_type param(const term_type& t)
+  const data_term_sequence_type &param(const term_type& t)
   {
     assert(is_prop_var(t));
-    return variable_sequence_type(atermpp::list_arg2(t));
+    return aterm_cast<data_term_sequence_type>(atermpp::list_arg2(t));
   }
 
   /// \brief Conversion from variable to term
   /// \param v A variable
   /// \return The converted variable
   static inline
-  term_type variable2term(const variable_type& v)
+  const term_type &variable2term(const variable_type& v)
   {
-    return v;
+    return aterm_cast<term_type>(v);
   }
 
   /// \brief Test if a term is a variable
