@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdexcept>
 
-#include "mcrl2/atermpp/detail/util.h"
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/detail/byteio.h"
 
 namespace atermpp

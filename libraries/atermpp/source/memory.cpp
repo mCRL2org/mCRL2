@@ -1,5 +1,3 @@
-/*{{{  includes */
-
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -15,7 +13,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/memory.h"
-#include "mcrl2/atermpp/detail/util.h"
 #include "mcrl2/atermpp/aterm.h"
 
 #ifdef DMALLOC
@@ -166,6 +163,22 @@ static void remove_from_hashtable(const detail::_aterm *t)
 #ifndef NDEBUG
   bool check_that_all_objects_are_free();
 #endif
+
+
+/* Free a term, without removing it from the
+   hashtable, and destroying its function symbol */
+void detail::simple_free_term(detail::_aterm *t, const size_t arity)
+{
+  for(size_t i=0; i<arity; ++i)
+  {
+    reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
+  }
+
+  TermInfo &ti = terminfo[TERM_SIZE_APPL(arity)];
+  t->next()  = ti.at_freelist;
+  ti.at_freelist = t; 
+}
+
 
 void aterm::free_term() const
 {
@@ -335,7 +348,6 @@ detail::_aterm* detail::allocate_term(const size_t size)
     at = (detail::_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
     at->reference_count()=0;
-    // new (&at->function()) function_symbol;  // placement new, as the memory calloc'ed.
   }
   else if (ti.at_freelist)
   {
@@ -446,8 +458,6 @@ static const size_t MAGIC_PRIME = 7;
 
 char afun_id[] = "$Id$";
 
-/*{{{  function declarations */
-
 static HashNumber AT_hashAFun(const std::string &name, const size_t arity);
 
 static void resize_function_symbol_hashtable()
@@ -470,44 +480,6 @@ static void resize_function_symbol_hashtable()
     entry.next = detail::function_symbol_hashtable[hnr];
     detail::function_symbol_hashtable[hnr] = i;
   }
-}
-
-std::string ATwriteAFunToString(const function_symbol &fun)
-{
-  std::ostringstream oss;
-  assert(fun.number()<detail::at_lookup_table.size());
-  const detail::_function_symbol &entry = detail::at_lookup_table[fun.number()];
-  std::string::const_iterator id = entry.name.begin();
-
-  /* This function symbol needs quotes */
-  oss << "\"";
-  while (id!=entry.name.end())
-  {
-    /* We need to escape special characters */
-    switch (*id)
-    {
-      case '\\':
-      case '"':
-        oss << "\\" << *id;
-        break;
-      case '\n':
-        oss << "\\n";
-        break;
-      case '\t':
-        oss << "\\t";
-        break;
-      case '\r':
-        oss << "\\r";
-        break;
-      default:
-        oss << *id;
-        break;
-    }
-    ++id;
-  }
-  oss << "\"";
-
-  return oss.str();
 }
 
 
@@ -573,7 +545,7 @@ function_symbol::function_symbol(const std::string &name, const size_t arity)
   }
 
   m_number=cur;
-  detail::increase_reference_count<false>(m_number);
+  increase_reference_count<false>();
 
   if (detail::at_lookup_table.size()>=detail::function_symbol_hashtable.size())
   {
@@ -581,23 +553,17 @@ function_symbol::function_symbol(const std::string &name, const size_t arity)
   }
 }
 
-/*}}}  */
-/*{{{  void AT_freeAFun(SymEntry sym) */
 
-/**
- * Free a symbol
- */
-
-void detail::at_free_afun(const size_t n)
+void function_symbol::free_function_symbol() const
 {
-  if (function_symbol_hashtable.size()==0)
+  if (detail::function_symbol_hashtable.size()==0)
   {
     // The aterm administration is destroyed. We cannot remove
     // this afun anymore.
     return;
   }
-  assert(n<detail::at_lookup_table.size());
-  const detail::_function_symbol &sym=detail::at_lookup_table[n];
+  assert(m_number<detail::at_lookup_table.size());
+  const detail::_function_symbol &sym=detail::at_lookup_table[m_number];
 
   assert(!sym.name.empty());
 
@@ -605,7 +571,7 @@ void detail::at_free_afun(const size_t n)
   const HashNumber hnr = AT_hashAFun(sym.name, sym.arity()) & detail::afun_table_mask;
 
   /* Update hashtable */
-  if (detail::function_symbol_hashtable[hnr] == n)
+  if (detail::function_symbol_hashtable[hnr] == m_number)
   {
     detail::function_symbol_hashtable[hnr] = sym.next;
   }
@@ -613,16 +579,16 @@ void detail::at_free_afun(const size_t n)
   {
     size_t cur;
     size_t prev = detail::function_symbol_hashtable[hnr];
-    for (cur = detail::at_lookup_table[prev].next; cur != n; prev = cur, cur = detail::at_lookup_table[cur].next)
+    for (cur = detail::at_lookup_table[prev].next; cur != m_number; prev = cur, cur = detail::at_lookup_table[cur].next)
     {
       assert(cur != size_t(-1));
     }
     detail::at_lookup_table[prev].next = detail::at_lookup_table[cur].next;
   }
 
-  assert(n<detail::at_lookup_table.size());
-  detail::at_lookup_table[n].next = detail::first_free;
-  detail::first_free = n;
+  assert(m_number<detail::at_lookup_table.size());
+  detail::at_lookup_table[m_number].next = detail::first_free;
+  detail::first_free = m_number;
 }
 
 } // namespace atermpp

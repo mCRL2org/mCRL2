@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include "mcrl2/atermpp/detail/atypes.h"
-#include "mcrl2/atermpp/detail/function_symbol_implementation.h"
+#include "mcrl2/atermpp/detail/function_symbol_constants.h"
 #include "mcrl2/atermpp/function_symbol.h"
 
 namespace atermpp
@@ -66,6 +66,7 @@ class _aterm
 };
 
 detail::_aterm* allocate_term(const size_t size);
+void simple_free_term(_aterm *t, const size_t arity);
 
 inline size_t term_size(const detail::_aterm *t);
 inline HashNumber hash_number(const detail::_aterm *t, const size_t size);

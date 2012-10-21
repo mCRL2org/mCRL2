@@ -265,7 +265,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
           label << "self:block(" << info.first << "),op(" << info.second << ")";
           lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
-          if (label_index == atermpp::ATERM_NON_EXISTING_POSITION)
+          if (label_index == atermpp::npos)
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
@@ -323,7 +323,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
           size_t to = indices[*j];
           lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
-          if (label_index == atermpp::ATERM_NON_EXISTING_POSITION)
+          if (label_index == atermpp::npos)
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;

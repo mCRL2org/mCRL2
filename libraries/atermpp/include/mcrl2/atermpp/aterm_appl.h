@@ -32,8 +32,8 @@ class term_appl:public aterm
     /// \brief Constructor.
     term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
     {
-      // assert((boost::is_base_of<Term, aterm>::value));
-      assert(sizeof(Term)==sizeof(size_t));
+      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     } 
     
   public:
@@ -69,16 +69,16 @@ class term_appl:public aterm
     /// \param t The aterm.
     term_appl (const term_appl &t):aterm(t)
     {
-      // assert((boost::is_base_of<Term, aterm>::value));
-      assert(sizeof(Term)==sizeof(size_t));
+      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
     /// \brief Explicit constructor from an aterm.
     /// \param t The aterm.
     explicit term_appl (const aterm &t):aterm(t)
     {
-      // assert((boost::is_base_of<Term, aterm>::value));
-      assert(sizeof(Term)==sizeof(size_t));
+      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
     /// \brief Constructor.
@@ -97,11 +97,9 @@ class term_appl:public aterm
               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ForwardIterator>::type>::type* = 0)
         :aterm(detail::local_term_appl<Term,ForwardIterator>(sym,begin,end))
     {
-      // increase_reference_count<false>(m_term);
+      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
-    
-    // template <class Iter>
-    // term_appl(const function_symbol &sym, Iter first, Iter last);
     
     /// \brief Constructor.
     /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
@@ -121,12 +119,17 @@ class term_appl:public aterm
               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ATermConverter>::type>::type* = 0)
          :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convert_to_aterm))
     {
+      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
     
     /// \brief Constructor.
     /// \param sym A function symbol.
     term_appl(const function_symbol &sym):aterm(sym)
-    {}
+    {
+      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
+    }
 
     /// \brief Constructor for a unary function application.
     /// \param sym A function symbol.
@@ -134,6 +137,8 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1)
          :aterm(detail::term_appl1<Term>(sym,t1))
     {
+      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
     /// \brief Constructor for a binary function application.
@@ -143,6 +148,8 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2)
          :aterm(detail::term_appl2<Term>(sym,t1,t2))
     {
+      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
     /// \brief Constructor for a ternary function application.
@@ -153,9 +160,11 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3)
          :aterm(detail::term_appl3<Term>(sym,t1,t2,t3))
     {
+      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
-    /// \brief Constructor for a unary function application.
+    /// \brief Constructor for a function application to four arguments.
     /// \param sym A function symbol.
     /// \param t1 The first argument.
     /// \param t2 The second argument.
@@ -164,9 +173,11 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
          :aterm(detail::term_appl4<Term>(sym,t1,t2,t3,t4))
     {
+      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
-    /// \brief Constructor for a unary function application.
+    /// \brief Constructor for a function application to five arguments.
     /// \param sym A function symbol.
     /// \param t1 The first argument.
     /// \param t2 The second argument.
@@ -176,9 +187,11 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
          :aterm(detail::term_appl5<Term>(sym,t1,t2,t3,t4,t5))
     {
+      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
-    /// \brief Constructor for a unary function application.
+    /// \brief Constructor for a function application to six arguments.
     /// \param sym A function symbol.
     /// \param t1 The first argument.
     /// \param t2 The second argument.
@@ -189,10 +202,13 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6)
          :aterm(detail::term_appl6<Term>(sym,t1,t2,t3,t4,t5,t6))
     {
+      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
     /// \brief The assignment operator
     /// \param t The assigned term
+    /// \return A reference to the term to which an assignment took place.
     term_appl &operator=(const term_appl &t)
     {
       copy_term(t.m_term);
@@ -244,7 +260,7 @@ class term_appl:public aterm
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.
-    const Term &operator()(size_type i) const
+    const Term &operator()(const size_type i) const
     {
       assert(i<m_term->function().arity());
       return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg[i];

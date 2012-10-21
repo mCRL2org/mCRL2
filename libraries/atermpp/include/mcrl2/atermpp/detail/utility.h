@@ -12,6 +12,8 @@
 #ifndef ATERM_DETAIL_UTILITY_H
 #define ATERM_DETAIL_UTILITY_H
 
+#include <string.h>
+#include <sstream>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -19,7 +21,16 @@
 namespace atermpp
 {
 
-namespace detail
+template <typename T>
+std::string to_string(const T& t)
+{
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
+
+
+/* namespace detail
 {
 
 /// \brief Converts a string to an aterm string
@@ -28,10 +39,11 @@ namespace detail
 inline
 aterm_appl str2appl(std::string const& s)
 {
-  return aterm_appl(function_symbol(s.c_str(), 0));
-}
+  return aterm_appl(function_symbol(s, 0));
+} 
 
 } // namespace detail
+*/
 
 } // namespace atermpp
 

@@ -12,7 +12,6 @@ namespace detail
 /* The type _function_symbol is used to store information about function_symbols. */
 struct _function_symbol
 {
-  public:
     size_t m_arity;
     size_t next;
     size_t reference_count;
@@ -34,16 +33,13 @@ struct _function_symbol
 
 extern std::vector < detail::_function_symbol > at_lookup_table;
 
-void at_free_afun(const size_t n);
-
-inline bool AT_isValidAFun(const size_t sym);
-
-template <bool CHECK>
-void increase_reference_count(const size_t n);
-
 inline
-void decrease_reference_count(const size_t n);
-
+bool is_valid_function_symbol(const size_t sym)
+{
+  return (sym != size_t(-1) &&
+          sym < detail::at_lookup_table.size() &&
+          detail::at_lookup_table[sym].reference_count>0);
+}
 
 } // namespace detail
 } // namespace atermpp

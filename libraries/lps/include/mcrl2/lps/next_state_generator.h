@@ -103,8 +103,8 @@ class next_state_generator
 
         static bool summand_set_contains(const std::set<action_summand> &summand_set, const summand_t &summand);
         void build_pruning_parameters(const action_summand_vector &summands);
-        bool is_not_false(summand_t &summand);
-        atermpp::shared_subset<summand_t>::iterator begin(internal_state_t state);
+        bool is_not_false(const summand_t &summand);
+        atermpp::shared_subset<summand_t>::iterator begin(const internal_state_t &state);
     };
 
     class iterator;
@@ -119,7 +119,11 @@ class next_state_generator
         size_t m_summand_index;
 
       public:
-        lps::state state() const { return m_generator->get_state(m_state); }
+        lps::state state() const 
+        { 
+          return m_generator->get_state(m_state); 
+        }
+
         internal_state_t &internal_state() { return m_state; }
         const internal_state_t &internal_state() const { return m_state; }
         lps::multi_action &action() { return m_action; }
@@ -157,9 +161,9 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator *generator, internal_state_t state, substitution_t *substitution, summand_subset_t &summand_subset);
+        iterator(next_state_generator *generator, const internal_state_t &state, substitution_t *substitution, summand_subset_t &summand_subset);
 
-        iterator(next_state_generator *generator, internal_state_t state, substitution_t *substitution, size_t summand_index);
+        iterator(next_state_generator *generator, const internal_state_t &state, substitution_t *substitution, size_t summand_index);
 
         operator bool() const
         {
@@ -169,7 +173,7 @@ class next_state_generator
       private:
         friend class boost::iterator_core_access;
 
-        bool equal(iterator const& other) const
+        bool equal(const iterator &other) const
         {
           return (!(bool)*this && !(bool)other) || (this == &other);
         }
@@ -207,40 +211,40 @@ class next_state_generator
     ~next_state_generator();
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(state state, substitution_t *substitution)
+    iterator begin(const state &state, substitution_t *substitution)
     {
       return begin(get_internal_state(state), substitution);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(internal_state_t state, substitution_t *substitution)
+    iterator begin(const internal_state_t &state, substitution_t *substitution)
     {
       return iterator(this, state, substitution, m_all_summands);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors using summands from \a summand_subset are generated.
-    iterator begin(state state, substitution_t *substitution, summand_subset_t &summand_subset)
+    iterator begin(const state &state, substitution_t *substitution, summand_subset_t &summand_subset)
     {
       return begin(get_internal_state(state), substitution, summand_subset);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(internal_state_t state, substitution_t *substitution, summand_subset_t &summand_subset)
+    iterator begin(const internal_state_t &state, substitution_t *substitution, summand_subset_t &summand_subset)
     {
       return iterator(this, state, substitution, summand_subset);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(state state, substitution_t *substitution, size_t summand_index)
+    iterator begin(const state &state, substitution_t *substitution, size_t summand_index)
     {
       return begin(get_internal_state(state), substitution, summand_index);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(internal_state_t state, substitution_t *substitution, size_t summand_index)
+    iterator begin(const internal_state_t &state, substitution_t *substitution, size_t summand_index)
     {
       return iterator(this, state, substitution, summand_index);
     }
@@ -276,13 +280,13 @@ class next_state_generator
     }
 
     /// \brief Converts a state arguments to internal state arguments.
-    internal_state_argument_t get_internal_state_argument(data::data_expression argument) const
+    internal_state_argument_t get_internal_state_argument(const data::data_expression &argument) const
     {
       return m_rewriter.convert_to(argument);
     }
 
     /// \brief Converts a internal state arguments to state arguments.
-    data::data_expression get_state_argument(internal_state_argument_t internal_argument) const
+    data::data_expression get_state_argument(const internal_state_argument_t &internal_argument) const
     {
       return m_rewriter.convert_from(internal_argument);
     }
@@ -294,10 +298,10 @@ class next_state_generator
     }
 
     /// \brief Converts states to internal states.
-    internal_state_t get_internal_state(state s) const;
+    internal_state_t get_internal_state(const state &s) const;
 
     /// \brief Converts internal states to states.
-    state get_state(internal_state_t internal_state) const;
+    state get_state(const internal_state_t &internal_state) const;
 
     /// \brief Returns the function symbol used to construct internal states.
     atermpp::function_symbol internal_state_function() const

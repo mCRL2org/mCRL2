@@ -14,7 +14,7 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/detail/bafio.h"
 #include "mcrl2/atermpp/detail/memory.h"
-#include "mcrl2/atermpp/detail/util.h"
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/detail/byteio.h"
 #include "mcrl2/atermpp/aterm_int.h"
 
@@ -499,7 +499,7 @@ static size_t readString(byte_reader* reader)
   /* Get length of string */
   if (readInt(&len, reader) < 0)
   {
-    return ATERM_NON_EXISTING_POSITION;
+    return atermpp::npos;
   }
 
   /* Assure buffer can hold the string */
@@ -516,7 +516,7 @@ static size_t readString(byte_reader* reader)
   /* Read the actual string */
   if (read_bytes(text_buffer, len, reader) != len)
   {
-    return ATERM_NON_EXISTING_POSITION;
+    return atermpp::npos;
   }
 
   /* Ok, return length of string */
@@ -997,7 +997,7 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
   }
   if (trm_sym->terms[trm_sym->cur_index].t != t)
   {
-    throw std::runtime_error("terms out of sync at pos " + to_string(trm_sym->cur_index) + " of sym " + ATwriteAFunToString(trm_sym->id) +
+    throw std::runtime_error("terms out of sync at pos " + to_string(trm_sym->cur_index) + " of sym " + trm_sym->id.name() +
                              ", term in table was " + (trm_sym->terms[trm_sym->cur_index].t).to_string() + ", expected " + t.to_string());
   }
   trm_sym->cur_index++;
@@ -1277,21 +1277,21 @@ static function_symbol read_symbol(byte_reader* reader)
   size_t arity, quoted;
   size_t len;
 
-  if ((len = readString(reader)) == ATERM_NON_EXISTING_POSITION)
+  if ((len = readString(reader)) == atermpp::npos)
   {
-    return ATERM_NON_EXISTING_POSITION;
+    return atermpp::npos;
   }
 
   text_buffer[len] = '\0';
 
   if (readInt(&arity, reader) < 0)
   {
-    return ATERM_NON_EXISTING_POSITION;
+    return atermpp::npos;
   }
 
   if (readInt(&quoted, reader) < 0)
   {
-    return ATERM_NON_EXISTING_POSITION;
+    return atermpp::npos;
   }
 
   return function_symbol(text_buffer, arity);

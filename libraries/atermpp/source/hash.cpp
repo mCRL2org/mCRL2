@@ -240,7 +240,7 @@ ssize_t indexed_set::index(const aterm& elem) const
     v=hashtable[c];
     if (v == EMPTY)
     {
-      return ATERM_NON_EXISTING_POSITION; /* Not found. */
+      return atermpp::npos; /* Not found. */
     }
 
     if (v != DELETED && elem==tableGet(m_keys, v))
@@ -252,7 +252,7 @@ ssize_t indexed_set::index(const aterm& elem) const
   }
   while (c != start);
 
-  return ATERM_NON_EXISTING_POSITION; /* Not found. */
+  return atermpp::npos; /* Not found. */
 }
 
 bool indexed_set::remove(const aterm& key)
@@ -351,7 +351,7 @@ void table::put(const aterm &key, const aterm &value)
 const aterm &table::get(const aterm &key) const
 {
   const size_t v = index(key);
-  if (v==ATERM_NON_EXISTING_POSITION)
+  if (v==atermpp::npos)
   {
     return detail::static_undefined_aterm;
   }

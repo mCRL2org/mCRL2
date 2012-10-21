@@ -103,7 +103,7 @@ inline HashNumber hash_number(const detail::_aterm *t, const size_t size)
   return hnr;
 }
 
-template <class Term, class InputIterator, class ATermConverter>
+/* template <class Term, class InputIterator, class ATermConverter>
 _aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIterator begin, const InputIterator end, ATermConverter convert_to_aterm)
 {
   const size_t arity = sym.arity();
@@ -150,7 +150,7 @@ _aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIt
   if (!cur)
   {
     cur = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
-    /* Delay masking until after allocate_term */
+    / * Delay masking until after allocate_term * /
     hnr &= detail::aterm_table_mask;
     new (&cur->function()) function_symbol(sym);
     
@@ -170,6 +170,65 @@ _aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIt
   }
   
   return cur;
+} */
+
+template <class Term, class InputIterator, class ATermConverter>
+_aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIterator begin, const InputIterator end, ATermConverter convert_to_aterm)
+{
+  const size_t arity = sym.arity();
+
+  HashNumber hnr = sym.number();
+  
+  /* The term is already partly constructed initially. If
+     it turns out that the term already exists, this skeleton is freed
+     using simple_free_term. Otherwise, the new_term is finished
+     and a it is returned. */ 
+
+  detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
+  
+  size_t j=0;
+  for (InputIterator i=begin; i!=end; ++i, ++j)
+  {
+    new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(new_term)->arg[j])) Term(convert_to_aterm(*i));
+    const aterm &arg = reinterpret_cast<detail::_aterm_appl<Term>*>(new_term)->arg[j];
+    CHECK_TERM(arg);
+    hnr = COMBINE(hnr, arg);
+  }
+  assert(j==arity);
+
+  hnr &= detail::aterm_table_mask;
+  detail::_aterm* cur = detail::aterm_hashtable[hnr];
+  while (cur)
+  {
+    if (cur->function()==sym)
+    {
+      bool found = true;
+      for (size_t i=0; i<arity; i++)
+      {
+        if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i] != reinterpret_cast<detail::_aterm_appl<Term>*>(new_term)->arg[i])
+        {
+          found = false;
+          break;
+        }
+      }
+      if (found)
+      {
+        simple_free_term(new_term,arity);
+        return cur;
+      }
+    }
+    cur = cur->next();
+  }
+
+  if (!cur)
+  {
+    new (&new_term->function()) function_symbol(sym);
+    
+    new_term->next() = detail::aterm_hashtable[hnr];
+    detail::aterm_hashtable[hnr] = new_term;
+  }
+  
+  return new_term;
 }
 
 // The functions below are used to obtain an address of objects that due to

@@ -15,12 +15,10 @@
 #include <string>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/utility.h"
 
 namespace atermpp
 {
-using detail::str2appl;
 
 /// \brief Term containing a string.
 class aterm_string: public aterm_appl
@@ -42,7 +40,7 @@ class aterm_string: public aterm_appl
     /// \brief Constructor that allows construction from a string.
     /// \param s A string.
     aterm_string(const std::string& s)
-      : aterm_appl(str2appl(s))
+      : aterm_appl(function_symbol(s,0))
     {
       assert(type() == AT_APPL);
       assert(aterm_appl(m_term).size() == 0);

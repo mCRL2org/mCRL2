@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/detail/util.h"
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/detail/safio.h"
 #include "mcrl2/atermpp/detail/byteencoding.h"
 #include "mcrl2/atermpp/aterm_io.h"
@@ -290,7 +290,7 @@ static void visitAppl(BinaryWriter binaryWriter, aterm_appl arg, ByteBuffer byte
 
     size_t header = getHeader(arg);
 
-    if (id != ATERM_NON_EXISTING_POSITION)
+    if (id != atermpp::npos)
     {
       header |= FUNSHARED;
       *(byteBuffer->currentPos) = (char) header;
@@ -464,7 +464,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
   {
     size_t termHash = (size_t)(currentTerm.address());
     size_t id = IMgetID(binaryWriter->sharedTerms, currentTerm.address(), termHash);
-    if (id != ATERM_NON_EXISTING_POSITION)
+    if (id != atermpp::npos)
     {
       *(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
       byteBuffer->currentPos++;

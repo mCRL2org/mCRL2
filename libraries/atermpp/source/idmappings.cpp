@@ -204,7 +204,7 @@ static void ensureTableCapacity(IDMappings idMappings)
       }
       i--;
     }
-    while (i!=ATERM_NON_EXISTING_POSITION);
+    while (i!=atermpp::npos);
 
     free(oldTable);
   }
@@ -289,7 +289,7 @@ size_t IMmakeIDMapping(IDMappings idMappings, void* key, size_t h, size_t value)
   table[bucketPos] = entry;
   idMappings->load++;
 
-  return ATERM_NON_EXISTING_POSITION;
+  return atermpp::npos;
 }
 
 /**
@@ -309,7 +309,7 @@ size_t IMgetID(IDMappings idMappings, void* key, size_t h)
 
   if (entry == NULL)
   {
-    return ATERM_NON_EXISTING_POSITION;
+    return atermpp::npos;
   }
   return entry->value;
 }

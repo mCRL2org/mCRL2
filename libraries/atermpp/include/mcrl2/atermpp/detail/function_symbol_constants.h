@@ -9,51 +9,16 @@
 /// \file mcrl2/atermpp/function_symbol.h
 /// \brief Function symbol class.
 
-#ifndef ATERMPP_DETAIL_FUNCTION_SYMBOL_IMPLEMENTATION_H
-#define ATERMPP_DETAIL_FUNCTION_SYMBOL_IMPLEMENTATION_H
+#ifndef ATERMPP_DETAIL_FUNCTION_SYMBOL_CONSTANTS_H
+#define ATERMPP_DETAIL_FUNCTION_SYMBOL_CONSTANTS_H
 
 #include "mcrl2/atermpp/function_symbol.h"
-#include "mcrl2/atermpp/detail/function_symbol.h"
 
 
 namespace atermpp
 {
 namespace detail
 {
-
-    template <bool CHECK>
-    void increase_reference_count(const size_t n)
-    {
-
-
-      assert(n!=size_t(-1));
-      {
-#ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"increase afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n].reference_count,at_lookup_table[n].name.c_str());
-#endif
-        assert(n<at_lookup_table.size());
-        if (CHECK) assert(at_lookup_table[n].reference_count>0);
-        at_lookup_table[n].reference_count++;
-      }
-    }
-
-    inline
-    void decrease_reference_count(const size_t n)
-    {
-      assert(n!=size_t(-1));
-      {
-#ifdef PRINT_GC_FUN_INFO
-fprintf(stderr,"decrease afun reference count %ld (%ld, %s)\n",n,at_lookup_table[n].reference_count,at_lookup_table[n].name.c_str());
-#endif
-        assert(n<at_lookup_table.size());
-        assert(at_lookup_table[n].reference_count>0);
-
-        if (--at_lookup_table[n].reference_count==0)
-        {
-          at_free_afun(n);
-        }
-      }
-    }
 
 struct constant_function_symbols
 {
@@ -98,18 +63,8 @@ struct constant_function_symbols
 
 extern constant_function_symbols function_adm;
 
-inline
-bool AT_isValidAFun(const size_t sym)
-{
-  return (sym != size_t(-1) &&
-          sym < detail::at_lookup_table.size() &&
-          detail::at_lookup_table[sym].reference_count>0);
-}
-
 } // namespace detail
-
-std::string ATwriteAFunToString(const function_symbol &t);
-
 } // namespace atermpp
-#endif // ATERMPP_DETAIL_FUNCTION_SYMBOL_IMPLEMENTATION_H
+
+#endif // ATERMPP_DETAIL_FUNCTION_SYMBOL_CONSTANTS_H
 

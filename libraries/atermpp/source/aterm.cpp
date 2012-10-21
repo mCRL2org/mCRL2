@@ -240,6 +240,45 @@ bool write_to_named_text_file(aterm t, const std::string& filename)
 
 static void topWriteToStream(const aterm &t, std::ostream& os);
 
+static std::string ATwriteAFunToString(const function_symbol &fun)
+{
+  std::ostringstream oss;
+  assert(fun.number()<detail::at_lookup_table.size());
+  const detail::_function_symbol &entry = detail::at_lookup_table[fun.number()];
+  std::string::const_iterator id = entry.name.begin();
+
+  /* This function symbol needs quotes */
+  oss << "\"";
+  while (id!=entry.name.end())
+  {
+    /* We need to escape special characters */
+    switch (*id)
+    {
+      case '\\':
+      case '"':
+        oss << "\\" << *id;
+        break;
+      case '\n':
+        oss << "\\n";
+        break;
+      case '\t':
+        oss << "\\t";
+        break;
+      case '\r':
+        oss << "\\r";
+        break;
+      default:
+        oss << *id;
+        break;
+    }
+    ++id;
+  }
+  oss << "\"";
+
+  return oss.str();
+}
+
+
 static void
 writeToStream(const aterm &t, std::ostream& os)
 {

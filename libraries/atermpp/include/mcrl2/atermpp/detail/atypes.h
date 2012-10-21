@@ -12,7 +12,7 @@ typedef size_t HashNumber;
  *    This is used as a replacement of a negative number as an indicator of non
  *       existence */
 
-static const size_t ATERM_NON_EXISTING_POSITION=(size_t)(-1);
+static const size_t npos=(size_t)(-1);
 
 /* Avoid warnings under windows, by renaming all strdup's into _strdup's,
    and renaming the _strdup into strdup under other platforms than windows.

@@ -21,7 +21,7 @@
 #include "boost/type_traits/is_base_of.hpp"
 #include "boost/type_traits/is_convertible.hpp"
 #include "boost/static_assert.hpp"
-#include "mcrl2/atermpp/detail/function_symbol_implementation.h"
+
 #include "mcrl2/atermpp/detail/aterm.h"
 
 /// \brief The main namespace for the aterm++ library.
@@ -37,6 +37,8 @@ class aterm
     template < typename T >
     friend class term_list; 
     
+    friend void detail::simple_free_term(detail::_aterm *t, const size_t arity);
+
   protected:
     detail::_aterm *m_term;
 
@@ -45,7 +47,7 @@ class aterm
  
     void free_term() const;
 
-    void decrease_reference_count()
+    void decrease_reference_count() const
     {
       assert(m_term!=NULL);
       assert(m_term->reference_count()>0);
