@@ -346,7 +346,11 @@ class pbes
     /// much more compact than the ascii representation.
     /// \param filename A string
     /// \param binary If true the file is saved in binary format
+#ifndef NDEBUG
     void save(const std::string& filename, bool binary = true, bool no_well_typedness_check = false) const
+#else
+    void save(const std::string& filename, bool binary = true, bool = false) const
+#endif
     {
       // The well typedness check is only done in debug mode, since for large
       // PBESs it takes too much time

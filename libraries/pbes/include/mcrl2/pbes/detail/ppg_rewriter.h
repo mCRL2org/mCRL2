@@ -415,7 +415,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     mode_stack.push(UNDETERMINED);
   }
 
+#ifndef NDEBUG
   void leave(const pbes_equation& x)
+#else
+  void leave(const pbes_equation&)
+#endif
   {
     fixpoint_symbol symbol = symbol_stack.top();
     symbol_stack.pop();
