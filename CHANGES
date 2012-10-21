@@ -1,4 +1,14 @@
 ===============================================================================
+Changes between toolset releases 201210.0 and 201210.1:
+===============================================================================
+
+Fixed bugs:
+  #1096 Allow filepicker to open file in mcrl2-gui
+  #1101 Enable selection of two inputs for tools in mcrl2-gui (if supported by
+        the tool)
+  #1100	Attempt to fix the build on ARM-based platforms.
+
+===============================================================================
 Changes between toolset releases 201202.0 and 201210.0:
 ===============================================================================
 
