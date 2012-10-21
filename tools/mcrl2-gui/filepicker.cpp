@@ -15,20 +15,34 @@
 #include <QList>
 #include <QUrl>
 
-FilePicker::FilePicker(mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent) :
+FilePicker::FilePicker(mcrl2::utilities::qt::PersistentFileDialog* fileDialog, QWidget *parent, bool save) :
   QWidget(parent),
   m_fileDialog(fileDialog)
 {
   m_ui.setupUi(this);
 
+  m_save=save;
+
   connect(m_ui.btnBrowse, SIGNAL(clicked()), this, SLOT(onBrowse()));
   connect(m_ui.value, SIGNAL(textChanged(QString)), this, SLOT(onTextChanged(QString)));
+
 }
 
 void FilePicker::onBrowse()
 {
-  QString fileName(m_fileDialog->getSaveFileName(tr("Select file"),
-                                                tr("All files (*.* )")));
+  QString fileName;
+
+  if(m_save)
+  {
+    fileName = m_fileDialog->getSaveFileName(tr("Select file"),
+                                                tr("All files (*.* )"));
+  }
+  else
+  {
+     fileName = m_fileDialog->getOpenFileName(tr("Select file"),
+                                                   tr("All files (*.* )"));
+  }
+
   if (!fileName.isNull())
     m_ui.value->setText(fileName);
 }
