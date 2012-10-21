@@ -36,9 +36,6 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 {
   m_ui.setupUi(this);
 
-  m_pckFileOut = new FilePicker(m_fileDialog, m_ui.pckFileOut);
-  m_ui.pckFileOut->layout()->addWidget(m_pckFileOut);
-
   connect(this, SIGNAL(colorChanged(QColor)), this, SLOT(onColorChanged(QColor)));
 
   connect(&m_process, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
@@ -65,12 +62,27 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
       filenr++;
       newfile = fileInfo.baseName().append("_%1.%2").arg(filenr).arg(m_info.output);
     }
+    m_pckFileOut = new FilePicker(m_fileDialog, m_ui.pckFileOut);
+    m_ui.pckFileOut->layout()->addWidget(m_pckFileOut);
     m_pckFileOut->setText(newfile);
   }
   else
   {
+    m_pckFileOut = NULL;
     m_ui.lblFileOut->setVisible(false);
-    m_pckFileOut->setVisible(false);
+    m_ui.pckFileOut->setVisible(false);
+  }
+
+  if (m_info.hasSecondInput())
+  {
+    m_pckFileIn = new FilePicker(m_fileDialog, m_ui.pckFileIn, false);
+    m_ui.pckFileIn->layout()->addWidget(m_pckFileIn);
+  }
+  else
+  {
+    m_pckFileIn = NULL;
+    m_ui.lblFileIn->setVisible(false);
+    m_ui.pckFileIn->setVisible(false);
   }
 
   for (int i = 0; i < m_info.options.count(); i++)
@@ -91,7 +103,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
     if (!option.hasArgument())
     {
-      m_ui.frmOptions->addRow(cbOpt, lblOpt);
+      m_ui.frmOptions2->addRow(cbOpt, lblOpt);
       m_optionValues.append(OptionValue(option, cbOpt));
     }
     else
@@ -245,11 +257,11 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
       }
       if (cbOpt != NULL)
       {
-        m_ui.frmOptions->addRow(cbOpt, lytOpt);
+        m_ui.frmOptions2->addRow(cbOpt, lytOpt);
       }
       else
       {
-        m_ui.frmOptions->addRow("<b>"+option.nameLong+": </b>", lytOpt);
+        m_ui.frmOptions2->addRow("<b>"+option.nameLong+": </b>", lytOpt);
       }
     }
   }
@@ -270,14 +282,30 @@ QString ToolInstance::arguments()
     result = QString("\"%1\"").arg(result);
   }
 
-  QString fileOut = m_pckFileOut->text();
-  if (!fileOut.isEmpty())
+  if (m_pckFileOut)
   {
+    QString fileOut = m_pckFileOut->text();
     if (fileOut.contains(" "))
     {
       fileOut = QString("\"%1\"").arg(fileOut);
     }
-    result.append(" ").append(fileOut);
+    if (!fileOut.isEmpty())
+    {
+      result.append(" ").append(fileOut);
+    }
+  }
+
+  if (m_pckFileIn)
+  {
+    QString fileIn = m_pckFileIn->text();
+    if (fileIn.contains(" "))
+    {
+      fileIn = QString("\"%1\"").arg(fileIn);
+    }
+    if (!fileIn.isEmpty())
+    {
+      result.append(" ").append(fileIn);
+    }
   }
 
   for (int i = 0; i < m_optionValues.count(); i++)

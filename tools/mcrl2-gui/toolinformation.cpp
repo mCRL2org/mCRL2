@@ -11,8 +11,8 @@
 #include "mcrl2/utilities/logger.h"
 #include <QTextStream>
 
-ToolInformation::ToolInformation(QString name, QString input, QString output, bool guiTool)
-  : name(name), input(input), output(output), guiTool(guiTool), valid(false)
+ToolInformation::ToolInformation(QString name, QString input, QString input2, QString output, bool guiTool)
+  : name(name), input(input), input2(input2), output(output), guiTool(guiTool), valid(false)
 {
 
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
