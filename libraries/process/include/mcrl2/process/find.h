@@ -24,6 +24,79 @@ namespace mcrl2
 namespace process
 {
 
+namespace detail
+{
+/// \cond INTERNAL_DOCS
+struct find_action_names_traverser: public process::action_label_traverser<find_action_names_traverser>
+{
+  typedef process::action_label_traverser<find_action_names_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  std::set<core::identifier_string> result;
+
+  void operator()(const lps::action_label& x)
+  {
+    result.insert(x.name());
+  }
+
+  void operator()(const process::block& x)
+  {
+    super::operator()(x);
+    core::identifier_string_list B = x.block_set();
+    result.insert(B.begin(), B.end());
+  }
+
+  void operator()(const process::hide& x)
+  {
+    super::operator()(x);
+    core::identifier_string_list I = x.hide_set();
+    result.insert(I.begin(), I.end());
+  }
+
+  void operator()(const process::rename& x)
+  {
+    super::operator()(x);
+    rename_expression_list R = x.rename_set();
+    for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+    {
+      result.insert(i->source());
+      result.insert(i->target());
+    }
+  }
+
+  void operator()(const process::comm& x)
+  {
+    super::operator()(x);
+    communication_expression_list C = x.comm_set();
+    for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+    {
+      core::identifier_string_list names = i->action_name().names();
+      result.insert(names.begin(), names.end());
+      result.insert(i->name());
+    }
+  }
+
+  void operator()(const process::allow& x)
+  {
+    super::operator()(x);
+    action_name_multiset_list V = x.allow_set();
+    for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
+    {
+      core::identifier_string_list names = i->names();
+      result.insert(names.begin(), names.end());
+    }
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+/// \endcond
+
+} // namespace detail
+
 //--- start generated process find code ---//
 /// \brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
@@ -173,6 +246,17 @@ std::set<lps::action_label> find_action_labels(const T& x)
   std::set<lps::action_label> result;
   process::find_action_labels(x, std::inserter(result, result.end()));
   return result;
+}
+
+/// \brief Returns all action names that occur in an object
+/// \param[in] x an object containing action names
+/// \return All action names that occur in the object x
+template <typename T>
+std::set<core::identifier_string> find_action_names(const T& x)
+{
+  detail::find_action_names_traverser f;
+  f(x);
+  return f.result;
 }
 
 } // namespace process

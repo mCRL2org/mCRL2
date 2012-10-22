@@ -141,7 +141,7 @@ if __name__ == "__main__":
     identifier_string_dependencies  = find_dependencies(all_classes, 'core::identifier_string')
     action_label_dependencies       = find_dependencies(all_classes, 'lps::action_label')
 
-    #print_dependencies(data_expression_dependencies, "data_expression_dependencies")
+    #print_dependencies(action_label_dependencies, "action_label_dependencies")
 
     # sort_expression_builder
     make_builder('../../data/include/mcrl2/data/builder.h'        , 'sort_expression_builder', 'add_sort_expressions', 'core::builder'                            , class_map, all_classes, 'data'            , 'data::sort_expression', sort_expression_dependencies, modifiability_map)
@@ -208,7 +208,6 @@ if __name__ == "__main__":
 
     # action_label_traverser
     make_traverser('../../lps/include/mcrl2/lps/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'core::traverser', class_map, all_classes, 'lps', 'lps::action_label', action_label_dependencies)
-    make_traverser('../../pbes/include/mcrl2/pbes/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'lps::action_label_traverser', class_map, all_classes, 'pbes_system', 'lps::action_label', action_label_dependencies)
     make_traverser('../../process/include/mcrl2/process/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'lps::action_label_traverser', class_map, all_classes, 'process', 'lps::action_label', action_label_dependencies)
 
     # boolean_variable_traverser

@@ -1131,7 +1131,7 @@ def is_dependent_type(dependencies, type):
     # TODO: handle template parameters
     elif type.endswith('Container'):
         return True
-    m = re.search('<(\w+)>', type)
+    m = re.search('<(.+)>', type)
     if m != None:
         return dependencies[m.group(1)]
     return False

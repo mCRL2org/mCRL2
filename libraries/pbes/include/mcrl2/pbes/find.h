@@ -16,7 +16,6 @@
 #include <iterator>
 #include <functional>
 #include "mcrl2/data/variable.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
@@ -220,27 +219,6 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
 {
   std::set<propositional_variable_instantiation> result;
   pbes_system::find_propositional_variable_instantiations(container, std::inserter(result, result.end()));
-  return result;
-}
-
-/// \brief Returns all action labels that occur in an object
-/// \param[in] x an object containing action labels
-/// \param[in,out] o an output iterator to which all action labels occurring in x are written.
-/// \return All action labels that occur in the term x
-template <typename T, typename OutputIterator>
-void find_action_labels(const T& x, OutputIterator o)
-{
-  lps::detail::make_find_action_labels_traverser<pbes_system::action_label_traverser>(o)(x);
-}
-
-/// \brief Returns all action labels that occur in an object
-/// \param[in] x an object containing action labels
-/// \return All action labels that occur in the object x
-template <typename T>
-std::set<lps::action_label> find_action_labels(const T& x)
-{
-  std::set<lps::action_label> result;
-  pbes_system::find_action_labels(x, std::inserter(result, result.end()));
   return result;
 }
 

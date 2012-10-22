@@ -237,7 +237,7 @@ struct default_push_traverser: public process_expression_traverser<Derived>
 
   void print_expression(const process_expression& x)
   {
-    mCRL2log(log::debug) << "entering " << process::pp(x) << std::endl;
+    mCRL2log(log::debug) << "entering " << process::pp(x) << " A = " << lps::pp(A) << std::endl;
   }
 
   // prints the top n elements of the stack
@@ -1093,13 +1093,13 @@ inline
 multi_action_name_set multi_action_names(const process_specification& procspec)
 {
   multi_action_name_set result;
-  std::set<lps::action_label> labels = process::find_action_labels(procspec.equations());
-  std::set<lps::action_label> labels1 = process::find_action_labels(procspec.init());
-  labels.insert(labels1.begin(), labels1.end());
-  for (std::set<lps::action_label>::const_iterator i = labels.begin(); i != labels.end(); ++i)
+  std::set<core::identifier_string> names = process::find_action_names(procspec.equations());
+  std::set<core::identifier_string> names1 = process::find_action_names(procspec.init());
+  names.insert(names1.begin(), names1.end());
+  for (std::set<core::identifier_string>::const_iterator i = names.begin(); i != names.end(); ++i)
   {
     multi_action_name alpha;
-    alpha.insert(i->name());
+    alpha.insert(*i);
     result.insert(alpha);
   }
   return result;

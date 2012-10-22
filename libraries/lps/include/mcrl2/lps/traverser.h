@@ -109,6 +109,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
@@ -292,6 +293,7 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const lps::specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
@@ -395,6 +397,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);

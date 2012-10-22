@@ -42,9 +42,9 @@ struct find_action_labels_traverser: public Traverser<find_action_labels_travers
     : out(out_)
   {}
 
-  void operator()(const core::identifier_string& v)
+  void operator()(const lps::action_label& x)
   {
-    *out = v;
+    *out = x;
   }
 
 #if BOOST_MSVC

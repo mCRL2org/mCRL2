@@ -73,6 +73,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -535,6 +536,7 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -697,6 +699,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -829,36 +832,6 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<data
   using super::operator();
 };
 //--- end generated add_traverser_identifier_strings code ---//
-
-//--- start generated add_traverser_action_labels code ---//
-template <template <class> class Traverser, class Derived>
-struct add_traverser_action_labels: public Traverser<Derived>
-{
-  typedef Traverser<Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  template <typename Container>
-  void operator()(const pbes_system::pbes<Container>& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.equations());
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-};
-
-/// \brief Traverser class
-template <typename Derived>
-struct action_label_traverser: public add_traverser_action_labels<lps::action_label_traverser, Derived>
-{
-  typedef add_traverser_action_labels<lps::action_label_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-};
-//--- end generated add_traverser_action_labels code ---//
 
 } // namespace pbes_system
 
