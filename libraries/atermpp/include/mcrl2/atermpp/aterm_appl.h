@@ -34,33 +34,33 @@ class term_appl:public aterm
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
-    } 
-    
+    }
+
   public:
     /// The type of object, T stored in the term_appl.
     typedef Term value_type;
-    
+
     /// Pointer to T.
     typedef Term* pointer;
-    
+
     /// Reference to T.
     typedef Term& reference;
-    
+
     /// Const reference to T.
     typedef const Term const_reference;
-    
+
     /// An unsigned integral type.
     typedef size_t size_type;
-    
+
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
-    
+
     /// Iterator used to iterate through an term_appl.
     typedef term_appl_iterator<Term> iterator;
-    
+
     /// Const iterator used to iterate through an term_appl.
     typedef term_appl_iterator<Term> const_iterator;
-    
+
     /// \brief Default constructor.
     term_appl():aterm()
     {}
@@ -89,18 +89,18 @@ class term_appl:public aterm
     /// \param sym A function symbol.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
-    
+
     template <class ForwardIterator>
-    term_appl(const function_symbol &sym, 
-              const ForwardIterator begin, 
+    term_appl(const function_symbol &sym,
+              const ForwardIterator begin,
               const ForwardIterator end,
               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ForwardIterator>::type>::type* = 0)
         :aterm(detail::local_term_appl<Term,ForwardIterator>(sym,begin,end))
     {
-      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
-    
+
     /// \brief Constructor.
     /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
     ///          This means that the ATermConverter is applied exactly once to each element.
@@ -111,9 +111,9 @@ class term_appl:public aterm
     /// \param convert_to_aterm. An optional translator that is applied to each element in the iterator range,
     //                              and which must translate these elements to type Term.
     template <class InputIterator, class ATermConverter>
-    term_appl(const function_symbol &sym, 
-              InputIterator begin, 
-              InputIterator end, 
+    term_appl(const function_symbol &sym,
+              InputIterator begin,
+              InputIterator end,
               ATermConverter convert_to_aterm,
               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, InputIterator>::type>::type* = 0,
               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ATermConverter>::type>::type* = 0)
@@ -122,7 +122,7 @@ class term_appl:public aterm
       // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
-    
+
     /// \brief Constructor.
     /// \param sym A function symbol.
     term_appl(const function_symbol &sym):aterm(sym)
