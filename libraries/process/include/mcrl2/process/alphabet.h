@@ -235,6 +235,11 @@ struct default_push_traverser: public process_expression_traverser<Derived>
     mCRL2log(log::debug) << "p = " << process::pp(r.first) << " A = " << lps::pp(r.second) << std::endl;
   }
 
+  void print_expression(const process_expression& x)
+  {
+    mCRL2log(log::debug) << "entering " << process::pp(x) << std::endl;
+  }
+
   // prints the top n elements of the stack
   void print_stack(std::size_t n, const std::string& msg = "") const
   {
@@ -318,17 +323,17 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // P(e1, ..., en)
   void operator()(const process::process_instance& x)
   {
-    std::cout << "handling process_instance[default] " << process::pp(x) << " " << print_W() << std::endl;
+    print_expression(x);
     process_expression p = parameters.process_body(x.identifier());
     if (W.find(x.identifier()) == W.end())
     {
       W.insert(x.identifier());
       derived()(p);    // now <p', A'_p> is on the stack
-      process_expression p1 = top().first;
-      process_identifier id = parameters.find_equation(x.identifier(), p1);
-      generated_equations[x.identifier()] = id;
-      process_instance Q(id, x.actual_parameters());
-      top().first = Q; // now <Q, A'_p> is on the stack
+      // process_expression p1 = top().first;
+      // process_identifier id = parameters.find_equation(x.identifier(), p1);
+      // generated_equations[x.identifier()] = id;
+      // process_instance Q(id, x.actual_parameters());
+      // top().first = Q; // now <Q, A'_p> is on the stack
       W.erase(x.identifier());
     }
     else
@@ -343,7 +348,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // P(d1 = e1, ..., dn = en)
   void operator()(const process::process_instance_assignment& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     process_expression p = parameters.process_body(x.identifier());
     if (W.find(x.identifier()) == W.end())
     {
@@ -367,7 +371,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // p1 + p2
   void leave(const process::choice& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     join(x);
     print_stack(1, " choice[default]");
   }
@@ -375,7 +378,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // p1 . p2
   void leave(const process::seq& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     join(x);
     print_stack(1, " seq[default]");
   }
@@ -383,7 +385,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // c -> p
   void leave(const process::if_then& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     top().first = derived().f(x, A);
     print_stack(1, " if_then[default]");
   }
@@ -391,7 +392,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // c -> p1 <> p2
   void leave(const process::if_then_else& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     join(x);
     print_stack(1, " if_then_else[default]");
   }
@@ -399,7 +399,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // sum d:D . p
   void leave(const process::sum& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     top().first = derived().f(x, A);
     print_stack(1, " sum[default]");
   }
@@ -407,7 +406,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // p @ t
   void leave(const process::at& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     top().first = derived().f(x, A);
     print_stack(1, " at[default]");
   }
@@ -415,7 +413,6 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // p << q
   void operator()(const process::bounded_init& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     derived()(x.left());
     print_stack(1, " bounded_init[default]");
   }
@@ -463,7 +460,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // a(e1, ..., en)
   void operator()(const lps::action& x)
   {
-    std::cout << "handling action[allow] " << lps::pp(x) << std::endl;
     multi_action_name a = name(x);
     if (A.find(a) != A.end())
     {
@@ -481,7 +477,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // tau
   void operator()(const process::tau& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     multi_action_name tau;
     multi_action_name_set A1 = set_intersection(A, tau);
     push(make_allow(A, x), A1);
@@ -491,7 +486,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // p1 || p2
   void operator()(const process::merge& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     if (A_is_Act)
     {
       derived()(x.left());
@@ -524,7 +518,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // p1 ||_ p2
   void operator()(const process::left_merge& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     if (A_is_Act)
     {
       derived()(x.left());
@@ -557,7 +550,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // p1 | p2
   void operator()(const process::sync& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     if (A_is_Act)
     {
       derived()(x.left());
@@ -590,7 +582,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // rename(R, p)
   void operator()(const process::rename& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     rename_expression_list R = x.rename_set();
     if (A_is_Act)
     {
@@ -612,7 +603,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // block(B, p)
   void operator()(const process::block& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     core::identifier_string_list B = x.block_set();
     if (A_is_Act)
     {
@@ -630,7 +620,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // hide(I, p)
   void operator()(const process::hide& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     core::identifier_string_list I = x.hide_set();
     if (A_is_Act)
     {
@@ -656,7 +645,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // comm(C, p)
   void operator()(const process::comm& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     communication_expression_list C = x.comm_set();
     if (A_is_Act)
     {
@@ -678,7 +666,6 @@ struct push_allow_traverser: public default_push_traverser<Derived>
   // allow(A, p)
   void operator()(const process::allow& x)
   {
-    std::cout << "handling " << process::pp(x) << std::endl;
     multi_action_name_set V = make_name_set(x.allow_set());
     process_expression p = x.operand();
     if (A_is_Act)
@@ -1103,15 +1090,26 @@ alphabet_result push_block(const process_expression& x, const multi_action_name_
 }
 
 inline
+multi_action_name_set multi_action_names(const process_specification& procspec)
+{
+  multi_action_name_set result;
+  const lps::action_label_list& labels = procspec.action_labels();
+  for (lps::action_label_list::const_iterator i = labels.begin(); i != labels.end(); ++i)
+  {
+    multi_action_name alpha;
+    alpha.insert(i->name());
+    result.insert(alpha);
+  }
+  return result;
+}
+
+inline
 void alphabet_reduce(process_specification& procspec)
 {
-  atermpp::vector<process_equation>& eqn = procspec.equations();
-  atermpp::vector<process_equation>::iterator first = eqn.begin();
-  atermpp::vector<process_equation>::iterator last = eqn.end();
   alphabet_parameters parameters(procspec);
   std::set<process_identifier> W;
-  multi_action_name_set A;
-  alphabet_result r = push_allow(procspec.init(), A, W, true, parameters);
+  multi_action_name_set A = multi_action_names(procspec);
+  alphabet_result r = push_allow(procspec.init(), A, W, false, parameters);
   procspec.init() = r.first;
 }
 
