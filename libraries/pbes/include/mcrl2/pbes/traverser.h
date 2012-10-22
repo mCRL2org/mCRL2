@@ -830,6 +830,36 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<data
 };
 //--- end generated add_traverser_identifier_strings code ---//
 
+//--- start generated add_traverser_action_labels code ---//
+template <template <class> class Traverser, class Derived>
+struct add_traverser_action_labels: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  template <typename Container>
+  void operator()(const pbes_system::pbes<Container>& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Traverser class
+template <typename Derived>
+struct action_label_traverser: public add_traverser_action_labels<lps::action_label_traverser, Derived>
+{
+  typedef add_traverser_action_labels<lps::action_label_traverser, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
+//--- end generated add_traverser_action_labels code ---//
+
 } // namespace pbes_system
 
 } // namespace mcrl2

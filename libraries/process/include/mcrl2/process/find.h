@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/add_binding.h"
 
@@ -152,6 +153,27 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
   return result;
 }
 //--- end generated process find code ---//
+
+/// \brief Returns all action labels that occur in an object
+/// \param[in] x an object containing action labels
+/// \param[in,out] o an output iterator to which all action labels occurring in x are written.
+/// \return All action labels that occur in the term x
+template <typename T, typename OutputIterator>
+void find_action_labels(const T& x, OutputIterator o)
+{
+  lps::detail::make_find_action_labels_traverser<process::action_label_traverser>(o)(x);
+}
+
+/// \brief Returns all action labels that occur in an object
+/// \param[in] x an object containing action labels
+/// \return All action labels that occur in the object x
+template <typename T>
+std::set<lps::action_label> find_action_labels(const T& x)
+{
+  std::set<lps::action_label> result;
+  process::find_action_labels(x, std::inserter(result, result.end()));
+  return result;
+}
 
 } // namespace process
 

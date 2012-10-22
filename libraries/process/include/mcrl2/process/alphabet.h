@@ -1093,8 +1093,10 @@ inline
 multi_action_name_set multi_action_names(const process_specification& procspec)
 {
   multi_action_name_set result;
-  const lps::action_label_list& labels = procspec.action_labels();
-  for (lps::action_label_list::const_iterator i = labels.begin(); i != labels.end(); ++i)
+  std::set<lps::action_label> labels = process::find_action_labels(procspec.equations());
+  std::set<lps::action_label> labels1 = process::find_action_labels(procspec.init());
+  labels.insert(labels1.begin(), labels1.end());
+  for (std::set<lps::action_label>::const_iterator i = labels.begin(); i != labels.end(); ++i)
   {
     multi_action_name alpha;
     alpha.insert(i->name());
