@@ -31,7 +31,7 @@ namespace lps
 
 class next_state_generator
 {
-  protected:
+  public:
     // A rewriter_expression_t is a data expression in rewriter-internal format.
     typedef atermpp::aterm_appl rewriter_expression_t;
     typedef atermpp::term_list<rewriter_expression_t> valuation_t;
@@ -41,7 +41,6 @@ class next_state_generator
     typedef data::detail::legacy_rewriter rewriter_t;
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
 
-  public:
     typedef data::rewriter::internal_substitution_type substitution_t;
     typedef rewriter_expression_t internal_state_argument_t;
     typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;

@@ -2990,7 +2990,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  argument_rewriter_struct()\n"
       "  {}\n"
       "\n"
-      "  atermpp::aterm_appl operator()(const atermpp::aterm &arg)\n"
+      "  atermpp::aterm_appl operator()(const atermpp::aterm &arg) const\n"
       "  {\n"
       "    return rewrite(aterm_cast<const atermpp::aterm_appl >(arg));\n"
       "  }\n"

@@ -72,8 +72,9 @@ class term_list:public aterm
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      assert(m_term==aterm().m_term || t.type()==AT_LIST); // Term list can be the undefined aterm(); Generally, this is used to indicate a faulty situation.
-                                                 // This use should be discouraged.
+      // Term list can be the undefined aterm(); Generally, this is used to indicate an error situation.
+      // This use should be discouraged. For this purpose exceptions ought to be used.
+      assert(m_term==aterm().m_term || t.type()==AT_LIST); 
     }
 
     /// \brief Creates a term_list with the elements from first to last.
@@ -90,8 +91,31 @@ class term_list:public aterm
       term_list<Term> result;
       while (first != last)
       {
-        const Term t=*(--last);
+        const Term &t=*(--last);
         result = push_front(result, t);
+      }
+      m_term=result.address();
+      increase_reference_count<false>();
+    }
+    
+    /// \brief Creates a term_list with the elements from first to last.
+    /// \details It is assumed that the range can be traversed from last to first.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param convert_to_aterm A class with a () operation, which is applied to each element
+    //                   before it is put into the list.
+    template <class Iter, class ATermConverter>
+    term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm, typename boost::enable_if<
+              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+              boost::random_access_traversal_tag >::type >::type* = 0)
+    {
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
+      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
+      term_list<Term> result;
+      while (first != last)
+      {
+        const Term &t=*(--last);
+        result = push_front(result, convert_to_aterm(t));
       }
       m_term=result.address();
       increase_reference_count<false>();

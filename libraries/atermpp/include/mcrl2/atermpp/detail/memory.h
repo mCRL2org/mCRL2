@@ -103,77 +103,11 @@ inline HashNumber hash_number(const detail::_aterm *t, const size_t size)
   return hnr;
 }
 
-/* template <class Term, class InputIterator, class ATermConverter>
-_aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIterator begin, const InputIterator end, ATermConverter convert_to_aterm)
-{
-  const size_t arity = sym.arity();
-
-  HashNumber hnr = sym.number();
-  // It is assumed that the aterm array is not initialised with terms.
-  // It is not clear whether this holds for all compilers on all platforms.
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, aterm, arity); 
-  // std::vector <aterm> arguments(arity);
-  
-  size_t j=0;
-  for (InputIterator i=begin; i!=end; ++i, ++j)
-  {
-    assert(j<arity);
-    new (&arguments[j]) aterm(convert_to_aterm(*i));
-    const aterm &arg = arguments[j];
-    CHECK_TERM(arg);
-    hnr = COMBINE(hnr, arg);
-  }
-  assert(j==arity);
-
-  detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
-  while (cur)
-  {
-    if (cur->function()==sym)
-    {
-      bool found = true;
-      for (size_t i=0; i<arity; i++)
-      {
-        if (reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i] != arguments[i])
-        {
-          found = false;
-          break;
-        }
-      }
-      if (found)
-      {
-        break;
-      }
-    }
-    cur = cur->next();
-  }
-
-  if (!cur)
-  {
-    cur = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
-    / * Delay masking until after allocate_term * /
-    hnr &= detail::aterm_table_mask;
-    new (&cur->function()) function_symbol(sym);
-    
-    for (size_t i=0; i<arity; i++)
-    {
-      new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(cur)->arg[i])) Term(arguments[i]);
-    }
-    cur->next() = detail::aterm_hashtable[hnr];
-    detail::aterm_hashtable[hnr] = cur;
-  }
-  
-
-  for (size_t j=0; j!=arity; ++j)
-  {
-    using namespace atermpp;
-    arguments[j].~aterm();
-  }
-  
-  return cur;
-} */
-
 template <class Term, class InputIterator, class ATermConverter>
-_aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIterator begin, const InputIterator end, ATermConverter convert_to_aterm)
+_aterm* local_term_appl_with_converter(const function_symbol &sym, 
+                                       const InputIterator begin, 
+                                       const InputIterator end, 
+                                       const ATermConverter &convert_to_aterm)
 {
   const size_t arity = sym.arity();
 

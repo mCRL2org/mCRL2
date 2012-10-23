@@ -32,7 +32,7 @@ class term_appl:public aterm
     /// \brief Constructor.
     term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -69,7 +69,7 @@ class term_appl:public aterm
     /// \param t The aterm.
     term_appl (const term_appl &t):aterm(t)
     {
-      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -77,7 +77,7 @@ class term_appl:public aterm
     /// \param t The aterm.
     explicit term_appl (const aterm &t):aterm(t)
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -114,12 +114,12 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym,
               InputIterator begin,
               InputIterator end,
-              ATermConverter convert_to_aterm,
+              const ATermConverter &convert_to_aterm,
               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, InputIterator>::type>::type* = 0,
               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, ATermConverter>::type>::type* = 0)
          :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convert_to_aterm))
     {
-      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -127,7 +127,7 @@ class term_appl:public aterm
     /// \param sym A function symbol.
     term_appl(const function_symbol &sym):aterm(sym)
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -137,7 +137,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1)
          :aterm(detail::term_appl1<Term>(sym,t1))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -148,7 +148,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2)
          :aterm(detail::term_appl2<Term>(sym,t1,t2))
     {
-      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -160,7 +160,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3)
          :aterm(detail::term_appl3<Term>(sym,t1,t2,t3))
     {
-      // BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -173,7 +173,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4)
          :aterm(detail::term_appl4<Term>(sym,t1,t2,t3,t4))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -187,7 +187,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5)
          :aterm(detail::term_appl5<Term>(sym,t1,t2,t3,t4,t5))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
@@ -202,7 +202,7 @@ class term_appl:public aterm
     term_appl(const function_symbol &sym, const Term &t1, const Term &t2, const Term &t3, const Term &t4, const Term &t5, const Term &t6)
          :aterm(detail::term_appl6<Term>(sym,t1,t2,t3,t4,t5,t6))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<Term, aterm>::value));
+      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
     }
 
