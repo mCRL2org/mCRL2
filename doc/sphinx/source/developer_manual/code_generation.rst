@@ -10,7 +10,7 @@ section gives an overview of the scripts and their purpose.
                                                              in ``doc/specs`` as input, and generates code for traversing the parse tree. The output of the script
                                                              is by no means complete, but it can be used as a starting point.
 
-* ``libraries/core/build/generate_template_overloads.py``    Generates overloads for several template functions (pp, find, normalize_sorts etc). These overloads
+* ``libraries/core/build/generate_template_overloads.py``    Generates overloads for several template functions (pp, find, normalize_sorts, etc.). These overloads
                                                              are added to header files to avoid the inclusion of heavy templated header files that are expensive
                                                              to compile. The implementations of the functions are added to files in the source directory, while
                                                              the declarations need to be added manually (since it is not always known where to put them).
