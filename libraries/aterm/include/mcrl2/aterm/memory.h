@@ -150,6 +150,7 @@ size_t AT_getMaxTermSize();
 
 static const size_t INITIAL_TERM_TABLE_CLASS = 17;
 
+#ifndef NDEBUG
 inline
 void CHECK_HEADER(const header_type h)
 {
@@ -168,6 +169,18 @@ void CHECK_ARITY(const size_t ari1, const size_t ari2)
 }
 
 inline
+void CHECK_TERM(const ATerm t)
+{
+  assert((t) != NULL && (AT_isValidTerm(t)));
+}
+#else
+inline void CHECK_HEADER(const header_type) {}
+inline void CHECK_ARGUMENT(const ATermAppl, const size_t) {}
+inline void CHECK_ARITY(const size_t, const size_t) {}
+inline void CHECK_TERM(const ATerm) {}
+#endif
+
+inline
 size_t START(const MachineWord w)
 {
   return FOLD(w);
@@ -183,12 +196,6 @@ inline
 HashNumber FINISH(const HashNumber hnr)
 {
   return hnr;
-}
-
-inline
-void CHECK_TERM(const ATerm t)
-{
-  assert((t) != NULL && (AT_isValidTerm(t)));
 }
 
 /*}}}  */
