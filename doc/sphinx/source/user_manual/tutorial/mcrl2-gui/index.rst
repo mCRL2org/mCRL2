@@ -120,8 +120,8 @@ to show the individual states, transitions and backpointers. For larger state
 spaces (with hundreds of thousands of states), showing too much detail slows the
 tool down dramatically.
 
-.. _tutorial-img5: ../_static/img/tutorial/diagraphica-1.jg
-.. _tutorial-img6: ../_static/img/tutorial/diagraphica-2.jg
+.. _tutorial-img5: ../_static/img/tutorial/diagraphica-1.jpg
+.. _tutorial-img6: ../_static/img/tutorial/diagraphica-2.jpg
 .. _tutorial-img7: ../_static/img/tutorial/lpsxsim.jpg
 .. _tutorial-img8: ../_static/img/tutorial/preferences.jpg
 
