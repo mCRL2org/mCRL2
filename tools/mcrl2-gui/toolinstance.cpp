@@ -94,7 +94,8 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     {
         cbOpt = new QCheckBox(option.nameLong+": ", this);
         cbOpt->setChecked(option.standard);
-        QFont font("" , cbOpt->font().family().size() , QFont::Bold);
+        QFont font(cbOpt->font());
+        font.setBold(true);
         cbOpt->setFont(font);
     }
 
