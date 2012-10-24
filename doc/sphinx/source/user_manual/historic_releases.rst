@@ -246,7 +246,7 @@ Release September 2010 (SVN revision 8071 + bugfixes)
 .. _ubuntu_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_10.04.1_LTS_(x86_64).deb
 
 .. |suse_64_201009| replace:: OpenSUSE 11.3 package (64-bit)
-.. _suse_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-OpenSuSE_11.3_(x86_64).rpm
+.. _suse_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-openSuSE_11.3_(x86_64).rpm
 
 .. |bin_osx_201009| replace:: Darwin package (32-bit)
 .. _bin_osx_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Darwin.dmg

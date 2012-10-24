@@ -13,9 +13,8 @@ system has been modeled and analyzed using mCRL2. Six critical issues were
 discovered. Since the model was close to the code, all problems that were found
 in the model, could be traced back to the actual code resulting in concrete
 suggestions for improvement of the code. All in all, the analysis significantly
-improved the quality of this system and led to its `certification
-<http://www.laquso.com/certificates/AIA-ITP-Load-Balancer-2008>`_ by Laboratory
-for Quality Software (`LaQuSo <http://www.laquso.com>`_).
+improved the quality of this system and led to its certification by the
+Laboratory for Quality Software (`LaQuSo <http://www.laquso.com>`_).
 
 Technical details
 -----------------
