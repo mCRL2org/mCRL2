@@ -1292,12 +1292,10 @@ class interface_description::optional_argument : public typed_argument< T >
      * \param[in] n the name of the argument
      * \param[in] d the default value for the argument
      **/
-    inline optional_argument(std::string const& name, std::string const& d)
+    inline optional_argument(std::string const& name, std::string const& d) : m_default(d)
     {
       basic_argument::set_type("optional");
       basic_argument::set_name(name);
-
-      m_default = d;
     }
 
     /**
