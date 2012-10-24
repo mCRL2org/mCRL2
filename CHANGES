@@ -9,6 +9,7 @@ Fixed bugs:
           the tool)
   - #1104 Fix link to "Compiling mCRL2 yourself" in docs.
   - #1105 Fix link to regression test results in docs.
+  - #1107 Fix labels of optional tool options in mcrl2-gui.
   - r11245 Fix typos in log messages.
   - r11278 Fix warnings in release mode.
   - r11287 Fix spelling errors in docs.
