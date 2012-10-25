@@ -17,6 +17,7 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/add_binding.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -257,6 +258,22 @@ std::set<core::identifier_string> find_action_names(const T& x)
   detail::find_action_names_traverser f;
   f(x);
   return f.result;
+}
+
+/// \brief Finds an equation that corresponds to a process identifier
+/// \param[in] equations a sequence of process equations
+/// \return The equation with the given process identifier. Throws an exception if no such equation was found.
+inline
+const process_equation& find_equation(const atermpp::vector<process_equation>& equations, const process_identifier& id)
+{
+  for (atermpp::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  {
+    if (i->identifier() == id)
+    {
+      return *i;
+    }
+  }
+  throw mcrl2::runtime_error("unknown process identifier " + process::pp(id));
 }
 
 } // namespace process

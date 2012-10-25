@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_IS_GUARDED_H
 #define MCRL2_PROCESS_IS_GUARDED_H
 
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/traverser.h"
 
 namespace mcrl2 {
@@ -33,24 +34,9 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  typedef atermpp::vector<process_equation>::const_iterator equation_iterator;
-
   const atermpp::vector<process_equation>& equations;
   std::set<process_identifier>& W;
   bool result;
-
-  process_equation find_equation(const process_identifier& id) const
-  {
-    for (equation_iterator i = equations.begin(); i != equations.end(); ++i)
-    {
-      if (i->identifier() == id)
-      {
-        return *i;
-      }
-    }
-    throw mcrl2::runtime_error("is_guarded: unknown process identifier " + process::pp(id));
-    return process_equation();
-  }
 
   is_guarded_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_)
     : equations(equations_), W(W_), result(true)
@@ -62,7 +48,7 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
     if (W.find(x.identifier()) == W.end())
     {
       W.insert(x.identifier());
-      process_equation eqn = find_equation(x.identifier());
+      const process_equation& eqn = find_equation(equations, x.identifier());
       result = result && is_guarded(eqn.expression(), equations, W);
     }
     else
@@ -77,7 +63,7 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
     if (W.find(x.identifier()) == W.end())
     {
       W.insert(x.identifier());
-      process_equation eqn = find_equation(x.identifier());
+      const process_equation& eqn = find_equation(equations, x.identifier());
       result = result && is_guarded(eqn.expression(), equations, W);
     }
     else

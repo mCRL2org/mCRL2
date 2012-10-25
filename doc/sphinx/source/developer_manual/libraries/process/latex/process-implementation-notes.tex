@@ -1,9 +1,12 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
-%%%%%%%%%\input{tcilatex}
-%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%\input{tcilatex}
 %%%%%%%\input{tcilatex}
+%%%%%%\input{tcilatex}
+%%%%%\input{tcilatex}
 %%%%\input{tcilatex}
 %%%\input{tcilatex}
 %%\input{tcilatex}
@@ -20,7 +23,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Friday, October 19, 2012 15:49:32}
+%TCIDATA{LastRevised=Thursday, October 25, 2012 12:42:03}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -277,14 +280,76 @@ R^{-1}(A) &=&\{R^{-1}(\alpha )\mid \alpha \in A\}
 \end{eqnarray*}%
 Let $B$ be a block set, then we define%
 \[
-\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \}
+\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
 \]%
 Let $I$ be a hide set, then we define%
 \[
 \tau _{I}(A)=\{\alpha \mid \exists \beta \in I^{\ast }.\alpha \beta \in A%
-\text{ and }\alpha \cap I=\emptyset \text{,}
+\text{ and }\alpha \cap I=\emptyset \text{,} 
 \]%
-where $I^{\ast }$ is the transitive reflexive closure of $I$.\newpage 
+where $I^{\ast }$ is the transitive reflexive closure of $I$.\newpage
+
+We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
+, where $\alpha $ is defined as%
+\[
+\begin{array}{lll}
+\alpha (a,W) & = & \{N(a)\} \\ 
+\alpha (P,W) & = & 
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+\emptyset  & \text{if }P\in W \\ 
+\alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
+\end{array}%
+\right.  \\ 
+\text{ where }P=p\text{ is the equation of }P%
+\end{array}
+\\ 
+\alpha (\delta ,W) & = & \emptyset  \\ 
+\alpha (\tau ,W) & = & \{\tau \} \\ 
+\alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (c\rightarrow p,W) & = & \alpha (p,W) \\ 
+\alpha (c\rightarrow p\diamond q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (\Sigma _{d:D}p,W) & = & \alpha (p,W) \\ 
+\alpha (p^{\mathbin{\mbox{\aap
+,}}}t,W) & = & \alpha (p,W) \\ 
+\alpha (p\ll q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (p\parallel q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
+(p,W)\times \alpha (q,W) \\ 
+\alpha (p\mathbin{\mathrel{\llfloor}}q,W) & = & \alpha (p,W)\cup \alpha
+(q,W)\cup \alpha (p,W)\times \alpha (q,W) \\ 
+\alpha (p\mid q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
+(p,W)\times \alpha (q,W) \\ 
+\alpha (\rho _{R}(p),W) & = & R(\alpha (p,W)) \\ 
+\alpha (\partial _{B}(p),W) & = & \partial _{B}(\alpha (p,W)) \\ 
+\alpha (\tau _{I}(p),W) & = & \tau _{I}(\alpha (p,W)) \\ 
+\alpha (\Gamma _{C}(p),W) & = & \Gamma _{C}(\alpha (p,W)) \\ 
+\alpha (\nabla _{V}(p),W) & = & \alpha (p,W)\cap (V\cup \{\tau \})%
+\end{array}%
+\]
+
+The intended meaning of the function $push_{\nabla }$ is:%
+\[
+push_{\nabla }(p,A)=\left\langle \nabla _{A}(p),A\cap \alpha
+(p)\right\rangle 
+\]
+
+During alphabet reduction, the following rules can be applied:%
+\[
+\begin{array}{lll}
+\bigtriangledown _{A}(p) & = & \left\{ 
+\begin{array}{ll}
+p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
+\bigtriangledown _{A\cap \alpha (p)}(p) & \text{otherwise}%
+\end{array}%
+\right. 
+\end{array}%
+\]%
+A property of $push_{\bigtriangledown }$ is the following: if $\left\langle
+p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\bigtriangledown
+}(p,A,\emptyset )$ then $p^{\prime }$ and $\bigtriangledown _{A}(p)$ are
+bisimulation equivalent.\newpage 
 
 \subsubsection{The mapping $push_{\odot }$}
 
@@ -301,17 +366,15 @@ $P$ & $%
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\left\langle Q_{P,A,\odot },\emptyset \right\rangle & \text{if }P\in W \\ 
-\left\langle Q_{P,A,\odot },A_{p}^{\prime }\right\rangle & \text{if }P\notin
-W%
+\left\langle P,\emptyset \right\rangle & \text{if }P\in W \\ 
+\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & \text{if }P\notin W%
 \end{array}%
 \right. \\ 
 \qquad \text{where }\left\{ \text{ }%
 \begin{array}{l}
 P=p\text{ is the equation of process }P \\ 
 \left\langle p^{\prime },A_{p}^{\prime }\right\rangle =push_{\odot
-}(p,A,W\cup \{P\}) \\ 
-Q_{P,A,\odot }=p^{\prime }\text{ is an added process equation}%
+}(p,A,W\cup \{P\})%
 \end{array}%
 \right.%
 \end{array}%
@@ -413,7 +476,8 @@ A^{\prime } & = & A\cap (A_{p}^{\prime }\times A_{q}^{\prime })%
 \end{array}%
 \right. $ \\ 
 $\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),R(A_{p}^{\prime
-})\right\rangle \text{ where }A^{\prime }=R^{-1}(A)$ \\ 
+})\right\rangle \text{ where }\left\langle p^{\prime },A_{p}^{\prime
+}\right\rangle =$ $push_{\bigtriangledown }(p,R^{-1}(A),W)$ \\ 
 $\partial _{B}(p)$ & $push_{\bigtriangledown }(p,\partial _{B}(A),W)$ \\ 
 $\tau _{I}(p)$ & $\left\langle \nabla _{A\setminus \{\tau \}}(\tau
 _{I}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
@@ -524,14 +588,9 @@ where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime }\cup A_{p}^{\prime
 $p\mid q$ & $\left\langle p^{\prime }\mid q^{\prime },A^{\prime
 }\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\times A_{q}^{\prime
 }$ \\ 
-$\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),A^{\prime
-}\right\rangle \text{ where }\left\{ \text{ }%
-\begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
-}(p,R^{-1}(A),W) \\ 
-A^{\prime } & = & R(A_{p}^{\prime })%
-\end{array}%
-\right. $ \\ 
+$\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),R(A_{p}^{\prime
+})\right\rangle $ where $\left\langle p^{\prime },A_{p}^{\prime
+}\right\rangle =push_{\partial }(p,R^{-1}(A),W)$ \\ 
 $\partial _{B}(p)$ & $push_{\partial }(p,A^{\prime },W)\text{ where }%
 A^{\prime }=A\cup B$ \\ 
 $\tau _{I}(p)$ & $\left\langle \tau _{I}(p^{\prime }),A^{\prime

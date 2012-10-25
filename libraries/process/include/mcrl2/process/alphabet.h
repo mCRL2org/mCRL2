@@ -16,14 +16,200 @@
 #include <iterator>
 #include <sstream>
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/process/detail/alphabet_utility.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/process/detail/alphabet_utility.h"
+#include "mcrl2/process/utility.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
 namespace process {
+
+namespace detail {
+
+struct alphabet_traverser: public process_expression_traverser<alphabet_traverser>
+{
+  typedef process_expression_traverser<alphabet_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  const atermpp::vector<process_equation>& equations;
+  std::set<process_identifier>& W;
+  atermpp::vector<multi_action_name_set> result_stack;
+
+  // Push A to result_stack
+  void push(const multi_action_name_set& A)
+  {
+    result_stack.push_back(A);
+  }
+
+  // Pop the top element of result_stack and return it
+  multi_action_name_set pop()
+  {
+    multi_action_name_set result = result_stack.back();
+    result_stack.pop_back();
+    return result;
+  }
+
+  // Return the top element of result_stack
+  multi_action_name_set& top()
+  {
+    return result_stack.back();
+  }
+
+  // Return the top element of result_stack
+  const multi_action_name_set& top() const
+  {
+    return result_stack.back();
+  }
+
+  // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2)
+  void join()
+  {
+    multi_action_name_set A2 = pop();
+    multi_action_name_set A1 = pop();
+    push(set_union(A1, A2));
+  }
+
+  // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2, A1xA2)
+  void join_parallel()
+  {
+    multi_action_name_set A2 = pop();
+    multi_action_name_set A1 = pop();
+    push(set_union(set_union(A1, A2), times(A1, A2)));
+  }
+
+  alphabet_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_)
+    : equations(equations_), W(W_)
+  {}
+
+  void operator()(const process::process_instance& x)
+  {
+    if (W.find(x.identifier()) == W.end())
+    {
+      const process_equation& eqn = find_equation(equations, x.identifier());
+      (*this)(eqn.expression());
+    }
+    else
+    {
+      push(multi_action_name_set());
+    }
+  }
+
+  void operator()(const process::process_instance_assignment& x)
+  {
+    if (W.find(x.identifier()) == W.end())
+    {
+      const process_equation& eqn = find_equation(equations, x.identifier());
+      (*this)(eqn.expression());
+    }
+    else
+    {
+      push(multi_action_name_set());
+    }
+  }
+
+  void operator()(const process::delta& x)
+  {
+    push(multi_action_name_set());
+  }
+
+  void operator()(const process::tau& x)
+  {
+    multi_action_name_set A;
+    A.insert(multi_action_name()); // A = { tau }
+    push(A);
+  }
+
+  // void operator()(const process::sum& x)
+
+  void leave(const process::block& x)
+  {
+//    top() = apply_block(x.block_set(), top());
+  }
+
+  void leave(const process::hide& x)
+  {
+    top() = apply_hide(x.hide_set(), top());
+  }
+
+  void leave(const process::rename& x)
+  {
+    top() = apply_rename(x.rename_set(), top());
+  }
+
+  void leave(const process::comm& x)
+  {
+    top() = apply_comm(x.comm_set(), top());
+  }
+
+  void leave(const process::allow& x)
+  {
+    top() = apply_allow(x.allow_set(), top());
+  }
+
+  void leave(const process::sync& x)
+  {
+    join_parallel();
+  }
+
+  // void operator()(const process::at& x)
+
+  void leave(const process::seq& x)
+  {
+    join();
+  }
+
+  // void operator()(const process::if_then& x)
+
+  void leave(const process::if_then_else& x)
+  {
+    join();
+  }
+
+  void leave(const process::bounded_init& x)
+  {
+    join();
+  }
+
+  void leave(const process::merge& x)
+  {
+    join_parallel();
+  }
+
+  void leave(const process::left_merge& x)
+  {
+    join_parallel();
+  }
+
+  void leave(const process::choice& x)
+  {
+    join();
+  }
+};
+
+inline
+multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
+{
+  detail::alphabet_traverser f(equations, W);
+  f(x);
+  return f.result_stack.back();
+}
+
+} // detail
+
+inline
+multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations)
+{
+  std::set<process_identifier> W;
+  return detail::alphabet(x, equations, W);
+}
 
 typedef std::pair<process_expression, multi_action_name_set> alphabet_result;
 
@@ -94,10 +280,10 @@ struct alphabet_parameters
   process_specification& procspec;
 
   // maps proces identifiers to their corresponding equations
-  std::map<process_identifier, equation_iterator> equation_map;
+  atermpp::map<process_identifier, process_equation*> equation_map;
 
-  // used for searching equations
-  std::map<process_identifier, std::map<process_expression, process_identifier> > equation_index;
+  // equations generated during alphabet reduction
+  atermpp::vector<process_equation> added_equations;
 
   // used for generating process identifiers
   data::set_identifier_generator generator;
@@ -106,39 +292,36 @@ struct alphabet_parameters
   // not yet exist, a new equation is created.
   process_identifier find_equation(const process_identifier& id, const process_expression& rhs)
   {
-    std::map<process_expression, process_identifier>& index = equation_index[id];
-    const process_equation& eqn = *equation_map[id];
+//std::cout << "<find_equation>" << process::pp(id) << " = " << process::pp(rhs) << std::endl;
+    atermpp::map<process_identifier, process_equation*>::iterator i = equation_map.find(id);
+    assert(i != equation_map.end());
+    const process_equation& eqn = *(i->second);
 
-    std::map<process_expression, process_identifier>::iterator i = index.find(rhs);
-    if (i == index.end()) // the equation does not yet exist
-    {
-      // create new equation
-      std::string prefix = std::string(id.name()) + "_";
-      core::identifier_string X = generator(prefix);
-      process_identifier new_id(X, id.sorts());
-      process_equation new_eqn(new_id, eqn.formal_parameters(), rhs);
+    // create new equation
+    std::string prefix = std::string(id.name()) + "_";
+    core::identifier_string X = generator(prefix);
+    process_identifier new_id(X, id.sorts());
+    process_equation new_eqn(new_id, eqn.formal_parameters(), rhs);
 
-      // update data structures
-      procspec.equations().push_back(new_eqn);
-      equation_iterator j = --procspec.equations().end();
-      equation_map[new_id] = j;
-      equation_index[id][rhs] = new_id;
+    // update data structures
+    added_equations.push_back(new_eqn);
 
-      // return result
-      return new_id;
-    }
-    else
-    {
-      return i->second;
-    }
+    // return result
+    return new_id;
   }
 
   // returns the body of the process with the given identifier
   process_expression process_body(const process_identifier& id) const
   {
-    std::map<process_identifier, equation_iterator>::const_iterator i = equation_map.find(id);
+//std::cout << "<process_body>" << process::pp(id) << std::endl;
+//for (atermpp::map<process_identifier, process_equation*>::const_iterator i = equation_map.begin(); i != equation_map.end(); ++i)
+//{
+//  std::cout << process::pp(i->first) << " -> " << std::endl; // << process::pp(*(i->second)) << std::endl;
+//}
+
+    atermpp::map<process_identifier, process_equation*>::const_iterator i = equation_map.find(id);
     assert (i != equation_map.end());
-    const process_equation& eqn = *i->second;
+    const process_equation& eqn = *(i->second);
     return eqn.expression();
   }
 
@@ -148,8 +331,7 @@ struct alphabet_parameters
     atermpp::vector<process_equation>& equations = p.equations();
     for (atermpp::vector<process_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
     {
-      equation_map[i->identifier()] = i;
-      equation_index[i->identifier()][i->expression()] = i->identifier();
+      equation_map[i->identifier()] = &(*i);
       generator.add_identifier(i->identifier().name());
     }
   }
@@ -218,8 +400,8 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   // algorithm parameters
   alphabet_parameters& parameters;
 
-  // if a new equation Q = p was introduced for the equation P = p, then generated_equations[P] = Q
-  atermpp::map<process_identifier, process_identifier> generated_equations;
+  // if P = p is an equation and push(P, A, W) = <p', A'_p> then process_instance_map[P] = p'
+  atermpp::map<process_identifier, process_expression> process_instance_map;
 
   // stack with intermediate results
   typedef std::pair<process_expression, multi_action_name_set> alphabet_result;
@@ -243,7 +425,7 @@ struct default_push_traverser: public process_expression_traverser<Derived>
       {
         out << ", ";
       }
-      out << process::pp(i->name());
+      out << std::string(i->name());
     }
     out << " }";
     return out.str();
@@ -321,23 +503,21 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   void operator()(const process::process_instance& x)
   {
     enter_expression(x, " process_instance[default]");
-    process_expression p = parameters.process_body(x.identifier());
     if (W.find(x.identifier()) == W.end())
     {
       W.insert(x.identifier());
+      process_expression p = parameters.process_body(x.identifier());
       derived()(p);    // now <p', A'_p> is on the stack
-      // process_expression p1 = top().first;
-      // process_identifier id = parameters.find_equation(x.identifier(), p1);
-      // generated_equations[x.identifier()] = id;
-      // process_instance Q(id, x.actual_parameters());
-      // top().first = Q; // now <Q, A'_p> is on the stack
+std::cout << "P = " << process::pp(x) << " p = " << process::pp(p) << " p1 = " << process::pp(top().first) << std::endl;
+      if (p == top().first)
+      {
+        top().first = x;
+      }
       W.erase(x.identifier());
     }
     else
     {
-      process_identifier id = generated_equations[x.identifier()];
-      process_instance Q(id, x.actual_parameters());
-      push(Q, multi_action_name_set());
+      push(x, multi_action_name_set());
     }
     leave_expression(x, " process_instance[default]");
   }
@@ -346,22 +526,21 @@ struct default_push_traverser: public process_expression_traverser<Derived>
   void operator()(const process::process_instance_assignment& x)
   {
     enter_expression(x, " process_instance_assignment[default]");
-    process_expression p = parameters.process_body(x.identifier());
     if (W.find(x.identifier()) == W.end())
     {
       W.insert(x.identifier());
+      process_expression p = parameters.process_body(x.identifier());
       derived()(p);    // now <p', A'_p> is on the stack
-      process_expression p1 = top().first;
-      process_identifier id = parameters.find_equation(x.identifier(), p1);
-      process_instance_assignment Q(id, x.assignments());
-      top().first = Q; // now <Q, A'_p> is on the stack
+std::cout << "P = " << process::pp(x) << " p = " << process::pp(p) << " p1 = " << process::pp(top().first) << std::endl;
+      if (p == top().first)
+      {
+        top().first = x;
+      }
       W.erase(x.identifier());
     }
     else
     {
-      process_identifier id = generated_equations[x.identifier()];
-      process_instance_assignment Q(id, x.assignments());
-      push(Q, multi_action_name_set());
+      push(x, multi_action_name_set());
     }
     leave_expression(x, " process_instance_assignment[default]");
   }
@@ -669,10 +848,10 @@ struct push_allow_traverser: public default_push_traverser<Derived>
     else
     {
       process_expression p = x.operand();
-      alphabet_result r = push_allow(p, set_union(A, apply_communication_inverse(C, A)), W, true, parameters);
+      alphabet_result r = push_allow(p, set_union(A, apply_comm_inverse(C, A)), W, true, parameters);
       const process_expression& p1 = r.first;
       const multi_action_name_set& Ap1 = r.second;
-      multi_action_name_set A1 = set_intersection(A, apply_communication(C, Ap1));
+      multi_action_name_set A1 = set_intersection(A, apply_comm(C, Ap1));
       push(make_allow(remove_tau(A), comm(C, p1)), A1);
     }
     leave_expression(x, " comm[allow]");
@@ -848,11 +1027,11 @@ struct push_sub_traverser: public default_push_traverser<Derived>
     enter_expression(x, " comm[sub]");
     communication_expression_list C = x.comm_set();
     process_expression p = x.operand();
-    alphabet_result r = push_sub(p, set_union(A, apply_communication_inverse(C, A)), W, parameters);
+    alphabet_result r = push_sub(p, set_union(A, apply_comm_inverse(C, A)), W, parameters);
     const process_expression& p1 = r.first;
     const multi_action_name_set& Ap1 = r.second;
-    multi_action_name_set A1 = set_intersection(A, apply_communication(C, Ap1));
-    multi_action_name_set A2 = subset_intersection(A, apply_communication(C, Ap1));
+    multi_action_name_set A1 = set_intersection(A, apply_comm(C, Ap1));
+    multi_action_name_set A2 = subset_intersection(A, apply_comm(C, Ap1));
     push(make_allow(remove_tau(A1), comm(C, p1)), A2);
     leave_expression(x, " comm[sub]");
   }
@@ -1023,11 +1202,11 @@ struct push_block_traverser: public default_push_traverser<Derived>
     enter_expression(x, " comm[block]");
     communication_expression_list C = x.comm_set();
     process_expression p = x.operand();
-    multi_action_name_set A2 = apply_communication_bar(C, A);
+    multi_action_name_set A2 = apply_comm_bar(C, A);
     alphabet_result r = push_block(p, set_difference(A, A2), W, parameters);
     const process_expression& p1 = r.first;
     const multi_action_name_set& Ap1 = r.second;
-    multi_action_name_set A1 = apply_block(A, apply_communication(C, Ap1));
+    multi_action_name_set A1 = detail::apply_block(A, apply_comm(C, Ap1));
     communication_expression_list C1; // = ???
     push(make_block(A2, comm(C1, p1)), A1);
     leave_expression(x, " comm[block]");
@@ -1150,6 +1329,7 @@ void alphabet_reduce(process_specification& procspec)
   std::set<process_identifier> W;
   multi_action_name_set A = multi_action_names(procspec);
   alphabet_result r = push_allow(procspec.init(), A, W, false, parameters);
+  procspec.equations().insert(procspec.equations().end(), parameters.added_equations.begin(), parameters.added_equations.end());
   procspec.init() = r.first;
 }
 
