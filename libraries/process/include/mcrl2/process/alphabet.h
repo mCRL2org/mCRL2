@@ -28,9 +28,10 @@ namespace process {
 
 namespace detail {
 
-struct alphabet_traverser: public process_expression_traverser<alphabet_traverser>
+template <typename Derived>
+struct alphabet_traverser: public process_expression_traverser<Derived>
 {
-  typedef process_expression_traverser<alphabet_traverser> super;
+  typedef process_expression_traverser<Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -38,6 +39,11 @@ struct alphabet_traverser: public process_expression_traverser<alphabet_traverse
 #if BOOST_MSVC
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
 
   const atermpp::vector<process_equation>& equations;
   std::set<process_identifier>& W;
@@ -89,12 +95,21 @@ struct alphabet_traverser: public process_expression_traverser<alphabet_traverse
     : equations(equations_), W(W_)
   {}
 
+  void operator()(const lps::action& x)
+  {
+    multi_action_name alpha;
+    alpha.insert(x.label().name());
+    multi_action_name_set A;
+    A.insert(alpha);
+    push(A);
+  }
+
   void operator()(const process::process_instance& x)
   {
     if (W.find(x.identifier()) == W.end())
     {
       const process_equation& eqn = find_equation(equations, x.identifier());
-      (*this)(eqn.expression());
+      derived()(eqn.expression());
     }
     else
     {
@@ -107,7 +122,7 @@ struct alphabet_traverser: public process_expression_traverser<alphabet_traverse
     if (W.find(x.identifier()) == W.end())
     {
       const process_equation& eqn = find_equation(equations, x.identifier());
-      (*this)(eqn.expression());
+      derived()(eqn.expression());
     }
     else
     {
@@ -194,10 +209,27 @@ struct alphabet_traverser: public process_expression_traverser<alphabet_traverse
   }
 };
 
+struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traverser>
+{
+  typedef alphabet_traverser<apply_alphabet_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::result_stack;
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  apply_alphabet_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
+    : alphabet_traverser(equations, W)
+  {}
+};
+
 inline
 multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
 {
-  detail::alphabet_traverser f(equations, W);
+  apply_alphabet_traverser f(equations, W);
   f(x);
   return f.result_stack.back();
 }

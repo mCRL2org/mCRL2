@@ -67,7 +67,7 @@ void test_alphabet_allow()
   BOOST_CHECK(lps::pp(B) == lps::pp(C));
 }
 
-void test_alphabet()
+void test_alphabet_reduce()
 {
   std::string text =
     "act a;        \n"
@@ -78,15 +78,27 @@ void test_alphabet()
   alphabet_reduce(procspec);
 }
 
+void test_alphabet()
+{
+  std::string text =
+    "act a, b;        \n"
+    "init a || b;     \n"
+    ;
+  process_specification procspec = parse_process_specification(text);
+  multi_action_name_set A = alphabet(procspec.init(), procspec.equations());
+  BOOST_CHECK(A.size() == 3);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   log::mcrl2_logger::set_reporting_level(log::debug);
 
-  test_alphabet();
   test_action_parse();
   test_alphabet_allow();
+  test_alphabet_reduce();
+  test_alphabet();
 
   return EXIT_SUCCESS;
 }
