@@ -10,6 +10,8 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
@@ -24,7 +26,6 @@
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -43,7 +44,7 @@ void test_term(const std::string& s, const T& x)
 
 void test_term(const std::string& s)
 {
-  atermpp::aterm a = atermpp::make_term(s);
+  atermpp::aterm a = atermpp::read_term_from_string(s);
   if (s.find("DataEqn") == 0)
   {
     data_equation x = atermpp::aterm_appl((atermpp::aterm_appl) a);

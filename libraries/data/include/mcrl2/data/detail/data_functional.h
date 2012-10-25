@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/function_symbol.h"

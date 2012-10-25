@@ -20,7 +20,6 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
@@ -155,7 +154,7 @@ void test_pbes()
   std::string filename = "write_to_named_text_file.pbes";
   try
   {
-    atermpp::aterm t = atermpp::make_term("f(x)");
+    atermpp::aterm t = atermpp::read_term_from_string("f(x)");
     atermpp::write_to_named_text_file(t, filename);
     p.load(filename);
     BOOST_CHECK(false); // loading is expected to fail

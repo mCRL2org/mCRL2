@@ -13,11 +13,10 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/set_operations.h"
 
 using namespace std;
@@ -47,24 +46,24 @@ struct func
 
   atermpp::aterm operator()(atermpp::aterm x) const
   {
-    return make_term("f(" + x.to_string() + ")");
+    return read_term_from_string("f(" + x.to_string() + ")");
   }
 };
 
 void test_aterm_list()
 {
-  aterm_list q = static_cast<aterm_list>(make_term("[1,2,3,4]"));
+  aterm_list q = static_cast<aterm_list>(read_term_from_string("[1,2,3,4]"));
 
   aterm_list r = reverse(q); // r == [4,3,2,1]
-  BOOST_CHECK(r == static_cast<aterm_list>(make_term("[4,3,2,1]")));
+  BOOST_CHECK(r == static_cast<aterm_list>(read_term_from_string("[4,3,2,1]")));
 
   aterm_list r1 = push_back(q, atermpp::aterm(aterm_int(5)));
-  BOOST_CHECK(r1 == static_cast<aterm_list>(make_term("[1,2,3,4,5]")));
+  BOOST_CHECK(r1 == static_cast<aterm_list>(read_term_from_string("[1,2,3,4,5]")));
 
   atermpp::aterm f = q.front(); // f == 1
   BOOST_CHECK(f == aterm_int(1));
 
-  q = push_front(q, make_term("[5,6]")); // q == [[5,6],1,2,3,4]
+  q = push_front(q, read_term_from_string("[5,6]")); // q == [[5,6],1,2,3,4]
 
   stringstream os;
   for (aterm_list::iterator i = q.begin(); i != q.end(); ++i)
@@ -77,25 +76,25 @@ void test_aterm_list()
   for_each(r.begin(), r.end(), counter(sum));
   BOOST_CHECK(sum == 10);
 
-  aterm_list v = static_cast<aterm_list>(make_term("[1,2,3,4]"));
-  aterm_list w = static_cast<aterm_list>(make_term("[0,1,2,3,4]"));
+  aterm_list v = static_cast<aterm_list>(read_term_from_string("[1,2,3,4]"));
+  aterm_list w = static_cast<aterm_list>(read_term_from_string("[0,1,2,3,4]"));
   BOOST_CHECK(pop_front(w) == v);
 
   // test concatenation
   {
-    aterm_list a = static_cast<aterm_list>(make_term("[1,2,3]"));
-    atermpp::aterm x = make_term("0");
-    // BOOST_CHECK(x + a == static_cast<aterm_list>(make_term("[0,1,2,3]")));
-    BOOST_CHECK(a + a == static_cast<aterm_list>(make_term("[1,2,3,1,2,3]")));
-    // BOOST_CHECK(a + x == static_cast<aterm_list>(make_term("[1,2,3,0]")));
+    aterm_list a = static_cast<aterm_list>(read_term_from_string("[1,2,3]"));
+    atermpp::aterm x = read_term_from_string("0");
+    // BOOST_CHECK(x + a == static_cast<aterm_list>(read_term_from_string("[0,1,2,3]")));
+    BOOST_CHECK(a + a == static_cast<aterm_list>(read_term_from_string("[1,2,3,1,2,3]")));
+    // BOOST_CHECK(a + x == static_cast<aterm_list>(read_term_from_string("[1,2,3,0]")));
   }
 }
 
 void test_set_operations()
 {
-  atermpp::aterm x = make_term("x");
-  atermpp::aterm y = make_term("y");
-  atermpp::aterm z = make_term("z");
+  atermpp::aterm x = read_term_from_string("x");
+  atermpp::aterm y = read_term_from_string("y");
+  atermpp::aterm z = read_term_from_string("z");
 
   aterm_list l;
   l = push_front(l, x);

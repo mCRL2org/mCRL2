@@ -238,7 +238,7 @@ class state_data_type: public pins_data_type
 
     std::size_t deserialize(const std::string& s)
     {
-      return expression2index(data::data_expression(atermpp::read_from_string(s)));
+      return expression2index(data::data_expression(atermpp::read_term_from_string(s)));
     }
 
     std::string print(int i) const
@@ -282,7 +282,7 @@ class action_label_data_type: public pins_data_type
 
     std::size_t deserialize(const std::string& s)
     {
-      return m_indexed_set[atermpp::read_from_string(s)];
+      return m_indexed_set[atermpp::read_term_from_string(s)];
     }
 
     std::string print(int i) const

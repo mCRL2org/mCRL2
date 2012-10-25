@@ -13,10 +13,9 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/utility.h"
 
 using namespace std;
 using namespace atermpp;
@@ -25,23 +24,23 @@ void test_aterm_function()
 {
   // create an unquoted function symbol
   function_symbol sym("f", 1);
-  atermpp::aterm x ( make_term("x"));
+  atermpp::aterm x ( read_term_from_string("x"));
 
   aterm_appl a(sym, x);
   BOOST_CHECK(a.to_string() == "\"f\"(\"x\")");
   BOOST_CHECK(a.function() == sym);
 
   string s = a.to_string();
-  aterm_appl b ( make_term(s));
+  aterm_appl b ( read_term_from_string(s));
   BOOST_CHECK(b.to_string() == "\"f\"(\"x\")");
   BOOST_CHECK(b.function() == sym); 
 
-  aterm_appl c (read_from_string(s));
+  aterm_appl c (read_term_from_string(s));
   BOOST_CHECK(c.to_string() == "\"f\"(\"x\")");
   BOOST_CHECK(c.function() == sym); 
 
-  aterm_appl f ( make_term("f(g(a,b),c)"));
-  aterm_appl g ( make_term("g(a,b)"));
+  aterm_appl f ( read_term_from_string("f(g(a,b),c)"));
+  aterm_appl g ( read_term_from_string("g(a,b)"));
   BOOST_CHECK(f(0) == g);
 }
 

@@ -15,7 +15,6 @@
 #include <string>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/utility.h"
 
 namespace atermpp
 {

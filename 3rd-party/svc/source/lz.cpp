@@ -213,8 +213,7 @@ int LZreadATerm(BitStream* bs, LZbuffer* buffer, aterm* term)
 
   if (decompress(bs,buffer,&str))
   {
-    *term=read_from_string(str);
-    /*    *term=ATmake(str);*/
+    *term=read_term_from_string(str);
     return 1;
   }
   else

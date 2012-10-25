@@ -13,18 +13,17 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/utility.h"
 
 using namespace std;
 using namespace atermpp;
 
 void test_aterm()
 {
-  atermpp::aterm a = make_term("f(x)");
-  atermpp::aterm label = make_term("label");
+  atermpp::aterm a = read_term_from_string("f(x)");
+  atermpp::aterm label = read_term_from_string("label");
 
   atermpp::aterm d = aterm_int(10);
   BOOST_CHECK(aterm_int(d).value() == 10);

@@ -14,10 +14,10 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/utility.h"
 
 using namespace std;
 using namespace atermpp;
@@ -82,40 +82,40 @@ struct fg_partial_replacer
 
 void test_find()
 {
-  aterm_appl a(make_term("h(g(x),f(y),p(a(x,y),q(f(z))))"));
+  aterm_appl a(read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
-  BOOST_CHECK(t == static_cast< aterm_appl>(make_term("f(y)")));
+  BOOST_CHECK(t == static_cast< aterm_appl>(read_term_from_string("f(y)")));
 
   std::vector< aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
-  BOOST_CHECK(v.front() == static_cast< aterm_appl>(make_term("f(y)")));
-  BOOST_CHECK(v.back() == static_cast< aterm_appl>(make_term("f(z)")));
+  BOOST_CHECK(v.front() == static_cast< aterm_appl>(read_term_from_string("f(y)")));
+  BOOST_CHECK(v.back() == static_cast< aterm_appl>(read_term_from_string("f(z)")));
 }
 
 void test_replace()
 {
-  BOOST_CHECK(replace(aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("f(a)"))) == make_term("f(a)"));
-  BOOST_CHECK(replace(aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("f(x)"))) == make_term("f(x)"));
-  BOOST_CHECK(replace(atermpp::aterm_list(make_term("[x]")), atermpp::aterm_appl(make_term("x")), atermpp::aterm_appl(make_term("f(x)"))) == make_term("[f(x)]"));
+  BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(a)"))) == read_term_from_string("f(a)"));
+  BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("f(x)"));
+  BOOST_CHECK(replace(atermpp::aterm_list(read_term_from_string("[x]")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("[f(x)]"));
 
-  aterm_appl a(make_term("f(f(x))"));
-  aterm_appl b(replace(a, atermpp::aterm_appl(make_term("f(x)")), atermpp::aterm_appl(make_term("x"))));
-  BOOST_CHECK(b == static_cast< aterm_appl>(make_term("f(x)")));
-  b = bottom_up_replace(a, atermpp::aterm_appl(make_term("f(x)")), atermpp::aterm_appl(make_term("x")));
-  BOOST_CHECK(b == static_cast< aterm_appl>(make_term("x")));
+  aterm_appl a(read_term_from_string("f(f(x))"));
+  aterm_appl b(replace(a, atermpp::aterm_appl(read_term_from_string("f(x)")), atermpp::aterm_appl(read_term_from_string("x"))));
+  BOOST_CHECK(b == static_cast< aterm_appl>(read_term_from_string("f(x)")));
+  b = bottom_up_replace(a, atermpp::aterm_appl(read_term_from_string("f(x)")), atermpp::aterm_appl(read_term_from_string("x")));
+  BOOST_CHECK(b == static_cast< aterm_appl>(read_term_from_string("x")));
 
-  atermpp::aterm f = make_term("[]");
+  atermpp::aterm f = read_term_from_string("[]");
   atermpp::aterm g = replace(f, a, b);
-  BOOST_CHECK(f == make_term("[]"));
-  BOOST_CHECK(g == make_term("[]"));
+  BOOST_CHECK(f == read_term_from_string("[]"));
+  BOOST_CHECK(g == read_term_from_string("[]"));
 
-  atermpp::aterm x = make_term("g(f(x),f(y),h(f(x)))");
+  atermpp::aterm x = read_term_from_string("g(f(x),f(y),h(f(x)))");
   atermpp::aterm y = replace(x, fg_replacer());
   atermpp::aterm z = partial_replace(x, fg_partial_replacer());
 
-  BOOST_CHECK(y == make_term("f(f(x),f(y),h(f(x)))"));
-  BOOST_CHECK(z == make_term("f(f(x),f(y),h(f(x)))"));
+  BOOST_CHECK(y == read_term_from_string("f(f(x),f(y),h(f(x)))"));
+  BOOST_CHECK(z == read_term_from_string("f(f(x),f(y),h(f(x)))"));
 }
 
 int test_main(int argc, char* argv[])

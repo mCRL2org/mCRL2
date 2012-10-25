@@ -16,8 +16,8 @@
 #include <boost/test/minimal.hpp>
 
 #include <map>
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/indexed_set.h"
 
@@ -27,7 +27,7 @@ using namespace atermpp;
 void test_table()
 {
   table t(100, 75);
-  t.put(make_term("a"), make_term("f(a)"));
+  t.put(read_term_from_string("a"), read_term_from_string("f(a)"));
   BOOST_CHECK(t.keys().size() == 1);
 
   {
@@ -35,8 +35,8 @@ void test_table()
   }
   table t2 = t;
 
-  atermpp::aterm a = t.get(make_term("a"));
-  BOOST_CHECK(a == make_term("f(a)"));
+  atermpp::aterm a = t.get(read_term_from_string("a"));
+  BOOST_CHECK(a == read_term_from_string("f(a)"));
 
   std::map<int, table> x;
   x[2] = t;

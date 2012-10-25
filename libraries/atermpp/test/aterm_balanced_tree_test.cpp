@@ -14,8 +14,8 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -55,13 +55,13 @@ struct func
 
   atermpp::aterm operator()(atermpp::aterm x) const
   {
-    return make_term("f(" + x.to_string() + ")");
+    return read_term_from_string("f(" + x.to_string() + ")");
   } 
 }; 
 
 void test_aterm_balanced_tree()
 {
-  aterm_list q = static_cast<aterm_list>(make_term("[0,1,2,3,4,5,6,7,8,9]"));
+  aterm_list q = static_cast<aterm_list>(read_term_from_string("[0,1,2,3,4,5,6,7,8,9]"));
 
   aterm_balanced_tree qtree(q.begin(),10);
 

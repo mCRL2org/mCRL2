@@ -12,9 +12,9 @@
 #include <iostream>
 #include <set>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/utility.h"
 
 using namespace std;
 using namespace atermpp;
@@ -30,9 +30,9 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  atermpp::aterm t      = make_term("[1,2]");
-  aterm_appl a = static_cast<aterm_appl>(make_term("f(x)"));
-  aterm_list l = static_cast<aterm_list>(make_term("[3]"));
+  atermpp::aterm t      = read_term_from_string("[1,2]");
+  aterm_appl a = static_cast<aterm_appl>(read_term_from_string("f(x)"));
+  aterm_list l = static_cast<aterm_list>(read_term_from_string("[3]"));
   aterm T      = t;
   aterm_appl A  = a;
   aterm_list L  = l;

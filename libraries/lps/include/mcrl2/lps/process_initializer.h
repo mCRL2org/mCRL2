@@ -15,7 +15,6 @@
 #include <iterator>
 #include <cassert>
 #include <string>
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"

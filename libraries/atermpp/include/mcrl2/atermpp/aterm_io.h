@@ -32,7 +32,7 @@ bool ATwriteToBinaryFile(const aterm &t, FILE* file);
 /// This function parses a character string into an aterm.
 /// \param s A string
 /// \return The term corresponding to the string.
-aterm read_from_string(const std::string& s);
+aterm read_term_from_string(const std::string& s);
 
 /// \brief Read a aterm from a string in baf format.
 /// This function decodes a baf character string into an aterm.
@@ -70,17 +70,6 @@ bool write_to_named_binary_file(aterm t, const std::string& filename)
 {
   return ATwriteToNamedBinaryFile(t, filename.c_str()) == true;
 } 
-
-/// \brief Writes term t to file named filename in Streamable aterm Format (saf).
-/// \param t A term.
-/// \param filename A string
-/// \return True if the operation succeeded.
-/* inline
-bool write_to_named_saf_file(aterm t, const std::string& filename)
-{
-  return ATwriteToNamedSAFFile(t, filename.c_str()) == ATtrue;
-} */
-
 
 } // namespace atermpp
 

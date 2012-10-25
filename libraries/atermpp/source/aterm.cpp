@@ -1116,7 +1116,7 @@ sparse_term(int* c, char** s)
 
 /* aterm
 ATreadFromString(const char* string)  */
-aterm read_from_string(const std::string& s)
+aterm read_term_from_string(const std::string& s)
 {
   const char* string=s.c_str();
   int             c;

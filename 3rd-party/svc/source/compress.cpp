@@ -110,7 +110,7 @@ int CSureadATerm(CompressedStream* cs, aterm* term)
 
   if (BSreadString(cs->bs,buffer))
   {
-    *term=read_from_string(buffer);
+    *term=read_term_from_string(buffer);
     return 1;
   }
   else
