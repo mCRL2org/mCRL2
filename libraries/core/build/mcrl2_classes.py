@@ -176,10 +176,10 @@ choice(const process_expression& left, const process_expression& right)         
 '''
 
 PBES_CLASSES = r'''
-fixpoint_symbol()                                                                                                                                                                                  : public atermpp::aterm_appl |   | FixPoint    | A fixpoint symbol
-propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                 : public atermpp::aterm_appl |   | PropVarDecl | A propositional variable declaration
-pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                            | M | PBEqn       | A PBES equation
-pbes<Container>(const data::data_specification& data, const Container& equations, const atermpp::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                              | M | PBES        | A PBES
+fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl |   | FixPoint    | A fixpoint symbol
+propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl |   | PropVarDecl | A propositional variable declaration
+pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | M | PBEqn       | A PBES equation
+pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const atermpp::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                | M | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
@@ -197,7 +197,7 @@ exists(const data::variable_list& variables, const pbes_expression& body)       
 
 BOOLEAN_CLASSES = r'''
 boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl |   | BooleanEquation | A boolean equation
-boolean_equation_system<Container>(const Container& equations, const boolean_expression& initial_state)                                           | M | BES             | A boolean equation system
+boolean_equation_system<BooleanEquationContainer>(const BooleanEquationContainer& equations, const boolean_expression& initial_state)             | M | BES             | A boolean equation system
 '''
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
@@ -1128,9 +1128,10 @@ def print_dependencies(dependencies, message):
 def is_dependent_type(dependencies, type):
     if type in dependencies:
         return dependencies[type]
-    # TODO: handle template parameters
-    elif type.endswith('Container'):
-        return True
+    elif type == 'bes::BooleanEquationContainer':
+        return dependencies['bes::boolean_equation']
+    elif type == 'pbes_system::PbesEquationContainer':
+        return dependencies['pbes_system::pbes_equation']
     m = re.search('<(.+)>', type)
     if m != None:
         return dependencies[m.group(1)]

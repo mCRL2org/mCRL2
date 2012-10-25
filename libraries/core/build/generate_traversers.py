@@ -141,7 +141,7 @@ if __name__ == "__main__":
     identifier_string_dependencies  = find_dependencies(all_classes, 'core::identifier_string')
     action_label_dependencies       = find_dependencies(all_classes, 'lps::action_label')
 
-    #print_dependencies(action_label_dependencies, "action_label_dependencies")
+    print_dependencies(process_expression_dependencies, "process_expression_dependencies")
 
     # sort_expression_builder
     make_builder('../../data/include/mcrl2/data/builder.h'        , 'sort_expression_builder', 'add_sort_expressions', 'core::builder'                            , class_map, all_classes, 'data'            , 'data::sort_expression', sort_expression_dependencies, modifiability_map)
