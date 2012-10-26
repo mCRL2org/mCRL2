@@ -243,7 +243,7 @@ class control_flow_graph_algorithm
         atermpp::vector<pfnf_implication>& implications = k->implications();
         for (atermpp::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
         {
-          simplify(i->g());
+          i->g() = simplify(i->g());
         }
       }
     }
