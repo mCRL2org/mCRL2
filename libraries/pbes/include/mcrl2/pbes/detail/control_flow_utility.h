@@ -94,13 +94,13 @@ struct control_flow_simplify_quantifier_builder: public pbes_system::detail::sim
     if (tr::is_not(x))
     {
       term_type t = tr::not_arg(x);
-      if (tr::is_and(t)) // x = !(y && z)
+      if (tr::is_or(t)) // x = !(y && z)
       {
         term_type y = utilities::optimized_not(tr::left(t));
         term_type z = utilities::optimized_not(tr::right(t));
         result = utilities::optimized_and(y, z);
       }
-      else if (tr::is_or(t)) // x = !(y || z)
+      else if (tr::is_and(t)) // x = !(y || z)
       {
         term_type y = utilities::optimized_not(tr::left(t));
         term_type z = utilities::optimized_not(tr::right(t));
