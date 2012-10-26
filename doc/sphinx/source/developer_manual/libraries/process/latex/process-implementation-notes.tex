@@ -1,12 +1,17 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
+%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%\input{tcilatex}
+%%%%%%%%%\input{tcilatex}
+%%%%%%%%\input{tcilatex}
 %%%%%%%\input{tcilatex}
 %%%%%%\input{tcilatex}
-%%%%%\input{tcilatex}
 %%%%\input{tcilatex}
 %%%\input{tcilatex}
 %%\input{tcilatex}
@@ -23,7 +28,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Thursday, October 25, 2012 12:42:03}
+%TCIDATA{LastRevised=Friday, October 26, 2012 17:37:29}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -252,13 +257,15 @@ parameters do not play a role in alphabet reduction, they are omitted from
 the definitions.
 
 Let $A,A_{1}$ and $A_{2}$ be sets of multi action names. Then we define%
-\begin{eqnarray*}
-A^{\subseteq } &=&\{\alpha \mid \exists \beta .\alpha \beta \in A\} \\
-A_{1}\times A_{2} &=&\{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta
-\in A_{2}\} \\
-A_{1}\leftarrowtail A_{2} &=&\{\alpha \mid \exists \beta .\alpha \beta \in
-A_{1}\text{ and }\beta \in A_{2}\}
-\end{eqnarray*}
+\[
+\begin{array}{lll}
+A^{\subseteq } & = & \{\alpha \mid \exists \beta .\alpha \beta \in A\} \\ 
+A_{1}\mid A_{2} & = & \{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta
+\in A_{2}\} \\ 
+A_{1}-A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta \in A_{1}\text{
+and }\beta \in A_{2}\}%
+\end{array}%
+\]
 
 Let $C$ be a communication set, then we define%
 \begin{eqnarray*}
@@ -316,15 +323,14 @@ We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
 ,}}}t,W) & = & \alpha (p,W) \\ 
 \alpha (p\ll q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
 \alpha (p\parallel q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
-(p,W)\times \alpha (q,W) \\ 
+(p,W)\mid \alpha (q,W) \\ 
 \alpha (p\mathbin{\mathrel{\llfloor}}q,W) & = & \alpha (p,W)\cup \alpha
-(q,W)\cup \alpha (p,W)\times \alpha (q,W) \\ 
-\alpha (p\mid q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
-(p,W)\times \alpha (q,W) \\ 
+(q,W)\cup \alpha (p,W)\mid \alpha (q,W) \\ 
+\alpha (p\mid q,W) & = & \alpha (p,W)\mid \alpha (q,W) \\ 
 \alpha (\rho _{R}(p),W) & = & R(\alpha (p,W)) \\ 
 \alpha (\partial _{B}(p),W) & = & \partial _{B}(\alpha (p,W)) \\ 
 \alpha (\tau _{I}(p),W) & = & \tau _{I}(\alpha (p,W)) \\ 
-\alpha (\Gamma _{C}(p),W) & = & \Gamma _{C}(\alpha (p,W)) \\ 
+\alpha (\Gamma _{C}(p),W) & = & C(\alpha (p,W)) \\ 
 \alpha (\nabla _{V}(p),W) & = & \alpha (p,W)\cap (V\cup \{\tau \})%
 \end{array}%
 \]
@@ -343,225 +349,76 @@ During alphabet reduction, the following rules can be applied:%
 p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
 \bigtriangledown _{A\cap \alpha (p)}(p) & \text{otherwise}%
 \end{array}%
-\right. 
-\end{array}%
-\]%
-A property of $push_{\bigtriangledown }$ is the following: if $\left\langle
-p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\bigtriangledown
-}(p,A,\emptyset )$ then $p^{\prime }$ and $\bigtriangledown _{A}(p)$ are
-bisimulation equivalent.\newpage 
-
-\subsubsection{The mapping $push_{\odot }$}
-
-We define the mapping $push_{\odot }$, with $\odot \in \{\bigtriangledown
-,\subseteq ,\partial \}$ as follows, where $\left\langle p^{\prime
-},A_{p}^{\prime }\right\rangle =$ $push_{\odot }(p,A,W)$ and $\left\langle
-q^{\prime },A_{q}^{\prime }\right\rangle =push_{\odot }(q,A,W)$, unless told
-otherwise. Note that this specification is only valid for pCRL expressions%
-\[
-\begin{tabular}{l|l}
-$x$ & $push_{\odot }(x,A,W)$ \\ \hline
-$\delta $ & $\left\langle \delta ,\emptyset \right\rangle $ \\ 
-$P$ & $%
-\begin{array}{l}
-\left\{ 
-\begin{array}{ll}
-\left\langle P,\emptyset \right\rangle & \text{if }P\in W \\ 
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & \text{if }P\notin W%
-\end{array}%
-\right. \\ 
-\qquad \text{where }\left\{ \text{ }%
-\begin{array}{l}
-P=p\text{ is the equation of process }P \\ 
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle =push_{\odot
-}(p,A,W\cup \{P\})%
-\end{array}%
 \right.%
 \end{array}%
-$ \\ 
-$p+q$ & $\left\langle f_{\odot }(x,A),A_{p}^{\prime }\cup A_{q}^{\prime
-}\right\rangle $ \\ 
-$p\cdot q$ & $\left\langle f_{\odot }(x,A),A_{p}^{\prime }\cup A_{q}^{\prime
-}\right\rangle $ \\ 
-$c\rightarrow p$ & $\left\langle f_{\odot }(x,A),A_{p}^{\prime
-}\right\rangle $ \\ 
-$c\rightarrow p\diamond q$ & $\left\langle f_{\odot }(x,A),A_{p}^{\prime
-}\cup A_{q}^{\prime }\right\rangle $ \\ 
-$\Sigma _{d:D}p$ & $\left\langle f_{\odot }(x,A),A_{p}^{\prime
-}\right\rangle $ \\ 
-$p^{\mathbin{\mbox{\aap ,}}}t$ & $\left\langle f_{\odot }(x,A),A_{p}^{\prime
-}\right\rangle $ \\ 
-$p\ll q$ & $push_{\odot }(p,A,W)$%
-\end{tabular}%
 \]%
-where%
-\begin{eqnarray*}
-f_{\bigtriangledown }(a,A) &=&\nabla _{A}(a) \\
-f_{\subseteq }(a,A) &=&\nabla _{A\setminus \{\tau \}}(a) \\
-f_{\partial }(a,A) &=&\partial _{A}(a)
-\end{eqnarray*}%
-An alternative formulation for $P$ that produces less equations is%
-\[
-\begin{tabular}{l|l}
-$P$ & $%
-\begin{array}{l}
-\left\{ 
-\begin{array}{ll}
-\left\langle Q_{P,A,\odot },\emptyset \right\rangle & \text{if }P\in W \\ 
-push_{\odot }(p^{\prime },A,W) & \text{if }P\notin W%
-\end{array}%
-\right. \\ 
-\qquad \text{where }\left\{ \text{ }%
-\begin{array}{l}
-P=p\text{ is the equation of process }P \\ 
-Q_{P,A,\odot }=p^{\prime }\text{ is an added process equation}%
-\end{array}%
-\right.%
-\end{array}%
-$%
-\end{tabular}%
-\]
-
 \newpage
 
 \subsubsection{The mapping $push_{\bigtriangledown }$}
 
-We define the mapping $push_{\bigtriangledown }$ as follows, where $%
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle =$ $%
-push_{\bigtriangledown }(p,A,W)$ and $\left\langle q^{\prime },A_{q}^{\prime
-}\right\rangle =push_{\bigtriangledown }(q,A,W)$, unless told otherwise.%
+We define the mapping $push_{\bigtriangledown }$ as follows%
 \[
-\begin{tabular}{l|l}
+\begin{tabular}{ll}
 $x$ & $push_{\bigtriangledown }(x,A,W)$ \\ \hline
-$a$ & $\left\{ 
+$p$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (x)}(p)$ if $p$ is a pCRL
+expression} \\ 
+$p\parallel q$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\nabla _{A\cap \alpha (x)}(p^{\prime }\parallel q^{\prime }) \\ 
+\text{where}\left\{ \text{ }%
+\begin{array}{lll}
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq },W) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A-\alpha (p)),W)%
+\end{array}%
+\right. 
+\end{array}%
+$} \\ 
+$p\mathbin{\mathrel{\llfloor}}q$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\left\{ 
 \begin{array}{ll}
-\left\langle a,\{N(a)\}\right\rangle & \text{if }N(a)\in A \\ 
-\left\langle \delta ,\emptyset \right\rangle & \text{otherwise}%
+\delta  & \text{if }A\cap \alpha (p)=\emptyset  \\ 
+\nabla _{A\cap \alpha (x)}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
+}) & \text{otherwise,}%
 \end{array}%
-\right. $ \\ 
-$\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
-A^{\prime }=A\cap \{\tau \}$ \\ 
-$p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
-\}}(p^{\prime }\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where}%
-\left\{ \text{ }%
+\right.  \\ 
+\text{where}\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A,W) \\ 
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime },W) \\ 
-A^{\prime } & = & A\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
-A_{p}^{\prime }\times A_{q}^{\prime })%
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq },W) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A-\alpha (p)),W)%
 \end{array}%
-\right. $ \\ 
-$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle \nabla _{A^{\prime
-}\setminus \{\tau \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
-}),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
+\right. 
+\end{array}%
+$} \\ 
+$p\mid q$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+\delta  & \text{if }A-\alpha (p)=\emptyset  \\ 
+\nabla _{A\cap \alpha (x)}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
+}) & \text{otherwise,}%
+\end{array}%
+\right.  \\ 
+\text{where}\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A,W) \\ 
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime },W) \\ 
-A^{\prime } & = & A\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
-A_{p}^{\prime }\times A_{q}^{\prime })%
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq },W) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A-\alpha (p)),W)%
 \end{array}%
-\right. $ \\ 
-$p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
-}\mid q^{\prime }),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
-\begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A,W) \\ 
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(q,A\cup A\leftarrowtail A_{p}^{\prime },W) \\ 
-A^{\prime } & = & A\cap (A_{p}^{\prime }\times A_{q}^{\prime })%
+\right. 
 \end{array}%
-\right. $ \\ 
-$\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),R(A_{p}^{\prime
-})\right\rangle \text{ where }\left\langle p^{\prime },A_{p}^{\prime
-}\right\rangle =$ $push_{\bigtriangledown }(p,R^{-1}(A),W)$ \\ 
-$\partial _{B}(p)$ & $push_{\bigtriangledown }(p,\partial _{B}(A),W)$ \\ 
-$\tau _{I}(p)$ & $\left\langle \nabla _{A\setminus \{\tau \}}(\tau
-_{I}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
-\begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(p,Act,W) \\ 
-A^{\prime } & = & A\cap \tau _{I}(A_{p}^{\prime })%
-\end{array}%
-\right. $ \\ 
-$\Gamma _{C}(p)$ & $\left\langle \nabla _{A\setminus \{\tau \}}(\Gamma
-_{C}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ \text{ }%
-\begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & 
-push_{\bigtriangledown }(p,A\cup C^{-1}(A),W) \\ 
-A^{\prime } & = & A\cap C(A_{p}^{\prime })%
-\end{array}%
-\right. $ \\ 
-$\nabla _{V}(p)$ & $push_{\bigtriangledown }(p,A\cap V,W)$%
-\end{tabular}%
-\]%
-\[
-\begin{tabular}{l|l}
-$x$ & $push_{\bigtriangledown }(x,Act,W)$ \\ \hline
-$p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
-\}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }),A^{\prime
-}\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime
-}\cup A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
-$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle \nabla _{A^{\prime
-}\setminus \{\tau \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
-}),A^{\prime }\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\cup
-A_{q}^{\prime }\cup A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
-$p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
-}\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where }A^{\prime
-}=A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
-$\partial _{B}(p)$ & $push_{\partial }(p,B,W)$%
-\end{tabular}%
-\]
-
-\newpage
-
-\subsubsection{The mapping $push_{\subseteq }$}
-
-We define the mapping $push_{\subseteq }$ as follows, where $\left\langle
-p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\subseteq }(p,A,W)$ and $%
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle =push_{\subseteq
-}(q,A,W)$, unless told otherwise.%
-\[
-\begin{tabular}{l|l}
-$x$ & $push_{\subseteq }(x,A,W)$ \\ \hline
-$a$ & $\left\langle \nabla _{A^{\prime }}(a),A^{\prime }\right\rangle \text{
-where }A^{\prime }=A^{\subseteq }\cap \{N(a)\}$ \\ 
-$\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
-A^{\prime }=A\cap \{\tau \}$ \\ 
-$p\parallel q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau
-\}}(p^{\prime }\parallel q^{\prime }),A^{\prime }\right\rangle \text{ where }%
-A^{\prime }=A^{\subseteq }\cap (A_{p}^{\prime }\cup A_{q}^{\prime }\cup
-A_{p}^{\prime }\times A_{q}^{\prime })$ \\ 
-$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle \nabla _{A^{\prime
-}\setminus \{\tau \}}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
-}),A^{\prime }\right\rangle \text{ where }A^{\prime }=A^{\subseteq }\cap
-(A_{p}^{\prime }\cup A_{q}^{\prime }\cup A_{p}^{\prime }\times A_{q}^{\prime
-})$ \\ 
-$p\mid q$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(p^{\prime
-}\mid q^{\prime }),A^{\prime }\right\rangle \text{ where }A^{\prime
-}=A^{\subseteq }\cap (A_{p}^{\prime }\times A_{q}^{\prime })$ \\ 
-$\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),R(A_{p}^{\prime
-})\right\rangle \text{ where }\left\langle p^{\prime },A_{p}^{\prime
-}\right\rangle =$ $push_{\subseteq }(p,R^{-1}(A),W)$ \\ 
-$\partial _{B}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }%
-A^{\prime }=\partial _{B}(A)$ \\ 
-$\tau _{I}(p)$ & $\left\langle \nabla _{A^{\prime }\setminus \{\tau \}}(\tau
-_{I}(p^{\prime })),A^{\prime }\right\rangle \text{ where }A^{\prime }=A\cap
-\tau _{I}(A_{p}^{\prime })\text{ }$ \\ 
-$\Gamma _{C}(p)$ & $\left\langle \nabla _{A^{\prime }}(\Gamma _{C}(p^{\prime
-})),A^{\prime \prime }\right\rangle \text{ where}\left\{ \text{ }%
-\begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\subseteq
-}(p,A\cup C^{-1}(A),W) \\ 
-A^{\prime } & = & A\cap C(A_{p}^{\prime }) \\ 
-A^{\prime \prime } & = & A^{\subseteq }\cap C(A_{p}^{\prime })%
-\end{array}%
-\right. $ \\ 
-$\nabla _{V}(p)$ & $push_{\subseteq }(p,A^{\prime })\text{ where }A^{\prime
-}=A^{\subseteq }\cap V$%
+$} \\ 
+$\rho _{R}(p)$ & \multicolumn{1}{|l}{$\rho _{R}(p^{\prime })$ where $%
+p^{\prime }=$ $push_{\bigtriangledown }(p,R^{-1}(A),W)$} \\ 
+$\partial _{B}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown
+}(p,\partial _{B}(A),W)$} \\ 
+$\tau _{I}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (x)}(\tau
+_{I}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown }(p,Act,W)$}
+\\ 
+$\Gamma _{C}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (x)}(\Gamma
+_{C}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown }(p,A\cup
+C^{-1}(A),W)$} \\ 
+$\nabla _{V}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown }(p,A\cap V,W)
+$}%
 \end{tabular}%
 \]
 
