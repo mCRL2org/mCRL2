@@ -7,6 +7,38 @@ Previous releases of mCRL2
 
 This page shows a list of historic releases of mCRL2.
 
+Release 201210.0
+----------------
+
+.. |bin_w32_201210.0| replace:: Windows Installer (32-bit)
+.. _bin_w32_201210.0: http://www.mcrl2.org/download/release/mcrl2-201210.0_x86.exe
+
+.. |bin_w64_201210.0| replace:: Windows Installer (64-bit)
+.. _bin_w64_201210.0: http://www.mcrl2.org/download/release/mcrl2-201210.0_x86_64.exe
+
+.. |bin_osx_201210.0| replace:: Darwin package
+.. _bin_osx_201210.0: http://www.mcrl2.org/download/release/mcrl2-201210.0-Darwin.dmg
+
+.. |bin_ppa_201210.0| replace:: PPA release
+.. _bin_ppa_201210.0: https://launchpad.net/~mcrl2/+archive/release-ppa
+
+.. |src_tgz_201210.0| replace:: GZipped Tarball
+.. _src_tgz_201210.0: http://www.mcrl2.org/download/release/mcrl2-201210.0.tar.gz
+
+  +------------------------+------------------------------------------+
+  |Operating system        |Release (201210.0)                        |
+  +========================+==========================================+
+  |Windows                 ||bin_w32_201210.0|_                       |
+  |                        +------------------------------------------+
+  |                        ||bin_w64_201210.0|_                       |
+  +------------------------+------------------------------------------+
+  |Linux                   ||ubuntu|_                                 |
+  +------------------------+------------------------------------------+
+  |Mac OS X (Darwin)       ||bin_osx_201210.0|_                       |
+  +------------------------+------------------------------------------+
+  |Source                  ||src_tgz_201210.0|_                       |
+  +------------------------+------------------------------------------+
+
 Release 201202.0
 ----------------
 
