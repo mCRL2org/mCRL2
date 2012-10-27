@@ -122,7 +122,7 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
 
     for (; !rules.empty(); rules=pop_front(rules))
     {
-      if (element_at(aterm_cast<const aterm_list>(rules.front()),2).function().arity() == arity + 1)
+      if (aterm_cast<aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),2)).function().arity() == arity + 1)
       {
         const atermpp::aterm_appl &cond = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),1));
         atermpp::term_list <variable_list> vars = push_front(atermpp::term_list <variable_list>(),get_vars(cond));

@@ -72,6 +72,14 @@ class aterm
       m_term=t.m_term;
     }
 
+    // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
+    // AS_INT and AS_LIST. 
+    const function_symbol &function() const
+    {
+      return m_term->function();
+    }
+    
+
   public: // Should be protected;
     /// \brief Constructor.
     /// \detail The function symbol must have arity 0. This function
@@ -118,10 +126,10 @@ class aterm
 
     /// \brief Returns the function symbol belonging to a term.
     /// \return The function symbol of this term.
-    const function_symbol &function() const
+    /* const function_symbol &function() const
     {
       return m_term->function();
-    }
+    } */
 
     /// \brief Returns the type of this term.
     /// Result is one of AT_APPL, AT_INT,

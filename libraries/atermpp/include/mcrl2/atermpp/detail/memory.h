@@ -80,7 +80,7 @@ t
 {
   assert(t != aterm());
   assert(t.address()->reference_count()>0);
-  assert(t.function().name().size()!=0);
+  assert(aterm_cast<aterm_appl>(t).function().name().size()!=0);
 }
 
 inline size_t term_size(const detail::_aterm *t)

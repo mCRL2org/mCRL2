@@ -39,7 +39,7 @@ static bool gsOccurs(const aterm &Elt, const aterm &t)
     // check occurrences of Elt in the arguments/elements of Term
     if (Term.type() == AT_APPL)
     {
-      function_symbol Head = Term.function();
+      function_symbol Head = aterm_cast<aterm_appl>(Term).function();
       const size_t NrArgs = Head.arity();
       for (size_t i = 0; i < NrArgs && !Result; i++)
       {

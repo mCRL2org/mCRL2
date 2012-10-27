@@ -60,7 +60,7 @@ static bool remove_sort_decl(aterm_appl sort)
 
 static bool remove_func_decl(aterm_appl func)
 {
-  const std::string name = func(0).function().name();
+  const std::string name = aterm_cast<aterm_appl>(func(0)).function().name();
   if (remove_bools && ("T#"==name || "F#"==name))
   {
     return true;
@@ -137,7 +137,7 @@ static aterm_appl find_type(aterm_appl a, aterm_list args, aterm_list types = at
   }
   for (aterm_list l=types; !l.empty(); l=l.tail())
   {
-    if (a.function().name()==(aterm_cast<aterm_appl>(l.front()))(0).function().name())
+    if (a.function().name()==aterm_cast<aterm_appl>((aterm_cast<aterm_appl>(l.front()))(0)).function().name())
     {
       if (is_domain(args,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1))))
       {

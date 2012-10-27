@@ -735,8 +735,6 @@ readFromTextFile(int* c, FILE* file)
   return term;
 }
 
-/*}}}  */
-/*{{{  aterm ATreadFromFile(FILE *file) */
 
 /**
  * Read an aterm from a file that could be binary or text.
@@ -755,7 +753,7 @@ aterm read_from_file(FILE* file)
       / * Might be a shared text file * /
       return AT_readFromSharedTextFile(&c, file);   */
   }
-  else if (c == SAF_IDENTIFICATION_TOKEN)
+  /* else if (c == SAF_IDENTIFICATION_TOKEN)
   {
     int token = ungetc(SAF_IDENTIFICATION_TOKEN, file);
     if (token != SAF_IDENTIFICATION_TOKEN)
@@ -764,7 +762,7 @@ aterm read_from_file(FILE* file)
     }
 
     return ATreadFromSAFFile(file);
-  }
+  } */
   else
   {
     /* Probably a text file */

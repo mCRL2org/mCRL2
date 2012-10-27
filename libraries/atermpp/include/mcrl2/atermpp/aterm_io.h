@@ -14,7 +14,7 @@
 
 
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/detail/safio.h"
+// #include "mcrl2/atermpp/detail/safio.h"
 #include "mcrl2/atermpp/detail/bafio.h"
 
 namespace atermpp
@@ -65,11 +65,10 @@ bool write_to_named_text_file(aterm t, const std::string& filename);
 /// \param t A term.
 /// \param filename A string
 /// \return True if the operation succeeded.
-inline
-bool write_to_named_binary_file(aterm t, const std::string& filename)
+/* inline bool write_to_named_binary_file(aterm t, const std::string& filename)
 {
   return ATwriteToNamedBinaryFile(t, filename.c_str()) == true;
-} 
+} */
 
 } // namespace atermpp
 

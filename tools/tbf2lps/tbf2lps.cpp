@@ -106,7 +106,8 @@ class tbf2lps_tool: public input_output_tool
       {
         mCRL2log(verbose) << "writing mCRL2 LPS to stdout..." << std::endl;
 
-        ATwriteToSAFFile(spec, stdout);
+        // ATwriteToSAFFile(spec, stdout);
+        ATwriteToBinaryFile(spec, stdout);
       }
       else
       {
@@ -119,7 +120,8 @@ class tbf2lps_tool: public input_output_tool
           throw mcrl2::runtime_error("cannot open output file '" + output_filename() + "'");
         }
 
-        ATwriteToSAFFile(spec,outstream);
+        ATwriteToBinaryFile(spec,outstream);
+        // ATwriteToSAFFile(spec,outstream);
 
         fclose(outstream);
       }

@@ -55,7 +55,7 @@ static size_t calcUniqueAFuns(
 
     case AT_APPL:
     {
-      function_symbol sym = t.function(); 
+      function_symbol sym = aterm_cast<aterm_appl>(t).function(); 
       assert(detail::at_lookup_table.size()>sym.number());
       nr_unique = count[sym.number()]>0 ? 0 : 1;
       count[sym.number()]++;
@@ -574,7 +574,7 @@ static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &inde
       sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST);
       break;
     case AT_APPL:
-      sym = t.function();
+      sym = aterm_cast<aterm_appl>(t).function();
       break;
     default:
       throw std::runtime_error("get_top_symbol: illegal term (" + t.to_string() + ")");
@@ -976,7 +976,7 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
       case AT_APPL:
       {
         size_t arity;
-        function_symbol sym = t.function();
+        function_symbol sym = aterm_cast<aterm_appl>(t).function();
         trm_sym = &sym_entries[index[sym.number()]];
         assert(sym == trm_sym->id);
         arity = sym.arity();

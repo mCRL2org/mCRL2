@@ -353,14 +353,6 @@ class shared_subset
     }
 };
 
-template <typename T>
-struct aterm_traits<shared_subset<T> >
-{
-  static void protect(const shared_subset<T> &subset) { subset.m_bdd_root.protect(); }
-  static void unprotect(const shared_subset<T> &subset) { subset.m_bdd_root.unprotect(); }
-  static void mark(const shared_subset<T> &subset) { subset.m_bdd_root.mark(); }
-};
-
 } // namespace atermpp
 
 #endif

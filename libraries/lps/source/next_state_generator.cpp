@@ -518,9 +518,9 @@ void next_state_generator::iterator::increment()
 
   std::vector <action> actions;
   actions.reserve(m_summand->action_label.size());
+  action_argument_converter aac(m_generator->m_rewriter,m_substitution);
   for (size_t i = 0; i < m_summand->action_label.size(); i++)
   {
-    action_argument_converter aac(m_generator->m_rewriter,m_substitution);
     const std::vector<rewriter_expression_t> &action_arguments=m_summand->action_label[i].arguments;
     actions.push_back(action(m_summand->action_label[i].label, data_expression_list(action_arguments.begin(), action_arguments.end(),aac)));
   }

@@ -53,7 +53,7 @@ class term_list_iterator: public boost::iterator_facade<
     term_list_iterator(const aterm &l)
       : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l.address()))
     { 
-      assert(l.type()==AT_LIST);
+      assert(l.type_is_list());
     } 
 
     /// \brief Constructor.

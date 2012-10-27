@@ -114,7 +114,7 @@ class term_list:public aterm
       term_list<Term> result;
       while (first != last)
       {
-        const Term &t=*(--last);
+        const typename Iter::value_type &t=*(--last);
         result = push_front(result, convert_to_aterm(t));
       }
       m_term=result.address();
@@ -137,7 +137,7 @@ class term_list:public aterm
       std::vector<Term> temporary_store;  // This can be made more efficient...
       while (first != last)
       {
-        const Term t= *first;
+        const Term &t= *first;
         temporary_store.push_back(t);
         first++;
       }

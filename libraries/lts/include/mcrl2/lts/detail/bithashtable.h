@@ -92,7 +92,7 @@ class bit_hash_table
         case AT_APPL:
           calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
           {
-            size_t len = t.function().arity();
+            size_t len = aterm_cast<aterm_appl>(t).function().arity();
             for (size_t i=0; i<len; i++)
             {
               calc_hash_aterm(((aterm_appl) t)(i),sh_a,sh_b,sh_c,sh_i);

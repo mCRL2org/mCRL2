@@ -150,7 +150,6 @@ BOOST_AUTO_TEST_CASE(test_abp)
   );
 
   specification spec = parse_linear_process_specification(text);
-
   test_initial_state_successors(spec);
   // Test all 2**3 possible feature flags
   for (size_t i = 0; i < 8; i++)

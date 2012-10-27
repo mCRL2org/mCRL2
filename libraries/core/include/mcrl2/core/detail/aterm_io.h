@@ -101,7 +101,8 @@ void save_aterm(aterm term, const std::string& filename, bool binary = true)
   bool result;
   if (binary)
   {
-    result = ATwriteToSAFFile(term, stream);
+    // result = ATwriteToSAFFile(term, stream);
+    result = ATwriteToBinaryFile(term, stream);
   }
   else
   {

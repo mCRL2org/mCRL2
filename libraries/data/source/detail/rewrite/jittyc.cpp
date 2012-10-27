@@ -298,7 +298,7 @@ static void term2seq(const aterm &t, aterm_list* s, size_t *var_cnt)
     }
     else
     {
-      size_t arity = t.function().arity(); 
+      size_t arity = aterm_cast<aterm_appl>(t).function().arity(); 
 
       *s = push_front<aterm>(*s, atermpp::aterm_appl(afunF,atermpp::aterm_cast<const aterm_appl>(t)(0),dummy,dummy));
 
@@ -342,7 +342,7 @@ static void get_used_vars_aux(const aterm &t, aterm_list* vars)
     }
     else
     {
-      size_t a = t.function().arity(); 
+      size_t a = aterm_cast<aterm_appl>(t).function().arity(); 
       for (size_t i=0; i<a; i++)
       {
         get_used_vars_aux(aterm_cast<const aterm_appl>(t)(i),vars);
@@ -909,11 +909,11 @@ static aterm_list get_vars(const aterm &a)
   {
     return aterm_list();
   }
-  else if (a.type() == AT_APPL && gsIsDataVarId((aterm_appl) a))
+  else if (a.type_is_appl() && gsIsDataVarId((aterm_appl) a))
   {
     return make_list<aterm>(a);
   }
-  else if (a.type()==AT_LIST)
+  else if (a.type_is_list())
   {
     aterm_list l;
     for (aterm_list m=(aterm_list) a; !m.empty(); m=m.tail())
@@ -925,7 +925,7 @@ static aterm_list get_vars(const aterm &a)
   else     // a.type() == AT_APPL
   {
     aterm_list l;
-    size_t arity = a.function().arity();
+    size_t arity = aterm_cast<aterm_appl>(a).function().arity();
     for (size_t i=0; i<arity; ++i)
     {
       l = get_vars(((aterm_appl) a)(i))+l;
@@ -1979,19 +1979,19 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
       if (used[cur_arg])
       {
         fprintf(f,"%sconst atermpp::aterm_appl &%s = arg%lu; // S1\n",whitespace(d*2),
-                aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,cur_arg);
+                aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree(0))(0)).function().name().c_str()+1,cur_arg);
       }
       else
       {
         fprintf(f,"%sconst atermpp::aterm_appl &%s = arg_not_nf%lu; // S1\n",whitespace(d*2),
-                aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,cur_arg);
+                aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree(0))(0)).function().name().c_str()+1,cur_arg);
         nnfvars = push_front<aterm>(nnfvars,tree(0));
       }
     }
     else
     {
       fprintf(f,"%sconst atermpp::aterm_appl &%s = aterm_cast<const atermpp::aterm_appl>(%s%lu(%lu)); // S2\n",whitespace(d*2),
-              aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg);
+              aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree(0))(0)).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg);
     }
     implement_tree_aux(f,aterm_cast<aterm_appl>(tree(1)),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
     return;
@@ -2002,7 +2002,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     {
       fprintf(f,"%sif (%s==arg%lu) // M\n"
               "%s{\n",
-              whitespace(d*2),aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,cur_arg,
+              whitespace(d*2),aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree(0))(0)).function().name().c_str()+1,cur_arg,
               whitespace(d*2)
              );
     }
@@ -2010,7 +2010,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     {
       fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%lu(%lu))) // M\n"
               "%s{\n",
-              whitespace(d*2),aterm_cast<aterm_appl>(tree(0))(0).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
+              whitespace(d*2),aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree(0))(0)).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
               whitespace(d*2)
              );
     }
@@ -2739,7 +2739,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Print defs
   //
   fprintf(f,
-          "#define isAppl(x) (x.function().number() != %li)\n"
+          "#define isAppl(x) (atermpp::aterm_cast<atermpp::aterm_appl>(x).function().number() != %li)\n"
           "\n", static_cast<aterm_appl>(data::variable("x", data::sort_bool::bool_())).function().number()
          );
 
@@ -3076,7 +3076,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 //       "  std::vector<atermpp::aterm> args(arity_u+arity_t-1);\n"
       "  new (&args[0]) aterm(head1);\n"
       "  size_t function_index;\n"
-      "  if ((head1.function().number()==%ld) && ((function_index = atermpp::aterm_int(head1).value()) < %zu) )\n"
+      "  if ((atermpp::aterm_cast<atermpp::aterm_appl>(head1).function().number()==%ld) && ((function_index = atermpp::aterm_int(head1).value()) < %zu) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
@@ -3166,7 +3166,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    // Term t has the shape #REWR#(t1,...,tn)\n"
       "    const atermpp::aterm &head = t(0);\n"
-      "    if (head.function().number()==%ld)\n"
+      "    if (atermpp::aterm_cast<atermpp::aterm_appl>(head).function().number()==%ld)\n"
       "    {\n"
       "      const size_t function_index = aterm_cast<const atermpp::aterm_int>(head).value();\n"
       "      if (function_index < %zu )\n"

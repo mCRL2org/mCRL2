@@ -215,6 +215,13 @@ class term_appl:public aterm
       return *this;
     }
 
+    /// \brief Returns the function symbol belonging to an aterm_appl.
+    /// \return The function symbol of this term.
+    const function_symbol &function() const
+    {
+      return m_term->function();
+    }
+
     /// \brief Returns the number of arguments of this term.
     /// \return The number of arguments of this term.
     size_type size() const

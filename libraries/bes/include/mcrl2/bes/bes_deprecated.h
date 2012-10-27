@@ -190,7 +190,8 @@ inline atermpp::aterm_appl apply_pair_symbol(const atermpp::aterm &t1, const ate
 static
 inline bool is_pair(const atermpp::aterm &t)
 {
-  return t.function()==PAIR();
+  using namespace atermpp;
+  return aterm_cast<aterm_appl>(t).function()==PAIR();
 }
 
 static size_t largest_power_of_2_smaller_than(size_t i)
@@ -647,17 +648,20 @@ inline bool is_dummy(const bes_expression& b)
 
 inline bool is_and(const bes_expression& b)
 {
-  return b.function()==AFunBESAnd();
+  using namespace atermpp;
+  return aterm_cast<aterm_appl>(b).function()==AFunBESAnd();
 }
 
 inline bool is_or(const bes_expression& b)
 {
-  return b.function()==AFunBESOr();
+  using namespace atermpp;
+  return aterm_cast<aterm_appl>(b).function()==AFunBESOr();
 }
 
 inline bool is_if(const bes_expression& b)
 {
-  return b.function()==AFunBESIf();
+  using namespace atermpp;
+  return aterm_cast<aterm_appl>(b).function()==AFunBESIf();
 }
 
 inline bes_expression lhs(const bes_expression& b)
@@ -2541,17 +2545,18 @@ class boolean_equation_system
     {
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
+      using namespace atermpp;
       if (internal_opt_store_as_tree)
       {
         atermpp::aterm t=variable_index.get(current_var);
         if (!is_pair(t))
         {
-          f << t.function().name();
+          f << aterm_cast<aterm_appl>(t).function().name();
         }
         else
         {
-          f << static_cast<atermpp::aterm_appl>(t)(0).function().name();
-          print_tree_rec('(',static_cast<atermpp::aterm_appl>(t)(1),f);
+          f << aterm_cast<aterm_appl>(aterm_cast<atermpp::aterm_appl>(t)(0)).function().name();
+          print_tree_rec('(',aterm_cast<atermpp::aterm_appl>(t)(1),f);
           f << ")";
         }
       }

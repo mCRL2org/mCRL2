@@ -182,7 +182,7 @@ aterm NextState::getTreeElement(const aterm &tree1, size_t index)
   {
     size_t t = (m+n)/2;
 
-    assert((tree.type() == AT_APPL) && (tree.function()==info.pairAFun));
+    assert(tree.type_is_appl() && (atermpp::aterm_cast<atermpp::aterm_appl>(tree).function()==info.pairAFun));
 
     if (index < t)
     {
@@ -727,7 +727,7 @@ static bool only_action(const aterm_list &ma, const char* action)
 
   for (aterm_list::const_iterator i=ma.begin(); i!=ma.end(); ++i) 
   {
-    if (strcmp(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(*i)(0))(0).function().name().c_str(),action))
+    if (strcmp(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(*i)(0))(0)).function().name().c_str(),action))
     {
       return false;
     }
@@ -927,7 +927,7 @@ void NextStateGenerator::SetTreeStateVars(const aterm &tree, aterm_list* vars)
     {
       return;
     }
-    else if (tree.function()==info.pairAFun)
+    else if (aterm_cast<aterm_appl>(tree).function()==info.pairAFun)
     {
       SetTreeStateVars(atermpp::aterm_cast<const atermpp::aterm_appl>(tree)(0),vars);
       SetTreeStateVars(atermpp::aterm_cast<const atermpp::aterm_appl>(tree)(1),vars);

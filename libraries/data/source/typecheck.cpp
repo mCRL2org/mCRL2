@@ -313,7 +313,7 @@ static aterm gsSubstValuesTable(const table &Substs, const aterm &t)
   if (Term.type() == AT_APPL)
   {
     //Term is an aterm_appl; distribute substitutions over the arguments
-    atermpp::function_symbol Head = Term.function();
+    atermpp::function_symbol Head = aterm_cast<aterm_appl>(Term).function();
     const size_t NrArgs = Head.arity();
     if (NrArgs > 0)
     {
