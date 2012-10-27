@@ -237,16 +237,15 @@ _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin,
 template <class Term>
 _aterm* term_appl1(const function_symbol &sym, const Term &arg0)
 {
-  detail::_aterm* cur, *prev, **hashspot;
   assert(sym.arity()==1);
   CHECK_TERM(arg0);
 
   HashNumber hnr = COMBINE(sym.number(), arg0);
 
-  prev = NULL;
-  hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
+  detail::_aterm* prev = NULL;
+  detail::_aterm** hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
 
-  cur = *hashspot;
+  detail::_aterm* cur = *hashspot;
   while (cur)
   {
     if ((sym==cur->function()) && 
@@ -280,18 +279,15 @@ _aterm* term_appl1(const function_symbol &sym, const Term &arg0)
 template <class Term>
 _aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Term &arg1)
 {
-  detail::_aterm* cur, *prev, **hashspot;
-
   assert(sym.arity()==2);
 
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
   HashNumber hnr = COMBINE(COMBINE(sym.number(), arg0),arg1);
 
-  prev = NULL;
-  hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
-
-  cur = *hashspot;
+  detail::_aterm** hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
+  detail::_aterm* prev = NULL;
+  detail::_aterm* cur = *hashspot;
   while (cur)
   {
     if (cur->function()==sym && 

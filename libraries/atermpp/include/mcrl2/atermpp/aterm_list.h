@@ -261,24 +261,24 @@ term_list<Term> push_front(const term_list<Term> &l, const Term &elem);
 /// \return The list with an element appended to it.
 template <typename Term>
 inline
-term_list<Term> push_back(term_list<Term> list, const Term &elem)
+term_list<Term> push_back(const term_list<Term> &l, const Term &elem)
 {
-  size_t len = list.size();
+  size_t len = l.size();
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
 
   /* Collect all elements of list in buffer */
-  for (size_t i=0; i<len; i++)
+  size_t j=0;
+  for (typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i, ++j)
   {
-    buffer[i] = list.front().address();
-    list = list.tail();
+    buffer[j] = i->address();
   }
 
   term_list<Term> result=push_front(term_list<Term>(),elem);
 
   /* Insert elements at the front of the list */
-  for (size_t i=len; i>0; i--)
+  for (size_t j=len; j>0; j--)
   {
-    result = push_front(result, Term(buffer[i-1]));
+    result = push_front(result, Term(buffer[j-1]));
   }
 
   return result;
@@ -299,13 +299,12 @@ term_list<Term> pop_front(const term_list<Term> &l)
 /// \return The reversed list.
 template <typename Term>
 inline
-term_list<Term> reverse(term_list<Term> l)
+term_list<Term> reverse(const term_list<Term> &l)
 {
   term_list<Term> result;
-  while (!l.empty())
+  for(typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    result = push_front(result, l.front());
-    l = l.tail(); 
+    result = push_front(result, *i);
   }
   return result;
 }
@@ -388,18 +387,17 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
 
   term_list<Term> result = m;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
-  /* Collect the elements of list1 in buffer */
-  term_list<Term> list1=l;
-  for (size_t i=0; i<len; i++)
+  
+  size_t j=0;
+  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++j)
   {
-    buffer[i] = list1.front().address();
-    list1 = list1.tail();
+    buffer[j] = i->address();
   }
 
   /* Insert elements at the front of the list */
-  for (size_t i=len; i>0; i--)
+  for (size_t j=len; j>0; j--)
   {
-    result = push_front(result, Term(buffer[i-1]));
+    result = push_front(result, Term(buffer[j-1]));
   }
 
   return result;

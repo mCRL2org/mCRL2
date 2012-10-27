@@ -47,14 +47,13 @@ class aterm
  
     void free_term() const;
 
-    void decrease_reference_count() const
+    inline void decrease_reference_count() const
     {
       assert(m_term!=NULL);
       assert(m_term->reference_count()>0);
       if (0== --m_term->reference_count())
       {
         free_term();
-        return;
       }
     }
 
@@ -63,7 +62,7 @@ class aterm
     {
       assert(m_term!=NULL);
       if (CHECK) assert(m_term->reference_count()>0);
-      m_term->reference_count()++;
+      ++(m_term->reference_count());
     }
 
     void copy_term(const aterm &t)

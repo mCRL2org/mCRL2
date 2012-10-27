@@ -78,7 +78,7 @@ class specification
 
     /// \brief Initializes the specification with an aterm.
     /// \param t A term
-    void construct_from_aterm(atermpp::aterm_appl t)
+    void construct_from_aterm(const atermpp::aterm_appl &t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data             = atermpp::aterm_appl(*i++);
@@ -97,7 +97,7 @@ class specification
     {
     }
 
-    specification(specification const& other)
+    specification(const specification &other)
     {
       m_data = other.m_data;
       m_action_labels = other.m_action_labels;
@@ -108,7 +108,7 @@ class specification
 
     /// \brief Constructor.
     /// \param t A term
-    specification(atermpp::aterm_appl t)
+    specification(const atermpp::aterm_appl &t)
     {
       assert(core::detail::check_rule_LinProcSpec(t));
       construct_from_aterm(t);

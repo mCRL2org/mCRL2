@@ -745,7 +745,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
     // Reflect the way of encoding the other arguments!
     if (is_variable(arg0) || is_abstraction(arg0) || is_where_clause(arg0))
     {
-      l = push_front(l, static_cast<atermpp::aterm>(arg0));
+      l = push_front<aterm>(l, arg0);
     }
     else
     {
@@ -755,10 +755,10 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
         l = push_front(l, arg0(i));
       }
     }
-    const data_expression_list args= application(term).arguments();
+    const data_expression_list &args= application(term).arguments();
     for (data_expression_list::const_iterator i=args.begin(); i!=args.end(); ++i)
     {
-      l = push_front(l, static_cast<atermpp::aterm>(toInner(*i,add_opids)));
+      l = push_front<aterm>(l, toInner(*i,add_opids));
     }
     l = reverse(l);
     return Apply(l);
@@ -769,7 +769,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
   }
   else if (is_where_clause(term))
   {
-    const where_clause t=term;
+    const where_clause &t=term;
     atermpp::term_list<atermpp::aterm> l;
     const std::vector < assignment_expression > lv=atermpp::convert < std::vector < assignment_expression > >(t.declarations());
     for(std::vector < assignment_expression > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
@@ -780,7 +780,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
   }
   else if (is_abstraction(term))
   {
-    const abstraction t=term;
+    const abstraction &t=term;
 
     return gsMakeBinder(t.binding_operator(),t.variables(),toInner(t.body(),add_opids));
   }
