@@ -68,14 +68,12 @@ set ( R_MCRL2_BOOST_HEADER_DIRS
   boost/utility
 )
 
-message(${Boost_INCLUDE_DIRS})
-
 foreach( hfile ${R_MCRL2_BOOST_HEADER_FILES})
   string(FIND ${hfile} "/" IDX REVERSE)
-  install(FILES "${Boost_INCLUDE_DIRS}/${hfile}" DESTINATION "include/boost")
+  install(FILES "${Boost_INCLUDE_DIRS}/${hfile}" DESTINATION "${MCRL2_INCLUDE_DIR}/boost" COMPONENT Headers)
 endforeach( hfile ${R_MCRL2_BOOST_HEADER_FILES})
 
 foreach( hdir ${R_MCRL2_BOOST_HEADER_DIRS})
   string(FIND ${hdir} "/" IDX REVERSE)
-  install(DIRECTORY "${Boost_INCLUDE_DIRS}/${hdir}" DESTINATION "include/boost")
+  install(DIRECTORY "${Boost_INCLUDE_DIRS}/${hdir}" DESTINATION "${MCRL2_INCLUDE_DIR}/boost" COMPONENT Headers) 
 endforeach( hdir ${R_MCRL2_BOOST_HEADER_DIRS})

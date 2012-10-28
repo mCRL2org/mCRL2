@@ -1,4 +1,5 @@
 #!/bin/bash
- echo $2;
- open "$2@CMAKE_INSTALL_PREFIX@/MacOS/mac_installer.app";
+ # Create Alias for mCRL2-gui in root of installation directory
+ #osascript -e "tell application \"System Events\" to display dialog {\"$2@CMAKE_INSTALL_PREFIX@\"}"; #<< Debug for testing installation path.
+ osascript -e "tell application \"Finder\" to make alias file to POSIX file {\"$2@CMAKE_INSTALL_PREFIX@/Applications/mcrl2-gui.app\"} at POSIX file {\"$2@CMAKE_INSTALL_PREFIX@\"}";
 exit 0

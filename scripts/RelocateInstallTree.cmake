@@ -23,8 +23,7 @@
 # we rely on MCRL2MacOSXBundleInformation to be included before this file,
 # and check whether the MACOSX_BUNDLE_NAME has been set.
 #
-# TODO: Make this into a proper solution
-if(NOT(MACOSX_BUNDLE_NAME) OR MCRL2_SINGLE_BUNDLE)
+if(NOT(MACOSX_BUNDLE_NAME))
   return()
 endif()
 
@@ -36,16 +35,16 @@ endif()
 #-------------------------------------------------------------------------------
 # Now the installation stuff below
 #-------------------------------------------------------------------------------
-set(plugin_dest_dir bin)
-set(qtconf_dest_dir bin)
-set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
+set(plugin_dest_dir ${MCRL2_BIN_DIR})
+set(qtconf_dest_dir ${MCRL2_BIN_DIR})
+set(APPS "\${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}")
 if(APPLE)
-  set(plugin_dest_dir bin/${PROJECT_NAME}.app/Contents/MacOS)
-  set(qtconf_dest_dir bin/${PROJECT_NAME}.app/Contents/Resources)
-  set (APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app")
+  set(plugin_dest_dir ${MCRL2_BIN_DIR}/${PROJECT_NAME}.app/Contents/MacOS)
+  set(qtconf_dest_dir ${MCRL2_BIN_DIR}/${PROJECT_NAME}.app/Contents/Resources)
+  set (APPS "\${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.app")
 endif()
 if(WIN32)
-  set (APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.exe")
+  set (APPS "\${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.exe")
 endif()
 
 #--------------------------------------------------------------------------------
@@ -72,9 +71,9 @@ if(APPLE)
   if(${QT_QTGUI_LIBRARY} MATCHES "^.*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     if(EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
       install(DIRECTORY
-        "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app/Contents/Resources/")
+        "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.app/Contents/Resources/")
       else()
-        message(WARNING "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app is probably corrupt.")
+        message(WARNING "${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.app is probably corrupt.")
       endif()
   endif()
 endif()
