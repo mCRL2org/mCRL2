@@ -49,20 +49,20 @@ message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
 ##---------------------------------------------------
 ## Toggle Single Bundle Build 
 ##---------------------------------------------------
-option(MCRL2_SINGLE_BUNDLE "Enable/disable settings for an OS-X distributable binary package" OFF)
+option(MCRL2_OSX_PACKAGE "Enable/disable settings for an OS-X distributable binary package" OFF)
 
 ##---------------------------------------------------
 ## A single bundle build requires static linking, since
 ## the bundle is re-locatable   
 ##---------------------------------------------------
-if( MCRL2_SINGLE_BUNDLE AND BUILD_SHARED_LIBS )
-  message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_SINGLE_BUNDLE set to TRUE" )
-endif( MCRL2_SINGLE_BUNDLE AND BUILD_SHARED_LIBS )
+if( MCRL2_OSX_PACKAGE AND BUILD_SHARED_LIBS )
+  message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_OSX_PACKAGE set to TRUE" )
+endif( MCRL2_OSX_PACKAGE AND BUILD_SHARED_LIBS )
 
 ##---------------------------------------------------
 ## Set locations for binary package.
 ##---------------------------------------------------
-if(MCRL2_SINGLE_BUNDLE)
+if(MCRL2_OSX_PACKAGE)
   set(MCRL2_BIN_DIR "Applications")
   set(MCRL2_LIB_DIR "Library")
   set(MCRL2_SHARE_DIR "Documents")
@@ -72,4 +72,4 @@ if(MCRL2_SINGLE_BUNDLE)
  
   #Override install location
   set(CMAKE_INSTALL_PREFIX "/mCRL2")
-endif(MCRL2_SINGLE_BUNDLE)
+endif(MCRL2_OSX_PACKAGE)

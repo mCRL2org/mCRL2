@@ -12,7 +12,7 @@
 # and this ugly workaround ensures that the bundle remains relocatable.
 #-------------------------------------------------------------------------------
 
-if( NOT (APPLE AND MCRL2_SINGLE_BUNDLE))
+if( NOT (APPLE AND MCRL2_OSX_PACKAGE))
   return()
 endif()
 
