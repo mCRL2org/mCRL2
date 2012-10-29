@@ -107,7 +107,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
           control_flow_vertex& u = *(i->source);
           std::size_t last_size = u.marking.size();
           const propositional_variable_instantiation& Xij = i->label;
-          std::set<data::variable> dx = propvar_parameters(Xij.name());
+          std::set<data::variable> dx = propvar_parameters(u.X.name());
           for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
           {
             std::size_t m = *j;
