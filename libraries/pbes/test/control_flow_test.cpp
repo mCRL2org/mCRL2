@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(test_simplify)
     "pbes                                                  \n"
     "  nu X0(b: Bool, n: Nat) = !val(b) || val(n == 0);    \n"
     "  nu X1(b: Bool, c: Bool) = !val(b == c);             \n"
-    "  nu X2(b: Bool, c: Bool) = val(b) || val(b == c);    \n"
+    "  nu X2(b: Bool, c: Bool) = val(b) && val(b == c);    \n"
     "  nu X3(n:Nat)            = val(n == 1);              \n"
     "init X0(true, 0);                                     \n"
     ;
