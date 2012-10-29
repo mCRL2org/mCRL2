@@ -49,53 +49,27 @@ message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
 ##---------------------------------------------------
 ## Toggle Single Bundle Build 
 ##---------------------------------------------------
-option(MCRL2_SINGLE_BUNDLE "Enable/disable creation of a single mCRL2.app" OFF)
+option(MCRL2_OSX_PACKAGE "Enable/disable settings for an OS-X distributable binary package" OFF)
 
 ##---------------------------------------------------
 ## A single bundle build requires static linking, since
 ## the bundle is re-locatable   
 ##---------------------------------------------------
-if( MCRL2_SINGLE_BUNDLE AND BUILD_SHARED_LIBS )
-  message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_SINGLE_BUNDLE set to TRUE" )
-endif( MCRL2_SINGLE_BUNDLE AND BUILD_SHARED_LIBS )
+if( MCRL2_OSX_PACKAGE AND BUILD_SHARED_LIBS )
+  message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_OSX_PACKAGE set to TRUE" )
+endif( MCRL2_OSX_PACKAGE AND BUILD_SHARED_LIBS )
 
 ##---------------------------------------------------
-## Set location for compiled binaries:
-##   For a single bundle they should be stored in "MacOS"
-##   instead of "bin"
+## Set locations for binary package.
 ##---------------------------------------------------
-if(MCRL2_SINGLE_BUNDLE)
-  set(MCRL2_BIN_DIR "MacOS")
-else(MCRL2_SINGLE_BUNDLE)
-  set(MCRL2_BIN_DIR "bin")
-endif(MCRL2_SINGLE_BUNDLE)
-
-##---------------------------------------------------
-## Set configuration for a single bundle app 
-##---------------------------------------------------
-if(MCRL2_SINGLE_BUNDLE)
-  #Process Info.plist with Copyright Information
-  configure_file( ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist.in ${CMAKE_BINARY_DIR}/build/macosx/Info.plist @ONLY)
-  #Install Info.plist for single application bundle
-  install(FILES ${CMAKE_BINARY_DIR}/build/macosx/Info.plist DESTINATION . )
-  #Install mcrl2-logo for single application bundle
-  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
-
-  if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-    message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This creates a non-standard installer when using CPack." )
-  endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-
-  SET(CMAKE_BUNDLE_NAME "mCRL2")
-
-  SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
-  # make sure CMAKE_INSTALL_PREFIX ends in /
-  STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
-  MATH(EXPR LEN "${LEN} -1" )
-  STRING(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
-  IF(NOT "${ENDCH}" STREQUAL "/")
-    SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
-  ENDIF(NOT "${ENDCH}" STREQUAL "/")
-  SET(CMAKE_INSTALL_PREFIX
-    "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
-endif(MCRL2_SINGLE_BUNDLE)
-
+if(MCRL2_OSX_PACKAGE)
+  set(MCRL2_BIN_DIR "Applications")
+  set(MCRL2_LIB_DIR "Library")
+  set(MCRL2_SHARE_DIR "Documents")
+  set(MCRL2_MAN_DIR "man/man1")
+  set(MCRL2_EXAMPLES_DIR "Examples")
+  set(MCRL2_INCLUDE_DIR "Headers/include")
+ 
+  #Override install location
+  set(CMAKE_INSTALL_PREFIX "/mCRL2")
+endif(MCRL2_OSX_PACKAGE)

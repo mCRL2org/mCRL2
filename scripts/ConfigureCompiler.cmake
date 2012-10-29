@@ -1,6 +1,4 @@
 # Compiler configuration shared on all platforms, on all compilers
-set(MCRL2_LIB_DIR "lib/mcrl2")
-
 if(CXX_COMPILER_ARCHITECTURE STREQUAL "x86")
   add_definitions("-DAT_32BIT")
 endif()

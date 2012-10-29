@@ -248,7 +248,7 @@ Then configure cmake::
             -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 \
             -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
             -DCMAKE_INSTALL_PREFIX=/  \
-            -DMCRL2_SINGLE_BUNDLE=ON  \
+            -DMCRL2_OSX_PACKAGE=ON  \
             -DBOOST_ROOT=$BOOST-INSTALL \
             -DMCRL2_PACKAGE_RELEASE=ON
 

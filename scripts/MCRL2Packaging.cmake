@@ -170,7 +170,7 @@ endif(EXISTS /etc/SuSE-release )
 # Fedora/RedHat RPM dependencies
 if(EXISTS /etc/redhat-release )
 	message(STATUS "Distribution: RedHat/Fedora" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, boost-system >= ${MCRL2_BOOST_VER}, boost-serialization >= ${MCRL2_BOOST_VER}, boost-signals >= ${MCRL2_BOOST_VER}, boost-filesystem >= ${MCRL2_BOOST_VER}, boost-regex >= ${MCRL2_BOOST_VER}")
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, boost-system >= ${MCRL2_BOOST_VER}")
 endif(EXISTS /etc/redhat-release )
 
 # Debian/Ubuntu dependencies
@@ -185,20 +185,21 @@ endif(EXISTS /etc/debian_version )
 
 if(APPLE)
   set(CPACK_STRIP_FILES FALSE)
+ 
+  set(CPACK_SET_DESTDIR TRUE)
+  set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
 
-  if(MCRL2_SINGLE_BUNDLE)
-    set(CPACK_SET_DESTDIR TRUE)
+  configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
 
-    configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+  #set(CPACK_POSTFLIGHT_SCRIPT
+  #  ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+  set(CPACK_POSTUPGRADE_SCRIPT
+    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
 
-    set(CMAKE_POSTFLIGHT_SCRIPT
-      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-    set(CPACK_POSTUPGRADE_SCRIPT
-      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+  #Force installer to behave as a monolithic installer.
+  #This workaround enables to install mCRL2 properly. (CMake 2.8.9, PackageMaker 3.0.4)
+  set(CPACK_MONOLITHIC_INSTALL 1)
 
-    set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
-
-  endif()
 endif()
 
 # Windows

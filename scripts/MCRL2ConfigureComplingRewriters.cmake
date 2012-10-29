@@ -77,11 +77,11 @@ include(MCRL2MacOSXCopyBoostHeaders)
 # mcrl2compilerewriter script is always called with an absolute path,
 # see jittyc.cpp. The dirname statement takes the directory of the mcrl2compilerewriter
 # script, and uses that path to search for the header files.
-if( APPLE AND MCRL2_SINGLE_BUNDLE )
+if( APPLE AND MCRL2_OSX_PACKAGE )
 
-  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"`dirname $0`/../include\"")
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"`dirname $0`/../${MCRL2_INCLUDE_DIR}\"")
   else()
-  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_INSTALL_PREFIX}/include\"")
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_INSTALL_PREFIX}/${MCRL2_INCLUDE_DIR}\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${Boost_INCLUDE_DIRS}\"")
 endif()
 
@@ -105,11 +105,12 @@ add_executable( mcrl2compilerewriter IMPORTED IMPORTED_LOCATION "${MCRL2_COMPILE
 install(
   PROGRAMS "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}"
   DESTINATION ${MCRL2_BIN_DIR}/
+  COMPONENT Applications
 )
 
 # Last but not least, generate the man pages.
 if (MCRL2_MAN_PAGES)
   add_custom_target(mcrl2compilerewriter_man_page ALL)
-  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/doc/sphinx/source/user_manual/tools/man/mcrl2compilerewriter.1 DESTINATION share/man/man1)
+  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/doc/sphinx/source/user_manual/tools/man/mcrl2compilerewriter.1 DESTINATION ${MCRL2_SHARE_DIR}/${MCRL2_MAN_DIR} COMPONENT Documentation)
 endif (MCRL2_MAN_PAGES)
 

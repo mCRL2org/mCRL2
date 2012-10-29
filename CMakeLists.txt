@@ -90,14 +90,28 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
+#Paths for the installation
+set(MCRL2_BIN_DIR "bin")
+set(MCRL2_LIB_DIR "lib/mcrl2")
+set(MCRL2_SHARE_DIR "share/mcrl2")
+  #Subdirectories of MCRL2_SHARE_DIR
+  set(MCRL2_MAN_DIR "man/man1")
+  set(MCRL2_EXAMPLES_DIR "doc/examples")
+set(MCRL2_INCLUDE_DIR "include")
+
+
+## Configure the compiler
+include(GetCompilerVersion)
+include(ConfigureCompiler)
+
 ## Library and executable staging
 set(MCRL2_STAGE_ROOTDIR ""
   CACHE PATH "Path to stage executables and libraries." )
   message( STATUS "MCRL2_STAGE_ROOTDIR: ${MCRL2_STAGE_ROOTDIR}" )
 if( MCRL2_STAGE_ROOTDIR )
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/bin")
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/lib")
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/share/mcrl2")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/${MCRL2_BIN_DIR}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/${MCRL2_LIB_DIR}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/${MCRL2_SHARE_DIR}")
 endif( MCRL2_STAGE_ROOTDIR )
 
 ## Set runtime path variable RPATH for install targets
@@ -111,20 +125,16 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH false)
 
 # the RPATH to be used when installing (non-OSX, use CMAKE_INSTALL_NAME_DIR instead)
 if(NOT CMAKE_INSTALL_RPATH)
-  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/mcrl2")
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../${MCRL2_LIB_DIR}")
 endif(NOT CMAKE_INSTALL_RPATH)
 
 # Mac OSX directory name for installed targets
 # Installing prerequisite shared libraries is dealt with in "RelocateInstallTree.cmake"
-set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib/mcrl2")
+set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
 
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
-
-## Configure the compiler
-include(GetCompilerVersion)
-include(ConfigureCompiler)
 
 ## Setup dependency to CADP
 include(MCRL2CADPSupport)
@@ -287,15 +297,6 @@ if(MCRL2_ENABLE_DEPRECATED)
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
-## Helper for exporting symbolic links on OS-X
-##---------------------------------------------------
-
-if(APPLE AND MCRL2_SINGLE_BUNDLE AND MCRL2_ENABLE_GUI_TOOLS)
-  add_subdirectory( build/macosx )
-endif(APPLE AND MCRL2_SINGLE_BUNDLE AND MCRL2_ENABLE_GUI_TOOLS)
-
-
-##---------------------------------------------------
 ## Documentation
 ##---------------------------------------------------
 
@@ -352,7 +353,7 @@ install(
     libraries/process/include/
     libraries/trace/include/
     libraries/utilities/include/
-  DESTINATION include
+  DESTINATION ${MCRL2_INCLUDE_DIR}
   COMPONENT Headers
   PATTERN ".svn" EXCLUDE
 )
@@ -360,7 +361,7 @@ FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
 install(
   FILES
     ${dparser_headers}
-  DESTINATION include/dparser
+  DESTINATION ${MCRL2_INCLUDE_DIR}/dparser
   COMPONENT Headers
 )
 endif( MCRL2_INSTALL_HEADERS )
@@ -375,7 +376,7 @@ message(STATUS "MCRL2_INSTALL_EXAMPLES: ${MCRL2_INSTALL_EXAMPLES}" )
 if ( MCRL2_INSTALL_EXAMPLES )
 install(
   DIRECTORY examples/
-  DESTINATION share/doc/mcrl2/examples
+  DESTINATION ${MCRL2_SHARE_DIR}/${MCRL2_EXAMPLES_DIR}
   COMPONENT Examples
   PATTERN ".svn" EXCLUDE
 )
