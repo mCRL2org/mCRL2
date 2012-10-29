@@ -282,9 +282,6 @@ struct equal_data_parameters_builder
   /// \brief Adds the expression 'a == b' to result.
   void operator()()
   {
-    using namespace data::lazy;
-    namespace d = data;
-
     atermpp::vector<data::data_expression> v;
     std::vector<action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
@@ -295,10 +292,10 @@ struct equal_data_parameters_builder
       data::data_expression_list::iterator i1, i2;
       for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
       {
-        v.push_back(d::lazy::equal_to(*i1, *i2));
+        v.push_back(data::lazy::equal_to(*i1, *i2));
       }
     }
-    data::data_expression expr = d::lazy::join_and(v.begin(), v.end());
+    data::data_expression expr = data::lazy::join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
     mCRL2log(debug) << "  <and-term> " << data::pp(expr) << std::endl;
 #endif
