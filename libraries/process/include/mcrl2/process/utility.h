@@ -134,7 +134,7 @@ multi_action_name_set set_difference(const multi_action_name_set& A1, const mult
 }
 
 inline
-multi_action_name_set times(const multi_action_name_set& A1, const multi_action_name_set& A2)
+multi_action_name_set concat(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A1.begin(); i != A1.end(); ++i)
