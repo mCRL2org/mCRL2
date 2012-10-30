@@ -1990,7 +1990,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     }
     else
     {
-      fprintf(f,"%sconst atermpp::aterm_appl &%s = aterm_cast<const atermpp::aterm_appl>(%s%lu(%lu)); // S2\n",whitespace(d*2),
+      fprintf(f,"%sconst atermpp::aterm_appl &%s = atermpp::aterm_cast<const atermpp::aterm_appl>(%s%lu(%lu)); // S2\n",whitespace(d*2),
               aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree(0))(0)).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg);
     }
     implement_tree_aux(f,aterm_cast<aterm_appl>(tree(1)),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
@@ -2674,7 +2674,7 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
         fprintf(f,  "static inline atermpp::aterm_appl rewr_%zu_%zu_%zu_term(const atermpp::aterm_appl &t) { return rewr_%zu_%zu_%zu(", func_index, a, nfs,func_index, a,nfs);
         for(size_t i = 1; i <= a; ++i)
         {
-          fprintf(f,  "%saterm_cast<const atermpp::aterm_appl>(t(%zu))", (i == 1?"":", "), i);
+          fprintf(f,  "%satermpp::aterm_cast<const atermpp::aterm_appl>(t(%zu))", (i == 1?"":", "), i);
         }
         fprintf(f,  "); }\n");
       }
@@ -3168,7 +3168,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    const atermpp::aterm &head = t(0);\n"
       "    if (atermpp::aterm_cast<atermpp::aterm_appl>(head).function().number()==%ld)\n"
       "    {\n"
-      "      const size_t function_index = aterm_cast<const atermpp::aterm_int>(head).value();\n"
+      "      const size_t function_index = atermpp::aterm_cast<const atermpp::aterm_int>(head).value();\n"
       "      if (function_index < %zu )\n"
       "      {\n"
       "        assert(arity <= %zu);\n"
@@ -3182,7 +3182,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    }\n"
       "    else\n"
       "    {\n"
-      "      return rewrite_appl_aux(aterm_cast<const atermpp::aterm_appl>(head), t);\n"
+      "      return rewrite_appl_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(head), t);\n"
       "    }\n"
       "  }\n"
       "  \n"

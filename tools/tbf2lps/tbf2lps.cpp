@@ -106,23 +106,25 @@ class tbf2lps_tool: public input_output_tool
         mCRL2log(verbose) << "writing mCRL2 LPS to stdout..." << std::endl;
 
         // ATwriteToSAFFile(spec, stdout);
-        write_term_to_binary_file(spec, stdout);
+        write_term_to_binary_stream(spec, std::cout);
       }
       else
       {
         mCRL2log(verbose) << "writing mCRL2 LPS to '" <<  output_filename() << "'..." << std::endl;
 
-        FILE* outstream = fopen(output_filename().c_str(), "wb");
+        // FILE* outstream = fopen(output_filename().c_str(), "wb");
+        std::ofstream outstream;
+        outstream.open(output_filename().c_str());
 
-        if (outstream == NULL)
+        if (outstream.fail())
         {
           throw mcrl2::runtime_error("cannot open output file '" + output_filename() + "'");
         }
 
-        write_term_to_binary_file(spec,outstream);
+        write_term_to_binary_stream(spec,outstream);
         // ATwriteToSAFFile(spec,outstream);
 
-        fclose(outstream);
+        outstream.close();
       }
       return true;
     }

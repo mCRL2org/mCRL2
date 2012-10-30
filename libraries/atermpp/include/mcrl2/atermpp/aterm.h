@@ -79,21 +79,20 @@ class aterm
       return m_term->function();
     }
     
-
-  public: // Should be protected;
     /// \brief Constructor.
     /// \detail The function symbol must have arity 0. This function
     /// is for internal use only. Use term_appl(sym) in applications.
     /// \param sym A function symbol.
     aterm(const function_symbol &sym);
   
+  public: // Should be protected; Does not work, due to a problem in the soundness checks.
     aterm (detail::_aterm *t):m_term(t)
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
       assert(t!=NULL);
       increase_reference_count<false>();
-    }
+    } 
 
   public:
 
@@ -104,7 +103,7 @@ class aterm
     }
 
     /// \brief Copy constructor
-    aterm (const aterm &t):m_term(t.m_term)
+    aterm(const aterm &t):m_term(t.m_term)
     {
       assert(t.address()!=NULL);
       increase_reference_count<true>();
@@ -123,13 +122,6 @@ class aterm
     {
       decrease_reference_count();
     }
-
-    /// \brief Returns the function symbol belonging to a term.
-    /// \return The function symbol of this term.
-    /* const function_symbol &function() const
-    {
-      return m_term->function();
-    } */
 
     /// \brief Returns the type of this term.
     /// Result is one of AT_APPL, AT_INT,

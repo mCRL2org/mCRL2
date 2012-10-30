@@ -108,7 +108,7 @@ bool %(check_name)s(Term t)
 '''
 CHECK_TERM_TYPE = '''  // check the type of the term
   atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
+  if (!term.type_is_appl())
   {
     return false;
   }

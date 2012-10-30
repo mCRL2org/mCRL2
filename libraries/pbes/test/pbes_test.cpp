@@ -150,11 +150,14 @@ void test_pbes()
   {
   }
 
-  std::string filename = "write_term_to_text_file.pbes";
+  std::string filename = "write_term_to_text_stream.pbes";
   try
   {
     atermpp::aterm t = atermpp::read_term_from_string("f(x)");
-    atermpp::write_term_to_text_file(t, filename);
+    std::ofstream os;
+    os.open(filename.c_str());
+    atermpp::write_term_to_text_stream(t, os);
+    os.close();
     p.load(filename);
     BOOST_CHECK(false); // loading is expected to fail
   }

@@ -56,6 +56,7 @@ extern char* _strdup(const char* s);
 
 static aterm    fparse_term(int* c, FILE* f);
 static aterm    sparse_term(int* c, char** s);
+// bool write_term_to_text_file(const aterm &t, FILE *file);
 
 
 void detail::aterm_io_init()
@@ -94,7 +95,7 @@ void detail::aterm_io_init()
  * Write a term in text format to file.
  */
 
-static bool writeToTextFile(const aterm &t, FILE* f)
+/* static bool writeToTextFile(const aterm &t, FILE* f)
 {
   function_symbol sym;
   aterm           arg;
@@ -110,7 +111,7 @@ static bool writeToTextFile(const aterm &t, FILE* f)
       fprintf(f, "%ld", aterm_int(t).value());
       break;
     case AT_APPL:
-      /*{{{  Print application */
+      / *{{{  Print application * /
 
       appl = aterm_cast<aterm_appl>(t);
 
@@ -133,10 +134,10 @@ static bool writeToTextFile(const aterm &t, FILE* f)
         fputc(')', f);
       }
 
-      /*}}}  */
+      / *}}}  * /
       break;
     case AT_LIST:
-      /*{{{  Print list */
+      / *{{{  Print list * /
 
       list = (aterm_list) t;
       if (!list.empty())
@@ -151,7 +152,7 @@ static bool writeToTextFile(const aterm &t, FILE* f)
         list = list.tail();
       }
 
-      /*}}}  */
+      / *}}}  * /
       break;
   }
 
@@ -180,14 +181,14 @@ bool write_term_to_text_file (const aterm &t, FILE* f)
   }
 
   return result;
-}
+} */
 
 
 /**
  * Write an aterm to a named plaintext file
  */
 
-bool write_term_to_text_file(const aterm &t, const std::string& filename)
+/* bool write_term_to_text_file(const aterm &t, const std::string& filename)
 {
   detail::aterm_io_init();
   FILE*  f;
@@ -207,86 +208,73 @@ bool write_term_to_text_file(const aterm &t, const std::string& filename)
   fclose(f);
 
   return result;
-}
+} */
 
-static void topWriteToStream(const aterm &t, std::ostream& os);
-
-static std::string ATwriteAFunToString(const function_symbol &fun)
+static void write_string_with_escape_symbols(const std::string &s, std::ostream& os)
 {
-  std::ostringstream oss;
-  assert(fun.number()<detail::at_lookup_table.size());
-  const detail::_function_symbol &entry = detail::at_lookup_table[fun.number()];
-  std::string::const_iterator id = entry.name.begin();
+  std::string::const_iterator id = s.begin();
 
   /* This function symbol needs quotes */
-  oss << "\"";
-  while (id!=entry.name.end())
+  while (id!=s.end())
   {
     /* We need to escape special characters */
     switch (*id)
     {
       case '\\':
       case '"':
-        oss << "\\" << *id;
+        os << "\\" << *id;
         break;
       case '\n':
-        oss << "\\n";
+        os << "\\n";
         break;
       case '\t':
-        oss << "\\t";
+        os << "\\t";
         break;
       case '\r':
-        oss << "\\r";
+        os << "\\r";
         break;
       default:
-        oss << *id;
+        os << *id;
         break;
     }
     ++id;
   }
-  oss << "\"";
-
-  return oss.str();
 }
 
+static void topWriteToStream(const aterm &t, std::ostream& os);
 
 static void writeToStream(const aterm &t, std::ostream& os)
 {
-  aterm_list list;
-  aterm_appl appl;
-  function_symbol sym;
-  size_t i, arity;
-  std::string name;
-
   switch (t.type())
   {
     case AT_INT:
+    {
       os << aterm_int(t).value();
       break;
+    }
     case AT_APPL:
-      appl = aterm_cast<aterm_appl>(t);
-      sym = appl.function();
-      arity = sym.arity();
-      name = sym.name();
-      os << ATwriteAFunToString(sym);
-      if (arity > 0 || (!true && name.empty()))
+    {
+      const aterm_appl &appl = aterm_cast<aterm_appl>(t);
+      const function_symbol sym = appl.function();
+      os << "\""; 
+      write_string_with_escape_symbols(sym.name(),os);
+      os << "\"";
+      if (sym.arity() > 0)
       {
         os << "(";
-        if (arity > 0)
+        topWriteToStream(appl(0), os);
+        for (size_t i = 1; i < sym.arity(); i++)
         {
-          topWriteToStream(appl(0), os);
-          for (i = 1; i < arity; i++)
-          {
-            os << ",";
-            topWriteToStream(appl(i), os);
-          }
+          os << ",";
+          topWriteToStream(appl(i), os);
         }
         os << ")";
       }
       break;
-
+    }
     case AT_LIST:
-      list = (aterm_list) t;
+    {
+      aterm_list list = aterm_cast<aterm_list>(t);
       if (!list.empty())
       {
         topWriteToStream(list.front(), os);
@@ -299,6 +287,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
         }
       }
       break;
+    }
   }
 }
 
@@ -322,9 +311,16 @@ static void topWriteToStream(const aterm &t, std::ostream& os)
 
 std::string aterm::to_string() const
 {
+  detail::aterm_io_init();
   std::ostringstream oss;
   topWriteToStream(*this, oss);
   return oss.str();
+}
+
+void write_term_to_text_stream(const aterm &t, std::ostream &os)
+{
+  detail::aterm_io_init();
+  topWriteToStream(t,os);
 }
 
 /**

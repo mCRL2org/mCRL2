@@ -18,18 +18,11 @@
 namespace atermpp
 {
 
-/// \brief Writes term t to a file in Binary aterm Format (baf).
-/// \param t A term.
-/// \param file A file suitable for writing.
-/// \return True if the operation succeeded.
-bool write_term_to_binary_file(const aterm &t, FILE* file);
-
-
 /// \brief Writes term t to file named filename in Binary aterm Format (baf).
 /// \param t A term.
 /// \param filename A string
 /// \return True if the operation succeeded.
-bool write_term_to_binary_file(const aterm &t, const std::string& filename);
+void write_term_to_binary_stream(const aterm &t, std::ostream &os);
 
 
 /// \brief Reads a term from a file in Binary aterm Format (baf).
@@ -44,22 +37,14 @@ aterm read_term_from_binary_file(FILE* file);
 aterm read_term_from_binary_file(const std::string& filename);
 
 
-/// \brief Writes term t to a file in textual format.
-/// This function writes aterm t in textual representation to file filename. "-" is
-/// standard output's filename.
+/// \brief Writes term t to a file in textual format to stream os.
+/// \detail This function writes aterm t in textual representation to the output stream.
+///         Error handling and setting whether exceptions are being generated is the
+///         responsibility of the surrounding function.
 /// \param t A term.
-/// \param filename A string
+/// \param os An outputstream string
 /// \return True if the operation succeeded.
-bool write_term_to_text_file(const aterm &t, FILE *file);
-
-
-/// \brief Writes term t to file named filename in textual format.
-/// This function writes aterm t in textual representation to file filename. "-" is
-/// standard output's filename.
-/// \param t A term.
-/// \param filename A string
-/// \return True if the operation succeeded.
-bool write_term_to_text_file(const aterm &t, const std::string& filename);
+void write_term_to_text_stream(const aterm &t, std::ostream &os);
 
 
 /// \brief Writes term t to a file in textual format.
@@ -80,26 +65,12 @@ aterm read_term_from_text_file(FILE *file);
 aterm read_term_from_text_file(const std::string& filename);
 
 
-/// \brief Write an aterm to a string.
-/// This function writes the aterm in binary format to the string.
-/// \param t A term.
-/// \return The binary string corresponding to the term.
-std::string write_term_to_binary_string(const aterm &t);
-
-
 /// \brief Read a aterm from a string in baf format.
 /// This function decodes a baf character string into an aterm.
 /// \param s A string.
 /// \param size A positive integer.
 /// \return The term corresponding to the string.
 aterm read_term_from_binary_string(const std::string& s);
-
-
-/// \brief Write an aterm from string.
-/// This function parses a character string into an aterm.
-/// \param s A string
-/// \return The term corresponding to the string.
-bool write_term_to_text_string(const aterm &t);
 
 
 /// \brief Read a aterm from a string in baf format.

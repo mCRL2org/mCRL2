@@ -17,8 +17,6 @@
 #include "mcrl2/atermpp/detail/byteio.h"
 #include "mcrl2/atermpp/aterm_int.h"
 
-/*}}}  */
-
 namespace atermpp
 {
 
@@ -26,7 +24,7 @@ namespace atermpp
  * Calculate the number of unique symbols.
  */
 
-/*{{{  static size_t calcUniqueAFuns(aterm t) */
+using namespace std;
 
 static size_t calcUniqueAFuns(
                   const aterm &t, 
@@ -100,12 +98,9 @@ static size_t AT_calcUniqueAFuns(const aterm &t, std::vector<size_t> &count)
   return result;
 }
 
-/*{{{  defines */
 
 static const size_t BAF_MAGIC = 0xbaf;
 static const size_t BAF_VERSION = 0x0300;      /* version 3.0 */
-//#define BAF_MAGIC 0xbaf
-//#define BAF_VERSION 0x0300      /* version 3.0 */
 
 static const size_t BAF_DEFAULT_TABLE_SIZE = 1024;
 
@@ -113,14 +108,9 @@ static const size_t BAF_LIST_BATCH_SIZE = 64;
 
 static const size_t SYMBOL_OFFSET = 10;
 
-//#define SYM_INDEX(n)      (((n)-SYMBOL_OFFSET)/2)
-//#define SYM_COMMAND(n)    ((n)*2 + SYMBOL_OFFSET)
 
 /* Maximum # of arguments to reserve space for on the stack in read_term */
 static const size_t MAX_STACK_ARGS = 4;
-
-/*}}}  */
-/*{{{  types */
 
 typedef struct _trm_bucket
 {
@@ -214,9 +204,6 @@ class sym_read_entry
 
 };
 
-/*}}}  */
-/*{{{  variables */
-
 char bafio_id[] = "$Id$";
 
 static size_t nr_unique_symbols = 0;
@@ -230,20 +217,7 @@ static size_t text_buffer_size = 0;
 static unsigned char bit_buffer = '\0';
 static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-/*}}}  */
 
-/*{{{  void AT_getBafVersion(int *major, int *minor) */
-
-/* void
-AT_getBafVersion(int* major, int* minor)
-{
-  *major = BAF_VERSION >> 8;
-  *minor = BAF_VERSION & 0xff;
-} */
-
-/*}}}  */
-
-/*{{{  static int writeIntToBuf(unsigned int val, unsigned char *buf) */
 
 static
 size_t
@@ -292,11 +266,8 @@ writeIntToBuf(const size_t val, unsigned char* buf)
   return 5;
 }
 
-/*}}}  */
 
-/*{{{  static int writeBits(size_t val, int nr_bits, byte_writer *writer) */
-
-static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer)
+static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer, ostream &os)
 {
   size_t cur_bit;
 
@@ -307,7 +278,7 @@ static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer)
     val >>= 1;
     if (++bits_in_buffer == 8)
     {
-      if (write_byte((int)bit_buffer, writer) == -1)
+      if (write_byte((int)bit_buffer, writer, os) == -1)
       {
         return -1;
       }
@@ -325,19 +296,17 @@ static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer)
   return 0;
 }
 
-/*}}}  */
-/*{{{  static int flushBitsToWriter(byte_writer *writer) */
 
 static
 int
-flushBitsToWriter(byte_writer* writer)
+flushBitsToWriter(byte_writer* writer, ostream &os)
 {
   int result = 0;
   if (bits_in_buffer > 0)
   {
     size_t left = 8-bits_in_buffer;
     bit_buffer <<= left;
-    result = (write_byte((int)bit_buffer, writer) == EOF) ? -1 : 0;
+    result = (write_byte((int)bit_buffer, writer, os) == EOF) ? -1 : 0;
     bits_in_buffer = 0;
     bit_buffer = '\0';
   }
@@ -345,8 +314,6 @@ flushBitsToWriter(byte_writer* writer)
   return result;
 }
 
-/*}}}  */
-/*{{{  static int readBits(size_t *val, int nr_bits, byte_reader *reader) */
 
 static
 int
@@ -377,16 +344,14 @@ readBits(size_t* val, const size_t nr_bits, byte_reader* reader)
   return 0;
 }
 
-/*}}}  */
-/*{{{  static int writeInt(size_t val, byte_writer *writer) */
 
-static bool writeInt(const size_t val, byte_writer* writer)
+static bool writeInt(const size_t val, byte_writer* writer, ostream &os)
 {
   size_t nr_items;
   unsigned char buf[8];
 
   nr_items = writeIntToBuf(val, buf);
-  if (write_bytes((char*)buf, nr_items, writer) != nr_items)
+  if (write_bytes((char*)buf, nr_items, writer, os) != nr_items)
   {
     return false;
   }
@@ -395,8 +360,6 @@ static bool writeInt(const size_t val, byte_writer* writer)
   return true;
 }
 
-/*}}}  */
-/*{{{  static int readInt(size_t *val, byte_reader *reader) */
 
 static int readInt(size_t* val, byte_reader* reader)
 {
@@ -466,19 +429,17 @@ static int readInt(size_t* val, byte_reader* reader)
   return 5;
 }
 
-/*}}}  */
-/*{{{  static int writeString(const char *str, size_t len, byte_writer *writer) */
 
-static bool writeString(const char* str, const size_t len, byte_writer* writer)
+static bool writeString(const char* str, const size_t len, byte_writer* writer, ostream &os)
 {
   /* Write length. */
-  if (!writeInt(len, writer))
+  if (!writeInt(len, writer, os))
   {
     return false;
   }
 
   /* Write actual string. */
-  if (write_bytes(str, len, writer) != len)
+  if (write_bytes(str, len, writer, os) != len)
   {
     return false;
   }
@@ -487,8 +448,6 @@ static bool writeString(const char* str, const size_t len, byte_writer* writer)
   return true;
 }
 
-/*}}}  */
-/*{{{  static int readString(byte_reader *reader) */
 
 static size_t readString(byte_reader* reader)
 {
@@ -521,36 +480,30 @@ static size_t readString(byte_reader* reader)
   return len;
 }
 
-/*}}}  */
-
-/*{{{  static ATbool write_symbol(function_symbol sym, byte_writer *writer) */
-
 /**
  * Write a symbol to file.
  */
 
-static bool write_symbol(const function_symbol sym, byte_writer* writer)
+static bool write_symbol(const function_symbol sym, byte_writer* writer, ostream &os)
 {
   const char* name = sym.name().c_str();
-  if (!writeString(name, strlen(name), writer))
+  if (!writeString(name, strlen(name), writer, os))
   {
     return false;
   }
 
-  if (!writeInt(sym.arity(), writer))
+  if (!writeInt(sym.arity(), writer, os))
   {
     return false;
   }
 
-  if (!writeInt(true, writer))
+  if (!writeInt(true, writer, os))
   {
     return false;
   }
 
   return true;
 }
-
-/*}}}  */
 
 /*{{{  static sym_entry *get_top_symbol(aterm t,index) */
 
@@ -583,8 +536,6 @@ static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &inde
   return &sym_entries[index[sym.number()]];
 }
 
-/*}}}  */
-/*{{{  static int bit_width(int val) */
 
 /* How many bits are needed to represent <val> */
 static size_t bit_width(size_t val)
@@ -605,8 +556,6 @@ static size_t bit_width(size_t val)
   return nr_bits;
 }
 
-/*}}}  */
-/*{{{  static void build_arg_tables() */
 
 /**
   * Build argument tables given the fact that the
@@ -722,8 +671,6 @@ static void build_arg_tables(const std::vector<size_t> &index)
   }
 }
 
-/*}}}  */
-/*{{{  static void add_term(sym_entry *entry, aterm t) */
 
 /**
   * Add a term to the termtable of a symbol.
@@ -736,9 +683,6 @@ static void add_term(sym_entry* entry, const aterm &t)
   entry->termtable[hnr] = &entry->terms[entry->cur_index];
   entry->cur_index++;
 }
-
-/*}}}  */
-/*{{{  static void collect_terms(aterm t) */
 
 /**
  * Collect all terms in the appropriate symbol table.
@@ -797,25 +741,23 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
   }
 }
 
-/*}}}  */
-/*{{{  static ATbool write_symbols(byte_writer *writer) */
 
 /**
  * Write all symbols in a term to file.
  */
 
-static bool write_symbols(byte_writer* writer)
+static bool write_symbols(byte_writer* writer, ostream &os)
 {
   size_t sym_idx, arg_idx, top_idx;
 
   for (sym_idx=0; sym_idx<nr_unique_symbols; sym_idx++)
   {
     sym_entry* cur_sym = &sym_entries[sym_idx];
-    if (!write_symbol(cur_sym->id, writer))
+    if (!write_symbol(cur_sym->id, writer,os))
     {
       return false;
     }
-    if (!writeInt(cur_sym->nr_terms, writer))
+    if (!writeInt(cur_sym->nr_terms, writer,os))
     {
       return false;
     }
@@ -823,14 +765,14 @@ static bool write_symbols(byte_writer* writer)
     for (arg_idx=0; arg_idx<cur_sym->arity; arg_idx++)
     {
       size_t nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
-      if (!writeInt(nr_symbols, writer))
+      if (!writeInt(nr_symbols, writer, os))
       {
         return false;
       }
       for (top_idx=0; top_idx<nr_symbols; top_idx++)
       {
         top_symbol* ts = &cur_sym->top_symbols[arg_idx].symbols[top_idx];
-        if (!writeInt(ts->index, writer))
+        if (!writeInt(ts->index, writer, os))
         {
           return false;
         }
@@ -841,8 +783,6 @@ static bool write_symbols(byte_writer* writer)
   return true;
 }
 
-/*}}}  */
-/*{{{  static int find_term(sym_entry *entry, aterm t) */
 
 /**
   * Find a term in a sym_entry.
@@ -863,9 +803,6 @@ static size_t find_term(sym_entry* entry, const aterm t)
   return cur - &entry->terms[0];
 }
 
-/*}}}  */
-/*{{{  static top_symbol *find_top_symbol(top_symbols *syms, function_symbol sym) */
-
 /**
  * Find a top symbol in a topsymbol table.
  */
@@ -885,18 +822,16 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sy
   return cur;
 }
 
-/*}}}  */
-/*{{{  static ATbool write_arg(sym_entry *trm_sym, aterm arg, arg_idx, writer) */
 
 /**
  * Write an argument using a byte_writer.
  */
 
 /* forward declaration */
-static bool write_term(const aterm, byte_writer*, const std::vector<size_t> &index);
+static bool write_term(const aterm, byte_writer*, const std::vector<size_t> &index, ostream &os);
 
 static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
-                      byte_writer* writer, const std::vector<size_t> &index)
+                      byte_writer* writer, const std::vector<size_t> &index, ostream &os)
 {
   top_symbol* ts;
   sym_entry* arg_sym;
@@ -906,7 +841,7 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
   sym = get_top_symbol(arg,index)->id;
   ts = find_top_symbol(&trm_sym->top_symbols[arg_idx], sym);
 
-  if (writeBits(ts->code, ts->code_width, writer)<0)
+  if (writeBits(ts->code, ts->code_width, writer, os)<0)
   {
     return false;
   }
@@ -914,13 +849,13 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
   arg_sym = &sym_entries[ts->index];
 
   arg_trm_idx = find_term(arg_sym, arg);
-  if (writeBits(arg_trm_idx, arg_sym->term_width, writer)<0)
+  if (writeBits(arg_trm_idx, arg_sym->term_width, writer, os)<0)
   {
     return false;
   }
 
   if (arg_trm_idx >= arg_sym->cur_index &&
-      !write_term(arg, writer,index))
+      !write_term(arg, writer,index, os))
   {
     return false;
   }
@@ -928,14 +863,12 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
   return true;
 }
 
-/*}}}  */
-/*{{{  static ATbool write_term(aterm t, byte_writer *writer) */
 
 /**
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm t, byte_writer* writer, const std::vector<size_t> &index)
+static bool write_term(const aterm t, byte_writer* writer, const std::vector<size_t> &index, ostream &os)
 {
   size_t arg_idx;
   sym_entry* trm_sym = NULL;
@@ -944,7 +877,7 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
     {
       case AT_INT:
         /* If aterm integers are > 32 bits, then this can fail. */
-        if (writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, writer) < 0)
+        if (writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, writer, os) < 0)
         {
           return false;
         }
@@ -960,11 +893,11 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
         else
         {
           trm_sym = &sym_entries[index[detail::function_adm.AS_LIST.number()]];
-          if (!write_arg(trm_sym, list.front(), 0, writer,index))
+          if (!write_arg(trm_sym, list.front(), 0, writer,index, os))
           {
             return false;
           }
-          if (!write_arg(trm_sym, (aterm)(list.tail()), 1, writer,index))
+          if (!write_arg(trm_sym, (aterm)(list.tail()), 1, writer,index, os))
           {
             return false;
           }
@@ -981,7 +914,7 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
         for (arg_idx=0; arg_idx<arity; arg_idx++)
         {
           aterm cur_arg = static_cast<aterm_appl>(t)(arg_idx);
-          if (!write_arg(trm_sym, cur_arg, arg_idx, writer,index))
+          if (!write_arg(trm_sym, cur_arg, arg_idx, writer,index, os))
           {
             return false;
           }
@@ -1002,10 +935,6 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
 
   return true;
 }
-
-/*}}}  */
-
-/*{{{  static void free_write_space() */
 
 /**
  * Free all space allocated by the bafio write functions.
@@ -1055,7 +984,7 @@ static void free_write_space()
 
 
 static bool
-write_baf(const aterm &t, byte_writer* writer)
+write_baf(const aterm &t, byte_writer* writer, ostream &os)
 {
   size_t nr_unique_terms = 0;
   size_t nr_symbols = detail::at_lookup_table.size();
@@ -1105,7 +1034,6 @@ write_baf(const aterm &t, byte_writer* writer)
 
   assert(cur == nr_unique_symbols);
 
-  /*}}}  */
 
   std::set<aterm> visited;
   collect_terms(t,visited,index);
@@ -1122,50 +1050,50 @@ write_baf(const aterm &t, byte_writer* writer)
 
   /*{{{  write header */
 
-  if (!writeInt(0, writer))
+  if (!writeInt(0, writer, os))
   {
     return false;
   }
 
-  if (!writeInt(BAF_MAGIC, writer))
+  if (!writeInt(BAF_MAGIC, writer, os))
   {
     return false;
   }
 
-  if (!writeInt(BAF_VERSION, writer))
+  if (!writeInt(BAF_VERSION, writer, os))
   {
     return false;
   }
 
-  if (!writeInt(nr_unique_symbols, writer))
+  if (!writeInt(nr_unique_symbols, writer, os))
   {
     return false;
   }
 
-  if (!writeInt(nr_unique_terms, writer))
+  if (!writeInt(nr_unique_terms, writer, os))
   {
     return false;
   }
 
   /*}}}  */
 
-  if (!write_symbols(writer))
+  if (!write_symbols(writer, os))
   {
     return false;
   }
 
   /* Write the top symbol */
-  if (!writeInt(get_top_symbol(t,index)-&sym_entries[0], writer))
+  if (!writeInt(get_top_symbol(t,index)-&sym_entries[0], writer, os))
   {
     return false;
   }
 
-  if (!write_term(t, writer,index))
+  if (!write_term(t, writer,index, os))
   {
     return false;
   }
 
-  if (flushBitsToWriter(writer)<0)
+  if (flushBitsToWriter(writer,os)<0)
   {
     return false;
   }
@@ -1175,6 +1103,27 @@ write_baf(const aterm &t, byte_writer* writer)
   return true;
 }
 
+void write_term_to_binary_stream(const aterm &t, std::ostream &os)
+{
+  static byte_writer writer;
+  static bool initialized = false;
+
+  if (!initialized)
+  {
+    writer.type = STREAM_WRITER;
+    writer.u.string_data.buf = (unsigned char*)calloc(BUFSIZ, 1);
+    writer.u.string_data.max_size = BUFSIZ;
+    initialized = true;
+  }
+  writer.u.string_data.cur_size = 0;
+
+  if (!write_baf(t, &writer, os))
+  {
+    throw std::runtime_error("Fail to write term to string");
+  }
+
+  // return std::string((char *)writer.u.string_data.buf,writer.u.string_data.cur_size);
+}
 
 std::string write_term_to_binary_string(const aterm &t)
 {
@@ -1190,7 +1139,7 @@ std::string write_term_to_binary_string(const aterm &t)
   }
   writer.u.string_data.cur_size = 0;
 
-  if (!write_baf(t, &writer))
+  if (!write_baf(t, &writer,cout))
   {
     throw std::runtime_error("Fail to write term to string");
   }
@@ -1218,7 +1167,7 @@ bool write_term_to_binary_file(const aterm &t, FILE* file)
   }
 #endif
 
-  return write_baf(t, &writer);
+  return write_baf(t, &writer,cout);
 }
 
 /**
@@ -1246,10 +1195,6 @@ bool write_term_to_binary_file(const aterm &t, const std::string& filename)
 
   return result;
 }
-
-/*}}}  */
-
-/*{{{  function_symbol read_symbol(byte_reader *reader) */
 
 /**
   * Read a single symbol from file.
@@ -1279,10 +1224,6 @@ static function_symbol read_symbol(byte_reader* reader)
 
   return function_symbol(text_buffer, arity);
 }
-
-/*}}}  */
-
-/*{{{  ATbool read_all_symbols(byte_reader *reader) */
 
 /**
  * Read all symbols from file.
@@ -1385,9 +1326,6 @@ static bool read_all_symbols(byte_reader* reader)
   return true;
 }
 
-/*}}}  */
-/*{{{  aterm read_term(sym_read_entry *sym, byte_reader *reader) */
-
 static aterm read_term(sym_read_entry* sym, byte_reader* reader)
 {
   size_t val;
@@ -1460,10 +1398,6 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
   return result;
 }
 
-/*}}}  */
-
-/*{{{  static void free_read_space() */
-
 /**
  * Free all temporary space allocated by the baf read functions.
  */
@@ -1504,10 +1438,6 @@ static void free_read_space()
                                               // to decreasing reference counters, after at_lookup_table has
                                               // been destroyed (i.e. core dump).
 }
-
-/*}}}  */
-
-/*{{{  aterm read_baf(byte_reader *reader) */
 
 /**
  * Read a term from a BAF reader.

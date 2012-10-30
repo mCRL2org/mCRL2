@@ -173,8 +173,9 @@ static void add_extra_mcrl2_lts_data(
   const bool has_act_labels,
   const aterm_list act_labels)
 {
-  FILE* f = fopen(filename.c_str(),"ab");
-  if (f == NULL)
+  // FILE* f = fopen(filename.c_str(),"ab");
+  std::ofstream f(filename.c_str(), std::ios_base::app); // Open to append.
+  if (f.fail())
   {
     throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
     return;
@@ -199,43 +200,47 @@ static void add_extra_mcrl2_lts_data(
    * in our code. Simply trying to read one byte past the end of the file (the read will fail) seems
    * to resolve this issue.
    */
-  char c;
+  /*char c;
   fseek(f,0,SEEK_END);
   if(fread(&c,1,1,f) != 0)
     throw mcrl2::runtime_error("Unexpectedly able to read past end of file.");
+  */
 
-  long position = ftell(f);
+  long position = f.tellp();
   if (position == -1)
   {
-    fclose(f);
+    f.close();
     throw mcrl2::runtime_error("Could not determine file size of '" + filename +
                                "'; not adding extra information.");
     return;
   }
 
-  if (write_term_to_binary_file(data,f) == false)
+  write_term_to_binary_stream(data,f);
+  if (f.fail())
   {
-    fclose(f);
+    f.close();
     throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename +
                                "', file could be corrupted.");
     return;
   }
 
-  unsigned char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
+  char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
   for (size_t i=0; i<8; i++)
   {
     buf[i] = position % 0x100;
     position >>= 8;
   }
-  if (fwrite(buf,1,8+12,f) != 8+12)
+ 
+  f.write(buf,8+12);
+  if (f.fail())
   {
-    fclose(f);
+    f.close();
     throw mcrl2::runtime_error("error writing extra LTS information to '" + filename +
                                "', file could be corrupted.");
     return;
   }
 
-  fclose(f);
+  f.close();
 }
 
 

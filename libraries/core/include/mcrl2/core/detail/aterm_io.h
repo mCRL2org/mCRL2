@@ -16,6 +16,8 @@
 #include <cerrno>
 #include <string>
 #include <cstring>
+#include <iostream>
+#include <fstream>
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_io.h"
@@ -70,7 +72,7 @@ aterm load_aterm(const std::string& filename)
   return term;
 }
 
-/// \brief Saves an aterm to the given file, or to stdout if filename is the empty string.
+/* /// \brief Saves an aterm to the given file, or to stdout if filename is the empty string.
 /// If writing fails an exception is thrown.
 /// \param term A term
 /// \param filename A string
@@ -114,6 +116,54 @@ void save_aterm(aterm term, const std::string& filename, bool binary = true)
   if (result == false)
   {
     throw mcrl2::runtime_error("could not write aterm to " + ((stream == stdout)?"stdout":("'" + filename + "'")));
+  }
+} */
+
+/// \brief Saves an aterm to the given file, or to stdout if filename is the empty string.
+/// If writing fails an exception is thrown.
+/// \param term A term
+/// \param filename A string
+/// \param binary If true the term is stored in binary format
+inline
+void save_aterm(aterm term, const std::string& filename, bool binary = true)
+{
+  // TODO: CHECK WHETHER THE NECESSARY ERROR HANDLING IS DONE.
+  using namespace std;
+  
+  if (filename.empty())
+  {
+    if (binary)
+    {
+      write_term_to_binary_stream(term, cout);
+    }
+    else 
+    {
+      write_term_to_text_stream(term, cout);
+    }
+    if (cout.fail())
+    {
+      throw mcrl2::runtime_error("could not write aterm to standard out");
+    }
+  }
+  else
+  {
+    ofstream os;
+    // os.open(filename.c_str(),  binary?(ios_base::binary || ios_base::out ):ios_base::out);
+    os.open(filename.c_str());
+    // os.exceptions(ofstream::eofbit || ofstream::failbit || ofstream::badbit);
+    if (binary)
+    {
+      write_term_to_binary_stream(term, os);
+    }
+    else 
+    {
+      write_term_to_text_stream(term, os);
+    }
+    if (os.fail())
+    {
+      throw mcrl2::runtime_error("could not write aterm to " + filename);
+    }
+    os.close();
   }
 }
 

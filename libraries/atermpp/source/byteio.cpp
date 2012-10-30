@@ -27,7 +27,7 @@ static void resize_buffer(byte_writer* writer, size_t delta)
   }
 }
 
-int write_byte(const int byte, byte_writer* writer)
+int write_byte(const int byte, byte_writer* writer, std::ostream &os)
 {
   switch (writer->type)
   {
@@ -39,13 +39,17 @@ int write_byte(const int byte, byte_writer* writer)
     case FILE_WRITER:
       return fputc(byte, writer->u.file_data);
 
+    case STREAM_WRITER:
+      os.put(byte);
+      return byte;
+
     default:
       abort();
   }
   return EOF;
 }
 
-size_t write_bytes(const char* buf, const size_t count, byte_writer* writer)
+size_t write_bytes(const char* buf, const size_t count, byte_writer* writer, std::ostream &os)
 {
   switch (writer->type)
   {
@@ -57,6 +61,10 @@ size_t write_bytes(const char* buf, const size_t count, byte_writer* writer)
 
     case FILE_WRITER:
       return fwrite(buf, 1, count, writer->u.file_data);
+
+    case STREAM_WRITER:
+      os.write(buf,count);
+      return count;
 
     default:
       abort();

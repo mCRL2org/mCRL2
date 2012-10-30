@@ -8,9 +8,11 @@ namespace atermpp
 
 static const int FILE_WRITER = 0;
 static const int STRING_WRITER = 1;
+static const int STREAM_WRITER = 2;
 
 static const int FILE_READER = 0;
 static const int STRING_READER = 1;
+static const int STREAM_READER = 2;
 
 typedef struct
 {
@@ -43,8 +45,8 @@ typedef struct
   } u;
 } byte_reader;
 
-int write_byte(const int byte, byte_writer* writer);
-size_t write_bytes(const char* buf, const size_t count, byte_writer* writer);
+int write_byte(const int byte, byte_writer* writer, std::ostream &os);
+size_t write_bytes(const char* buf, const size_t count, byte_writer* writer, std::ostream &os);
 int read_byte(byte_reader* reader);
 size_t read_bytes(char* buf, size_t count, byte_reader* reader);
 void init_file_reader(byte_reader* reader, FILE* file);

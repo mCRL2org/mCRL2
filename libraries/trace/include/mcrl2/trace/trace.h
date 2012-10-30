@@ -787,7 +787,7 @@ class Trace
 
       // write trace
 
-      os << atermpp::write_term_to_binary_string(trace);  //XXX no error handling?
+      atermpp::write_term_to_binary_stream(trace,os);  
       if (os.bad())
       {
         throw runtime_error("could not write to stream");
