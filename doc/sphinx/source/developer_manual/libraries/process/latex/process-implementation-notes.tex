@@ -1,20 +1,21 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
+%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%\input{tcilatex}
 %%%%%%%%%\input{tcilatex}
 %%%%%%%%\input{tcilatex}
-%%%%%%%\input{tcilatex}
 %%%%%%\input{tcilatex}
+%%%%%\input{tcilatex}
 %%%%\input{tcilatex}
 %%%\input{tcilatex}
-%%\input{tcilatex}
 
 
 \documentclass{article}
@@ -28,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Friday, October 26, 2012 17:37:29}
+%TCIDATA{LastRevised=Tuesday, October 30, 2012 17:16:07}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -262,8 +263,8 @@ Let $A,A_{1}$ and $A_{2}$ be sets of multi action names. Then we define%
 A^{\subseteq } & = & \{\alpha \mid \exists \beta .\alpha \beta \in A\} \\ 
 A_{1}\mid A_{2} & = & \{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta
 \in A_{2}\} \\ 
-A_{1}-A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta \in A_{1}\text{
-and }\beta \in A_{2}\}%
+A_{1}\leftarrowtail A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta
+\in A_{1}\text{ and }\beta \in A_{2}\}%
 \end{array}%
 \]
 
@@ -305,14 +306,14 @@ We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\emptyset  & \text{if }P\in W \\ 
+\emptyset & \text{if }P\in W \\ 
 \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
 \\ 
-\alpha (\delta ,W) & = & \emptyset  \\ 
+\alpha (\delta ,W) & = & \emptyset \\ 
 \alpha (\tau ,W) & = & \{\tau \} \\ 
 \alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
 \alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
@@ -359,16 +360,18 @@ p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\
 We define the mapping $push_{\bigtriangledown }$ as follows%
 \[
 \begin{tabular}{ll}
-$x$ & $push_{\bigtriangledown }(x,A,W)$ \\ \hline
-$p$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (x)}(p)$ if $p$ is a pCRL
+$x$ & $push_{\bigtriangledown }(x,A)$ \\ \hline
+$p$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p)}(p)$ if $p$ is a pCRL
 expression} \\ 
 $p\parallel q$ & \multicolumn{1}{|l}{$%
 \begin{array}{l}
-\nabla _{A\cap \alpha (x)}(p^{\prime }\parallel q^{\prime }) \\ 
+\nabla _{A\cap \alpha (p^{\prime }\parallel q^{\prime })}(p^{\prime
+}\parallel q^{\prime }) \\ 
 \text{where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq },W) \\ 
-q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A-\alpha (p)),W)%
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
+(p)))%
 \end{array}%
 \right. 
 \end{array}%
@@ -378,14 +381,15 @@ $p\mathbin{\mathrel{\llfloor}}q$ & \multicolumn{1}{|l}{$%
 \left\{ 
 \begin{array}{ll}
 \delta  & \text{if }A\cap \alpha (p)=\emptyset  \\ 
-\nabla _{A\cap \alpha (x)}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
-}) & \text{otherwise,}%
+\nabla _{A\cap \alpha (p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
+})}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{otherwise,}%
 \end{array}%
 \right.  \\ 
 \text{where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq },W) \\ 
-q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A-\alpha (p)),W)%
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
+(p)))%
 \end{array}%
 \right. 
 \end{array}%
@@ -394,31 +398,32 @@ $p\mid q$ & \multicolumn{1}{|l}{$%
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\delta  & \text{if }A-\alpha (p)=\emptyset  \\ 
-\nabla _{A\cap \alpha (x)}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
-}) & \text{otherwise,}%
+\delta  & \text{if }A\leftarrowtail \alpha (p)=\emptyset  \\ 
+\nabla _{A\cap \alpha (p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
+})}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{otherwise,}%
 \end{array}%
 \right.  \\ 
 \text{where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq },W) \\ 
-q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A-\alpha (p)),W)%
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
+(p)))%
 \end{array}%
 \right. 
 \end{array}%
 $} \\ 
-$\rho _{R}(p)$ & \multicolumn{1}{|l}{$\rho _{R}(p^{\prime })$ where $%
-p^{\prime }=$ $push_{\bigtriangledown }(p,R^{-1}(A),W)$} \\ 
+$\rho _{R}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p^{\prime
+})}\rho _{R}(p^{\prime })$ where $p^{\prime }=$ $push_{\bigtriangledown
+}(p,R^{-1}(A))$} \\ 
 $\partial _{B}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown
-}(p,\partial _{B}(A),W)$} \\ 
-$\tau _{I}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (x)}(\tau
-_{I}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown }(p,Act,W)$}
-\\ 
-$\Gamma _{C}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (x)}(\Gamma
-_{C}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown }(p,A\cup
-C^{-1}(A),W)$} \\ 
-$\nabla _{V}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown }(p,A\cap V,W)
-$}%
+}(p,\partial _{B}(A))$} \\ 
+$\tau _{I}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p^{\prime
+})}(\tau _{I}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown
+}(p,Act)$} \\ 
+$\Gamma _{C}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p^{\prime
+})}(\Gamma _{C}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown
+}(p,A\cup C^{-1}(A))$} \\ 
+$\nabla _{V}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown }(p,A\cap V)$}%
 \end{tabular}%
 \]
 

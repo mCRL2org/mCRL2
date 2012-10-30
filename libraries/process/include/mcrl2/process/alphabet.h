@@ -175,7 +175,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   {
     Node right = pop();
     Node left = pop();
-    push(set_union(set_union(left.alphabet, right.alphabet), concat(left.alphabet, right.alphabet)));
+    push(merge_union(left.alphabet, right.alphabet));
   }
 
   // Pops two elements A1 and A2 from the stack, and pushes back A1 | A2
@@ -335,31 +335,6 @@ alphabet_node alphabet(const process_expression& x, const atermpp::vector<proces
   return f.node_stack.back();
 }
 
-/*
-  // remove each element x from node.alphabet for which no y in A exists such that x is included in A
-  // TODO: the efficiency of this operation can probably be improved
-  void filter_alphabet(Node& node, bool A_includes_subsets = false)
-  {
-    for (multi_action_name_set::iterator i = node.alphabet.begin(); i != node.alphabet.end(); )
-    {
-      bool remove = !includes(A, *i);
-      if (exact)
-      {
-        remove = remove || A.find(*i) == A.end();
-      }
-      if (remove)
-      {
-        node.alphabet.erase(i++);
-        node.m_true_intersection = true;
-      }
-      else
-      {
-        ++i;
-      }
-    }
-  }
-*/
-
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public alphabet_traverser<Derived, Node>
 {
@@ -449,8 +424,12 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
 
   void leave(const process::comm& x)
   {
-    super::leave(x);
-    top().m_expression = x;
+    communication_expression_list C = x.comm_set();
+    multi_action_name_set A1 = set_union(A, apply_comm_inverse(C, A));
+    push_allow_node node = push_allow(x.operand(), A1, false, equations);
+    node.m_expression = comm(C, node.expression());
+    node.m_true_intersection = filter_alphabet(node.alphabet, A, A_includes_subsets); // TODO: is this needed?
+    push(node);
   }
 
   void leave(const process::allow& x)
@@ -499,7 +478,7 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
   {
     push_allow_node left = push_allow(x.left(), A, true, equations);
     push_allow_node right = push_allow(x.right(), set_union(A, left_arrow(A, left.alphabet)), false, equations);
-    push(push_allow_node(set_union(left.alphabet, right.alphabet), merge(left.expression(), right.expression()), false));
+    push(push_allow_node(merge_union(left.alphabet, right.alphabet), merge(left.expression(), right.expression()), false));
   }
 
   void leave(const process::left_merge& x)
@@ -539,6 +518,8 @@ push_allow_node push_allow(const process_expression& x, const multi_action_name_
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A, A_includes_subsets);
   f(x);
   mCRL2log(log::debug) << "<push_allow result>" << f.node_stack.back().print() << std::endl;
+  f.node_stack.back().m_true_intersection = filter_alphabet(f.node_stack.back().alphabet, A, A_includes_subsets);
+  mCRL2log(log::debug) << "<push_allow result after filtering>" << f.node_stack.back().print() << std::endl;
   return f.node_stack.back();
 }
 

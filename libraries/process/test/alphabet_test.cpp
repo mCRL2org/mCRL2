@@ -149,6 +149,7 @@ void test_alphabet()
 {
   test_alphabet("a || b", "{a, ab, b}");
   test_alphabet("allow({ a, a | b }, a || b)", "{a, ab}");
+  test_alphabet("allow({a}, a || a)", "{a}");
 }
 
 template <typename Operation>
@@ -169,6 +170,21 @@ void test_alphabet_operation()
   test_alphabet_operation("{ab, b}", "{b}", "{, a}", process::left_arrow, "left_arrow");
 }
 
+void test_push_allow(const std::string& expression, const std::string& Atext, bool A_includes_subsets, const std::string& expected_result, const std::string& equations = "")
+{
+  std::string text = "act a, b, c, d;\n" + equations + "\ninit " + expression + ";\n";
+  process_specification procspec = parse_process_specification(text);
+  multi_action_name_set A = parse_multi_action_name_set(Atext);
+  process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), A, A_includes_subsets, procspec.equations());
+  std::string result = process::pp(node.expression());
+  check_result(expression, result, expected_result, "push_allow");
+}
+
+void test_push_allow()
+{
+  test_push_allow("a || a", "{a}", false, "allow({a}, a || a)");
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -179,6 +195,7 @@ int test_main(int argc, char* argv[])
   test_alphabet_reduce();
   test_alphabet();
   test_alphabet_operation();
+  test_push_allow();
 
   return EXIT_SUCCESS;
 }

@@ -242,6 +242,33 @@ bool includes(const multi_action_name_set& A, const multi_action_name& y)
   return false;
 }
 
+// Returns true if elements were removed from alphabet
+inline
+bool filter_alphabet(multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets = false)
+{
+  bool result = false;
+  for (multi_action_name_set::iterator i = alphabet.begin(); i != alphabet.end(); )
+  {
+    bool remove = A_includes_subsets ? !includes(A, *i) : A.find(*i) == A.end();
+    if (remove)
+    {
+      alphabet.erase(i++);
+      result = true;
+    }
+    else
+    {
+      ++i;
+    }
+  }
+  return result;
+}
+
+inline
+multi_action_name_set merge_union(const multi_action_name_set& A1, const multi_action_name_set& A2)
+{
+  return set_union(set_union(A1, A2), concat(A1, A2));
+}
+
 } // namespace process
 
 } // namespace mcrl2
