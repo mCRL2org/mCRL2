@@ -94,18 +94,21 @@ multi_action_name apply_rename(const rename_expression_list& R, const multi_acti
 } // namespace detail
 
 inline
-multi_action_name set_union(const multi_action_name& alpha, const multi_action_name& beta)
+multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
 {
-  multi_action_name result;
-  std::set_union(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
+  multi_action_name result = alpha;
+  result.insert(beta.begin(), beta.end());
   return result;
 }
 
 inline
-multi_action_name set_difference(const multi_action_name& alpha, const multi_action_name& beta)
+multi_action_name multiset_difference(const multi_action_name& alpha, const multi_action_name& beta)
 {
-  multi_action_name result;
-  std::set_difference(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
+  multi_action_name result = alpha;
+  for (multi_action_name::const_iterator i = beta.begin(); i != beta.end(); ++i)
+  {
+    result.erase(*i);
+  }
   return result;
 }
 
@@ -139,12 +142,9 @@ multi_action_name_set concat(const multi_action_name_set& A1, const multi_action
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A1.begin(); i != A1.end(); ++i)
   {
-    const multi_action_name& alpha = *i;
     for (multi_action_name_set::const_iterator j = A2.begin(); j != A2.end(); ++j)
     {
-      const multi_action_name& beta = *j;
-      multi_action_name gamma = set_union(alpha, beta);
-      result.insert(gamma);
+      result.insert(multiset_union(*i, *j));
     }
   }
   return result;
@@ -164,7 +164,7 @@ multi_action_name_set apply_hide(const core::identifier_string_list& I, const mu
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    result.insert(set_difference(*i, m));
+    result.insert(multiset_difference(*i, m));
   }
   return result;
 }
@@ -212,7 +212,7 @@ multi_action_name_set apply_comm(const communication_expression_list& C, const m
       const multi_action_name& gamma = *j;
       if (std::includes(gamma.begin(), gamma.end(), alpha.begin(), alpha.end()))
       {
-        multi_action_name beta = set_difference(gamma, alpha);
+        multi_action_name beta = multiset_difference(gamma, alpha);
         beta.insert(a);
         result.insert(beta);
       }

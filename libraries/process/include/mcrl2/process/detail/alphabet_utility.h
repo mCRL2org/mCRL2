@@ -119,7 +119,7 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, const multi_ac
       const multi_action_name& gamma = *j;
       if (std::includes(gamma.begin(), gamma.end(), beta.begin(), beta.end()))
       {
-        multi_action_name alpha = set_difference(gamma, beta);
+        multi_action_name alpha = multiset_difference(gamma, beta);
         result.insert(alpha);
       }
     }
