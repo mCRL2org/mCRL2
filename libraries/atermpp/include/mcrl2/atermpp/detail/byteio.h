@@ -47,10 +47,9 @@ typedef struct
 
 int write_byte(const int byte, byte_writer* writer, std::ostream &os);
 size_t write_bytes(const char* buf, const size_t count, byte_writer* writer, std::ostream &os);
-int read_byte(byte_reader* reader);
-size_t read_bytes(char* buf, size_t count, byte_reader* reader);
-void init_file_reader(byte_reader* reader, FILE* file);
-void init_string_reader(byte_reader* reader, const unsigned char* buf, const size_t max_size);
+int read_byte(byte_reader* reader, std::istream &is);
+size_t read_bytes(char* buf, size_t count, byte_reader* reader, std::istream &is);
+void init_stream_reader(byte_reader* reader, std::istream &is);
 
 } // namespace atermpp
 

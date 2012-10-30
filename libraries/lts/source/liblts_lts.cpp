@@ -100,16 +100,18 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 
   const std::string error_message="The .lts file " + filename +
                                   " does not appear to contain datatypes, action declarations and process parameters";
-  FILE* g = fopen(filename.c_str(),"rb");
-  if ((g == NULL) ||
-      (fseek(g,-(12+8),SEEK_END) != 0))
+  ifstream g;
+  g.open(filename.c_str());
+  g.seekg(-(12+8),ios_base::end);
+  if (g.fail())  
   {
     throw mcrl2::runtime_error(error_message + " (cannot reopen file)");
   }
   else
   {
     unsigned char buf[8+12];
-    if (fread(&buf,1,8+12,g) != 8+12)
+    g.read((char*)buf,8+12);
+    if (g.fail())
     {
       throw mcrl2::runtime_error(error_message + " (file does not contain control information)");
     }
@@ -117,16 +119,21 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
     {
       if (!strncmp(((char*) buf)+8,"   1STL2LRCm",12))
       {
-        aterm data;
         long position = 0;
         for (unsigned char i=0; i<8; i++)
         {
           position = (position << 8) + buf[7-i];
         }
-        if ((fseek(g,position,SEEK_SET) != 0) ||
-            ((data = read_term_from_file(g)) == aterm()))
+        g.seekg(position);
+        if (g.fail())
         {
           throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
+        }
+
+        aterm data=read_term_from_stream(g);
+        if (data==aterm())
+        {
+          throw mcrl2::runtime_error(error_message + " (data information is incorrect)");
         }
         else
         {
@@ -146,10 +153,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         }
       }
     }
-    if (g != NULL)
-    {
-      fclose(g);
-    }
+    g.close();
   }
 }
 
@@ -173,7 +177,6 @@ static void add_extra_mcrl2_lts_data(
   const bool has_act_labels,
   const aterm_list act_labels)
 {
-  // FILE* f = fopen(filename.c_str(),"ab");
   std::ofstream f(filename.c_str(), std::ios_base::app); // Open to append.
   if (f.fail())
   {
@@ -224,14 +227,14 @@ static void add_extra_mcrl2_lts_data(
     return;
   }
 
-  char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
+  unsigned char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
   for (size_t i=0; i<8; i++)
   {
     buf[i] = position % 0x100;
     position >>= 8;
   }
  
-  f.write(buf,8+12);
+  f.write((char *)buf,8+12);
   if (f.fail())
   {
     f.close();

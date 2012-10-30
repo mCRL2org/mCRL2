@@ -620,41 +620,11 @@ class Trace
 
     atermpp::aterm readATerm(std::istream& is)
     {
-#define RAT_INIT_BUF_SIZE (64*1024)
-      size_t buf_size = RAT_INIT_BUF_SIZE;
-      char* buf = NULL;
-      std::streamsize len = 0;
-
-      while (!is.eof())
-      {
-        char* new_buf = (char*) realloc(buf,buf_size*sizeof(char));
-        if (new_buf == NULL)
-        {
-          free(buf);
-          throw runtime_error("not enough memory to read aterm");
-        }
-        buf = new_buf;
-
-        is.read(buf+len,buf_size-len);
-        if (is.bad())
-        {
-          free(buf);
-          throw runtime_error("could not read aterm from stream");
-        }
-
-        len+=is.gcount();
-        buf_size = buf_size * 2;
-      }
-      is.clear();
-
-      // atermpp::aterm t = atermpp::ATreadFromBinaryString((unsigned char*) buf, static_cast< int >(len));
-      atermpp::aterm t = atermpp::read_term_from_binary_string(std::string(buf,len));
+      atermpp::aterm t = atermpp::read_term_from_binary_stream(is);
       if (t == atermpp::aterm())
       {
         throw runtime_error("failed to read aterm from stream");
       }
-
-      free(buf);
 
       return t;
     }

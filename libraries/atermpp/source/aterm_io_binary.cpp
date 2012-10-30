@@ -317,7 +317,7 @@ flushBitsToWriter(byte_writer* writer, ostream &os)
 
 static
 int
-readBits(size_t* val, const size_t nr_bits, byte_reader* reader)
+readBits(size_t* val, const size_t nr_bits, byte_reader* reader, istream &is)
 {
   size_t cur_bit, mask = 1;
 
@@ -326,7 +326,7 @@ readBits(size_t* val, const size_t nr_bits, byte_reader* reader)
   {
     if (bits_in_buffer == 0)
     {
-      int val = read_byte(reader);
+      int val = read_byte(reader, is);
       if (val == EOF)
       {
         return -1;
@@ -361,12 +361,12 @@ static bool writeInt(const size_t val, byte_writer* writer, ostream &os)
 }
 
 
-static int readInt(size_t* val, byte_reader* reader)
+static int readInt(size_t* val, byte_reader* reader, istream &is)
 {
   int buf[8];
 
   /* Try to read 1st character */
-  if ((buf[0] = read_byte(reader)) == EOF)
+  if ((buf[0] = read_byte(reader,is)) == EOF)
   {
     return EOF;
   }
@@ -379,7 +379,7 @@ static int readInt(size_t* val, byte_reader* reader)
   }
 
   /* Try to read 2nd character */
-  if ((buf[1] = read_byte(reader)) == EOF)
+  if ((buf[1] = read_byte(reader,is)) == EOF)
   {
     return EOF;
   }
@@ -392,7 +392,7 @@ static int readInt(size_t* val, byte_reader* reader)
   }
 
   /* Try to read 3rd character */
-  if ((buf[2] = read_byte(reader)) == EOF)
+  if ((buf[2] = read_byte(reader,is)) == EOF)
   {
     return EOF;
   }
@@ -405,7 +405,7 @@ static int readInt(size_t* val, byte_reader* reader)
   }
 
   /* Try to read 4th character */
-  if ((buf[3] = read_byte(reader)) == EOF)
+  if ((buf[3] = read_byte(reader,is)) == EOF)
   {
     return EOF;
   }
@@ -419,7 +419,7 @@ static int readInt(size_t* val, byte_reader* reader)
   }
 
   /* Try to read 5th character */
-  if ((buf[4] = read_byte(reader)) == EOF)
+  if ((buf[4] = read_byte(reader,is)) == EOF)
   {
     return EOF;
   }
@@ -449,12 +449,12 @@ static bool writeString(const char* str, const size_t len, byte_writer* writer, 
 }
 
 
-static size_t readString(byte_reader* reader)
+static size_t readString(byte_reader* reader, istream &is)
 {
   size_t len;
 
   /* Get length of string */
-  if (readInt(&len, reader) < 0)
+  if (readInt(&len, reader, is) < 0)
   {
     return atermpp::npos;
   }
@@ -471,7 +471,7 @@ static size_t readString(byte_reader* reader)
   }
 
   /* Read the actual string */
-  if (read_bytes(text_buffer, len, reader) != len)
+  if (read_bytes(text_buffer, len, reader,is) != len)
   {
     return atermpp::npos;
   }
@@ -1200,24 +1200,24 @@ bool write_term_to_binary_file(const aterm &t, const std::string& filename)
   * Read a single symbol from file.
   */
 
-static function_symbol read_symbol(byte_reader* reader)
+static function_symbol read_symbol(byte_reader* reader, istream &is)
 {
   size_t arity, quoted;
   size_t len;
 
-  if ((len = readString(reader)) == atermpp::npos)
+  if ((len = readString(reader, is)) == atermpp::npos)
   {
     return atermpp::npos;
   }
 
   text_buffer[len] = '\0';
 
-  if (readInt(&arity, reader) < 0)
+  if (readInt(&arity, reader, is) < 0)
   {
     return atermpp::npos;
   }
 
-  if (readInt(&quoted, reader) < 0)
+  if (readInt(&quoted, reader, is) < 0)
   {
     return atermpp::npos;
   }
@@ -1229,7 +1229,7 @@ static function_symbol read_symbol(byte_reader* reader)
  * Read all symbols from file.
  */
 
-static bool read_all_symbols(byte_reader* reader)
+static bool read_all_symbols(byte_reader* reader, istream &is)
 {
   size_t k, val;
   size_t i, j, arity;
@@ -1238,7 +1238,7 @@ static bool read_all_symbols(byte_reader* reader)
   {
     /*{{{  Read the actual symbol */
 
-    function_symbol sym = read_symbol(reader);
+    function_symbol sym = read_symbol(reader,is);
     read_symbols[i].sym = sym;
     arity = sym.arity();
     read_symbols[i].arity = arity;
@@ -1246,7 +1246,7 @@ static bool read_all_symbols(byte_reader* reader)
     /*}}}  */
     /*{{{  Read term count and allocate space */
 
-    if (readInt(&val, reader) < 0 || val == 0)
+    if (readInt(&val, reader, is) < 0 || val == 0)
     {
       return false;
     }
@@ -1298,7 +1298,7 @@ static bool read_all_symbols(byte_reader* reader)
 
     for (j=0; j<read_symbols[i].arity; j++)
     {
-      if (readInt(&val, reader) < 0)
+      if (readInt(&val, reader, is) < 0)
       {
         return false;
       }
@@ -1313,7 +1313,7 @@ static bool read_all_symbols(byte_reader* reader)
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
       {
-        if (readInt(&val, reader) < 0)
+        if (readInt(&val, reader, is) < 0)
         {
           return false;
         }
@@ -1326,7 +1326,7 @@ static bool read_all_symbols(byte_reader* reader)
   return true;
 }
 
-static aterm read_term(sym_read_entry* sym, byte_reader* reader)
+static aterm read_term(sym_read_entry* sym, byte_reader* reader, istream &is)
 {
   size_t val;
   size_t i, arity = sym->arity;
@@ -1337,7 +1337,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
 
   for (i=0; i<arity; i++)
   {
-    if (readBits(&val, sym->sym_width[i], reader) < 0)
+    if (readBits(&val, sym->sym_width[i], reader, is) < 0)
     {
       return aterm();
     }
@@ -1347,7 +1347,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
     }
     arg_sym = &read_symbols[sym->topsyms[i][val]];
 
-    if (readBits(&val, arg_sym->term_width, reader) < 0)
+    if (readBits(&val, arg_sym->term_width, reader, is) < 0)
     {
       return aterm();
     }
@@ -1358,7 +1358,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
     }
     if (arg_sym->terms[val]==aterm())
     {
-      arg_sym->terms[val] = read_term(arg_sym, reader);
+      arg_sym->terms[val] = read_term(arg_sym, reader, is);
       if (arg_sym->terms[val]==aterm())
       {
         return aterm();
@@ -1372,7 +1372,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader)
   {
     /*{{{  Read an integer */
 
-    if (readBits(&val, INT_SIZE_IN_BAF, reader) < 0)
+    if (readBits(&val, INT_SIZE_IN_BAF, reader, is) < 0)
     {
       return aterm();
     }
@@ -1444,7 +1444,7 @@ static void free_read_space()
  */
 
 static
-aterm read_baf(byte_reader* reader)
+aterm read_baf(byte_reader* reader, istream &is)
 {
   size_t val, nr_unique_terms;
   aterm result;
@@ -1455,14 +1455,14 @@ aterm read_baf(byte_reader* reader)
 
   /*{{{  Read header */
 
-  if (readInt(&val, reader) < 0)
+  if (readInt(&val, reader, is) < 0)
   {
     return aterm();
   }
 
   if (val == 0)
   {
-    if (readInt(&val, reader) < 0)
+    if (readInt(&val, reader, is) < 0)
     {
       return aterm();
     }
@@ -1474,7 +1474,7 @@ aterm read_baf(byte_reader* reader)
     return aterm();
   }
 
-  if (readInt(&val, reader) < 0)
+  if (readInt(&val, reader, is) < 0)
   {
     return aterm();
   }
@@ -1485,13 +1485,13 @@ aterm read_baf(byte_reader* reader)
     return aterm();
   }
 
-  if (readInt(&val, reader) < 0)
+  if (readInt(&val, reader, is) < 0)
   {
     return aterm();
   }
   nr_unique_symbols = val;
 
-  if (readInt(&nr_unique_terms, reader) < 0)
+  if (readInt(&nr_unique_terms, reader, is) < 0)
   {
     return aterm();
   }
@@ -1508,34 +1508,26 @@ aterm read_baf(byte_reader* reader)
 
   /*}}}  */
 
-  if (!read_all_symbols(reader))
+  if (!read_all_symbols(reader,is))
   {
     return aterm();
   }
 
-  if (readInt(&val, reader) < 0)
+  if (readInt(&val, reader, is) < 0)
   {
     return aterm();
   }
 
-  result = read_term(&read_symbols[val], reader);
+  result = read_term(&read_symbols[val], reader, is);
   free_read_space();
   return result;
 }
 
 
-aterm read_term_from_binary_string(const std::string& s)
+aterm read_term_from_binary_stream(istream &is)
 {
   byte_reader reader;
-  init_string_reader(&reader, reinterpret_cast<const unsigned char*>(s.c_str()), s.size());
-  return read_baf(&reader);
-}
-
-
-aterm read_term_from_binary_file(FILE* file)
-{
-  byte_reader reader;
-  init_file_reader(&reader, file);
+  init_stream_reader(&reader, is);
 
 #ifdef WIN32
   if (_setmode(_fileno(file), _O_BINARY) == -1)
@@ -1545,43 +1537,12 @@ aterm read_term_from_binary_file(FILE* file)
   }
 #endif
 
-  aterm result=read_baf(&reader);
+  aterm result=read_baf(&reader, is);
   if (result==aterm())
   {
     throw std::runtime_error("Failed to read term from binary file.");
   }
   return result;
 }
-
-aterm read_term_from_binary_file(const std::string &filename)
-{
-  FILE*  f;
-  const char* name=filename.c_str();
-
-  if (!strcmp(name, "-"))
-  {
-    return read_term_from_binary_file(stdin);
-  }
-
-  if (!(f = fopen(name, "rb")))
-  {
-    throw std::runtime_error("Failed to open binary file " + filename + " for reading.");
-  }
-
-  aterm result;
-  try 
-  { 
-    result = read_term_from_binary_file(f);
-  }
-  catch (std::runtime_error &e)
-  {
-    fclose(f);
-    throw std::runtime_error(e.what() + std::string("\nWhen reading from binary file ") + filename);
-  }
-  fclose(f);
-
-  return result;
-}
-
 
 } // namespace atermpp

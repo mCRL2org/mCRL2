@@ -72,7 +72,7 @@ size_t write_bytes(const char* buf, const size_t count, byte_writer* writer, std
   return 0;
 }
 
-int read_byte(byte_reader* reader)
+int read_byte(byte_reader* reader, std::istream &is)
 {
   size_t index;
   int c;
@@ -96,6 +96,11 @@ int read_byte(byte_reader* reader)
       reader->bytes_read++;
       break;
 
+    case STREAM_READER:
+      c = is.get();
+      reader->bytes_read++;
+      break;
+
     default:
       abort();
   }
@@ -103,7 +108,7 @@ int read_byte(byte_reader* reader)
   return c;
 }
 
-size_t read_bytes(char* buf, size_t count, byte_reader* reader)
+size_t read_bytes(char* buf, size_t count, byte_reader* reader, std::istream &is)
 {
   size_t index, size, left;
   size_t result;
@@ -134,26 +139,22 @@ size_t read_bytes(char* buf, size_t count, byte_reader* reader)
       reader->bytes_read += count;
       break;
 
+    case STREAM_READER:
+      is.read(buf, count);
+      result=count;
+      reader->bytes_read += count;
+      break;
+
     default:
       abort();
   }
   return result;
 }
 
-void init_file_reader(byte_reader* reader, FILE* file)
+void init_stream_reader(byte_reader* reader, std::istream &is)
 {
-  reader->type = FILE_READER;
+  reader->type = STREAM_READER;
   reader->bytes_read = 0;
-  reader->u.file_data = file;
-}
-
-void init_string_reader(byte_reader* reader, const unsigned char* buf, const size_t max_size)
-{
-  reader->type = STRING_READER;
-  reader->bytes_read = 0;
-  reader->u.string_data.buf = buf;
-  reader->u.string_data.index = 0;
-  reader->u.string_data.size = max_size;
 }
 
 } // namespace atermpp
