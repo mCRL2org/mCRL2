@@ -255,7 +255,6 @@ add_subdirectory ( tools/pbespgsolve )
 add_subdirectory ( tools/pbespp )
 add_subdirectory ( tools/pbesrewr )
 add_subdirectory ( tools/symbolic_exploration )
-add_subdirectory ( tools/tbf2lps )
 add_subdirectory ( tools/tracepp )
 add_subdirectory ( tools/txt2pbes )
 add_subdirectory ( tools/txt2lps )
@@ -294,7 +293,7 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 ##---------------------------------------------------
 
 if(MCRL2_ENABLE_DEPRECATED)
-
+  add_subdirectory ( tools/tbf2lps )
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
