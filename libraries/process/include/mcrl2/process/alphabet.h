@@ -59,17 +59,24 @@ struct alphabet_node
   alphabet_node(const multi_action_name_set& alphabet_)
     : alphabet(alphabet_)
   {}
+
+  std::string print() const
+  {
+    std::ostringstream out;
+    out << "alphabet = " << lps::pp(alphabet);
+    return out.str();
+  }
 };
 
-struct push_allow_node: public alphabet_node
+struct bounded_alphabet_node: public alphabet_node
 {
-  push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression(), bool needs_allow = false)
-    : alphabet_node(alphabet), m_expression(expression), m_needs_allow(needs_allow)
+  bounded_alphabet_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression(), bool true_intersection = false)
+    : alphabet_node(alphabet), m_expression(expression), m_true_intersection(true_intersection)
   {}
 
   process_expression expression() const
   {
-    if (m_needs_allow)
+    if (m_true_intersection)
     {
       return make_allow(alphabet, m_expression);
     }
@@ -82,16 +89,19 @@ struct push_allow_node: public alphabet_node
   std::string print() const
   {
     std::ostringstream out;
-    out << "alphabet = " << lps::pp(alphabet) << " expression = " << process::pp(m_expression) << " needs allow = " << std::boolalpha << m_needs_allow << std::endl;
+    out << "alphabet = " << lps::pp(alphabet) << " expression = " << process::pp(m_expression) << " needs allow = " << std::boolalpha << m_true_intersection << std::endl;
     return out.str();
   }
 
   process_expression m_expression;
-  bool m_needs_allow;
+
+  // if true, then there were elements removed from the alphabet using the intersection with the bound set A
+  bool m_true_intersection;
 };
 
-push_allow_node push_allow(const process_expression& x, const multi_action_name_set& A, bool A_includes_subsets, const atermpp::vector<process_equation>& equations);
+bounded_alphabet_node push_allow(const process_expression& x, const multi_action_name_set& A, bool A_includes_subsets, const atermpp::vector<process_equation>& equations);
 
+/// \brief Traverser that computes the alphabet of process expressions
 template <typename Derived, typename Node = alphabet_node>
 struct alphabet_traverser: public process_expression_traverser<Derived>
 {
@@ -116,10 +126,6 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   alphabet_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_)
     : equations(equations_), W(W_)
   {}
-
-  // an event that is triggered after computation of the alphabet in a node
-  void on_finish_alphabet(Node&)
-  { }
 
   // Push A to node_stack
   void push(const multi_action_name_set& A)
@@ -161,12 +167,20 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     push(set_union(left.alphabet, right.alphabet));
   }
 
-  // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2, A1xA2)
-  void join_parallel()
+  // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2, A1 | A2)
+  void join_merge()
   {
     Node right = pop();
     Node left = pop();
     push(set_union(set_union(left.alphabet, right.alphabet), concat(left.alphabet, right.alphabet)));
+  }
+
+  // Pops two elements A1 and A2 from the stack, and pushes back A1 | A2
+  void join_sync()
+  {
+    Node right = pop();
+    Node left = pop();
+    push(concat(left.alphabet, right.alphabet));
   }
 
   void leave(const lps::action& x)
@@ -176,7 +190,6 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     multi_action_name_set A;
     A.insert(alpha);
     push(A);
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::process_instance& x)
@@ -192,7 +205,6 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     {
       push(multi_action_name_set());
     }
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::process_instance_assignment& x)
@@ -208,13 +220,11 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     {
       push(multi_action_name_set());
     }
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::delta& x)
   {
     push(multi_action_name_set());
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::tau& x)
@@ -222,93 +232,78 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     multi_action_name_set A;
     A.insert(multi_action_name()); // A = { tau }
     push(A);
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::sum& x)
   {
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::block& x)
   {
     top() = process::apply_block(x.block_set(), top().alphabet);
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::hide& x)
   {
     top() = process::apply_hide(x.hide_set(), top().alphabet);
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::rename& x)
   {
     top() = process::apply_rename(x.rename_set(), top().alphabet);
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::comm& x)
   {
     top() = process::apply_comm(x.comm_set(), top().alphabet);
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::allow& x)
   {
     top() = process::apply_allow(x.allow_set(), top().alphabet);
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::sync& x)
   {
-    join_parallel();
-    derived().on_finish_alphabet(top());
+    join_sync();
   }
 
   void leave(const process::at& x)
   {
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::seq& x)
   {
-    derived().on_finish_alphabet(top());
+    join();
   }
 
   void leave(const process::if_then& x)
   {
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::if_then_else& x)
   {
     join();
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::bounded_init& x)
   {
     join();
-    derived().on_finish_alphabet(top());
   }
 
   void leave(const process::merge& x)
   {
-    join_parallel();
-    derived().on_finish_alphabet(top());
+    join_merge();
   }
 
   void leave(const process::left_merge& x)
   {
-    join_parallel();
-    derived().on_finish_alphabet(top());
+    join_merge();
   }
 
   void leave(const process::choice& x)
   {
     join();
-    derived().on_finish_alphabet(top());
   }
 };
 
@@ -330,21 +325,23 @@ struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traver
 };
 
 inline
-multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
+alphabet_node alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
 {
   apply_alphabet_traverser f(equations, W);
   f(x);
-  return f.node_stack.back().alphabet;
+  return f.node_stack.back();
 }
 
-template <typename Derived, typename Node = push_allow_node>
-struct push_allow_traverser: public alphabet_traverser<Derived, Node>
+/// \brief Traverser that computes the alphabet of process expressions intersected by a set A.
+/// In general the alphabet can become large, and so the intersection with A is done already
+/// during the computation.
+template <typename Derived, typename Node = bounded_alphabet_node>
+struct bounded_alphabet_traverser: public alphabet_traverser<Derived, Node>
 {
   typedef alphabet_traverser<Derived, Node> super;
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::W;
   using super::push;
   using super::pop;
   using super::top;
@@ -361,7 +358,7 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
   // if true, interpret A as 'A_subset'
   bool A_includes_subsets;
 
-  push_allow_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A_, bool A_includes_subsets_)
+  bounded_alphabet_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A_, bool A_includes_subsets_)
     : super(equations, W), A(A_), A_includes_subsets(A_includes_subsets_)
   {}
 
@@ -390,7 +387,7 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
   }
 
   // intersect node.alphabet with A
-  void on_finish_alphabet(Node& node)
+  void intersect_alphabet(Node& node)
   {
     mCRL2log(log::debug) << "<finish> A = " << lps::pp(A) << " alphabet = " << lps::pp(node.alphabet) << std::endl;
     for (multi_action_name_set::iterator i = node.alphabet.begin(); i != node.alphabet.end(); )
@@ -399,14 +396,188 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
       if (remove)
       {
         node.alphabet.erase(i++);
-        node.m_needs_allow = true;
+        node.m_true_intersection = true;
       }
       else
       {
         ++i;
       }
     }
-    mCRL2log(log::debug) << "<on_finish_alphabet>" << node.print() << std::endl;
+    mCRL2log(log::debug) << "<intersect_alphabet>" << node.print() << std::endl;
+  }
+
+  void leave(const lps::action& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::process_instance& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::process_instance_assignment& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::delta& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::tau& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::sum& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::block& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::hide& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::rename& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::comm& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::allow& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::sync& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::at& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::seq& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::if_then& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::if_then_else& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::bounded_init& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::merge& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::left_merge& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+
+  void leave(const process::choice& x)
+  {
+    super::leave(x);
+    intersect_alphabet(top());
+  }
+};
+
+struct apply_bounded_alphabet_traverser: public bounded_alphabet_traverser<apply_bounded_alphabet_traverser>
+{
+  typedef bounded_alphabet_traverser<apply_bounded_alphabet_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  apply_bounded_alphabet_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A, bool A_includes_subsets)
+    : bounded_alphabet_traverser(equations, W, A, A_includes_subsets)
+  {}
+};
+
+inline
+bounded_alphabet_node bounded_alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A, bool A_includes_subsets)
+{
+  apply_bounded_alphabet_traverser f(equations, W, A, A_includes_subsets);
+  f(x);
+  return f.node_stack.back().alphabet;
+}
+
+template <typename Derived, typename Node = bounded_alphabet_node>
+struct push_allow_traverser: public bounded_alphabet_traverser<Derived, Node>
+{
+  typedef bounded_alphabet_traverser<Derived, Node> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::A;
+  using super::A_includes_subsets;
+  using super::W;
+  using super::push;
+  using super::pop;
+  using super::top;
+  using super::node_stack;
+  using super::equations;
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  push_allow_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A_, bool A_includes_subsets_)
+    : super(equations, W, A, A_includes_subsets)
+  {}
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
   }
 
   void leave(const lps::action& x)
@@ -513,9 +684,9 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
 
   void operator()(const process::merge& x)
   {
-    push_allow_node left = push_allow(x.left(), A, true, equations);
-    push_allow_node right = push_allow(x.right(), set_union(A, left_arrow(A, left.alphabet)), false, equations);
-    push(push_allow_node(set_union(left.alphabet, right.alphabet), merge(left.expression(), right.expression()), false));
+    bounded_alphabet_node left = push_allow(x.left(), A, true, equations);
+    bounded_alphabet_node right = push_allow(x.right(), set_union(A, left_arrow(A, left.alphabet)), false, equations);
+    push(bounded_alphabet_node(set_union(left.alphabet, right.alphabet), merge(left.expression(), right.expression()), false));
   }
 
   void leave(const process::left_merge& x)
@@ -531,7 +702,7 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
   }
 };
 
-template <template <class, class> class Traverser, typename Node = push_allow_node>
+template <template <class, class> class Traverser, typename Node = bounded_alphabet_node>
 struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<Traverser, Node>, Node>
 {
   typedef Traverser<apply_push_allow_traverser<Traverser, Node>, Node> super;
@@ -549,7 +720,7 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
 };
 
 inline
-push_allow_node push_allow(const process_expression& x, const multi_action_name_set& A, bool A_includes_subsets, const atermpp::vector<process_equation>& equations)
+bounded_alphabet_node push_allow(const process_expression& x, const multi_action_name_set& A, bool A_includes_subsets, const atermpp::vector<process_equation>& equations)
 {
   std::set<process_identifier> W;
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A, A_includes_subsets);
@@ -595,7 +766,14 @@ inline
 multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations)
 {
   std::set<process_identifier> W;
-  return detail::alphabet(x, equations, W);
+  return detail::alphabet(x, equations, W).alphabet;
+}
+
+inline
+multi_action_name_set bounded_alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations, const multi_action_name_set& A, bool A_includes_subsets)
+{
+  std::set<process_identifier> W;
+  return detail::bounded_alphabet(x, equations, W, A, A_includes_subsets).alphabet;
 }
 
 inline

@@ -24,17 +24,7 @@
 using namespace mcrl2;
 using namespace mcrl2::process;
 
-void test_action_parse()
-{
-  lps::action_label_list act_decl = lps::parse_action_declaration("a: Nat;");
-  lps::action a = lps::parse_action("a(2)", act_decl);
-  multi_action_name A;
-  A.insert(core::identifier_string("a"));
-
-  BOOST_CHECK(name(a) == A);
-}
-
-multi_action_name_set parse_multi_action_name_set(const std::string& text, const lps::action_label_list& action_decls)
+multi_action_name_set parse_multi_action_name_set(const std::string& text, const lps::action_label_list& action_decls = lps::parse_action_declaration("a, b, c, d;"))
 {
   multi_action_name_set result;
   std::string s = text.substr(1, text.size() - 2);
@@ -46,26 +36,60 @@ multi_action_name_set parse_multi_action_name_set(const std::string& text, const
   return result;
 }
 
-// void test_alphabet_allow()
-// {
-//   std::string procspec =
-//     "act a, b, c, d; \n"
-//     "init delta;  \n"
-//     ;
-//
-//   process_specification P = parse_process_specification(procspec);
-//   lps::action_label_list action_decls = lps::parse_action_declaration("a, b, c, d;");
-//   process_expression p = parse_process_expression("a || b . c", procspec);
-//   BOOST_CHECK(process::pp(p) == "a || b . c");
-//   multi_action_name_set A = parse_multi_action_name_set("{a, b, d, a|d, a|c}", action_decls);
-//   std::cout << "A = " << lps::pp(A) << std::endl;
-//   alphabet_result r = push_allow(p, A, false, P);
-//   const multi_action_name_set& B = r.second;
-//   std::cout << "B = " << lps::pp(B) << std::endl;
-//   multi_action_name_set C = parse_multi_action_name_set("{a, b, a | c}", action_decls);
-//   std::cout << "C = " << lps::pp(C) << std::endl;
-//   BOOST_CHECK(lps::pp(B) == lps::pp(C));
-// }
+template <typename Container>
+std::string print_container(const Container& c, const std::string& start = "", const std::string& end = "", const std::string& sep = "")
+{
+  std::ostringstream out;
+  out << start;
+  for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+  {
+    if (i != c.begin())
+    {
+      out << sep;
+    }
+    out << *i;
+  }
+  out << end;
+  return out.str();
+}
+
+template <typename Container>
+std::string print_set(const Container& c)
+{
+  return print_container(c, "{", "}", ", ");
+}
+
+std::string print(const multi_action_name& alpha)
+{
+  std::set<std::string> A;
+  for (multi_action_name::const_iterator i = alpha.begin(); i != alpha.end(); ++i)
+  {
+    A.insert(std::string(*i));
+  }
+  return print_container(A);
+}
+
+std::string print(const multi_action_name_set& A)
+{
+  std::set<std::string> V;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    V.insert(print(*i));
+  }
+  return print_set(V);
+}
+
+void test_parse()
+{
+  lps::action_label_list act_decl = lps::parse_action_declaration("a: Nat;");
+  lps::action a = lps::parse_action("a(2)", act_decl);
+  multi_action_name A;
+  A.insert(core::identifier_string("a"));
+  BOOST_CHECK(name(a) == A);
+
+  multi_action_name_set B = parse_multi_action_name_set("{a, a|b}");
+  BOOST_CHECK(print(B) == "{a, ab}");
+}
 
 void test_alphabet_reduce()
 {
@@ -78,61 +102,35 @@ void test_alphabet_reduce()
   alphabet_reduce(procspec);
 }
 
-inline
-multi_action_name mname(const std::string& s)
+void test_alphabet(const std::string& expression, const std::string& expected_result, const std::string& equations = "")
 {
-  multi_action_name alpha;
-  alpha.insert(core::identifier_string(s));
-  return alpha;
-}
-
-inline
-multi_action_name mname(const std::string& s1, const std::string& s2)
-{
-  multi_action_name alpha;
-  alpha.insert(core::identifier_string(s1));
-  alpha.insert(core::identifier_string(s2));
-  return alpha;
+  std::string text = "act a, b, c, d;\n" + equations + "\ninit " + expression + ";\n";
+  process_specification procspec = parse_process_specification(text);
+  multi_action_name_set A = alphabet(procspec.init(), procspec.equations());
+  if (print(A) != expected_result)
+  {
+    std::cout << "--- test_alphabet failure ---" << std::endl;
+    std::cout << "expression      = " << expression << std::endl;
+    std::cout << "result          = " << print(A) << std::endl;
+    std::cout << "expected result = " << expected_result << std::endl;
+    BOOST_CHECK(print(A) == expected_result);
+  }
 }
 
 void test_alphabet()
 {
-  std::string text =
-    "act a, b;        \n"
-    "init a || b;     \n"
-    ;
-  process_specification procspec = parse_process_specification(text);
-  multi_action_name_set A = alphabet(procspec.init(), procspec.equations());
-  BOOST_CHECK(A.size() == 3);
-  BOOST_CHECK(A.find(mname("a")) != A.end());
-  BOOST_CHECK(A.find(mname("b")) != A.end());
-  BOOST_CHECK(A.find(mname("a", "b")) != A.end());
-}
-
-void test_alphabet2()
-{
-  std::string text =
-    "act a, b;        \n"
-    "init allow({ a, a | b }, a || b);     \n"
-    ;
-  process_specification procspec = parse_process_specification(text);
-  multi_action_name_set A = alphabet(procspec.init(), procspec.equations());
-  BOOST_CHECK(A.size() == 2);
-  BOOST_CHECK(A.find(mname("a")) != A.end());
-  BOOST_CHECK(A.find(mname("a", "b")) != A.end());
+  test_alphabet("a || b", "{a, ab, b}");
+  test_alphabet("allow({ a, a | b }, a || b)", "{a, ab}");
 }
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
-
   log::mcrl2_logger::set_reporting_level(log::debug);
 
-  test_action_parse();
-  // test_alphabet_allow();
+  test_parse();
   test_alphabet_reduce();
   test_alphabet();
-  test_alphabet2();
 
   return EXIT_SUCCESS;
 }
