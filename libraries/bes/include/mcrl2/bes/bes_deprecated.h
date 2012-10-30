@@ -872,7 +872,7 @@ bes_expression substitute_true_false(
 
   if (bes_global_variables<size_t>::opt_use_hashtables)
   {
-    hashtable1.reset();
+    hashtable1.clear();
   }
   return result;
 }
@@ -895,7 +895,7 @@ inline bes_expression BDDif(bes_expression b1, bes_expression b2, bes_expression
   hashtable_reset_counter++;
   if (hashtable_reset_counter==1000) // resetting of the hashtable is quite expensive.
   {
-    hashtable.reset();
+    hashtable.clear();
     hashtable_reset_counter=0;
   }
   return b;
@@ -1719,7 +1719,7 @@ class boolean_equation_system
         reset_variable_relevance();
         if (bes_global_variables<size_t>::opt_use_hashtables)
         {
-          variable_relevance_indexed_set.reset();
+          variable_relevance_indexed_set.clear();
         }
         if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
         {
@@ -3149,14 +3149,14 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
         {
           if (opt_use_hashtables)
           {
-            bex_hashtable.reset();  /* we change the approximation, so the
+            bex_hashtable.clear();  /* we change the approximation, so the
                                        hashtable becomes invalid */
           }
           if (opt_construct_counter_example)
           {
             if (opt_use_hashtables)
             {
-              bex_hashtable.reset();  /* We want to construct a counter example, which is
+              bex_hashtable.clear();  /* We want to construct a counter example, which is
                                          not traceable when results in the hashtable are used */
             }
             approximation[v]=evaluate_bex(
@@ -3205,14 +3205,14 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
           {
             if (opt_use_hashtables)
             {
-              bex_hashtable.reset();  /* we change approximation, so the
+              bex_hashtable.clear();  /* we change approximation, so the
                                          hashtable becomes invalid */
             }
             if (opt_construct_counter_example)
             {
               if (opt_use_hashtables)
               {
-                bex_hashtable.reset();  /* We want to construct a counter example, which is
+                bex_hashtable.clear();  /* We want to construct a counter example, which is
                                            not traceable when results in the hashtable are used */
               }
               approximation[*u]=evaluate_bex(
@@ -3241,7 +3241,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
 
     if (opt_use_hashtables)
     {
-      bex_hashtable.reset();
+      bex_hashtable.clear();
     }
 
     for (bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
@@ -3285,7 +3285,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
     }
     if (opt_use_hashtables)
     {
-      bex_hashtable.reset();
+      bex_hashtable.clear();
     }
 
   }

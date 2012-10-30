@@ -46,11 +46,11 @@ void test_indexed_set()
   atermpp::aterm b = t.get(1);
   BOOST_CHECK(b == read_term_from_string("b"));
 
-  t.remove(a);
+  t.erase(a);
   BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
 
-  t.remove(read_term_from_string("x"));
+  t.erase(read_term_from_string("x"));
   BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
 
@@ -58,7 +58,7 @@ void test_indexed_set()
   BOOST_CHECK(t.keys().size() == 2);
   BOOST_CHECK(p.first == 0);
 
-  t.reset();
+  t.clear();
   BOOST_CHECK(t.keys().size() == 0);
   BOOST_CHECK(t.size() == 0);
 

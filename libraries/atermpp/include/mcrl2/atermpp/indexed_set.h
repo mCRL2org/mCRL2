@@ -48,9 +48,9 @@ class indexed_set
     /// This function clears the hash table in the set, but does not release the memory.
     /// Using indexed_set_reset instead of indexed_set_destroy is preferable when indexed sets of
     /// approximately the same size are being used.
-    void reset();
+    void clear();
 
-    /// \brief Enter elem into the set.
+    /// \brief Enter an element into the set.
     /// This functions enters elem into the set. If elem was already in the set the previously
     /// assigned index of elem is returned, and the boolean is set to false. If elem did not yet occur in set a
     /// new number is assigned, and the boolean is set to true.  This number can either be the number of an
@@ -99,7 +99,7 @@ class indexed_set
     /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
     /// \param elem An element of the set.
     /// \return whether the element was successfully removed.
-    bool remove(const aterm& elem);
+    bool erase(const aterm& elem);
 
     /// \brief Retrieve all elements in set.
     /// A list with all valid elements stored in the indexed set is returned.  The list is

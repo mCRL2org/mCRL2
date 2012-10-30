@@ -23,7 +23,8 @@ add_library(${PROJECT_NAME}
   source/aterm_io_binary.cpp
   source/memory.cpp
   source/aterm_io_text.cpp
-  source/hash.cpp
+  source/table.cpp
+  source/indexed_set.cpp
 #  source/byteio.cpp
 #  source/byteencoding.cpp
 #  source/safio.cpp

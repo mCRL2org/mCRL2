@@ -39,14 +39,14 @@ class table:public indexed_set
             indexed_set(initial_size,max_load_pct)
     {}
 
-    /// \brief Resets a table.
+    /// \brief Clears a table.
     /// This function resets an atermtable, without freeing the memory it occupies. Its
     /// effect is the same as the subsequent execution of a destroy and a create of a table, but as no
     /// memory is released and obtained from the C memory management system this function is gen-
     /// erally cheaper. but if subsequent tables differ very much in size, the use of table_destroy and
     /// table_create may be prefered, because in such a way the sizes of the table adapt automatically
     /// to the requirements of the application.
-    void reset();
+    void clear();
 
     /// \brief Add / update a (key, value)-pair in a table.
     /// If key does not already exist in the table, this function adds the (key, value)-pair
@@ -62,7 +62,7 @@ class table:public indexed_set
 
     /// \brief Remove the (key, value)-pair from table.
     /// \param key A key value.
-    bool remove(const aterm &key);
+    bool erase(const aterm &key);
 
     /// \brief Get a list of all the values in a table.
     /// This function can be useful if you need to iterate over all values in a table. It

@@ -2218,7 +2218,7 @@ static bool gstcTransformVarConsTypeData(void)
         break;
       }
       Left=aterm_cast<aterm_appl>(Eqn(2));
-      FreeVars.reset();
+      FreeVars.clear();
       LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars,true);
       if (aterm()==LeftType)
       {
@@ -2253,7 +2253,7 @@ static bool gstcTransformVarConsTypeData(void)
         break;
       }
     }
-    DeclaredVars.reset();
+    DeclaredVars.clear();
     NewEqns=push_front<aterm>(NewEqns,gsMakeDataEqn(VarList,Cond,Left,Right));
   }
   if (b)
@@ -2273,7 +2273,7 @@ static bool gstcTransformActProcVarConst(void)
   for (aterm_list ProcVars=body.proc_pars.keys(); !ProcVars.empty(); ProcVars=ProcVars.tail())
   {
     aterm_appl ProcVar=ATAgetFirst(ProcVars);
-    Vars.reset();
+    Vars.clear();
     gstcATermTableCopy(context.glob_vars,Vars);
 
     table NewVars;
@@ -2308,7 +2308,7 @@ static bool gstcTransformPBESVarConst(void)
   for (aterm_list PBVars=body.proc_pars.keys(); !PBVars.empty(); PBVars=PBVars.tail())
   {
     aterm_appl PBVar=ATAgetFirst(PBVars);
-    Vars.reset();
+    Vars.clear();
     gstcATermTableCopy(context.glob_vars,Vars);
 
     table NewVars;
@@ -2763,7 +2763,7 @@ static table gstcRemoveVars(table &Vars, aterm_list VarDecls)
     aterm_appl VarDecl=ATAgetFirst(VarDecls);
     aterm_appl VarName=aterm_cast<aterm_appl>(VarDecl(0));
 
-    Vars.remove(VarName);
+    Vars.erase(VarName);
   }
 
   return Vars;
@@ -3040,7 +3040,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
     }
 
     //reverse the assignments
-    As.reset();
+    As.clear();
     for (aterm_list l=aterm_cast<aterm_list>(TypeCheckedProcTerm(1)),m=FormalPars; !l.empty(); l=l.tail(),m=m.tail())
     {
       aterm_appl act_par=ATAgetFirst(l);

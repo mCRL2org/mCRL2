@@ -1304,7 +1304,7 @@ void PrintEqns(std::ostream& OutStream, const aterm_list Eqns,
           {
             OutStream <<  "\n";
             StartPrefix = i;
-            VarDeclTable.reset();
+            VarDeclTable.clear();
           }
         }
       }
