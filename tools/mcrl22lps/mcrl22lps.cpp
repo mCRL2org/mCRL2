@@ -25,7 +25,6 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 // #include "gc.h"  Required for ad hoc garbage collection. This is possible with ATcollect,
 // useful to find garbage collection problems.
@@ -271,8 +270,6 @@ class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return mcrl22lps_gui_tool().execute(argc, argv);
 }
 

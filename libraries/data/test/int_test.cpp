@@ -15,8 +15,6 @@
 
 #include "mcrl2/data/standard_utility.h"
 
-#include "mcrl2/atermpp/aterm_init.h"
-
 using namespace mcrl2;
 using namespace mcrl2::data;
 
@@ -34,8 +32,6 @@ void recogniser_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   recogniser_test();
 
   return EXIT_SUCCESS;

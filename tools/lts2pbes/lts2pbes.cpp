@@ -17,7 +17,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
@@ -327,7 +326,5 @@ class lts2pbes_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2pbes_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return lts2pbes_gui_tool().execute(argc, argv);
 }

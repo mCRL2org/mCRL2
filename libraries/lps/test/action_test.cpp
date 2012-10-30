@@ -13,7 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/function_symbol.h"
@@ -28,8 +27,6 @@ using namespace mcrl2::lps;
 int test_main(int argc, char** argv)
 {
   using atermpp::make_vector;
-
-  MCRL2_ATERMPP_INIT(argc, argv)
 
   sort_expression X(basic_sort("X"));
   sort_expression Y(basic_sort("Y"));

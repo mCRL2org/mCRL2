@@ -27,7 +27,6 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 #ifdef MCRL2_PGSOLVER_ENABLED
 #include <cstdlib>
@@ -206,8 +205,6 @@ void test_lps(const std::string& lps_spec, const std::string& formula = lps::det
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_pbes(BES1);
   test_pbes(BES2);
   test_pbes(BES3);

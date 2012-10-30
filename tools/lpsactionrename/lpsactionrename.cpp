@@ -27,7 +27,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -215,7 +214,5 @@ class action_rename_gui_tool: public mcrl2_gui_tool<action_rename_tool>
 
 int main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   return action_rename_gui_tool().execute(argc, argv);
 }

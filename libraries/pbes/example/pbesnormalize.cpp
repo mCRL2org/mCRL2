@@ -13,7 +13,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -54,8 +53,6 @@ class pbes_normalize_tool: public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   pbes_normalize_tool tool;
   return tool.execute(argc, argv);
 }

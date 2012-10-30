@@ -19,8 +19,6 @@
 #include "mcrl2/data/fset.h"
 #include "mcrl2/data/standard.h"
 
-#include "mcrl2/atermpp/aterm_init.h"
-
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -236,8 +234,6 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {

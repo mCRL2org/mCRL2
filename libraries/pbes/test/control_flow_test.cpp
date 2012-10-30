@@ -10,7 +10,6 @@
 /// \brief Tests for control flow algorithm.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -137,13 +136,10 @@ void test_simplify()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_control_flow();
   test_simplify();
   test_source_dest1();
   test_source_dest2();
-  //BOOST_CHECK(false);
 
   return 0;
 }

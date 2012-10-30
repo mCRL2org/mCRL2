@@ -22,7 +22,6 @@
 #include <mcrl2/atermpp/aterm_list.h>
 #include <mcrl2/atermpp/table.h>
 #include <mcrl2/atermpp/algorithm.h>
-#include "mcrl2/atermpp/aterm_init.h"
 
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
@@ -104,6 +103,5 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return lpsrealelm_tool().execute(argc, argv);
 }

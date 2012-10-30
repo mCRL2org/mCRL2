@@ -1,7 +1,6 @@
 #include <string>
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parelm.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
@@ -157,8 +156,6 @@ std::string SPEC7 =
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_parelm(SPEC1);
   test_parelm(SPEC2);
   test_parelm(SPEC3);

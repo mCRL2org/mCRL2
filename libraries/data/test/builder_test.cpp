@@ -13,7 +13,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/parse.h"
@@ -132,8 +131,6 @@ void test_binding()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_binding();
 
   return EXIT_SUCCESS;

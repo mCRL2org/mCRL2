@@ -14,7 +14,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -52,8 +51,6 @@ const std::string INFO =
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   pbes<> p = txt2pbes(PBES_SPEC);
   pbes_system::detail::pbes_property_map info1(p);
   std::cerr << info1.to_string() << std::endl;

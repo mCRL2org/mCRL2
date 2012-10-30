@@ -124,7 +124,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
           position = (position << 8) + buf[7-i];
         }
         if ((fseek(g,position,SEEK_SET) != 0) ||
-            ((data = read_from_file(g)) == aterm()))
+            ((data = read_term_from_file(g)) == aterm()))
         {
           throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
         }
@@ -213,7 +213,7 @@ static void add_extra_mcrl2_lts_data(
     return;
   }
 
-  if (ATwriteToBinaryFile(data,f) == false)
+  if (write_term_to_binary_file(data,f) == false)
   {
     fclose(f);
     throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename +

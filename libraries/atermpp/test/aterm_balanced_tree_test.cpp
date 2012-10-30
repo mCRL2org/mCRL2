@@ -18,7 +18,6 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/atermpp/set_operations.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;

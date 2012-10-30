@@ -22,7 +22,6 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -287,6 +286,5 @@ class lpsconfcheck_gui_tool: public mcrl2_gui_tool<confcheck_tool>
 
 int main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
   return lpsconfcheck_gui_tool().execute(argc, argv);
 }

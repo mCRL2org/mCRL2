@@ -14,7 +14,6 @@
 #include <cassert>
 #include <vector>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
@@ -63,8 +62,6 @@ void test_replace()
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_find();
   test_replace();
 

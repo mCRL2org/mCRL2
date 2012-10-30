@@ -647,7 +647,8 @@ class Trace
       }
       is.clear();
 
-      atermpp::aterm t = atermpp::ATreadFromBinaryString((unsigned char*) buf, static_cast< int >(len));
+      // atermpp::aterm t = atermpp::ATreadFromBinaryString((unsigned char*) buf, static_cast< int >(len));
+      atermpp::aterm t = atermpp::read_term_from_binary_string(std::string(buf,len));
       if (t == atermpp::aterm())
       {
         throw runtime_error("failed to read aterm from stream");
@@ -785,9 +786,8 @@ class Trace
       }
 
       // write trace
-      size_t len;
-      const char* bs = (const char*) atermpp::ATwriteToBinaryString(trace,&len);  //XXX no error handling?
-      os.write(bs,len);
+
+      os << atermpp::write_term_to_binary_string(trace);  //XXX no error handling?
       if (os.bad())
       {
         throw runtime_error("could not write to stream");

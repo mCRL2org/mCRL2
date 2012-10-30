@@ -12,7 +12,6 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_expression.h"
@@ -301,8 +300,6 @@ void generate_values_test()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   check_concepts();
 
   empty_test();

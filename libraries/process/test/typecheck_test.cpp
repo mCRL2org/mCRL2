@@ -14,7 +14,6 @@
 #include <mcrl2/lps/parse.h>
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/specification.h>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -348,7 +347,5 @@ BOOST_AUTO_TEST_CASE(test_double_variable_assignment_in_process)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

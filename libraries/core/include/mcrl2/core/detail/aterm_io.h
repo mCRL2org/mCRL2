@@ -58,7 +58,7 @@ aterm load_aterm(const std::string& filename)
     throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading (" + err_msg + ")");
   }
   //read term from stream
-  aterm term = read_from_file(stream);
+  aterm term = read_term_from_file(stream);
   if (stream != stdin)
   {
     fclose(stream);
@@ -101,12 +101,11 @@ void save_aterm(aterm term, const std::string& filename, bool binary = true)
   bool result;
   if (binary)
   {
-    // result = ATwriteToSAFFile(term, stream);
-    result = ATwriteToBinaryFile(term, stream);
+    result = write_term_to_binary_file(term, stream);
   }
   else
   {
-    result = ATwriteToTextFile(term, stream);
+    result = write_term_to_text_file(term, stream);
   }
   if (stream != stdout)
   {

@@ -18,7 +18,6 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -141,8 +140,6 @@ void test_replace_summand_variables()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_replace();
   test_lps_substituter();
   test_lps_substitute();

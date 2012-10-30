@@ -16,7 +16,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
@@ -56,8 +55,6 @@ void compatibility_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   compatibility_test();
 
   return EXIT_SUCCESS;

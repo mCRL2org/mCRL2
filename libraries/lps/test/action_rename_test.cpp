@@ -12,7 +12,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
@@ -169,7 +168,6 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   test1();
   test2();
   test3();

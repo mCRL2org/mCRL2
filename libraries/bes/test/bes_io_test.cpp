@@ -12,7 +12,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/io.h"
@@ -79,8 +78,6 @@ void test_pgsolver()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_parse_bes();
   test_bes();
   test_pbes();

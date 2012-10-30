@@ -37,7 +37,6 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 
@@ -342,7 +341,6 @@ class mcrl2i_gui_tool: public mcrl2_gui_tool<mcrl2i_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return mcrl2i_gui_tool().execute(argc, argv);
 }
 

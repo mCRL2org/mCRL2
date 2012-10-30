@@ -15,7 +15,6 @@
 
 #include <map>
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/indexed_set.h"
 
 using namespace std;
@@ -69,7 +68,6 @@ void test_indexed_set()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   test_indexed_set();
   return 0;
 }

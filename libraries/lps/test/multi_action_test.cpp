@@ -14,7 +14,6 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/print.h"
@@ -114,8 +113,6 @@ void test_pp()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_equal_multi_actions();
   test_pp();
 

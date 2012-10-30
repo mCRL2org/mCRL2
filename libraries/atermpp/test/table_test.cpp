@@ -17,7 +17,6 @@
 
 #include <map>
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/indexed_set.h"
 
@@ -44,7 +43,6 @@ void test_table()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   test_table();
   return 0;
 }

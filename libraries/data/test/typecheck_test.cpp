@@ -15,7 +15,6 @@
 #include <iostream>
 #include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
@@ -1576,7 +1575,5 @@ BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

@@ -16,7 +16,6 @@
 #include <mcrl2/lps/untime.h>
 #include <mcrl2/lps/linearise.h>
 #include <mcrl2/lps/find.h>
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -143,8 +142,6 @@ void test_case_4()
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERMPP_INIT(ac, av)
-
   test_case_1();
   test_case_2();
   test_case_3();

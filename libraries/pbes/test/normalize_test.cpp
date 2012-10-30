@@ -21,7 +21,6 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 
 using namespace mcrl2;
@@ -212,8 +211,6 @@ void test_normalize_and_or()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_normalize1();
   test_normalize2();
   test_normalize3();

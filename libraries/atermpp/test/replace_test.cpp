@@ -15,7 +15,6 @@
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
@@ -120,8 +119,6 @@ void test_replace()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_find();
   test_replace();
 

@@ -13,7 +13,6 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
@@ -94,8 +93,6 @@ void test_precedence()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_boolean_expressions();
   test_bes2pbes();
   test_precedence();

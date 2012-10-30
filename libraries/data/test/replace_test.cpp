@@ -16,7 +16,6 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
@@ -138,8 +137,6 @@ void test_replace_with_binders()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_assignment_list();
   test_variable_replace();
   test_replace_with_binders();

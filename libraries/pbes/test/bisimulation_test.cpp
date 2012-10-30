@@ -5,7 +5,6 @@
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/pbespgsolve.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -189,7 +188,5 @@ BOOST_AUTO_TEST_CASE(buffers_explicit_lose)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

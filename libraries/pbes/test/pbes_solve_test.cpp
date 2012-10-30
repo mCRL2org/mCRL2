@@ -10,7 +10,6 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -283,8 +282,6 @@ void test_abp()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_all();
   test_abp();
 

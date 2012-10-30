@@ -24,7 +24,6 @@
 #include <cassert>
 
 #include "mcrl2/exception.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -302,7 +301,5 @@ class sim_tool : public rewriter_tool< input_tool >
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return sim_tool().execute(argc, argv);
 }

@@ -13,7 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
@@ -1105,7 +1104,5 @@ BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

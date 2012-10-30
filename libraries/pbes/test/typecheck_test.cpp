@@ -13,7 +13,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/typecheck.h"
@@ -66,9 +65,7 @@ void test_pbes_specification2()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_pbes_specification1();
+ test_pbes_specification1();
   test_pbes_specification2();
 
   return 0;

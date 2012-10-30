@@ -14,7 +14,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/print.h"
 
@@ -58,8 +57,6 @@ void test_action_name_multiset()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_comm();
   test_action_name_multiset();
 

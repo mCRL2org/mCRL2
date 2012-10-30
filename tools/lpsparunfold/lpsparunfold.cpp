@@ -20,7 +20,6 @@
 //mCRL2
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 
 //LPS framework
@@ -239,7 +238,5 @@ class lps_parunfold_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<parunfold_
 
 int main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   return lps_parunfold_gui_tool().execute(argc, argv);
 }

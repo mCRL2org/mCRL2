@@ -14,7 +14,6 @@
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/suminst.h>
 #include <mcrl2/lps/linearise.h>
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -211,8 +210,6 @@ void test_case_7()
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERMPP_INIT(ac, av)
-
   std::clog << "test case 1" << std::endl;
   test_case_1();
   std::clog << "test case 2" << std::endl;

@@ -17,7 +17,6 @@
 
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/test_utilities.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
@@ -56,7 +55,5 @@ BOOST_AUTO_TEST_CASE(test_abp)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

@@ -14,11 +14,7 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/data_specification.h"
-// #include "mcrl2/data/sort_expression.h"
-// #include "mcrl2/data/data_expression.h"
-// #include "mcrl2/data/variable.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_sort.h"
@@ -47,8 +43,6 @@ variable bool_(std::string name)
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   variable n1 = nat("n1");
   variable n2 = nat("n2");
   variable n3 = nat("n3");

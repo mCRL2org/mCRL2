@@ -13,7 +13,6 @@
 #include <iterator>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -91,8 +90,6 @@ void test2()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_separate_keyword_section();
   test2();
 

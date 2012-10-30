@@ -12,7 +12,6 @@
 #define AUTHOR "Muck van Weerdenburg, Jan Friso Groote"
 
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
@@ -436,7 +435,5 @@ class ltsconvert_gui_tool: public mcrl2_gui_tool<ltsconvert_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return ltsconvert_gui_tool().execute(argc,argv);
 }

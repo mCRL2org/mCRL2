@@ -12,7 +12,6 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/exception.h"
@@ -112,7 +111,6 @@ class pbes_absint_gui_tool: public mcrl2_gui_tool<pbes_absinthe_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   pbes_absint_gui_tool tool;
   return tool.execute(argc, argv);
 }

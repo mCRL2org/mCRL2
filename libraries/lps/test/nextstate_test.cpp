@@ -11,7 +11,6 @@
 
 #include <queue>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate/standard.h"
@@ -145,6 +144,5 @@ BOOST_AUTO_TEST_CASE(test_abp)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  atermpp::aterm_init();
   return 0;
 }

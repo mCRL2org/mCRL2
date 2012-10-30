@@ -20,7 +20,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -49,8 +48,6 @@ void test_system_defined_sorts()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_find_sort_expressions();
 
   test_system_defined_sorts();

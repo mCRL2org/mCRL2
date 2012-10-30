@@ -19,7 +19,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_algorithm.h"
 
@@ -202,7 +201,5 @@ class ltsinfo_gui_tool: public mcrl2_gui_tool<ltsinfo_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return ltsinfo_gui_tool().execute(argc, argv);
 }

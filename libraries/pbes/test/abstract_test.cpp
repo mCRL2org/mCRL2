@@ -12,7 +12,6 @@
 #include <string>
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
@@ -67,8 +66,6 @@ void test_pbesabstract()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_pbesabstract();
 
   return 0;

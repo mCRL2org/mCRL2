@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/qt_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -43,7 +42,5 @@ class ltsgraph_tool : public ltsgraph_base
 
 int main(int argc, char *argv[])
 {
-  atermpp::aterm_init();
-
   return ltsgraph_tool().execute(argc, argv);
 }

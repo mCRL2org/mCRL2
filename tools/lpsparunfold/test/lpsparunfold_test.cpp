@@ -18,7 +18,6 @@
 #include "../lpsparunfoldlib.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -27,8 +26,6 @@ using namespace mcrl2::lps;
 
 int test_main(int /*argc*/, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   {
     /**
       * Unfold Pos process parameter at index 0

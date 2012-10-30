@@ -15,7 +15,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/ltsmin.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -185,8 +184,6 @@ static void test_ltsmin(const std::string& rewriter_strategy)
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_ltsmin("jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
   test_ltsmin("jittyc");

@@ -15,7 +15,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -169,8 +168,6 @@ void test_pbes(std::string text)
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_pbes(t1);
   test_pbes(t2);
   test_pbes(t3);

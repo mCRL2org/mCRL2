@@ -17,7 +17,6 @@
 #include "springlayout.h"
 
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 LTSGraph::LTSGraph() :
   super(

@@ -28,7 +28,6 @@
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "test_specifications.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -528,8 +527,6 @@ void test_elevator()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_elevator();
   test_example();
   test_lps2pbes();

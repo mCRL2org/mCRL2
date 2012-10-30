@@ -8,8 +8,6 @@
 namespace atermpp
 {
 
-/*{{{  static void resize_buffer(byte_writer *writer, int delta) */
-
 static void resize_buffer(byte_writer* writer, size_t delta)
 {
   size_t size_needed, new_size;
@@ -29,10 +27,6 @@ static void resize_buffer(byte_writer* writer, size_t delta)
   }
 }
 
-/*}}}  */
-
-/*{{{  int write_byte(int byte, byte_writer *writer) */
-
 int write_byte(const int byte, byte_writer* writer)
 {
   switch (writer->type)
@@ -50,9 +44,6 @@ int write_byte(const int byte, byte_writer* writer)
   }
   return EOF;
 }
-
-/*}}}  */
-/*{{{  unsigned int write_bytes(const char *buf, unsigned int count, byte_writer *writer) */
 
 size_t write_bytes(const char* buf, const size_t count, byte_writer* writer)
 {
@@ -72,9 +63,6 @@ size_t write_bytes(const char* buf, const size_t count, byte_writer* writer)
   }
   return 0;
 }
-
-/*}}}  */
-/*{{{  int read_byte(byte_reader *reader) */
 
 int read_byte(byte_reader* reader)
 {
@@ -106,9 +94,6 @@ int read_byte(byte_reader* reader)
 
   return c;
 }
-
-/*}}}  */
-/*{{{  unsigned int read_bytes(char *buf, int count, byte_reader *reader) */
 
 size_t read_bytes(char* buf, size_t count, byte_reader* reader)
 {
@@ -147,18 +132,12 @@ size_t read_bytes(char* buf, size_t count, byte_reader* reader)
   return result;
 }
 
-/*}}}  */
-/*{{{  void init_file_reader(byte_reader *reader, FILE *file) */
-
 void init_file_reader(byte_reader* reader, FILE* file)
 {
   reader->type = FILE_READER;
   reader->bytes_read = 0;
   reader->u.file_data = file;
 }
-
-/*}}}  */
-/*{{{  void init_string_reader(byte_reader *reader, const unsigned char *buf, int max_size) */
 
 void init_string_reader(byte_reader* reader, const unsigned char* buf, const size_t max_size)
 {
@@ -168,7 +147,5 @@ void init_string_reader(byte_reader* reader, const unsigned char* buf, const siz
   reader->u.string_data.index = 0;
   reader->u.string_data.size = max_size;
 }
-
-/*}}}  */
 
 } // namespace atermpp

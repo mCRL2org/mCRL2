@@ -15,7 +15,6 @@
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -71,8 +70,6 @@ void test_remove_unused_summand_variables()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_remove_unused_summand_variables();
 
   return 0;

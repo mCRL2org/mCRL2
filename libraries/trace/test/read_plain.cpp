@@ -1,6 +1,5 @@
 #include <boost/test/minimal.hpp>
 #include <sstream>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/trace/trace.h"
 
 using namespace std;
@@ -38,8 +37,6 @@ void test_next_action(Trace& t, const char* s)
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc,argv);
-
   Trace t;
 
   BOOST_REQUIRE(read_trace(t,trace_str));

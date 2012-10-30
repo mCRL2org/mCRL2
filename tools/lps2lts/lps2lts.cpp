@@ -19,8 +19,6 @@
 
 #include "boost/lexical_cast.hpp"
 
-#include "mcrl2/atermpp/aterm_init.h"
-
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
@@ -460,7 +458,6 @@ void premature_termination_handler(int)
 int main(int argc, char** argv)
 {
   int result;
-  MCRL2_ATERMPP_INIT(argc, argv)
   tool_instance = new lps2lts_gui_tool();
 
   signal(SIGABRT,premature_termination_handler);

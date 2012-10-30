@@ -4,7 +4,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -41,8 +40,6 @@ void test1()
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test1();
 
   return 0;

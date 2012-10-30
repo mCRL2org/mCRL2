@@ -20,7 +20,6 @@
 #include <string>
 
 //mCRL2 specific
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -64,6 +63,5 @@ class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool>
 
 int main(int argc, char** argv)
 {
-  atermpp::aterm_init();
   return txt2pbes_gui_tool().execute(argc, argv);
 }

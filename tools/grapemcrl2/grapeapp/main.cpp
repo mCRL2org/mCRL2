@@ -15,7 +15,6 @@
 #include "mcrl2gen/mcrl2gen.h"
 #include "grape_frame.h"
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"

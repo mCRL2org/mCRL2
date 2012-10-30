@@ -16,7 +16,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
@@ -114,8 +113,6 @@ void test_operators()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_algorithm();
   test_operators();
   test_for_each();

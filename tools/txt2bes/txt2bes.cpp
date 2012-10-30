@@ -25,7 +25,6 @@
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/pbesinstconversion.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -71,6 +70,5 @@ class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return txt2pbes_gui_tool().execute(argc, argv);
 }

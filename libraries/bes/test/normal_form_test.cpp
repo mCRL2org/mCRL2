@@ -16,7 +16,6 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -61,8 +60,6 @@ void test_standard_recursive_form()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_standard_recursive_form();
 
   return 0;

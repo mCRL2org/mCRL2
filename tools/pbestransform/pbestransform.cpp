@@ -14,7 +14,6 @@
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/transform.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -75,8 +74,6 @@ class pbes_transform_gui_tool: public mcrl2_gui_tool<pbes_transform_tool>
 
 int main(int argc, char** argv)
 {
-  aterm_init();
-
   pbes_transform_gui_tool tool;
   return tool.execute(argc, argv);
 }

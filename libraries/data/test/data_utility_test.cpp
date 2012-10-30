@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
@@ -56,8 +55,6 @@ void test_fresh_variables()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_fresh_variables();
 
   return 0;

@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
@@ -21,7 +20,6 @@ using namespace atermpp;
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   aterm_int i(10);
   atermpp::aterm x=aterm_appl(function_symbol("x",0));
   atermpp::aterm y=aterm_appl(function_symbol("y",0));

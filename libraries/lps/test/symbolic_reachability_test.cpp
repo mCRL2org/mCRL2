@@ -13,7 +13,6 @@
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 const std::string case_no_influenced_parameters(
   "act a;\n\n"
@@ -201,8 +200,6 @@ void check_info(mcrl2::lps::specification const& model)
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   using namespace mcrl2;
   using namespace mcrl2::lps;
 

@@ -19,7 +19,6 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
@@ -62,8 +61,6 @@ void test_boolean_operators()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_boolean_operators();
 
   return 0;

@@ -17,7 +17,6 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/basic_sort.h"
 
 using namespace mcrl2;
@@ -71,8 +70,6 @@ void test_sort()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   parser_test();
   test_user_defined_sort();
   test_whr();

@@ -16,7 +16,6 @@
 #include <string>
 #include <iostream>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -92,6 +91,5 @@ class lpspp_gui_tool: public mcrl2_gui_tool<lpspp_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return lpspp_gui_tool().execute(argc, argv);
 }

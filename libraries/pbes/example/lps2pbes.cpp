@@ -18,7 +18,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -30,8 +29,6 @@ using namespace mcrl2::pbes_system::pbes_expr;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   if (argc < 4)
   {
     std::cout << "Usage: lps2pbes FILENAME-INPUT-LPS FILENAME-INPUT-MCF FILENAME-OUTPUT-PBES" << std::endl;

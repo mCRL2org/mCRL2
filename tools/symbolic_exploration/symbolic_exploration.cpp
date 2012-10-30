@@ -10,7 +10,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/symbolic_exploration.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -54,7 +53,6 @@ class symbolic_exploration_gui_tool: public mcrl2_gui_tool<symbolic_exploration_
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   symbolic_exploration_gui_tool tool;
   return tool.execute(argc, argv);
 }

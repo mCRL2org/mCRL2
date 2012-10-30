@@ -18,7 +18,6 @@
 #include <fstream>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -92,7 +91,6 @@ class pbespp_gui_tool: public mcrl2_gui_tool<pbespp_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return pbespp_gui_tool().execute(argc, argv);
 }
 

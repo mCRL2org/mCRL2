@@ -12,7 +12,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/detail/bafio.h"
 #include "mcrl2/atermpp/detail/memory.h"
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/detail/byteio.h"
@@ -22,7 +21,6 @@
 
 namespace atermpp
 {
-
 
 /**
  * Calculate the number of unique symbols.
@@ -236,12 +234,12 @@ static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 /*{{{  void AT_getBafVersion(int *major, int *minor) */
 
-void
+/* void
 AT_getBafVersion(int* major, int* minor)
 {
   *major = BAF_VERSION >> 8;
   *minor = BAF_VERSION & 0xff;
-}
+} */
 
 /*}}}  */
 
@@ -1055,8 +1053,6 @@ static void free_write_space()
   // sym_entries = NULL;
 }
 
-/*}}}  */
-/*{{{  ATbool write_baf(aterm t, byte_writer *writer) */
 
 static bool
 write_baf(const aterm &t, byte_writer* writer)
@@ -1179,11 +1175,8 @@ write_baf(const aterm &t, byte_writer* writer)
   return true;
 }
 
-/*}}}  */
 
-/*{{{  char *ATwriteToBinaryString(aterm t, int *len) */
-
-unsigned char* ATwriteToBinaryString(const aterm &t, size_t* len)
+std::string write_term_to_binary_string(const aterm &t)
 {
   static byte_writer writer;
   static bool initialized = false;
@@ -1199,21 +1192,14 @@ unsigned char* ATwriteToBinaryString(const aterm &t, size_t* len)
 
   if (!write_baf(t, &writer))
   {
-    return NULL;
+    throw std::runtime_error("Fail to write term to string");
   }
 
-  if (len != NULL)
-  {
-    *len = writer.u.string_data.cur_size;
-  }
-
-  return writer.u.string_data.buf;
+  return std::string((char *)writer.u.string_data.buf,writer.u.string_data.cur_size);
 }
 
-/*}}}  */
-/*{{{  ATbool ATwriteToBinaryFile(aterm t, FILE *file) */
 
-bool ATwriteToBinaryFile(const aterm &t, FILE* file)
+bool write_term_to_binary_file(const aterm &t, FILE* file)
 {
   static byte_writer writer;
   static bool initialized = false;
@@ -1235,22 +1221,19 @@ bool ATwriteToBinaryFile(const aterm &t, FILE* file)
   return write_baf(t, &writer);
 }
 
-/*}}}  */
-
-/*{{{  aterm ATwriteToNamedBinaryFile(char *name) */
-
 /**
   * Write an aterm to a named BAF file
   */
 
-bool ATwriteToNamedBinaryFile(aterm t, const char* name)
+bool write_term_to_binary_file(const aterm &t, const std::string& filename)
 {
   FILE*  f;
   bool result;
+  const char* name=filename.c_str();
 
   if (!strcmp(name, "-"))
   {
-    return ATwriteToBinaryFile(t, stdout);
+    return write_term_to_binary_file(t, stdout);
   }
 
   if (!(f = fopen(name, "wb")))
@@ -1258,7 +1241,7 @@ bool ATwriteToNamedBinaryFile(aterm t, const char* name)
     return false;
   }
 
-  result = ATwriteToBinaryFile(t, f);
+  result = write_term_to_binary_file(t, f);
   fclose(f);
 
   return result;
@@ -1606,32 +1589,22 @@ aterm read_baf(byte_reader* reader)
   }
 
   result = read_term(&read_symbols[val], reader);
-
   free_read_space();
-
   return result;
 }
 
-/*}}}  */
 
-/*{{{  aterm ATreadFromBinaryString(const unsigned char *s, int size) */
-
-aterm ATreadFromBinaryString(const unsigned char* s, size_t size)
+aterm read_term_from_binary_string(const std::string& s)
 {
   byte_reader reader;
-
-  init_string_reader(&reader, s, size);
-
+  init_string_reader(&reader, reinterpret_cast<const unsigned char*>(s.c_str()), s.size());
   return read_baf(&reader);
 }
 
-/*}}}  */
-/*{{{  aterm ATreadFromBinaryFile(FILE *file) */
 
-aterm ATreadFromBinaryFile(FILE* file)
+aterm read_term_from_binary_file(FILE* file)
 {
   byte_reader reader;
-
   init_file_reader(&reader, file);
 
 #ifdef WIN32
@@ -1642,9 +1615,43 @@ aterm ATreadFromBinaryFile(FILE* file)
   }
 #endif
 
-  return read_baf(&reader);
+  aterm result=read_baf(&reader);
+  if (result==aterm())
+  {
+    throw std::runtime_error("Failed to read term from binary file.");
+  }
+  return result;
 }
 
-/*}}}  */
+aterm read_term_from_binary_file(const std::string &filename)
+{
+  FILE*  f;
+  const char* name=filename.c_str();
+
+  if (!strcmp(name, "-"))
+  {
+    return read_term_from_binary_file(stdin);
+  }
+
+  if (!(f = fopen(name, "rb")))
+  {
+    throw std::runtime_error("Failed to open binary file " + filename + " for reading.");
+  }
+
+  aterm result;
+  try 
+  { 
+    result = read_term_from_binary_file(f);
+  }
+  catch (std::runtime_error &e)
+  {
+    fclose(f);
+    throw std::runtime_error(e.what() + std::string("\nWhen reading from binary file ") + filename);
+  }
+  fclose(f);
+
+  return result;
+}
+
 
 } // namespace atermpp

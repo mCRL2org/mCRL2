@@ -10,7 +10,6 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -71,8 +70,6 @@ void test_remove_unreachable_variables()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_remove_unreachable_variables();
 
   return 0;

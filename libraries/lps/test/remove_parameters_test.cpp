@@ -19,7 +19,6 @@
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -75,8 +74,6 @@ void test_instantiate_free_variables()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_remove_parameters();
   test_instantiate_free_variables();
 

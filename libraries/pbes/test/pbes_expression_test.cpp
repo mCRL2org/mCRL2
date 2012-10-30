@@ -20,7 +20,6 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -314,8 +313,6 @@ void test_term_traits()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_term_traits();
   test_accessors();
   test_pbes_expression_with_variables();

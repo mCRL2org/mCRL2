@@ -14,8 +14,6 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-//#include "mcrl2/bes/find.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/traverser.h"
 
@@ -124,8 +122,6 @@ void test_traverser1()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_custom_traverser();
   test_traverser1();
 

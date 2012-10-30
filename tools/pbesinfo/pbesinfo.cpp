@@ -27,7 +27,6 @@
 
 //MCRL2-specific
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
@@ -104,6 +103,5 @@ class pbesinfo_gui_tool: public mcrl2_gui_tool<pbesinfo_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return pbesinfo_gui_tool().execute(argc, argv);
 }

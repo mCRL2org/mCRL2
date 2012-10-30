@@ -14,18 +14,116 @@
 
 
 #include "mcrl2/atermpp/aterm.h"
-// #include "mcrl2/atermpp/detail/safio.h"
-#include "mcrl2/atermpp/detail/bafio.h"
 
 namespace atermpp
 {
 
-aterm read_from_file(FILE *file);
-bool ATwriteToTextFile(const aterm &t, FILE* f);
-unsigned char* ATwriteToBinaryString(const aterm &t, size_t* len);
-aterm ATreadFromBinaryString(const unsigned char* s, size_t size);
-bool ATwriteToBinaryFile(const aterm &t, FILE* file);
+/// \brief Writes term t to a file in Binary aterm Format (baf).
+/// \param t A term.
+/// \param file A file suitable for writing.
+/// \return True if the operation succeeded.
+bool write_term_to_binary_file(const aterm &t, FILE* file);
 
+
+/// \brief Writes term t to file named filename in Binary aterm Format (baf).
+/// \param t A term.
+/// \param filename A string
+/// \return True if the operation succeeded.
+bool write_term_to_binary_file(const aterm &t, const std::string& filename);
+
+
+/// \brief Reads a term from a file in Binary aterm Format (baf).
+/// \param file A file in baf format.
+/// \return The term which is read.
+aterm read_term_from_binary_file(FILE* file);
+
+
+/// \brief Reads a term from a file in Binary aterm Format (baf).
+/// \param filename The name of a file in baf format.
+/// \return The term which is read.
+aterm read_term_from_binary_file(const std::string& filename);
+
+
+/// \brief Writes term t to a file in textual format.
+/// This function writes aterm t in textual representation to file filename. "-" is
+/// standard output's filename.
+/// \param t A term.
+/// \param filename A string
+/// \return True if the operation succeeded.
+bool write_term_to_text_file(const aterm &t, FILE *file);
+
+
+/// \brief Writes term t to file named filename in textual format.
+/// This function writes aterm t in textual representation to file filename. "-" is
+/// standard output's filename.
+/// \param t A term.
+/// \param filename A string
+/// \return True if the operation succeeded.
+bool write_term_to_text_file(const aterm &t, const std::string& filename);
+
+
+/// \brief Writes term t to a file in textual format.
+/// This function writes aterm t in textual representation to file filename. "-" is
+/// standard output's filename.
+/// \param t A term.
+/// \param filename A string.
+/// \return True if the operation succeeded.
+aterm read_term_from_text_file(FILE *file);
+
+
+/// \brief Writes term t to file named filename in textual format.
+/// This function writes aterm t in textual representation to file filename. "-" is
+/// standard output's filename.
+/// \param t A term.
+/// \param filename A string.
+/// \return True if the operation succeeded.
+aterm read_term_from_text_file(const std::string& filename);
+
+
+/// \brief Write an aterm to a string.
+/// This function writes the aterm in binary format to the string.
+/// \param t A term.
+/// \return The binary string corresponding to the term.
+std::string write_term_to_binary_string(const aterm &t);
+
+
+/// \brief Read a aterm from a string in baf format.
+/// This function decodes a baf character string into an aterm.
+/// \param s A string.
+/// \param size A positive integer.
+/// \return The term corresponding to the string.
+aterm read_term_from_binary_string(const std::string& s);
+
+
+/// \brief Write an aterm from string.
+/// This function parses a character string into an aterm.
+/// \param s A string
+/// \return The term corresponding to the string.
+bool write_term_to_text_string(const aterm &t);
+
+
+/// \brief Read a aterm from a string in baf format.
+/// This function decodes a baf character string into an aterm.
+/// \param s A string
+/// \param size A positive integer
+/// \return The term corresponding to the string.
+aterm read_term_from_text_string(const std::string& s);
+
+
+/// \brief Read an aterm from named binary or text file.
+/// This function reads an aterm file filename. A test is performed to see if the file
+/// is in baf, taf, or plain text. "-" is standard input's filename.
+/// \param name A string
+/// \return A term that was read from a file.
+aterm read_term_from_file(const std::string& name);
+
+
+/// \brief Read an aterm from a file in binary or text format.
+/// This function reads an aterm file filename. A test is performed to see if the file
+/// is in baf, taf, or plain text. "-" is standard input's filename.
+/// \param name A string
+/// \return A term that was read from a file.
+aterm read_term_from_file(FILE *file);
 
 
 /// \brief Read an aterm from string.
@@ -34,41 +132,8 @@ bool ATwriteToBinaryFile(const aterm &t, FILE* file);
 /// \return The term corresponding to the string.
 aterm read_term_from_string(const std::string& s);
 
-/// \brief Read a aterm from a string in baf format.
-/// This function decodes a baf character string into an aterm.
-/// \param s A string
-/// \param size A positive integer
-/// \return The term corresponding to the string.
-inline
-aterm read_from_binary_string(const std::string& s, unsigned int size)
-{
-  return ATreadFromBinaryString(reinterpret_cast<const unsigned char*>(s.c_str()), size);
-} 
 
-/// \brief Read an aterm from named binary or text file.
-/// This function reads an aterm file filename. A test is performed to see if the file
-/// is in baf, taf, or plain text. "-" is standard input's filename.
-/// \param name A string
-/// \return A term that was read from a file.
 
-aterm read_from_named_file(const std::string& name);
-
-/// \brief Writes term t to file named filename in textual format.
-/// This function writes aterm t in textual representation to file filename. "-" is
-/// standard output's filename.
-/// \param t A term.
-/// \param filename A string
-/// \return True if the operation succeeded.
-bool write_to_named_text_file(aterm t, const std::string& filename);
-
-/// \brief Writes term t to file named filename in Binary aterm Format (baf).
-/// \param t A term.
-/// \param filename A string
-/// \return True if the operation succeeded.
-/* inline bool write_to_named_binary_file(aterm t, const std::string& filename)
-{
-  return ATwriteToNamedBinaryFile(t, filename.c_str()) == true;
-} */
 
 } // namespace atermpp
 

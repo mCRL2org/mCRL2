@@ -10,7 +10,6 @@
 /// \brief Tests for pfnf rewriter.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
@@ -321,8 +320,6 @@ void test_pfnf_print()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_pfnf_visitor();
   test_pfnf_rewriter();
   test_pfnf_rewriter2();

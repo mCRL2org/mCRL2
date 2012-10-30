@@ -15,7 +15,6 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -107,7 +106,6 @@ class pbes_constelm_gui_tool: public mcrl2_gui_tool<pbes_constelm_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   pbes_constelm_gui_tool tool;
   return tool.execute(argc, argv);
 }

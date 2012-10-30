@@ -1,4 +1,3 @@
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/qt_tool.h"
 #include "mainwindow.h"
@@ -53,7 +52,5 @@ class ltsview_tool : public ltsview_base
 
 int main(int argc, char *argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return ltsview_tool().execute(argc, argv);
 }

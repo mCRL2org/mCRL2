@@ -12,7 +12,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/pg_parse.h"
 
 using namespace mcrl2;
@@ -66,7 +65,6 @@ void test_case()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
   test_case();
   return 0;
 }

@@ -19,7 +19,6 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
 #include "diagraph.h"
 
@@ -86,9 +85,6 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                               wxCmdLineArgType lpCmdLine,
                               int nCmdShow)
 {
-
-  MCRL2_ATERMPP_INIT(0, lpCmdLine)
-
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else

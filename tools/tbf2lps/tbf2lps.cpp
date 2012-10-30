@@ -19,7 +19,6 @@
 #include <cstring>
 #include <cassert>
 #include "lpstrans.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -60,7 +59,7 @@ class tbf2lps_tool: public input_output_tool
       {
         mCRL2log(verbose) << "reading mCRL LPS from stdin..." << std::endl;
 
-        mcrl_spec = (aterm_appl) read_from_file(stdin);
+        mcrl_spec = (aterm_appl) read_term_from_file(stdin);
 
         if (mcrl_spec == 0)
         {
@@ -82,7 +81,7 @@ class tbf2lps_tool: public input_output_tool
           throw mcrl2::runtime_error("could not open input file '" + input_filename() + "' for reading");
         }
 
-        mcrl_spec = (aterm_appl) read_from_file(in_stream);
+        mcrl_spec = (aterm_appl) read_term_from_file(in_stream);
 
         fclose(in_stream);
 
@@ -107,7 +106,7 @@ class tbf2lps_tool: public input_output_tool
         mCRL2log(verbose) << "writing mCRL2 LPS to stdout..." << std::endl;
 
         // ATwriteToSAFFile(spec, stdout);
-        ATwriteToBinaryFile(spec, stdout);
+        write_term_to_binary_file(spec, stdout);
       }
       else
       {
@@ -120,7 +119,7 @@ class tbf2lps_tool: public input_output_tool
           throw mcrl2::runtime_error("cannot open output file '" + output_filename() + "'");
         }
 
-        ATwriteToBinaryFile(spec,outstream);
+        write_term_to_binary_file(spec,outstream);
         // ATwriteToSAFFile(spec,outstream);
 
         fclose(outstream);
@@ -156,6 +155,5 @@ class tbf2lps_gui_tool: public mcrl2_gui_tool<tbf2lps_tool>
 
 int main(int argc, char** argv)
 {
-  aterm_init(); 
   return tbf2lps_gui_tool().execute(argc, argv);
 }

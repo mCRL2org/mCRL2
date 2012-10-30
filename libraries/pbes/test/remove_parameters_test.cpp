@@ -17,7 +17,6 @@
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2;
@@ -93,8 +92,6 @@ void test_pbes_expression()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_propositional_variable_instantiation();
 
   return 0;

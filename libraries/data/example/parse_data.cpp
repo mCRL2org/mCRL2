@@ -4,14 +4,11 @@
 #include <cassert>
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   if (argc < 2)
   {
     std::cout << "Usage: parse_data FILENAME" << std::endl;

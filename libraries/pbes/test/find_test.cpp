@@ -11,7 +11,6 @@
 
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/print.h"
@@ -126,8 +125,6 @@ void test_find_free_variables()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_find();
   test_free_variables();
   test_find_free_variables();

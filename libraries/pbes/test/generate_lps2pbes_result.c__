@@ -17,7 +17,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -29,8 +28,6 @@ using namespace mcrl2::pbes_system;
 
 int main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   if (argc < 4)
   {
     std::cerr << "Usage: " << argv[0] << " specification_file formula_file (timed/untimed)" << std::endl;

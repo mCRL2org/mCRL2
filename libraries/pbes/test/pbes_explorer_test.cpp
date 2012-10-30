@@ -12,7 +12,6 @@
 #include <iostream>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/test_utilities.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 #include "mcrl2/pbes/pbes_explorer.h"
@@ -323,7 +322,5 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   return 0;
 }

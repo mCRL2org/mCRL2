@@ -17,7 +17,6 @@
 
 //MCRL2-specific
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/bes_property_map.h"
@@ -126,6 +125,5 @@ class besinfo_gui_tool: public mcrl2_gui_tool<besinfo_tool>
 
 int main(int argc, char** argv)
 {
-  atermpp::aterm_init();
   return besinfo_gui_tool().execute(argc, argv);
 }

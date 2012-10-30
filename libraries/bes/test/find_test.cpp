@@ -14,7 +14,6 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/find.h"
 
@@ -218,8 +217,6 @@ void test_bnd_occ()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_my_find();
   test_find();
   test_my_search();

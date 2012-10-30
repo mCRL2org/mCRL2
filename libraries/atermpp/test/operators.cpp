@@ -13,7 +13,6 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 
 using namespace std;
@@ -28,8 +27,6 @@ class D: public aterm_appl
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   atermpp::aterm t      = read_term_from_string("[1,2]");
   aterm_appl a = static_cast<aterm_appl>(read_term_from_string("f(x)"));
   aterm_list l = static_cast<aterm_list>(read_term_from_string("[3]"));

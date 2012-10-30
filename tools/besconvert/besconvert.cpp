@@ -18,7 +18,6 @@
 #include "mcrl2/utilities/execution_timer.h"
 
 #include "mcrl2/atermpp/indexed_set.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/detail/bes_algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
@@ -679,7 +678,5 @@ class besconvert_tool: public super
 
 int main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   return besconvert_tool().execute(argc, argv);
 }

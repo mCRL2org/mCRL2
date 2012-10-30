@@ -8,7 +8,6 @@
 
 #include <boost/test/minimal.hpp>
 
-#include <mcrl2/atermpp/aterm_init.h>
 #include <mcrl2/lts/lts_algorithm.h>
 #include <mcrl2/lts/lts_aut.h>
 

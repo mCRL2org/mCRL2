@@ -31,7 +31,6 @@
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 using namespace mcrl2;
@@ -517,7 +516,6 @@ void test_functions()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
   pbes_system::detail::set_bes_equation_limit(100000);
   test_pbesinst();
   test_pbesinst_finite();

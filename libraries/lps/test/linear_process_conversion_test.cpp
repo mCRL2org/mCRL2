@@ -16,7 +16,6 @@
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -196,8 +195,6 @@ void test_process(std::string text, bool expect_exception = false)
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   std::clog << "SPEC1" << std::endl;
   test_process(SPEC1, true);
   std::clog << "SPEC2" << std::endl;

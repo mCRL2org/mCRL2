@@ -23,7 +23,6 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -62,8 +61,6 @@ void test_parelm()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_parelm();
 
   return 0;

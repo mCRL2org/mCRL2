@@ -14,7 +14,6 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/core/detail/print_utility.h"
@@ -125,8 +124,6 @@ void test_search_sort_expression()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_find();
   test_free_variables();
   test_search();

@@ -13,7 +13,6 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/print.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -166,8 +165,6 @@ void test_bes()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_expressions();
   test_boolean_equation();
   test_join();

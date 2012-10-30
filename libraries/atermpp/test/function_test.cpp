@@ -15,7 +15,6 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;
@@ -46,7 +45,6 @@ void test_aterm_function()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   test_aterm_function();
   return 0;
 }

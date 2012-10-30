@@ -20,7 +20,6 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -147,8 +146,6 @@ void run(std::map<std::string, rewriter_variant>& rewriters, const std::vector<p
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   // a map of rewriters that should be applied to the sequence of terms
   std::map<std::string, rewriter_variant> rewriters;
   std::vector<int> pbes_rewriter_indices;

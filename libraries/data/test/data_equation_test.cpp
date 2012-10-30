@@ -14,7 +14,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/variable.h"
@@ -41,8 +40,6 @@ void data_equation_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   data_equation_test();
 
   return EXIT_SUCCESS;

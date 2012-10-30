@@ -16,7 +16,6 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/utility.h"
@@ -302,8 +301,6 @@ void tutorial2()
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   test_bes();
   test_abp();
   test_bes_examples();

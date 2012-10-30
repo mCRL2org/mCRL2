@@ -21,7 +21,6 @@
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/pbespgsolve.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 
 using namespace mcrl2;
@@ -122,8 +121,6 @@ std::string random1 =
 
 int test_main(int argc, char** argv)
 {
-  atermpp::aterm_init();
-
   bool compute_conditions = false;
   bool remove_equations = true;
   test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");

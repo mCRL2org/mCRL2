@@ -13,7 +13,6 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/basic_sort.h"
@@ -292,8 +291,6 @@ void system_defined_check()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   variable_test();
 
   function_symbol_test();

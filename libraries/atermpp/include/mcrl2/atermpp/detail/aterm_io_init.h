@@ -9,20 +9,18 @@
 /// \file mcrl2/atermpp/aterm_init.h
 /// \brief Initialization of the aterm Library.
 
-#ifndef MCRL2_ATERMPP_ATERM_INIT_H
-#define MCRL2_ATERMPP_ATERM_INIT_H
-
-#include "mcrl2/atermpp/aterm.h"
-
-#define MCRL2_ATERMPP_INIT(argc, argv) atermpp::aterm_init();
+#ifndef MCRL2_ATERMPP_ATERM_IO_INIT_H
+#define MCRL2_ATERMPP_ATERM_IO_INIT_H
 
 namespace atermpp
 {
-/// \brief Initialize the aterm++ Library. The specified argument t is used to mark the
-/// the bottom of the program stack.
+namespace detail
+{
+/// \brief Initialize binary i/o on windows machines. 
 
-void aterm_init();
+void aterm_io_init();
 
+} // namespace detail
 } // namespace atermpp
 
-#endif // MCRL2_ATERMPP_ATERM_INIT_H
+#endif // MCRL2_ATERMPP_ATERM_IO_INIT_H

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <queue>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/next_state_generator_old.h"
 
 using namespace mcrl2;
@@ -67,8 +66,6 @@ void traverse_states(const lps::specification& lps_spec, bool per_summand = fals
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   if (argc != 2)
   {
     std::cerr << "usage: next_state_generator LPS_FILE" << std::endl;

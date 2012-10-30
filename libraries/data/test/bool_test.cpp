@@ -15,7 +15,6 @@
 
 #include "mcrl2/data/bool.h"
 
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -30,8 +29,6 @@ void bool_sort_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   bool_sort_test();
 
   return EXIT_SUCCESS;

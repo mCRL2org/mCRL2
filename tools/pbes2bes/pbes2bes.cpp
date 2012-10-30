@@ -57,7 +57,6 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2::log;
@@ -299,7 +298,5 @@ class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return pbes2bes_gui_tool().execute(argc, argv);
 }

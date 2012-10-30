@@ -11,7 +11,6 @@
 
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
@@ -30,8 +29,6 @@ void test_identifier_string()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_identifier_string();
 
   return 0;

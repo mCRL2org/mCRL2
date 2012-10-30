@@ -12,7 +12,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/bes/small_progress_measures.h"
 #include "mcrl2/bes/gauss_elimination.h"
@@ -71,7 +70,5 @@ BOOST_AUTO_TEST_CASE(test_simple)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

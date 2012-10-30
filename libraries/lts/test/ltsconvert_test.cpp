@@ -18,7 +18,6 @@
 
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -260,8 +259,6 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }
 

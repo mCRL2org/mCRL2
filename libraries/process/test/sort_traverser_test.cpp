@@ -13,7 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/process_specification.h"
@@ -164,8 +163,6 @@ void test_process(std::string text)
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_process(CASE1);
   test_process(CASE2);
   test_process(CASE3);

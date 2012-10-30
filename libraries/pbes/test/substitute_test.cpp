@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/substitutions.h"
@@ -84,8 +83,6 @@ void test_propositional_variable_substitution()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_substitution();
   test_propositional_variable_substitution();
 

@@ -13,7 +13,6 @@
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using mcrl2::utilities::tools::input_output_tool;
@@ -54,7 +53,6 @@ class lps_parelm_gui_tool: public mcrl2_gui_tool<lps_parelm_tool>
 
 int main(int argc, char** argv)
 {
-  atermpp::aterm_init();
   return lps_parelm_gui_tool().execute(argc, argv);
 }
 

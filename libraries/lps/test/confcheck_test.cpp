@@ -17,7 +17,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -209,7 +208,5 @@ BOOST_AUTO_TEST_CASE(case_5)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

@@ -25,7 +25,6 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -933,8 +932,6 @@ void test_bke()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_bke();
 
   test_sorts();

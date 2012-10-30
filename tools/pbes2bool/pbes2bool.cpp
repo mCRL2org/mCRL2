@@ -55,7 +55,6 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2::utilities;
@@ -350,7 +349,5 @@ class pbes2bool_gui_tool: public mcrl2_gui_tool<pbes2bool_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return pbes2bool_gui_tool().execute(argc, argv);
 }

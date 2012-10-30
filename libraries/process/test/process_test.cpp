@@ -16,7 +16,6 @@
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -231,8 +230,6 @@ void test_data_spec()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_linear(CASE1);
   test_linear(CASE2);
   test_linear(CASE3);

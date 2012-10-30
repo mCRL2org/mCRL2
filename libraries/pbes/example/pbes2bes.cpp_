@@ -20,15 +20,12 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
   bool print_equations;          // print the generated equations to standard out

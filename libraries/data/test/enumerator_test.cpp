@@ -13,7 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
 #include "mcrl2/data/function_symbol.h"
@@ -244,8 +243,6 @@ void test_enumerator_variable_limit()
 
 int test_main(int argc, char* argv[])
 {
-  atermpp::aterm_init();
-
   test_data_enumerator();
   test_data_enumerator2();
   test2();
