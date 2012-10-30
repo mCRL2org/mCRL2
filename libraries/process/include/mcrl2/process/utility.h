@@ -96,8 +96,8 @@ multi_action_name apply_rename(const rename_expression_list& R, const multi_acti
 inline
 multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
 {
-  multi_action_name result = alpha;
-  result.insert(beta.begin(), beta.end());
+  multi_action_name result;
+  std::merge(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
   return result;
 }
 
@@ -219,6 +219,27 @@ multi_action_name_set apply_comm(const communication_expression_list& C, const m
     }
   }
   return result;
+}
+
+// Returns true if the multiset y is contained in x
+inline
+bool includes(const multi_action_name& x, const multi_action_name& y)
+{
+  return std::includes(x.begin(), x.end(), y.begin(), y.end());
+}
+
+inline
+// Returns true if A contains an x such that includes(x, y)
+bool includes(const multi_action_name_set& A, const multi_action_name& y)
+{
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    if (includes(*i, y))
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace process

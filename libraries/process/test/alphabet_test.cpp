@@ -24,7 +24,17 @@
 using namespace mcrl2;
 using namespace mcrl2::process;
 
-multi_action_name_set parse_multi_action_name_set(const std::string& text, const lps::action_label_list& action_decls = lps::parse_action_declaration("a, b, c, d;"))
+multi_action_name parse_multi_action_name(const std::string& text)
+{
+  multi_action_name result;
+  for (std::string::const_iterator i = text.begin(); i != text.end(); ++i)
+  {
+    result.insert(core::identifier_string(std::string(1, *i)));
+  }
+  return result;
+}
+
+multi_action_name_set parse_multi_action_name_set(const std::string& text)
 {
   multi_action_name_set result;
 
@@ -34,14 +44,7 @@ multi_action_name_set parse_multi_action_name_set(const std::string& text, const
   std::vector<std::string> v = utilities::regex_split(s, "\\s*,\\s*");
   for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
   {
-    multi_action_name alpha;
-    std::string word = *i;
-    for (std::string::iterator j = word.begin(); j != word.end(); ++j)
-    {
-      std::string z(1, *j);
-      alpha.insert(core::identifier_string(z));
-    }
-    result.insert(alpha);
+    result.insert(parse_multi_action_name(*i));
   }
   return result;
 }
@@ -100,6 +103,14 @@ void test_parse()
   multi_action_name_set B = parse_multi_action_name_set("{a, ab}");
   std::cout << "B = " << print(B) << std::endl;
   BOOST_CHECK(print(B) == "{a, ab}");
+}
+
+void test_includes()
+{
+  multi_action_name alpha = parse_multi_action_name("abb");
+  multi_action_name beta = parse_multi_action_name("aabb");
+  BOOST_CHECK(!includes(alpha, beta));
+  BOOST_CHECK(includes(beta, alpha));
 }
 
 void test_alphabet_reduce()
@@ -163,6 +174,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv);
   log::mcrl2_logger::set_reporting_level(log::debug);
 
+  test_includes();
   test_parse();
   test_alphabet_reduce();
   test_alphabet();
