@@ -16,7 +16,6 @@
 #endif
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/detail/aterm_io_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -32,16 +31,7 @@ using namespace std;
 
 static const size_t ERROR_SIZE = 32;
 
-/* Initial number of terms that can be protected */
-/* In the current implementation this means that
-   excessive term protection can lead to deteriorating
-   performance! */
-
-
 /* globals */
-
-/* We need a buffer for printing and parsing */
-static std::string string_buffer;
 
 /* Parse error description */
 static int      line = 0;
@@ -49,15 +39,10 @@ static int      col = 0;
 static char     error_buf[ERROR_SIZE];
 static int      error_idx = 0;
 
-
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char* _strdup(const char* s);
-#endif
-
 static aterm    fparse_term(int* c, istream &is);
 
 
-void detail::aterm_io_init()
+static void aterm_io_init()
 {
   static bool initialized = false;
   if (initialized)
@@ -191,7 +176,7 @@ static void topWriteToStream(const aterm &t, std::ostream& os)
 
 std::string aterm::to_string() const
 {
-  detail::aterm_io_init();
+  aterm_io_init();
   std::ostringstream oss;
   topWriteToStream(*this, oss);
   return oss.str();
@@ -199,7 +184,7 @@ std::string aterm::to_string() const
 
 void write_term_to_text_stream(const aterm &t, std::ostream &os)
 {
-  detail::aterm_io_init();
+  aterm_io_init();
   topWriteToStream(t,os);
 }
 
@@ -287,10 +272,8 @@ static aterm_list fparse_terms(int* c, istream &is)
 
 static aterm fparse_quoted_appl(int* c, istream &is)
 {
-  assert(string_buffer.empty());
-  aterm_list       args ;
-  function_symbol          sym;
-  char*           name;
+  /* We need a buffer for printing and parsing */
+  std::string function_string;
 
   /* First parse the identifier */
   fnext_char(c, is);
@@ -310,36 +293,31 @@ static aterm fparse_quoted_appl(int* c, istream &is)
         switch (*c)
         {
           case 'n':
-            string_buffer+='\n';
+            function_string+='\n';
             break;
           case 'r':
-            string_buffer+='\r';
+            function_string+='\r';
             break;
           case 't':
-            string_buffer+= '\t';
+            function_string+= '\t';
             break;
           default:
-            string_buffer+= *c;
+            function_string+= *c;
             break;
         }
         break;
       default:
-        string_buffer+= *c;
+        function_string+= *c;
         break;
     }
     fnext_char(c, is);
   }
 
-  name = _strdup(string_buffer.c_str());
-  string_buffer.clear();
-  if (!name)
-  {
-    throw std::runtime_error("fparse_quoted_appl: symbol too long.");
-  }
 
   fnext_skip_layout(c, is);
 
   /* Time to parse the arguments */
+  aterm_list args;
   if (*c == '(')
   {
     fnext_skip_layout(c, is);
@@ -347,10 +325,7 @@ static aterm fparse_quoted_appl(int* c, istream &is)
     {
       args = fparse_terms(c, is);
     }
-    else
-    {
-      args = aterm_list();
-    }
+
     if (args == aterm() || *c != ')')
     {
       return aterm();
@@ -359,42 +334,42 @@ static aterm fparse_quoted_appl(int* c, istream &is)
   }
 
   /* Wrap up this function application */
-  sym = function_symbol(name, args.size());
-  free(name);
+  const function_symbol sym(function_string, args.size());
+  
   return aterm_appl(sym, args.begin(), args.end());
 }
 
 /**
- * Parse a quoted application.
- */
+ *  * Parse an unquoted application. If a term is printed, applications
+ *    are always quoted. But when typing aterms, it is convenient not to be
+ *    forced to type quoted around each string. Therefore non quoted 
+ *    function symbols are still allowed.
+ *   */
+
 
 static aterm_appl fparse_unquoted_appl(int* c, istream &is)
 {
-  assert(string_buffer.empty());
-  function_symbol sym;
-  aterm_list args = aterm_list();
-  char* name = NULL;
-
+  std::string function_string;
   if (*c != '(')
   {
     /* First parse the identifier */
     while (isalnum(*c)
            || *c == '-' || *c == '_' || *c == '+' || *c == '*' || *c == '$')
     {
-      string_buffer+= *c;
+      function_string+= *c;
       fnext_char(c, is);
-    }
-    name = _strdup(string_buffer.c_str());
-    string_buffer.clear();
-    if (!name)
-    {
-      throw std::runtime_error("fparse_unquoted_appl: symbol too long.");
     }
 
     fskip_layout(c, is);
   }
 
+  if (function_string.empty())
+  {
+    return aterm_appl();
+  }
+
   /* Time to parse the arguments */
+  aterm_list args;
   if (*c == '(')
   {
     fnext_skip_layout(c, is);
@@ -402,10 +377,7 @@ static aterm_appl fparse_unquoted_appl(int* c, istream &is)
     {
       args = fparse_terms(c, is);
     }
-    else
-    {
-      args = aterm_list();
-    }
+
     if (args == aterm() || *c != ')')
     {
       return aterm_appl();
@@ -414,22 +386,19 @@ static aterm_appl fparse_unquoted_appl(int* c, istream &is)
   }
 
   /* Wrap up this function application */
-  sym = function_symbol(name ? name : "", args.size());
-  if (name != NULL)
-  {
-    free(name);
-  }
-
+  const function_symbol sym(function_string, args.size());
   return aterm_appl(sym, args.begin(), args.end());
 }
 
+
+
 /**
- * Parse a number or blob.
+ * Parse a number.
  */
 
 static aterm fparse_num(int* c, istream &is)
 {
-  char            num[32], *ptr = num, *numend = num + 30;
+  char num[32], *ptr = num, *numend = num + 30;
 
   if (*c == '-')
   {
@@ -444,12 +413,8 @@ static aterm fparse_num(int* c, istream &is)
   }
 
   {
-    /*{{{  An integer */
-
     *ptr = '\0';
     return aterm_int(static_cast<size_t>(atol(num)));
-
-    /*}}}  */
   }
 }
 
@@ -459,7 +424,6 @@ static aterm fparse_num(int* c, istream &is)
 
 static aterm fparse_term(int* c, istream &is)
 {
-  /* aterm t, result = NULL; */
   aterm result;
 
   switch (*c)
@@ -488,11 +452,7 @@ static aterm fparse_term(int* c, istream &is)
       {
         result = fparse_unquoted_appl(c, is);
       }
-      else if (isdigit(*c))
-      {
-        result = fparse_num(c, is);
-      }
-      else if (*c == '.' || *c == '-')
+      else if (isdigit(*c) || *c == '-')
       {
         result = fparse_num(c, is);
       }
@@ -545,7 +505,7 @@ static aterm read_term_from_text_stream(int *c, istream &is)
 
 aterm read_term_from_stream(istream &is)
 {
-  detail::aterm_io_init();
+  aterm_io_init();
   int c;
 
   fnext_char(&c, is);
@@ -577,7 +537,7 @@ aterm read_term_from_string(const std::string& s)
 
 aterm read_term_from_text_stream(istream &is)
 {
-  detail::aterm_io_init();
+  aterm_io_init();
   int             c;
 
   fnext_skip_layout(&c, is);

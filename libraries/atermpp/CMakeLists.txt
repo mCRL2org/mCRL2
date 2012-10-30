@@ -24,7 +24,7 @@ add_library(${PROJECT_NAME}
   source/memory.cpp
   source/aterm_io_text.cpp
   source/hash.cpp
-  source/byteio.cpp
+#  source/byteio.cpp
 #  source/byteencoding.cpp
 #  source/safio.cpp
 #  source/idmappings.cpp

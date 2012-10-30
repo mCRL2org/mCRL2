@@ -14,11 +14,35 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/detail/memory.h"
 #include "mcrl2/atermpp/detail/utility.h"
-#include "mcrl2/atermpp/detail/byteio.h"
 #include "mcrl2/atermpp/aterm_int.h"
 
 namespace atermpp
 {
+
+static int write_byte(const int byte, std::ostream &os)
+{
+  os.put(byte);
+  return byte;
+}
+
+static size_t write_bytes(const char* buf, const size_t count, std::ostream &os)
+{
+  os.write(buf,count);
+  return count;
+}
+
+static int read_byte(std::istream &is)
+{
+  int c = is.get();
+  return c;
+}
+
+static size_t read_bytes(char* buf, size_t count, std::istream &is)
+{
+  is.read(buf, count);
+  return count;
+}
+
 
 /**
  * Calculate the number of unique symbols.
@@ -267,7 +291,7 @@ writeIntToBuf(const size_t val, unsigned char* buf)
 }
 
 
-static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer, ostream &os)
+static int writeBits(size_t val, const size_t nr_bits, ostream &os)
 {
   size_t cur_bit;
 
@@ -278,7 +302,7 @@ static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer, ostr
     val >>= 1;
     if (++bits_in_buffer == 8)
     {
-      if (write_byte((int)bit_buffer, writer, os) == -1)
+      if (write_byte((int)bit_buffer, os) == -1)
       {
         return -1;
       }
@@ -297,16 +321,14 @@ static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer, ostr
 }
 
 
-static
-int
-flushBitsToWriter(byte_writer* writer, ostream &os)
+static int flushBitsToWriter(ostream &os)
 {
   int result = 0;
   if (bits_in_buffer > 0)
   {
     size_t left = 8-bits_in_buffer;
     bit_buffer <<= left;
-    result = (write_byte((int)bit_buffer, writer, os) == EOF) ? -1 : 0;
+    result = (write_byte((int)bit_buffer, os) == EOF) ? -1 : 0;
     bits_in_buffer = 0;
     bit_buffer = '\0';
   }
@@ -317,7 +339,7 @@ flushBitsToWriter(byte_writer* writer, ostream &os)
 
 static
 int
-readBits(size_t* val, const size_t nr_bits, byte_reader* reader, istream &is)
+readBits(size_t* val, const size_t nr_bits, istream &is)
 {
   size_t cur_bit, mask = 1;
 
@@ -326,7 +348,7 @@ readBits(size_t* val, const size_t nr_bits, byte_reader* reader, istream &is)
   {
     if (bits_in_buffer == 0)
     {
-      int val = read_byte(reader, is);
+      int val = read_byte(is);
       if (val == EOF)
       {
         return -1;
@@ -345,13 +367,13 @@ readBits(size_t* val, const size_t nr_bits, byte_reader* reader, istream &is)
 }
 
 
-static bool writeInt(const size_t val, byte_writer* writer, ostream &os)
+static bool writeInt(const size_t val, ostream &os)
 {
   size_t nr_items;
   unsigned char buf[8];
 
   nr_items = writeIntToBuf(val, buf);
-  if (write_bytes((char*)buf, nr_items, writer, os) != nr_items)
+  if (write_bytes((char*)buf, nr_items, os) != nr_items)
   {
     return false;
   }
@@ -361,12 +383,12 @@ static bool writeInt(const size_t val, byte_writer* writer, ostream &os)
 }
 
 
-static int readInt(size_t* val, byte_reader* reader, istream &is)
+static int readInt(size_t* val, istream &is)
 {
   int buf[8];
 
   /* Try to read 1st character */
-  if ((buf[0] = read_byte(reader,is)) == EOF)
+  if ((buf[0] = read_byte(is)) == EOF)
   {
     return EOF;
   }
@@ -379,7 +401,7 @@ static int readInt(size_t* val, byte_reader* reader, istream &is)
   }
 
   /* Try to read 2nd character */
-  if ((buf[1] = read_byte(reader,is)) == EOF)
+  if ((buf[1] = read_byte(is)) == EOF)
   {
     return EOF;
   }
@@ -392,7 +414,7 @@ static int readInt(size_t* val, byte_reader* reader, istream &is)
   }
 
   /* Try to read 3rd character */
-  if ((buf[2] = read_byte(reader,is)) == EOF)
+  if ((buf[2] = read_byte(is)) == EOF)
   {
     return EOF;
   }
@@ -405,7 +427,7 @@ static int readInt(size_t* val, byte_reader* reader, istream &is)
   }
 
   /* Try to read 4th character */
-  if ((buf[3] = read_byte(reader,is)) == EOF)
+  if ((buf[3] = read_byte(is)) == EOF)
   {
     return EOF;
   }
@@ -419,7 +441,7 @@ static int readInt(size_t* val, byte_reader* reader, istream &is)
   }
 
   /* Try to read 5th character */
-  if ((buf[4] = read_byte(reader,is)) == EOF)
+  if ((buf[4] = read_byte(is)) == EOF)
   {
     return EOF;
   }
@@ -430,16 +452,16 @@ static int readInt(size_t* val, byte_reader* reader, istream &is)
 }
 
 
-static bool writeString(const char* str, const size_t len, byte_writer* writer, ostream &os)
+static bool writeString(const char* str, const size_t len, ostream &os)
 {
   /* Write length. */
-  if (!writeInt(len, writer, os))
+  if (!writeInt(len, os))
   {
     return false;
   }
 
   /* Write actual string. */
-  if (write_bytes(str, len, writer, os) != len)
+  if (write_bytes(str, len, os) != len)
   {
     return false;
   }
@@ -449,12 +471,12 @@ static bool writeString(const char* str, const size_t len, byte_writer* writer, 
 }
 
 
-static size_t readString(byte_reader* reader, istream &is)
+static size_t readString(istream &is)
 {
   size_t len;
 
   /* Get length of string */
-  if (readInt(&len, reader, is) < 0)
+  if (readInt(&len, is) < 0)
   {
     return atermpp::npos;
   }
@@ -471,7 +493,7 @@ static size_t readString(byte_reader* reader, istream &is)
   }
 
   /* Read the actual string */
-  if (read_bytes(text_buffer, len, reader,is) != len)
+  if (read_bytes(text_buffer, len, is) != len)
   {
     return atermpp::npos;
   }
@@ -484,20 +506,20 @@ static size_t readString(byte_reader* reader, istream &is)
  * Write a symbol to file.
  */
 
-static bool write_symbol(const function_symbol sym, byte_writer* writer, ostream &os)
+static bool write_symbol(const function_symbol sym, ostream &os)
 {
   const char* name = sym.name().c_str();
-  if (!writeString(name, strlen(name), writer, os))
+  if (!writeString(name, strlen(name), os))
   {
     return false;
   }
 
-  if (!writeInt(sym.arity(), writer, os))
+  if (!writeInt(sym.arity(), os))
   {
     return false;
   }
 
-  if (!writeInt(true, writer, os))
+  if (!writeInt(true, os))
   {
     return false;
   }
@@ -746,18 +768,18 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
  * Write all symbols in a term to file.
  */
 
-static bool write_symbols(byte_writer* writer, ostream &os)
+static bool write_symbols(ostream &os)
 {
   size_t sym_idx, arg_idx, top_idx;
 
   for (sym_idx=0; sym_idx<nr_unique_symbols; sym_idx++)
   {
     sym_entry* cur_sym = &sym_entries[sym_idx];
-    if (!write_symbol(cur_sym->id, writer,os))
+    if (!write_symbol(cur_sym->id, os))
     {
       return false;
     }
-    if (!writeInt(cur_sym->nr_terms, writer,os))
+    if (!writeInt(cur_sym->nr_terms, os))
     {
       return false;
     }
@@ -765,14 +787,14 @@ static bool write_symbols(byte_writer* writer, ostream &os)
     for (arg_idx=0; arg_idx<cur_sym->arity; arg_idx++)
     {
       size_t nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
-      if (!writeInt(nr_symbols, writer, os))
+      if (!writeInt(nr_symbols, os))
       {
         return false;
       }
       for (top_idx=0; top_idx<nr_symbols; top_idx++)
       {
         top_symbol* ts = &cur_sym->top_symbols[arg_idx].symbols[top_idx];
-        if (!writeInt(ts->index, writer, os))
+        if (!writeInt(ts->index, os))
         {
           return false;
         }
@@ -824,14 +846,14 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sy
 
 
 /**
- * Write an argument using a byte_writer.
+ * Write an argument.
  */
 
 /* forward declaration */
-static bool write_term(const aterm, byte_writer*, const std::vector<size_t> &index, ostream &os);
+static bool write_term(const aterm, const std::vector<size_t> &index, ostream &os);
 
 static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
-                      byte_writer* writer, const std::vector<size_t> &index, ostream &os)
+                      const std::vector<size_t> &index, ostream &os)
 {
   top_symbol* ts;
   sym_entry* arg_sym;
@@ -841,7 +863,7 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
   sym = get_top_symbol(arg,index)->id;
   ts = find_top_symbol(&trm_sym->top_symbols[arg_idx], sym);
 
-  if (writeBits(ts->code, ts->code_width, writer, os)<0)
+  if (writeBits(ts->code, ts->code_width, os)<0)
   {
     return false;
   }
@@ -849,13 +871,13 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
   arg_sym = &sym_entries[ts->index];
 
   arg_trm_idx = find_term(arg_sym, arg);
-  if (writeBits(arg_trm_idx, arg_sym->term_width, writer, os)<0)
+  if (writeBits(arg_trm_idx, arg_sym->term_width, os)<0)
   {
     return false;
   }
 
   if (arg_trm_idx >= arg_sym->cur_index &&
-      !write_term(arg, writer,index, os))
+      !write_term(arg, index, os))
   {
     return false;
   }
@@ -868,7 +890,7 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm t, byte_writer* writer, const std::vector<size_t> &index, ostream &os)
+static bool write_term(const aterm t, const std::vector<size_t> &index, ostream &os)
 {
   size_t arg_idx;
   sym_entry* trm_sym = NULL;
@@ -877,7 +899,7 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
     {
       case AT_INT:
         /* If aterm integers are > 32 bits, then this can fail. */
-        if (writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, writer, os) < 0)
+        if (writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os) < 0)
         {
           return false;
         }
@@ -893,11 +915,11 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
         else
         {
           trm_sym = &sym_entries[index[detail::function_adm.AS_LIST.number()]];
-          if (!write_arg(trm_sym, list.front(), 0, writer,index, os))
+          if (!write_arg(trm_sym, list.front(), 0, index, os))
           {
             return false;
           }
-          if (!write_arg(trm_sym, (aterm)(list.tail()), 1, writer,index, os))
+          if (!write_arg(trm_sym, (aterm)(list.tail()), 1, index, os))
           {
             return false;
           }
@@ -914,7 +936,7 @@ static bool write_term(const aterm t, byte_writer* writer, const std::vector<siz
         for (arg_idx=0; arg_idx<arity; arg_idx++)
         {
           aterm cur_arg = static_cast<aterm_appl>(t)(arg_idx);
-          if (!write_arg(trm_sym, cur_arg, arg_idx, writer,index, os))
+          if (!write_arg(trm_sym, cur_arg, arg_idx, index, os))
           {
             return false;
           }
@@ -984,7 +1006,7 @@ static void free_write_space()
 
 
 static bool
-write_baf(const aterm &t, byte_writer* writer, ostream &os)
+write_baf(const aterm &t, ostream &os)
 {
   size_t nr_unique_terms = 0;
   size_t nr_symbols = detail::at_lookup_table.size();
@@ -1050,50 +1072,50 @@ write_baf(const aterm &t, byte_writer* writer, ostream &os)
 
   /*{{{  write header */
 
-  if (!writeInt(0, writer, os))
+  if (!writeInt(0, os))
   {
     return false;
   }
 
-  if (!writeInt(BAF_MAGIC, writer, os))
+  if (!writeInt(BAF_MAGIC, os))
   {
     return false;
   }
 
-  if (!writeInt(BAF_VERSION, writer, os))
+  if (!writeInt(BAF_VERSION, os))
   {
     return false;
   }
 
-  if (!writeInt(nr_unique_symbols, writer, os))
+  if (!writeInt(nr_unique_symbols, os))
   {
     return false;
   }
 
-  if (!writeInt(nr_unique_terms, writer, os))
+  if (!writeInt(nr_unique_terms, os))
   {
     return false;
   }
 
   /*}}}  */
 
-  if (!write_symbols(writer, os))
+  if (!write_symbols(os))
   {
     return false;
   }
 
   /* Write the top symbol */
-  if (!writeInt(get_top_symbol(t,index)-&sym_entries[0], writer, os))
+  if (!writeInt(get_top_symbol(t,index)-&sym_entries[0], os))
   {
     return false;
   }
 
-  if (!write_term(t, writer,index, os))
+  if (!write_term(t, index, os))
   {
     return false;
   }
 
-  if (flushBitsToWriter(writer,os)<0)
+  if (flushBitsToWriter(os)<0)
   {
     return false;
   }
@@ -1105,119 +1127,35 @@ write_baf(const aterm &t, byte_writer* writer, ostream &os)
 
 void write_term_to_binary_stream(const aterm &t, std::ostream &os)
 {
-  static byte_writer writer;
-  static bool initialized = false;
 
-  if (!initialized)
-  {
-    writer.type = STREAM_WRITER;
-    writer.u.string_data.buf = (unsigned char*)calloc(BUFSIZ, 1);
-    writer.u.string_data.max_size = BUFSIZ;
-    initialized = true;
-  }
-  writer.u.string_data.cur_size = 0;
-
-  if (!write_baf(t, &writer, os))
+  if (!write_baf(t, os))
   {
     throw std::runtime_error("Fail to write term to string");
   }
-
-  // return std::string((char *)writer.u.string_data.buf,writer.u.string_data.cur_size);
-}
-
-std::string write_term_to_binary_string(const aterm &t)
-{
-  static byte_writer writer;
-  static bool initialized = false;
-
-  if (!initialized)
-  {
-    writer.type = STRING_WRITER;
-    writer.u.string_data.buf = (unsigned char*)calloc(BUFSIZ, 1);
-    writer.u.string_data.max_size = BUFSIZ;
-    initialized = true;
-  }
-  writer.u.string_data.cur_size = 0;
-
-  if (!write_baf(t, &writer,cout))
-  {
-    throw std::runtime_error("Fail to write term to string");
-  }
-
-  return std::string((char *)writer.u.string_data.buf,writer.u.string_data.cur_size);
-}
-
-
-bool write_term_to_binary_file(const aterm &t, FILE* file)
-{
-  static byte_writer writer;
-  static bool initialized = false;
-
-  if (!initialized)
-  {
-    writer.type = FILE_WRITER;
-    initialized = true;
-  }
-  writer.u.file_data = file;
-
-#ifdef WIN32
-  if (_setmode(_fileno(file), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set outputfile to binary mode.");
-  }
-#endif
-
-  return write_baf(t, &writer,cout);
-}
-
-/**
-  * Write an aterm to a named BAF file
-  */
-
-bool write_term_to_binary_file(const aterm &t, const std::string& filename)
-{
-  FILE*  f;
-  bool result;
-  const char* name=filename.c_str();
-
-  if (!strcmp(name, "-"))
-  {
-    return write_term_to_binary_file(t, stdout);
-  }
-
-  if (!(f = fopen(name, "wb")))
-  {
-    return false;
-  }
-
-  result = write_term_to_binary_file(t, f);
-  fclose(f);
-
-  return result;
 }
 
 /**
   * Read a single symbol from file.
   */
 
-static function_symbol read_symbol(byte_reader* reader, istream &is)
+static function_symbol read_symbol(istream &is)
 {
   size_t arity, quoted;
   size_t len;
 
-  if ((len = readString(reader, is)) == atermpp::npos)
+  if ((len = readString(is)) == atermpp::npos)
   {
     return atermpp::npos;
   }
 
   text_buffer[len] = '\0';
 
-  if (readInt(&arity, reader, is) < 0)
+  if (readInt(&arity, is) < 0)
   {
     return atermpp::npos;
   }
 
-  if (readInt(&quoted, reader, is) < 0)
+  if (readInt(&quoted, is) < 0)
   {
     return atermpp::npos;
   }
@@ -1229,7 +1167,7 @@ static function_symbol read_symbol(byte_reader* reader, istream &is)
  * Read all symbols from file.
  */
 
-static bool read_all_symbols(byte_reader* reader, istream &is)
+static bool read_all_symbols(istream &is)
 {
   size_t k, val;
   size_t i, j, arity;
@@ -1238,7 +1176,7 @@ static bool read_all_symbols(byte_reader* reader, istream &is)
   {
     /*{{{  Read the actual symbol */
 
-    function_symbol sym = read_symbol(reader,is);
+    function_symbol sym = read_symbol(is);
     read_symbols[i].sym = sym;
     arity = sym.arity();
     read_symbols[i].arity = arity;
@@ -1246,7 +1184,7 @@ static bool read_all_symbols(byte_reader* reader, istream &is)
     /*}}}  */
     /*{{{  Read term count and allocate space */
 
-    if (readInt(&val, reader, is) < 0 || val == 0)
+    if (readInt(&val, is) < 0 || val == 0)
     {
       return false;
     }
@@ -1298,7 +1236,7 @@ static bool read_all_symbols(byte_reader* reader, istream &is)
 
     for (j=0; j<read_symbols[i].arity; j++)
     {
-      if (readInt(&val, reader, is) < 0)
+      if (readInt(&val, is) < 0)
       {
         return false;
       }
@@ -1313,7 +1251,7 @@ static bool read_all_symbols(byte_reader* reader, istream &is)
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
       {
-        if (readInt(&val, reader, is) < 0)
+        if (readInt(&val, is) < 0)
         {
           return false;
         }
@@ -1326,7 +1264,7 @@ static bool read_all_symbols(byte_reader* reader, istream &is)
   return true;
 }
 
-static aterm read_term(sym_read_entry* sym, byte_reader* reader, istream &is)
+static aterm read_term(sym_read_entry* sym, istream &is)
 {
   size_t val;
   size_t i, arity = sym->arity;
@@ -1337,7 +1275,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader, istream &is)
 
   for (i=0; i<arity; i++)
   {
-    if (readBits(&val, sym->sym_width[i], reader, is) < 0)
+    if (readBits(&val, sym->sym_width[i], is) < 0)
     {
       return aterm();
     }
@@ -1347,7 +1285,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader, istream &is)
     }
     arg_sym = &read_symbols[sym->topsyms[i][val]];
 
-    if (readBits(&val, arg_sym->term_width, reader, is) < 0)
+    if (readBits(&val, arg_sym->term_width, is) < 0)
     {
       return aterm();
     }
@@ -1358,7 +1296,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader, istream &is)
     }
     if (arg_sym->terms[val]==aterm())
     {
-      arg_sym->terms[val] = read_term(arg_sym, reader, is);
+      arg_sym->terms[val] = read_term(arg_sym, is);
       if (arg_sym->terms[val]==aterm())
       {
         return aterm();
@@ -1372,7 +1310,7 @@ static aterm read_term(sym_read_entry* sym, byte_reader* reader, istream &is)
   {
     /*{{{  Read an integer */
 
-    if (readBits(&val, INT_SIZE_IN_BAF, reader, is) < 0)
+    if (readBits(&val, INT_SIZE_IN_BAF, is) < 0)
     {
       return aterm();
     }
@@ -1444,7 +1382,7 @@ static void free_read_space()
  */
 
 static
-aterm read_baf(byte_reader* reader, istream &is)
+aterm read_baf(istream &is)
 {
   size_t val, nr_unique_terms;
   aterm result;
@@ -1455,14 +1393,14 @@ aterm read_baf(byte_reader* reader, istream &is)
 
   /*{{{  Read header */
 
-  if (readInt(&val, reader, is) < 0)
+  if (readInt(&val, is) < 0)
   {
     return aterm();
   }
 
   if (val == 0)
   {
-    if (readInt(&val, reader, is) < 0)
+    if (readInt(&val, is) < 0)
     {
       return aterm();
     }
@@ -1474,7 +1412,7 @@ aterm read_baf(byte_reader* reader, istream &is)
     return aterm();
   }
 
-  if (readInt(&val, reader, is) < 0)
+  if (readInt(&val, is) < 0)
   {
     return aterm();
   }
@@ -1485,13 +1423,13 @@ aterm read_baf(byte_reader* reader, istream &is)
     return aterm();
   }
 
-  if (readInt(&val, reader, is) < 0)
+  if (readInt(&val, is) < 0)
   {
     return aterm();
   }
   nr_unique_symbols = val;
 
-  if (readInt(&nr_unique_terms, reader, is) < 0)
+  if (readInt(&nr_unique_terms, is) < 0)
   {
     return aterm();
   }
@@ -1508,17 +1446,17 @@ aterm read_baf(byte_reader* reader, istream &is)
 
   /*}}}  */
 
-  if (!read_all_symbols(reader,is))
+  if (!read_all_symbols(is))
   {
     return aterm();
   }
 
-  if (readInt(&val, reader, is) < 0)
+  if (readInt(&val, is) < 0)
   {
     return aterm();
   }
 
-  result = read_term(&read_symbols[val], reader, is);
+  result = read_term(&read_symbols[val], is);
   free_read_space();
   return result;
 }
@@ -1526,9 +1464,6 @@ aterm read_baf(byte_reader* reader, istream &is)
 
 aterm read_term_from_binary_stream(istream &is)
 {
-  byte_reader reader;
-  init_stream_reader(&reader, is);
-
 #ifdef WIN32
   if (_setmode(_fileno(file), _O_BINARY) == -1)
   {
@@ -1537,7 +1472,7 @@ aterm read_term_from_binary_stream(istream &is)
   }
 #endif
 
-  aterm result=read_baf(&reader, is);
+  aterm result=read_baf(is);
   if (result==aterm())
   {
     throw std::runtime_error("Failed to read term from binary file.");
