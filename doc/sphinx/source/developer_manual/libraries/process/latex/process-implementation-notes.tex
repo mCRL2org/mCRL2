@@ -1,21 +1,23 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
-%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%\input{tcilatex}
 %%%%%%%%\input{tcilatex}
+%%%%%%%\input{tcilatex}
 %%%%%%\input{tcilatex}
-%%%%%\input{tcilatex}
 %%%%\input{tcilatex}
-%%%\input{tcilatex}
+%%\input{tcilatex}
 
 
 \documentclass{article}
@@ -29,7 +31,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Tuesday, October 30, 2012 17:16:07}
+%TCIDATA{LastRevised=Thursday, November 01, 2012 13:26:48}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -269,17 +271,16 @@ A_{1}\leftarrowtail A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta
 \]
 
 Let $C$ be a communication set, then we define%
-\begin{eqnarray*}
-C(A) &=&A\cup \{\alpha _{i}\beta \mid \exists \alpha .\alpha \rightarrow
-\alpha _{i}\in C\text{ and }\alpha \beta \in A\} \\
-C^{-1}(A) &=&\{\alpha \beta \mid \exists \alpha _{i}.\alpha \rightarrow
-a_{i}\in C\text{ and }\alpha _{i}\beta \in A\} \\
-\overline{C}(A) &=&\{\alpha \in A\mid \exists \alpha _{i},\beta .\alpha
-\beta \rightarrow \alpha _{i}\in C\} \\
-C\setminus A &=&\{\alpha \rightarrow \alpha _{i}\in C\mid \{\alpha
-_{i}\}\notin A\}\text{ TODO: check this}
-\end{eqnarray*}%
-Let $R$ be a renaming, then we define%
+\[
+\begin{array}{lll}
+C(A) & = & \{\gamma _{C}(\alpha )\mid \alpha \in A\} \\ 
+C^{-1}(A) & = & \{\alpha \mid \gamma _{C}(\alpha )\in A\} \\ 
+C\rfloor A & = & \{\alpha \rightarrow \alpha _{i}\in C\mid \exists \beta
+.\alpha \beta \in A\}%
+\end{array}%
+\]%
+where $\gamma _{C}$ is the function that applies the communications
+described by $C$ to a multi action. Let $R$ be a renaming, then we define%
 \begin{eqnarray*}
 R(\alpha ) &=&\{R(\alpha _{i})\mid \alpha _{i}\in \alpha \} \\
 R^{-1}(\alpha ) &=&\{\beta \mid R(\beta )=\alpha \} \\
@@ -290,12 +291,9 @@ Let $B$ be a block set, then we define%
 \[
 \partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
 \]%
-Let $I$ be a hide set, then we define%
-\[
-\tau _{I}(A)=\{\alpha \mid \exists \beta \in I^{\ast }.\alpha \beta \in A%
-\text{ and }\alpha \cap I=\emptyset \text{,} 
-\]%
-where $I^{\ast }$ is the transitive reflexive closure of $I$.\newpage
+\newpage
+
+\subsubsection{The mapping $\protect\alpha $}
 
 We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
 , where $\alpha $ is defined as%
@@ -336,23 +334,6 @@ We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
 \end{array}%
 \]
 
-The intended meaning of the function $push_{\nabla }$ is:%
-\[
-push_{\nabla }(p,A)=\left\langle \nabla _{A}(p),A\cap \alpha
-(p)\right\rangle 
-\]
-
-During alphabet reduction, the following rules can be applied:%
-\[
-\begin{array}{lll}
-\bigtriangledown _{A}(p) & = & \left\{ 
-\begin{array}{ll}
-p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
-\bigtriangledown _{A\cap \alpha (p)}(p) & \text{otherwise}%
-\end{array}%
-\right.%
-\end{array}%
-\]%
 \newpage
 
 \subsubsection{The mapping $push_{\bigtriangledown }$}
@@ -361,12 +342,10 @@ We define the mapping $push_{\bigtriangledown }$ as follows%
 \[
 \begin{tabular}{ll}
 $x$ & $push_{\bigtriangledown }(x,A)$ \\ \hline
-$p$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p)}(p)$ if $p$ is a pCRL
-expression} \\ 
+$p$ & \multicolumn{1}{|l}{$\nabla _{A}(p)$ if $p$ is a pCRL expression} \\ 
 $p\parallel q$ & \multicolumn{1}{|l}{$%
 \begin{array}{l}
-\nabla _{A\cap \alpha (p^{\prime }\parallel q^{\prime })}(p^{\prime
-}\parallel q^{\prime }) \\ 
+\nabla _{A}(p^{\prime }\parallel q^{\prime }) \\ 
 \text{where}\left\{ \text{ }%
 \begin{array}{lll}
 p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
@@ -381,8 +360,8 @@ $p\mathbin{\mathrel{\llfloor}}q$ & \multicolumn{1}{|l}{$%
 \left\{ 
 \begin{array}{ll}
 \delta  & \text{if }A\cap \alpha (p)=\emptyset  \\ 
-\nabla _{A\cap \alpha (p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
-})}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{otherwise,}%
+\nabla _{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{%
+otherwise,}%
 \end{array}%
 \right.  \\ 
 \text{where}\left\{ \text{ }%
@@ -399,8 +378,8 @@ $p\mid q$ & \multicolumn{1}{|l}{$%
 \left\{ 
 \begin{array}{ll}
 \delta  & \text{if }A\leftarrowtail \alpha (p)=\emptyset  \\ 
-\nabla _{A\cap \alpha (p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime
-})}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{otherwise,}%
+\nabla _{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{%
+otherwise,}%
 \end{array}%
 \right.  \\ 
 \text{where}\left\{ \text{ }%
@@ -412,89 +391,40 @@ q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
 \right. 
 \end{array}%
 $} \\ 
-$\rho _{R}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p^{\prime
-})}\rho _{R}(p^{\prime })$ where $p^{\prime }=$ $push_{\bigtriangledown
-}(p,R^{-1}(A))$} \\ 
+$\rho _{R}(p)$ & \multicolumn{1}{|l}{$\rho _{R}(p^{\prime })$ where $%
+p^{\prime }=$ $push_{\bigtriangledown }(p,R^{-1}(A))$} \\ 
 $\partial _{B}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown
 }(p,\partial _{B}(A))$} \\ 
-$\tau _{I}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p^{\prime
-})}(\tau _{I}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown
-}(p,Act)$} \\ 
-$\Gamma _{C}(p)$ & \multicolumn{1}{|l}{$\nabla _{A\cap \alpha (p^{\prime
-})}(\Gamma _{C}(p^{\prime }))$ where $p^{\prime }=push_{\bigtriangledown
-}(p,A\cup C^{-1}(A))$} \\ 
+$\tau _{I}(p)$ & \multicolumn{1}{|l}{$\nabla _{A}(\tau _{I}(p))$} \\ 
+$\Gamma _{C}(p)$ & \multicolumn{1}{|l}{$\nabla _{A}(\Gamma _{C}(p^{\prime }))
+$ where $p^{\prime }=push_{\bigtriangledown }(p,C^{-1}(A))$} \\ 
 $\nabla _{V}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown }(p,A\cap V)$}%
 \end{tabular}%
-\]
-
-\subsubsection{The mapping $push_{\partial }$}
-
-We define the mapping $push_{\partial }$ as follows, where $\left\langle
-p^{\prime },A_{p}^{\prime }\right\rangle =$ $push_{\partial }(p,A,W)$ and $%
-\left\langle q^{\prime },A_{q}^{\prime }\right\rangle =push_{\partial
-}(q,A,W)$, unless told otherwise.%
+\]%
+During the computation of $push_{\bigtriangledown }$ the following
+optimizations can be applied to every occurrence of an allow operator:%
 \[
-\begin{tabular}{l|l}
-$x$ & $push_{\partial }(x,A,W)$ \\ \hline
-$a$ & $\left\langle \partial _{A}(a),A^{\prime }\right\rangle \text{ where }%
-A^{\prime }=A\cap \{N(a)\}$ \\ 
-$\tau $ & $\left\langle \tau ,A^{\prime }\right\rangle \text{ where }%
-A^{\prime }=\{\tau \}$ \\ 
-$p\parallel q$ & $\left\langle p^{\prime }\parallel q^{\prime },A^{\prime
-}\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime
-}\cup A_{p}^{\prime }\times A_{q}^{\prime }$ \\ 
-$p\mathbin{\mathrel{\llfloor}}q$ & $\left\langle p^{\prime }%
-\mathbin{\mathrel{\llfloor}}q^{\prime },A^{\prime }\right\rangle \text{
-where }A^{\prime }=A_{p}^{\prime }\cup A_{q}^{\prime }\cup A_{p}^{\prime
-}\times A_{q}^{\prime }$ \\ 
-$p\mid q$ & $\left\langle p^{\prime }\mid q^{\prime },A^{\prime
-}\right\rangle \text{ where }A^{\prime }=A_{p}^{\prime }\times A_{q}^{\prime
-}$ \\ 
-$\rho _{R}(p)$ & $\left\langle \rho _{R}(p^{\prime }),R(A_{p}^{\prime
-})\right\rangle $ where $\left\langle p^{\prime },A_{p}^{\prime
-}\right\rangle =push_{\partial }(p,R^{-1}(A),W)$ \\ 
-$\partial _{B}(p)$ & $push_{\partial }(p,A^{\prime },W)\text{ where }%
-A^{\prime }=A\cup B$ \\ 
-$\tau _{I}(p)$ & $\left\langle \tau _{I}(p^{\prime }),A^{\prime
-}\right\rangle \text{ where }\left\{ \text{ }%
 \begin{array}{lll}
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
-}(p,A\setminus I,W) \\ 
-A^{\prime } & = & \tau _{I}(A)%
+\bigtriangledown _{A}(p) & = & \left\{ 
+\begin{array}{ll}
+p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
+\bigtriangledown _{A\cap \alpha (p)}(p) & \text{otherwise}%
 \end{array}%
-\right. $ \\ 
-$\Gamma _{C}(p)$ & $\left\langle \partial _{A^{\prime \prime }}(\Gamma
-_{C^{\prime }}(p^{\prime })),A^{\prime }\right\rangle \text{ where}\left\{ 
-\text{ }%
+\right.  \\ 
+\Gamma _{C}(p) & = & \Gamma _{C\rfloor \alpha (p)}(p)%
+\end{array}%
+\]%
+Here we applied the following rules:%
+\[
 \begin{array}{lll}
-A^{\prime \prime } & = & \overline{C}(A) \\ 
-\left\langle p^{\prime },A_{p}^{\prime }\right\rangle & = & push_{\partial
-}(p,A\setminus A^{\prime \prime },W) \\ 
-A^{\prime } & = & \partial _{A}(C(A_{p}^{\prime })) \\ 
-C^{\prime } & = & C\setminus A%
+\bigtriangledown _{A}(\rho _{R}(p)) & = & \rho _{R}(\bigtriangledown
+_{R^{-1}(A)}(p)) \\ 
+\bigtriangledown _{A}(\partial _{B}(p)) & = & \bigtriangledown _{\partial
+_{B}(A)}(p) \\ 
+\bigtriangledown _{A}(\Gamma _{C}(p)) & = & \bigtriangledown _{A}(\Gamma
+_{C}(\bigtriangledown _{C^{-1}(A)}(p))) \\ 
+\bigtriangledown _{A}(\nabla _{V}(p)) & = & \nabla _{A\cap V}(p)%
 \end{array}%
-\right. $ \\ 
-$\nabla _{V}(p)$ & $push_{\subseteq }(p,A^{\prime },W)\text{ where }%
-A^{\prime }=A^{\subseteq }\cap V$%
-\end{tabular}%
 \]
-
-% \subsubsection{Example}
-%
-% Let $P=a.P$ be a process definition, and suppose we want to compute $%
-% push_{\bigtriangledown }(P,A,\emptyset )$. We find%
-% \[
-% \begin{array}{lll}
-% push_{\bigtriangledown }(a,A,\{P\}) & = & \left\langle \nabla _{A\cap
-% \{a\}}(a),A\cap \{a\}\right\rangle \\
-% push_{\bigtriangledown }(P,A,\{P\}) & = & \left\langle
-% Q_{P,A,\bigtriangledown },\emptyset \right\rangle \\
-% push_{\bigtriangledown }(a.P,A,\{P\}) & = & \left\langle \nabla
-% _{A}(a.P),A\cap \{a\}\right\rangle \\
-% push_{\bigtriangledown }(P,A,\emptyset ) & = & \left\langle
-% Q_{P,A,\bigtriangledown },A\cap \{a\}\right\rangle%
-% \end{array}%
-% \]%
-% where $Q_{P,A,\bigtriangledown }=\nabla _{A}(a.P)$ is an added equation.
 
 \end{document}
