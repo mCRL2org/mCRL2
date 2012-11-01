@@ -95,7 +95,7 @@ struct control_flow_simplify_quantifier_builder: public pbes_system::detail::sim
   }
 
   // returns the argument of a data not
-  data_expression not_arg(const data_expression& x)
+  data::data_expression not_arg(const data::data_expression& x)
   {
     return data::application(x).arguments().front();
   }
