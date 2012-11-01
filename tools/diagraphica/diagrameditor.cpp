@@ -517,10 +517,10 @@ QRectF DiagramEditor::worldRectangle(QPointF start, QPointF stop)
 
   QRectF gridCoordinates = m_diagram->gridCoordinates();
 
-  double x1 = qMin(start.x(), gridCoordinates.right());
-  double y1 = qMin(start.y(), gridCoordinates.top());
-  double x2 = qMax(stop.x(), gridCoordinates.left());
-  double y2 = qMax(stop.y(), gridCoordinates.bottom());
+  qreal x1 = qMin(start.x(), gridCoordinates.right());
+  qreal y1 = qMin(start.y(), gridCoordinates.top());
+  qreal x2 = qMax(stop.x(), gridCoordinates.left());
+  qreal y2 = qMax(stop.y(), gridCoordinates.bottom());
 
   x1 = snapIfNeeded(qMax(x1, gridCoordinates.left()));
   y1 = snapIfNeeded(qMax(y1, gridCoordinates.bottom()));
