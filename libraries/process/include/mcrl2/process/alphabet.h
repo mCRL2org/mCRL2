@@ -418,8 +418,11 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
 
   void leave(const process::rename& x)
   {
-    super::leave(x);
-    top().m_expression = x;
+    rename_expression_list R = x.rename_set();
+    multi_action_name_set A1 = apply_rename_inverse(R, A);
+    push_allow_node node = push_allow(x.operand(), A1, false, equations);
+    node.m_expression = rename(R, node.expression());
+    push(node);
   }
 
   void leave(const process::comm& x)
@@ -428,7 +431,7 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     multi_action_name_set A1 = set_union(A, apply_comm_inverse(C, A));
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.m_expression = comm(C, node.expression());
-    node.m_true_intersection = filter_alphabet(node.alphabet, A, A_includes_subsets); // TODO: is this needed?
+    node.m_true_intersection = filter_alphabet(node.alphabet, A, A_includes_subsets);
     push(node);
   }
 

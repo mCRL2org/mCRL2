@@ -17,6 +17,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/detail/alphabet_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -47,6 +48,24 @@ multi_action_name_set parse_multi_action_name_set(const std::string& text)
     result.insert(parse_multi_action_name(*i));
   }
   return result;
+}
+
+communication_expression_list parse_comm_set(const std::string& text)
+{
+  atermpp::vector<communication_expression> result;
+  std::string s = text.substr(1, text.size() - 2);
+  std::vector<std::string> v = utilities::regex_split(s, "\\s*,\\s*");
+  for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
+  {
+    std::vector<std::string> w = utilities::regex_split(*i, "\\s*->\\s*");
+    std::string lhs = utilities::regex_replace("\\s*\\|\\s*", "", w[0]);
+    std::string rhs = w[1];
+    multi_action_name beta = parse_multi_action_name(lhs);
+    core::identifier_string_list alpha(beta.begin(), beta.end());
+    core::identifier_string a(rhs);
+    result.push_back(communication_expression(alpha, a));
+  }
+  return communication_expression_list(result.begin(), result.end());
 }
 
 template <typename Container>
@@ -162,7 +181,7 @@ void test_alphabet_operation(const std::string& text1, const std::string& text2,
   check_result(text1 + ", " + text2, result, expected_result, title);
 }
 
-void test_alphabet_operation()
+void test_alphabet_operations()
 {
   test_alphabet_operation("{a}", "{b}", "{ab}", process::concat, "concat");
   test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", process::concat, "concat");
@@ -185,6 +204,21 @@ void test_push_allow()
   test_push_allow("a || a", "{a}", false, "allow({a}, a || a)");
 }
 
+template <typename Operation>
+void test_comm_operation(const std::string& comm_text, const std::string& Atext, const std::string& expected_result, Operation op, const std::string& title)
+{
+  communication_expression_list C = parse_comm_set(comm_text);
+  multi_action_name_set A = parse_multi_action_name_set(Atext);
+  multi_action_name_set A1 = op(C, A);
+  std::string result = print(A1);
+  check_result(comm_text + ", " + Atext, result, expected_result, title);
+}
+
+void test_comm_operations()
+{
+  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", process::apply_comm_inverse, "comm_inverse");
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -194,7 +228,8 @@ int test_main(int argc, char* argv[])
   test_parse();
   test_alphabet_reduce();
   test_alphabet();
-  test_alphabet_operation();
+  test_alphabet_operations();
+  test_comm_operations();
   test_push_allow();
 
   return EXIT_SUCCESS;

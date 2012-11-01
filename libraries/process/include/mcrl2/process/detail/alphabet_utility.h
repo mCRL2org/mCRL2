@@ -22,6 +22,54 @@ namespace mcrl2 {
 
 namespace process {
 
+namespace detail {
+
+inline
+core::identifier_string apply_rename_inverse(const rename_expression_list& R, const core::identifier_string& x)
+{
+  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  {
+    if (x == i->target())
+    {
+      return i->source();
+    }
+  }
+  return x;
+}
+
+inline
+multi_action_name apply_rename_inverse(const rename_expression_list& R, const multi_action_name& a)
+{
+  multi_action_name result;
+  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
+  {
+    result.insert(detail::apply_rename_inverse(R, *i));
+  }
+  return result;
+}
+
+inline
+void apply_comm_inverse(const atermpp::vector<core::identifier_string>& alpha1, atermpp::vector<core::identifier_string>& alpha2, std::size_t i, const std::map<core::identifier_string, core::identifier_string_list>& Cinverse, multi_action_name_set& result)
+{
+  if (i >= alpha1.size())
+  {
+    result.insert(multi_action_name(alpha2.begin(), alpha2.end()));
+  }
+  else
+  {
+    core::identifier_string c = alpha1[i];
+    alpha2.push_back(c);
+    apply_comm_inverse(alpha1, alpha2, i + 1, Cinverse, result);
+    alpha2.erase(--alpha2.end());
+    std::map<core::identifier_string, core::identifier_string_list>::const_iterator j = Cinverse.find(alpha1[i]);
+    assert (j != Cinverse.end());
+    alpha2.insert(alpha2.end(), j->second.begin(), j->second.end());
+    apply_comm_inverse(alpha1, alpha2, i + 1, Cinverse, result);
+  }
+}
+
+} // namespace detail
+
 // A multi-action is a set of actions. The special multi-action 'tau' is represented by the
 // empty set of actions.
 
@@ -130,25 +178,29 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, const multi_ac
 inline
 multi_action_name_set apply_comm_inverse(const communication_expression_list& C, const multi_action_name_set& A)
 {
-  multi_action_name_set result;
+  std::map<core::identifier_string, core::identifier_string_list> Cinverse;
   for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
   {
-    core::identifier_string_list names = i->action_name().names();
-    core::identifier_string a = i->name();
-    multi_action_name alpha(names.begin(), names.end());
-    // *i == alpha -> a
-
-    for (multi_action_name_set::const_iterator j = A.begin(); j != A.end(); ++j)
+    Cinverse[i->name()] = i->action_name().names();
+  }
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator j = A.begin(); j != A.end(); ++j)
+  {
+    const multi_action_name& alpha = *j;
+    atermpp::vector<core::identifier_string> alpha1; // elements of alpha that are present in Cinverse
+    atermpp::vector<core::identifier_string> alpha2; // elements of alpha that are not present in Cinverse
+    for (multi_action_name::const_iterator k = alpha.begin(); k != alpha.end(); ++k)
     {
-      const multi_action_name& gamma = *j;
-      if (gamma.find(a) != gamma.end())
+      if (Cinverse.find(*k) == Cinverse.end())
       {
-        multi_action_name beta = gamma;
-        beta.erase(beta.find(a));
-        beta.insert(alpha.begin(), alpha.end());
-        result.insert(beta);
+        alpha2.push_back(*k);
+      }
+      else
+      {
+        alpha1.push_back(*k);
       }
     }
+    detail::apply_comm_inverse(alpha1, alpha2, 0, Cinverse, result);
   }
   return result;
 }
@@ -174,36 +226,12 @@ multi_action_name_set apply_comm_bar(const communication_expression_list& C, con
 }
 
 inline
-core::identifier_string apply_rename_inverse(const rename_expression_list& R, const core::identifier_string& x)
-{
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-  {
-    if (x == i->target())
-    {
-      return i->source();
-    }
-  }
-  return x;
-}
-
-inline
-multi_action_name apply_rename_inverse(const rename_expression_list& R, const multi_action_name& a)
-{
-  multi_action_name result;
-  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
-  {
-    result.insert(apply_rename_inverse(R, *i));
-  }
-  return result;
-}
-
-inline
 multi_action_name_set apply_rename_inverse(const rename_expression_list& R, const multi_action_name_set& A)
 {
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    result.insert(apply_rename_inverse(R, *i));
+    result.insert(detail::apply_rename_inverse(R, *i));
   }
   return result;
 }
