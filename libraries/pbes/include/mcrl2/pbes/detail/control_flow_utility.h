@@ -84,6 +84,22 @@ struct control_flow_simplify_quantifier_builder: public pbes_system::detail::sim
     return data::is_data_expression(x) && data::sort_bool::is_not_application(x);
   }
 
+  bool is_data_and(const pbes_expression& x) const
+  {
+    return data::is_data_expression(x) && data::sort_bool::is_and_application(x);
+  }
+
+  bool is_data_or(const pbes_expression& x) const
+  {
+    return data::is_data_expression(x) && data::sort_bool::is_or_application(x);
+  }
+
+  // returns the argument of a data not
+  data_expression not_arg(const data_expression& x)
+  {
+    return data::application(x).arguments().front();
+  }
+
   // replace !(y || z) by !y && !z
   // replace !(y && z) by !y || !z
   // replace !(y => z) by y || !z
@@ -114,7 +130,7 @@ struct control_flow_simplify_quantifier_builder: public pbes_system::detail::sim
       }
       else if (is_data_not(t)) // x = !val(!y)
       {
-        term_type y = data::application(t).arguments().front();
+        term_type y = not_arg(t);
         result = y;
       }
     }
@@ -127,9 +143,36 @@ struct control_flow_simplify_quantifier_builder: public pbes_system::detail::sim
     return result;
   }
 
+  // replaces data operators !, ||, && by their pbes equivalent
+  term_type preprocess(const term_type& x)
+  {
+    typedef core::term_traits<data::data_expression> tt;
+    if (is_data_not(x))
+    {
+      return tr::not_(not_arg(x));
+    }
+    else if (is_data_and(x))
+    {
+      data::data_expression y = x;
+      return tr::and_(tt::left(y), tt::right(y));
+    }
+    else if (is_data_or(x))
+    {
+      data::data_expression y = x;
+      return tr::or_(tt::left(y), tt::right(y));
+    }
+    return x;
+  }
+
   // replace the data expression y != z by !(y == z)
   term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
   {
+    // if x has one of the operators !, ||, && at the top level, handle it by the PBES simplification
+    term_type y = preprocess(x);
+    if (y != x)
+    {
+      return super::visit(y, sigma);
+    }
     typedef core::term_traits<data::data_expression> tt;
     term_type result = super::visit_data_expression(x, d, sigma);
     data::data_expression t = result;
