@@ -14,16 +14,28 @@
 #include <set>
 #include <sstream>
 #include <vector>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/detail/alphabet_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/test_utilities.h"
 
+using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::process;
+
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
+struct LogDebug {
+  LogDebug()
+  {
+    log::mcrl2_logger::set_reporting_level(log::debug);
+  }
+};
+BOOST_GLOBAL_FIXTURE(LogDebug);
 
 multi_action_name parse_multi_action_name(const std::string& text)
 {
@@ -66,6 +78,19 @@ communication_expression_list parse_comm_set(const std::string& text)
     result.push_back(communication_expression(alpha, a));
   }
   return communication_expression_list(result.begin(), result.end());
+}
+
+rename_expression_list parse_rename_set(const std::string& text)
+{
+  atermpp::vector<rename_expression> result;
+  std::string s = text.substr(1, text.size() - 2);
+  std::vector<std::string> v = utilities::regex_split(s, "\\s*,\\s*");
+  for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
+  {
+    std::vector<std::string> w = utilities::regex_split(*i, "\\s*->\\s*");
+    result.push_back(rename_expression(core::identifier_string(w[0]), core::identifier_string(w[1])));
+  }
+  return rename_expression_list(result.begin(), result.end());
 }
 
 template <typename Container>
@@ -111,7 +136,7 @@ std::string print(const multi_action_name_set& A)
   return print_set(V);
 }
 
-void test_parse()
+BOOST_AUTO_TEST_CASE(test_parse)
 {
   lps::action_label_list act_decl = lps::parse_action_declaration("a: Nat;");
   lps::action a = lps::parse_action("a(2)", act_decl);
@@ -124,15 +149,15 @@ void test_parse()
   BOOST_CHECK(print(B) == "{a, ab}");
 }
 
-void test_includes()
+BOOST_AUTO_TEST_CASE(test_includes)
 {
   multi_action_name alpha = parse_multi_action_name("abb");
   multi_action_name beta = parse_multi_action_name("aabb");
-  BOOST_CHECK(!includes(alpha, beta));
-  BOOST_CHECK(includes(beta, alpha));
+  BOOST_CHECK(!detail::includes(alpha, beta));
+  BOOST_CHECK(detail::includes(beta, alpha));
 }
 
-void test_alphabet_reduce()
+BOOST_AUTO_TEST_CASE(test_alphabet_reduce)
 {
   std::string text =
     "act a;        \n"
@@ -164,7 +189,7 @@ void test_alphabet(const std::string& expression, const std::string& expected_re
   check_result(expression, result, expected_result, "alphabet");
 }
 
-void test_alphabet()
+BOOST_AUTO_TEST_CASE(test_alphabet1)
 {
   test_alphabet("a || b", "{a, ab, b}");
   test_alphabet("allow({ a, a | b }, a || b)", "{a, ab}");
@@ -181,7 +206,7 @@ void test_alphabet_operation(const std::string& text1, const std::string& text2,
   check_result(text1 + ", " + text2, result, expected_result, title);
 }
 
-void test_alphabet_operations()
+BOOST_AUTO_TEST_CASE(test_alphabet_operations)
 {
   test_alphabet_operation("{a}", "{b}", "{ab}", process::concat, "concat");
   test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", process::concat, "concat");
@@ -199,7 +224,7 @@ void test_push_allow(const std::string& expression, const std::string& Atext, bo
   check_result(expression, result, expected_result, "push_allow");
 }
 
-void test_push_allow()
+BOOST_AUTO_TEST_CASE(test_push_allow1)
 {
   test_push_allow("a || a", "{a}", false, "allow({a}, a || a)");
 }
@@ -214,23 +239,30 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
   check_result(comm_text + ", " + Atext, result, expected_result, title);
 }
 
-void test_comm_operations()
+BOOST_AUTO_TEST_CASE(test_comm_operations)
 {
-  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", process::apply_comm_inverse, "comm_inverse");
+  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", process::apply_comm_inverse, "apply_comm_inverse");
+  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{ac, c, cc, cd}", process::apply_comm, "apply_comm");
 }
 
-int test_main(int argc, char* argv[])
+template <typename Operation>
+void test_rename_operation(const std::string& rename_text, const std::string& Atext, const std::string& expected_result, Operation op, const std::string& title)
+{
+  rename_expression_list R = parse_rename_set(rename_text);
+  multi_action_name_set A = parse_multi_action_name_set(Atext);
+  multi_action_name_set A1 = op(R, A);
+  std::string result = print(A1);
+  check_result(rename_text + ", " + Atext, result, expected_result, title);
+}
+
+BOOST_AUTO_TEST_CASE(test_rename_operations)
+{
+  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", process::apply_rename, "apply_rename");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", process::apply_rename_inverse, "apply_rename_inverse");
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
-  log::mcrl2_logger::set_reporting_level(log::debug);
-
-  test_includes();
-  test_parse();
-  test_alphabet_reduce();
-  test_alphabet();
-  test_alphabet_operations();
-  test_comm_operations();
-  test_push_allow();
-
   return EXIT_SUCCESS;
 }
