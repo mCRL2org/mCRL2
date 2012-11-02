@@ -85,7 +85,7 @@ multi_action_name_set apply_block(const multi_action_name_set& B, const multi_ac
   {
     alpha.insert(i->begin(), i->end());
   }
-  return apply_block(alpha, A);
+  return detail::apply_block(alpha, A);
 }
 
 // TODO: increase the efficiency of this implementation
@@ -231,6 +231,38 @@ multi_action_name_set concat(const multi_action_name_set& A1, const multi_action
     {
       result.insert(multiset_union(*i, *j));
     }
+  }
+  return result;
+}
+
+inline
+multi_action_name_set left_arrow(const multi_action_name_set& A1, const multi_action_name_set& A2)
+{
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator i = A2.begin(); i != A2.end(); ++i)
+  {
+    const multi_action_name& beta = *i;
+    for (multi_action_name_set::const_iterator j = A1.begin(); j != A1.end(); ++j)
+    {
+      const multi_action_name& gamma = *j;
+      if (std::includes(gamma.begin(), gamma.end(), beta.begin(), beta.end()))
+      {
+        multi_action_name alpha = multiset_difference(gamma, beta);
+        result.insert(alpha);
+      }
+    }
+  }
+  return result;
+}
+
+inline
+multi_action_name_set make_name_set(const action_name_multiset_list& v)
+{
+  multi_action_name_set result;
+  for (action_name_multiset_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    core::identifier_string_list names = i->names();
+    result.insert(multi_action_name(names.begin(), names.end()));
   }
   return result;
 }

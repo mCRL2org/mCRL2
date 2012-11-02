@@ -17,7 +17,6 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/alphabet.h"
-#include "mcrl2/process/detail/alphabet_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -29,13 +28,42 @@ using namespace mcrl2::process;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-struct LogDebug {
+struct LogDebug
+{
   LogDebug()
   {
     log::mcrl2_logger::set_reporting_level(log::debug);
   }
 };
 BOOST_GLOBAL_FIXTURE(LogDebug);
+
+inline
+multi_action_name name(const lps::action& x)
+{
+  multi_action_name result;
+  result.insert(x.label().name());
+  return result;
+}
+
+inline
+multi_action_name name(const multi_action& x)
+{
+  multi_action_name result;
+  lps::action_list a = x.actions();
+  for (lps::action_list::iterator i = a.begin(); i != a.end(); ++i)
+  {
+    result.insert(i->label().name());
+  }
+  return result;
+}
+
+inline
+multi_action_name name(const core::identifier_string& x)
+{
+  multi_action_name result;
+  result.insert(x);
+  return result;
+}
 
 multi_action_name parse_multi_action_name(const std::string& text)
 {
@@ -60,6 +88,32 @@ multi_action_name_set parse_multi_action_name_set(const std::string& text)
     result.insert(parse_multi_action_name(*i));
   }
   return result;
+}
+
+action_name_multiset_list parse_allow_set(const std::string& text)
+{
+  atermpp::vector<action_name_multiset> result;
+  std::string s = text.substr(1, text.size() - 2);
+  std::vector<std::string> v = utilities::regex_split(s, "\\s*,\\s*");
+  for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
+  {
+    std::string word = utilities::regex_replace("\\s*\\|\\s*", "", *i);
+    multi_action_name alpha = parse_multi_action_name(word);
+    result.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+  }
+  return action_name_multiset_list(result.begin(), result.end());
+}
+
+core::identifier_string_list parse_block_set(const std::string& text)
+{
+  atermpp::vector<core::identifier_string> result;
+  std::string s = text.substr(1, text.size() - 2);
+  std::vector<std::string> v = utilities::regex_split(s, "\\s*,\\s*");
+  for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
+  {
+    result.push_back(core::identifier_string(*i));
+  }
+  return core::identifier_string_list(result.begin(), result.end());
 }
 
 communication_expression_list parse_comm_set(const std::string& text)
@@ -259,6 +313,34 @@ BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", process::apply_rename, "apply_rename");
   test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", process::apply_rename_inverse, "apply_rename_inverse");
+}
+
+void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
+{
+  action_name_multiset_list V = parse_allow_set(allow_text);
+  multi_action_name_set A = parse_multi_action_name_set(Atext);
+  multi_action_name_set A1 = apply_allow(V, A);
+  std::string result = print(A1);
+  check_result(allow_text + ", " + Atext, result, expected_result, title);
+}
+
+BOOST_AUTO_TEST_CASE(test_allow1)
+{
+  test_allow("{a|b, a|b|b, c}", "{ab, abbc, c}", "{ab, c}", "apply_allow");
+}
+
+void test_block(const std::string& block_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
+{
+  core::identifier_string_list B = parse_block_set(block_text);
+  multi_action_name_set A = parse_multi_action_name_set(Atext);
+  multi_action_name_set A1 = apply_block(B, A);
+  std::string result = print(A1);
+  check_result(block_text + ", " + Atext, result, expected_result, title);
+}
+
+BOOST_AUTO_TEST_CASE(test_block1)
+{
+  test_block("{b}", "{ab, abbc, c}", "{c}", "apply_block");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

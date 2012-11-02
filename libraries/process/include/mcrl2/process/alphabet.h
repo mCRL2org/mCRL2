@@ -16,7 +16,6 @@
 #include <iterator>
 #include <sstream>
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/process/detail/alphabet_utility.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/traverser.h"
@@ -406,8 +405,10 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
 
   void leave(const process::block& x)
   {
-    super::leave(x);
-    top().m_expression = x;
+    core::identifier_string_list B = x.block_set();
+    multi_action_name_set A1 = process::apply_block(B, A);
+    push_allow_node node = push_allow(x.operand(), A1, false, equations);
+    push(node);
   }
 
   void leave(const process::hide& x)
@@ -419,7 +420,7 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
   void leave(const process::rename& x)
   {
     rename_expression_list R = x.rename_set();
-    multi_action_name_set A1 = apply_rename_inverse(R, A);
+    multi_action_name_set A1 = process::apply_rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.m_expression = rename(R, node.expression());
     push(node);
@@ -428,7 +429,7 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
   void leave(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    multi_action_name_set A1 = set_union(A, apply_comm_inverse(C, A));
+    multi_action_name_set A1 = set_union(A, process::apply_comm_inverse(C, A));
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.m_expression = comm(C, node.expression());
     node.m_true_intersection = filter_alphabet(node.alphabet, A, A_includes_subsets);
@@ -437,8 +438,10 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
 
   void leave(const process::allow& x)
   {
-    super::leave(x);
-    top().m_expression = x;
+    action_name_multiset_list V = x.allow_set();
+    multi_action_name_set A1 = process::apply_allow(V, A);
+    push_allow_node node = push_allow(x.operand(), A1, false, equations);
+    push(node);
   }
 
   void leave(const process::sync& x)
