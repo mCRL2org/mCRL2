@@ -88,24 +88,29 @@ multi_action_name_set apply_block(const multi_action_name_set& B, const multi_ac
   return detail::apply_block(alpha, A);
 }
 
-// TODO: increase the efficiency of this implementation
 inline
-multi_action_name apply_comm(const std::map<multi_action_name, core::identifier_string>& C, const multi_action_name& alpha)
+void apply_comm(const communication_expression& c, multi_action_name_set& A)
 {
-  multi_action_name result = alpha;
-  for (std::map<multi_action_name, core::identifier_string>::const_iterator i = C.begin(); i != C.end(); ++i)
+  core::identifier_string_list names = c.action_name().names();
+  core::identifier_string a = c.name();
+  multi_action_name alpha(names.begin(), names.end());
+  // c == alpha -> a
+
+  multi_action_name_set to_be_added;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    const multi_action_name& beta = i->first;
-    while (includes(result, beta))
+    multi_action_name beta = *i;
+    while (includes(beta, alpha))
     {
-      for (multi_action_name::const_iterator j = beta.begin(); j != beta.end(); ++j)
+      for (multi_action_name::const_iterator j = alpha.begin(); j != alpha.end(); ++j)
       {
-        result.erase(result.find(*j));
+        beta.erase(beta.find(*j));
       }
-      result.insert(i->second);
+      beta.insert(a);
+      to_be_added.insert(beta);
     }
   }
-  return result;
+  A.insert(to_be_added.begin(), to_be_added.end());
 }
 
 inline
@@ -293,24 +298,14 @@ multi_action_name_set apply_block(const core::identifier_string_list& B, const m
 inline
 multi_action_name_set apply_comm(const communication_expression_list& C, const multi_action_name_set& A)
 {
-  multi_action_name_set result;
+  multi_action_name_set result = A;
 
-  // convert C to C1
-  std::map<multi_action_name, core::identifier_string> C1;
+  // sequentially apply the communication rules to result
   for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
   {
-    core::identifier_string_list names = i->action_name().names();
-    core::identifier_string a = i->name();
-    multi_action_name alpha(names.begin(), names.end());
-    // *i == alpha -> a
-    C1[alpha] = a;
+    detail::apply_comm(*i, result);
   }
 
-  // apply C1 to the elements of A
-  for (multi_action_name_set::const_iterator j = A.begin(); j != A.end(); ++j)
-  {
-    result.insert(detail::apply_comm(C1, *j));
-  }
   return result;
 }
 
@@ -378,18 +373,17 @@ multi_action_name_set apply_rename_inverse(const rename_expression_list& R, cons
   return result;
 }
 
-// Returns true if elements were removed from alphabet
+// Removes all elements from alphabet that are not in A. Returns true if elements were removed from alphabet.
 inline
-bool filter_alphabet(multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets = false)
+multi_action_name_set set_intersection(const multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
-  bool result = false;
-  for (multi_action_name_set::iterator i = alphabet.begin(); i != alphabet.end(); )
+  multi_action_name_set result = alphabet;
+  for (multi_action_name_set::iterator i = result.begin(); i != result.end(); )
   {
     bool remove = A_includes_subsets ? !detail::includes(A, *i) : A.find(*i) == A.end();
     if (remove)
     {
-      alphabet.erase(i++);
-      result = true;
+      result.erase(i++);
     }
     else
     {
@@ -403,6 +397,22 @@ inline
 multi_action_name_set merge_union(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   return set_union(set_union(A1, A2), concat(A1, A2));
+}
+
+inline
+communication_expression_list filter_comm_set(const communication_expression_list& C, const multi_action_name_set& alphabet)
+{
+  std::vector<communication_expression> result;
+  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  {
+    core::identifier_string_list lhs = i->action_name().names();
+    multi_action_name alpha(lhs.begin(), lhs.end());
+    if (detail::includes(alphabet, alpha))
+    {
+      result.push_back(*i);
+    }
+  }
+  return communication_expression_list(result.begin(), result.end());
 }
 
 } // namespace process

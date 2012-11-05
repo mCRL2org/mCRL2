@@ -14,7 +14,10 @@
 
 #include <algorithm>
 #include <iterator>
+#include <iostream>
 #include <sstream>
+#include <boost/logic/tribool.hpp>
+#include <boost/logic/tribool_io.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/builder.h"
@@ -38,6 +41,11 @@ bool contains_tau(const multi_action_name_set& A)
 inline
 process_expression make_allow(const multi_action_name_set& A, const process_expression& x)
 {
+  if (A.empty())
+  {
+    return delta();
+  }
+
   assert(!contains_tau(A));
 
   // convert A to an action_name_multiset_list B
@@ -58,45 +66,92 @@ struct alphabet_node
   alphabet_node(const multi_action_name_set& alphabet_)
     : alphabet(alphabet_)
   {}
-
-  std::string print() const
-  {
-    std::ostringstream out;
-    out << "alphabet = " << lps::pp(alphabet);
-    return out.str();
-  }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const alphabet_node& x)
+{
+  return out << "alphabet = " << lps::pp(x.alphabet);
+}
 
 struct push_allow_node: public alphabet_node
 {
-  push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression(), bool true_intersection = false)
-    : alphabet_node(alphabet), m_expression(expression), m_true_intersection(true_intersection)
+  push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression(), boost::logic::tribool needs_allow = boost::logic::indeterminate)
+    : alphabet_node(alphabet), m_expression(expression), m_needs_allow(needs_allow)
   {}
 
-  process_expression expression() const
+/*
+  // computes the process expression corresponding to this node
+  process_expression expression(const multi_action_name_set& A, bool A_includes_subsets) const
   {
-    if (m_true_intersection)
+    //std::cout << "<expression> A = " << lps::pp(A) << " alphabet = " << lps::pp(alphabet) << " m_needs_allow = " << std::boolalpha << m_needs_allow;
+    multi_action_name_set alphabet1 = alphabet;
+    bool needs_allow;
+    if (boost::logic::indeterminate(m_needs_allow))
     {
-      return make_allow(alphabet, m_expression);
+      multi_action_name_set alphabet1 = set_intersection(alphabet1, A, A_includes_subsets);
+    }
+    else
+    {
+      needs_allow = m_needs_allow;
+    }
+    //std::cout << " alphabet1 = " << lps::pp(alphabet1) << " needs_allow = " << needs_allow << std::endl;
+    if (needs_allow)
+    {
+      return make_allow(alphabet1, m_expression);
     }
     else
     {
       return m_expression;
     }
   }
+*/
 
-  std::string print() const
+  std::string print(const multi_action_name_set& A, bool A_includes_subsets) const
   {
     std::ostringstream out;
-    out << "alphabet = " << lps::pp(alphabet) << " expression = " << process::pp(m_expression) << " needs allow = " << std::boolalpha << m_true_intersection << std::endl;
+    if (m_needs_allow)
+    {
+      out << "allow(" << lps::pp(set_intersection(alphabet, A, A_includes_subsets)) << ", " << process::pp(m_expression) << ")";
+    }
+    else if (!m_needs_allow)
+    {
+      out << process::pp(m_expression);
+    }
+    else
+    {
+      out << "allow?(" << lps::pp(set_intersection(alphabet, A, A_includes_subsets)) << ", " << process::pp(m_expression) << ")";
+    }
+    out << " with alphabet = " << lps::pp(alphabet);
     return out.str();
+  }
+
+  void finish(const multi_action_name_set& A, bool A_includes_subsets)
+  {
+    if (boost::logic::indeterminate(m_needs_allow))
+    {
+      multi_action_name_set alphabet1 = set_intersection(alphabet, A, A_includes_subsets);
+      m_needs_allow = alphabet1.size() < alphabet.size();
+      alphabet = alphabet1;
+    }
+    if (m_needs_allow)
+    {
+      m_expression = make_allow(alphabet, m_expression);
+    }
+    m_needs_allow = false;
   }
 
   process_expression m_expression;
 
-  // if true, then there were elements removed from the alphabet using the intersection with the bound set A
-  bool m_true_intersection;
+  // if true, the alphabet of this node is included in the allow set A
+  boost::logic::tribool m_needs_allow;
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
+{
+  return out << "alphabet = " << lps::pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << " needs_allow = " << std::boolalpha << x.m_needs_allow << std::endl;
+}
 
 push_allow_node push_allow(const process_expression& x, const multi_action_name_set& A, bool A_includes_subsets, const atermpp::vector<process_equation>& equations);
 
@@ -126,25 +181,24 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     : equations(equations_), W(W_)
   {}
 
-  // Push A to node_stack
-  void push(const multi_action_name_set& A)
-  {
-    mCRL2log(log::debug) << "<push> A = " << lps::pp(A) << std::endl;
-    node_stack.push_back(Node(A));
-  }
-
   // Push a node to node_stack
   void push(const Node& node)
   {
-    mCRL2log(log::debug) << "<push> A = " << lps::pp(node.alphabet) << std::endl;
+    mCRL2log(log::debug1) << "<push> A = " << lps::pp(node.alphabet) << std::endl;
     node_stack.push_back(node);
+  }
+
+  // Push A to node_stack
+  void push(const multi_action_name_set& A)
+  {
+    push(Node(A));
   }
 
   // Pop the top element of node_stack and return it
   Node pop()
   {
     Node result = node_stack.back();
-    mCRL2log(log::debug) << "<pop> A = " << lps::pp(result.alphabet) << std::endl;
+    mCRL2log(log::debug1) << "<pop> A = " << lps::pp(result.alphabet) << std::endl;
     node_stack.pop_back();
     return result;
   }
@@ -242,27 +296,27 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
 
   void leave(const process::block& x)
   {
-    top() = process::apply_block(x.block_set(), top().alphabet);
+    top().alphabet = process::apply_block(x.block_set(), top().alphabet);
   }
 
   void leave(const process::hide& x)
   {
-    top() = process::apply_hide(x.hide_set(), top().alphabet);
+    top().alphabet = process::apply_hide(x.hide_set(), top().alphabet);
   }
 
   void leave(const process::rename& x)
   {
-    top() = process::apply_rename(x.rename_set(), top().alphabet);
+    top().alphabet = process::apply_rename(x.rename_set(), top().alphabet);
   }
 
   void leave(const process::comm& x)
   {
-    top() = process::apply_comm(x.comm_set(), top().alphabet);
+    top().alphabet = process::apply_comm(x.comm_set(), top().alphabet);
   }
 
   void leave(const process::allow& x)
   {
-    top() = process::apply_allow(x.allow_set(), top().alphabet);
+    top().alphabet = process::apply_allow(x.allow_set(), top().alphabet);
   }
 
   void leave(const process::sync& x)
@@ -367,40 +421,52 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     return static_cast<Derived&>(*this);
   }
 
+  void log(const process_expression& x)
+  {
+    mCRL2log(log::debug) << "allow(" << lps::pp(A) << (A_includes_subsets ? "*" : "") << ", " << process::pp(x) << ") -> " << top().print(A, A_includes_subsets) << std::endl;
+  }
+
+  void leave_pcrl(const process_expression& x)
+  {
+    top().m_expression = x;
+    top().m_needs_allow = boost::logic::indeterminate;
+    log(x);
+  }
+
   void leave(const lps::action& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::process_instance& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::process_instance_assignment& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::delta& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::tau& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::sum& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::block& x)
@@ -408,13 +474,16 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     core::identifier_string_list B = x.block_set();
     multi_action_name_set A1 = process::apply_block(B, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
+    node.finish(A1, false);
     push(node);
+    log(x);
   }
 
   void leave(const process::hide& x)
   {
     super::leave(x);
     top().m_expression = x;
+    log(x);
   }
 
   void leave(const process::rename& x)
@@ -422,8 +491,10 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     rename_expression_list R = x.rename_set();
     multi_action_name_set A1 = process::apply_rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
-    node.m_expression = rename(R, node.expression());
+    node.m_expression = rename(R, node.m_expression);
+    node.finish(A1, false);
     push(node);
+    log(x);
   }
 
   void leave(const process::comm& x)
@@ -431,9 +502,10 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     communication_expression_list C = x.comm_set();
     multi_action_name_set A1 = set_union(A, process::apply_comm_inverse(C, A));
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
-    node.m_expression = comm(C, node.expression());
-    node.m_true_intersection = filter_alphabet(node.alphabet, A, A_includes_subsets);
-    push(node);
+    node.finish(A1, false);
+    communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
+    push(push_allow_node(process::apply_comm(C1, node.alphabet), comm(C1, node.m_expression), boost::logic::indeterminate));
+    log(x);
   }
 
   void leave(const process::allow& x)
@@ -441,62 +513,77 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     action_name_multiset_list V = x.allow_set();
     multi_action_name_set A1 = process::apply_allow(V, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
+    node.finish(A1, false);
     push(node);
-  }
-
-  void leave(const process::sync& x)
-  {
-    super::leave(x);
-    top().m_expression = x;
+    log(x);
   }
 
   void leave(const process::at& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::seq& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::if_then& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::if_then_else& x)
   {
-    super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void leave(const process::bounded_init& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 
   void operator()(const process::merge& x)
   {
     push_allow_node left = push_allow(x.left(), A, true, equations);
-    push_allow_node right = push_allow(x.right(), set_union(A, left_arrow(A, left.alphabet)), false, equations);
-    push(push_allow_node(merge_union(left.alphabet, right.alphabet), merge(left.expression(), right.expression()), false));
+    left.finish(A, true);
+    multi_action_name_set A1 = set_union(A, left_arrow(A, left.alphabet));
+    push_allow_node right = push_allow(x.right(), A1, false, equations);
+    right.finish(A1, false);
+    push(push_allow_node(merge_union(left.alphabet, right.alphabet), merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log(x);
   }
 
   void leave(const process::left_merge& x)
   {
-    super::leave(x);
-    top().m_expression = x;
+    push_allow_node left = push_allow(x.left(), A, true, equations);
+    left.finish(A, true);
+    multi_action_name_set A1 = set_union(A, left_arrow(A, left.alphabet));
+    push_allow_node right = push_allow(x.right(), A1, false, equations);
+    right.finish(A1, false);
+    push(push_allow_node(merge_union(left.alphabet, right.alphabet), left_merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log(x);
+  }
+
+  void leave(const process::sync& x)
+  {
+    push_allow_node left = push_allow(x.left(), A, true, equations);
+    left.finish(A, true);
+    multi_action_name_set A1 = set_union(A, left_arrow(A, left.alphabet));
+    push_allow_node right = push_allow(x.right(), A1, false, equations);
+    right.finish(A1, false);
+    push(push_allow_node(concat(left.alphabet, right.alphabet), sync(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log(x);
   }
 
   void leave(const process::choice& x)
   {
     super::leave(x);
-    top().m_expression = x;
+    leave_pcrl(x);
   }
 };
 
@@ -523,9 +610,7 @@ push_allow_node push_allow(const process_expression& x, const multi_action_name_
   std::set<process_identifier> W;
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A, A_includes_subsets);
   f(x);
-  mCRL2log(log::debug) << "<push_allow result>" << f.node_stack.back().print() << std::endl;
-  f.node_stack.back().m_true_intersection = filter_alphabet(f.node_stack.back().alphabet, A, A_includes_subsets);
-  mCRL2log(log::debug) << "<push_allow result after filtering>" << f.node_stack.back().print() << std::endl;
+  f.node_stack.back().finish(A, A_includes_subsets);
   return f.node_stack.back();
 }
 
@@ -549,7 +634,9 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
   process_expression operator()(const process::allow& x)
   {
     multi_action_name_set A = make_name_set(x.allow_set());
-    return push_allow(x.operand(), A, false, equations).expression();
+    push_allow_node node = push_allow(x.operand(), A, false, equations);
+    node.finish(A, false);
+    return node.m_expression;
   }
 };
 

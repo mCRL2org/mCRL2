@@ -274,7 +274,8 @@ void test_push_allow(const std::string& expression, const std::string& Atext, bo
   process_specification procspec = parse_process_specification(text);
   multi_action_name_set A = parse_multi_action_name_set(Atext);
   process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), A, A_includes_subsets, procspec.equations());
-  std::string result = process::pp(node.expression());
+  node.finish(A, A_includes_subsets);
+  std::string result = process::pp(node.m_expression);
   check_result(expression, result, expected_result, "push_allow");
 }
 
@@ -296,7 +297,7 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
 BOOST_AUTO_TEST_CASE(test_comm_operations)
 {
   test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", process::apply_comm_inverse, "apply_comm_inverse");
-  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{ac, c, cc, cd}", process::apply_comm, "apply_comm");
+  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", process::apply_comm, "apply_comm");
 }
 
 template <typename Operation>
