@@ -248,6 +248,9 @@ BOOST_AUTO_TEST_CASE(test_alphabet1)
   test_alphabet("a || b", "{a, ab, b}");
   test_alphabet("allow({ a, a | b }, a || b)", "{a, ab}");
   test_alphabet("allow({a}, a || a)", "{a}");
+  test_alphabet("a", "{a}");
+  test_alphabet("c|c", "{cc}");
+  test_alphabet("a.c|c", "{a, cc}");
 }
 
 template <typename Operation>
@@ -265,6 +268,7 @@ BOOST_AUTO_TEST_CASE(test_alphabet_operations)
   test_alphabet_operation("{a}", "{b}", "{ab}", process::concat, "concat");
   test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", process::concat, "concat");
   test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aac}", process::left_arrow, "left_arrow");
+  test_alphabet_operation("{aa, b}", "{a}", "{a}", process::left_arrow, "left_arrow");
   test_alphabet_operation("{ab, b}", "{b}", "{, a}", process::left_arrow, "left_arrow");
 }
 

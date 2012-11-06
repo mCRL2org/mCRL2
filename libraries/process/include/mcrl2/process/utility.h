@@ -197,7 +197,11 @@ multi_action_name multiset_difference(const multi_action_name& alpha, const mult
   multi_action_name result = alpha;
   for (multi_action_name::const_iterator i = beta.begin(); i != beta.end(); ++i)
   {
-    result.erase(*i);
+    multi_action_name::iterator j = result.find(*i);
+    if (j != result.end())
+    {
+      result.erase(j);
+    }
   }
   return result;
 }
@@ -234,7 +238,7 @@ multi_action_name_set concat(const multi_action_name_set& A1, const multi_action
   {
     for (multi_action_name_set::const_iterator j = A2.begin(); j != A2.end(); ++j)
     {
-      result.insert(multiset_union(*i, *j));
+       result.insert(multiset_union(*i, *j));
     }
   }
   return result;
@@ -250,7 +254,7 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, const multi_ac
     for (multi_action_name_set::const_iterator j = A1.begin(); j != A1.end(); ++j)
     {
       const multi_action_name& gamma = *j;
-      if (std::includes(gamma.begin(), gamma.end(), beta.begin(), beta.end()))
+      if (detail::includes(gamma, beta))
       {
         multi_action_name alpha = multiset_difference(gamma, beta);
         result.insert(alpha);

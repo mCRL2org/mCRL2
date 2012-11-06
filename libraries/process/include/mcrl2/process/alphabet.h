@@ -29,6 +29,8 @@ namespace mcrl2 {
 
 namespace process {
 
+multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations);
+
 namespace detail {
 
 inline
@@ -36,6 +38,16 @@ bool contains_tau(const multi_action_name_set& A)
 {
   multi_action_name tau;
   return A.find(tau) != A.end();
+}
+
+inline
+process_expression make_sync(const process_expression x, const process_expression& y)
+{
+  if (is_delta(x) && is_delta(y))
+  {
+    return delta();
+  }
+  return sync(x, y);
 }
 
 inline
@@ -59,6 +71,19 @@ process_expression make_allow(const multi_action_name_set& A, const process_expr
   return allow(B, x);
 }
 
+inline
+process_expression make_comm(const communication_expression_list& C, const process_expression& x)
+{
+  if (C.empty())
+  {
+    return x;
+  }
+  else
+  {
+    return comm(C, x);
+  }
+}
+
 struct alphabet_node
 {
   multi_action_name_set alphabet;
@@ -80,33 +105,6 @@ struct push_allow_node: public alphabet_node
     : alphabet_node(alphabet), m_expression(expression), m_needs_allow(needs_allow)
   {}
 
-/*
-  // computes the process expression corresponding to this node
-  process_expression expression(const multi_action_name_set& A, bool A_includes_subsets) const
-  {
-    //std::cout << "<expression> A = " << lps::pp(A) << " alphabet = " << lps::pp(alphabet) << " m_needs_allow = " << std::boolalpha << m_needs_allow;
-    multi_action_name_set alphabet1 = alphabet;
-    bool needs_allow;
-    if (boost::logic::indeterminate(m_needs_allow))
-    {
-      multi_action_name_set alphabet1 = set_intersection(alphabet1, A, A_includes_subsets);
-    }
-    else
-    {
-      needs_allow = m_needs_allow;
-    }
-    //std::cout << " alphabet1 = " << lps::pp(alphabet1) << " needs_allow = " << needs_allow << std::endl;
-    if (needs_allow)
-    {
-      return make_allow(alphabet1, m_expression);
-    }
-    else
-    {
-      return m_expression;
-    }
-  }
-*/
-
   std::string print(const multi_action_name_set& A, bool A_includes_subsets) const
   {
     std::ostringstream out;
@@ -122,7 +120,6 @@ struct push_allow_node: public alphabet_node
     {
       out << "allow?(" << lps::pp(set_intersection(alphabet, A, A_includes_subsets)) << ", " << process::pp(m_expression) << ")";
     }
-    out << " with alphabet = " << lps::pp(alphabet);
     return out.str();
   }
 
@@ -421,51 +418,84 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     return static_cast<Derived&>(*this);
   }
 
+  void log_push_result(const process_expression& x, const multi_action_name_set& A, bool A_includes_subsets, const push_allow_node& result, const std::string& msg = "")
+  {
+    push_allow_node result1 = result;
+    result1.finish(A, A_includes_subsets);
+    mCRL2log(log::debug) << msg << "push(" << process::pp(x) << ", " << lps::pp(A) << (A_includes_subsets ? "*" : "") << ") = "
+      << result1.print(A, A_includes_subsets) << " with alphabet(" << process::pp(result.m_expression) << ") = " << lps::pp(result.alphabet) << std::endl;
+  }
+
   void log(const process_expression& x)
   {
-    mCRL2log(log::debug) << "allow(" << lps::pp(A) << (A_includes_subsets ? "*" : "") << ", " << process::pp(x) << ") -> " << top().print(A, A_includes_subsets) << std::endl;
+    log_push_result(x, A, A_includes_subsets, top());
   }
 
   void leave_pcrl(const process_expression& x)
   {
-    top().m_expression = x;
-    top().m_needs_allow = boost::logic::indeterminate;
+    // N.B. This can not be handled using the current traverser, since it is possible that
+    // non-pCRL expressions occur inside pCRL operators. For example: a . c|c.
+    push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
     log(x);
   }
 
-  void leave(const lps::action& x)
+  void operator()(const lps::action& x)
   {
-    super::leave(x);
     leave_pcrl(x);
   }
 
-  void leave(const process::process_instance& x)
+  void operator()(const process::process_instance& x)
   {
-    super::leave(x);
     leave_pcrl(x);
   }
 
-  void leave(const process::process_instance_assignment& x)
+  void operator()(const process::process_instance_assignment& x)
   {
-    super::leave(x);
     leave_pcrl(x);
   }
 
-  void leave(const process::delta& x)
+  void operator()(const process::delta& x)
   {
-    super::leave(x);
     leave_pcrl(x);
   }
 
-  void leave(const process::tau& x)
+  void operator()(const process::tau& x)
   {
-    super::leave(x);
     leave_pcrl(x);
   }
 
-  void leave(const process::sum& x)
+  void operator()(const process::sum& x)
   {
-    super::leave(x);
+    leave_pcrl(x);
+  }
+
+  void operator()(const process::at& x)
+  {
+    leave_pcrl(x);
+  }
+
+  void operator()(const process::seq& x)
+  {
+    leave_pcrl(x);
+  }
+
+  void operator()(const process::if_then& x)
+  {
+    leave_pcrl(x);
+  }
+
+  void operator()(const process::if_then_else& x)
+  {
+    leave_pcrl(x);
+  }
+
+  void operator()(const process::bounded_init& x)
+  {
+    leave_pcrl(x);
+  }
+
+  void operator()(const process::choice& x)
+  {
     leave_pcrl(x);
   }
 
@@ -503,8 +533,9 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     multi_action_name_set A1 = set_union(A, process::apply_comm_inverse(C, A));
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.finish(A1, false);
+    log_push_result(x, A1, false, node, "<comm>");
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
-    push(push_allow_node(process::apply_comm(C1, node.alphabet), comm(C1, node.m_expression), boost::logic::indeterminate));
+    push(push_allow_node(process::apply_comm(C1, node.alphabet), make_comm(C1, node.m_expression), boost::logic::indeterminate));
     log(x);
   }
 
@@ -518,42 +549,15 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
     log(x);
   }
 
-  void leave(const process::at& x)
-  {
-    super::leave(x);
-    leave_pcrl(x);
-  }
-
-  void leave(const process::seq& x)
-  {
-    super::leave(x);
-    leave_pcrl(x);
-  }
-
-  void leave(const process::if_then& x)
-  {
-    super::leave(x);
-    leave_pcrl(x);
-  }
-
-  void leave(const process::if_then_else& x)
-  {
-    leave_pcrl(x);
-  }
-
-  void leave(const process::bounded_init& x)
-  {
-    super::leave(x);
-    leave_pcrl(x);
-  }
-
   void operator()(const process::merge& x)
   {
     push_allow_node left = push_allow(x.left(), A, true, equations);
     left.finish(A, true);
+    log_push_result(x.left(), A, true, left, "<merge-left>");
     multi_action_name_set A1 = set_union(A, left_arrow(A, left.alphabet));
     push_allow_node right = push_allow(x.right(), A1, false, equations);
     right.finish(A1, false);
+    log_push_result(x.right(), A1, false, right, "<merge-right>");
     push(push_allow_node(merge_union(left.alphabet, right.alphabet), merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
     log(x);
   }
@@ -573,17 +577,13 @@ struct push_allow_traverser: public alphabet_traverser<Derived, Node>
   {
     push_allow_node left = push_allow(x.left(), A, true, equations);
     left.finish(A, true);
+    log_push_result(x.left(), A, true, left, "<sync-left>");
     multi_action_name_set A1 = set_union(A, left_arrow(A, left.alphabet));
     push_allow_node right = push_allow(x.right(), A1, false, equations);
     right.finish(A1, false);
-    push(push_allow_node(concat(left.alphabet, right.alphabet), sync(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log_push_result(x.right(), A1, false, right, "<sync-right>");
+    push(push_allow_node(concat(left.alphabet, right.alphabet), make_sync(left.m_expression, right.m_expression), boost::logic::indeterminate));
     log(x);
-  }
-
-  void leave(const process::choice& x)
-  {
-    super::leave(x);
-    leave_pcrl(x);
   }
 };
 
