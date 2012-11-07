@@ -13,6 +13,8 @@
 #define MCRL2_PROCESS_UTILITY_H
 
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/print.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -113,24 +115,30 @@ void apply_comm(const communication_expression& c, multi_action_name_set& A)
   A.insert(to_be_added.begin(), to_be_added.end());
 }
 
+// Add inverse communication to A
 inline
-void apply_comm_inverse(const atermpp::vector<core::identifier_string>& alpha1, atermpp::vector<core::identifier_string>& alpha2, std::size_t i, const std::map<core::identifier_string, core::identifier_string_list>& Cinverse, multi_action_name_set& result)
+void apply_comm_inverse(const communication_expression& gamma, multi_action_name_set& A)
 {
-  if (i >= alpha1.size())
+  atermpp::vector<multi_action_name> to_be_added;
+  core::identifier_string c = gamma.name();
+  core::identifier_string_list lhs = gamma.action_name().names();
+
+  for (multi_action_name_set::iterator i = A.begin(); i != A.end(); ++i)
   {
-    result.insert(multi_action_name(alpha2.begin(), alpha2.end()));
+    const multi_action_name& alpha = *i;
+    std::size_t n = alpha.count(c);
+    if (n > 0)
+    {
+      multi_action_name beta = alpha;
+      for (std::size_t k = 0; k < n; k++)
+      {
+        beta.erase(beta.find(c));
+        beta.insert(lhs.begin(), lhs.end());
+        to_be_added.push_back(beta);
+      }
+    }
   }
-  else
-  {
-    core::identifier_string c = alpha1[i];
-    alpha2.push_back(c);
-    apply_comm_inverse(alpha1, alpha2, i + 1, Cinverse, result);
-    alpha2.erase(--alpha2.end());
-    std::map<core::identifier_string, core::identifier_string_list>::const_iterator j = Cinverse.find(alpha1[i]);
-    assert (j != Cinverse.end());
-    alpha2.insert(alpha2.end(), j->second.begin(), j->second.end());
-    apply_comm_inverse(alpha1, alpha2, i + 1, Cinverse, result);
-  }
+  A.insert(to_be_added.begin(), to_be_added.end());
 }
 
 inline
@@ -245,7 +253,7 @@ multi_action_name_set concat(const multi_action_name_set& A1, const multi_action
 }
 
 inline
-multi_action_name_set left_arrow(const multi_action_name_set& A1, const multi_action_name_set& A2)
+multi_action_name_set left_arrow1(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A2.begin(); i != A2.end(); ++i)
@@ -257,10 +265,30 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, const multi_ac
       if (detail::includes(gamma, beta))
       {
         multi_action_name alpha = multiset_difference(gamma, beta);
-        result.insert(alpha);
+        if (!alpha.empty())
+        {
+          result.insert(alpha);
+        }
       }
     }
   }
+  return result;
+}
+
+
+inline
+multi_action_name_set left_arrow(const multi_action_name_set& A1, bool A1_includes_subsets, const multi_action_name_set& A2)
+{
+  multi_action_name_set result;
+  if (A1_includes_subsets)
+  {
+    result = A1;
+  }
+  else
+  {
+    result = set_union(A1, left_arrow1(A1, A2));
+  }
+  mCRL2log(log::debug) << "<left_arrow>" << lps::pp(A1) << " <- " << lps::pp(A2) << " = " << lps::pp(result) << std::endl;
   return result;
 }
 
@@ -316,30 +344,12 @@ multi_action_name_set apply_comm(const communication_expression_list& C, const m
 inline
 multi_action_name_set apply_comm_inverse(const communication_expression_list& C, const multi_action_name_set& A)
 {
-  std::map<core::identifier_string, core::identifier_string_list> Cinverse;
+  multi_action_name_set result = A;
   for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
   {
-    Cinverse[i->name()] = i->action_name().names();
+    detail::apply_comm_inverse(*i, result);
   }
-  multi_action_name_set result;
-  for (multi_action_name_set::const_iterator j = A.begin(); j != A.end(); ++j)
-  {
-    const multi_action_name& alpha = *j;
-    atermpp::vector<core::identifier_string> alpha1; // elements of alpha that are present in Cinverse
-    atermpp::vector<core::identifier_string> alpha2; // elements of alpha that are not present in Cinverse
-    for (multi_action_name::const_iterator k = alpha.begin(); k != alpha.end(); ++k)
-    {
-      if (Cinverse.find(*k) == Cinverse.end())
-      {
-        alpha2.push_back(*k);
-      }
-      else
-      {
-        alpha1.push_back(*k);
-      }
-    }
-    detail::apply_comm_inverse(alpha1, alpha2, 0, Cinverse, result);
-  }
+  mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << lps::pp(A) << " -> " << lps::pp(result) << std::endl;
   return result;
 }
 
@@ -378,13 +388,14 @@ multi_action_name_set apply_rename_inverse(const rename_expression_list& R, cons
 }
 
 // Removes all elements from alphabet that are not in A. Returns true if elements were removed from alphabet.
+// The value tau is removed from the result.
 inline
 multi_action_name_set set_intersection(const multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name_set result = alphabet;
   for (multi_action_name_set::iterator i = result.begin(); i != result.end(); )
   {
-    bool remove = A_includes_subsets ? !detail::includes(A, *i) : A.find(*i) == A.end();
+    bool remove = A_includes_subsets ? (!detail::includes(A, *i) || i->empty()) : A.find(*i) == A.end();
     if (remove)
     {
       result.erase(i++);

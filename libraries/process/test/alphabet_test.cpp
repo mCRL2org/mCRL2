@@ -267,9 +267,9 @@ BOOST_AUTO_TEST_CASE(test_alphabet_operations)
 {
   test_alphabet_operation("{a}", "{b}", "{ab}", process::concat, "concat");
   test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", process::concat, "concat");
-  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aac}", process::left_arrow, "left_arrow");
-  test_alphabet_operation("{aa, b}", "{a}", "{a}", process::left_arrow, "left_arrow");
-  test_alphabet_operation("{ab, b}", "{b}", "{, a}", process::left_arrow, "left_arrow");
+  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aac}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{aa, b}", "{a}", "{a}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{ab, b}", "{b}", "{a}", process::left_arrow1, "left_arrow1"); // N.B. tau is excluded!
 }
 
 void test_push_allow(const std::string& expression, const std::string& Atext, bool A_includes_subsets, const std::string& expected_result, const std::string& equations = "")
@@ -301,6 +301,7 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
 BOOST_AUTO_TEST_CASE(test_comm_operations)
 {
   test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", process::apply_comm_inverse, "apply_comm_inverse");
+  test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", process::apply_comm_inverse, "apply_comm_inverse");
   test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", process::apply_comm, "apply_comm");
 }
 
