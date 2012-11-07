@@ -50,6 +50,12 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().print(";\n");
   }
 
+  void print_if_then_condition(const data::data_expression& condition, const std::string& arrow = "  ->  ", int precedence = max_precedence)
+  {
+    print_expression(condition, precedence);
+    derived().print(arrow);
+  }
+
   void operator()(const process::process_specification& x)
   {
     derived().enter(x);
@@ -232,7 +238,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", max_precedence);
+    print_if_then_condition(x.condition(), " -> ", max_precedence);
     print_expression(x.then_case(), 5);
     derived().leave(x);
   }
@@ -241,7 +247,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then_else& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", max_precedence);
+    print_if_then_condition(x.condition(), " -> ", max_precedence);
     print_expression(x.then_case(), 5);
     derived().print(" <> ");
     // N.B. the else case is printed with a lower precedence, since we want the expression a -> b -> c <> d <> e

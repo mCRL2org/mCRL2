@@ -57,12 +57,20 @@ void test_action_name_multiset()
   BOOST_CHECK(text == "a | b | c, a | b | c");
 }
 
+void test_process_expression()
+{
+  std::string SPEC = "act c; init true -> c;";
+  process_specification procspec = parse_process_specification(SPEC);
+  BOOST_CHECK(process::pp(procspec.init()) == "true -> c");
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_comm();
   test_action_name_multiset();
+  test_process_expression();
 
   return EXIT_SUCCESS;
 }
