@@ -137,7 +137,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived().print("block(");
-    print_list(x.block_set(), "{", "}, ", ", ");
+    print_list(x.block_set(), "{", "}, ", ", ", true);
     derived()(x.operand());
     derived().print(")");
     derived().leave(x);
