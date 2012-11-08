@@ -470,6 +470,34 @@ BOOST_AUTO_TEST_CASE(test_deep_stack)
 #endif // false
 
 
+BOOST_AUTO_TEST_CASE(test_max_states)
+{
+  std::string spec(
+  "act a;\n"
+  "proc P(s: Pos) =\n"
+  "  (s <= 10) -> a . P(s+1);\n"
+  "init P(1);\n");
+
+  lps::specification specification = lps::parse_linear_process_specification(spec);
+
+  lts::lts_generation_options options;
+  options.trace_prefix = "lps2lts_test";
+  options.specification = specification;
+  options.lts = utilities::temporary_filename("lps2lts_test_file");
+  options.max_states = 5;
+
+  lts::lts_aut_t result;
+  options.outformat = result.type();
+  lts::lps2lts_algorithm lps2lts;
+  lps2lts.initialise_lts_generation(&options);
+  lps2lts.generate_lts();
+  lps2lts.finalise_lts_generation();
+  result.load(options.lts);
+  remove(options.lts.c_str()); // Clean up after ourselves
+
+  BOOST_CHECK_LT(result.num_states(), 10);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
