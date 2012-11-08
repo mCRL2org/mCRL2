@@ -251,6 +251,7 @@ BOOST_AUTO_TEST_CASE(test_alphabet1)
   test_alphabet("a", "{a}");
   test_alphabet("c|c", "{cc}");
   test_alphabet("a.c|c", "{a, cc}");
+  test_alphabet("tau.a", "{, a}");
 }
 
 template <typename Operation>
@@ -278,7 +279,7 @@ void test_push_allow(const std::string& expression, const std::string& Atext, bo
   process_specification procspec = parse_process_specification(text);
   multi_action_name_set A = parse_multi_action_name_set(Atext);
   process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), A, A_includes_subsets, procspec.equations());
-  node.finish(A, A_includes_subsets);
+  node.finish(procspec.equations(), A, A_includes_subsets);
   std::string result = process::pp(node.m_expression);
   check_result(expression, result, expected_result, "push_allow");
 }
