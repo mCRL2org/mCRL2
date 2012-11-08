@@ -304,93 +304,10 @@ multi_action_name_set make_name_set(const action_name_multiset_list& v)
   return result;
 }
 
-inline
-multi_action_name_set apply_allow(const action_name_multiset_list& V, const multi_action_name_set& A)
-{
-  // compute V1 such that V1 = union(V, { tau })
-  multi_action_name_set V1;
-  for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
-  {
-    core::identifier_string_list names = i->names();
-    multi_action_name alpha(names.begin(), names.end());
-    V1.insert(alpha);
-  }
-  V1.insert(multi_action_name());
-
-  return set_intersection(A, V1);
-}
-
-inline
-multi_action_name_set apply_block(const core::identifier_string_list& B, const multi_action_name_set& A)
-{
-  multi_action_name alpha(B.begin(), B.end());
-  return detail::apply_block(alpha, A);
-}
-
-inline
-multi_action_name_set apply_comm(const communication_expression_list& C, const multi_action_name_set& A)
-{
-  multi_action_name_set result = A;
-
-  // sequentially apply the communication rules to result
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
-  {
-    detail::apply_comm(*i, result);
-  }
-
-  return result;
-}
-
-inline
-multi_action_name_set apply_comm_inverse(const communication_expression_list& C, const multi_action_name_set& A)
-{
-  multi_action_name_set result = A;
-  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
-  {
-    detail::apply_comm_inverse(*i, result);
-  }
-  mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << lps::pp(A) << " -> " << lps::pp(result) << std::endl;
-  return result;
-}
-
-inline
-multi_action_name_set apply_hide(const core::identifier_string_list& I, const multi_action_name_set& A)
-{
-  multi_action_name m(I.begin(), I.end());
-  multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    result.insert(multiset_difference(*i, m));
-  }
-  return result;
-}
-
-inline
-multi_action_name_set apply_rename(const rename_expression_list& R, const multi_action_name_set& A)
-{
-  multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    result.insert(detail::apply_rename(R, *i));
-  }
-  return result;
-}
-
-inline
-multi_action_name_set apply_rename_inverse(const rename_expression_list& R, const multi_action_name_set& A)
-{
-  multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    result.insert(detail::apply_rename_inverse(R, *i));
-  }
-  return result;
-}
-
 // Removes all elements from alphabet that are not in A. Returns true if elements were removed from alphabet.
 // The value tau is removed from the result.
 inline
-multi_action_name_set set_intersection(const multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets = false)
+multi_action_name_set set_intersection(const multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets)
 {
   multi_action_name_set result = alphabet;
   for (multi_action_name_set::iterator i = result.begin(); i != result.end(); )
@@ -409,12 +326,6 @@ multi_action_name_set set_intersection(const multi_action_name_set& alphabet, co
 }
 
 inline
-multi_action_name_set merge_union(const multi_action_name_set& A1, const multi_action_name_set& A2)
-{
-  return set_union(set_union(A1, A2), concat(A1, A2));
-}
-
-inline
 communication_expression_list filter_comm_set(const communication_expression_list& C, const multi_action_name_set& alphabet)
 {
   std::vector<communication_expression> result;
@@ -429,6 +340,112 @@ communication_expression_list filter_comm_set(const communication_expression_lis
   }
   return communication_expression_list(result.begin(), result.end());
 }
+
+/// \brief The namespace for alphabet operations
+namespace alphabet_operations {
+
+inline
+multi_action_name_set merge(const multi_action_name_set& A1, const multi_action_name_set& A2)
+{
+  return set_union(set_union(A1, A2), concat(A1, A2));
+}
+
+inline
+multi_action_name_set left_merge(const multi_action_name_set& A1, const multi_action_name_set& A2)
+{
+  return alphabet_operations::merge(A1, A2);
+}
+
+inline
+multi_action_name_set sync(const multi_action_name_set& A1, const multi_action_name_set& A2)
+{
+  return concat(A1, A2);
+}
+
+inline
+multi_action_name_set comm(const communication_expression_list& C, const multi_action_name_set& A)
+{
+  multi_action_name_set result = A;
+
+  // sequentially apply the communication rules to result
+  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  {
+    detail::apply_comm(*i, result);
+  }
+
+  return result;
+}
+
+inline
+multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A)
+{
+  multi_action_name_set result = A;
+  for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+  {
+    detail::apply_comm_inverse(*i, result);
+  }
+  mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << lps::pp(A) << " -> " << lps::pp(result) << std::endl;
+  return result;
+}
+
+inline
+multi_action_name_set hide(const core::identifier_string_list& I, const multi_action_name_set& A)
+{
+  multi_action_name m(I.begin(), I.end());
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    result.insert(multiset_difference(*i, m));
+  }
+  return result;
+}
+
+inline
+multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A)
+{
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    result.insert(detail::apply_rename(R, *i));
+  }
+  return result;
+}
+
+inline
+multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A)
+{
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    result.insert(detail::apply_rename_inverse(R, *i));
+  }
+  return result;
+}
+
+inline
+multi_action_name_set allow(const action_name_multiset_list& V, const multi_action_name_set& A)
+{
+  // compute V1 such that V1 = union(V, { tau })
+  multi_action_name_set V1;
+  for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
+  {
+    core::identifier_string_list names = i->names();
+    multi_action_name alpha(names.begin(), names.end());
+    V1.insert(alpha);
+  }
+  V1.insert(multi_action_name());
+
+  return process::set_intersection(A, V1);
+}
+
+inline
+multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A)
+{
+  multi_action_name alpha(B.begin(), B.end());
+  return detail::apply_block(alpha, A);
+}
+
+} // namespace alphabet_operations
 
 } // namespace process
 

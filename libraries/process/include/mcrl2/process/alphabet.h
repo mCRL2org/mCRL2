@@ -236,7 +236,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   {
     Node right = pop();
     Node left = pop();
-    push(merge_union(left.alphabet, right.alphabet));
+    push(alphabet_operations::merge(left.alphabet, right.alphabet));
   }
 
   // Pops two elements A1 and A2 from the stack, and pushes back A1 | A2
@@ -244,7 +244,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   {
     Node right = pop();
     Node left = pop();
-    push(concat(left.alphabet, right.alphabet));
+    push(alphabet_operations::sync(left.alphabet, right.alphabet));
   }
 
   void leave(const lps::action& x)
@@ -304,27 +304,27 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
 
   void leave(const process::block& x)
   {
-    top().alphabet = process::apply_block(x.block_set(), top().alphabet);
+    top().alphabet = alphabet_operations::block(x.block_set(), top().alphabet);
   }
 
   void leave(const process::hide& x)
   {
-    top().alphabet = process::apply_hide(x.hide_set(), top().alphabet);
+    top().alphabet = alphabet_operations::hide(x.hide_set(), top().alphabet);
   }
 
   void leave(const process::rename& x)
   {
-    top().alphabet = process::apply_rename(x.rename_set(), top().alphabet);
+    top().alphabet = alphabet_operations::rename(x.rename_set(), top().alphabet);
   }
 
   void leave(const process::comm& x)
   {
-    top().alphabet = process::apply_comm(x.comm_set(), top().alphabet);
+    top().alphabet = alphabet_operations::comm(x.comm_set(), top().alphabet);
   }
 
   void leave(const process::allow& x)
   {
-    top().alphabet = process::apply_allow(x.allow_set(), top().alphabet);
+    top().alphabet = alphabet_operations::allow(x.allow_set(), top().alphabet);
   }
 
   void leave(const process::sync& x)
@@ -544,7 +544,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::block& x)
   {
     core::identifier_string_list B = x.block_set();
-    multi_action_name_set A1 = process::apply_block(B, A);
+    multi_action_name_set A1 = alphabet_operations::block(B, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.finish(equations, A1, false);
     push(node);
@@ -554,7 +554,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::rename& x)
   {
     rename_expression_list R = x.rename_set();
-    multi_action_name_set A1 = process::apply_rename_inverse(R, A);
+    multi_action_name_set A1 = alphabet_operations::rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.m_expression = rename(R, node.m_expression);
     node.finish(equations, A1, false);
@@ -565,19 +565,19 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    multi_action_name_set A1 = process::apply_comm_inverse(C, A);
+    multi_action_name_set A1 = alphabet_operations::comm_inverse(C, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.finish(equations, A1, false);
     log_push_result(x, A1, false, node, "<comm>");
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
-    push(push_allow_node(process::apply_comm(C1, node.alphabet), make_comm(C1, node.m_expression), boost::logic::indeterminate));
+    push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), make_comm(C1, node.m_expression), boost::logic::indeterminate));
     log(x);
   }
 
   void operator()(const process::allow& x)
   {
     action_name_multiset_list V = x.allow_set();
-    multi_action_name_set A1 = process::apply_allow(V, A);
+    multi_action_name_set A1 = alphabet_operations::allow(V, A);
     push_allow_node node = push_allow(x.operand(), A1, false, equations);
     node.finish(equations, A1, false);
     push(node);
@@ -593,7 +593,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node right = push_allow(x.right(), A1, A_includes_subsets, equations);
     right.finish(equations, A1, A_includes_subsets);
     log_push_result(x.right(), A1, false, right, "<merge-right>");
-    push(push_allow_node(merge_union(left.alphabet, right.alphabet), make_merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    push(push_allow_node(alphabet_operations::merge(left.alphabet, right.alphabet), make_merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
     log(x);
   }
 
@@ -604,7 +604,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     multi_action_name_set A1 = left_arrow(A, A_includes_subsets, left.alphabet);
     push_allow_node right = push_allow(x.right(), A1, A_includes_subsets, equations);
     right.finish(equations, A1, A_includes_subsets);
-    push(push_allow_node(merge_union(left.alphabet, right.alphabet), left_merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    push(push_allow_node(alphabet_operations::left_merge(left.alphabet, right.alphabet), left_merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
     log(x);
   }
 
@@ -617,7 +617,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node right = push_allow(x.right(), A1, A_includes_subsets, equations);
     right.finish(equations, A1, A_includes_subsets);
     log_push_result(x.right(), A1, false, right, "<sync-right>");
-    push(push_allow_node(concat(left.alphabet, right.alphabet), make_sync(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    push(push_allow_node(alphabet_operations::sync(left.alphabet, right.alphabet), make_sync(left.m_expression, right.m_expression), boost::logic::indeterminate));
     log(x);
   }
 };

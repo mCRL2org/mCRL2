@@ -301,9 +301,9 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
 
 BOOST_AUTO_TEST_CASE(test_comm_operations)
 {
-  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", process::apply_comm_inverse, "apply_comm_inverse");
-  test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", process::apply_comm_inverse, "apply_comm_inverse");
-  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", process::apply_comm, "apply_comm");
+  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", alphabet_operations::comm_inverse, "comm_inverse");
+  test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", alphabet_operations::comm_inverse, "comm_inverse");
+  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", alphabet_operations::comm, "comm");
 }
 
 template <typename Operation>
@@ -318,36 +318,36 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
 
 BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
-  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", process::apply_rename, "apply_rename");
-  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", process::apply_rename_inverse, "apply_rename_inverse");
+  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", alphabet_operations::rename_inverse, "rename_inverse");
 }
 
 void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
 {
   action_name_multiset_list V = parse_allow_set(allow_text);
   multi_action_name_set A = parse_multi_action_name_set(Atext);
-  multi_action_name_set A1 = apply_allow(V, A);
+  multi_action_name_set A1 = alphabet_operations::allow(V, A);
   std::string result = print(A1);
   check_result(allow_text + ", " + Atext, result, expected_result, title);
 }
 
 BOOST_AUTO_TEST_CASE(test_allow1)
 {
-  test_allow("{a|b, a|b|b, c}", "{ab, abbc, c}", "{ab, c}", "apply_allow");
+  test_allow("{a|b, a|b|b, c}", "{ab, abbc, c}", "{ab, c}", "allow");
 }
 
 void test_block(const std::string& block_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
 {
   core::identifier_string_list B = parse_block_set(block_text);
   multi_action_name_set A = parse_multi_action_name_set(Atext);
-  multi_action_name_set A1 = apply_block(B, A);
+  multi_action_name_set A1 = alphabet_operations::block(B, A);
   std::string result = print(A1);
   check_result(block_text + ", " + Atext, result, expected_result, title);
 }
 
 BOOST_AUTO_TEST_CASE(test_block1)
 {
-  test_block("{b}", "{ab, abbc, c}", "{c}", "apply_block");
+  test_block("{b}", "{ab, abbc, c}", "{c}", "block");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
