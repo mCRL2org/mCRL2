@@ -86,7 +86,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "See -c/--cluster, esp. for a short explanation of the clustering "
                       "process.", 'n');
       desc.add_option("no-alpha",
-                      "alphabet reductions are not applied."
+                      "alphabet reductions are not applied. "
                       "By default mcrl22lps attempts to distribute communication, hiding "
                       "and allow operators over the parallel composition operator as "
                       "this reduces the size of intermediate linear processes. By using "
