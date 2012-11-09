@@ -759,6 +759,8 @@ namespace mcrl2
                   rename_expression_list R)
     {
       //applies R^{-1} to a multiaction l, returns a list of multiactions.
+      //As R is not a bijection, this means applying each renaming c->d in R, and leaving
+      //the original in place.
 
       atermpp::term_list< identifier_string_list > m=push_front(atermpp::term_list< identifier_string_list >(),identifier_string_list());
       if (l.empty())
@@ -768,27 +770,26 @@ namespace mcrl2
 
       for (core::identifier_string_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        core::identifier_string_list temp;
+        atermpp::term_list< identifier_string_list > temp;
         for (rename_expression_list::const_iterator j=R.begin(); j!=R.end(); ++j)
         {
           if (*i == j->target())
           {
-            temp=push_front(temp,j->source());
+            temp=push_front(temp,push_front(identifier_string_list(),j->source()));
           }
         }
-        if (temp.empty())
-        {
-          temp=push_front(temp,*i);    
-        }
-        m = sync_list(m,push_front(atermpp::term_list< identifier_string_list > (),temp)); 
+        temp=push_front(temp,push_front(identifier_string_list(),*i));    
+
+        m = sync_list(m,temp); 
       }
       return m;
     }
 
     atermpp::term_list < core::identifier_string_list > alphabet_reduction::apply_unrename_allow_list(atermpp::term_list < core::identifier_string_list > V, rename_expression_list R)
     {
-      //applies R^{-1} to a multiaction V, returns a list V1 -- also allow-list.
-
+      // This function calculates { alpha | R(alpha) in V}.
+      // E.g. for R={ d->c} and V={c}, the result is {c,d}.
+      
       atermpp::term_list< identifier_string_list > m;
       if (V.empty())
       {
