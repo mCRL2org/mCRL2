@@ -18,11 +18,16 @@ proc
   Fork(n:Pos) = sum m:Pos.get(m,n).put(m,n).Fork(n);
 
   ForkPhil(n:Pos) = Fork(n) || Phil(n);
-  KForkPhil(p:Pos) =
-       % ForkPhil(1) || ... || ForkPhil(k);
-       % or
-       (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);
-       % ForkPhil(1) || ForkPhil(2);
+  KForkPhil(p:Pos) =ForkPhil(1) ||
+                    ForkPhil(2) ||
+                    ForkPhil(3) ||
+                    ForkPhil(4) ||
+                    ForkPhil(5) ||
+                    ForkPhil(6) ||
+                    ForkPhil(7) ||
+                    ForkPhil(8) ||
+                    ForkPhil(9) ||
+                    ForkPhil(10);
 
 init allow( { __get, __put, eat },
        comm( { get|_get->__get, put|_put->__put },
