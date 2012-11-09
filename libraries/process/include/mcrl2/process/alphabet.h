@@ -45,6 +45,20 @@ struct allow_set
   allow_set(const multi_action_name_set& actions_, bool includes_subsets_ = false)
     : actions(actions_), includes_subsets(includes_subsets_)
   {}
+
+  // computes the intersection of alphabet and this allow set
+  multi_action_name_set set_intersection(const multi_action_name_set& alphabet) const
+  {
+    multi_action_name_set result;
+    for (multi_action_name_set::const_iterator i = alphabet.begin(); i != alphabet.end(); ++i)
+    {
+      if (i->empty() || (actions.find(*i) != actions.end()))
+      {
+        result.insert(*i);
+      }
+    }
+    return result;
+  }
 };
 
 inline
@@ -97,22 +111,24 @@ process_expression make_left_merge(const process_expression x, const process_exp
 inline
 process_expression make_allow(const multi_action_name_set& A, const process_expression& x)
 {
-  if (A.empty())
+  if (A.empty()) 
   {
     return delta();
   }
-
-  assert(!contains_tau(A));
 
   // convert A to an action_name_multiset_list B
   atermpp::vector<action_name_multiset> v;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
     const multi_action_name& alpha = *i;
-    v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+    if (!i->empty()) // exclude tau
+    {
+      v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+    }
   }
   action_name_multiset_list B(v.begin(), v.end());
-  return allow(B, x);
+  
+  return B.empty() ? x : allow(B, x);
 }
 
 inline
@@ -170,15 +186,37 @@ struct push_allow_node: public alphabet_node
   void finish(const atermpp::vector<process_equation>& equations, const allow_set& A)
   {
     alphabet = process::alphabet(m_expression, equations);
+
     if (boost::logic::indeterminate(m_needs_allow))
     {
-      multi_action_name_set alphabet1 = set_intersection(alphabet, A.actions, A.includes_subsets);
-      m_needs_allow = alphabet1.size() < alphabet.size();
-      alphabet = alphabet1;
+      std::size_t alphabet_size = alphabet.size();
+      bool alphabet_contains_tau = contains_tau(alphabet);
+
+      alphabet = process::set_intersection(alphabet, A.actions, A.includes_subsets);
+      if (alphabet_contains_tau)
+      {
+        multi_action_name tau;
+        alphabet.insert(tau);
+      }
+
+      m_needs_allow = alphabet.size() < alphabet_size;
     }
+
     if (m_needs_allow)
     {
-      m_expression = make_allow(alphabet, m_expression);
+      if (alphabet.size() == 1 && contains_tau(alphabet)) // alphabet == { tau }
+      {
+        // N.B. This is a tricky case. We can't return allow({tau}, m_expression),
+        // as this is not allowed in mCRL2. We can take an arbitrary element of
+        // A instead.
+        multi_action_name_set A1;
+        A1.insert(*A.actions.begin());
+        m_expression = make_allow(A1, m_expression);
+      }
+      else
+      {
+        m_expression = make_allow(alphabet, m_expression);
+      }
     }
     m_needs_allow = false;
   }
@@ -500,8 +538,6 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave_pcrl(const process_expression& x)
   {
-    // N.B. This can not be handled using the current traverser, since it is possible that
-    // non-pCRL expressions occur inside pCRL operators. For example: a . c|c.
     push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
     log(x);
   }
@@ -567,7 +603,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   }
 
   // TODO: handle the body of a hide expression
-  void leave(const process::hide& x)
+  void operator()(const process::hide& x)
   {
     leave_pcrl(x);
   }
@@ -617,41 +653,43 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void operator()(const process::merge& x)
   {
-    allow_set A1(A.actions, true);
-    push_allow_node left = push_allow(x.left(), A1, equations);
-    left.finish(equations, A1);
-    log_push_result(x.left(), A1, left, "<merge-left>");
-    allow_set A2(left_arrow(A1.actions, A1.includes_subsets, left.alphabet));
-    push_allow_node right = push_allow(x.right(), A2, equations);
-    right.finish(equations, A2);
-    log_push_result(x.right(), A2, right, "<merge-right>");
-    push(push_allow_node(alphabet_operations::merge(left.alphabet, right.alphabet), make_merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    allow_set A_sub(A.actions, true);
+    push_allow_node p1 = push_allow(x.left(), A_sub, equations);
+    p1.finish(equations, A_sub);
+    log_push_result(x.left(), A_sub, p1, "<merge-left>");
+    allow_set A_arrow(left_arrow(A.actions, A.includes_subsets, p1.alphabet), A.includes_subsets);
+    push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
+    q1.finish(equations, A_arrow);
+    log_push_result(x.right(), A_arrow, q1, "<merge-right>");
+    push(push_allow_node(alphabet_operations::merge(p1.alphabet, q1.alphabet), make_merge(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
     log(x);
   }
 
   void operator()(const process::left_merge& x)
   {
-    allow_set A1(A.actions, true);
-    push_allow_node left = push_allow(x.left(), A1, equations);
-    left.finish(equations, A1);
-    allow_set A2(left_arrow(A1.actions, A1.includes_subsets, left.alphabet));
-    push_allow_node right = push_allow(x.right(), A2, equations);
-    right.finish(equations, A2);
-    push(push_allow_node(alphabet_operations::left_merge(left.alphabet, right.alphabet), make_left_merge(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    allow_set A_sub(A.actions, true);
+    push_allow_node p1 = push_allow(x.left(), A_sub, equations);
+    p1.finish(equations, A_sub);
+    log_push_result(x.left(), A_sub, p1, "<left_merge-left>");
+    allow_set A_arrow(left_arrow(A.actions, A.includes_subsets, p1.alphabet), A.includes_subsets);
+    push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
+    q1.finish(equations, A_arrow);
+    log_push_result(x.right(), A_arrow, q1, "<left_merge-right>");
+    push(push_allow_node(alphabet_operations::left_merge(p1.alphabet, q1.alphabet), make_left_merge(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
     log(x);
   }
 
   void operator()(const process::sync& x)
   {
-    allow_set A1(A.actions, true);
-    push_allow_node left = push_allow(x.left(), A1, equations);
-    left.finish(equations, A1);
-    log_push_result(x.left(), A1, left, "<sync-left>");
-    allow_set A2(left_arrow(A1.actions, A1.includes_subsets, left.alphabet));
-    push_allow_node right = push_allow(x.right(), A2, equations);
-    right.finish(equations, A2);
-    log_push_result(x.right(), A2, right, "<sync-right>");
-    push(push_allow_node(alphabet_operations::sync(left.alphabet, right.alphabet), make_sync(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    allow_set A_sub(A.actions, true);
+    push_allow_node p1 = push_allow(x.left(), A_sub, equations);
+    p1.finish(equations, A_sub);
+    log_push_result(x.left(), A_sub, p1, "<sync-left>");
+    allow_set A_arrow(left_arrow(A.actions, A.includes_subsets, p1.alphabet), A.includes_subsets);
+    push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
+    q1.finish(equations, A_arrow);
+    log_push_result(x.right(), A_arrow, q1, "<sync-right>");
+    push(push_allow_node(alphabet_operations::sync(p1.alphabet, q1.alphabet), make_sync(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
     log(x);
   }
 };

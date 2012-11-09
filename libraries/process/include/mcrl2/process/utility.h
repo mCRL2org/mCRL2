@@ -288,7 +288,7 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, bool A1_includ
   {
     result = set_union(A1, left_arrow1(A1, A2));
   }
-  mCRL2log(log::debug) << "<left_arrow>" << lps::pp(A1) << " <- " << lps::pp(A2) << " = " << lps::pp(result) << std::endl;
+  mCRL2log(log::debug) << "<left_arrow>" << lps::pp(A1) << (A1_includes_subsets ? "*" : "") << " <- " << lps::pp(A2) << " = " << lps::pp(result) << (A1_includes_subsets ? "*" : "") << std::endl;
   return result;
 }
 
@@ -304,15 +304,14 @@ multi_action_name_set make_name_set(const action_name_multiset_list& v)
   return result;
 }
 
-// Removes all elements from alphabet that are not in A. Returns true if elements were removed from alphabet.
-// The value tau is removed from the result.
+// Removes all elements from alphabet that are not in A.
 inline
 multi_action_name_set set_intersection(const multi_action_name_set& alphabet, const multi_action_name_set& A, bool A_includes_subsets)
 {
   multi_action_name_set result = alphabet;
   for (multi_action_name_set::iterator i = result.begin(); i != result.end(); )
   {
-    bool remove = A_includes_subsets ? (!detail::includes(A, *i) || i->empty()) : A.find(*i) == A.end();
+    bool remove = A_includes_subsets ? !detail::includes(A, *i) : A.find(*i) == A.end();
     if (remove)
     {
       result.erase(i++);

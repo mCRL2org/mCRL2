@@ -172,6 +172,10 @@ std::string print_set(const Container& c)
 
 std::string print(const multi_action_name& alpha)
 {
+  if (alpha.empty())
+  {
+    return "tau";
+  }
   std::multiset<std::string> A;
   for (multi_action_name::const_iterator i = alpha.begin(); i != alpha.end(); ++i)
   {
@@ -188,6 +192,15 @@ std::string print(const multi_action_name_set& A)
     V.insert(print(*i));
   }
   return print_set(V);
+}
+
+BOOST_AUTO_TEST_CASE(test_print)
+{
+  multi_action_name_set A = parse_multi_action_name_set("{a}");
+  multi_action_name tau;
+  A.insert(tau);
+  std::cout << print(A) << std::endl;
+  BOOST_CHECK(print(A) == "{a, tau}");
 }
 
 BOOST_AUTO_TEST_CASE(test_parse)
@@ -251,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_alphabet1)
   test_alphabet("a", "{a}");
   test_alphabet("c|c", "{cc}");
   test_alphabet("a.c|c", "{a, cc}");
-  test_alphabet("tau.a", "{, a}");
+  test_alphabet("tau.a", "{a, tau}");
 }
 
 template <typename Operation>
@@ -271,6 +284,7 @@ BOOST_AUTO_TEST_CASE(test_alphabet_operations)
   test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aac}", process::left_arrow1, "left_arrow1");
   test_alphabet_operation("{aa, b}", "{a}", "{a}", process::left_arrow1, "left_arrow1");
   test_alphabet_operation("{ab, b}", "{b}", "{a}", process::left_arrow1, "left_arrow1"); // N.B. tau is excluded!
+  test_alphabet_operation("{bc}", "{c}", "{b}", process::left_arrow1, "left_arrow1");
 }
 
 void test_push_allow(const std::string& expression, const std::string& Atext, bool A_includes_subsets, const std::string& expected_result, const std::string& equations = "")
