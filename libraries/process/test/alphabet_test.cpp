@@ -278,8 +278,8 @@ void test_push_allow(const std::string& expression, const std::string& Atext, bo
   std::string text = "act a, b, c, d;\n" + equations + "\ninit " + expression + ";\n";
   process_specification procspec = parse_process_specification(text);
   multi_action_name_set A = parse_multi_action_name_set(Atext);
-  process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), A, A_includes_subsets, procspec.equations());
-  node.finish(procspec.equations(), A, A_includes_subsets);
+  process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), allow_set(A, A_includes_subsets), procspec.equations());
+  node.finish(procspec.equations(), allow_set(A, A_includes_subsets));
   std::string result = process::pp(node.m_expression);
   check_result(expression, result, expected_result, "push_allow");
 }
