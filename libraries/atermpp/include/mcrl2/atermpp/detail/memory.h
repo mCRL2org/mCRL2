@@ -83,22 +83,17 @@ t
   assert(aterm_cast<aterm_appl>(t).function().name().size()!=0);
 }
 
-inline size_t term_size(const detail::_aterm *t)
+inline HashNumber hash_number(detail::_aterm *t)
 {
-  if (t->function().number()==detail::function_adm.AS_INT.number())
-  {
-    return TERM_SIZE_INT;
-  }
-  return TERM_SIZE_APPL(t->function().arity());
-}
+  const function_symbol &f=t->function();
+  HashNumber hnr = f.number();
 
-inline HashNumber hash_number(const detail::_aterm *t, const size_t size)
-{
-  HashNumber hnr = t->function().number();
-  for (size_t i=TERM_SIZE_APPL(0); i<size; i++)
+  size_t* begin=reinterpret_cast<size_t*>(t)+TERM_SIZE_APPL(0);
+  size_t* end=begin+f.arity();
+  for (size_t* i=begin; i!=end; ++i)
   {
-    hnr = COMBINE(hnr, *(reinterpret_cast<const size_t *>(t) + i));
-  }
+    hnr = COMBINE(hnr, *i);
+  } 
 
   return hnr;
 }

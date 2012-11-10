@@ -68,8 +68,7 @@ class _aterm
 detail::_aterm* allocate_term(const size_t size);
 void simple_free_term(_aterm *t, const size_t arity);
 
-inline size_t term_size(const detail::_aterm *t);
-inline HashNumber hash_number(const detail::_aterm *t, const size_t size);
+inline HashNumber hash_number(_aterm *t);
 
 // extern _aterm *empty_aterm_list();
 

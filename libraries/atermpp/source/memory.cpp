@@ -82,7 +82,6 @@ namespace detail
 
 
 /* The constants below are not static to prevent some compiler warnings */
-const size_t MIN_TERM_SIZE = detail::TERM_SIZE_APPL(0);
 const size_t INITIAL_MAX_TERM_SIZE = 256;
 
 
@@ -171,19 +170,16 @@ void initialise_administration()
 static size_t total_nodes = 0;
 
 
-static void remove_from_hashtable(const detail::_aterm *t)
+static void remove_from_hashtable(detail::_aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
   detail::_aterm *prev=NULL;
-  const HashNumber hnr = hash_number(t, term_size(t)) & detail::aterm_table_mask;
+  const HashNumber hnr = detail::hash_number(t) & detail::aterm_table_mask;
   detail::_aterm *cur = detail::aterm_hashtable[hnr];
 
   do
   {
-    if (!cur)
-    {
-      throw mcrl2::runtime_error("Internal error: cannot find term in hashtable."); // If only occurs if the internal administration is in error.
-    }
+    assert(cur!=NULL); // This only occurs if the hashtable is in error.
     if (cur == t)
     {
       if (prev)
@@ -230,15 +226,18 @@ void aterm::free_term() const
 
   remove_from_hashtable(t);  // Remove from hash_table
 
-  for(size_t i=0; i<function().arity(); ++i)
+  if (t->function()!=detail::function_adm.AS_INT)
   {
-    reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
+    for(size_t i=0; i<function().arity(); ++i)
+    {
+      reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
+    }
   }
 #ifndef NDEBUG
   const size_t function_symbol_index=function().number();
   size_t ref_count=detail::at_lookup_table[function_symbol_index].reference_count;
 #endif
-  const size_t size=term_size(t);
+  const size_t size=detail::TERM_SIZE_APPL(t->function().arity());
 
   t->function().~function_symbol(); 
 
@@ -285,7 +284,7 @@ static void resize_aterm_hashtable()
     {
       assert(aterm_walker->reference_count()>0);
       detail::_aterm* next = aterm_walker->next();
-      const HashNumber hnr = hash_number(aterm_walker, term_size(aterm_walker)) & detail::aterm_table_mask;
+      const HashNumber hnr = hash_number(aterm_walker) & detail::aterm_table_mask;
       aterm_walker->next() = new_hashtable[hnr];
       new_hashtable[hnr] = aterm_walker;
       assert(aterm_walker->next()!=aterm_walker);
@@ -344,7 +343,7 @@ static void allocate_block(size_t size)
     std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
   }
 
-  assert(size >= MIN_TERM_SIZE && size < terminfo.size());
+  assert(size < terminfo.size());
 
   TermInfo &ti = terminfo[size];
 
@@ -484,7 +483,7 @@ _aterm* aterm_int(size_t val)
     detail::aterm_hashtable[hnr] = cur;
   }
 
-  assert((hnr & detail::aterm_table_mask) == (hash_number(cur, TERM_SIZE_INT) & detail::aterm_table_mask));
+  assert((hnr & detail::aterm_table_mask) == (hash_number(cur) & detail::aterm_table_mask));
   return cur;
 }
 } //namespace detail
@@ -507,7 +506,7 @@ static void resize_function_symbol_hashtable()
 
   size_t *old_function_symbol_hashtable=function_symbol_hashtable;
   function_symbol_hashtable=reinterpret_cast<size_t *>(realloc(function_symbol_hashtable,afun_table_size*sizeof(size_t)));
-  if (function_symbol_hashtable)
+  if (function_symbol_hashtable==NULL)
   {
     // resizing the hashtable failed; continue with the old hashtable.
     mCRL2log(mcrl2::log::warning) << "could not resize function symbol hashtable to class " << afun_table_class << "."; 
@@ -560,12 +559,6 @@ function_symbol::function_symbol():m_number(0)
   }
   increase_reference_count<false>();
 }
-
-function_symbol::~function_symbol()
-{
-  decrease_reference_count();
-} 
-
 
 function_symbol::function_symbol(const std::string &name, const size_t arity)
 {

@@ -32,7 +32,7 @@ struct constant_function_symbols
     // confused with function symbols that are used by applications of the aterms.
     constant_function_symbols():
       AS_DEFAULT("<undefined term>", 0),
-      AS_INT("<aterm int>", 0),
+      AS_INT("<aterm int>", 1),
       AS_LIST("<list constructor>", 2),
       AS_EMPTY_LIST("<empty list>", 0)   
     {} 
@@ -46,7 +46,7 @@ struct constant_function_symbols
     void initialise_function_symbols()
     {
       new (&AS_DEFAULT) function_symbol("<undefined term>", 0);
-      new (&AS_INT) function_symbol("<aterm int>", 0);
+      new (&AS_INT) function_symbol("<aterm int>", 1);
       new (&AS_LIST) function_symbol("<list constructor>", 2);
       new (&AS_EMPTY_LIST) function_symbol("<empty list>", 0);
       // The following numbers are expected to be used. If not

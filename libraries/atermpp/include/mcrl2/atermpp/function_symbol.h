@@ -90,10 +90,10 @@ class function_symbol
     }
 
     /// \brief Destructor
-    ~function_symbol();
-    /* {
+    ~function_symbol()
+    {
       decrease_reference_count();
-    } */
+    } 
 
     /// \brief Return the name of the function_symbol.
     /// \return The name of the function symbol.

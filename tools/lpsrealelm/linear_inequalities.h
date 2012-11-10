@@ -251,13 +251,11 @@ class linear_inequality
     /// \brief Constructor yielding an inconsistent inequality.
     linear_inequality():m_lhs(),m_comparison(less)
     {
-      // m_rhs.protect();
       m_rhs=real_zero();
     }
 
     linear_inequality(const linear_inequality& l)
     {
-      // m_rhs.protect();
       m_rhs=l.m_rhs;
       m_lhs=l.m_lhs;
       m_comparison=l.m_comparison;
@@ -265,7 +263,6 @@ class linear_inequality
 
     ~linear_inequality()
     {
-      // m_rhs.unprotect();
     }
 
     linear_inequality& operator=(const linear_inequality& l)
@@ -287,7 +284,6 @@ class linear_inequality
                       const rewriter& r)
       :m_lhs(),m_comparison(less)
     {
-      // m_rhs.protect();
       m_rhs=real_zero();
 
 
@@ -331,7 +327,6 @@ class linear_inequality
                       const comparison_t cmp,
                       const rewriter& r):m_lhs(),m_comparison(cmp)
     {
-      // m_rhs.protect();
       m_rhs=real_zero();
 
       parse_and_store_expression(lhs,r);
@@ -575,42 +570,21 @@ std::string string(const linear_inequality& l)
 // Real zero and real one are an ad hoc solution. They should be provided by
 // the data type library.
 
-static data_expression init_real_zero(data_expression& real_zero)
-{
-  real_zero=sort_real::real_("0");
-  // real_zero.protect();
-  return real_zero;
-}
-
-static data_expression init_real_one(data_expression& real_one)
-{
-  real_one=sort_real::real_("1");
-  // real_one.protect();
-  return real_one;
-}
-
-static data_expression init_real_minus_one(data_expression& real_minus_one)
-{
-  real_minus_one=sort_real::real_("-1");
-  // real_minus_one.protect();
-  return real_minus_one;
-}
-
 inline data_expression real_zero()
 {
-  static data_expression real_zero=init_real_zero(real_zero);
+  static data_expression real_zero=sort_real::real_("0");
   return real_zero;
 }
 
 inline data_expression real_one()
 {
-  static data_expression real_one=init_real_one(real_one);
+  static data_expression real_one=sort_real::real_("1");
   return real_one;
 }
 
 inline data_expression real_minus_one()
 {
-  static data_expression real_minus_one=init_real_minus_one(real_minus_one);
+  static data_expression real_minus_one=sort_real::real_("-1");
   return real_minus_one;
 }
 
