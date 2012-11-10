@@ -26,13 +26,16 @@ namespace atermpp
 
 namespace detail
 {
+  // The hashtables are not vectors to prevent them from being
+  // destroyed prematurely.
   static size_t afun_table_class;
+  static size_t afun_table_size=0;
   static size_t afun_table_mask;
-  static std::vector < size_t > function_symbol_hashtable;
+  static size_t *function_symbol_hashtable; 
 
   static size_t aterm_table_class;
   static size_t aterm_table_size;
-  size_t aterm_table_mask;  // used in memory.h
+  size_t aterm_table_mask;            // used in memory.h
   detail::_aterm* * aterm_hashtable;  // used in memory.h
 
   static const size_t INITIAL_AFUN_TABLE_CLASS = 14;
@@ -49,9 +52,29 @@ namespace detail
     return AT_TABLE_SIZE(table_class)-1;
   } 
 
-  static size_t first_free=size_t(-1);;
-  std::vector < detail::_function_symbol > at_lookup_table;
+  // The at_lookup_table is not a vector to prevent it from being destroyed prematurely.
+  static const size_t INITIAL_FUNCTION_LOOKUP_TABLE_SIZE=128;
+  static size_t first_free=size_t(-1);
+  static size_t at_lookup_table_actual_size=0;
+  size_t at_lookup_table_size=0;
+  detail::_function_symbol* at_lookup_table;
   
+  size_t at_lookup_table_create_free_entry_at_end()
+  {
+    if (at_lookup_table_actual_size<=at_lookup_table_size)
+    {
+      at_lookup_table_actual_size <<= 1;
+      at_lookup_table=reinterpret_cast<_function_symbol*>(
+                        realloc(at_lookup_table,at_lookup_table_actual_size*sizeof(_function_symbol)));
+      if (at_lookup_table==NULL)
+      {
+        throw std::runtime_error("Out of memory. Fail to resize at_lookup_table.");
+      }
+    }
+    assert(at_lookup_table_actual_size>at_lookup_table_size);
+    return at_lookup_table_size++;
+  }
+
   aterm static_undefined_aterm;
   aterm static_empty_aterm_list;
  
@@ -106,18 +129,38 @@ void initialise_administration()
   // a .cpp file, or due to the initialisation of a pre-main initialisation
   // of a static variable, which some compilers do.
 
-  if (function_symbol_hashtable.size()==0)
+  if (afun_table_size==0)
   { 
     afun_table_class=detail::INITIAL_AFUN_TABLE_CLASS;
-    afun_table_mask=AT_TABLE_MASK(detail::INITIAL_AFUN_TABLE_CLASS);
-    function_symbol_hashtable=std::vector < size_t >(AT_TABLE_SIZE(detail::INITIAL_AFUN_TABLE_CLASS),size_t(-1));
+    afun_table_size=detail::AT_TABLE_SIZE(afun_table_class);
+    afun_table_mask=AT_TABLE_MASK(afun_table_class);
+    
+    function_symbol_hashtable=reinterpret_cast<size_t *>(malloc(afun_table_size*sizeof(size_t)));
+    if (function_symbol_hashtable==NULL)
+    {
+      throw std::runtime_error("Out of memory. Cannot create function symbol hashtable.");
+    }
+    for(size_t i=1; i<afun_table_size; ++i)
+    { 
+      function_symbol_hashtable[i]=size_t(-1);
+    }
 
     aterm_table_class=detail::INITIAL_TERM_TABLE_CLASS;
-    aterm_table_size=detail::AT_TABLE_SIZE(detail::INITIAL_TERM_TABLE_CLASS);
+    aterm_table_size=detail::AT_TABLE_SIZE(aterm_table_class);
     aterm_table_mask=detail::AT_TABLE_MASK(detail::INITIAL_TERM_TABLE_CLASS);
 
     aterm_hashtable=reinterpret_cast<detail::_aterm**>(calloc(aterm_table_size,sizeof(detail::_aterm*)));
-    at_lookup_table.reserve(128);
+    if (aterm_hashtable==NULL)
+    {
+      throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");
+    }
+
+    at_lookup_table_actual_size=INITIAL_FUNCTION_LOOKUP_TABLE_SIZE;
+    at_lookup_table=reinterpret_cast<detail::_function_symbol*>(malloc(at_lookup_table_actual_size*sizeof(detail::_function_symbol)));
+    if (at_lookup_table==NULL)
+    {
+      throw std::runtime_error("Out of memory. Cannot create function lookup table.");
+    }
 
     detail::function_adm.initialise_function_symbols();
   }
@@ -184,13 +227,7 @@ void aterm::free_term() const
 {
   detail::_aterm* t=this->m_term;
   assert(t->reference_count()==0);
-  /* if (function().number()<4) // The default term and the empty list are not removed,
-                             // as the datastructures may not exist anymore when this 
-                             // happens. */
-  if (detail::function_symbol_hashtable.size()==0)
-  {
-    return;
-  } 
+
   remove_from_hashtable(t);  // Remove from hash_table
 
   for(size_t i=0; i<function().arity(); ++i)
@@ -232,7 +269,7 @@ static void resize_aterm_hashtable()
   
   if (new_hashtable==NULL)
   {
-    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << detail::aterm_table_class << ". "; // << e.what() << std::endl;
+    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to class " << detail::aterm_table_class << ". "; 
     detail::aterm_table_class--;
     detail::aterm_table_size = ((HashNumber)1)<<detail::aterm_table_class;
     detail::aterm_table_mask = (((HashNumber)1)<<detail::aterm_table_class)-1;
@@ -281,7 +318,7 @@ bool check_that_all_objects_are_free()
     }
   }
 
-  for(size_t i=0; i<detail::at_lookup_table.size(); ++i)
+  for(size_t i=0; i<detail::at_lookup_table_size; ++i)
   {
     if (i!=detail::function_adm.AS_EMPTY_LIST.number() && detail::at_lookup_table[i].reference_count>0)  // ATempty is not destroyed, so is AS_EMPTY_LIST.
     {
@@ -304,7 +341,7 @@ static void allocate_block(size_t size)
   Block* newblock = (Block*)calloc(1, sizeof(Block));
   if (newblock == NULL)
   {
-    std::runtime_error("allocate_block: out of memory!");
+    std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
   }
 
   assert(size >= MIN_TERM_SIZE && size < terminfo.size());
@@ -462,23 +499,39 @@ static HashNumber AT_hashAFun(const std::string &name, const size_t arity);
 
 static void resize_function_symbol_hashtable()
 {
-  ++detail::afun_table_class;
+  using namespace detail;
+  ++afun_table_class;
 
-  // detail::afun_table_size  = detail::AT_TABLE_SIZE(detail::afun_table_class);
-  detail::afun_table_mask  = detail::AT_TABLE_MASK(detail::afun_table_class);
+  afun_table_size  = AT_TABLE_SIZE(afun_table_class);
+  afun_table_mask  = AT_TABLE_MASK(afun_table_class);
 
-  detail::function_symbol_hashtable.clear();
-  detail::function_symbol_hashtable.resize(detail::AT_TABLE_SIZE(detail::afun_table_class),size_t(-1));
-
-  for (size_t i=0; i<detail::at_lookup_table.size(); i++)
+  size_t *old_function_symbol_hashtable=function_symbol_hashtable;
+  function_symbol_hashtable=reinterpret_cast<size_t *>(realloc(function_symbol_hashtable,afun_table_size*sizeof(size_t)));
+  if (function_symbol_hashtable)
   {
-    detail::_function_symbol &entry = detail::at_lookup_table[i];
+    // resizing the hashtable failed; continue with the old hashtable.
+    mCRL2log(mcrl2::log::warning) << "could not resize function symbol hashtable to class " << afun_table_class << "."; 
+    --afun_table_class;
+    afun_table_size  = AT_TABLE_SIZE(afun_table_class);
+    afun_table_mask  = AT_TABLE_MASK(afun_table_class);
+    function_symbol_hashtable=old_function_symbol_hashtable;
+    return;
+  }
+
+  for(size_t i=1; i<afun_table_size; ++i)
+  {
+    function_symbol_hashtable[i]=size_t(-1);
+  }
+
+  for (size_t i=0; i<at_lookup_table_size; i++)
+  {
+    _function_symbol &entry = at_lookup_table[i];
     assert(entry.reference_count>0);
 
     HashNumber hnr = AT_hashAFun(entry.name, entry.arity() );
-    hnr &= detail::afun_table_mask;
-    entry.next = detail::function_symbol_hashtable[hnr];
-    detail::function_symbol_hashtable[hnr] = i;
+    hnr &= afun_table_mask;
+    entry.next = function_symbol_hashtable[hnr];
+    function_symbol_hashtable[hnr] = i;
   }
 }
 
@@ -499,10 +552,24 @@ static HashNumber AT_hashAFun(const std::string &name, const size_t arity)
   return hnr*MAGIC_PRIME;
 }
 
+function_symbol::function_symbol():m_number(0)
+{
+  if (detail::afun_table_size==0)
+  {
+    detail::initialise_administration();
+  }
+  increase_reference_count<false>();
+}
+
+function_symbol::~function_symbol()
+{
+  decrease_reference_count();
+} 
+
 
 function_symbol::function_symbol(const std::string &name, const size_t arity)
 {
-  if (detail::function_symbol_hashtable.size()==0)
+  if (detail::afun_table_size==0)
   {
     detail::initialise_administration();
   }
@@ -518,36 +585,32 @@ function_symbol::function_symbol(const std::string &name, const size_t arity)
   if (cur == size_t(-1))
   {
     const size_t free_entry = detail::first_free;
-    assert(detail::at_lookup_table.size()<detail::function_symbol_hashtable.size());
+    assert(detail::at_lookup_table_size<detail::afun_table_size);
 
     if (free_entry!=size_t(-1)) // There is a free place in at_lookup_table() to store an function_symbol.
     {
-      assert(detail::first_free<detail::at_lookup_table.size());
+      assert(detail::first_free<detail::at_lookup_table_size);
       cur=detail::first_free;
       detail::first_free = detail::at_lookup_table[detail::first_free].next;
-      assert(detail::first_free==size_t(-1) || detail::first_free<detail::at_lookup_table.size());
-      assert(free_entry<detail::at_lookup_table.size());
+      assert(detail::first_free==size_t(-1) || detail::first_free<detail::at_lookup_table_size);
+      assert(free_entry<detail::at_lookup_table_size);
       assert(detail::at_lookup_table[cur].reference_count==0);
-      detail::at_lookup_table[cur].reference_count=0;
-      detail::at_lookup_table[cur].m_arity = arity;
-      detail::at_lookup_table[cur].name = name;
+      detail::at_lookup_table[cur]=detail::_function_symbol(name,arity,detail::function_symbol_hashtable[hnr]);
     }
     else
     {
-      cur = detail::at_lookup_table.size();
-      detail::at_lookup_table.push_back(detail::_function_symbol(name,arity));
+      cur = detail::at_lookup_table_create_free_entry_at_end();
+      //placement new.
+      new (&detail::at_lookup_table[cur]) detail::_function_symbol(name,arity,detail::function_symbol_hashtable[hnr]); 
     }
 
-
-
-    detail::at_lookup_table[cur].next = detail::function_symbol_hashtable[hnr];
     detail::function_symbol_hashtable[hnr] = cur;
   }
 
   m_number=cur;
   increase_reference_count<false>();
 
-  if (detail::at_lookup_table.size()>=detail::function_symbol_hashtable.size())
+  if (detail::at_lookup_table_size>=detail::afun_table_size)
   {
     resize_function_symbol_hashtable();
   }
@@ -556,13 +619,7 @@ function_symbol::function_symbol(const std::string &name, const size_t arity)
 
 void function_symbol::free_function_symbol() const
 {
-  if (detail::function_symbol_hashtable.size()==0)
-  {
-    // The aterm administration is destroyed. We cannot remove
-    // this afun anymore.
-    return;
-  }
-  assert(m_number<detail::at_lookup_table.size());
+  assert(m_number<detail::at_lookup_table_size);
   const detail::_function_symbol &sym=detail::at_lookup_table[m_number];
 
   assert(!sym.name.empty());
@@ -586,7 +643,7 @@ void function_symbol::free_function_symbol() const
     detail::at_lookup_table[prev].next = detail::at_lookup_table[cur].next;
   }
 
-  assert(m_number<detail::at_lookup_table.size());
+  assert(m_number<detail::at_lookup_table_size);
   detail::at_lookup_table[m_number].next = detail::first_free;
   detail::first_free = m_number;
 }

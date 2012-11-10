@@ -34,7 +34,7 @@ class function_symbol
     {
       assert(m_number!=size_t(-1));
 
-      assert(m_number<detail::at_lookup_table.size());
+      assert(m_number<detail::at_lookup_table_size);
       if (CHECK) assert(detail::at_lookup_table[m_number].reference_count>0);
       detail::at_lookup_table[m_number].reference_count++;
     }
@@ -43,7 +43,7 @@ class function_symbol
     {
       assert(m_number!=size_t(-1));
 
-      assert(m_number<detail::at_lookup_table.size());
+      assert(m_number<detail::at_lookup_table_size);
       assert(detail::at_lookup_table[m_number].reference_count>0);
 
       if (--detail::at_lookup_table[m_number].reference_count==0)
@@ -55,11 +55,7 @@ class function_symbol
 
   public:
     /// \brief default constructor
-    function_symbol():m_number(0)
-    {
-      assert(detail::at_lookup_table.size()>0);
-      increase_reference_count<false>();
-    }
+    function_symbol();
 
     /// \brief Constructor.
     /// \param name A string
@@ -94,10 +90,10 @@ class function_symbol
     }
 
     /// \brief Destructor
-    ~function_symbol()
-    {
+    ~function_symbol();
+    /* {
       decrease_reference_count();
-    }
+    } */
 
     /// \brief Return the name of the function_symbol.
     /// \return The name of the function symbol.
@@ -115,7 +111,7 @@ class function_symbol
       // First check below is a trick, function symbols with small numbers may
       // be referred to, while the data structures containing the data about these
       // functions may already have destroyed.
-      assert(m_number<=3 || m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
+      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
       return m_number;
     }
 

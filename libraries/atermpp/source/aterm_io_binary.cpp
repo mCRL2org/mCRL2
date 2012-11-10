@@ -76,7 +76,7 @@ static size_t calcUniqueAFuns(
     case AT_APPL:
     {
       function_symbol sym = aterm_cast<aterm_appl>(t).function(); 
-      assert(detail::at_lookup_table.size()>sym.number());
+      assert(detail::at_lookup_table_size>sym.number());
       nr_unique = count[sym.number()]>0 ? 0 : 1;
       count[sym.number()]++;
       arity = sym.arity();
@@ -1009,7 +1009,7 @@ static bool
 write_baf(const aterm &t, ostream &os)
 {
   size_t nr_unique_terms = 0;
-  size_t nr_symbols = detail::at_lookup_table.size();
+  size_t nr_symbols = detail::at_lookup_table_size;
   size_t cur;
 
   /* Initialize bit buffer */
@@ -1017,8 +1017,8 @@ write_baf(const aterm &t, ostream &os)
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 
-  std::vector<size_t> count(detail::at_lookup_table.size(),0);
-  std::vector<size_t> index(detail::at_lookup_table.size(),size_t(-1));
+  std::vector<size_t> count(detail::at_lookup_table_size,0);
+  std::vector<size_t> index(detail::at_lookup_table_size,size_t(-1));
   nr_unique_symbols = AT_calcUniqueAFuns(t,count);
 
   sym_entries = std::vector<sym_entry>(nr_unique_symbols);
