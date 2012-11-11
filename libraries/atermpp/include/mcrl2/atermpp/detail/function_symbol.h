@@ -31,15 +31,15 @@ struct _function_symbol
     }
 };
 
-extern size_t at_lookup_table_size;
-extern detail::_function_symbol* at_lookup_table;
+extern size_t function_lookup_table_size;
+extern detail::_function_symbol* function_lookup_table;
 
 inline
 bool is_valid_function_symbol(const size_t sym)
 {
   return (sym != size_t(-1) &&
-          sym < detail::at_lookup_table_size &&
-          detail::at_lookup_table[sym].reference_count>0);
+          sym < detail::function_lookup_table_size &&
+          detail::function_lookup_table[sym].reference_count>0);
 }
 
 } // namespace detail

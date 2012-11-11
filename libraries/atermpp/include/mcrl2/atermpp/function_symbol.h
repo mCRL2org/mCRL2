@@ -34,19 +34,19 @@ class function_symbol
     {
       assert(m_number!=size_t(-1));
 
-      assert(m_number<detail::at_lookup_table_size);
-      if (CHECK) assert(detail::at_lookup_table[m_number].reference_count>0);
-      detail::at_lookup_table[m_number].reference_count++;
+      assert(m_number<detail::function_lookup_table_size);
+      if (CHECK) assert(detail::function_lookup_table[m_number].reference_count>0);
+      detail::function_lookup_table[m_number].reference_count++;
     }
 
     void decrease_reference_count() const
     {
       assert(m_number!=size_t(-1));
 
-      assert(m_number<detail::at_lookup_table_size);
-      assert(detail::at_lookup_table[m_number].reference_count>0);
+      assert(m_number<detail::function_lookup_table_size);
+      assert(detail::function_lookup_table[m_number].reference_count>0);
 
-      if (--detail::at_lookup_table[m_number].reference_count==0)
+      if (--detail::function_lookup_table[m_number].reference_count==0)
       {
         free_function_symbol();
       }
@@ -100,7 +100,7 @@ class function_symbol
     const std::string &name() const
     {
       assert(detail::is_valid_function_symbol(m_number));
-      return detail::at_lookup_table[m_number].name;
+      return detail::function_lookup_table[m_number].name;
     }
 
     
@@ -120,7 +120,7 @@ class function_symbol
     size_t arity() const
     {
       assert(detail::is_valid_function_symbol(m_number));
-      return detail::at_lookup_table[m_number].arity();
+      return detail::function_lookup_table[m_number].arity();
     }
 
 

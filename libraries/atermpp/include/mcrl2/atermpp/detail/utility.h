@@ -29,22 +29,6 @@ std::string to_string(const T& t)
   return oss.str();
 }
 
-
-/* namespace detail
-{
-
-/// \brief Converts a string to an aterm string
-/// \param s A string
-/// \return The converted string
-inline
-aterm_appl str2appl(std::string const& s)
-{
-  return aterm_appl(function_symbol(s, 0));
-} 
-
-} // namespace detail
-*/
-
 } // namespace atermpp
 
 #endif // ATERM_DETAIL_UTILITY_H

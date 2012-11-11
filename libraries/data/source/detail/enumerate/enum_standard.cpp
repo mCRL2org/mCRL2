@@ -426,9 +426,9 @@ bool EnumeratorSolutionsStandard::next(
     {
       assert(!e.vars().empty());
       assert(e.expr()!=m_enclosing_enumerator->rewr_obj->internal_false);
-      const variable var = e.vars().front();
-      const sort_expression sort = var.sort();
-      variable_list uvars = pop_front(e.vars());
+      const variable &var = e.vars().front();
+      const sort_expression &sort = var.sort();
+      const variable_list &uvars = pop_front(e.vars());
 
 
       if (is_function_sort(sort))

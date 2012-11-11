@@ -22,6 +22,7 @@ add_custom_target(${PROJECT_NAME}_headers
 add_library(${PROJECT_NAME}
   source/aterm_io_binary.cpp
   source/memory.cpp
+  source/function_symbol.cpp
   source/aterm_io_text.cpp
   source/table.cpp
   source/indexed_set.cpp

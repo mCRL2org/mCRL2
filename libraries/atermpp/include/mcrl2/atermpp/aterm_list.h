@@ -15,7 +15,6 @@
 #include <cassert>
 #include <limits>
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
-#include <boost/iterator/iterator_facade.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_convertible.hpp>

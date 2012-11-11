@@ -18,6 +18,7 @@
 #include <vector>
 #include <assert.h>
 
+#include <boost/utility/enable_if.hpp>
 #include "boost/type_traits/is_base_of.hpp"
 #include "boost/type_traits/is_convertible.hpp"
 #include "boost/static_assert.hpp"
@@ -249,7 +250,7 @@ class aterm
     }
 
     /// \brief Returns true if this term is not equal to the term assigned by
-    //         the default constructor, i.e. *this!=aterm().
+    ///        the default constructor, i.e. *this!=aterm().
     /// \details This operation is more efficient than comparing the current
     ///          term with an aterm().
     /// \return A boolean indicating whether this term equals the default constructor.
@@ -259,6 +260,18 @@ class aterm
       return this->function().number()!=detail::function_adm.AS_DEFAULT.number();
     }
 
+    /// \brief Swaps this term with its argument.
+    /// \details This operation is more efficient than exchanging terms by an assignment,
+    ///          as swapping does not require to change the protection of terms.
+    /// \param t The term with which this term is swapped.
+    void swap(aterm &t) 
+    {
+      assert(m_term!=NULL && m_term->reference_count()>0);
+      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
+      detail::_aterm* tmp(t.m_term);
+      t.m_term=m_term;
+      m_term=tmp; 
+    }
 };
 
 /// \brief A cheap cast from one aterm based type to another
@@ -285,7 +298,23 @@ std::ostream& operator<<(std::ostream& out, const aterm& t)
 {
   return out << t.to_string();
 }
-	
 } // namespace atermpp
+	
+namespace std
+{
+
+/// \brief Swaps two terms of a type derived from an aterm.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+/// \param t1 The first term
+/// \param t2 The second term
+
+template <class T>
+inline void swap(T &t1, T &t2, typename boost::enable_if< typename boost::is_base_of< atermpp::aterm, T >::type >::type* = 0)
+{
+  BOOST_STATIC_ASSERT(sizeof(T)==sizeof(atermpp::aterm));
+  t1.swap(t2);
+}
+} // namespace std
 
 #endif // MCRL2_ATERMPP_ATERM_H

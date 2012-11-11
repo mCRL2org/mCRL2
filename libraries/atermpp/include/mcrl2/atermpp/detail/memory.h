@@ -3,7 +3,7 @@
 
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/atermpp/detail/architecture.h"
+#include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -21,6 +21,8 @@ namespace detail
   extern aterm static_empty_aterm_list;
  
   void initialise_administration();
+  void initialise_aterm_administration();
+
 }
   
 inline
@@ -30,8 +32,8 @@ detail::_aterm *aterm::undefined_aterm()
   {
     detail::initialise_administration();
     new (&detail::static_undefined_aterm) aterm(detail::function_adm.AS_DEFAULT); // Use placement new as static_undefined_aterm
-                                                                          // may not have initialised when this is called, 
-                                                                          // causing a problem with reference counting.
+                                                                                  // may not have initialised when this is called, 
+                                                                                  // causing a problem with reference counting.
   }
 
   return detail::static_undefined_aterm.m_term;
@@ -44,20 +46,14 @@ detail::_aterm *aterm::empty_aterm_list()
   {
     detail::initialise_administration();
     new (&detail::static_empty_aterm_list) aterm(detail::function_adm.AS_EMPTY_LIST); // Use placement new as static_empty_atermlist
-                                                                              // may not have initialised when this is called, 
-                                                                              // causing a problem with reference counting.
+                                                                                      // may not have initialised when this is called, 
+                                                                                      // causing a problem with reference counting.
   }
   return detail::static_empty_aterm_list.m_term;
 } 
 
 namespace detail
 {
-
-inline
-size_t TERM_SIZE_APPL(const size_t arity)
-{
-  return (sizeof(detail::_aterm)/sizeof(size_t))+arity;
-}
 
 inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
