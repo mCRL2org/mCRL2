@@ -523,17 +523,23 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return node_stack.back();
   }
 
-  void log_push_result(const process_expression& x, const allow_set& A, const push_allow_node& result, const std::string& msg = "")
+  void log_push_result(const process_expression& x, const allow_set& A, const push_allow_node& result, const std::string& msg = "", const std::string& text = "")
   {
+    std::string text1 = text;
+    if (!text1.empty())
+    {
+      text1 = text1 + " = ";
+    }
     push_allow_node result1 = result;
     result1.finish(equations, A);
     mCRL2log(log::debug) << msg << "push(" << process::pp(x) << ", " << A << ") = "
+      << text1
       << result1.print(A) << " with alphabet(" << process::pp(result.m_expression) << ") = " << lps::pp(result.alphabet) << std::endl;
   }
 
-  void log(const process_expression& x)
+  void log(const process_expression& x, const std::string& text = "")
   {
-    log_push_result(x, A, top());
+    log_push_result(x, A, top(), "", text);
   }
 
   void leave_pcrl(const process_expression& x)
@@ -608,6 +614,13 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     leave_pcrl(x);
   }
 
+  std::string log_block(const process::block& x, const allow_set& A1)
+  {
+    std::ostringstream out;
+    out << "block({" << core::pp(x.block_set()) << "}, push(" << A1 << ", " << process::pp(x.operand()) << "))";
+    return out.str();
+  }
+
   void operator()(const process::block& x)
   {
     core::identifier_string_list B = x.block_set();
@@ -615,18 +628,43 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.finish(equations, A1);
     push(node);
-    log(x);
+    log(x, log_block(x, A1));
+  }
+
+  std::string log_rename(const process::rename& x, const allow_set& A1)
+  {
+    std::ostringstream out;
+    out << "rename({" << process::pp(x.rename_set()) << "}, push(" << A1 << ", " << process::pp(x.operand()) << "))";
+    return out.str();
+  }
+
+  core::identifier_string_list left_hand_sides(const rename_expression_list& R) const
+  {
+    std::vector<core::identifier_string> result;
+    for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+    {
+      result.push_back(i->source());
+    }
+    return core::identifier_string_list(result.begin(), result.end());
   }
 
   void operator()(const process::rename& x)
   {
     rename_expression_list R = x.rename_set();
-    allow_set A1(alphabet_operations::rename_inverse(R, A.actions));
+    core::identifier_string_list B = left_hand_sides(R);
+    allow_set A1(alphabet_operations::rename_inverse(R, alphabet_operations::block(B, A.actions)));
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.m_expression = rename(R, node.m_expression);
     node.finish(equations, A1);
     push(node);
-    log(x);
+    log(x, log_rename(x, A1));
+  }
+
+  std::string log_comm(const process::comm& x, const allow_set& A1)
+  {
+    std::ostringstream out;
+    out << "comm({" << process::pp(x.comm_set()) << "}, push(" << A1 << ", " << process::pp(x.operand()) << "))";
+    return out.str();
   }
 
   void operator()(const process::comm& x)
@@ -638,7 +676,14 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     log_push_result(x, A1, node, "<comm>");
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
     push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), make_comm(C1, node.m_expression), boost::logic::indeterminate));
-    log(x);
+    log(x, log_comm(x, A1));
+  }
+
+  std::string log_allow(const process::allow& x, const allow_set& A1)
+  {
+    std::ostringstream out;
+    out << "allow({" << process::pp(x.allow_set()) << "}, push(" << A1 << ", " << process::pp(x.operand()) << "))";
+    return out.str();
   }
 
   void operator()(const process::allow& x)
@@ -648,7 +693,14 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.finish(equations, A1);
     push(node);
-    log(x);
+    log(x, log_allow(x, A1));
+  }
+
+  std::string log_merge(const process::merge& x, const allow_set& A_sub, const allow_set& A_arrow)
+  {
+    std::ostringstream out;
+    out << "merge(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << "))";
+    return out.str();
   }
 
   void operator()(const process::merge& x)
@@ -662,7 +714,14 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     q1.finish(equations, A_arrow);
     log_push_result(x.right(), A_arrow, q1, "<merge-right>");
     push(push_allow_node(alphabet_operations::merge(p1.alphabet, q1.alphabet), make_merge(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
-    log(x);
+    log(x, log_merge(x, A_sub, A_arrow));
+  }
+
+  std::string log_left_merge(const process::left_merge& x, const allow_set& A_sub, const allow_set& A_arrow)
+  {
+    std::ostringstream out;
+    out << "left_merge(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << "))";
+    return out.str();
   }
 
   void operator()(const process::left_merge& x)
@@ -676,7 +735,14 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     q1.finish(equations, A_arrow);
     log_push_result(x.right(), A_arrow, q1, "<left_merge-right>");
     push(push_allow_node(alphabet_operations::left_merge(p1.alphabet, q1.alphabet), make_left_merge(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
-    log(x);
+    log(x, log_left_merge(x, A_sub, A_arrow));
+  }
+
+  std::string log_sync(const process::left_merge& x, const allow_set& A_sub, const allow_set& A_arrow)
+  {
+    std::ostringstream out;
+    out << "sync(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << "))";
+    return out.str();
   }
 
   void operator()(const process::sync& x)
@@ -690,7 +756,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     q1.finish(equations, A_arrow);
     log_push_result(x.right(), A_arrow, q1, "<sync-right>");
     push(push_allow_node(alphabet_operations::sync(p1.alphabet, q1.alphabet), make_sync(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
-    log(x);
+    log(x, log_sync(x, A_sub, A_arrow));
   }
 };
 

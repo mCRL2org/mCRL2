@@ -20,6 +20,14 @@ namespace mcrl2 {
 
 namespace process {
 
+inline
+multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
+{
+  multi_action_name result;
+  std::merge(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
+  return result;
+}
+
 namespace detail {
 
 // Returns true if the multiset y is contained in x
@@ -165,39 +173,31 @@ multi_action_name apply_rename(const rename_expression_list& R, const multi_acti
   return result;
 }
 
-inline
-core::identifier_string apply_rename_inverse(const rename_expression_list& R, const core::identifier_string& x)
+void rename_inverse(const rename_expression_list& R, multi_action_name& alpha, multi_action_name& beta, multi_action_name_set& result)
 {
+  result.insert(multiset_union(alpha, beta));
+  if (alpha.empty())
+  {
+    return;
+  }
+
   for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
   {
-    if (x == i->target())
+    core::identifier_string src = i->source();
+    core::identifier_string target = i->target();
+    multi_action_name::iterator j = alpha.find(target);
+    if (j != alpha.end())
     {
-      return i->source();
+      alpha.erase(j);
+      multi_action_name::iterator k = beta.insert(src);
+      rename_inverse(R, alpha, beta, result);
+      alpha.insert(target);
+      beta.erase(k);
     }
   }
-  return x;
-}
-
-inline
-multi_action_name apply_rename_inverse(const rename_expression_list& R, const multi_action_name& a)
-{
-  multi_action_name result;
-  for (multi_action_name::const_iterator i = a.begin(); i != a.end(); ++i)
-  {
-    result.insert(detail::apply_rename_inverse(R, *i));
-  }
-  return result;
 }
 
 } // namespace detail
-
-inline
-multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
-{
-  multi_action_name result;
-  std::merge(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
-  return result;
-}
 
 inline
 multi_action_name multiset_difference(const multi_action_name& alpha, const multi_action_name& beta)
@@ -410,14 +410,18 @@ multi_action_name_set rename(const rename_expression_list& R, const multi_action
   return result;
 }
 
+/// \brief Computes R^[-1}(A)
 inline
 multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A)
 {
-  multi_action_name_set result;
+  multi_action_name_set result = A;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    result.insert(detail::apply_rename_inverse(R, *i));
+    multi_action_name alpha = *i;
+    multi_action_name beta;
+    detail::rename_inverse(R, alpha, beta, result);
   }
+  mCRL2log(log::debug) << "<rename_inverse>" << process::pp(R) << ": " << lps::pp(A) << " -> " << lps::pp(result) << std::endl;
   return result;
 }
 

@@ -333,7 +333,7 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
 BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, aad, abc, abd, accc, accd, acdd, bccc, bccd, bcdd}", alphabet_operations::rename_inverse, "rename_inverse");
 }
 
 void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
