@@ -29,6 +29,8 @@ namespace mcrl2 {
 
 namespace process {
 
+multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations);
+
 /// \brief Represents a set of multi action names. It implicitly contains the empty
 /// multi action (tau). Using the attribute includes_subsets, one can denote that
 /// subsets of multi actions belong to the set as well.
@@ -67,7 +69,52 @@ std::ostream& operator<<(std::ostream& out, const allow_set& A)
   return out << lps::pp(A.actions) << (A.includes_subsets ? "*" : "");
 }
 
-multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations);
+namespace alphabet_operations2 {
+
+inline
+allow_set comm(const communication_expression_list& C, const allow_set& A)
+{
+  return allow_set(alphabet_operations::comm(C, A.actions, A.includes_subsets), A.includes_subsets);
+}
+
+inline
+allow_set comm_inverse(const communication_expression_list& C, const allow_set& A)
+{
+  return allow_set(alphabet_operations::comm_inverse(C, A.actions, A.includes_subsets), A.includes_subsets);
+}
+
+inline
+allow_set hide(const core::identifier_string_list& I, const allow_set& A)
+{
+  return allow_set(alphabet_operations::hide(I, A.actions, A.includes_subsets), A.includes_subsets);
+}
+
+inline
+allow_set rename(const rename_expression_list& R, const allow_set& A)
+{
+  return allow_set(alphabet_operations::rename(R, A.actions, A.includes_subsets), A.includes_subsets);
+}
+
+/// \brief Computes R^[-1}(A)
+inline
+allow_set rename_inverse(const rename_expression_list& R, const allow_set& A)
+{
+  return allow_set(alphabet_operations::rename_inverse(R, A.actions, A.includes_subsets), false);
+}
+
+inline
+allow_set allow(const action_name_multiset_list& V, const allow_set& A)
+{
+  return allow_set(alphabet_operations::allow(V, A.actions, A.includes_subsets), A.includes_subsets);
+}
+
+inline
+allow_set block(const core::identifier_string_list& B, const allow_set& A)
+{
+  return allow_set(alphabet_operations::block(B, A.actions, A.includes_subsets), A.includes_subsets);
+}
+
+} // namespace alphabet_operations2
 
 namespace detail {
 
@@ -158,82 +205,6 @@ std::ostream& operator<<(std::ostream& out, const alphabet_node& x)
 {
   return out << "alphabet = " << lps::pp(x.alphabet);
 }
-
-struct push_allow_node: public alphabet_node
-{
-  push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression(), boost::logic::tribool needs_allow = boost::logic::indeterminate)
-    : alphabet_node(alphabet), m_expression(expression), m_needs_allow(needs_allow)
-  {}
-
-  std::string print(const allow_set& A) const
-  {
-    std::ostringstream out;
-    if (m_needs_allow)
-    {
-      out << "allow(" << lps::pp(set_intersection(alphabet, A.actions, A.includes_subsets)) << ", " << process::pp(m_expression) << ")";
-    }
-    else if (!m_needs_allow)
-    {
-      out << process::pp(m_expression);
-    }
-    else
-    {
-      out << "allow?(" << lps::pp(set_intersection(alphabet, A.actions, A.includes_subsets)) << ", " << process::pp(m_expression) << ")";
-    }
-    return out.str();
-  }
-
-  void finish(const atermpp::vector<process_equation>& equations, const allow_set& A)
-  {
-    alphabet = process::alphabet(m_expression, equations);
-
-    if (boost::logic::indeterminate(m_needs_allow))
-    {
-      std::size_t alphabet_size = alphabet.size();
-      bool alphabet_contains_tau = contains_tau(alphabet);
-
-      alphabet = process::set_intersection(alphabet, A.actions, A.includes_subsets);
-      if (alphabet_contains_tau)
-      {
-        multi_action_name tau;
-        alphabet.insert(tau);
-      }
-
-      m_needs_allow = alphabet.size() < alphabet_size;
-    }
-
-    if (m_needs_allow)
-    {
-      if (alphabet.size() == 1 && contains_tau(alphabet)) // alphabet == { tau }
-      {
-        // N.B. This is a tricky case. We can't return allow({tau}, m_expression),
-        // as this is not allowed in mCRL2. We can take an arbitrary element of
-        // A instead.
-        multi_action_name_set A1;
-        A1.insert(*A.actions.begin());
-        m_expression = make_allow(A1, m_expression);
-      }
-      else
-      {
-        m_expression = make_allow(alphabet, m_expression);
-      }
-    }
-    m_needs_allow = false;
-  }
-
-  process_expression m_expression;
-
-  // if true, the alphabet of this node is included in the allow set A
-  boost::logic::tribool m_needs_allow;
-};
-
-inline
-std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
-{
-  return out << "alphabet = " << lps::pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << " needs_allow = " << std::boolalpha << x.m_needs_allow << std::endl;
-}
-
-push_allow_node push_allow(const process_expression& x, const allow_set& A, const atermpp::vector<process_equation>& equations);
 
 /// \brief Traverser that computes the alphabet of process expressions
 template <typename Derived, typename Node = alphabet_node>
@@ -468,6 +439,82 @@ alphabet_node alphabet(const process_expression& x, const atermpp::vector<proces
   return f.node_stack.back();
 }
 
+struct push_allow_node: public alphabet_node
+{
+  push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression(), boost::logic::tribool needs_allow = boost::logic::indeterminate)
+    : alphabet_node(alphabet), m_expression(expression), m_needs_allow(needs_allow)
+  {}
+
+  std::string print(const allow_set& A) const
+  {
+    std::ostringstream out;
+    if (m_needs_allow)
+    {
+      out << "allow(" << lps::pp(set_intersection(alphabet, A.actions, A.includes_subsets)) << ", " << process::pp(m_expression) << ")";
+    }
+    else if (!m_needs_allow)
+    {
+      out << process::pp(m_expression);
+    }
+    else
+    {
+      out << "allow?(" << lps::pp(set_intersection(alphabet, A.actions, A.includes_subsets)) << ", " << process::pp(m_expression) << ")";
+    }
+    return out.str();
+  }
+
+  void finish(const atermpp::vector<process_equation>& equations, const allow_set& A)
+  {
+    alphabet = process::alphabet(m_expression, equations);
+
+    if (boost::logic::indeterminate(m_needs_allow))
+    {
+      std::size_t alphabet_size = alphabet.size();
+      bool alphabet_contains_tau = contains_tau(alphabet);
+
+      alphabet = process::set_intersection(alphabet, A.actions, A.includes_subsets);
+      if (alphabet_contains_tau)
+      {
+        multi_action_name tau;
+        alphabet.insert(tau);
+      }
+
+      m_needs_allow = alphabet.size() < alphabet_size;
+    }
+
+    if (m_needs_allow)
+    {
+      if (alphabet.size() == 1 && contains_tau(alphabet)) // alphabet == { tau }
+      {
+        // N.B. This is a tricky case. We can't return allow({tau}, m_expression),
+        // as this is not allowed in mCRL2. We can take an arbitrary element of
+        // A instead.
+        multi_action_name_set A1;
+        A1.insert(*A.actions.begin());
+        m_expression = make_allow(A1, m_expression);
+      }
+      else
+      {
+        m_expression = make_allow(alphabet, m_expression);
+      }
+    }
+    m_needs_allow = false;
+  }
+
+  process_expression m_expression;
+
+  // if true, the alphabet of this node is included in the allow set A
+  boost::logic::tribool m_needs_allow;
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
+{
+  return out << "alphabet = " << lps::pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << " needs_allow = " << std::boolalpha << x.m_needs_allow << std::endl;
+}
+
+push_allow_node push_allow(const process_expression& x, const allow_set& A, const atermpp::vector<process_equation>& equations);
+
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
 {
@@ -532,7 +579,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     }
     push_allow_node result1 = result;
     result1.finish(equations, A);
-    mCRL2log(log::debug) << msg << "push(" << process::pp(x) << ", " << A << ") = "
+    mCRL2log(log::debug) << msg << "push(" << A << ", " << process::pp(x) << ") = "
       << text1
       << result1.print(A) << " with alphabet(" << process::pp(result.m_expression) << ") = " << lps::pp(result.alphabet) << std::endl;
   }
@@ -624,7 +671,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::block& x)
   {
     core::identifier_string_list B = x.block_set();
-    allow_set A1(alphabet_operations::block(B, A.actions));
+    allow_set A1 = alphabet_operations2::block(B, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.finish(equations, A1);
     push(node);
@@ -652,7 +699,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     rename_expression_list R = x.rename_set();
     core::identifier_string_list B = left_hand_sides(R);
-    allow_set A1(alphabet_operations::rename_inverse(R, alphabet_operations::block(B, A.actions)));
+    allow_set A1 = alphabet_operations2::rename_inverse(R, alphabet_operations2::block(B, A));
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.m_expression = rename(R, node.m_expression);
     node.finish(equations, A1);
@@ -670,7 +717,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::comm& x)
   {
     communication_expression_list C = x.comm_set();
-    allow_set A1(alphabet_operations::comm_inverse(C, A.actions));
+    allow_set A1 = alphabet_operations2::comm_inverse(C, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.finish(equations, A1);
     log_push_result(x, A1, node, "<comm>");
@@ -689,7 +736,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::allow& x)
   {
     action_name_multiset_list V = x.allow_set();
-    allow_set A1(alphabet_operations::allow(V, A.actions, A.includes_subsets), A.includes_subsets);
+    allow_set A1 = alphabet_operations2::allow(V, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.finish(equations, A1);
     push(node);

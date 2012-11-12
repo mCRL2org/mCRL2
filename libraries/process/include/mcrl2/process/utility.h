@@ -74,31 +74,6 @@ bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIt
 }
 
 inline
-multi_action_name_set apply_block(const multi_action_name& alpha, const multi_action_name_set& A)
-{
-  multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    if (has_empty_intersection(alpha.begin(), alpha.end(), i->begin(), i->end()))
-    {
-      result.insert(*i);
-    }
-  }
-  return result;
-}
-
-inline
-multi_action_name_set apply_block(const multi_action_name_set& B, const multi_action_name_set& A)
-{
-  multi_action_name alpha;
-  for (multi_action_name_set::const_iterator i = B.begin(); i != B.end(); ++i)
-  {
-    alpha.insert(i->begin(), i->end());
-  }
-  return detail::apply_block(alpha, A);
-}
-
-inline
 void apply_comm(const communication_expression& c, multi_action_name_set& A)
 {
   core::identifier_string_list names = c.action_name().names();
@@ -344,6 +319,22 @@ communication_expression_list filter_comm_set(const communication_expression_lis
 namespace alphabet_operations {
 
 inline
+multi_action_name_set subsets(const multi_action_name_set& A)
+{
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    multi_action_name alpha = *i;
+    while (!alpha.empty())
+    {
+      result.insert(alpha);
+      alpha.erase(alpha.begin());
+    }
+  }
+  return result;
+}
+
+inline
 multi_action_name_set merge(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   return set_union(set_union(A1, A2), concat(A1, A2));
@@ -362,7 +353,7 @@ multi_action_name_set sync(const multi_action_name_set& A1, const multi_action_n
 }
 
 inline
-multi_action_name_set comm(const communication_expression_list& C, const multi_action_name_set& A)
+multi_action_name_set comm(const communication_expression_list& C, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name_set result = A;
 
@@ -376,7 +367,7 @@ multi_action_name_set comm(const communication_expression_list& C, const multi_a
 }
 
 inline
-multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A)
+multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name_set result = A;
   for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
@@ -388,7 +379,7 @@ multi_action_name_set comm_inverse(const communication_expression_list& C, const
 }
 
 inline
-multi_action_name_set hide(const core::identifier_string_list& I, const multi_action_name_set& A)
+multi_action_name_set hide(const core::identifier_string_list& I, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name m(I.begin(), I.end());
   multi_action_name_set result;
@@ -400,7 +391,7 @@ multi_action_name_set hide(const core::identifier_string_list& I, const multi_ac
 }
 
 inline
-multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A)
+multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
@@ -412,8 +403,12 @@ multi_action_name_set rename(const rename_expression_list& R, const multi_action
 
 /// \brief Computes R^[-1}(A)
 inline
-multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A)
+multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
+  if (A_includes_subsets)
+  {
+    return rename_inverse(R, subsets(A), false);
+  }
   multi_action_name_set result = A;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
@@ -448,10 +443,37 @@ multi_action_name_set allow(const action_name_multiset_list& V, const multi_acti
 }
 
 inline
-multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A)
+multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
-  multi_action_name alpha(B.begin(), B.end());
-  return detail::apply_block(alpha, A);
+  multi_action_name_set result;
+  multi_action_name beta(B.begin(), B.end());
+
+  if (A_includes_subsets)
+  {
+    for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+    {
+      multi_action_name alpha = *i;
+      for (core::identifier_string_list::const_iterator j = B.begin(); j != B.end(); ++j)
+      {
+        alpha.erase(*j);
+      }
+      if (!alpha.empty())
+      {
+        result.insert(alpha);
+      }
+    }
+  }
+  else
+  {
+    for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+    {
+      if (detail::has_empty_intersection(beta.begin(), beta.end(), i->begin(), i->end()))
+      {
+        result.insert(*i);
+      }
+    }
+  }
+  return result;
 }
 
 } // namespace alphabet_operations
