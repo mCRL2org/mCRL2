@@ -90,8 +90,6 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 #else
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return wxEntry(argc, argv);
 }
 #endif

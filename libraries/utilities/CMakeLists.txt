@@ -132,7 +132,6 @@ target_link_libraries(${PROJECT_NAME}
   ${QT_QTCORE_LIBRARY}
   ${QT_QTGUI_LIBRARY}
   ${QT_QTMAIN_LIBRARY}
-  mcrl2_aterm
 )
 
 # add install target:

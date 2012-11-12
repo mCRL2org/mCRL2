@@ -66,7 +66,6 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SRC_FILES})
 
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
-  mcrl2_aterm
   mcrl2_core
   mcrl2_data
   mcrl2_lps
