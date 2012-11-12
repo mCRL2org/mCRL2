@@ -1389,7 +1389,7 @@ static string calc_inner_appl_head(size_t arity)
   {
     ss << "make_term_with_many_arguments";
   }
-  ss << "(" << (get_appl_afun_value(arity+1)) << ",";    // YYYY
+  ss << "(get_appl_afun_value(" << arity+1 << "),";    // YYYY
   return ss.str();
 }
 
@@ -2188,19 +2188,17 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
   {
     if (arity > 5)
     {
-      fprintf(f,  "  return make_term_with_many_arguments("
-              "%lu,"
+      fprintf(f,  "  return make_term_with_many_arguments(get_appl_afun_value(%lu),"
               "(atermpp::detail::_aterm*)%p",
-              get_appl_afun_value(arity+1),  
+              arity+1,  
               (void*)get_int2aterm_value(opid)
              );
     }
     else
     {
-      fprintf(f,  "  return atermpp::aterm_appl("
-              "%lu,"
+      fprintf(f,  "  return atermpp::aterm_appl(get_appl_afun_value(%lu),"
               "(atermpp::detail::_aterm*) %p",
-              get_appl_afun_value(arity+1),  
+              arity+1,  
               (void*)get_int2aterm_value(opid)
              );
     }
@@ -3132,6 +3130,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "static atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
+      "  // Term t does not have the shape #REWR#(t1,...,tn)\n"
+      "  if (mcrl2::data::is_variable(t))\n"
+      "  {\n"
+      "    return (*(this_rewriter->global_sigma))(t);\n"
+      "  }\n"
       "  if (mcrl2::data::is_abstraction(t))\n"
       "  {\n"
       "    atermpp::aterm_appl binder(t(0));\n"
@@ -3186,11 +3189,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    }\n"
       "  }\n"
       "  \n"
-      "  // Term t does not have the shape #REWR#(t1,...,tn)\n"
-      "  if (gsIsDataVarId(t))\n"
-      "  {\n"
-      "    return (*(this_rewriter->global_sigma))(t);\n"
-      "  }\n"
       "  return rewrite_aux(t);\n"
       "}\n",
       atermpp::detail::function_adm.AS_INT.number(),get_num_opids(), max_arity);

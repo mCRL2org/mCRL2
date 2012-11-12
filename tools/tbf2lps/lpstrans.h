@@ -17,6 +17,6 @@ atermpp::aterm_appl translate(atermpp::aterm_appl spec, bool convert_bools, bool
 //Ret: an equivalent mCRL2 LPS, in which sort Bool is converted based on the
 //     values of convert_bools and convert_funcs
 
-bool is_mCRL_spec(atermpp::aterm_appl spec);
+bool is_mCRL_spec(const atermpp::aterm_appl &spec);
 //Ret: spec is a mCRL LPE
 

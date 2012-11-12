@@ -1033,7 +1033,7 @@ write_baf(const aterm &t, ostream &os)
       nr_unique_terms += count[lcv];
 
       sym_entries[cur].term_width = bit_width(count[lcv]);
-      sym_entries[cur].id = lcv;
+      sym_entries[cur].id = function_symbol(lcv);
       sym_entries[cur].arity = function_symbol(lcv).arity();
       sym_entries[cur].nr_terms = count[lcv];
       sym_entries[cur].terms.resize(count[lcv]);
@@ -1145,19 +1145,19 @@ static function_symbol read_symbol(istream &is)
 
   if ((len = readString(is)) == atermpp::npos)
   {
-    return atermpp::npos;
+    return function_symbol(atermpp::npos);
   }
 
   text_buffer[len] = '\0';
 
   if (readInt(&arity, is) < 0)
   {
-    return atermpp::npos;
+    return function_symbol(atermpp::npos);
   }
 
   if (readInt(&quoted, is) < 0)
   {
-    return atermpp::npos;
+    return function_symbol(atermpp::npos);
   }
 
   return function_symbol(text_buffer, arity);

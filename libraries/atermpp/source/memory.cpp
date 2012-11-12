@@ -22,7 +22,6 @@
 namespace atermpp
 {
 
-/*{{{  globals */
 
 namespace detail
 {
@@ -68,26 +67,6 @@ typedef struct TermInfo
 
 static std::vector<TermInfo> terminfo(INITIAL_MAX_TERM_SIZE);
 
-
-void initialise_aterm_administration()
-{
-  // Explict initialisation on first use. This first
-  // use is when a function symbol is created for the first time,
-  // which may be due to the initialisation of a global variable in
-  // a .cpp file, or due to the initialisation of a pre-main initialisation
-  // of a static variable, which some compilers do.
-
-  aterm_table_size=INITIAL_TERM_TABLE_SIZE;
-  aterm_table_mask=aterm_table_size-1;
-
-  aterm_hashtable=reinterpret_cast<_aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
-  if (aterm_hashtable==NULL)
-  {
-    throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");
-  }
-  
-}
-
 static size_t total_nodes = 0;
 
 
@@ -119,10 +98,6 @@ static void remove_from_hashtable(_aterm *t)
   while (((prev=cur), (cur=cur->next())));
   assert(0);
 }
-
-#ifndef NDEBUG
-  static bool check_that_all_objects_are_free();
-#endif
 
 
 /* Free a term, without removing it from the
@@ -181,7 +156,7 @@ static void resize_aterm_hashtable()
 }
 
 #ifndef NDEBUG
-bool check_that_all_objects_are_free()
+static void check_that_all_objects_are_free()
 {
   std::cerr << "CHECKING THAT ALL OBJECTS ARE FREE \n";
   bool result=true;
@@ -214,12 +189,32 @@ bool check_that_all_objects_are_free()
 
   }
 
-  return result;
+  assert(result);
 }
 #endif
 
-/*}}}  */
-/*{{{  static void allocate_block(size_t size)  */
+void initialise_aterm_administration()
+{
+  // Explict initialisation on first use. This first
+  // use is when a function symbol is created for the first time,
+  // which may be due to the initialisation of a global variable in
+  // a .cpp file, or due to the initialisation of a pre-main initialisation
+  // of a static variable, which some compilers do.
+
+  aterm_table_size=INITIAL_TERM_TABLE_SIZE;
+  aterm_table_mask=aterm_table_size-1;
+
+  aterm_hashtable=reinterpret_cast<_aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
+  if (aterm_hashtable==NULL)
+  {
+    throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");
+  }
+
+  // Check at exit that all function symbols and terms have been cleaned up properly.
+  assert(!atexit(check_that_all_objects_are_free)); // zero is returned when registering is successful.
+  
+}
+
 
 static void allocate_block(size_t size)
 {
@@ -336,10 +331,10 @@ void aterm::free_term() const
       reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
     }
   }
-#ifndef NDEBUG
+/* #ifndef NDEBUG
   const size_t function_symbol_index=function().number();
   const size_t ref_count=detail::function_lookup_table[function_symbol_index].reference_count;
-#endif
+#endif */
   const size_t size=detail::TERM_SIZE_APPL(t->function().arity());
 
   t->function().~function_symbol(); 
@@ -348,13 +343,13 @@ void aterm::free_term() const
   t->next()  = ti.at_freelist;
   ti.at_freelist = t; 
 
-#ifndef NDEBUG
+/* #ifndef NDEBUG
   if (function_symbol_index==detail::function_adm.AS_EMPTY_LIST.number() && ref_count<=2) // When destroying the one but last empty_list function symbol, it 
                                                                                           // is likely that all other terms have been removed.
   {
     assert(detail::check_that_all_objects_are_free());
   }
-#endif
+#endif */
 }
 
 aterm::aterm(const function_symbol &sym)

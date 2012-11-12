@@ -47,9 +47,9 @@ static bool remove_standard_functions = true;
 static bool has_func_T = false;
 static aterm_list typelist;
 
-bool is_mCRL_spec(aterm_appl spec)
+bool is_mCRL_spec(const aterm_appl &spec)
 {
-  return spec.function() == atermpp::function_symbol("spec2gen", 2).number();
+  return spec.function() == atermpp::function_symbol("spec2gen", 2);
 }
 
 

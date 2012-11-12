@@ -716,7 +716,7 @@ function_symbol get_int2term(const size_t n)
   return int2term()[n];
 }
 
-atermpp::aterm_int OpId2Int(const function_symbol &term)
+const atermpp::aterm_int &OpId2Int(const function_symbol &term)
 {
   std::map< function_symbol, atermpp::aterm_int >::iterator f = term2int().find(term);
   if (f == term2int().end())
@@ -726,7 +726,7 @@ atermpp::aterm_int OpId2Int(const function_symbol &term)
     term2int()[term] =  i;
     assert(int2term().size()==num_opids);
     int2term().push_back(term);
-    return i;
+    return term2int()[term];
   }
 
   return f->second;
@@ -793,7 +793,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
   using namespace atermpp;
   if (is_variable(term))
   {
-    return variable(term);
+    return aterm_cast<data_expression>(term);
   }
 
   if (is_where_clause(term))

@@ -67,7 +67,7 @@ class function_symbol
     /// \details This function is deprecated and should not be used
     /// \param n The number of an function_symbol
     /// \deprecated
-    function_symbol(const size_t n):m_number(n)
+    explicit function_symbol(const size_t n):m_number(n)
     {
       assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
       increase_reference_count<false>();

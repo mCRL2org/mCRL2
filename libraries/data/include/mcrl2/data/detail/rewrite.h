@@ -239,7 +239,7 @@ bool isValidRewriteRule(const data_equation &dataeqn);
 extern std::vector <atermpp::function_symbol> apples;
 
 /** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
-inline size_t get_appl_afun_value(size_t arity)
+inline atermpp::function_symbol& get_appl_afun_value(size_t arity)
 {
   if (arity >= apples.size())
   {
@@ -250,7 +250,7 @@ inline size_t get_appl_afun_value(size_t arity)
     }
   }
   assert(arity<apples.size());
-  return apples[arity].number();
+  return apples[arity];
 }
 
 /**
@@ -342,7 +342,7 @@ inline size_t getArity(const data::function_symbol &op)
 }
 
 
-atermpp::aterm_int OpId2Int(const function_symbol &);
+const atermpp::aterm_int &OpId2Int(const function_symbol &);
 
 data_expression fromInner(const atermpp::aterm_appl &term);
 
