@@ -97,10 +97,8 @@ class control_flow_source_algorithm
 
     // computes the source function for a pbes equation
     // source[i] contains the source parameters of g_i, represented in the form of a substitution
-    template <typename DataRewriter>
     void compute_source(const pfnf_equation& eqn,
-                        std::vector<data::mutable_map_substitution<> >& source,
-                        DataRewriter rewr
+                        std::vector<data::mutable_map_substitution<> >& source
                        ) const
     {
       typedef core::term_traits<pbes_expression> tr;
@@ -161,13 +159,12 @@ class control_flow_source_algorithm
     // rewrite the parameters of the propositional variables, using the substitutions of the source function
     void compute_source()
     {
-      data::rewriter rewr(m_pbes.data());
       const std::vector<pfnf_equation>& equations = m_pbes.equations();
 
       for (std::vector<pfnf_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         std::vector<data::mutable_map_substitution<> > source;
-        compute_source(*i, source, rewr);
+        compute_source(*i, source);
         m_source.push_back(source);
       }
     }
