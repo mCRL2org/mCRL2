@@ -17,7 +17,6 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_io.h"
@@ -399,44 +398,9 @@ class ltsconvert_tool : public ltsconvert_base
 
 };
 
-class ltsconvert_gui_tool: public mcrl2_gui_tool<ltsconvert_tool>
-{
-  public:
-    ltsconvert_gui_tool()
-    {
-
-      std::vector<std::string> values;
-
-      m_gui_options["determinise"] = create_checkbox_widget();
-
-      values.clear();
-      values.push_back("none");
-      values.push_back("bisim");
-      values.push_back("branching-bisim");
-      values.push_back("dpbranching-bisim");
-      values.push_back("sim");
-      values.push_back("trace");
-      values.push_back("weak-trace");
-      values.push_back("tau-star");
-      m_gui_options["equivalence"] = create_radiobox_widget(values);
-      m_gui_options["lps"] = create_filepicker_widget("LPS files (*.lps)|*.lps|All Files (*.*)|*.*");
-      m_gui_options["no-state"] = create_checkbox_widget();
-      m_gui_options["no-reach"] = create_checkbox_widget();
-      m_gui_options["tau"] = create_textctrl_widget();
-
-      //-iFORMAT, --in=FORMAT    use FORMAT as the input format
-      //-oFORMAT, --out=FORMAT   use FORMAT as the output format
-
-    }
-};
-
-
-
-
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return ltsconvert_gui_tool().execute(argc,argv);
+  return ltsconvert_tool().execute(argc,argv);
 }

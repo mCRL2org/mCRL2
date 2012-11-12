@@ -22,7 +22,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include "mcrl2/data/parse.h"
 // #include "mcrl2/data/detail/internal_format_conversion.h"
@@ -317,22 +316,9 @@ class lts2lps_tool : public input_output_tool
     }
 };
 
-class lts2lps_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2lps_tool>
-{
-  public:
-    lts2lps_gui_tool()
-    {
-
-      m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
-      m_gui_options["lps"]  = create_filepicker_widget("LPS File (*.lps)|*.lps|All Files (*.*)|*.*");
-      m_gui_options["mcrl2"] = create_filepicker_widget("mCRL2 files (*.mcrl2)|*.mcrl2|Text Files (*.txt)|*.txt|All Files (*.*)|*.*");
-
-    }
-};
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lts2lps_gui_tool().execute(argc, argv);
+  return lts2lps_tool().execute(argc, argv);
 }

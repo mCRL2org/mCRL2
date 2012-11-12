@@ -13,7 +13,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -69,20 +68,9 @@ class pbes_stategraph_tool: public input_output_tool
     }
 };
 
-class pbes_stategraph_gui_tool: public mcrl2_gui_tool<pbes_stategraph_tool>
-{
-  public:
-    pbes_stategraph_gui_tool()
-    {
-      m_gui_options["simplify"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  pbes_stategraph_gui_tool tool;
-  return tool.execute(argc, argv);
+  return pbes_stategraph_tool().execute(argc, argv);
 }
 

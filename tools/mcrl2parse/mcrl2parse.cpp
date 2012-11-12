@@ -47,7 +47,6 @@
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -785,15 +784,9 @@ class mcrl2parse_tool : public input_tool
 
 };
 
-class mcrl2parse_gui_tool: public mcrl2_gui_tool<mcrl2parse_tool>
-{
-  public:
-    mcrl2parse_gui_tool() {}
-};
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return mcrl2parse_gui_tool().execute(argc, argv);
+  return mcrl2parse_tool().execute(argc, argv);
 }

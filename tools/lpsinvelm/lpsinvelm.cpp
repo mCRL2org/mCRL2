@@ -19,7 +19,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/tools.h"
 
 using namespace mcrl2;
@@ -39,7 +38,7 @@ using namespace mcrl2::utilities::tools;
 
 /// \brief The class invelm_tool takes an invariant and an LPS, and simplifies this LPS using
 /// \brief the invariant.
-class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
+class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 {
   private:
     /// \brief The name of the file containing the invariant.
@@ -155,7 +154,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
   public:
     /// \brief Constructor setting all flags to their default values.
-    invelm_tool() : super(
+    lpsinvelm_tool() : super(
         "lpsinvelm",
         "Luc Engelen",
         "check invariants and use these to simplify or eliminate summands of an LPS",
@@ -197,28 +196,8 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
     }
 };
 
-class lpsinvelm_gui_tool: public mcrl2_gui_tool<invelm_tool>
-{
-  public:
-    lpsinvelm_gui_tool()
-    {
-
-      m_gui_options["counter-example"] = create_checkbox_widget();
-      m_gui_options["no-elimination"] = create_checkbox_widget();
-      m_gui_options["simplify-all"] = create_checkbox_widget();
-      m_gui_options["no-check"] = create_checkbox_widget();
-      m_gui_options["induction"] = create_checkbox_widget();
-      m_gui_options["print-dot"] = create_textctrl_widget();
-      add_rewriter_widget();
-      m_gui_options["summand"] = create_textctrl_widget();
-      m_gui_options["time-limit"] = create_textctrl_widget();
-      m_gui_options["all-violations"] = create_checkbox_widget();
-      m_gui_options["smt-solver"] = create_textctrl_widget();
-    }
-};
-
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return lpsinvelm_gui_tool().execute(argc, argv);
+  return lpsinvelm_tool().execute(argc, argv);
 }

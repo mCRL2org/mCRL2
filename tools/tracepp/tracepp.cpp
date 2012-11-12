@@ -20,7 +20,6 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/data/data_expression.h"
@@ -299,24 +298,8 @@ class tracepp_tool: public input_output_tool
     }
 };
 
-class tracepp_gui_tool: public mcrl2_gui_tool<tracepp_tool>
-{
-  public:
-    tracepp_gui_tool()
-    {
-      std::vector<std::string> values;
-      values.push_back("plain");
-      values.push_back("states");
-      values.push_back("mcrl2");
-      values.push_back("aut");
-      values.push_back("dot");
-      m_gui_options["format"] = create_radiobox_widget(values);
-    }
-};
-
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return tracepp_gui_tool().execute(argc, argv);
+  return tracepp_tool().execute(argc, argv);
 }

@@ -22,7 +22,6 @@
 //mCRL2 specific
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/pbesinstconversion.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -31,12 +30,12 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class txt2pbes_tool: public input_output_tool
+class txt2bes_tool: public input_output_tool
 {
     typedef input_output_tool super;
 
   public:
-    txt2pbes_tool()
+    txt2bes_tool()
       : super(NAME, AUTHOR,
               "parse a textual description of a BES",
               "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
@@ -62,15 +61,8 @@ class txt2pbes_tool: public input_output_tool
     }
 };
 
-class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool>
-{
-  public:
-    txt2pbes_gui_tool() {}
-};
-
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return txt2pbes_gui_tool().execute(argc, argv);
+  return txt2bes_tool().execute(argc, argv);
 }

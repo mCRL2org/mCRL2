@@ -16,7 +16,6 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -89,22 +88,9 @@ class lps2pbes_tool : public input_output_tool
 
 };
 
-class lps2pbes_gui_tool: public mcrl2_gui_tool<lps2pbes_tool>
-{
-  public:
-    lps2pbes_gui_tool()
-    {
-      m_gui_options["formula"] = create_filepicker_widget("modal mu-calculus files (*.mcf)|*.mcf|Text files(*.txt)|*.txt|All Files (*.*)|*.*");
-      m_gui_options["timed"] = create_checkbox_widget();
-      m_gui_options["structured"] = create_checkbox_widget();
-      m_gui_options["unoptimized"] = create_checkbox_widget();
-    }
-};
-
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps2pbes_gui_tool().execute(argc, argv);
+  return lps2pbes_tool().execute(argc, argv);
 }

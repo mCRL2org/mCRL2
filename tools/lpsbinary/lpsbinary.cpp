@@ -15,7 +15,6 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::utilities;
@@ -48,18 +47,9 @@ class binary_tool: public rewriter_tool<input_output_tool>
 
 };
 
-class binary_gui_tool: public mcrl2_gui_tool<binary_tool>
-{
-  public:
-    binary_gui_tool()
-    {
-      add_rewriter_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc,argv)
 
-  return binary_gui_tool().execute(argc, argv);
+  return binary_tool().execute(argc, argv);
 }

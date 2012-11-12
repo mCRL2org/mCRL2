@@ -25,7 +25,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -71,15 +70,8 @@ class txt2pbes_tool: public input_output_tool
     }
 };
 
-class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool>
-{
-  public:
-    txt2pbes_gui_tool() {}
-};
-
-
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return txt2pbes_gui_tool().execute(argc, argv);
+  return txt2pbes_tool().execute(argc, argv);
 }
