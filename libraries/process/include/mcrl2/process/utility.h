@@ -426,19 +426,25 @@ multi_action_name_set rename_inverse(const rename_expression_list& R, const mult
 }
 
 inline
-multi_action_name_set allow(const action_name_multiset_list& V, const multi_action_name_set& A)
+multi_action_name_set allow(const action_name_multiset_list& V, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
-  // compute V1 such that V1 = union(V, { tau })
-  multi_action_name_set V1;
+  multi_action_name_set result;
+
   for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
   {
     core::identifier_string_list names = i->names();
-    multi_action_name alpha(names.begin(), names.end());
-    V1.insert(alpha);
+    multi_action_name v(names.begin(), names.end());
+    for (multi_action_name_set::const_iterator j = A.begin(); j != A.end(); ++j)
+    {
+      const multi_action_name& alpha = *j;
+      bool keep = A_includes_subsets ? detail::includes(alpha, v) : alpha == v;
+      if (keep)
+      {
+        result.insert(v);
+      }
+    }
   }
-  V1.insert(multi_action_name());
-
-  return process::set_intersection(A, V1);
+  return result;
 }
 
 inline

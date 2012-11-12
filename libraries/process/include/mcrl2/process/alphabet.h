@@ -111,7 +111,7 @@ process_expression make_left_merge(const process_expression x, const process_exp
 inline
 process_expression make_allow(const multi_action_name_set& A, const process_expression& x)
 {
-  if (A.empty()) 
+  if (A.empty())
   {
     return delta();
   }
@@ -127,7 +127,7 @@ process_expression make_allow(const multi_action_name_set& A, const process_expr
     }
   }
   action_name_multiset_list B(v.begin(), v.end());
-  
+
   return B.empty() ? x : allow(B, x);
 }
 
@@ -689,7 +689,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void operator()(const process::allow& x)
   {
     action_name_multiset_list V = x.allow_set();
-    allow_set A1(alphabet_operations::allow(V, A.actions));
+    allow_set A1(alphabet_operations::allow(V, A.actions, A.includes_subsets), A.includes_subsets);
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.finish(equations, A1);
     push(node);
