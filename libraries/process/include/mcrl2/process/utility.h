@@ -318,18 +318,31 @@ communication_expression_list filter_comm_set(const communication_expression_lis
 /// \brief The namespace for alphabet operations
 namespace alphabet_operations {
 
+// N.B. Very inefficient!
+inline
+void find_subsets(const multi_action_name& alpha, multi_action_name_set& result)
+{
+  if (alpha.empty())
+  {
+    return;
+  }
+  result.insert(alpha);
+  multi_action_name beta = alpha;
+  for (multi_action_name::const_iterator i = alpha.begin(); i != alpha.end(); ++i)
+  {
+    beta.erase(beta.find(*i));
+    find_subsets(beta, result);
+    beta.insert(*i);
+  }
+}
+
 inline
 multi_action_name_set subsets(const multi_action_name_set& A)
 {
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    multi_action_name alpha = *i;
-    while (!alpha.empty())
-    {
-      result.insert(alpha);
-      alpha.erase(alpha.begin());
-    }
+    find_subsets(*i, result);
   }
   return result;
 }
