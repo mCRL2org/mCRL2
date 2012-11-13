@@ -832,6 +832,45 @@ class command_line_parser
       get_registered_actions().push_back(action);
     }
 
+    /**
+     * \brief Overload for std::string that just returns the value.
+     * \overload
+     *
+     * Note that this is essential for handling arguments with spaces.
+     **/
+    inline void
+    option_argument_as_impl(std::string const& long_identifier, std::string& res) const
+    {
+      res = option_argument(long_identifier);
+    }
+
+    /**
+     * \brief Returns the converted argument of the first option matching a name
+     * \param[in] long_identifier the long identifier for the option
+     * \pre 0 < options.count(long_identifier) and !options.find(long_identifier)->second.empty()
+     * \throw std::runtime_error containing a message that the argument cannot be converted to the specified type
+     * \return t : T where t << std::istringstream(option_argument_as(long_identifier))
+     * \see std::string const& option_argument(std::string const& long_identifier)
+     **/
+    template < typename T >
+    inline void
+    option_argument_as_impl(std::string const& long_identifier, T& result) const
+    {
+      std::istringstream in(option_argument(long_identifier));
+
+      result = T();
+
+      in >> result;
+
+      if (in.fail())
+      {
+        const char short_option(m_interface.long_to_short(long_identifier));
+
+        throw error("argument `" + option_argument(long_identifier) + "' to option --" + long_identifier +
+              ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
+      }
+    }
+
   public:
 
     /**
@@ -940,22 +979,11 @@ class command_line_parser
     template < typename T >
     inline T option_argument_as(std::string const& long_identifier) const
     {
-      std::istringstream in(option_argument(long_identifier));
-
-      T result = T();
-
-      in >> result;
-
-      if (in.fail())
-      {
-        const char short_option(m_interface.long_to_short(long_identifier));
-
-        throw error("argument `" + option_argument(long_identifier) + "' to option --" + long_identifier +
-              ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
-      }
-
+      T result;
+      option_argument_as_impl(long_identifier, result);
       return result;
     }
+
 };
 
 /// Creates an optional option argument specification object
