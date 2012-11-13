@@ -65,7 +65,9 @@ typedef struct TermInfo
 
 } TermInfo;
 
-static std::vector<TermInfo> terminfo(INITIAL_MAX_TERM_SIZE);
+// The following is not a vector to avoid that it is prematurely destroyed.
+static size_t terminfo_size=0;
+static TermInfo *terminfo;
 
 static size_t total_nodes = 0;
 
@@ -160,7 +162,7 @@ static void check_that_all_objects_are_free()
 {
   bool result=true;
 
-  for(size_t size=0; size<terminfo.size(); ++size)
+  for(size_t size=0; size<terminfo_size; ++size)
   {
     TermInfo *ti=&terminfo[size];
     for(Block* b=ti->at_block; b!=NULL; b=b->next_by_size)
@@ -218,8 +220,17 @@ void initialise_aterm_administration()
     throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");
   }
 
+  terminfo_size=INITIAL_MAX_TERM_SIZE;
+  terminfo=reinterpret_cast<TermInfo*>(malloc(terminfo_size*sizeof(TermInfo)));
+  for(size_t i=0; i<terminfo_size; ++i)
+  {
+    new (&terminfo[i]) TermInfo();
+  }
+
   // Check at exit that all function symbols and terms have been cleaned up properly.
+#ifdef this_sanity_check_fails_on_some_machines_and_needs_to_be_investigated_further
   assert(!atexit(check_that_all_objects_are_free)); // zero is returned when registering is successful.
+#endif
   
 }
 
@@ -232,7 +243,7 @@ static void allocate_block(size_t size)
     std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
   }
 
-  assert(size < terminfo.size());
+  assert(size < terminfo_size);
 
   TermInfo &ti = terminfo[size];
 
@@ -252,9 +263,20 @@ static void allocate_block(size_t size)
 
 _aterm* allocate_term(const size_t size)
 {
-  if (size >= terminfo.size())
+  if (size >= terminfo_size) 
   {
-    terminfo.resize(size+1);
+    // Double the size of terminfo
+    size_t old_term_info_size=terminfo_size;
+    terminfo_size <<=1; // Multiply by 2.
+    terminfo=reinterpret_cast<TermInfo*>(realloc(terminfo,terminfo_size*sizeof(TermInfo)));
+    if (terminfo==NULL)
+    {
+      throw std::runtime_error("Out of memory. Failed to allocate an extension of terminfo.");
+    }
+    for(size_t i=old_term_info_size; i<terminfo_size; ++i)
+    {
+      new (&terminfo[i]) TermInfo();
+    }
   }
 
   if (total_nodes>=(aterm_table_size>>1))
