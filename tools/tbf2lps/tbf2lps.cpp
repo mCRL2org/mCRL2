@@ -21,7 +21,6 @@
 #include "lpstrans.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2::log;
@@ -147,16 +146,7 @@ class tbf2lps_tool: public input_output_tool
     }
 };
 
-class tbf2lps_gui_tool: public mcrl2_gui_tool<tbf2lps_tool>
-{
-  public:
-    tbf2lps_gui_tool()
-    {
-      m_gui_options["no-conv-map"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return tbf2lps_gui_tool().execute(argc, argv);
+  return tbf2lps_tool().execute(argc, argv);
 }

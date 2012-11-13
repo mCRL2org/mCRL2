@@ -22,7 +22,6 @@
 #include "mcrl2/bes/detail/bes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -114,16 +113,7 @@ class besinfo_tool: public bes_input_tool<input_tool>
 
 };
 
-class besinfo_gui_tool: public mcrl2_gui_tool<besinfo_tool>
-{
-  public:
-    besinfo_gui_tool()
-    {
-      m_gui_options["full"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return besinfo_gui_tool().execute(argc, argv);
+  return besinfo_tool().execute(argc, argv);
 }

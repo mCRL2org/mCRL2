@@ -10,7 +10,6 @@
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -70,17 +69,8 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
 
 };
 
-class lps_rewriter_gui_tool: public mcrl2_gui_tool<lps_rewriter_tool>
-{
-  public:
-    lps_rewriter_gui_tool()
-    {
-      add_rewriter_widget();
-    }
-};
-
 int main(int argc, char* argv[])
 {
-  return lps_rewriter_gui_tool().execute(argc, argv);
+  return lps_rewriter_tool().execute(argc, argv);
 }
 

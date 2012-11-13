@@ -32,7 +32,6 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/pg_parse.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -131,25 +130,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
     }
 };
 
-class pg_solver_gui_tool: public mcrl2_gui_tool<pg_solver_tool>
-{
-  public:
-    pg_solver_gui_tool()
-    {
-      m_gui_options["verify"] = create_checkbox_widget();
-
-			std::vector<std::string> values;
-
-      values.clear();
-      values.push_back("spm");
-      values.push_back("altspm");
-      values.push_back("recursive");
-      m_gui_options["solver-type"] = create_radiobox_widget(values);
-    }
-};
-
 int main(int argc, char* argv[])
 {
-  pg_solver_gui_tool tool;
-  return tool.execute(argc, argv);
+  return pg_solver_tool().execute(argc, argv);
 }

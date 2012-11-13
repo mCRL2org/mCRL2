@@ -21,7 +21,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -43,7 +42,7 @@ using namespace mcrl2::log;
 /// \brief tau-summands of an LPS are confluent. The tau-actions of all confluent tau-summands can be
 /// \brief renamed to ctau, depending on the flag m_no_marking.
 
-class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
+class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 {
   protected:
 
@@ -169,7 +168,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
   public:
     /// \brief Constructor setting all flags to their default values.
-    confcheck_tool() : super(
+    lpsconfcheck_tool() : super(
         "lpsconfcheck",
         "Luc Engelen",
         "mark confluent tau-summands of an LPS",
@@ -263,28 +262,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
 };
 
-class lpsconfcheck_gui_tool: public mcrl2_gui_tool<confcheck_tool>
-{
-  public:
-    lpsconfcheck_gui_tool()
-    {
-      m_gui_options["check-all"] = create_checkbox_widget();
-      m_gui_options["counter-example"] = create_checkbox_widget();
-      m_gui_options["generate-invariants"] = create_checkbox_widget();
-      m_gui_options["invariant"] = create_filepicker_widget();
-      m_gui_options["no-marking"] = create_checkbox_widget();
-      m_gui_options["no-check"] = create_checkbox_widget();
-      m_gui_options["induction"] = create_checkbox_widget();
-      m_gui_options["print-dot"] = create_textctrl_widget();
-      add_rewriter_widget();
-      m_gui_options["summand"] = create_textctrl_widget();
-      m_gui_options["time-limit"] = create_textctrl_widget();
-      m_gui_options["smt-solver"] = create_textctrl_widget();
-    }
-};
-
-
 int main(int argc, char* argv[])
 {
-  return lpsconfcheck_gui_tool().execute(argc, argv);
+  return lpsconfcheck_tool().execute(argc, argv);
 }

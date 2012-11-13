@@ -24,7 +24,8 @@ class ToolCatalog
 {
   public:
     ToolCatalog();
-    QString fileType(QString extension);
+    // file types for an extension
+    QStringList fileTypes(QString extension);
 
     void load();
 
@@ -37,7 +38,8 @@ class ToolCatalog
     void generateFileTypes();
 
     QDomDocument m_xml;
-    QMap<QString, QString> m_filetypes;
+    // Maps extensions to file types
+    QMultiMap<QString, QString> m_filetypes;
 
     QMap<QString, QMap<QString, ToolInformation> > m_categories;
 };

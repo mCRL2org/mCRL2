@@ -18,7 +18,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/tools.h"
 
 using namespace mcrl2::log;
@@ -74,22 +73,7 @@ class lpspp_tool: public input_output_tool
     }
 };
 
-class lpspp_gui_tool: public mcrl2_gui_tool<lpspp_tool>
-{
-  public:
-    lpspp_gui_tool()
-    {
-
-      std::vector<std::string> values;
-
-      values.clear();
-      values.push_back("default");
-      values.push_back("internal");
-      m_gui_options["format"] = create_radiobox_widget(values);
-    }
-};
-
 int main(int argc, char* argv[])
 {
-  return lpspp_gui_tool().execute(argc, argv);
+  return lpspp_tool().execute(argc, argv);
 }

@@ -27,7 +27,6 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -312,19 +311,7 @@ class lts2pbes_tool : public input_output_tool
     }
 };
 
-class lts2pbes_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2pbes_tool>
-{
-  public:
-    lts2pbes_gui_tool()
-    {
-      m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
-      m_gui_options["lps"]  = create_filepicker_widget("LPS File (*.lps)|*.lps|All Files (*.*)|*.*");
-      m_gui_options["mcrl2"] = create_filepicker_widget("mCRL2 files (*.mcrl2)|*.mcrl2|Text Files (*.txt)|*.txt|All Files (*.*)|*.*");
-      m_gui_options["formula"] = create_filepicker_widget("modal mu-calculus files (*.mcf)|*.mcf|Text files(*.txt)|*.txt|All Files (*.*)|*.*");
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return lts2pbes_gui_tool().execute(argc, argv);
+  return lts2pbes_tool().execute(argc, argv);
 }

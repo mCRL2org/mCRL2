@@ -209,7 +209,7 @@ bool lps2lts_algorithm::generate_lts()
   if (m_options.bithashing)
   {
     const std::pair<size_t, bool> p=m_bit_hash_table.add_state(storage_state(initial_state));
-    m_initial_state_number=p.first; 
+    m_initial_state_number=p.first;
     assert(p.second); // The initial state is new.
   }
   else
@@ -823,6 +823,11 @@ void lps2lts_algorithm::generate_lts_breadth()
                        << "tr.\n";
     }
   }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
+  }
 }
 
 void lps2lts_algorithm::generate_lts_breadth_bithashing(const generator_state_t &initial_state)
@@ -887,6 +892,11 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(const generator_state_t 
       start_level_transitions = m_num_transitions;
     }
   }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
+  }
 }
 
 void lps2lts_algorithm::generate_lts_depth(const generator_state_t &initial_state)
@@ -918,6 +928,11 @@ void lps2lts_algorithm::generate_lts_depth(const generator_state_t &initial_stat
                         << " and " << m_num_transitions << " transition" << ((m_num_transitions==1)?"":"s")
                         << " (stacksize is " << stack.size() << ")" << std::endl;
     }
+  }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
   }
 }
 
@@ -958,5 +973,10 @@ void lps2lts_algorithm::generate_lts_random(const generator_state_t &initial_sta
                         << m_num_transitions << " transition" << ((m_num_transitions==1)?"":"s")
                         << " and encountered " << m_num_states << " unique state" << ((m_num_states==1)?"":"s") << std::endl;
     }
+  }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
   }
 }

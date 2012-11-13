@@ -36,8 +36,6 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
-
 
 using namespace std;
 using namespace mcrl2;
@@ -322,17 +320,8 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     }
 };
 
-class mcrl2i_gui_tool: public mcrl2_gui_tool<mcrl2i_tool>
-{
-  public:
-    mcrl2i_gui_tool()
-    {
-      add_rewriter_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return mcrl2i_gui_tool().execute(argc, argv);
+  return mcrl2i_tool().execute(argc, argv);
 }
 

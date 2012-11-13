@@ -425,13 +425,20 @@ inline
 std::string pp(const multi_action_name& x)
 {
   std::ostringstream out;
-  for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
+  if (x.empty())
   {
-    if (i != x.begin())
+    out << "tau";
+  }
+  else
+  {
+    for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
     {
-      out << " | ";
+      if (i != x.begin())
+      {
+        out << " | ";
+      }
+      out << core::pp(*i);
     }
-    out << core::pp(*i);
   }
   return out.str();
 }

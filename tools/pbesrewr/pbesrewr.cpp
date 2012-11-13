@@ -16,7 +16,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -86,28 +85,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
 };
 
-class pbes_rewriter_gui: public mcrl2_gui_tool<pbes_rewriter>
-{
-  public:
-    pbes_rewriter_gui()
-    {
-
-      std::vector<std::string> values;
-
-      values.clear();
-      values.push_back("simplify");
-      values.push_back("quantifier-all");
-      values.push_back("quantifier-finite");
-      values.push_back("quantifier-one-point");
-      values.push_back("pfnf");
-      values.push_back("ppg");
-      values.push_back("bqnf-quantifier");
-      m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
-
-      add_rewriter_widget();
-    }
-};
 int main(int argc, char* argv[])
 {
-  return pbes_rewriter_gui().execute(argc, argv);
+  return pbes_rewriter().execute(argc, argv);
 }

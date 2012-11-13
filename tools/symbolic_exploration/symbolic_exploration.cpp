@@ -12,7 +12,6 @@
 
 #include "mcrl2/pbes/detail/symbolic_exploration.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -69,14 +68,7 @@ class symbolic_exploration_tool: public input_output_tool
     }
 };
 
-class symbolic_exploration_gui_tool: public mcrl2_gui_tool<symbolic_exploration_tool>
-{
-  public:
-    symbolic_exploration_gui_tool() {}
-};
-
 int main(int argc, char* argv[])
 {
-  symbolic_exploration_gui_tool tool;
-  return tool.execute(argc, argv);
+  return symbolic_exploration_tool().execute(argc, argv);
 }

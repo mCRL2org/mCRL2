@@ -20,7 +20,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
@@ -101,22 +100,8 @@ class bespp_tool: public bes_input_tool<input_output_tool>
     }
 };
 
-class bespp_gui_tool: public mcrl2_gui_tool<bespp_tool>
-{
-  public:
-    bespp_gui_tool()
-    {
-
-      std::vector<std::string> values;
-
-      values.clear();
-      values.push_back("default");
-      m_gui_options["format"] = create_radiobox_widget(values);
-    }
-};
-
 int main(int argc, char* argv[])
 {
-  return bespp_gui_tool().execute(argc, argv);
+  return bespp_tool().execute(argc, argv);
 }
 

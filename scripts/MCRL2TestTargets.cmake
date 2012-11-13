@@ -165,13 +165,11 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     )
   endif(MCRL2_MAN_PAGES)
   add_test(NAME mcrl22lps_generate-xml COMMAND mcrl22lps --generate-xml)
-  add_test(NAME mcrl22lps_mcrl2-gui COMMAND mcrl22lps --mcrl2-gui)
 
 
   set_tests_properties(
     mcrl22lps_abp
     mcrl22lps_generate-xml
-    mcrl22lps_mcrl2-gui
     lpsinfo_abp
     lpsconstelm_abp
     lpsparelm_abp

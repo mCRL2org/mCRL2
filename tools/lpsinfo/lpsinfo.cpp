@@ -15,7 +15,6 @@
 
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -49,16 +48,7 @@ class lpsinfo_tool: public input_tool
 
 };
 
-class lpsinfo_gui_tool: public mcrl2_gui_tool<lpsinfo_tool>
-{
-  public:
-    lpsinfo_gui_tool()
-    {
-      // m_gui_options["abc"] = create_textctrl_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return lpsinfo_gui_tool().execute(argc, argv);
+  return lpsinfo_tool().execute(argc, argv);
 }

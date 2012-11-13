@@ -23,7 +23,6 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/process/parse.h"
 
 // #include "gc.h"  Required for ad hoc garbage collection. This is possible with ATcollect,
@@ -85,7 +84,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "See -c/--cluster, esp. for a short explanation of the clustering "
                       "process.", 'n');
       desc.add_option("no-alpha",
-                      "alphabet reductions are not applied."
+                      "alphabet reductions are not applied. "
                       "By default mcrl22lps attempts to distribute communication, hiding "
                       "and allow operators over the parallel composition operator as "
                       "this reduces the size of intermediate linear processes. By using "
@@ -236,40 +235,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
     }
 };
 
-class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
-{
-  public:
-    mcrl22lps_gui_tool()
-    {
-
-      m_gui_options["statenames"] = create_checkbox_widget();
-      m_gui_options["binary"] = create_checkbox_widget();
-      m_gui_options["cluster"] = create_checkbox_widget();
-      m_gui_options["delta"] = create_checkbox_widget();
-      m_gui_options["check-only"] = create_checkbox_widget();
-      m_gui_options["no-globvars"] = create_checkbox_widget();
-      m_gui_options["no-deltaelm"] = create_checkbox_widget();
-      m_gui_options["check-only"] = create_checkbox_widget();
-      m_gui_options["check-only"] = create_checkbox_widget();
-      m_gui_options["no-constelm"] = create_checkbox_widget();
-
-      std::vector<std::string> values;
-      values.clear();
-      values.push_back("regular");
-      values.push_back("regular2");
-      values.push_back("stack");
-      m_gui_options["lin-method"] = create_radiobox_widget(values);
-      m_gui_options["no-cluster"] = create_checkbox_widget();
-      m_gui_options["no-rewrite"] = create_checkbox_widget();
-
-      add_rewriter_widget();
-      m_gui_options["newstate"] = create_checkbox_widget();
-      m_gui_options["no-alpha"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return mcrl22lps_gui_tool().execute(argc, argv);
+  return mcrl22lps_tool().execute(argc, argv);
 }
 

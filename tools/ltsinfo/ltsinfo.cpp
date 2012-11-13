@@ -18,7 +18,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_algorithm.h"
 
@@ -190,16 +189,7 @@ class ltsinfo_tool : public ltsinfo_base
     }
 };
 
-class ltsinfo_gui_tool: public mcrl2_gui_tool<ltsinfo_tool>
-{
-  public:
-    ltsinfo_gui_tool()
-    {
-      //-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return ltsinfo_gui_tool().execute(argc, argv);
+  return ltsinfo_tool().execute(argc, argv);
 }

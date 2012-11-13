@@ -14,7 +14,6 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -84,19 +83,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
     }
 };
 
-class suminst_gui_tool: public mcrl2_gui_tool<suminst_tool>
-{
-  public:
-    suminst_gui_tool()
-    {
-
-      m_gui_options["finite"] = create_checkbox_widget();
-      add_rewriter_widget();
-      m_gui_options["tau"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  return suminst_gui_tool().execute(argc, argv);
+  return suminst_tool().execute(argc, argv);
 }

@@ -90,10 +90,17 @@ else()
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
-    CACHE STRING "Flags used for linking binaries during maintainer builds.")
-set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
-    CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
+if(APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER ""
+      CACHE STRING "Flags used for linking binaries during maintainer builds.")
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER ""
+      CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
+else()
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
+      CACHE STRING "Flags used for linking binaries during maintainer builds.")
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once"
+      CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
+endif()
 
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
