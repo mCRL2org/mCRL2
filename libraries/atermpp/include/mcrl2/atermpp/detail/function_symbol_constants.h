@@ -28,14 +28,18 @@ struct constant_function_symbols
     atermpp::function_symbol AS_LIST;
     atermpp::function_symbol AS_EMPTY_LIST;
 
-    // The function symbols below intentionally contain spaces, such that they are not
-    // confused with function symbols that are used by applications of the aterms.
     constant_function_symbols():
-      AS_DEFAULT("<undefined term>", 0),
-      AS_INT("<aterm int>", 1),
-      AS_LIST("<list constructor>", 2),
-      AS_EMPTY_LIST("<empty list>", 0)   
-    {} 
+       AS_DEFAULT("<undefined_term>",0),
+       AS_INT("<aterm_int>",1),
+       AS_LIST("<list_constructor>",2),
+       AS_EMPTY_LIST("<empty_list>",0)
+    {
+      assert(AS_DEFAULT.number()==0);
+      assert(AS_INT.number()==1);
+      assert(AS_LIST.number()==2);
+      assert(AS_EMPTY_LIST.number()==3);
+    } 
+
 
     // This function is used to explicitly initialise
     // the default constant function symbols, in case 
@@ -45,10 +49,10 @@ struct constant_function_symbols
     // functions, but this is compiler dependent.
     void initialise_function_symbols()
     {
-      new (&AS_DEFAULT) function_symbol("<undefined term>", 0);
-      new (&AS_INT) function_symbol("<aterm int>", 1);
-      new (&AS_LIST) function_symbol("<list constructor>", 2);
-      new (&AS_EMPTY_LIST) function_symbol("<empty list>", 0);
+      new (&AS_DEFAULT) function_symbol("<undefined_term>", 0);
+      new (&AS_INT) function_symbol("<aterm_int>", 1);
+      new (&AS_LIST) function_symbol("<list_constructor>", 2);
+      new (&AS_EMPTY_LIST) function_symbol("<empty_list>", 0);
       // The following numbers are expected to be used. If not
       // something is most likely wrong. Moreover, some code
       // depends on low numbers to be assigned to the basic 

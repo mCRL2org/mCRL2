@@ -158,8 +158,6 @@ static void resize_aterm_hashtable()
 #ifndef NDEBUG
 static void check_that_all_objects_are_free()
 {
-#if 0
-  std::cerr << "CHECKING THAT ALL OBJECTS ARE FREE \n";
   bool result=true;
 
   for(size_t size=0; size<terminfo.size(); ++size)
@@ -171,18 +169,27 @@ static void check_that_all_objects_are_free()
       {
         if (p->reference_count()!=0 && p->function()!=function_adm.AS_EMPTY_LIST)
         {
-          fprintf(stderr,"CHECK: Non free term %p (size %lu). ",&*p,size);
-          fprintf(stderr,"Reference count %ld\n",p->reference_count());
+          fprintf(stderr,"CHECK: Non free term %p (size %lu). ",p,size);
+          fprintf(stderr,"Reference count %ld ",p->reference_count());
+          std::cerr << "Func: " << p->function().name() << ". Arity: " << p->function().arity() << "\n";
           result=false;
-          assert(result);
         }
       }
     }
   }
 
-  for(size_t i=4; i<function_lookup_table_size; ++i) // We do not check the first four function symbols
+  // Check the function symbols. The first four function symbols
+  // can be constructed twice in the same spot (function_symbol_constants.h)
+  // and only destroyed once and therefore their reference counts can be 1 at 
+  // termination. The function symbol with number 0 even can have reference
+  // count 2, most likely due to the construction of empty_aterm_list which 
+  // can be constructed twice, first as an undefined aterm, and later as an
+  // empty_aterm_list. See memory.h.
+  for(size_t i=0; i<function_lookup_table_size; ++i) 
   {
-    if (function_lookup_table[i].reference_count>0)  
+    if (!(function_lookup_table[i].reference_count==0 ||
+          (i==0 && function_lookup_table[i].reference_count<=2) ||
+          (i<4 && function_lookup_table[i].reference_count<=1)))
     {
       result=false;
       fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
@@ -190,7 +197,7 @@ static void check_that_all_objects_are_free()
     }
 
   }
-#endif
+  assert(result);
 }
 #endif
 

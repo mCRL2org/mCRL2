@@ -45,7 +45,6 @@ using namespace atermpp;
 /* ======= Initialize the hash table ======= */
 int HTinit(HTable* table)
 {
-
   new (&table->terms) atermpp::indexed_set(PT_INITIALSIZE, 75); // Placement new.
   PTinit(&table->pointers);
 
@@ -54,7 +53,12 @@ int HTinit(HTable* table)
 
 void HTfree(HTable* table)
 {
-
+  using namespace atermpp;
+  table->terms.clear();  // Remove all elements, but do not destroy. 
+                         // This is sometimes (sic) done at later instance.
+                         // But the content of this indexed set must be destroyed.
+                         // HTables are constructed by new, and in ordinary
+                         // ways, this needs to be investigated.
   PTfree(&table->pointers);
 }
 
