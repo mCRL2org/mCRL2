@@ -11,7 +11,7 @@
 #define MPI_SPM_SOLVER_H_INCLUDED
 
 #include "GamePartition.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 #include "MpiUtils.h"
 #include "SmallProgressMeasures.h"
 #include "VertexPartition.h"

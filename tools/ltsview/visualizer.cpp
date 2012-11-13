@@ -6,163 +6,105 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "wx.hpp" // precompiled headers
-
 #include "visualizer.h"
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include "cluster.h"
-#include "color_interpolator.h"
-#include "enums.h"
 #include "lts.h"
 #include "mathutils.h"
-#include "mediator.h"
-#include "primitivefactory.h"
 #include "settings.h"
 #include "state.h"
 #include "transition.h"
 #include "vectors.h"
-#include "visobjectfactory.h"
 
-extern "C" {
-#ifdef __APPLE__
-# include <OpenGL/gl.h>
-# include <OpenGL/glu.h>
-#else
-# if defined(_WIN32_) || defined(_MSC_VER)
-#  include <windows.h>
-#  undef __in_range // For STLport
-# endif
-# include <GL/gl.h>
-# include <GL/glu.h>
-#endif
-}
+#include <QtOpenGL>
 
 using namespace std;
 using namespace MathUtils;
 
 #define SELECT_BLEND 0.3f
 
-Visualizer::Visualizer(Mediator* owner,Settings* ss)
+Visualizer::Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_):
+  QObject(parent),
+  settings(settings_),
+  ltsManager(ltsManager_),
+  markManager(markManager_),
+  primitiveFactory(settings)
 {
-  lts = NULL;
-  mediator = owner;
-  settings = ss;
-  settings->subscribe(BranchRotation,this);
-  settings->subscribe(BranchTilt,this);
-  settings->subscribe(ClusterHeight,this);
-  settings->subscribe(InterpolateColor1,this);
-  settings->subscribe(InterpolateColor2,this);
-  settings->subscribe(LongInterpolation,this);
-  settings->subscribe(MarkedColor,this);
-  settings->subscribe(Quality,this);
+  connect(&settings->stateSize, SIGNAL(changed(float)), this, SIGNAL(dirtied()));
+  connect(&settings->clusterHeight, SIGNAL(changed(float)), this, SLOT(dirtyMatrices()));
+  connect(&settings->branchRotation, SIGNAL(changed(int)), this, SLOT(dirtyMatrices()));
+  connect(&settings->branchTilt, SIGNAL(changed(int)), this, SLOT(branchTiltChanged(int)));
+  connect(&settings->quality, SIGNAL(changed(int)), this, SLOT(dirtyObjects()));
+  connect(&settings->transparency, SIGNAL(changed(int)), this, SIGNAL(dirtied()));
+  connect(&settings->stateColor, SIGNAL(changed(QColor)), this, SIGNAL(dirtied()));
+  connect(&settings->downEdgeColor, SIGNAL(changed(QColor)), this, SIGNAL(dirtied()));
+  connect(&settings->upEdgeColor, SIGNAL(changed(QColor)), this, SIGNAL(dirtied()));
+  connect(&settings->markedColor, SIGNAL(changed(QColor)), this, SLOT(dirtyColorsMark()));
+  connect(&settings->clusterColorTop, SIGNAL(changed(QColor)), this, SLOT(dirtyColorsNoMark()));
+  connect(&settings->clusterColorBottom, SIGNAL(changed(QColor)), this, SLOT(dirtyColorsNoMark()));
+  connect(&settings->longInterpolation, SIGNAL(changed(bool)), this, SLOT(dirtyColorsNoMark()));
+  connect(&settings->simPrevColor, SIGNAL(changed(QColor)), this, SIGNAL(dirtied()));
+  connect(&settings->simCurrColor, SIGNAL(changed(QColor)), this, SIGNAL(dirtied()));
+  connect(&settings->simSelColor, SIGNAL(changed(QColor)), this, SIGNAL(dirtied()));
+  connect(&settings->simPosColor, SIGNAL(changed(QColor)), this, SIGNAL(dirtied()));
+  connect(&settings->clusterVisStyleTubes, SIGNAL(changed(bool)), this, SLOT(dirtyObjects()));
 
-  visObjectFactory = new VisObjectFactory();
-  primitiveFactory = new PrimitiveFactory(settings);
-  sin_obt = float(sin(deg_to_rad(settings->getInt(BranchTilt))));
-  cos_obt = float(cos(deg_to_rad(settings->getInt(BranchTilt))));
+  connect(ltsManager, SIGNAL(ltsChanged(LTS *)), this, SLOT(setClusterHeight()));
+  connect(ltsManager, SIGNAL(clustersChanged()), this, SLOT(dirtyObjects()));
+  connect(ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(dirtyObjects()));
+  connect(ltsManager, SIGNAL(clusterPositionsChanged()), this, SLOT(dirtyObjects()));
+  connect(ltsManager, SIGNAL(statePositionsChanged()), this, SLOT(dirtyPositions()));
+  connect(ltsManager, SIGNAL(selectionChanged()), this, SLOT(dirtyColors()));
+  connect(ltsManager, SIGNAL(simulationChanged()), this, SLOT(dirtyColors()));
 
+  connect(markManager, SIGNAL(marksChanged()), this, SLOT(dirtyColors()));
+
+  sin_obt = float(sin(deg_to_rad(settings->branchTilt.value())));
+  cos_obt = float(cos(deg_to_rad(settings->branchTilt.value())));
+
+  update_objects = true;
   update_matrices = false;
-  update_abs = true;
   update_colors = false;
-  create_objects = false;
-}
-
-Visualizer::~Visualizer()
-{
-  delete visObjectFactory;
-  delete primitiveFactory;
+  update_positions = false;
 }
 
 float Visualizer::getHalfStructureHeight() const
 {
-  if (lts == NULL)
+  if (!ltsManager->lts())
   {
     return 0.0f;
   }
-  return settings->getFloat(ClusterHeight)*(lts->getNumRanks()-1) / 2.0f;
+  return settings->clusterHeight.value() * (ltsManager->lts()->getNumRanks() - 1) / 2.0f;
 }
 
-void Visualizer::setLTS(LTS* l,bool compute_ratio)
+void Visualizer::setClusterHeight()
 {
-  lts = l;
-  if (compute_ratio)
-  {
-    float ratio = lts->getInitialState()->getCluster()->getBCRadius() /
-                  lts->getInitialState()->getCluster()->getBCHeight();
-    settings->setFloat(ClusterHeight,
-                       max(4,round_to_int(40.0f * ratio)) / 10.0f);
-  }
-  update_abs = true;
-  traverseTree(true);
+  float ratio = ltsManager->lts()->getInitialState()->getCluster()->getBCRadius() /
+                ltsManager->lts()->getInitialState()->getCluster()->getBCHeight();
+  settings->clusterHeight.setValue(max(4,round_to_int(40.0f * ratio)) / 10.0f);
+  dirtyObjects();
 }
 
-void Visualizer::notifyStatePositionsChanged()
+void Visualizer::branchTiltChanged(int value)
 {
-  update_abs = true;
-}
-
-void Visualizer::notifyMarkStyleChanged()
-{
-  update_colors = true;
-}
-
-void Visualizer::notifyVisStyleChanged()
-{
-  traverseTree(true);
-}
-
-void Visualizer::notify(SettingID s)
-{
-  switch (s)
-  {
-    case BranchTilt:
-      sin_obt = float(sin(deg_to_rad(settings->getInt(BranchTilt))));
-      cos_obt = float(cos(deg_to_rad(settings->getInt(BranchTilt))));
-      update_matrices = true;
-      update_abs = true;
-      break;
-    case BranchRotation:
-    case ClusterHeight:
-    case Quality:
-      update_matrices = true;
-      update_abs = true;
-      break;
-    case InterpolateColor1:
-    case InterpolateColor2:
-    case LongInterpolation:
-      if (mediator->getMarkStyle() == NO_MARKS)
-      {
-        update_colors = true;
-      }
-      break;
-    case MarkedColor:
-      if (mediator->getMarkStyle() != NO_MARKS)
-      {
-        update_colors = true;
-      }
-      break;
-    case Selection:
-      update_colors = true;
-      break;
-    default:
-      break;
-  }
+  sin_obt = float(sin(deg_to_rad(value)));
+  cos_obt = float(cos(deg_to_rad(value)));
+  dirtyMatrices();
 }
 
 void Visualizer::computeBoundsInfo(float& bcw,float& bch)
 {
   bcw = 0.0f;
   bch = 0.0f;
-  if (lts != NULL)
+  if (ltsManager->lts())
   {
-    computeSubtreeBounds(lts->getInitialState()->getCluster(),
-                         bcw, bch);
+    computeSubtreeBounds(ltsManager->lts()->getInitialState()->getCluster(), bcw, bch);
   }
 }
 
-void Visualizer::computeSubtreeBounds(Cluster* root,float& bw,float& bh)
+void Visualizer::computeSubtreeBounds(Cluster* root, float& bw, float& bh)
 {
   // compute the bounding cylinder of the structure.
   if (!root->hasDescendants())
@@ -199,7 +141,7 @@ void Visualizer::computeSubtreeBounds(Cluster* root,float& bw,float& bh)
       }
     }
     bw = max(bw,root->getTopRadius());
-    bh += settings->getFloat(ClusterHeight);
+    bh += settings->clusterHeight.value();
   }
 }
 
@@ -207,51 +149,44 @@ void Visualizer::computeSubtreeBounds(Cluster* root,float& bw,float& bh)
 
 void Visualizer::drawStructure()
 {
-  if (lts == NULL)
+  if (!ltsManager->lts())
   {
     return;
   }
-  if (update_matrices)
+  if (update_objects || update_matrices)
   {
-    traverseTree(false);
-    update_matrices = false;
+    traverseTree();
   }
   if (update_colors)
   {
     updateColors();
-    update_colors = false;
   }
-  visObjectFactory->drawObjects(primitiveFactory,settings->getInt(Alpha),
-                                mediator->getMatchStyle() == MATCH_MULTI);
+  visObjectFactory.drawObjects(&primitiveFactory,(int)((100 - settings->transparency.value()) * 2.55f),
+                                markManager->stateMatchStyle() == MATCH_MULTI);
 }
 
-void Visualizer::traverseTree(bool co)
+void Visualizer::traverseTree()
 {
-  if (lts == NULL)
+  if (update_objects)
   {
-    return;
-  }
-  create_objects = co;
-  if (co)
-  {
-    visObjectFactory->clear();
+    visObjectFactory.clear();
     update_colors = true;
   }
   glPushMatrix();
   glLoadIdentity();
-  VisStyle visStyle = static_cast<VisStyle>(settings->getInt(ClusterVisStyle));
-  switch (visStyle)
+  Cluster *root = ltsManager->lts()->getInitialState()->getCluster();
+  if (settings->clusterVisStyleTubes.value())
   {
-    case CONES:
-      traverseTreeC(lts->getInitialState()->getCluster(), true, 0);
-      break;
-    case TUBES:
-      traverseTreeT(lts->getInitialState()->getCluster(), true, 0);
-      break;
-    default:
-      break;
+    traverseTreeT(root, true, 0);
+  }
+  else
+  {
+    traverseTreeC(root, true, 0);
   }
   glPopMatrix();
+  update_objects = false;
+  update_matrices = false;
+  update_positions = true;
 }
 
 void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
@@ -264,30 +199,30 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
     vector<int> ids;
     ids.push_back(root->getRank());
     ids.push_back(root->getPositionInRank());
-    if (create_objects)
+    if (update_objects)
     {
-      root->setVisObject(visObjectFactory->makeObject(
-                           primitiveFactory->makeSphere(),ids));
+      root->setVisObject(visObjectFactory.makeObject(
+                           primitiveFactory.makeSphere(),ids));
     }
     else
     {
-      visObjectFactory->updateObjectMatrix(root->getVisObject());
+      visObjectFactory.updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
   }
   else
   {
-    int drot = rot + settings->getInt(BranchRotation);
+    int drot = rot + settings->branchRotation.value();
     if (drot >= 360)
     {
       drot -= 360;
     }
-    if (create_objects)
+    if (update_objects)
     {
       root->clearBranchVisObjects();
     }
 
-    glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
+    glTranslatef(0.0f,0.0f,settings->clusterHeight.value());
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
@@ -308,63 +243,62 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
         {
           glRotatef(-desc->getPosition() - rot, 0.0f, 0.0f, 1.0f);
           glTranslatef(root->getBaseRadius(), 0.0f, 0.0f);
-          glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+          glRotatef(settings->branchTilt.value(), 0.0f, 1.0f, 0.0f);
           traverseTreeC(desc, true, drot);
-          glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+          glRotatef(-settings->branchTilt.value(), 0.0f, 1.0f, 0.0f);
           glTranslatef(-root->getBaseRadius(), 0.0f, 0.0f);
           glRotatef(desc->getPosition() + rot, 0.0f, 0.0f, 1.0f);
         }
       }
     }
-    glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
+    glTranslatef(0.0f,0.0f,-settings->clusterHeight.value());
 
     float r = root->getBaseRadius() / root->getTopRadius();
     glPushMatrix();
-    glTranslatef(0.0f,0.0f,0.5f*settings->getFloat(ClusterHeight));
+    glTranslatef(0.0f,0.0f,0.5f*settings->clusterHeight.value());
     if (r > 1.0f)
     {
       r = 1.0f / r;
       glRotatef(180.0f,1.0f,0.0f,0.0f);
       glScalef(root->getBaseRadius(),root->getBaseRadius(),
-               settings->getFloat(ClusterHeight));
+               settings->clusterHeight.value());
 
       vector<int> ids;
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
 
-      if (create_objects)
+      if (update_objects)
       {
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeTruncatedCone(r,topClosed,
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeTruncatedCone(r,topClosed,
                                  root->getNumDescendants() > 1 || root->hasSeveredDescendants()),
                              ids));
       }
       else
       {
-        visObjectFactory->updateObjectMatrix(root->getVisObject());
+        visObjectFactory.updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
     }
     else
     {
-      glScalef(root->getTopRadius(),root->getTopRadius(),
-               settings->getFloat(ClusterHeight));
+      glScalef(root->getTopRadius(),root->getTopRadius(),settings->clusterHeight.value());
 
       vector<int> ids;
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
 
-      if (create_objects)
+      if (update_objects)
       {
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeTruncatedCone(r,
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeTruncatedCone(r,
                                  root->getNumDescendants() > 1 || root->hasSeveredDescendants(),
                                  topClosed), ids));
       }
       else
       {
-        visObjectFactory->updateObjectMatrix(root->getVisObject());
+        visObjectFactory.updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
@@ -380,39 +314,39 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
     // root has no descendants; so draw it as a hemispheroid
     glPushMatrix();
     glScalef(root->getTopRadius(),root->getTopRadius(),
-             min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
-    if (create_objects)
+             min(root->getTopRadius(),settings->clusterHeight.value()));
+    if (update_objects)
     {
       vector<int> ids;
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
-      if (root == lts->getInitialState()->getCluster())
+      if (root == ltsManager->lts()->getInitialState()->getCluster())
       {
         // exception: draw root as a sphere if it is the initial cluster
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeSphere(), ids));
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeSphere(), ids));
       }
       else
       {
-        root->setVisObject(visObjectFactory->makeObject(
-                             primitiveFactory->makeHemisphere(),ids));
+        root->setVisObject(visObjectFactory.makeObject(
+                             primitiveFactory.makeHemisphere(),ids));
       }
     }
     else
     {
-      visObjectFactory->updateObjectMatrix(root->getVisObject());
+      visObjectFactory.updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
   }
   else
   {
-    int drot = rot + settings->getInt(BranchRotation);
+    int drot = rot + settings->branchRotation.value();
     if (drot >= 360)
     {
       drot -= 360;
     }
     float baserad = 0.0f;
-    if (create_objects)
+    if (update_objects)
     {
       root->clearBranchVisObjects();
     }
@@ -424,12 +358,12 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
       {
         if (desc->isCentered())
         {
-          if (create_objects)
+          if (update_objects)
           {
             root->addBranchVisObject(-1);
           }
           baserad = desc->getTopRadius();
-          glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
+          glTranslatef(0.0f,0.0f,settings->clusterHeight.value());
           if (root->getNumDescendants() > 1)
           {
             traverseTreeT(desc,false,drot);
@@ -438,26 +372,26 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
           {
             traverseTreeT(desc,false,rot);
           }
-          glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
+          glTranslatef(0.0f,0.0f,-settings->clusterHeight.value());
         }
         else
         {
           // make the connecting cone
           float d_rad = root->getBaseRadius() - root->getTopRadius();
-          float sz = sqrt(settings->getFloat(ClusterHeight) *
-                          settings->getFloat(ClusterHeight) + d_rad * d_rad);
+          float sz = sqrt(settings->clusterHeight.value() *
+                          settings->clusterHeight.value() + d_rad * d_rad);
           float alpha, sign;
           if (d_rad < 0.0f)
           {
             sign = -1.0f;
-            alpha = atan(settings->getFloat(ClusterHeight) / -d_rad);
+            alpha = atan(settings->clusterHeight.value() / -d_rad);
           }
           else
           {
             sign = 1.0f;
             if (d_rad > 0.0f)
             {
-              alpha = atan(settings->getFloat(ClusterHeight) / d_rad);
+              alpha = atan(settings->clusterHeight.value() / d_rad);
             }
             else
             {
@@ -469,29 +403,29 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
           glTranslatef(root->getTopRadius(),0.0f,0.0f);
           glRotatef(sign*(90.0f-rad_to_deg(alpha)),0.0f,1.0f,0.0f);
           glScalef(sz,sz,sz);
-          if (create_objects)
+          if (update_objects)
           {
             vector<int> ids;
             ids.push_back(root->getRank());
             ids.push_back(root->getPositionInRank());
-            root->addBranchVisObject(visObjectFactory->makeObject(
-                                       primitiveFactory->makeObliqueCone(alpha,
+            root->addBranchVisObject(visObjectFactory.makeObject(
+                                       primitiveFactory.makeObliqueCone(alpha,
                                            desc->getTopRadius()/sz,sign),ids));
           }
           else
           {
-            visObjectFactory->updateObjectMatrix(root->getBranchVisObject(i));
+            visObjectFactory.updateObjectMatrix(root->getBranchVisObject(i));
           }
           glPopMatrix();
 
           // recurse into the subtree
           glTranslatef(root->getBaseRadius(),0.0f,
-                       settings->getFloat(ClusterHeight));
-          glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+                       settings->clusterHeight.value());
+          glRotatef(settings->branchTilt.value(),0.0f,1.0f,0.0f);
           traverseTreeT(desc,false,drot);
-          glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+          glRotatef(-settings->branchTilt.value(),0.0f,1.0f,0.0f);
           glTranslatef(-root->getBaseRadius(),0.0f,
-                       -settings->getFloat(ClusterHeight));
+                       -settings->clusterHeight.value());
           glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
         }
       }
@@ -502,27 +436,27 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
       // root has no centered descendant, so draw it as a hemispheroid
       glPushMatrix();
       glScalef(root->getTopRadius(),root->getTopRadius(),
-               min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
-      if (create_objects)
+               min(root->getTopRadius(),settings->clusterHeight.value()));
+      if (update_objects)
       {
         vector<int> ids;
         ids.push_back(root->getRank());
         ids.push_back(root->getPositionInRank());
-        if (root == lts->getInitialState()->getCluster())
+        if (root == ltsManager->lts()->getInitialState()->getCluster())
         {
           // exception: draw root as a sphere if it is the initial cluster
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeSphere(), ids));
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeSphere(), ids));
         }
         else
         {
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeHemisphere(), ids));
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeHemisphere(), ids));
         }
       }
       else
       {
-        visObjectFactory->updateObjectMatrix(root->getVisObject());
+        visObjectFactory.updateObjectMatrix(root->getVisObject());
       }
       glPopMatrix();
     }
@@ -535,42 +469,42 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
         r = 1.0f;
       }
       glPushMatrix();
-      glTranslatef(0.0f,0.0f,0.5f*settings->getFloat(ClusterHeight));
+      glTranslatef(0.0f,0.0f,0.5f*settings->clusterHeight.value());
       if (r > 1.0f)
       {
         r = 1.0f / r;
         glRotatef(180.0f,1.0f,0.0f,0.0f);
-        glScalef(baserad,baserad,settings->getFloat(ClusterHeight));
-        if (create_objects)
+        glScalef(baserad,baserad,settings->clusterHeight.value());
+        if (update_objects)
         {
           vector<int> ids;
           ids.push_back(root->getRank());
           ids.push_back(root->getPositionInRank());
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeTruncatedCone(r,topClosed,
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeTruncatedCone(r,topClosed,
                                    root->hasSeveredDescendants()), ids));
         }
         else
         {
-          visObjectFactory->updateObjectMatrix(root->getVisObject());
+          visObjectFactory.updateObjectMatrix(root->getVisObject());
         }
       }
       else
       {
         glScalef(root->getTopRadius(),root->getTopRadius(),
-                 settings->getFloat(ClusterHeight));
-        if (create_objects)
+                 settings->clusterHeight.value());
+        if (update_objects)
         {
           vector<int> ids;
           ids.push_back(root->getRank());
           ids.push_back(root->getPositionInRank());
-          root->setVisObject(visObjectFactory->makeObject(
-                               primitiveFactory->makeTruncatedCone(r,
+          root->setVisObject(visObjectFactory.makeObject(
+                               primitiveFactory.makeTruncatedCone(r,
                                    root->hasSeveredDescendants(),topClosed),ids));
         }
         else
         {
-          visObjectFactory->updateObjectMatrix(root->getVisObject());
+          visObjectFactory.updateObjectMatrix(root->getVisObject());
         }
       }
       glPopMatrix();
@@ -578,112 +512,169 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
   }
 }
 
+static inline QColor blend(QColor from, QColor to, float factor)
+{
+  unsigned char red = (unsigned char)(from.red() * factor + to.red() * (1.0 - factor));
+  unsigned char green = (unsigned char)(from.green() * factor + to.green() * (1.0 - factor));
+  unsigned char blue = (unsigned char)(from.blue() * factor + to.blue() * (1.0 - factor));
+  return QColor(red, green, blue);
+}
+
 void Visualizer::updateColors()
 {
   Cluster* cl;
-  RGB_Color c;
-  if (mediator->getMarkStyle() == NO_MARKS)
+  QColor c;
+  if (markManager->markStyle() == NO_MARKS)
   {
-    ColorInterpolator ipr = ColorInterpolator();
-    ipr.computeColors(settings->getRGB(InterpolateColor1),
-                      settings->getRGB(InterpolateColor2), lts->getMaxRanks() - 2,
-                      settings->getBool(LongInterpolation));
-    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
+    QColor from = settings->clusterColorTop.value();
+    QColor to = settings->clusterColorBottom.value();
+
+    float hueFrom = from.hueF();
+    float hueTo = to.hueF();
+    bool useLongInterpolation = settings->longInterpolation.value();
+
+    // set hues equal if one of the colors is grey
+    if (to.red() == to.green() && to.green() == to.blue())
+    {
+      hueTo = hueFrom;
+    }
+    if (from.red() == from.green() && from.green() == from.blue())
+    {
+      hueFrom = hueTo;
+    }
+
+    float hueDelta = hueTo - hueFrom;
+    if ((useLongInterpolation && abs(hueDelta) < 0.5f) || (!useLongInterpolation && abs(hueDelta) >= 0.5f))
+    {
+      if (hueDelta > 0.0f)
+      {
+        hueDelta -= 1.0f;
+      }
+      else
+      {
+        hueDelta += 1.0f;
+      }
+    }
+
+    float saturationFrom = from.saturationF();
+    float saturationDelta = to.saturationF() - saturationFrom;
+    float valueFrom = from.valueF();
+    float valueDelta = to.valueF() - valueFrom;
+
+    int ranks = ltsManager->lts()->getMaxRanks();
+
+    for (Cluster_iterator ci = ltsManager->lts()->getClusterIterator(); !ci.is_end();
          ++ci)
     {
       cl = *ci;
-      c = ipr.getColor(cl->getRank());
-      if (cl->isSelected())
+
+      if (ranks == 1)
       {
-        c.blendWith(RGB_Color(255, 122, 0), SELECT_BLEND);
+        c = from;
+      }
+      else
+      {
+        float t = cl->getRank() / (float)(ranks);
+        float hue = hueFrom + t * hueDelta;
+        if (hue < 0.0f)
+        {
+          hue += 1.0f;
+        }
+        if (hue >= 1.0f)
+        {
+          hue -= 1.0f;
+        }
+        c = QColor::fromHsvF(hue, saturationFrom + saturationDelta * t, valueFrom + valueDelta * t);
+      }
+
+      if (cl == ltsManager->selectedCluster())
+      {
+        c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
       }
       // set color of cluster cl
-      visObjectFactory->updateObjectColor(cl->getVisObject(),c);
+      visObjectFactory.updateObjectColor(cl->getVisObject(),c);
       // and its branches
       for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
       {
         if (cl->getBranchVisObject(i) != -1)
         {
-          visObjectFactory->updateObjectColor(
+          visObjectFactory.updateObjectColor(
             cl->getBranchVisObject(i),c);
         }
       }
     }
   }
-  else // mediator->getMarkStyle() != NO_MARKS
+  else // markManager->markStyle() != NO_MARKS
   {
-    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
+    for (Cluster_iterator ci = ltsManager->lts()->getClusterIterator(); !ci.is_end();
          ++ci)
     {
       cl = *ci;
-      vector<RGB_Color> rule_colours;
+      vector<QColor> rule_colours;
 
-      c = RGB_Color(255, 255, 255);
-      if (mediator->isMarked(cl))
+      c = QColor(255, 255, 255);
+      if (markManager->isMarked(cl))
       {
-        if (mediator->getMarkStyle() == MARK_STATES &&
-            mediator->getMatchStyle() == MATCH_MULTI)
+        if (markManager->markStyle() == MARK_STATES &&
+            markManager->stateMatchStyle() == MATCH_MULTI)
         {
-          vector<int> cluster_rules;
-          cl->getMatchedRules(cluster_rules);
-          for (size_t i = 0; i <  cluster_rules.size(); ++i)
-          {
-            rule_colours.push_back(
-              mediator->getMarkRuleColor(cluster_rules[i]));
-          }
+          QList<QColor> colors = markManager->markColors(cl);
+          rule_colours.reserve(colors.size());
+          rule_colours.insert(rule_colours.end(), colors.begin(), colors.end());
         }
         else
         {
-          c = settings->getRGB(MarkedColor);
+          c = settings->markedColor.value();
         }
       }
 
-      if (cl->isSelected())
+      if (cl == ltsManager->selectedCluster())
       {
-        c.blendWith(RGB_Color(255, 122, 0), SELECT_BLEND);
+        c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
       }
 
-      visObjectFactory->updateObjectColor(cl->getVisObject(),c);
-      visObjectFactory->updateObjectTexture(cl->getVisObject(),
+      visObjectFactory.updateObjectColor(cl->getVisObject(),c);
+      visObjectFactory.updateObjectTexture(cl->getVisObject(),
                                             rule_colours);
 
       for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
       {
         if (cl->getBranchVisObject(i) != -1)
         {
-          visObjectFactory->updateObjectColor(
+          visObjectFactory.updateObjectColor(
             cl->getBranchVisObject(i),c);
-          visObjectFactory->updateObjectTexture(
+          visObjectFactory.updateObjectTexture(
             cl->getBranchVisObject(i),rule_colours);
         }
       }
     }
   }
+  update_colors = false;
 }
 
 void Visualizer::sortClusters(Vector3D viewpoint)
 {
-  visObjectFactory->sortObjects(viewpoint);
+  visObjectFactory.sortObjects(viewpoint);
 }
 
 // ------------- STATES --------------------------------------------------------
 
 void Visualizer::drawStates(bool simulating)
 {
-  if (lts == NULL)
+  if (!ltsManager->lts())
   {
     return;
   }
 
   // Compute absolute positions of nodes, if necessary
   computeAbsPos();
-  drawStates(lts->getInitialState()->getCluster(), simulating);
+  drawStates(ltsManager->lts()->getInitialState()->getCluster(), simulating);
 }
 
-void Visualizer::drawSimStates(vector<State*> historicStates,
+void Visualizer::drawSimStates(QList<State*> historicStates,
                                State* currState, Transition* chosenTrans)
 {
-  if (lts == NULL)
+  if (!ltsManager->lts())
   {
     return;
   }
@@ -691,34 +682,33 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   // Compute absolute positions of nodes, if necessary
   computeAbsPos();
 
-  float ns = settings->getFloat(StateSize);
-  RGB_Color c;
+  float ns = settings->stateSize.value();
+  QColor c;
   Vector3D p;
 
   set<State*> drawnStates;
 
   // Draw the current state.
-  //RGB_Color hisStateColor = settings->getRGB(SimStateColor);
-  if (lts->getZoomLevel() == currState->getZoomLevel())
+  //QColor hisStateColor = settings->simStateColor.value();
+  if (ltsManager->lts()->getZoomLevel() == currState->getZoomLevel())
   {
-    if (mediator->isMarked(currState))
+    if (markManager->isMarked(currState))
     {
-      c = settings->getRGB(MarkedColor);
+      c = settings->markedColor.value();
     }
     else
     {
-      c = settings->getRGB(SimCurrColor);
+      c = settings->simCurrColor.value();
     }
 
-    if (currState->isSelected())
+    if (currState == ltsManager->selectedState())
     {
-      c.blendWith(RGB_Color(255, 122, 0),SELECT_BLEND);
+      c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
     }
 
     glColor4ub(c.red(), c.green(), c.blue(), 255);
     Vector3D p = currState->getPositionAbs();
 
-    glPushName(STATE);
     glPushName(currState->getID());
 
     glPushMatrix();
@@ -727,10 +717,9 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     // Make the current state a bit larger, to make it easier to find it in the
     // simulation
     glScalef(1.5 *ns, 1.5* ns, 1.5 * ns);
-    primitiveFactory->drawSimpleSphere();
+    primitiveFactory.drawSimpleSphere();
     glPopMatrix();
 
-    glPopName();
     glPopName();
     drawnStates.insert(currState);
   }
@@ -741,29 +730,27 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   {
     endState = currState->getOutTransition(i)->getEndState();
 
-    if (lts->getZoomLevel() == endState->getZoomLevel()
+    if (ltsManager->lts()->getZoomLevel() == endState->getZoomLevel()
         && drawnStates.find(endState) == drawnStates.end())
     {
-      glPushName(SIMSTATE);
-
       glPushName(endState->getID());
 
-      if (mediator->isMarked(endState))
+      if (markManager->isMarked(endState))
       {
-        c = settings->getRGB(MarkedColor);
+        c = settings->markedColor.value();
       }
       else if (currState->getOutTransition(i) == chosenTrans)
       {
-        c = settings->getRGB(SimSelColor);
+        c = settings->simSelColor.value();
       }
       else
       {
-        c = settings->getRGB(SimPosColor);
+        c = settings->simPosColor.value();
       }
 
-      if (endState->isSelected())
+      if (endState == ltsManager->selectedState())
       {
-        c.blendWith(RGB_Color(255, 122, 0), SELECT_BLEND);
+        c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
       }
 
       glColor4ub(c.red(), c.green(), c.blue(), 255);
@@ -778,10 +765,9 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
       {
         glScalef(ns, ns, ns);
       }
-      primitiveFactory->drawSimpleSphere();
+      primitiveFactory.drawSimpleSphere();
       glPopMatrix();
 
-      glPopName();
       glPopName();
       drawnStates.insert(endState);
     }
@@ -790,40 +776,38 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   // Draw previous states of the simulation, in the colour specified in the
   // settings (default: white)
   State* s;
-  for (size_t i = 0; i < historicStates.size() - 1; ++i)
+  for (int i = 0; i < historicStates.size(); ++i)
   {
     s = historicStates[i];
 
-    if (lts->getZoomLevel() == s->getZoomLevel()
+    if (ltsManager->lts()->getZoomLevel() == s->getZoomLevel()
         && drawnStates.find(s) == drawnStates.end())
     {
-      if (mediator->isMarked(s))
+      if (markManager->isMarked(s))
       {
-        c = settings->getRGB(MarkedColor);
+        c = settings->markedColor.value();
       }
       else
       {
-        c = settings->getRGB(SimPrevColor);
+        c = settings->simPrevColor.value();
       }
 
-      if (s->isSelected())
+      if (s == ltsManager->selectedState())
       {
-        c.blendWith(RGB_Color(255, 122, 0), SELECT_BLEND);
+        c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
       }
 
       glColor4ub(c.red(), c.green(), c.blue(), 255);
 
-      glPushName(STATE);
       glPushName(s->getID());
 
       p = s->getPositionAbs();
       glPushMatrix();
       glTranslatef(p.x(), p.y(), p.z());
       glScalef(ns, ns, ns);
-      primitiveFactory->drawSimpleSphere();
+      primitiveFactory.drawSimpleSphere();
       glPopMatrix();
 
-      glPopName();
       glPopName();
       drawnStates.insert(s);
     }
@@ -832,13 +816,17 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
 
 void Visualizer::computeAbsPos()
 {
-  if (update_abs)
+  if (update_objects || update_matrices)
+  {
+    traverseTree();
+  }
+  if (update_positions)
   {
     glPushMatrix();
     glLoadIdentity();
-    computeStateAbsPos(lts->getInitialState()->getCluster(),0);
+    computeStateAbsPos(ltsManager->lts()->getInitialState()->getCluster(), 0);
     glPopMatrix();
-    update_abs = false;
+    update_positions = false;
   }
 }
 
@@ -849,7 +837,7 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
 // Secondly, it also assigns the incoming and outgoing control points for the
 // back pointers to each state.
 
-  if (root->getState(0)->getZoomLevel() == lts->getZoomLevel())
+  if (root->getState(0)->getZoomLevel() == ltsManager->lts()->getZoomLevel())
   {
     // compute position of each state in this cluster
     for (int i = 0; i < root->getNumStates(); ++i)
@@ -864,15 +852,15 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         Vector3D p1 = Vector3D(M[12], M[13], M[14]);
         s->setPositionAbs(p1);
 
-        // The outgoing vector of the state lies settings->getFloat(ClusterHeight) above the state.
+        // The outgoing vector of the state lies settings->clusterHeight.value() above the state.
         glPushMatrix();
-        glTranslatef(0.0f, 0.0f, -2 * settings->getFloat(ClusterHeight));
+        glTranslatef(0.0f, 0.0f, -2 * settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Vector3D p2 = Vector3D(M[12], M[13], M[14]);
         s->setIncomingControl(p2);
 
-        // The incoming vector of the state lies settings->getFloat(ClusterHeight) beneath the state.
-        glTranslatef(0.0f, 0.0f, 4 * settings->getFloat(ClusterHeight));
+        // The incoming vector of the state lies settings->clusterHeight.value() beneath the state.
+        glTranslatef(0.0f, 0.0f, 4 * settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Vector3D p3 = Vector3D(M[12], M[13], M[14]);
         s->setOutgoingControl(p3);
@@ -893,13 +881,13 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
 
         // The outgoing vector of the state points out of the cluster, in the
         // direction the state itself is positioned. Furthermore, it points
-        // settings->getFloat(ClusterHeight) up.
-        glTranslatef(root->getTopRadius() * 3, 0.0f, -settings->getFloat(ClusterHeight));
+        // settings->clusterHeight.value() up.
+        glTranslatef(root->getTopRadius() * 3, 0.0f, -settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Vector3D p2 = Vector3D(M[12], M[13], M[14]);
         s->setIncomingControl(p2);
 
-        glTranslatef(0.0f, 0.0f, 2 * settings->getFloat(ClusterHeight));
+        glTranslatef(0.0f, 0.0f, 2 * settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Vector3D p3 = Vector3D(M[12], M[13], M[14]);
         s->setOutgoingControl(p3);
@@ -911,15 +899,15 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
       glRotatef(-s->getPositionAngle(), 0.0f, 0.0f, 1.0f);
       glTranslatef(s->getPositionRadius(), 0.0f, 0.0f);
 
-      glTranslatef(settings->getFloat(StateSize) * 5.0f,
-                   settings->getFloat(StateSize) * 5.0f,
+      glTranslatef(settings->stateSize.value() * 5.0f,
+                   settings->stateSize.value() * 5.0f,
                    0.0f);
       glGetFloatv(GL_MODELVIEW_MATRIX, M);
       Vector3D p = Vector3D(M[12], M[13], M[14]);
       s->setLoopControl1(p);
 
       glTranslatef(0.0f,
-                   -settings->getFloat(StateSize) * 10.0f,
+                   -settings->stateSize.value() * 10.0f,
                    0.0f);
       glGetFloatv(GL_MODELVIEW_MATRIX, M);
       p = Vector3D(M[12], M[13], M[14]);
@@ -929,12 +917,12 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
     }
 
     // recurse into the descendants
-    int drot = rot + settings->getInt(BranchRotation);
+    int drot = rot + settings->branchRotation.value();
     if (drot >= 360)
     {
       drot -= 360;
     }
-    glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
+    glTranslatef(0.0f,0.0f,settings->clusterHeight.value());
 
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
@@ -949,66 +937,60 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         {
           glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
           glTranslatef(root->getBaseRadius(),0.0f,0.0f);
-          glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+          glRotatef(settings->branchTilt.value(),0.0f,1.0f,0.0f);
           computeStateAbsPos(desc,drot);
-          glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+          glRotatef(-settings->branchTilt.value(),0.0f,1.0f,0.0f);
           glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
           glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
         }
       }
     }
 
-    glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
+    glTranslatef(0.0f,0.0f,-settings->clusterHeight.value());
   }
 }
 
 void Visualizer::drawStates(Cluster* root, bool simulating)
 {
-  if (lts->getZoomLevel() == root->getState(0)->getZoomLevel())
+  if (ltsManager->lts()->getZoomLevel() == root->getState(0)->getZoomLevel())
   {
-    float ns = settings->getFloat(StateSize);
+    float ns = settings->stateSize.value();
     for (int i = 0; i < root->getNumStates(); ++i)
     {
       State* s = root->getState(i);
 
       if (!(simulating && s->isSimulated()))
       {
-        RGB_Color c;
+        QColor c;
         GLuint texName;
 
-        if (!mediator->isMarked(s))
+        if (!markManager->isMarked(s))
         {
-          c = settings->getRGB(StateColor);
+          c = settings->stateColor.value();
         }
         else
         {
-          if (mediator->getMatchStyle() != MATCH_MULTI)
+          if (markManager->stateMatchStyle() != MATCH_MULTI)
           {
-            c = settings->getRGB(MarkedColor);
+            c = settings->markedColor.value();
           }
           else
           {
-            c = settings->getRGB(StateColor);
-            vector< int > state_rules;
-            s->getMatchedRules(state_rules);
+            c = settings->stateColor.value();
 
-            size_t n_colours = 1;
-            size_t n_rules = state_rules.size();
+            QList<QColor> colors = markManager->markColors(s);
 
-            while (n_colours < n_rules)
+            int n_colours = 1;
+            while (n_colours < colors.size())
             {
               n_colours = n_colours << 1;
             }
-
-
             GLubyte* texture = (GLubyte*)malloc(4 * n_colours *
                                                 sizeof(GLubyte));
 
-            for (size_t i = 0; i < n_colours; ++i)
+            for (int i = 0; i < n_colours; ++i)
             {
-              size_t j = i % n_rules;
-
-              RGB_Color c1 = mediator->getMarkRuleColor(state_rules[j]);
+              QColor c1 = colors[i % colors.size()];
               texture[4*i]   = (GLubyte) c1.red();
               texture[4*i+1] = (GLubyte) c1.green();
               texture[4*i+2] = (GLubyte) c1.blue();
@@ -1036,9 +1018,9 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
           }
         }
 
-        if (s->isSelected())
+        if (s == ltsManager->selectedState())
         {
-          c.blendWith(RGB_Color(255, 122, 0), SELECT_BLEND);
+          c = blend(c, QColor(255, 122, 0), SELECT_BLEND);
         }
 
         glColor4ub(c.red(),c.green(),c.blue(),255);
@@ -1050,11 +1032,11 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
 
         glPushName(s->getID());
 
-        primitiveFactory->drawSimpleSphere();
+        primitiveFactory.drawSimpleSphere();
         glPopName();
         glPopMatrix();
 
-        if (mediator->isMarked(s))
+        if (markManager->isMarked(s))
         {
           glDisable(GL_TEXTURE_1D);
 
@@ -1079,7 +1061,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
 
 void Visualizer::drawTransitions(bool draw_fp,bool draw_bp)
 {
-  if (lts == NULL)
+  if (!ltsManager->lts())
   {
     return;
   }
@@ -1089,12 +1071,12 @@ void Visualizer::drawTransitions(bool draw_fp,bool draw_bp)
   }
 
   computeAbsPos();
-  drawTransitions(lts->getInitialState()->getCluster(),draw_fp,draw_bp);
+  drawTransitions(ltsManager->lts()->getInitialState()->getCluster(),draw_fp,draw_bp);
 }
 
 void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp)
 {
-  if (lts->getZoomLevel() == root->getState(0)->getZoomLevel())
+  if (ltsManager->lts()->getZoomLevel() == root->getState(0)->getZoomLevel())
   {
     for (int j = 0; j < root->getNumStates(); ++j)
     {
@@ -1105,33 +1087,33 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp)
         Transition* outTransition = s->getOutTransition(i);
         State* endState = outTransition->getEndState();
 
-        if (lts->getZoomLevel() == endState->getZoomLevel())
+        if (ltsManager->lts()->getZoomLevel() == endState->getZoomLevel())
         {
           // Draw transition from root to endState
           if (disp_bp && outTransition->isBackpointer())
           {
-            RGB_Color color, black(0, 0, 0);
-            if (mediator->isMarked(outTransition))
+            QColor color, black(0, 0, 0);
+            if (markManager->isMarked(outTransition))
             {
-              color = settings->getRGB(MarkedColor);
+              color = settings->markedColor.value();
             }
             else
             {
-              color = settings->getRGB(UpEdgeColor);
+              color = settings->upEdgeColor.value();
             }
             drawBackPointer(s,black,endState,color);
           } 
           else
           if (disp_fp && !outTransition->isBackpointer())
           {
-            if (mediator->isMarked(outTransition))
+            if (markManager->isMarked(outTransition))
             {
-              RGB_Color c = settings->getRGB(MarkedColor);
+              QColor c = settings->markedColor.value();
               glColor4ub(c.red(),c.green(),c.blue(),255);
             }
             else
             {
-              RGB_Color c = settings->getRGB(DownEdgeColor);
+              QColor c = settings->downEdgeColor.value();
               glColor4ub(c.red(),c.green(),c.blue(),255);
             }
             drawForwardPointer(s,endState);
@@ -1144,19 +1126,19 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp)
         bool hasMarkedLoop = false;
         for (int i = 0; i < s->getNumLoops() && !hasMarkedLoop; ++i)
         {
-          if (mediator->isMarked(s->getLoop(i)))
+          if (markManager->isMarked(s->getLoop(i)))
           {
             hasMarkedLoop = true;
           }
         }
         if (hasMarkedLoop)
         {
-          RGB_Color c = settings->getRGB(MarkedColor);
+          QColor c = settings->markedColor.value();
           glColor4ub(c.red(),c.green(),c.blue(),255);
         }
         else
         {
-          RGB_Color c = settings->getRGB(DownEdgeColor);
+          QColor c = settings->downEdgeColor.value();
           glColor4ub(c.red(),c.green(),c.blue(),255);
         }
         drawLoop(s);
@@ -1174,46 +1156,46 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp)
 }
 
 void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
-                                    vector<Transition*> transHis,
-                                    vector<Transition*> posTrans,
+                                    QList<Transition*> transHis,
+                                    QList<Transition*> posTrans,
                                     Transition* chosenTrans)
 {
   computeAbsPos();
 
   // Draw the historical transitions.
-  for (size_t i = 0; i < transHis.size(); ++i)
+  for (int i = 0; i < transHis.size(); ++i)
   {
     Transition* currTrans = transHis[i];
     State* beginState = currTrans->getBeginState();
     State* endState = currTrans->getEndState();
 
-    if (lts->getZoomLevel() == beginState->getZoomLevel() &&
-        lts->getZoomLevel() == endState->getZoomLevel())
+    if (ltsManager->lts()->getZoomLevel() == beginState->getZoomLevel() &&
+        ltsManager->lts()->getZoomLevel() == endState->getZoomLevel())
     {
       // Draw transition from beginState to endState
       if (currTrans->isBackpointer() && draw_bp)
       {
-        RGB_Color color, black(0, 0, 0);
-        if (mediator->isMarked(currTrans))
+        QColor color, black(0, 0, 0);
+        if (markManager->isMarked(currTrans))
         {
-          color = settings->getRGB(MarkedColor);
+          color = settings->markedColor.value();
         }
         else
         {
-          color = settings->getRGB(SimPrevColor);
+          color = settings->simPrevColor.value();
         }
         drawBackPointer(beginState, black, endState, color);
       }
       if (!currTrans->isBackpointer() && draw_fp)
       {
-        if (mediator->isMarked(currTrans))
+        if (markManager->isMarked(currTrans))
         {
-          RGB_Color c = settings->getRGB(MarkedColor);
+          QColor c = settings->markedColor.value();
           glColor4ub(c.red(), c.green(), c.blue(), 255);
         }
         else
         {
-          RGB_Color transColor = settings->getRGB(SimPrevColor);
+          QColor transColor = settings->simPrevColor.value();
           glColor4ub(transColor.red(), transColor.green(), transColor.blue(), 255);
         }
         if (!currTrans->isSelfLoop())
@@ -1230,33 +1212,33 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
 
   // Draw the possible transitions from the current state, as well as the state
   // they lead into
-  for (size_t i = 0; i < posTrans.size(); ++i)
+  for (int i = 0; i < posTrans.size(); ++i)
   {
     Transition* currTrans = posTrans[i];
     State* beginState = currTrans->getBeginState();
     State* endState = currTrans->getEndState();
 
 
-    if (lts->getZoomLevel() == beginState->getZoomLevel() &&
-        lts->getZoomLevel() == endState->getZoomLevel())
+    if (ltsManager->lts()->getZoomLevel() == beginState->getZoomLevel() &&
+        ltsManager->lts()->getZoomLevel() == endState->getZoomLevel())
     {
       // Draw transition from beginState to endState
       if (currTrans->isBackpointer() && draw_bp)
       {
-        RGB_Color color, black(0, 0, 0);
-        if (mediator->isMarked(currTrans))
+        QColor color, black(0, 0, 0);
+        if (markManager->isMarked(currTrans))
         {
-          color = settings->getRGB(MarkedColor);
+          color = settings->markedColor.value();
         }
         else
         if (currTrans == chosenTrans)
         {
-          color = settings->getRGB(SimSelColor);
+          color = settings->simSelColor.value();
           glLineWidth(2.0);
         }
         else
         {
-          color = settings->getRGB(SimPosColor);
+          color = settings->simPosColor.value();
         }
         drawBackPointer(beginState, black, endState, color);
         glLineWidth(1.0);
@@ -1266,18 +1248,18 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
       {
         if (currTrans == chosenTrans)
         {
-          RGB_Color c  = settings->getRGB(SimSelColor);
+          QColor c  = settings->simSelColor.value();
           glColor4ub(c.red(), c.green(), c.blue(), 255);
           glLineWidth(2.0);
         }
         else
         {
-          RGB_Color c = settings->getRGB(SimPosColor);
+          QColor c = settings->simPosColor.value();
           glColor4ub(c.red(), c.green(), c.blue(), 255);
         }
-        if (mediator->isMarked(currTrans))
+        if (markManager->isMarked(currTrans))
         {
-          RGB_Color c = settings->getRGB(MarkedColor);
+          QColor c = settings->markedColor.value();
           glColor4ub(c.red(), c.green(), c.blue(), 255);
         }
 
@@ -1307,7 +1289,7 @@ void Visualizer::drawForwardPointer(State* startState, State* endState)
   glEnd();
 }
 
-void Visualizer::drawBackPointer(State* startState, const RGB_Color& startColor, State* endState, const RGB_Color& endColor)
+void Visualizer::drawBackPointer(State* startState, const QColor& startColor, State* endState, const QColor& endColor)
 {
   Vector3D startPoint = startState->getPositionAbs();
   Vector3D startControl = startState->getOutgoingControl();
@@ -1329,7 +1311,7 @@ void Visualizer::drawBackPointer(State* startState, const RGB_Color& startColor,
   }
 
   float t,it,b0,b1,b2,b3,x,y,z;
-  int N = settings->getInt(Quality);
+  int N = settings->quality.value();
 
   float col[3];
   col[0] = startColor.red();
@@ -1386,7 +1368,7 @@ void Visualizer::drawLoop(State* state)
   Vector3D endControl = state->getLoopControl2();
 
   float t,it,b0,b1,b2,b3,x,y,z;
-  int N = settings->getInt(Quality);
+  int N = settings->quality.value();
   glBegin(GL_LINE_STRIP);
   for (int k = 0; k < N; ++k)
   {
@@ -1418,14 +1400,14 @@ void Visualizer::drawLoop(State* state)
 
 void Visualizer::exportToText(std::string filename)
 {
-  if (lts == NULL)
+  if (!ltsManager->lts())
   {
-    return ;
+    return;
   }
   std::map< Cluster*, unsigned int > clus_id;
   unsigned int N = 0;
-  float ch = settings->getFloat(ClusterHeight);
-  Cluster_iterator ci(lts);
+  float ch = settings->clusterHeight.value();
+  Cluster_iterator ci(ltsManager->lts());
   std::ofstream file(filename.c_str());
   if (!file)
   {

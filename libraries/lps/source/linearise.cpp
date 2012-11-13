@@ -38,7 +38,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/find.h"
 
 //mCRL2 data
@@ -258,21 +258,6 @@ class specification_basic_type:public boost::noncopyable
     }
 
   private:
-    // TODO. This summand constructor should become part of the lps library.
-    deprecated::summand summand_(const variable_list summation_variables,
-                     const data_expression condition,
-                     const bool is_delta,
-                     const action_list actions,
-                     const bool has_time,
-                     const data_expression time,
-                     const assignment_list assignments)
-    {
-      return
-        (has_time?
-         deprecated::summand(summation_variables,condition,is_delta,actions,time,assignments):
-         deprecated::summand(summation_variables,condition,is_delta,actions,assignments));
-    }
-
     process_expression delta_at_zero(void)
     {
       return at(delta(), data::sort_real::real_(0));
@@ -453,8 +438,6 @@ class specification_basic_type:public boost::noncopyable
         // of getparameters.
         const variable_list templist=getparameters(multiAction);
         objectdata[n].parameters=templist;
-        // objectdata[n].objectname=identifier_string((aterm_appl)(aterm_list)actionnames);
-        objectdata[n].multi_action_names=actionnames;
         objectdata[n].object=multiact;
         // must separate assignment below as
         // objectdata may change as a side effect of make
@@ -1310,10 +1293,10 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
+    template <class MutableSubstitution>
     void alphaconvertprocess(
       variable_list& sumvars,
-      variable_list& rename_vars,
-      data_expression_list& rename_terms,
+      MutableSubstitution &sigma,
       const process_expression p)
     {
       /* This function replaces the variables in sumvars
@@ -1330,8 +1313,7 @@ class specification_basic_type:public boost::noncopyable
         {
           variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars=push_front(newsumvars,newvar);
-          rename_vars=push_front(rename_vars,var);
-          rename_terms=push_front(rename_terms,data_expression(newvar));
+          sigma[var]=data_expression(newvar);
         }
         else
         {
@@ -1341,13 +1323,14 @@ class specification_basic_type:public boost::noncopyable
       sumvars=reverse(newsumvars);
     }
 
-
+    template <class MutableSubstitution>
     void alphaconvert(
       variable_list& sumvars,
-      variable_list& rename_vars,
-      data_expression_list& rename_terms,
-      const variable_list occurvars,
-      const data_expression_list occurterms)
+      // variable_list& rename_vars,
+      // data_expression_list& rename_terms,
+      MutableSubstitution &sigma,
+      const variable_list &occurvars,
+      const data_expression_list &occurterms)
     {
       /* This function replaces the variables in sumvars
          by unique ones if these variables occur in occurvars
@@ -1363,8 +1346,9 @@ class specification_basic_type:public boost::noncopyable
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars=push_front(newsumvars,newvar);
-          rename_vars=push_front(rename_vars,var);
-          rename_terms=push_front(rename_terms,data_expression(newvar));
+          /* rename_vars=push_front(rename_vars,var);
+             rename_terms=push_front(rename_terms,data_expression(newvar)); */
+          sigma[var]=data_expression(newvar);
         }
         else
         {
@@ -1376,74 +1360,14 @@ class specification_basic_type:public boost::noncopyable
 
     /******************* substitute *****************************************/
 
-    data_expression_list substitute_datalist(
-      const data_expression_list terms,
-      const variable_list vars,
-      const  data_expression_list tl)
-    {
-      std::map < variable, data_expression > sigma;
-      data_expression_list::const_iterator j=terms.begin();
-      for (variable_list::const_iterator i=vars.begin();
-           i!=vars.end(); ++i, ++j)
-      {
-        /* Substitutions are carried out from left to right. The first applicable substitution counts */
-        if (sigma.count(*i)==0)
-        {
-          sigma[*i]=*j;
-        }
-      }
-      return data::replace_free_variables(atermpp::convert<data::data_expression_list>(tl), data::make_map_substitution(sigma));
-    }
 
-    data_expression substitute_data(
-      const data_expression_list terms,
-      const variable_list vars,
-      const data_expression t)
-    {
-      /* The code below could be replaced by the code below, but this is too inefficient,
-         as the reverse operator is expensive:
-         <snip>
-      */
-      std::map < variable, data_expression > sigma;
-      data_expression_list::const_iterator j=terms.begin();
-      for (variable_list::const_iterator i=vars.begin();
-           i!=vars.end(); ++i, ++j)
-      {
-        /* Substitutions are carried out from left to right. The first applicable substitution counts */
-        if (sigma.count(*i)==0)
-        {
-          sigma[*i]=*j;
-        }
-      }
-      const data_expression result=data::replace_free_variables(t, make_map_substitution(sigma));
-      return result;
-    }
-
-    action_list substitute_multiaction(
-      const data_expression_list terms,
-      const variable_list vars,
-      const action_list multiAction)
-    {
-      if (multiAction.empty())
-      {
-        return multiAction;
-      }
-      const action act=multiAction.front();
-      return push_front(substitute_multiaction(terms,vars,pop_front(multiAction)),
-                        action(act.label(),
-                               substitute_datalist(
-                                 terms,
-                                 vars,
-                                 act.arguments())));
-    }
-
+    template <class Substitution>
     assignment_list substitute_assignmentlist(
-      const data_expression_list terms,
-      const variable_list vars,
-      const assignment_list assignments,
-      const variable_list parameters,
-      int replacelhs,
-      int replacerhs)
+      const assignment_list &assignments,
+      const variable_list &parameters,
+      const bool replacelhs,
+      const bool replacerhs,
+      const Substitution &sigma)
     {
       /* TODO: This should be replaced by standard functions. */
       /* precondition: the variables in the assignment occur in
@@ -1483,32 +1407,30 @@ class specification_basic_type:public boost::noncopyable
 
           if (replacelhs)
           {
-            lhs=substitute_data(terms,vars,lhs);
+            lhs=data::replace_free_variables(lhs,sigma);
             assert(is_variable(lhs));
           }
           if (replacerhs)
           {
-            rhs=substitute_data(terms,vars,rhs);
+            rhs=data::replace_free_variables(rhs,sigma);
           }
 
           if (lhs==rhs)
           {
             return substitute_assignmentlist(
-                     terms,
-                     vars,
                      pop_front(assignments),
                      pop_front(parameters),
                      replacelhs,
-                     replacerhs);
+                     replacerhs,
+                     sigma);
           }
           return push_front(
                    substitute_assignmentlist(
-                     terms,
-                     vars,
                      pop_front(assignments),
                      pop_front(parameters),
                      replacelhs,
-                     replacerhs),
+                     replacerhs,
+                     sigma),
                    assignment(lhs,rhs));
         }
       }
@@ -1524,132 +1446,131 @@ class specification_basic_type:public boost::noncopyable
 
       if (replacelhs)
       {
-        lhs=substitute_data(terms,vars,lhs);
+        lhs=data::replace_free_variables(lhs,sigma);
         assert(is_variable(lhs));
       }
       if (replacerhs)
       {
-        rhs=substitute_data(terms,vars,rhs);
+        rhs=data::replace_free_variables(rhs,sigma);
       }
 
       if (lhs==rhs)
       {
         return substitute_assignmentlist(
-                 terms,
-                 vars,
                  assignments,
                  pop_front(parameters),
                  replacelhs,
-                 replacerhs);
+                 replacerhs,
+                 sigma);
       }
       return push_front(
                substitute_assignmentlist(
-                 terms,
-                 vars,
                  assignments,
                  pop_front(parameters),
                  replacelhs,
-                 replacerhs),
+                 replacerhs,
+                 sigma),
                assignment(lhs,rhs));
     }
 
-    data_expression substitute_time(
-      const data_expression_list terms,
-      const variable_list vars,
-      const data_expression time)
-    {
-      return substitute_data(terms,vars,time);
-    }
+    /* The function below calculates sigma(p) and replaces
+       all variables that are bound by a sum in p by unique
+       variables */
 
     process_expression substitute_pCRLproc(
-      const data_expression_list terms,
-      const variable_list vars,
-      const process_expression p)
+      const process_expression p,
+      const  std::map < variable, data_expression > &sigma)
     {
-      assert(terms.size()==vars.size());
       if (is_choice(p))
       {
         return choice(
-                 substitute_pCRLproc(terms,vars,choice(p).left()),
-                 substitute_pCRLproc(terms,vars,choice(p).right()));
+                 substitute_pCRLproc(choice(p).left(),sigma),
+                 substitute_pCRLproc(choice(p).right(),sigma));
       }
       if (is_seq(p))
       {
         return seq(
-                 substitute_pCRLproc(terms,vars,seq(p).left()),
-                 substitute_pCRLproc(terms,vars,seq(p).right()));
+                 substitute_pCRLproc(seq(p).left(),sigma),
+                 substitute_pCRLproc(seq(p).right(),sigma));
       }
       if (is_sync(p))
       {
         return process::sync(
-                 substitute_pCRLproc(terms,vars,process::sync(p).left()),
-                 substitute_pCRLproc(terms,vars,process::sync(p).right()));
+                 substitute_pCRLproc(process::sync(p).left(),sigma),
+                 substitute_pCRLproc(process::sync(p).right(),sigma));
       }
       if (is_if_then(p))
       {
-        data_expression condition=substitute_data(terms,vars,if_then(p).condition());
+        data_expression condition=data::replace_free_variables(if_then(p).condition(), make_map_substitution(sigma));
         if (condition==sort_bool::false_())
         {
           return delta_at_zero();
         }
         if (condition==sort_bool::true_())
         {
-          return substitute_pCRLproc(terms,vars,if_then(p).then_case());
+          return substitute_pCRLproc(if_then(p).then_case(),sigma);
         }
-        return if_then(condition,substitute_pCRLproc(terms,vars,if_then(p).then_case()));
+        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma));
       }
       if (is_if_then_else(p))
       {
-        data_expression condition=substitute_data(terms,vars,if_then_else(p).condition());
+        data_expression condition=data::replace_free_variables(if_then_else(p).condition(), make_map_substitution(sigma));
         if (condition==sort_bool::false_())
         {
-          return substitute_pCRLproc(terms,vars,if_then_else(p).else_case());
+          return substitute_pCRLproc(if_then_else(p).else_case(),sigma);
         }
         if (condition==sort_bool::true_())
         {
-          return substitute_pCRLproc(terms,vars,if_then_else(p).then_case());
+          return substitute_pCRLproc(if_then_else(p).then_case(),sigma);
         }
         return if_then_else(
                  condition,
-                 substitute_pCRLproc(terms,vars,if_then_else(p).then_case()),
-                 substitute_pCRLproc(terms,vars,if_then_else(p).else_case()));
+                 substitute_pCRLproc(if_then_else(p).then_case(),sigma),
+                 substitute_pCRLproc(if_then_else(p).else_case(),sigma));
       }
 
       if (is_sum(p))
       {
         variable_list sumargs=sum(p).bound_variables();
-        variable_list vars1=vars;
-        data_expression_list terms1=terms;
+        variable_list vars;
+        data_expression_list terms; 
 
-        alphaconvert(sumargs,vars1,terms1,variable_list(terms),data_expression_list(vars));
+        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+        {
+          vars=push_back(vars,i->first);
+          terms=push_back(terms,i->second);
+        }
+        
+        std::map < variable, data_expression > local_sigma=sigma;
+        alphaconvert(sumargs,local_sigma,vars,terms);
 
         const process_expression result=sum(sumargs,
-                                            substitute_pCRLproc(terms1,vars1,sum(p).operand()));
+                                            substitute_pCRLproc(sum(p).operand(),local_sigma));
         return result;
       }
 
       if (is_process_instance(p))
       {
         return process_instance(process_instance(p).identifier(),
-                                substitute_datalist(terms,vars,process_instance(p).actual_parameters()));
+                                data::replace_free_variables(process_instance(p).actual_parameters(), make_map_substitution(sigma)));
       }
 
       if (is_process_instance_assignment(p))
       {
         const process_instance q=transform_process_assignment_to_process(p);
-        return process_instance(q.identifier(),substitute_datalist(terms,vars,q.actual_parameters()));
+        return process_instance(q.identifier(),data::replace_free_variables(q.actual_parameters(), make_map_substitution(sigma)));
       }
 
       if (is_action(p))
       {
         return action(action(p).label(),
-                      substitute_datalist(terms,vars,action(p).arguments()));
+                      data::replace_free_variables(action(p).arguments(), make_map_substitution(sigma)));
       }
 
       if (is_at(p))
       {
-        return at(substitute_pCRLproc(terms,vars,at(p).operand()),
-                  substitute_data(terms,vars,at(p).time_stamp()));
+        return at(substitute_pCRLproc(at(p).operand(),sigma),
+                  data::replace_free_variables(at(p).time_stamp(), make_map_substitution(sigma)));
       }
 
       if (is_delta(p))
@@ -1665,8 +1586,8 @@ class specification_basic_type:public boost::noncopyable
       if (is_sync(p))
       {
         return process::sync(
-                 substitute_pCRLproc(terms,vars,process::sync(p).left()),
-                 substitute_pCRLproc(terms,vars,process::sync(p).right()));
+                 substitute_pCRLproc(process::sync(p).left(),sigma),
+                 substitute_pCRLproc(process::sync(p).right(),sigma));
 
       }
 
@@ -1681,20 +1602,20 @@ class specification_basic_type:public boost::noncopyable
     process_instance transform_process_assignment_to_process(const process_instance_assignment procId)
     {
       size_t n=objectIndex(procId.identifier());
-      variable_list variables;
-      data_expression_list terms;
 
       assignment_list assignments=procId.assignments();
 
       // Transform the assignments into a list of variables and substitutable terms;
+      // std::map < variable, data_expression > sigma;
+      mutable_map_substitution <> sigma;
       for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
       {
-        variables=push_front(variables,i->lhs());
-        terms=push_front(terms,i->rhs());
+        sigma[i->lhs()]=i->rhs();
       }
 
-      return process_instance(procId.identifier(),
-                              substitute_datalist(terms,variables,data_expression_list(objectdata[n].parameters)));
+      const data_expression_list dl=make_data_expression_list(objectdata[n].parameters);
+      process_instance p(procId.identifier(), data::replace_free_variables(dl,sigma));
+      return p;
     }
 
     /********************************************************************/
@@ -1788,11 +1709,12 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
-        variable_list renamevars;
-        data_expression_list renameterms;
-        alphaconvert(sumvars,renamevars,renameterms,freevars,data_expression_list());
-        body1=substitute_pCRLproc(renameterms,renamevars,body1);
-        const data_expression time1=substitute_data(renameterms,renamevars,time);
+        /* variable_list renamevars;
+        data_expression_list renameterms; */
+        std::map < variable, data_expression > sigma;
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        body1=substitute_pCRLproc(body1, sigma);
+        const data_expression time1=data::replace_free_variables(time, make_map_substitution(sigma));
         body1=wraptime(body1,time1,sumvars+freevars);
         return sum(sumvars,body1);
       }
@@ -1992,13 +1914,12 @@ class specification_basic_type:public boost::noncopyable
       {
         if (sum_state>=s)
         {
-          variable_list renamevars;
           variable_list sumvars=sum(body).bound_variables();
           process_expression body1=sum(body).operand();
 
-          data_expression_list renameterms;
-          alphaconvert(sumvars,renamevars,renameterms,freevars,data_expression_list());
-          body1=substitute_pCRLproc(renameterms,renamevars,body1);
+          std::map < variable, data_expression > sigma;
+          alphaconvert(sumvars,sigma,freevars,data_expression_list());
+          body1=substitute_pCRLproc(body1, sigma);
           body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first);
           /* Due to the optimisation below, suggested by Yaroslav Usenko, bodytovarheadGNF(...,sum_state,...)
              can deliver a process of the form c -> x + !c -> y. In this case, the
@@ -2302,14 +2223,11 @@ class specification_basic_type:public boost::noncopyable
         /* we must take care that no variables in body2 are
             inadvertently bound */
         variable_list sumvars=sum(body1).bound_variables();
-        variable_list vars;
-        data_expression_list terms;
-        alphaconvertprocess(sumvars,vars,terms,body2);
+
+        std::map < variable, data_expression > sigma;
+        alphaconvertprocess(sumvars,sigma,body2);
         return sum(sumvars,
-                   putbehind(substitute_pCRLproc(
-                               terms,
-                               vars,
-                               sum(body1).operand()),
+                   putbehind(substitute_pCRLproc(sum(body1).operand(), sigma),
                              body2));
       }
 
@@ -2376,14 +2294,15 @@ class specification_basic_type:public boost::noncopyable
         /* we must take care that no variables in condition are
             inadvertently bound */
         variable_list sumvars=sum(body1).bound_variables();
-        variable_list vars;
-        data_expression_list terms;
-        alphaconvert(sumvars,vars,terms,variable_list(),
+        /* variable_list vars;
+        data_expression_list terms; */
+        std::map < variable, data_expression > sigma;
+        alphaconvert(sumvars,sigma,variable_list(),
                      push_front(data_expression_list(),condition));
         return sum(
                  sumvars,
                  distribute_condition(
-                   substitute_pCRLproc(terms,vars,sum(body1).operand()),
+                   substitute_pCRLproc(sum(body1).operand(),sigma),
                    condition));
       }
 
@@ -2753,11 +2672,10 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
-        variable_list renamevars;
-        data_expression_list renameterms;
-        alphaconvert(sumvars,renamevars,renameterms,freevars,data_expression_list());
-        body1=substitute_pCRLproc(renameterms,renamevars,body1);
-        const data_expression time1=substitute_data(renameterms,renamevars,time);
+        std::map < variable, data_expression > sigma;
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        body1=substitute_pCRLproc(body1, sigma);
+        const data_expression time1=data::replace_free_variables(time,make_map_substitution(sigma));
         body1=distributeTime(body1,time1,sumvars+freevars,timecondition);
         return sum(sumvars,body1);
       }
@@ -2913,10 +2831,20 @@ class specification_basic_type:public boost::noncopyable
            we must now substitute */
         procstorealGNFrec(t,first,todo,regular);
 
-        process_expression t3=substitute_pCRLproc(
-                                process_instance(body).actual_parameters(),
-                                objectdata[n].parameters,
-                                objectdata[n].processbody);
+        std::map < variable, data_expression > sigma;
+        
+        const data_expression_list &dl= process_instance(body).actual_parameters();
+        const variable_list &vl=objectdata[n].parameters;
+
+        data_expression_list::const_iterator j=dl.begin();
+        for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i,++j)
+        {
+          assert(j!=dl.end());
+          sigma[*i]=*j;
+        }
+        assert(j==dl.end());
+
+        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma);
 
         if (regular)
         {
@@ -3149,13 +3077,11 @@ class specification_basic_type:public boost::noncopyable
         // templist is needed as objectdata may be realloced
         // during the substitution. Same applies to tempvar
         // below.
-        data_expression_list templist=substitute_datalist(data_expression_list(push_front(variable_list(),var2)),
-                                      push_front(variable_list(),var),
-                                      data_expression_list(objectdata[n].parameters));
+        std::map < variable, data_expression > sigma;
+        sigma[var]=var2;
+        data_expression_list templist=data::replace_free_variables(aterm_cast<data_expression_list>(objectdata[n].parameters), make_map_substitution(sigma));
         objectdata[n].parameters=variable_list(templist);
-        process_expression tempvar=substitute_pCRLproc(data_expression_list(push_front(variable_list(),var2)),
-                                   push_front(variable_list(),var),
-                                   objectdata[n].processbody);
+        process_expression tempvar=substitute_pCRLproc(objectdata[n].processbody, sigma);
         objectdata[n].processbody=tempvar;
         var=var2;
         return false;
@@ -3907,42 +3833,46 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    deprecated::summand_list insert_summand(
-      const deprecated::summand_list sumlist,
-      const variable_list parameters,
-      const variable_list sumvars,
-      const data_expression condition,
-      const action_list multiAction,
-      const data_expression actTime,
-      const data_expression_list procargs,
+    void insert_summand(
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
+      const variable_list &parameters,
+      const variable_list &sumvars,
+      const data_expression &condition,
+      const action_list &multiAction,
+      const data_expression &actTime,
+      const data_expression_list &procargs,
       const bool has_time,
-      const bool is_delta_summand)
+      const bool is_deadlock_summand)
     {
-      /* insert a new summand in sumlist; first try whether there is already
-         a similar summand, such that this summand can be added with minimal
-         increase of size. Otherwise add a fully new summand. Note that by
-         a more careful matching, the number of summands can be reduced.
-
-         Note also that a terminated term is indicated by taking procargs
-         equal to NULL. */
-
-      if (condition!=sort_bool::false_())
+      const data_expression rewritten_condition=RewriteTerm(condition);
+      if (rewritten_condition==sort_bool::false_())
       {
-        return push_front(sumlist,
-                          summand_(sumvars,condition,is_delta_summand,
-                                   multiAction,has_time,actTime,
-                                   (is_delta_summand?assignment_list():
-                                    make_assignment_list(parameters,procargs))));
+        deadlock_summands.push_back(deadlock_summand(sumvars,
+                                                     rewritten_condition,
+                                                     deadlock(data::sort_real::real_(0))));
+      }
+
+      if (is_deadlock_summand)
+      {
+        deadlock_summands.push_back(deadlock_summand(sumvars,
+                                                     rewritten_condition,
+                                                     has_time?deadlock(actTime):deadlock()));
       }
       else
       {
-        return sumlist;
+        action_summands.push_back(action_summand(sumvars,
+                                                 rewritten_condition,
+                                                 has_time?multi_action(multiAction,actTime):multi_action(multiAction),
+                                                 make_assignment_list(parameters,procargs)));
       }
     }
 
+
     void add_summands(
       const process_identifier procId,
-      deprecated::summand_list& sumlist,
+      action_summand_vector& action_summands,
+      deadlock_summand_vector& deadlock_summands,
       process_expression summandterm,
       const std::vector < process_identifier> &pCRLprocs,
       const variable_list parameters,
@@ -4043,9 +3973,10 @@ class specification_basic_type:public boost::noncopyable
                      atTime,stack,sumvars);
           }
         }
-        sumlist=insert_summand(sumlist,parameters,
-                               sumvars,RewriteTerm(condition1),multiAction,
-                               atTime,procargs,has_time,is_delta_summand);
+   
+        insert_summand(action_summands,deadlock_summands,parameters,
+                       sumvars,condition1,multiAction,
+                       atTime,procargs,has_time,is_delta_summand);
         return;
       }
 
@@ -4091,25 +4022,25 @@ class specification_basic_type:public boost::noncopyable
         {
           throw mcrl2::runtime_error("terminating processes should not exist when using the regular flag");
         }
-        sumlist=insert_summand(sumlist,parameters,
-                               sumvars,
-                               RewriteTerm(condition1),
-                               multiAction,
-                               atTime,
-                               data_expression_list(dummyparameterlist(stack,(bool) singlestate)),
-                               has_time,
-                               is_delta_summand);
+        insert_summand(action_summands,deadlock_summands,parameters,
+                       sumvars,
+                       condition1,
+                       multiAction,
+                       atTime,
+                       aterm_cast<data_expression_list>(dummyparameterlist(stack,(bool) singlestate)),
+                       has_time,
+                       is_delta_summand);
         return;
       }
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
       procargs=push_front(data_expression_list(),data_expression(make_application(stack.opns->pop,stack.stackvar)));
 
-      sumlist=insert_summand(
-                sumlist,
+      insert_summand(
+                action_summands,deadlock_summands,
                 parameters,
                 sumvars,
-                RewriteTerm(condition1),
+                condition1,
                 multiAction,
                 atTime,
                 procargs,
@@ -4122,7 +4053,8 @@ class specification_basic_type:public boost::noncopyable
 
     void collectsumlistterm(
       const process_identifier procId,
-      deprecated::summand_list& sumlist,
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       const process_expression body,
       const variable_list pars,
       const stacklisttype& stack,
@@ -4135,34 +4067,36 @@ class specification_basic_type:public boost::noncopyable
         const process_expression t1=choice(body).left();
         const process_expression t2=choice(body).right();
 
-        collectsumlistterm(procId,sumlist,t1,pars,stack,
+        collectsumlistterm(procId,action_summands,deadlock_summands,t1,pars,stack,
                            regular,singlestate,pCRLprocs);
-        collectsumlistterm(procId,sumlist,t2,pars,stack,
+        collectsumlistterm(procId,action_summands,deadlock_summands,t2,pars,stack,
                            regular,singlestate,pCRLprocs);
         return;
       }
       else
       {
-        add_summands(procId,sumlist,body,pCRLprocs,pars,stack,
+        add_summands(procId,action_summands,deadlock_summands,body,pCRLprocs,pars,stack,
                      regular,singlestate);
       }
     }
 
-    deprecated::summand_list collectsumlist(
+    void collectsumlist(
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       const std::vector < process_identifier> &pCRLprocs,
       const variable_list pars,
       const stacklisttype& stack,
       bool regular,
       bool singlestate)
     {
-      deprecated::summand_list sumlist;
       for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
            walker!=pCRLprocs.end(); ++walker)
       {
         const process_identifier procId= *walker;
         collectsumlistterm(
           procId,
-          sumlist,
+          action_summands,
+          deadlock_summands,
           objectdata[objectIndex(procId)].processbody,
           pars,
           stack,
@@ -4170,8 +4104,6 @@ class specification_basic_type:public boost::noncopyable
           singlestate,
           pCRLprocs);
       }
-
-      return sumlist;
     }
 
 
@@ -4649,27 +4581,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool summandsCanBeClustered(
-      const deprecated::summand summand1,
-      const deprecated::summand summand2)
+      const action_summand &summand1,
+      const action_summand &summand2)
     {
       if (summand1.has_time()!= summand2.has_time())
-      {
-        return false;
-      }
-
-      if (summand1.is_delta())
-      {
-        if (summand2.is_delta())
-        {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-      }
-
-      if (summand2.is_delta())
       {
         return false;
       }
@@ -4683,8 +4598,8 @@ class specification_basic_type:public boost::noncopyable
          ordered.
       */
 
-      const action_list multiactionlist1=summand1.actions();
-      const action_list multiactionlist2=summand2.actions();
+      const action_list multiactionlist1=summand1.multi_action().actions();
+      const action_list multiactionlist2=summand2.multi_action().actions();
       action_list::const_iterator i2=multiactionlist2.begin();
       for (action_list::const_iterator i1=multiactionlist1.begin(); i1!=multiactionlist1.end(); ++i1,++i2)
       {
@@ -4716,11 +4631,11 @@ class specification_basic_type:public boost::noncopyable
       return data_expression(var);
     }
 
-    deprecated::summand collect_sum_arg_arg_cond(
+    action_summand collect_sum_arg_arg_cond(
       const enumtype& e,
       size_t n,
-      const deprecated::summand_list sumlist,
-      const variable_list gsorts)
+      const action_summand_vector &action_summands,
+      const variable_list &gsorts)
     {
       /* This function gets a list of summands, with
          the same multiaction and time
@@ -4741,7 +4656,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression binarysumcondition;
       int equaluptillnow=1;
 
-      for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end() ; ++walker)
+      for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
       {
         const variable_list sumvars=walker->summation_variables();
         resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist);
@@ -4767,9 +4682,9 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression equalterm;
       equaluptillnow=1;
-      for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
+      for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
       {
-        const deprecated::summand smmnd=*walker;
+        const action_summand smmnd=*walker;
         const data_expression condition=smmnd.condition();
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
@@ -4777,7 +4692,19 @@ class specification_basic_type:public boost::noncopyable
         ++auxrename_list_pars;
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
-        const data_expression auxresult1=substitute_data(auxargs,auxpars,condition);
+        std::map < variable, data_expression > sigma;
+        data_expression_list::const_iterator j=auxargs.begin();
+        for (variable_list::const_iterator i=auxpars.begin();
+             i!=auxpars.end(); ++i, ++j)
+        {
+          /* Substitutions are carried out from left to right. The first applicable substitution counts */
+          if (sigma.count(*i)==0)
+          {
+            sigma[*i]=*j;
+          }
+        }
+
+        const data_expression auxresult1=data::replace_free_variables(condition,make_map_substitution(sigma));
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -4828,103 +4755,106 @@ class specification_basic_type:public boost::noncopyable
       /* First we collect all multi-actions in a separate vector
          of multiactions */
       std::vector < action_list > multiActionList;
-      bool multiActionIsDelta=false;
 
-      for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end() ; ++walker)
+      for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
       {
-        if (walker->is_delta())
-        {
-          multiActionIsDelta=true;
-          break;
-        }
-        multiActionList.push_back(walker->actions());
+        multiActionList.push_back(walker->multi_action().actions());
       }
 
       action_list resultmultiactionlist;
-      if (!multiActionIsDelta)
+      size_t multiactioncount= multiActionList[0].size(); // The number of multi actions.
+      for (; multiactioncount>0 ; multiactioncount--)
       {
-        size_t multiactioncount= multiActionList[0].size(); // The number of multi actions.
-        for (; multiactioncount>0 ; multiactioncount--)
+        data_expression_list resultf;
+        // fcnt is the arity of the action with index multiactioncount-1;
+        // const action a= *(multiActionList[0].begin()+(multiactioncount-1));
+        action_list::const_iterator a=multiActionList[0].begin();
+        for (size_t i=1 ; i<multiactioncount ; ++i,++a) {}
+        // const action a= *((multiActionList[0]).begin()+(multiactioncount-1));
+        size_t fcnt=(a->arguments()).size();
+        data_expression f;
+
+        for (; fcnt>0 ; fcnt--)
         {
-          data_expression_list resultf;
-          // fcnt is the arity of the action with index multiactioncount-1;
-          // const action a= *(multiActionList[0].begin()+(multiactioncount-1));
-          action_list::const_iterator a=multiActionList[0].begin();
-          for (size_t i=1 ; i<multiactioncount ; ++i,++a) {}
-          // const action a= *((multiActionList[0]).begin()+(multiactioncount-1));
-          size_t fcnt=(a->arguments()).size();
-          data_expression f;
-
-          for (; fcnt>0 ; fcnt--)
+          data_expression_list auxresult;
+          data_expression equalterm;
+          bool equaluptillnow=true;
+          std::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
+          std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+          std::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
+          for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end();
+               ++walker,++multiactionwalker)
           {
-            data_expression_list auxresult;
-            data_expression equalterm;
-            bool equaluptillnow=true;
-            std::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
-            std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-            std::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
-            for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end();
-                 ++walker,++multiactionwalker)
+            assert(auxrename_list_pars!=rename_list_pars.end());
+            assert(auxrename_list_args!=rename_list_args.end());
+            const variable_list auxpars= *auxrename_list_pars;
+            ++auxrename_list_pars;
+            const data_expression_list auxargs= *auxrename_list_args;
+            ++auxrename_list_args;
+            // f is the fcnt-th argument of the multiactioncount-th action in the list
+            action_list::const_iterator a1=multiactionwalker->begin();
+            for (size_t i=1; i<multiactioncount; ++i, ++a1) {};
+            data_expression_list::const_iterator d1=(a1->arguments()).begin();
+            for (size_t i=1; i<fcnt; ++i, ++d1) {};
+            f= *d1;
+            std::map < variable, data_expression > sigma;
+            data_expression_list::const_iterator j=auxargs.begin();
+            for (variable_list::const_iterator i=auxpars.begin();
+                 i!=auxpars.end(); ++i, ++j)
             {
-              assert(auxrename_list_pars!=rename_list_pars.end());
-              assert(auxrename_list_args!=rename_list_args.end());
-              const variable_list auxpars= *auxrename_list_pars;
-              ++auxrename_list_pars;
-              const data_expression_list auxargs= *auxrename_list_args;
-              ++auxrename_list_args;
-              // f is the fcnt-th argument of the multiactioncount-th action in the list
-              action_list::const_iterator a1=multiactionwalker->begin();
-              for (size_t i=1; i<multiactioncount; ++i, ++a1) {};
-              data_expression_list::const_iterator d1=(a1->arguments()).begin();
-              for (size_t i=1; i<fcnt; ++i, ++d1) {};
-              f= *d1;
-              const data_expression auxresult1=substitute_data(auxargs,auxpars,f);
-
-              if (equalterm==data_expression()||is_global_variable(equalterm))
+              /* Substitutions are carried out from left to right. The first applicable substitution counts */
+              if (sigma.count(*i)==0)
               {
-                equalterm=auxresult1;
+                sigma[*i]=*j;
               }
-              else
-              {
-                if (equaluptillnow)
-                {
-                  equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
-                }
-              }
-              auxresult=push_front(auxresult,auxresult1);
             }
-            if (equaluptillnow)
+
+            const data_expression auxresult1=data::replace_free_variables(f,make_map_substitution(sigma));
+
+            if (equalterm==data_expression()||is_global_variable(equalterm))
             {
-              resultf=push_front(resultf,equalterm);
+              equalterm=auxresult1;
             }
             else
             {
-              if (!options.binary)
+              if (equaluptillnow)
               {
-                resultf=push_front(resultf,
-                                   data_expression(application(
-                                                     find_case_function(e.enumeratedtype_index,f.sort()),
-                                                     push_front(auxresult,data_expression(e.var)))));
-              }
-              else
-              {
-                data_expression temp=construct_binary_case_tree(
-                                       n,
-                                       resultsum,
-                                       auxresult,
-                                       f.sort(),
-                                       e);
-                resultf=push_front(resultf,temp);
+                equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
               }
             }
+            auxresult=push_front(auxresult,auxresult1);
           }
-          a=multiActionList[0].begin();
-          for (size_t i=1 ; i<multiactioncount ; ++i,++a) {}
-          resultmultiactionlist=
-            push_front(
-              resultmultiactionlist,
-              action(a->label(),resultf));
+          if (equaluptillnow)
+          {
+            resultf=push_front(resultf,equalterm);
+          }
+          else
+          {
+            if (!options.binary)
+            {
+              resultf=push_front(resultf,
+                                 data_expression(application(
+                                                   find_case_function(e.enumeratedtype_index,f.sort()),
+                                                   push_front(auxresult,data_expression(e.var)))));
+            }
+            else
+            {
+              data_expression temp=construct_binary_case_tree(
+                                     n,
+                                     resultsum,
+                                     auxresult,
+                                     f.sort(),
+                                     e);
+              resultf=push_front(resultf,temp);
+            }
+          }
         }
+        a=multiActionList[0].begin();
+        for (size_t i=1 ; i<multiactioncount ; ++i,++a) {}
+        resultmultiactionlist=
+          push_front(
+            resultmultiactionlist,
+            action(a->label(),resultf));
       }
 
       /* Construct resulttime, the time of the action ... */
@@ -4935,7 +4865,7 @@ class specification_basic_type:public boost::noncopyable
       bool all_summands_have_time=true;
 
       // first find out whether there is a summand with explicit time.
-      for (deprecated::summand_list::const_iterator walker=sumlist.begin() ; walker!=sumlist.end(); ++walker)
+      for (action_summand_vector::const_iterator walker=action_summands.begin() ; walker!=action_summands.end(); ++walker)
       {
         if (walker->has_time())
         {
@@ -4959,11 +4889,11 @@ class specification_basic_type:public boost::noncopyable
         auxrename_list_pars=rename_list_pars.begin();
         auxrename_list_args=rename_list_args.begin();
         auxresult=data_expression_list();
-        for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
+        for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
         {
           if (walker->has_time())
           {
-            const data_expression actiontime=walker->time();
+            const data_expression actiontime=walker->multi_action().time();
 
             assert(auxrename_list_pars!=rename_list_pars.end());
             assert(auxrename_list_args!=rename_list_args.end());
@@ -4972,7 +4902,19 @@ class specification_basic_type:public boost::noncopyable
             const data_expression_list auxargs= *auxrename_list_args;
             ++auxrename_list_args;
 
-            const data_expression auxresult1=substitute_time(auxargs,auxpars,actiontime);
+            std::map < variable, data_expression > sigma;
+            data_expression_list::const_iterator j=auxargs.begin();
+            for (variable_list::const_iterator i=auxpars.begin();
+                 i!=auxpars.end(); ++i, ++j)
+            {
+              /* Substitutions are carried out from left to right. The first applicable substitution counts */
+              if (sigma.count(*i)==0)
+              {
+                sigma[*i]=*j;
+              }
+            }
+
+            const data_expression auxresult1=data::replace_free_variables(actiontime, make_map_substitution(sigma));
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -5025,7 +4967,7 @@ class specification_basic_type:public boost::noncopyable
         auxrename_list_pars=rename_list_pars.begin();
         auxrename_list_args=rename_list_args.begin();
         data_expression_list auxresult;
-        for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
+        for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
         {
           const assignment_list nextstate=walker->assignments();
 
@@ -5039,7 +4981,19 @@ class specification_basic_type:public boost::noncopyable
           data_expression nextstateparameter;
           nextstateparameter=getRHSassignment(*var_it,nextstate);
 
-          data_expression auxresult1=substitute_data(auxargs,auxpars,nextstateparameter);
+          std::map < variable, data_expression > sigma;
+          data_expression_list::const_iterator j=auxargs.begin();
+          for (variable_list::const_iterator i=auxpars.begin();
+                 i!=auxpars.end(); ++i, ++j)
+          {
+            /* Substitutions are carried out from left to right. The first applicable substitution counts */
+            if (sigma.count(*i)==0)
+            {
+              sigma[*i]=*j;
+            }
+          }
+
+          data_expression auxresult1=data::replace_free_variables(nextstateparameter, make_map_substitution(sigma));
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
             equalterm=auxresult1;
@@ -5092,8 +5046,240 @@ class specification_basic_type:public boost::noncopyable
       /* The list of arguments in nextstate are now in a sequential form, and
            must be transformed back to a list of assignments */
       const assignment_list final_resultnextstate=make_assignment_list(gsorts,resultnextstate);
-      return summand_(resultsum,resultcondition,multiActionIsDelta,resultmultiactionlist,
-                      some_summand_has_time,resulttime,final_resultnextstate);
+      return action_summand(resultsum,
+                            resultcondition,
+                            some_summand_has_time?multi_action(resultmultiactionlist,resulttime):multi_action(resultmultiactionlist),
+                            final_resultnextstate);
+    }
+
+    deadlock_summand collect_sum_arg_arg_cond(
+      const enumtype& e,
+      size_t n,
+      const deadlock_summand_vector &deadlock_summands,
+      const variable_list & /* gsorts */)
+    {
+      /* This function gets a list of summands, with
+         the same multiaction and time
+         status. It yields a single clustered summand
+         by introducing an auxiliary sum operator, with
+         a variable of enumtype. In case binary is used,
+         a sequence of variables are introduced of sort Bool */
+
+      variable_list resultsum;
+      data_expression resultcondition;
+      action_list resultmultiaction;
+      data_expression resulttime;
+
+      std::vector < variable_list > rename_list_pars;
+      std::vector < data_expression_list > rename_list_args;
+      /* rename list is a list of pairs of variable and term lists */
+      data_expression_list conditionlist;
+      data_expression binarysumcondition;
+      int equaluptillnow=1;
+
+      for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end() ; ++walker)
+      {
+        const variable_list sumvars=walker->summation_variables();
+        resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist);
+      }
+
+      if (options.binary)
+      {
+        resultsum=make_binary_sums(
+                    n,
+                    enumeratedtypes[e.enumeratedtype_index].sortId,
+                    binarysumcondition,
+                    resultsum);
+      }
+      else
+      {
+        resultsum=push_front(resultsum,e.var);
+      }
+
+      /* we construct the resulting condition */
+      data_expression_list auxresult;
+      std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+      std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+
+      data_expression equalterm;
+      equaluptillnow=1;
+      for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end(); ++walker)
+      {
+        const deadlock_summand smmnd=*walker;
+        const data_expression condition=smmnd.condition();
+        assert(auxrename_list_pars!=rename_list_pars.end());
+        assert(auxrename_list_args!=rename_list_args.end());
+        const variable_list auxpars= *auxrename_list_pars;
+        ++auxrename_list_pars;
+        const data_expression_list auxargs= *auxrename_list_args;
+        ++auxrename_list_args;
+        std::map < variable, data_expression > sigma;
+        data_expression_list::const_iterator j=auxargs.begin();
+        for (variable_list::const_iterator i=auxpars.begin();
+             i!=auxpars.end(); ++i, ++j)
+        {
+          /* Substitutions are carried out from left to right. The first applicable substitution counts */
+          if (sigma.count(*i)==0)
+          {
+            sigma[*i]=*j;
+          }
+        }
+
+        const data_expression auxresult1=data::replace_free_variables(condition, make_map_substitution(sigma));
+        if (equalterm==data_expression()||is_global_variable(equalterm))
+        {
+          equalterm=auxresult1;
+        }
+        else
+        {
+          if (equaluptillnow)
+          {
+            equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
+          }
+        }
+        auxresult=push_front(auxresult,auxresult1);
+      }
+      if (options.binary)
+      {
+        resultcondition=construct_binary_case_tree(n,
+                        resultsum,auxresult,sort_bool::bool_(),e);
+        resultcondition=lazy::and_(binarysumcondition,resultcondition);
+        resultcondition=lazy::and_(
+                          construct_binary_case_tree(n,
+                              resultsum,conditionlist,sort_bool::bool_(),e),
+                          resultcondition);
+      }
+      else
+      {
+        if (equaluptillnow)
+        {
+          resultcondition=lazy::and_(
+                            application(
+                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                              push_front(conditionlist,data_expression(e.var))),
+                            equalterm);
+        }
+        else
+        {
+          resultcondition=application(
+                            find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                            push_front(auxresult,data_expression(e.var)));
+          resultcondition=lazy::and_(
+                            application(
+                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                              push_front(conditionlist,data_expression(e.var))),
+                            resultcondition);
+        }
+      }
+
+      /* now we construct the arguments of the action */
+      /* First we collect all multi-actions in a separate vector
+         of multiactions */
+      std::vector < action_list > multiActionList;
+      
+      action_list resultmultiactionlist;
+
+      /* Construct resulttime, the time of the action ... */
+
+      equaluptillnow=true;
+      equalterm=data_expression();
+      bool some_summand_has_time=false;
+      bool all_summands_have_time=true;
+
+      // first find out whether there is a summand with explicit time.
+      for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin() ; walker!=deadlock_summands.end(); ++walker)
+      {
+        if (walker->deadlock().has_time())
+        {
+          some_summand_has_time=true;
+        }
+        else
+        {
+          all_summands_have_time=false;
+        }
+      }
+
+      if ((some_summand_has_time))
+      {
+        variable dummy_time_variable;
+        if (!all_summands_have_time)
+        {
+          // Generate a fresh dummy variable, and add it to the summand variables
+          dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
+          resultsum=push_front(resultsum,dummy_time_variable);
+        }
+        auxrename_list_pars=rename_list_pars.begin();
+        auxrename_list_args=rename_list_args.begin();
+        auxresult=data_expression_list();
+        for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end(); ++walker)
+        {
+          if (walker->deadlock().has_time())
+          {
+            const data_expression actiontime=walker->deadlock().time();
+
+            assert(auxrename_list_pars!=rename_list_pars.end());
+            assert(auxrename_list_args!=rename_list_args.end());
+            const variable_list auxpars= *auxrename_list_pars;
+            ++auxrename_list_pars;
+            const data_expression_list auxargs= *auxrename_list_args;
+            ++auxrename_list_args;
+
+            std::map < variable, data_expression > sigma;
+            data_expression_list::const_iterator j=auxargs.begin();
+            for (variable_list::const_iterator i=auxpars.begin();
+                 i!=auxpars.end(); ++i, ++j)
+            {
+              /* Substitutions are carried out from left to right. The first applicable substitution counts */
+              if (sigma.count(*i)==0)
+              {
+                sigma[*i]=*j;
+              }
+            }
+
+            const data_expression auxresult1=data::replace_free_variables(actiontime, make_map_substitution(sigma));
+            if (equalterm==data_expression()||is_global_variable(equalterm))
+            {
+              equalterm=auxresult1;
+            }
+            else
+            {
+              if (equaluptillnow)
+              {
+                equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
+              }
+            }
+            auxresult=push_front(auxresult,auxresult1);
+          }
+          else
+          {
+            // this summand does not have time. But some summands have.
+            auxresult=push_front(auxresult,data_expression(dummy_time_variable));
+            equaluptillnow=false;
+          }
+        }
+        if (options.binary==1)
+        {
+          resulttime=construct_binary_case_tree(n,
+                                                resultsum,auxresult,sort_real::real_(),e);
+        }
+        else
+        {
+          if (equaluptillnow)
+          {
+            resulttime=equalterm;
+          }
+          else
+          {
+            resulttime=application(
+                         find_case_function(e.enumeratedtype_index,sort_real::real_()),
+                         push_front(auxresult,data_expression(e.var)));
+          }
+        }
+      }
+      
+      return deadlock_summand(resultsum,
+                              resultcondition,
+                              some_summand_has_time?deadlock(resulttime):deadlock());
     }
 
     sort_expression_list getActionSorts(const action_list actionlist)
@@ -5107,36 +5293,93 @@ class specification_basic_type:public boost::noncopyable
       return resultsorts;
     }
 
-    deprecated::summand_list cluster_actions(
-      const deprecated::summand_list sums,
+    void cluster_actions(
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       const variable_list pars)
     {
-      /* We cluster first the summands with the action
-          occurring in the first summand of sums.
-          These summands are first stored in w1. */
-
-      deprecated::summand_list result;
-      deprecated::summand_list reducible_sumlist=sums;
-
-      for (deprecated::summand_list::const_iterator i=sums.begin() ; i!=sums.end() ; ++i)
       {
-        const deprecated::summand summand1=*i;
+        /* We cluster first the action summands with the action
+            occurring in the first summand of sums.
+            These summands are first stored in w1. */
 
-        deprecated::summand_list w1;
-        deprecated::summand_list w2;
-        for (deprecated::summand_list::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+        action_summand_vector result;
+        action_summand_vector reducible_sumlist=action_summands;
+
+        for (action_summand_vector::const_iterator i=action_summands.begin() ; i!=action_summands.end() ; ++i)
         {
-          const deprecated::summand summand2=*w3;
-          if (summandsCanBeClustered(summand1,summand2))
+          const action_summand summand1=*i;
+
+          action_summand_vector w1;
+          action_summand_vector w2;
+          for (action_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
           {
-            w1=push_front(w1,summand2);
+            const action_summand summand2=*w3;
+            if (summandsCanBeClustered(summand1,summand2))
+            {
+              w1.push_back(summand2);
+            }
+            else
+            {
+              w2.push_back(summand2);
+            }
+          }
+          reducible_sumlist.swap(w2);
+
+          /* In w1 we now find all the summands labelled with
+             similar multiactions, actiontime and terminationstatus.
+             We must now construct its clustered form. */
+          size_t n=w1.size();
+
+          if (n>0)
+          {
+            if (n>1)
+            {
+              const action_list multiaction=w1.front().multi_action().actions();
+              sort_expression_list actionsorts;
+              actionsorts=getActionSorts(multiaction);
+
+              const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
+
+              result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,n,w1,pars));
+            }
+            else
+            {
+              // result=w1 + result;
+              for(action_summand_vector::const_iterator i=result.begin(); i!=result.end(); ++i)
+              {
+                w1.push_back(*i);
+              }
+              w1.swap(result);
+            }
+          }
+        }
+        action_summands=result;
+      }
+
+      // Now the delta summands are clustered.
+      deadlock_summand_vector result;
+      deadlock_summand_vector reducible_sumlist=deadlock_summands;
+
+      for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin() ; i!=deadlock_summands.end() ; ++i)
+      {
+        const deadlock_summand summand1=*i;
+
+        deadlock_summand_vector w1;
+        deadlock_summand_vector w2;
+        for (deadlock_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+        {
+          const deadlock_summand summand2=*w3;
+          if (summand1.deadlock().has_time()!=summand2.deadlock().has_time())
+          {
+            w1.push_back(summand2);
           }
           else
           {
-            w2=push_front(w2,summand2);
+            w2.push_back(summand2);
           }
         }
-        reducible_sumlist=w2;
+        reducible_sumlist.swap(w2);
 
         /* In w1 we now find all the summands labelled with
            similar multiactions, actiontime and terminationstatus.
@@ -5148,25 +5391,22 @@ class specification_basic_type:public boost::noncopyable
           if (n>1)
           {
             sort_expression_list actionsorts;
-            if (!w1.front().is_delta())
-            {
-              const action_list multiaction=w1.front().actions();
-              actionsorts=getActionSorts(multiaction);
-            }
 
             const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
-            // const enumtype *enumeratedtype_=new enumtype(options.binary?2:n,actionsorts,get_sorts(pars),*this);
 
-            result=push_front(result,
-                              collect_sum_arg_arg_cond(enumeratedtype_,n,w1,pars));
+            result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,n,w1,pars));
           }
           else
           {
-            result=w1 + result;
+            // result=w1 + result;
+            for(deadlock_summand_vector::const_iterator i=w1.begin(); i!=w1.end(); ++i)
+            {
+              result.push_back(*i);
+            }
           }
         }
       }
-      return result;
+      deadlock_summands.swap(result);
     }
 
     /**************** GENERaTE LPEpCRL **********************************/
@@ -5175,15 +5415,21 @@ class specification_basic_type:public boost::noncopyable
     /* The variable regular indicates that we are interested in generating
        a LPE assuming the pCRL term under consideration is regular */
 
-    deprecated::summand_list generateLPEpCRL(const process_identifier procId,
-                                 /*const bool canterminate,*/
-                                 const bool containstime,
-                                 const bool regular,
-                                 variable_list& parameters,
-                                 assignment_list& init)
+    void generateLPEpCRL(action_summand_vector &action_summands,
+                         deadlock_summand_vector &deadlock_summands,
+                         const process_identifier procId,
+                         /*const bool canterminate,*/
+                         const bool containstime,
+                         const bool regular,
+                         variable_list& parameters,
+                         assignment_list& init)
     /* A pair of initial state and linear process must be extracted
        from the underlying GNF */
     {
+      // We use action_summands and deadlock_summands as an output.
+      assert(action_summands.size()==0);
+      assert(deadlock_summands.size()==0);
+
       bool singlecontrolstate=false;
       size_t n=objectIndex(procId);
 
@@ -5238,13 +5484,13 @@ class specification_basic_type:public boost::noncopyable
       init=make_initialstate(procId,stack,pCRLprocs,
                              regular,singlecontrolstate,parameters);
 
-      deprecated::summand_list sums=collectsumlist(pCRLprocs,parameters,stack,
-                                       /*(canterminate&&objectdata[n].canterminate),*/regular,
-                                       singlecontrolstate);
+      collectsumlist(action_summands,deadlock_summands,pCRLprocs,parameters,stack,
+                     /*(canterminate&&objectdata[n].canterminate),*/regular,
+                     singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
       {
-        sums=cluster_actions(sums,parameters);
+        cluster_actions(action_summands,deadlock_summands,parameters);
       }
 
       if ((!containstime) || options.add_delta)
@@ -5258,12 +5504,8 @@ class specification_basic_type:public boost::noncopyable
            this delta. As the removal of timed delta's
            is time consuming in the linearisation, the use
            of this flag, can speed up linearisation considerably */
-        sums=push_front(sums,
-                        summand_(variable_list(),sort_bool::true_(),true,action_list(),
-                                 false,data_expression(),assignment_list()));
+        deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
       }
-
-      return sums;
     }
 
 
@@ -5286,29 +5528,16 @@ class specification_basic_type:public boost::noncopyable
       return reverse(resultactionlist);
     }
 
-    deprecated::summand_list hidecomposition(const identifier_string_list hidelist, const deprecated::summand_list summands)
+    void hidecomposition(const identifier_string_list hidelist, action_summand_vector &action_summands)
     {
-      deprecated::summand_list resultsumlist;
-
-      for (deprecated::summand_list::const_iterator i=summands.begin(); i!=summands.end() ; ++i)
+      for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
       {
-        const variable_list sumvars=i->summation_variables();
-        const data_expression actiontime=i->time();
-        const data_expression condition=i->condition();
-        const assignment_list nextstate=i->assignments();
-
-        action_list acts;
-        if (!i->is_delta())
-        {
-          const action_list multiaction=i->actions();
-          acts=hide_(hidelist,multiaction);
-        }
-        resultsumlist=push_front(
-                        resultsumlist,
-                        summand_(sumvars,condition,i->is_delta(),acts,
-                                 i->has_time(),actiontime,nextstate));
+        const action_list acts=hide_(hidelist,i->multi_action().actions());
+        *i=action_summand(i->summation_variables(),
+                          i->condition(),
+                          i->has_time()?multi_action(acts,i->multi_action().time()):multi_action(acts),
+                          i->assignments());
       }
-      return reverse(resultsumlist);
     }
 
     /**************** allow/block *************************************/
@@ -5372,54 +5601,68 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    deprecated::summand_list insert_timed_delta_summand(
-      const deprecated::summand_list l,
-      const deprecated::summand s)
+    void insert_timed_delta_summand(
+      const action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
+      const deadlock_summand &s)
     {
       /* The delta summands are put in front.
          The sequence of summands is maintained as
          good as possible, to eliminate summands as
          quickly as possible */
-      assert(s.is_delta());
-      deprecated::summand_list result;
+      deadlock_summand_vector result;
 
-      const variable_list sumvars=s.summation_variables();
+      // const variable_list sumvars=s.summation_variables();
       const data_expression cond=s.condition();
-      const data_expression actiontime=s.time();
+      const data_expression actiontime=s.deadlock().time();
 
-      deprecated::summand_list tail=l;
-      for (deprecated::summand_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      // First check whether the delta summand is subsumed by an action summands.
+      for (action_summand_vector::const_iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
       {
-        const deprecated::summand smmnd=*i;
+        // const action_summand smmnd=*i;
         const data_expression cond1=i->condition();
-        tail=pop_front(tail);
         if ((!options.add_delta) &&
-            ((actiontime==i->time()) || (!i->has_time())) &&
+            ((actiontime==i->multi_action().time()) || (!i->multi_action().has_time())) &&
+            (implies_condition(cond,cond1)))
+        {
+          /* De delta summand is subsumed by action summand *i. So, it does not
+             have to be added. */
+          
+          return;
+        }
+      }
+
+      for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
+      {
+        const deadlock_summand smmnd=*i;
+        const data_expression cond1=i->condition();
+        if ((!options.add_delta) &&
+            ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
             (implies_condition(cond,cond1)))
         {
           /* put the summand that was effective in removing
              this delta summand to the front, such that it
              is encountered early later on, removing a next
              delta summand */
-          return push_front(reverse(result)+tail,smmnd);
+          
+          copy(i,deadlock_summands.end(),back_inserter(result));
+          deadlock_summands.swap(result);
+          return;
         }
-        if ((i->is_delta()) &&
-            ((options.add_delta)||
-             (((actiontime==smmnd.time())|| (!s.has_time())) &&
+        if (((options.add_delta)||
+             (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
               (implies_condition(cond1,cond)))))
         {
           /* do not add summand to result, as it is superseded by s */
         }
         else
         {
-          result=push_front(result,smmnd);
+          result.push_back(smmnd);
         }
       }
 
-      result=push_front(reverse(result),
-                        summand_(sumvars,cond,s.is_delta(),(s.is_delta()?action_list():s.actions()),s.has_time(),
-                                 actiontime,s.assignments()));
-      return result;
+      result.push_back(s);
+      deadlock_summands.swap(result);
     }
 
     action_name_multiset_list sortMultiActionLabels(const action_name_multiset_list l)
@@ -5486,16 +5729,17 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    bool encap(const identifier_string_list encaplist, const action_list multiaction)
+    bool encap(const action_name_multiset_list& encaplist, const action_list multiaction)
     {
       for (action_list::const_iterator walker=multiaction.begin();
            walker!=multiaction.end(); ++walker)
       {
         // for(identifier_string_list::const_iterator i=encaplist.begin(); i!=encaplist.end(); ++i)
         // building an iterator over an identifier_string_list does not work. TODO.
-        for (identifier_string_list i=encaplist; !i.empty(); i=pop_front(i))
+        for (action_name_multiset_list i=encaplist; !i.empty(); i=pop_front(i))
         {
-          const identifier_string s1= i.front();
+          assert(i.front().names().size() == 1);
+          const identifier_string s1= i.front().names().front();
           const identifier_string s2=walker->label().name();
           if (s1==s2)
           {
@@ -5506,17 +5750,22 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    deprecated::summand_list allowblockcomposition(
+    void allowblockcomposition(
       const action_name_multiset_list allowlist1,  // This is a list of list of identifierstring.
-      const deprecated::summand_list sourcesumlist,
-      const bool is_allow)
+      const bool is_allow,
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands)
     {
       /* This function calculates the allow or the block operator,
          depending on whether is_allow is true */
 
-      deprecated::summand_list resultdeltasumlist;
-      deprecated::summand_list resultsimpledeltasumlist;
-      deprecated::summand_list resultactionsumlist;
+      action_summand_vector sourcesumlist;
+      action_summands.swap(sourcesumlist);
+
+      deadlock_summand_vector resultdeltasumlist;
+      deadlock_summand_vector resultsimpledeltasumlist;
+      deadlock_summands.swap(resultdeltasumlist);
+
       action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
 
       size_t sourcesumlist_length=sourcesumlist.size();
@@ -5527,7 +5776,7 @@ class specification_basic_type:public boost::noncopyable
         // message about the block operator is very confusing.
       {
         mCRL2log(mcrl2::log::verbose) << "- calculating the " << (is_allow?"allow":"block") <<
-              " operator on " << sourcesumlist.size() << " summands";
+              " operator on " << sourcesumlist.size() << " action summands and " << resultdeltasumlist.size() << " delta summands ";
       }
 
       /* First add the resulting sums in two separate lists
@@ -5536,100 +5785,72 @@ class specification_basic_type:public boost::noncopyable
          each delta summand it is determined whether it ought
          to be added, or is superseded by an action or another
          delta summand */
-      for (deprecated::summand_list::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
+      for (action_summand_vector::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
       {
-        const deprecated::summand smmnd= *i;
+        const action_summand smmnd= *i;
         const variable_list sumvars=smmnd.summation_variables();
-        // const action_list multiaction=smmnd.actions();
-        const data_expression actiontime=smmnd.time();
+        const action_list multiaction=smmnd.multi_action().actions();
+        const data_expression actiontime=smmnd.multi_action().time();
         const data_expression condition=smmnd.condition();
 
 
-        if (!i->is_delta() &&
-            ((is_allow && allow_(allowlist,smmnd.actions())) ||
-             (!is_allow && !encap(aterm_cast<identifier_string_list>(allowlist),smmnd.actions()))))
+        if ((is_allow && allow_(allowlist,multiaction)) ||
+             (!is_allow && !encap(allowlist,multiaction)))
         {
-          resultactionsumlist=push_front(
-                                resultactionsumlist,
-                                smmnd);
+          action_summands.push_back(smmnd);
         }
         else
         {
           if (smmnd.has_time())
           {
-            resultdeltasumlist=push_front(
-                                 resultdeltasumlist,
-                                 deprecated::summand(sumvars,
-                                         condition,
-                                         true,
-                                         action_list(),
-                                         actiontime,
-                                         assignment_list())); // We are not interested in the nextstate after delta.
+            resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock(actiontime)));
           }
           else
           {
             // summand has no time.
             if (condition==sort_bool::true_())
             {
-              resultsimpledeltasumlist=push_front(
-                                         resultsimpledeltasumlist,
-                                         deprecated::summand(
-                                           sumvars,
-                                           condition,
-                                           true,
-                                           action_list(),
-                                           assignment_list())); // We are not interested in the nextstate after delta.
+              resultsimpledeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
             }
             else
             {
-              resultdeltasumlist=push_front(
-                                   resultdeltasumlist,
-                                   deprecated::summand(
-                                     sumvars,
-                                     condition,
-                                     true,
-                                     action_list(),
-                                     assignment_list())); // We are not interested in the nextstate after delta.
+              resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
             }
           }
         }
       }
 
-      deprecated::summand_list resultsumlist=resultactionsumlist;
-
       if (options.nodeltaelimination)
       {
-        resultsumlist=resultsimpledeltasumlist + resultdeltasumlist + resultactionsumlist;
+        deadlock_summands.swap(resultsimpledeltasumlist);
+        copy(resultdeltasumlist.begin(),resultdeltasumlist.end(),back_inserter(deadlock_summands)); 
       }
       else
       {
         if (!options.add_delta) /* if a delta summand is added, conditional, timed
                                    delta's are subsumed and do not need to be added */
         {
-          for (deprecated::summand_list::const_iterator j=resultsimpledeltasumlist.begin();
+          for (deadlock_summand_vector::const_iterator j=resultsimpledeltasumlist.begin();
                j!=resultsimpledeltasumlist.end(); ++j)
           {
-            resultsumlist=insert_timed_delta_summand(resultsumlist,*j);
+            insert_timed_delta_summand(action_summands,deadlock_summands,*j);
           }
-          for (deprecated::summand_list::const_iterator j=resultdeltasumlist.begin();
+          for (deadlock_summand_vector::const_iterator j=resultdeltasumlist.begin();
                j!=resultdeltasumlist.end(); ++j)
           {
-            resultsumlist=insert_timed_delta_summand(resultsumlist,*j);
+            insert_timed_delta_summand(action_summands,deadlock_summands,*j);
           }
         }
         else
         {
           // Add a true -> delta
-          resultsumlist=push_front(resultsumlist,
-                                   deprecated::summand(variable_list(),sort_bool::true_(),true,action_list(),assignment_list()));
+          insert_timed_delta_summand(action_summands,deadlock_summands,deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
         }
       }
       if (mCRL2logEnabled(mcrl2::log::verbose) && (sourcesumlist_length>2 || is_allow))
       {
-        mCRL2log(mcrl2::log::verbose) << ", resulting in " << resultsumlist.size() << " summands\n";
+        mCRL2log(mcrl2::log::verbose) << ", resulting in " << action_summands.size() << " action summands and " << deadlock_summands.size() << " delta summands\n";
       }
-
-      return resultsumlist;
     }
 
     /**************** renaming ******************************************/
@@ -5664,33 +5885,20 @@ class specification_basic_type:public boost::noncopyable
       return resultactionlist;
     }
 
-    deprecated::summand_list renamecomposition(const rename_expression_list renamings,
-                                   const deprecated::summand_list sourcesumlist)
+    void renamecomposition(
+      const rename_expression_list renamings,
+      action_summand_vector &action_summands)
     {
-      deprecated::summand_list resultsumlist;
-
-      for (deprecated::summand_list::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
+      for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
       {
-        if (i->is_delta())
-        {
-          resultsumlist=push_front(resultsumlist,*i);
-        }
-        else
-        {
-          const deprecated::summand smmnd=*i;
-          const variable_list sumvars=smmnd.summation_variables();
-          const action_list multiaction=smmnd.actions();
-          const data_expression actiontime=smmnd.time();
-          const data_expression condition=smmnd.condition();
-          const assignment_list nextstate=smmnd.assignments();
+        const action_list actions=rename_actions(renamings,i->multi_action().actions());
 
-          resultsumlist=push_front(
-                          resultsumlist,
-                          summand_(sumvars,condition,false,rename_actions(renamings,multiaction),
-                                   smmnd.has_time(),actiontime,nextstate));
-        }
+        *i= action_summand(i->summation_variables(),
+                           i->condition(),
+                           i->multi_action().has_time()?multi_action(actions,i->multi_action().time()):multi_action(actions),
+                           i->assignments());
+        
       }
-      return reverse(resultsumlist);
     }
 
     /**************** equalargs ****************************************/
@@ -6276,14 +6484,16 @@ class specification_basic_type:public boost::noncopyable
       return makeMultiActionConditionList_aux(multiaction,comm_table,action_list(),true);
     }
 
-    deprecated::summand_list communicationcomposition(
+    void communicationcomposition(
       const communication_expression_list communications,
-      const deprecated::summand_list summands)
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands)
+
     {
       /* We follow the implementation of Muck van Weerdenburg, described in
          a note: Calculation of communication with open terms. */
 
-      mCRL2log(mcrl2::log::verbose) << "- calculating the communication operator on " << summands.size() << " summands";
+      mCRL2log(mcrl2::log::verbose) << "- calculating the communication operator on " << action_summands.size() << " action summands";
 
       /* first we sort the multiactions in communications */
       communication_expression_list resultingCommunications;
@@ -6302,112 +6512,99 @@ class specification_basic_type:public boost::noncopyable
       }
       communication_expression_list communications1=resultingCommunications;
 
-      deprecated::summand_list resultsumlist;
-      deprecated::summand_list resultingDeltaSummands;
+      action_summand_vector resultsumlist;
+      deadlock_summand_vector resultingDeltaSummands;
+      deadlock_summands.swap(resultingDeltaSummands);
 
-      for (deprecated::summand_list::const_iterator sourcesumlist=summands.begin();
-           sourcesumlist!=summands.end(); ++sourcesumlist)
+      for (action_summand_vector::const_iterator sourcesumlist=action_summands.begin();
+           sourcesumlist!=action_summands.end(); ++sourcesumlist)
       {
-        const deprecated::summand smmnd=*sourcesumlist;
+        const action_summand smmnd=*sourcesumlist;
         const variable_list sumvars=smmnd.summation_variables();
-        if (smmnd.is_delta())
+        const action_list multiaction=smmnd.multi_action().actions();
+        const data_expression condition=smmnd.condition();
+        const assignment_list nextstate=smmnd.assignments();
+
+        /* Recall a delta summand for every non delta summand.
+         * The reason for this is that with communication, the
+         * conditions for summands can become much more complex.
+         * Many of the actions in these summands are replaced by
+         * delta's later on. Due to the more complex conditions it
+         * will be hard to remove them. By adding a default delta
+         * with a simple condition, makes this job much easier
+         * later on, and will in general reduce the number of delta
+         * summands in the whole system */
+
+        /* But first remove free variables from sumvars */
+
+        variable_list newsumvars;
+        for (variable_list::const_iterator i=sumvars.begin(); i!=sumvars.end(); ++i)
         {
-          resultingDeltaSummands=push_front(
-                                   resultingDeltaSummands,
-                                   smmnd);
-        }
-        else
-        {
-          const action_list multiaction=smmnd.actions();
-          const data_expression condition=smmnd.condition();
-          const assignment_list nextstate=smmnd.assignments();
-
-          /* Recall a delta summand for every non delta summand.
-           * The reason for this is that with communication, the
-           * conditions for summands can become much more complex.
-           * Many of the actions in these summands are replaced by
-           * delta's later on. Due to the more complex conditions it
-           * will be hard to remove them. By adding a default delta
-           * with a simple condition, makes this job much easier
-           * later on, and will in general reduce the number of delta
-           * summands in the whole system */
-
-          /* But first remove free variables from sumvars */
-
-          variable_list newsumvars;
-          for (variable_list::const_iterator i=sumvars.begin(); i!=sumvars.end(); ++i)
+          const variable sumvar=*i;
+          if (occursinterm(sumvar,condition) ||
+              (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
           {
-            const variable sumvar=*i;
-            if (occursinterm(sumvar,condition) ||
-                (smmnd.has_time() && occursinterm(sumvar,smmnd.time())))
-            {
-              newsumvars=push_front(newsumvars,sumvar);
-            }
-          }
-          newsumvars=reverse(newsumvars);
-
-          resultingDeltaSummands=
-            push_front(resultingDeltaSummands,
-                       summand_(newsumvars,condition,true,action_list(),
-                                smmnd.has_time(),smmnd.time(),nextstate));
-
-          /* the multiactionconditionlist is a list containing
-             tuples, with a multiaction and the condition,
-             expressing whether the multiaction can happen. All
-             conditions exclude each other. Furthermore, the list
-             is not empty. If no communications can take place,
-             the original multiaction is delivered, with condition
-             true. */
-          const tuple_list multiactionconditionlist=
-            makeMultiActionConditionList(
-              multiaction,
-              communications1);
-
-          assert(multiactionconditionlist.actions.size()==
-                 multiactionconditionlist.conditions.size());
-          for (size_t i=0 ; i<multiactionconditionlist.actions.size(); ++i)
-          {
-            const data_expression communicationcondition=
-              RewriteTerm(multiactionconditionlist.conditions[i]);
-
-            const action_list multiaction=multiactionconditionlist.actions[i];
-            const data_expression newcondition=RewriteTerm(
-                                                 lazy::and_(condition,communicationcondition));
-            deprecated::summand new_summand=
-              summand_(sumvars,newcondition,false,multiaction,
-                       smmnd.has_time(),smmnd.time(),nextstate);
-            if (!options.nosumelm)
-            {
-              action_summand act_summand(summand_to_action_summand(new_summand));
-              sumelm(act_summand);
-              new_summand = mcrl2::lps::deprecated::summand(action_summand_to_aterm(act_summand));
-            }
-
-            if (newcondition!=sort_bool::false_())
-            {
-              resultsumlist=push_front(resultsumlist,new_summand);
-            }
+            newsumvars=push_front(newsumvars,sumvar);
           }
         }
+        newsumvars=reverse(newsumvars);
+
+        resultingDeltaSummands.push_back(deadlock_summand(newsumvars,
+                                                          condition,
+                                                          smmnd.multi_action().has_time()?deadlock(smmnd.multi_action().time()):deadlock()));
+
+        /* the multiactionconditionlist is a list containing
+           tuples, with a multiaction and the condition,
+           expressing whether the multiaction can happen. All
+           conditions exclude each other. Furthermore, the list
+           is not empty. If no communications can take place,
+           the original multiaction is delivered, with condition
+           true. */
+        const tuple_list multiactionconditionlist=
+          makeMultiActionConditionList(
+            multiaction,
+            communications1);
+
+        assert(multiactionconditionlist.actions.size()==
+               multiactionconditionlist.conditions.size());
+        for (size_t i=0 ; i<multiactionconditionlist.actions.size(); ++i)
+        {
+          const data_expression communicationcondition=
+            RewriteTerm(multiactionconditionlist.conditions[i]);
+
+          const action_list multiaction=multiactionconditionlist.actions[i];
+          const data_expression newcondition=RewriteTerm(
+                                               lazy::and_(condition,communicationcondition));
+          action_summand new_summand(sumvars,
+                                     newcondition,
+                                     smmnd.multi_action().has_time()?multi_action(multiaction, smmnd.multi_action().time()):multi_action(multiaction),
+                                     nextstate);
+          if (!options.nosumelm)
+          {
+            sumelm(new_summand);
+          }
+
+          if (newcondition!=sort_bool::false_())
+          {
+            resultsumlist.push_back(new_summand);
+          }
+        }
+        
       }
 
       /* Now the resulting delta summands must be added again */
 
-      if (options.nodeltaelimination)
+      action_summands.swap(resultsumlist);
+      if (!options.nodeltaelimination)
       {
-        resultsumlist=resultsumlist + resultingDeltaSummands;
-      }
-      else
-      {
-        for (deprecated::summand_list::const_iterator w=resultingDeltaSummands.begin();
+        for (deadlock_summand_vector::const_iterator w=resultingDeltaSummands.begin();
              w!=resultingDeltaSummands.end(); ++w)
         {
-          resultsumlist=insert_timed_delta_summand(resultsumlist,*w);
+          insert_timed_delta_summand(action_summands,deadlock_summands,*w);
         }
       }
 
-      mCRL2log(mcrl2::log::verbose) << " resulting in " << resultsumlist.size() << " summands\n";
-      return reverse(resultsumlist);
+      mCRL2log(mcrl2::log::verbose) << " resulting in " << action_summands.size() << " action summands and " << deadlock_summands.size() << " delta summands\n";
     }
 
     bool check_real_variable_occurrence(
@@ -6517,29 +6714,35 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression getUltimateDelayCondition(
-      const deprecated::summand_list sumlist,
+      const action_summand_vector &action_summands,
+      const deadlock_summand_vector &deadlock_summands,
       const variable_list freevars,
       const data_expression timevariable,
       variable_list& existentially_quantified_variables)
     {
       assert(existentially_quantified_variables.empty());
 
-      for (deprecated::summand_list::const_iterator walker=sumlist.begin();
-           walker!=sumlist.end(); ++walker)
+      /* First walk through the summands to see whether
+         a summand with condition true that does not refer
+         to time exists. In that case the ultimate delay
+         condition is true */
+
+      for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
+           i!=deadlock_summands.end(); ++i)
       {
-        /* First walk through the summands to see whether
-           a summand with condition true that does not refer
-           to time exists. In that case the ultimate delay
-           condition is true */
-
-        const deprecated::summand smmnd=*walker;
-        const data_expression condition=smmnd.condition();
-
-        if ((!walker->has_time()) && (condition==sort_bool::true_()))
+        if ((!i->deadlock().has_time()) && (i->condition()==sort_bool::true_()))
         {
           return sort_bool::true_();
         }
+      }
 
+      for (action_summand_vector::const_iterator i=action_summands.begin();
+           i!=action_summands.end(); ++i)
+      {
+        if ((!i->multi_action().has_time()) && (i->condition()==sort_bool::true_()))
+        {
+          return sort_bool::true_();
+        }
       }
 
       /* Unfortunately, no ultimate delay condition true can
@@ -6550,23 +6753,40 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list condition_list;
       std::vector < variable_list> renamings_pars;
       std::vector < data_expression_list> renamings_args;
-      for (deprecated::summand_list::const_iterator walker=sumlist.begin();
-           walker!=sumlist.end(); ++walker)
+      for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
+           i!=deadlock_summands.end(); ++i)
       {
-        const deprecated::summand smmnd=*walker;
-        const variable_list sumvars=smmnd.summation_variables();
-        const data_expression actiontime=smmnd.time();
-        const data_expression condition=smmnd.condition();
-
         variable_list new_existentially_quantified_variables;
         const data_expression ult_del_condition=
              makesingleultimatedelaycondition(
-                             sumvars,
+                             i->summation_variables(),
                              freevars,
-                             condition,
-                             walker->has_time(),
+                             i->condition(),
+                             i->deadlock().has_time(),
                              timevariable,
-                             actiontime,
+                             i->deadlock().time(),
+                             new_existentially_quantified_variables);
+        existentially_quantified_variables=merge_var(
+                                             new_existentially_quantified_variables,
+                                             existentially_quantified_variables,
+                                             renamings_pars,
+                                             renamings_args,
+                                             condition_list);
+        results=push_front(results,ult_del_condition);
+      }
+
+      for (action_summand_vector::const_iterator i=action_summands.begin();
+           i!=action_summands.end(); ++i)
+      {
+        variable_list new_existentially_quantified_variables;
+        const data_expression ult_del_condition=
+             makesingleultimatedelaycondition(
+                             i->summation_variables(),
+                             freevars,
+                             i->condition(),
+                             i->multi_action().has_time(),
+                             timevariable,
+                             i->multi_action().time(),
                              new_existentially_quantified_variables);
         existentially_quantified_variables=merge_var(
                                              new_existentially_quantified_variables,
@@ -6591,7 +6811,22 @@ class specification_basic_type:public boost::noncopyable
       for(data_expression_list::const_iterator i=results.begin();
               i!=results.end(); ++i,++j,++renamings_par,++renamings_arg)
       {
-        result=lazy::or_(result,substitute_data(*renamings_arg,*renamings_par,lazy::and_(*i,*j)));
+        const variable_list &auxpars=*renamings_par;
+        const data_expression_list &auxargs=*renamings_arg;
+
+        std::map < variable, data_expression > sigma;
+        data_expression_list::const_iterator j1=auxargs.begin();
+        for (variable_list::const_iterator i1=auxpars.begin();
+             i1!=auxpars.end(); ++i1, ++j1)
+        {
+          /* Substitutions are carried out from left to right. The first applicable substitution counts */
+          if (sigma.count(*i1)==0)
+          {
+            sigma[*i1]=*j1;
+          }
+        }
+
+        result=lazy::or_(result,data::replace_free_variables(lazy::and_(*i,*j), make_map_substitution(sigma)));
       }
       return result;
     }
@@ -6599,73 +6834,95 @@ class specification_basic_type:public boost::noncopyable
 
     /******** make_unique_variables **********************/
 
-    variable_list make_unique_variables(
-      const variable_list var_list,
+    std::map < variable, data_expression > make_unique_variables(
+      const variable_list &var_list,
       const std::string& hint)
     {
       /* This function generates a list of variables with the same sorts
          as in variable_list, where all names are unique */
 
-      if (var_list.empty())
-      {
-        return var_list;
-      }
+      std::map < variable, data_expression > sigma;
 
-      variable v=var_list.front();
-      assert(is_variable(v));
-      variable new_variable=get_fresh_variable(std::string(v.name()) + ((hint.empty())?"":"_") + hint,
-                            v.sort());
-      return push_front(
-               make_unique_variables(pop_front(var_list),hint),
-               new_variable);
+      for(variable_list::const_iterator i=var_list.begin(); i!=var_list.end(); ++i)
+      {
+        sigma[*i]=get_fresh_variable(std::string(i->name()) + ((hint.empty())?"":"_") + hint, i->sort());
+      }
+      return sigma;
     }
 
     /******** make_parameters_and_variables_unique **********************/
 
-    deprecated::summand_list make_parameters_and_sum_variables_unique(
-      const deprecated::summand_list summands,
+    void make_parameters_and_sum_variables_unique(
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       variable_list& pars,
       assignment_list& init,
       const std::string hint="")
     {
-      deprecated::summand_list result_summands;
+      action_summand_vector result_action_summands;
 
-      const variable_list unique_pars=make_unique_variables(pars,hint);
-      assert(unique_pars.size()==pars.size());
-      init=substitute_assignmentlist(aterm_cast<data_expression_list>(unique_pars),pars,init,pars,1,0);  // Only substitute the variables
-      // the variables at the lhs.
-      for (deprecated::summand_list::const_iterator s=summands.begin(); s!=summands.end(); ++s)
+      std::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
+      const variable_list unique_pars=data::replace_free_variables(pars,make_map_substitution(sigma));
+
+      init=substitute_assignmentlist(init,pars,true,false, make_map_substitution(sigma));  // Only substitute the variables at the lhs.
+      for (action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
-        const deprecated::summand smmnd= *s;
+        const action_summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
-        const variable_list unique_sumvars=make_unique_variables(sumvars,hint);
-        assert(unique_sumvars.size()==sumvars.size());
+        std::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
+        const variable_list unique_sumvars=data::replace_free_variables(sumvars, make_map_substitution(sigma_sumvars));
+
         data_expression condition=smmnd.condition();
-        action_list multiaction;
-        if (!smmnd.is_delta())
-        { 
-          multiaction=smmnd.actions();
-        }
-        data_expression actiontime=smmnd.time();
+        action_list multiaction=smmnd.multi_action().actions();
+        data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-        condition=substitute_data(aterm_cast<data_expression_list>(unique_pars),pars,condition);
-        condition=substitute_data(aterm_cast<data_expression_list>(unique_sumvars),sumvars,condition);
+        condition=data::replace_free_variables(condition,make_map_substitution(sigma));
+        condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
 
-        actiontime=substitute_time(aterm_cast<data_expression_list>(unique_pars),pars,actiontime);
-        actiontime=substitute_time(aterm_cast<data_expression_list>(unique_sumvars),sumvars,actiontime);
-        multiaction=substitute_multiaction(aterm_cast<data_expression_list>(unique_pars),pars,multiaction),
-        multiaction=substitute_multiaction(aterm_cast<data_expression_list>(unique_sumvars),sumvars,multiaction),
+        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
+        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
+        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma));
+        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma_sumvars));
 
-        nextstate=substitute_assignmentlist(aterm_cast<data_expression_list>(unique_pars),pars,nextstate,pars,1,1);
-        nextstate=substitute_assignmentlist(aterm_cast<data_expression_list>(unique_sumvars),sumvars,nextstate,unique_pars,0,1);
+        nextstate=substitute_assignmentlist(nextstate,pars,true,true,make_map_substitution(sigma));
+        nextstate=substitute_assignmentlist(nextstate,unique_pars,false,true,make_map_substitution(sigma_sumvars));
 
-        result_summands=push_front(result_summands,
-                                   summand_(unique_sumvars,condition,s->is_delta(),multiaction,
-                                            s->has_time(),actiontime,nextstate));
+        result_action_summands.push_back(action_summand(unique_sumvars,
+                                                        condition,
+                                                        s->multi_action().has_time()?multi_action(multiaction,actiontime):multi_action(multiaction),
+                                                        nextstate));
       }
       pars=unique_pars;
-      return result_summands;
+      action_summands.swap(result_action_summands);
+
+      deadlock_summand_vector result_deadlock_summands;
+      
+      assert(unique_pars.size()==pars.size());
+      
+      for (deadlock_summand_vector::const_iterator s=deadlock_summands.begin(); s!=deadlock_summands.end(); ++s)
+      {
+        const deadlock_summand smmnd= *s;
+        const variable_list sumvars=smmnd.summation_variables();
+        std::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
+        const variable_list unique_sumvars=data::replace_free_variables(sumvars, make_map_substitution(sigma_sumvars));
+
+        assert(unique_sumvars.size()==sumvars.size());
+        data_expression condition=smmnd.condition();
+        data_expression actiontime=smmnd.deadlock().time();
+
+        condition=data::replace_free_variables(condition,make_map_substitution(sigma));
+        condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
+
+        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
+        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
+
+        result_deadlock_summands.push_back(deadlock_summand(unique_sumvars,
+                                                            condition,
+                                                            s->deadlock().has_time()?deadlock(actiontime):deadlock()));
+      }
+      pars=unique_pars;
+      result_deadlock_summands.swap(deadlock_summands);
     }
 
 
@@ -6674,15 +6931,21 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** parallel composition ******************************/
 
-    deprecated::summand_list combine_summand_lists(
-      const deprecated::summand_list sumlist1,
-      const deprecated::summand_list sumlist2,
+    void combine_summand_lists(
+      const action_summand_vector &action_summands1,
+      const deadlock_summand_vector &deadlock_summands1,
+      const action_summand_vector &action_summands2,
+      const deadlock_summand_vector &deadlock_summands2,
       const variable_list par1,
       const variable_list par3,
-      const variable_list parametersOfsumlist2)
+      const variable_list parametersOfsumlist2,
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands)
 
     {
-      deprecated::summand_list resultsumlist;
+      assert(action_summands.size()==0);
+      assert(deadlock_summands.size()==0);
+
       variable_list allpars;
 
       allpars=par1 + par3;
@@ -6693,19 +6956,55 @@ class specification_basic_type:public boost::noncopyable
       variable_list ultimate_delay_sumvars1;
       data_expression ultimatedelaycondition=
         (options.add_delta?data_expression(sort_bool::true_()):
-           getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
+           getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
 
-      for (deprecated::summand_list::const_iterator walker1=sumlist1.begin();
-           walker1!=sumlist1.end(); ++walker1)
+      for (deadlock_summand_vector::const_iterator walker1=deadlock_summands1.begin();
+           walker1!=deadlock_summands1.end(); ++walker1)
       {
-        const deprecated::summand summand1= *walker1;
+        const deadlock_summand summand1= *walker1;
         variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
-        action_list multiaction1;
-        if (!summand1.is_delta())
+        // action_list multiaction1=summand1.actions();
+        data_expression actiontime1=summand1.deadlock().time();
+        data_expression condition1=summand1.condition();
+        // assignment_list nextstate1=summand1.assignments();
+        bool has_time=summand1.deadlock().has_time();
+
+        if (!has_time)
         {
-          multiaction1=summand1.actions();
+          if (ultimatedelaycondition!=sort_bool::true_())
+          {
+            actiontime1=timevar;
+            sumvars1=push_front(sumvars1,timevar);
+            condition1=lazy::and_(ultimatedelaycondition,condition1);
+            has_time=true;
+          }
         }
-        data_expression actiontime1=summand1.time();
+        else
+        {
+          /* Summand1 has time. Substitute the time expression for
+             timevar in ultimatedelaycondition, and extend the condition */
+          std::map < variable, data_expression > sigma;
+          sigma[timevar]=actiontime1;
+          const data_expression intermediateultimatedelaycondition=
+                      data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
+          condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
+        }
+
+        condition1=RewriteTerm(condition1);
+        if (condition1!=sort_bool::false_())
+        {
+          deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
+        }
+        
+      }
+
+      for (action_summand_vector::const_iterator walker1=action_summands1.begin();
+           walker1!=action_summands1.end(); ++walker1)
+      {
+        const action_summand summand1= *walker1;
+        variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
+        action_list multiaction1=summand1.multi_action().actions();
+        data_expression actiontime1=summand1.multi_action().time();
         data_expression condition1=summand1.condition();
         assignment_list nextstate1=summand1.assignments();
         bool has_time=summand1.has_time();
@@ -6726,28 +7025,20 @@ class specification_basic_type:public boost::noncopyable
           {
             /* Summand1 has time. Substitute the time expression for
                timevar in ultimatedelaycondition, and extend the condition */
+            std::map < variable, data_expression > sigma;
+            sigma[timevar]=actiontime1;
             const data_expression intermediateultimatedelaycondition=
-              substitute_data(
-                push_front(data_expression_list(),actiontime1),
-                push_front(variable_list(),timevar),
-                ultimatedelaycondition);
+                       data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
             condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
           }
 
           condition1=RewriteTerm(condition1);
           if (condition1!=sort_bool::false_())
           {
-            resultsumlist=
-              push_front(
-                resultsumlist,
-                summand_(
-                  sumvars1,
-                  condition1,
-                  summand1.is_delta(),
-                  multiaction1, //substitute_multiaction(rename1_list,sums1renaming,multiaction1),
-                  has_time,
-                  actiontime1,
-                  nextstate1));
+            action_summands.push_back(action_summand(sumvars1,
+                                                     condition1,
+                                                     has_time?multi_action(multiaction1, actiontime1):multi_action(multiaction1),
+                                                     nextstate1));
           }
         }
       }
@@ -6755,22 +7046,59 @@ class specification_basic_type:public boost::noncopyable
 
       variable_list ultimate_delay_sumvars2;
       ultimatedelaycondition=(options.add_delta?data_expression(sort_bool::true_()):
-                  getUltimateDelayCondition(sumlist1,par1, timevar,ultimate_delay_sumvars2));
+                  getUltimateDelayCondition(action_summands1,deadlock_summands1,par1, timevar,ultimate_delay_sumvars2));
 
-      for (deprecated::summand_list::const_iterator walker2=sumlist2.begin();
-           walker2!=sumlist2.end(); ++walker2)
+      for (deadlock_summand_vector::const_iterator walker2=deadlock_summands2.begin();
+           walker2!=deadlock_summands2.end(); ++walker2)
       {
-        const deprecated::summand summand2= *walker2;
+        const deadlock_summand summand2= *walker2;
         variable_list sumvars2=summand2.summation_variables() + ultimate_delay_sumvars2;
-        action_list multiaction2;
-        if (!summand2.is_delta())
+        data_expression actiontime2=summand2.deadlock().time();
+        data_expression condition2=summand2.condition();
+        bool has_time=summand2.deadlock().has_time();
+
+        if (!has_time)
         {
-          multiaction2=summand2.actions();
+          if (ultimatedelaycondition!=sort_bool::true_())
+          {
+            actiontime2=data_expression(timevar);
+            sumvars2=push_front(sumvars2,timevar);
+            condition2=lazy::and_(ultimatedelaycondition,condition2);
+            has_time=true;
+          }
         }
-        data_expression actiontime2=summand2.time();
+        else
+        {
+          /* Summand2 has time. Substitute the time expression for
+             timevar in ultimatedelaycondition, and extend the condition */
+          std::map < variable, data_expression > sigma;
+          sigma[timevar]=actiontime2;
+
+          const data_expression intermediateultimatedelaycondition=
+                        data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
+          condition2=lazy::and_(intermediateultimatedelaycondition,condition2);
+        }
+
+        condition2=RewriteTerm(condition2);
+        if (condition2!=sort_bool::false_())
+        {
+          deadlock_summands.push_back(deadlock_summand(sumvars2, 
+                                                       condition2,
+                                                       has_time?deadlock(actiontime2):deadlock()));
+        }
+        
+      }
+
+      for (action_summand_vector::const_iterator walker2=action_summands2.begin();
+           walker2!=action_summands2.end(); ++walker2)
+      {
+        const action_summand summand2= *walker2;
+        variable_list sumvars2=summand2.summation_variables() + ultimate_delay_sumvars2;
+        action_list multiaction2=summand2.multi_action().actions();
+        data_expression actiontime2=summand2.multi_action().time();
         data_expression condition2=summand2.condition();
         assignment_list nextstate2=summand2.assignments();
-        bool has_time=summand2.has_time();
+        bool has_time=summand2.multi_action().has_time();
 
         if (multiaction2!=push_front(action_list(),terminationAction))
         {
@@ -6788,74 +7116,54 @@ class specification_basic_type:public boost::noncopyable
           {
             /* Summand2 has time. Substitute the time expression for
                timevar in ultimatedelaycondition, and extend the condition */
+            std::map < variable, data_expression > sigma;
+            sigma[timevar]=actiontime2;
+
             const data_expression intermediateultimatedelaycondition=
-              substitute_data(
-                push_front(data_expression_list(),actiontime2),
-                push_front(variable_list(),timevar),
-                ultimatedelaycondition);
+                                data::replace_free_variables(ultimatedelaycondition,make_map_substitution(sigma));
             condition2=lazy::and_(intermediateultimatedelaycondition,condition2);
           }
 
           condition2=RewriteTerm(condition2);
           if (condition2!=sort_bool::false_())
           {
-            resultsumlist=
-              push_front(
-                resultsumlist,
-                summand_(
-                  sumvars2,
-                  condition2,
-                  summand2.is_delta(),
-                  multiaction2,
-                  has_time,
-                  actiontime2,
-                  nextstate2));
+            action_summands.push_back(action_summand(sumvars2,
+                                                     condition2,
+                                                     has_time?multi_action(multiaction2,actiontime2):multi_action(multiaction2),
+                                                     nextstate2));
           }
         }
       }
 
-      /* thirdly we enumerate all communications */
+      /* thirdly we enumerate all multi actions*/
 
-      for (deprecated::summand_list::const_iterator walker1=sumlist1.begin();
-           walker1!=sumlist1.end(); ++walker1)
+      for (action_summand_vector::const_iterator walker1=action_summands1.begin();
+           walker1!=action_summands1.end(); ++walker1)
       {
-        const deprecated::summand summand1= *walker1;
+        const action_summand summand1= *walker1;
 
         const variable_list sumvars1=summand1.summation_variables();
-        action_list multiaction1;
-        if (!summand1.is_delta())
-        {
-          multiaction1=summand1.actions();
-        }
-        const data_expression actiontime1=summand1.time();
+        const action_list multiaction1=summand1.multi_action().actions();
+        const data_expression actiontime1=summand1.multi_action().time();
         const data_expression condition1=summand1.condition();
         const assignment_list nextstate1=summand1.assignments();
 
-        for (deprecated::summand_list::const_iterator walker2=sumlist2.begin();
-             walker2!=sumlist2.end(); ++walker2)
+        for (action_summand_vector::const_iterator walker2=action_summands2.begin();
+             walker2!=action_summands2.end(); ++walker2)
         {
-          const deprecated::summand summand2= *walker2;
+          const action_summand summand2= *walker2;
           const variable_list sumvars2=summand2.summation_variables();
-          action_list multiaction2;
-          if (!summand2.is_delta())
-          {
-            multiaction2=summand2.actions();
-          }
-          const data_expression actiontime2=summand2.time();
+          const action_list multiaction2=summand2.multi_action().actions();
+          const data_expression actiontime2=summand2.multi_action().time();
           const data_expression condition2=summand2.condition();
           const assignment_list nextstate2=summand2.assignments();
 
           if ((multiaction1==push_front(action_list(),terminationAction))==(multiaction2==push_front(action_list(),terminationAction)))
           {
             action_list multiaction3;
-            bool is_delta3=false;
             if ((multiaction1==push_front(action_list(),terminationAction))&&(multiaction2==push_front(action_list(),terminationAction)))
             {
               multiaction3=push_front(action_list(),terminationAction);
-            }
-            else if (summand1.is_delta() || summand2.is_delta())
-            {
-              is_delta3=true;
             }
             else
             {
@@ -6902,40 +7210,37 @@ class specification_basic_type:public boost::noncopyable
             const assignment_list nextstate3=nextstate1+nextstate2;
 
             condition3=RewriteTerm(condition3);
-            if ((condition3!=sort_bool::false_()) && (!is_delta3))
+            if (condition3!=sort_bool::false_())
             {
-              resultsumlist=
-                push_front(
-                  resultsumlist,
-                  summand_(
-                    allsums,
-                    condition3,
-                    is_delta3,
-                    multiaction3,
-                    has_time3,
-                    action_time3,
-                    nextstate3));
+              action_summands.push_back(action_summand(allsums,
+                                                       condition3,
+                                                       has_time3?multi_action(multiaction3,action_time3):multi_action(multiaction3),
+                                                       nextstate3));
             }
           }
         }
       }
-
-      return resultsumlist;
     }
 
 
-    deprecated::summand_list parallelcomposition(
-      const deprecated::summand_list summands1,
-      const variable_list pars1,
-      const assignment_list init1,
-      const deprecated::summand_list summands2,
-      const variable_list pars2,
-      const assignment_list init2,
+    void parallelcomposition(
+      const action_summand_vector &action_summands1,
+      const deadlock_summand_vector &deadlock_summands1,
+      const variable_list &pars1,
+      const assignment_list &init1,
+      const action_summand_vector &action_summands2,
+      const deadlock_summand_vector &deadlock_summands2,
+      const variable_list &pars2,
+      const assignment_list &init2,
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       variable_list& pars_result,
       assignment_list& init_result)
     {
-      mCRL2log(mcrl2::log::verbose) << "- calculating parallel composition: " << summands1.size() <<
-            " || " << summands2.size() << " = ";
+      mCRL2log(mcrl2::log::verbose) << "- calculating parallel composition: " << action_summands1.size() <<
+            " actions + " << deadlock_summands1.size() <<
+            " deadlocks || " << action_summands2.size() <<
+            " actions + " << deadlock_summands2.size() << " deadlocks = ";
 
       // At this point the parameters of pars1 and pars2 are unique, except for
       // those that are constant in both processes.
@@ -6951,22 +7256,25 @@ class specification_basic_type:public boost::noncopyable
       }
 
       pars3=reverse(pars3);
-      deprecated::summand_list result=combine_summand_lists(summands1,summands2,pars1,pars3,pars2);
+      assert(action_summands.size()==0);
+      assert(deadlock_summands.size()==0);
+      combine_summand_lists(action_summands1,deadlock_summands1,action_summands2,deadlock_summands2,pars1,pars3,pars2,action_summands,deadlock_summands);
 
-      mCRL2log(mcrl2::log::verbose) << result.size() << " resulting summands.\n";
+      mCRL2log(mcrl2::log::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
       pars_result=pars1+pars3;
       init_result=init1 + init2;
-      return result;
     }
 
     /**************** GENERaTE LPEmCRL **********************************/
 
 
     /// \brief Linearise a process indicated by procIdDecl.
-    /// \details Returns a deprecated::summand_list, the process parameters
+    /// \details Returns actions_summands, deadlock_summands, the process parameters
     ///              and the initial assignment list.
 
-    deprecated::summand_list generateLPEmCRLterm(
+    void generateLPEmCRLterm(
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       const process_expression t,
       const bool regular,
       const bool rename_variables,
@@ -6975,25 +7283,39 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_process_instance(t))
       {
-        deprecated::summand_list t3=generateLPEmCRL(process_instance(t).identifier(),regular,pars,init);
+        generateLPEmCRL(action_summands,deadlock_summands,process_instance(t).identifier(),regular,pars,init);
         size_t n=objectIndex(process_instance(t).identifier());
-        data_expression_list args=process_instance(t).actual_parameters();
-        init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
+        const data_expression_list args=process_instance(t).actual_parameters();
+        // init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,false,true);
+
+        std::map < variable, data_expression > sigma;
+        data_expression_list::const_iterator j=args.begin();
+        const variable_list vars=objectdata[n].parameters;
+        for (variable_list::const_iterator i=vars.begin();
+             i!=vars.end(); ++i, ++j)
+        {
+          /* Substitutions are carried out from left to right. The first applicable substitution counts */
+          if (sigma.count(*i)==0)
+          {
+            sigma[*i]=*j;
+          }
+        }
+
+        init=substitute_assignmentlist(init,pars,false,true,make_map_substitution(sigma));
 
         // Make the bound variables and parameters in this process unique.
 
         if ((objectdata[n].processstatus==GNF)||
             (objectdata[n].processstatus==pCRL)||
-            (objectdata[n].processstatus==GNFalpha)||
-            (objectdata[n].processstatus==multiAction))
+            (objectdata[n].processstatus==GNFalpha))
         {
-          t3=make_parameters_and_sum_variables_unique(t3,pars,init,std::string(objectdata[n].objectname));
+          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,std::string(objectdata[n].objectname));
         }
         else
         {
           if (rename_variables)
           {
-            t3=make_parameters_and_sum_variables_unique(t3,pars,init);
+            make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init);
           }
         }
 
@@ -7005,8 +7327,7 @@ class specification_basic_type:public boost::noncopyable
           // Note that this is only useful, in regular mode. This does not make sense if
           // stacks are being used.
 
-          linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
-          lps::deprecated::set_linear_process_summands(lps, t3);
+          linear_process lps(pars,deadlock_summands,action_summands);
           process_initializer initializer(init);
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
@@ -7029,8 +7350,6 @@ class specification_basic_type:public boost::noncopyable
           {
             if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars,
                 global_variables.find(*i)==global_variables.end() && // it is neither a glabal variable
-// N.B. linear_process::summands() is deprecated
-//                lps::search_free_variable(temporary_spec.process().summands(),*i)
                 (lps::search_free_variable(temporary_spec.process().action_summands(),*i) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),*i))
                )          // and it occurs in the summands.
             {
@@ -7038,95 +7357,75 @@ class specification_basic_type:public boost::noncopyable
             }
           }
 
-          t3=deprecated::summand_list();
-          for (std::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
-               i!=temporary_spec.process().action_summands().end(); ++i)
-          {
-            if (i->condition()!=sort_bool::false_())
-            {
-              t3=push_front(t3,summand_(i->summation_variables(),
-                                        i->condition(),
-                                        false, // Summand is a proper action summand, not a delta summand.
-                                        i->multi_action().actions(),
-                                        i->multi_action().has_time(),
-                                        i->multi_action().time(),
-                                        i->assignments()));
-            }
-          }
-          for (std::vector < deadlock_summand >::const_iterator i=temporary_spec.process().deadlock_summands().begin();
-               i!=temporary_spec.process().deadlock_summands().end(); ++i)
-          {
-            if (i->condition()!=sort_bool::false_())
-            {
-              t3=push_front(t3,summand_(i->summation_variables(),
-                                        i->condition(),
-                                        true,   // Summand is delta.
-                                        action_list(),
-                                        i->deadlock().has_time(),
-                                        i->deadlock().time(),
-                                        assignment_list()));
-            }
-          }
+          action_summands=temporary_spec.process().action_summands();
+          deadlock_summands=temporary_spec.process().deadlock_summands();
         }
         // Now constelm has been applied.
-
-        return t3;
+        return;
       }
 
       if (is_merge(t))
       {
         variable_list pars1,pars2;
         assignment_list init1,init2;
-        const deprecated::summand_list t1=generateLPEmCRLterm(process::merge(t).left(),
+        action_summand_vector action_summands1, action_summands2;
+        deadlock_summand_vector deadlock_summands1, deadlock_summands2;
+        generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(t).left(),
                               regular,rename_variables,pars1,init1);
-        const deprecated::summand_list t2=generateLPEmCRLterm(process::merge(t).right(),
+        generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(t).right(),
                               regular,true,pars2,init2);
-        deprecated::summand_list t3=parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
-        return t3;
+        parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
+                              action_summands2,deadlock_summands2,pars2,init2,
+                              action_summands,deadlock_summands,pars,init);
+        return;
       }
 
       if (is_hide(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(hide(t).operand(),
+        generateLPEmCRLterm(action_summands,deadlock_summands,hide(t).operand(),
                               regular,rename_variables,pars,init);
-        return hidecomposition(hide(t).hide_set(),t2);
+        hidecomposition(hide(t).hide_set(),action_summands);
+        return;
       }
 
       if (is_allow(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(allow(t).operand(),
-                              regular,rename_variables,pars,init);
-        return allowblockcomposition(allow(t).allow_set(),t2,true);
+        generateLPEmCRLterm(action_summands,deadlock_summands,allow(t).operand(), regular,rename_variables,pars,init);
+        allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands);
+        return;
       }
 
       if (is_block(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(block(t).operand(),
-                              regular,rename_variables,pars,init);
-        return allowblockcomposition(aterm_cast<action_name_multiset_list>(block(t).block_set()),t2,false);
+        generateLPEmCRLterm(action_summands,deadlock_summands,block(t).operand(), regular,rename_variables,pars,init);
+        allowblockcomposition(action_name_multiset_list(block(t).block_set()),false,action_summands,deadlock_summands);
+        return;
       }
 
       if (is_rename(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),
+        generateLPEmCRLterm(action_summands,deadlock_summands,process::rename(t).operand(),
                               regular,rename_variables,pars,init);
-        return renamecomposition(process::rename(t).rename_set(),t2);
+        renamecomposition(process::rename(t).rename_set(),action_summands);
+        return;
       }
 
       if (is_comm(t))
       {
-        const deprecated::summand_list t1=generateLPEmCRLterm(comm(t).operand(),
+        generateLPEmCRLterm(action_summands,deadlock_summands,comm(t).operand(),
                               regular,rename_variables,pars,init);
-        return communicationcomposition(comm(t).comm_set(),t1);
+        communicationcomposition(comm(t).comm_set(),action_summands,deadlock_summands);
+        return;
       }
 
       throw mcrl2::runtime_error("Internal error. Expect mCRL term " + process::pp(t) +".");
-      return deprecated::summand_list();
     }
 
     /**************** GENERaTE LPEmCRL **********************************/
 
-    deprecated::summand_list generateLPEmCRL(
+    void generateLPEmCRL(
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       const process_identifier procIdDecl,
       const bool regular,
       variable_list& pars,
@@ -7142,7 +7441,7 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==GNFalpha)||
           (objectdata[n].processstatus==multiAction))
       {
-        return generateLPEpCRL(procIdDecl,
+        return generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
                                objectdata[n].containstime,regular,pars,init);
       }
       /* process is a mCRLdone */
@@ -7151,12 +7450,11 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==mCRL))
       {
         objectdata[n].processstatus=mCRLlin;
-        return generateLPEmCRLterm(objectdata[n].processbody,
+        return generateLPEmCRLterm(action_summands,deadlock_summands,objectdata[n].processbody,
                                    regular,false,pars,init);
       }
 
       throw mcrl2::runtime_error("laststatus: " + str(boost::format("%d") % objectdata[n].processstatus));
-      return deprecated::summand_list();
     }
 
     /**************** alphaconversion ********************************/
@@ -7164,71 +7462,70 @@ class specification_basic_type:public boost::noncopyable
     process_expression alphaconversionterm(
       const process_expression t,
       const variable_list parameters,
-      const variable_list varlist,         // the variables varlist and tl must not be passed by reference.
-      const data_expression_list tl)
+      const std::map < variable, data_expression > &sigma)
     {
       if (is_choice(t))
       {
         return choice(
-                 alphaconversionterm(choice(t).left(),parameters,varlist,tl),
-                 alphaconversionterm(choice(t).right(),parameters,varlist,tl));
+                 alphaconversionterm(choice(t).left(),parameters,sigma),
+                 alphaconversionterm(choice(t).right(),parameters,sigma));
       }
 
       if (is_seq(t))
       {
         return seq(
-                 alphaconversionterm(seq(t).left(),parameters,varlist,tl),
-                 alphaconversionterm(seq(t).right(),parameters,varlist,tl));
+                 alphaconversionterm(seq(t).left(),parameters,sigma),
+                 alphaconversionterm(seq(t).right(),parameters,sigma));
       }
 
       if (is_sync(t))
       {
         return process::sync(
-                 alphaconversionterm(process::sync(t).left(),parameters,varlist,tl),
-                 alphaconversionterm(process::sync(t).right(),parameters,varlist,tl));
+                 alphaconversionterm(process::sync(t).left(),parameters,sigma),
+                 alphaconversionterm(process::sync(t).right(),parameters,sigma));
       }
 
       if (is_bounded_init(t))
       {
         return bounded_init(
-                 alphaconversionterm(bounded_init(t).left(),parameters,varlist,tl),
-                 alphaconversionterm(bounded_init(t).right(),parameters,varlist,tl));
+                 alphaconversionterm(bounded_init(t).left(),parameters,sigma),
+                 alphaconversionterm(bounded_init(t).right(),parameters,sigma));
       }
 
       if (is_merge(t))
       {
-        alphaconversionterm(process::merge(t).left(),parameters,varlist,tl),
-                            alphaconversionterm(process::merge(t).right(),parameters,varlist,tl);
+        alphaconversionterm(process::merge(t).left(),parameters,sigma),
+                            alphaconversionterm(process::merge(t).right(),parameters,sigma);
         return process_expression();
       }
 
       if (is_left_merge(t))
       {
-        alphaconversionterm(left_merge(t).left(),parameters,varlist,tl),
-                            alphaconversionterm(left_merge(t).right(),parameters,varlist,tl);
+        alphaconversionterm(left_merge(t).left(),parameters,sigma),
+                            alphaconversionterm(left_merge(t).right(),parameters,sigma);
         return process_expression();
       }
 
       if (is_at(t))
       {
-        return at(alphaconversionterm(at(t).operand(),parameters,varlist,tl),
-                  substitute_data(tl,varlist,data_expression(at(t).time_stamp())));
+        return at(alphaconversionterm(at(t).operand(),parameters,sigma),
+                  data::replace_free_variables(data_expression(at(t).time_stamp()), make_map_substitution(sigma)));
       }
 
       if (is_if_then(t))
       {
         return if_then(
-                 substitute_data(tl,varlist,data_expression(if_then(t).condition())),
-                 alphaconversionterm(if_then(t).then_case(),parameters,varlist,tl));
+                 data::replace_free_variables(data_expression(if_then(t).condition()), make_map_substitution(sigma)),
+                 alphaconversionterm(if_then(t).then_case(),parameters,sigma));
       }
 
       if (is_sum(t))
       {
         variable_list sumvars=sum(t).bound_variables();
-        variable_list varlist1(varlist);
-        data_expression_list tl1(tl);
-        alphaconvert(sumvars,varlist1,tl1,variable_list(),aterm_cast<data_expression_list>(parameters));
-        const process_expression  result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,varlist1,tl1));
+        std::map < variable, data_expression > local_sigma=sigma;
+        
+        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
+        const process_expression  result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,local_sigma));
         return result;
       }
 
@@ -7237,13 +7534,12 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier procId=process_instance(t).identifier();
         alphaconversion(procId,parameters);
         return process_instance(procId,
-                                substitute_datalist(tl,varlist,process_instance(t).actual_parameters()));
+                                data::replace_free_variables(process_instance(t).actual_parameters(), make_map_substitution(sigma)));
       }
 
       if (is_action(t))
       {
-        return action(action(t).label(),
-                      substitute_datalist(tl,varlist,action(t).arguments()));
+        return action(action(t).label(), data::replace_free_variables(action(t).arguments(), make_map_substitution(sigma)));
       }
 
       if (is_delta(t)||
@@ -7254,31 +7550,31 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_hide(t))
       {
-        alphaconversionterm(hide(t).operand(),parameters,varlist,tl);
+        alphaconversionterm(hide(t).operand(),parameters,sigma);
         return process_expression();
       }
 
       if (is_rename(t))
       {
-        alphaconversionterm(process::rename(t).operand(),parameters,varlist,tl);
+        alphaconversionterm(process::rename(t).operand(),parameters,sigma);
         return process_expression();
       }
 
       if (is_comm(t))
       {
-        alphaconversionterm(comm(t).operand(),parameters,varlist,tl);
+        alphaconversionterm(comm(t).operand(),parameters,sigma);
         return process_expression();
       }
 
       if (is_allow(t))
       {
-        alphaconversionterm(allow(t).operand(),parameters,varlist,tl);
+        alphaconversionterm(allow(t).operand(),parameters,sigma);
         return process_expression();
       }
 
       if (is_block(t))
       {
-        alphaconversionterm(block(t).operand(),parameters,varlist,tl);
+        alphaconversionterm(block(t).operand(),parameters,sigma);
         return process_expression();
       }
 
@@ -7296,16 +7592,14 @@ class specification_basic_type:public boost::noncopyable
         objectdata[n].processstatus=GNFalpha;
         // tempvar below is needed as objectdata may be reallocated
         // during a call to alphaconversionterm.
-        variable_list vars;
-        data_expression_list dl;
-        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,vars,dl);
+        std::map < variable, data_expression > sigma;
+        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters, sigma);
         objectdata[n].processbody=tempvar;
       }
       else if (objectdata[n].processstatus==mCRLdone)
       {
-        variable_list vars;
-        data_expression_list dl;
-        alphaconversionterm(objectdata[n].processbody,parameters,vars,dl);
+        std::map < variable, data_expression > sigma;
+        alphaconversionterm(objectdata[n].processbody,parameters, sigma);
 
       }
       else if (objectdata[n].processstatus==GNFalpha)
@@ -7831,12 +8125,13 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** AddTerminationActionIfNecessary ****************/
 
-    void AddTerminationActionIfNecessary(const deprecated::summand_list summands)
+    void AddTerminationActionIfNecessary(const action_summand_vector &summands)
     {
-      for (deprecated::summand_list::const_iterator i=summands.begin(); i!=summands.end(); ++i)
+      for (action_summand_vector::const_iterator i=summands.begin(); i!=summands.end(); ++i)
       {
-        const deprecated::summand smd=*i;
-        if (!smd.is_delta() && smd.actions()==push_front(action_list(),terminationAction))
+        const action_summand smd=*i;
+        const action_list multiaction=smd.multi_action().actions();
+        if (multiaction==push_front(action_list(),terminationAction))
         {
           acts=push_front(acts,terminationAction.label());
           mCRL2log(mcrl2::log::warning) << "The action " << lps::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
@@ -7849,7 +8144,8 @@ class specification_basic_type:public boost::noncopyable
   public:
     variable_list SieveProcDataVarsSummands(
       const std::set <variable> &vars,
-      const deprecated::summand_list summands,
+      const action_summand_vector &action_summands,
+      const deadlock_summand_vector &deadlock_summands,
       const variable_list parameters)
     {
       /* In this routine it is checked which free variables
@@ -7861,19 +8157,28 @@ class specification_basic_type:public boost::noncopyable
       std::set < variable > vars_set(vars.begin(),vars.end());
       std::set < variable > vars_result_set;
 
-      for (deprecated::summand_list::const_iterator smds=summands.begin();
-           smds!=summands.end(); ++smds)
+      for (deadlock_summand_vector::const_iterator smds=deadlock_summands.begin();
+           smds!=deadlock_summands.end(); ++smds)
       {
-        const deprecated::summand smd= *smds;
+        const deadlock_summand smd= *smds;
 
-        if (!smd.is_delta())
+        if (smd.deadlock().has_time())
         {
-          filter_vars_by_multiaction(smd.actions(),vars_set,vars_result_set);
-          filter_vars_by_assignmentlist(smd.assignments(),parameters,vars_set,vars_result_set);
+          filter_vars_by_term(smd.deadlock().time(),vars_set,vars_result_set);
         }
-        if (smd.has_time())
+        filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
+      }
+      for (action_summand_vector::const_iterator smds=action_summands.begin();
+           smds!=action_summands.end(); ++smds)
+      {
+        const action_summand smd= *smds;
+
+        filter_vars_by_multiaction(smd.multi_action().actions(),vars_set,vars_result_set);
+        filter_vars_by_assignmentlist(smd.assignments(),parameters,vars_set,vars_result_set);
+        
+        if (smd.multi_action().has_time())
         {
-          filter_vars_by_term(smd.time(),vars_set,vars_result_set);
+          filter_vars_by_term(smd.multi_action().time(),vars_set,vars_result_set);
         }
         filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
       }
@@ -7911,8 +8216,10 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** transform **************************************/
   public:
-    deprecated::summand_list transform(
+    void transform(
       const process_identifier init,
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
       variable_list& parameters,
       assignment_list& initial_state)
     {
@@ -7940,16 +8247,14 @@ class specification_basic_type:public boost::noncopyable
          first variable in a sequence is always an actionvariable */
       procstorealGNF(init1,options.lin_method!=lmStack);
 
-      deprecated::summand_list t3=generateLPEmCRL(init1,
-                                      options.lin_method!=lmStack,parameters,initial_state);
-      t3=allowblockcomposition(action_name_multiset_list(),t3,false); // This removes superfluous delta summands.
+      generateLPEmCRL(action_summands,deadlock_summands,init1, options.lin_method!=lmStack,parameters,initial_state);
+      allowblockcomposition(action_name_multiset_list(),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
-        t3=cluster_actions(t3,parameters);
+        cluster_actions(action_summands,deadlock_summands,parameters);
       }
 
-      AddTerminationActionIfNecessary(t3);
-      return t3;
+      AddTerminationActionIfNecessary(action_summands);
     }
 
 }; // End of the class specification basictype
@@ -7981,19 +8286,20 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   //linearise spec
   variable_list parameters;
   assignment_list initial_state;
-  const deprecated::summand_list result = spec.transform(init,parameters,initial_state);
+  action_summand_vector action_summands;
+  deadlock_summand_vector deadlock_summands;
+  spec.transform(init,action_summands,deadlock_summands,parameters,initial_state);
 
   // compute global variables
-  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters);
+  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,action_summands,deadlock_summands,parameters);
   data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters);
   std::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 
   linear_process lps(parameters,
-                     deadlock_summand_vector(),
-                     action_summand_vector());
-  deprecated::set_linear_process_summands(lps, result);
+                     deadlock_summands,
+                     action_summands);
 
   lps::specification spec1(
     spec.data,

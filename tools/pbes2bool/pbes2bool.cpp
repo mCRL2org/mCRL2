@@ -130,7 +130,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       if (parser.options.count("output")) // Output format is deprecated.
       {
         std::string format = parser.option_argument("output");
-        parser.error("the option --output or -o is deprecated. Use the tool pbes2bes for this functionality. ");
+        throw parser.error("the option --output or -o is deprecated. Use the tool pbes2bes for this functionality. ");
       }
     }
 

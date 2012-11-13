@@ -67,8 +67,8 @@ struct add_sort_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
@@ -227,8 +227,8 @@ struct add_data_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
@@ -386,8 +386,8 @@ struct add_pbes_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());

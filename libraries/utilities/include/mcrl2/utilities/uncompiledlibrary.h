@@ -28,6 +28,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "dynamiclibrary.h"
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/logger.h"
 
 class uncompiled_library : public dynamic_library
@@ -35,22 +36,14 @@ class uncompiled_library : public dynamic_library
 private:
     std::list<std::string> m_tempfiles;
     std::string m_compile_script;
-    bool file_exists(const std::string& filename)
-    {
-      if (FILE * file = fopen(filename.c_str(), "r"))
-      {
-        fclose(file);
-        return true;
-      }
-      return false;
-    }
+
 public:
-    uncompiled_library(const std::string& script) : m_compile_script(script) {};
+    uncompiled_library(const std::string& script) : m_compile_script(script) {}
 
     void compile(const std::string& filename) throw(std::runtime_error)
     {
       std::stringstream commandline;
-      commandline << m_compile_script << " " << filename << " " << " 2>&1";
+      commandline << '"' << m_compile_script << "\" " << filename << " " << " 2>&1";
 
       // Execute script.
       FILE* stream = popen(commandline.str().c_str(), "r");
@@ -71,7 +64,7 @@ public:
         line.erase(line.size() - 1);
         // Check that reported file exists. If not, produce error message and
         // flush script output to the log.
-        if (!file_exists(line))
+        if (!mcrl2::utilities::file_exists(line))
         {
           mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
           mCRL2log(mcrl2::log::error) << line << std::endl;

@@ -13,7 +13,7 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/tree_set.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 #define EMPTY_SET (-1)
 #define EMPTY_LIST (-1)

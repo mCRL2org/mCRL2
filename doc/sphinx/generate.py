@@ -39,6 +39,8 @@ def getarguments():
                       help="The version number to be used in the documentation. This "
                            "should be a release number, followed by a period, followed "
                            "by the SVN revision number.")
+  parser.add_argument("-p", "--path", dest="path", metavar="DIR", action="store",
+                    default="")
   parser.add_argument("-t", "--temp", dest="temp", metavar="DIR", action="store",
                     default=os.path.join(os.path.dirname(__file__), '_temp'),
                     help="Store temporary files in DIR")
@@ -55,6 +57,10 @@ if __name__ == '__main__':
   args = getarguments()
   temppath = os.path.abspath(args.temp)
   outpath = os.path.abspath(args.out)
+  if args.path:
+    binpath = os.path.abspath(args.path)
+  else:
+    binpath = ''
   if args.force:
     clearcache(temppath, args.force)
   if args.clean:
@@ -63,4 +69,4 @@ if __name__ == '__main__':
 
   sys.path = [os.path.dirname(__file__)] + sys.path
   import source
-  source.generate_rst('', temppath, outpath, [args.version] if args.release else args.version.rsplit('.', 1))
+  source.generate_rst(binpath, temppath, outpath, [args.version] if args.release else args.version.rsplit('.', 1))

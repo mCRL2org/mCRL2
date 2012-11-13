@@ -6,8 +6,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required (VERSION 2.6)
-message(STATUS "CMAKE VERSION: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION}")
+cmake_minimum_required (VERSION 2.8)
 project (MCRL2)
 # Commonly used options
 # ---------------------
@@ -18,9 +17,17 @@ project (MCRL2)
 #   CMAKE_INSTALL_PREFIX = /usr/local(*) (any path can be used)
 #   CMAKE_BUILD_TYPE     = None | Debug | Release(*) | RelwithDebInfo | MinSizeRel
 #   BUILD_SHARED_LIBS    = ON    | OFF(*)
-#   MCRL2_ENABLE_EXPERIMENTAL  = ON    | OFF(*)
-#   MCRL2_ENABLE_DEPRECATED    = ON    | OFF(*)
 
+option(MCRL2_ENABLE_GUI_TOOLS
+       "Enable/disable creation of GUI tools"          ON)
+option(MCRL2_ENABLE_CADP_SUPPORT
+       "Enable/disable support for CADP"               OFF)
+option(MCRL2_ENABLE_EXPERIMENTAL
+       "Enable/disable creation of experimental tools" OFF)
+option(MCRL2_ENABLE_DEPRECATED
+       "Enable/disable creation of deprecated tools"   OFF)
+option(MCRL2_INSTALL_HEADERS
+       "Enable/disable install headers"                ON)
 
 # Note on adding definitions containing quotes (")
 # ------------------------------------------------
@@ -71,69 +78,43 @@ project (MCRL2)
 #   http://www.cmake.org/cmake/help/cmake2.6docs.html#prop_dir:COMPILE_DEFINITIONS
 #
 
-set( MCRL2_ENABLE_SVN true )
-set( MCRL2_ENABLE_PARSERS true )
+##---------------------------------------------------
+## Configure CMake
+##---------------------------------------------------
 
-IF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" STRLESS "2.8" )
-  message(STATUS "=========================================" )
-  message(STATUS "CMake version 2.8+ is required for:" )
-  message(STATUS "  svn revision in tools" )
-  message(STATUS "  generating parsers" )
-  message(STATUS "Current version of CMake is NOT suitable" )
-  message(STATUS "for development purposes." )
-  message(STATUS "=========================================" )
-
-  set( MCRL2_ENABLE_SVN false )
-  set( MCRL2_ENABLE_PARSERS false )
-ENDIF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" STRLESS "2.8" )
-
-# Set path where additional modules can be found
+## Set path where additional modules can be found
 set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" )
 
-# Variables required for an additional build type "Maintainer"
-
-include(CheckCXXCompilerFlag)
-
-##---------------------------------------------------
-## Add "Maintainer" Build type
-##---------------------------------------------------
-include(MCRL2AddMaintainerBuildType)
-
-##---------------------------------------------------
 ## Determine build type
-##---------------------------------------------------
-
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE} " )
-
-##---------------------------------------------------
-## Print CMake install prefix (if any)
-##---------------------------------------------------
-
-message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-
-##-----------------------------------------------------
-## Set platform specific options
-##-----------------------------------------------------
-if(WIN32)
-  include(ConfigureWindows)
-endif(WIN32)
-if(UNIX AND NOT APPLE)
-  include(ConfigureUnix)
-endif(UNIX AND NOT APPLE)
-if(APPLE)
-  include(ConfigureApple)
-endif(APPLE)
+#Paths for the installation
+set(MCRL2_BIN_DIR "bin")
 set(MCRL2_LIB_DIR "lib/mcrl2")
+set(MCRL2_SHARE_DIR "share/mcrl2")
+  #Subdirectories of MCRL2_SHARE_DIR
+  set(MCRL2_MAN_DIR "man/man1")
+  set(MCRL2_EXAMPLES_DIR "doc/examples")
+set(MCRL2_INCLUDE_DIR "include")
 
-message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
-##-----------------------------------------------------
+## Configure the compiler
+include(GetCompilerVersion)
+include(ConfigureCompiler)
+
+## Library and executable staging
+set(MCRL2_STAGE_ROOTDIR ""
+  CACHE PATH "Path to stage executables and libraries." )
+  message( STATUS "MCRL2_STAGE_ROOTDIR: ${MCRL2_STAGE_ROOTDIR}" )
+if( MCRL2_STAGE_ROOTDIR )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/${MCRL2_BIN_DIR}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/${MCRL2_LIB_DIR}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/${MCRL2_SHARE_DIR}")
+endif( MCRL2_STAGE_ROOTDIR )
+
 ## Set runtime path variable RPATH for install targets
-##-----------------------------------------------------
 
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH false)
@@ -155,51 +136,29 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
+## Setup dependency to CADP
+include(MCRL2CADPSupport)
+
+## Determine latest SVN revision
+include(MCRL2Version)
 
 ##---------------------------------------------------
-## Print compiler information
+## Print additional configuration information
 ##---------------------------------------------------
-include(GetCompilerVersion)
+include(PrintBuildInfo)
 
 ##---------------------------------------------------
-## Print architecture information
-##---------------------------------------------------
-include(GetArchitectureInformation)
-
-##-----------------------------------------------------
-## Set Compiler specific options
-##-----------------------------------------------------
-if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
-  include(ConfigureClang)
-else( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
-  if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-    include(ConfigureGCC)
-  endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-endif( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang" )
-if(MSVC)
-  include(ConfigureMSVC)
-endif(MSVC)
-
-##---------------------------------------------------
-## Configure Boost
+## Find dependencies (Boost, OpenGL, [CVC3, gl2ps])
 ##---------------------------------------------------
 include(ConfigureBoost)
-
-##---------------------------------------------------
-## Option to enable/disable mcrl2-gui tools
-##---------------------------------------------------
-option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
-
-##---------------------------------------------------
-## Detect OpenGL
-##---------------------------------------------------
+find_package(cvc3)
 
 if( MCRL2_ENABLE_GUI_TOOLS )
-  include(FindOpenGL)
-  message(STATUS "OpenGL: ${OPENGL_FOUND}")
+  find_package(OpenGL)
+  find_package(gl2ps)
 
   if(NOT OPENGL_FOUND)
-    message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
+    message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools.")
   else( OPENGL_FOUND )
     if ( APPLE )
       include_directories( ${OPENGL_INCLUDE_DIR} )
@@ -209,108 +168,37 @@ if( MCRL2_ENABLE_GUI_TOOLS )
       set(CMAKE_MODULE_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
     endif (APPLE)
   endif(NOT OPENGL_FOUND)
+
+  find_package(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL)
+  if(QT4_FOUND)
+    include(${QT_USE_FILE})
+  else(QT4_FOUND)
+    message(FATAL_ERROR "Qt4 not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools.")
+  endif(QT4_FOUND)
+
+  message(STATUS "QT Version: ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}")
+
 endif( MCRL2_ENABLE_GUI_TOOLS )
 
 ##---------------------------------------------------
-## Configure wxWidgets
-##---------------------------------------------------
-include(ConfigureWxWidgets)
-
-##---------------------------------------------------
-## Determine latest SVN revision
+## 3rd party libraries
 ##---------------------------------------------------
 
-include(MCRL2Version)
-message(STATUS "mCRL2 version: ${MCRL2_VERSION}")
-message(STATUS "SVN data: ${Project_WC_LAST_CHANGED_DATE}")
-
-##---------------------------------------------------
-## Store copyright information in variable
-##---------------------------------------------------
-file(READ COPYING MCRL2_COPYRIGHT_TEXT)
-
-##---------------------------------------------------
-## Find cvc3
-##---------------------------------------------------
-
-find_package( cvc3 )
-if( cvc3_FOUND )
-  message(STATUS "CVC3 version: ${cvc3_VERSION}")
-endif( cvc3_FOUND )
-
-##---------------------------------------------------
-## Find gl2ps library, and use if available
-##---------------------------------------------------
 if(MCRL2_ENABLE_GUI_TOOLS)
-  find_package(gl2ps)
+  add_subdirectory ( 3rd-party/tr)
   if( GL2PS_FOUND )
-    message(STATUS "using system gl2ps library")
+    message(STATUS "Using system gl2ps library.")
   else( GL2PS_FOUND )
-    message(STATUS "using mcrl2-provided gl2ps library")
-
-    ##---------------------------------------------------
-    ## Find mlib / required by gl2ps to resolve undefined symbols
-    ##---------------------------------------------------
-    if(UNIX)
-      find_package( mlib )
-      if( mlib_FOUND )
-        message(STATUS "mlib found")
-      else( mlib_FOUND )
-        message( FATAL_ERROR "mlib is required")
-      endif( mlib_FOUND )
-    endif(UNIX)
+    message(STATUS "Using gl2ps library provided by mCRL2.")
+    add_subdirectory ( 3rd-party/gl2ps )
   endif( GL2PS_FOUND)
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
-##---------------------------------------------------
-## TODO: Find dparser
-##---------------------------------------------------
-
-##---------------------------------------------------
-## Option to enable/disable CADP support
-##---------------------------------------------------
-option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable support for CADP" OFF)
-
-##---------------------------------------------------
-## Setup dependency to CADP
-##---------------------------------------------------
-
-include(MCRL2CADPSupport)
-
-##---------------------------------------------------
-## Library and executable staging
-##---------------------------------------------------
-
-set(MCRL2_STAGE_ROOTDIR ""
-  CACHE PATH "Path to stage executables and libraries." )
-  message( STATUS "MCRL2_STAGE_ROOTDIR: ${MCRL2_STAGE_ROOTDIR}" )
-if( MCRL2_STAGE_ROOTDIR )
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/bin")
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/lib")
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/share/mcrl2")
-endif( MCRL2_STAGE_ROOTDIR )
-
-##---------------------------------------------------
-## 3rd party dependencies
-##---------------------------------------------------
-
 add_subdirectory ( 3rd-party/svc )
-if(MCRL2_ENABLE_GUI_TOOLS)
-  add_subdirectory ( 3rd-party/tr)
-  if(NOT GL2PS_FOUND)
-    add_subdirectory ( 3rd-party/gl2ps )
-  endif(NOT GL2PS_FOUND)
-endif(MCRL2_ENABLE_GUI_TOOLS)
-
-##---------------------------------------------------
-## DParser
-##---------------------------------------------------
-
 add_subdirectory ( 3rd-party/dparser )
-add_subdirectory ( tools/mcrl2parse )
 
 ##---------------------------------------------------
-## Library dependencies
+## mCRL2 libraries
 ##---------------------------------------------------
 
 # add_subdirectory ( libraries/aterm )
@@ -326,12 +214,12 @@ add_subdirectory ( libraries/trace )
 add_subdirectory ( libraries/utilities )
 
 ##---------------------------------------------------
-## Tool dependencies
+## Command-line tools
 ##---------------------------------------------------
 
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
-add_subdirectory ( tools/diagraphica )
+add_subdirectory ( tools/complps2pbes )
 add_subdirectory ( tools/formulacheck )
 add_subdirectory ( tools/lps2lts )
 add_subdirectory ( tools/lps2pbes )
@@ -350,23 +238,14 @@ add_subdirectory ( tools/lpssumelm )
 add_subdirectory ( tools/lpssuminst )
 add_subdirectory ( tools/lpsuntime )
 add_subdirectory ( tools/lpssim )
-add_subdirectory ( tools/lpsxsim )
-add_subdirectory ( tools/lpsxsim-qt )
 add_subdirectory ( tools/lts2lps )
 add_subdirectory ( tools/lts2pbes )
 add_subdirectory ( tools/ltsconvert )
 add_subdirectory ( tools/ltscompare )
 add_subdirectory ( tools/ltsinfo )
-add_subdirectory ( tools/ltsgraph )
-add_subdirectory ( tools/ltsgraph-qt )
-add_subdirectory ( tools/ltsview )
-add_subdirectory ( tools/ltsview-qt )
 add_subdirectory ( tools/mcrl22lps )
 add_subdirectory ( tools/mcrl2i )
-add_subdirectory ( tools/mcrl2xi )
-add_subdirectory ( tools/mcrl2xi-qt )
-add_subdirectory ( tools/mcrl2-gui )
-add_subdirectory ( tools/mcrl2-gui-qt )
+add_subdirectory ( tools/mcrl2parse )
 add_subdirectory ( tools/pbes2bool )
 add_subdirectory ( tools/pbes2bes )
 add_subdirectory ( tools/pbesconstelm )
@@ -376,32 +255,25 @@ add_subdirectory ( tools/pbespgsolve )
 add_subdirectory ( tools/pbespp )
 add_subdirectory ( tools/pbesrewr )
 add_subdirectory ( tools/symbolic_exploration )
-add_subdirectory ( tools/tbf2lps )
 add_subdirectory ( tools/tracepp )
 add_subdirectory ( tools/txt2pbes )
 add_subdirectory ( tools/txt2lps )
 
-## Compile installer tools for mac
-if(APPLE AND MCRL2_SINGLE_BUNDLE)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
-
-  # Install "install_tools" in share/installer
-  # install_tools contains the tools marked for symlink export
-  install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
-  #Process Info.plist with Copyright Information
-  configure_file( ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist.in ${CMAKE_BINARY_DIR}/build/macosx/Info.plist @ONLY)
-  #Install Info.plist for single application bundle
-  install(FILES ${CMAKE_BINARY_DIR}/build/macosx/Info.plist DESTINATION . )
-  #Install mcrl2-logo for single application bundle
-  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
-endif(APPLE AND MCRL2_SINGLE_BUNDLE)
+##---------------------------------------------------
+## Graphical tools
+##---------------------------------------------------
+if(MCRL2_ENABLE_GUI_TOOLS)
+  add_subdirectory ( tools/diagraphica )
+  add_subdirectory ( tools/lpsxsim )
+  add_subdirectory ( tools/ltsgraph )
+  add_subdirectory ( tools/ltsview )
+  add_subdirectory ( tools/mcrl2-gui )
+  add_subdirectory ( tools/mcrl2xi )
+endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------
-## Experimental tool dependencies
+## Experimental tools
 ##---------------------------------------------------
-
-option(MCRL2_ENABLE_EXPERIMENTAL "Enable/disable creation of experimental tools" OFF)
-message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/besconvert )
@@ -412,17 +284,16 @@ if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/pbesabsinthe )
   add_subdirectory ( tools/pbesinst )
   add_subdirectory ( tools/pbespareqelm )
+  add_subdirectory ( tools/pbesstategraph )
   add_subdirectory ( tools/txt2bes )
 endif(MCRL2_ENABLE_EXPERIMENTAL)
 
 ##---------------------------------------------------
-## Deprecated tool dependencies
+## Deprecated tools
 ##---------------------------------------------------
 
-option(MCRL2_ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF)
-message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
-
 if(MCRL2_ENABLE_DEPRECATED)
+  add_subdirectory ( tools/tbf2lps )
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
@@ -468,9 +339,6 @@ include(MCRL2ConfigureComplingRewriters)
 ## Install headers
 ## --------------------------------------------------
 
-option(MCRL2_INSTALL_HEADERS "Enable/disable install headers" ON)
-message(STATUS "MCRL2_INSTALL_HEADERS: ${MCRL2_INSTALL_HEADERS}" )
-
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
@@ -485,14 +353,16 @@ install(
     libraries/process/include/
     libraries/trace/include/
     libraries/utilities/include/
-  DESTINATION include
+  DESTINATION ${MCRL2_INCLUDE_DIR}
+  COMPONENT Headers
   PATTERN ".svn" EXCLUDE
 )
 FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
 install(
   FILES
     ${dparser_headers}
-  DESTINATION include/dparser
+  DESTINATION ${MCRL2_INCLUDE_DIR}/dparser
+  COMPONENT Headers
 )
 endif( MCRL2_INSTALL_HEADERS )
 
@@ -506,7 +376,8 @@ message(STATUS "MCRL2_INSTALL_EXAMPLES: ${MCRL2_INSTALL_EXAMPLES}" )
 if ( MCRL2_INSTALL_EXAMPLES )
 install(
   DIRECTORY examples/
-  DESTINATION share/doc/mcrl2/examples
+  DESTINATION ${MCRL2_SHARE_DIR}/${MCRL2_EXAMPLES_DIR}
+  COMPONENT Examples
   PATTERN ".svn" EXCLUDE
 )
 endif ( MCRL2_INSTALL_EXAMPLES )
@@ -529,40 +400,4 @@ include(MCRL2MakeTargets)
 ## Packaging
 ##---------------------------------------------------
 
-## Preprocessing:
-## Setup mCRL2 for creating a single re-locatable bundle for MacOSX
-if(APPLE)
-
-  if(MCRL2_SINGLE_BUNDLE)
-    if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-      message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This creates a non-standard installer when using CPack." )
-    endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-
-    SET(CMAKE_BUNDLE_NAME "mCRL2")
-
-    SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
-    # make sure CMAKE_INSTALL_PREFIX ends in /
-    STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
-    MATH(EXPR LEN "${LEN} -1" )
-    STRING(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
-    IF(NOT "${ENDCH}" STREQUAL "/")
-      SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
-    ENDIF(NOT "${ENDCH}" STREQUAL "/")
-    SET(CMAKE_INSTALL_PREFIX
-      "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
-
-
-  endif(MCRL2_SINGLE_BUNDLE)
-
-ENDIF(APPLE)
-
-## Preprocessing:
 include(MCRL2Packaging)
-
-##---------------------------------------------------
-## Add LTSmin as a last target, such that it is
-## processed after the installation of the libraries
-##---------------------------------------------------
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/scripts/ltsmin)
-

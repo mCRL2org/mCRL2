@@ -41,8 +41,8 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const bes::boolean_equation_system<Container>& x)
+  template <typename BooleanEquationContainer>
+  void operator()(const bes::boolean_equation_system<BooleanEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
@@ -167,8 +167,8 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const bes::boolean_equation_system<Container>& x)
+  template <typename BooleanEquationContainer>
+  void operator()(const bes::boolean_equation_system<BooleanEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());

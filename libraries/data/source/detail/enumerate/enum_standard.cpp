@@ -228,14 +228,14 @@ bool EnumeratorSolutionsStandard::find_equality(
     if (a1!=a2)
     {
       if (is_variable(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) &&
-                               (!find_if(a2,test_equal(a1)).defined()))        // true if a1 does not occur in a2.
+                               (atermpp::find_if(a2,test_equal(a1))==atermpp::aterm_appl()))        // true if a1 does not occur in a2.
       {
         v = a1;
         e = a2;
         return true;
       }
       if (is_variable(a2) && (find(vars.begin(),vars.end(),a2)!=vars.end()) &&
-                               (!find_if(a1,test_equal(a2)).defined()))        // true if a2 does not occur in a1.
+                               (atermpp::find_if(a1,test_equal(a2))==atermpp::aterm_appl()))        // true if a2 does not occur in a1.
       {
         v = a2;
         e = a1;
@@ -406,6 +406,8 @@ bool EnumeratorSolutionsStandard::next(
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
+  vector < atermpp::aterm > var_array; // This does not need to be a atermpp vector, as its content
+                                       // is protected elsewhere.
   while (ss_stack.empty() && !fs_stack.empty())
   {
     fs_expr e=fs_stack.front();
@@ -516,16 +518,14 @@ bool EnumeratorSolutionsStandard::next(
           assert(target_sort==sort);
 
           variable_list var_list;
-          MCRL2_SYSTEM_SPECIFIC_ALLOCA(var_array,atermpp::aterm,domain_sorts.size()+1);
-          // std::vector < atermpp::aterm > var_array(domain_sorts.size()+1);
-          size_t j=1;
-          new (&var_array[0]) atermpp::aterm(OpId2Int(*it));
-          for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
+          assert(var_array.size()==0);
+          var_array.push_back(OpId2Int(*it));
+          
+          for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
           {
             const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
             var_list = push_front(var_list,fv);
-            new (&var_array[j]) atermpp::aterm(fv);
-
+            var_array.push_back(fv);
 
             used_vars++;
             if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
@@ -556,29 +556,24 @@ bool EnumeratorSolutionsStandard::next(
             }
             else if (used_vars > max_vars)
             {
-              cerr << "need more than " << max_vars << " variables to find all valuations of ";
+              mCRL2log(log::info) << "need more than " << max_vars << " variables to find all valuations of ";
               for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
               {
                 if (k != enum_vars.begin())
                 {
-                  cerr << ", ";
+                  mCRL2log(log::info) << ", ";
                 }
-                cerr << data::pp(*k) << ":" << data::pp(k->sort());
+                mCRL2log(log::info) << data::pp(*k) << ":" << data::pp(k->sort());
               }
-              cerr << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
+              mCRL2log(log::info) << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
               max_vars *= MAX_VARS_FACTOR;
             }
           }
           // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
           // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
           // using it is much cheaper than using a default substitution.
-          const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,
-                                                 &var_array[0],&var_array[0]+domain_sorts.size()+1),enum_sigma);
-          for(size_t i=0;i<=domain_sorts.size(); i++)
-          {
-            using namespace atermpp;
-            var_array[i].~aterm();
-          } 
+          const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,var_array.begin(), var_array.end()),enum_sigma);
+          var_array.clear();
 
           const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
           enum_sigma[var]=term_rf;

@@ -21,6 +21,7 @@ using lps::specification;
 using lps::action_rename_specification;
 // using lps::action_rename;
 
+static
 void test1()
 {
   // Check a renaming when more than one renaming rule
@@ -44,6 +45,7 @@ void test1()
   BOOST_CHECK(new_spec.process().summand_count()==3);
 }
 
+static
 void test2()
 {
   // Check whether new declarations in the rename file
@@ -70,6 +72,7 @@ void test2()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+static
 void test3()
 {
   // Check whether constants in an action_rename file are properly translated.
@@ -92,6 +95,7 @@ void test3()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+static
 void test4()
 {
   const std::string SPEC =
@@ -119,6 +123,7 @@ void test4()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+static
 void test5() // Test whether partial renaming to delta is going well. See bug report #1009.
 {
   const std::string SPEC =

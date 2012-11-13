@@ -4,6 +4,7 @@
 
 import os
 import random
+import re
 from optparse import OptionParser
 from path import *
 
@@ -69,7 +70,7 @@ def timeout_command(program, options, timeout = -1):
     if mcrl2_tool_options.verbose:
         print 'executing', command
 
-    cmd = command.split(" ")
+    cmd = re.split('\s+', command)
     start = datetime.datetime.now()
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -99,7 +100,13 @@ def run_pbes2bool(filename, timeout = 3):
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
-    return last_word(text) == 'true'
+    try:
+        return last_word(text) == 'true'
+    except IndexError:
+        print 'pbes2bool output:'
+        print '  stdout:', text
+        print '  stderr:', dummy
+        return None
 
 # returns True, False or None if a timeout occurs
 def run_pbespgsolve(filename, timeout = 3):
@@ -110,9 +117,9 @@ def run_pbespgsolve(filename, timeout = 3):
         return None
     return last_word(text) == 'true'
 
-def run_txt2pbes(txtfile, pbesfile):
+def run_txt2pbes(txtfile, pbesfile, options = ''):
     add_temporary_files(txtfile, pbesfile)
-    run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
+    run_program('txt2pbes', '%s %s %s' % (options, txtfile, pbesfile))
 
 def run_txt2bes(txtfile, besfile):
     add_temporary_files(txtfile, besfile)
@@ -180,12 +187,32 @@ def run_bessolve(filename, strategy = 'spm', timeout = 10):
     return None
 
 # runs pbesrewr
-def run_pbesrewr(pbesfile1, pbesfile2, timeout = 10):
+def run_pbesrewr(pbesfile1, pbesfile2, pbes_rewriter = 'simplify', timeout = 10):
     add_temporary_files(pbesfile1, pbesfile2)
-    timeout_command('pbesrewr',  '%s %s' % (pbesfile1, pbesfile2), timeout)
+    timeout_command('pbesrewr',  '--pbes-rewriter=%s %s %s' % (pbes_rewriter, pbesfile1, pbesfile2), timeout)
 
-def run_mcrl22lps(mcrl2file, lpsfile, timeout = 10):
-    timeout_command('mcrl22lps',  '%s %s' % (mcrl2file, lpsfile), timeout)
+def run_mcrl22lps(mcrl2file, lpsfile, options = '', timeout = 10):
+    args = '%s %s %s' % (options, mcrl2file, lpsfile)
+    timeout_command('mcrl22lps',  args.strip(), timeout)
 
-def run_lps2lts(lpsfile, destfile, options, timeout = 10):
-    timeout_command('lps2lts',  '%s %s %s' % (options, lpsfile, destfile), timeout)
+def run_lps2lts(lpsfile, destfile, options = '', timeout = 10):
+    args = '%s %s %s' % (options, lpsfile, destfile)
+    dummy, text = timeout_command('lps2lts', args.strip(), timeout)
+    return text
+
+def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
+    dummy, text = timeout_command('ltscompare',  '%s %s %s' % (options, ltsfile1, ltsfile2), timeout)
+    return text.find('LTSs are strongly bisimilar') != -1
+
+def run_lpspbes(lpsfile, mcffile, pbesfile, options = '', timeout = 10):
+    args = '%s -f%s %s %s' % (lpsfile, mcffile, options, pbesfile)
+    timeout_command('lps2pbes',  args.strip(), timeout)
+
+def run_pbesstategraph(pbesfile1, pbesfile2, options = '', timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('pbesstategraph',  '%s %s %s' % (options, pbesfile1, pbesfile2), timeout)
+
+def run_symbolic_exploration(pbesfile1, pbesfile2, options = '', timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('symbolic_exploration',  '%s %s %s' % (options, pbesfile1, pbesfile2), timeout)
+

@@ -11,12 +11,8 @@ project(mcrl2_data)
 cmake_minimum_required(VERSION 2.6)
 
 # Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB HEADERS "include/mcrl2/data/*.h")
-FILE(GLOB DETAIL_HEADERS "include/mcrl2/data/detail/*.h")
-FILE(GLOB DETAIL_SUB_HEADERS "include/mcrl2/data/detail/*/*.h")
-add_custom_target(${PROJECT_NAME}_headers
-  SOURCES ${HEADERS} ${DETAIL_HEADERS} ${DETAIL_SUB_HEADERS}
-)
+FILE(GLOB_RECURSE HEADERS "include" "*.h")
+add_custom_target(${PROJECT_NAME}_headers SOURCES ${HEADERS})
 
 # ######### General setup ##########
 
@@ -53,7 +49,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 # include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 add_library(${PROJECT_NAME}
@@ -66,4 +62,4 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

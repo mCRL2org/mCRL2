@@ -13,6 +13,7 @@
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/state.h"
 #include "mcrl2/lps/translate_user_notation.h"
 
 #include "mcrl2/modal_formula/find.h"

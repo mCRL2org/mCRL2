@@ -65,11 +65,10 @@ std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spe
 #endif
 
   // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
-  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter_with_variables datarv(datar);
-  data::data_enumerator<> datae(pbes_spec.data(), datar, generator);
+  data::data_enumerator datae(pbes_spec.data(), datar);
   const bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,data::data_enumerator<> >
+  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator>
   pbesr(datarv, datae, enumerate_infinite_sorts);
   // The use of a pbesrewriter is switched off, because the pbesrewriter is too slow for the time being.
   // ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr);

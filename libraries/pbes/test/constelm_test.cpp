@@ -138,7 +138,7 @@ std::string t11 =
   "                                                              \n"
   "init X(1,2);                                                  \n"
   ;
-std::string x11 = "binding_variables = X";
+std::string x11 = "binding_variables = X(n1,n2: Nat)";
 
 std::string t12 =
   "% example 4.2.1 from \"Tools for PBES\" report                                     \n"

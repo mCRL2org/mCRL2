@@ -392,6 +392,7 @@ std::string case_10 =
 
 const std::string expected_10 = "process_parameter_count = 1";
 
+static
 void test_constelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
   specification spec = parse_linear_process_specification(spec_text);
@@ -402,6 +403,7 @@ void test_constelm(const std::string& message, const std::string& spec_text, con
   BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
 }
 
+static
 void test_constelm()
 {
   test_constelm("case_1" , case_1,  expected_1);
@@ -417,6 +419,7 @@ void test_constelm()
   test_constelm("case_10" , case_10,  expected_10);
 }
 
+static
 void test_abp()
 {
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());

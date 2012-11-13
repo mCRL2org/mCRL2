@@ -1979,7 +1979,7 @@ aterm_appl gsMakeActionRenameSpec(const aterm_appl& DataSpec_0, const aterm_appl
 inline
 aterm_appl gsMakeAllow(const aterm_list& MultActName_0, const aterm_appl& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Allow(), MultActName_0, ProcExpr_1);
+  return term_appl<aterm>(function_symbol_Allow(), aterm_cast<aterm>(MultActName_0), aterm_cast<aterm>(ProcExpr_1));
 }
 
 inline

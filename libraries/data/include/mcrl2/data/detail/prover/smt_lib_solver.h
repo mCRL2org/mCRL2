@@ -18,7 +18,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"

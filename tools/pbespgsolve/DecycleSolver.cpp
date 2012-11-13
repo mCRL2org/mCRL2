@@ -129,7 +129,7 @@ DecycleSolver::~DecycleSolver()
 
 ParityGame::Strategy DecycleSolver::solve()
 {
-    info( "(DecycleSolver) Searching for winner-controlled cycles...");
+    mCRL2log(mcrl2::log::verbose, "DecycleSolver") << "Searching for winner-controlled cycles..." << std::endl;
 
     const verti V = game_.graph().V();
     ParityGame::Strategy strategy(V, NO_VERTEX);
@@ -172,8 +172,7 @@ ParityGame::Strategy DecycleSolver::solve()
         verti new_size = solved_set.size();
         if (old_size < new_size)
         {
-            info( "(DecycleSolver) Identified %d vertices in %d-dominated "
-                  "cycles.", new_size - old_size, prio );
+            mCRL2log(mcrl2::log::verbose, "DecycleSolver") << "Identified " << new_size - old_size << " vertices in " << prio << "-dominated cycles" << std::endl;
         }
 
         // Early out: if all vertices are solved, it is pointless to continue.
@@ -183,7 +182,7 @@ ParityGame::Strategy DecycleSolver::solve()
     if (solved_set.empty())
     {
         // Don't construct a subgame if it is identical to the input game:
-        info("(DecycleSolver) No suitable cycles found! Solving...");
+        mCRL2log(mcrl2::log::verbose, "DecycleSolver") << "No suitable cycles found! Solving..." << std::endl;
         std::auto_ptr<ParityGameSolver> subsolver(
             pgsf_.create(game_, vmap_, vmap_size_) );
         subsolver->solve().swap(strategy);
@@ -192,8 +191,7 @@ ParityGame::Strategy DecycleSolver::solve()
     }
 
     const verti num_unsolved = V - (verti)solved_set.size();
-    info( "(DecycleSolver) Creating subgame with %d vertices remaining...",
-            num_unsolved );
+    mCRL2log(mcrl2::log::verbose, "DecycleSolver") << "Creating subgame with " << num_unsolved << " vertices remaining..." << std::endl;
 
     // Gather remaining unsolved vertices:
     std::vector<verti> unsolved;
@@ -225,11 +223,11 @@ ParityGame::Strategy DecycleSolver::solve()
             pgsf_.create(subgame, &unsolved[0], unsolved.size()) );
     }
 
-    info( "(DecycleSolver) Solving...");
+    mCRL2log(mcrl2::log::verbose, "DecycleSolver") << "Solving..." << std::endl;
     ParityGame::Strategy substrat = subsolver->solve();
     if (!substrat.empty())
     {
-        info( "(DecycleSolver) Merging strategies...");
+        mCRL2log(mcrl2::log::verbose, "DecycleSolver") << "Merging strategies..." << std::endl;
         merge_strategies(strategy, substrat, unsolved);
     }
 

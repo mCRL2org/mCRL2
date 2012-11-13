@@ -16,6 +16,8 @@
 #include <map>
 #include <set>
 
+#include "markmanager.h"
+
 class State;
 
 // forward declaration
@@ -64,9 +66,9 @@ class Cluster
     int getNumDeadlocks() const;
     void addDeadlock();
 
-    void addMatchedRule(int mr);
-    void removeMatchedRule(int mr);
-    void getMatchedRules(std::vector< int > &mrs);
+    void addMatchedRule(MarkRuleIndex index);
+    void removeMatchedRule(MarkRuleIndex index);
+    const std::set<MarkRuleIndex> &getMatchedRules() const { return matchedRules; }
     int getNumMarkedStatesAll();
     int getNumMarkedStatesAny();
     void setNumMarkedStatesAll(int n);
@@ -77,6 +79,7 @@ class Cluster
 
     // Methods on transitions
     void addActionLabel(int l);
+    void resetActionMarks() { numMarkedTransitions = 0; }
     bool hasMarkedTransition() const;
     int setActionMark(int l,bool b);
 
@@ -104,11 +107,6 @@ class Cluster
     void addBranchVisObject(int vo);
     void clearBranchVisObjects();
 
-    // Methods for selection
-    void select();
-    void deselect();
-    bool isSelected() const;
-
   private:
     std::map< int, int > actionLabelCounts;
     Cluster* ancestor;
@@ -129,8 +127,7 @@ class Cluster
     float bc_height; // height of the bounding cylinder that contains this cluster's subtree
     int visObject;
     std::vector< int > branchVisObjects;
-    bool selected;
-    std::set< int > matchedRules;
+    std::set< MarkRuleIndex > matchedRules;
 };
 
 #endif

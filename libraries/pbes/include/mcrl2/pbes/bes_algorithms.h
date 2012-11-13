@@ -32,11 +32,9 @@ namespace pbes_system
 /// \return A bes.
 pbes<> pbesinst(const pbes<>& p, bool lazy = false)
 {
-  typedef data::data_enumerator<utilities::number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
+  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, data::data_enumerator> my_rewriter;
   data::rewriter datar(p.data());
-  utilities::number_postfix_generator name_generator("x");
-  my_enumerator datae(p.data(), datar, name_generator);
+  data::data_enumerator datae(p.data(), datar, "x");
   my_rewriter pbesr(datar, datae);
   if (lazy)
   {

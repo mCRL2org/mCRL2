@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=mCRL2
-Comment=Graphical front end for mCRL2 toolset
-Type=Application
-Exec=mcrl2-gui
-Categories=Education;Science;
-X-SuSE-translate=true
-

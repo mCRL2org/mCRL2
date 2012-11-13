@@ -380,7 +380,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
               new_disjuncts.push_back(*it);
             }
           }
-          pbes_expression new_disj = pbes_expr::join_and(new_disjuncts.begin(), new_disjuncts.end());
+          pbes_expression new_disj = pbes_expr::join_or(new_disjuncts.begin(), new_disjuncts.end());
           pbes_expression expr = split_here(new_disj);
           if (simple_disjuncts.size() > 0)
           {
@@ -414,7 +414,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     mode_stack.push(UNDETERMINED);
   }
 
+#ifndef NDEBUG
   void leave(const pbes_equation& x)
+#else
+  void leave(const pbes_equation&)
+#endif
   {
     fixpoint_symbol symbol = symbol_stack.top();
     symbol_stack.pop();

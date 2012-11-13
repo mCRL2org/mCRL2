@@ -11,6 +11,9 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <map>
 #include <vector>
@@ -22,44 +25,30 @@ class Node
 {
   public:
     // -- constructors and destructors ------------------------------
-    Node(const size_t& idx);
-    Node(
-      const size_t& idx,
-      const std::vector< double > &tpl);
-    virtual ~Node();
+    Node(size_t idx): index(idx), cluster(0) {}
+    Node(size_t idx, const std::vector<double> &tpl): index(idx), tuple(tpl), cluster(0) {}
 
     // -- set functions ---------------------------------------------
-    void swapTupleVal(
-      const size_t& idx1,
-      const size_t& idx2);
-    void moveTupleVal(
-      const size_t& idxFr,
-      const size_t& idxTo);
-    void moveTupleVals(std::map< size_t , size_t > &idcsFrTo);
-    void addTupleVal(
-      const size_t& idx,
-      const double& val);
-    void delTupleVal(const size_t& idx);
-    void addInEdge(Edge* e);
-    void setInEdges(const std::vector< Edge* > e);
-    void addOutEdge(Edge* e);
-    void setOutEdges(const std::vector< Edge* > e);
-    void setCluster(Cluster* c);
+    void swapTupleVal(size_t idx1, size_t idx2);
+    void moveTupleVal(size_t idxFr, size_t idxTo);
+    void moveTupleVals(std::map<size_t, size_t> &idcsFrTo);
+    void addTupleVal(size_t idx, double val) { tuple.insert(tuple.begin() + idx, val); }
+    void delTupleVal(size_t idx) { tuple.erase(tuple.begin() + idx); }
+    void addInEdge(Edge* e) { inEdges.push_back(e); }
+    void setInEdges(const std::vector<Edge *> &e) { inEdges = e; }
+    void addOutEdge(Edge* e) { outEdges.push_back(e); }
+    void setOutEdges(const std::vector<Edge *> &e) { outEdges = e; }
+    void setCluster(Cluster* c) { cluster = c; }
 
     // -- get functions ---------------------------------------------
-    size_t getIndex();
-    size_t getSizeTuple();
-    double getTupleVal(const size_t& idx);
-    size_t getSizeInEdges();
-    Edge* getInEdge(const size_t& idx);
-    size_t getSizeOutEdges();
-    Edge* getOutEdge(const size_t& idx);
-    Cluster* getCluster();
-
-    // -- clear functions -------------------------------------------
-    void clearInEdges();
-    void clearOutEdges();
-    void clearCluster();
+    size_t getIndex() const { return index; }
+    size_t getSizeTuple() const { return tuple.size(); }
+    double getTupleVal(const size_t& idx) const { return tuple[idx]; }
+    size_t getSizeInEdges() const { return inEdges.size(); }
+    Edge* getInEdge(const size_t& idx) const { return inEdges[idx]; }
+    size_t getSizeOutEdges() const { return outEdges.size(); }
+    Edge* getOutEdge(const size_t& idx) const { return outEdges[idx]; }
+    Cluster* getCluster() const { return cluster; }
 
   protected:
     // -- data members ----------------------------------------------

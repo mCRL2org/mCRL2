@@ -34,6 +34,11 @@ next_state_generator::next_state_generator(
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());
   m_state_function = atermpp::function_symbol("STATE", m_process_parameters.size());
 
+  if(m_specification.process().has_time())
+  {
+    mCRL2log(log::warning) << "specification uses time, which is (currently) not supported; ignoring timing" << std::endl;
+  }
+
   for (action_summand_vector::iterator i = m_specification.process().action_summands().begin(); i != m_specification.process().action_summands().end(); i++)
   {
     summand_t summand;
@@ -68,6 +73,14 @@ next_state_generator::next_state_generator(
 
     m_summands.push_back(summand);
   }
+
+  state initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
+  state initial_state;
+  for (size_t i = 0; i < initial_state_raw.size(); i++)
+  {
+    initial_state.push_back(m_rewriter(initial_state_raw[i]));
+  }
+  m_initial_state = get_internal_state(initial_state);
 
   m_all_summands = summand_subset_t(this, use_summand_pruning);
 }
@@ -416,6 +429,7 @@ struct condition_converter
 
 void next_state_generator::iterator::increment()
 {
+  std::vector < rewriter_expression_t > condition_arguments;
   while (!m_summand ||
     (m_cached && m_enumeration_cache_iterator == m_enumeration_cache_end) ||
     (!m_cached && m_enumeration_iterator == enumerator_t::iterator_internal()))
@@ -455,10 +469,13 @@ void next_state_generator::iterator::increment()
 
     if (m_generator->m_use_enumeration_caching)
     {
-      const condition_converter cc(m_state);
-      const std::vector<size_t> &condition_pars=m_summand->condition_parameters;
-      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_pars.begin(), condition_pars.end(),cc);
-      
+      condition_arguments.resize(m_summand->condition_parameters.size());
+
+      for (size_t i = 0; i < m_summand->condition_parameters.size(); i++)
+      {
+        condition_arguments[i] = m_state(m_summand->condition_parameters[i]);
+      }
+      m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_arguments.begin(), condition_arguments.end());
       std::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);
       if (position == m_summand->enumeration_cache.end())
       {
@@ -497,7 +514,29 @@ void next_state_generator::iterator::increment()
   }
   else
   {
-    valuation = *m_enumeration_iterator++;
+    valuation = *m_enumeration_iterator;
+
+    // If we failed to exactly rewrite the condition to true, nextstate generation fails.
+    if(!m_enumeration_iterator.solution_is_exact())
+    {
+      // Integrate the valuation in the substitution, to generate a more meaningful error message.
+      valuation_t::iterator v = valuation.begin();
+      for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++, v++)
+      {
+        (*m_substitution)[*i] = *v;
+      }
+
+      // Reduce condition as much as possible, and give a hint of the original condition in the error message.
+      rewriter_expression_t reduced_condition(m_generator->m_rewriter.rewrite_internal(m_summand->condition, *m_substitution));
+      std::string printed_condition(data::pp(m_generator->m_rewriter.convert_from(m_summand->condition)).substr(0, 80));
+
+      throw mcrl2::runtime_error("Expression " + data::pp(m_generator->m_rewriter.convert_from(reduced_condition)) +
+                                 " does not rewrite to true or false in the condition "
+                                 + printed_condition
+                                 + (printed_condition.size() > 80?"...":""));
+    }
+
+    m_enumeration_iterator++;
   }
 
   if (m_caching)
@@ -517,12 +556,16 @@ void next_state_generator::iterator::increment()
   m_transition.m_state = internal_state_t(m_generator->m_state_function, state_args.begin(), state_args.end(), sar);
 
   std::vector <action> actions;
-  actions.reserve(m_summand->action_label.size());
-  action_argument_converter aac(m_generator->m_rewriter,m_substitution);
+  actions.resize(m_summand->action_label.size());
+  std::vector < data_expression> arguments;
   for (size_t i = 0; i < m_summand->action_label.size(); i++)
   {
-    const std::vector<rewriter_expression_t> &action_arguments=m_summand->action_label[i].arguments;
-    actions.push_back(action(m_summand->action_label[i].label, data_expression_list(action_arguments.begin(), action_arguments.end(),aac)));
+    arguments.resize(m_summand->action_label[i].arguments.size());
+    for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
+    {
+      arguments[j] = m_generator->m_rewriter.convert_from(m_generator->m_rewriter.rewrite_internal(m_summand->action_label[i].arguments[j], *m_substitution));
+    }
+    actions[i] = action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }
   m_transition.m_action = multi_action(action_list(actions.begin(), actions.end())); 
 

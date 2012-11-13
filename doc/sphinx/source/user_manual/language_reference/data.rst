@@ -529,11 +529,11 @@ substituted.
        | ``Int -> Int``
        | ``Real -> Real``
      - Predecessor (equivalent to :samp:`a - 1`)
-   * - ``div({a}, {b})``
+   * - :samp:`{a} div {b}`
      - | ``Nat # Pos -> Nat``
        | ``Int # Pos -> Int``
      - Integer division
-   * - :samp:`mod({a}, {b})`
+   * - :samp:`{a} mod {b}`
      - | ``Nat # Pos -> Nat``
        | ``Int # Pos -> Nat``
      - Remainder of :samp:`{a}` divided by :samp:`{b}`.

@@ -8,337 +8,200 @@
 //
 /// \file ./colorchooser.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "colorchooser.h"
 
 using namespace std;
 
-// -- static variables ----------------------------------------------
+static const double handleSize = 5.0;
 
-double ColorChooser::hdlSzeHnt =  5.0;
-
-
-// -- constructors and destructor -----------------------------------
-
-
-// ------------------------
-ColorChooser::ColorChooser(
-  Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
-// ------------------------
+ColorChooser::ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorChooser::ColorType type):
+  Visualizer(parent, 0),
+  m_dof(dof),
+  m_yCoordinates(yCoordinates),
+  m_type(type),
+  m_dragIdx(NON_EXISTING)
 {
-  hdlSize  = hdlSzeHnt;
-
-  active  = false;
-  dragIdx = NON_EXISTING;
+  setMouseTracking(true);
+  setMinimumSize(100,50);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 
-// --------------------------
-ColorChooser::~ColorChooser()
-// --------------------------
-{}
-
-
-// -- set functions -------------------------------------------------
-
-
-// ---------------------------------------------
-void ColorChooser::setActive(const bool& flag)
-// ---------------------------------------------
-{
-  active = flag;
-}
-
-
-// -----------------------------
-void ColorChooser::setPoints(
-  const vector< double > &hue,
-  const vector< double > &y)
-// -----------------------------
-{
-  positionsX.clear();
-  for (size_t i = 0; i < hue.size(); ++i)
-  {
-    positionsX.push_back((2.0*hue[i])-1.0);
-  }
-
-  positionsY = y;
-}
-
-
-// -- visualization functions  --------------------------------------
-
-
-// -----------------------------------------------------
 void ColorChooser::visualize(const bool& inSelectMode)
-// -----------------------------------------------------
 {
-  /*
-  // check if positions are ok
-  if ( geomChanged == true )
-      calcPositions();
-  */
-
-  // visualize
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
+    startSelectMode(hits, selectBuf, 2.0, 2.0);
 
     drawPoints(inSelectMode);
 
-    finishSelectMode(
-      hits,
-      selectBuf);
+    finishSelectMode(hits, selectBuf);
   }
   else
   {
     clear();
-    drawColorSpectrum();
+    if (m_type == HueColor)
+    {
+      drawColorSpectrum();
+    }
+    else
+    {
+      drawGrayScale();
+    }
     drawPath(inSelectMode);
     drawPoints(inSelectMode);
   }
 }
 
-
-// -- event handlers ------------------------------------------------
-
-
-// ----------------------------------------
-void ColorChooser::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
-// ----------------------------------------
+void ColorChooser::handleMouseEnterEvent()
 {
-  mediator->handleDOFColActivate();
-  mediator->setDOFColorSelected();
-  if (active == true)
-  {
-    Visualizer::handleMouseLftDownEvent(x, y);
+  emit activated();
+  // normal mode
+  updateGL();
+}
 
-    // selection moce
-    visualize(true);
-    // normal mode
-    visualize(false);
-
-    if (dragIdx == NON_EXISTING)
-    {
-      double w, h;
-      double xRgt;
-      double yTop;
-      double xCur, yCur;
-
-      // get size of sides
-      canvas->getSize(w, h);
-
-      // calc size of bounding box
-      xRgt =  0.5*w;
-      yTop =  0.5*h;
-
-      // get cur mouse position
-      canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
-
-      // normalize mouse position
-      // xLft is -1.0, xRgt is 1.0, yTop = 1.0 and yBot = -1.0
-      xCur = xCur/xRgt;
-      yCur = yCur/yTop;
-
-      positionsX.push_back(xCur);
-      positionsY.push_back(yCur);
-
-      mediator->handleDOFColAdd(0.5*(xCur+1), yCur);
-    }
-  }
+void ColorChooser::handleMouseLeaveEvent()
+{
+  emit deactivated();
+  // normal mode
+  updateGL();
 }
 
 
-// --------------------------------------
-void ColorChooser::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-// --------------------------------------
+void ColorChooser::handleMouseEvent(QMouseEvent* e)
 {
-  if (active == true)
+  Visualizer::handleMouseEvent(e);
+  if (e->type() != QEvent::MouseMove || e->buttons() != Qt::NoButton)
   {
-    Visualizer::handleMouseLftUpEvent(x, y);
-    dragIdx = NON_EXISTING;
-  }
-}
-
-
-// ----------------------------------------
-void ColorChooser::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-// ----------------------------------------
-{
-  if (active == true)
-  {
-    Visualizer::handleMouseRgtDownEvent(x, y);
-
     // selection mode
-    visualize(true);
-    // normal mode
-    visualize(false);
-  }
-}
+    updateGL(true);
 
+    if (e->button() == Qt::LeftButton)
+    {
+      if (e->type() == QEvent::MouseButtonPress)
+      {
+        if (m_dragIdx == NON_EXISTING)
+        {
+          QPointF pos = worldCoordinate(e->posF());
 
-// --------------------------------------
-void ColorChooser::handleMouseRgtUpEvent(
-  const int& x,
-  const int& y)
-// --------------------------------------
-{
-  if (active == true)
-  {
-    Visualizer::handleMouseRgtUpEvent(x, y);
-  }
-}
+          double xCur = pos.x() / (0.5 * worldSize().width());
+          double yCur = pos.y() / (0.5 * worldSize().height());
 
+          m_dof->addValue((xCur + 1.0) / 2.0);
+          m_yCoordinates->append(yCur);
+        }
+      }
+      if (e->type() == QEvent::MouseButtonRelease)
+      {
+        m_dragIdx = NON_EXISTING;
+      }
+    }
 
-// ---------------------------------------
-void ColorChooser::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-// ---------------------------------------
-{
-  if (active == true)
-  {
-    Visualizer::handleMouseMotionEvent(x, y);
-    if (mouseDrag == MSE_DRAG_TRUE)
+    if (m_mouseDrag && e->buttons() == Qt::LeftButton)
     {
       handleDrag();
     }
+
+    // normal mode
+    updateGL();
   }
 }
 
-
-// -- utility drawing functions -------------------------------------
-
-// ***
-/*
-// -----------------------
-void ColorChooser::clear()
-// -----------------------
-{
-    VisUtils::clear( clearColor );
-}
-*/
-
-// -----------------------------------
 void ColorChooser::drawColorSpectrum()
-// -----------------------------------
 {
-  double w, h;
-  double xLft, xRgt;
-  double yBot, yTop;
-  double xItv;
-  ColorRGB col;
-
-  // get size of sides
-  canvas->getSize(w, h);
+  QSizeF size = worldSize();
 
   // calc size of bounding box
-  xLft = -0.5*w;
-  xRgt =  0.5*w;
-  yTop =  0.5*h;
-  yBot = -0.5*h;
+  double xLft = -0.5*size.width();
+  double xRgt =  0.5*size.width();
+  double yTop =  0.5*size.height();
+  double yBot = -0.5*size.height();
 
-  xItv = (xRgt-xLft)/255.0;
+  double xItv = (xRgt-xLft)/255.0;
   for (int i = 0; i < 255; ++i)
   {
-    VisUtils::mapColorSpectral(
-      i/255.0,
-      col);
-    VisUtils::setColor(col);
-    VisUtils::fillRect(
-      xLft+i*xItv, xLft+(i+1)*xItv,
-      yTop,        yBot);
+    VisUtils::setColor(VisUtils::spectral(i / 255.0));
+    VisUtils::fillRect(xLft+i*xItv, xLft+(i+1)*xItv, yTop, yBot);
   }
 }
 
 
-// ----------------------------------------------------
-void ColorChooser::drawPath(const bool& inSelectMode)
-// ----------------------------------------------------
+void ColorChooser::drawGrayScale()
 {
-  double w, h;
+  QSizeF size = worldSize();
+
+  // calc size of bounding box
+  double xLft = -0.5*size.width();
+  double xRgt =  0.5*size.width();
+  double yTop =  0.5*size.height();
+  double yBot = -0.5*size.height();
+
+  double xItv = (xRgt-xLft)/255.0;
+  VisUtils::enableBlending();
+  for (int i = 0; i < 255; ++i)
+  {
+    VisUtils::setColor(Qt::blue, pow((i/255.0), 2));
+    VisUtils::fillRect(
+      xLft+i*xItv, xLft+(i+1)*xItv,
+      0.5*yTop,    0.5*yBot);
+  }
+  VisUtils::disableBlending();
+}
+
+
+void ColorChooser::drawPath(const bool& inSelectMode)
+{
   double xRgt;
   double yTop;
   double pix;
-  double size;
 
-  // get size of sides
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  pix = canvas->getPixelSize();
+  QSizeF size = worldSize();
+  pix = pixelSize();
 
-  // calc size of bounding box
-  xRgt =  0.5*w;
-  yTop =  0.5*h;
-  // size of positions
-  size = positionsX.size();
+  xRgt =  0.5*size.width();
+  yTop =  0.5*size.height();
 
-  // selection mode
-  if (inSelectMode == true)
-    {}
-  // rendering mode
-  else
+  if (!inSelectMode)
   {
     VisUtils::enableLineAntiAlias();
-    for (int i = 0; i < size-1; ++i)
+    for (int i = 0; i < m_yCoordinates->size()-1; ++i)
     {
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawLineDashed(
-        positionsX[i]*xRgt+pix, positionsX[i+1]*xRgt+pix,
-        positionsY[i]*yTop-pix, positionsY[i+1]*yTop-pix);
+        xPosition(i)*xRgt+pix, xPosition(i+1)*xRgt+pix,
+        yPosition(i)*yTop-pix, yPosition(i+1)*yTop-pix);
 
-      VisUtils::setColorLtGray();
+      VisUtils::setColor(VisUtils::lightGray);
       VisUtils::drawLineDashed(
-        positionsX[i]*xRgt, positionsX[i+1]*xRgt,
-        positionsY[i]*yTop, positionsY[i+1]*yTop);
+        xPosition(i)*xRgt, xPosition(i+1)*xRgt,
+        yPosition(i)*yTop, yPosition(i+1)*yTop);
     }
-
     VisUtils::disableLineAntiAlias();
   }
 }
 
 
-// ------------------------------------------------------
 void ColorChooser::drawPoints(const bool& inSelectMode)
-// ------------------------------------------------------
 {
-  double w, h;
   double xRgt;
   double yTop;
   double pix;
   size_t    size;
   double hdlDOF;
 
-  // get size of sides
-  canvas->getSize(w, h);
-  // get size of 1 pixel
-  pix = canvas->getPixelSize();
+  pix = pixelSize();
 
   // calc size of bounding box
-  xRgt =  0.5*w;
-  yTop =  0.5*h;
+  xRgt =  0.5*worldSize().width();
+  yTop =  0.5*worldSize().height();
 
   // size of handle
-  hdlDOF = hdlSize*pix;
+  hdlDOF = handleSize*pix;
 
   // size of positions
-  size = positionsX.size();
+  size = m_yCoordinates->size();
 
   // selection mode
   if (inSelectMode == true)
@@ -347,8 +210,8 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     {
       glPushName((GLuint) i);
       VisUtils::fillRect(
-        positionsX[i]*xRgt-5.0*pix, positionsX[i]*xRgt+5.0*pix,
-        positionsY[i]*yTop+5.0*pix, positionsY[i]*yTop-5.0*pix);
+        xPosition(i)*xRgt-5.0*pix, xPosition(i)*xRgt+5.0*pix,
+        yPosition(i)*yTop+5.0*pix, yPosition(i)*yTop-5.0*pix);
       glPopName();
     }
 
@@ -356,21 +219,21 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     {
       glPushName((GLuint) size-1);
       VisUtils::fillRect(
-        positionsX[size-1]*xRgt-5.0*pix, positionsX[size-1]*xRgt+5.0*pix,
-        positionsY[size-1]*yTop+5.0*pix, positionsY[size-1]*yTop-5.0*pix);
+        xPosition(size-1)*xRgt-5.0*pix, xPosition(size-1)*xRgt+5.0*pix,
+        yPosition(size-1)*yTop+5.0*pix, yPosition(size-1)*yTop-5.0*pix);
       glPopName();
     }
     else if (size > 1)
     {
       double agl = Utils::calcAngleDg(
-                     positionsX[size-1]*xRgt - positionsX[size-2]*xRgt,
-                     positionsY[size-1]*yTop - positionsY[size-2]*yTop);
+                     xPosition(size-1)*xRgt - xPosition(size-2)*xRgt,
+                     yPosition(size-1)*yTop - yPosition(size-2)*yTop);
 
       // arrow
       glPushMatrix();
       glTranslatef(
-        positionsX[size-1]*xRgt,
-        positionsY[size-1]*yTop,
+        xPosition(size-1)*xRgt,
+        yPosition(size-1)*yTop,
         0.0);
       glRotatef(90.0+agl, 0.0, 0.0, 1.0);
 
@@ -390,73 +253,59 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     VisUtils::enableLineAntiAlias();
     for (size_t i = 0; i < size-1; ++i)
     {
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawLine(
-        positionsX[i]*xRgt-4.0*pix, positionsX[i]*xRgt+6.0*pix,
-        positionsY[i]*yTop+4.0*pix, positionsY[i]*yTop-6.0*pix);
+        xPosition(i)*xRgt-4.0*pix, xPosition(i)*xRgt+6.0*pix,
+        yPosition(i)*yTop+4.0*pix, yPosition(i)*yTop-6.0*pix);
       VisUtils::drawLine(
-        positionsX[i]*xRgt-4.0*pix, positionsX[i]*xRgt+6.0*pix,
-        positionsY[i]*yTop-6.0*pix, positionsY[i]*yTop+4.0*pix);
+        xPosition(i)*xRgt-4.0*pix, xPosition(i)*xRgt+6.0*pix,
+        yPosition(i)*yTop-6.0*pix, yPosition(i)*yTop+4.0*pix);
 
-      if (active == true)
-      {
-        VisUtils::setColorRed();
-      }
-      else
-      {
-        VisUtils::setColorWhite();
-      }
+      VisUtils::setColor(underMouse() ? Qt::red : Qt::white);
 
       VisUtils::drawLine(
-        positionsX[i]*xRgt-5.0*pix, positionsX[i]*xRgt+5.0*pix,
-        positionsY[i]*yTop+5.0*pix, positionsY[i]*yTop-5.0*pix);
+        xPosition(i)*xRgt-5.0*pix, xPosition(i)*xRgt+5.0*pix,
+        yPosition(i)*yTop+5.0*pix, yPosition(i)*yTop-5.0*pix);
       VisUtils::drawLine(
-        positionsX[i]*xRgt-5.0*pix, positionsX[i]*xRgt+5.0*pix,
-        positionsY[i]*yTop-5.0*pix, positionsY[i]*yTop+5.0*pix);
+        xPosition(i)*xRgt-5.0*pix, xPosition(i)*xRgt+5.0*pix,
+        yPosition(i)*yTop-5.0*pix, yPosition(i)*yTop+5.0*pix);
     }
 
     if (size == 1)
     {
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawLine(
-        positionsX[size-1]*xRgt-4.0*pix, positionsX[size-1]*xRgt+6.0*pix,
-        positionsY[size-1]*yTop+4.0*pix, positionsY[size-1]*yTop-6.0*pix);
+        xPosition(size-1)*xRgt-4.0*pix, xPosition(size-1)*xRgt+6.0*pix,
+        yPosition(size-1)*yTop+4.0*pix, yPosition(size-1)*yTop-6.0*pix);
       VisUtils::drawLine(
-        positionsX[size-1]*xRgt-4.0*pix, positionsX[size-1]*xRgt+6.0*pix,
-        positionsY[size-1]*yTop-6.0*pix, positionsY[size-1]*yTop+4.0*pix);
+        xPosition(size-1)*xRgt-4.0*pix, xPosition(size-1)*xRgt+6.0*pix,
+        yPosition(size-1)*yTop-6.0*pix, yPosition(size-1)*yTop+4.0*pix);
 
 
-      if (active == true)
-      {
-        VisUtils::setColorRed();
-      }
-      else
-      {
-        VisUtils::setColorWhite();
-      }
+      VisUtils::setColor(underMouse() ? Qt::red : Qt::white);
 
       VisUtils::drawLine(
-        positionsX[size-1]*xRgt-5.0*pix, positionsX[size-1]*xRgt+5.0*pix,
-        positionsY[size-1]*yTop+5.0*pix, positionsY[size-1]*yTop-5.0*pix);
+        xPosition(size-1)*xRgt-5.0*pix, xPosition(size-1)*xRgt+5.0*pix,
+        yPosition(size-1)*yTop+5.0*pix, yPosition(size-1)*yTop-5.0*pix);
       VisUtils::drawLine(
-        positionsX[size-1]*xRgt-5.0*pix, positionsX[size-1]*xRgt+5.0*pix,
-        positionsY[size-1]*yTop-5.0*pix, positionsY[size-1]*yTop+5.0*pix);
+        xPosition(size-1)*xRgt-5.0*pix, xPosition(size-1)*xRgt+5.0*pix,
+        yPosition(size-1)*yTop-5.0*pix, yPosition(size-1)*yTop+5.0*pix);
     }
     else if (size > 1)
     {
       double agl = Utils::calcAngleDg(
-                     positionsX[size-1]*xRgt - positionsX[size-2]*xRgt,
-                     positionsY[size-1]*yTop - positionsY[size-2]*yTop);
+                     xPosition(size-1)*xRgt - xPosition(size-2)*xRgt,
+                     yPosition(size-1)*yTop - yPosition(size-2)*yTop);
 
       // drop shadow
       glPushMatrix();
       glTranslatef(
-        positionsX[size-1]*xRgt+pix,
-        positionsY[size-1]*yTop-pix,
+        xPosition(size-1)*xRgt+pix,
+        yPosition(size-1)*yTop-pix,
         0.0);
       glRotatef(90.0+agl, 0.0, 0.0, 1.0);
 
-      VisUtils::setColorBlack();
+      VisUtils::setColor(Qt::black);
       VisUtils::drawTriangle(
         -hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
@@ -470,25 +319,19 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
       // arrow
       glPushMatrix();
       glTranslatef(
-        positionsX[size-1]*xRgt,
-        positionsY[size-1]*yTop,
+        xPosition(size-1)*xRgt,
+        yPosition(size-1)*yTop,
         0.0);
       glRotatef(90.0+agl, 0.0, 0.0, 1.0);
 
-      if (active == true)
-      {
-        VisUtils::setColorGreen();
-      }
-      else
-      {
-        VisUtils::setColorWhite();
-      }
+      VisUtils::setColor(underMouse() ? Qt::green : Qt::white);
+
       VisUtils::fillTriangle(
         -hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
         hdlDOF, 2.0*hdlDOF);
 
-      VisUtils::setColorMdGray();
+      VisUtils::setColor(VisUtils::mediumGray);
       VisUtils::drawTriangle(
         -hdlDOF, 2.0*hdlDOF,
         0.0,    0.0,
@@ -504,80 +347,51 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 }
 
 
-// -- utility event handlers ------------------------------------
-
-
-// ------------------------------------------------------
 void ColorChooser::handleHits(const vector< int > &ids)
-// ------------------------------------------------------
 {
-  if (mouseSide == MSE_SIDE_LFT)
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
   {
-    if (0 <= ids[0] && static_cast <size_t>(ids[0]) < positionsX.size())
+    int id = ids[0];
+    if (m_lastMouseEvent.button() == Qt::LeftButton)
     {
-      dragIdx = ids[0];
+      if (0 <= id && id < m_yCoordinates->size())
+      {
+        m_dragIdx = id;
+      }
     }
-  }
-  else if (mouseSide == MSE_SIDE_RGT)
-  {
-    if (0 <= ids[0] && static_cast <size_t>(ids[0]) < positionsX.size())
+    else if (m_lastMouseEvent.button() == Qt::RightButton)
     {
-      /*
-      positionsX.erase( positionsX.begin()+ids[0] );
-      positionsY.erase( positionsY.begin()+ids[0] );
-      */
-
-      mediator->handleDOFColClear(ids[0]);
+      if (0 <= id && id < m_yCoordinates->size() && m_yCoordinates->size() > 2)
+      {
+        m_dof->removeValue(id);
+        m_yCoordinates->removeAt(id);
+      }
     }
   }
 }
 
 
-// ----------------------------
 void ColorChooser::handleDrag()
-// ----------------------------
 {
-  if (dragIdx != NON_EXISTING && static_cast <size_t>(dragIdx) < positionsX.size())
+  if (m_dragIdx != NON_EXISTING && m_dragIdx < (size_t)m_yCoordinates->size())
   {
-    double w, h;
-    double xRgt;
-    double yTop;
-    double xCur, yCur;
+    QSizeF size = worldSize();
+    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
 
-    // get size of sides
-    canvas->getSize(w, h);
+    double xCur = pos.x()/(0.5*size.width());
+    double yCur = pos.y()/(0.5*size.height());
 
-    // calc size of bounding box
-    xRgt =  0.5*w;
-    yTop =  0.5*h;
-
-    // get cur mouse position
-    canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
-
-    // normalize mouse position
-    // xLft is -1.0, xRgt is 1.0, yTop = 1.0 and yBot = -1.0
-    xCur = xCur/xRgt;
-    yCur = yCur/yTop;
-
-    positionsX[dragIdx] = xCur;
-    positionsY[dragIdx] = yCur;
-
-    mediator->handleDOFColUpdate(
-      dragIdx,
-      0.5*(xCur+1),
-      yCur);
+    m_dof->setValue(m_dragIdx, (xCur + 1.0) / 2.0);
+    (*m_yCoordinates)[m_dragIdx] = yCur;
+    updateGL(true);
+    updateGL();
   }
 }
 
 
-// -- hit detection -------------------------------------------------
-
-
-// ----------------------------
 void ColorChooser::processHits(
   GLint hits,
   GLuint buffer[])
-// ----------------------------
 {
   GLuint* ptr;
   vector< int > ids;
@@ -617,8 +431,5 @@ void ColorChooser::processHits(
     handleHits(ids);
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
-
-
-// -- end -----------------------------------------------------------

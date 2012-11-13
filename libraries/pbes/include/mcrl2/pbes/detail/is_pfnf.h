@@ -80,9 +80,7 @@ bool is_pfnf_or_expression(const pbes_expression& x)
 inline
 bool is_pfnf_or(const pbes_expression& x)
 {
-  bool result = is_true(x) || is_pfnf_or_expression(x);
-  return result;
-  //return is_true(x) || is_pfnf_or_expression(x);
+  return is_true(x) || is_pfnf_or_expression(x);
 }
 
 // Determines if an expression has the format g_i => x with is_pfnf_or(x)

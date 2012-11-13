@@ -13,6 +13,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include <iomanip>
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -199,14 +200,17 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 bool lps2lts_algorithm::generate_lts()
 {
   generator_state_t initial_state = m_generator->internal_initial_state();
-  if (m_use_confluence_reduction != 0)
+  m_initial_state_number=0;
+  if (m_use_confluence_reduction)
   {
     initial_state = get_prioritised_representative(initial_state);
   }
 
   if (m_options.bithashing)
   {
-    m_bit_hash_table.add_state(storage_state(initial_state));
+    const std::pair<size_t, bool> p=m_bit_hash_table.add_state(storage_state(initial_state));
+    m_initial_state_number=p.first; 
+    assert(p.second); // The initial state is new.
   }
   else
   {
@@ -216,12 +220,12 @@ bool lps2lts_algorithm::generate_lts()
   if (m_options.outformat == lts_aut)
   {
     // HACK: this line will be overwritten once generation is finished.
-    m_aut_file << "                                                 " << std::endl;
+    m_aut_file << "                                                             " << std::endl;
   }
   else if (m_options.outformat != lts_none)
   {
-    size_t initial_state_number = m_output_lts.add_state(m_generator->initial_state());
-    m_output_lts.set_initial_state(initial_state_number);
+    m_initial_state_number = m_output_lts.add_state(m_generator->initial_state());
+    m_output_lts.set_initial_state(m_initial_state_number);
   }
   m_num_states = 1;
 
@@ -281,7 +285,7 @@ bool lps2lts_algorithm::finalise_lts_generation()
   {
     m_aut_file.flush();
     m_aut_file.seekp(0);
-    m_aut_file << "des (0," << m_num_transitions << "," << m_num_states << ")";
+    m_aut_file << "des (" << m_initial_state_number << "," << m_num_transitions << "," << m_num_states << ")";
     m_aut_file.close();
   }
   else if (m_options.outformat != lts_none)
@@ -500,17 +504,19 @@ bool lps2lts_algorithm::save_trace(const lps2lts_algorithm::generator_state_t &s
   trace.setState(m_generator->get_state(state));
   for (std::deque<generator_state_t>::iterator i = states.begin(); i != states.end(); i++)
   {
-    bool found = false;
     for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution); j != m_generator->end(); j++)
     {
-      if (get_prioritised_representative(j->internal_state()) == *i)
+      generator_state_t destination = j->internal_state();
+      if (m_use_confluence_reduction)
+      {
+        destination = get_prioritised_representative(destination);
+      }
+      if (destination == *i)
       {
         trace.addAction(j->action());
-        found = true;
         break;
       }
     }
-    assert(found);
     state = *i;
     trace.setState(m_generator->get_state(state));
   }
@@ -567,7 +573,7 @@ void lps2lts_algorithm::check_divergence(const lps2lts_algorithm::generator_stat
 
   if (search_divergence(state, current_path, visited))
   {
-    size_t state_number = m_state_numbers.index(state);
+    size_t state_number = m_state_numbers.index(storage_state(state));
     if (m_options.trace && m_traces_saved < m_options.max_traces)
     {
       std::ostringstream reason;
@@ -593,36 +599,30 @@ void lps2lts_algorithm::check_divergence(const lps2lts_algorithm::generator_stat
 
 void lps2lts_algorithm::save_actions(const lps2lts_algorithm::generator_state_t &state, const next_state_generator::transition_t &transition)
 {
-  for (action_list::iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
+  size_t state_number = m_state_numbers.index(storage_state(state));
+  mCRL2log(info) << "Detected action '" << pp(transition.action()) << "' (state index " << state_number << ")";
+  if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
-    if (m_options.trace_actions.count(i->label().name()) > 0)
+    std::ostringstream reason;
+    reason << "act_" << m_traces_saved;
+    if (m_options.trace_multiactions.find(transition.action()) != m_options.trace_multiactions.end())
     {
-      size_t state_number = m_state_numbers.index(storage_state(state));
-      if (m_options.trace && m_traces_saved < m_options.max_traces)
+      reason << "_" << pp(transition.action());
+    }
+    for (action_list::iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
+    {
+      if (m_options.trace_actions.count(i->label().name()) > 0)
       {
-        std::ostringstream reason;
-        reason << "act_" << m_traces_saved << "_" << std::string(i->label().name());
-        std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, reason.str(), "trc");
-        if (save_trace(transition.internal_state(), filename))
-        {
-          mCRL2log(info) << "detect: action '" << lps::pp(transition.action())
-                         << "' found and saved to '" << filename
-                         << "' (state index: " << state_number << ")." << std::endl;
-        }
-        else
-        {
-          mCRL2log(info) << "detect: action '" << lps::pp(transition.action())
-                         << "' found, but could not be saved to '" << filename
-                         << "' (state index: " << state_number << ")." << std::endl;
-        }
-      }
-      else
-      {
-        mCRL2log(info) << "detect: action '" << lps::pp(transition.action())
-                       << "' found (state index: " << state_number << ")." << std::endl;
+        reason << "_" << i->label().name();
       }
     }
+    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, reason.str(), "trc");
+    if (save_trace(transition.internal_state(), filename))
+      mCRL2log(info) << " and saved to '" << filename << "'";
+    else
+      mCRL2log(info) << " but could not saved to '" << filename << "'";
   }
+  mCRL2log(info) << std::endl;
 }
 
 void lps2lts_algorithm::save_deadlock(const lps2lts_algorithm::generator_state_t &state)
@@ -725,6 +725,19 @@ bool lps2lts_algorithm::add_transition(const lps2lts_algorithm::generator_state_
 
   m_num_transitions++;
 
+  for (std::set<lps::multi_action>::const_iterator ma = m_options.trace_multiactions.begin(); ma != m_options.trace_multiactions.end(); ++ma)
+  {
+    if (*ma == transition.action())
+    {
+      save_actions(state, transition);
+    }
+  }
+
+  if (m_options.detect_action && m_detected_action_summands[transition.summand_index()])
+  {
+    save_actions(state, transition);
+  }
+
   return destination_state_number.second;
 }
 
@@ -743,11 +756,10 @@ std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorit
     {
       transitions.push_back(*it++);
     }
-    //transitions = std::list<next_state_generator::transition_t>(m_generator->begin(state), m_generator->end());
   }
   catch (mcrl2::runtime_error& e)
   {
-    std::cerr << "Error while exploring state space: " << e.what() << "\n";
+    mCRL2log(error) << "Error while exploring state space: " << e.what() << "\n";
     save_error(state);
     exit(EXIT_FAILURE);
   }
@@ -776,10 +788,9 @@ std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorit
 void lps2lts_algorithm::generate_lts_breadth()
 {
   size_t current_state = 0;
-
   size_t start_level_seen = 1;
-  size_t start_level_explored = 0;
   size_t start_level_transitions = 0;
+  time_t last_log_time = time(NULL) - 1, new_log_time;
 
   while (!m_must_abort && (current_state < m_state_numbers.size()) && 
          (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
@@ -793,29 +804,23 @@ void lps2lts_algorithm::generate_lts_breadth()
     }
 
     current_state++;
-    if (!m_options.suppress_progress_messages && ((current_state % 1000) == 0))
-    {
-      mCRL2log(verbose) << "monitor: currently at level " << m_level << " with "
-                        << current_state << " state" << ((current_state==1)?"":"s") << " and "
-                        << m_num_transitions << " transition" << ((m_num_transitions==1)?"":"s")
-                        << " explored and " << m_num_states << " state" << ((m_num_states==1)?"":"s") << " seen." << std::endl;
-    }
-
     if (current_state == start_level_seen)
     {
-      if (!m_options.suppress_progress_messages)
-      {
-        mCRL2log(verbose) << "monitor: level " << m_level << " done."
-                          << " (" << (current_state - start_level_explored) << " state"
-                          << ((current_state - start_level_explored)==1?"":"s") << ", "
-                          << (m_num_transitions - start_level_transitions) << " transition"
-                          << ((m_num_transitions - start_level_transitions)==1?")\n":"s)\n");
-      }
-
       m_level++;
       start_level_seen = m_num_states;
-      start_level_explored = current_state;
       start_level_transitions = m_num_transitions;
+    }
+
+    if (!m_options.suppress_progress_messages && time(&new_log_time) > last_log_time)
+    {
+      last_log_time = new_log_time;
+      size_t lvl_states = m_num_states - start_level_seen;
+      size_t lvl_transitions = m_num_transitions - start_level_transitions;
+      mCRL2log(status) << std::fixed << std::setprecision(2)
+                       << m_num_states << "st, " << m_num_transitions << "tr"
+                       << ", explored " << 100.0 * ((float)current_state / m_num_states)
+                       << "%. Last level: " << m_level << ", " << lvl_states << "st, " << lvl_transitions
+                       << "tr.\n";
     }
   }
 }
@@ -859,7 +864,7 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(const generator_state_t 
     current_state++;
     if (!m_options.suppress_progress_messages && ((current_state % 1000) == 0))
     {
-      mCRL2log(verbose) << "monitor: currently at level " << m_level << " with "
+      mCRL2log(status) << "monitor: currently at level " << m_level << " with "
                         << current_state << " state" << ((current_state==1)?"":"s") << " and "
                         << m_num_transitions << " transition" << ((m_num_transitions==1)?"":"s")
                         << " explored and " << m_num_states << " state" << ((m_num_states==1)?"":"s") << " seen." << std::endl;

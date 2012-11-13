@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/bisimulation_type.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/utilities/input_input_output_tool.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

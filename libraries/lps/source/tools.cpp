@@ -10,13 +10,13 @@
 
 #include <fstream>
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/lps/invariant_eliminator.h"
+#include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/lps/parelm.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
@@ -93,7 +93,6 @@ void lpsinvelm(const std::string& input_filename,
                const std::string& dot_file_name,
                data::rewriter::strategy rewrite_strategy,
                data::detail::smt_solver_type solver_type,
-               const size_t summand_number,
                const bool no_check,
                const bool no_elimination,
                const bool simplify_all,
@@ -120,7 +119,7 @@ void lpsinvelm(const std::string& input_filename,
     mCRL2log(log::verbose) << "parsing input file '" <<  invariant_filename << "'..." << std::endl;
 
     data::variable_list& parameters=specification.process().process_parameters();
-    invariant = parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());
+    invariant = data::parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());
 
     instream.close();
   }
@@ -152,15 +151,15 @@ void lpsinvelm(const std::string& input_filename,
 
   if (invariance_result)
   {
-    detail::Invariant_Eliminator invariant_eliminator(specification,
-                                              rewrite_strategy,
-                                              time_limit,
-                                              path_eliminator,
-                                              solver_type,
-                                              apply_induction,
-                                              simplify_all);
-
-    mcrl2::lps::specification(invariant_eliminator.simplify(invariant, no_elimination, summand_number)).save(output_filename);
+    invelm_algorithm algorithm(specification,
+                               rewrite_strategy,
+                               time_limit,
+                               path_eliminator,
+                               solver_type,
+                               apply_induction,
+                               simplify_all);
+    algorithm.run(invariant, !no_elimination);
+    specification.save(output_filename);
   }
 }
 
@@ -306,9 +305,9 @@ void lpsuntime(const std::string& input_filename,
   spec.save(output_filename);
 }
 
-void txtlps(const std::string& input_filename,
-            const std::string& output_filename
-           )
+void txt2lps(const std::string& input_filename,
+             const std::string& output_filename
+            )
 {
   lps::specification spec;
   if (input_filename.empty())

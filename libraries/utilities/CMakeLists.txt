@@ -14,11 +14,9 @@ project(mcrl2_utilities)
 cmake_minimum_required(VERSION 2.6)
 
 # Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB HEADERS "include/mcrl2/utilities/*.h")
-FILE(GLOB DETAIL_HEADERS "include/mcrl2/utilities/detail/*.h")
+FILE(GLOB_RECURSE HEADERS "include" "*.h")
 add_custom_target(${PROJECT_NAME}_headers
-  SOURCES ${HEADERS} ${DETAIL_HEADERS}
-)
+  SOURCES ${HEADERS})
 
 set(mcrl2_utilities_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
@@ -35,52 +33,18 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_version.c
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
+
 add_library(${PROJECT_NAME}
   ${mcrl2_utilities_src}
 )
 
-target_link_libraries(${PROJECT_NAME}
-  ${Boost_LIBRARIES}
-)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 # ##############################
-# ##    mcrl2_utilities_wx    ##
+# ##    mcrl2_utilities_qt    ##
 # ##############################
 
 if(MCRL2_ENABLE_GUI_TOOLS)
-
-project(mcrl2_utilities_wx)
-cmake_minimum_required(VERSION 2.6)
-
-set(mcrl2_utilities_wx_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/spinctrlfloat.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/colorbutton.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/font_renderer.cpp
-)
-
-set(mcrl2_utilities_wx_src ${mcrl2_utilities_wx_src} PARENT_SCOPE)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-
-add_library(${PROJECT_NAME}
-  ${mcrl2_utilities_wx_src}
-)
-
-target_link_libraries(${PROJECT_NAME}
-  ${wxWidgets_LIBRARIES}
-  ${OPENGL_LIBRARY}
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
-
-
-find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtMain)
-if (QT4_FOUND)
 
 # ##############################
 # ##    mcrl2_utilities_qt    ##
@@ -88,7 +52,6 @@ if (QT4_FOUND)
 
 project(mcrl2_utilities_qt)
 cmake_minimum_required(VERSION 2.6)
-
 
 set(mcrl2_utilities_qt_ui
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.ui
@@ -99,6 +62,10 @@ set(mcrl2_utilities_qt_h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/atermthread.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/logwidget.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/qt_tool.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/setting.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/extendedtabwidget.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/numberedtextedit.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/mcrl2/utilities/persistentfiledialog.h
 )
 qt4_wrap_cpp(mcrl2_utilities_qt_h_moc ${mcrl2_utilities_qt_h})
 
@@ -107,6 +74,9 @@ set(mcrl2_utilities_qt_src
   ${mcrl2_utilities_qt_h_moc}
   ${CMAKE_CURRENT_SOURCE_DIR}/source/atermthread.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logwidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/extendedtabwidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/numberedtextedit.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/persistentfiledialog.cpp
 )
 
 #set(mcrl2_utilities_qt_src ${mcrl2_utilities_qt_src} PARENT_SCOPE)
@@ -132,13 +102,10 @@ target_link_libraries(${PROJECT_NAME}
   ${QT_QTCORE_LIBRARY}
   ${QT_QTGUI_LIBRARY}
   ${QT_QTMAIN_LIBRARY}
+  mcrl2_atermpp
 )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
-
-endif(QT4_FOUND)
-
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 endif(MCRL2_ENABLE_GUI_TOOLS)

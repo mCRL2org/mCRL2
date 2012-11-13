@@ -6,6 +6,10 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
+if (NOT APPLE)
+  return()
+endif()
+
 ##---------------------------------------------------
 ## Set Compiler options 
 ##---------------------------------------------------
@@ -18,13 +22,6 @@ set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
 ## Set Shared Build  
 ##---------------------------------------------------
 option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF) 
-
-##---------------------------------------------------
-## Add definitions
-##---------------------------------------------------
-
-add_definitions( -D__DARWIN__)
-add_definitions( -D__WXMAC__)
 
 ##---------------------------------------------------
 ## Toggle profile build
@@ -52,24 +49,27 @@ message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
 ##---------------------------------------------------
 ## Toggle Single Bundle Build 
 ##---------------------------------------------------
-option(MCRL2_SINGLE_BUNDLE "Enable/disable creation of a single mCRL2.app" OFF)
+option(MCRL2_OSX_PACKAGE "Enable/disable settings for an OS-X distributable binary package" OFF)
 
 ##---------------------------------------------------
 ## A single bundle build requires static linking, since
 ## the bundle is re-locatable   
 ##---------------------------------------------------
-if( MCRL2_SINGLE_BUNDLE AND BUILD_SHARED_LIBS )
-  message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_SINGLE_BUNDLE set to TRUE" )
-endif( MCRL2_SINGLE_BUNDLE AND BUILD_SHARED_LIBS )
+if( MCRL2_OSX_PACKAGE AND BUILD_SHARED_LIBS )
+  message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_OSX_PACKAGE set to TRUE" )
+endif( MCRL2_OSX_PACKAGE AND BUILD_SHARED_LIBS )
 
 ##---------------------------------------------------
-## Set location for compiled binaries:
-##   For a single bundle they should be stored in "MacOS"
-##   instead of "bin"
+## Set locations for binary package.
 ##---------------------------------------------------
-if(MCRL2_SINGLE_BUNDLE)
-  set(MCRL2_BIN_DIR "MacOS")
-else(MCRL2_SINGLE_BUNDLE)
-  set(MCRL2_BIN_DIR "bin")
-endif(MCRL2_SINGLE_BUNDLE)
-
+if(MCRL2_OSX_PACKAGE)
+  set(MCRL2_BIN_DIR "Applications")
+  set(MCRL2_LIB_DIR "Library")
+  set(MCRL2_SHARE_DIR "Documents")
+  set(MCRL2_MAN_DIR "man/man1")
+  set(MCRL2_EXAMPLES_DIR "Examples")
+  set(MCRL2_INCLUDE_DIR "Headers/include")
+ 
+  #Override install location
+  set(CMAKE_INSTALL_PREFIX "/mCRL2")
+endif(MCRL2_OSX_PACKAGE)

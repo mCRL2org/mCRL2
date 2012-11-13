@@ -9,8 +9,6 @@
 /// \file transition.cpp
 /// \brief Source file for Transition class
 
-#include "wx.hpp" // precompiled headers
-
 #include <cstddef>
 
 #include "transition.h"
@@ -19,7 +17,7 @@
 // Constructor and Destructor
 
 Transition::Transition(State* bs,State* es,int lbl)
-  : beginState(bs), endState(es), label(lbl), marked(NULL)
+  : beginState(bs), endState(es), label(lbl)
 {
 }
 
@@ -51,14 +49,3 @@ bool Transition::isSelfLoop() const
 {
   return (beginState == endState);
 }
-
-bool Transition::isMarked() const
-{
-  return *marked;
-}
-
-void Transition::setMarkedPointer(bool* bp)
-{
-  marked = bp;
-}
-

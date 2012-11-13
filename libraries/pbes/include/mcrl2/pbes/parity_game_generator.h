@@ -59,20 +59,17 @@ class parity_game_generator
     /// \brief The PBES that is being solved.
     pbes<>& m_pbes;
 
-    /// \brief Identifier generator for the enumerator. (TODO: this needs to be improved!)
-    utilities::number_postfix_generator generator;
-
     /// \brief Data rewriter.
     data::rewriter datar;
 
     /// \brief Data enumerator.
-    data::data_enumerator<> datae;
+    data::data_enumerator datae;
 
     /// \brief Data rewriter that operates on data expressions with variables.
     data::rewriter_with_variables datarv;
 
     /// \brief PBES rewriter.
-    pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R;
+    pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> R;
 
     /// \brief Maps propositional variables to corresponding PBES equations.
     std::map<core::identifier_string, std::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
@@ -311,9 +308,8 @@ class parity_game_generator
       :
       m_initialized(false),
       m_pbes(p),
-      generator("UNIQUE_PREFIX"),
       datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
-      datae(p.data(), datar, generator),
+      datae(p.data(), datar),
       datarv(datar),
       R(datarv, datae),
       m_true_false_dependencies(true_false_dependencies),
@@ -378,6 +374,10 @@ class parity_game_generator
         return PGAME_AND;
       }
       else if (tr::is_exists(phi))
+      {
+        return PGAME_OR;
+      }
+      else if (tr::is_data(phi))
       {
         return PGAME_OR;
       }
@@ -490,7 +490,7 @@ class parity_game_generator
     virtual
     void print_variable_mapping()
     {
-      std::cerr << "--- variable mapping ---" << std::endl;
+      mCRL2log(log::info) << "--- variable mapping ---" << std::endl;
       std::map<size_t, pbes_expression> m;
       for (std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
       {
@@ -498,12 +498,12 @@ class parity_game_generator
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        std::cerr << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
+        mCRL2log(log::info) << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
       }
-      std::cerr << "--- priorities ---" << std::endl;
+      mCRL2log(log::info) << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
       {
-        std::cerr << core::pp(i->first) << " " << i->second << std::endl;
+        mCRL2log(log::info) << core::pp(i->first) << " " << i->second << std::endl;
       }
     }
 };

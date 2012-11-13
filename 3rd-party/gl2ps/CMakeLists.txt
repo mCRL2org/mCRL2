@@ -11,6 +11,13 @@ project(gl2ps)
 cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
+
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB HEADERS "include/gl2ps/*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS} ${DETAIL_HEADERS}
+)
+
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
 
 # actual target:
@@ -29,4 +36,4 @@ if( mlib_FOUND )
 endif( mlib_FOUND )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

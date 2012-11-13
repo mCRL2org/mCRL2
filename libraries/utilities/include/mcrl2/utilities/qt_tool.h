@@ -21,6 +21,7 @@
 #include <QUrl>
 #include <QtGlobal>
 #include <string>
+#include "toolset_version.h"
 
 namespace mcrl2
 {
@@ -72,12 +73,15 @@ class QtToolBase : public QObject
 
     void showAbout()
     {
+      QString version = QString(mcrl2::utilities::get_toolset_version().c_str());
       QString description = m_description;
       description.replace("\n", "<br>");
       QString message;
       message += "<h1>" + m_name + "</h1>";
       message += "<p>" + description + "</p>";
       message += "<p>Written by " + m_author + "</p>";
+      message += "<\br>";
+      message += "<p>Version: " + version + "</p>";
       QMessageBox::about(m_window, QString("About ") + m_name, message);
     }
 
@@ -93,6 +97,11 @@ class QtToolBase : public QObject
 template <typename Tool>
 class qt_tool: public Tool, public QtToolBase
 {
+  private:
+    int m_argc;
+    char** m_argv;
+  protected:
+    QApplication* m_application;
   public:
     qt_tool(const std::string& name,
             const std::string& author,
@@ -103,14 +112,27 @@ class qt_tool: public Tool, public QtToolBase
             std::string known_issues = ""
            )
       : Tool(name, author, what_is, tool_description, known_issues),
-        QtToolBase(QString::fromStdString(name), QString::fromStdString(author), QString::fromStdString(about_description), QString::fromStdString(manual_url))
+        QtToolBase(QString::fromStdString(name), QString::fromStdString(author), QString::fromStdString(about_description), QString::fromStdString(manual_url)),
+        m_application(NULL)
     {}
+
+    virtual bool pre_run()
+    {
+      m_application = new QApplication(m_argc, m_argv);
+      qsrand(QDateTime::currentDateTime().toTime_t());
+      return true;
+    }
 
     int execute(int& argc, char** argv)
     {
-      QApplication app(argc, argv);
-      qsrand(QDateTime::currentDateTime().toTime_t());
+      m_argc = argc;
+      m_argv = argv;
       return static_cast<Tool *>(this)->execute(argc, argv);
+    }
+
+    virtual ~qt_tool()
+    {
+      delete m_application;
     }
 };
 

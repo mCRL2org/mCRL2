@@ -24,7 +24,7 @@
 #     not be generated from a clean SVN checkout.
 #
 # Package maintainers may set the variable below to issue a new release.
-set( MCRL2_MAJOR_VERSION "201202.0" )
+set( MCRL2_MAJOR_VERSION "201210.1" )
 string( SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 MCRL2_COPYRIGHT_YEAR )
 
 option( MCRL2_PACKAGE_RELEASE "Include release version information. This discards SVN revision information and uses only the MCRL2_MAJOR_VERSION CMake variable." FALSE)
@@ -35,12 +35,12 @@ mark_as_advanced( MCRL2_PACKAGE_RELEASE )
 # status.
 #
 set( MCRL2_MINOR_VERSION "Unknown" )
-if( MCRL2_ENABLE_SVN )
-  find_package(Subversion)
-  if( SUBVERSION_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.svn" )
+find_package(Subversion)
+if( SUBVERSION_FOUND )
+  if ( EXISTS "${CMAKE_SOURCE_DIR}/.svn" )
     # Subversion available: minor revision becomes SVN revision
     Subversion_WC_INFO( ${PROJECT_SOURCE_DIR} Project )
-	  set( MCRL2_MINOR_VERSION ${Project_WC_REVISION} ) 
+    set( MCRL2_MINOR_VERSION ${Project_WC_REVISION} ) 
     # Check for local changes; if there are any, then minor revision gets a 
     # postfix "M"
     execute_process(
@@ -55,8 +55,12 @@ if( MCRL2_ENABLE_SVN )
         message( FATAL_ERROR "You are trying to package a release from an SVN repository that has local modifications." )
       endif( MCRL2_PACKAGE_RELEASE )
     endif( NOT ${Project_WC_REVISION_M} STREQUAL "" )
-  endif( SUBVERSION_FOUND  AND EXISTS "${CMAKE_SOURCE_DIR}/.svn" )
-endif( MCRL2_ENABLE_SVN )
+  else( EXISTS "${CMAKE_SOURCE_DIR}/.svn" )
+    message( STATUS "WARNING! No version information could be included because ${CMAKE_SOURCE_DIR} is unversioned." )
+  endif( EXISTS "${CMAKE_SOURCE_DIR}/.svn" )
+else( SUBVERSION_FOUND )
+  message( STATUS "WARNING! No version information could be included because the Subversion package could not be found (are you using CMake <2.8?)" )
+endif( SUBVERSION_FOUND ) 
 
 # Try to read build/SourceVersion, and set that version
 if( MCRL2_MINOR_VERSION STREQUAL "Unknown" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion")

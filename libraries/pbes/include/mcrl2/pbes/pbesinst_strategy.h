@@ -13,7 +13,7 @@
 #define MCRL2_PBES_PBESINST_STRATEGY_H
 
 #include <string>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -72,7 +72,7 @@ std::string print_pbesinst_strategy(const pbesinst_strategy strategy)
   {
     return "lazy";
   }
-  throw mcrl2::runtime_error("unknown pbesinst strategy " + strategy);
+  throw mcrl2::runtime_error("unknown pbesinst strategy");
 }
 
 inline
@@ -94,7 +94,7 @@ std::string description(const pbesinst_strategy strategy)
   {
     return "for computing only boolean equations which can be reached from the initial state";
   }
-  throw mcrl2::runtime_error("unknown pbesinst strategy " + strategy);
+  throw mcrl2::runtime_error("unknown pbesinst strategy");
 }
 
 } // namespace pbes_system

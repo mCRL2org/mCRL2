@@ -89,14 +89,4 @@ std::set<data::variable> find_free_variables(const lps::deadlock& x);
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::lps::deadlock>
-{
-};
-} // namespace atermpp
-/// \endcond
-
 #endif // MCRL2_LPS_DEADLOCK_H

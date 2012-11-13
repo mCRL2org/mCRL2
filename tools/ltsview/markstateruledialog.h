@@ -1,52 +1,42 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file markstateruledialog.h
-/// \brief Header file for MarkStateRuleDialog class
 
 #ifndef MARKSTATERULEDIALOG_H
 #define MARKSTATERULEDIALOG_H
 
-#include <map>
-#include <set>
-#include <vector>
-#include <wx/wx.h>
+#include "ui_markstateruledialog.h"
 
-#include "mcrl2/utilities/colorbutton.h"
+#include <QColor>
+#include <QDialog>
 
-class LTS;
-class Mediator;
-class RGB_Color;
-class wxCheckListBox;
+#include "lts.h"
 
-class MarkStateRuleDialog : public wxDialog
+class MarkStateRuleDialog : public QDialog
 {
+  Q_OBJECT
+
   public:
-    MarkStateRuleDialog(wxWindow* parent,Mediator* owner,LTS* alts);
-    ~MarkStateRuleDialog();
-    int getParamIndex();
-    bool getNegated();
-    std::set<std::string> getValues();
-    RGB_Color getColor();
-    wxString getMarkRuleString();
-    void setData(int p,RGB_Color col,bool neg, const std::set<std::string> &vals);
-    void onParameterChoice(wxCommandEvent& event);
+    MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color, int parameter, bool negated, QSet<int> values);
+    QColor color() { return m_color; }
+    int parameter() { return m_currentParameter; }
+    bool negated() { return m_ui.relationList->item(1)->isSelected(); }
+    QSet<int> values();
+
+  protected slots:
+    void colorClicked();
+    void setColor(QColor color);
+    void parameterSelected();
+
   private:
-    Mediator* mediator;
-    std::map< wxString, int > parameterIndices;
-    wxListBox* parameterListBox;
-    wxListBox* relationListBox;
-    mcrl2::utilities::wx::wxColorButton* ruleClrButton;
-    std::map< wxString, std::string > values;
-    wxCheckListBox* valuesListBox;
-    LTS*  lts;
-    void loadValues(wxString paramName);
-    DECLARE_EVENT_TABLE()
+    Ui::MarkStateRuleDialog m_ui;
+    LTS *m_lts;
+    QColor m_color;
+    int m_currentParameter;
 };
 
 #endif

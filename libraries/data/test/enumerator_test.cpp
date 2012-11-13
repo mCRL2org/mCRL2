@@ -22,7 +22,6 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -53,8 +52,7 @@ void test_data_enumerator()
   {
     data_specification data_spec = parse_data_specification(DATA_SPEC1);
     rewriter rewr(data_spec);
-    utilities::number_postfix_generator generator("x_");
-    data_enumerator<utilities::number_postfix_generator> e(data_spec, rewr, generator);
+    data_enumerator e(data_spec, rewr, "x_");
 
     variable x(identifier_string("x"), sort_pos::pos());
     std::vector<data_expression_with_variables> values = e.enumerate(x);
@@ -93,8 +91,7 @@ void test_data_enumerator2()
   variable x = parse_variable("d:D", data_spec);
 
   rewriter rewr(data_spec);
-  utilities::number_postfix_generator generator("x_");
-  data_enumerator<utilities::number_postfix_generator> e(data_spec, rewr, generator);
+  data_enumerator e(data_spec, rewr, "x_");
 
   try
   {
@@ -140,8 +137,7 @@ void test3()
 {
   data_specification data_spec = parse_data_specification(DATA_SPEC1);
   rewriter rewr(data_spec);
-  utilities::number_postfix_generator generator("x_");
-  data_enumerator<utilities::number_postfix_generator> e(data_spec, rewr, generator);
+  data_enumerator e(data_spec, rewr, "x_");
 
   variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
@@ -152,8 +148,7 @@ void test4()
 {
   data_specification data_spec(parse_data_specification("sort N = Nat;")); // import Nat
   rewriter datar(data_spec);
-  utilities::number_postfix_generator generator("x_");
-  data_enumerator<utilities::number_postfix_generator> datae(data_spec, datar, generator);
+  data_enumerator datae(data_spec, datar, "x_");
   variable y = parse_data_expression("n", "n: Nat;\n");
   std::vector<data_expression_with_variables> z = datae.enumerate(y);
   BOOST_CHECK(z.size() > 0);
@@ -166,8 +161,7 @@ void test5()
   data_specification data_spec;
   data_spec.add_context_sort(sort_nat::nat());
   rewriter datar(data_spec);
-  utilities::number_postfix_generator generator("x_");
-  data_enumerator<utilities::number_postfix_generator> datae(data_spec, datar, generator);
+  data_enumerator datae(data_spec, datar, "x_");
   std::deque<data_expression_with_variables> v;
   variable n("n", sort_nat::nat());
   v.push_front(data_expression_with_variables(n, make_list(n)));
@@ -213,8 +207,7 @@ std::vector<data::data_expression> value_range(data::sort_expression s, const da
   data::variable v("dummy", s);
   std::cout << "v = " << data::pp(v) << std::endl;
   std::vector<data::data_expression> result;
-  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<utilities::number_postfix_generator> e(data_spec, rewr, generator);
+  data::data_enumerator e(data_spec, rewr);
   std::vector<data::data_expression_with_variables> values = e.enumerate(v);
   for (std::vector<data::data_expression_with_variables>::iterator i = values.begin(); i != values.end(); ++i)
   {

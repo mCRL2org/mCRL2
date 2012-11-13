@@ -1,328 +1,273 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file simulation.cpp
-/// \brief Source file for Simulation class
 
-#include "wx.hpp" // precompiled headers
-
+#include "mcrl2/trace/trace.h"
+#include "mcrl2/utilities/logger.h"
+#include "lts.h"
 #include "simulation.h"
 #include "transition.h"
 #include "state.h"
+#include <algorithm>
 
 using namespace std;
 
-Simulation::Simulation()
+Simulation::Simulation(QObject *parent, LTS *lts):
+  QObject(parent),
+  m_lts(lts),
+  m_initialState(0),
+  m_currentState(0),
+  m_currentTransition(0)
 {
-  currState = NULL;
-  initialState = NULL;
-  started = false;
-  chosenTrans = -1;
-}
-
-void Simulation::setInitialState(State* init)
-{
-  initialState = init;
-}
-
-void Simulation::start()
-{
-  stateHis.push_back(initialState);
-  initialState->setSimulated(true);
-  currState = initialState;
-  posTrans.clear();
-  for (int i = 0; i < currState->getNumOutTransitions(); ++i)
-  {
-    posTrans.push_back(currState->getOutTransition(i));
-    currState->getOutTransition(i)->getEndState()->setSimulated(true);
-  }
-  for (int i = 0; i < currState->getNumLoops(); ++i)
-  {
-    posTrans.push_back(currState->getLoop(i));
-  }
-  if (posTrans.size() > 0)
-  {
-    chosenTrans = 0;
-  }
-  else
-  {
-    chosenTrans = -1;
-  }
-  started = true;
-  //Fire signal
-  signal();
-}
-void Simulation::stop()
-{
-  // Set started to false
-  started = false;
-  for (size_t i = 0; i < stateHis.size(); ++i)
-  {
-    stateHis[i]->setSimulated(false);
-  }
-  for (size_t i = 0; i < posTrans.size(); ++i)
-  {
-    posTrans[i]->getEndState()->setSimulated(false);
-  }
-  chosenTrans = -1;
-  // Clear history
-  stateHis.clear();
-  transHis.clear();
-  posTrans.clear();
-  currState = NULL;
-  // Fire signal
-  signal();
 }
 
 Simulation::~Simulation()
 {
-  //Stop simulation
   stop();
-  transHis.clear();
-  for (size_t i = 0; i < stateHis.size(); ++i)
+}
+
+void Simulation::operator=(const Simulation &other)
+{
+  if (&other == this)
   {
-    stateHis[i]->setSimulated(false);
+    return;
   }
-  stateHis.clear();
-  for (size_t i = 0; i < posTrans.size(); ++i)
+
+  stop();
+  m_lts = other.m_lts;
+  m_initialState = other.m_initialState;
+  m_currentState = other.m_currentState;
+  m_currentTransition = other.m_currentTransition;
+  m_history = other.m_history;
+
+  if (m_currentState)
   {
-    posTrans[i]->getEndState()->setSimulated(false);
+    m_currentState->increaseSimulation();
+    for (int i = 0; i < m_history.size(); i++)
+    {
+      m_history[i]->getBeginState()->increaseSimulation();
+    }
   }
-  posTrans.clear();
+
+  emit changed();
 }
 
-vector< Transition* > const& Simulation::getTransHis() const
+QList<Transition *> Simulation::availableTransitions() const
 {
-  return transHis;
-}
-
-vector< State* > const& Simulation::getStateHis() const
-{
-  return stateHis;
-}
-
-State* Simulation::getCurrState() const
-{
-  return currState;
-}
-
-vector< Transition* > const& Simulation::getPosTrans() const
-{
-  return posTrans;
-}
-
-Transition* Simulation::getChosenTrans() const
-{
-  if (chosenTrans >= 0)
+  if (!m_currentState)
   {
-    return posTrans[chosenTrans];
+    return QList<Transition *>();
   }
-  else
+
+  QList<Transition *> output;
+  for (int i = 0; i < m_currentState->getNumOutTransitions(); i++)
   {
-    return NULL;
+    output += m_currentState->getOutTransition(i);
+  }
+  for (int i = 0; i < m_currentState->getNumLoops(); i++)
+  {
+    output += m_currentState->getLoop(i);
+  }
+  return output;
+}
+
+void Simulation::start()
+{
+  if (!m_currentState)
+  {
+    m_currentState = (m_initialState ? m_initialState : m_lts->getInitialState());
+    m_currentState->increaseSimulation();
+    m_currentTransition = 0;
+    emit started();
+    emit changed();
   }
 }
 
-int Simulation::getChosenTransi() const
+void Simulation::stop()
 {
-  return chosenTrans;
-}
-bool Simulation::getStarted() const
-{
-  return started;
+  if (m_currentState)
+  {
+    m_history.clear();
+    m_currentTransition = 0;
+    m_currentState->decreaseSimulation();
+    m_currentState = 0;
+    emit stopped();
+    emit changed();
+  }
 }
 
-void Simulation::traceBack(State* initState)
+void Simulation::selectTransition(Transition *transition)
 {
-  // First, reverse the vectors, so we can push each new transition at the back
-  reverse(stateHis.begin(), stateHis.end());
-  reverse(transHis.begin(), transHis.end());
-  State* currPos = stateHis.back();
-  while (currPos != initState)
+  if (m_currentTransition != transition)
   {
-    // Loop through the incoming transitions of currPos.
-    // Because of the way the LTS is structured, we know that there is at least
-    // one incoming transition that is not a selfloop and not a backpointer.
-    // We take the first such transition, because that guarantees that the
-    // source state of that transition is in the previous level.
-    // Just taking the first incoming transition may lead to infinite loops.
-	  for(int i = 0; i < currPos->getNumInTransitions(); ++i)
-	  {
-	    Transition* trans = currPos->getInTransition(i);
-      if (!trans->isBackpointer() && !trans->isSelfLoop())
+    m_currentTransition = transition;
+    emit selectionChanged();
+  }
+}
+
+void Simulation::followTransition(Transition *transition)
+{
+  m_history += transition;
+  m_currentTransition = 0;
+  m_currentState = transition->getEndState();
+  m_currentState->increaseSimulation();
+  emit changed();
+}
+
+void Simulation::undo()
+{
+  if (canUndo())
+  {
+    m_history.last()->getEndState()->decreaseSimulation();
+    m_currentState = m_history.last()->getBeginState();
+    m_currentTransition = m_history.takeLast();
+    emit changed();
+  }
+}
+
+void Simulation::traceback()
+{
+  // TODO: this algorithm only works for iterative state ranking
+  if (m_currentState)
+  {
+    State *initialState = m_lts->getInitialState();
+    State *currentState = m_history.isEmpty() ? m_currentState : m_history.first()->getBeginState();
+
+    while (currentState != initialState)
+    {
+      // Loop through the incoming transitions of currentState.
+      // Because of the way the LTS is structured, we know that there is at least
+      // one incoming transition that is not a selfloop and not a backpointer.
+      // We take the first such transition, because that guarantees that the
+      // source state of that transition is in the previous level.
+      // Just taking the first incoming transition may lead to infinite loops.
+      for (int i = 0; i < currentState->getNumInTransitions(); i++)
       {
-        transHis.push_back(trans);
-        currPos = trans->getBeginState();
-        currPos->setSimulated(true);
-        stateHis.push_back(currPos);
-        break;
-      }	
+        Transition *transition = currentState->getInTransition(i);
+        if (!transition->isBackpointer() && !transition->isSelfLoop())
+        {
+          m_history.prepend(transition);
+          currentState = transition->getBeginState();
+          currentState->increaseSimulation();
+          break;
+        }
+      }
     }
+
+    emit changed();
   }
-  // Undo reversion
-  reverse(transHis.begin(), transHis.end());
-  reverse(stateHis.begin(), stateHis.end());
-  signal();
 }
 
-void Simulation::followTrans()
+bool Simulation::loadTrace(QString filename)
 {
-  if (chosenTrans != -1)
+  mcrl2::trace::Trace trace;
+  try
   {
-    Transition* toFollow = posTrans[chosenTrans];
-    State* nextState = toFollow->getEndState();
-    transHis.push_back(posTrans[chosenTrans]);
-    for (size_t i = 0; i < posTrans.size(); ++i)
+    trace.load(filename.toStdString());
+  }
+  catch (...)
+  {
+    mCRL2log(mcrl2::log::error) << "Error loading file: " << filename.toStdString();
+    return false;
+  }
+
+  if (trace.number_of_states() == 0)
+  {
+    mCRL2log(mcrl2::log::error) << "The trace in " << filename.toStdString() << " has no state information, which is currently not allowed by ltsview.\nThis typically occurs with traces generated by ltscompare, which can currently not be used in ltsview.";
+    return false;
+  }
+
+  if (!m_lts->hasStateInfo())
+  {
+     mCRL2log(mcrl2::log::error) << "The trace in " << filename.toStdString() << " has state information but the labelled transition system does not have it, which is currently not allowed by ltsview.";
+     return false;
+  }
+
+  Simulation simulation(0, m_lts);
+  State* initialState = m_lts->getInitialState();
+  if (trace.currentState().size() != m_lts->getNumParameters())
+  {
+    mCRL2log(mcrl2::log::error) << "The trace in " << filename.toStdString() << " and the labelled transition system have state information of unequal lengths.";
+    return false;
+  }
+  simulation.setInitialState(initialState);
+  simulation.start();
+
+  // Get the first state of the trace 
+  mcrl2::lps::state currentState = trace.currentState();
+
+  // Load the rest of the trace.
+  while (trace.getPosition() != trace.number_of_actions())
+  {
+    std::string action = pp(trace.currentAction());
+    trace.increasePosition();
+
+    QList<Transition *> transitions = simulation.availableTransitions();
+    int possibilities = 0;
+    Transition *transition = 0;
+
+    for (int i = 0; i < transitions.size(); i++)
     {
-      posTrans[i]->getEndState()->setSimulated(false);
+      if (action == m_lts->getLabel(transitions[i]->getLabel()))
+      {
+        possibilities++;
+        transition = transitions[i];
+      }
     }
-    for (size_t i = 0; i < stateHis.size(); ++i)
+
+    if (possibilities > 1)
     {
-      stateHis[i]->setSimulated(true);
+      // More than one possibility, meaning that choosing on action name is
+      // ambiguous. Solve disambiguation by looking at states
+
+      currentState = trace.currentState();
+
+      // Match is the score keeping track of how well a state matches an LPS
+      // state. The (unique) state with the maximum match will be chosen.
+      // The value of this match should be the number of variables which have
+      // the same value as in the LPS, minus the number of free variables (
+      // which are undetectable).
+      int maxmatch = -1;
+
+      for (int i = 0; i < transitions.size(); i++)
+      {
+        State *state = transitions[i]->getEndState();
+        int match = 0;
+
+        for (size_t j = 0; j < currentState.size(); j++)
+        {
+          if (mcrl2::data::pp(currentState[j]) == m_lts->getStateParameterValueStr(state, j))
+          {
+            match++;
+          }
+        }
+
+        if (match > maxmatch)
+        {
+          maxmatch = match;
+          transition = transitions[i];
+        }
+      }
     }
-    nextState->setSimulated(true);
-    stateHis.push_back(nextState);
-    currState = nextState;
-    posTrans.clear();
-    for (int i = 0; i < nextState->getNumOutTransitions(); ++i)
+    else if (possibilities == 1)
     {
-      posTrans.push_back(nextState->getOutTransition(i));
-      nextState->getOutTransition(i)->getEndState()->setSimulated(true);
-    }
-    for (int i = 0; i < nextState->getNumLoops(); ++i)
-    {
-      posTrans.push_back(nextState->getLoop(i));
-    }
-    if (posTrans.size() > 0)
-    {
-      chosenTrans = 0;
+      // Exactly one possibility, so skip
     }
     else
     {
-      chosenTrans = -1;
+      // This cannot occur, unless there was some mismatch between lps and lts
+      mCRL2log(mcrl2::log::error) << "Could not regenerate trace, does it belong to the loaded LTS?";
+      return false;
     }
-    //Fire signal
-    signal();
-  }
-}
 
-void Simulation::chooseTrans(int i)
-{
-  // Prevent infinite looping behaviour through signals and slots:
-  // Updating the selection in the selector in the simulation dialog triggers
-  // an update of the transition that was chosen, leading to a chooseTrans call.
-  // This chooseTrans call triggers a selChangeSignal, which may again lead to
-  // an update of the selection in the simulation dialog, leading to an infinite
-  // recursion.
-  // This is prevented by only updating the chosen transition if it is really changed.
-  // See also mCRL2 bug #932 (https://svn.win.tue.nl/trac/MCRL2/ticket/932)
-  if(chosenTrans != i)
-  {
-    chosenTrans = i;
-    // Fire signal
-    selChangeSignal();
+    simulation.followTransition(transition);
   }
-}
 
-void Simulation::undoStep()
-{
-  State* lastState;
-  // Remove last transition, state from history
-  transHis.pop_back();
-  stateHis.back()->setSimulated(false);
-  stateHis.pop_back();
-  for (size_t i = 0; i < posTrans.size(); ++i)
-  {
-    posTrans[i]->getEndState()->setSimulated(false);
-    posTrans[i]->getEndState()->deselect();
-  }
-  // Set new states
-  lastState = stateHis.back();
-  currState = lastState;
-  currState->setSimulated(true);
-
-  posTrans.clear();
-  for (int i = 0; i < currState->getNumOutTransitions(); ++i)
-  {
-    posTrans.push_back(currState->getOutTransition(i));
-    currState->getOutTransition(i)->getEndState()->setSimulated(true);
-  }
-  for (int i = 0; i < currState->getNumLoops(); ++i)
-  {
-    posTrans.push_back(currState->getLoop(i));
-  }
-  if (posTrans.size() > 0)
-  {
-    chosenTrans = 0;
-  }
-  else
-  {
-    chosenTrans = -1;
-  }
-  // Fire signal
-  signal();
-}
-
-void Simulation::resetSim()
-{
-  State* firstState = stateHis.front();
-  transHis.clear();
-  for (size_t i = 0; i < stateHis.size(); ++i)
-  {
-    stateHis[i]->setSimulated(false);
-  }
-  stateHis.clear();
-
-  firstState->setSimulated(true);
-  stateHis.push_back(firstState);
-  currState = firstState;
-  posTrans.clear();
-  for (int i = 0; i < currState->getNumOutTransitions(); ++i)
-  {
-    posTrans.push_back(currState->getOutTransition(i));
-    currState->getOutTransition(i)->getEndState()->setSimulated(true);
-  }
-  for (int i = 0; i < currState->getNumLoops(); ++i)
-  {
-    posTrans.push_back(currState->getLoop(i));
-  }
-  if (posTrans.size() > 0)
-  {
-    chosenTrans = 0;
-  }
-  else
-  {
-    chosenTrans = -1;
-  }
-  // Fire signal
-  signal();
-}
-
-Simulation::simConnection Simulation::connectSel(
-  simulationSignal::slot_function_type subscriber)
-{
-  simConnection result = selChangeSignal.connect(subscriber);
-  // Send acknowledgement to subscriber;
-  selChangeSignal();
-  return result;
-}
-
-Simulation::simConnection Simulation::connect(
-  simulationSignal::slot_function_type subscriber)
-{
-  simConnection result = signal.connect(subscriber);
-  // Send acknowledge to subscriber
-  signal();
-  // return value
-  return result;
-}
-
-void Simulation::disconnect(Simulation::simConnection subscriber)
-{
-  subscriber.disconnect();
+  // Set simulation to the LTS
+  *this = simulation;
+  return true;
 }

@@ -13,6 +13,7 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/process/is_guarded.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
@@ -228,6 +229,47 @@ void test_data_spec()
   data::pp(spec.data());
 }
 
+void test_guarded()
+{
+  std::string PROCSPEC =
+    "act a;                  \n"
+    "proc P(n: Nat) = Q(n);  \n"
+    "proc Q(n: Nat) = a.P(n);\n"
+    "proc R(n: Nat) = S(n);  \n"
+    "proc S(n: Nat) = R(n);  \n"
+    "init P(2);              \n"
+    ;
+
+  std::string DATA_DECL = "act a;\n";
+  std::string PROC_DECL = "proc P(n: Nat); proc Q(n: Nat); proc R(n: Nat); proc S(n: Nat);\n";
+  process_specification procspec = parse_process_specification(PROCSPEC);
+  process_expression x;
+
+  x = parse_process_expression("delta", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(is_guarded(x, procspec.equations()));
+
+  x = parse_process_expression("tau", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(is_guarded(x, procspec.equations()));
+
+  x = parse_process_expression("a", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(is_guarded(x, procspec.equations()));
+
+  x = parse_process_expression("P(0)", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(is_guarded(x, procspec.equations()));
+
+  x = parse_process_expression("a.P(0) + P(1)", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(is_guarded(x, procspec.equations()));
+
+  x = parse_process_expression("a.P(0) || P(1)", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(is_guarded(x, procspec.equations()));
+
+  x = parse_process_expression("a.P(0) . P(1)", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(is_guarded(x, procspec.equations()));
+
+  x = parse_process_expression("R(0)", DATA_DECL, PROC_DECL);
+  BOOST_CHECK(!is_guarded(x, procspec.equations()));
+}
+
 int test_main(int argc, char* argv[])
 {
   test_linear(CASE1);
@@ -248,6 +290,8 @@ int test_main(int argc, char* argv[])
   test_linear(CASE15);
 
   test_data_spec();
+
+  test_guarded();
 
   return 0;
 }

@@ -15,8 +15,8 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <cctype>
+#include <fstream>
 #include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2
@@ -66,25 +66,52 @@ const std::vector<data::rewrite_strategy>& get_test_rewrite_strategies(const boo
   return rewrite_strategies;
 }
 
-/// \brief Get filename based on timestamp
+/// \brief Generate a random alphanumeric character
+inline
+char rand_alnum()
+{
+  char c;
+  do
+  {
+    c = static_cast<char>(std::rand());
+  } while(!std::isalnum(c));
+  return c;
+
+}
+
+/// \brief Generate a random string of length n
+inline
+std::string rand_alnum_str(const std::string::size_type n)
+{
+  std::string s;
+  s.reserve(n);
+  generate_n(std::back_inserter(s), n, rand_alnum);
+  return s;
+}
+
+inline
+bool file_exists(const char *filename)
+{
+  std::ifstream ifile(filename);
+  return ifile;
+}
+
+/// \brief Get filename with random suffix
 /// \warning is prone to race conditions
+inline
 std::string temporary_filename(std::string const& prefix = "")
 {
-  time_t now = time(NULL);
-  std::stringstream now_s;
-  now_s << now;
-
-  std::string basename(prefix + now_s.str());
-  boost::filesystem::path result(basename);
+  std::string basename(prefix + "_" + rand_alnum_str(8));
+  std::string result = basename ;
   int suffix = 0;
-  while (boost::filesystem::exists(result))
+  while (file_exists(result.c_str()))
   {
     std::stringstream suffix_s;
     suffix_s << suffix;
-    result = boost::filesystem::path(basename + suffix_s.str());
+    result = basename + suffix_s.str();
     ++suffix;
   }
-  return result.string();
+  return result;
 }
 
 }

@@ -12,19 +12,7 @@
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
 
-extern "C" {
-#ifdef __APPLE__
-# include <OpenGL/gl.h>
-# include <OpenGL/glu.h>
-#else
-# if defined(_WIN32_) || defined(_MSC_VER)
-#  include <windows.h>
-#  undef __in_range // For STLport
-# endif
-# include <GL/gl.h>
-# include <GL/glu.h>
-#endif
-}
+#include <QtOpenGL>
 
 /* Abstract base class */
 

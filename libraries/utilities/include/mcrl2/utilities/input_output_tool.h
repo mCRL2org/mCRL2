@@ -39,7 +39,7 @@ class input_output_tool: public input_tool
     {
       if (2 < parser.arguments.size())
       {
-        parser.error("too many file arguments");
+        throw parser.error("too many file arguments");
       }
     }
 

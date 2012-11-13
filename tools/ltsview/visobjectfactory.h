@@ -11,11 +11,11 @@
 
 #ifndef VISOBJECTFACTORY_H
 #define VISOBJECTFACTORY_H
-#include <vector>
 
+#include <vector>
+#include <QColor>
 
 class PrimitiveFactory;
-class RGB_Color;
 class Vector3D;
 class VisObject;
 
@@ -28,8 +28,8 @@ class VisObjectFactory
     void drawObjects(PrimitiveFactory* pf,unsigned char alpha,bool texture);
     int makeObject(int primitive, std::vector<int> &ids);
     void sortObjects(Vector3D viewpoint);
-    void updateObjectColor(int obj, RGB_Color color);
-    void updateObjectTexture(int obj, std::vector<RGB_Color> &texColours);
+    void updateObjectColor(int obj, QColor color);
+    void updateObjectTexture(int obj, std::vector<QColor> &texColours);
     void updateObjectMatrix(int obj);
   private:
     std::vector<VisObject*> objects;

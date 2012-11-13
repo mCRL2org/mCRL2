@@ -6,10 +6,8 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-# Raise warning if MCRL2_COPYRIGHT_TEXT is not set.
-if( NOT(MCRL2_COPYRIGHT_TEXT) )
-  message(WARNING "MCRL2_COPYRIGHT_TEXT is not set.")
-endif( NOT(MCRL2_COPYRIGHT_TEXT) )
+# Get copyright text from file
+file(READ "${CMAKE_SOURCE_DIR}/COPYING" MCRL2_COPYRIGHT_TEXT)
 
 # Raise warning if MCRL2_VERSION is not set.
 if( NOT(MCRL2_VERSION) )

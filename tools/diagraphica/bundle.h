@@ -11,6 +11,9 @@
 #ifndef BUNDLE_H
 #define BUNDLE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <map>
 #include <vector>
@@ -29,26 +32,26 @@ class Bundle
     Bundle(const Bundle& bdl);
     virtual ~Bundle();
 
+
     // -- set functions ---------------------------------------------
-    void setIndex(const size_t& idx);
-    void setParent(Bundle* p);
-    void addChild(Bundle* c);
-    void setInCluster(Cluster* in);
-    void setOutCluster(Cluster* out);
+    void setIndex(const size_t& idx) { index = idx; }
+    void setParent(Bundle* p) { parent = p; }
+    void addChild(Bundle* c) { children.push_back(c); }
+    void setInCluster(Cluster* in) { inCluster = in; }
+    void setOutCluster(Cluster* out) { outCluster = out; }
     void addEdge(Edge* e);
     void setEdges(const std::vector< Edge* > &e);
-    void updateLabel(
-      const std::string& lbl,
-      const std::string& status);
+    void updateLabel(const std::string& lbl, const std::string& status) { labels[lbl] = status; }
+
 
     // -- get functions ---------------------------------------------
-    size_t getIndex();
-    Bundle* getParent();
-    size_t getSizeChildren();
+    size_t getIndex() { return index; }
+    Bundle* getParent() { return parent; }
+    size_t getSizeChildren() { return children.size(); }
     Bundle* getChild(const size_t& idx);
-    Cluster* getInCluster();
-    Cluster* getOutCluster();
-    size_t getSizeEdges();
+    Cluster* getInCluster() { return inCluster; }
+    Cluster* getOutCluster() { return outCluster; }
+    size_t getSizeEdges() { return edges.size(); }
     Edge* getEdge(const size_t& idx);
     void getLabels(std::vector< std::string > &lbls);
     void getLabels(
@@ -59,10 +62,10 @@ class Bundle
       std::string& lbls);
 
     // -- clear functions -------------------------------------------
-    void clearParent();
+    void clearParent() { parent = 0; }
     void clearChildren();
-    void clearInCluster();
-    void clearOutCluster();
+    void clearInCluster() { inCluster = 0; }
+    void clearOutCluster() { outCluster = 0; }
     void clearEdges();
 
   protected:

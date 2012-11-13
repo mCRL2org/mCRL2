@@ -24,7 +24,7 @@
 #include <cassert>
 #include <deque>
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -63,9 +63,9 @@ class torx_tool : public rewriter_tool< input_tool >
       m_use_dummies = 0 < parser.options.count("dummy");
 
       if (parser.arguments.size() == 0) {
-        parser.error("no INFILE specified");
+        throw parser.error("no INFILE specified");
       } else if (parser.arguments.size() != 1) {
-        parser.error("too many file arguments");
+        throw parser.error("too many file arguments");
       }
     }
 

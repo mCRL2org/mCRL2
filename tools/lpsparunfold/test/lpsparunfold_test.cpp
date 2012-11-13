@@ -24,7 +24,7 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 
-int test_main(int /*argc*/, char* argv[])
+int test_main(int, char**)
 {
   {
     /**

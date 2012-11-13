@@ -56,6 +56,15 @@ bool is_linear(const process_specification& p, bool verbose = false)
   return true;
 }
 
+/// \brief Returns true if the process equation is linear.
+/// \param eqn A process equation
+inline
+bool is_linear(const process_equation& eqn)
+{
+  detail::linear_process_expression_traverser f;
+  return f.is_linear(eqn);
+}
+
 } // namespace process
 
 } // namespace mcrl2

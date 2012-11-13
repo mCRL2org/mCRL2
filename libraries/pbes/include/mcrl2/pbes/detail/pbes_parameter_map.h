@@ -18,7 +18,7 @@
 #include <set>
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/pbes.h"
@@ -113,7 +113,7 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes<>& p, const std::string& 
     match_results<std::string::const_iterator> what;
     if (!regex_match(line, what, sre))
     {
-      std::cerr << "warning: ignoring selection '" << line << "'" << std::endl;
+      mCRL2log(log::warning) << "ignoring selection '" << line << "'" << std::endl;
       continue;
     }
     std::string X = what[1];

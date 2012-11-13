@@ -19,7 +19,6 @@
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"

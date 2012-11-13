@@ -13,6 +13,7 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/parse.h"
@@ -138,6 +139,34 @@ void test_replace_summand_variables()
   BOOST_CHECK(variables.find(c) == variables.end());
 }
 
+void test_action_list()
+{
+  sort_expression_list s;
+  s = atermpp::push_front(s, sort_expression(sort_nat::nat()));
+  action_label label(core::identifier_string("a"), s);
+
+  variable b("b", data::sort_bool::bool_());
+  variable c("c", data::sort_bool::bool_());
+  data_expression_list e1;
+  e1 = atermpp::push_front(e1, data_expression(sort_bool::and_(b, c)));
+  data_expression_list e2;
+  e2 = atermpp::push_front(e2, data_expression(sort_bool::and_(c, c)));
+
+  action_list l1;
+  action a1(label, e1);
+  l1 = atermpp::push_front(l1, a1);
+
+  action_list l2;
+  action a2(label, e2);
+  l2 = atermpp::push_front(l2, a2);
+
+  data::mutable_map_substitution<> sigma;
+  sigma[b] = c;
+
+  l1 = lps::replace_free_variables(l1, sigma);
+  BOOST_CHECK(l1 == l2);
+}
+
 int test_main(int argc, char* argv[])
 {
   test_replace();
@@ -145,6 +174,7 @@ int test_main(int argc, char* argv[])
   test_lps_substitute();
   test_replace_process_parameters();
   test_replace_summand_variables();
+  test_action_list();
 
   return 0;
 }

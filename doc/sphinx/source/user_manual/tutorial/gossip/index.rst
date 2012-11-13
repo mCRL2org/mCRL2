@@ -283,7 +283,7 @@ Next we are going to investigate some properties of the gossiping girls.
       
 .. admonition:: Exercise
 
-   As a last exercise, verify whether there is no path shorter than
+   As a last exercise, check whether or not there is a path shorter than
    ``(N-1)+(N-2)`` leading to the situation where all girls know all gossips.
    
 .. admonition:: Solution
@@ -317,8 +317,15 @@ Next we are going to investigate some properties of the gossiping girls.
    replaced by :ref:`tool-pbespgsolve`. The latter uses a different algorithm
    for doing the actual verification; it first translates the pbes into a
    parity game, and then solves the parity game.
-            
    
+.. note::
+
+   For ``N >= 4``, the minimal number of calls that needs to be made is
+   ``2N - 4``, as was shown in [Hur00]_. 
+            
+.. [Hur00] C.A.J. Hurkens. Spreading gossip efficiently.
+   Nieuw Archief voor Wiskunde, Vol. 5/1, No. 2, p208-. 2000.   
+   `(PDF) <http://alexandria.tue.nl/repository/articles/623317.pdf>`_
    
 
 

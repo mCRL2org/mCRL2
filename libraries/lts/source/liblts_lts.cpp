@@ -171,11 +171,11 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 static void add_extra_mcrl2_lts_data(
   const std::string& filename,
   const bool has_data_spec,
-  const aterm_appl data_spec,
+  const aterm_appl& data_spec,
   const bool has_params,
-  const aterm_list params,
+  const aterm_list& params,
   const bool has_act_labels,
-  const aterm_list act_labels)
+  const aterm_list& act_labels)
 {
   std::ofstream f(filename.c_str(), std::ios_base::app); // Open to append.
   if (f.fail())

@@ -57,6 +57,18 @@ struct for_each_proc
     : m_names(names)
   {}
 
+  bool operator()(aterm t)
+  {
+    if(t.type() == AT_APPL)
+    {
+      return (*this)(aterm_cast<aterm_appl>(t));
+    }
+    else
+    {
+      return false;
+    }
+  }
+
   bool operator()(aterm_appl t)
   {
     m_names.insert(t.function().name());
@@ -68,7 +80,7 @@ void test_for_each()
 {
   aterm_appl t = static_cast<aterm_appl>(read_term_from_string("h(g(x),f(y))"));
   std::set<std::string> names;
-  for_each(t, for_each_proc(names));
+  atermpp::for_each(t, for_each_proc(names));
   for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
   {
     std::cout << *i << " ";

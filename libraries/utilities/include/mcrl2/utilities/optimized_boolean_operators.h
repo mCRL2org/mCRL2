@@ -303,22 +303,54 @@ Term optimized_imp(const Term& p, const Term& q)
 /// \brief Make a universal quantification
 /// \param l A sequence of variables
 /// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
 /// \return The application of universal quantification to the arguments.
 template <typename Term, typename VariableSequence>
 inline
-Term optimized_forall(const VariableSequence& l, const Term& p, bool remove_variables = false, bool empty_domain_allowed = true)
+Term optimized_forall(const VariableSequence& l, const Term& p, bool remove_variables = false)
 {
+  bool empty_domain_allowed = true;
+  return detail::optimized_forall(l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+}
+
+/// \brief Make a universal quantification
+/// \param l A sequence of variables
+/// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
+/// \return The application of universal quantification to the arguments.
+/// The optimization forall x:empty_set. phi = true is not applied.
+template <typename Term, typename VariableSequence>
+inline
+Term optimized_forall_no_empty_domain(const VariableSequence& l, const Term& p, bool remove_variables = false)
+{
+  bool empty_domain_allowed = false;
   return detail::optimized_forall(l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
 }
 
 /// \brief Make an existential quantification
 /// \param l A sequence of variables
 /// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
 /// \return The application of existential quantification to the arguments.
 template <typename Term, typename VariableSequence>
 inline
-Term optimized_exists(const VariableSequence& l, const Term& p, bool remove_variables = false, bool empty_domain_allowed = true)
+Term optimized_exists(const VariableSequence& l, const Term& p, bool remove_variables = false)
 {
+  bool empty_domain_allowed = true;
+  return detail::optimized_exists(l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+}
+
+/// \brief Make an existential quantification
+/// \param l A sequence of variables
+/// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
+/// \return The application of existential quantification to the arguments.
+/// The optimization exists x:empty_set. phi = false is not applied.
+template <typename Term, typename VariableSequence>
+inline
+Term optimized_exists_no_empty_domain(const VariableSequence& l, const Term& p, bool remove_variables = false)
+{
+  bool empty_domain_allowed = false;
   return detail::optimized_exists(l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
 }
 

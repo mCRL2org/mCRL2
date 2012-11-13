@@ -26,6 +26,7 @@
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbesinst.h"
+#include "mcrl2/pbes/pbesinst_symbolic.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
@@ -514,8 +515,27 @@ void test_functions()
   algorithm.run(p, parameter_map);
 }
 
+void test_pbesinst_symbolic(const std::string& text)
+{
+  pbes<> p;
+  p = txt2pbes(text);
+  pbesinst_symbolic_algorithm algorithm(p);
+  algorithm.run();
+}
+
+void test_pbesinst_symbolic()
+{
+  test_pbesinst_symbolic(test2);
+  test_pbesinst_symbolic(test4);
+  test_pbesinst_symbolic(test5);
+  test_pbesinst_symbolic(test6);
+}
+
 int test_main(int argc, char** argv)
 {
+  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "symbolic");
+
+  test_pbesinst_symbolic();
   pbes_system::detail::set_bes_equation_limit(100000);
   test_pbesinst();
   test_pbesinst_finite();

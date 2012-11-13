@@ -38,7 +38,7 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -452,7 +452,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       x = sort_list::right(x);
     }
-    return sort_list::is_nil_function_symbol(x);
+    return sort_list::is_empty_function_symbol(x);
   }
 
   bool is_snoc_list(data_expression x) const
@@ -461,7 +461,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       x = sort_list::left(x);
     }
-    return sort_list::is_nil_function_symbol(x);
+    return sort_list::is_empty_function_symbol(x);
   }
 
   bool is_fset_cons_list(data_expression x)

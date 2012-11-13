@@ -9,12 +9,17 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
+#include <QList>
+#include <QObject>
+
 #include <string>
 #include <vector>
-#include "enums.h"
+#include "ltsmanager.h"
+#include "markmanager.h"
+#include "primitivefactory.h"
 #include "settings.h"
+#include "visobjectfactory.h"
 
-class Mediator;
 class PrimitiveFactory;
 class LTS;
 class VisObjectFactory;
@@ -23,58 +28,66 @@ class Cluster;
 class Transition;
 class Vector3D;
 
-class Visualizer: public Subscriber
+class Visualizer: public QObject
 {
+  Q_OBJECT
+
   public:
-    Visualizer(Mediator* owner,Settings* ss);
-    ~Visualizer();
+    Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_);
 
     void computeBoundsInfo(float& bcw,float& bch);
     float getHalfStructureHeight() const;
-    void notify(SettingID s);
-    void setLTS(LTS* l,bool compute_ratio);
-    void notifyMarkStyleChanged();
-    void notifyStatePositionsChanged();
-    void notifyVisStyleChanged();
 
     void drawStates(bool simulating);
-    void drawSimStates(std::vector<State*> historicStates, State*
+    void drawSimStates(QList<State*> historicStates, State*
                        currState, Transition* chosenTrans);
 
     void drawTransitions(bool draw_fp,bool draw_bp);
     void drawSimTransitions(bool draw_fp, bool draw_bp,
-                            std::vector<Transition*> historicTrans, std::vector<Transition*>
+                            QList<Transition*> historicTrans, QList<Transition*>
                             posTrans, Transition* chosenTrans);
 
     void drawStructure();
     void sortClusters(Vector3D viewpoint);
     void exportToText(std::string filename);
 
+  public slots:
+    void setClusterHeight();
+    void branchTiltChanged(int value);
+    void dirtyObjects() { update_objects = true; emit dirtied(); }
+    void dirtyMatrices() { update_matrices = true; emit dirtied(); }
+    void dirtyPositions() { update_positions = true; emit dirtied(); }
+    void dirtyColors() { update_colors = true; emit dirtied(); }
+    void dirtyColorsMark() { if (markManager->markStyle() != NO_MARKS) dirtyColors(); }
+    void dirtyColorsNoMark() { if (markManager->markStyle() == NO_MARKS) dirtyColors(); }
+
+  signals:
+    void dirtied();
+
   private:
+    Settings* settings;
+    LtsManager *ltsManager;
+    MarkManager* markManager;
+    VisObjectFactory visObjectFactory;
+    PrimitiveFactory primitiveFactory;
     float cos_obt;
     float sin_obt;
-    LTS* lts;
-    VisObjectFactory* visObjectFactory;
-    Mediator* mediator;
-    PrimitiveFactory* primitiveFactory;
-    Settings* settings;
-    VisStyle visStyle;
-    bool create_objects;
-    bool update_colors;
+    bool update_objects;
     bool update_matrices;
-    bool update_abs;
+    bool update_colors;
+    bool update_positions;
 
     void computeAbsPos();
     void computeStateAbsPos(Cluster* root,int rot);
     void computeSubtreeBounds(Cluster* root,float& boundWidth,
                               float& boundHeight);
-    void drawBackPointer(State* startState, const RGB_Color& startColor, State* endState, const RGB_Color& endColor);
+    void drawBackPointer(State* startState, const QColor& startColor, State* endState, const QColor& endColor);
     void drawForwardPointer(State* startState,State* endState);
     void drawLoop(State* state);
     void drawStates(Cluster* root,bool simulating);
     void drawTransitions(Cluster* root,bool disp_fp,bool disp_bp);
 
-    void traverseTree(bool co);
+    void traverseTree();
     void traverseTreeC(Cluster* root, bool topClosed, int rot);
     void traverseTreeT(Cluster* root, bool topClosed, int rot);
     void updateColors();

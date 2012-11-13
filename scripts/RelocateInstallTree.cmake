@@ -1,4 +1,4 @@
-# Authors: Frank Stappers
+# Authors: Frank Stappers, Jeroen Keiren
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -6,29 +6,90 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-# This script relocates the prerequisited shared libraries for a 
-# tool/project. 
+# This script relocates the prerequisited shared libraries for a
+# tool/project.
 
-# CMake 2.6 only supports relocating libraries for the Mac OSX.
-# CMake 2.8 support also relocation libraries for windows.
-# Since we support version 2.6 and up, we can only facilitate
-# relocation of shared libraries only for  Mac OSX. 
+# CMake 2.8 supports relocation libraries for Mac OSX and windows.
 
-if( APPLE AND BUILD_SHARED_LIBS AND NOT MCRL2_SINGLE_BUNDLE )
+# This is based on the example on http://www.cmake.org/Wiki/BundleUtilitiesExample
+# Since we do not include Qt plugins, these have been left out.
 
-if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
-install(CODE "
-    include(${CMAKE_SOURCE_DIR}/scripts/MCRL2BundleUtilities.cmake) 
-    fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app\" \"\" \"${MCRL2_LIB_DIR}\")
-    " COMPONENT Runtime)
-endif(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
+# Source files, Moc headers, ui files and resource files have been added in
+# the CMake script that includes this script.
+# Here we only need to take care of the installation stuff
 
-endif( APPLE AND BUILD_SHARED_LIBS AND NOT MCRL2_SINGLE_BUNDLE )
+# WARNING: Relocation is only enabled for GUI tools
+# At the moment we detect GUI tools using an extremely ugly check,
+# we rely on MCRL2MacOSXBundleInformation to be included before this file,
+# and check whether the MACOSX_BUNDLE_NAME has been set.
+#
+if(NOT(MACOSX_BUNDLE_NAME))
+  return()
+endif()
 
-if( APPLE AND MCRL2_SINGLE_BUNDLE )
-  if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
-    FILE(APPEND ${CMAKE_BINARY_DIR}/install_tools "${PROJECT_NAME}.app\n" )
-  else(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
-    FILE(APPEND ${CMAKE_BINARY_DIR}/install_tools "${PROJECT_NAME}\n" )
-  endif(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
-endif( APPLE AND MCRL2_SINGLE_BUNDLE )
+# Warning: this seems to only make sense on Windows and MacOSX!
+if(NOT(APPLE OR WIN32))
+  return()
+endif()
+
+#-------------------------------------------------------------------------------
+# Now the installation stuff below
+#-------------------------------------------------------------------------------
+set(plugin_dest_dir ${MCRL2_BIN_DIR})
+set(qtconf_dest_dir ${MCRL2_BIN_DIR})
+set(APPS "\${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}")
+if(APPLE)
+  set(plugin_dest_dir ${MCRL2_BIN_DIR}/${PROJECT_NAME}.app/Contents/MacOS)
+  set(qtconf_dest_dir ${MCRL2_BIN_DIR}/${PROJECT_NAME}.app/Contents/Resources)
+  set (APPS "\${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.app")
+endif()
+if(WIN32)
+  set (APPS "\${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.exe")
+endif()
+
+#--------------------------------------------------------------------------------
+# install a qt.conf file
+# this inserts some cmake code into the install script to write the file
+INSTALL(CODE "
+    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
+    " COMPONENT Applications)
+
+#--------------------------------------------------------------------------------
+# Use BundleUtilities to get all other dependencies for the application to work.
+# It takes a bundle or executable along with possible plugins and inspects it
+# for dependencies.  If they are not system dependencies, they are copied.
+
+# directories to look for dependencies
+# Note: dlls for QT are installed in QT_BINARY_DIR if it is installed through
+# the windows installer.
+SET(DIRS ${QT_LIBRARY_DIR} ${QT_BINARY_DIR})
+
+# On Apple, the MacPorts build of Qt uses a slightly different structure
+# Therefore, we need to copy the qt_menu.nib file over to a decent location,
+# such that it can be found by fixup_bundle.
+if(APPLE)
+  if(${QT_QTGUI_LIBRARY} MATCHES "^.*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    if(EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
+      install(DIRECTORY
+        "${QT_LIBRARY_DIR}/Resources/qt_menu.nib" DESTINATION "${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.app/Contents/Resources/")
+      else()
+        message(WARNING "${CMAKE_INSTALL_PREFIX}/${MCRL2_BIN_DIR}/${PROJECT_NAME}.app is probably corrupt.")
+      endif()
+  endif()
+endif()
+
+if(APPLE OR WIN32)
+
+# Now the work of copying dependencies into the bundle/package
+# The quotes are escaped and variables to use at install time have their $ escaped
+# An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
+# Note that the image plugins depend on QtSvg and QtXml, and it got those copied
+# over.
+INSTALL(CODE "
+    file(GLOB_RECURSE QTPLUGINS
+	  \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+    include(BundleUtilities)
+    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+    " COMPONENT Applications)
+
+endif()

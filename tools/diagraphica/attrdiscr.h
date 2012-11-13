@@ -11,6 +11,9 @@
 #ifndef ATTRDISCR_H
 #define ATTRDISCR_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <algorithm>
 #include <cstddef>
 #include <string>
@@ -24,9 +27,8 @@ class AttrDiscr : public Attribute
   public:
     // -- constructors and destructor -------------------------------
     AttrDiscr(
-      Mediator* m,
-      const std::string& nam,
-      const std::string& typ,
+      QString name,
+      QString type,
       const size_t& idx,
       const std::vector< std::string > &vals);
     AttrDiscr(const AttrDiscr& attr);
@@ -42,9 +44,6 @@ class AttrDiscr : public Attribute
     void configValues(
       const std::vector< std::string > &curDomain,
       std::map< size_t, size_t  > &origToCurDomain);
-
-    // -- get functions ---------------------------------------------
-    int getAttrType();
 
     size_t getSizeOrigValues();
     Value* getOrigValue(size_t idx);

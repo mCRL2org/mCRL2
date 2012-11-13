@@ -148,201 +148,62 @@ version). The following libraries are required:
 
    You can also :doc:`compile the required Boost libraries yourself <boost>`.
 
+QT
+--
 
-wxWidgets
----------
+.. |qt| replace:: *QT 4*
+.. _qt: http://qt.nokia.com
 
-.. |wx| replace:: *wxWidgets 2.8.11*
-.. |wxdev| replace:: *wxWidgets 2.9.3* 
-.. _wx: http://www.wxwidgets.org
-
-The mCRL2 toolset requires |wx|_ or higher for compilation of the graphical 
-tools (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
+The mCRL2 toolset requires |qt|_ for compilation of the graphical tools 
+(:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
 :ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`). 
-
-.. warning::
-
-   It is important that you have matching wxWidgets libraries for your build
-   setup. Linking debug versions of the wxWidgets libraries to the mCRL2 
-   binaries or vice versa may give unexpected results.
-
-.. warning::
-
-   To be able to use all graphical tools, wxWidgets must be configured to
-   support OpenGL.
 
 .. admonition:: Windows
    :class: platform-specific win
-
-   It is recommended to install wxWidgets using the following steps:
-
-   - Download wxWidgets to ``<WXROOT>``
-   - Edit ``<WXROOT/include/wx/msw/setup.h>`` such that ``wxUSE_GLCANVAS`` is 
-     defined to be 1.
-   - In the Visual Studio/Windows SDK command prompt, build *wxWidgets* as 
-     follows::
+   
+   When building for the Windows SDK, it is recommended to install QT using the
+   following steps:
+   
+   For a 32-bit version, binaries are available:
+   
+     - Download the Qt libraries for Windows for your compiler version from http://qt.nokia.com/downloads.
+       For the Windows 7.1 SDK you need to select the Qt libraries for Windows (VS 2010).
+     - Follow the installation instructions.
      
-       cd <WXROOT>/build/msw 
-       nmake BUILD="release" USE_OPENGL=1 makefile.vc 
-       nmake BUILD="debug" USE_OPENGL=1 makefile.vc 
-
-   Alternatively, the last step can be replaced by the following:
-
-   - Open ``/build/msw/wx.sln`` in Visual Studio. If it asks to convert 
-     projects, confirm for all files in the project.
-   - Compile all libraries for a certain build type (e.g. Release, Debug).
-   - To build for a x64 platform, perform the following steps: 
-
-     - Select the solution in the Solution Explorer and open the Properties page
-       (Right click, then select :guilabel:`Properties`). 
-     - Select :guilabel:`Configuration Properties` and click on 
-       :guilabel:`Configuration Manager`. 
-     - Change the :guilabel:`Active solution configuration` to "Release". 
-     - Click on the :guilabel:`Active solution plaform`, and select "New" in the
-       dropdown box. 
-     - Select "x64" as the new platform, and copy settings from "Win32".
-
-   When installed correctly, CMake should be able to automatically find your 
-   installation. If automatic detection fails, configure CMake appropriately by
-   by setting the ``wxWidgets_LIB_DIR`` and ``wxWidgets_ROOT_DIR`` to 
-   ``<wxdir>/lib/vc_lib`` and ``<wxdir>``, respectively. This can be done by
-   executing::
-
-     cmake -DwxWidgets_LIB_DIR="<wxdir>/lib/vc_lib" -DwxWidgets_ROOT_DIR="<wxdir>"
-
-   Optionally, you can compile mCRL2 with wxWidgets Styled Text Control (wxSTC).
-   This provides features within :ref:`tool-mcrl2xi` as syntax highlighting and
-   bracket matching. To enable these features, perform the following steps:
-
-   - After having wxWidgets compiled, goto "<wxdir>/contrib/build/stc"
-   - Open ``stc.dsw`` with MSVC.
-   - For Windows X64 set "Active Solution Platform" to X64 
-     (:menuselection:`Build -> Configuration Manager`)
-   - Compile desired configurations (Debug & Release are sufficient). These 
-     options can be found under :menuselection:`Build -> Batch Build`.
-   - Press :guilabel:`build` to compile.
-   - Close MSVC and copy ``<wxdir>/contrib/include/wx/stc`` to 
-     ``<wxdir>/include/wx/stc``
-   - Now mCRL2 can be compiled with wxSTC. To enable this option, the CMake 
-     configuration flag ``MCRL2_WITH_WXSTC`` should be set to ``TRUE``.
-
-.. admonition:: Mac OS X
-   :class: platform-specific mac-only
-
-   |wx| only supports the carbon-framework. The 
-   carbon-framework requires that the entire toolset (dependencies included) 
-   is compiled in the i386 architecture.
-   By default Mac OS X 10.5 builds executables for the i386 architecture.
-   These executable are compatible with Mac OS X 10.6 and Mac OS X 10.7.
-
-   |wxdev| and higher support the cacoa-framework. The 
-   cacoa-framework requires that the entire toolset (dependencies included) 
-   is compiled in the x86_64 architecture.
-   By default Mac OS X 10.6 and Mac OS X 10.7 build executables for the x86_64 
-   architecture.   
+   For a 64-bit version, perform the following steps (taken from http://qt-project.org/doc/qt-4.8/install-win.html):
    
-   **Mac OS X 10.5**
+     - Download the Qt libraries source package (.zip) from http://qt.nokia.com/downloads.
+     - Extract the files, e.g. to ``C:\Qt\4.8.2``
+     - Add ``C:\Qt\4.8.2\bin`` to your ``PATH`` environment variable.
+     - Open a *Visual Studio* command prompt, and type the following (to support
+       both the Debug and the Release build)::
+     
+         C:
+         cd /D C:\Qt\4.8.2
+         configure -opensource -fast -debug-and-release -no-qt3support -no-dsp -no-vcproj  
+       
+       You need to accept the licence by typing ``y``.
+       Qt can now be compiled by typing::
+       
+         nmake
 
-   Options to build with |wx|:
+       .. warning::
 
-   1. wxWidgets can be installed using MacPorts::
-
-        sudo port install wxWidgets
-
-   2. To build from source, download the sources for the latest stable release version  
-      and build, using the following configuration::
-
-        ./configure  --disable-shared --disable-compat24 --disable-mediactrl --disable-sound --with-opengl
-
-     Optionally, you can compile mCRL2 with wxWidgets Styled Text Control (wxSTC).
-     This provides features within :ref:`tool-mcrl2xi` as syntax highlighting and
-     bracket matching. To enable these features, perform the following steps for 
-     |wx|:
-
-     - After having wxWidgets compiled goto "cd <wxdir>/contrib/"
-     - Type `make` to compile.
-     - Type `make install` to install
-     - Now mCRL2 can be compiled with wxSTC. To enable this option, the CMake 
-       configuration flag ``MCRL2_WITH_WXSTC`` should be set to ``TRUE``.
-
-   **Mac OS X 10.6 - 10.7**
-
-   To build with |wx| the architecture must be set to i386. 
-   This can be accomplished by:
+          A bug in 64-bit MSVC is causing a problem in the release build of the
+          Qt libraries. This can be circumvented by installing the fix of Microsoft
+          `KB2280741 <http://support.microsoft.com/kb/2280741>`_.
    
-   1. To build from source, download the sources for |wx| 
-      and build, using the following configuration::
-      
-        arch_flags="-arch i386"
-        ./configure --disable-shared --disable-compat24 CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags"  --disable-mediactrl --disable-sound --with-opengl --with-macosx-version-min=10.5 --with-macosx-sdk=/Developer/SDKs/MacOSX10.5.sdk 
-
-     Optionally, you can compile mCRL2 with wxWidgets Styled Text Control (wxSTC).
-     This provides features within :ref:`tool-mcrl2xi` as syntax highlighting and
-     bracket matching. To enable these features, perform the following steps for 
-     |wx|:
-
-     - After having wxWidgets compiled goto "cd <wxdir>/contrib/"
-     - Type `make` to compile.
-     - Type `make install` to install
-     - Now mCRL2 can be compiled with wxSTC. To enable this option, the CMake 
-       configuration flag ``MCRL2_WITH_WXSTC`` should be set to ``TRUE``.
-
-   To build with |wxdev| for the x86_64 architecture, use one of the following options: 
-
-   1. wxWidgets can be installed using MacPorts::
-
-        sudo port install wxWidgets-devel
-
-   2. To build from source, download the sources for the latest development version 
-      and build, using the following configuration::
-      
-        set arch_flags="-arch x86_64"
-        ./configure -with-osx_cocoa --disable-shared --disable-compat24 --disable-unicode CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags" --prefix=`pwd`/Release/ --with-libiconv-prefix=/opt/local/ --disable-mediactrl --disable-sound
-
-   **Note**
-
-   To configure the mCRL2 toolset set the location of ``wx-config`` and 
-   ``wxrc`` to the locations of these tools. 
-   Make sure to build the toolset static, i.e., the value of
-   ``BUILD_SHARED_LIBS`` needs to be set to ``FALSE``.
-
-
-
-   **Warning**
-
-   Graphical tools might give the following warning when being built::
-
-     Linking CXX executable mcrl2-gui.app/Contents/MacOS/mcrl2-gui
-     ld: warning: in /System/Library/Frameworks//QuickTime.framework/QuickTime, missing required architecture x86_64 in file
-
-   Since we do not use the media controls or the sound library, we can remove 
-   all occurrences of "-framework QuickTime" from the "configure" and 
-   "configure.in", to remove this warning. This requires a make clean, 
-   configure, make and install of the wxWidgets.
-
+   When installed correctly, and the binary directory for Qt has been added to
+   your ``PATH``, CMake should be able to automatically find your 
+   installation.
+   
 .. admonition:: Linux
    :class: platform-specific linux
-
+   
    Binary development versions are available in the package manager in most 
-   distributions (for instance the ``libwxgtk2.8-dev`` PPA package).
+   distributions (for instance the ``libqt4-dev`` PPA package).
 
-   To build from source, download the sources and build as usual, using the
-   following configuration::
-
-     ./configure  --disable-shared --disable-compat24 --disable-mediactrl --disable-sound --with-opengl 
-     
    On linux it is also required to install OpenGL related development packages.
    The exact package to be installed depends on your distribution. For Ubuntu
-   this are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
-
-   Optionally, you can compile mCRL2 with wxWidgets Styled Text Control (wxSTC).
-   This provides features within :ref:`tool-mcrl2xi` as syntax highlighting and
-   bracket matching. To enable these features, perform the following steps for 
-   wxWidgets 2.8:
-
-   - After having wxWidgets compiled goto "cd <wxdir>/contrib/"
-   - Type `make` to compile.
-   - Type `make install` to install
-   - Now mCRL2 can be compiled with wxSTC. To enable this option, the CMake 
-     configuration flag ``MCRL2_WITH_WXSTC`` should be set to ``TRUE``.
+   these are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
 

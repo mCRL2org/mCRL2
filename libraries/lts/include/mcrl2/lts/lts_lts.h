@@ -292,8 +292,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
       m_parameters(l.m_parameters),
       m_has_valid_action_decls(l.m_has_valid_action_decls),
       m_action_decls(l.m_action_decls)
-    {
-    }
+    {}
 
     /** \brief Standard destructor for the class lts_lts
     */
@@ -443,21 +442,5 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 };
 } // namespace lts
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::lts::detail::state_label_lts>
-{
-};
-
-template<>
-struct aterm_traits<mcrl2::lts::detail::action_label_lts>
-{
-};
-} // namespace atermpp
-/// \endcond
-
 
 #endif

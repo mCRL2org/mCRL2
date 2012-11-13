@@ -183,15 +183,17 @@ static void read_from_aut(lts_aut_t& l, istream& is)
 
   read_aut_header(is,initial_state,ntrans,nstate);
 
-  l.set_num_states(nstate,false);
+  map <size_t,size_t> state_number_translator;
 
-  if (initial_state>= l.num_states())
+  if (nstate==0)
   {
-    throw mcrl2::runtime_error("cannot parse AUT input (initial state index (" + c(initial_state) +
-                               ") is larger or equal to the number of states (" +
-                               c(l.num_states()) + ") given in the header).");
+    throw mcrl2::runtime_error("cannot parse AUT input that has no states; at least an initial state is required.");
   }
 
+  l.set_num_states(nstate,false);
+
+  state_number_translator[initial_state]=0;
+  initial_state=0;
   l.set_initial_state(initial_state);
 
   map < string, size_t > labs;
@@ -207,16 +209,38 @@ static void read_from_aut(lts_aut_t& l, istream& is)
       break; // eof encountered
     }
 
-    if (from >= l.num_states())
-    {
-      throw mcrl2::runtime_error("cannot parse AUT input (invalid transition at line " +
-                                 c(line_no) + "; state index (" + c(from) + ") higher than maximum (" +
-                                 c(l.num_states()) + ") given by header).");
+    map <size_t,size_t>::const_iterator j=state_number_translator.find(from);
+    if (j==state_number_translator.end())
+    { 
+      // Not found.
+      const size_t size=state_number_translator.size();
+      state_number_translator[from]=size;
+      from=size; 
     }
-    if (to >= l.num_states())
+    else
+    {  
+      // found.
+      from=j->second;
+    }
+
+    j=state_number_translator.find(to);
+    if (j==state_number_translator.end())
+    { 
+      // Not found.
+      const size_t size=state_number_translator.size();
+      state_number_translator[to]=size;
+      to=size; 
+    }
+    else
+    {  
+      // found.
+      to=j->second;
+    }
+
+    if (state_number_translator.size() > l.num_states())
     {
-      throw mcrl2::runtime_error("cannot parse AUT input (invalid transition at line " + c(line_no) +
-                                 "; state index (" + c(to) + ") higher than maximum (" + c(l.num_states()) + ") given by header).");
+      throw mcrl2::runtime_error("Number of actual states in .aut file is higher than maximum (" +
+                                 c(l.num_states()) + ") given by header (found at line " + c(line_no) + ").");
     }
 
     size_t label;

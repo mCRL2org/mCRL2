@@ -22,7 +22,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;

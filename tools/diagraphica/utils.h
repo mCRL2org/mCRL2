@@ -11,6 +11,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
@@ -44,6 +47,11 @@ class Utils
       const double& x,
       const double& y);
 
+    static double distLinePoint(
+      const QPointF& lineStart,
+      const QPointF& lineEnd,
+      const QPointF& point);
+
     // -- math functions --------------------------------------------
     static int rndToInt(const double& f);
     static double rndToNearestMult(
@@ -76,30 +84,6 @@ class Utils
     static double mean(const std::vector< double > vals);
     static double variance(const std::vector< double > vals);
     static double stdDev(const std::vector< double > vals);
-
-    // -- classification (binning ) ---------------------------------
-    static void classEqualIntervals(
-      const size_t& numClasses,
-      const std::vector< double > &values,
-      std::vector< std::string > &legendClasses,
-      std::map< double, size_t > &valuesToClasses);
-    static void classifyQuantiles(
-      const size_t& numClasses,
-      std::set< double > &values,
-      std::vector< std::string > &legendClasses,
-      std::map< double, size_t > &valuesToClasses);
-    static void classifyMeanStandardDeviation(
-      const size_t& numClasses,
-      const std::vector< double > &values,
-      std::vector< std::string > &legendClasses,
-      std::map< double, size_t > &valuesToClasses);
-    /*
-    static void classifyOptimal(
-        const int &numClasses,
-        const std::vector< double > &values,
-        std::vector< std::string > &legendClasses,
-        std::map< double, int > &valuesToClasses );
-    */
 };
 
 #endif

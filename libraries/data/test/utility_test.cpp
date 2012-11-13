@@ -126,7 +126,7 @@ void list_construction_test()
 
   representation_check(R, sort_list::list(bool_(), boost::make_iterator_range(expressions)),
                        R(cons_(bool_(), expressions[0], cons_(bool_(), expressions[1],
-                               cons_(bool_(), expressions[2], cons_(bool_(), expressions[3], nil(bool_())))))),specification);
+                               cons_(bool_(), expressions[2], cons_(bool_(), expressions[3], empty(bool_())))))),specification);
 }
 
 void convert_test()

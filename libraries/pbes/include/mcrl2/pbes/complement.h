@@ -26,7 +26,7 @@
 #ifndef MCRL2_PBES_COMPLEMENT_H
 #define MCRL2_PBES_COMPLEMENT_H
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/pbes/builder.h"
 
 namespace mcrl2

@@ -27,7 +27,6 @@ var b:Bool;
     c:Bool;
     p:Pos;
     q:Pos;
-    r:Pos;
 eqn ==(@c1, @cDub(b,p)) = false;
     ==(@cDub(b,p), @c1) = false;
     ==(@cDub(b,p), @cDub(c, q)) = &&(==(b,c), ==(p,q));

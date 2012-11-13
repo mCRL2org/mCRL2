@@ -17,6 +17,13 @@
 ## Set properties for testing
 set(MCRL2_TEST_LABEL "rev.${MCRL2_VERSION}-${CMAKE_BUILD_TYPE}")
 
+option(MCRL2_SKIP_LONG_TESTS "Disable execution of tests that take a long time to complete" OFF)
+message(STATUS "MCRL2_SKIP_LONG_TESTS: ${MCRL2_SKIP_LONG_TESTS}")
+mark_as_advanced(MCRL2_SKIP_LONG_TESTS)
+
+if(MCRL2_SKIP_LONG_TESTS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMCRL2_SKIP_LONG_TESTS")
+endif(MCRL2_SKIP_LONG_TESTS)
 
 option(MCRL2_ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
 message(STATUS "MCRL2_ENABLE_TEST_TARGETS: ${MCRL2_ENABLE_TEST_TARGETS}" )
@@ -204,9 +211,9 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2"			 "lpsparunfold")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps;lts2pbes")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2"			 "lpsparunfold")
-# run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm")    OUTCOMMENTED, AS REALS CANNOT BE ENUMERATED.
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm;lps2lts;ltsinfo;ltsconvert;ltscompare")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "lpsbinary;lpsrealelm")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_100.mcrl2" "lpsbinary;lpsrealelm")
 
 endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 

@@ -95,7 +95,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
           /* Check for various possible errors */
           if (errno != 0 || *p != '\0')
           {
-            parser.error("Parsed an invalid index value");
+            throw parser.error("Parsed an invalid index value");
           }
           m_set_index.insert(val);
           s_old_index = s_index+1;
@@ -107,7 +107,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         /* Check for various possible errors */
         if (errno != 0 || *p != '\0')
         {
-          parser.error("Parsed an invalid index value");
+          throw parser.error("Parsed an invalid index value");
         }
         m_set_index.insert(val);
       }

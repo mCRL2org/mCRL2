@@ -11,6 +11,9 @@
 #ifndef CORRLPLOT_H
 #define CORRLPLOT_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
@@ -22,22 +25,17 @@
 
 class CorrlPlot : public Visualizer
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     CorrlPlot(
-      Mediator* m,
+      QWidget *parent,
       Graph* g,
-      GLCanvas* c);
-    virtual ~CorrlPlot();
+      int attributeIndex1,
+      int attributeIndex2);
 
     // -- set data functions ----------------------------------------
-    void setValues(
-      const size_t& idx1,
-      const size_t& idx2,
-      const std::vector< std::vector< size_t > > &mapXY,
-      const std::vector< std::vector< int > > &num);
-    void clearValues();
-
     void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
@@ -51,13 +49,9 @@ class CorrlPlot : public Visualizer
     void drawDiagram(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    /*
-    void handleMouseEnterEvent();
-    void handleMouseLeaveEvent();
-    */
+    void handleMouseEvent(QMouseEvent* e);
+
+    QSize sizeHint() const { return QSize(400,400); }
 
   protected:
     // -- utility data functions ------------------------------------
@@ -83,8 +77,8 @@ class CorrlPlot : public Visualizer
     // -- data members ----------------------------------------------
 
     // data
-    size_t attrIdx1;
-    size_t attrIdx2;
+    Attribute *attribute1;
+    Attribute *attribute2;
     std::string xLabel;
     std::string yLabel;
     std::vector< std::vector< size_t > > mapXToY; // for each x idx, 1 or more y indices

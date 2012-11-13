@@ -34,19 +34,19 @@ class RewriterJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    atermpp::aterm_appl toRewriteFormat(const data_expression &term);
-    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl &term, internal_substitution_type &sigma);
+    atermpp::aterm_appl toRewriteFormat(const data_expression& term);
+    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl& term, internal_substitution_type &sigma);
 
     bool addRewriteRule(const data_equation &Rule);
     bool removeRewriteRule(const data_equation &Rule);
 
   private:
-    // unsigned int num_opids;
     size_t max_vars;
     bool need_rebuild;
 
     std::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
     std::vector < atermpp::aterm_list >  jitty_strat;
+    size_t MAX_LEN; 
     atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &term, internal_substitution_type &sigma);
     void build_strategies();
 
@@ -58,6 +58,7 @@ class RewriterJitty: public Rewriter
     /* Auxiliary function to take care that the array jitty_strat is sufficiently large
        to access element i */
     void make_jitty_strat_sufficiently_larger(const size_t i);
+    atermpp::aterm_list create_strategy(const data_equation_list& rules1);
 
 };
 }

@@ -82,7 +82,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
                  .add_value(pbesinst_finite),
                  "compute the BES using strategy NAME:", 's').
       add_option("select",
-                 make_optional_argument("NAME", ""),
+                 make_optional_argument("PARAMS", ""),
                  "select finite parameters that need to be expanded\n"
                  "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
                  "            *(*:Bool)\n",

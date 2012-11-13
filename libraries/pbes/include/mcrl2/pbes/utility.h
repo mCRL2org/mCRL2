@@ -450,10 +450,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {
-                      std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
+                      mCRL2log(log::verbose) << "Used " << no_variables << " variables when eliminating universal quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
+                        mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);
@@ -576,7 +576,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       std::set < pbes_expression > disjunction_set;
       distribute_or(expr,disjunction_set);
       bool constructor_sorts_found=true;
-      for (; constructor_sorts_found ;)
+      while (constructor_sorts_found)
       {
         constructor_sorts_found=false;
         for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -628,10 +628,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {
-                      std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
+                      mCRL2log(log::verbose) << "Used " << no_variables << " variables when eliminating existential quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
+                        mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);

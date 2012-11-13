@@ -26,6 +26,7 @@ simulation::simulation(const specification& specification, data::rewrite_strateg
 
 void simulation::truncate(size_t state_number)
 {
+  assert(state_number < m_full_trace.size());
   if (m_tau_prioritization)
   {
     m_prioritized_trace.resize(state_number + 1);
@@ -40,6 +41,7 @@ void simulation::truncate(size_t state_number)
 
 void simulation::select(size_t transition_number)
 {
+  assert(transition_number < m_full_trace.back().transitions.size());
   if (m_tau_prioritization)
   {
     m_prioritized_trace.back().transition_number = transition_number;
@@ -213,6 +215,7 @@ std::vector<simulation::transition_t> simulation::prioritize(const std::vector<s
         break;
       }
     }
+    output.push_back(transition);
   }
   return output;
 }
@@ -231,7 +234,7 @@ bool simulation::is_prioritized(const multi_action &action)
 
 void simulation::prioritize_trace()
 {
-  m_prioritized_trace.push_back(m_full_trace.back());
+  m_prioritized_trace.push_back(m_full_trace.front());
   for (size_t index = 0; index < m_full_trace.size() - 1; index++)
   {
     transition_t transition = m_full_trace[index].transitions[m_full_trace[index].transition_number];

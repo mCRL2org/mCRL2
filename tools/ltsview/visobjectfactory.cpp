@@ -9,28 +9,13 @@
 /// \file visobjectfactory.cpp
 /// \brief Source file for VisObjectFactory class
 
-#include "wx.hpp" // precompiled headers
-
 #include "visobjectfactory.h"
 #include <algorithm>
 #include <cstdlib>
 #include "primitivefactory.h"
-#include "rgb_color.h"
 #include "vectors.h"
 
-extern "C" {
-#ifdef __APPLE__
-# include <OpenGL/gl.h>
-# include <OpenGL/glu.h>
-#else
-# if defined(_WIN32_) || defined(_MSC_VER)
-#  include <windows.h>
-#  undef __in_range // For STLport
-# endif
-# include <GL/gl.h>
-# include <GL/glu.h>
-#endif
-}
+#include <QtOpenGL>
 
 using namespace std;
 
@@ -40,18 +25,18 @@ class VisObject
     VisObject();
     ~VisObject();
     float* getMatrixP() const;
-    RGB_Color getColor() const; //TODO This doesn't seem to be used;
+    QColor getColor() const; //TODO This doesn't seem to be used;
     Vector3D getCoordinates() const;
     int getPrimitive() const;
-    void setColor(RGB_Color c);
-    void setTextureColours(std::vector<RGB_Color>& colours);
+    void setColor(QColor c);
+    void setTextureColours(std::vector<QColor>& colours);
     void setPrimitive(int p);
     void draw(PrimitiveFactory* pf,unsigned char alpha);
     void drawWithTexture(PrimitiveFactory* pf, unsigned char alpha);
     void addIdentifier(int id);
   private:
     float* matrix;
-    RGB_Color color;
+    QColor color;
     GLuint texName;
     int numColours;
     int primitive;
@@ -61,7 +46,7 @@ class VisObject
 VisObject::VisObject()
 {
   matrix = (float*)malloc(16*sizeof(float));
-  color = RGB_Color(150, 150, 150);
+  color = QColor(150, 150, 150);
   numColours = 0;
   primitive = 0;
 
@@ -80,7 +65,7 @@ float* VisObject::getMatrixP() const
   return matrix;
 }
 
-RGB_Color VisObject::getColor() const
+QColor VisObject::getColor() const
 {
   return color;
 }
@@ -95,12 +80,12 @@ Vector3D VisObject::getCoordinates() const
   return Vector3D(matrix[12], matrix[13], matrix[14]);
 }
 
-void VisObject::setColor(RGB_Color c)
+void VisObject::setColor(QColor c)
 {
   color = c;
 }
 
-void VisObject::setTextureColours(vector<RGB_Color>& colours)
+void VisObject::setTextureColours(vector<QColor>& colours)
 {
   if (colours.size() > 0)
   {
@@ -270,12 +255,12 @@ void VisObjectFactory::updateObjectMatrix(int obj)
   glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)objects[obj]->getMatrixP());
 }
 
-void VisObjectFactory::updateObjectColor(int obj,RGB_Color color)
+void VisObjectFactory::updateObjectColor(int obj,QColor color)
 {
   objects[obj]->setColor(color);
 }
 
-void VisObjectFactory::updateObjectTexture(int obj, vector<RGB_Color> &colours)
+void VisObjectFactory::updateObjectTexture(int obj, vector<QColor> &colours)
 {
   objects[obj]->setTextureColours(colours);
 }

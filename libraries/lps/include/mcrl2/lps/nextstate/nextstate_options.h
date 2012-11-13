@@ -13,7 +13,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -38,7 +38,7 @@ NextStateFormat parse_nextstate_format(const std::string& s)
   }
   else
   {
-    throw mcrl2::runtime_error("unkown nextstate format " + s);
+    throw mcrl2::runtime_error("unknown nextstate format " + s);
   }
 }
 

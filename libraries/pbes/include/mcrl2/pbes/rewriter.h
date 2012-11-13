@@ -296,7 +296,7 @@ class enumerate_quantifiers_rewriter
     /// \brief Constructor
     /// \param r A data rewriter
     /// \param e A data enumerator
-    /// \param enumerate_infinite_sorts Determines if quantifier variables of infinte sorts are enumerated
+    /// \param enumerate_infinite_sorts Determines if quantifier variables of infinite sorts are enumerated
     enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e, bool enumerate_infinite_sorts = true, bool skip_data = false)
       : m_rewriter(r), m_enumerator(e), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
     {}
@@ -314,7 +314,7 @@ class enumerate_quantifiers_rewriter
       term_type result = r(x, sigma);
 
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-      std::cerr << "<enumerate-quantifiers>" << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
+      mCRL2log(log::debug) << "<enumerate-quantifiers>" << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
 #endif
       return result;
     }
@@ -333,7 +333,7 @@ class enumerate_quantifiers_rewriter
       term_type result = r(x, substitution_function(sigma));
 
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-      std::cerr << "<enumerate-quantifiers>" << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << data::print_substitution(sigma) << std::endl;
+      mCRL2log(log::debug) << "<enumerate-quantifiers>" << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << data::print_substitution(sigma) << std::endl;
 #endif
       return result;
     }

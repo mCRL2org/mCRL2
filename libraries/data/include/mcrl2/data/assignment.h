@@ -306,6 +306,19 @@ inline assignment_list make_assignment_vector(Container const& container, typena
   return atermpp::convert< assignment_vector >(container);
 }
 
+/// \brief Returns the left hand sides of an assignment list
+/// \param x An assignment list
+inline
+variable_list left_hand_sides(const assignment_list& x)
+{
+  std::vector<variable> result;
+  for (assignment_list::const_iterator i = x.begin(); i != x.end(); ++i)
+  {
+    result.push_back(i->lhs());
+  }
+  return variable_list(result.begin(), result.end());
+}
+
 ////--- start generated is-functions ---//
 //
 //    /// \brief Test for a assignment expression

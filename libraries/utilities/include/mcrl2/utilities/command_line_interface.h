@@ -19,11 +19,13 @@
 #include <cassert>
 #include <cstdlib>
 #include <sstream>
+#include <cstring>
 
 #include "boost/algorithm/string.hpp"
 #include "boost/type_traits/is_pod.hpp"
 #include "boost/shared_ptr.hpp"
 #include "mcrl2/utilities/toolset_version.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -868,7 +870,7 @@ class command_line_parser
      *
      * \code
      *  try {
-     *    error("Parse error: option -b unknown");
+     *    throw error("Parse error: option -b unknown");
      *  }
      *  catch (std::exception& e) {
      *    std::cerr << e.what();
@@ -881,7 +883,10 @@ class command_line_parser
      * tool: Parse error: option -b unknown
      * Try `tool --help' for more information. \endverbatim
      **/
-    void error(std::string const& message) const;
+    mcrl2::command_line_error error(std::string const& message) const
+    {
+      return mcrl2::command_line_error(m_interface.m_name, message);
+    }
 
     /**
      *  \brief Checks that all arguments are passed at most once
@@ -892,7 +897,7 @@ class command_line_parser
       {
         if (1 < m_options.count(i->first))
         {
-          error("option -" + (m_interface.long_to_short(i->first) != '\0' ?
+          throw error("option -" + (m_interface.long_to_short(i->first) != '\0' ?
                               std::string(1, m_interface.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
         }
       }
@@ -937,7 +942,7 @@ class command_line_parser
     {
       std::istringstream in(option_argument(long_identifier));
 
-      T result;
+      T result = T();
 
       in >> result;
 
@@ -945,7 +950,7 @@ class command_line_parser
       {
         const char short_option(m_interface.long_to_short(long_identifier));
 
-        error("argument `" + option_argument(long_identifier) + "' to option --" + long_identifier +
+        throw error("argument `" + option_argument(long_identifier) + "' to option --" + long_identifier +
               ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
       }
 
@@ -1287,12 +1292,10 @@ class interface_description::optional_argument : public typed_argument< T >
      * \param[in] n the name of the argument
      * \param[in] d the default value for the argument
      **/
-    inline optional_argument(std::string const& name, std::string const& d)
+    inline optional_argument(std::string const& name, std::string const& d) : m_default(d)
     {
       basic_argument::set_type("optional");
       basic_argument::set_name(name);
-
-      m_default = d;
     }
 
     /**

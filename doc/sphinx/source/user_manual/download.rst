@@ -41,11 +41,17 @@ binaries are available.
    |                        +-------------------------+
    |                        | |bin_w64n|_             |
    +------------------------+-------------------------+
+   |Ubuntu                  | |bin_deb32n|_           |
+   |                        +-------------------------+
+   |                        | |bin_deb64n|_           |
+   +------------------------+-------------------------+
+   |Fedora                  | |bin_fedora64n|_        |
+   +------------------------+-------------------------+
    |Source                  | |src_tgzn|_             |
    +------------------------+-------------------------+
 
 If you are using a Linux distribution that is not listed, you may wish to try
-:doc:`compiling mCRL2 yourself <build>`.
+:ref:`compiling mCRL2 yourself <build>`.
 
 .. ifconfig:: release == version
 

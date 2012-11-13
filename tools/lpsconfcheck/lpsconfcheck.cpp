@@ -118,7 +118,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
         if (m_summand_number < 1)
         {
-          parser.error("The summand number must be greater than or equal to 1.\n");
+          throw parser.error("The summand number must be greater than or equal to 1.\n");
         }
         else
         {

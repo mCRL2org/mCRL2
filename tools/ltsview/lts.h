@@ -17,13 +17,10 @@
 #include <map>
 
 #include "mcrl2/lts/lts_fsm.h"
-#include "enums.h"
 
 class LTS;
-class Mediator;
 class State;
 class Cluster;
-class Simulation;
 
 class Cluster_iterator
 {
@@ -31,6 +28,7 @@ class Cluster_iterator
     Cluster_iterator(LTS* l);
     virtual ~Cluster_iterator() {}
     void operator++();
+    void operator++(int) { ++*this; }
     Cluster* operator*();
     virtual bool is_end();
   protected:
@@ -57,6 +55,7 @@ class State_iterator
     State_iterator(LTS* l);
     ~State_iterator();
     void operator++();
+    void operator++(int) { ++*this; }
     State* operator*();
     bool is_end();
   private:
@@ -67,13 +66,16 @@ class State_iterator
 class LTS
 {
   public:
-    LTS(Mediator* owner);
+    LTS();
     ~LTS();
+
+    State *state(int id) const { return states[id]; }
+    Cluster *cluster(int rank, int position) const { return clustersInRank[rank][position]; }
 
     void addCluster(Cluster* c);
     void addClusterAndBelow(Cluster* c);
     void clearStatePositions();
-    void clusterStates(RankStyle rs);
+    void clusterStates(bool cyclic);
     void computeClusterInfo();
     void getActionLabels(std::vector<std::string> &ls) const;
     State* getInitialState() const;
@@ -88,31 +90,27 @@ class LTS
     int getNumStates() const;
     int getNumTransitions() const;
 
+    bool hasStateInfo() const { return mcrl2_lts->has_state_info(); }
     size_t getNumParameters() const;
-    std::vector<std::string> getParameterDomain(size_t parindex);
+    const std::vector<std::string>& getParameterDomain(size_t parindex) { return mcrl2_lts->state_element_values(parindex); }
     std::string getParameterName(size_t parindex) ;
     size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,
                                           size_t param);
     std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
 
-    State* selectStateByID(int id);
-    Cluster* selectCluster(const int rank, const int pos);
-    void deselect();
     void positionClusters(bool fsmstyle);
-    void positionStates(StatePositioningStyle s);
-    void rankStates(RankStyle rs);
+    void positionStates(bool multiPass);
+    void rankStates(bool cyclic);
 
     bool readFromFile(const std::string& filename);
 
     int getZoomLevel() const;
     void setZoomLevel(const int level);
-    // Zooms into the structure starting from the initial cluster/state
-    // and upto selectedCluster, if any.
-    LTS* zoomIntoAbove();
-    // Zooms into the structure starting from the selectedCluster, upto
-    // the end of the structure.
-    LTS* zoomIntoBelow();
+    // Zooms into the structure starting from the initial cluster/state and upto target.
+    LTS* zoomIntoAbove(Cluster *target);
+    // Zooms into the structure starting from the target, upto the end of the structure.
+    LTS* zoomIntoBelow(Cluster *target);
     // Zooms out to the previous level.
     LTS* zoomOut();
     // Returns the maximal rank of the structure, that is, the highest
@@ -123,30 +121,14 @@ class LTS
     LTS* getPreviousLevel() const;
     void fromAbove();
 
-    // Method for simulation
-    Simulation* getSimulation() const;
-
-    // Methods getting information from parents while zooming in
-    Cluster* getSelectedCluster() const;
-
-    // Loads a trace stored in location path and constructs a simulation
-    // from it.
-    void loadTrace(std::string const& path);
-
-    void generateBackTrace();
-
   private:
-    Mediator* mediator;
-    Simulation* simulation;
-    mcrl2::lts::lts_fsm_t mcrl2_lts;
+    mcrl2::lts::lts_fsm_t *mcrl2_lts;
 
     bool lastWasAbove;
     int zoomLevel;
     int deadlockCount;
     LTS* previousLevel;
     State* initialState;
-    State* selectedState;
-    Cluster* selectedCluster;
     Cluster* lastCluster;
     std::vector< State* > states;
     std::vector< std::vector< Cluster* > > clustersInRank;
@@ -156,12 +138,10 @@ class LTS
     std::map<std::string, std::string> freeVars;
 
     // Constructor for zooming
-    LTS(Mediator* owner, LTS* parent, bool fromAbove);
+    LTS(LTS* parent, Cluster *target, bool fromAbove);
 
     void clearRanksAndClusters();
     void clusterTree(State* s,Cluster* c,bool cyclic);
-
-    void visit(State* s);
 
     friend class Cluster_iterator;
     friend class Reverse_cluster_iterator;

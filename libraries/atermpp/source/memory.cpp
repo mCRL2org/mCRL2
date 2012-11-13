@@ -158,6 +158,7 @@ static void resize_aterm_hashtable()
 #ifndef NDEBUG
 static void check_that_all_objects_are_free()
 {
+#if 0
   std::cerr << "CHECKING THAT ALL OBJECTS ARE FREE \n";
   bool result=true;
 
@@ -173,6 +174,7 @@ static void check_that_all_objects_are_free()
           fprintf(stderr,"CHECK: Non free term %p (size %lu). ",&*p,size);
           fprintf(stderr,"Reference count %ld\n",p->reference_count());
           result=false;
+          assert(result);
         }
       }
     }
@@ -188,8 +190,7 @@ static void check_that_all_objects_are_free()
     }
 
   }
-
-  assert(result);
+#endif
 }
 #endif
 

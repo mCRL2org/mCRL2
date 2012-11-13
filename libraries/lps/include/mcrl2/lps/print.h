@@ -15,6 +15,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/lps/state.h"
@@ -240,24 +241,15 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   void operator()(const lps::deadlock_summand& x)
   {
     derived().enter(x);
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print("(");
-#endif
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
     print_condition(x.condition(), " ->\n         ", max_precedence);
     derived()(x.deadlock());
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print(")");
-#endif
     derived().leave(x);
   }
 
   void operator()(const lps::action_summand& x)
   {
     derived().enter(x);
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print("(");
-#endif
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
     print_condition(x.condition(), " ->\n         ", max_precedence);
     derived()(x.multi_action());
@@ -265,9 +257,6 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().print("P(");
     print_assignments(x.assignments(), true, "", "", ", ");
     derived().print(")");
-#ifdef MCRL2_PRINT_SUMMAND_BRACKETS
-    derived().print(")");
-#endif
     derived().leave(x);
   }
 
@@ -298,6 +287,14 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
 
       // print deadlock summands
       print_numbered_list(x.deadlock_summands(), separator, number_separator, x.action_summands().size() + 1, true);
+
+      // print delta if there are no summands
+      if (x.action_summands().empty() && (x.deadlock_summands().empty()))
+      {
+        deadlock_summand_vector v;
+        v.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock(data::parse_data_expression("0"))));
+        print_numbered_list(v, separator, number_separator, 1, true);
+      }
     }
     else
     {
@@ -315,6 +312,14 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
         opener = separator;
       }
       print_list(x.deadlock_summands(), opener, closer, separator);
+
+      // print delta if there are no summands
+      if (x.action_summands().empty() && (x.deadlock_summands().empty()))
+      {
+        deadlock_summand_vector v;
+        v.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock(data::parse_data_expression("0"))));
+        print_list(v, opener, closer, separator);
+      }
     }
 
     derived().print(";\n");

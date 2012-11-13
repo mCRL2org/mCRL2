@@ -25,7 +25,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 # include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+
 include_directories(${CMAKE_SOURCE_DIR}/tools/lpsxsim)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -36,11 +36,10 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities
   mcrl2_syntax
   dparser
-  ${Boost_LIBRARIES}
 )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)

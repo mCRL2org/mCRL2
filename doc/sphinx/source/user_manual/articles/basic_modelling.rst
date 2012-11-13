@@ -525,13 +525,13 @@ The modal µ-calculus
 --------------------
 
 Although regular HML is a powerful tool to specify properties over infinite
-systems, it is still not expressive enough to formulate so-called *fairness
-properties*. These are properties that say things like `if the system is offered
+systems, it is still not expressive enough to formulate so-called 
+fairness properties*. These are properties that say things like `if the system is offered
 the possibility to perform an action infinitely often, then it will eventually
 perform this action'.
 
-Another way of extending HML to deal with infinite behaviour is to add a *least
-fixpoint operator*. This extension is called the *modal µ-calculus*, named
+Another way of extending HML to deal with infinite behaviour is to add a
+*least fixpoint operator*. This extension is called the *modal µ-calculus*, named
 after the least fixpoint operator `\mu`. The µ-calculus (we often leave out the
 `modal', as no confusion can arise) is famous for its expressivity, and infamous
 for its unintelligability. We will therefore first give the definition and the
@@ -610,7 +610,7 @@ Intuitively, the least fixpoint operator `\mu` corresponds to an eventuality,
 where the greatest fixpoint operator says something about properties that
 continue to hold forever.
 
-We can read `\mu X\,.\, \varphi \lor \mccan{\alpha}X` as ``X` is the smallest
+We can read `\mu X\,.\, \varphi \lor \mccan{\alpha}X` as `X` is the smallest
 set of states such that a state is in `X` if and only if `\varphi` holds in that
 state, or there is an `\alpha`-successor that is in `X`'. Conversely, `\nu
 X\,.\, \varphi \land \mcall{\alpha}X` is the largest set of states such that a

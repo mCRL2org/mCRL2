@@ -11,8 +11,8 @@
 
 #include <iostream>
 #include <string>
+#include <stdio.h>
 #include <boost/test/minimal.hpp>
-#include <boost/filesystem/operations.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
@@ -44,7 +44,7 @@ void test_boolean_expressions()
   boolean_equation_system<> q;
   q.load(filename);
   BOOST_CHECK(p == q);
-  boost::filesystem::remove(boost::filesystem::path(filename));
+  remove(filename.c_str());
 }
 
 void test_bes2pbes()

@@ -29,6 +29,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/data/selection.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -487,7 +488,7 @@ class pins
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
       : m_specification(load_specification(filename)),
-        m_generator(m_specification, data::rewriter(m_specification.data(), data::parse_rewrite_strategy(rewriter_strategy)))
+        m_generator(m_specification, data::rewriter(m_specification.data(), data::used_data_equation_selector(m_specification.data(),lps::find_function_symbols(m_specification),m_specification.global_variables()), data::parse_rewrite_strategy(rewriter_strategy)))
     {
       initialize_read_write_groups();
 

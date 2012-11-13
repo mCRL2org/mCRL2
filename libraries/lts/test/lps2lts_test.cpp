@@ -17,10 +17,11 @@
 #include <time.h>
 #include <iostream>
 #include <sstream>
+#include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lts/detail/exploration_old.h"
+#include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -56,13 +57,13 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
 
   LTS_TYPE result;
   options.outformat = result.type();
-  lts::old::lps2lts_algorithm lps2lts;
+  lts::lps2lts_algorithm lps2lts;
   lps2lts.initialise_lts_generation(&options);
   lps2lts.generate_lts();
   lps2lts.finalise_lts_generation();
 
   result.load(options.lts);
-  boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
+  remove(options.lts.c_str()); // Clean up after ourselves
 
   return result;
 }
@@ -432,9 +433,35 @@ BOOST_AUTO_TEST_CASE(test_well_typedness_of_length_of_list_of_numbers)
   check_lps2lts_specification(spec, 1, 1, 1);
 }
 
+#if 0 // This test has been disabled; it was decided not to fix this issue.
+// The following example illustrates that enumeration can sometimes need
+// a large stack depth.
+// The example was attached to bug #1019, and fails with limited stack,
+// succeeds with unlimited stack.
+BOOST_AUTO_TEST_CASE(test_deep_stack)
+{
+  std::string spec(
+    "sort Packet = struct packet(d0: Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool);\n"
+    "act  Terminate;\n"
+    "proc P(s3: Pos) =\n"
+    "   (s3 == 2) ->\n"
+    "     Terminate .\n"
+    "     P(s3 = 3)\n"
+    " + sum p: Packet.\n"
+    "     (s3 == 1) ->\n"
+    "     tau .\n"
+    "     P(s3 = 2)\n"
+    " + delta;\n"
+    "init P(1);\n"
+  );
+  check_lps2lts_specification(spec, 3, 524289, 2);
+}
+#endif // false
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
+ // Initialise random seed to allow parallel running with lps2lts_test_old
   return 0;
 }
 

@@ -13,10 +13,11 @@
 #define MCRL2_BES_DETAIL_STANDARD_FORM_TRAVERSER_H
 
 #include <iterator>
+#include <map>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

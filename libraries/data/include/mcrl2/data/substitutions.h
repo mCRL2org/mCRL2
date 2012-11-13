@@ -136,6 +136,20 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
     throw std::runtime_error("data::sequence_sequence_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
   }
+
+  std::string to_string() const
+  {
+    std::ostringstream out;
+    out << "[";
+    typename VariableContainer::const_iterator i = variables.begin();
+    typename ExpressionContainer::const_iterator j = expressions.begin();
+    for (; i != variables.end(); ++i, ++j)
+    {
+      out << (i == variables.begin() ? "" : "; ") << data::pp(*i) << " := " << data::pp(*j);
+    }
+    out << "]";
+    return out.str();
+  }
 };
 
 /// \brief Utility function for creating a sequence_sequence_substitution.
@@ -225,6 +239,18 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
   {
     throw std::runtime_error("data::map_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
+  }
+
+  std::string to_string() const
+  {
+    std::ostringstream out;
+    out << "[";
+    for (typename AssociativeContainer::const_iterator i = m_map.begin(); i != m_map.end(); ++i)
+    {
+      out << (i == m_map.begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
+    }
+    out << "]";
+    return out.str();
   }
 };
 

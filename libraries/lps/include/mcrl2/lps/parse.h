@@ -14,7 +14,7 @@
 
 #include <sstream>
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
@@ -182,6 +182,7 @@ specification parse_linear_process_specification(std::istream& spec_stream)
   }
   process::detail::linear_process_conversion_traverser visitor;
   specification result = visitor.convert(pspec);
+  complete_data_specification(result);
   return result;
 }
 /// \brief Parses a linear process specification from a string

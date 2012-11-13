@@ -16,9 +16,8 @@
 #include <cerrno>
 #include <string>
 #include <cstring>
-#include <iostream>
 #include <fstream>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_io.h"
 
@@ -94,7 +93,7 @@ void save_aterm(aterm term, const std::string& filename, bool binary = true)
   }
   else
   {
-    ofstream os;
+    std::ofstream os;
     os.open(filename.c_str());
     if (binary)
     {

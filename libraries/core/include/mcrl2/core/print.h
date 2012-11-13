@@ -16,17 +16,17 @@
 #include <cctype>
 #include <cassert>
 #include <cstdlib>
+#include <list>
 #include <ostream>
 #include <string>
 #include <sstream>
 #include <vector>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/print_format.h"
-#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
@@ -134,6 +134,14 @@ struct printer: public core::traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).print(x.to_string());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <typename T>
+  void operator()(const std::list<T>& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    print_list(x, "", "", ", ");
     static_cast<Derived&>(*this).leave(x);
   }
 

@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 {
   if (argc != 2)
   {
-    std::cerr << "usage: next_state_generator LPS_FILE" << std::endl;
+    mCRL2log(log::warning) << "usage: next_state_generator LPS_FILE" << std::endl;
   }
   else
   {

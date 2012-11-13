@@ -35,6 +35,8 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
+#include "mcrl2/pbes/detail/control_flow.h"
+#include "mcrl2/pbes/detail/is_pfnf.h"
 
 namespace mcrl2
 {
@@ -221,10 +223,9 @@ void pbespareqelm(const std::string& input_filename,
     case quantifier_all:
     case quantifier_finite:
     {
-      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
+      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> my_pbes_rewriter;
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
-      utilities::number_postfix_generator name_generator("UNIQUE_PREFIX");
-      data::data_enumerator<> datae(p.data(), datar, name_generator);
+      data::data_enumerator datae(p.data(), datar);
       data::rewriter_with_variables datarv(datar);
       my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
       pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
@@ -237,6 +238,25 @@ void pbespareqelm(const std::string& input_filename,
 
   // save the result
   p.save(output_filename);
+}
+
+void pbesstategraph(const std::string& input_filename,
+                    const std::string& output_filename,
+                    bool simplify,
+                    bool apply_to_original
+                   )
+{
+  pbes<> p;
+  load_pbes(p, input_filename);
+  pbes_system::normalize(p);
+  pbes_system::detail::control_flow_algorithm algorithm;
+  pbes<> q = algorithm.run(p, simplify, apply_to_original);
+  q.save(output_filename, true, true);
+  if (!q.is_well_typed())
+  {
+    mCRL2log(log::error) << "pbesstategraph error: not well typed!" << std::endl;
+    mCRL2log(log::error) << pbes_system::pp(q) << std::endl;
+  }
 }
 
 } // namespace pbes_system

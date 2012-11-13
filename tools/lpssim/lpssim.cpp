@@ -23,7 +23,7 @@
 #include <cstring>
 #include <cassert>
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -108,7 +108,7 @@ class sim_tool : public rewriter_tool< input_tool >
         lps::detail::instantiate_global_variables(lps_specification);
       }
 
-      lps::simulation simulation(lps_specification);
+      lps::simulation simulation(lps_specification, rewrite_strategy());
       size_t state_index = 0;
 
 

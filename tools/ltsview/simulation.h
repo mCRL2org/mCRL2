@@ -1,67 +1,60 @@
-// Author(s): Bas Ploeger and Carst Tankink
+// Author(s): Bas Ploeger, Carst Tankink, Ruud Koolen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file simulation.h
-/// \brief Header file for Simulation class
 
 #ifndef SIMULATION_H
 #define SIMULATION_H
-// Boost signals and slots
-#include <boost/signal.hpp>
-#include <boost/bind.hpp>
 
-class Transition;
+#include <QList>
+#include <QObject>
+
+class LTS;
 class State;
+class Transition;
 
-class Simulation
+class Simulation : public QObject
 {
-  public:
-    typedef boost::signal<void ()> simulationSignal;
-    typedef boost::signals::connection simConnection;
+  Q_OBJECT
 
   public:
-    Simulation();
+    Simulation(QObject *parent, LTS *lts);
     ~Simulation();
+    void operator=(const Simulation &other);
+    LTS *lts() const { return m_lts; }
+    bool isStarted() const { return m_currentState != 0; }
+    State *initialState() const { return m_initialState; }
+    State *currentState() const { return m_currentState; }
+    Transition *currentTransition() const { return m_currentTransition; }
+    QList<Transition *> history() const { return m_history; }
+    QList<Transition *> availableTransitions() const;
+    bool canUndo() const { return !m_history.isEmpty(); }
 
+  public slots:
     void start();
     void stop();
-    void setInitialState(State* initialState);
+    void setInitialState(State* initialState) { m_initialState = initialState; }
+    void selectTransition(Transition *transition);
+    void followTransition(Transition *transition);
+    void undo();
+    void traceback();
+    bool loadTrace(QString filename);
 
-    std::vector< Transition* > const& getTransHis() const;
-    std::vector< State*> const& getStateHis() const;
-    State* getCurrState() const;
-    std::vector< Transition* > const& getPosTrans() const;
-    Transition* getChosenTrans() const;
-    int getChosenTransi() const;
-    bool getStarted() const;
-
-    // Generates a back trace to initState.
-    // Pre: initState is the initial state for the entire (top level) LTS
-    void traceBack(State* initState);
-    void chooseTrans(int i);
-    void followTrans();
-    void undoStep();
-    void resetSim();
-
-    simConnection connect(simulationSignal::slot_function_type subscriber);
-    simConnection connectSel(simulationSignal::slot_function_type subscriber);
-    void disconnect(simConnection subscriber);
+  signals:
+    void started();
+    void stopped();
+    void changed();
+    void selectionChanged();
 
   private:
-    bool started;
-    int chosenTrans;
-    State* initialState;
-    State* currState;
-    std::vector< Transition* > posTrans;
-    std::vector< State* > stateHis;
-    std::vector< Transition* > transHis;
-    simulationSignal signal;
-    simulationSignal selChangeSignal;
+    LTS *m_lts;
+    State *m_initialState;
+    State *m_currentState;
+    Transition *m_currentTransition;
+    QList<Transition *> m_history;
 };
 
-#endif //SIMULATION_H
+#endif

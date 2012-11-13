@@ -15,8 +15,8 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "mcrl2/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lts/lts_io.h"
@@ -85,20 +85,20 @@ class ltsinfo_tool : public ltsinfo_base
       }
       if (1 < parser.arguments.size())
       {
-        parser.error("too many file arguments");
+        throw parser.error("too many file arguments");
       }
 
       if (parser.options.count("in"))
       {
         if (1 < parser.options.count("in"))
         {
-          parser.error("multiple input formats specified; can only use one");
+          throw parser.error("multiple input formats specified; can only use one");
         }
 
         intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
         if (intype == lts_none || intype == lts_dot)
         {
-          parser.error("option -i/--in has illegal argument '" +
+          throw parser.error("option -i/--in has illegal argument '" +
                        parser.option_argument("in") + "'");
         }
       }

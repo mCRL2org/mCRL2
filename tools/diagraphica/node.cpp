@@ -8,339 +8,45 @@
 //
 /// \file ./node.cpp
 
-#include "wx.hpp" // precompiled headers
-
-#include "mcrl2/exception.h"
 #include "node.h"
 
-#include <string>
-
-// -- constructors and destructors ----------------------------------
-
-using namespace std;
-
-// -------------------------
-Node::Node(const size_t& idx)
-// -------------------------
+void Node::swapTupleVal(size_t idx1, size_t idx2)
 {
-  index   = idx;
-  cluster = NULL;
+  double temp = tuple[idx1];
+  tuple[idx1] = tuple[idx2];
+  tuple[idx2] = temp;
 }
 
-
-// ---------------------------
-Node::Node(
-  const size_t& idx,
-  const vector< double > &tpl)
-// ---------------------------
+void Node::moveTupleVal(size_t idxFr, size_t idxTo)
 {
-  index   = idx;
-  tuple   = tpl;
-  cluster = NULL;
-}
+  double temp = tuple[idxFr];
 
-
-// ----------
-Node::~Node()
-// ----------
-{
-  clearInEdges();
-  clearOutEdges();
-}
-
-
-// -- set functions -------------------------------------------------
-
-
-// ---------------------
-void Node::swapTupleVal(
-  const size_t& idx1,
-  const size_t& idx2)
-// ---------------------
-{
-  if (idx1 < tuple.size() &&
-      idx2 < tuple.size())
+  if (idxFr < idxTo)
   {
-    double temp = tuple[idx1];
-    tuple[idx1] = tuple[idx2];
-    tuple[idx2] = temp;
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Error swapping node tuple values.");
-  }
-}
-
-
-// ---------------------
-void Node::moveTupleVal(
-  const size_t& idxFr,
-  const size_t& idxTo)
-// ---------------------
-{
-  if (idxFr < tuple.size() &&
-      idxTo < tuple.size())
-  {
-    double temp = tuple[idxFr];
-
-    // 2 cases to consider
-    if (idxFr < idxTo)
+    for (size_t i = idxFr; i < idxTo; ++i)
     {
-      // move all values after idxFr 1 pos up
-      for (size_t i = idxFr; i < idxTo; ++i)
-      {
-        tuple[i] = tuple[i+1];
-      }
-      // update idxTo
-      tuple[idxTo] = temp;
+      tuple[i] = tuple[i+1];
     }
-    else if (idxTo < idxFr)
+    tuple[idxTo] = temp;
+  }
+  else if (idxTo < idxFr)
+  {
+    for (size_t i = idxFr; i > idxTo; --i)
     {
-      // move all values before idxFr 1 pos down
-      for (size_t i = idxFr; i > idxTo; --i)
-      {
-        tuple[i] = tuple[i-1];
-      }
-      // update idxTo
-      tuple[idxTo] = temp;
+      tuple[i] = tuple[i-1];
     }
+    tuple[idxTo] = temp;
   }
-  else
+}
+
+void Node::moveTupleVals(std::map<size_t, size_t> &idcsFrTo)
+{
+  std::vector<double> tupleNew(idcsFrTo.size(), -1);
+
+  for (size_t i = 0; i < idcsFrTo.size(); ++i)
   {
-    throw mcrl2::runtime_error("Error moving node tuple value.");
+    tupleNew[idcsFrTo[i]] = tuple[i];
   }
+
+  tuple = tupleNew;
 }
-
-
-// --------------------------------------------------
-void Node::moveTupleVals(map< size_t , size_t > &idcsFrTo)
-// --------------------------------------------------
-{
-  if (idcsFrTo.size() == tuple.size())
-  {
-    try
-    {
-      vector< double > tupleNew;
-
-      // init new tuple
-      {
-        for (size_t i = 0; i < idcsFrTo.size(); ++i)
-        {
-          tupleNew.push_back(-1);
-        }
-      }
-
-      // update new tuple
-      {
-        for (size_t i = 0; i < idcsFrTo.size(); ++i)
-        {
-          tupleNew[ idcsFrTo[i] ] = tuple[i];
-        }
-      }
-
-      // set tuple to new list of attributes
-      tuple.clear();
-      tuple = tupleNew;
-      tupleNew.clear();
-    }
-    catch (...)
-    {
-      throw mcrl2::runtime_error("Error moving node tuple values.");
-    }
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Error moving node tuple values.");
-  }
-}
-
-
-// --------------------
-void Node::addTupleVal(
-  const size_t& idx,
-  const double& val)
-// --------------------
-{
-  tuple.insert(
-    tuple.begin() + idx,
-    val);
-}
-
-
-// -------------------------------------
-void Node::delTupleVal(const size_t& idx)
-// -------------------------------------
-{
-  tuple.erase(tuple.begin() + idx);
-}
-
-
-// -----------------------------
-void Node::addInEdge(Edge* in)
-// -----------------------------
-{
-  inEdges.push_back(in);
-}
-
-
-// ---------------------------------------------
-void Node::setInEdges(const vector< Edge* > e)
-// ---------------------------------------------
-{
-  clearInEdges();
-  inEdges = e;
-}
-
-
-// -------------------------------
-void Node::addOutEdge(Edge* out)
-// -------------------------------
-{
-  outEdges.push_back(out);
-}
-
-
-// ----------------------------------------------
-void Node::setOutEdges(const vector< Edge* > e)
-// ----------------------------------------------
-{
-  clearOutEdges();
-  outEdges = e;
-}
-
-
-// --------------------------------
-void Node::setCluster(Cluster* c)
-// --------------------------------
-{
-  cluster = c;
-}
-
-
-// -- get functions -------------------------------------------------
-
-
-// -----------------
-size_t Node::getIndex()
-// -----------------
-{
-  return index;
-}
-
-
-// ---------------------
-size_t Node::getSizeTuple()
-// ---------------------
-{
-  return tuple.size();
-}
-
-
-// ------------------------------------
-double Node::getTupleVal(const size_t& idx)
-// ------------------------------------
-{
-  if (idx < tuple.size())
-  {
-    return tuple[idx];
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Error retrieving node tuple value.");
-  }
-}
-
-
-// -----------------------
-size_t Node::getSizeInEdges()
-// -----------------------
-{
-  return inEdges.size();
-}
-
-
-// ------------------------------------
-Edge* Node::getInEdge(const size_t& idx)
-// ------------------------------------
-{
-  if (idx < inEdges.size())
-  {
-    return inEdges[idx];
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Error retrieving node incoming edge.");
-  }
-}
-
-
-// ------------------------
-size_t Node::getSizeOutEdges()
-// ------------------------
-{
-  return outEdges.size();
-}
-
-
-// -------------------------------------
-Edge* Node::getOutEdge(const size_t& idx)
-// -------------------------------------
-{
-  if (idx < outEdges.size())
-  {
-    return outEdges[idx];
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Error retrieving node outgoing edge.");
-  }
-}
-
-
-// ------------------------
-Cluster* Node::getCluster()
-// ------------------------
-{
-  return cluster;
-}
-
-
-// -- clear functions -----------------------------------------------
-
-
-// ----------------------
-void Node::clearInEdges()
-// ----------------------
-{
-  for (size_t i = 0; i < inEdges.size(); ++i)
-  {
-    inEdges[i] = NULL;
-  }
-  inEdges.clear();
-}
-
-
-// -----------------------
-void Node::clearOutEdges()
-// -----------------------
-{
-  for (size_t i = 0; i < outEdges.size(); ++i)
-  {
-    outEdges[i] = NULL;
-  }
-  outEdges.clear();
-}
-
-
-// ----------------------
-void Node::clearCluster()
-// ----------------------
-{
-  cluster = NULL;
-}
-
-
-// -- private utility functions -------------------------------------
-
-
-// -- end -----------------------------------------------------------

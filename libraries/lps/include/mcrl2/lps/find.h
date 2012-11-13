@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_FIND_H
 #define MCRL2_LPS_FIND_H
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/find.h"
@@ -24,6 +24,43 @@ namespace mcrl2
 
 namespace lps
 {
+
+namespace detail
+{
+/// \cond INTERNAL_DOCS
+template <template <class> class Traverser, class OutputIterator>
+struct find_action_labels_traverser: public Traverser<find_action_labels_traverser<Traverser, OutputIterator> >
+{
+  typedef Traverser<find_action_labels_traverser<Traverser, OutputIterator> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  OutputIterator out;
+
+  find_action_labels_traverser(OutputIterator out_)
+    : out(out_)
+  {}
+
+  void operator()(const lps::action_label& x)
+  {
+    *out = x;
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Traverser, class OutputIterator>
+find_action_labels_traverser<Traverser, OutputIterator>
+make_find_action_labels_traverser(OutputIterator out)
+{
+  return find_action_labels_traverser<Traverser, OutputIterator>(out);
+}
+/// \endcond
+
+} // namespace detail
 
 //--- start generated lps find code ---//
 /// \brief Returns all variables that occur in an object
@@ -165,6 +202,27 @@ bool search_free_variable(const Container& container, const data::variable& d)
   // TODO: replace this by a more efficient implementation
   std::set<data::variable> variables = lps::find_free_variables(container);
   return variables.find(d) != variables.end();
+}
+
+/// \brief Returns all action labels that occur in an object
+/// \param[in] x an object containing action labels
+/// \param[in,out] o an output iterator to which all action labels occurring in x are written.
+/// \return All action labels that occur in the term x
+template <typename T, typename OutputIterator>
+void find_action_labels(const T& x, OutputIterator o)
+{
+  lps::detail::make_find_action_labels_traverser<lps::action_label_traverser>(o)(x);
+}
+
+/// \brief Returns all action labels that occur in an object
+/// \param[in] x an object containing action labels
+/// \return All action labels that occur in the object x
+template <typename T>
+std::set<lps::action_label> find_action_labels(const T& x)
+{
+  std::set<lps::action_label> result;
+  lps::find_action_labels(x, std::inserter(result, result.end()));
+  return result;
 }
 
 } // namespace lps

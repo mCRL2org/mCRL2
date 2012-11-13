@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/dparser.h"
 #include "mcrl2/core/detail/dparser_functions.h"
 

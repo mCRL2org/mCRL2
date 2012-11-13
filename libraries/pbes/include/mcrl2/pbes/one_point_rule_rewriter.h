@@ -16,6 +16,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/replace.h"
 
@@ -34,6 +35,16 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
   using super::leave;
   using super::operator();
 
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+  pbes_expression operator()(const imp& x)
+  {
+    return derived()(or_(not_(x.left()), x.right()));
+  }
+
   pbes_expression operator()(const exists& x)
   {
     namespace a = data::detail::data_accessors;
@@ -46,9 +57,9 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
     for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
     {
-      // check if the term *i corresponds to (v == e), with v a quantifier variable.
       if (data::is_data_expression(*i))
       {
+        // check if the term *i corresponds to (v == e), with v a quantifier variable.
         if (data::is_equal_to_application(data::data_expression(*i)))
         {
           data::data_expression left = a::left(*i);
@@ -65,6 +76,15 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
             variables.erase(data::variable(right));
             to_be_removed.push_back(i);
           }
+        }
+        // check if the term *i corresponds to b, with b a boolean quantifier variable.
+        else if (data::is_variable(*i))
+        {
+          assert(data::sort_bool::is_bool(data::variable(*i).sort()));
+          data::variable b = *i;
+          sigma[b] = data::sort_bool::true_();
+          variables.erase(b);
+          to_be_removed.push_back(i);
         }
       }
     }
@@ -102,9 +122,9 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
     for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
     {
-      // check if the term *i corresponds to (v != e), with v a quantifier variable.
       if (data::is_data_expression(*i))
       {
+        // check if the term *i corresponds to (v != e), with v a quantifier variable.
         if (data::is_not_equal_to_application(data::data_expression(*i)))
         {
           data::data_expression left = a::left(*i);
@@ -121,6 +141,19 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
             variables.erase(data::variable(right));
             to_be_removed.push_back(i);
           }
+        }
+      }
+      // check if the term *i corresponds to !b, with b a boolean quantifier variable.
+      else if (is_not(*i))
+      {
+        pbes_expression e = not_(atermpp::aterm_appl(*i)).operand();
+        if (data::is_variable(e) && variables.find(data::variable(e)) != variables.end())
+        {
+          data::variable b = e;
+          assert(data::sort_bool::is_bool(b.sort()));
+          sigma[b] = data::sort_bool::false_();
+          variables.erase(b);
+          to_be_removed.push_back(i);
         }
       }
     }
@@ -166,7 +199,7 @@ class one_point_rule_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>()(x);
+      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>()(detail::data2pbes(x));
     }
 };
 

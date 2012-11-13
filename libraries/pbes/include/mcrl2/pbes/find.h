@@ -22,7 +22,7 @@
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/add_binding.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

@@ -9,6 +9,7 @@
 /// \file mcrl2/pbes/pbesinst_algorithm.h
 /// \brief Algorithm for instantiating a PBES.
 
+#include <cassert>
 #include <set>
 #include <iostream>
 #include <sstream>
@@ -163,7 +164,7 @@ class pbesinst_algorithm
         pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::variable_list()), psi_e);
         if (m_print_equations)
         {
-          std::cerr << pbes_system::pp(eqn.symbol()) << " " << pbes_system::pp(X_e) << " = " << pbes_system::pp(psi_e) << std::endl;
+          mCRL2log(log::info) << pbes_system::pp(eqn.symbol()) << " " << pbes_system::pp(X_e) << " = " << pbes_system::pp(psi_e) << std::endl;
         }
         E[index].push_back(new_eqn);
         mCRL2log(log::verbose) << print_equation_count(++m_equation_count);

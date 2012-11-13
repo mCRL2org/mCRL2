@@ -267,9 +267,6 @@ struct equal_data_parameters_builder
   /// \brief Adds the expression 'a == b' to result.
   void operator()()
   {
-    using namespace data::lazy;
-    namespace d = data;
-
     std::vector<data::data_expression> v;
     std::vector<action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
@@ -280,10 +277,10 @@ struct equal_data_parameters_builder
       data::data_expression_list::iterator i1 = d1.begin(), i2 = d2.begin();
       for (     ; i1 != d1.end(); ++i1, ++i2)
       {
-        v.push_back(d::lazy::equal_to(*i1, *i2));
+        v.push_back(data::lazy::equal_to(*i1, *i2));
       }
     }
-    data::data_expression expr = d::lazy::join_and(v.begin(), v.end());
+    data::data_expression expr = data::lazy::join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
     mCRL2log(debug) << "  <and-term> " << data::pp(expr) << std::endl;
 #endif
@@ -415,6 +412,46 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_and(z.begin(), z.end());
   return result;
+}
+
+/// \brief Represents the name of a multi action
+typedef std::multiset<core::identifier_string> multi_action_name;
+
+/// \brief Represents a set of multi action names
+typedef std::set<multi_action_name> multi_action_name_set;
+
+/// \brief Pretty print function for a multi action name
+inline
+std::string pp(const multi_action_name& x)
+{
+  std::ostringstream out;
+  for (multi_action_name::const_iterator i = x.begin(); i != x.end(); ++i)
+  {
+    if (i != x.begin())
+    {
+      out << " | ";
+    }
+    out << core::pp(*i);
+  }
+  return out.str();
+}
+
+/// \brief Pretty print function for a set of multi action names
+inline
+std::string pp(const multi_action_name_set& A)
+{
+  std::ostringstream out;
+  out << "{";
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    if (i != A.begin())
+    {
+      out << ", ";
+    }
+    out << pp(*i);
+  }
+  out << "}";
+  return out.str();
 }
 
 } // namespace lps

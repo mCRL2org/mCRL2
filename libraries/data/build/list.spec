@@ -15,7 +15,7 @@
 
 sort List(S) <"list">;
 
-cons [] <"nil"> : List(S);
+cons [] <"empty"> : List(S);
      |> <"cons_"> : S <"left"> # List(S) <"right"> -> List(S);
 
 map in <"in"> : S <"left"> # List(S) <"right"> -> Bool;

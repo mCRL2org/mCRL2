@@ -87,12 +87,12 @@ class pbes_parelm_algorithm
     template <typename Container>
     void print_container(const Container& v, std::string message = "<variables>") const
     {
-      std::cerr << message << std::endl;
+      mCRL2log(log::info) << message << std::endl;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
-        std::cerr << *i << " ";
+        mCRL2log(log::info) << *i << " ";
       }
-      std::cerr << std::endl;
+      mCRL2log(log::info) << std::endl;
     }
 
     /// \brief Prints a map to standard error
@@ -101,12 +101,12 @@ class pbes_parelm_algorithm
     template <typename Container>
     void print_map(const Container& v, std::string message = "<variables>") const
     {
-      std::cerr << message << std::endl;
+      mCRL2log(log::info) << message << std::endl;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
-        std::cerr << i->first << " -> " << i->second << std::endl;
+        mCRL2log(log::info) << i->first << " -> " << i->second << std::endl;
       }
-      std::cerr << std::endl;
+      mCRL2log(log::info) << std::endl;
     }
 
     /// \endcond
@@ -165,7 +165,7 @@ class pbes_parelm_algorithm
           int k = variable_index(i->variable().parameters(), *j);
           if (k < 0)
           {
-            std::cerr << "<variable error>" << data::pp(*j) << std::endl;
+            mCRL2log(log::error) << "<variable error>" << data::pp(*j) << std::endl;
             continue;
           }
           v.insert(offset + k);

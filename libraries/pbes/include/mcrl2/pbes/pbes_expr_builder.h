@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_PBES_EXPR_BUILDER_H
 #define MCRL2_PBES_PBES_EXPR_BUILDER_H
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
@@ -178,7 +178,7 @@ struct pbes_expr_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-    std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
     pbes_expression_builder_increase_indent();
 #endif
 
@@ -296,7 +296,7 @@ struct pbes_expr_builder
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
     pbes_expression_builder_decrease_indent();
-    std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -439,7 +439,7 @@ struct pbes_expr_builder<Term, void>
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-    std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
     pbes_expression_builder_increase_indent();
 #endif
 
@@ -557,7 +557,7 @@ struct pbes_expr_builder<Term, void>
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
     pbes_expression_builder_decrease_indent();
-    std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;

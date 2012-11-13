@@ -249,10 +249,6 @@ an addition check is performed.
  
    assert( gsIsSpecV1( new_alpha_spec ) );
 
-Source
-------
-The complete source tutorial for the source can be found `here <http://mcrl2.org/mcrl2/wiki/index.php/CoreLibraryTutorial.cpp>`_.
-
 References
 ----------
 

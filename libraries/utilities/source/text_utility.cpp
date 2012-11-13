@@ -18,7 +18,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -75,7 +76,7 @@ std::string read_text(const std::string& filename, bool warn)
   {
     if (warn)
     {
-      std::cerr << "Could not open input file: " << filename << std::endl;
+      mCRL2log(log::warning) << "Could not open input file: " << filename << std::endl;
       return "";
     }
     else
@@ -209,7 +210,7 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
   return string_join(result, "\n");
 }
 
-/// \brief Test if a string is a number. 
+/// \brief Test if a string is a number.
 /// \param s A string of text.
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s)

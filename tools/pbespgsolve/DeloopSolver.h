@@ -12,7 +12,7 @@
 
 #include "SmallProgressMeasures.h"
 #include "DenseSet.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 #include "SCC.h"
 #include <deque>
 #include <string>
@@ -25,7 +25,7 @@
     with a new solver.
 
     Similar to the DecycleSolver, except being less general yet faster. */
-class DeloopSolver : public ParityGameSolver, public virtual Logger
+class DeloopSolver : public ParityGameSolver
 {
 public:
     DeloopSolver( const ParityGame &game, ParityGameSolverFactory &pgsf,

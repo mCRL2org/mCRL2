@@ -62,7 +62,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
     int prio;
     while ((prio = first_inversion(game)) < game.d())
     {
-        debug("prio=%d", prio);
+        mCRL2log(mcrl2::log::debug) << "prio=" << prio << std::endl;
 
         const StaticGraph &graph = game.graph();
         const verti V = graph.V();
@@ -77,10 +77,10 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
             {
                 if (game.priority(v) < prio) min_prio_attr.insert(v);
             }
-            debug("|min_prio|=%d", (int)min_prio_attr.size());
+            mCRL2log(mcrl2::log::debug) << "|min_prio|=" << min_prio_attr.size() << std::endl;
             assert(!min_prio_attr.empty());
             make_attractor_set(game, player, min_prio_attr, strat);
-            debug("|min_prio_attr|=%d", (int)min_prio_attr.size());
+            mCRL2log(mcrl2::log::debug) << "|min_prio_attr|=" << min_prio_attr.size() << std::endl;
             if (min_prio_attr.size() == V) break;
             get_complement(V, min_prio_attr.begin(), min_prio_attr.end())
                 .swap(unsolved);
@@ -105,10 +105,10 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
                     lost_attr.insert(*it);
                 }
             }
-            debug("|lost|=%d", (int)lost_attr.size());
+            mCRL2log(mcrl2::log::debug) << "|lost|=" << lost_attr.size() << std::endl;
             if (lost_attr.empty()) break;
             make_attractor_set(game, opponent, lost_attr, strat);
-            debug("|lost_attr|=%d", (int)lost_attr.size());
+            mCRL2log(mcrl2::log::debug) << "|lost_attr|=" << lost_attr.size() << std::endl;
             get_complement(V, lost_attr.begin(), lost_attr.end())
                 .swap(unsolved);
         }

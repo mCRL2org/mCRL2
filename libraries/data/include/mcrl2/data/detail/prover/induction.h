@@ -140,7 +140,7 @@ class Induction
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       const variable v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      const substitution v_substitution1(v_induction_variable, sort_list::nil(sort_expression(v_induction_variable_sort)));
+      const substitution v_substitution1(v_induction_variable, sort_list::empty(sort_expression(v_induction_variable_sort)));
       const data_expression v_base_case = aterm_cast<data_expression>(v_substitution1(f_formula));
 
       substitution v_substitution2 = substitution(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
@@ -197,7 +197,7 @@ class Induction
       const variable_list v_list_of_dummies = push_front(a_list_of_dummies, v_dummy);
       const substitution v_substitution1(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
       const data_expression v_formula_1 = aterm_cast<data_expression>(v_substitution1(a_formula));
-      const substitution v_substitution2(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
+      const substitution v_substitution2(v_variable, sort_list::empty(sort_expression(v_variable_sort)));
       const data_expression v_formula_2 = aterm_cast<data_expression>(v_substitution2(a_formula));
       const data_expression v_hypothesis = aterm_cast<data_expression>(v_substitution2(a_hypothesis));
 

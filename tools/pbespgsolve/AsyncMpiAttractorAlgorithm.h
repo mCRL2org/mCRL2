@@ -11,7 +11,7 @@
 #define ASYNC_MPI_ATTRACTOR_ALGORITHM_H_INCLUDED
 
 #include "MpiAttractorAlgorithm.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 
 /*! Attractor set computation implementation that runs asynchronously; i.e. all
    worker processes send and receive vertices to be added to the set while they

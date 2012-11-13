@@ -75,13 +75,22 @@ void pbespp(const std::string& input_filename,
            );
 
 void txt2pbes(const std::string& input_filename,
-              const std::string& output_filename);
+              const std::string& output_filename,
+              bool normalize
+             );
 
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
-              const std::string& formfilename,
-              bool timed
+              const std::string& formula_filename,
+              bool timed,
+              bool structured,
+              bool unoptimized
              );
+
+void complps2pbes(const std::string& input_filename,
+                  const std::string& output_filename,
+                  const std::string& formula_filename
+                 );
 
 void lpsbisim2pbes(const std::string& input_filename1,
                    const std::string& input_filename2,
@@ -103,6 +112,12 @@ void pbesabsinthe(const std::string& input_filename,
                   bool print_used_function_symbols,
                   bool enable_logging
                  );
+
+void pbesstategraph(const std::string& input_filename,
+                    const std::string& output_filename,
+                    bool simplify,
+                    bool apply_to_original
+                   );
 
 } // namespace pbes_system
 

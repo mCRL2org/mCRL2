@@ -20,7 +20,6 @@
 #include <cctype>
 
 #include "boost/utility.hpp"
-#include "boost/lexical_cast.hpp"
 
 #include <cstdio>
 #include <cerrno>
@@ -231,18 +230,11 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
           else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
           {
-            try
+            rewriter::strategy new_strategy = parse_rewrite_strategy(s);
+            if (new_strategy!=m_rewrite_strategy)
             {
-              rewriter::strategy new_strategy = boost::lexical_cast< rewriter::strategy >(s);
-              if (new_strategy!=m_rewrite_strategy)
-              {
-                m_rewrite_strategy=new_strategy;
-                rewr=rewriter(spec,m_rewrite_strategy);
-              }
-            }
-            catch (boost::bad_lexical_cast&)
-            {
-              throw mcrl2::runtime_error("The string " + s + " does not describe a rewrite strategy.");
+              m_rewrite_strategy=new_strategy;
+              rewr=rewriter(spec,m_rewrite_strategy);
             }
           }
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))

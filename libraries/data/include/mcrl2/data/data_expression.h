@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
-#include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -24,6 +23,7 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

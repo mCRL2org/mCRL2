@@ -17,6 +17,7 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -39,7 +40,7 @@ std::string read_text(const std::string& filename, bool warn=false)
   {
     if (warn)
     {
-      std::cerr << "Could not open input file: " << filename << std::endl;
+      mCRL2log(log::warning) << "Could not open input file: " << filename << std::endl;
     }
     return "";
   }

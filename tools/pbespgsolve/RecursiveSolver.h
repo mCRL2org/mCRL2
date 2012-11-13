@@ -11,7 +11,7 @@
 #define RECURSIVE_SOLVER_H_INCLUDED
 
 #include "ParityGameSolver.h"
-#include "Logger.h"
+#include "mcrl2/utilities/logger.h"
 
 /*! Provides a view of a strategy corresponding to a subset of the vertex set.
     Note that elements of the substrategy can be written to, and the underlying
@@ -109,7 +109,7 @@ int first_inversion(const ParityGame &game);
 
 
 /*! Parity game solver implementing Zielonka's recursive algorithm. */
-class RecursiveSolver : public ParityGameSolver, public virtual Logger
+class RecursiveSolver : public ParityGameSolver
 {
 public:
     RecursiveSolver(const ParityGame &game);

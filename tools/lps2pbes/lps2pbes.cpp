@@ -28,8 +28,10 @@ class lps2pbes_tool : public input_output_tool
     typedef input_output_tool super;
 
   protected:
+    std::string formula_filename;
     bool timed;
-    std::string formfilename;
+    bool structured;
+    bool unoptimized;
 
     std::string synopsis() const
     {
@@ -43,19 +45,22 @@ class lps2pbes_tool : public input_output_tool
                       "use the state formula from FILE", 'f');
       desc.add_option("timed",
                       "use the timed version of the algorithm, even for untimed LPS's", 't');
+      desc.add_option("structured",
+                      "generate equations such that no mixed conjunctions and disjunctions occur", 's');
+      desc.add_option("unoptimized",
+                      "do not simplify boolean expressions", 'u');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-
-      timed     = 0 < parser.options.count("timed");
-
-      //check for presence of -f
       if (parser.options.count("formula"))
       {
-        formfilename = parser.option_argument("formula");
+        formula_filename = parser.option_argument("formula");
       }
+      timed       = parser.options.count("timed") > 0;
+      structured  = parser.options.count("structured") > 0;
+      unoptimized = parser.options.count("unoptimized") > 0;
     }
 
   public:
@@ -73,8 +78,10 @@ class lps2pbes_tool : public input_output_tool
     {
       lps2pbes(input_filename(),
                output_filename(),
-               formfilename,
-               timed
+               formula_filename,
+               timed,
+               structured,
+               unoptimized
              );
       return true;
     }
@@ -86,8 +93,10 @@ class lps2pbes_gui_tool: public mcrl2_gui_tool<lps2pbes_tool>
   public:
     lps2pbes_gui_tool()
     {
-      m_gui_options["timed"] = create_checkbox_widget();
       m_gui_options["formula"] = create_filepicker_widget("modal mu-calculus files (*.mcf)|*.mcf|Text files(*.txt)|*.txt|All Files (*.*)|*.*");
+      m_gui_options["timed"] = create_checkbox_widget();
+      m_gui_options["structured"] = create_checkbox_widget();
+      m_gui_options["unoptimized"] = create_checkbox_widget();
     }
 };
 

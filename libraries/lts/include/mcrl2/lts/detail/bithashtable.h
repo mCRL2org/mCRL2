@@ -14,7 +14,8 @@
 #define MCRL2_LTS_DETAIL_BITHASHTABLE_H
 
 #include <vector>
-#include "mcrl2/exception.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

@@ -43,10 +43,6 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
     /// \brief The name of the file containing the invariant.
     std::string m_invariant_file_name;
 
-    /// \brief The number of the summand that is eliminated or simplified. If this number is 0,
-    /// \brief all summands will be simplified or eliminated.
-    size_t m_summand_number;
-
     /// \brief The flag indicating whether or not the invariance of the formula as found in
     /// \brief invelm_tool::m_invariant_file_name is checked.
     bool m_no_check;
@@ -115,19 +111,6 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       {
         m_dot_file_name = parser.option_argument_as< std::string >("print-dot");
       }
-      if (parser.options.count("summand"))
-      {
-        m_summand_number = parser.option_argument_as< size_t >("summand");
-
-        if (m_summand_number < 1)
-        {
-          parser.error("The summand number must be greater than or equal to 1.\n");
-        }
-        else
-        {
-          mCRL2log(verbose) << "Eliminating or simplifying summand number " <<  m_summand_number << "." << std::endl;
-        }
-      }
       if (parser.options.count("time-limit"))
       {
         m_time_limit = parser.option_argument_as< int >("time-limit");
@@ -146,8 +129,6 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       desc.
       add_option("invariant", make_file_argument("INVFILE"),
                  "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
-      add_option("summand", make_mandatory_argument("NUM"),
-                 "eliminate or simplify the summand with number NUM only", 's').
       add_option("no-check",
                  "do not check if the invariant holds before eliminating unreachable summands", 'n').
       add_option("no-elimination",
@@ -183,7 +164,6 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
         "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
         "\n"
         "The tool can also be used to simplify the conditions of the summands of the given LPS."),
-      m_summand_number(0),
       m_no_check(false),
       m_no_elimination(false),
       m_simplify_all(false),
@@ -202,7 +182,6 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
                 m_dot_file_name,
                 rewrite_strategy(),
                 solver_type(),
-                m_summand_number,
                 m_no_check,
                 m_no_elimination,
                 m_simplify_all,
@@ -216,10 +195,10 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
     }
 };
 
-class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
+class lpsinvelm_gui_tool: public mcrl2_gui_tool<invelm_tool>
 {
   public:
-    lpsinvelm_giu_tool()
+    lpsinvelm_gui_tool()
     {
 
       m_gui_options["counter-example"] = create_checkbox_widget();
@@ -238,5 +217,5 @@ class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
 
 int main(int argc, char* argv[])
 {
-  return lpsinvelm_giu_tool().execute(argc, argv);
+  return lpsinvelm_gui_tool().execute(argc, argv);
 }

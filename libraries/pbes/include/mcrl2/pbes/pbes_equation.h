@@ -196,7 +196,7 @@ class pbes_equation
           )
          )
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the names of the binding variable parameters are not unique" << std::endl;
+        mCRL2log(log::error) << "pbes_equation::is_well_typed() failed: the names of the binding variable parameters are not unique" << std::endl;
         return false;
       }
 
@@ -211,7 +211,7 @@ class pbes_equation
           )
          )
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pbes_system::pp(formula()) << std::endl;
+        mCRL2log(log::error) << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pbes_system::pp(formula()) << std::endl;
         return false;
       }
 
@@ -220,7 +220,7 @@ class pbes_equation
       nvisitor.visit(formula());
       if (nvisitor.result)
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the quantifier variable " << data::pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
+        mCRL2log(log::error) << "pbes_equation::is_well_typed() failed: the quantifier variable " << data::pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
         return false;
       }
 

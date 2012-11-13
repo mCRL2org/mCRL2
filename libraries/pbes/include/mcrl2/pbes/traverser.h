@@ -68,11 +68,12 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(const pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -221,8 +222,8 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(const pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
@@ -372,8 +373,8 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(const pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
@@ -530,11 +531,12 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(const pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -692,11 +694,12 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const pbes_system::pbes<Container>& x)
+  template <typename PbesEquationContainer>
+  void operator()(const pbes_system::pbes<PbesEquationContainer>& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.initial_state());
     static_cast<Derived&>(*this).leave(x);
   }

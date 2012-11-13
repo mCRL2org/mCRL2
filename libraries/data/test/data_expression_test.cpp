@@ -286,7 +286,7 @@ void assignment_test()
 
 void system_defined_check()
 {
-  BOOST_CHECK(sort_list::nil(sort_pos::pos()) != sort_list::nil(sort_nat::nat()));
+  BOOST_CHECK(sort_list::empty(sort_pos::pos()) != sort_list::empty(sort_nat::nat()));
 }
 
 int test_main(int argc, char** argv)

@@ -114,16 +114,14 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
     {
       variable_list d = forall(x).variables();
       data_expression y = derived()(forall(x).body());
-      d = data::detail::set_intersection(d, free_variables(y));
-      return utilities::optimized_forall(d, y);
+      return utilities::optimized_forall(d, y, true);
     }
 
     data_expression operator()(const exists& x) // x = exists d. y
     {
       variable_list d = exists(x).variables();
       data_expression y = derived()(exists(x).body());
-      d = data::detail::set_intersection(d, free_variables(y));
-      return utilities::optimized_exists(d, y);
+      return utilities::optimized_exists(d, y, true);
     }
 };
 

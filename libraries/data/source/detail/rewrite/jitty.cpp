@@ -23,9 +23,8 @@
 #include "boost/config.hpp"
 
 #include "mcrl2/utilities/detail/memory_utility.h"
-#include "mcrl2/exception.h"
-#include "mcrl2/atermpp/aterm_list.h"
-// #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct_core.h"
 
 using namespace mcrl2::log;
@@ -72,14 +71,12 @@ static function_symbol get_function_symbol_of_head(const data_expression &t)
   return get_function_symbol_of_head(application(t).head());
 }
 
-
-static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitty *rewriter)
+aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
 {
-
   size_t max_arity = 0;
   for (data_equation_list::const_iterator l=rules1.begin(); l!=rules1.end(); ++l)
   {
-    const size_t current_arity=rewriter->toRewriteFormat(l->lhs()).size();
+    const size_t current_arity=toRewriteFormat(l->lhs()).size();
     if (current_arity > max_arity + 1)
     {
       max_arity = current_arity-1;
@@ -92,9 +89,9 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
   {
     rules = push_front<aterm>(rules,
                        push_front<aterm>(push_front<aterm>(push_front<aterm>(push_front<aterm>(aterm_list(),
-                                         rewriter->toRewriteFormat(j->rhs())),
-                                         rewriter->toRewriteFormat(j->lhs())),
-                                         rewriter->toRewriteFormat(j->condition())),
+                                         toRewriteFormat(j->rhs())),
+                                         toRewriteFormat(j->lhs())),
+                                         toRewriteFormat(j->condition())),
                                          aterm_cast<const aterm_list>(j->variables())));
   }
   rules = reverse(rules);
@@ -206,7 +203,13 @@ static aterm_list create_strategy(const data_equation_list &rules1, RewriterJitt
       {
         if (aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()).empty())
         {
-          strat = push_front(strat, (pop_front(aterm_cast<const aterm_list>(m.front()))).front());
+          aterm rule = pop_front(aterm_cast<const aterm_list>(m.front())).front();
+          strat = push_front(strat, rule);
+          size_t len = aterm_cast<const aterm_list>(aterm_cast<const aterm_list>(rule).front()).size();
+          if (len>MAX_LEN) 
+          {
+            MAX_LEN=len;
+          }
         }
         else
         {
@@ -278,6 +281,7 @@ RewriterJitty::RewriterJitty(
 {
   m_data_specification_for_enumeration = data_spec;
 
+  MAX_LEN=0;
   max_vars = 0;
   need_rebuild = false;
 
@@ -328,7 +332,7 @@ RewriterJitty::RewriterJitty(
     }
     else
     {
-      jitty_strat[i.value()] = create_strategy(reverse(it->second), this);
+      jitty_strat[i.value()] = create_strategy(reverse(it->second));
     }
   }
 }
@@ -757,6 +761,7 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
         }
 
         size_t max_len = aterm_cast<const aterm_list>(rule.front()).size();
+        assert(max_len<=MAX_LEN);
         size_t number_of_vars=0;
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
@@ -873,7 +878,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
       make_jitty_strat_sufficiently_larger(j);
       if (!jitty_strat[j].defined())
       {
-        jitty_strat[j] = create_strategy(opids->second, this);
+        jitty_strat[j] = create_strategy(opids->second);
       }
     }
     need_rebuild = false;

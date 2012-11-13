@@ -11,9 +11,30 @@
 
 namespace MathUtils
 {
+
 const double PI = 3.14159265359;
-int round_to_int(float f);
-float deg_to_rad(float deg);
-float rad_to_deg(float rad);
+
+static inline int round_to_int(float f)
+{
+  if (f >= 0.0f)
+  {
+    return (int)(f + 0.5f);
+  }
+  else
+  {
+    return (int)(f - 0.5f);
+  }
+}
+
+static inline float deg_to_rad(float deg)
+{
+  return deg * (float)PI / 180.0f;
+}
+
+static inline float rad_to_deg(float rad)
+{
+  return rad * 180.0f / (float)PI;
+}
+
 }
 #endif

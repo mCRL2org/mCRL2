@@ -122,7 +122,7 @@ Furthermore, integration with CADP and LTSmin must be tested on Linux::
     
 *LTSmin support*
 
-  Run the following commands:
+  Run the following commands::
   
     $ mkdir /tmp/mcrl2-ltsmin-build
     $ cd /tmp/mcrl2-ltsmin-build
@@ -222,12 +222,12 @@ Windows::
   set PATH=%PATH%;"C:\Program Files (x86)\CMake 2.8\bin";"C:\Program Files\SlikSvn\bin"
   mkdir package
   cd package
-  cmake ..\mcrl2-VERSION -G "NMake Makefiles" -DSVNVERSION:FILEPATH="C:\Program Files\SlikSvn\bin\svnversion" -DwxWidgets_CONFIGURATION="msw" -DwxWidgets_USE_REL_AND_DBG=ON -DSVNCOMMAND:FILEPATH="C:\Program Files\SlikSvn\bin\svn" -DBUILDNAME=MSVC9-Win7-X64-Release -DBOOST_ROOT:PATH="C:\Projects\boost_1_48_0" -DwxWidgets_ROOT_DIR:PATH="C:\Projects\wxmsw_2_8_11" -DMCRL2_ENABLE_DEPRECATED=ON -DMCRL2_ENABLE_EXPERIMENTAL=ON -DCMAKE_BUILD_TYPE:STRING="Release" -DMCRL2_PACKAGE_RELEASE=ON
+  cmake ..\mcrl2-VERSION -G "NMake Makefiles" -DSVNVERSION:FILEPATH="C:\Program Files\SlikSvn\bin\svnversion" -DSVNCOMMAND:FILEPATH="C:\Program Files\SlikSvn\bin\svn" -DBUILDNAME=MSVC9-Win7-X64-Release -DBOOST_ROOT:PATH="C:\Projects\boost_1_48_0" -DMCRL2_ENABLE_DEPRECATED=ON -DMCRL2_ENABLE_EXPERIMENTAL=ON -DCMAKE_BUILD_TYPE:STRING="Release" -DMCRL2_PACKAGE_RELEASE=ON
   cpack -G NSIS
 
 An alternative way to create a Windows installer, used on a 32bit system::
 
-  cmake . -DBOOST_ROOT=D:/build/boost/boost_1_47 -DwxWidgets_ROOT_DIR=d:/build/wxWidgets-2.8.12 -DMCRL2_WITH_WXSTC=ON -DMCRL2_PACKAGE_RELEASE=ON
+  cmake . -DBOOST_ROOT=D:/build/boost/boost_1_47 -DMCRL2_PACKAGE_RELEASE=ON
   cmake --build . --config Release --target ALL_BUILD
   cpack -G NSIS
 
@@ -239,7 +239,7 @@ Mac OS-X installer for 10.5+
 First check out ``tags/mcrl2-VERSION`` using a subversion client, assume to
 ``mcrl2-VERSION``.
 
-Then statically build and install wxWidgets 2.8.12 for the i386 architecture to ``$WX-INSTALL``.
+Then statically build and install QT for the i386 architecture to ``$QT-INSTALL``.
 Then statically build and install Boost 1.47 for the i386 architecture to ``$BOOST-INSTALL``.
 
 Then configure cmake::
@@ -248,12 +248,9 @@ Then configure cmake::
             -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 \
             -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
             -DCMAKE_INSTALL_PREFIX=/  \
-            -DMCRL2_SINGLE_BUNDLE=ON  \
+            -DMCRL2_OSX_PACKAGE=ON  \
             -DBOOST_ROOT=$BOOST-INSTALL \
-            -DwxWidgets_wxrc_EXECUTABLE=$WX-INSTALL/bin/wxrc \
-            -DwxWidgets_CONFIG_EXECUTABLE=$WX-INSTALL/bin/wx-config \
             -DMCRL2_PACKAGE_RELEASE=ON
-            -DMCRL2_WITH_WXSTC=ON
 
 Build the toolset::
 

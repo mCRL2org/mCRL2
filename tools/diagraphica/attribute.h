@@ -11,30 +11,37 @@
 #ifndef ATTRIBUTE_H
 #define ATTRIBUTE_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <algorithm>
 #include <cstddef>
 #include <string>
 #include <map>
 #include <vector>
-#include "colleague.h"
 #include "value.h"
 
-class Attribute : public Colleague
+#ifndef NON_EXISTING
+#define NON_EXISTING (size_t)(-1)
+#endif
+
+class Attribute : public QObject
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     Attribute(
-      Mediator* m,
-      const std::string& nam,
-      const std::string& typ,
+      QString name,
+      QString type,
       const size_t& idx);
     Attribute(const Attribute& attr);
     virtual ~Attribute();
 
     // -- set functions ---------------------------------------------
     void setIndex(const size_t& idx);
-    void setName(const std::string& nme);
-    void setType(const std::string& typ);
+    void setName(QString name);
+    void setType(QString type);
 
     virtual void clusterValues(
       const std::vector< int > &indices,
@@ -48,29 +55,15 @@ class Attribute : public Colleague
       const std::vector< std::string > &curDomain,
       std::map< size_t, size_t  > &origToCurDomain);
 
-    // functions overridden by AttrConti
-    virtual void classifyEqualIntervals(const size_t& number);
-    virtual void classifyQuantiles(const size_t& number);
-    virtual void classifyMeanStandardDeviation(const size_t& number);
-    virtual void removeClassification();
-
     // -- get functions ---------------------------------------------
     size_t getIndex();
-    std::string getName();
-    std::string getType();
-    virtual int getAttrType() = 0;
+    QString name();
+    QString type();
 
     // functions overridden by AttrDiscr
     virtual size_t getSizeOrigValues();
     virtual Value* getOrigValue(size_t idx);
     virtual Value* getCurValue(size_t idx);
-
-    // functions overridden by AttrConti
-    virtual double getLowerBound();
-    virtual double getUpperBound();
-    virtual void getRangeOrigValues(
-      double& lwrBnd,
-      double& uprBnd);
 
     virtual size_t getSizeCurValues() = 0;
     virtual Value* mapToValue(double key) = 0;
@@ -78,15 +71,17 @@ class Attribute : public Colleague
     // -- clear functions -------------------------------------------
     virtual void clearClusters() = 0;
 
-// -- public constants ------------------------------------------
-    enum
-    {
-      ATTR_TYPE_CONTI,
-      ATTR_TYPE_DISCR,
-      PART_METH_EQUAL_INTERVALS,
-      PART_METH_QUANTILES,
-      PART_METH_MEAN_STANDARD_DEVIATION
-    };
+  public:
+    void emitDuplicated() { emit duplicated(); }
+    void emitDeleted() { emit deleted(); }
+    void emitMoved(int newPosition) { emit moved(newPosition); }
+
+  signals:
+    void changed();
+    void duplicated();
+    void renamed();
+    void deleted();
+    void moved(int newPosition);
 
   protected:
     // -- private utility functions ---------------------------------
@@ -95,8 +90,8 @@ class Attribute : public Colleague
 
     // -- data members ----------------------------------------------
     size_t    index;
-    std::string name;
-    std::string type;
+    QString m_name;
+    QString m_type;
 };
 
 #endif

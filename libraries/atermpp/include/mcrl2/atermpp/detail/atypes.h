@@ -10,8 +10,8 @@
 // #pragma message ( "* Define AT_64BIT for x86_x64 architecture." )
 // 
 // /* Covers gcc, icc, msvc and Solaris cc */  	 	 
-// #if defined(__LP64__) || defined(_LP64) || defined(__lp64) || \
-//      defined(_ADDR64) || defined(__arch64__) || defined(_M_X64) || \
+// #if defined(__LP64__) || defined(_LP64) || defined(__lp64) ||
+//      defined(_ADDR64) || defined(__arch64__) || defined(_M_X64) ||
 //      defined(_M_IA64) || defined(WIN64)  	 	 
 // #pragma message ( "Detected x86_x64 architecture." )
 // #  define AT_64BIT

@@ -1702,7 +1702,7 @@ reconstruct_container_expression(aterm_appl Part)
       expr = sort_list::right(expr);
     }
 
-    if (sort_list::is_nil_function_symbol(expr))
+    if (sort_list::is_empty_function_symbol(expr))
     {
       Part = sort_list::list_enumeration(expr.sort(), elements);
     }
@@ -1716,7 +1716,7 @@ reconstruct_container_expression(aterm_appl Part)
       expr = sort_list::left(expr);
     }
 
-    if (sort_list::is_nil_function_symbol(expr))
+    if (sort_list::is_empty_function_symbol(expr))
     {
       Part = sort_list::list_enumeration(expr.sort(), elements);
     }

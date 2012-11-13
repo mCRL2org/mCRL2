@@ -17,7 +17,7 @@
 
 #include "boost/utility.hpp"
 
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/function_symbol.h"
@@ -649,7 +649,6 @@ namespace mcrl2 {
         variable vc("c",sort_bool::bool_());
         variable vp("p",pos());
         variable vq("q",pos());
-        variable vr("r",pos());
 
         data_equation_vector result;
         result.push_back(data_equation(atermpp::make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));

@@ -11,6 +11,8 @@
 
 #ifndef PRIMITIVEFACTORY_H
 #define PRIMITIVEFACTORY_H
+
+#include <QObject>
 #include <vector>
 #include "settings.h"
 
@@ -18,8 +20,10 @@ class ConeDB;
 class Primitive;
 class P_ObliqueCone;
 
-class PrimitiveFactory: public Subscriber
+class PrimitiveFactory: public QObject
 {
+  Q_OBJECT
+
   public:
     PrimitiveFactory(Settings* ss);
     ~PrimitiveFactory();
@@ -30,7 +34,11 @@ class PrimitiveFactory: public Subscriber
     int makeSphere();
     int makeTruncatedCone(float r,bool topClosed,bool bottomClosed);
     //int  makeTube();
-    void notify(SettingID s);
+
+  private slots:
+    void qualityChanged();
+    void branchTiltChanged();
+
   private:
     std::vector<Primitive*> primitives;
     std::vector<P_ObliqueCone*> oblq_cones;

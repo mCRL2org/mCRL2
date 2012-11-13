@@ -1,0 +1,430 @@
+% at
+% left merge
+% \RequirePackage{stmaryrd}
+%%%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%\input{tcilatex}
+%%%%%%%%\input{tcilatex}
+%%%%%%%\input{tcilatex}
+%%%%%%\input{tcilatex}
+%%%%\input{tcilatex}
+%%\input{tcilatex}
+
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{stmaryrd}
+
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Friday, June 15, 2012 17:58:29}
+%TCIDATA{LastRevised=Thursday, November 01, 2012 13:26:48}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\geometry{left=1in,right=1in,top=1in,bottom=1in}
+\input{include/tcilatex}
+\font \aap cmmi10
+\newcommand{\at}{\mathbin{\mbox{\aap ,}}}
+\newcommand{\leftm}{\mathbin{\mathrel{\llfloor}}}
+%\input{tcilatex}
+
+\begin{document}
+
+
+\section{Process Library Implementation Notes}
+
+\subsection{Processes}
+
+Process expressions in mCRL2 are expressions built according to the
+following syntax:%
+\[
+\begin{array}{ccc}
+\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
+a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\ 
+P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\ 
+P(d:=e) & \text{process\_assignment(}P\text{,}d:=e\text{)} & \text{%
+ProcessAssignment} \\ 
+\delta & \text{delta()} & \text{Delta} \\ 
+\tau & \text{tau()} & \text{Tau} \\ 
+\dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\ 
+\partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\ 
+\tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\ 
+\rho _{R}(x) & \text{rename(}R\text{,}x\text{)} & \text{Rename} \\ 
+\Gamma _{C}(x) & \text{comm(}C\text{,}x\text{)} & \text{Comm} \\ 
+\bigtriangledown _{V}(x) & \text{allow(}V\text{,}x\text{)} & \text{Allow} \\ 
+x\mid y & \text{sync(}x\text{,}y\text{)} & \text{Sync} \\ 
+x\mbox{\aap ,}t & \text{at\_time(}x\text{,}t\text{)} & \text{AtTime} \\ 
+x\cdot y & \text{seq(}x\text{,}y\text{)} & \text{Seq} \\ 
+c\rightarrow x & \text{if\_then(}c\text{,}x\text{)} & \text{IfThen} \\ 
+c\rightarrow x\diamond y & \text{if\_then\_else(}c\text{,}x\text{,}y\text{)}
+& \text{IfThenElse} \\ 
+x\ll y & \text{binit(}x\text{,}y\text{)} & \text{BInit} \\ 
+x\ \parallel \ y & \text{merge(}x\text{,}y\text{)} & \text{Merge} \\ 
+x\ \mathbin{\mathrel{\llfloor}}\ y & \text{lmerge(}x\text{,}y\text{)} & 
+\text{LMerge} \\ 
+x+y & \text{choice(}x\text{,}y\text{)} & \text{Choice}%
+\end{array}%
+\]
+
+where the types of the symbols are as follows:%
+\[
+\begin{array}{cl}
+a,b & \text{strings (action names)} \\ 
+P & \text{a process identifier} \\ 
+e & \text{a sequence of data expressions} \\ 
+d & \text{a sequence of data variables} \\ 
+B & \text{a set of strings (action names) } \\ 
+R & \text{a sequence of rename expressions} \\ 
+C & \text{a sequence of communication expressions} \\ 
+V & \text{a sequence of multi actions} \\ 
+t & \text{a data expression of type real} \\ 
+x,y & \text{process expressions} \\ 
+c & \text{ a data expression of type bool}%
+\end{array}%
+\]%
+A rename expression is of the form $a\rightarrow b$, with $a$ and $b$ action
+names. A multi action is of the form $a_{1}\ |\ \cdots \ |\ a_{n}$, with $%
+a_{i}$ actions. A communication expression is of the form $b_{1}\ |\ \cdots
+\ |\ b_{n}\rightarrow b$, with $b$ and $b_{i}$ action names.
+
+\subsubsection{Restrictions}
+
+A multi action is a multi set of actions. The left hand sides of the
+communication expressions in $C$ must be unique. Also the left hand sides of
+the rename expressions in $R$ must be unique.
+
+\newpage
+
+\subsubsection{Linear process expressions}
+
+Linear process expressions are a subset of process expresions satisfying the
+following grammar:
+\begin{verbatim}
+<linear process expression> ::= choice(<linear process expression>, <linear process expression>)
+                              | <summand>
+ 
+<summand>                   ::= sum(<variables>, <alternative>)
+                              | <conditional action prefix>
+                              | <conditional deadlock>
+ 
+<conditional action prefix> ::= if_then(<condition>, <action prefix>)
+                              | <action prefix>
+ 
+<action prefix>             ::= seq(<timed multiaction>, <process reference>)
+                              | <timed multiaction>
+ 
+<timed multiaction>         ::= at_time(<multiaction>, <time stamp>)
+                              | <multiaction>
+ 
+<multiaction>               ::= tau()
+                              | <action>
+                              | sync(<multiaction>, <multiaction>)
+ 
+<conditional deadlock>      ::= if_then(<condition>, <timed deadlock>)
+                              | <timed deadlock>
+ 
+<timed deadlock>            ::= delta()
+                              | at_time(delta(), <time stamp>)
+ 
+<process reference>         ::= process(<process identifier>, <data expressions>)
+                              | process_assignment(<process identifier>, <data assignments>)
+\end{verbatim}
+
+\newpage
+
+\subsection{Guarded process expressions}
+
+We define the predicate $is\_guarded$ for process expressions as follows: $%
+is\_guarded(p)=is\_guarded(p,\emptyset )$%
+\[
+\begin{array}{lll}
+is\_guarded(a(e),W) & = & true \\ 
+is\_guarded(\delta ,W) & = & true \\ 
+is\_guarded(\tau ,W) & = & true \\ 
+is\_guarded(P(e),W) & = & 
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+false & \text{if }P\in W \\ 
+is\_guarded(p,W\cup \{P\}) & \text{if }P\notin W%
+\end{array}%
+\right. \\ 
+\text{where }P(d)=p\text{ is the equation corresponding to }P(e)%
+\end{array}
+\\ 
+is\_guarded(p+q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(p\cdot q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(c\rightarrow p,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(c\rightarrow p\diamond q,W) & = & is\_guarded(p,W)\wedge
+is\_guarded(q,W) \\ 
+is\_guarded(\Sigma _{d:D}\ p,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p^{\mathbin{\mbox{\aap ,}}}t,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\ll q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\parallel q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(p\mathbin{\mathrel{\llfloor}}q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\mid q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(\rho _{R}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\partial _{B}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\tau _{I}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\Gamma _{C}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\nabla _{V}(p),W) & = & is\_guarded(p,W)%
+\end{array}%
+\]%
+\newline
+N.B. This specification assumes that process names are unique. In mCRL2
+process names can be overloaded, therefore in the implemenation $W$ contains 
+\emph{process identifiers} (i.e. both the process name and the sorts of the
+arguments) instead of process names.
+
+\newpage
+
+\subsection{Alphabet reduction}
+
+\subsubsection{Notations}
+
+In this text multi actions are represented using $a,b,\ldots $ and multi
+action names using $\alpha ,\beta ,\ldots $ The elements of multi actions
+and multi action names are denoted with a subscript, so $a=a_{1}\mid \ldots
+\mid a_{n}$ and $\alpha =\{\alpha _{1},\ldots ,\alpha _{n}\}$. Note that a
+multi action is a multiset (or bag) of actions and a multi action name is a
+multiset of names. The multi action name of multi action $a$ is denoted as $%
+N(a)$ and the name of action $a_{i}$ is denoted as $N(a_{i}).$We write $%
+\alpha \beta $ as shorthand for $\alpha \cup \beta $ and $\alpha _{i}\beta $
+for $\{\alpha _{i}\}\cup \beta $. Sets of multi action names are represented
+using $A,A_{1},A_{2},\ldots $ A communication maps a multi action name to an
+action name, and is denoted as $\alpha \rightarrow \alpha _{i}$. A renaming $%
+R$ is a substitution on action names, and is denoted as $R=\{\alpha
+_{i_{1}}\rightarrow \alpha _{j_{1}},\ldots ,\alpha _{i_{n}}\rightarrow
+\alpha _{j_{n}}\}$. A block set $B$ is a set of action names. A hide set $I$
+is a set of action names.
+
+\subsubsection{Definitions}
+
+We define pCRL terms $p$ using the following grammar:%
+\[
+p::=a\mid P\mid \delta \mid \tau \mid p+p\mid p\cdot p\mid c\rightarrow
+p\mid c\rightarrow p\diamond p\mid \Sigma _{d:D}p\mid p^{%
+\mathbin{\mbox{\aap
+,}}}t\mid p\ll p, 
+\]%
+and parallel mCRL terms $q$ using the following grammar:%
+\[
+q::=p\mid q\parallel q\mid q\mathbin{\mathrel{\llfloor}}q\mid q\shortmid
+q\mid \rho _{R}(q)\mid \partial _{B}(q)\mid \tau _{I}(q)\mid \Gamma
+_{C}(q)\mid \nabla _{V}(q). 
+\]
+
+Both multi actions $a$ and process instances $P$ can have data expressions
+as parameters. So in general we have $a=a_{1}(e_{1},\ldots ,e_{m})\mid
+\ldots \mid $ $a_{n}(e_{1},\ldots ,e_{n})$ and $P=P(e_{1},\ldots ,e_{n})$.
+The mCRL2 language also has a construct $P(d_{i_{1}}=e_{i_{1}},\ldots
+,d_{i_{k}}=e_{i_{k}})$, but this is just a shorthand notation. Since data
+parameters do not play a role in alphabet reduction, they are omitted from
+the definitions.
+
+Let $A,A_{1}$ and $A_{2}$ be sets of multi action names. Then we define%
+\[
+\begin{array}{lll}
+A^{\subseteq } & = & \{\alpha \mid \exists \beta .\alpha \beta \in A\} \\ 
+A_{1}\mid A_{2} & = & \{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta
+\in A_{2}\} \\ 
+A_{1}\leftarrowtail A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta
+\in A_{1}\text{ and }\beta \in A_{2}\}%
+\end{array}%
+\]
+
+Let $C$ be a communication set, then we define%
+\[
+\begin{array}{lll}
+C(A) & = & \{\gamma _{C}(\alpha )\mid \alpha \in A\} \\ 
+C^{-1}(A) & = & \{\alpha \mid \gamma _{C}(\alpha )\in A\} \\ 
+C\rfloor A & = & \{\alpha \rightarrow \alpha _{i}\in C\mid \exists \beta
+.\alpha \beta \in A\}%
+\end{array}%
+\]%
+where $\gamma _{C}$ is the function that applies the communications
+described by $C$ to a multi action. Let $R$ be a renaming, then we define%
+\begin{eqnarray*}
+R(\alpha ) &=&\{R(\alpha _{i})\mid \alpha _{i}\in \alpha \} \\
+R^{-1}(\alpha ) &=&\{\beta \mid R(\beta )=\alpha \} \\
+R(A) &=&\{R(\alpha )\mid \alpha \in A\} \\
+R^{-1}(A) &=&\{R^{-1}(\alpha )\mid \alpha \in A\}
+\end{eqnarray*}%
+Let $B$ be a block set, then we define%
+\[
+\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
+\]%
+\newpage
+
+\subsubsection{The mapping $\protect\alpha $}
+
+We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
+, where $\alpha $ is defined as%
+\[
+\begin{array}{lll}
+\alpha (a,W) & = & \{N(a)\} \\ 
+\alpha (P,W) & = & 
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+\emptyset & \text{if }P\in W \\ 
+\alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
+\end{array}%
+\right. \\ 
+\text{ where }P=p\text{ is the equation of }P%
+\end{array}
+\\ 
+\alpha (\delta ,W) & = & \emptyset \\ 
+\alpha (\tau ,W) & = & \{\tau \} \\ 
+\alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (c\rightarrow p,W) & = & \alpha (p,W) \\ 
+\alpha (c\rightarrow p\diamond q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (\Sigma _{d:D}p,W) & = & \alpha (p,W) \\ 
+\alpha (p^{\mathbin{\mbox{\aap
+,}}}t,W) & = & \alpha (p,W) \\ 
+\alpha (p\ll q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (p\parallel q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
+(p,W)\mid \alpha (q,W) \\ 
+\alpha (p\mathbin{\mathrel{\llfloor}}q,W) & = & \alpha (p,W)\cup \alpha
+(q,W)\cup \alpha (p,W)\mid \alpha (q,W) \\ 
+\alpha (p\mid q,W) & = & \alpha (p,W)\mid \alpha (q,W) \\ 
+\alpha (\rho _{R}(p),W) & = & R(\alpha (p,W)) \\ 
+\alpha (\partial _{B}(p),W) & = & \partial _{B}(\alpha (p,W)) \\ 
+\alpha (\tau _{I}(p),W) & = & \tau _{I}(\alpha (p,W)) \\ 
+\alpha (\Gamma _{C}(p),W) & = & C(\alpha (p,W)) \\ 
+\alpha (\nabla _{V}(p),W) & = & \alpha (p,W)\cap (V\cup \{\tau \})%
+\end{array}%
+\]
+
+\newpage
+
+\subsubsection{The mapping $push_{\bigtriangledown }$}
+
+We define the mapping $push_{\bigtriangledown }$ as follows%
+\[
+\begin{tabular}{ll}
+$x$ & $push_{\bigtriangledown }(x,A)$ \\ \hline
+$p$ & \multicolumn{1}{|l}{$\nabla _{A}(p)$ if $p$ is a pCRL expression} \\ 
+$p\parallel q$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\nabla _{A}(p^{\prime }\parallel q^{\prime }) \\ 
+\text{where}\left\{ \text{ }%
+\begin{array}{lll}
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
+(p)))%
+\end{array}%
+\right. 
+\end{array}%
+$} \\ 
+$p\mathbin{\mathrel{\llfloor}}q$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+\delta  & \text{if }A\cap \alpha (p)=\emptyset  \\ 
+\nabla _{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{%
+otherwise,}%
+\end{array}%
+\right.  \\ 
+\text{where}\left\{ \text{ }%
+\begin{array}{lll}
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
+(p)))%
+\end{array}%
+\right. 
+\end{array}%
+$} \\ 
+$p\mid q$ & \multicolumn{1}{|l}{$%
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+\delta  & \text{if }A\leftarrowtail \alpha (p)=\emptyset  \\ 
+\nabla _{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{%
+otherwise,}%
+\end{array}%
+\right.  \\ 
+\text{where}\left\{ \text{ }%
+\begin{array}{lll}
+p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
+(p)))%
+\end{array}%
+\right. 
+\end{array}%
+$} \\ 
+$\rho _{R}(p)$ & \multicolumn{1}{|l}{$\rho _{R}(p^{\prime })$ where $%
+p^{\prime }=$ $push_{\bigtriangledown }(p,R^{-1}(A))$} \\ 
+$\partial _{B}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown
+}(p,\partial _{B}(A))$} \\ 
+$\tau _{I}(p)$ & \multicolumn{1}{|l}{$\nabla _{A}(\tau _{I}(p))$} \\ 
+$\Gamma _{C}(p)$ & \multicolumn{1}{|l}{$\nabla _{A}(\Gamma _{C}(p^{\prime }))
+$ where $p^{\prime }=push_{\bigtriangledown }(p,C^{-1}(A))$} \\ 
+$\nabla _{V}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown }(p,A\cap V)$}%
+\end{tabular}%
+\]%
+During the computation of $push_{\bigtriangledown }$ the following
+optimizations can be applied to every occurrence of an allow operator:%
+\[
+\begin{array}{lll}
+\bigtriangledown _{A}(p) & = & \left\{ 
+\begin{array}{ll}
+p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
+\bigtriangledown _{A\cap \alpha (p)}(p) & \text{otherwise}%
+\end{array}%
+\right.  \\ 
+\Gamma _{C}(p) & = & \Gamma _{C\rfloor \alpha (p)}(p)%
+\end{array}%
+\]%
+Here we applied the following rules:%
+\[
+\begin{array}{lll}
+\bigtriangledown _{A}(\rho _{R}(p)) & = & \rho _{R}(\bigtriangledown
+_{R^{-1}(A)}(p)) \\ 
+\bigtriangledown _{A}(\partial _{B}(p)) & = & \bigtriangledown _{\partial
+_{B}(A)}(p) \\ 
+\bigtriangledown _{A}(\Gamma _{C}(p)) & = & \bigtriangledown _{A}(\Gamma
+_{C}(\bigtriangledown _{C^{-1}(A)}(p))) \\ 
+\bigtriangledown _{A}(\nabla _{V}(p)) & = & \nabla _{A\cap V}(p)%
+\end{array}%
+\]
+
+\end{document}

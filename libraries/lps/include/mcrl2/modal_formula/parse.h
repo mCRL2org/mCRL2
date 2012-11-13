@@ -200,15 +200,15 @@ void translate_regular_formula(state_formula& f)
 inline
 void complete_state_formula(state_formula& x, lps::specification& spec, bool check_monotonicity = true)
 {
-  if (check_monotonicity && state_formulas::detail::has_name_clashes(x))
-  {
-    x = state_formulas::detail::resolve_name_clashes(x);
-  }
   type_check(x, spec, check_monotonicity);
   translate_regular_formula(x);
   spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
   x = state_formulas::translate_user_notation(x);
   x = state_formulas::normalize_sorts(x, spec.data());
+  if (check_monotonicity && state_formulas::detail::has_name_clashes(x))
+  {
+    x = state_formulas::detail::resolve_name_clashes(x);
+  }
 }
 
 /// \brief Parses a state formula from an input stream

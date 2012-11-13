@@ -13,6 +13,7 @@
 #define MCRL2_UTILITIES_FILE_UTILITY_H
 
 #include <ctime>
+#include <cstdio>
 #include <string>
 #include <boost/lexical_cast.hpp>
 
@@ -21,6 +22,17 @@ namespace mcrl2
 
 namespace utilities
 {
+
+inline
+bool file_exists(const std::string& filename)
+{
+  if (FILE * file = fopen(filename.c_str(), "r"))
+  {
+    fclose(file);
+    return true;
+  }
+  return false;
+}
 
 inline
 std::string create_filename(const std::string& prefix = "file", const std::string& extension = ".txt")

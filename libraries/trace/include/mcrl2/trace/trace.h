@@ -24,6 +24,7 @@
 #include <string>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/construction_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/state.h"
@@ -88,11 +89,15 @@ class Trace
     std::vector < mcrl2::lps::multi_action > actions;
     size_t pos; // Invariant: pos <= actions.size().
 
-    atermpp::function_symbol trace_pair;
-    int trace_pair_set;
     mcrl2::data::data_specification m_spec;
     lps::action_label_list m_act_decls;
     bool m_data_specification_and_act_decls_are_defined;
+
+    atermpp::function_symbol const& trace_pair() const
+    {
+      static atermpp::function_symbol trace_pair = atermpp::function_symbol("pair",2);
+      return trace_pair;
+    }
 
 #define TRACE_MCRL2_MARKER "mCRL2Trace"
 #define TRACE_MCRL2_MARKER_SIZE 10
@@ -106,20 +111,18 @@ class Trace
     /// \details The current position
     /// and length of trace are set to 0. 
     Trace()
-      : trace_pair_set(0),
-        m_data_specification_and_act_decls_are_defined(false)
+      : m_data_specification_and_act_decls_are_defined(false)
     {
       init();
     }
-    
+
     /// \brief Constructor for an empty trace.
     /// \details The current position
     /// and length of trace are set to 0. 
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
     Trace(const mcrl2::data::data_specification &spec, const mcrl2::lps::action_label_list &act_decls)
-      : trace_pair_set(0),
-        m_spec(spec),
+      : m_spec(spec),
         m_act_decls(act_decls),
         m_data_specification_and_act_decls_are_defined(true)
     {
@@ -134,8 +137,7 @@ class Trace
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::istream& is, TraceFormat tf = tfUnknown)
-      : trace_pair_set(0),
-        m_data_specification_and_act_decls_are_defined(false)
+      : m_data_specification_and_act_decls_are_defined(false)
     {
       init();
       try
@@ -144,7 +146,6 @@ class Trace
       }
       catch (...)
       {
-        cleanup();
         throw;
       }
     }
@@ -161,8 +162,7 @@ class Trace
           const mcrl2::data::data_specification &spec, 
           const mcrl2::lps::action_label_list &act_decls, 
           TraceFormat tf = tfUnknown)
-      : trace_pair_set(0),
-        m_spec(spec),
+      : m_spec(spec),
         m_act_decls(act_decls),
         m_data_specification_and_act_decls_are_defined(true)
     {
@@ -173,7 +173,6 @@ class Trace
       }
       catch (...)
       {
-        cleanup();
         throw;
       }
     }
@@ -185,8 +184,7 @@ class Trace
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::string const& filename, TraceFormat tf = tfUnknown)
-      : trace_pair_set(0),
-        m_data_specification_and_act_decls_are_defined(false)
+      : m_data_specification_and_act_decls_are_defined(false)
     {
       init();
       try
@@ -195,7 +193,6 @@ class Trace
       }
       catch (...)
       {
-        cleanup();
         throw;
       }
     }
@@ -210,8 +207,7 @@ class Trace
           const mcrl2::data::data_specification &spec, 
           const mcrl2::lps::action_label_list &act_decls,
           TraceFormat tf = tfUnknown)
-      : trace_pair_set(0),
-        m_spec(spec),
+      : m_spec(spec),
         m_act_decls(act_decls),
         m_data_specification_and_act_decls_are_defined(true)
     {
@@ -222,16 +218,8 @@ class Trace
       }
       catch (...)
       {
-        cleanup();
         throw;
       }
-    }
-
-    /// \brief Destructor for the trace.
-    /// \details This destructor frees all the associated memory of the trace.
-    ~Trace()
-    {
-      cleanup();
     }
 
     bool operator <(const Trace& t) const
@@ -567,29 +555,18 @@ class Trace
 
     bool isTimedMAct(const atermpp::aterm_appl &t)
     {
-      return t.type()==atermpp::AT_APPL && t.function()==trace_pair;
+      return t.type()==atermpp::AT_APPL && t.function()==trace_pair();
     }
 
     atermpp::aterm_appl makeTimedMAct(const mcrl2::lps::multi_action &ma)
     {
-      return atermpp::aterm_appl(trace_pair,ma.actions(), ma.time());
+      return atermpp::aterm_appl(trace_pair(),ma.actions(), ma.time());
     }
 
     void init()
     {
-      if (trace_pair_set == 0)
-      {
-        trace_pair = atermpp::function_symbol("pair",2);
-      }
-      trace_pair_set++;
-
       pos = 0;
       truncate(); // Take care that pos 0 exists.
-    }
-
-    void cleanup()
-    {
-      trace_pair_set--;
     }
 
     TraceFormat detectFormat(std::istream& is)

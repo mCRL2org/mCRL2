@@ -76,9 +76,13 @@ class next_state_generator
     friend struct atermpp::aterm_traits<pruning_tree_node_t>;
 
   public:
+    class iterator;
+
     class summand_subset_t
     {
       friend class next_state_generator;
+      friend class next_state_generator::iterator;
+
       public:
         /// \brief Trivial constructor. Constructs an invalid command subset.
         summand_subset_t() {}
@@ -106,7 +110,6 @@ class next_state_generator
         atermpp::shared_subset<summand_t>::iterator begin(const internal_state_t &state);
     };
 
-    class iterator;
     class transition_t
     {
       friend struct atermpp::aterm_traits<transition_t>;
@@ -196,6 +199,7 @@ class next_state_generator
     data::variable_vector m_process_parameters;
     atermpp::function_symbol m_state_function;
     std::vector<summand_t> m_summands;
+    internal_state_t m_initial_state;
 
     summand_subset_t m_all_summands;
 
@@ -257,13 +261,13 @@ class next_state_generator
     /// \brief Gets the initial state.
     state initial_state() const
     {
-      return m_specification.initial_process().state(m_specification.process().process_parameters());
+      return get_state(internal_initial_state());
     }
 
     /// \brief Gets the initial state in internal format.
     internal_state_t internal_initial_state() const
     {
-      return get_internal_state(initial_state());
+      return m_initial_state;
     }
 
     /// \brief Returns the currently loaded specification.

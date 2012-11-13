@@ -17,7 +17,7 @@
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -40,7 +40,7 @@ void Invariant_Checker::print_counter_example()
   {
     data_expression v_counter_example(f_bdd_prover.get_counter_example());
     assert(v_counter_example!=0);
-    std::cerr << "  Counter example: " << data::pp(v_counter_example) << "\n";
+    mCRL2log(info) << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
 

@@ -15,7 +15,7 @@ Overview
 --------
 In essence, the system consists of a collection of Bash scripts that
 gets executed periodically by the host's cron daemon. This collection
-is structured into one main script and a number of job scipts.
+is structured into one main script and a number of job scripts.
 
 Main script
 ^^^^^^^^^^^
@@ -129,7 +129,6 @@ The ``scripts`` directory contains the following files:
 * ``backup.sh``: job script for backing up precious cronjob files
 * ``build_plots.sh``: job script for generating build performance plots (calls
   ``make_build_plots.sh`` in ``performance``)
-* ``build.sh``: job script for building the toolset using Bjam 
 * ``cbuild.sh``: job script for building the toolset using CMake 
 * ``libdoc.sh``: job script for updating online library documentation
 * ``main.sh``: the main script
@@ -257,7 +256,7 @@ requirements:
   #. If your account has no SSH key pair yet, run the following command::
   
        ssh-keygen -t rsa
-        
+      
      Save the key to the default location (``$HOME/.ssh/id_rsa``) and do
      **not** enter a passphrase (simply hit enter when prompted, twice).
   #. Upload the **public** key of the account's SSH key pair to the webserver::

@@ -36,6 +36,21 @@ class txt2pbes_tool: public input_output_tool
 {
   typedef input_output_tool super;
 
+  protected:
+    bool m_normalize;
+
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      m_normalize = parser.option_argument_as<bool>("normalize");
+    }
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("normalize", make_optional_argument("NAME", "1"), "normalize the result (default true)", 'n');
+    }
+
   public:
     txt2pbes_tool()
       : super(NAME, AUTHOR,
@@ -48,7 +63,8 @@ class txt2pbes_tool: public input_output_tool
     bool run()
     {
       txt2pbes(input_filename(),
-               output_filename()
+               output_filename(),
+               m_normalize
               );
       return true;
     }

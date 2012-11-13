@@ -17,7 +17,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/confluence_checker.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 
 using namespace mcrl2::log;
 
@@ -266,7 +266,7 @@ void Confluence_Checker::print_counter_example()
   if (f_counter_example)
   {
     const data_expression v_counter_example(f_bdd_prover.get_counter_example());
-    std::cerr << "  Counter example: " << data::pp(v_counter_example) << "\n";
+    mCRL2log(info) << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
 

@@ -38,7 +38,7 @@ void type_check(sort_expression& sort_expr, const data_specification& data_spec)
   t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
   if (t==atermpp::aterm())
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(sort_expr));
+    throw mcrl2::runtime_error("could not type check sort " + core::pp_deprecated(sort_expr));
   }
   sort_expr = sort_expression(t);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
@@ -76,8 +76,9 @@ void type_check(data_expression& data_expr,
   t = core::type_check_data_expr(t, atermpp::aterm_appl(), mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
   if (t == atermpp::aterm())
   {
+    const data_expression d=data_expr;
     data_expr = data_expression();
-    throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(data_expr));
+    throw mcrl2::runtime_error("could not type check data expression " + core::pp_deprecated(d));
   }
   else
   {

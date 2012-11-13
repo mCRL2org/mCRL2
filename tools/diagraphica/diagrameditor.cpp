@@ -8,11 +8,11 @@
 //
 /// \file ./diagrameditor.cpp
 
-#include "wx.hpp" // precompiled headers
-
 #include "diagrameditor.h"
 #include <iostream>
 #include <sstream>
+#include <QColorDialog>
+
 using namespace std;
 
 
@@ -23,270 +23,521 @@ int DiagramEditor::szeTxt = 12;
 // -- constructors and destructor -----------------------------------
 
 
-// --------------------------
 DiagramEditor::DiagramEditor(
-  Mediator* m,
-  Graph* g,
-  GLCanvas* c)
-  : Visualizer(m, g, c)
-// --------------------------
+    QWidget *parent,
+    Graph* g):
+  Visualizer(parent, g)
 {
   //setClearColor( 0.44, 0.59, 0.85 );
   setClearColor(0.65, 0.79, 0.94);
 
-  diagram     = new Diagram(m/*, c*/);
-  editMode    = EDIT_MODE_SELECT;
-  drgBegIdx1 = -1;
-  drgBegIdx2 = -1;
-  selectedX1 = -1;
-  selectedX2 = -1;
-  selectedY1 = -1;
-  selectedY2 = -1;
-  selection = false;
-  lastSelectedShapeId = NON_EXISTING;
 
-  initMouse();
+  m_diagram     = new Diagram(this);
+  m_editMode    = EDIT_MODE_SELECT;
+  m_currentSelectedShapeId = -1;
+  m_currentSelectedHandleId = -1;
 
-  clipBoardShape = NULL;
+  initContextMenu();
+  setMouseTracking(true); // Needed to paste at the current position with keyboard shortcuts
 }
 
 
-// ----------------------------
-DiagramEditor::~DiagramEditor()
-// ----------------------------
+// -- get functions ---------------------------------------------
+
+
+Shape* DiagramEditor::selectedShape()
 {
-  if (diagram != NULL)
+  if (m_diagram != 0)
   {
-    delete diagram;
-    diagram = NULL;
-  }
-
-  if (clipBoardShape != NULL)
-  {
-    delete clipBoardShape;
-    clipBoardShape = NULL;
-  }
-}
-
-
-// -- set data functions --------------------------------------------
-
-
-// --------------------------------------------
-void DiagramEditor::setDiagram(Diagram* dgrm)
-// --------------------------------------------
-{
-  delete diagram;
-  diagram = dgrm;
-}
-
-
-// ------------------------------------
-void DiagramEditor::setEditModeSelect()
-// ------------------------------------
-{
-  editMode = EDIT_MODE_SELECT;
-
-  for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
-  {
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
+    // Find any selected shape
+    for (int i = 0; i < m_diagram->shapeCount(); ++i)
     {
-      diagram->getShape(i)->setModeEdit();
-    }
-  }
-
-  canvas->Refresh();
-}
-
-
-// ------------------------------------
-void DiagramEditor::setEditModeNote()
-// ------------------------------------
-{
-  editMode = EDIT_MODE_NOTE;
-  deselectAll();
-  canvas->Refresh();
-}
-
-
-// ---------------------------------
-void DiagramEditor::setEditModeDOF()
-// ---------------------------------
-{
-  editMode = EDIT_MODE_DOF;
-  deselectAll();
-  canvas->Refresh();
-}
-
-
-// ----------------------------------
-void DiagramEditor::setEditModeRect()
-// ----------------------------------
-{
-  editMode = EDIT_MODE_RECT;
-  deselectAll();
-  canvas->Refresh();
-}
-
-
-// -------------------------------------
-void DiagramEditor::setEditModeEllipse()
-// -------------------------------------
-{
-  editMode = EDIT_MODE_ELLIPSE;
-  deselectAll();
-  canvas->Refresh();
-}
-
-
-// ----------------------------------
-void DiagramEditor::setEditModeLine()
-// ----------------------------------
-{
-  editMode = EDIT_MODE_LINE;
-  deselectAll();
-  canvas->Refresh();
-}
-
-
-// -----------------------------------
-void DiagramEditor::setEditModeArrow()
-// -----------------------------------
-{
-  editMode = EDIT_MODE_ARROW;
-  deselectAll();
-  canvas->Refresh();
-}
-
-
-// ------------------------------------
-void DiagramEditor::setEditModeDArrow()
-// ------------------------------------
-{
-  editMode = EDIT_MODE_DARROW;
-  deselectAll();
-  canvas->Refresh();
-}
-
-
-// ------------------------------------------------
-void DiagramEditor::setShowGrid(const bool& flag)
-// ------------------------------------------------
-{
-  diagram->setShowGrid(flag);
-  canvas->Refresh();
-}
-
-
-// ------------------------------------------------
-void DiagramEditor::setSnapGrid(const bool& flag)
-// ------------------------------------------------
-{
-  diagram->setSnapGrid(flag);
-  canvas->Refresh();
-}
-
-
-// -----------------------------
-void DiagramEditor::setFillCol()
-// -----------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    ColorRGB col;
-    s->getFillColor(col);
-
-    mediator->getColor(col);
-    s->setFillColor(col);
-
-    canvas->Refresh();
-  }
-
-  s = NULL;
-}
-
-
-// -----------------------------
-void DiagramEditor::setLineCol()
-// -----------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    ColorRGB col;
-    s->getLineColor(col);
-
-    mediator->getColor(col);
-    s->setLineColor(col);
-
-    canvas->Refresh();
-  }
-
-  s = NULL;
-}
-
-
-// --------------------------------------------------
-void DiagramEditor::handleIntersection()
-// --------------------------------------------------
-{
-  size_t shapeCount = diagram->getSizeShapes();
-  Shape* s = NULL;
-  if (!isAnyShapeSelected())  // If not dragging shape, look for intersections
-  {
-    for (size_t i = 0; i < shapeCount; i++)
-    {
-      s = diagram->getShape(i);
-      double sX1 = s->getXCtr() - s->getXDFC();
-      double sY1 = s->getYCtr() + s->getYDFC();
-      double sX2 = s->getXCtr() + s->getXDFC();
-      double sY2 = s->getYCtr() - s->getYDFC();
-      double x1 = selectedX1 - selectedX2;
-      double y1 = selectedY1 + selectedY2;
-      double x2 = selectedX1 + selectedX2;
-      double y2 = selectedY1 - selectedY2;
-      translatePoints(sX1, sY1, sX2, sY2, s->getXCtr(), s->getYCtr(), s->getXDFC(), s->getYDFC());
-      translatePoints(x1, y1, x2, y2, selectedX1, selectedY1, selectedX2, selectedY2);
-      if (!(x1 >= sX2 || x2 <= sX1 || y1 <= sY2 || y2 >= sY1))
+      if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
       {
-        s->setMode(Shape::MODE_EDIT);
+        return m_diagram->shape(i);
       }
-      s = NULL;
     }
   }
-  selection = false;
+  return 0;
+}
+
+QList<Shape*> DiagramEditor::selectedShapes()
+{
+  QList<Shape*> result;
+  if (m_diagram != 0)
+  {
+    for (int i = 0; i < m_diagram->shapeCount(); ++i)
+    {
+      if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+      {
+        result.append(m_diagram->shape(i));
+      }
+    }
+  }
+  return result;
 }
 
 
-// --------------------------------------------------
+// -- public utility functions --------------------------------------
+
+
+void DiagramEditor::deselectAll()
+{
+  size_t sizeShapes = 0;
+  if (m_diagram != 0)
+  {
+    sizeShapes = m_diagram->shapeCount();
+  }
+
+  for (size_t i = 0; i < sizeShapes; ++i)
+  {
+    m_diagram->shape(i)->setModeNormal();
+  }
+}
+
+
+// -- visualization functions  ----------------------------------
+
+
+void DiagramEditor::visualize(const bool& inSelectMode)
+{
+  if (inSelectMode)
+  {
+    // set up picking
+    GLint hits = 0;
+    GLuint selectBuf[512];
+    startSelectMode(
+          hits,
+          selectBuf,
+          2.0,
+          2.0);
+
+    // render in select mode
+    glPushName(0);
+    m_diagram->visualize(inSelectMode, pixelSize());
+    glPopName();
+
+    // finish up picking
+    finishSelectMode(
+          hits,
+          selectBuf);
+  }
+  else
+  {
+    clear();
+    m_diagram->visualize(inSelectMode, pixelSize());
+
+    if (m_mouseDrag && m_lastMouseEvent.buttons() == Qt::LeftButton)
+    {
+      double pix = pixelSize();
+
+      QPointF start = worldCoordinate(m_mouseDragStart);
+      QPointF stop = worldCoordinate(m_lastMouseEvent.pos());
+
+      QRectF gridCoordinates = m_diagram->gridCoordinates();
+
+      qreal x1 = qMin(start.x(), gridCoordinates.right());
+      qreal y1 = qMin(start.y(), gridCoordinates.top());
+      qreal x2 = qMax(stop.x(), gridCoordinates.left());
+      qreal y2 = qMax(stop.y(), gridCoordinates.bottom());
+
+      x1 = qMax(x1, gridCoordinates.left());
+      y1 = qMax(y1, gridCoordinates.bottom());
+      x2 = qMin(x2, gridCoordinates.right());
+      y2 = qMin(y2, gridCoordinates.top());
+
+      if (m_diagram->snapGrid())
+      {
+        double intv = m_diagram->gridInterval(pixelSize());
+
+        x1 = Utils::rndToNearestMult(x1, intv);
+        y1 = Utils::rndToNearestMult(y1, intv);
+        x2 = Utils::rndToNearestMult(x2, intv);
+        y2 = Utils::rndToNearestMult(y2, intv);
+      }
+
+      double dX = x2-x1;
+      double dY = y2-y1;
+
+      double xC = x1+0.5*dX;
+      double yC = y1+0.5*dY;
+
+      VisUtils::setColor(VisUtils::darkGray);
+      if (m_editMode == EDIT_MODE_SELECT)
+      {
+        m_selection.setCoords(x1, y1, x2, y2);
+        if (m_currentSelectedShapeId == -1)
+        {
+          VisUtils::drawRect(x1, x2, y1, y2);
+        }
+      }
+      else
+      {
+        m_selection.setCoords(-1, -1, -1, -1);
+        if (m_editMode == EDIT_MODE_RECT || m_editMode == EDIT_MODE_NOTE)
+        {
+          VisUtils::drawRect(x1, x2, y1, y2);
+        }
+        else if (m_editMode == EDIT_MODE_ELLIPSE)
+        {
+          VisUtils::drawEllipse(xC, yC, 0.5*dX, 0.5*dY, Shape::segNumHnt);
+        }
+        else if (m_editMode == EDIT_MODE_LINE)
+        {
+          VisUtils::drawLine(x1, x2, y1, y2);
+        }
+        else if (m_editMode == EDIT_MODE_ARROW)
+        {
+          VisUtils::drawArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
+        }
+        else if (m_editMode == EDIT_MODE_DARROW)
+        {
+          VisUtils::drawDArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
+        }
+      }
+    }
+  }
+}
+
+void DiagramEditor::generateTextures()
+{
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
+  {
+    m_diagram->shape(i)->generateTextures();
+  }
+}
+
+
+// -- set functions ---------------------------------------------
+
+
+void DiagramEditor::setDiagram(Diagram* dgrm)
+{
+  delete m_diagram;
+  m_diagram = dgrm;
+  update();
+}
+
+void DiagramEditor::setEditMode(int mode)
+{
+  m_editMode = mode;
+  deselectAll();
+  update();
+}
+
+void DiagramEditor::setShowGrid(bool show)
+{
+  m_diagram->setShowGrid(show);
+  update();
+}
+
+
+void DiagramEditor::setSnapGrid(bool show)
+{
+  m_diagram->setSnapGrid(show);
+  update();
+}
+
+
+void DiagramEditor::setFillColor()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    QColor color = QColorDialog::getColor(s->fillColor(), this);
+    if (color.isValid())
+    {
+      s->setFillColor(color);
+      update();
+    }
+  }
+}
+
+
+void DiagramEditor::setLineColor()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    QColor color = QColorDialog::getColor(s->lineColor(), this);
+    if (color.isValid())
+    {
+      s->setLineColor(color);
+      update();
+    }
+  }
+}
+
+
+// -- context menu functions ------------------------------------
+
+
+void DiagramEditor::editDof(Shape *shape)
+{
+  Shape* s = (shape != 0 ? shape : selectedShape());
+  if (s != 0)
+  {
+    if (s->drawMode() == Shape::MODE_NORMAL || s->drawMode() == Shape::MODE_EDIT)
+    {
+      s->setModeEditDOFXCtr();
+    }
+    QList<DofDialog*> openDialogs = findChildren<DofDialog*>();
+    for (int i = 0; i < openDialogs.size(); ++i)
+    {
+      if (openDialogs[i]->shape() == s)
+      {
+        openDialogs[i]->show();
+        openDialogs[i]->setFocus();
+        return;
+      }
+    }
+    DofDialog* dofDialog = new DofDialog(m_graph, s, this);
+    connect(dofDialog, SIGNAL(dofActivated(int)), this, SLOT(update()));
+    dofDialog->show();
+  }
+}
+
+void DiagramEditor::editTextSize()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    bool ok;
+    int size = QInputDialog::getInt(this, "Set Text Size", "Points:", s->textSize(), 6, 72, 1, &ok);
+    if (ok)
+    {
+      s->setTextSize(size);
+      updateGL();
+    }
+  }
+}
+
+void DiagramEditor::editNote()
+{
+  Shape* s = selectedShape();
+  if (s != 0)
+  {
+    bool ok;
+    QString note = QInputDialog::getText(this, "Set Note", "Text:", QLineEdit::Normal, s->note(), &ok);
+    if (ok)
+    {
+      s->setNote(note);
+      updateGL();
+    }
+  }
+}
+
+
+void DiagramEditor::cutShapes()
+{
+  // find & cut selected shapes
+  QList<Shape*> shapes = selectedShapes();
+
+  if (!shapes.isEmpty()) {
+    m_clipBoardList.clear();
+    for (int i = 0; i < shapes.size(); ++i)
+    {
+      m_clipBoardList.append(new Shape(*shapes[i]));
+      m_diagram->removeShape(shapes[i]->index());
+    }
+  }
+  updateGL();
+}
+
+
+void DiagramEditor::copyShapes()
+{
+  // find & copy selected shapes
+  QList<Shape*> shapes = selectedShapes();
+
+  if (!shapes.isEmpty()) {
+    m_clipBoardList.clear();
+    for (int i = 0; i < shapes.size(); ++i)
+    {
+      m_clipBoardList.append(new Shape(*shapes[i]));
+    }
+  }
+}
+
+void DiagramEditor::pasteShapes()
+{
+  if (m_clipBoardList.size() > 0)
+  {
+    deselectAll();
+
+    double xOriginal = m_clipBoardList[0]->xCenter();
+    double yOriginal = m_clipBoardList[0]->yCenter();
+
+    QPointF pos = worldCoordinate(m_lastMouseEvent.posF());
+    double xPaste = pos.x();
+    double yPaste = pos.y();
+
+    for (int i = 0; i < m_clipBoardList.size(); ++i)
+    {
+      // update index of clipboard shape
+      m_clipBoardList[i]->setIndex(m_diagram->shapeCount());
+
+      // update clipboard shape
+      if (i == 0) // Paste the first selected shape to the clicked position
+      {
+        m_clipBoardList[i]->setCenter(xPaste, yPaste);
+      }
+      else // Paste other shapes relative to their position with respect to first shape
+      {
+        double distanceX, distanceY, x1, x2, y1, y2;
+        m_clipBoardList[0]->center(x1, y1);
+        m_clipBoardList[i]->center(x2, y2);
+
+        // calculate the distance between the first selected shape and the current shape
+        distanceX = xOriginal - x2;
+        distanceY = yOriginal - y2;
+        if (x2 > xOriginal)
+        {
+          distanceX = x2 - xOriginal;
+        }
+        if (y2 > yOriginal)
+        {
+          distanceY = y2 - yOriginal;
+        }
+
+        double xC = xPaste + distanceX; // Calculate new center of the selected shape according to the distance between the first shape
+        double yC = yPaste + distanceY;
+
+        m_clipBoardList[i]->setCenter(xC, yC);
+      }
+      m_clipBoardList[i]->setModeEdit();
+
+      // add clipboard shape to diagram
+      m_diagram->addShape(m_clipBoardList[i]);
+      // make another copy of clipboard shape
+      m_clipBoardList[i] = new Shape(*m_clipBoardList[i]);
+    }
+  }
+  updateGL();
+}
+
+void DiagramEditor::selectAllShapes()
+{
+  for (int i = 0; i < m_diagram->shapeCount() ; ++i)
+  {
+    m_diagram->shape(i)->setDrawMode(Shape::MODE_EDIT);
+  }
+  updateGL();
+}
+
+void DiagramEditor::deleteShapes()
+{
+  for (int i = m_diagram->shapeCount()-1 ; i >= 0 ; i--)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->removeShape(i);
+    }
+  }
+  updateGL();
+}
+
+void DiagramEditor::bringToFront()
+{
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeToFront(i);
+    }
+  }
+  updateGL();
+}
+
+void DiagramEditor::sendToBack()
+{
+  for (int i = m_diagram->shapeCount()-1 ; i >= 0 ; i--)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeToBack(i);
+    }
+  }
+  updateGL();
+}
+
+void DiagramEditor::bringForward()
+{
+  for (int i = m_diagram->shapeCount()-1 ; i >= 0 ; i--)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeForward(i);
+    }
+  }
+  updateGL();
+}
+
+void DiagramEditor::sendBackward()
+{
+  for (int i = 0; i < m_diagram->shapeCount(); ++i)
+  {
+    if (m_diagram->shape(i)->drawMode() == Shape::MODE_EDIT)
+    {
+      m_diagram->moveShapeBackward(i);
+    }
+  }
+  updateGL();
+}
+
+double DiagramEditor::snapIfNeeded(double input)
+{
+  if (m_diagram->snapGrid())
+  {
+    double itv = m_diagram->gridInterval(pixelSize());
+    return Utils::rndToNearestMult(input, itv);
+  }
+  return input;
+}
+
+QPointF DiagramEditor::snapIfNeeded(QPointF input)
+{
+  return QPointF(snapIfNeeded(input.x()), snapIfNeeded(input.y()));
+}
+
+double DiagramEditor::snapAngleIfNeeded(double input)
+{
+  if (m_diagram->snapGrid())
+  {
+    double itv = m_diagram->angleInterval();
+    return Utils::rndToNearestMult(input, itv);
+  }
+  return input;
+}
+
+QRectF DiagramEditor::worldRectangle(QPointF start, QPointF stop)
+{
+  start = worldCoordinate(start);
+  stop = worldCoordinate(stop);
+
+  QRectF gridCoordinates = m_diagram->gridCoordinates();
+
+  qreal x1 = qMin(start.x(), gridCoordinates.right());
+  qreal y1 = qMin(start.y(), gridCoordinates.top());
+  qreal x2 = qMax(stop.x(), gridCoordinates.left());
+  qreal y2 = qMax(stop.y(), gridCoordinates.bottom());
+
+  x1 = snapIfNeeded(qMax(x1, gridCoordinates.left()));
+  y1 = snapIfNeeded(qMax(y1, gridCoordinates.bottom()));
+  x2 = snapIfNeeded(qMin(x2, gridCoordinates.right()));
+  y2 = snapIfNeeded(qMin(y2, gridCoordinates.top()));
+
+  return QRectF(x1, y1, x2-x1, y2-y1);
+}
+
+
+// -- private utility functions ---------------------------------
+
+
 void DiagramEditor::translatePoints(double& x1, double& y1,
                                     double& x2, double& y2,
                                     double givenX1, double givenY1,
                                     double givenX2, double givenY2)
-// --------------------------------------------------
 {
   x1 = givenX1 - givenX2;
   y1 = givenY1 + givenY2;
@@ -307,3068 +558,548 @@ void DiagramEditor::translatePoints(double& x1, double& y1,
   }
 }
 
-
-// --------------------------------------------------
-bool DiagramEditor::isAnyShapeSelected()
-// --------------------------------------------------
+void DiagramEditor::createShape()
 {
-  if (diagram != NULL)
+  deselectAll();
+
+  QRectF rectangle = worldRectangle(m_mouseDragStart, m_lastMouseEvent.pos());
+  double dX = rectangle.width();
+  double dY = rectangle.height();
+
+  double pix = pixelSize();
+  if (Utils::abs(dX) < Shape::minSzeHnt*pix && Utils::abs(dY) < Shape::minSzeHnt*pix)
   {
-    size_t sizeShapes = diagram->getSizeShapes();
-    for (size_t i = 0; i < sizeShapes; ++i)
-    {
-      if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-  return false;
-}
-
-
-// --------------------------------------------------
-void DiagramEditor::handleDOFSel(const size_t& DOFIdx)
-// --------------------------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
+    dX = Shape::minSzeHnt*pix;
+    dY = Shape::minSzeHnt*pix;
   }
 
-  if (s != NULL)
-  {
-    if (DOFIdx == s->getDOFXCtr()->getIndex())
-    {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
-      s->setModeEdtDOFXCtr();
-    }
-    else if (DOFIdx == s->getDOFYCtr()->getIndex())
-    {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
-      s->setModeEdtDOFYCtr();
-    }
-    else if (DOFIdx == s->getDOFHgt()->getIndex())
-    {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
-      s->setModeEdtDOFHgt();
-    }
-    else if (DOFIdx == s->getDOFWth()->getIndex())
-    {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
-      s->setModeEdtDOFWth();
-    }
-    else if (DOFIdx == s->getDOFAgl()->getIndex())
-    {
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaDeactivate();
-      s->setModeEdtDOFAgl();
-    }
-    else if (DOFIdx == s->getDOFCol()->getIndex())
-    {
-      s->setModeEdtDOFCol();
-      mediator->handleDOFColActivate();
-      mediator->handleDOFOpaDeactivate();
-    }
-    else if (DOFIdx == s->getDOFOpa()->getIndex())
-    {
-      s->setModeEdtDOFOpa();
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaActivate();
-    }
-    else if (DOFIdx == s->getDOFText()->getIndex())
-    {
-      s->setModeEdtDOFText();
-      mediator->handleDOFColDeactivate();
-      mediator->handleDOFOpaActivate();
-    }
-    s = NULL;
+  double xC = rectangle.left()+0.5*dX;
+  double yC = rectangle.top()+0.5*dY;
+  double xDFC = 0.5*dX;
+  double yDFC = -0.5*dY;
 
-    canvas->Refresh();
+  Shape* s = new Shape(m_diagram, m_diagram->shapeCount(),
+                       xC,        yC,
+                       xDFC,      yDFC,
+                       0.0,       Shape::TYPE_RECT,
+                       0.0,       0.0);
+
+  s->setModeEdit();
+
+  if (m_editMode == EDIT_MODE_RECT)
+  {
+    s->setTypeRect();
+  }
+  else if (m_editMode == EDIT_MODE_ELLIPSE)
+  {
+    s->setTypeEllipse();
+  }
+  else if (m_editMode == EDIT_MODE_LINE)
+  {
+    s->setTypeLine();
+  }
+  else if (m_editMode == EDIT_MODE_ARROW)
+  {
+    s->setTypeArrow();
+  }
+  else if (m_editMode == EDIT_MODE_DARROW)
+  {
+    s->setTypeDArrow();
+  }
+  else if (m_editMode == EDIT_MODE_NOTE)
+  {
+    s->setTypeNote();
+  }
+
+  m_diagram->addShape(s);
+  updateGL();
+
+  if (m_editMode == EDIT_MODE_NOTE)
+  {
+    editNote();
   }
 }
 
-
-// ----------------------------------------
-void DiagramEditor::handleDOFSetTextStatus(
-  const size_t& DOFIdx,
-  const int& status)
-// ----------------------------------------
+void DiagramEditor::initContextMenu()
 {
-  Shape* s = NULL;
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_TEXT)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    if (DOFIdx == s->getDOFXCtr()->getIndex())
-    {
-      s->getDOFXCtr()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFYCtr()->getIndex())
-    {
-      s->getDOFYCtr()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFHgt()->getIndex())
-    {
-      s->getDOFHgt()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFWth()->getIndex())
-    {
-      s->getDOFWth()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFAgl()->getIndex())
-    {
-      s->getDOFAgl()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFCol()->getIndex())
-    {
-      s->getDOFCol()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFOpa()->getIndex())
-    {
-      s->getDOFOpa()->setTextStatus(status);
-    }
-    else if (DOFIdx == s->getDOFText()->getIndex())
-    {
-      s->getDOFText()->setTextStatus(status);
-    }
-    s = NULL;
-  }
+  m_popup.clear();
+  m_popup.addAction("Edit DOF", this, SLOT(editDof()));
+  m_popup.addAction("Edit Note", this, SLOT(editNote()));
+  m_popup.addAction("Text Size", this, SLOT(editTextSize()));
+  m_popup.addSeparator();
+  m_popup.addAction("Cut", this, SLOT(cutShapes()), QKeySequence::Cut);
+  m_popup.addAction("Copy", this, SLOT(copyShapes()), QKeySequence::Copy);
+  m_popup.addAction("Paste", this, SLOT(pasteShapes()), QKeySequence::Paste);
+  m_popup.addAction("Select All", this, SLOT(selectAllShapes()), QKeySequence::SelectAll);
+  m_popup.addSeparator();
+  m_popup.addAction("Delete", this, SLOT(deleteShapes()), QKeySequence::Delete);
+  m_popup.addSeparator();
+  m_popup.addAction("Bring to front", this, SLOT(bringToFront()));
+  m_popup.addAction("Send to back", this, SLOT(sendToBack()));
+  m_popup.addAction("Bring forward", this, SLOT(bringForward()));
+  m_popup.addAction("Send backward", this, SLOT(sendBackward()));
 }
 
-
-// -----------------------------------------------------------
-int DiagramEditor::handleDOFGetTextStatus(const size_t& DOFIdx)
-// -----------------------------------------------------------
+void DiagramEditor::showContextMenu()
 {
-  int result = -1;
+  QStringList enabledOptions("Select All");
 
-  Shape* s = NULL;
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
+  if (!m_clipBoardList.isEmpty())
   {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
+    enabledOptions << "Paste";
   }
 
-  if (s != NULL)
+  QList<Shape*> shapes = selectedShapes();
+  if (shapes.size() == 1)
   {
-    if (DOFIdx == s->getDOFXCtr()->getIndex())
-    {
-      result = s->getDOFXCtr()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFYCtr()->getIndex())
-    {
-      result = s->getDOFYCtr()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFHgt()->getIndex())
-    {
-      result = s->getDOFHgt()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFWth()->getIndex())
-    {
-      result = s->getDOFWth()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFAgl()->getIndex())
-    {
-      result = s->getDOFAgl()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFCol()->getIndex())
-    {
-      result = s->getDOFCol()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFOpa()->getIndex())
-    {
-      result = s->getDOFOpa()->getTextStatus();
-    }
-    else if (DOFIdx == s->getDOFText()->getIndex())
-    {
-      result = s->getDOFText()->getTextStatus();
-    }
+    if (shapes[0]->shapeType() != Shape::TYPE_NOTE)
+      enabledOptions << "Edit DOF";
+    enabledOptions  << "Edit Note" << "Text Size";
+  }
+  if (shapes.size() > 0)
+  {
+    enabledOptions << "Cut" << "Copy" << "Delete" <<
+                      "Bring to front" << "Send to back" <<
+                      "Bring forward" << "Send backward";
   }
 
-  return result;
-}
-
-
-// ---------------------------------
-void DiagramEditor::handleDOFColAdd(
-  const double& hue,
-  const double& y)
-// ---------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
+  QList<QAction*> actions = m_popup.actions();
+  for (int i = 0; i < actions.size(); ++i)
   {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_TEXT)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
+    actions[i]->setEnabled(enabledOptions.indexOf(actions[i]->text()) != -1);
   }
 
-  if (s != NULL)
-  {
-    s->setModeEdtDOFCol();
-    mediator->handleDOFColActivate();
-    mediator->handleDOFOpaDeactivate();
-    s->getDOFCol()->addValue(hue);
-    s->addDOFColYValue(y);
-  }
-
-  s = NULL;
-}
-
-
-// ------------------------------------
-void DiagramEditor::handleDOFColUpdate(
-  const size_t& idx,
-  const double& hue,
-  const double& y)
-// ------------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    s->getDOFCol()->setValue(idx, hue);
-    s->setDOFColYValue(idx, y);
-  }
-
-  s = NULL;
-}
-
-
-// -----------------------------------
-void DiagramEditor::handleDOFColClear(
-  const size_t& idx)
-// -----------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    if (s->getDOFCol()->getSizeValues() > 2)
-    {
-      s->getDOFCol()->clearValue(idx);
-      s->clearDOFColYValue(idx);
-
-      vector< double > hues;
-      vector< double > yVals;
-
-      s->getDOFCol()->getValues(hues);
-      s->getDOFColYValues(yVals);
-
-      mediator->handleDOFColSetValuesEdt(hues, yVals);
-    }
-  }
-
-  s = NULL;
-}
-
-
-// ---------------------------------
-void DiagramEditor::handleDOFOpaAdd(
-  const double& hue,
-  const double& y)
-// ---------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_TEXT)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    s->setModeEdtDOFOpa();
-    mediator->handleDOFColDeactivate();
-    mediator->handleDOFOpaActivate();
-    s->getDOFOpa()->addValue(hue);
-    s->addDOFOpaYValue(y);
-  }
-
-  s = NULL;
-}
-
-
-// ------------------------------------
-void DiagramEditor::handleDOFOpaUpdate(
-  const size_t& idx,
-  const double& opa,
-  const double& y)
-// ------------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    s->getDOFOpa()->setValue(idx, opa);
-    s->setDOFOpaYValue(idx, y);
-  }
-
-  s = NULL;
-}
-
-
-// -----------------------------------
-void DiagramEditor::handleDOFOpaClear(
-  const size_t& idx)
-// -----------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    if (s->getDOFOpa()->getSizeValues() > 2)
-    {
-      s->getDOFOpa()->clearValue(idx);
-      s->clearDOFOpaYValue(idx);
-
-      vector< double > opas;
-      vector< double > yVals;
-
-      s->getDOFOpa()->getValues(opas);
-      s->getDOFOpaYValues(yVals);
-
-      mediator->handleDOFOpaSetValuesEdt(opas, yVals);
-    }
-  }
-
-  s = NULL;
-}
-
-
-// --------------------------------
-void DiagramEditor::setLinkDOFAttr(
-  const size_t& DOFIdx,
-  const size_t& attrIdx)
-// --------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_TEXT)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    Attribute* a = graph->getAttribute(attrIdx);
-    DOF* dof = NULL;
-
-    if (DOFIdx == s->getDOFXCtr()->getIndex())
-    {
-      dof = s->getDOFXCtr();
-    }
-    else if (DOFIdx == s->getDOFYCtr()->getIndex())
-    {
-      dof = s->getDOFYCtr();
-    }
-    else if (DOFIdx == s->getDOFWth()->getIndex())
-    {
-      dof = s->getDOFWth();
-    }
-    else if (DOFIdx == s->getDOFHgt()->getIndex())
-    {
-      dof = s->getDOFHgt();
-    }
-    else if (DOFIdx == s->getDOFAgl()->getIndex())
-    {
-      dof = s->getDOFAgl();
-    }
-    else if (DOFIdx == s->getDOFCol()->getIndex())
-    {
-      dof = s->getDOFCol();
-    }
-    else if (DOFIdx == s->getDOFOpa()->getIndex())
-    {
-      dof = s->getDOFOpa();
-    }
-    else if (DOFIdx == s->getDOFText()->getIndex())
-    {
-      dof = s->getDOFText();
-      if (a->getSizeCurValues() > 0)
-      {
-        s->setVariable(a->getCurValue(0)->getValue());
-        s->setNote("");
-      }
-      else
-      {
-        s->setNote(a->getName());
-        s->setVariable("");
-      }
-
-    }
-
-    if (dof != NULL)
-    {
-      dof->setAttribute(a);
-    }
-
-    displDOFInfo(s);
-
-    a   = NULL;
-    dof = NULL;
-  }
-
-  s = NULL;
-}
-
-
-// ------------------------------------------------------
-void DiagramEditor::clearLinkDOFAttr(const size_t& DOFIdx)
-// ------------------------------------------------------
-{
-  Shape* s = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_XCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_YCTR ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_HGT  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_WTH  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_AGL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_COL  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_OPA  ||
-        diagram->getShape(i)->getMode() == Shape::MODE_EDT_DOF_TEXT)
-    {
-      s = diagram->getShape(i);
-      break;
-    }
-  }
-
-  if (s != NULL)
-  {
-    DOF* dof = NULL;
-
-    if (DOFIdx == s->getDOFXCtr()->getIndex())
-    {
-      dof = s->getDOFXCtr();
-    }
-    else if (DOFIdx == s->getDOFYCtr()->getIndex())
-    {
-      dof = s->getDOFYCtr();
-    }
-    else if (DOFIdx == s->getDOFWth()->getIndex())
-    {
-      dof = s->getDOFWth();
-    }
-    else if (DOFIdx == s->getDOFHgt()->getIndex())
-    {
-      dof = s->getDOFHgt();
-    }
-    else if (DOFIdx == s->getDOFAgl()->getIndex())
-    {
-      dof = s->getDOFAgl();
-    }
-    else if (DOFIdx == s->getDOFCol()->getIndex())
-    {
-      dof = s->getDOFCol();
-    }
-    else if (DOFIdx == s->getDOFOpa()->getIndex())
-    {
-      dof = s->getDOFOpa();
-    }
-    else if (DOFIdx == s->getDOFText()->getIndex())
-    {
-      dof = s->getDOFText();
-      s->setVariable("");
-      s->setVariableName("");
-      s->setNote("");
-    }
-
-    if (dof != NULL)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    displDOFInfo(s);
-
-    dof = NULL;
-  }
-
-  s = NULL;
-}
-
-
-// -------------------------------------------------------
-void DiagramEditor::clearLinkAttrDOF(const size_t& attrIdx)
-// -------------------------------------------------------
-{
-  Shape* s        = NULL;
-  DOF* dof        = NULL;
-  Attribute* attr = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    s = diagram->getShape(i);
-
-    dof  = s->getDOFXCtr();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    dof  = s->getDOFYCtr();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    dof  = s->getDOFWth();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    dof  = s->getDOFHgt();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    dof  = s->getDOFAgl();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    dof  = s->getDOFCol();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    dof  = s->getDOFOpa();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-
-    dof  = s->getDOFText();
-    attr = dof->getAttribute();
-    if (attr != NULL && attr->getIndex() == attrIdx)
-    {
-      dof->setAttribute(NULL);
-    }
-    s->setVariable("");
-  }
-
-  s    = NULL;
-  dof  = NULL;
-  attr = NULL;
-}
-
-
-// -- get functions ---------------------------------------------
-
-
-// ---------------------------------
-Diagram* DiagramEditor::getDiagram()
-// ---------------------------------
-{
-  return diagram;
-}
-
-
-// -----------------------------
-int DiagramEditor::getEditMode()
-// -----------------------------
-{
-  return editMode;
-}
-
-// -- helper functions ----------------------------------------------
-void DiagramEditor::printMouseVariables()
-{
-  Visualizer::printMouseVariables();
-}
-
-
-// -- visualization functions  ----------------------------------
-
-
-// ------------------------------------------------------
-void DiagramEditor::visualize(const bool& inSelectMode)
-// ------------------------------------------------------
-{
-  clear();
-
-  if (inSelectMode == true)
-  {
-    if (editMode == EDIT_MODE_SELECT || editMode == EDIT_MODE_DOF || editMode == EDIT_MODE_NOTE)
-    {
-      // set up picking
-      GLint hits = 0;
-      GLuint selectBuf[512];
-      startSelectMode(
-        hits,
-        selectBuf,
-        2.0,
-        2.0);
-
-      // render in select mode
-      glPushName(0);
-      diagram->visualize(inSelectMode, canvas);
-      glPopName();
-
-      // finish up picking
-      finishSelectMode(
-        hits,
-        selectBuf);
-    }
-  }
-  else
-  {
-    diagram->visualize(inSelectMode, canvas);
-
-    if (mouseDrag == MSE_DRAG_TRUE &&
-        mouseSide == MSE_SIDE_LFT)
-    {
-      double x1, y1;
-      double x2, y2;
-      double pix;
-
-      canvas->getWorldCoords(xMouseDragBeg, yMouseDragBeg, x1, y1);
-      canvas->getWorldCoords(xMouseCur, yMouseCur, x2, y2);
-
-      if (diagram->getSnapGrid() == true)
-      {
-        double intv = diagram->getGridInterval(canvas);
-
-        x1 = Utils::rndToNearestMult(x1, intv);
-        y1 = Utils::rndToNearestMult(y1, intv);
-        x2 = Utils::rndToNearestMult(x2, intv);
-        y2 = Utils::rndToNearestMult(y2, intv);
-      }
-
-      pix = canvas->getPixelSize();
-
-      double dX, dY;
-      double xC, yC;
-
-      dX = x2-x1;
-      dY = y2-y1;
-
-      xC = x1+0.5*dX;
-      yC = y1+0.5*dY;
-
-      VisUtils::setColorDkGray();
-      if (editMode == EDIT_MODE_SELECT)
-      {
-        selectedX1 = xC;
-        selectedY1 = yC;
-        selectedX2 = 0.5*dX;
-        selectedY2 = -0.5*dY;
-        if (!isAnyShapeSelected())
-        {
-          VisUtils::drawRect(x1, x2, y1, y2);
-        }
-      }
-      else
-      {
-        selectedX1 = -1;
-        selectedX2 = -1;
-        selectedY1 = -1;
-        selectedY2 = -1;
-        if (editMode == EDIT_MODE_RECT)
-        {
-          VisUtils::drawRect(x1, x2, y1, y2);
-        }
-        else if (editMode == EDIT_MODE_ELLIPSE)
-        {
-          VisUtils::drawEllipse(xC, yC, 0.5*dX, 0.5*dY, Shape::segNumHnt);
-        }
-        else if (editMode == EDIT_MODE_LINE)
-        {
-          VisUtils::drawLine(x1, x2, y1, y2);
-        }
-        else if (editMode == EDIT_MODE_ARROW)
-        {
-          VisUtils::drawArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
-        }
-        else if (editMode == EDIT_MODE_DARROW)
-        {
-          VisUtils::drawDArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
-        }
-      }
-    }
-  }
-}
-
-void DiagramEditor::reGenText()
-{
-  Shape* s        = NULL;
-
-  size_t sizeShapes = diagram->getSizeShapes();
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    s = diagram->getShape(i);
-    s->setTextures(false);
-  }
+  m_popup.popup(mapToGlobal(m_lastMouseEvent.pos()));
 }
 
 
 // -- event handlers --------------------------------------------
 
 
-// -----------------------------------------
-void DiagramEditor::handleMouseLftDownEvent(
-  const int& x,
-  const int& y)
-// -----------------------------------------
+void DiagramEditor::handleMouseEvent(QMouseEvent* e)
 {
-  Visualizer::handleMouseLftDownEvent(x, y);
+  Visualizer::handleMouseEvent(e);
 
-  if (editMode == EDIT_MODE_SELECT || editMode == EDIT_MODE_DOF)
+  if (e->type() != QEvent::MouseMove || e->buttons() != Qt::NoButton)
   {
-    visualize(true);
+    // redraw in select mode
+    updateGL(true);
+    // redraw in render mode
+    updateGL();
   }
+
+  m_lastMousePos = e->pos();
 }
 
-
-// ---------------------------------------
-void DiagramEditor::handleMouseLftUpEvent(
-  const int& x,
-  const int& y)
-// ---------------------------------------
+void DiagramEditor::handleKeyEvent(QKeyEvent* e)
 {
-  Visualizer::handleMouseLftUpEvent(x, y);
-
-  if (editMode == EDIT_MODE_SELECT)
+  Visualizer::handleKeyEvent(e);
+  if (e->type() == QEvent::KeyPress)
   {
-    visualize(true);
-    handleIntersection();
+    if (m_editMode == EDIT_MODE_SELECT && e->matches(QKeySequence::SelectAll))
+    {
+      selectAllShapes();
+    }
+    else if (e->matches(QKeySequence::Cut))
+    {
+      cutShapes();
+    }
+    else if (e->matches(QKeySequence::Copy))
+    {
+      copyShapes();
+    }
+    else if (e->matches(QKeySequence::Paste))
+    {
+      pasteShapes();
+    }
   }
-  else if (editMode == EDIT_MODE_DOF)
+  if (e->type() == QEvent::KeyRelease)
   {
-    visualize(true);
+    if (e->matches(QKeySequence::Delete))
+    {
+      deleteShapes();
+    }
   }
-  else
-  {
-    double w, h;
-    double x1, x2, y1, y2;
-    double dX, dY;
-    double pix;
-
-    canvas->getSize(w, h);
-    pix = canvas->getPixelSize();
-
-    // do transl & scale here
-
-    canvas->getWorldCoords(xMouseDragBeg, yMouseDragBeg, x1, y1);
-    canvas->getWorldCoords(xMouseCur,     yMouseCur,     x2, y2);
-
-    canvas->getWorldCoords(xMouseDragBeg, yMouseDragBeg, x1, y1);
-    canvas->getWorldCoords(xMouseCur, yMouseCur, x2, y2);
-
-    if (diagram->getSnapGrid() == true)
-    {
-      double intv = diagram->getGridInterval(canvas);
-
-      x1 = Utils::rndToNearestMult(x1, intv);
-      y1 = Utils::rndToNearestMult(y1, intv);
-      x2 = Utils::rndToNearestMult(x2, intv);
-      y2 = Utils::rndToNearestMult(y2, intv);
-    }
-
-    dX = x2-x1;
-    dY = y2-y1;
-
-    if (Utils::abs(dX) < Shape::minSzeHnt*pix &&
-        Utils::abs(dY) < Shape::minSzeHnt*pix)
-    {
-      dX = Shape::minSzeHnt*pix;
-      dY = Shape::minSzeHnt*pix;
-    }
-
-    double xC, yC, xDFC, yDFC;
-    xC = x1+0.5*dX;
-    yC = y1+0.5*dY;
-    xDFC = 0.5*dX;
-    yDFC = -0.5*dY;
-
-    double xLeft, xRight, yTop, yBottom;
-    mediator->getGridCoordinates(xLeft, xRight, yTop, yBottom);
-    if (!(xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC)))
-    {
-      if (xLeft > (xC - xDFC))
-      {
-        xC = xLeft + xDFC;
-      }
-      else if (xRight < (xC + xDFC))
-      {
-        xC = xRight - xDFC;
-      }
-      if (yBottom > (yC - yDFC))
-      {
-        yC = yBottom + yDFC;
-      }
-      else if (yTop < (yC + yDFC))
-      {
-        yC = yTop - yDFC;
-      }
-    }
-
-    Shape* s = new Shape(
-      mediator,
-      diagram->getSizeShapes(),
-      xC,     yC,
-      0.5*dX, -0.5*dY,
-      0.0,    Shape::TYPE_RECT);
-
-    if (editMode == EDIT_MODE_RECT)
-    {
-      s->setTypeRect();
-    }
-    else if (editMode == EDIT_MODE_ELLIPSE)
-    {
-      s->setTypeEllipse();
-    }
-    else if (editMode == EDIT_MODE_LINE)
-    {
-      s->setTypeLine();
-    }
-    else if (editMode == EDIT_MODE_ARROW)
-    {
-      s->setTypeArrow();
-    }
-    else if (editMode == EDIT_MODE_DARROW)
-    {
-      s->setTypeDArrow();
-    }
-    else if (editMode == EDIT_MODE_NOTE)
-    {
-      s->setTypeNote();
-      mediator->handleNote(s->getIndex() , s->getNote());
-    }
-
-    diagram->addShape(s);
-    s = NULL;
-
-    // undo transl & scale here
-  }
+  // redraw in render mode
+  updateGL();
 }
 
-
-// -------------------------------------------
-void DiagramEditor::handleMouseLftDClickEvent(
-  const int& x,
-  const int& y)
-// -------------------------------------------
-{
-  Visualizer::handleMouseLftDClickEvent(x, y);
-
-  if (editMode == EDIT_MODE_SELECT)
-  {
-    visualize(true);
-  }
-}
-
-
-// -----------------------------------------
-void DiagramEditor::handleMouseRgtDownEvent(
-  const int& x,
-  const int& y)
-// -----------------------------------------
-{
-  Visualizer::handleMouseRgtDownEvent(x, y);
-
-  if (editMode == EDIT_MODE_SELECT)
-  {
-    visualize(true);
-  }
-}
-
-
-// ----------------------------------------
-void DiagramEditor::handleMouseMotionEvent(
-  const int& x,
-  const int& y)
-// ----------------------------------------
-{
-  Visualizer::handleMouseMotionEvent(x, y);
-
-  if ((editMode  == EDIT_MODE_SELECT || editMode  == EDIT_MODE_DOF) &&
-      mouseDrag == MSE_DRAG_TRUE)
-  {
-    if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
-    {
-      selection = true;
-      visualize(true);      // select mode
-    }
-    else
-    {
-      handleDrag();
-    }
-  }
-
-  xMousePrev = xMouseCur;
-  yMousePrev = yMouseCur;
-}
-
-
-// -------------------------------------------------------
-void DiagramEditor::handleKeyDownEvent(const int& keyCode, const int& specialKey)
-// -------------------------------------------------------
-{
-  Visualizer::handleKeyDownEvent(keyCode);
-  if (editMode == EDIT_MODE_SELECT)
-  {
-    // Ctrl+A is pressed, select all the shapes in the diagram, 65 for A, 10 for CTRL, GetModifiers function of wxWidgets is not working properly
-    if (keyCode == 65 && specialKey == 10)
-    {
-      handleSelectAll();
-    }
-    else if (keyCode == WXK_DELETE && specialKey == 12)   // Cut Shortcut, shift + del
-    {
-      handleCut();
-    }
-    else if (keyCode == 67 && specialKey == 10)   // Copy Shortcut, ctrl + c
-    {
-      handleCopy();
-    }
-    else if (keyCode == 86 && specialKey == 10)   // Paste Shortcut, ctrl + v
-    {
-      handlePaste();
-    }
-  }
-}
-
-
-// -------------------------------------------------------
-void DiagramEditor::handleKeyUpEvent(const int& keyCode, const int& /*specialKey*/)
-// -------------------------------------------------------
-{
-  Visualizer::handleKeyUpEvent(keyCode);
-  if (editMode == EDIT_MODE_SELECT)
-  {
-    if (keyCode == WXK_DELETE)   // Delete
-    {
-      handleDelete();
-    }
-  }
-}
-
-
-// -------------------------------------------------------
 void DiagramEditor::handleHits(const vector< int > &ids)
-// -------------------------------------------------------
 {
-
-  // only diagram was hit
-  if (ids.size() == 1)
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
   {
-    lastSelectedShapeId = NON_EXISTING;
-    handleHitDiagramOnly();
-  }
-  // shape was hit
-  else if (ids.size() == 2 && !selection)
-  {
-    lastSelectedShapeId = ids[1];
-    handleHitShape(ids[1]);
-  }
-  else if (ids.size() == 3)
-  {
-    lastSelectedShapeId = ids[1];
-    handleHitShapeHandle(ids[1], ids[2]);
-  }
-}
-
-
-// ---------------------------------------
-void DiagramEditor::handleHitDiagramOnly()
-// ---------------------------------------
-{
-  if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
-  {
-    deselectAll();
-    mediator->handleDOFDeselect();
-  }
-  else
-  {
-    drgBegIdx1 = NON_EXISTING;
-    drgBegIdx2 = NON_EXISTING;
-  }
-
-  if (mouseSide == MSE_SIDE_RGT)
-  {
-    canvas->getWorldCoords(
-      xMouseCur, yMouseCur,
-      xPaste,    yPaste);
-
-    //Clear mouse input
-    handleMouseRgtUpEvent((int)xMouseCur, (int)yMouseCur);
-
-    bool pasteFlag = false;
-    int checkedItem = -1;
-    if (clipBoardShape != NULL || clipBoardList.size() > 0)
+    if (ids.size() <= 1 || (m_lastMouseEvent.button() == Qt::LeftButton && m_editMode != EDIT_MODE_SELECT && m_editMode != EDIT_MODE_DOF))
+    // Deselect if nothing hit or before shape creation
     {
-      pasteFlag = true;
+      deselectAll();
     }
-
-    Shape* selectedShape = NULL;
-    //find the selected shape
-    for (size_t i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i)
+    else if (ids.size() == 2)
     {
-      if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
+      if (m_editMode == EDIT_MODE_SELECT || m_lastMouseEvent.button() == Qt::RightButton)
+      // Select the shape if it was not selected
       {
-        selectedShape = diagram->getShape(i);
-        checkedItem = selectedShape->getCheckedId();
-      }
-    }
-
-    mediator->handleEditShape(
-      false,     // cut
-      false,     // copy
-      pasteFlag, // paste
-      false,     // delete
-      false,     // bring to front
-      false,     // send to back
-      false,     // bring forward
-      false,     // send backward
-      false,     // edit DOF
-      checkedItem);  // id of the variable displayed on the shape
-  }
-}
-
-// ------------------------------------------------------
-void DiagramEditor::handleHitShape(const size_t& shapeIdx)
-// ------------------------------------------------------
-{
-  size_t sizeShapes = 0;
-  if (diagram != NULL)
-  {
-    sizeShapes = diagram->getSizeShapes();
-  }
-
-  if (shapeIdx != NON_EXISTING && shapeIdx < sizeShapes)
-  {
-    Shape* s = diagram->getShape(shapeIdx);
-
-    if (mouseClick == MSE_CLICK_SINGLE)
-    {
-      if (mouseButton == MSE_BUTTON_DOWN)
-      {
-        if (mouseSide == MSE_SIDE_LFT)
+        Shape* s = m_diagram->shape(ids[1]);
+        if (s != 0)
         {
-          if (editMode == EDIT_MODE_SELECT)   // mode
-          {
-            if (s->getMode() == Shape::MODE_EDIT)
-            {
-              if (drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING)
-              {
-                s->setModeNormal();
-              }
-              else
-              {
-                s->setModeEdit();
-                drgBegIdx1 = NON_EXISTING;
-                drgBegIdx2 = NON_EXISTING;
-              }
-            }
-            else
-            {
-              s->setModeEdit();
-            }
-
-            for (size_t i = 0; i < sizeShapes; ++i)
-              if (i != shapeIdx)
-              {
-                diagram->getShape(i)->setModeNormal();
-              }
-          }
-          else if (editMode == EDIT_MODE_DOF)
-          {
-            if (s->getMode() != Shape::MODE_EDT_DOF_XCTR &&
-                s->getMode() != Shape::MODE_EDT_DOF_YCTR &&
-                s->getMode() != Shape::MODE_EDT_DOF_WTH  &&
-                s->getMode() != Shape::MODE_EDT_DOF_HGT  &&
-                s->getMode() != Shape::MODE_EDT_DOF_AGL)
-            {
-              s->setMode(Shape::MODE_EDT_DOF_XCTR);
-              drgBegIdx1 = -1;
-              drgBegIdx2 = -1;
-            }
-            displDOFInfo(s);
-
-
-            for (size_t i = 0; i < sizeShapes; ++i)
-              if (i != shapeIdx)
-              {
-                diagram->getShape(i)->setModeNormal();
-              }
-          }
-          else if (editMode == EDIT_MODE_NOTE)
-          {
-            //mediator->handleNote( shapeIdx, s->getNote() );
-          } // mode
-        } // side
-        else if (mouseSide == MSE_SIDE_RGT)
-        {
-          s->setModeEdit();
-          canvas->getWorldCoords(
-            xMouseCur, yMouseCur,
-            xPaste,    yPaste);
-          int countSelectedShapes = 0;
-          for (size_t i = 0; i < sizeShapes; i++)
-          {
-            if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-            {
-              countSelectedShapes++;
-            }
-          }
-          if (countSelectedShapes > 0)
+          if (s->drawMode() != Shape::MODE_EDIT)
           {
             deselectAll();
+            s->setModeEdit();
           }
-          s->setModeEdit();
-
-          //Clear mouse input
-          handleMouseRgtUpEvent((int)xMouseCur, (int)yMouseCur);
-
-          displShapeEdtOptions(s);
-        } // side
-      } // button
-    } // click
-
-    canvas->Refresh();
-    s = NULL;
-  }
-}
-
-
-// --------------------------------------
-void DiagramEditor::handleHitShapeHandle(
-  const size_t& shapeIdx,
-  const size_t& handleId)
-// --------------------------------------
-{
-  size_t sizeShapes = 0;
-  if (diagram != NULL)
-  {
-    sizeShapes = diagram->getSizeShapes();
-  }
-
-  if (shapeIdx != NON_EXISTING && shapeIdx < sizeShapes)
-  {
-    Shape* s = diagram->getShape(shapeIdx);
-
-    if (mouseClick == MSE_CLICK_SINGLE)
-    {
-      if (mouseButton == MSE_BUTTON_DOWN)
-      {
-        if (mouseSide == MSE_SIDE_LFT)
-        {
-          if (editMode == EDIT_MODE_NOTE)
-          {
-          }
-          else if (mouseDrag == MSE_DRAG_TRUE)
-          {
-            drgBegIdx1 = shapeIdx;
-            drgBegIdx2 = handleId;
-            xDrgDist   = 0;
-            yDrgDist   = 0;
-          }
-          else if (mouseDrag == MSE_DRAG_FALSE)
-          {
-            drgBegIdx1 = -1;
-            drgBegIdx2 = -1;
-          }
-        }
-        else if (mouseSide == MSE_SIDE_RGT)
-        {
-          canvas->getWorldCoords(
-            xMouseCur, yMouseCur,
-            xPaste,    yPaste);
-
-          /*for ( int i = 0; i < sizeShapes; ++i )
-              if ( i != s->getIndex() )
-                  diagram->getShape(i)->setModeNormal();*/
-
-          //Clear mouse input
-          handleMouseRgtUpEvent((int)xMouseCur, (int)yMouseCur);
-
-          displShapeEdtOptions(s);
         }
       }
-      else if (mouseButton == MSE_BUTTON_UP)
+      if (m_editMode == EDIT_MODE_SELECT && m_lastMouseEvent.button() == Qt::LeftButton)
+      // Prepare dragging
       {
-        drgBegIdx1 = NON_EXISTING;
-        drgBegIdx2 = NON_EXISTING;
-
-        s->handleHit(handleId);
+        m_currentSelectedShapeId = ids[1];
+        m_currentSelectedHandleId = -1;
       }
     }
-    else if (mouseClick == MSE_CLICK_DOUBLE)
+    else // ids.size() > 2
     {
-      if (mouseButton == MSE_BUTTON_UP)
+      if (m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF)
+      // Prepare dragging of a handle
       {
-        if (mouseSide == MSE_SIDE_LFT)
+        m_currentSelectedShapeId = ids[1];
+        m_currentSelectedHandleId = ids[2];
+      }
+    }
+  }
+
+  if (ids.size() >= 2 && m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::LeftButton)
+  {
+    Shape* s = m_diagram->shape(ids[1]);
+    if (s != 0)
+    {
+      if (m_editMode == EDIT_MODE_DOF && ids.size() == 2)
+      {
+        editDof(s);
+      }
+      if ((m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF) && ids.size() == 3)
+      {
+        if (s->drawMode() == Shape::MODE_EDIT_DOF_AGL && ids[2] == Shape::ID_HDL_DIR)
         {
-          if (s->getMode() != Shape::MODE_EDT_DOF_XCTR &&
-              s->getMode() != Shape::MODE_EDT_DOF_YCTR &&
-              s->getMode() != Shape::MODE_EDT_DOF_WTH  &&
-              s->getMode() != Shape::MODE_EDT_DOF_HGT  &&
-              s->getMode() != Shape::MODE_EDT_DOF_AGL)
+          s->angleDOF()->setDirection(0-s->angleDOF()->direction());
+        }
+      }
+    }
+  }
+
+
+  if (m_mouseDrag && m_lastMouseEvent.buttons() == Qt::LeftButton)
+  {
+    if (m_currentSelectedShapeId != -1)
+    // Some dragging is possibile
+    {
+      if (m_editMode == EDIT_MODE_SELECT)
+      // Drag the shape or a shape handle
+      {
+        if (m_currentSelectedHandleId == -1 || m_currentSelectedHandleId == Shape::ID_HDL_CTR)
+        // Drag the shape
+        {
+          QRectF rectangle = worldRectangle(m_lastMousePos, m_lastMouseEvent.pos());
+          double dX = rectangle.width();
+          double dY = rectangle.height();
+
+          QList<Shape*> shapes = selectedShapes();
+          for (int i = 0; i < shapes.size(); ++i)
           {
-            s->setMode(Shape::MODE_EDT_DOF_XCTR);
-            drgBegIdx1 = -1;
-            drgBegIdx2 = -1;
+            Shape* s = shapes[i];
+            s->setCenter(s->xCenter()+dX, s->yCenter()+dY);
           }
-          if (s->getType() != Shape::TYPE_NOTE)
+        }
+        else
+        // Drag a shape handle
+        {
+          Shape* s = m_diagram->shape(m_currentSelectedShapeId);
+          if (s != 0)
           {
-            displDOFInfo(s);
-            editMode = EDIT_MODE_DOF;
-            mediator->handleEditModeDOF(this);
-          }
-          for (size_t i = 0; i < sizeShapes; ++i)
-            if (i != shapeIdx)
+            switch(m_currentSelectedHandleId)
             {
-              diagram->getShape(i)->setModeNormal();
+              case Shape::ID_HDL_TOP_LFT:
+                handleDragTop(s);
+                handleDragLft(s);
+                break;
+              case Shape::ID_HDL_LFT:
+                handleDragLft(s);
+                break;
+              case Shape::ID_HDL_BOT_LFT:
+                handleDragBot(s);
+                handleDragLft(s);
+                break;
+              case Shape::ID_HDL_BOT:
+                handleDragBot(s);
+                break;
+              case Shape::ID_HDL_BOT_RGT:
+                handleDragBot(s);
+                handleDragRgt(s);
+                break;
+              case Shape::ID_HDL_RGT:
+                handleDragRgt(s);
+                break;
+              case Shape::ID_HDL_TOP_RGT:
+                handleDragTop(s);
+                handleDragRgt(s);
+                break;
+              case Shape::ID_HDL_TOP:
+                handleDragTop(s);
+                break;
+              case Shape::ID_HDL_ROT_RGT:
+                handleDragRot(s, false);
+                break;
+              case Shape::ID_HDL_ROT_TOP:
+                handleDragRot(s, true);
+                break;
+              default:
+                break;
             }
-        }
-      }
-    }
-    s = NULL;
-  }
-}
-
-
-// -----------------------------
-void DiagramEditor::handleDrag()
-// -----------------------------
-{
-  size_t sizeShapes = 0;
-  if (diagram != NULL)
-  {
-    sizeShapes = diagram->getSizeShapes();
-  }
-
-  if (drgBegIdx1 != NON_EXISTING && drgBegIdx1 < sizeShapes)
-  {
-    // do transl & scale here
-    Shape* s = diagram->getShape(drgBegIdx1);
-
-    if (s->getMode() == Shape::MODE_EDIT)
-    {
-      if (drgBegIdx2 == Shape::ID_HDL_CTR)
-      {
-        double xDrag, yDrag;
-        handleDragCtr(s, xDrag, yDrag);
-        size_t i;
-        for (i = 0; i < sizeShapes; i++)
-        {
-          Shape* otherSelectedShape = diagram->getShape(i);
-          if (drgBegIdx1 != i && otherSelectedShape->getMode() == Shape::MODE_EDIT)
-          {
-            double xCtr, yCtr;
-            otherSelectedShape->getCenter(xCtr, yCtr);
-            xCtr += xDrag;
-            yCtr += yDrag;
-            otherSelectedShape ->setCenter(xCtr, yCtr);
           }
-          otherSelectedShape = NULL;
         }
       }
-      else if (drgBegIdx2 == Shape::ID_HDL_TOP_LFT)
+      if ((m_editMode == EDIT_MODE_SELECT || m_editMode == EDIT_MODE_DOF) && m_currentSelectedHandleId != -1)
+      // Drag a DOF handle
       {
-        handleDragTopLft(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_LFT)
-      {
-        handleDragLft(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_BOT_LFT)
-      {
-        handleDragBotLft(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_BOT)
-      {
-        handleDragBot(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_BOT_RGT)
-      {
-        handleDragBotRgt(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_RGT)
-      {
-        handleDragRgt(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_TOP_RGT)
-      {
-        handleDragTopRgt(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_TOP)
-      {
-        handleDragTop(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_ROT_RGT)
-      {
-        handleDragRotRgt(s);
-      }
-      else if (drgBegIdx2 == Shape::ID_HDL_ROT_TOP)
-      {
-        handleDragRotTop(s);
-      }
-    }
-    else if (s->getMode() == Shape::MODE_EDT_DOF_XCTR)
-    {
-      /*
-      if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-        handleDragDOFXCtrBeg( s );
-      else
-      */
-      if (drgBegIdx2 == Shape::ID_HDL_DOF_END)
-      {
-        handleDragDOFXCtrEnd(s);
-      }
-    }
-    else if (s->getMode() == Shape::MODE_EDT_DOF_YCTR)
-    {
-      /*
-      if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-        handleDragDOFYCtrBeg( s );
-      else
-      */
-      if (drgBegIdx2 == Shape::ID_HDL_DOF_END)
-      {
-        handleDragDOFYCtrEnd(s);
-      }
-    }
-    else if (s->getMode() == Shape::MODE_EDT_DOF_WTH)
-    {
-      /*
-      if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-        handleDragDOFWthBeg( s );
-      else
-      */
-      if (drgBegIdx2 == Shape::ID_HDL_DOF_END)
-      {
-        handleDragDOFWthEnd(s);
-      }
-    }
-    else if (s->getMode() == Shape::MODE_EDT_DOF_HGT)
-    {
-      /*
-      if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-        handleDragDOFHgtBeg( s );
-      else
-      */
-      if (drgBegIdx2 == Shape::ID_HDL_DOF_END)
-      {
-        handleDragDOFHgtEnd(s);
-      }
-    }
-    else if (s->getMode() == Shape::MODE_EDT_DOF_AGL)
-    {
-      if (drgBegIdx2 == Shape::ID_HDL_HGE)
-      {
-        handleDragHge(s);
-      }
-      /*
-      else if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-        handleDragDOFAglBeg( s );
-      */
-      else if (drgBegIdx2 == Shape::ID_HDL_DOF_END)
-      {
-        handleDragDOFAglEnd(s);
-      }
-    }
-    // undo transl & scale here
-
-    canvas->Refresh();
-    s = NULL;
-  }
-}
-
-
-// ----------------------------
-void DiagramEditor::handleShowVariable(const string& variable, const int& variableId)
-// ----------------------------
-{
-  Shape* selectedShape = NULL;
-  if (lastSelectedShapeId != NON_EXISTING)
-  {
-    selectedShape = diagram->getShape(lastSelectedShapeId);
-    selectedShape->setCheckedId(variableId);
-    string variableName = variable;
-    size_t i = variable.find(":",0); // for getting variable's name
-    variableName = variable.substr(0, i);
-    i++;
-    string variableValue = variable;
-    variableValue.erase(0,i);
-    selectedShape->setNote(variableName);
-    selectedShape->setVariableName(variableName);
-    if (variable.length() > variableValue.length())  // If their length is same, it means variable doesn't have a value
-    {
-      selectedShape->setVariable(variableValue);
-    }
-    else
-    {
-      selectedShape->setVariable("");
-    }
-  }
-}
-
-
-// ----------------------------
-void DiagramEditor::handleShowNote(const string& variable, const size_t& shapeId)
-// ----------------------------
-{
-  Shape* selectedShape = NULL;
-  selectedShape = diagram->getShape(shapeId);
-  selectedShape->setNote(variable);
-  if (selectedShape->getType() == Shape::TYPE_NOTE)
-  {
-    double letterCount = selectedShape->getNote().length();
-    double x = letterCount * 0.009;
-    double y = 0.02;
-    selectedShape->setDFC(x, y);
-  }
-}
-
-
-// ----------------------------
-void DiagramEditor::handleAddText(string& variable, size_t& shapeId)
-// ----------------------------
-{
-  Shape* selectedShape = NULL;
-  shapeId = lastSelectedShapeId;
-  selectedShape = diagram->getShape(shapeId);
-  variable = selectedShape->getNote();
-  selectedShape = NULL;
-}
-
-
-// ----------------------------
-void DiagramEditor::handleTextSize(size_t& textSize, size_t& shapeId)
-// ----------------------------
-{
-  Shape* selectedShape = NULL;
-  shapeId = lastSelectedShapeId;
-  selectedShape = diagram->getShape(shapeId);
-  if (selectedShape != NULL)
-  {
-    textSize = selectedShape->getTextSize();
-    selectedShape = NULL;
-  }
-}
-
-
-// ----------------------------
-void DiagramEditor::handleSetTextSize(size_t& textSize, size_t& shapeId)
-// ----------------------------
-{
-
-  Shape* selectedShape = NULL;
-  selectedShape = diagram->getShape(shapeId);
-  selectedShape->setTextSize(textSize);
-}
-
-
-// ----------------------------
-void DiagramEditor::handleCut()
-// ----------------------------
-{
-  Shape* origShape = NULL;
-  Shape* copyShape = NULL;
-  bool shapeSelected = false;
-
-  // find & copy selected shape
-  for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
-  {
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-    {
-      if (!shapeSelected)
-      {
-        shapeSelected = true;
-        clearClipBoard();
-      }
-      origShape = diagram->getShape(i);
-
-      // invoke copy constructor
-      copyShape = new Shape(*origShape);
-      // delete original shape
-      diagram->deleteShape(origShape->getIndex());
-      i--; // decrement index; because deletion of the shape decrements the size of the diagram
-
-      clipBoardList.push_back(copyShape);
-      origShape = NULL;
-      copyShape = NULL;
-    }
-  }
-}
-
-
-// -----------------------------
-void DiagramEditor::handleCopy()
-// -----------------------------
-{
-  Shape* origShape = NULL;
-  Shape* copyShape = NULL;
-  bool shapeSelected = false;
-
-  // find & copy selected shape
-  for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
-  {
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-    {
-      if (!shapeSelected)
-      {
-        shapeSelected = true;
-        clearClipBoard();
-      }
-      origShape = diagram->getShape(i);
-
-      // invoke copy constructor
-      copyShape = new Shape(*origShape);
-
-      clipBoardList.push_back(copyShape);
-      origShape = NULL;
-      copyShape = NULL;
-    }
-  }
-}
-
-
-// ------------------------------
-void DiagramEditor::clearClipBoard()
-// ------------------------------
-{
-  size_t size = clipBoardList.size();
-  for (size_t i = 0; i < size; i++)
-  {
-    clipBoardList[i] = NULL;
-  }
-  clipBoardList.clear();
-}
-
-
-// ------------------------------
-void DiagramEditor::handlePaste()
-// ------------------------------
-{
-  if (clipBoardList.size() > 0)
-  {
-    // deselect all other shapes
-    for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
-      if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-      {
-        diagram->getShape(i)->setModeNormal();
-      }
-
-    size_t size = clipBoardList.size();
-    double xC, yC, xCFirst, yCFirst;
-    clipBoardList[0]->getCenter(xCFirst, yCFirst);
-    for (size_t i = 0; i < size; i++)
-    {
-      // update index of clipboard shape
-      clipBoardList[i]->setIndex(diagram->getSizeShapes());
-
-      // update clipboard shape
-      if (i == 0) // Paste the first selected shape to the clicked position
-      {
-        clipBoardList[i]->setCenter(xPaste, yPaste);
-      }
-      else // Paste other shapes relative to their position with respect to first shape
-      {
-        double distanceX, distanceY, x1, x2, y1, y2;
-        clipBoardList[0]->getCenter(x1, y1);
-        clipBoardList[i]->getCenter(x2, y2);
-
-        // calculate the distance between the first selected shape and the current shape
-        distanceX = xCFirst - x2;
-        distanceY = yCFirst - y2;
-        if (x2 > xCFirst)
+        Shape* s = m_diagram->shape(m_currentSelectedShapeId);
+        if (s != 0)
         {
-          distanceX = x2 - xCFirst;
+          switch(m_currentSelectedHandleId)
+          {
+            case Shape::ID_HDL_DOF_END:
+
+              switch(s->drawMode())
+              {
+                case Shape::MODE_EDIT_DOF_XCTR:
+                  handleDragDOFXCtrEnd(s);
+                  break;
+                case Shape::MODE_EDIT_DOF_YCTR:
+                  handleDragDOFYCtrEnd(s);
+                  break;
+                case Shape::MODE_EDIT_DOF_WTH:
+                  handleDragDOFWthEnd(s);
+                  break;
+                case Shape::MODE_EDIT_DOF_HGT:
+                  handleDragDOFHgtEnd(s);
+                  break;
+                case Shape::MODE_EDIT_DOF_AGL:
+                  handleDragDOFAglEnd(s);
+                  break;
+                default:
+                  break;
+              }
+
+              break;
+            case Shape::ID_HDL_HGE:
+              if (s->drawMode() == Shape::MODE_EDIT_DOF_AGL)
+              {
+                handleDragDOFHge(s);
+              }
+              break;
+            default:
+              break;
+          }
         }
-        if (y2 > yCFirst)
+      }
+    }
+  }
+
+
+  if (m_mouseDragReleased && m_lastMouseEvent.button() == Qt::LeftButton && m_currentSelectedShapeId == -1)
+  // Drag ended and no shape or handle was dragged
+  {
+    if (m_editMode == EDIT_MODE_SELECT)
+    // We try to select some shapes
+    {
+      deselectAll();
+      for (int i = 0; i < m_diagram->shapeCount(); ++i)
+      {
+        Shape* s = m_diagram->shape(i);
+        QRectF shape(s->xCenter()-s->xDistance(), s->yCenter()-s->yDistance(), 2.0*s->xDistance(), 2.0*s->yDistance());
+
+        if (m_selection.intersects(shape))
         {
-          distanceY = y2 - yCFirst;
+          s->setDrawMode(Shape::MODE_EDIT);
         }
-
-        xC = xPaste + distanceX; // Calculate new center of the selected shape according to the distance between the first shape
-        yC = yPaste + distanceY;
-
-        clipBoardList[i]->setCenter(xC, yC);
-      }
-      clipBoardList[i]->setModeEdit();
-
-      // add clipboard shape to diagram
-      diagram->addShape(clipBoardList[i]);
-      // make another copy of clipboard shape
-      clipBoardList[i] = new Shape(*clipBoardList[i]);
-    }
-  }
-}
-
-
-// -------------------------------
-void DiagramEditor::handleDelete()
-// -------------------------------
-{
-  vector< size_t > toDelete;
-  // get indices to delete
-  {
-    for (size_t i = 0; i < diagram->getSizeShapes() ; ++i)
-    {
-      /*
-      if ( diagram->getShape(i)->getMode() == Shape::MODE_EDT_CTR_DFC ||
-      diagram->getShape(i)->getMode() == Shape::MODE_EDT_HGE_AGL )
-      */
-      if (diagram->getShape(i)->getMode() == Shape::MODE_EDIT)
-      {
-        toDelete.push_back(i);
       }
     }
+
+    if (m_editMode != EDIT_MODE_SELECT && m_editMode != EDIT_MODE_DOF)
+    // We create a shape
+    {
+      createShape();
+    }
   }
 
-  // delete shapes
+  if (m_lastMouseEvent.type() == QEvent::MouseButtonRelease && m_lastMouseEvent.button() == Qt::RightButton)
   {
-    for (size_t i = 0; i < toDelete.size(); ++i)
-    {
-      diagram->deleteShape(toDelete[i]-i);
-    }
+    showContextMenu();
+  }
+
+  if (m_lastMouseEvent.buttons() == Qt::NoButton)
+  // Reset the drag information if all buttons are released
+  {
+    m_currentSelectedShapeId = -1;
+    m_currentSelectedHandleId = -1;
   }
 }
 
 
-// -------------------------------
-void DiagramEditor::handleSelectAll()
-// -------------------------------
-{
-  for (size_t i = 0; i < diagram->getSizeShapes() ; ++i)
-  {
-    diagram->getShape(i)->setMode(Shape::MODE_EDIT);
-  }
-}
-
-
-// -------------------------------------
-void DiagramEditor::handleBringToFront()
-// -------------------------------------
-{
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-    {
-      s = diagram->getShape(i);
-    }
-
-  if (s != NULL)
-  {
-    diagram->moveShapeToBack(s->getIndex());
-  }
-
-  s = NULL;
-}
-
-
-// -----------------------------------
-void DiagramEditor::handleSendToBack()
-// -----------------------------------
-{
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-    {
-      s = diagram->getShape(i);
-    }
-
-  if (s != NULL)
-  {
-    diagram->moveShapeToFront(s->getIndex());
-  }
-
-  s = NULL;
-}
-
-
-// -------------------------------------
-void DiagramEditor::handleBringForward()
-// -------------------------------------
-{
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-    {
-      s = diagram->getShape(i);
-    }
-
-  if (s != NULL)
-  {
-    diagram->moveShapeBackward(s->getIndex());
-  }
-
-  s = NULL;
-}
-
-
-// -------------------------------------
-void DiagramEditor::handleSendBackward()
-// -------------------------------------
-{
-  Shape* s = NULL;
-  for (size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i)
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-    {
-      s = diagram->getShape(i);
-    }
-
-  if (s != NULL)
-  {
-    diagram->moveShapeForward(s->getIndex());
-  }
-
-  s = NULL;
-}
-
-
-// --------------------------------
-void DiagramEditor::handleEditDOF()
-// --------------------------------
-{
-  Shape* s = NULL;
-  if (lastSelectedShapeId != NON_EXISTING)
-  {
-    s = diagram->getShape(lastSelectedShapeId);
-  }
-  if (s != NULL)
-  {
-    s->setModeEdtDOFXCtr();
-    displDOFInfo(s);
-    editMode = EDIT_MODE_DOF;
-    mediator->
-    handleEditModeDOF(this);
-    for (size_t i = 0; i < diagram->getSizeShapes(); ++i)
-      if (i != s->getIndex())
-      {
-        diagram->getShape(i)->setModeNormal();
-      }
-    s = NULL;
-  }
-}
-
-
-// --------------------------------
-void DiagramEditor::handleSetDOF(const size_t& attrIdx)   // Link Attribute to the Text DOF of the selected Shape
-// --------------------------------
-{
-  Shape* s = NULL;
-
-  if (lastSelectedShapeId != NON_EXISTING)
-  {
-    s = diagram->getShape(lastSelectedShapeId);
-  }
-  if (s != NULL)
-  {
-    DOF* dof = NULL;
-    if (attrIdx == NON_EXISTING) // NON_EXISTING Indicates, removing attribute from the Text DOF of the selected shape
-    {
-      dof = s->getDOFText();
-      s->setVariable("");
-      dof->setAttribute(NULL);
-    }
-    else
-    {
-      Attribute* a = graph->getAttribute(attrIdx);
-      dof = s->getDOFText();
-      dof->setAttribute(a);
-      a   = NULL;
-    }
-    dof = NULL;
-  }
-  s = NULL;
-}
-
-
-// --------------------------------
-void DiagramEditor::handleCheckedVariable(const size_t& idDOF, const int& variableId)
-// --------------------------------
-{
-  Shape* selectedShape = NULL;
-
-  //find the selected shape
-  for (size_t i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i)
-  {
-    if (diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
-    {
-      selectedShape = diagram->getShape(i);
-      if (idDOF == selectedShape->getDOFText()->getIndex())  // Check the Variable if TextDOF is modified
-      {
-        selectedShape->setCheckedId(variableId);
-      }
-    }
-  }
-}
-
-
-// -- public utility functions --------------------------------------
-
-
-// ------------------------------
-void DiagramEditor::deselectAll()
-// ------------------------------
-{
-  size_t sizeShapes = 0;
-  if (diagram != NULL)
-  {
-    sizeShapes = diagram->getSizeShapes();
-  }
-
-  for (size_t i = 0; i < sizeShapes; ++i)
-  {
-    diagram->getShape(i)->setModeNormal();
-  }
-
-  drgBegIdx1 = -1;
-  drgBegIdx2 = -1;
-}
-
-
-// -- private utility functions -------------------------------------
-
-
-// -------------------------------------------------
-void DiagramEditor::displShapeEdtOptions(Shape* s)
-// -------------------------------------------------
-{
-  if (s != NULL)
-  {
-    bool editDOF = true;
-    bool pasteFlag = false;
-    int checkedId = s->getCheckedId();
-    if (clipBoardShape != NULL || clipBoardList.size() > 0)
-    {
-      pasteFlag = true;
-    }
-
-    if (s->getType() == Shape::TYPE_NOTE) // If the shape is a note, don't display the text options
-    {
-      editDOF = false;
-    }
-
-    mediator->handleEditShape(
-      true,      // cut
-      true,      // copy
-      pasteFlag, // paste
-      true,      // delete
-      true,      // bring to front
-      true,      // send to back
-      true,      // bring forward
-      true,      // send backward
-      editDOF,     // edit DOF
-      checkedId);  // id of the variable displayed on the shape
-  }
-}
-
-
-// -----------------------------------------
-void DiagramEditor::displDOFInfo(Shape* s)
-// -----------------------------------------
-{
-  if (s != NULL)
-  {
-    vector< size_t > indcs;
-    vector< string > dofs;
-    vector< size_t > attrIdcs;
-    size_t selIdx = NON_EXISTING;
-
-    indcs.push_back(s->getDOFXCtr()->getIndex());
-    dofs.push_back(s->getDOFXCtr()->getLabel());
-    if (s->getDOFXCtr()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFXCtr()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_XCTR)
-    {
-      selIdx = s->getDOFXCtr()->getIndex();
-    }
-
-    indcs.push_back(s->getDOFYCtr()->getIndex());
-    dofs.push_back(s->getDOFYCtr()->getLabel());
-    if (s->getDOFYCtr()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFYCtr()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_YCTR)
-    {
-      selIdx = s->getDOFYCtr()->getIndex();
-    }
-
-    indcs.push_back(s->getDOFWth()->getIndex());
-    dofs.push_back(s->getDOFWth()->getLabel());
-    if (s->getDOFWth()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFWth()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_WTH)
-    {
-      selIdx = s->getDOFWth()->getIndex();
-    }
-
-    indcs.push_back(s->getDOFHgt()->getIndex());
-    dofs.push_back(s->getDOFHgt()->getLabel());
-    if (s->getDOFHgt()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFHgt()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_HGT)
-    {
-      selIdx = s->getDOFHgt()->getIndex();
-    }
-
-    indcs.push_back(s->getDOFAgl()->getIndex());
-    dofs.push_back(s->getDOFAgl()->getLabel());
-    if (s->getDOFAgl()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFAgl()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_AGL)
-    {
-      selIdx = s->getDOFAgl()->getIndex();
-    }
-
-    indcs.push_back(s->getDOFCol()->getIndex());
-    dofs.push_back(s->getDOFCol()->getLabel());
-    if (s->getDOFCol()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFCol()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_COL)
-    {
-      selIdx = s->getDOFCol()->getIndex();
-    }
-
-    indcs.push_back(s->getDOFOpa()->getIndex());
-    dofs.push_back(s->getDOFOpa()->getLabel());
-    if (s->getDOFOpa()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFOpa()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_OPA)
-    {
-      selIdx = s->getDOFOpa()->getIndex();
-    }
-
-    indcs.push_back(s->getDOFText()->getIndex());
-    dofs.push_back(s->getDOFText()->getLabel());
-    if (s->getDOFText()->getAttribute() == NULL)
-    {
-      attrIdcs.push_back(NON_EXISTING);
-    }
-    else
-    {
-      attrIdcs.push_back(s->getDOFText()->getAttribute()->getIndex());
-    }
-    if (s->getMode() == Shape::MODE_EDT_DOF_TEXT)
-    {
-      selIdx = s->getDOFText()->getIndex();
-    }
-
-    mediator->handleEditDOF(
-      indcs,
-      dofs,
-      attrIdcs,
-      selIdx);
-
-    vector< double > vals;
-    vector< double > yVals;
-
-    s->getDOFCol()->getValues(vals);
-    s->getDOFColYValues(yVals);
-    mediator->handleDOFColSetValuesEdt(vals, yVals);
-
-    vals.clear();
-    s->getDOFOpa()->getValues(vals);
-    s->getDOFOpaYValues(yVals);
-    mediator->handleDOFOpaSetValuesEdt(vals, yVals);
-  }
-}
-
-
-// ------------------------------------------
-void DiagramEditor::handleDragCtr(Shape* s, double& xDrag, double& yDrag)
-// ------------------------------------------
-{
-  double xPrv, yPrv;
-  double xCur, yCur;
-  double xCtr, yCtr;
-  double xDFC, yDFC;
-  double x,    y;
-
-  canvas->getWorldCoords(xMousePrev, yMousePrev, xPrv, yPrv);
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  x = xCtr;
-  y = yCtr;
-
-  xDrgDist += xCur-xPrv;
-  yDrgDist += yCur-yPrv;
-
-  if (diagram->getSnapGrid() == true)
-  {
-    x = Utils::rndToNearestMult(x+xDrgDist, diagram->getGridInterval(canvas));
-    y = Utils::rndToNearestMult(y+yDrgDist, diagram->getGridInterval(canvas));
-    double x1 = Utils::rndToNearestMult(x - xDFC, diagram->getGridInterval(canvas));
-    double y1 = Utils::rndToNearestMult(y - yDFC, diagram->getGridInterval(canvas));
-    x = x1 + xDFC;
-    y = y1 + yDFC;
-
-    if (x != xCtr)
-    {
-      xDrgDist = xCur-x;
-    }
-    if (y != yCtr)
-    {
-      yDrgDist = yCur-y;
-    }
-  }
-  else
-  {
-    x += xCur-xPrv;
-    y += yCur-yPrv;
-  }
-  xDrag = x - xCtr;
-  yDrag = y - yCtr;
-
-  s->setCenter(x, y);
-}
-
-
-// ---------------------------------------------
-void DiagramEditor::handleDragTopLft(Shape* s)
-// ---------------------------------------------
-{
-  double angl;             // shape's rotation angle in radians
-  double xCtr, yCtr;       // center of shape
-  double xDFC, yDFC;       // deltas of shape
-  double xCur, yCur;       // current mouse position
-  double x0,   y0;         // position after translating to shape's center
-  double xS,   yS;         // position after rotating to shape's angle
-  double hypX, adjX, oppX; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's x-axis
-  double hypY, adjY, oppY; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's y-axis
-
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv = diagram->getGridInterval(canvas);
-    xCur = Utils::rndToNearestMult(xCur, itv);
-    yCur = Utils::rndToNearestMult(yCur, itv);
-  }
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
-
-  hypX = 0.5*(-xDFC-xS);
-  adjX = hypX*cos(angl);   // x (-)
-  oppX = hypX*sin(angl);   // y (-)
-
-  hypY = 0.5*(yS-yDFC);
-  adjY = hypY*cos(angl);   // y (+)
-  oppY = hypY*sin(angl);   // x (-)
-
-  s->setDFC(xDFC+hypX,      yDFC+hypY);
-  s->setCenter(xCtr-adjX-oppY, yCtr-oppX+adjY);
-}
-
-
-// ------------------------------------------
 void DiagramEditor::handleDragLft(Shape* s)
-// ------------------------------------------
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double xS;      // position after rotating to shape's angle
-  double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's x-axis
+  double angle = Utils::degrToRad(s->angle());
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF rightLocation = QPointF(s->xCenter()+cos(angle)*s->xDistance(), s->yCenter()+sin(angle)*s->xDistance());
 
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
+  double mouseToRightDistance = snapIfNeeded(Utils::distLinePoint(rightLocation, rightLocation + QPointF(sin(-angle), cos(-angle)), mouseLocation));
+  QPointF leftLocation = QPointF(rightLocation.x() + mouseToRightDistance*cos(angle), rightLocation.y() + mouseToRightDistance*sin(angle));
 
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
+  QPointF newCenter = (leftLocation + rightLocation) / 2;
 
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
-    xS = a/cos(angl);
-  }
-
-  hyp = 0.5*(-xDFC-xS);
-  adj = hyp*cos(angl);   // x (-)
-  opp = hyp*sin(angl);   // y (-)
-
-  s->setDFC(xDFC+hyp, yDFC);
-  s->setCenter(xCtr-adj, yCtr-opp);
-
+  s->setCenter(newCenter.x(), newCenter.y());
+  s->setDistance(-mouseToRightDistance/2, s->yDistance());
 }
 
 
-// ---------------------------------------------
-void DiagramEditor::handleDragBotLft(Shape* s)
-// ---------------------------------------------
-{
-  double angl;             // shape's rotation angle in radians
-  double xCtr, yCtr;       // center of shape
-  double xDFC, yDFC;       // deltas of shape
-  double xCur, yCur;       // current mouse position
-  double x0,   y0;         // position after translating to shape's center
-  double xS,   yS;         // position after rotating to shape's angle
-  double hypX, adjX, oppX; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's x-axis
-  double hypY, adjY, oppY; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's y-axis
-
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv = diagram->getGridInterval(canvas);
-    xCur = Utils::rndToNearestMult(xCur, itv);
-    yCur = Utils::rndToNearestMult(yCur, itv);
-  }
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
-
-  hypX = 0.5*(-xDFC-xS);
-  adjX = hypX*cos(angl);   // x (-)
-  oppX = hypX*sin(angl);   // y (-)
-
-  hypY = 0.5*(-yDFC-yS);
-  adjY = hypY*cos(angl);   // y (-)
-  oppY = hypY*sin(angl);   // x (+)
-
-  s->setDFC(xDFC+hypX,      yDFC+hypY);
-  s->setCenter(xCtr-adjX+oppY, yCtr-oppX-adjY);
-
-}
-
-
-// ------------------------------------------
 void DiagramEditor::handleDragBot(Shape* s)
-// ------------------------------------------
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double yS;      // position after rotating to shape's angle
-  double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's y-axis
+  double angle = Utils::degrToRad(s->angle());
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF topLocation = QPointF(s->xCenter()-sin(angle)*s->yDistance(), s->yCenter()+cos(angle)*s->yDistance());
 
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
+  double mouseToTopDistance = snapIfNeeded(Utils::distLinePoint(topLocation, topLocation + QPointF(cos(angle), sin(angle)), mouseLocation));
+  QPointF BottomLocation = QPointF(topLocation.x() + mouseToTopDistance*sin(angle), topLocation.y() - mouseToTopDistance*cos(angle));
 
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  yS = x0*sin(-angl) + y0*cos(-angl);
+  QPointF newCenter = (BottomLocation + topLocation) / 2;
 
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
-    yS = a/cos(angl);
-  }
-
-  hyp = 0.5*(-yDFC-yS);
-  adj = hyp*cos(angl);   // y (-)
-  opp = hyp*sin(angl);   // x (+)
-
-  s->setDFC(xDFC,     yDFC+hyp);
-  s->setCenter(xCtr+opp, yCtr-adj);
+  s->setCenter(newCenter.x(), newCenter.y());
+  s->setDistance(s->xDistance(), mouseToTopDistance/2);
 }
 
 
-// ---------------------------------------------
-void DiagramEditor::handleDragBotRgt(Shape* s)
-// ---------------------------------------------
-{
-  double angl;             // shape's rotation angle in radians
-  double xCtr, yCtr;       // center of shape
-  double xDFC, yDFC;       // deltas of shape
-  double xCur, yCur;       // current mouse position
-  double x0,   y0;         // position after translating to shape's center
-  double xS,   yS;         // position after rotating to shape's angle
-  double hypX, adjX, oppX; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's x-axis
-  double hypY, adjY, oppY; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's y-axis
-
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv = diagram->getGridInterval(canvas);
-    xCur = Utils::rndToNearestMult(xCur, itv);
-    yCur = Utils::rndToNearestMult(yCur, itv);
-  }
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
-
-  hypX = 0.5*(xS-xDFC);
-  adjX = hypX*cos(angl);   // x (+)
-  oppX = hypX*sin(angl);   // y (+)
-
-  hypY = 0.5*(-yDFC-yS);
-  adjY = hypY*cos(angl);   // y (-)
-  oppY = hypY*sin(angl);   // x (+)
-
-  s->setDFC(xDFC+hypX,      yDFC+hypY);
-  s->setCenter(xCtr+adjX+oppY, yCtr+oppX-adjY);
-}
-
-
-// ------------------------------------------
 void DiagramEditor::handleDragRgt(Shape* s)
-// ------------------------------------------
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double xS;      // position after rotating to shape's angle
-  double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's x-axis
+  double angle = Utils::degrToRad(s->angle());
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF leftLocation = QPointF(s->xCenter()-cos(angle)*s->xDistance(), s->yCenter()-sin(angle)*s->xDistance());
 
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
+  double mouseToLeftDistance = snapIfNeeded(Utils::distLinePoint(leftLocation, leftLocation + QPointF(sin(-angle), cos(-angle)), mouseLocation));
+  QPointF rightLocation = QPointF(leftLocation.x() + mouseToLeftDistance*cos(angle), leftLocation.y() + mouseToLeftDistance*sin(angle));
 
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
+  QPointF newCenter = (rightLocation + leftLocation) / 2;
 
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
-    xS = a/cos(angl);
-  }
-
-  hyp = 0.5*(xS-xDFC);
-  adj = hyp*cos(angl);   // x (+)
-  opp = hyp*sin(angl);   // y (+)
-
-  s->setDFC(xDFC+hyp, yDFC);
-  s->setCenter(xCtr+adj, yCtr+opp);
+  s->setCenter(newCenter.x(), newCenter.y());
+  s->setDistance(mouseToLeftDistance/2, s->yDistance());
 }
 
 
-// ---------------------------------------------
-void DiagramEditor::handleDragTopRgt(Shape* s)
-// ---------------------------------------------
-{
-  double angl;             // shape's rotation angle in radians
-  double xCtr, yCtr;       // center of shape
-  double xDFC, yDFC;       // deltas of shape
-  double xCur, yCur;       // current mouse position
-  double x0,   y0;         // position after translating to shape's center
-  double xS,   yS;         // position after rotating to shape's angle
-  double hypX, adjX, oppX; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's x-axis
-  double hypY, adjY, oppY; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's y-axis
-
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv = diagram->getGridInterval(canvas);
-    xCur = Utils::rndToNearestMult(xCur, itv);
-    yCur = Utils::rndToNearestMult(yCur, itv);
-  }
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-  yS = x0*sin(-angl) + y0*cos(-angl);
-
-  hypX = 0.5*(xS-xDFC);
-  adjX = hypX*cos(angl);   // x (+)
-  oppX = hypX*sin(angl);   // y (+)
-
-  hypY = 0.5*(yS-yDFC);
-  adjY = hypY*cos(angl);   // y (+)
-  oppY = hypY*sin(angl);   // x (-)
-
-  s->setDFC(xDFC+hypX,      yDFC+hypY);
-  s->setCenter(xCtr+adjX-oppY, yCtr+oppX+adjY);
-}
-
-
-// ------------------------------------------
 void DiagramEditor::handleDragTop(Shape* s)
-// ------------------------------------------
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double yS;      // position after rotating to shape's angle
-  double hyp, adj, opp; // hypotenuse, adjacent & opposite sides
-  // for movement parallel to shape's y-axis
+  double angle = Utils::degrToRad(s->angle());
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF bottomLocation = QPointF(s->xCenter()+sin(angle)*s->yDistance(), s->yCenter()-cos(angle)*s->yDistance());
 
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
+  double mouseToBottomDistance = snapIfNeeded(Utils::distLinePoint(bottomLocation, bottomLocation + QPointF(cos(angle), sin(angle)), mouseLocation));
+  QPointF topLocation = QPointF(bottomLocation.x() + mouseToBottomDistance*sin(angle), bottomLocation.y() - mouseToBottomDistance*cos(angle));
 
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  yS = x0*sin(-angl) + y0*cos(-angl);
+  QPointF newCenter = (topLocation + bottomLocation) / 2;
 
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
-    yS = a/cos(angl);
-  }
-
-  hyp = 0.5*(yS-yDFC);
-  adj = hyp*cos(angl);   // y (+)
-  opp = hyp*sin(angl);   // x (-)
-
-  s->setDFC(xDFC,     yDFC+hyp);
-  s->setCenter(xCtr-opp, yCtr+adj);
+  s->setCenter(newCenter.x(), newCenter.y());
+  s->setDistance(s->xDistance(), -mouseToBottomDistance/2);
 }
 
 
-// ---------------------------------------------
-void DiagramEditor::handleDragRotRgt(Shape* s)
-// ---------------------------------------------
+void DiagramEditor::handleDragRot(Shape* s, bool isTop)
 {
-  double aglRd;      // shape's rotation angle in radians
-  double aglDg;      // shape's rotation angle in degrees
-  double xCtr, yCtr; // center of shape
-  double xDFC, yDFC; // deltas of shape
-  double xCur, yCur; // current mouse position
-  double x0,   y0;   // position after translating to shape's center
-  double xS,   yS;   // position after rotating to shape's angle
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF relativeMouseLocation = mouseLocation - QPointF(s->xCenter(), s->yCenter());
+  double newAngle = Utils::calcAngleDg(relativeMouseLocation.x(), relativeMouseLocation.y()) + (isTop ? 270.0 : 0);
 
-  // get shape's geometry
-  aglDg = s->getAngleCtr();
-
-  aglRd = Utils::degrToRad(aglDg);
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-aglRd) - y0*sin(-aglRd);
-  yS = x0*sin(-aglRd) + y0*cos(-aglRd);
-
-  aglDg = aglDg + Utils::calcAngleDg(xS, yS);
-
-  if (diagram->getSnapGrid() == true)
+  if ((!isTop && s->xDistance() < 0) || (isTop && s->yDistance() < 0))
   {
-    double itv = diagram->getAngleInterval();
-    aglDg = Utils::rndToNearestMult(aglDg, itv);
+    newAngle += 180.0;
+  }
+  while (newAngle >= 360.0)
+  {
+    newAngle -= 360.0;
   }
 
-  if (xDFC < 0)
-    // shape reflected about y-axis
-  {
-    aglDg += 180.0;
-  }
-  if (aglDg >= 360.0)
-  {
-    aglDg -= 360.0;
-  }
+  newAngle = snapAngleIfNeeded(newAngle);
 
-  // update angle
-  s->setAngleCtr(aglDg);
+  s->setAngle(newAngle);
 }
 
 
-// ---------------------------------------------
-void DiagramEditor::handleDragRotTop(Shape* s)
-// ---------------------------------------------
-{
-  double aglRd;      // shape's rotation angle in radians
-  double aglDg;      // shape's rotation angle in degrees
-  double xCtr, yCtr; // center of shape
-  double xDFC, yDFC; // deltas of shape
-  double xCur, yCur; // current mouse position
-  double x0,   y0;   // position after translating to shape's center
-  double xS,   yS;   // position after rotating to shape's angle
-
-  // get shape's geometry
-  aglDg = s->getAngleCtr();
-  aglRd = Utils::degrToRad(aglDg);
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-aglRd) - y0*sin(-aglRd);
-  yS = x0*sin(-aglRd) + y0*cos(-aglRd);
-
-  aglDg = aglDg + Utils::calcAngleDg(xS, yS) - 90.0;
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv = diagram->getAngleInterval();
-    aglDg = Utils::rndToNearestMult(aglDg, itv);
-  }
-
-  if (yDFC < 0)
-    // shape reflected about y-axis
-  {
-    aglDg += 180.0;
-  }
-  if (aglDg >= 360.0)
-  {
-    aglDg -= 360.0;
-  }
-
-  // update angle
-  s->setAngleCtr(aglDg);
-}
-
-
-// -------------------------------------------------
-void DiagramEditor::handleDragDOFXCtrBeg(Shape* s)
-// -------------------------------------------------
-{
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double x0;            // x position after translating to shape's center
-
-  // get shape's geometry
-  s->getCenter(xCtr, yCtr);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to center, the 'origin'
-  x0 = xCur-xCtr;
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
-  }
-
-  s->getDOFXCtr()->setMin(x0);
-}
-
-
-// -------------------------------------------------
 void DiagramEditor::handleDragDOFXCtrEnd(Shape* s)
-// -------------------------------------------------
 {
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double x0;            // x position after translating to shape's center
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  double mouseToCenterDistance = snapIfNeeded(mouseLocation.x() - s->xCenter());
 
-  // get shape's geometry
-  s->getCenter(xCtr, yCtr);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to center, the 'origin'
-  x0 = xCur-xCtr;
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
-  }
-
-  s->getDOFXCtr()->setMax(x0);
+  s->xCenterDOF()->setMax(mouseToCenterDistance);
 }
 
 
-// -------------------------------------------------
-void DiagramEditor::handleDragDOFYCtrBeg(Shape* s)
-// -------------------------------------------------
-{
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double y0;            // y position after translating to shape's center
-
-  // get shape's geometry
-  s->getCenter(xCtr, yCtr);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to center, the 'origin'
-  y0 = yCur-yCtr;
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
-  }
-
-  s->getDOFYCtr()->setMin(y0);
-}
-
-
-// -------------------------------------------------
 void DiagramEditor::handleDragDOFYCtrEnd(Shape* s)
-// -------------------------------------------------
 {
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double y0;            // y position after translating to shape's center
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  double mouseToCenterDistance = snapIfNeeded(mouseLocation.y() - s->yCenter());
 
-  // get shape's geometry
-  s->getCenter(xCtr, yCtr);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to center, the 'origin'
-  y0 = yCur-yCtr;
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
-  }
-
-  s->getDOFYCtr()->setMax(y0);
+  s->yCenterDOF()->setMax(mouseToCenterDistance);
 }
 
 
-// ------------------------------------------------
-void DiagramEditor::handleDragDOFWthBeg(Shape* s)
-// ------------------------------------------------
-{
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double xS;      // position after rotating to shape's angle
-  double hyp;           // hypotenuse, for movement parallel to shape's x-axis
-
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to center, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
-    xS = a/cos(angl);
-  }
-
-  hyp = xS-xDFC;
-  s->getDOFWth()->setMin(hyp);
-}
-
-
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFWthEnd(Shape* s)
-// ------------------------------------------------
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double xS;      // position after rotating to shape's angle
-  double hyp;           // hypotenuse, for movement parallel to shape's x-axis
+  double angle = Utils::degrToRad(s->angle());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF rightLocation = QPointF(s->xCenter()+cos(angle)*s->xDistance(), s->yCenter()+sin(angle)*s->xDistance());
+  double mouseToRightDistance = snapIfNeeded(Utils::distLinePoint(rightLocation, rightLocation + QPointF(sin(-angle), cos(-angle)), mouseLocation));
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to center, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-
-  // rotate to 'normal' orientation, find x & y
-  xS = x0*cos(-angl) - y0*sin(-angl);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(xCtr+xS*cos(angl), itv)-xCtr;
-    xS = a/cos(angl);
-  }
-
-  hyp = xS-xDFC;
-  s->getDOFWth()->setMax(hyp);
+  s->widthDOF()->setMax(mouseToRightDistance);
 }
 
 
-// ------------------------------------------------
-void DiagramEditor::handleDragDOFHgtBeg(Shape* s)
-// ------------------------------------------------
-{
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double yS;      // position after rotating to shape's angle
-  double hyp;           // hypotenuse, for movement parallel to shape's y-axis
-
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  yS = x0*sin(-angl) + y0*cos(-angl);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
-    yS = a/cos(angl);
-  }
-
-  hyp = yS-yDFC;
-  s->getDOFHgt()->setMin(hyp);
-}
-
-
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFHgtEnd(Shape* s)
-// ------------------------------------------------
 {
-  double angl;          // shape's rotation angle in radians
-  double xCtr, yCtr;    // center of shape
-  double xDFC, yDFC;    // deltas of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // position after translating to shape's center
-  double yS;      // position after rotating to shape's angle
-  double hyp;           // hypotenuse, for movement parallel to shape's y-axis
+  double angle = Utils::degrToRad(s->angle());
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF topLocation = QPointF(s->xCenter()-sin(angle)*s->yDistance(), s->yCenter()+cos(angle)*s->yDistance());
+  double mouseToTopDistance = snapIfNeeded(Utils::distLinePoint(topLocation, topLocation - QPointF(cos(angle), sin(angle)), mouseLocation));
 
-  // get shape's geometry
-  angl = Utils::degrToRad(s->getAngleCtr());
-  s->getCenter(xCtr, yCtr);
-  s->getDFC(xDFC, yDFC);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to xCtr, the 'origin'
-  x0 = xCur-xCtr;
-  y0 = yCur-yCtr;
-  // rotate to 'normal' orientation, find x & y
-  yS = x0*sin(-angl) + y0*cos(-angl);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    double a = Utils::rndToNearestMult(yCtr+yS*cos(angl), itv)-yCtr;
-    yS = a/cos(angl);
-  }
-
-  hyp = yS-yDFC;
-  s->getDOFHgt()->setMax(hyp);
+  s->heightDOF()->setMax(mouseToTopDistance);
 }
 
 
-// ------------------------------------------
-void DiagramEditor::handleDragHge(Shape* s)
-// ------------------------------------------
+void DiagramEditor::handleDragDOFHge(Shape* s)
 {
-  double xCtr, yCtr;    // center of shape
-  double xCur, yCur;    // current mouse position
-  double x0,   y0;      // y position after translating to shape's center
+  QPointF mouseLocation = snapIfNeeded(worldCoordinate(m_lastMouseEvent.posF()));
+  QPointF centerLocation = QPointF(s->xCenter(), s->yCenter());
+  QPointF relativeLocation = mouseLocation - centerLocation;
 
-  // get shape's geometry
-  s->getCenter(xCtr, yCtr);
-
-  // get mouse info
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-  // translate to center, the 'origin'
-  y0 = yCur-yCtr;
-  x0 = xCur-xCtr;
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itv  = diagram->getGridInterval(canvas);
-    x0 = Utils::rndToNearestMult(xCtr+x0, itv)-xCtr;
-    y0 = Utils::rndToNearestMult(yCtr+y0, itv)-yCtr;
-  }
-
-  s->setHinge(x0, y0);
+  s->setHinge(relativeLocation.x(), relativeLocation.y());
 }
 
 
-// ------------------------------------------------
-void DiagramEditor::handleDragDOFAglBeg(Shape* s)
-// ------------------------------------------------
-{
-  double xHge, yHge, xCtr, yCtr;
-  double dstHgeCtr;
-  double aglRef, aglTot;
-  double xCur, yCur, xRelHge, yRelHge;
-
-  // distance from hinge to center
-  s->getHinge(xHge, yHge);
-  s->getCenter(xCtr, yCtr);
-  dstHgeCtr = Utils::dist(xCtr+xHge, yCtr+yHge, xCtr, yCtr);
-  // angle center relative to hinge
-  if (dstHgeCtr == 0)
-  {
-    aglRef = 0;
-  }
-  else
-  {
-    aglRef = Utils::calcAngleDg(-xHge, -yHge);
-  }
-
-  // mouse position relative to hinge
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-  xRelHge = xCur-(xCtr+xHge);
-  yRelHge = yCur-(yCtr+yHge);
-
-  aglTot = Utils::calcAngleDg(xRelHge, yRelHge);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itvAgl  = diagram->getAngleInterval();
-    aglTot = Utils::rndToNearestMult(aglTot, itvAgl);
-  }
-
-  s->getDOFAgl()->setMin(aglTot-aglRef);
-}
-
-
-// ------------------------------------------------
 void DiagramEditor::handleDragDOFAglEnd(Shape* s)
-// ------------------------------------------------
 {
-  double xHge, yHge, xCtr, yCtr;
-  double dstHgeCtr;
-  double aglRef, aglTot;
-  double xCur, yCur, xRelHge, yRelHge;
+  QPointF mouseLocation = worldCoordinate(m_lastMouseEvent.posF());
+  QPointF relativeMouseLocation = mouseLocation - QPointF(s->xCenter()+s->xHinge(), s->yCenter()+s->yHinge());
+  double newAngle = Utils::calcAngleDg(relativeMouseLocation.x(), relativeMouseLocation.y());
+  double offsetAngle = Utils::calcAngleDg(-s->xHinge(), -s->yHinge());
+  newAngle = snapAngleIfNeeded(newAngle);
 
-  // distance from hinge to center
-  s->getHinge(xHge, yHge);
-  s->getCenter(xCtr, yCtr);
-  dstHgeCtr = Utils::dist(xCtr+xHge, yCtr+yHge, xCtr, yCtr);
-  // angle center relative to hinge
-  if (dstHgeCtr == 0)
-  {
-    aglRef = 0;
-  }
-  else
-  {
-    aglRef = Utils::calcAngleDg(-xHge, -yHge);
-  }
-
-  // mouse position relative to hinge
-  canvas->getWorldCoords(xMouseCur,  yMouseCur,  xCur, yCur);
-
-
-  xRelHge = xCur-(xCtr+xHge);
-  yRelHge = yCur-(yCtr+yHge);
-
-  /*
-  // rotate to 'normal' orientation, find x & y
-  double xTmp, yTmp;
-  xS = x0*cos( -angl ) - y0*sin( -angl );
-  yS = x0*sin( -angl ) + y0*cos( -angl );
-  */
-
-  aglTot = Utils::calcAngleDg(xRelHge, yRelHge);
-
-  if (diagram->getSnapGrid() == true)
-  {
-    double itvAgl  = diagram->getAngleInterval();
-    aglTot = Utils::rndToNearestMult(aglTot, itvAgl);
-  }
-
-  s->getDOFAgl()->setMax(aglTot-aglRef);
+  s->angleDOF()->setMax(newAngle-offsetAngle);
 }
 
 
 // -- hit detection -------------------------------------------------
 
 
-// -----------------------------
 void DiagramEditor::processHits(
-  GLint hits,
-  GLuint buffer[])
-// -----------------------------
+    GLint hits,
+    GLuint buffer[])
 {
   GLuint* ptr;
   vector< int > ids;
@@ -3408,7 +1139,7 @@ void DiagramEditor::processHits(
     handleHits(ids);
   }
 
-  ptr = NULL;
+  ptr = 0;
 }
 
 

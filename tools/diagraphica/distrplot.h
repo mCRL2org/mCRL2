@@ -11,6 +11,9 @@
 #ifndef DISTRPLOT_H
 #define DISTRPLOT_H
 
+#include <QtCore>
+#include <QtGui>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
@@ -23,13 +26,15 @@
 
 class DistrPlot : public Visualizer
 {
+  Q_OBJECT
+
   public:
     // -- constructors and destructor -------------------------------
     DistrPlot(
-      Mediator* m,
+      QWidget *parent,
       Graph* g,
-      GLCanvas* c);
-    virtual ~DistrPlot();
+      int attributeIndex
+      );
 
     // -- set data functions ----------------------------------------
     void setValues(
@@ -47,13 +52,9 @@ class DistrPlot : public Visualizer
     void drawDiagram(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
-    void handleMouseMotionEvent(
-      const int& x,
-      const int& y);
-    /*
-    void handleMouseEnterEvent();
-    void handleMouseLeaveEvent();
-    */
+    void handleMouseEvent(QMouseEvent* e);
+
+    QSize sizeHint() const { return QSize(400,400); }
 
   protected:
     // -- utility data functions ------------------------------------
@@ -75,7 +76,7 @@ class DistrPlot : public Visualizer
 
     // -- data members ----------------------------------------------
     // data
-    size_t              attrIdx;
+    Attribute *attribute;
     std::vector< size_t >    number;
     size_t              maxNumber;
     // vis settings

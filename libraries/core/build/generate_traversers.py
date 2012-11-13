@@ -139,8 +139,9 @@ if __name__ == "__main__":
     variable_dependencies           = find_dependencies(all_classes, 'data::variable')
     boolean_variable_dependencies   = find_dependencies(all_classes, 'bes::boolean_variable')
     identifier_string_dependencies  = find_dependencies(all_classes, 'core::identifier_string')
+    action_label_dependencies       = find_dependencies(all_classes, 'lps::action_label')
 
-    #print_dependencies(data_expression_dependencies, "data_expression_dependencies")
+    print_dependencies(process_expression_dependencies, "process_expression_dependencies")
 
     # sort_expression_builder
     make_builder('../../data/include/mcrl2/data/builder.h'        , 'sort_expression_builder', 'add_sort_expressions', 'core::builder'                            , class_map, all_classes, 'data'            , 'data::sort_expression', sort_expression_dependencies, modifiability_map)
@@ -204,6 +205,10 @@ if __name__ == "__main__":
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'variable_traverser', 'add_traverser_variables', 'lps::variable_traverser'             , class_map, all_classes, 'action_formulas' , 'data::variable', variable_dependencies)
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'variable_traverser', 'add_traverser_variables', 'action_formulas::variable_traverser' , class_map, all_classes, 'regular_formulas', 'data::variable', variable_dependencies)
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'variable_traverser', 'add_traverser_variables', 'regular_formulas::variable_traverser', class_map, all_classes, 'state_formulas'  , 'data::variable', variable_dependencies)
+
+    # action_label_traverser
+    make_traverser('../../lps/include/mcrl2/lps/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'core::traverser', class_map, all_classes, 'lps', 'lps::action_label', action_label_dependencies)
+    make_traverser('../../process/include/mcrl2/process/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'lps::action_label_traverser', class_map, all_classes, 'process', 'lps::action_label', action_label_dependencies)
 
     # boolean_variable_traverser
     make_traverser('../../bes/include/mcrl2/bes/traverser.h', 'boolean_variable_traverser', 'add_traverser_boolean_variables', 'core::traverser', class_map, all_classes, 'bes', 'bes::boolean_variable', boolean_variable_dependencies)

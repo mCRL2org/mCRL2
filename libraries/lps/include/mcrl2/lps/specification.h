@@ -21,7 +21,7 @@
 #include <cerrno>
 #include <cstring>
 #include <set>
-#include "mcrl2/exception.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/lps/linear_process.h"

@@ -12,9 +12,14 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
+# Trick to add header files to projects in IDEs like Visual Studio and XCode
+FILE(GLOB_RECURSE HEADERS "." "*.h")
+add_custom_target(${PROJECT_NAME}_headers
+  SOURCES ${HEADERS})
+
 add_executable(${PROJECT_NAME}
   lpsrealelm.cpp
-  realelm.cpp 
+  realelm.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
@@ -24,8 +29,9 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
@@ -33,7 +39,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR} COMPONENT Applications)
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)

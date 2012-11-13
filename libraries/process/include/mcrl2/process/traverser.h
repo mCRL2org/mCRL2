@@ -57,6 +57,8 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.equations());
     static_cast<Derived&>(*this)(x.init());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -335,6 +337,7 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.equations());
     static_cast<Derived&>(*this)(x.init());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -601,6 +604,7 @@ struct add_traverser_process_expressions: public Traverser<Derived>
   void operator()(const process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.equations());
     static_cast<Derived&>(*this)(x.init());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -864,6 +868,8 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const process::process_specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.equations());
     static_cast<Derived&>(*this)(x.init());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1133,6 +1139,8 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.equations());
     static_cast<Derived&>(*this)(x.init());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1427,6 +1435,271 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<lps:
   using super::operator();
 };
 //--- end generated add_traverser_identifier_strings code ---//
+
+//--- start generated add_traverser_action_labels code ---//
+template <template <class> class Traverser, class Derived>
+struct add_traverser_action_labels: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  void operator()(const process::process_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.equations());
+    static_cast<Derived&>(*this)(x.init());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::process_equation& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.expression());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::process_instance& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::process_instance_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::delta& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::tau& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::sum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::block& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::hide& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::rename& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::comm& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::allow& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::sync& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::at& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::seq& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::if_then& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.then_case());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::if_then_else& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.then_case());
+    static_cast<Derived&>(*this)(x.else_case());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::bounded_init& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::merge& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::left_merge& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::choice& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::process_expression& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::process_expression result;
+    if (process::is_process_instance(x))
+    {
+      static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_process_instance_assignment(x))
+    {
+      static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_delta(x))
+    {
+      static_cast<Derived&>(*this)(process::delta(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_tau(x))
+    {
+      static_cast<Derived&>(*this)(process::tau(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_sum(x))
+    {
+      static_cast<Derived&>(*this)(process::sum(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_block(x))
+    {
+      static_cast<Derived&>(*this)(process::block(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_hide(x))
+    {
+      static_cast<Derived&>(*this)(process::hide(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_rename(x))
+    {
+      static_cast<Derived&>(*this)(process::rename(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_comm(x))
+    {
+      static_cast<Derived&>(*this)(process::comm(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_allow(x))
+    {
+      static_cast<Derived&>(*this)(process::allow(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_sync(x))
+    {
+      static_cast<Derived&>(*this)(process::sync(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_at(x))
+    {
+      static_cast<Derived&>(*this)(process::at(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_seq(x))
+    {
+      static_cast<Derived&>(*this)(process::seq(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_if_then(x))
+    {
+      static_cast<Derived&>(*this)(process::if_then(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_if_then_else(x))
+    {
+      static_cast<Derived&>(*this)(process::if_then_else(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_bounded_init(x))
+    {
+      static_cast<Derived&>(*this)(process::bounded_init(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_merge(x))
+    {
+      static_cast<Derived&>(*this)(process::merge(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_left_merge(x))
+    {
+      static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_appl(x)));
+    }
+    else if (process::is_choice(x))
+    {
+      static_cast<Derived&>(*this)(process::choice(atermpp::aterm_appl(x)));
+    }
+    else if (lps::is_action(x))
+    {
+      static_cast<Derived&>(*this)(lps::action(atermpp::aterm_appl(x)));
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Traverser class
+template <typename Derived>
+struct action_label_traverser: public add_traverser_action_labels<lps::action_label_traverser, Derived>
+{
+  typedef add_traverser_action_labels<lps::action_label_traverser, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
+//--- end generated add_traverser_action_labels code ---//
 
 } // namespace process
 

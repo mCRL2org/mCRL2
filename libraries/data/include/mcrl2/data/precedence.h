@@ -217,7 +217,7 @@ namespace detail {
     {
       x = sort_list::right(x);
     }
-    return sort_list::is_nil_function_symbol(x);
+    return sort_list::is_empty_function_symbol(x);
   }
 
   inline
@@ -227,7 +227,7 @@ namespace detail {
     {
       x = sort_list::left(x);
     }
-    return sort_list::is_nil_function_symbol(x);
+    return sort_list::is_empty_function_symbol(x);
   }
 
   inline

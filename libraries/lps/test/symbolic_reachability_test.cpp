@@ -1,3 +1,14 @@
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file symbolic_reachability_test.cpp
+/// \brief Add your file description here.
+
 #include <algorithm>
 #include <iterator>
 #include <iostream>
@@ -10,9 +21,13 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/lps/nextstate/standard.h"
+#include "mcrl2/lps/find.h"
+#include "mcrl2/lps/state.h"
+#include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
+
+using namespace mcrl2;
 
 const std::string case_no_influenced_parameters(
   "act a;\n\n"
@@ -59,17 +74,46 @@ class group_information
 {
 
   private:
-
     mcrl2::lps::specification const&     m_model;
-
     std::vector< std::vector< size_t > > m_group_indices;
 
   private:
 
-    void gather(mcrl2::lps::specification const& l);
+    template <typename SummandVector>
+    void gather_summands(const SummandVector& summands, const data::variable_list& parameter_list, const std::set<data::variable>& parameter_set, std::size_t& summand_index)
+    {
+      for (typename SummandVector::const_iterator i = summands.begin(); i != summands.end(); ++i)
+      {
+        std::set<data::variable> used_variables = lps::find_free_variables(*i);
+        std::set<data::variable> used_parameters;
+        std::set_intersection(used_variables.begin(), used_variables.end(), parameter_set.begin(), parameter_set.end(), std::inserter(used_parameters, used_parameters.begin()));
+
+        std::size_t j_index = 0;
+        for (data::variable_list::const_iterator j = parameter_list.begin(); j != parameter_list.end(); ++j)
+        {
+          if (used_parameters.find(*j) != used_parameters.end())
+          {
+            m_group_indices[summand_index++].push_back(j_index);
+          }
+          j_index++;
+        }
+      }
+    }
+
+    void gather(lps::specification const& l)
+    {
+      lps::linear_process specification(l.process());
+
+      std::size_t size = specification.action_summands().size() + specification.deadlock_summands().size();
+      m_group_indices.resize(size);
+
+      std::set<data::variable> parameter_set = data::find_variables(specification.process_parameters());
+      std::size_t summand_index = 0;
+      gather_summands(specification.action_summands(), specification.process_parameters(), parameter_set, summand_index);
+      gather_summands(specification.deadlock_summands(), specification.process_parameters(), parameter_set, summand_index);
+    }
 
   public:
-
     /**
      * \brief constructor from an mCRL2 lps
      **/
@@ -103,71 +147,6 @@ class group_information
     }
 };
 
-void group_information::gather(mcrl2::lps::specification const& l)
-{
-  using namespace mcrl2;
-
-  using data::find_variables;
-  using data::variable;
-
-  struct local
-  {
-    static void add_used_variables(std::set< variable >& r, std::set< variable > const& c)
-    {
-      r.insert(c.begin(), c.end());
-    }
-  };
-
-  lps::linear_process specification(l.process());
-
-  // the set with process parameters
-  std::set< variable > parameters = find_variables(specification.process_parameters());
-
-  // the list of summands
-  std::vector< lps::deprecated::summand > summands = atermpp::convert<std::vector<lps::deprecated::summand> >(lps::deprecated::linear_process_summands(specification));
-
-  m_group_indices.resize(summands.size());
-
-  for (std::vector< lps::deprecated::summand >::const_iterator i = summands.begin(); i != summands.end(); ++i)
-  {
-    std::set< variable > used_variables;
-
-    local::add_used_variables(used_variables, find_variables(i->condition()));
-    local::add_used_variables(used_variables, lps::find_variables((i->is_delta()?lps::action_list():i->actions())));
-
-    if (i->has_time())
-    {
-      local::add_used_variables(used_variables, find_variables(i->time()));
-    }
-
-    data::assignment_list assignments(i->assignments());
-
-    for (data::assignment_list::const_iterator j = assignments.begin(); j != assignments.end(); ++j)
-    {
-      if (j->lhs() != j->rhs())
-      {
-        local::add_used_variables(used_variables, find_variables(j->lhs()));
-        local::add_used_variables(used_variables, find_variables(j->rhs()));
-      }
-    }
-
-    // process parameters used in condition or action of summand
-    std::set< variable > used_parameters;
-
-    std::set_intersection(used_variables.begin(), used_variables.end(),
-                          parameters.begin(), parameters.end(), std::inserter(used_parameters, used_parameters.begin()));
-
-    std::vector< variable > parameters_list(specification.process_parameters().begin(), specification.process_parameters().end());
-
-    for (std::vector< variable >::const_iterator j = parameters_list.begin(); j != parameters_list.end(); ++j)
-    {
-      if (used_parameters.find(*j) != used_parameters.end())
-      {
-        m_group_indices[i - summands.begin()].push_back(j - parameters_list.begin());
-      }
-    }
-  }
-}
 
 void check_info(mcrl2::lps::specification const& model)
 {
@@ -221,37 +200,30 @@ int test_main(int argc, char** argv)
     model.process().deadlock_summands().clear();
 
     data::rewriter        rewriter(model.data());
+    next_state_generator::substitution_t dummy;
 
-    // Note the second argument that specifies that don't care variables are not treated specially
-    NextState* explorer = createNextState(model, rewriter, false);
+    next_state_generator explorer(model, rewriter);
 
-    std::stack< atermpp::aterm >     stack;
-    std::set< atermpp::aterm >   known;
+    std::stack< state >     stack;
+    std::set< state >   known;
 
-    stack.push(explorer->getInitialState());
+    stack.push(explorer.initial_state());
     known.insert(stack.top());
 
     while (!stack.empty())
     {
-      atermpp::aterm     current(stack.top());
-
+      state current(stack.top());
       stack.pop();
 
       for (size_t i = 0; i < model.process().summand_count(); ++i)
       {
-        atermpp::aterm     state;
-        multi_action transition;
-
-        std::auto_ptr< NextStateGenerator > generator(explorer->getNextStates(current, i));
-
-        while (generator->next(transition, &state))
+        for(next_state_generator::iterator j = explorer.begin(current, &dummy, i); j != explorer.end(); ++j)
         {
-          if (known.find(state) == known.end())
+          if (known.find(j->state()) == known.end())
           {
-            std::cerr << atermpp::aterm(state) << std::endl;
-
-            known.insert(state);
-            stack.push(state);
+            std::cerr << pp(j->state()) << std::endl;
+            known.insert(j->state());
+            stack.push(j->state());
           }
         }
       }
