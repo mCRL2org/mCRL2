@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 #include <set>
-#include <vector>
 #include <string.h>
 #include <sstream>
 
@@ -169,12 +168,22 @@ static void check_that_all_objects_are_free()
     {
       for(_aterm* p=(_aterm*)b->data; p!=NULL && ((b==ti->at_block && p<(_aterm*)ti->top_at_blocks) || p<(_aterm*)b->end); p=p + size)
       {
-        if (p->reference_count()!=0 && p->function()!=function_adm.AS_EMPTY_LIST)
+        if (p->reference_count()!=0)
         {
-          fprintf(stderr,"CHECK: Non free term %p (size %lu). ",p,size);
-          fprintf(stderr,"Reference count %ld ",p->reference_count());
-          std::cerr << "Func: " << p->function().name() << ". Arity: " << p->function().arity() << "\n";
-          result=false;
+          if (p->function()==function_adm.AS_DEFAULT) // && p->reference_count()<=2)
+          {
+            // This is ok, as static_empty_aterm_list can first be set to static_undefined_aterm and then
+            // during initialisation be set static_empty_aterm_list, without destroying the term first set to it.
+            // A similar problem may occur with static_undefined_aterm, as in turns out that the reference count
+            // can become 2.
+          }
+          else
+          {
+            fprintf(stderr,"CHECK: Non free term %p (size %lu). ",p,size);
+            fprintf(stderr,"Reference count %ld ",p->reference_count());
+            std::cerr << "Func: " << p->function().name() << ". Arity: " << p->function().arity() << "\n";
+            result=false;
+          }
         }
       }
     }
@@ -222,15 +231,20 @@ void initialise_aterm_administration()
 
   terminfo_size=INITIAL_MAX_TERM_SIZE;
   terminfo=reinterpret_cast<TermInfo*>(malloc(terminfo_size*sizeof(TermInfo)));
+  if (terminfo==NULL)
+  {
+    throw std::runtime_error("Out of memory. Failed to allocate the terminfo array.");
+  }
+
   for(size_t i=0; i<terminfo_size; ++i)
   {
     new (&terminfo[i]) TermInfo();
   }
 
   // Check at exit that all function symbols and terms have been cleaned up properly.
-#ifdef this_sanity_check_fails_on_some_machines_and_needs_to_be_investigated_further
+// #ifdef this_sanity_check_fails_on_some_machines_and_needs_to_be_investigated_further
   assert(!atexit(check_that_all_objects_are_free)); // zero is returned when registering is successful.
-#endif
+// #endif
   
 }
 
