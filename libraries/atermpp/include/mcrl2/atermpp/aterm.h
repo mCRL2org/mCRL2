@@ -317,4 +317,6 @@ inline void swap(T &t1, T &t2, typename boost::enable_if< typename boost::is_bas
 }
 } // namespace std
 
+#include "mcrl2/atermpp/detail/memory.h"
+
 #endif // MCRL2_ATERMPP_ATERM_H

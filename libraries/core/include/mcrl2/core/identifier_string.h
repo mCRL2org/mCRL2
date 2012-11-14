@@ -12,6 +12,7 @@
 #ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
 #define MCRL2_BASIC_IDENTIFIER_STRING_H
 
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 
 namespace mcrl2

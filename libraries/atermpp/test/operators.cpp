@@ -13,6 +13,7 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 
 using namespace std;

@@ -13,6 +13,7 @@
 #define MCRL2_ATERMPP_ATERM_ACCESS_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 namespace atermpp
 {

@@ -11,8 +11,8 @@
 #endif
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/detail/memory.h"
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
 

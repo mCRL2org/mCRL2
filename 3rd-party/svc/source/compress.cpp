@@ -22,7 +22,9 @@
 
 #include <limits.h>
 #include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_int.h"
 #include <svc/compress.h>
+
 
 using namespace atermpp;
 

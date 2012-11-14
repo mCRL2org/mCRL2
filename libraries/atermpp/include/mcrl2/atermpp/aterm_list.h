@@ -39,7 +39,7 @@ class term_list:public aterm
     typedef Term& reference;
     
     /// Const reference to T.
-    typedef const Term &const_reference;
+    typedef const Term &const_reference;  
     
     /// An unsigned integral type.
     typedef size_t size_type;
@@ -422,6 +422,6 @@ const Term &element_at(const term_list<Term> &l, size_t m)
 
 } // namespace atermpp
 
-#include "mcrl2/atermpp/detail/memory.h"
+#include "mcrl2/atermpp/detail/aterm_list_implementation.h"
 
 #endif // MCRL2_ATERMPP_ATERM_LIST_H

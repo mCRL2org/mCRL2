@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <svc/huffman.h>
+#include "mcrl2/atermpp/aterm_int.h"
 
 using namespace atermpp;
 

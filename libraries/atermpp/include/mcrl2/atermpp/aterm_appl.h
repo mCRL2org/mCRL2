@@ -19,6 +19,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
+#include "mcrl2/atermpp/aterm.h"
 
 
 namespace atermpp
@@ -278,6 +279,6 @@ typedef term_appl<aterm> aterm_appl;
 
 } // namespace atermpp
 
-#include "mcrl2/atermpp/detail/memory.h"
+#include "mcrl2/atermpp/detail/aterm_appl_implementation.h"
 
 #endif // MCRL2_ATERMPP_ATERM_APPL_H

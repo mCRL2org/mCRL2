@@ -12,7 +12,10 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/memory.h"
+#include "mcrl2/atermpp/detail/aterm_int.h"
+#include "mcrl2/atermpp/detail/aterm_appl.h"
 #include "mcrl2/atermpp/aterm.h"
+
 
 #ifdef DMALLOC
 #include <dmalloc.h>
