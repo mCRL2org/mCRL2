@@ -187,14 +187,14 @@ std::string print(const multi_action_name& alpha)
   return print_container(A);
 }
 
-std::string print(const multi_action_name_set& A)
+std::string print(const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   std::multiset<std::string> V;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
     V.insert(print(*i));
   }
-  return print_set(V);
+  return print_set(V) + (A_includes_subsets ? "*" : "");
 }
 
 BOOST_AUTO_TEST_CASE(test_print)
@@ -337,7 +337,7 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
   bool A_includes_subsets;
   boost::tuples::tie(A, A_includes_subsets) = parse_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(C, A, A_includes_subsets);
-  std::string result = print(A1);
+  std::string result = print(A1, A_includes_subsets);
   check_result(comm_text + ", " + Atext, result, expected_result, title);
 }
 
@@ -346,7 +346,7 @@ BOOST_AUTO_TEST_CASE(test_comm_operations)
   test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", alphabet_operations::comm_inverse, "comm_inverse");
   test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", alphabet_operations::comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", alphabet_operations::comm, "comm");
-  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}*", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", alphabet_operations::comm, "comm");
+  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}*", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}*", alphabet_operations::comm, "comm");
 }
 
 template <typename Operation>
@@ -357,17 +357,17 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
   bool A_includes_subsets;
   boost::tuples::tie(A, A_includes_subsets) = parse_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(R, A, A_includes_subsets);
-  std::string result = print(A1);
+  std::string result = print(A1, A_includes_subsets);
   check_result(rename_text + ", " + Atext, result, expected_result, title);
 }
 
 BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}*", "{bb, bbdd}", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, aad, abc, abd, accc, accd, acdd, bccc, bccd, bcdd}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{aa -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{aa -> b}", "{bb}*", "{aa, aaaa, aab, b, bb}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}*", "{bb, bbdd}*", alphabet_operations::rename, "rename");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{b, bb}", "{a, aa}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{bb}*", "{aa}*", alphabet_operations::rename_inverse, "rename_inverse");
 }
 
 void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
@@ -394,14 +394,14 @@ void test_block(const std::string& block_text, const std::string& Atext, const s
   bool A_includes_subsets;
   boost::tuples::tie(A, A_includes_subsets) = parse_multi_action_name_set(Atext);
   multi_action_name_set A1 = alphabet_operations::block(B, A, A_includes_subsets);
-  std::string result = print(A1);
+  std::string result = print(A1, A_includes_subsets);
   check_result(block_text + ", " + Atext, result, expected_result, title);
 }
 
 BOOST_AUTO_TEST_CASE(test_block1)
 {
   test_block("{b}", "{ab, abbc, c}", "{c}", "block");
-  test_block("{b}", "{ab, abbc, c}*", "{a, ac, c}", "block");
+  test_block("{b}", "{ab, abbc, c}*", "{a, ac, c}*", "block");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

@@ -99,7 +99,7 @@ allow_set rename(const rename_expression_list& R, const allow_set& A)
 inline
 allow_set rename_inverse(const rename_expression_list& R, const allow_set& A)
 {
-  return allow_set(alphabet_operations::rename_inverse(R, A.actions, A.includes_subsets), false);
+  return allow_set(alphabet_operations::rename_inverse(R, A.actions, A.includes_subsets), A.includes_subsets);
 }
 
 inline
