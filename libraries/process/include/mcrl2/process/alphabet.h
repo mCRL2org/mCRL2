@@ -685,21 +685,10 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return out.str();
   }
 
-  core::identifier_string_list left_hand_sides(const rename_expression_list& R) const
-  {
-    std::vector<core::identifier_string> result;
-    for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-    {
-      result.push_back(i->source());
-    }
-    return core::identifier_string_list(result.begin(), result.end());
-  }
-
   void operator()(const process::rename& x)
   {
     rename_expression_list R = x.rename_set();
-    core::identifier_string_list B = left_hand_sides(R);
-    allow_set A1 = alphabet_operations2::rename_inverse(R, alphabet_operations2::block(B, A));
+    allow_set A1 = alphabet_operations2::rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.m_expression = rename(R, node.m_expression);
     node.finish(equations, A1);

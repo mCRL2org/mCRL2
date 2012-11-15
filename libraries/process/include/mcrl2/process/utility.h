@@ -148,30 +148,6 @@ multi_action_name apply_rename(const rename_expression_list& R, const multi_acti
   return result;
 }
 
-void rename_inverse(const rename_expression_list& R, multi_action_name& alpha, multi_action_name& beta, multi_action_name_set& result)
-{
-  result.insert(multiset_union(alpha, beta));
-  if (alpha.empty())
-  {
-    return;
-  }
-
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-  {
-    core::identifier_string src = i->source();
-    core::identifier_string target = i->target();
-    multi_action_name::iterator j = alpha.find(target);
-    if (j != alpha.end())
-    {
-      alpha.erase(j);
-      multi_action_name::iterator k = beta.insert(src);
-      rename_inverse(R, alpha, beta, result);
-      alpha.insert(target);
-      beta.erase(k);
-    }
-  }
-}
-
 } // namespace detail
 
 inline
@@ -403,6 +379,7 @@ multi_action_name_set hide(const core::identifier_string_list& I, const multi_ac
   return result;
 }
 
+/// \brief Computes R(A)
 inline
 multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
@@ -418,19 +395,15 @@ multi_action_name_set rename(const rename_expression_list& R, const multi_action
 inline
 multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
-  if (A_includes_subsets)
+  // compute inverse of R
+  atermpp::vector<rename_expression> r;
+  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
   {
-    return rename_inverse(R, subsets(A), false);
+    r.push_back(rename_expression(i->target(), i->source()));
   }
-  multi_action_name_set result = A;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    multi_action_name alpha = *i;
-    multi_action_name beta;
-    detail::rename_inverse(R, alpha, beta, result);
-  }
-  mCRL2log(log::debug) << "<rename_inverse>" << process::pp(R) << ": " << lps::pp(A) << " -> " << lps::pp(result) << std::endl;
-  return result;
+  rename_expression_list Rinverse(r.begin(), r.end());
+
+  return rename(Rinverse, A, A_includes_subsets);
 }
 
 inline
