@@ -427,7 +427,7 @@ struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traver
 #endif
 
   apply_alphabet_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
-    : alphabet_traverser(equations, W)
+    : super(equations, W)
   {}
 };
 

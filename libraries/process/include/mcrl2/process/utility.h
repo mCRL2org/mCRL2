@@ -403,7 +403,7 @@ multi_action_name_set rename_inverse(const rename_expression_list& R, const mult
   }
   rename_expression_list Rinverse(r.begin(), r.end());
 
-  return rename(Rinverse, A, A_includes_subsets);
+  return alphabet_operations::rename(Rinverse, A, A_includes_subsets);
 }
 
 inline
