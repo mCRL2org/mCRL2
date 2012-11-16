@@ -217,6 +217,7 @@ add_subdirectory ( libraries/utilities )
 ## Command-line tools
 ##---------------------------------------------------
 
+add_subdirectory ( tools/alphabet )
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
 add_subdirectory ( tools/complps2pbes )

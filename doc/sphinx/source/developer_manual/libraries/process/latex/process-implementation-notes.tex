@@ -1,22 +1,10 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
-%%%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%%%\input{tcilatex}
-%%%%%%%%%\input{tcilatex}
-%%%%%%%%\input{tcilatex}
-%%%%%%%\input{tcilatex}
 %%%%%%\input{tcilatex}
+%%%%%\input{tcilatex}
 %%%%\input{tcilatex}
+%%%\input{tcilatex}
 %%\input{tcilatex}
 
 
@@ -31,7 +19,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Thursday, November 01, 2012 13:26:48}
+%TCIDATA{LastRevised=Tuesday, November 13, 2012 15:15:45}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -217,47 +205,66 @@ arguments) instead of process names.
 
 \subsection{Alphabet reduction}
 
+Alphabet reduction is a preprocessing step for linearization. It is a
+transformation on process expressions that preserves branching bisimulation.
+
 \subsubsection{Notations}
 
-In this text multi actions are represented using $a,b,\ldots $ and multi
-action names using $\alpha ,\beta ,\ldots $ The elements of multi actions
-and multi action names are denoted with a subscript, so $a=a_{1}\mid \ldots
-\mid a_{n}$ and $\alpha =\{\alpha _{1},\ldots ,\alpha _{n}\}$. Note that a
-multi action is a multiset (or bag) of actions and a multi action name is a
-multiset of names. The multi action name of multi action $a$ is denoted as $%
-N(a)$ and the name of action $a_{i}$ is denoted as $N(a_{i}).$We write $%
-\alpha \beta $ as shorthand for $\alpha \cup \beta $ and $\alpha _{i}\beta $
-for $\{\alpha _{i}\}\cup \beta $. Sets of multi action names are represented
-using $A,A_{1},A_{2},\ldots $ A communication maps a multi action name to an
-action name, and is denoted as $\alpha \rightarrow \alpha _{i}$. A renaming $%
-R$ is a substitution on action names, and is denoted as $R=\{\alpha
-_{i_{1}}\rightarrow \alpha _{j_{1}},\ldots ,\alpha _{i_{n}}\rightarrow
-\alpha _{j_{n}}\}$. A block set $B$ is a set of action names. A hide set $I$
-is a set of action names.
+In this text action names are represented using $a,b,\ldots $ and multi
+action names using $\alpha ,\beta ,\ldots $ So in general we have $\alpha
+=a_{1}\mid \ldots \mid a_{n}$. In alphabet reduction data parameters play a
+minor role, therefore we choose a notation in which data parameters are
+omitted. We use the abbreviation $\overline{a}=a(e_{1},\ldots ,e_{n})$ to
+denote an action, and $\overline{\alpha }=\overline{a_{1}}\mid \ldots \mid 
+\overline{a_{n}}$ to denote a multi action, where $e_{1},\ldots ,e_{n}$ are
+data expressions.Note that a multi action is a multiset (or bag) of actions
+and a multi action name is a multiset of names. We write $\alpha \beta $ as
+shorthand for $\alpha \cup \beta $ and $a\beta $ for $\{a\}\cup \beta $.
+Sets of multi action names are represented using $A,A_{1},A_{2},\ldots $ A
+communication $C$ maps multi action names to action names, and is denoted as 
+$\{\alpha _{1}\rightarrow a_{1},\ldots ,\alpha _{n}\rightarrow a_{n}\}$. A
+renaming $R$ is a substitution on action names, and is denoted as $%
+R=\{a_{1}\rightarrow b_{1},\ldots ,a_{n}\rightarrow b_{n}\}$. A block set $B$
+is a set of action names. A hide set $I$ is a set of action names.
 
 \subsubsection{Definitions}
 
+We define multi actions $\overline{\alpha }$ using the following grammar:%
+\[
+\overline{\alpha }:=\overline{a}\shortmid \overline{\alpha }\mid \overline{a}%
+, 
+\]%
+where $\overline{a}$ is an action, and where $\shortmid $ is used to
+distinguish alternatives.
+
 We define pCRL terms $p$ using the following grammar:%
 \[
-p::=a\mid P\mid \delta \mid \tau \mid p+p\mid p\cdot p\mid c\rightarrow
-p\mid c\rightarrow p\diamond p\mid \Sigma _{d:D}p\mid p^{%
-\mathbin{\mbox{\aap
-,}}}t\mid p\ll p, 
+p::=\overline{a}\shortmid P\shortmid \delta \shortmid \tau \shortmid
+p+p\shortmid p\cdot p\shortmid c\rightarrow p\shortmid c\rightarrow
+p\diamond p\shortmid \Sigma _{d:D}p\shortmid p^{\mathbin{\mbox{\aap
+,}}}t\shortmid p\ll p, 
 \]%
 and parallel mCRL terms $q$ using the following grammar:%
 \[
-q::=p\mid q\parallel q\mid q\mathbin{\mathrel{\llfloor}}q\mid q\shortmid
-q\mid \rho _{R}(q)\mid \partial _{B}(q)\mid \tau _{I}(q)\mid \Gamma
-_{C}(q)\mid \nabla _{V}(q). 
+q::=p\shortmid q\parallel q\shortmid q\mathbin{\mathrel{\llfloor}}q\shortmid
+q\mid q\shortmid \rho _{R}(q)\shortmid \partial _{B}(q)\shortmid \tau
+_{I}(q)\shortmid \Gamma _{C}(q)\shortmid \nabla _{V}(q). 
 \]
 
-Both multi actions $a$ and process instances $P$ can have data expressions
-as parameters. So in general we have $a=a_{1}(e_{1},\ldots ,e_{m})\mid
-\ldots \mid $ $a_{n}(e_{1},\ldots ,e_{n})$ and $P=P(e_{1},\ldots ,e_{n})$.
+\paragraph{Remark 1}
+
+Note that there is an unfortunate overload of the $\boldsymbol{\mid }$%
+-operator in both multi actions and process expressions. This has
+consequences for the implementation, since it there is no clean distinction
+between parallel and non-parallel operators.
+
+\paragraph{Remark 2}
+
 The mCRL2 language also has a construct $P(d_{i_{1}}=e_{i_{1}},\ldots
-,d_{i_{k}}=e_{i_{k}})$, but this is just a shorthand notation. Since data
-parameters do not play a role in alphabet reduction, they are omitted from
-the definitions.
+,d_{i_{k}}=e_{i_{k}})$, but this is just a shorthand notation. Therefore we
+will ignore it in this text.
+
+\subsubsection{Alphabet operations}
 
 Let $A,A_{1}$ and $A_{2}$ be sets of multi action names. Then we define%
 \[
@@ -268,19 +275,47 @@ A_{1}\mid A_{2} & = & \{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta
 A_{1}\leftarrowtail A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta
 \in A_{1}\text{ and }\beta \in A_{2}\}%
 \end{array}%
-\]
+\]%
+Note that $\beta $ can take the value $\tau $ in the definition of $%
+A_{1}\leftarrowtail A_{2}$, which implies $A_{1}\subset A_{1}\leftarrowtail
+A_{2}$. The set $A^{\subseteq }$ has an exponential size, so whenever
+possible it should not be computed explicitly.
 
 Let $C$ be a communication set, then we define%
 \[
 \begin{array}{lll}
-C(A) & = & \{\gamma _{C}(\alpha )\mid \alpha \in A\} \\ 
-C^{-1}(A) & = & \{\alpha \mid \gamma _{C}(\alpha )\in A\} \\ 
-C\rfloor A & = & \{\alpha \rightarrow \alpha _{i}\in C\mid \exists \beta
-.\alpha \beta \in A\}%
+C(A) & = & \cup _{\alpha \in A}\text{\textsc{Comm}(}C\text{, }\alpha \text{)}
+\\ 
+C^{-1}(A) & = & \cup _{\alpha \in A}\text{\textsc{CommInverse}(}C\text{, }%
+\alpha \text{)} \\ 
+filter_{\nabla }(C,A) & = & \{\gamma \rightarrow c\in C\mid \exists _{\alpha
+\in A}.\gamma \subset \alpha \}%
 \end{array}%
 \]%
-where $\gamma _{C}$ is the function that applies the communications
-described by $C$ to a multi action. Let $R$ be a renaming, then we define%
+where \textsc{Comm} and \textsc{CommInverse} are defined using pseudo code
+as follows:%
+\[
+\begin{array}{l}
+\text{\textsc{Comm}(}C\text{, }\alpha \text{)} \\ 
+R:=\{\alpha \} \\ 
+\text{\textbf{for }}\gamma \rightarrow c\in C\text{ \textbf{do}} \\ 
+\qquad \text{\textbf{if }}\exists \beta .\alpha =\beta \gamma \text{ \textbf{%
+then} }R:=R\cup \text{\textsc{Comm}(}C\text{, }\beta c\text{)} \\ 
+\text{\textbf{return }}R%
+\end{array}%
+\]%
+\[
+\begin{array}{l}
+\text{\textsc{CommInverse}(}C\text{, }\alpha \text{)} \\ 
+R:=\{\alpha \} \\ 
+\text{\textbf{for }}\gamma \rightarrow c\in C\text{ \textbf{do}} \\ 
+\qquad \text{\textbf{if }}\exists \beta .\alpha =\beta c\text{ \textbf{then} 
+}R:=R\cup \text{\textsc{CommInverse}(}C\text{, }\beta \gamma \text{)} \\ 
+\text{\textbf{return }}R%
+\end{array}%
+\]
+
+Let $R$ be a rename set, then we define%
 \begin{eqnarray*}
 R(\alpha ) &=&\{R(\alpha _{i})\mid \alpha _{i}\in \alpha \} \\
 R^{-1}(\alpha ) &=&\{\beta \mid R(\beta )=\alpha \} \\
@@ -290,13 +325,12 @@ R^{-1}(A) &=&\{R^{-1}(\alpha )\mid \alpha \in A\}
 Let $B$ be a block set, then we define%
 \[
 \partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
-\]%
-\newpage
+\]
 
 \subsubsection{The mapping $\protect\alpha $}
 
-We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
-, where $\alpha $ is defined as%
+We define the mapping $\alpha $ as follows. The value $\alpha (p,\emptyset )$
+is an over approximation of the alphabet of process expression $p$.%
 \[
 \begin{array}{lll}
 \alpha (a,W) & = & \{N(a)\} \\ 
@@ -334,97 +368,92 @@ We define the alphabet of a process expression $p$ as $\alpha (p,\emptyset )$%
 \end{array}%
 \]
 
-\newpage
+\paragraph{Example 1}
 
-\subsubsection{The mapping $push_{\bigtriangledown }$}
+If $C=\{a\mid b\rightarrow c\}$, then $\alpha (\Gamma _{C}(a(1)\mid
+b(2)))=\{a,b,c,a\mid b\}$. Note that the action $c$ does not occur in the
+transition system of this process expression.
 
-We define the mapping $push_{\bigtriangledown }$ as follows%
+\subsubsection{The mapping $push_{\protect\nabla }$}
+
+We define a mapping $push_{\nabla }$ such that $push_{\nabla }(A,p)$ is
+bisimulation equivalent to $\nabla _{A}(p)$. This mapping is used as a
+preprocession step to linearization, and it has the goal to push allow
+expressions deeply inside process expressions. It is important to know that
+an allow set $A$ in the expression $\nabla _{A}(p)$ implicitly contains the
+empty multi action $\tau $.%
 \[
-\begin{tabular}{ll}
-$x$ & $push_{\bigtriangledown }(x,A)$ \\ \hline
-$p$ & \multicolumn{1}{|l}{$\nabla _{A}(p)$ if $p$ is a pCRL expression} \\ 
-$p\parallel q$ & \multicolumn{1}{|l}{$%
-\begin{array}{l}
-\nabla _{A}(p^{\prime }\parallel q^{\prime }) \\ 
-\text{where}\left\{ \text{ }%
+\begin{tabular}{lll}
+$push_{\nabla }(A,p)$ & $=$ & $\nabla _{A}(p)$ if $p$ is a pCRL expression
+\\ 
+$push_{\nabla }(A,p\parallel q)$ & $=$ & $\nabla _{A}(p^{\prime }\parallel
+q^{\prime })\text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
-q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
-(p)))%
+p^{\prime } & = & push_{\nabla }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\nabla }(q,A\leftarrowtail \alpha (p^{\prime }))%
 \end{array}%
-\right. 
-\end{array}%
-$} \\ 
-$p\mathbin{\mathrel{\llfloor}}q$ & \multicolumn{1}{|l}{$%
-\begin{array}{l}
-\left\{ 
-\begin{array}{ll}
-\delta  & \text{if }A\cap \alpha (p)=\emptyset  \\ 
-\nabla _{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{%
-otherwise,}%
-\end{array}%
-\right.  \\ 
-\text{where}\left\{ \text{ }%
+\right. $ \\ 
+$push_{\nabla }(A,p\mathbin{\mathrel{\llfloor}}q)$ & $=$ & $\nabla
+_{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime })\text{ where}\left\{ 
+\text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
-q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
-(p)))%
+p^{\prime } & = & push_{\nabla }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\nabla }(q,A\leftarrowtail \alpha (p^{\prime }))%
 \end{array}%
-\right. 
-\end{array}%
-$} \\ 
-$p\mid q$ & \multicolumn{1}{|l}{$%
-\begin{array}{l}
-\left\{ 
-\begin{array}{ll}
-\delta  & \text{if }A\leftarrowtail \alpha (p)=\emptyset  \\ 
-\nabla _{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime }) & \text{%
-otherwise,}%
-\end{array}%
-\right.  \\ 
-\text{where}\left\{ \text{ }%
+\right. $ \\ 
+$push_{\nabla }(A,p\mid q)$ & $=$ & $\nabla _{A}(p^{\prime }\mid q^{\prime
+}) $ where$\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\bigtriangledown }(p,A^{\subseteq }) \\ 
-q^{\prime } & = & push_{\bigtriangledown }(q,A\cup (A\leftarrowtail \alpha
-(p)))%
+p^{\prime } & = & push_{\nabla }(p,A^{\subseteq }) \\ 
+q^{\prime } & = & push_{\nabla }(q,A\leftarrowtail \alpha (p^{\prime }))%
 \end{array}%
-\right. 
-\end{array}%
-$} \\ 
-$\rho _{R}(p)$ & \multicolumn{1}{|l}{$\rho _{R}(p^{\prime })$ where $%
-p^{\prime }=$ $push_{\bigtriangledown }(p,R^{-1}(A))$} \\ 
-$\partial _{B}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown
-}(p,\partial _{B}(A))$} \\ 
-$\tau _{I}(p)$ & \multicolumn{1}{|l}{$\nabla _{A}(\tau _{I}(p))$} \\ 
-$\Gamma _{C}(p)$ & \multicolumn{1}{|l}{$\nabla _{A}(\Gamma _{C}(p^{\prime }))
-$ where $p^{\prime }=push_{\bigtriangledown }(p,C^{-1}(A))$} \\ 
-$\nabla _{V}(p)$ & \multicolumn{1}{|l}{$push_{\bigtriangledown }(p,A\cap V)$}%
+\right. $ \\ 
+$push_{\nabla }(A,\rho _{R}(p))$ & $=$ & $\rho _{R}(p^{\prime })$ where $%
+p^{\prime }=$ $push_{\nabla }(p,R^{-1}(\partial _{B}(A)))$ where $B=\{a\mid
+\exists b.a\rightarrow b\in R\}$ \\ 
+$push_{\nabla }(A,\partial _{B}(p))$ & $=$ & $push_{\nabla }(p,\partial
+_{B}(A))$ \\ 
+$push_{\nabla }(A,\tau _{I}(p))$ & $=$ & $\nabla _{A}(\tau _{I}(p))$ \\ 
+$push_{\nabla }(A,\Gamma _{C}(p))$ & $=$ & $\nabla _{A}(\Gamma
+_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(p,C^{-1}(A))$ \\ 
+$push_{\nabla }(A,\nabla _{V}(p))$ & $=$ & $push_{\nabla }(p,A\cap V)$%
 \end{tabular}%
-\]%
+\]
+
+\paragraph{Optimizations}
+
 During the computation of $push_{\bigtriangledown }$ the following
-optimizations can be applied to every occurrence of an allow operator:%
+optimizations are applied in the right hand side of each equation:%
 \[
 \begin{array}{lll}
-\bigtriangledown _{A}(p) & = & \left\{ 
+\nabla _{A}(p) & = & \left\{ 
 \begin{array}{ll}
 p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
-\bigtriangledown _{A\cap \alpha (p)}(p) & \text{otherwise}%
+\nabla _{A\cap \alpha (p)}(p) & \text{otherwise}%
 \end{array}%
-\right.  \\ 
-\Gamma _{C}(p) & = & \Gamma _{C\rfloor \alpha (p)}(p)%
+\right. \\ 
+\nabla _{\emptyset }(p) & = & \left\{ 
+\begin{array}{ll}
+\tau & \text{if }p=\tau \\ 
+\delta & \text{otherwise}%
 \end{array}%
-\]%
-Here we applied the following rules:%
-\[
-\begin{array}{lll}
-\bigtriangledown _{A}(\rho _{R}(p)) & = & \rho _{R}(\bigtriangledown
-_{R^{-1}(A)}(p)) \\ 
-\bigtriangledown _{A}(\partial _{B}(p)) & = & \bigtriangledown _{\partial
-_{B}(A)}(p) \\ 
-\bigtriangledown _{A}(\Gamma _{C}(p)) & = & \bigtriangledown _{A}(\Gamma
-_{C}(\bigtriangledown _{C^{-1}(A)}(p))) \\ 
-\bigtriangledown _{A}(\nabla _{V}(p)) & = & \nabla _{A\cap V}(p)%
+\right. \\ 
+\Gamma _{C}(p) & = & \Gamma _{filter_{\nabla }(C,\alpha (p))}(p)%
 \end{array}%
 \]
+
+\paragraph{Remark 3}
+
+The computation of $push_{\nabla }(A,p\parallel q)$ involves computation of $%
+push_{\nabla }(p,A^{\subseteq }\dot{)}$. In the implementation $A^{\subseteq
+}$ is not computed explicitly. Instead it is represented by $A$ together
+with a boolean attribute that denotes that subsets are to be included as
+well. Currently there is one case in the implementation where explicit
+computation of $A^{\subseteq }$ can not be avoided. In the computation of $%
+push_{\nabla }(A^{\subseteq },\rho _{R}(p))$ the set $\partial
+_{B}(A^{\subseteq })$ appears in the right hand side. This set is explicitly
+computed, for the lack of a more compact representation. It should be
+possible to define a couple of operators on allow sets such that they can be
+represented efficiently in terms of these operators. This is future work.
 
 \end{document}
