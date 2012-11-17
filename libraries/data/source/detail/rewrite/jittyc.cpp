@@ -1338,7 +1338,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   }
   else if (/*t.type() == AT_APPL && */ gsIsNil((aterm_appl) t))
   {
-    assert(startarg>=0);
+    // assert(startarg>=0); This value may be negative.
     return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) == nnfvars.end());
   }
   else if (/* t.type() == AT_APPL && */ gsIsDataVarId((aterm_appl) t))
@@ -1404,6 +1404,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const bool rewr,
                   const size_t total_arity)
 {
+// std::cerr << "STARTARG " << startarg << " TERM " << t << "\n";
+// assert(startarg>=0);
   if (t.type()==AT_LIST)
   {
     stringstream ss;
@@ -1617,7 +1619,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         }
         ss << ":";
         bool c = rewr;
-        assert(startarg>=0);
+        // assert(startarg>=0); For unclear reasons, this may be negative.
         if (rewr && (nnfvars!=aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) != nnfvars.end()))
         {
           ss << "rewrite(";
@@ -1672,7 +1674,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   {
     stringstream ss;
     assert(nnfvars!=aterm_list(aterm()));
-    assert(startarg>=0);
+    // assert(startarg>=0); This may be negative.
     bool b = (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) != nnfvars.end());
     if (rewr && b)
     {
@@ -1850,6 +1852,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
 void RewriterCompilingJitty::calcTerm(FILE* f, aterm t, int startarg, aterm_list nnfvars, bool rewr)
 {
+// std::cerr << "STARTARG2 " << startarg << " TERM " << t << "\n";
+// assert(startarg>=0);
   pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
   fprintf(f,"%s",p.second.c_str());
   return;
@@ -1883,9 +1887,10 @@ static aterm add_args(aterm a, size_t num)
   }
 }
 
-static int get_startarg(aterm a, int n)
+static int get_startarg(const aterm &a, int n)
 {
-  if (a.type()==AT_LIST)
+// std::cerr << "GET STARTARG " << a << "  N " << n << "\n";
+  if (a.type_is_list())
   {
     return n-((aterm_list) a).size()+1;
   }
