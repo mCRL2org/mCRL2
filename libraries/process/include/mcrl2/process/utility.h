@@ -396,7 +396,7 @@ inline
 multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   // compute inverse of R
-  atermpp::vector<rename_expression> r;
+  std::vector<rename_expression> r;
   for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
   {
     r.push_back(rename_expression(i->target(), i->source()));
