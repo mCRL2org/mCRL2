@@ -92,7 +92,5 @@ class alphabet_tool : public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return alphabet_tool().execute(argc, argv);
 }

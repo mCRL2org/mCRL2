@@ -5729,17 +5729,14 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    bool encap(const action_name_multiset_list& encaplist, const action_list multiaction)
+    bool encap(const identifier_string_list& encaplist, const action_list multiaction)
     {
       for (action_list::const_iterator walker=multiaction.begin();
            walker!=multiaction.end(); ++walker)
       {
-        // for(identifier_string_list::const_iterator i=encaplist.begin(); i!=encaplist.end(); ++i)
-        // building an iterator over an identifier_string_list does not work. TODO.
-        for (action_name_multiset_list i=encaplist; !i.empty(); i=pop_front(i))
+        for (identifier_string_list i=encaplist; !i.empty(); i=pop_front(i))
         {
-          assert(i.front().names().size() == 1);
-          const identifier_string s1= i.front().names().front();
+          const identifier_string s1= i.front();
           const identifier_string s2=walker->label().name();
           if (s1==s2)
           {
@@ -5795,7 +5792,7 @@ class specification_basic_type:public boost::noncopyable
 
 
         if ((is_allow && allow_(allowlist,multiaction)) ||
-             (!is_allow && !encap(allowlist,multiaction)))
+             (!is_allow && !encap(aterm_cast<identifier_string_list>(allowlist),multiaction)))
         {
           action_summands.push_back(smmnd);
         }
