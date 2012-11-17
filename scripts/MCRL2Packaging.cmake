@@ -58,7 +58,14 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verif
 set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui" "mcrl2xi;mcrl2xi")
 
 # Branding image displayed inside the installer
-set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
+# Install icon for NSIS
+if( WIN32 )
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
+endif( WIN32 )
+# Install icon for DragNDrop 
+if( APPLE ) 
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/tools/mcrl2-gui/mcrl2-gui.icns")
+endif( APPLE )
 
 # Registry key used when installing; windows only
 set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
