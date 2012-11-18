@@ -1404,8 +1404,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const bool rewr,
                   const size_t total_arity)
 {
-// std::cerr << "STARTARG " << startarg << " TERM " << t << "\n";
-// assert(startarg>=0);
   if (t.type()==AT_LIST)
   {
     stringstream ss;
@@ -1852,8 +1850,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
 void RewriterCompilingJitty::calcTerm(FILE* f, aterm t, int startarg, aterm_list nnfvars, bool rewr)
 {
-// std::cerr << "STARTARG2 " << startarg << " TERM " << t << "\n";
-// assert(startarg>=0);
   pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
   fprintf(f,"%s",p.second.c_str());
   return;
@@ -1889,7 +1885,6 @@ static aterm add_args(aterm a, size_t num)
 
 static int get_startarg(const aterm &a, int n)
 {
-// std::cerr << "GET STARTARG " << a << "  N " << n << "\n";
   if (a.type_is_list())
   {
     return n-((aterm_list) a).size()+1;
@@ -2258,7 +2253,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, size_
   finish_function(f,arity,opid,used);
 }
 
-aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
+aterm_appl RewriterCompilingJitty::build_ar_expr(const aterm &expr, const aterm_appl &var)
 {
   if (expr.type_is_int())
   {
@@ -2277,7 +2272,13 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(aterm expr, aterm_appl var)
     }
   }
 
-  aterm head = ((aterm_list) expr).front();
+
+  if (!expr.type_is_list())
+  {
+    return make_ar_false();
+  }
+
+  aterm head = aterm_cast<aterm_list>(expr).front();
   if (!head.type_is_int())
   {
     return (head==var)?make_ar_true():make_ar_false();

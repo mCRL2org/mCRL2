@@ -96,7 +96,7 @@ class RewriterCompilingJitty: public Rewriter
     std::map <size_t,size_t> int2ar_idx;
     size_t ar_size;
     std::vector<atermpp::aterm_appl> ar;
-    atermpp::aterm_appl build_ar_expr(atermpp::aterm expr, atermpp::aterm_appl var);
+    atermpp::aterm_appl build_ar_expr(const atermpp::aterm &expr, const atermpp::aterm_appl &var);
     atermpp::aterm_appl build_ar_expr_aux(const data_equation &eqn, const size_t arg, const size_t arity);
     atermpp::aterm_appl build_ar_expr(const data_equation_list &eqns, const size_t arg, const size_t arity);
     bool always_rewrite_argument(const atermpp::aterm_int &opid, const size_t arity, const size_t arg);
