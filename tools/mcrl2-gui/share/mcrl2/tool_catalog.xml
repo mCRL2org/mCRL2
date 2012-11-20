@@ -30,7 +30,6 @@
 <tool name="pbesparelm" 	input_format="pbes" output_format ="pbes"   category="Transformation"/>
 <tool name="pbespp" 		input_format="pbes" output_format ="txt"    category="Analysis"/>
 <tool name="pbesrewr" 		input_format="pbes" output_format ="pbes"   category="Transformation"/>
-<tool name="tbf2lps" 		input_format="tbf"  output_format ="lps"    category="Transformation"/>
 <tool name="tracepp" 		input_format="trc"  output_format ="txt"    category="Analysis"/>
 <tool name="txt2lps" 		input_format="txt"  output_format ="lps"    category="Transformation"/>
 <tool name="txt2pbes" 		input_format="txt"  output_format ="pbes"   category="Transformation"/>
