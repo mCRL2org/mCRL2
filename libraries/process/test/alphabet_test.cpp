@@ -404,6 +404,46 @@ BOOST_AUTO_TEST_CASE(test_block1)
   test_block("{b}", "{ab, abbc, c}*", "{a, ac, c}*", "block");
 }
 
+multi_action_name make_multi_action_name(const std::string& x)
+{
+  multi_action_name result;
+  result.insert(core::identifier_string(x));
+  return result;
+}
+
+BOOST_AUTO_TEST_CASE(test_alphabet_parallel)
+{
+  std::string text =
+    "act a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20; \n"
+    "init a1 || a2 || a3 || a4 || a5 || a6 || a7 || a8 || a9 || a10 || a11 || a12 || a13 || a14 || a15 || a16 || a17 || a18 || a19 || a20;  \n"
+    ;
+//    "init allow({a1, a2, a3, a4, a5, a6, a7, a8, a9, a10}, a1 || a2 || a3 || a4 || a5 || a6 || a7 || a8 || a9 || a10);  \n"
+  process_specification procspec = parse_process_specification(text);
+  multi_action_name_set A;
+  A.insert(make_multi_action_name("a1"));
+  A.insert(make_multi_action_name("a2"));
+  A.insert(make_multi_action_name("a3"));
+  A.insert(make_multi_action_name("a4"));
+  A.insert(make_multi_action_name("a5"));
+  A.insert(make_multi_action_name("a6"));
+  A.insert(make_multi_action_name("a7"));
+  A.insert(make_multi_action_name("a8"));
+  A.insert(make_multi_action_name("a9"));
+  A.insert(make_multi_action_name("a11"));
+  A.insert(make_multi_action_name("a12"));
+  A.insert(make_multi_action_name("a13"));
+  A.insert(make_multi_action_name("a14"));
+  A.insert(make_multi_action_name("a15"));
+  A.insert(make_multi_action_name("a16"));
+  A.insert(make_multi_action_name("a17"));
+  A.insert(make_multi_action_name("a18"));
+  A.insert(make_multi_action_name("a19"));
+  A.insert(make_multi_action_name("a20"));
+
+  multi_action_name_set B = alphabet_intersection(procspec.init(), procspec.equations(), A);
+  BOOST_CHECK(lps::pp(B) == "{a1, a2, a3, a4, a5, a6, a7, a8, a9, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20}");
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
