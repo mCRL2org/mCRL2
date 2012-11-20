@@ -2726,8 +2726,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ar_size = 0;
   int2ar_idx.clear();
 
-  for(std::map< data::function_symbol, atermpp::aterm_int >::const_iterator l = term2int_begin()
-        ; l != term2int_end()
+  for(std::map< data::function_symbol, atermpp::aterm_int >::const_iterator l = term2int.begin()
+        ; l != term2int.end()
         ; ++l)
   {
     size_t i = l->second.value();

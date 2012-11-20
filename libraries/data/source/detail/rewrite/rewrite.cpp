@@ -681,56 +681,9 @@ std::vector <atermpp::function_symbol> apples;
 
 /*************  Below the functions toInner and fromInner are being defined *********************/
 
-static
-std::map< function_symbol, atermpp::aterm_int > &term2int()
-{
-  static std::map< function_symbol, atermpp::aterm_int > term2int;
-  return term2int;
-}
 
-std::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_begin()
-{
-  return term2int().begin();
-}
-
-std::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end()
-{
-  return term2int().end();
-}
-
-static
-std::vector < data::function_symbol > &int2term()
-{
-  static std::vector < data::function_symbol > int2term;
-  return int2term;
-}
-
-size_t get_num_opids()
-{
-  return int2term().size();
-}
-
-function_symbol get_int2term(const size_t n)
-{
-  assert(n<int2term().size());
-  return int2term()[n];
-}
-
-const atermpp::aterm_int &OpId2Int(const function_symbol &term)
-{
-  std::map< function_symbol, atermpp::aterm_int >::iterator f = term2int().find(term);
-  if (f == term2int().end())
-  {
-    const size_t num_opids=get_num_opids();
-    atermpp::aterm_int i(num_opids);
-    term2int()[term] =  i;
-    assert(int2term().size()==num_opids);
-    int2term().push_back(term);
-    return term2int()[term];
-  }
-
-  return f->second;
-}
+std::map< function_symbol, atermpp::aterm_int > term2int;
+std::vector < data::function_symbol > int2term;
 
 atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 {

@@ -304,36 +304,36 @@ _aterm* allocate_term(const size_t size)
     resize_aterm_hashtable();
   }
 
-  _aterm *at;
+  total_nodes++;
   TermInfo &ti = terminfo[size];
   if (ti.at_block && ti.top_at_blocks < ti.at_block->end)
   {
     /* the first block is not full: allocate a cell */
-    at = (_aterm *)ti.top_at_blocks;
+    _aterm *at = (_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
     at->reference_count()=0;
+    return at;
   }
   else if (ti.at_freelist)
   {
     /* the freelist is not empty: allocate a cell */
-    at = ti.at_freelist;
+    _aterm *at = ti.at_freelist;
     ti.at_freelist = ti.at_freelist->next();
     assert(ti.at_block != NULL);
     assert(ti.top_at_blocks == ti.at_block->end);
     assert(at->reference_count()==0);
+    return at;
   }
   else
   {
     /* there is no more memory of the current size allocate a block */
     allocate_block(size);
     assert(ti.at_block != NULL);
-    at = (_aterm *)ti.top_at_blocks;
+    _aterm *at = (_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
     at->reference_count()=0;
+    return at;
   }
-
-  total_nodes++;
-  return at;
 } 
 
 _aterm* aterm_int(size_t val)
@@ -365,38 +365,28 @@ _aterm* aterm_int(size_t val)
 
 
 void aterm::free_term() const
-{
+{ 
   detail::_aterm* t=this->m_term;
   assert(t->reference_count()==0);
 
   remove_from_hashtable(t);  // Remove from hash_table
 
-  if (t->function()!=detail::function_adm.AS_INT)
+  const function_symbol &f=t->function();
+  const size_t arity=f.arity();
+  if (f!=detail::function_adm.AS_INT)
   {
-    for(size_t i=0; i<function().arity(); ++i)
+    for(size_t i=0; i<arity; ++i)
     {
       reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
     }
   }
-/* #ifndef NDEBUG
-  const size_t function_symbol_index=function().number();
-  const size_t ref_count=detail::function_lookup_table[function_symbol_index].reference_count;
-#endif */
-  const size_t size=detail::TERM_SIZE_APPL(t->function().arity());
+  const size_t size=detail::TERM_SIZE_APPL(arity);
 
-  t->function().~function_symbol(); 
+  f.~function_symbol(); 
 
   detail::TermInfo &ti = detail::terminfo[size];
   t->next()  = ti.at_freelist;
   ti.at_freelist = t; 
-
-/* #ifndef NDEBUG
-  if (function_symbol_index==detail::function_adm.AS_EMPTY_LIST.number() && ref_count<=2) // When destroying the one but last empty_list function symbol, it 
-                                                                                          // is likely that all other terms have been removed.
-  {
-    assert(detail::check_that_all_objects_are_free());
-  }
-#endif */
 }
 
 aterm::aterm(const function_symbol &sym)

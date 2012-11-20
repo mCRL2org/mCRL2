@@ -317,8 +317,8 @@ RewriterJitty::RewriterJitty(
     }
   }
 
-  for(std::map< function_symbol, atermpp::aterm_int >::const_iterator l1 = term2int_begin()
-      ; l1 != term2int_end()
+  for(std::map< function_symbol, atermpp::aterm_int >::const_iterator l1 = term2int.begin()
+      ; l1 != term2int.end()
       ; ++l1)
   {
 

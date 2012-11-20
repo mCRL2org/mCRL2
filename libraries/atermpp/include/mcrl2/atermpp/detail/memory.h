@@ -60,7 +60,7 @@ namespace detail
 inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
 {
-  return ((hnr)<<1 ^(hnr)>>1 ^ w);
+  return (hnr<<1) ^ hnr ^ w;
 }
 
 inline

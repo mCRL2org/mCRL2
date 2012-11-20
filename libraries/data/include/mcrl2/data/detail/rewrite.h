@@ -238,16 +238,21 @@ bool isValidRewriteRule(const data_equation &dataeqn);
 
 extern std::vector <atermpp::function_symbol> apples;
 
+inline void extend_appl_afun_values(const size_t arity)
+{
+  for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
+  {
+    assert(old_num==apples.size());
+    apples.push_back(atermpp::function_symbol("#REWR#",old_num));
+  }
+}
+
 /** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
-inline atermpp::function_symbol& get_appl_afun_value(size_t arity)
+inline atermpp::function_symbol& get_appl_afun_value(const size_t arity)
 {
   if (arity >= apples.size())
   {
-    for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
-    {
-      assert(old_num==apples.size());
-      apples.push_back(atermpp::function_symbol("#REWR#",old_num));
-    }
+    extend_appl_afun_values(arity);
   }
   assert(arity<apples.size());
   return apples[arity];
@@ -316,14 +321,6 @@ inline atermpp::aterm_appl Apply3(
 
 /** The functions below are used for fromInner and toInner(c). */
 
-size_t get_num_opids();
-
-function_symbol get_int2term(const size_t n);
-
-std::map< function_symbol, atermpp::aterm_int >::const_iterator term2int_begin();
-
-std::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end();
-
 inline size_t getArity(const data::function_symbol &op)
 {
   // This function calculates the cumulated length of all
@@ -341,8 +338,39 @@ inline size_t getArity(const data::function_symbol &op)
   return arity;
 }
 
+extern std::map< function_symbol, atermpp::aterm_int > term2int;
+extern std::vector < data::function_symbol > int2term;
 
-const atermpp::aterm_int &OpId2Int(const function_symbol &);
+inline size_t get_num_opids()
+{
+  return int2term.size();
+}
+
+inline function_symbol &get_int2term(const size_t n)
+{
+  assert(n<int2term.size());
+  return int2term[n];
+}
+
+inline const atermpp::aterm_int &OpId2Int_aux(const function_symbol &term)
+{
+  const size_t num_opids=get_num_opids();
+  atermpp::aterm_int i(num_opids);
+  term2int[term] =  i;
+  assert(int2term.size()==num_opids);
+  int2term.push_back(term);
+  return term2int[term];
+}
+
+inline const atermpp::aterm_int &OpId2Int(const function_symbol &term)
+{
+  std::map< function_symbol, atermpp::aterm_int >::const_iterator f = term2int.find(term);
+  if (f == term2int.end())
+  {
+    return OpId2Int_aux(term);
+  }
+  return f->second;
+}
 
 data_expression fromInner(const atermpp::aterm_appl &term);
 
