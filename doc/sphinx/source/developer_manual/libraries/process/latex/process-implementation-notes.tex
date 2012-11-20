@@ -1,6 +1,10 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
+%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%\input{tcilatex}
+%%%%%%%%\input{tcilatex}
+%%%%%%%\input{tcilatex}
 %%%%%%\input{tcilatex}
 %%%%%\input{tcilatex}
 %%%%\input{tcilatex}
@@ -19,7 +23,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Tuesday, November 13, 2012 15:15:45}
+%TCIDATA{LastRevised=Tuesday, November 20, 2012 14:51:27}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -316,12 +320,22 @@ R:=\{\alpha \} \\
 \]
 
 Let $R$ be a rename set, then we define%
-\begin{eqnarray*}
-R(\alpha ) &=&\{R(\alpha _{i})\mid \alpha _{i}\in \alpha \} \\
-R^{-1}(\alpha ) &=&\{\beta \mid R(\beta )=\alpha \} \\
-R(A) &=&\{R(\alpha )\mid \alpha \in A\} \\
-R^{-1}(A) &=&\{R^{-1}(\alpha )\mid \alpha \in A\}
-\end{eqnarray*}%
+\[
+\begin{array}{lll}
+R(\alpha ) & = & \{R(\alpha _{i})\mid \alpha _{i}\in \alpha \} \\ 
+R^{-1}(\alpha ) & = & \{\beta \mid R(\beta )=\alpha \} \\ 
+R(A) & = & \{R(\alpha )\mid \alpha \in A\} \\ 
+R^{-1}(A) & = & \{R^{-1}(\alpha )\mid \alpha \in A\}%
+\end{array}%
+\]%
+Let $I$ be a hide set, then we define%
+\[
+\begin{array}{ccc}
+\tau _{I}(A) & = & \{\beta \mid \exists _{\alpha \in A,\gamma \in I^{\ast
+}}.\alpha =\beta \gamma \wedge \beta \cap I=\emptyset \} \\ 
+\tau _{I}^{-1}(A) & = & A\mid I^{\ast }%
+\end{array}%
+\]%
 Let $B$ be a block set, then we define%
 \[
 \partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
@@ -333,19 +347,19 @@ We define the mapping $\alpha $ as follows. The value $\alpha (p,\emptyset )$
 is an over approximation of the alphabet of process expression $p$.%
 \[
 \begin{array}{lll}
-\alpha (a,W) & = & \{N(a)\} \\ 
+\alpha (\overline{a},W) & = & \{a\} \\ 
 \alpha (P,W) & = & 
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\emptyset & \text{if }P\in W \\ 
+\emptyset  & \text{if }P\in W \\ 
 \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
 \\ 
-\alpha (\delta ,W) & = & \emptyset \\ 
+\alpha (\delta ,W) & = & \emptyset  \\ 
 \alpha (\tau ,W) & = & \{\tau \} \\ 
 \alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
 \alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
@@ -366,6 +380,46 @@ is an over approximation of the alphabet of process expression $p$.%
 \alpha (\Gamma _{C}(p),W) & = & C(\alpha (p,W)) \\ 
 \alpha (\nabla _{V}(p),W) & = & \alpha (p,W)\cap (V\cup \{\tau \})%
 \end{array}%
+\]%
+When computing $A\cap \alpha (p,W)$ for some multi action name set $A$, we
+can use the following optimization. This is done to keep intermediate
+expressions small.%
+\[
+\begin{array}{lll}
+A\cap \alpha (P,W) & = & 
+\begin{array}{l}
+\left\{ 
+\begin{array}{ll}
+\emptyset  & \text{if }P\in W \\ 
+A^{\subseteq }\cap \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
+\end{array}%
+\right.  \\ 
+\text{ where }P=p\text{ is the equation of }P%
+\end{array}
+\\ 
+A\cap \alpha (p+q,W) & = & \left( A^{\subseteq }\cap \alpha (p,W)\right)
+\cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
+A\cap \alpha (p\cdot q,W) & = & \left( A^{\subseteq }\cap \alpha
+(p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
+A\cap \alpha (c\rightarrow p,W) & = & A^{\subseteq }\cap \alpha (p,W) \\ 
+A\cap \alpha (c\rightarrow p\diamond q,W) & = & \left( A^{\subseteq }\cap
+\alpha (p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
+A\cap \alpha (\Sigma _{d:D}p,W) & = & A^{\subseteq }\cap \alpha (p,W) \\ 
+A\cap \alpha (p^{\mathbin{\mbox{\aap
+,}}}t,W) & = & A^{\subseteq }\cap \alpha (p,W) \\ 
+A\cap \alpha (p\ll q,W) & = & \left( A^{\subseteq }\cap \alpha (p,W)\right)
+\cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
+A\cap \alpha (p\parallel q,W) & = & \left( A^{\subseteq }\cap \alpha
+(p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right) \cup \left(
+A^{\subseteq }\cap \alpha (p,W)\right) \mid \left( A^{\subseteq }\cap \alpha
+(q,W)\right)  \\ 
+\alpha (p\mathbin{\mathrel{\llfloor}}q,W) & = & \left( A^{\subseteq }\cap
+\alpha (p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right) \cup
+\left( A^{\subseteq }\cap \alpha (p,W)\right) \mid \left( A^{\subseteq }\cap
+\alpha (q,W)\right)  \\ 
+A\cap \alpha (p\mid q,W) & = & \left( A^{\subseteq }\cap \alpha (p,W)\right)
+\mid \left( A^{\subseteq }\cap \alpha (q,W)\right) 
+\end{array}%
 \]
 
 \paragraph{Example 1}
@@ -373,6 +427,12 @@ is an over approximation of the alphabet of process expression $p$.%
 If $C=\{a\mid b\rightarrow c\}$, then $\alpha (\Gamma _{C}(a(1)\mid
 b(2)))=\{a,b,c,a\mid b\}$. Note that the action $c$ does not occur in the
 transition system of this process expression.
+
+\paragraph{Example 2}
+
+In the computation of $\left\{ a_{1},a_{2},\ldots ,a_{20}\right\} \cap
+\alpha \left( a_{1}\parallel a_{2}\parallel \ldots \parallel a_{20}\right) $
+the above mentioned optimization is really needed.
 
 \subsubsection{The mapping $push_{\protect\nabla }$}
 
@@ -389,36 +449,46 @@ $push_{\nabla }(A,p)$ & $=$ & $\nabla _{A}(p)$ if $p$ is a pCRL expression
 $push_{\nabla }(A,p\parallel q)$ & $=$ & $\nabla _{A}(p^{\prime }\parallel
 q^{\prime })\text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(p,A^{\subseteq }) \\ 
-q^{\prime } & = & push_{\nabla }(q,A\leftarrowtail \alpha (p^{\prime }))%
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
+q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla }(A,p\mathbin{\mathrel{\llfloor}}q)$ & $=$ & $\nabla
 _{A}(p^{\prime }\mathbin{\mathrel{\llfloor}}q^{\prime })\text{ where}\left\{ 
 \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(p,A^{\subseteq }) \\ 
-q^{\prime } & = & push_{\nabla }(q,A\leftarrowtail \alpha (p^{\prime }))%
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
+q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla }(A,p\mid q)$ & $=$ & $\nabla _{A}(p^{\prime }\mid q^{\prime
 }) $ where$\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(p,A^{\subseteq }) \\ 
-q^{\prime } & = & push_{\nabla }(q,A\leftarrowtail \alpha (p^{\prime }))%
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
+q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla }(A,\rho _{R}(p))$ & $=$ & $\rho _{R}(p^{\prime })$ where $%
-p^{\prime }=$ $push_{\nabla }(p,R^{-1}(\partial _{B}(A)))$ where $B=\{a\mid
+p^{\prime }=$ $push_{\nabla }(R^{-1}(\partial _{B}(A)),p)$ where $B=\{a\mid
 \exists b.a\rightarrow b\in R\}$ \\ 
-$push_{\nabla }(A,\partial _{B}(p))$ & $=$ & $push_{\nabla }(p,\partial
-_{B}(A))$ \\ 
-$push_{\nabla }(A,\tau _{I}(p))$ & $=$ & $\nabla _{A}(\tau _{I}(p))$ \\ 
+$push_{\nabla }(A,\partial _{B}(p))$ & $=$ & $push_{\nabla }(\partial
+_{B}(A),p)$ \\ 
+$push_{\nabla }(A,\tau _{I}(p))$ & $=$ & $\tau _{I}(p^{\prime })$ where $%
+p^{\prime }=push_{\nabla }(\tau _{I}^{-1}(A),p)$ \\ 
 $push_{\nabla }(A,\Gamma _{C}(p))$ & $=$ & $\nabla _{A}(\Gamma
-_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(p,C^{-1}(A))$ \\ 
-$push_{\nabla }(A,\nabla _{V}(p))$ & $=$ & $push_{\nabla }(p,A\cap V)$%
+_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(C^{-1}(A),p)$ \\ 
+$push_{\nabla }(A,\nabla _{V}(p))$ & $=$ & $push_{\nabla }(A\cap V,p)$%
 \end{tabular}%
 \]
+
+\paragraph{Example 3}
+
+The presence of $R^{-1}(\partial _{B}(A))$ instead of just $R^{-1}(A)$ in
+the right hand side of the rename operator is explained by the example $%
+push_{\nabla }(\{b\},\rho _{\{b\rightarrow c\}}b)$. We see that $\rho
+_{\{b\rightarrow c\}}push_{\nabla }(R^{-1}(A),p)=\rho _{\{b\rightarrow
+c\}}push_{\nabla }(\{b\},b)=\rho _{\{b\rightarrow c\}}b=c$, which is clearly
+the wrong answer.
 
 \paragraph{Optimizations}
 
@@ -438,22 +508,42 @@ p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\
 \delta & \text{otherwise}%
 \end{array}%
 \right. \\ 
-\Gamma _{C}(p) & = & \Gamma _{filter_{\nabla }(C,\alpha (p))}(p)%
+\Gamma _{C}(p) & = & \Gamma _{filter_{\nabla }(C,\alpha (p))}(p) \\ 
+\delta \mid \delta & = & \delta \\ 
+\delta \parallel \delta & = & \delta%
 \end{array}%
 \]
 
-\paragraph{Remark 3}
+\subsubsection{Allow sets}
 
-The computation of $push_{\nabla }(A,p\parallel q)$ involves computation of $%
-push_{\nabla }(p,A^{\subseteq }\dot{)}$. In the implementation $A^{\subseteq
-}$ is not computed explicitly. Instead it is represented by $A$ together
-with a boolean attribute that denotes that subsets are to be included as
-well. Currently there is one case in the implementation where explicit
-computation of $A^{\subseteq }$ can not be avoided. In the computation of $%
-push_{\nabla }(A^{\subseteq },\rho _{R}(p))$ the set $\partial
-_{B}(A^{\subseteq })$ appears in the right hand side. This set is explicitly
-computed, for the lack of a more compact representation. It should be
-possible to define a couple of operators on allow sets such that they can be
-represented efficiently in terms of these operators. This is future work.
+There are two rules in the definition of $push_{\nabla }$ where the allow
+set can/should not be computed explicitly. The computation of $push_{\nabla
+}(A,p\parallel q)$ involves computation of $push_{\nabla }(p,A^{\subseteq }%
+\dot{)}$. We want to avoid the computation of $A^{\subseteq }$, since it can
+become very large. The computation of $push_{\nabla }(A,\tau _{I}(p))$
+involves computation of $push_{\nabla }(p,\tau _{I}^{-1}(A)\dot{)}$. The set 
+$\tau _{I}^{-1}(A)=A\mid I^{\ast }$ is infinite.
+
+In the implementation we use allow sets of the form $\left( A\mid I^{\ast
+}\right) ^{\subseteq },$ where $I$ may be empty, and where $^{\subseteq }$
+is optional. Such an allow set is stored as two sets $A$ and $I$, together
+with an attribute that tells if $^{\subseteq }$ is appicable. We need to
+show that allow sets are closed under the operations in $push_{\nabla }$.%
+\[
+\begin{array}{lll}
+\partial _{B}(\left( A\mid I^{\ast }\right) ^{\subseteq }) & ?= & \left(
+\partial _{B}(A)\mid \partial _{B}(I)^{\ast }\right) ^{\subseteq } \\ 
+\tau _{I_{1}}^{-1}\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right)
+& ?= & \left( A\mid \left( I\cup I_{1}\right) ^{\ast }\right) ^{\subseteq }
+\\ 
+\left( A\mid I^{\ast }\right) ^{\subseteq }\cap V & = & \{\beta \in V\mid
+\exists _{\alpha \in A}.\tau _{I}(\beta )\sqsubseteq \alpha \} \\ 
+R^{-1}\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right) & = & ? \\ 
+C^{-1}\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right) & = & ? \\ 
+\left( A\mid I^{\ast }\right) ^{\subseteq }\leftarrowtail A_{1} & = & ? \\ 
+\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right) ^{\subseteq } & =
+& \left( A\mid I^{\ast }\right) ^{\subseteq }%
+\end{array}%
+\]
 
 \end{document}
