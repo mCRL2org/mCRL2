@@ -1,15 +1,20 @@
 % at
 % left merge
 % \RequirePackage{stmaryrd}
+%%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%%\input{tcilatex}
+%%%%%%%%%%%\input{tcilatex}
 %%%%%%%%%%\input{tcilatex}
 %%%%%%%%%\input{tcilatex}
 %%%%%%%%\input{tcilatex}
 %%%%%%%\input{tcilatex}
 %%%%%%\input{tcilatex}
 %%%%%\input{tcilatex}
-%%%%\input{tcilatex}
 %%%\input{tcilatex}
-%%\input{tcilatex}
 
 
 \documentclass{article}
@@ -23,7 +28,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Tuesday, November 20, 2012 14:51:27}
+%TCIDATA{LastRevised=Thursday, November 22, 2012 13:17:48}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -55,7 +60,7 @@
 \font \aap cmmi10
 \newcommand{\at}{\mathbin{\mbox{\aap ,}}}
 \newcommand{\leftm}{\mathbin{\mathrel{\llfloor}}}
-%\input{tcilatex}
+%%\input{tcilatex}
 
 \begin{document}
 
@@ -274,8 +279,8 @@ Let $A,A_{1}$ and $A_{2}$ be sets of multi action names. Then we define%
 \[
 \begin{array}{lll}
 A^{\subseteq } & = & \{\alpha \mid \exists \beta .\alpha \beta \in A\} \\ 
-A_{1}\mid A_{2} & = & \{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta
-\in A_{2}\} \\ 
+A_{1}A_{2} & = & \{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta \in
+A_{2}\} \\ 
 A_{1}\leftarrowtail A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta
 \in A_{1}\text{ and }\beta \in A_{2}\}%
 \end{array}%
@@ -333,12 +338,21 @@ Let $I$ be a hide set, then we define%
 \begin{array}{ccc}
 \tau _{I}(A) & = & \{\beta \mid \exists _{\alpha \in A,\gamma \in I^{\ast
 }}.\alpha =\beta \gamma \wedge \beta \cap I=\emptyset \} \\ 
-\tau _{I}^{-1}(A) & = & A\mid I^{\ast }%
+\tau _{I}^{-1}(A) & = & AI^{\ast }%
 \end{array}%
 \]%
 Let $B$ be a block set, then we define%
 \[
 \partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
+\]%
+We define a mapping $act$ that extracts the individual action names of a set
+of multi action names:%
+\[
+\begin{array}{lll}
+act\left( a_{1}\mid \ldots \mid a_{n}\right) & = & \left\{ a_{1}\mid \ldots
+\mid a_{n}\right\} \\ 
+act\left( A\right) & = & \bigcup_{\alpha \in A}act\left( \alpha \right)%
+\end{array}%
 \]
 
 \subsubsection{The mapping $\protect\alpha $}
@@ -352,14 +366,14 @@ is an over approximation of the alphabet of process expression $p$.%
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\emptyset  & \text{if }P\in W \\ 
+\emptyset & \text{if }P\in W \\ 
 \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
 \\ 
-\alpha (\delta ,W) & = & \emptyset  \\ 
+\alpha (\delta ,W) & = & \emptyset \\ 
 \alpha (\tau ,W) & = & \{\tau \} \\ 
 \alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
 \alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
@@ -370,10 +384,10 @@ is an over approximation of the alphabet of process expression $p$.%
 ,}}}t,W) & = & \alpha (p,W) \\ 
 \alpha (p\ll q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
 \alpha (p\parallel q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
-(p,W)\mid \alpha (q,W) \\ 
+(p,W)\alpha (q,W) \\ 
 \alpha (p\mathbin{\mathrel{\llfloor}}q,W) & = & \alpha (p,W)\cup \alpha
-(q,W)\cup \alpha (p,W)\mid \alpha (q,W) \\ 
-\alpha (p\mid q,W) & = & \alpha (p,W)\mid \alpha (q,W) \\ 
+(q,W)\cup \alpha (p,W)\alpha (q,W) \\ 
+\alpha (p\mid q,W) & = & \alpha (p,W)\alpha (q,W) \\ 
 \alpha (\rho _{R}(p),W) & = & R(\alpha (p,W)) \\ 
 \alpha (\partial _{B}(p),W) & = & \partial _{B}(\alpha (p,W)) \\ 
 \alpha (\tau _{I}(p),W) & = & \tau _{I}(\alpha (p,W)) \\ 
@@ -381,44 +395,38 @@ is an over approximation of the alphabet of process expression $p$.%
 \alpha (\nabla _{V}(p),W) & = & \alpha (p,W)\cap (V\cup \{\tau \})%
 \end{array}%
 \]%
-When computing $A\cap \alpha (p,W)$ for some multi action name set $A$, we
-can use the following optimization. This is done to keep intermediate
-expressions small.%
+When computing $A\cap \alpha (p,W)$ for some multi action name set $A$, it
+may be beneficial to apply an optimization. This is done to keep
+intermediate expressions small. We introduce $\alpha (p,W,A)$ $=A\cap \alpha
+(p,W)$, and define it as follows:%
 \[
 \begin{array}{lll}
-A\cap \alpha (P,W) & = & 
+\alpha (P,W,A) & = & 
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\emptyset  & \text{if }P\in W \\ 
-A^{\subseteq }\cap \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
+\emptyset & \text{if }P\in W \\ 
+A\cap \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
 \\ 
-A\cap \alpha (p+q,W) & = & \left( A^{\subseteq }\cap \alpha (p,W)\right)
-\cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
-A\cap \alpha (p\cdot q,W) & = & \left( A^{\subseteq }\cap \alpha
-(p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
-A\cap \alpha (c\rightarrow p,W) & = & A^{\subseteq }\cap \alpha (p,W) \\ 
-A\cap \alpha (c\rightarrow p\diamond q,W) & = & \left( A^{\subseteq }\cap
-\alpha (p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
-A\cap \alpha (\Sigma _{d:D}p,W) & = & A^{\subseteq }\cap \alpha (p,W) \\ 
-A\cap \alpha (p^{\mathbin{\mbox{\aap
-,}}}t,W) & = & A^{\subseteq }\cap \alpha (p,W) \\ 
-A\cap \alpha (p\ll q,W) & = & \left( A^{\subseteq }\cap \alpha (p,W)\right)
-\cup \left( A^{\subseteq }\cap \alpha (q,W)\right)  \\ 
-A\cap \alpha (p\parallel q,W) & = & \left( A^{\subseteq }\cap \alpha
-(p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right) \cup \left(
-A^{\subseteq }\cap \alpha (p,W)\right) \mid \left( A^{\subseteq }\cap \alpha
-(q,W)\right)  \\ 
-\alpha (p\mathbin{\mathrel{\llfloor}}q,W) & = & \left( A^{\subseteq }\cap
-\alpha (p,W)\right) \cup \left( A^{\subseteq }\cap \alpha (q,W)\right) \cup
-\left( A^{\subseteq }\cap \alpha (p,W)\right) \mid \left( A^{\subseteq }\cap
-\alpha (q,W)\right)  \\ 
-A\cap \alpha (p\mid q,W) & = & \left( A^{\subseteq }\cap \alpha (p,W)\right)
-\mid \left( A^{\subseteq }\cap \alpha (q,W)\right) 
+\alpha (p+q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\ 
+\alpha (p\cdot q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\ 
+\alpha (c\rightarrow p,W,A) & = & \alpha (p,W,A) \\ 
+\alpha (c\rightarrow p\diamond q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A)
+\\ 
+\alpha (\Sigma _{d:D}p,W,A) & = & \alpha (p,W,A) \\ 
+\alpha (p^{\mathbin{\mbox{\aap
+,}}}t,W,A) & = & \alpha (p,W,A) \\ 
+\alpha (p\ll q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\ 
+\alpha (p\parallel q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A)\cup \alpha
+(p,W,A^{\subseteq })\alpha (q,W,A^{\subseteq }) \\ 
+\alpha (p\mathbin{\mathrel{\llfloor}}q,W,A) & = & \alpha (p,W,A)\cup \alpha
+(q,W,A)\cup \alpha (p,W,A^{\subseteq })\alpha (q,W,A^{\subseteq }) \\ 
+\alpha (p\mid q,W,A) & = & \alpha (p,W,A^{\subseteq })\alpha
+(q,W,A^{\subseteq })%
 \end{array}%
 \]
 
@@ -469,8 +477,8 @@ q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla }(A,\rho _{R}(p))$ & $=$ & $\rho _{R}(p^{\prime })$ where $%
-p^{\prime }=$ $push_{\nabla }(R^{-1}(\partial _{B}(A)),p)$ where $B=\{a\mid
-\exists b.a\rightarrow b\in R\}$ \\ 
+p^{\prime }=$ $push_{\nabla }(R^{-1}(A),p)$ where $B=\{a\mid \exists
+b.a\rightarrow b\in R\}$ \\ 
 $push_{\nabla }(A,\partial _{B}(p))$ & $=$ & $push_{\nabla }(\partial
 _{B}(A),p)$ \\ 
 $push_{\nabla }(A,\tau _{I}(p))$ & $=$ & $\tau _{I}(p^{\prime })$ where $%
@@ -522,28 +530,68 @@ set can/should not be computed explicitly. The computation of $push_{\nabla
 \dot{)}$. We want to avoid the computation of $A^{\subseteq }$, since it can
 become very large. The computation of $push_{\nabla }(A,\tau _{I}(p))$
 involves computation of $push_{\nabla }(p,\tau _{I}^{-1}(A)\dot{)}$. The set 
-$\tau _{I}^{-1}(A)=A\mid I^{\ast }$ is infinite.
+$\tau _{I}^{-1}(A)=AI^{\ast }$ is infinite.
 
-In the implementation we use allow sets of the form $\left( A\mid I^{\ast
-}\right) ^{\subseteq },$ where $I$ may be empty, and where $^{\subseteq }$
-is optional. Such an allow set is stored as two sets $A$ and $I$, together
-with an attribute that tells if $^{\subseteq }$ is appicable. We need to
-show that allow sets are closed under the operations in $push_{\nabla }$.%
+In the implementation we use allow sets of the form $A^{\subseteq }I^{\ast },
+$ where $A$ is a set of multi action names and $I$ is a set of action names.
+The $^{\subseteq }$ is optional and $I$ may be empty. Such an allow set is
+stored as two sets $A$ and $I$, together with an attribute that tells if $%
+^{\subseteq }$ is appicable. We need to show that allow sets are closed
+under the operations in $push_{\nabla }$.%
 \[
 \begin{array}{lll}
-\partial _{B}(\left( A\mid I^{\ast }\right) ^{\subseteq }) & ?= & \left(
-\partial _{B}(A)\mid \partial _{B}(I)^{\ast }\right) ^{\subseteq } \\ 
-\tau _{I_{1}}^{-1}\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right)
-& ?= & \left( A\mid \left( I\cup I_{1}\right) ^{\ast }\right) ^{\subseteq }
-\\ 
-\left( A\mid I^{\ast }\right) ^{\subseteq }\cap V & = & \{\beta \in V\mid
-\exists _{\alpha \in A}.\tau _{I}(\beta )\sqsubseteq \alpha \} \\ 
-R^{-1}\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right) & = & ? \\ 
-C^{-1}\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right) & = & ? \\ 
-\left( A\mid I^{\ast }\right) ^{\subseteq }\leftarrowtail A_{1} & = & ? \\ 
-\left( \left( A\mid I^{\ast }\right) ^{\subseteq }\right) ^{\subseteq } & =
-& \left( A\mid I^{\ast }\right) ^{\subseteq }%
+\partial _{B}(A^{\subseteq }I^{\ast }) & = & \tau _{B}(A)^{\subseteq }\tau
+_{B}(I)^{\ast } \\ 
+\tau _{I_{1}}^{-1}\left( A^{\subseteq }I^{\ast }\right)  & = & A^{\subseteq
+}\left( I\cup I_{1}\right) ^{\ast } \\ 
+\left( A^{\subseteq }I^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists
+_{\alpha \in A}.\tau _{I}(\beta )\sqsubseteq \alpha \} \\ 
+R^{-1}\left( A^{\subseteq }I^{\ast }\right)  & = & R^{-1}\left( A\right)
+^{\subseteq }R^{-1}\left( I\right) ^{\ast } \\ 
+C^{-1}\left( A^{\subseteq }I^{\ast }\right)  & \subseteq  & C^{-1}\left(
+A\right) ^{\subseteq }act\left( C^{-1}\left( I\right) \right) ^{\ast } \\ 
+\left( A^{\subseteq }I^{\ast }\right) \leftarrowtail A_{1} & = & 
+A^{\subseteq }I^{\ast } \\ 
+\left( A^{\subseteq }I^{\ast }\right) ^{\subseteq } & = & A^{\subseteq
+}I^{\ast } \\ 
+\partial _{B}(AI^{\ast }) & = & \partial _{B}(A)\tau _{B}(I)^{\ast } \\ 
+\tau _{I_{1}}^{-1}\left( AI^{\ast }\right)  & = & A\left( I\cup I_{1}\right)
+^{\ast } \\ 
+\left( AI^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists _{\alpha \in
+A}.\tau _{I}(\beta )=\alpha \} \\ 
+R^{-1}\left( AI^{\ast }\right)  & = & R^{-1}\left( A\right) R^{-1}\left(
+I\right) ^{\ast } \\ 
+C^{-1}\left( AI^{\ast }\right)  & \subseteq  & C^{-1}\left( A\right)
+act\left( C^{-1}\left( I\right) \right) ^{\ast } \\ 
+\left( AI^{\ast }\right) \leftarrowtail A_{1} & = & \left( A\leftarrowtail
+\tau _{I}(A_{1})\right) I^{\ast } \\ 
+\left( AI^{\ast }\right) ^{\subseteq } & = & A^{\subseteq }I^{\ast }%
 \end{array}%
-\]
+\]%
+where we used the following properties:%
+\[
+\begin{array}{lll}
+\partial _{B}\left( A_{1}A_{2}\right)  & = & \partial _{B}\left(
+A_{1}\right) \partial _{B}\left( A_{1}\right)  \\ 
+\partial _{B}\left( A^{\subseteq }\right)  & = & \tau _{B}(A)^{\subseteq }
+\\ 
+R^{-1}\left( A^{\subseteq }\right)  & = & R^{-1}\left( A\right) ^{\subseteq }
+\\ 
+R^{-1}\left( A_{1}A_{2}\right)  & = & R^{-1}\left( A_{1}\right) R^{-1}\left(
+A_{2}\right)  \\ 
+R^{-1}\left( A^{\ast }\right)  & = & R^{-1}\left( A\right) ^{\ast } \\ 
+C^{-1}\left( A^{\subseteq }\right)  & \subseteq  & C^{-1}\left( A\right)
+^{\subseteq } \\ 
+C^{-1}\left( A_{1}A_{2}\right)  & = & C^{-1}\left( A_{1}\right) C^{-1}\left(
+A_{2}\right)  \\ 
+C^{-1}\left( A^{\ast }\right)  & = & C^{-1}\left( A\right) ^{\ast } \\ 
+A^{\subseteq }\leftarrowtail A_{1} & = & A^{\subseteq }%
+\end{array}%
+\]%
+Note that in case of the communication we only have an inclusion relation
+instead of equality. This is done to stay within the format $A^{\subseteq
+}I^{\ast }$. As a consequence the implementation uses an over-approximation
+of $C^{-1}\left( A^{\subseteq }I^{\ast }\right) $ and $C^{-1}\left( AI^{\ast
+}\right) $.
 
 \end{document}
