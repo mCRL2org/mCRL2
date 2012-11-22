@@ -34,6 +34,7 @@ namespace process
 
 // Make some LPS types visible. These should become part of the process library.
 using lps::action;
+using lps::action_name_set;
 using lps::multi_action;
 using lps::multi_action_name;
 using lps::multi_action_name_set;

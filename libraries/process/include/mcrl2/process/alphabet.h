@@ -30,6 +30,7 @@ namespace mcrl2 {
 namespace process {
 
 multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations);
+multi_action_name_set alphabet_intersection(const process_expression& x, const atermpp::vector<process_equation>& equations, const multi_action_name_set& A);
 
 /// \brief Represents a set of multi action names. It implicitly contains the empty
 /// multi action (tau). Using the attribute includes_subsets, one can denote that
@@ -709,7 +710,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave_pcrl(const process_expression& x)
   {
-    push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
+    push(push_allow_node(process::alphabet_intersection(x, equations, A.actions), x, boost::logic::indeterminate));
     log(x);
   }
 

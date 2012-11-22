@@ -367,8 +367,8 @@ multi_action_name_set comm_inverse(const communication_expression_list& C, const
   return result;
 }
 
-inline
-multi_action_name_set hide(const core::identifier_string_list& I, const multi_action_name_set& A, bool A_includes_subsets = false)
+template <typename IdentifierContainer>
+multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name m(I.begin(), I.end());
   multi_action_name_set result;
