@@ -299,7 +299,8 @@ std::ostream& operator<<(std::ostream& out, const aterm& t)
   return out << t.to_string();
 }
 } // namespace atermpp
-	
+
+#ifndef WIN32
 namespace std
 {
 
@@ -316,6 +317,7 @@ inline void swap(T &t1, T &t2, typename boost::enable_if< typename boost::is_bas
   t1.swap(t2);
 }
 } // namespace std
+#endif
 
 #include "mcrl2/atermpp/detail/memory.h"
 

@@ -1464,14 +1464,6 @@ aterm read_baf(istream &is)
 
 aterm read_term_from_binary_stream(istream &is)
 {
-#ifdef WIN32
-  if (_setmode(_fileno(file), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set inputfile to binary mode."
-          );
-  }
-#endif
-
   aterm result=read_baf(is);
   if (result==aterm())
   {
