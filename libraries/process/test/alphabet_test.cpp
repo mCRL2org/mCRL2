@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}*", "{bb, bbdd}*", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, aad, abc, abd, accc, accd, acdd, bccc, bccd, bcdd}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
   test_rename_operation("{a -> b}", "{b, bb}", "{a, aa, ab, b, bb}", alphabet_operations::rename_inverse, "rename_inverse");
   test_rename_operation("{a -> b}", "{bb}*", "{aa, ab, bb}*", alphabet_operations::rename_inverse, "rename_inverse");
   test_rename_operation("{a -> b}", "{b}", "{a, b}", alphabet_operations::rename_inverse, "rename_inverse");

@@ -383,7 +383,6 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
   void filter()
   {
     Node& node = top();
-    //mCRL2log(log::debug) << "<filter_alphabet before>" << node.print() << std::endl;
     for (multi_action_name_set::iterator i = node.alphabet.begin(); i != node.alphabet.end(); )
     {
       bool remove = !includes(A, *i);
@@ -396,7 +395,6 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
         ++i;
       }
     }
-    //mCRL2log(log::debug) << "<filter_alphabet after >" << node.print() << std::endl;
   }
 
   void leave(const lps::action& x)
@@ -626,8 +624,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave_pcrl(const process_expression& x)
   {
-    // push(push_allow_node(process::alphabet_intersection(x, equations, A.A), x, boost::logic::indeterminate));
+#ifdef MCRL2_USE_ALPHABET_INTERSECTION
+    push(push_allow_node(process::alphabet_intersection(x, equations, A.A), x, boost::logic::indeterminate));
+#else
     push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
+#endif
     log(x);
   }
 
