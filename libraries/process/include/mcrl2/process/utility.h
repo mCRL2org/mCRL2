@@ -404,6 +404,21 @@ multi_action_name_set subsets(const multi_action_name_set& A)
   return result;
 }
 
+// remove all elements alpha in A that are included in another element of A
+inline
+multi_action_name_set remove_subsets(const multi_action_name_set& A)
+{
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    if (!detail::includes(result, *i))
+    {
+      result.insert(*i);
+    }
+  }
+  return result;
+}
+
 inline
 multi_action_name_set merge(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {

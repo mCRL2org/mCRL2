@@ -241,6 +241,7 @@ allow_set subsets(const allow_set& x)
 {
   allow_set result = x;
   result.A_includes_subsets = true;
+  result.A = alphabet_operations::remove_subsets(result.A);
   return result;
 }
 

@@ -498,8 +498,7 @@ struct push_allow_node: public alphabet_node
 
   void finish(const atermpp::vector<process_equation>& equations, const allow_set& A)
   {
-    alphabet = process::alphabet(m_expression, equations);
-
+    // alphabet = process::alphabet(m_expression, equations);
     if (boost::logic::indeterminate(m_needs_allow))
     {
       std::size_t alphabet_size = alphabet.size();
@@ -624,7 +623,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave_pcrl(const process_expression& x)
   {
-#ifdef MCRL2_USE_ALPHABET_INTERSECTION
+#ifndef MCRL2_USE_ALPHABET_INTERSECTION
     push(push_allow_node(process::alphabet_intersection(x, equations, A.A), x, boost::logic::indeterminate));
 #else
     push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
@@ -778,11 +777,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void operator()(const process::merge& x)
   {
-    allow_set A_sub(A.A, true);
+    allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations);
     p1.finish(equations, A_sub);
     log_push_result(x.left(), A_sub, p1, "<merge-left>");
-    allow_set A_arrow(left_arrow(A.A, A.A_includes_subsets, p1.alphabet), A.A_includes_subsets);
+    allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
     q1.finish(equations, A_arrow);
     log_push_result(x.right(), A_arrow, q1, "<merge-right>");
@@ -799,11 +798,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void operator()(const process::left_merge& x)
   {
-    allow_set A_sub(A.A, true);
+    allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations);
     p1.finish(equations, A_sub);
     log_push_result(x.left(), A_sub, p1, "<left_merge-left>");
-    allow_set A_arrow(left_arrow(A.A, A.A_includes_subsets, p1.alphabet), A.A_includes_subsets);
+    allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
     q1.finish(equations, A_arrow);
     log_push_result(x.right(), A_arrow, q1, "<left_merge-right>");
@@ -820,11 +819,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void operator()(const process::sync& x)
   {
-    allow_set A_sub(A.A, true);
+    allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations);
     p1.finish(equations, A_sub);
     log_push_result(x.left(), A_sub, p1, "<sync-left>");
-    allow_set A_arrow(left_arrow(A.A, A.A_includes_subsets, p1.alphabet), A.A_includes_subsets);
+    allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
     q1.finish(equations, A_arrow);
     log_push_result(x.right(), A_arrow, q1, "<sync-right>");
