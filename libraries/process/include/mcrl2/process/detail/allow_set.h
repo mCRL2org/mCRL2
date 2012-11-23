@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_DETAIL_ALLOW_SET_H
 
 #include "mcrl2/process/utility.h"
-#include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
 
@@ -23,27 +22,26 @@ namespace process {
 //
 //} // namespace detail
 
-/// \brief Represents the set AI*, where the attribute includes_subsets determines whether subsets
+/// \brief Represents the set AI*, where the attribute A_includes_subsets determines whether subsets
 /// of the elements are included.
 struct allow_set
 {
   multi_action_name_set A;
+  bool A_includes_subsets;
   action_name_set I;
-
-  bool includes_subsets;
 
   allow_set()
   {}
 
-  allow_set(const multi_action_name_set& A_, const action_name_set& I_ = action_name_set(), bool includes_subsets_ = false)
-    : A(A_), I(I_), includes_subsets(includes_subsets_)
+  allow_set(const multi_action_name_set& A_, bool A_includes_subsets_ = false, const action_name_set& I_ = action_name_set())
+    : A(A_), A_includes_subsets(A_includes_subsets_), I(I_)
   {}
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const allow_set& x)
 {
-  return out << lps::pp(x.A) << (x.includes_subsets ? "*" : "") << core::pp(x.I) << "*";
+  return out << lps::pp(x.A) << (x.A_includes_subsets ? "*" : "") << core::pp(x.I);
 }
 
 // operations on allow_set
@@ -74,87 +72,15 @@ bool contains(const multi_action_name_set& A, const multi_action_name& a)
   return A.find(a) != A.end();
 }
 
-typedef atermpp::map<core::identifier_string, std::vector<core::identifier_string> > rename_inverse_map;
-
-struct rename_inverse_apply
-{
-  const multi_action_name& alpha;
-  const std::vector<core::identifier_string>& beta;
-  multi_action_name_set& A;
-
-  rename_inverse_apply(const multi_action_name& alpha_, const std::vector<core::identifier_string>& beta_, multi_action_name_set& A_)
-    : alpha(alpha_), beta(beta_), A(A_)
-  {}
-
-  void operator()()
-  {
-    multi_action_name gamma = alpha;
-    gamma.insert(beta.begin(), beta.end());
-    A.insert(gamma);
-  }
-};
-
-inline
-void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name& x, multi_action_name_set& result)
-{
-  std::vector<std::vector<core::identifier_string> > V;
-
-  multi_action_name alpha = x;
-
-  // remove elements that appear in Rinverse, and put the replacements in V
-  for (multi_action_name::iterator i = alpha.begin(); i != alpha.end(); )
-  {
-    rename_inverse_map::const_iterator j = Rinverse.find(*i);
-    if (j != Rinverse.end())
-    {
-      alpha.erase(i++);
-      V.push_back(j->second);
-    }
-    else
-    {
-      ++i;
-    }
-  }
-
-  // v will hold a replacement
-  std::vector<core::identifier_string> v(V.size());
-
-  // generate all permutations of the replacements in V, and put them in result
-  utilities::foreach_sequence(V, v.begin(), rename_inverse_apply(alpha, v, result));
-}
-
-inline
-multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A)
-{
-  // compute inverse of R
-  rename_inverse_map Rinverse;
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-  {
-    Rinverse[i->target()].push_back(i->source());
-  }
-
-  multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    rename_inverse(Rinverse, *i, result);
-  }
-  return result;
-}
-
 inline
 action_name_set rename_inverse(const rename_expression_list& R, const action_name_set& I)
 {
-  // compute inverse of R
-  rename_inverse_map Rinverse;
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-  {
-    Rinverse[i->target()].push_back(i->source());
-  }
+  detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
 
   action_name_set result;
   for (action_name_set::const_iterator i = I.begin(); i != I.end(); ++i)
   {
-    rename_inverse_map::const_iterator j = Rinverse.find(*i);
+    detail::rename_inverse_map::const_iterator j = Rinverse.find(*i);
     if (j != Rinverse.end())
     {
       result.insert(j->second.begin(), j->second.end());
@@ -180,6 +106,7 @@ multi_action_name apply_comm_inverse(const communication_expression& x, const mu
 inline
 void comm_inverse(const communication_expression_list& C, const multi_action_name& alpha, multi_action_name_set& result)
 {
+  result.insert(alpha);
   for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
   {
     if (contains(alpha, i->name()))
@@ -221,30 +148,43 @@ action_name_set comm_inverse(const communication_expression_list& C, const actio
 }
 
 // Hides (or: removes) elements in I from C
-template <typename ContainerI, typename ContainerC>
-ContainerC hide(const ContainerI& I, const ContainerC& C)
+inline
+action_name_set hide(const core::identifier_string_list& I, const action_name_set& J)
 {
-  std::vector<core::identifier_string> result;
-  for (typename ContainerC::const_iterator i = C.begin(); i != C.end(); ++i)
+  action_name_set result;
+  for (action_name_set::const_iterator j = J.begin(); j != J.end(); ++j)
   {
-    if (contains(I, *i))
+    if (!contains(I, *j))
     {
-      result.push_back(*i);
+      result.insert(*j);
     }
   }
-  return ContainerC(result.begin(), result.end());
+  return result;
+}
+
+multi_action_name hide(const action_name_set& I, const multi_action_name& alpha)
+{
+  multi_action_name result;
+  for (multi_action_name::const_iterator i = alpha.begin(); i != alpha.end(); ++i)
+  {
+    if (!contains(I, *i))
+    {
+      result.insert(*i);
+    }
+  }
+  return result;
 }
 
 inline
 allow_set block(const core::identifier_string_list& B, const allow_set& x)
 {
-  if (x.includes_subsets)
+  if (x.A_includes_subsets)
   {
-    return allow_set(alphabet_operations::hide(B, x.A), hide(B, x.I), x.includes_subsets);
+    return allow_set(alphabet_operations::hide(B, x.A), x.A_includes_subsets, allow_set_operations::hide(B, x.I));
   }
   else
   {
-    return allow_set(alphabet_operations::block(B, x.A), hide(B, x.I), x.includes_subsets);
+    return allow_set(alphabet_operations::block(B, x.A), x.A_includes_subsets, allow_set_operations::hide(B, x.I));
   }
 }
 
@@ -257,16 +197,17 @@ allow_set hide_inverse(const core::identifier_string_list& I, const allow_set& x
 }
 
 inline
-allow_set intersection(const multi_action_name_set& V, const allow_set& x)
+allow_set allow(const action_name_multiset_list& V, const allow_set& x)
 {
   multi_action_name_set result;
-  for (multi_action_name_set::iterator i = V.begin(); i != V.end(); ++i)
+  for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
   {
-    multi_action_name beta = hide(x.I, *i);
-    bool add = x.includes_subsets ? detail::includes(x.A, beta) : contains(x.A, beta);
+    core::identifier_string_list names = i->names();
+    multi_action_name beta(names.begin(), names.end());
+    bool add = x.A_includes_subsets ? detail::includes(x.A, beta) : contains(x.A, allow_set_operations::hide(x.I, beta));
     if (add)
     {
-      result.insert(*i);
+      result.insert(beta);
     }
   }
   return allow_set(result);
@@ -275,20 +216,20 @@ allow_set intersection(const multi_action_name_set& V, const allow_set& x)
 inline
 allow_set rename_inverse(const rename_expression_list& R, const allow_set& x)
 {
-  return allow_set(rename_inverse(R, x.A), rename_inverse(R, x.I), x.includes_subsets);
+  return allow_set(alphabet_operations::rename_inverse(R, x.A), x.A_includes_subsets, rename_inverse(R, x.I));
 }
 
 inline
 allow_set comm_inverse(const communication_expression_list& C, const allow_set& x)
 {
-  return allow_set(comm_inverse(C, x.A), comm_inverse(C, x.I), x.includes_subsets);
+  return allow_set(comm_inverse(C, x.A), x.A_includes_subsets, comm_inverse(C, x.I));
 }
 
 inline
 allow_set left_arrow(const allow_set& x, const multi_action_name_set& A)
 {
   allow_set result = x;
-  if (!x.includes_subsets)
+  if (!x.A_includes_subsets)
   {
     result.A = left_arrow1(x.A, alphabet_operations::hide(x.I, A));
   }
@@ -299,7 +240,7 @@ inline
 allow_set subsets(const allow_set& x)
 {
   allow_set result = x;
-  result.includes_subsets = true;
+  result.A_includes_subsets = true;
   return result;
 }
 

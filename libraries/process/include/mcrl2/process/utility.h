@@ -15,6 +15,7 @@
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/print.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
 
@@ -29,6 +30,86 @@ multi_action_name multiset_union(const multi_action_name& alpha, const multi_act
 }
 
 namespace detail {
+
+// returns true if x is a source of one of the rename rules in R
+inline
+bool is_source(const rename_expression_list& R, const core::identifier_string& x)
+{
+  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  {
+    if (i->source() == x)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+typedef atermpp::map<core::identifier_string, std::vector<core::identifier_string> > rename_inverse_map;
+
+// Example: R = {b -> c}, then rename_inverse(R) = {b -> [], c -> [b, c]}
+inline
+rename_inverse_map rename_inverse(const rename_expression_list& R)
+{
+  rename_inverse_map Rinverse;
+  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+  {
+    Rinverse[i->target()].push_back(i->source());
+    if (!is_source(R, i->target()))
+    {
+      Rinverse[i->target()].push_back(i->target());
+    }
+    Rinverse[i->source()]; // this is to make sure that i->source() is in the map
+  }
+  return Rinverse;
+}
+
+struct rename_inverse_apply
+{
+  const multi_action_name& alpha;
+  const std::vector<core::identifier_string>& beta;
+  multi_action_name_set& A;
+
+  rename_inverse_apply(const multi_action_name& alpha_, const std::vector<core::identifier_string>& beta_, multi_action_name_set& A_)
+    : alpha(alpha_), beta(beta_), A(A_)
+  {}
+
+  void operator()()
+  {
+    multi_action_name gamma = alpha;
+    gamma.insert(beta.begin(), beta.end());
+    A.insert(gamma);
+  }
+};
+
+inline
+void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name& x, multi_action_name_set& result)
+{
+  std::vector<std::vector<core::identifier_string> > V;
+
+  multi_action_name alpha = x;
+
+  // remove elements that appear in Rinverse, and put the replacements in V
+  for (multi_action_name::iterator i = alpha.begin(); i != alpha.end(); )
+  {
+    rename_inverse_map::const_iterator j = Rinverse.find(*i);
+    if (j != Rinverse.end())
+    {
+      alpha.erase(i++);
+      V.push_back(j->second);
+    }
+    else
+    {
+      ++i;
+    }
+  }
+
+  // v will hold a replacement
+  std::vector<core::identifier_string> v(V.size());
+
+  // generate all permutations of the replacements in V, and put them in result
+  utilities::foreach_sequence(V, v.begin(), rename_inverse_apply(alpha, v, result));
+}
 
 // Returns true if the multiset y is contained in x
 inline
@@ -374,7 +455,12 @@ multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    result.insert(multiset_difference(*i, m));
+    multi_action_name alpha = *i;
+    for (typename IdentifierContainer::const_iterator j = I.begin(); j != I.end(); ++j)
+    {
+      alpha.erase(*j);
+    }
+    result.insert(alpha);
   }
   return result;
 }
@@ -395,15 +481,14 @@ multi_action_name_set rename(const rename_expression_list& R, const multi_action
 inline
 multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
-  // compute inverse of R
-  atermpp::vector<rename_expression> r;
-  for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
-  {
-    r.push_back(rename_expression(i->target(), i->source()));
-  }
-  rename_expression_list Rinverse(r.begin(), r.end());
+  detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
 
-  return alphabet_operations::rename(Rinverse, A, A_includes_subsets);
+  multi_action_name_set result;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    detail::rename_inverse(Rinverse, *i, result);
+  }
+  return result;
 }
 
 inline

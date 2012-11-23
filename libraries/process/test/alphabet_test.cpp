@@ -197,6 +197,11 @@ std::string print(const multi_action_name_set& A, bool A_includes_subsets = fals
   return print_set(V) + (A_includes_subsets ? "*" : "");
 }
 
+std::string print(const allow_set& x)
+{
+  return print(x.A, x.A_includes_subsets);
+}
+
 BOOST_AUTO_TEST_CASE(test_print)
 {
   multi_action_name_set A;
@@ -339,6 +344,13 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
   multi_action_name_set A1 = op(C, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(comm_text + ", " + Atext, result, expected_result, title);
+
+  if (title == "comm_inverse")
+  {
+    allow_set A2 = allow_set_operations::comm_inverse(C, allow_set(A, A_includes_subsets));
+    std::string result_allow = print(A2);
+    check_result(comm_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_comm_operations)
@@ -359,15 +371,24 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
   multi_action_name_set A1 = op(R, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(rename_text + ", " + Atext, result, expected_result, title);
+
+  if (title == "rename_inverse")
+  {
+    allow_set A2 = allow_set_operations::rename_inverse(R, allow_set(A, A_includes_subsets));
+    std::string result_allow = print(A2);
+    check_result(rename_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}*", "{bb, bbdd}*", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{b, bb}", "{a, aa}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{bb}*", "{aa}*", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, aad, abc, abd, accc, accd, acdd, bccc, bccd, bcdd}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{b, bb}", "{a, aa, ab, b, bb}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{bb}*", "{aa, ab, bb}*", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{b}", "{a, b}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{a}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
 }
 
 void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
@@ -379,6 +400,10 @@ void test_allow(const std::string& allow_text, const std::string& Atext, const s
   multi_action_name_set A1 = alphabet_operations::allow(V, A, A_includes_subsets);
   std::string result = print(A1);
   check_result(allow_text + ", " + Atext, result, expected_result, title);
+
+  allow_set A2 = allow_set_operations::allow(V, allow_set(A, A_includes_subsets));
+  std::string result_allow = print(A2);
+  check_result(allow_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
 }
 
 BOOST_AUTO_TEST_CASE(test_allow1)
@@ -396,6 +421,10 @@ void test_block(const std::string& block_text, const std::string& Atext, const s
   multi_action_name_set A1 = alphabet_operations::block(B, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(block_text + ", " + Atext, result, expected_result, title);
+
+  allow_set A2 = allow_set_operations::block(B, allow_set(A, A_includes_subsets));
+  std::string result_allow = print(A2);
+  check_result(block_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
 }
 
 BOOST_AUTO_TEST_CASE(test_block1)
