@@ -287,7 +287,7 @@ multi_action_name_set concat(const multi_action_name_set& A1, const multi_action
 inline
 multi_action_name_set left_arrow1(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
-  multi_action_name_set result;
+  multi_action_name_set result = A1; // needed because tau is not explicitly stored
   for (multi_action_name_set::const_iterator i = A2.begin(); i != A2.end(); ++i)
   {
     const multi_action_name& beta = *i;

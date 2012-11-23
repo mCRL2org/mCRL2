@@ -310,10 +310,11 @@ BOOST_AUTO_TEST_CASE(test_alphabet_operations)
 {
   test_alphabet_operation("{a}", "{b}", "{ab}", process::concat, "concat");
   test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", process::concat, "concat");
-  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aac}", process::left_arrow1, "left_arrow1");
-  test_alphabet_operation("{aa, b}", "{a}", "{a}", process::left_arrow1, "left_arrow1");
-  test_alphabet_operation("{ab, b}", "{b}", "{a}", process::left_arrow1, "left_arrow1"); // N.B. tau is excluded!
-  test_alphabet_operation("{bc}", "{c}", "{b}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aabc, aac, ab}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{aa, b}", "{a}", "{a, aa, b}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{ab, b}", "{b}", "{a, ab, b}", process::left_arrow1, "left_arrow1"); // N.B. tau is excluded!
+  test_alphabet_operation("{bc}", "{c}", "{b, bc}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{a}", "{a}", "{a}", process::left_arrow1, "left_arrow1");
 }
 
 void test_push_allow(const std::string& expression, const std::string& Atext, const std::string& expected_result, const std::string& equations = "")
