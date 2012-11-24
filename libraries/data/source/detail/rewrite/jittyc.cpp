@@ -169,15 +169,15 @@ static aterm_appl make_ar_var(size_t var)
 }
 
 static size_t num_int2aterms = 0;
-static atermpp::detail::_aterm** int2aterms = NULL; // An array with prepared aterm_int's.
-static atermpp::detail::_aterm* get_int2aterm_value(size_t i)
+static const atermpp::detail::_aterm** int2aterms = NULL; // An array with prepared aterm_int's.
+static const atermpp::detail::_aterm* get_int2aterm_value(size_t i)
 {
   if (((size_t) i) >= num_int2aterms)
   {
     size_t old_num = num_int2aterms;
     num_int2aterms = i+1;
 
-    int2aterms = (atermpp::detail::_aterm**) realloc(int2aterms,num_int2aterms*sizeof(aterm));
+    int2aterms = (const atermpp::detail::_aterm**) realloc(int2aterms,num_int2aterms*sizeof(aterm));
     if (int2aterms == NULL)
     {
       throw mcrl2::runtime_error("Cannot allocate enough memory.");
@@ -188,13 +188,13 @@ static atermpp::detail::_aterm* get_int2aterm_value(size_t i)
     }
     for (; old_num < num_int2aterms; old_num++)
     {
-      int2aterms[old_num] = reinterpret_cast<atermpp::detail::_aterm*>(atermpp::aterm_int(old_num).address());
+      int2aterms[old_num] = reinterpret_cast<const atermpp::detail::_aterm*>(atermpp::aterm_int(old_num).address());
     }
   }
   return int2aterms[i];
 }
 
-static atermpp::detail::_aterm* get_int2aterm_value(const aterm_int &i)
+static const atermpp::detail::_aterm* get_int2aterm_value(const aterm_int &i)
 {
   return get_int2aterm_value(i.value());
 }
@@ -1428,7 +1428,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         if (b || !rewr)
         {
-          ss << "atermpp::aterm((atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(static_cast<aterm_int>(((aterm_list) t).front())) << "))";
+          ss << "atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(static_cast<aterm_int>(((aterm_list) t).front())) << "))";
         }
         else
         {
@@ -1463,7 +1463,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           {
             /* if (arity<=5)
             { */
-              ss << "atermpp::aterm((atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(static_cast<aterm_int>(((aterm_list) t).front())) << ")";
+              ss << "atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(static_cast<aterm_int>(((aterm_list) t).front())) << ")";
             /* }
             else
             {
@@ -1496,7 +1496,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                  to recalculate the normal form. TODO: this needs to be reconstructed. */
               /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((aterm_int) ((aterm_list) t).front()).value()
                                + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ")"; */
-              ss << "atermpp::aterm((atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(OpId2Int(f).value()) << ")";
+              ss << "atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(OpId2Int(f).value()) << ")";
             /* }
             else
             {
@@ -2026,7 +2026,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
   {
     if (level == 0)
     {
-      fprintf(f,"%sif ((arg%lu(0)).address()==reinterpret_cast<atermpp::detail::_aterm*>(%p)) // F\n"
+      fprintf(f,"%sif ((arg%lu(0)).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n",
               whitespace(d*2),
               cur_arg,
@@ -2036,7 +2036,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     }
     else
     {
-      fprintf(f,"%sif (isAppl(%s%lu(%lu)) && (aterm_cast<const atermpp::aterm_appl >(%s%lu(%lu))(0)).address()==reinterpret_cast<atermpp::detail::_aterm*>(%p)) // F\n"
+      fprintf(f,"%sif (isAppl(%s%lu(%lu)) && (aterm_cast<const atermpp::aterm_appl >(%s%lu(%lu))(0)).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n"
               "%s  atermpp::aterm_appl t%lu (%s%lu(%lu));\n",
               whitespace(d*2),
@@ -2076,7 +2076,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     fprintf(f,"%sif (",whitespace(d*2));
     calcTerm(f,tree(0),0,nnfvars);
 
-    fprintf(f,"==atermpp::aterm_appl((atermpp::detail::_aterm*) %p)) // C\n"
+    fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n",
             (void*)get_rewrappl_value(true_num).address(),
             whitespace(d*2)
@@ -2130,7 +2130,7 @@ void RewriterCompilingJitty::implement_tree(
     fprintf(f,"%sif (",whitespace(d*2));
     calcTerm(f,tree(0),0,aterm_list());
 
-    fprintf(f,"==atermpp::aterm_appl((atermpp::detail::_aterm*) %p)) // C\n"
+    fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n"
             "%sreturn ",
             (void*)get_rewrappl_value(true_num).address(),
@@ -2191,7 +2191,7 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
     if (arity > 5)
     {
       fprintf(f,  "  return make_term_with_many_arguments(get_appl_afun_value(%lu),"
-              "(atermpp::detail::_aterm*)%p",
+              "(const atermpp::detail::_aterm*)%p",
               arity+1,  
               (void*)get_int2aterm_value(opid)
              );
@@ -2199,7 +2199,7 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
     else
     {
       fprintf(f,  "  return atermpp::aterm_appl(get_appl_afun_value(%lu),"
-              "(atermpp::detail::_aterm*) %p",
+              "(const atermpp::detail::_aterm*) %p",
               arity+1,  
               (void*)get_int2aterm_value(opid)
              );
@@ -2808,7 +2808,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f, 
       "const size_t arity = f.arity();\n"
 
-      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,arity);\n");
+      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,arity);\n");
 
     for (size_t j=0; j<=i; ++j)
     {
@@ -2861,7 +2861,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "  else\n"
             "  {\n"
             "    //atermpp::aterm args[arity+ld];\n"
-            "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::detail::_aterm*,(arity+%zu));\n"
+            "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,const atermpp::detail::_aterm*,(arity+%zu));\n"
             "\n"
             "    for (size_t i=0; i<arity; i++)\n"
             "    {\n"

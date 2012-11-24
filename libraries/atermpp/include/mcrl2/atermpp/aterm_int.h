@@ -49,7 +49,7 @@ class aterm_int:public aterm
     /// \param t A term representing an integer.
     aterm_int &operator=(const aterm_int &t)
     {
-      copy_term(t.m_term);
+      copy_term(t);
       return *this;
     }
 
@@ -57,7 +57,7 @@ class aterm_int:public aterm
     /// \return The value of the term.
     size_t value() const
     {
-      return reinterpret_cast<detail::_aterm_int*>(m_term)->value;
+      return reinterpret_cast<const detail::_aterm_int*>(m_term)->value;
     }
 };
 

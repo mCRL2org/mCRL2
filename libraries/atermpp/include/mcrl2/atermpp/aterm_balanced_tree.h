@@ -270,7 +270,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     friend class boost::iterator_core_access;
 
-    std::stack< atermpp::detail::_aterm* > m_trees;
+    std::stack< const atermpp::detail::_aterm* > m_trees;
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
@@ -280,7 +280,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
     }
 
     /// \brief Determine if a stack is empty
-    bool is_empty(const std::stack<atermpp::detail::_aterm*>& tree) const
+    bool is_empty(const std::stack<const atermpp::detail::_aterm*>& tree) const
     {
       return tree.empty() || (tree.size() == 1 && term_balanced_tree<Value>::is_empty(tree.top()));
     }
@@ -299,7 +299,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
       if (!m_trees.empty())
       {
-        detail::_aterm* current = m_trees.top();
+        const detail::_aterm* current = m_trees.top();
 
         if (current->function()!=term_balanced_tree < Value >::tree_node())
         {
@@ -308,8 +308,8 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
         m_trees.pop();
         do 
         {
-          m_trees.push((reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[1]).address());
-          current=reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[0].address();
+          m_trees.push((reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[1]).address());
+          current=reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[0].address();
         }
         while (current->function()==term_balanced_tree < Value >::tree_node());
 
@@ -319,12 +319,12 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     void initialise(const aterm &tree)
     {
-        detail::_aterm_appl<aterm>* current = reinterpret_cast<detail::_aterm_appl<aterm> *>(tree.address());
+      const detail::_aterm_appl<aterm>* current = reinterpret_cast<const detail::_aterm_appl<aterm> *>(tree.address());
 
       while (current->function()==term_balanced_tree< Value >::tree_node())
       {
         m_trees.push(current->arg[1].address());
-        current=reinterpret_cast<detail::_aterm_appl<aterm > *>(current->arg[0].address());
+        current=reinterpret_cast<const detail::_aterm_appl<aterm > *>(current->arg[0].address());
       }
       m_trees.push(current);
     }

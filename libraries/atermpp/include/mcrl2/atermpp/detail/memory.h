@@ -12,7 +12,7 @@ namespace atermpp
 namespace detail
 {
   extern size_t aterm_table_mask;
-  extern detail::_aterm* * aterm_hashtable;
+  extern const detail::_aterm* * aterm_hashtable;
 
 
   extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
@@ -24,7 +24,7 @@ namespace detail
 }
   
 inline
-detail::_aterm *aterm::undefined_aterm()
+const detail::_aterm *aterm::undefined_aterm()
 {
   if (detail::static_undefined_aterm.m_term==NULL)
   {
@@ -38,7 +38,7 @@ detail::_aterm *aterm::undefined_aterm()
 } 
 
 inline
-detail::_aterm *aterm::empty_aterm_list()
+const detail::_aterm *aterm::empty_aterm_list()
 {
   if (detail::static_empty_aterm_list.m_term==NULL)
   {
@@ -76,19 +76,19 @@ t
 #endif
 )
 {
-  assert(t != aterm());
+  assert(t.defined());
   assert(t.address()->reference_count()>0);
   // assert(aterm_cast<aterm_appl>(t).function().name().size()!=0);
 }
 
-inline HashNumber hash_number(detail::_aterm *t)
+inline HashNumber hash_number(const detail::_aterm *t)
 {
   const function_symbol &f=t->function();
   HashNumber hnr = f.number();
 
-  size_t* begin=reinterpret_cast<size_t*>(t)+TERM_SIZE;
-  size_t* end=begin+f.arity();
-  for (size_t* i=begin; i!=end; ++i)
+  const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
+  const size_t* end=begin+f.arity();
+  for (const size_t* i=begin; i!=end; ++i)
   {
     hnr = COMBINE(hnr, *i);
   } 

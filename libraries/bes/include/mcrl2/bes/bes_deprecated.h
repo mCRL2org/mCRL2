@@ -431,7 +431,7 @@ class bes_expression: public atermpp::aterm
     // allow assignment from aterms
     bes_expression& operator=(const bes_expression& t)
     {
-      copy_term(t.m_term);
+      copy_term(t);
       return *this;
     } 
 

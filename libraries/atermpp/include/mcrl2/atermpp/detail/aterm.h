@@ -20,8 +20,8 @@ class _aterm
 {
   protected:
     function_symbol m_function_symbol;
-    size_t  m_reference_count;
-    _aterm* m_next;
+    mutable size_t  m_reference_count;
+    mutable const _aterm* m_next;
 
   public:
     function_symbol &function() 
@@ -34,19 +34,34 @@ class _aterm
       return m_function_symbol;
     }
 
-    size_t &reference_count()
+    size_t decrease_reference_count() const
+    {
+      return --m_reference_count;
+    } 
+
+    void increase_reference_count() const
+    {
+      ++m_reference_count;
+    } 
+
+    void reset_reference_count() const
+    {
+      m_reference_count=0;
+    } 
+
+    size_t reference_count() const 
     {
       return m_reference_count;
     }
 
-    const size_t &reference_count() const 
-    {
-      return m_reference_count;
-    }
-
-    _aterm* &next()
+    const _aterm* next() const
     {
       return m_next;
+    }
+
+    void set_next(const _aterm* n) const
+    {
+      m_next=n;
     }
 
     size_t type() const
@@ -67,9 +82,9 @@ class _aterm
 
 static const size_t TERM_SIZE=sizeof(_aterm)/sizeof(size_t);
 
-detail::_aterm* allocate_term(const size_t size);
-void simple_free_term(_aterm *t, const size_t arity);
-inline HashNumber hash_number(_aterm *t);
+const detail::_aterm* allocate_term(const size_t size);
+void simple_free_term(const _aterm *t, const size_t arity);
+inline HashNumber hash_number(const _aterm *t);
 
 } // namespace detail
 } // namespace atermpp

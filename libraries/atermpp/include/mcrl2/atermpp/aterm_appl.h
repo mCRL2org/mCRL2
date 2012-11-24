@@ -31,7 +31,7 @@ class term_appl:public aterm
 
   protected:
     /// \brief Constructor.
-    term_appl (detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<detail::_aterm*>(t))
+    term_appl (const detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<const detail::_aterm*>(t))
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));
@@ -212,7 +212,7 @@ class term_appl:public aterm
     /// \return A reference to the term to which an assignment took place.
     term_appl &operator=(const term_appl &t)
     {
-      copy_term(t.m_term);
+      copy_term(t);
       return *this;
     }
 
@@ -241,14 +241,14 @@ class term_appl:public aterm
     /// \return An iterator pointing to the first argument.
     const_iterator begin() const
     {
-      return const_iterator(&(reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg[0]));
+      return const_iterator(&(reinterpret_cast<const detail::_aterm_appl<Term>*>(m_term)->arg[0]));
     }
 
     /// \brief Returns a const_iterator pointing past the last argument.
     /// \return A const_iterator pointing past the last argument.
     const_iterator end() const
     {
-      return const_iterator(&reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg[size()]);
+      return const_iterator(&reinterpret_cast<const detail::_aterm_appl<Term>*>(m_term)->arg[size()]);
     }
 
     /// \brief Returns the largest possible number of arguments.
@@ -271,7 +271,7 @@ class term_appl:public aterm
     const Term &operator()(const size_type i) const
     {
       assert(i<m_term->function().arity());
-      return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg[i];
+      return reinterpret_cast<const detail::_aterm_appl<Term>*>(m_term)->arg[i];
     }
 };
 

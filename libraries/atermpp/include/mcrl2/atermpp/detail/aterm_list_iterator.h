@@ -51,15 +51,15 @@ class term_list_iterator: public boost::iterator_facade<
     /// \brief Constructor.
     /// \param l A sequence of terms
     term_list_iterator(const aterm &l)
-      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l.address()))
+      : m_list(reinterpret_cast<const detail::_aterm_list<Term>*>(l.address()))
     { 
       assert(l.type_is_list());
     } 
 
     /// \brief Constructor.
     /// \param l A sequence of terms
-    term_list_iterator(detail::_aterm *l)
-      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l))
+    term_list_iterator(const detail::_aterm *l)
+      : m_list(reinterpret_cast<const detail::_aterm_list<Term>*>(l))
     { 
       assert(l->type()==AT_LIST);
     } 
@@ -86,10 +86,10 @@ class term_list_iterator: public boost::iterator_facade<
     /// \brief Increments the iterator
     void increment()
     {
-      m_list = reinterpret_cast<detail::_aterm_list<Term>*>(m_list->tail.address());
+      m_list = reinterpret_cast<const detail::_aterm_list<Term>*>(m_list->tail.address());
     }
 
-    detail::_aterm_list<Term>* m_list;
+    const detail::_aterm_list<Term>* m_list;
 };
 
 } // namespace atermpp

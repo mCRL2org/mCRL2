@@ -38,13 +38,13 @@ class aterm
     template < typename T >
     friend class term_list; 
     
-    friend void detail::simple_free_term(detail::_aterm *t, const size_t arity);
+    friend void detail::simple_free_term(const detail::_aterm *t, const size_t arity);
 
   protected:
-    detail::_aterm *m_term;
+    const detail::_aterm* m_term;
 
-    static detail::_aterm *undefined_aterm();
-    static detail::_aterm *empty_aterm_list();
+    static const detail::_aterm *undefined_aterm();
+    static const detail::_aterm *empty_aterm_list();
  
     void free_term() const;
 
@@ -52,7 +52,7 @@ class aterm
     {
       assert(m_term!=NULL);
       assert(m_term->reference_count()>0);
-      if (0== --m_term->reference_count())
+      if (0== m_term->decrease_reference_count())
       {
         free_term();
       }
@@ -63,7 +63,7 @@ class aterm
     {
       assert(m_term!=NULL);
       if (CHECK) assert(m_term->reference_count()>0);
-      ++(m_term->reference_count());
+      m_term->increase_reference_count();
     }
 
     void copy_term(const aterm &t)
@@ -87,7 +87,7 @@ class aterm
     aterm(const function_symbol &sym);
   
   public: // Should be protected; Does not work, due to a problem in the soundness checks.
-    aterm (detail::_aterm *t):m_term(t)
+    aterm (const detail::_aterm *t):m_term(t)
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
@@ -114,7 +114,7 @@ class aterm
     /// \param t a term to be assigned.
     aterm &operator=(const aterm &t)
     {
-      copy_term(t.m_term);
+      copy_term(t);
       return *this;
     }
 
@@ -243,7 +243,7 @@ class aterm
     /// \details This address will be stable as long as this aterm
     ///          exists, i.e., has a reference count larger than 0.
     /// \return A void* pointer, representing the machine address of the current aterm.
-    detail::_aterm* address() const
+    const detail::_aterm* address() const
     {
       assert(m_term!=NULL && m_term->reference_count()>0);
       return m_term;
@@ -268,7 +268,7 @@ class aterm
     {
       assert(m_term!=NULL && m_term->reference_count()>0);
       assert(t.m_term!=NULL && t.m_term->reference_count()>0);
-      detail::_aterm* tmp(t.m_term);
+      const detail::_aterm* tmp(t.m_term);
       t.m_term=m_term;
       m_term=tmp; 
     }

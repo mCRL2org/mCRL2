@@ -42,7 +42,7 @@ namespace detail
   size_t function_lookup_table_size=0;
   _function_symbol* function_lookup_table;
   
-  size_t function_lookup_table_create_free_entry_at_end()
+  static size_t function_lookup_table_create_free_entry_at_end()
   {
     if (function_lookup_table_actual_size<=function_lookup_table_size)
     {

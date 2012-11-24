@@ -36,7 +36,7 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// \brief Constructor.
     /// \param t A term
-    term_appl_iterator(Term* t)
+    term_appl_iterator(const Term* t)
       : m_term(t)
     {}
 
@@ -70,7 +70,7 @@ class term_appl_iterator: public boost::iterator_facade<
       m_term--;
     }
 
-    Term *m_term;
+    const Term *m_term;
 };
 
 } // namespace atermpp

@@ -45,7 +45,7 @@ static const size_t a_prime_number = 134217689;
 
 /* A very simple hashing function. */
 
-static size_t hashcode(void* a, const size_t sizeMinus1)
+static size_t hashcode(const void* a, const size_t sizeMinus1)
 {
   return ((((size_t)(a) >> 2) * a_prime_number) & sizeMinus1);
 }

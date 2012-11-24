@@ -1294,10 +1294,10 @@ static aterm read_term(sym_read_entry* sym, istream &is)
     {
       return aterm();
     }
-    if (arg_sym->terms[val]==aterm())
+    if (!arg_sym->terms[val].defined())
     {
       arg_sym->terms[val] = read_term(arg_sym, is);
-      if (arg_sym->terms[val]==aterm())
+      if (!arg_sym->terms[val].defined())
       {
         return aterm();
       }
@@ -1465,7 +1465,7 @@ aterm read_baf(istream &is)
 aterm read_term_from_binary_stream(istream &is)
 {
   aterm result=read_baf(is);
-  if (result==aterm())
+  if (!result.defined())
   {
     throw std::runtime_error("Failed to read term from binary file.");
   }

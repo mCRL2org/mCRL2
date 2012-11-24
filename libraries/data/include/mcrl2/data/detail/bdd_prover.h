@@ -188,7 +188,7 @@ class BDD_Prover: public Prover
       }
 
       aterm_appl v_guard = smallest(a_formula);
-      if (v_guard==aterm())
+      if (!v_guard.defined())
       {
         return a_formula;
       }

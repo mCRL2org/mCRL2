@@ -34,7 +34,7 @@ namespace detail
 static const size_t INITIAL_TERM_TABLE_SIZE = 1<<17;  // Must be a power of 2.
 static size_t aterm_table_size;
 size_t aterm_table_mask;            // used in memory.h
-_aterm* * aterm_hashtable;  // used in memory.h
+const _aterm* * aterm_hashtable;  // used in memory.h
 
 aterm static_undefined_aterm;
 aterm static_empty_aterm_list;
@@ -60,7 +60,7 @@ typedef struct TermInfo
 {
   Block*       at_block;
   size_t* top_at_blocks;
-  _aterm*       at_freelist;
+  const _aterm*       at_freelist;
 
   TermInfo():at_block(NULL),top_at_blocks(NULL),at_freelist(NULL)
   {}
@@ -74,12 +74,12 @@ static TermInfo *terminfo;
 static size_t total_nodes = 0;
 
 
-static void remove_from_hashtable(_aterm *t)
+static void remove_from_hashtable(const _aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
-  _aterm *prev=NULL;
+  const _aterm *prev=NULL;
   const HashNumber hnr = hash_number(t) & aterm_table_mask;
-  _aterm *cur = aterm_hashtable[hnr];
+  const _aterm *cur = aterm_hashtable[hnr];
 
   do
   {
@@ -88,7 +88,7 @@ static void remove_from_hashtable(_aterm *t)
     {
       if (prev)
       {
-        prev->next() = cur->next();
+        prev->set_next(cur->next());
       }
       else
       {
@@ -106,15 +106,15 @@ static void remove_from_hashtable(_aterm *t)
 
 /* Free a term, without removing it from the
    hashtable, and destroying its function symbol */
-void simple_free_term(_aterm *t, const size_t arity)
+void simple_free_term(const _aterm *t, const size_t arity)
 {
   for(size_t i=0; i<arity; ++i)
   {
-    reinterpret_cast<_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
+    reinterpret_cast<const _aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
   }
 
   TermInfo &ti = terminfo[TERM_SIZE_APPL(arity)];
-  t->next()  = ti.at_freelist;
+  t->set_next(ti.at_freelist);
   ti.at_freelist = t; 
 }
 
@@ -125,10 +125,10 @@ static void resize_aterm_hashtable()
 {
   const size_t old_size=aterm_table_size;
   aterm_table_size <<=1; // Double the size.
-  _aterm* * new_hashtable;
+  const _aterm* * new_hashtable;
 
   {
-    new_hashtable=reinterpret_cast<_aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
+    new_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
   }
   
   if (new_hashtable==NULL)
@@ -142,14 +142,14 @@ static void resize_aterm_hashtable()
   /*  Rehash all old elements */
   for (size_t p=0; p<old_size; ++p) 
   {
-    _aterm* aterm_walker=aterm_hashtable[p];
+    const _aterm* aterm_walker=aterm_hashtable[p];
 
     while (aterm_walker)
     {
       assert(aterm_walker->reference_count()>0);
-      _aterm* next = aterm_walker->next();
+      const _aterm* next = aterm_walker->next();
       const HashNumber hnr = hash_number(aterm_walker) & aterm_table_mask;
-      aterm_walker->next() = new_hashtable[hnr];
+      aterm_walker->set_next(new_hashtable[hnr]);
       new_hashtable[hnr] = aterm_walker;
       assert(aterm_walker->next()!=aterm_walker);
       aterm_walker = next;
@@ -173,12 +173,11 @@ static void check_that_all_objects_are_free()
       {
         if (p->reference_count()!=0)
         {
-          if (p->function()==function_adm.AS_DEFAULT) // && p->reference_count()<=2)
+          if (p->function()==function_adm.AS_DEFAULT /* && p->reference_count()<=1*/ )
           {
-            // This is ok, as static_empty_aterm_list can first be set to static_undefined_aterm and then
-            // during initialisation be set static_empty_aterm_list, without destroying the term first set to it.
-            // A similar problem may occur with static_undefined_aterm, as in turns out that the reference count
-            // can become 2.
+            // This is ok, as static_undefined_aterm is defined in undefined_aterm using an placement new,
+            // and subsequently again by some compilers again using a placement new. This overwrites
+            // the initial value for static_undefined_aterm, without properly destroying it. 
           }
           else
           {
@@ -226,7 +225,7 @@ void initialise_aterm_administration()
   aterm_table_size=INITIAL_TERM_TABLE_SIZE;
   aterm_table_mask=aterm_table_size-1;
 
-  aterm_hashtable=reinterpret_cast<_aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
+  aterm_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
   if (aterm_hashtable==NULL)
   {
     throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");
@@ -278,7 +277,7 @@ static void allocate_block(size_t size)
 
 
 
-_aterm* allocate_term(const size_t size)
+const _aterm* allocate_term(const size_t size)
 {
   if (size >= terminfo_size) 
   {
@@ -311,13 +310,13 @@ _aterm* allocate_term(const size_t size)
     /* the first block is not full: allocate a cell */
     _aterm *at = (_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
-    at->reference_count()=0;
+    at->reset_reference_count();
     return at;
   }
   else if (ti.at_freelist)
   {
     /* the freelist is not empty: allocate a cell */
-    _aterm *at = ti.at_freelist;
+    const _aterm *at = ti.at_freelist;
     ti.at_freelist = ti.at_freelist->next();
     assert(ti.at_block != NULL);
     assert(ti.top_at_blocks == ti.at_block->end);
@@ -331,17 +330,17 @@ _aterm* allocate_term(const size_t size)
     assert(ti.at_block != NULL);
     _aterm *at = (_aterm *)ti.top_at_blocks;
     ti.top_at_blocks += size;
-    at->reference_count()=0;
+    at->reset_reference_count();
     return at;
   }
 } 
 
-_aterm* aterm_int(size_t val)
+const _aterm* aterm_int(size_t val)
 {
   HashNumber hnr = COMBINE(function_adm.AS_INT.number(), val);
 
-  _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
-  while (cur && (cur->function()!=function_adm.AS_INT || (reinterpret_cast<_aterm_int*>(cur)->value != val)))
+  const _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
+  while (cur && (cur->function()!=function_adm.AS_INT || (reinterpret_cast<const _aterm_int*>(cur)->value != val)))
   {
     cur = cur->next();
   }
@@ -351,10 +350,10 @@ _aterm* aterm_int(size_t val)
     cur = allocate_term(TERM_SIZE_INT);
     /* Delay masking until after allocate */
     hnr &= aterm_table_mask;
-    new (&cur->function()) function_symbol(function_adm.AS_INT);
-    reinterpret_cast<_aterm_int*>(cur)->value = val;
+    new (&const_cast<_aterm *>(cur)->function()) function_symbol(function_adm.AS_INT);
+    reinterpret_cast<_aterm_int*>(const_cast<_aterm *>(cur))->value = val;
 
-    cur->next() = aterm_hashtable[hnr];
+    cur->set_next(aterm_hashtable[hnr]);
     aterm_hashtable[hnr] = cur;
   }
 
@@ -366,7 +365,7 @@ _aterm* aterm_int(size_t val)
 
 void aterm::free_term() const
 { 
-  detail::_aterm* t=this->m_term;
+  const detail::_aterm* t=this->m_term;
   assert(t->reference_count()==0);
 
   remove_from_hashtable(t);  // Remove from hash_table
@@ -377,7 +376,7 @@ void aterm::free_term() const
   {
     for(size_t i=0; i<arity; ++i)
     {
-      reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
+      reinterpret_cast<const detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
     }
   }
   const size_t size=detail::TERM_SIZE_APPL(arity);
@@ -385,7 +384,7 @@ void aterm::free_term() const
   f.~function_symbol(); 
 
   detail::TermInfo &ti = detail::terminfo[size];
-  t->next()  = ti.at_freelist;
+  t->set_next(ti.at_freelist);
   ti.at_freelist = t; 
 }
 
@@ -395,36 +394,25 @@ aterm::aterm(const function_symbol &sym)
 
   HashNumber hnr = sym.number();
 
-  detail::_aterm* prev = NULL;
-  detail::_aterm **hashspot = &(detail::aterm_hashtable[hnr & detail::aterm_table_mask]);
+  const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
 
-  detail::_aterm *cur = *hashspot;
   while (cur)
   {
     if (cur->function()==sym)
     {
-      /* Promote current entry to front of hashtable */
-      if (prev!=NULL)
-      {
-        prev->next() = cur->next();
-        cur->next() = (detail::_aterm*) &**hashspot;
-        *hashspot = cur;
-      }
-
       m_term=cur;
       increase_reference_count<false>();
       return;
     }
-    prev = cur;
     cur = cur->next();
   }
 
   cur = detail::allocate_term(detail::TERM_SIZE_APPL(0));
   /* Delay masking until after allocate */
   hnr &= detail::aterm_table_mask;
-  new (&cur->function()) function_symbol(sym);
+  new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
   
-  cur->next() = &*detail::aterm_hashtable[hnr];
+  cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
 
   m_term=cur;

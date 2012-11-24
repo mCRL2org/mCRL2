@@ -62,7 +62,7 @@ class term_list:public aterm
     /// \param l A list.
     term_list(const term_list<Term> &t):aterm(t)
     {
-      assert(m_term==aterm().m_term || type() == AT_LIST); 
+      assert(!defined() || type_is_list()); 
     }
 
     /// \brief Explicit construction from an aterm. 
@@ -71,9 +71,9 @@ class term_list:public aterm
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      // Term list can be the undefined aterm(); Generally, this is used to indicate an error situation.
+      // Term list can be undefined; Generally, this is used to indicate an error situation.
       // This use should be discouraged. For this purpose exceptions ought to be used.
-      assert(m_term==aterm().m_term || t.type()==AT_LIST); 
+      assert(!defined() || t.type_is_list()); 
     }
 
     /// \brief Creates a term_list with the elements from first to last.
@@ -154,7 +154,7 @@ class term_list:public aterm
     /// \param l A list.
     term_list<Term> &operator=(const term_list &l)
     {
-      copy_term(l.m_term);
+      copy_term(l);
       return *this;
     }
 
@@ -163,21 +163,21 @@ class term_list:public aterm
     /// \return This list as an aterm_list.
     operator term_list<aterm>() const
     {
-      return atermpp::aterm_cast<term_list<aterm> >(m_term);
+      return atermpp::aterm_cast<term_list<aterm> >(*this);
     } 
 
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
     const term_list<Term> &tail() const
     {
-      return (reinterpret_cast<detail::_aterm_list<Term>*>(m_term))->tail;
+      return (reinterpret_cast<const detail::_aterm_list<Term>*>(m_term))->tail;
     }
 
     /// \brief Returns the first element of the list.
     /// \return The term at the head of the list.
     const Term &front() const
     {
-      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term)->head;
+      return reinterpret_cast<const detail::_aterm_list<Term>*>(m_term)->head;
     }
 
     /// \brief Returns the size of the term_list.
@@ -263,7 +263,7 @@ inline
 term_list<Term> push_back(const term_list<Term> &l, const Term &elem)
 {
   size_t len = l.size();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
 
   /* Collect all elements of list in buffer */
   size_t j=0;
@@ -317,7 +317,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
 {
   size_t i = 0;
   term_list<Term> l = list;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,list.size());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,list.size());
 
   while (l!=term_list<Term>())
   {
@@ -385,7 +385,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   }
 
   term_list<Term> result = m;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,detail::_aterm*,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
   
   size_t j=0;
   for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++j)
