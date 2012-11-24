@@ -18,7 +18,6 @@
 #include <sstream>
 #include <boost/logic/tribool.hpp>
 #include <boost/logic/tribool_io.hpp>
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/allow_set.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/builder.h"
@@ -31,7 +30,6 @@ namespace mcrl2 {
 namespace process {
 
 multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations);
-multi_action_name_set alphabet_intersection(const process_expression& x, const atermpp::vector<process_equation>& equations, const multi_action_name_set& A);
 
 namespace detail {
 
@@ -356,122 +354,6 @@ alphabet_node alphabet(const process_expression& x, const atermpp::vector<proces
   return f.node_stack.back();
 }
 
-template <typename Derived, typename Node = alphabet_node>
-struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
-{
-  typedef alphabet_traverser<Derived, Node> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-  using super::top;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
-  }
-
-  const multi_action_name_set& A;
-
-  alphabet_intersection_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A_)
-    : super(equations, W), A(A_)
-  {}
-
-  void filter()
-  {
-    Node& node = top();
-    for (multi_action_name_set::iterator i = node.alphabet.begin(); i != node.alphabet.end(); )
-    {
-      bool remove = !includes(A, *i);
-      if (remove)
-      {
-        node.alphabet.erase(i++);
-      }
-      else
-      {
-        ++i;
-      }
-    }
-  }
-
-  void leave(const lps::action& x)
-  {
-    super::leave(x);
-    filter();
-  }
-
-  void leave(const process::block& x)
-  {
-    throw mcrl2::runtime_error("alphabet_intersection is undefined for expression " + process::pp(x));
-  }
-
-  void leave(const process::hide& x)
-  {
-    throw mcrl2::runtime_error("alphabet_intersection is undefined for expression " + process::pp(x));
-  }
-
-  void leave(const process::rename& x)
-  {
-    throw mcrl2::runtime_error("alphabet_intersection is undefined for expression " + process::pp(x));
-  }
-
-  void leave(const process::comm& x)
-  {
-    throw mcrl2::runtime_error("alphabet_intersection is undefined for expression " + process::pp(x));
-  }
-
-  void leave(const process::allow& x)
-  {
-    throw mcrl2::runtime_error("alphabet_intersection is undefined for expression " + process::pp(x));
-  }
-
-  void leave(const process::sync& x)
-  {
-    super::leave(x);
-    filter();
-  }
-
-  void leave(const process::merge& x)
-  {
-    super::leave(x);
-    filter();
-  }
-
-  void leave(const process::left_merge& x)
-  {
-    super::leave(x);
-    filter();
-  }
-};
-
-struct apply_alphabet_intersection_traverser: public alphabet_intersection_traverser<apply_alphabet_intersection_traverser>
-{
-  typedef alphabet_intersection_traverser<apply_alphabet_intersection_traverser> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-  using super::node_stack;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-
-  apply_alphabet_intersection_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
-    : super(equations, W, A)
-  {}
-};
-
-inline
-alphabet_node alphabet_intersection(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
-{
-  apply_alphabet_intersection_traverser f(equations, W, A);
-  f(x);
-  return f.node_stack.back();
-}
-
 struct push_allow_node: public alphabet_node
 {
   push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression(), boost::logic::tribool needs_allow = boost::logic::indeterminate)
@@ -623,11 +505,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void leave_pcrl(const process_expression& x)
   {
-#ifndef MCRL2_USE_ALPHABET_INTERSECTION
-    push(push_allow_node(process::alphabet_intersection(x, equations, A.A), x, boost::logic::indeterminate));
-#else
     push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
-#endif
     log(x);
   }
 
@@ -691,10 +569,21 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     leave_pcrl(x);
   }
 
-  // TODO: handle the body of a hide expression
+  std::string log_hide(const process::hide& x, const allow_set& A1)
+  {
+    std::ostringstream out;
+    out << "hide({" << core::pp(x.hide_set()) << "}, push(" << A1 << ", " << process::pp(x.operand()) << "))";
+    return out.str();
+  }
+
   void operator()(const process::hide& x)
   {
-    leave_pcrl(x);
+    core::identifier_string_list I = x.hide_set();
+    allow_set A1 = allow_set_operations::hide_inverse(I, A);
+    push_allow_node node = push_allow(x.operand(), A1, equations);
+    node.m_expression = hide(I, node.m_expression);
+    push(node);
+    log(x, log_hide(x, A1));
   }
 
   std::string log_block(const process::block& x, const allow_set& A1)
@@ -709,7 +598,6 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     core::identifier_string_list B = x.block_set();
     allow_set A1 = allow_set_operations::block(B, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
-    node.finish(equations, A1);
     push(node);
     log(x, log_block(x, A1));
   }
@@ -727,7 +615,6 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     allow_set A1 = allow_set_operations::rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
     node.m_expression = rename(R, node.m_expression);
-    node.finish(equations, A1);
     push(node);
     log(x, log_rename(x, A1));
   }
@@ -744,8 +631,6 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     communication_expression_list C = x.comm_set();
     allow_set A1 = allow_set_operations::comm_inverse(C, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
-    node.finish(equations, A1);
-    log_push_result(x, A1, node, "<comm>");
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
     push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), make_comm(C1, node.m_expression), boost::logic::indeterminate));
     log(x, log_comm(x, A1));
@@ -763,7 +648,6 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     action_name_multiset_list V = x.allow_set();
     allow_set A1 = allow_set_operations::allow(V, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
-    node.finish(equations, A1);
     push(node);
     log(x, log_allow(x, A1));
   }
@@ -779,12 +663,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations);
-    p1.finish(equations, A_sub);
-    log_push_result(x.left(), A_sub, p1, "<merge-left>");
     allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
-    q1.finish(equations, A_arrow);
-    log_push_result(x.right(), A_arrow, q1, "<merge-right>");
     push(push_allow_node(alphabet_operations::merge(p1.alphabet, q1.alphabet), make_merge(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
     log(x, log_merge(x, A_sub, A_arrow));
   }
@@ -800,12 +680,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations);
-    p1.finish(equations, A_sub);
-    log_push_result(x.left(), A_sub, p1, "<left_merge-left>");
     allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
-    q1.finish(equations, A_arrow);
-    log_push_result(x.right(), A_arrow, q1, "<left_merge-right>");
     push(push_allow_node(alphabet_operations::left_merge(p1.alphabet, q1.alphabet), make_left_merge(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
     log(x, log_left_merge(x, A_sub, A_arrow));
   }
@@ -821,12 +697,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     allow_set A_sub = allow_set_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations);
-    p1.finish(equations, A_sub);
-    log_push_result(x.left(), A_sub, p1, "<sync-left>");
     allow_set A_arrow = allow_set_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations);
-    q1.finish(equations, A_arrow);
-    log_push_result(x.right(), A_arrow, q1, "<sync-right>");
     push(push_allow_node(alphabet_operations::sync(p1.alphabet, q1.alphabet), make_sync(p1.m_expression, q1.m_expression), boost::logic::indeterminate));
     log(x, log_sync(x, A_sub, A_arrow));
   }
@@ -879,7 +751,6 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
   {
     allow_set A(make_name_set(x.allow_set()));
     push_allow_node node = push_allow(x.operand(), A, equations);
-    node.finish(equations, A);
     return node.m_expression;
   }
 };
@@ -898,13 +769,6 @@ multi_action_name_set alphabet(const process_expression& x, const atermpp::vecto
 {
   std::set<process_identifier> W;
   return detail::alphabet(x, equations, W).alphabet;
-}
-
-inline
-multi_action_name_set alphabet_intersection(const process_expression& x, const atermpp::vector<process_equation>& equations, const multi_action_name_set& A)
-{
-  std::set<process_identifier> W;
-  return detail::alphabet_intersection(x, equations, W, A).alphabet;
 }
 
 inline

@@ -19,6 +19,7 @@
 #include <boost/tuple/tuple.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -470,7 +471,7 @@ BOOST_AUTO_TEST_CASE(test_alphabet_parallel)
   A.insert(make_multi_action_name("a19"));
   A.insert(make_multi_action_name("a20"));
 
-  multi_action_name_set B = alphabet_intersection(procspec.init(), procspec.equations(), A);
+  multi_action_name_set B = detail::alphabet_intersection(procspec.init(), procspec.equations(), A);
   BOOST_CHECK(lps::pp(B) == "{a1, a2, a3, a4, a5, a6, a7, a8, a9, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20}");
 }
 
