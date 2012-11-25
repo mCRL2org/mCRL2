@@ -81,10 +81,10 @@ multi_action_name parse_multi_action_name(const std::string& text)
 std::pair<multi_action_name_set, bool> parse_multi_action_name_set(const std::string& text)
 {
   multi_action_name_set result;
-  bool result_includes_subsets = boost::algorithm::ends_with(text, "*");
+  bool result_includes_subsets = boost::algorithm::ends_with(text, "@");
 
-  // remove {}*
-  std::string s = utilities::regex_replace("[{}*]", "", text);
+  // remove {}@
+  std::string s = utilities::regex_replace("[{}@]", "", text);
 
   std::vector<std::string> v = utilities::regex_split(s, "\\s*,\\s*");
   for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
@@ -195,7 +195,7 @@ std::string print(const multi_action_name_set& A, bool A_includes_subsets = fals
   {
     V.insert(print(*i));
   }
-  return print_set(V) + (A_includes_subsets ? "*" : "");
+  return print_set(V) + (A_includes_subsets ? "@" : "");
 }
 
 std::string print(const allow_set& x)
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(test_comm_operations)
   test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", alphabet_operations::comm_inverse, "comm_inverse");
   test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", alphabet_operations::comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", alphabet_operations::comm, "comm");
-  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}*", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}*", alphabet_operations::comm, "comm");
+  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}@", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}@", alphabet_operations::comm, "comm");
 }
 
 template <typename Operation>
@@ -385,10 +385,10 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
 BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}*", "{bb, bbdd}*", alphabet_operations::rename, "rename");
+  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}@", "{bb, bbdd}@", alphabet_operations::rename, "rename");
   test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
   test_rename_operation("{a -> b}", "{b, bb}", "{a, aa, ab, b, bb}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{bb}*", "{aa, ab, bb}*", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{bb}@", "{aa, ab, bb}@", alphabet_operations::rename_inverse, "rename_inverse");
   test_rename_operation("{a -> b}", "{b}", "{a, b}", alphabet_operations::rename_inverse, "rename_inverse");
   test_rename_operation("{a -> b}", "{a}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
 }
@@ -411,7 +411,7 @@ void test_allow(const std::string& allow_text, const std::string& Atext, const s
 BOOST_AUTO_TEST_CASE(test_allow1)
 {
   test_allow("{a|b, a|b|b, c}", "{ab, abbc, c}", "{ab, c}", "allow");
-  test_allow("{a, b, c}", "{ab}*", "{a, b}", "allow");
+  test_allow("{a, b, c}", "{ab}@", "{a, b}", "allow");
 }
 
 void test_block(const std::string& block_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
@@ -432,7 +432,7 @@ void test_block(const std::string& block_text, const std::string& Atext, const s
 BOOST_AUTO_TEST_CASE(test_block1)
 {
   test_block("{b}", "{ab, abbc, c}", "{c}", "block");
-  test_block("{b}", "{ab, abbc, c}*", "{a, ac, c}*", "block");
+  test_block("{b}", "{ab, abbc, c}@", "{a, ac, c}@", "block");
 }
 
 multi_action_name make_multi_action_name(const std::string& x)

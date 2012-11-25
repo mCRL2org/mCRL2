@@ -384,15 +384,7 @@ struct push_allow_node: public alphabet_node
     if (boost::logic::indeterminate(m_needs_allow))
     {
       std::size_t alphabet_size = alphabet.size();
-      bool alphabet_contains_tau = contains_tau(alphabet);
-
-      alphabet = process::set_intersection(alphabet, A.A, A.A_includes_subsets);
-      if (alphabet_contains_tau)
-      {
-        multi_action_name tau;
-        alphabet.insert(tau);
-      }
-
+      alphabet = A.intersect(alphabet);
       m_needs_allow = alphabet.size() < alphabet_size;
     }
 
@@ -581,7 +573,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     core::identifier_string_list I = x.hide_set();
     allow_set A1 = allow_set_operations::hide_inverse(I, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
-    node.m_expression = hide(I, node.m_expression);
+    node.m_expression = process::hide(I, node.m_expression);
     push(node);
     log(x, log_hide(x, A1));
   }
@@ -614,7 +606,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     rename_expression_list R = x.rename_set();
     allow_set A1 = allow_set_operations::rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
-    node.m_expression = rename(R, node.m_expression);
+    node.m_expression = process::rename(R, node.m_expression);
     push(node);
     log(x, log_rename(x, A1));
   }
