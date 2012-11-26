@@ -158,26 +158,28 @@ action_name_set rename_inverse(const rename_expression_list& R, const action_nam
   return result;
 }
 
-multi_action_name apply_comm_inverse(const communication_expression& x, const multi_action_name& alpha)
+std::pair<multi_action_name, multi_action_name> apply_comm_inverse(const communication_expression& x, const multi_action_name& alpha1, const multi_action_name& alpha2)
 {
   core::identifier_string c = x.name();
   core::identifier_string_list lhs = x.action_name().names();
-  multi_action_name result = alpha;
-  result.erase(result.find(c));
-  result.insert(lhs.begin(), lhs.end());
+  std::pair<multi_action_name, multi_action_name> result;
+  result.first = alpha1;
+  result.second = alpha2;
+  result.first.erase(result.first.find(c));
+  result.second.insert(lhs.begin(), lhs.end());
   return result;
 }
 
 inline
-void comm_inverse(const communication_expression_list& C, const multi_action_name& alpha, multi_action_name_set& result)
+void comm_inverse(const communication_expression_list& C, const multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
 {
-  result.insert(alpha);
+  result.insert(multiset_union(alpha1, alpha2));
   for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
   {
-    if (detail::contains(alpha, i->name()))
+    if (detail::contains(alpha1, i->name()))
     {
-      multi_action_name beta = apply_comm_inverse(*i, alpha);
-      comm_inverse(C, beta, result);
+      std::pair<multi_action_name, multi_action_name> beta = apply_comm_inverse(*i, alpha1, alpha2);
+      comm_inverse(C, beta.first, beta.second, result);
     }
   }
 }
@@ -186,9 +188,10 @@ inline
 multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A)
 {
   multi_action_name_set result;
+  multi_action_name empty;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
-    comm_inverse(C, *i, result);
+    comm_inverse(C, *i, empty, result);
   }
   return result;
 }
