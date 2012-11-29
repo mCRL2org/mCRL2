@@ -23,6 +23,7 @@
  */
 
 #include <cassert>
+#include <cstdio>
 #include <list>
 #include <string>
 #include <sstream>
@@ -44,24 +45,31 @@ public:
     {
       std::stringstream commandline;
       commandline << '"' << m_compile_script << "\" " << filename << " " << " 2>&1";
-
+      
       // Execute script.
       FILE* stream = popen(commandline.str().c_str(), "r");
       if (stream == NULL)
       {
         throw std::runtime_error("Could not execute compile script.");
       }
+      
+      // Explicitly lock the output stream. It seems that on MacOSX some mixing
+      // of output streams happens, especially during testing with multiple threads.
+      // This results in ferror returning a non-zero value further down.
+      flockfile(stream);
 
       // Script produces one file per line. Last file is the shared library,
       // preceding files are temporary files that should be removed when the
       // library is unloaded.
       std::string files;
       char buf[1024];
-      while (fgets(buf, 1024, stream) != NULL)
+      while(fgets(buf, 1024, stream) != NULL)
       {
         std::string line(buf);
         assert(*line.rbegin() == '\n');
         line.erase(line.size() - 1);
+        mCRL2log(mcrl2::log::debug, "uncompiled_library") << "  Read line: " << line;
+        
         // Check that reported file exists. If not, produce error message and
         // flush script output to the log.
         if (!mcrl2::utilities::file_exists(line))
@@ -72,6 +80,7 @@ public:
           {
             mCRL2log(mcrl2::log::error) << std::string(buf);
           }
+          funlockfile(stream);
           pclose(stream);
           throw std::runtime_error("Compile script failed.");
         }
@@ -81,13 +90,15 @@ public:
         }
         m_tempfiles.push_back(line);
       }
-
+      
       if (ferror(stream))
       {
+        funlockfile(stream);
         pclose(stream);
         throw std::runtime_error("There was a problem reading the output of the compile script.");
       }
-
+      
+      funlockfile(stream);
       pclose(stream);
 
       m_filename = m_tempfiles.back();
