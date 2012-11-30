@@ -3018,7 +3018,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  }\n"
       "};\n"
       "\n"
-      "static atermpp::aterm_appl rewrite_int_aux(const atermpp::aterm_appl &t)\n"
+      "atermpp::aterm_appl rewrite_int_aux(const atermpp::aterm_appl &t)\n"
       "{\n"
 //      "  const size_t arity = t.size();\n"
 //      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity));\n"
@@ -3034,7 +3034,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "}\n\n");
 
   fprintf(f,
-      "static atermpp::aterm_appl rewrite_appl_aux(\n"
+      "atermpp::aterm_appl rewrite_appl_aux(\n"
       "     atermpp::aterm_appl head,\n"
       "     const atermpp::aterm_appl &t)\n"
       "{\n"
@@ -3151,7 +3151,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Moved part of the rewrite function to rewrite_aux, such that the compiler
   // can inline rewrite more often, and so gain some performance.
   fprintf(f,
-      "static atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &t)\n"
+      "atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
       "  // Term t does not have the shape #REWR#(t1,...,tn)\n"

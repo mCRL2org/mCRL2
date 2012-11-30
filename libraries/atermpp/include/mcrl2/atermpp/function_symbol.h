@@ -184,6 +184,16 @@ class function_symbol
       assert(f.m_number==size_t(-1) || detail::is_valid_function_symbol(f.m_number));
       return m_number>=f.m_number;
     }
+
+    /// \brief Swap this function with its argument.
+    /// \detail More efficient than assigning twice.
+    /// \parameter f The function symbol with which the swap takes place.
+    void swap(function_symbol &f)
+    {
+      const size_t n=f.m_number;
+      f.m_number=m_number;
+      m_number=n;
+    }
 };
 
 inline
@@ -193,5 +203,22 @@ std::ostream& operator<<(std::ostream& out, const function_symbol& t)
 }
 
 } // namespace atermpp
+
+
+/* namespace std
+{
+
+/// \brief Swaps two function symbols.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+/// \param t1 The first term
+/// \param t2 The second term
+
+inline void swap(atermpp::function_symbol &t1, atermpp::function_symbol &t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
+*/
 
 #endif // MCRL2_ATERMPP_FUNCTION_SYMBOL_H

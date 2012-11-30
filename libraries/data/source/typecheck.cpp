@@ -317,18 +317,12 @@ static aterm gsSubstValuesTable(const table &Substs, const aterm &t)
     const size_t NrArgs = Head.arity();
     if (NrArgs > 0)
     {
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,aterm,NrArgs);
-      // std::vector <aterm> Args(NrArgs);
+      std::vector <aterm> Args;
       for (size_t i = 0; i < NrArgs; i++)
       {
-         new (&Args[i]) aterm(gsSubstValuesTable(Substs, ((aterm_appl) Term)(i)));
+         Args.push_back(gsSubstValuesTable(Substs, ((aterm_appl) Term)(i)));
       }
-      const aterm a = aterm_appl(Head, &Args[0],&Args[0]+NrArgs);
-      for (size_t i = 0; i < NrArgs; i++)
-      {
-        Args[i].~aterm(); 
-      }
-      return a;
+      return aterm_appl(Head, Args.begin(), Args.end());
     }
     else
     {

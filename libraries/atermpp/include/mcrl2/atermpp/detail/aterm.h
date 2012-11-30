@@ -83,7 +83,10 @@ class _aterm
 static const size_t TERM_SIZE=sizeof(_aterm)/sizeof(size_t);
 
 const detail::_aterm* allocate_term(const size_t size);
+const _aterm* aterm0(const function_symbol &sym);
+void remove_from_hashtable(const _aterm *t);
 void simple_free_term(const _aterm *t, const size_t arity);
+void initialise_aterm_administration();
 inline HashNumber hash_number(const _aterm *t);
 
 } // namespace detail

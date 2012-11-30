@@ -41,26 +41,27 @@ class term_balanced_tree: public aterm
 
   protected:
 
-    static const atermpp::function_symbol &tree_empty()
+    static const atermpp::function_symbol &tree_empty_function()
     {
-      static atermpp::function_symbol empty("@empty@", 0);
+      static const atermpp::function_symbol empty("@empty@", 0);
       return empty;
     }
 
-    static function_symbol const& tree_node()
+    static function_symbol const& tree_node_function()
     {
-      static function_symbol node("@node@", 2);
+      static const function_symbol node("@node@", 2);
       return node;
     }
 
-    static bool is_empty(const aterm tree)
+    static const aterm &empty_tree()
     {
-      return tree == aterm_appl(tree_empty());
+      static const aterm empty_term(tree_empty_function());
+      return empty_term;
     }
 
-    static bool is_node(const aterm tree)
+    static bool is_empty(const detail::_aterm* tree)
     {
-      return tree.type() == AT_APPL && (aterm_appl(tree).function() == tree_node());
+      return tree->function() == tree_empty_function();
     }
 
     template < typename ForwardTraversalIterator >
@@ -76,33 +77,24 @@ class term_balanced_tree: public aterm
 
 
     template < typename ForwardTraversalIterator >
-    term_balanced_tree make_tree(ForwardTraversalIterator& p, const size_t size)
+    const detail::_aterm* make_tree(ForwardTraversalIterator& p, const size_t size)
     {
-      if (size==0)
+      if (size>1)
       {
-        return term_balanced_tree(aterm_appl(tree_empty()));
+        size_t left_size = (size + 1) >> 1; // size/2 rounded up.
+        const term_balanced_tree left_tree(make_tree(p, left_size));
+        size_t right_size = size >> 1; // size/2 rounded down.
+        const term_balanced_tree right_tree(make_tree(p, right_size));
+        return reinterpret_cast<const detail::_aterm*>(detail::term_appl2<term_balanced_tree>(tree_node_function(),left_tree,right_tree));
       }
 
       if (size==1)
       {
-        const term_balanced_tree &result=atermpp::aterm_cast<const term_balanced_tree>(*p);
-        ++p;
-        return result;
+        return (p++)->address();
       }
-      else
-      {
-        size_t left_size = (size + 1) >> 1; // size/2 rounded up.
-        const  term_balanced_tree left_tree=make_tree(p, left_size);
-        size_t right_size = size >> 1; // size/2 rounded down.
 
-        return term_balanced_tree(left_tree,make_tree(p, right_size));
-      }
-    }
-
-    // \brief Protected constructor
-    term_balanced_tree(const term_balanced_tree &left, const term_balanced_tree &right)
-           : aterm(term_appl<term_balanced_tree>(tree_node(), left, right))
-    {
+      assert(size==0);
+      return empty_tree().address(); // must be optimised.
     }
 
   public:
@@ -132,7 +124,7 @@ class term_balanced_tree: public aterm
 
     /// Default constructor. Creates an empty tree.
     term_balanced_tree()
-      : aterm(tree_empty())
+      : aterm(empty_tree())
     {}
 
     /// Construction from aterm
@@ -146,8 +138,9 @@ class term_balanced_tree: public aterm
     /// \param last The end of a range of elements.
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const ForwardTraversalIterator last)
+      : aterm(make_tree(first,get_distance(first,last)))
     {
-      copy_term(make_tree(first,get_distance(first,last)));
+      // copy_term(make_tree(first,get_distance(first,last)));
     }
 
     /// \brief Creates an term_balanced_tree with a copy of a range. 
@@ -155,8 +148,9 @@ class term_balanced_tree: public aterm
     /// \param size The size of the range of elements.
     template < typename ForwardTraversalIterator >
     term_balanced_tree(ForwardTraversalIterator first, const size_t size)
+      : aterm(make_tree(first,size))
     {
-      copy_term(make_tree(first,size));
+      // copy_term(make_tree(first,size));
     }
 
     /// \brief Get the left branch of the tree
@@ -225,12 +219,6 @@ class term_balanced_tree: public aterm
       return const_iterator();
     }
 
-    /// \brief Swaps contents of containers
-    void swap(term_balanced_tree< Term >& other)
-    {
-      std::swap(m_term, other.m_term);
-    }
-
     /// \brief Returns the size of the term_balanced_tree.
     /// \details This operator is linear in the size of the balanced tree.
     /// \return The size of the tree.
@@ -247,14 +235,14 @@ class term_balanced_tree: public aterm
     /// \return True iff the tree is empty.
     bool empty() const
     {
-      return m_term->function()==tree_empty();
+      return m_term->function()==tree_empty_function();
     }
 
     /// \brief Returns true iff the tree is a node with a left and right subtree.
     /// \return True iff the tree is a node with a left and right subtree.
     bool is_node() const
     {
-      return function()==tree_node();
+      return function()==tree_node_function();
     }
 }; 
 
@@ -301,7 +289,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
       {
         const detail::_aterm* current = m_trees.top();
 
-        if (current->function()!=term_balanced_tree < Value >::tree_node())
+        if (current->function()!=term_balanced_tree < Value >::tree_node_function())
         {
           return;
         }
@@ -311,7 +299,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
           m_trees.push((reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[1]).address());
           current=reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[0].address();
         }
-        while (current->function()==term_balanced_tree < Value >::tree_node());
+        while (current->function()==term_balanced_tree < Value >::tree_node_function());
 
         m_trees.push(current);
       }
@@ -321,7 +309,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
     {
       const detail::_aterm_appl<aterm>* current = reinterpret_cast<const detail::_aterm_appl<aterm> *>(tree.address());
 
-      while (current->function()==term_balanced_tree< Value >::tree_node())
+      while (current->function()==term_balanced_tree< Value >::tree_node_function())
       {
         m_trees.push(current->arg[1].address());
         current=reinterpret_cast<const detail::_aterm_appl<aterm > *>(current->arg[0].address());
@@ -353,24 +341,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 /// \brief A term_balanced_tree with elements of type aterm.
 typedef term_balanced_tree<aterm> aterm_balanced_tree;
 
-/// \brief Applies a function to all elements of the list and returns the result.
-/// \param l The list that is transformed.
-/// \param f The function that is applied to the elements of the list.
-/// \return The transformed list.
-template <typename Term, typename Function>
-inline
-term_balanced_tree< Term > apply(const term_balanced_tree<Term> &l, const Function f)
-{
-  std::vector < Term > result;
-
-  for (typename term_balanced_tree< Term >::const_iterator i = l.begin(); i != l.end(); ++i)
-  {
-    result.push_back(f(*i));
-  }
-
-  return term_balanced_tree< Term >(result.begin(),result.size());
-} 
-
 } // namespace atermpp
+
 
 #endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

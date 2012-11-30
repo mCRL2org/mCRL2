@@ -40,6 +40,8 @@ class aterm
     
     friend void detail::simple_free_term(const detail::_aterm *t, const size_t arity);
 
+    friend void detail::initialise_aterm_administration();
+
   protected:
     const detail::_aterm* m_term;
 
@@ -84,7 +86,10 @@ class aterm
     /// \detail The function symbol must have arity 0. This function
     /// is for internal use only. Use term_appl(sym) in applications.
     /// \param sym A function symbol.
-    aterm(const function_symbol &sym);
+    aterm(const function_symbol &sym):m_term(detail::aterm0(sym))
+    {
+      increase_reference_count<false>();
+    }
   
   public: // Should be protected; Does not work, due to a problem in the soundness checks.
     aterm (const detail::_aterm *t):m_term(t)
@@ -300,7 +305,7 @@ std::ostream& operator<<(std::ostream& out, const aterm& t)
 }
 } // namespace atermpp
 
-#ifndef WIN32
+
 namespace std
 {
 
@@ -310,15 +315,13 @@ namespace std
 /// \param t1 The first term
 /// \param t2 The second term
 
-template <class T>
-inline void swap(T &t1, T &t2, typename boost::enable_if< typename boost::is_base_of< atermpp::aterm, T >::type >::type* = 0)
+inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
 {
-  BOOST_STATIC_ASSERT(sizeof(T)==sizeof(atermpp::aterm));
   t1.swap(t2);
 }
-} // namespace std
-#endif
+} // namespace std 
 
-#include "mcrl2/atermpp/detail/memory.h"
+
+#include "mcrl2/atermpp/detail/aterm_implementation.h"
 
 #endif // MCRL2_ATERMPP_ATERM_H

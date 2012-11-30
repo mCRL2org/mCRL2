@@ -63,4 +63,7 @@ class aterm_int:public aterm
 
 } // namespace atermpp
 
+#include "mcrl2/atermpp/detail/aterm_int.h"
+#include "mcrl2/atermpp/detail/aterm_int_implementation.h"
+
 #endif // MCRL2_ATERMPP_ATERM_INT_H

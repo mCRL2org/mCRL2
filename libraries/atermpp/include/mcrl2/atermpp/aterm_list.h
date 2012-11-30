@@ -422,6 +422,25 @@ const Term &element_at(const term_list<Term> &l, size_t m)
 
 } // namespace atermpp
 
+
+/* namespace std
+{
+
+/// \brief Swaps two term lists.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+/// \param t1 The first term
+/// \param t2 The second term
+
+template <class T>
+inline void swap(atermpp::term_list<T> &t1, atermpp::term_list<T> &t2)
+{
+  t1.swap(t2);
+}
+
+} // namespace std
+*/
+
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
 
 #endif // MCRL2_ATERMPP_ATERM_LIST_H

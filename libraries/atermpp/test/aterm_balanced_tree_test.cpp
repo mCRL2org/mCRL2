@@ -64,8 +64,10 @@ void test_aterm_balanced_tree()
   BOOST_CHECK(empty_tree.begin() == empty_tree.end());
 
   aterm_list q(read_term_from_string("[0,1,2,3,4,5,6,7,8,9]"));
-
+  aterm_list r(read_term_from_string("[0,1,2,3,4,6,1,7,8,9]"));
   aterm_balanced_tree qtree(q.begin(),10);
+  aterm_balanced_tree rtree(r.begin(),10);
+
 
   BOOST_CHECK(qtree.size() == 10);
   BOOST_CHECK(!qtree.empty());
@@ -85,13 +87,9 @@ void test_aterm_balanced_tree()
 
   BOOST_CHECK(count == 45);
 
-  qtree = apply(qtree, increment());
-
   count = 0;
 
   std::for_each(qtree.begin(), qtree.end(), counter(count));
-
-  BOOST_CHECK(count == 55); 
 
   aterm_balanced_tree qcopy(q.begin(),10);
 
@@ -99,8 +97,9 @@ void test_aterm_balanced_tree()
 
   BOOST_CHECK(std::equal(qtree.begin(), qtree.end(), q.begin()));
   BOOST_CHECK(std::equal(q.begin(), q.end(), qtree.begin()));
-  BOOST_CHECK(!std::equal(qcopy.begin(), qcopy.end(), q.begin()));
-  BOOST_CHECK(!std::equal(q.begin(), q.end(), qcopy.begin()));
+
+  BOOST_CHECK(!std::equal(rtree.begin(), rtree.end(), q.begin()));
+  BOOST_CHECK(!std::equal(q.begin(), q.end(), rtree.begin()));
 } 
 
 int test_main(int , char**)

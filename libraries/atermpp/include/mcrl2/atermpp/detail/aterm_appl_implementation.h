@@ -12,6 +12,21 @@ namespace atermpp
 namespace detail
 {
 
+/* Free a term, without removing it from the
+ *    hashtable, and destroying its function symbol */
+inline void simple_free_term(const _aterm *t, const size_t arity)
+{
+  for(size_t i=0; i<arity; ++i)
+  {
+    reinterpret_cast<const _aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
+  }
+
+  TermInfo &ti = terminfo[TERM_SIZE_APPL(arity)];
+  t->set_next(ti.at_freelist);
+  ti.at_freelist = t;
+}
+
+
 template <class Term, class InputIterator, class ATermConverter>
 const _aterm* local_term_appl_with_converter(const function_symbol &sym, 
                                        const InputIterator begin, 
@@ -377,6 +392,32 @@ const _aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Ter
   return cur;
 }
 } //namespace detail
+
+inline void aterm::free_term() const
+{
+  const detail::_aterm* t=this->m_term;
+  assert(t->reference_count()==0);
+
+  remove_from_hashtable(t);  // Remove from hash_table
+
+  const function_symbol &f=t->function();
+  const size_t arity=f.arity();
+  if (f!=detail::function_adm.AS_INT)
+  {
+    for(size_t i=0; i<arity; ++i)
+    {
+      reinterpret_cast<const detail::_aterm_appl<aterm> *>(t)->arg[i].decrease_reference_count();
+    }
+  }
+  const size_t size=detail::TERM_SIZE_APPL(arity);
+
+  f.~function_symbol();
+
+  detail::TermInfo &ti = detail::terminfo[size];
+  t->set_next(ti.at_freelist);
+  ti.at_freelist = t;
+}
+
 
 template <class Term>
 term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n) 
