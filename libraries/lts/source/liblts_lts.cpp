@@ -131,7 +131,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         }
 
         aterm data=read_term_from_stream(g);
-        if (data==aterm())
+        if (!data.defined())
         {
           throw mcrl2::runtime_error(error_message + " (data information is incorrect)");
         }

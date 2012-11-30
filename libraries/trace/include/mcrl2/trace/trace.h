@@ -598,7 +598,7 @@ class Trace
     atermpp::aterm readATerm(std::istream& is)
     {
       atermpp::aterm t = atermpp::read_term_from_binary_stream(is);
-      if (t == atermpp::aterm())
+      if (!t.defined())
       {
         throw runtime_error("failed to read aterm from stream");
       }

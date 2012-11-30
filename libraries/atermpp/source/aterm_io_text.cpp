@@ -245,7 +245,7 @@ static aterm_list fparse_terms(int* c, istream &is)
   aterm_list list;
   aterm el = fparse_term(c, is);
 
-  if (el == aterm())
+  if (!el.defined())
   {
     return aterm_list();
   }
@@ -256,7 +256,7 @@ static aterm_list fparse_terms(int* c, istream &is)
   {
     fnext_skip_layout(c, is);
     el = fparse_term(c, is);
-    if (el == aterm())
+    if (!el.defined())
     {
       return aterm_list();
     }
@@ -326,7 +326,7 @@ static aterm fparse_quoted_appl(int* c, istream &is)
       args = fparse_terms(c, is);
     }
 
-    if (args == aterm() || *c != ')')
+    if (!args.defined() || *c != ')')
     {
       return aterm();
     }
@@ -378,7 +378,7 @@ static aterm_appl fparse_unquoted_appl(int* c, istream &is)
       args = fparse_terms(c, is);
     }
 
-    if (args == aterm() || *c != ')')
+    if (!args.defined() || *c != ')')
     {
       return aterm_appl();
     }
@@ -440,7 +440,7 @@ static aterm fparse_term(int* c, istream &is)
       else
       {
         result = fparse_terms(c, is);
-        if (result == aterm() || *c != ']')
+        if (!result.defined() || *c != ']')
         {
           return aterm();
         }
@@ -544,7 +544,7 @@ aterm read_term_from_text_stream(istream &is)
 
   aterm term = fparse_term(&c, is);
 
-  if (term == aterm())
+  if (!term.defined())
   {
     mCRL2log(mcrl2::log::error) << "ATreadFromString: parse error at or near:" << std::endl
                                 << is << std::endl;

@@ -1506,7 +1506,7 @@ namespace mcrl2
 
         V = detail::optimize_allow_list(V,untypeMAL(l));
         a = allow(detail::transform_list_back(V),a);
-        assert(l!=aterm());
+        assert(l.defined());
         alphas[a]=l;
         return a;
       }
@@ -1915,7 +1915,7 @@ namespace mcrl2
         assert(0);
       }
 
-      assert(l!=aterm());  // This cannot be done comparing to action_label_list_list, as in this case
+      assert(l.defined());  // This cannot be done comparing to action_label_list_list, as in this case
                            // the default constructor is empty;
 
       if (all_stable)
