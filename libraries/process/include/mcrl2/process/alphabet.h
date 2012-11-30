@@ -18,8 +18,10 @@
 #include <sstream>
 #include <boost/logic/tribool.hpp>
 #include <boost/logic/tribool_io.hpp>
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/allow_set.h"
 #include "mcrl2/process/find.h"
+#include "mcrl2/process/replace.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
@@ -495,6 +497,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     log_push_result(x, A, top(), "", text);
   }
 
+  bool is_pcrl(const process_expression& x) const
+  {
+    return !is_merge(x) && !is_left_merge(x) && !is_sync(x) && !is_hide(x) && !is_rename(x) && !is_block(x) && !is_allow(x) && !is_comm(x);
+  }
+
   void leave_pcrl(const process_expression& x)
   {
     push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
@@ -506,14 +513,44 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     leave_pcrl(x);
   }
 
+
   void operator()(const process::process_instance& x)
   {
-    leave_pcrl(x);
+    const process_equation& eqn = find_equation(equations, x.identifier());
+    process_expression p = eqn.expression();
+    data::mutable_map_substitution<> sigma;
+    data::variable_list d = eqn.formal_parameters();
+    data::data_expression_list e = x.actual_parameters();
+    data::variable_list::iterator di = d.begin();
+    data::data_expression_list::iterator ei = e.begin();
+    for (; di != d.end(); ++di, ++ei)
+    {
+      sigma[*di] = *ei;
+    }
+    p = process::replace_free_variables(p, sigma);
+    derived()(p);
+    if (is_pcrl(eqn.expression()))
+    {
+      top().m_expression = x;
+    }
   }
 
   void operator()(const process::process_instance_assignment& x)
   {
-    leave_pcrl(x);
+    const process_equation& eqn = find_equation(equations, x.identifier());
+    process_expression p = eqn.expression();
+    data::mutable_map_substitution<> sigma;
+    data::assignment_list a = x.assignments();
+    for (data::assignment_list::iterator i = a.begin(); i != a.end(); ++i)
+    {
+      sigma[i->lhs()] = i->rhs();
+    }
+    p = process::replace_free_variables(p, sigma);
+    derived()(p);
+    if (is_pcrl(eqn.expression()))
+    {
+      top().m_expression = x;
+    }
   }
 
   void operator()(const process::delta& x)
