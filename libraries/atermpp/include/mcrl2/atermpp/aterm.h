@@ -42,6 +42,9 @@ class aterm
 
     friend void detail::initialise_aterm_administration();
 
+    template <class Term, class Iter, class ATermConverter>
+    friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+
   protected:
     const detail::_aterm* m_term;
 

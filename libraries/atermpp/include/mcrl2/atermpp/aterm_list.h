@@ -19,6 +19,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/atermpp/detail/aterm_list.h"
 
 namespace atermpp
 {
@@ -83,18 +84,11 @@ class term_list:public aterm
     template <class Iter>
     term_list(Iter first, Iter last, typename boost::enable_if<
               typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-              boost::random_access_traversal_tag >::type >::type* = 0)
+              boost::random_access_traversal_tag >::type >::type* = 0):
+        aterm(detail::make_list_backward<Term,Iter,
+                  detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      term_list<Term> result;
-      while (first != last)
-      {
-        const Term &t=*(--last);
-        result = push_front(result, t);
-      }
-      m_term=result.address();
-      increase_reference_count<false>();
+      assert(!defined() || type_is_list()); 
     }
     
     /// \brief Creates a term_list with the elements from first to last.
@@ -106,18 +100,10 @@ class term_list:public aterm
     template <class Iter, class ATermConverter>
     term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm, typename boost::enable_if<
               typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-              boost::random_access_traversal_tag >::type >::type* = 0)
+              boost::random_access_traversal_tag >::type >::type* = 0):
+         aterm(detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      term_list<Term> result;
-      while (first != last)
-      {
-        const typename Iter::value_type &t=*(--last);
-        result = push_front(result, convert_to_aterm(t));
-      }
-      m_term=result.address();
-      increase_reference_count<false>();
+      assert(!defined() || type_is_list()); 
     }
     
     /// \brief Creates a term_list from the elements from first to last.
@@ -129,25 +115,29 @@ class term_list:public aterm
     template <class Iter>
              term_list(Iter first, Iter last, typename boost::disable_if<
              typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-             boost::random_access_traversal_tag >::type >::type* = 0)
+             boost::random_access_traversal_tag >::type >::type* = 0):
+         aterm(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
+                                 (first, last, detail::do_not_convert_term<Term>()))
     {
-      BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
-      BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-      std::vector<Term> temporary_store;  // This can be made more efficient...
-      while (first != last)
-      {
-        const Term &t= *first;
-        temporary_store.push_back(t);
-        first++;
-      }
-      term_list<Term> result;
-      for(typename std::vector<Term>::reverse_iterator i=temporary_store.rbegin(); 
-              i!=temporary_store.rend(); ++i)
-      { 
-        result=push_front(result, *i); 
-      }
-      m_term=result.address();
-      increase_reference_count<false>();
+      assert(!defined() || type_is_list()); 
+    }
+
+    /// \brief Creates a term_list from the elements from first to last.
+    /// \details The range is traversed from first to last. This requires
+    //           to copy the elements internally, which is less efficient
+    //           than this function with random access iterators as arguments.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    //  \param convert_to_aterm A class with a () operation, whic is applied to each element
+    //                      before it is put into the list.
+    template <class Iter, class  ATermConverter>
+             term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm, typename boost::disable_if<
+             typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+             boost::random_access_traversal_tag >::type >::type* = 0):
+         aterm(detail::make_list_forward<Term,Iter,ATermConverter>
+                                 (first, last, convert_to_aterm))
+    {
+      assert(!defined() || type_is_list()); 
     }
 
     /// Assigment operator.
@@ -249,8 +239,7 @@ typedef term_list<aterm> aterm_list;
 /// \return The list with an element inserted in front of it.
 template <typename Term>
 inline
-term_list<Term> push_front(const term_list<Term> &l, const Term &elem);
-
+term_list<Term> push_front(const term_list<Term> &l, const Term &el);
 
 /// \brief Returns the list obtained by inserting a new element at the end. Note
 /// that the complexity of this function is O(n), with n the number of

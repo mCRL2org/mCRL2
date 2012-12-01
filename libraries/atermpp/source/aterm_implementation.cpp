@@ -98,28 +98,15 @@ static void check_that_all_objects_are_free()
     {
       for(_aterm* p=(_aterm*)b->data; p!=NULL && ((b==ti->at_block && p<(_aterm*)ti->top_at_blocks) || p<(_aterm*)b->end); p=p + size)
       {
-        if (p->reference_count()!=0)
+        if (p->reference_count()!=0 &&
+            ((p->function()!=function_adm.AS_DEFAULT && p->function()!=function_adm.AS_EMPTY_LIST) || p->reference_count()>1))
         {
-          if (p->function()==function_adm.AS_DEFAULT || p->function()==function_adm.AS_EMPTY_LIST)
-          {
-            if (p->reference_count()>1) 
-            {
-              // reference_count<=1 is ok, as static_undefined_aterm and static_empty list are defined in using a placement new,
-              // and subsequently again by some compilers again using a placement new. This overwrites
-              // the initial value for static_undefined_aterm and static_empty_list, without properly destroying it. 
-              fprintf(stderr,"CHECK: Non free term %p (size %lu). ",p,size);
-              fprintf(stderr,"Reference count %ld nr. %ld",p->reference_count(), p->function().number());
-              std::cerr << "Func: " << p->function().name() << ". Arity: " << p->function().arity() << "\n";
-            }
-          }
-          else
-          {
-            fprintf(stderr,"CHECK: Non free term %p (size %lu). ",p,size);
-            fprintf(stderr,"Reference count %ld ",p->reference_count());
-            std::cerr << "Func: " << p->function().name() << ". Arity: " << p->function().arity() << "\n";
-            result=false;
-          }
+          std::cerr << "CHECK: Non free term " << p << " (size " << size << "). ";
+          std::cerr << "Reference count " << p->reference_count() << " nr. " << p->function().number() << ". ";
+          std::cerr << "Func: " << p->function().name() << ". Arity: " << p->function().arity() << ".\n";
+          result=false;
         }
+        
       }
     }
   }
@@ -127,10 +114,11 @@ static void check_that_all_objects_are_free()
   // Check the function symbols. The first four function symbols
   // can be constructed twice in the same spot (function_symbol_constants.h)
   // and only destroyed once and therefore their reference counts can be 1 at 
-  // termination. The function symbol with number 0 even can have reference
-  // count 2, most likely due to the construction of empty_aterm_list which 
-  // can be constructed twice, first as an undefined aterm, and later as an
-  // empty_aterm_list. See memory.h.
+  // termination. The function symbols with number 0 and 3 even can have reference
+  // count 2, because the terms containing may still exist as they are also constructed
+  // in a nonderministic fashion using a placement new. So, they can be constructed
+  // without properly being destroyed, increasing the reference count of the function
+  // symbols in it by 1.
   for(size_t i=0; i<function_lookup_table_size; ++i) 
   {
     if (!(function_lookup_table[i].reference_count==0 ||
@@ -139,9 +127,9 @@ static void check_that_all_objects_are_free()
           (i==2 && function_lookup_table[i].reference_count<=1) || //AS_LIST
           (i==3 && function_lookup_table[i].reference_count<=2)))  //AS_EMPTY_LIST
     {
+      std::cerr << "Symbol " << function_lookup_table[i].name << " has positive reference count (nr. " <<
+                 i << ", ref.count " << function_lookup_table[i].reference_count << ")\n";
       result=false;
-      fprintf(stderr,"Symbol %s has positive reference count (nr. %ld, ref.count %ld)\n",
-                function_lookup_table[i].name.c_str(),i,function_lookup_table[i].reference_count);
     }
 
   }
