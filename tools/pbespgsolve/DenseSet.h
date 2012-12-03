@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <memory>
 #include <utility>
+#include "mcrl2/atermpp/detail/atypes.h" // Define ssize_t on windows.
 
 // copied from mcrl2/libraries/aterm/include/mcrl2/aterm/atypes.h
 #if defined(_MSC_VER) || defined(WIN32) || defined(WIN64)
