@@ -129,7 +129,13 @@ class RewriterCompilingJitty: public Rewriter
 
 };
 
-const atermpp::aterm_appl &get_rewrappl_value_without_check(const size_t i);
+extern std::vector <atermpp::aterm_appl> rewr_appls;
+
+inline const atermpp::aterm_appl &get_rewrappl_value_without_check(const size_t i)
+{
+  assert(i<rewr_appls.size());
+  return rewr_appls[i];
+}
 
 }
 }

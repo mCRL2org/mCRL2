@@ -199,7 +199,7 @@ static const atermpp::detail::_aterm* get_int2aterm_value(const aterm_int &i)
   return get_int2aterm_value(i.value());
 }
 
-static std::vector <aterm_appl> rewr_appls;
+std::vector <aterm_appl> rewr_appls;
 
 static void set_rewrappl_value(const size_t i)
 {
@@ -209,11 +209,11 @@ static void set_rewrappl_value(const size_t i)
   }
 }
 
-const aterm_appl &get_rewrappl_value_without_check(const size_t i)
+/* const aterm_appl &get_rewrappl_value_without_check(const size_t i)
 {
   assert(i<rewr_appls.size());
   return rewr_appls[i];
-}
+} */
 
 static aterm_appl get_rewrappl_value(const size_t i)
 {
