@@ -1392,7 +1392,8 @@ static string calc_inner_appl_head(size_t arity)
   {
     ss << "make_term_with_many_arguments";
   }
-  ss << "(get_appl_afun_value(" << arity+1 << "),";    // YYYY
+  ss << "(get_appl_afun_value_no_check(" << arity+1 << "),";    // YYYY
+  extend_appl_afun_values(arity+1);
   return ss.str();
 }
 
@@ -2188,9 +2189,10 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
   }
   else
   {
+    extend_appl_afun_values(arity+1);
     if (arity > 5)
     {
-      fprintf(f,  "  return make_term_with_many_arguments(get_appl_afun_value(%lu),"
+      fprintf(f,  "  return make_term_with_many_arguments(get_appl_afun_value_no_check(%lu),"
               "(const atermpp::detail::_aterm*)%p",
               arity+1,  
               (void*)get_int2aterm_value(opid)
@@ -2198,7 +2200,7 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
     }
     else
     {
-      fprintf(f,  "  return atermpp::aterm_appl(get_appl_afun_value(%lu),"
+      fprintf(f,  "  return atermpp::aterm_appl(get_appl_afun_value_no_check(%lu),"
               "(const atermpp::detail::_aterm*) %p",
               arity+1,  
               (void*)get_int2aterm_value(opid)
@@ -2875,11 +2877,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f,
             "\n"
             "    return atermpp::aterm_appl(mcrl2::data::detail::get_appl_afun_value(arity+%zu),&args[0],&args[0]+(arity+%zu));\n"  
-/*            "    for (size_t i=0; i<(arity+%zu); ++i)\n"
-            "    {\n"
-            "      args[i].~aterm();\n"
-            "    }\n"  
-            "    return result;\n" */
             "  }\n"
             "}\n"
             "\n",i,i);
@@ -2954,11 +2951,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
   }
 
+  extend_appl_afun_values(max_arity+1);
   fprintf(f,
           "void rewrite_init(RewriterCompilingJitty *r)\n"
           "{\n"
           "  this_rewriter=r;\n"
-          "  mcrl2::data::detail::get_appl_afun_value(%zu);\n"
+          "  mcrl2::data::detail::get_appl_afun_value_no_check(%zu);\n"
           "  assert(this_rewriter->rewriter_binding_variable_lists.size()==%zu);\n"
           "  assert(this_rewriter->rewriter_bound_variables.size()==%zu);\n",
           max_arity+1,rewriter_binding_variable_lists.size(),rewriter_bound_variables.size()

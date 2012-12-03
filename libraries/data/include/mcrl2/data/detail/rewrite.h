@@ -258,6 +258,13 @@ inline atermpp::function_symbol& get_appl_afun_value(const size_t arity)
   return apples[arity];
 }
 
+/** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
+inline atermpp::function_symbol& get_appl_afun_value_no_check(const size_t arity)
+{
+  assert(arity<apples.size());
+  return apples[arity];
+}
+
 /**
  * \brief The apply functions below takes terms in internal format,
  *        and transform them into a function application. In case
