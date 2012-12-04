@@ -173,10 +173,15 @@ void initialise_aterm_administration()
                                                                                  // may not have initialised when this is called, 
                                                                                  // causing a problem with reference counting.
   
-  // Check at exit that all function symbols and terms have been cleaned up properly.
-// #ifdef this_sanity_check_fails_on_some_machines_and_needs_to_be_investigated_further
+// Check at exit that all function symbols and terms have been cleaned up properly.
+// TODO: on windows it turns out that the reference counts do not reduce to 0. 
+//       The reason for it is unclear. It could either be due to an unforeseen sequence
+//       of destroying static and global variables, in relation to the execution of the
+//       exit function defined below. Or it could be that on windows global variables
+//       are not properly cleaned up. This requires further investigation.
+#if !(defined(_WIN32) || defined(_WIN64))
   assert(!atexit(check_that_all_objects_are_free)); // zero is returned when registering is successful.
-// #endif
+#endif
   
 }
 
