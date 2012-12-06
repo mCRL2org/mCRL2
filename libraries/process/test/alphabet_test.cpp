@@ -260,21 +260,6 @@ void check_result(const std::string& expression, const std::string& result, cons
   }
 }
 
-void test_subsets(const std::string& Atext, const std::string& expected_result)
-{
-  multi_action_name_set A;
-  bool dummy;
-  boost::tuples::tie(A, dummy) = parse_multi_action_name_set(Atext);
-  multi_action_name_set A1 = alphabet_operations::subsets(A);
-  std::string result = print(A1);
-  check_result(Atext, result, expected_result, "alphabet");
-}
-
-BOOST_AUTO_TEST_CASE(test_subsets1)
-{
-  test_subsets("{ab, c}", "{a, ab, b, c}");
-}
-
 void test_alphabet(const std::string& expression, const std::string& expected_result, const std::string& equations = "")
 {
   std::string text = "act a, b, c, d;\n" + equations + "\ninit " + expression + ";\n";

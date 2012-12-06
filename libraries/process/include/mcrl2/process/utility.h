@@ -31,6 +31,92 @@ multi_action_name multiset_union(const multi_action_name& alpha, const multi_act
 
 namespace detail {
 
+inline
+bool contains_tau(const multi_action_name_set& A)
+{
+  multi_action_name tau;
+  return A.find(tau) != A.end();
+}
+
+inline
+process_expression make_sync(const process_expression x, const process_expression& y)
+{
+  if (is_delta(x) && is_delta(y))
+  {
+    return delta();
+  }
+  return sync(x, y);
+}
+
+inline
+process_expression make_merge(const process_expression x, const process_expression& y)
+{
+  if (is_delta(x) && is_delta(y))
+  {
+    return delta();
+  }
+  return merge(x, y);
+}
+
+inline
+process_expression make_left_merge(const process_expression x, const process_expression& y)
+{
+  if (is_delta(x) && is_delta(y))
+  {
+    return delta();
+  }
+  return left_merge(x, y);
+}
+
+inline
+process_expression make_allow(const multi_action_name_set& A, const process_expression& x)
+{
+  if (A.empty())
+  {
+    return delta();
+  }
+
+  // convert A to an action_name_multiset_list B
+  atermpp::vector<action_name_multiset> v;
+  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    const multi_action_name& alpha = *i;
+    if (!i->empty()) // exclude tau
+    {
+      v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+    }
+  }
+  action_name_multiset_list B(v.begin(), v.end());
+
+  return B.empty() ? x : allow(B, x);
+}
+
+inline
+process_expression make_comm(const communication_expression_list& C, const process_expression& x)
+{
+  if (C.empty())
+  {
+    return x;
+  }
+  else
+  {
+    return comm(C, x);
+  }
+}
+
+inline
+process_expression make_hide(const core::identifier_string_list& I, const process_expression& x)
+{
+  if (I.empty())
+  {
+    return x;
+  }
+  else
+  {
+    return hide(I, x);
+  }
+}
+
 // returns true if x is a source of one of the rename rules in R
 inline
 bool is_source(const rename_expression_list& R, const core::identifier_string& x)
@@ -374,35 +460,6 @@ communication_expression_list filter_comm_set(const communication_expression_lis
 
 /// \brief The namespace for alphabet operations
 namespace alphabet_operations {
-
-// N.B. Very inefficient!
-inline
-void find_subsets(const multi_action_name& alpha, multi_action_name_set& result)
-{
-  if (alpha.empty())
-  {
-    return;
-  }
-  result.insert(alpha);
-  multi_action_name beta = alpha;
-  for (multi_action_name::const_iterator i = alpha.begin(); i != alpha.end(); ++i)
-  {
-    beta.erase(beta.find(*i));
-    find_subsets(beta, result);
-    beta.insert(*i);
-  }
-}
-
-inline
-multi_action_name_set subsets(const multi_action_name_set& A)
-{
-  multi_action_name_set result;
-  for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
-  {
-    find_subsets(*i, result);
-  }
-  return result;
-}
 
 // remove all elements alpha in A that are included in another element of A
 inline
