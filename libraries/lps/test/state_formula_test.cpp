@@ -222,6 +222,26 @@ BOOST_AUTO_TEST_CASE(test_1094)
   BOOST_CHECK_THROW(parse_state_formula(FORMULA, s), mcrl2::runtime_error);
 }
 
+inline
+state_formula sigma(const state_formula& x)
+{
+  variable X("X", data::data_expression_list());
+  return x == X ? false_() : x;
+}
+
+BOOST_AUTO_TEST_CASE(test_replace_state_formulas)
+{
+  specification spec;
+  state_formula f = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  state_formula result = replace_state_formulas(f, sigma);
+  state_formula expected_result = parse_state_formula("(mu X. false) && (mu X. false)", spec);
+  if (!(result == expected_result))
+  {
+    std::cout << "error: " << state_formulas::pp(result) << " != " << state_formulas::pp(expected_result) << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
