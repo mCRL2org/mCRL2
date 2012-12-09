@@ -137,11 +137,12 @@ if __name__ == "__main__":
     state_formula_dependencies      = find_dependencies(all_classes, 'state_formulas::state_formula')
 
     variable_dependencies           = find_dependencies(all_classes, 'data::variable')
+    state_variable_dependencies     = find_dependencies(all_classes, 'state_formulas::variable')
     boolean_variable_dependencies   = find_dependencies(all_classes, 'bes::boolean_variable')
     identifier_string_dependencies  = find_dependencies(all_classes, 'core::identifier_string')
     action_label_dependencies       = find_dependencies(all_classes, 'lps::action_label')
 
-    print_dependencies(process_expression_dependencies, "process_expression_dependencies")
+    #print_dependencies(state_variable_dependencies, "state_variable_dependencies")
 
     # sort_expression_builder
     make_builder('../../data/include/mcrl2/data/builder.h'        , 'sort_expression_builder', 'add_sort_expressions', 'core::builder'                            , class_map, all_classes, 'data'            , 'data::sort_expression', sort_expression_dependencies, modifiability_map)
@@ -205,6 +206,9 @@ if __name__ == "__main__":
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'variable_traverser', 'add_traverser_variables', 'lps::variable_traverser'             , class_map, all_classes, 'action_formulas' , 'data::variable', variable_dependencies)
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'variable_traverser', 'add_traverser_variables', 'action_formulas::variable_traverser' , class_map, all_classes, 'regular_formulas', 'data::variable', variable_dependencies)
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'variable_traverser', 'add_traverser_variables', 'regular_formulas::variable_traverser', class_map, all_classes, 'state_formulas'  , 'data::variable', variable_dependencies)
+
+    # state_variable_traverser
+    make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'state_variable_traverser', 'add_traverser_state_variables', 'state_formulas::state_formula_traverser_base'         , class_map, all_classes, 'state_formulas' , 'state_formulas::variable', state_variable_dependencies)
 
     # action_label_traverser
     make_traverser('../../lps/include/mcrl2/lps/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'core::traverser', class_map, all_classes, 'lps', 'lps::action_label', action_label_dependencies)

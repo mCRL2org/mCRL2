@@ -113,6 +113,39 @@ struct add_data_variable_binding: public regular_formulas::add_data_variable_bin
   }
 };
 
+/// \brief Maintains a multiset of bound state variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_state_variable_binding: public core::add_binding<Builder, Derived, core::identifier_string>
+{
+  typedef core::add_binding<Builder, Derived, core::identifier_string> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::bind_count;
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void enter(mu const& x)
+  {
+    increase_bind_count(x.name());
+  }
+
+  void leave(mu const& x)
+  {
+    decrease_bind_count(x.name());
+  }
+
+  void enter(nu const& x)
+  {
+    increase_bind_count(x.name());
+  }
+
+  void leave(nu const& x)
+  {
+    decrease_bind_count(x.name());
+  }
+};
+
 } // namespace state_formulas
 
 } // namespace mcrl2

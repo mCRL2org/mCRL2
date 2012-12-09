@@ -202,6 +202,11 @@ def run_lps2lts(lpsfile, destfile, options = '', timeout = 10):
     dummy, text = timeout_command('lps2lts', args.strip(), timeout)
     return text
 
+def run_ltsinfo(ltsfile, timeout = 10):
+    add_temporary_files(ltsfile)
+    text, dummy = timeout_command('lps2lts', ltsfile, timeout)
+    return (dummy + text).find('error') == -1
+
 # returns the output of ltscompare (for example: 'LTSs are branching bisimilar')
 def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
     add_temporary_files(ltsfile1, ltsfile2)

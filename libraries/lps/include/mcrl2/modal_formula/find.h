@@ -460,6 +460,90 @@ struct state_variable_name_traverser: public state_formulas::state_formula_trave
     names.insert(x.name());
   }
 };
+
+template <template <class> class Traverser, class OutputIterator>
+struct find_state_variables_traverser: public Traverser<find_state_variables_traverser<Traverser, OutputIterator> >
+{
+  typedef Traverser<find_state_variables_traverser<Traverser, OutputIterator> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  OutputIterator out;
+
+  find_state_variables_traverser(OutputIterator out_)
+    : out(out_)
+  {}
+
+  void operator()(const variable& v)
+  {
+    *out = v;
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Traverser, class OutputIterator>
+find_state_variables_traverser<Traverser, OutputIterator>
+make_find_state_variables_traverser(OutputIterator out)
+{
+  return find_state_variables_traverser<Traverser, OutputIterator>(out);
+}
+
+template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
+struct find_free_state_variables_traverser: public Binder<Traverser, find_free_state_variables_traverser<Traverser, Binder, OutputIterator> >
+{
+  typedef Binder<Traverser, find_free_state_variables_traverser<Traverser, Binder, OutputIterator> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::is_bound;
+  using super::bind_count;
+  using super::increase_bind_count;
+
+  OutputIterator out;
+
+  find_free_state_variables_traverser(OutputIterator out_)
+    : out(out_)
+  {}
+
+/*
+  template <typename VariableContainer>
+  find_free_state_variables_traverser(OutputIterator out_, const VariableContainer& v)
+    : out(out_)
+  {
+    increase_bind_count(v);
+  }
+*/
+
+  void operator()(const variable& v)
+  {
+    if (!is_bound(v.name()))
+    {
+      *out = v;
+    }
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
+find_free_state_variables_traverser<Traverser, Binder, OutputIterator>
+make_find_free_state_variables_traverser(OutputIterator out)
+{
+  return find_free_state_variables_traverser<Traverser, Binder, OutputIterator>(out);
+}
+
+template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator, class VariableContainer>
+find_free_state_variables_traverser<Traverser, Binder, OutputIterator>
+make_find_free_state_variables_traverser(OutputIterator out, const VariableContainer& v)
+{
+  return find_free_state_variables_traverser<Traverser, Binder, OutputIterator>(out, v);
+}
 /// \endcond
 
 } // namespace detail
@@ -482,6 +566,48 @@ std::set<core::identifier_string> find_state_variable_names(const state_formula&
   detail::state_variable_name_traverser f;
   f(x);
   return f.names;
+}
+
+/// \brief Returns all state variables that occur in an object
+/// \param[in] x an object containing state variables
+/// \param[in,out] o an output iterator to which all state variables occurring in x are written.
+/// \return All variables that occur in the term x
+template <typename T, typename OutputIterator>
+void find_state_variables(const T& x, OutputIterator o)
+{
+  state_formulas::detail::make_find_state_variables_traverser<state_formulas::state_variable_traverser>(o)(x);
+}
+
+/// \brief Returns all state variables that occur in an object
+/// \param[in] x an object containing variables
+/// \return All state variables that occur in the object x
+template <typename T>
+std::set<state_formulas::variable> find_state_variables(const T& x)
+{
+  std::set<state_formulas::variable> result;
+  state_formulas::find_state_variables(x, std::inserter(result, result.end()));
+  return result;
+}
+
+/// \brief Returns all free state variables that occur in an object
+/// \param[in] x an object containing state variables
+/// \param[in,out] o an output iterator to which all state variables occurring in x are added.
+/// \return All free state variables that occur in the object x
+template <typename T, typename OutputIterator>
+void find_free_state_variables(const T& x, OutputIterator o)
+{
+  state_formulas::detail::make_find_free_state_variables_traverser<state_formulas::state_variable_traverser, state_formulas::add_state_variable_binding>(o)(x);
+}
+
+/// \brief Returns all free state variables that occur in an object
+/// \param[in] x an object containing variables
+/// \return All state variables that occur in the object x
+template <typename T>
+std::set<state_formulas::variable> find_free_state_variables(const T& x)
+{
+  std::set<state_formulas::variable> result;
+  state_formulas::find_free_state_variables(x, std::inserter(result, result.end()));
+  return result;
 }
 
 } // namespace state_formulas
