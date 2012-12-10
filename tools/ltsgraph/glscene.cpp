@@ -688,6 +688,8 @@ void GLScene::renderEdge(size_t i)
   // them in x-y direction.
   if (edge.from == edge.to)
   {
+    if (!m_drawselfloops)
+      return;
     Coord3D diff = ctrl[1] - ctrl[0];
     diff = diff.cross(Coord3D(0, 0, 1));
     diff = diff * ((via - from).size() / (diff.size() * 2.0));
@@ -760,6 +762,9 @@ void GLScene::renderNode(size_t i)
 
 void GLScene::renderTransitionLabel(size_t i)
 {
+  Graph::Edge edge = m_graph.edge(i);
+  if (edge.from == edge.to && !m_drawselfloops)
+    return;
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   if (!m_graph.transitionLabelstring(label.labelindex).isEmpty()) {
     glStartName(so_label, i);
@@ -876,7 +881,7 @@ void GLScene::renderHandle(size_t i)
 
 GLScene::GLScene(Graph::Graph &g)
   : m_graph(g),
-    m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawinitialmarking(true),
+    m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(1000.0)
 {
   m_camera = new CameraAnimation();

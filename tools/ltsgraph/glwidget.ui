@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>229</width>
-    <height>220</height>
+    <height>236</height>
    </rect>
   </property>
   <property name="font">
@@ -139,9 +139,19 @@
      </widget>
     </item>
     <item>
+     <widget class="QCheckBox" name="cbSelfLoops">
+      <property name="text">
+       <string>Show self loops</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QCheckBox" name="cbInitial">
       <property name="text">
-       <string>Mark Initial state</string>
+       <string>Mark initial state</string>
       </property>
       <property name="checked">
        <bool>true</bool>
