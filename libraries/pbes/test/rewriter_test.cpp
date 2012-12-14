@@ -629,7 +629,7 @@ void test_one_point_rule_rewriter()
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
 
-  test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "forall c: Bool. val(false) || val(c)");
+  test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "forall c: Bool. val(c) || val(false)");
 }
 
 void test_data2pbes()

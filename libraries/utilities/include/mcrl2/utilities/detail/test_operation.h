@@ -70,6 +70,7 @@ void test_operation(
   {
     std::cout << (opname2 + "(y)") << " = " << print(f2) << std::endl;
   }
+  assert(success);
 }
 
 /// \brief Generic function that applies an operation to an object, and compares it

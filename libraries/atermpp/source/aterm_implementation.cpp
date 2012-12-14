@@ -43,9 +43,41 @@ const size_t INITIAL_MAX_TERM_SIZE = 256;
 
 // The following is not a vector to avoid that it is prematurely destroyed.
 size_t terminfo_size=0;
+size_t garbage_collect_count_down=0;
 TermInfo *terminfo;
 
 size_t total_nodes = 0;
+
+void free_term(const detail::_aterm* t) 
+{
+  // const detail::_aterm* t=this->m_term;
+  assert(t->reference_count()==0);
+
+  const function_symbol &f=t->function();
+  const size_t arity=f.arity();
+
+  const size_t size=detail::TERM_SIZE_APPL(arity);
+
+  detail::TermInfo &ti = detail::terminfo[size];
+  t->set_reference_count_indicates_in_freelist();
+  remove_from_hashtable(t);  // Remove from hash_table
+  t->set_next(ti.at_freelist);
+  ti.at_freelist = t;
+
+  if (f!=detail::function_adm.AS_INT)
+  {
+    for(size_t i=0; i<arity; ++i)
+    {
+      const aterm& a= reinterpret_cast<const detail::_aterm_appl<aterm> *>(t)->arg[i];
+      if  (0==a.decrease_reference_count())
+      {
+        free_term(a.m_term);
+      } 
+    }
+  } 
+
+  f.~function_symbol();
+}
 
 
 void resize_aterm_hashtable()
@@ -73,7 +105,7 @@ void resize_aterm_hashtable()
 
     while (aterm_walker)
     {
-      assert(aterm_walker->reference_count()>0);
+      assert(!aterm_walker->reference_count_indicates_is_in_freelist());
       const _aterm* next = aterm_walker->next();
       const HashNumber hnr = hash_number(aterm_walker) & aterm_table_mask;
       aterm_walker->set_next(new_hashtable[hnr]);
@@ -86,24 +118,106 @@ void resize_aterm_hashtable()
   aterm_hashtable=new_hashtable;
 }
 
+void collect_terms_with_reference_count_0()
+{
+  // This function puts all with reference count==0 in the freelist, in the reverse order as 
+  // the sequence of blocks.
+  
+  
+  // First put all terms with reference count 0 in the freelist.
+  for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
+  {
+    TermInfo &ti=terminfo[size];
+
+    for(Block* b=ti.at_block; b!=NULL; b=b->next_by_size)
+    {
+      for(size_t *p=b->data; p<b->end; p=p+size)
+      {
+        const _aterm* p1=reinterpret_cast<_aterm*>(p);
+        if (p1->reference_count()==0)
+        {
+          // Put term in freelist, freeing subterms also.
+          free_term(p1);
+        }
+      }
+
+    }
+  }
+
+  // Reconstruct the freelists for all terms, freeing empty blocks.
+  size_t number_of_blocks=0; 
+  for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
+  {
+    TermInfo &ti=terminfo[size];
+    Block* previous_block=NULL;
+    ti.at_freelist=NULL;
+    for(Block* b=ti.at_block; b!=NULL; )
+    {
+      Block* next_block=b->next_by_size;
+      bool block_is_empty_up_till_now=true;
+      const _aterm* freelist_of_previous_block=ti.at_freelist;
+      for(size_t *p=b->data; p<b->end; p=p+size)
+      {
+        const _aterm* p1=reinterpret_cast<_aterm*>(p);
+        assert(p1->reference_count()!=0);
+        if (p1->reference_count_indicates_is_in_freelist())
+        {
+          p1->set_next(ti.at_freelist);
+          ti.at_freelist=p1;
+        }
+        else
+        {
+          block_is_empty_up_till_now=false;
+        }
+      }
+
+      if (block_is_empty_up_till_now)  
+      {
+        ti.at_freelist=freelist_of_previous_block;  
+        if (previous_block==NULL)
+        {
+          ti.at_block=next_block;
+        }
+        else
+        {
+          previous_block->next_by_size=next_block;
+        }
+        free(b);
+      }
+      else
+      {
+        previous_block=b;
+        number_of_blocks++;
+      }
+      b=next_block;
+    }
+  }
+  garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/16); 
+}
+
+
+
 #ifndef NDEBUG
 static void check_that_all_objects_are_free()
 {
+  collect_terms_with_reference_count_0();
+
   bool result=true;
 
-  for(size_t size=0; size<terminfo_size; ++size)
+  for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
-    TermInfo *ti=&terminfo[size];
-    for(Block* b=ti->at_block; b!=NULL; b=b->next_by_size)
+    const TermInfo &ti=terminfo[size];
+    for(Block* b=ti.at_block; b!=NULL; b=b->next_by_size)
     {
-      for(_aterm* p=(_aterm*)b->data; p!=NULL && ((b==ti->at_block && p<(_aterm*)ti->top_at_blocks) || p<(_aterm*)b->end); p=p + size)
+      for(size_t* p=b->data; p<b->end; p=p+size)
       {
-        if (p->reference_count()!=0 &&
-            ((p->function()!=function_adm.AS_DEFAULT && p->function()!=function_adm.AS_EMPTY_LIST) || p->reference_count()>1))
+        const _aterm* p1=reinterpret_cast<_aterm*>(p);
+        if (!p1->reference_count_is_zero() && !p1->reference_count_indicates_is_in_freelist() &&
+            ((p1->function()!=function_adm.AS_DEFAULT && p1->function()!=function_adm.AS_EMPTY_LIST) || p1->reference_count()>1))
         {
-          std::cerr << "CHECK: Non free term " << p << " (size " << size << "). ";
-          std::cerr << "Reference count " << p->reference_count() << " nr. " << p->function().number() << ". ";
-          std::cerr << "Func: " << p->function().name() << ". Arity: " << p->function().arity() << ".\n";
+          std::cerr << "CHECK: Non free term " << p1 << " (size " << size << "). ";
+          std::cerr << "Reference count " << p1->reference_count() << " nr. " << p1->function().number() << ". ";
+          std::cerr << "Func: " << p1->function().name() << ". Arity: " << p1->function().arity() << ".\n";
           result=false;
         }
         
@@ -137,6 +251,8 @@ static void check_that_all_objects_are_free()
 }
 #endif
 
+
+
 void initialise_aterm_administration()
 {
   // Explict initialisation on first use. This first
@@ -160,7 +276,7 @@ void initialise_aterm_administration()
     throw std::runtime_error("Out of memory. Failed to allocate the terminfo array.");
   }
 
-  for(size_t i=0; i<terminfo_size; ++i)
+  for(size_t i=TERM_SIZE; i<terminfo_size; ++i)
   {
     new (&terminfo[i]) TermInfo();
   }
@@ -188,26 +304,32 @@ void initialise_aterm_administration()
 
 void allocate_block(const size_t size)
 {
-  Block* newblock = (Block*)calloc(1, sizeof(Block));
+  Block* newblock = (Block*)malloc(sizeof(Block));
   if (newblock == NULL)
   {
     std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
   }
 
+  assert(size>=TERM_SIZE);
   assert(size < terminfo_size);
-
   TermInfo &ti = terminfo[size];
 
   newblock->end = (newblock->data) + (BLOCK_SIZE - (BLOCK_SIZE % size));
 
-  newblock->size = size;
-#ifndef NDEBUG
+  // Put new terms in the block in the freelist.
+  
+  for(size_t *p=newblock->data; p<newblock->end; p=p+size)
+  {
+    _aterm* p1=reinterpret_cast<_aterm*>(p);
+    p1->set_next(ti.at_freelist);
+    ti.at_freelist = p1;
+    p1->set_reference_count_indicates_in_freelist(false);
+  }
+
   newblock->next_by_size = ti.at_block;
-#endif
   ti.at_block = newblock;
-  ti.top_at_blocks = newblock->data;
   assert(ti.at_block != NULL);
-  assert(ti.at_freelist == NULL);
+  assert(ti.at_freelist != NULL);
 }
 
 } // namespace detail

@@ -39,6 +39,8 @@ class aterm
     friend class term_list; 
     
     friend void detail::simple_free_term(const detail::_aterm *t, const size_t arity);
+   
+    friend void detail::free_term(const detail::_aterm* t);
 
     friend void detail::initialise_aterm_administration();
 
@@ -51,16 +53,12 @@ class aterm
     static const detail::_aterm *undefined_aterm();
     static const detail::_aterm *empty_aterm_list();
  
-    void free_term() const;
-
-    inline void decrease_reference_count() const
+    inline size_t decrease_reference_count() const
     {
       assert(m_term!=NULL);
       assert(m_term->reference_count()>0);
-      if (0== m_term->decrease_reference_count())
-      {
-        free_term();
-      }
+      m_term->decrease_reference_count();
+      return m_term->reference_count();
     }
 
     template <bool CHECK>

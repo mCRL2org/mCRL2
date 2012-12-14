@@ -68,8 +68,8 @@ t
 )
 {
   assert(t.defined());
-  assert(t.address()->reference_count()>0);
-  // assert(aterm_cast<aterm_appl>(t).function().name().size()!=0);
+  assert(!t.address()->reference_count_indicates_is_in_freelist());
+  assert(!t.address()->reference_count_is_zero());
 }
 
 inline HashNumber hash_number(const detail::_aterm *t)
@@ -87,40 +87,38 @@ inline HashNumber hash_number(const detail::_aterm *t)
   return hnr;
 }
 
-static const size_t BLOCK_SIZE = 1<<13;
+static const size_t BLOCK_SIZE = 1<<14; 
 
 typedef struct Block
 {
-  size_t data[BLOCK_SIZE];
-
-  size_t size;
-#ifndef NDEBUG
   struct Block* next_by_size;
-#endif
-
   size_t* end;
+  size_t data[BLOCK_SIZE];
 } Block;
 
 typedef struct TermInfo
 {
   Block*       at_block;
-  size_t* top_at_blocks;
   const _aterm*       at_freelist;
 
-  TermInfo():at_block(NULL),top_at_blocks(NULL),at_freelist(NULL)
+  TermInfo():at_block(NULL),at_freelist(NULL)
   {}
 
 } TermInfo;
 
 void resize_aterm_hashtable();
 void allocate_block(const size_t size);
+void collect_terms_with_reference_count_0();
 
 extern size_t terminfo_size;
 extern size_t total_nodes;
 extern TermInfo *terminfo;
 
+extern size_t garbage_collect_count_down;
+
 inline const _aterm* allocate_term(const size_t size)
 {
+  assert(size>=TERM_SIZE);
   if (size >= terminfo_size) 
   {
     // Double the size of terminfo
@@ -147,39 +145,36 @@ inline const _aterm* allocate_term(const size_t size)
 
   total_nodes++;
   TermInfo &ti = terminfo[size];
-  if (ti.at_block && ti.top_at_blocks < ti.at_block->end)
-  {
-    /* the first block is not full: allocate a cell */
-    _aterm *at = (_aterm *)ti.top_at_blocks;
-    ti.top_at_blocks += size;
-    at->reset_reference_count();
-    return at;
+  if (garbage_collect_count_down>0)
+  { 
+    garbage_collect_count_down--;
   }
-  else if (ti.at_freelist)
+  
+  if (garbage_collect_count_down==0 && ti.at_freelist==NULL) // It is time to collect free terms, and there are
+                                                             // no free terms left.
   {
-    /* the freelist is not empty: allocate a cell */
-    const _aterm *at = ti.at_freelist;
-    ti.at_freelist = ti.at_freelist->next();
-    assert(ti.at_block != NULL);
-    assert(ti.top_at_blocks == ti.at_block->end);
-    assert(at->reference_count()==0);
-    return at;
+    collect_terms_with_reference_count_0();
   }
-  else
+
+  if (ti.at_freelist==NULL)
   {
     /* there is no more memory of the current size allocate a block */
     allocate_block(size);
     assert(ti.at_block != NULL);
-    _aterm *at = (_aterm *)ti.top_at_blocks;
-    ti.top_at_blocks += size;
-    at->reset_reference_count();
-    return at;
   }
+  
+  const _aterm *at = ti.at_freelist;
+  ti.at_freelist = ti.at_freelist->next();
+  assert(at->reference_count_indicates_is_in_freelist());
+  at->reset_reference_count();
+  assert(ti.at_block != NULL);
+  return at;
 } 
 
 inline void remove_from_hashtable(const _aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
+  assert(t->reference_count_indicates_is_in_freelist());
   const _aterm *prev=NULL;
   const HashNumber hnr = hash_number(t) & aterm_table_mask;
   const _aterm *cur = aterm_hashtable[hnr];
