@@ -1043,7 +1043,7 @@ write_baf(const aterm &t, ostream &os)
                                  sizeof(trm_bucket*));
       if (!sym_entries[cur].termtable)
       {
-        std::runtime_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
+        throw std::runtime_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
       }
 
       // entry->index = cur;
@@ -1199,14 +1199,8 @@ static bool read_all_symbols(istream &is)
     {
       read_symbols[i].terms = std::vector<aterm>(val);
     }
-    /* if (!read_symbols[i].terms)
-    {
-      std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " terms.");
-    } */
 
-    /*}}}  */
-
-    /*{{{  Allocate space for topsymbol information */
+    /*  Allocate space for topsymbol information */
 
     if (arity == 0)
     {
@@ -1218,17 +1212,17 @@ static bool read_all_symbols(istream &is)
     {
       read_symbols[i].nr_topsyms = (size_t*)calloc(arity, sizeof(size_t));
       if (!read_symbols[i].nr_topsyms)
-        std::runtime_error("read_all_symbols: out of memory trying to allocate "
+        throw std::runtime_error("read_all_symbols: out of memory trying to allocate "
                            "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].sym_width = (size_t*)calloc(arity, sizeof(size_t));
       if (!read_symbols[i].sym_width)
-        std::runtime_error("read_all_symbols: out of memory trying to allocate "
+        throw std::runtime_error("read_all_symbols: out of memory trying to allocate "
                            "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].topsyms = (size_t**)calloc(arity, sizeof(size_t*));
       if (!read_symbols[i].topsyms)
-        std::runtime_error("read_all_symbols: out of memory trying to allocate "
+        throw std::runtime_error("read_all_symbols: out of memory trying to allocate "
                            "space for " + to_string(arity) + " arguments.");
     }
 
@@ -1246,7 +1240,7 @@ static bool read_all_symbols(istream &is)
       read_symbols[i].topsyms[j] = (size_t*)calloc(val, sizeof(size_t));
       if (!read_symbols[i].topsyms[j])
       {
-        std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " top symbols.");
+        throw std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " top symbols.");
       }
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
@@ -1434,17 +1428,9 @@ aterm read_baf(istream &is)
     return aterm();
   }
 
-  /*}}}  */
-  /*{{{  Allocate symbol space */
-
+  /* Allocate symbol space */
   read_symbols = std::vector<sym_read_entry>(nr_unique_symbols);
-  /* read_symbols = (sym_read_entry*)calloc(nr_unique_symbols, sizeof(sym_read_entry));
-  if (!read_symbols)
-  {
-    std::runtime_error("read_baf: out of memory when allocating " + to_string(nr_unique_symbols) + " syms.");
-  } */
 
-  /*}}}  */
 
   if (!read_all_symbols(is))
   {

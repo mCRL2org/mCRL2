@@ -307,7 +307,7 @@ void allocate_block(const size_t size)
   Block* newblock = (Block*)malloc(sizeof(Block));
   if (newblock == NULL)
   {
-    std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
+    throw std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
   }
 
   assert(size>=TERM_SIZE);
