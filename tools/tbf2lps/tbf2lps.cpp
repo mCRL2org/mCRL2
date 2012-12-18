@@ -58,7 +58,7 @@ class tbf2lps_tool: public input_output_tool
       {
         mCRL2log(verbose) << "reading mCRL LPS from stdin..." << std::endl;
 
-        mcrl_spec = (aterm_appl) read_term_from_stream(std::cin);
+        mcrl_spec = (aterm_appl) read_term_from_binary_stream(std::cin);
 
         if (mcrl_spec == 0)
         {
@@ -74,14 +74,14 @@ class tbf2lps_tool: public input_output_tool
         mCRL2log(verbose) << "reading mCRL LPS from '" <<  input_filename() << "'..." << std::endl;
 
         std::ifstream in_stream;
-        in_stream.open(input_filename().c_str());
+        in_stream.open(input_filename().c_str(), std::ios::binary);
 
         if (in_stream.fail())
         {
           throw mcrl2::runtime_error("could not open input file '" + input_filename() + "' for reading");
         }
 
-        mcrl_spec = (aterm_appl) read_term_from_stream(in_stream);
+        mcrl_spec = (aterm_appl) read_term_from_binary_stream(in_stream);
 
         in_stream.close();
 

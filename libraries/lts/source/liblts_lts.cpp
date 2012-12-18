@@ -101,7 +101,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
   const std::string error_message="The .lts file " + filename +
                                   " does not appear to contain datatypes, action declarations and process parameters";
   ifstream g;
-  g.open(filename.c_str());
+  g.open(filename.c_str(), ios::binary);
   g.seekg(-(12+8),ios_base::end);
   if (g.fail())  
   {
@@ -130,7 +130,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
           throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
         }
 
-        aterm data=read_term_from_stream(g);
+        aterm data=read_term_from_binary_stream(g);
         if (!data.defined())
         {
           throw mcrl2::runtime_error(error_message + " (data information is incorrect)");

@@ -44,17 +44,36 @@ aterm load_aterm(const std::string& filename)
 
   if (filename.empty())
   {
-    result=read_term_from_stream(std::cin);
+    if(atermpp::is_binary_aterm_file(filename))
+    {
+      result=read_term_from_binary_stream(std::cin);
+    }
+    else
+    {
+      result=read_term_from_text_stream(std::cin);
+    }
   }
   else
   {
     std::ifstream is;
-    is.open(filename.c_str());
-    if (is.fail())
-    { 
-      throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
+    if(atermpp::is_binary_aterm_file(filename))
+    {
+      is.open(filename.c_str(), std::ios::binary);
+      if (is.fail())
+      {
+        throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
+      }
+      result=read_term_from_binary_stream(is);
     }
-    result=read_term_from_stream(is);
+    else
+    {
+      is.open(filename.c_str());
+      if (is.fail())
+      {
+        throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
+      }
+      result=read_term_from_text_stream(is);
+    }
     is.close();
   }
 
@@ -94,13 +113,14 @@ void save_aterm(aterm term, const std::string& filename, bool binary = true)
   else
   {
     std::ofstream os;
-    os.open(filename.c_str());
     if (binary)
     {
+      os.open(filename.c_str(), std::ios::binary);
       write_term_to_binary_stream(term, os);
     }
     else 
     {
+      os.open(filename.c_str());
       write_term_to_text_stream(term, os);
     }
     if (os.fail())

@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <stack>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 
 #ifdef WIN32
@@ -500,39 +501,13 @@ static aterm read_term_from_text_stream(int *c, istream &is)
 
 
 /**
- * Read an aterm from a file that could be binary or text.
- */
-
-aterm read_term_from_stream(istream &is)
-{
-  aterm_io_init();
-  int c;
-
-  fnext_char(&c, is);
-  if (c == 0)
-  {
-    return read_term_from_binary_stream(is);  
-  }
-  else
-  {
-    /* Probably a text file */
-    line = 0;
-    col = 0;
-    error_idx = 0;
-    memset(error_buf, 0, ERROR_SIZE);
-
-    return read_term_from_text_stream(&c, is);
-  }
-}
-
-/**
  * Read from a string.
  */
 
 aterm read_term_from_string(const std::string& s)
 {
   stringstream ss(s);
-  return  read_term_from_stream(ss);
+  return  read_term_from_text_stream(ss);
 }
 
 aterm read_term_from_text_stream(istream &is)
@@ -553,6 +528,30 @@ aterm read_term_from_text_stream(istream &is)
   return term;
 }
 
+bool is_binary_aterm_stream(std::istream& is)
+{
+  aterm_io_init();
 
+  int c;
+  fnext_char(&c, is);
+  return (c == 0);
+}
+
+/**
+ * Read an aterm from a file that could be binary or text.
+ */
+bool is_binary_aterm_file(const std::string& filename)
+{
+  if(filename.empty())
+  {
+    return is_binary_aterm_stream(std::cin);
+  }
+  else
+  {
+    std::ifstream is;
+    is.open(filename.c_str());
+    return is_binary_aterm_stream(is);
+  }
+}
 
 } // namespace atermpp

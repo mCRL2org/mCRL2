@@ -18,6 +18,9 @@
 namespace atermpp
 {
 
+bool is_binary_aterm_stream(std::istream& is);
+bool is_binary_aterm_file(const std::string& filename);
+
 /// \brief Writes term t to a stream in binary aterm format.
 /// \param t A term.
 /// \param os An output stream
@@ -40,13 +43,6 @@ void write_term_to_text_stream(const aterm &t, std::ostream &os);
 /// \param is An input stream.
 /// \return The term that is read from the input stream.
 aterm read_term_from_text_stream(std::istream &is);
-
-
-/// \brief Reads an aterm from a stream in either binary or text format.
-/// \param is An input stream
-/// \return A term that was read from a file.
-aterm read_term_from_stream(std::istream &is);
-
 
 /// \brief Reads an aterm from a string. The string can be in either binary or text format.
 /// \param s A string
