@@ -2166,6 +2166,229 @@ struct variable_traverser: public add_traverser_variables<regular_formulas::vari
 };
 //--- end generated state_formulas::add_traverser_variables code ---//
 
+//--- start generated state_formulas::add_traverser_state_variables code ---//
+template <template <class> class Traverser, class Derived>
+struct add_traverser_state_variables: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  void operator()(const state_formulas::true_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::false_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::not_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::and_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::or_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.left());
+    static_cast<Derived&>(*this)(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::forall& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::exists& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::must& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::may& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::yaled& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::yaled_timed& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::delay& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::delay_timed& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::variable& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::nu& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::mu& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const state_formulas::state_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::state_formula result;
+    if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this)(data::data_expression(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_true(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::true_(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_false(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::false_(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_not(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::not_(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_and(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::and_(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_or(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::or_(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_imp(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::imp(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_forall(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::forall(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_exists(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::exists(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_must(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::must(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_may(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::may(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_yaled(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::yaled(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_yaled_timed(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::yaled_timed(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_delay(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::delay(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_delay_timed(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::delay_timed(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_variable(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::variable(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_nu(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::nu(atermpp::aterm_appl(x)));
+    }
+    else if (state_formulas::is_mu(x))
+    {
+      static_cast<Derived&>(*this)(state_formulas::mu(atermpp::aterm_appl(x)));
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Traverser class
+template <typename Derived>
+struct state_variable_traverser: public add_traverser_state_variables<state_formulas::state_formula_traverser_base, Derived>
+{
+  typedef add_traverser_state_variables<state_formulas::state_formula_traverser_base, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
+//--- end generated state_formulas::add_traverser_state_variables code ---//
+
 //--- start generated state_formulas::add_traverser_identifier_strings code ---//
 template <template <class> class Traverser, class Derived>
 struct add_traverser_identifier_strings: public Traverser<Derived>

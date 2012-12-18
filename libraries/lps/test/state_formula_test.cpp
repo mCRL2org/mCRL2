@@ -17,6 +17,9 @@
 #include <iostream>
 #include <iterator>
 #include <set>
+#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
@@ -218,3 +221,51 @@ BOOST_AUTO_TEST_CASE(test_1094)
 
   BOOST_CHECK_THROW(parse_state_formula(FORMULA, s), mcrl2::runtime_error);
 }
+
+inline
+state_formula sigma(const state_formula& x)
+{
+  variable X("X", data::data_expression_list());
+  return x == X ? false_() : x;
+}
+
+BOOST_AUTO_TEST_CASE(test_replace_state_formulas)
+{
+  specification spec;
+  state_formula f = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  state_formula result = replace_state_formulas(f, sigma);
+  state_formula expected_result = parse_state_formula("(mu X. false) && (mu X. false)", spec);
+  if (!(result == expected_result))
+  {
+    std::cout << "error: " << state_formulas::pp(result) << " != " << state_formulas::pp(expected_result) << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
+BOOST_AUTO_TEST_CASE(test_find_state_variables)
+{
+  specification spec;
+
+  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", spec);
+  std::set<state_formulas::variable> v = state_formulas::find_state_variables(f);
+  BOOST_CHECK(v.size() == 2);
+
+  f = parse_state_formula("mu X. nu Y. (true && mu Z. (X && Y || Z))", spec);
+  v = find_state_variables(f);
+  BOOST_CHECK(v.size() == 3);
+
+  state_formulas::variable X("X", data::data_expression_list());
+  state_formulas::variable Y("Y", data::data_expression_list());
+  state_formulas::variable Z("Z", data::data_expression_list());
+  state_formula phi = state_formulas::and_(X, Y);
+  v = find_state_variables(phi);
+  BOOST_CHECK(v.size() == 2);  
+  v = find_free_state_variables(phi);
+  BOOST_CHECK(v.size() == 2);
+  state_formula psi = state_formulas::mu("X", data::assignment_list(), phi);
+  v = find_state_variables(psi);
+  BOOST_CHECK(v.size() == 2);  
+  v = find_free_state_variables(psi);
+  BOOST_CHECK(v.size() == 1);
+}
+

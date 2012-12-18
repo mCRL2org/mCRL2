@@ -222,6 +222,7 @@ class GLWidget : public QGLWidget
     void toggleTransitionLabels(bool show) { m_scene->setDrawTransitionLabels(show); }
     void toggleStateLabels(bool show) { m_scene->setDrawStateLabels(show); }
     void toggleStateNumbers(bool show) { m_scene->setDrawStateNumbers(show); }
+    void toggleSelfLoops(bool show) { m_scene->setDrawSelfLoops(show); }
     void toggleInitialMarking(bool show) { m_scene->setDrawInitialMarking(show); }
     void toggleFog(bool show) { m_scene->setDrawFog(show); }
     void setNodeSize(int size) { m_scene->setNodeSize(size); m_scene->updateShapes(); }

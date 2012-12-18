@@ -6,7 +6,16 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required (VERSION 2.8)
+if( APPLE )
+  # Graphical tools depend on the CMake Module DeployQt4. This module is used 
+  # for the deployment (installation and packaging) of Qt. This module is 
+  # available as of version 2.8.7. To include Qt libraries in a package we require
+  # version 2.8.10.  
+  cmake_minimum_required (VERSION 2.8.7)
+else()
+  cmake_minimum_required (VERSION 2.8)
+endif()
+
 project (MCRL2)
 # Commonly used options
 # ---------------------

@@ -18,6 +18,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/tuple/tuple.hpp>
 #include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -79,10 +80,10 @@ multi_action_name parse_multi_action_name(const std::string& text)
 std::pair<multi_action_name_set, bool> parse_multi_action_name_set(const std::string& text)
 {
   multi_action_name_set result;
-  bool result_includes_subsets = boost::algorithm::ends_with(text, "*");
+  bool result_includes_subsets = boost::algorithm::ends_with(text, "@");
 
-  // remove {}*
-  std::string s = utilities::regex_replace("[{}*]", "", text);
+  // remove {}@
+  std::string s = utilities::regex_replace("[{}@]", "", text);
 
   std::vector<std::string> v = utilities::regex_split(s, "\\s*,\\s*");
   for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
@@ -193,7 +194,12 @@ std::string print(const multi_action_name_set& A, bool A_includes_subsets = fals
   {
     V.insert(print(*i));
   }
-  return print_set(V) + (A_includes_subsets ? "*" : "");
+  return print_set(V) + (A_includes_subsets ? "@" : "");
+}
+
+std::string print(const allow_set& x)
+{
+  return print(x.A, x.A_includes_subsets);
 }
 
 BOOST_AUTO_TEST_CASE(test_print)
@@ -253,21 +259,6 @@ void check_result(const std::string& expression, const std::string& result, cons
   }
 }
 
-void test_subsets(const std::string& Atext, const std::string& expected_result)
-{
-  multi_action_name_set A;
-  bool dummy;
-  boost::tuples::tie(A, dummy) = parse_multi_action_name_set(Atext);
-  multi_action_name_set A1 = alphabet_operations::subsets(A);
-  std::string result = print(A1);
-  check_result(Atext, result, expected_result, "alphabet");
-}
-
-BOOST_AUTO_TEST_CASE(test_subsets1)
-{
-  test_subsets("{ab, c}", "{a, ab, b, c}");
-}
-
 void test_alphabet(const std::string& expression, const std::string& expected_result, const std::string& equations = "")
 {
   std::string text = "act a, b, c, d;\n" + equations + "\ninit " + expression + ";\n";
@@ -304,10 +295,11 @@ BOOST_AUTO_TEST_CASE(test_alphabet_operations)
 {
   test_alphabet_operation("{a}", "{b}", "{ab}", process::concat, "concat");
   test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", process::concat, "concat");
-  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aac}", process::left_arrow1, "left_arrow1");
-  test_alphabet_operation("{aa, b}", "{a}", "{a}", process::left_arrow1, "left_arrow1");
-  test_alphabet_operation("{ab, b}", "{b}", "{a}", process::left_arrow1, "left_arrow1"); // N.B. tau is excluded!
-  test_alphabet_operation("{bc}", "{c}", "{b}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aabc, aac, ab}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{aa, b}", "{a}", "{a, aa, b}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{ab, b}", "{b}", "{a, ab, b}", process::left_arrow1, "left_arrow1"); // N.B. tau is excluded!
+  test_alphabet_operation("{bc}", "{c}", "{b, bc}", process::left_arrow1, "left_arrow1");
+  test_alphabet_operation("{a}", "{a}", "{a}", process::left_arrow1, "left_arrow1");
 }
 
 void test_push_allow(const std::string& expression, const std::string& Atext, const std::string& expected_result, const std::string& equations = "")
@@ -338,6 +330,13 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
   multi_action_name_set A1 = op(C, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(comm_text + ", " + Atext, result, expected_result, title);
+
+  if (title == "comm_inverse")
+  {
+    allow_set A2 = allow_set_operations::comm_inverse(C, allow_set(A, A_includes_subsets));
+    std::string result_allow = print(A2);
+    check_result(comm_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_comm_operations)
@@ -345,7 +344,7 @@ BOOST_AUTO_TEST_CASE(test_comm_operations)
   test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", alphabet_operations::comm_inverse, "comm_inverse");
   test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", alphabet_operations::comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", alphabet_operations::comm, "comm");
-  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}*", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}*", alphabet_operations::comm, "comm");
+  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}@", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}@", alphabet_operations::comm, "comm");
 }
 
 template <typename Operation>
@@ -358,15 +357,24 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
   multi_action_name_set A1 = op(R, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(rename_text + ", " + Atext, result, expected_result, title);
+
+  if (title == "rename_inverse")
+  {
+    allow_set A2 = allow_set_operations::rename_inverse(R, allow_set(A, A_includes_subsets));
+    std::string result_allow = print(A2);
+    check_result(rename_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}*", "{bb, bbdd}*", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{aac, accc}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{b, bb}", "{a, aa}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{bb}*", "{aa}*", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b, c -> d}", "{ab, aacc}@", "{bb, bbdd}@", alphabet_operations::rename, "rename");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{b, bb}", "{a, aa, ab, b, bb}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{bb}@", "{aa, ab, bb}@", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{b}", "{a, b}", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{a}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
 }
 
 void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
@@ -378,12 +386,16 @@ void test_allow(const std::string& allow_text, const std::string& Atext, const s
   multi_action_name_set A1 = alphabet_operations::allow(V, A, A_includes_subsets);
   std::string result = print(A1);
   check_result(allow_text + ", " + Atext, result, expected_result, title);
+
+  allow_set A2 = allow_set_operations::allow(V, allow_set(A, A_includes_subsets));
+  std::string result_allow = print(A2);
+  check_result(allow_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
 }
 
 BOOST_AUTO_TEST_CASE(test_allow1)
 {
   test_allow("{a|b, a|b|b, c}", "{ab, abbc, c}", "{ab, c}", "allow");
-  test_allow("{a, b, c}", "{ab}*", "{a, b}", "allow");
+  test_allow("{a, b, c}", "{ab}@", "{a, b}", "allow");
 }
 
 void test_block(const std::string& block_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
@@ -395,12 +407,56 @@ void test_block(const std::string& block_text, const std::string& Atext, const s
   multi_action_name_set A1 = alphabet_operations::block(B, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(block_text + ", " + Atext, result, expected_result, title);
+
+  allow_set A2 = allow_set_operations::block(B, allow_set(A, A_includes_subsets));
+  std::string result_allow = print(A2);
+  check_result(block_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
 }
 
 BOOST_AUTO_TEST_CASE(test_block1)
 {
   test_block("{b}", "{ab, abbc, c}", "{c}", "block");
-  test_block("{b}", "{ab, abbc, c}*", "{a, ac, c}*", "block");
+  test_block("{b}", "{ab, abbc, c}@", "{a, ac, c}@", "block");
+}
+
+multi_action_name make_multi_action_name(const std::string& x)
+{
+  multi_action_name result;
+  result.insert(core::identifier_string(x));
+  return result;
+}
+
+BOOST_AUTO_TEST_CASE(test_alphabet_parallel)
+{
+  std::string text =
+    "act a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20; \n"
+    "init a1 || a2 || a3 || a4 || a5 || a6 || a7 || a8 || a9 || a10 || a11 || a12 || a13 || a14 || a15 || a16 || a17 || a18 || a19 || a20;  \n"
+    ;
+//    "init allow({a1, a2, a3, a4, a5, a6, a7, a8, a9, a10}, a1 || a2 || a3 || a4 || a5 || a6 || a7 || a8 || a9 || a10);  \n"
+  process_specification procspec = parse_process_specification(text);
+  multi_action_name_set A;
+  A.insert(make_multi_action_name("a1"));
+  A.insert(make_multi_action_name("a2"));
+  A.insert(make_multi_action_name("a3"));
+  A.insert(make_multi_action_name("a4"));
+  A.insert(make_multi_action_name("a5"));
+  A.insert(make_multi_action_name("a6"));
+  A.insert(make_multi_action_name("a7"));
+  A.insert(make_multi_action_name("a8"));
+  A.insert(make_multi_action_name("a9"));
+  A.insert(make_multi_action_name("a11"));
+  A.insert(make_multi_action_name("a12"));
+  A.insert(make_multi_action_name("a13"));
+  A.insert(make_multi_action_name("a14"));
+  A.insert(make_multi_action_name("a15"));
+  A.insert(make_multi_action_name("a16"));
+  A.insert(make_multi_action_name("a17"));
+  A.insert(make_multi_action_name("a18"));
+  A.insert(make_multi_action_name("a19"));
+  A.insert(make_multi_action_name("a20"));
+
+  multi_action_name_set B = detail::alphabet_intersection(procspec.init(), procspec.equations(), A);
+  BOOST_CHECK_EQUAL(lps::pp(B),"{a1, a2, a3, a4, a5, a6, a7, a8, a9, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20}");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
