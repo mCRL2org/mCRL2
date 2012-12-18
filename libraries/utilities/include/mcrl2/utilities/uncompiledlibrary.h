@@ -23,6 +23,7 @@
  */
 
 #include <cassert>
+#include <cerrno>
 #include <cstdio>
 #include <list>
 #include <string>
@@ -52,53 +53,53 @@ public:
       {
         throw std::runtime_error("Could not execute compile script.");
       }
-      
-      // Explicitly lock the output stream. It seems that on MacOSX some mixing
-      // of output streams happens, especially during testing with multiple threads.
-      // This results in ferror returning a non-zero value further down.
-      flockfile(stream);
 
       // Script produces one file per line. Last file is the shared library,
       // preceding files are temporary files that should be removed when the
       // library is unloaded.
       std::string files;
       char buf[1024];
-      while(fgets(buf, 1024, stream) != NULL)
-      {
-        std::string line(buf);
-        assert(*line.rbegin() == '\n');
-        line.erase(line.size() - 1);
-        mCRL2log(mcrl2::log::debug, "uncompiled_library") << "  Read line: " << line;
-        
-        // Check that reported file exists. If not, produce error message and
-        // flush script output to the log.
-        if (!mcrl2::utilities::file_exists(line))
+      while(!feof(stream))
+      {        
+        if(fgets(buf, sizeof(buf), stream) != NULL)
         {
-          mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
-          mCRL2log(mcrl2::log::error) << line << std::endl;
-          while (fgets(buf, 1024, stream) != NULL)
+          std::string line(buf);
+          assert(*line.rbegin() == '\n');
+          line.erase(line.size() - 1);
+          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "  Read line: " << line;
+          
+          // Check that reported file exists. If not, produce error message and
+          // flush script output to the log.
+          if (!mcrl2::utilities::file_exists(line))
           {
-            mCRL2log(mcrl2::log::error) << std::string(buf);
+            mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
+            mCRL2log(mcrl2::log::error) << line << std::endl;
+            while (fgets(buf, sizeof(buf), stream) != NULL)
+            {
+              mCRL2log(mcrl2::log::error) << std::string(buf);
+            }
+            pclose(stream);
+            throw std::runtime_error("Compile script failed.");
           }
-          funlockfile(stream);
-          pclose(stream);
-          throw std::runtime_error("Compile script failed.");
+          m_tempfiles.push_back(line);
         }
-        else
+        else if(ferror(stream) && errno == EINTR)
         {
-          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Temporary file '" << line << "' generated." << std::endl;
+            // On OSX, interrupts sometimes arrive during the call to read(), which
+            // is called by fgets. If an interrupt arrives, we just ignore it
+            // an clear the error status of the stream, and try again.
+            mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Reading was interrupted. Clearing error status and retrying" << std::endl;
+            perror("Error according to errno");
+            clearerr(stream);
         }
-        m_tempfiles.push_back(line);
       }
       
       if (ferror(stream))
       {
-        funlockfile(stream);
         pclose(stream);
         throw std::runtime_error("There was a problem reading the output of the compile script.");
       }
       
-      funlockfile(stream);
       pclose(stream);
 
       m_filename = m_tempfiles.back();
