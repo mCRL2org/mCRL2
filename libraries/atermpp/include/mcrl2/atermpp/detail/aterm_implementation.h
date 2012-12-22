@@ -121,9 +121,13 @@ inline const _aterm* allocate_term(const size_t size)
   assert(size>=TERM_SIZE);
   if (size >= terminfo_size) 
   {
-    // Double the size of terminfo
-    size_t old_term_info_size=terminfo_size;
+    // Resize the size of terminfo to the minimum of twice its old size and size+1;
+    const size_t old_term_info_size=terminfo_size;
     terminfo_size <<=1; // Multiply by 2.
+    if (size>=terminfo_size)
+    {
+      terminfo_size=size+1;
+    }
     terminfo=reinterpret_cast<TermInfo*>(realloc(terminfo,terminfo_size*sizeof(TermInfo)));
     if (terminfo==NULL)
     {
@@ -133,6 +137,7 @@ inline const _aterm* allocate_term(const size_t size)
     {
       new (&terminfo[i]) TermInfo();
     }
+    assert(size<terminfo_size);
   }
 
   if (total_nodes>=(aterm_table_size>>1))
@@ -155,7 +160,6 @@ inline const _aterm* allocate_term(const size_t size)
   {
     collect_terms_with_reference_count_0();
   }
-
   if (ti.at_freelist==NULL)
   {
     /* there is no more memory of the current size allocate a block */

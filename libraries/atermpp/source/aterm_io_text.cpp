@@ -468,39 +468,6 @@ static aterm fparse_term(int* c, istream &is)
 }
 
 /**
- * Read a term from a text file. The first character has been read.
- */
-
-static aterm read_term_from_text_stream(int *c, istream &is)
-{
-  fskip_layout(c, is);
-
-  aterm term = fparse_term(c, is);
-
-  if (term.address())
-  {
-    is.unget();
-  }
-  else
-  {
-    std::stringstream os;
-    os << "parse error at line " << line << ", col " << col << ":";
-    for (size_t i = 0; i < ERROR_SIZE; ++i)
-    {
-      char c = error_buf[(i + error_idx) % ERROR_SIZE];
-      if (c)
-      {
-        os << c;
-      }
-    }
-    throw std::runtime_error(os.str());
-  }
-
-  return term;
-} 
-
-
-/**
  * Read from a string.
  */
 
