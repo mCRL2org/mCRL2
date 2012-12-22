@@ -41,6 +41,8 @@ namespace lts
 namespace detail
 {
 
+extern std::vector < atermpp::function_symbol > state_function_symbols;
+
 /** \brief This class contains state labels for an labelled transition system in .lts format.
     \details A state label in .lts format consists of a term of the form
              STATE(t1,...,tn) where ti are the data expressions.
@@ -54,28 +56,23 @@ class state_label_lts : public atermpp::aterm_appl
     /** \brief We store functions symbols with varying arity and string "STATE"
         in this atermpp::aterm_appl array, as they are automatically protected.
     */
-    static std::vector < atermpp::aterm_appl > vector_templates;
 
     /** \brief A function to get a protected STATE function symbol of the
                indicated arity.
     */
+
     static atermpp::function_symbol get_STATE_function_symbol(const size_t arity)
     {
-      if (arity>=vector_templates.size())
+
+      if (arity>=state_function_symbols.size())
       {
-        vector_templates.resize(arity+1);
+        state_function_symbols.resize(arity+1);
       }
-      if (vector_templates[arity]==atermpp::aterm_appl())
+      if (state_function_symbols[arity]==atermpp::function_symbol())
       {
-        atermpp::aterm_appl stub(atermpp::function_symbol("STUB",0));
-        atermpp::aterm_list l;
-        for (size_t i=0; i<arity; ++i)
-        {
-          l=atermpp::push_front(l,atermpp::aterm(stub));
-        }
-        vector_templates[arity]=atermpp::aterm_appl(atermpp::function_symbol("STATE",arity),l.begin(),l.end());
+        state_function_symbols[arity]=atermpp::function_symbol("STATE",arity);
       }
-      return vector_templates[arity].function();
+      return state_function_symbols[arity];
     }
 
   public:
@@ -93,13 +90,11 @@ class state_label_lts : public atermpp::aterm_appl
       // Take care that the STATE function symbol with the desired arity exists.
       const size_t arity=a.function().arity();
       get_STATE_function_symbol(arity);
-      assert(a.function()==vector_templates[arity].function());
     }
 
     /** \brief Construct a state label out of a data_expression_list.
     */
     state_label_lts(const mcrl2::data::data_expression_list& l):
-      // atermpp::aterm_appl(get_STATE_function_symbol(l.size()),atermpp::aterm_list(l))
       atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 
