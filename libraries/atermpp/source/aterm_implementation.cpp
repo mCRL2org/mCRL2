@@ -200,6 +200,12 @@ void collect_terms_with_reference_count_0()
 #ifndef NDEBUG
 static void check_that_all_objects_are_free()
 {
+
+  return; // Remove this return to check whether all data terms and function symbols
+          // have been removed. On some platforms this does not work, as some global
+          // data structures (vectors, maps, etc.) have not been destroyed when this
+          // function is called.
+
   collect_terms_with_reference_count_0();
 
   bool result=true;

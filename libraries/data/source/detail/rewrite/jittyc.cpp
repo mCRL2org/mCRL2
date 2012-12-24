@@ -209,12 +209,6 @@ static void set_rewrappl_value(const size_t i)
   }
 }
 
-/* const aterm_appl &get_rewrappl_value_without_check(const size_t i)
-{
-  assert(i<rewr_appls.size());
-  return rewr_appls[i];
-} */
-
 static aterm_appl get_rewrappl_value(const size_t i)
 {
   set_rewrappl_value(i);
@@ -1661,7 +1655,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     else
     {
       set_rewrappl_value(static_cast<aterm_int>(t).value());
-      ss << "mcrl2::data::detail::get_rewrappl_value_without_check(" << static_cast<aterm_int>(t).value() << ")"; 
+      // ss << "mcrl2::data::detail::get_rewrappl_value_without_check(" << static_cast<aterm_int>(t).value() << ")"; 
+      ss << "atermpp::aterm_cast<const atermpp::aterm_appl>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << 
+                    mcrl2::data::detail::get_rewrappl_value_without_check(static_cast<aterm_int>(t).value()).address() << ")))"; 
     }
     return pair<bool,string>(
              rewr || b,
@@ -2183,9 +2179,7 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
   if (arity == 0)
   {
     set_rewrappl_value(opid);
-    fprintf(f,  "  return mcrl2::data::detail::get_rewrappl_value_without_check(%lu",
-            opid
-           ); 
+    fprintf(f,  "  return mcrl2::data::detail::get_rewrappl_value_without_check(%lu", opid); 
   }
   else
   {
@@ -3071,13 +3065,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (gsIsDataVarId(head))\n"
       "  {\n"
       "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity);\n"
-//      "    std::vector < atermpp::aterm > args(arity); \n"
       "    new (&args[0]) atermpp::aterm(head);\n"
       "    for(size_t i=1; i<arity; ++i)\n"
       "    {\n"
       "      new (&args[i]) atermpp::aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t(i))));\n"
       "    }\n"
-      "    const aterm_appl result= ApplyArray(arity,&args[0],&args[0]+arity);\n"
+      "    const aterm_appl result=ApplyArray(arity,&args[0],&args[0]+arity);\n"
       "    for(size_t i=0; i<arity; ++i)\n"
       "    {\n"
       "      args[i].~aterm();\n"

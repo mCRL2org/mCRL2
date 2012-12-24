@@ -15,7 +15,6 @@
 #include <cstring>
 #include <limits>
 #include <algorithm>
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/algorithm.h"
@@ -73,26 +72,27 @@ bool occur_check(const variable &v, const atermpp::aterm_appl &e)
 }
 #endif
 
+template <class Rewriter>
+struct rewrite_list_rewriter
+{
+  typename Rewriter::substitution_type &m_sigma;
+  Rewriter &m_rewr;
+
+  rewrite_list_rewriter(typename Rewriter::substitution_type &sigma, Rewriter &rewr):m_sigma(sigma),m_rewr(rewr)
+  {}
+
+  const data_expression operator() (const data_expression &t) const
+  {
+    return m_rewr.rewrite(t,m_sigma);
+  }
+};
 
 data_expression_list Rewriter::rewrite_list(
      const data_expression_list &terms,
      substitution_type &sigma)
 {
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array,data_expression, terms.size());
-  size_t position=0;
-  for(data_expression_list::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
-  {
-    new (&term_array[position]) data_expression(rewrite(*i,sigma));
-  }
-  ++position;
-  data_expression_list l;
-  for( ; position>0 ; )
-  {
-    --position;
-    l = push_front(l,term_array[position]);
-    term_array[position].~data_expression();
-  }
-  return l;
+  rewrite_list_rewriter<Rewriter> r(sigma,*this);
+  return data_expression_list(terms.begin(),terms.end(),r);
 }
 
 atermpp::aterm_appl Rewriter::toRewriteFormat(const data_expression &/*Term*/)
@@ -114,26 +114,29 @@ atermpp::aterm_appl Rewriter::rewrite_internal(
   return data_expression();
 }
 
+template <class Rewriter>
+struct rewrite_list_rewriter_internal
+{
+  typename Rewriter::internal_substitution_type &m_sigma;
+  Rewriter &m_rewr;
+
+  rewrite_list_rewriter_internal(typename Rewriter::internal_substitution_type &sigma, Rewriter &rewr):m_sigma(sigma),m_rewr(rewr)
+  {}
+
+  const aterm_appl operator() (const aterm_appl &t) const
+  {
+    return m_rewr.rewrite_internal(t,m_sigma);
+  }
+};
+
+
+
 atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(
     const atermpp::term_list<atermpp::aterm_appl> &terms,
     internal_substitution_type &sigma)
 {
-  using namespace atermpp;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array, aterm_appl, terms.size());
-  // std::vector <atermpp::aterm_appl> term_array(terms.size());
-  size_t position=0;
-  for(atermpp::term_list<atermpp::aterm_appl>::const_iterator i=terms.begin(); i!=terms.end(); ++i,++position)
-  {
-    new (&term_array[position]) aterm_appl(rewrite_internal(*i,sigma));
-  }
-  atermpp::term_list<atermpp::aterm_appl> l;
-  for( ; position>0 ; )
-  {
-    --position;
-    l = push_front(l,term_array[position]);
-    term_array[position].~aterm_appl();
-  }
-  return l;
+  rewrite_list_rewriter_internal<Rewriter> r(sigma,*this);
+  return atermpp::term_list<atermpp::aterm_appl>(terms.begin(),terms.end(),r);
 }
 
 bool Rewriter::addRewriteRule(const data_equation &/*Rule*/)
@@ -301,21 +304,15 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   }
 
   // There are more arguments than bound variables.
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
-  // std::vector < atermpp::aterm > args(arity-vl.size());
-  new (&args[0]) aterm(result);
+  std::vector < atermpp::aterm > args; 
+  args.push_back(result);
   for(size_t i=1; i<arity-vl.size(); ++i)
   {
     assert(vl.size()+i<arity);
-    new (&args[i]) aterm(t(vl.size()+i));
+    args.push_back(t(vl.size()+i));
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
-  const atermpp::aterm_appl result1=rewrite_internal(ApplyArray(arity-vl.size(),&args[0],&args[0]+arity-vl.size()),sigma);
-  for(size_t i=0; i<arity-vl.size(); ++i)
-  {
-    args[i].~aterm();
-  } 
-  return result1;
+  return rewrite_internal(ApplyArray(arity-vl.size(),args.begin(),args.end()),sigma);
 }
 
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
