@@ -101,7 +101,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
   const std::string error_message="The .lts file " + filename +
                                   " does not appear to contain datatypes, action declarations and process parameters";
   ifstream g;
-  g.open(filename.c_str(), ios::binary);
+  g.open(filename.c_str(), std::ios::binary);
   g.seekg(-(12+8),ios_base::end);
   if (g.fail())  
   {
@@ -124,19 +124,15 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         {
           position = (position << 8) + buf[7-i];
         }
-        g.seekg(position);
+        g.seekg(position, std::ios_base::beg);
         if (g.fail())
         {
           throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
         }
 
-        aterm data=read_term_from_binary_stream(g);
-        if (!data.defined())
-        {
-          throw mcrl2::runtime_error(error_message + " (data information is incorrect)");
-        }
-        else
-        {
+		try
+		{
+		  aterm data=read_term_from_binary_stream(g);
           data::data_specification data_spec(atermpp::aterm_appl(((aterm_appl)data)(0)));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
@@ -151,6 +147,10 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
             l.set_action_labels(lps::action_label_list((ATAgetArgument((aterm_appl)data,2))(0)));
           }
         }
+		catch(std::runtime_error& e)
+		{
+		  throw mcrl2::runtime_error(e.what() + std::string(" (data information is incorrect)"));
+		}
       }
     }
     g.close();
@@ -177,7 +177,7 @@ static void add_extra_mcrl2_lts_data(
   const bool has_act_labels,
   const aterm_list& act_labels)
 {
-  std::ofstream f(filename.c_str(), std::ios_base::app); // Open to append.
+  std::fstream f(filename.c_str(), std::ios::in|std::ios::out|std::ios::binary|std::ios::app); // Open to append.
   if (f.fail())
   {
     throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
@@ -189,27 +189,17 @@ static void add_extra_mcrl2_lts_data(
   aterm arg3 = (aterm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
   aterm data = (aterm) aterm_appl(function_symbol("mCRL2LTS1",3),arg1,arg2,arg3);
 
-  /* From the remarks on MSDN:
-   *
-   *   "Note that when a file is opened for appending data, the current file position is determined
-   *    by the last I/O operation, not by where the next write would occur. For example, if a file
-   *    is opened for an append and the last operation was a read, the file position is the point
-   *    where the next read operation would start, not where the next write would start. (When a
-   *    file is opened for appending, the file position is moved to end of file before any write
-   *    operation.) If no I/O operation has yet occurred on a file opened for appending, the file
-   *    position is the beginning of the file."
-   *
-   * In practice, this means that the Microsoft implementation of ftell() returns 0 at this point
-   * in our code. Simply trying to read one byte past the end of the file (the read will fail) seems
-   * to resolve this issue.
-   */
-  /*char c;
-  fseek(f,0,SEEK_END);
-  if(fread(&c,1,1,f) != 0)
-    throw mcrl2::runtime_error("Unexpectedly able to read past end of file.");
-  */
+  /* Determine the position at which the additional information starts.
+     Due to the way in which file operations are implemented on Windows, we need to
+	 use the get pointer for determining the length of the SVC input. (seekp gives invalid
+	 results, leading to a wrong encoded position in the output of the LTS file).
+	 According to the example at http://www.cplusplus.com/reference/istream/istream/seekg/
+	 this is the, more-or-less standard, way to determine the lenght of the file. */
 
-  long position = f.tellp();
+  f.seekg (0, std::ios::end);
+  long position = f.tellg();
+  f.seekg (0, std::ios::beg);
+
   if (position == -1)
   {
     f.close();
