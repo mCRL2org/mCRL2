@@ -43,11 +43,11 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
   if (s.m_data_specification_is_type_checked)
   {
     return gsMakeDataSpec(
-             gsMakeSortSpec(atermpp::convert< atermpp::aterm_list >(s.m_sorts) +
-                            atermpp::convert< atermpp::aterm_list >(s.m_aliases)),
-             gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(s.m_constructors)),
-             gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(s.m_mappings)),
-             gsMakeDataEqnSpec(atermpp::convert< atermpp::aterm_list >(s.m_equations)));
+             gsMakeSortSpec(atermpp::aterm_list(s.m_sorts.begin(),s.m_sorts.end()) +
+                            atermpp::aterm_list(s.m_aliases.begin(),s.m_aliases.end())),
+             gsMakeConsSpec(atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
+             gsMakeMapSpec(atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
+             gsMakeDataEqnSpec(atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
   }
   else
   {

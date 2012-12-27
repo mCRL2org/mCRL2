@@ -105,8 +105,6 @@ class lpsparunfold
     /// \brief Boolean to indicate if additional distribution laws need to be generated.
     bool m_add_distribution_laws;
 
-    mcrl2::data::function_symbol_vector m_additional_mappings;
-
     /** \brief  Generates a fresh basic sort given an string.
       * \param  str a string value. The value is used to generate a fresh
       *         basic sort.
@@ -147,7 +145,7 @@ class lpsparunfold
     **/
     mcrl2::data::function_symbol_vector create_projection_functions(mcrl2::data::function_symbol_vector k);
 
-    /** \brief  Creates the needed equations for the unfolded process parameter.
+    /** \brief  Creates the needed equations for the unfolded process parameter. The equations are added to m_data_specification.
       * \param  pi set of projection functions.
       * \param  case_function the case function.
       * \param  set_of_new_sorts set of fresh sorts.
@@ -155,7 +153,7 @@ class lpsparunfold
       * \param  determine_function the determine function.
       * \return A set of equations for the unfolded process parameter.
     **/
-    mcrl2::data::data_equation_vector create_data_equations(
+    void create_data_equations(
       mcrl2::data::function_symbol_vector pi,
       mcrl2::data::function_symbol case_function,
       mcrl2::data::function_symbol_vector set_of_new_sorts,
@@ -243,7 +241,7 @@ class lpsparunfold
       mcrl2::data::function_symbol case_function,
       const bool add_case_function_to_data_type);
 
-    mcrl2::data::data_equation_vector generate_case_functions(
+    void generate_case_functions(
       mcrl2::data::function_symbol_vector elements_of_new_sorts,
       mcrl2::data::function_symbol case_function);
 

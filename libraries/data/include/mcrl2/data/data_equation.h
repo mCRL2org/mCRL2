@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_DATA_EQUATION_H
 #define MCRL2_DATA_DATA_EQUATION_H
 
-#include "boost/range/iterator_range.hpp"
-
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
@@ -67,7 +65,7 @@ class data_equation: public atermpp::aterm_appl
                   const data_expression& rhs,
                   typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
       : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              atermpp::convert< variable_list >(variables), condition, lhs, rhs))
+                              variable_list(variables.begin(),variables.end()), condition, lhs, rhs))
     {}
 
     /// \brief Constructor
@@ -83,7 +81,7 @@ class data_equation: public atermpp::aterm_appl
                   const data_expression& rhs,
                   typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
       : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              atermpp::convert< variable_list >(variables), sort_bool::true_(), lhs, rhs))
+                              variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs))
     {}
 
     /// \brief Constructor

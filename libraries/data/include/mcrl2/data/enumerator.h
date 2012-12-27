@@ -161,9 +161,9 @@ class data_enumerator
             variables.push_back(variable(m_generator(), *j));
           }
 
-          variable_list w(atermpp::convert< variable_list >(variables));
+          variable_list w(variables.begin(),variables.end());
 
-          result.push_back(data_expression_with_variables(application(*i, atermpp::convert< data_expression_list >(w)), w));
+          result.push_back(data_expression_with_variables(application(*i, atermpp::aterm_cast< data_expression_list >(w)), w));
         }
         else
         {
