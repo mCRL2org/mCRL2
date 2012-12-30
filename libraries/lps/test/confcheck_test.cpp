@@ -39,7 +39,7 @@ static size_t count_ctau(lps::specification const& s)
     if (al.size()==1)
     {
       const action_label lab=al.front().label();
-      if (lab.name().to_string()=="\"ctau\"")
+      if (lab.name().to_string()=="ctau")
       {
         ++result;
       }

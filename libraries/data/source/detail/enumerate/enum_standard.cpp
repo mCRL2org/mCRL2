@@ -406,8 +406,7 @@ bool EnumeratorSolutionsStandard::next(
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
-  vector < atermpp::aterm > var_array; // This does not need to be a atermpp vector, as its content
-                                       // is protected elsewhere.
+  vector < atermpp::aterm > var_array; 
   while (ss_stack.empty() && !fs_stack.empty())
   {
     fs_expr e=fs_stack.front();
@@ -659,7 +658,7 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   const function_symbol_vector mappings(data_spec.mappings());
   for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
   {
-    if (i->name().to_string() == "\"==\"")
+    if (i->name().to_string() == "==")
     {
       atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
       eqs.insert(atermpp::aterm_cast<atermpp::aterm_int>(t(0)));

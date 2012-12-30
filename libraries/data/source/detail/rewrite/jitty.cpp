@@ -786,6 +786,7 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
 
           if (arity == rule_arity)
           {
+// std::cerr << "RHS " << rhs << "\n";
             const aterm_appl result=rewrite_aux(aterm_cast<const aterm_appl>(subst_values(vars,vals,number_of_vars,rhs)),sigma);
             for (size_t i=0; i<arity; i++)
             {

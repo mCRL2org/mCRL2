@@ -6,7 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdexcept>
-#include <stack>
+#include <deque>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -16,7 +16,6 @@
 #include <io.h>
 #endif
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -28,19 +27,16 @@ namespace atermpp
 
 using namespace std;
 
-/* defines */
-
-static const size_t ERROR_SIZE = 32;
-
-/* globals */
 
 /* Parse error description */
-static int      line = 0;
-static int      col = 0;
-static char     error_buf[ERROR_SIZE];
-static int      error_idx = 0;
+static size_t line = 0;
+static size_t col = 0;
+static deque<char> error_buf;
+static const size_t MAX_ERROR_SIZE = 64;
 
-static aterm    fparse_term(int* c, istream &is);
+/* Prototypes */
+static aterm fparse_term(int* c, istream &is);
+
 
 
 static void aterm_io_init()
@@ -78,32 +74,55 @@ static void aterm_io_init()
 
 static void write_string_with_escape_symbols(const std::string &s, std::ostream& os)
 {
-  std::string::const_iterator id = s.begin();
+  // Check whether the string starts with a - or a number, or contains the symbols 
+  // \, ", (, ), [, ], comma, space, \t, \n or \r. If yes, the string will be 
+  // surrounded by quotes, and the symbols \, ", \t, \n, \r
+  // will be preceded by an escape symbol.
+  
+  assert(s.size()>0);
+  char c=s[0];
+  bool contains_special_symbols= c=='-' || isdigit(c);
 
-  /* This function symbol needs quotes */
-  while (id!=s.end())
+  for(std::string::const_iterator i=s.begin(); !contains_special_symbols && i!=s.end(); ++i)
   {
-    /* We need to escape special characters */
-    switch (*id)
+    if (*i=='\\' || *i=='"' || *i=='(' || *i==')' || *i=='[' || *i==']' || *i==',' || *i==' ' || *i=='\n' || *i=='\t' || *i=='\r')
     {
-      case '\\':
-      case '"':
-        os << "\\" << *id;
-        break;
-      case '\n':
-        os << "\\n";
-        break;
-      case '\t':
-        os << "\\t";
-        break;
-      case '\r':
-        os << "\\r";
-        break;
-      default:
-        os << *id;
-        break;
+      contains_special_symbols=true;
     }
-    ++id;
+  }
+
+  if (contains_special_symbols)
+  {
+    /* This function symbol needs quotes */
+    os << "\""; 
+    for(std::string::const_iterator i=s.begin(); i!=s.end(); ++i)
+    {
+      /* We need to escape special characters */
+      switch (*i)
+      {
+        case '\\':
+        case '"':
+          os << "\\" << *i;
+          break;
+        case '\n':
+          os << "\\n";
+          break;
+        case '\t':
+          os << "\\t";
+          break;
+        case '\r':
+          os << "\\r";
+          break;
+        default:
+          os << *i;
+          break;
+      }
+    }
+    os << "\"";
+  }
+  else
+  {
+    os << s;
   }
 }
 
@@ -122,9 +141,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
     {
       const aterm_appl &appl = aterm_cast<aterm_appl>(t);
       const function_symbol sym = appl.function();
-      os << "\""; 
       write_string_with_escape_symbols(sym.name(),os);
-      os << "\"";
       if (sym.arity() > 0)
       {
         os << "(";
@@ -207,9 +224,23 @@ static void fnext_char(int* c, istream &is)
     {
       col++;
     }
-    error_buf[error_idx++] = *c;
-    error_idx %= ERROR_SIZE;
+    error_buf.push_back(*c);
+    if (error_buf.size()>=MAX_ERROR_SIZE)
+    {
+      error_buf.pop_front();
+    }
   }
+}
+
+static std::string print_parse_error_position()
+{
+  std::stringstream s;
+  s << "Error occurred at line " << line << ", col " << col << " near: ";
+  for(deque<char>::const_iterator i=error_buf.begin(); i!=error_buf.end(); ++i)
+  {
+    s << *i;
+  }
+  return s.str();
 }
 
 /**
@@ -243,27 +274,21 @@ static void fnext_skip_layout(int* c, istream &is)
 
 static aterm_list fparse_terms(int* c, istream &is)
 {
-  aterm_list list;
-  aterm el = fparse_term(c, is);
-
-  if (!el.defined())
+cerr << "FPARSE TERMS " << char(*c) << "\n";
+  if (*c==']' || *c==')')  // The termlist must be empty.
   {
     return aterm_list();
   }
 
-  list = push_front(aterm_list(), el);
+  aterm el = fparse_term(c, is);
+  aterm_list list = push_front(aterm_list(), el);
 
   while (*c == ',')
   {
     fnext_skip_layout(c, is);
     el = fparse_term(c, is);
-    if (!el.defined())
-    {
-      return aterm_list();
-    }
     list = push_front(list, el);
   }
-
   return reverse(list);
 }
 
@@ -271,7 +296,7 @@ static aterm_list fparse_terms(int* c, istream &is)
  * Parse a quoted application.
  */
 
-static aterm fparse_quoted_appl(int* c, istream &is)
+static string fparse_quoted_string(int* c, istream &is)
 {
   /* We need a buffer for printing and parsing */
   std::string function_string;
@@ -284,12 +309,12 @@ static aterm fparse_quoted_appl(int* c, istream &is)
     switch (*c)
     {
       case EOF:
-        return aterm();
+        throw atermpp::runtime_error("Premature end of file while parsing quoted function symbol.");
       case '\\':
         fnext_char(c, is);
         if (*c == EOF)
         {
-          return aterm();
+          throw atermpp::runtime_error("Premature end of file while parsing quoted function symbol.");
         }
         switch (*c)
         {
@@ -313,49 +338,20 @@ static aterm fparse_quoted_appl(int* c, istream &is)
     }
     fnext_char(c, is);
   }
-
-
   fnext_skip_layout(c, is);
-
-  /* Time to parse the arguments */
-  aterm_list args;
-  if (*c == '(')
-  {
-    fnext_skip_layout(c, is);
-    if (*c != ')')
-    {
-      args = fparse_terms(c, is);
-    }
-
-    if (!args.defined() || *c != ')')
-    {
-      return aterm();
-    }
-    fnext_skip_layout(c, is);
-  }
-
-  /* Wrap up this function application */
-  const function_symbol sym(function_string, args.size());
-  
-  return aterm_appl(sym, args.begin(), args.end());
+  return function_string;
 }
 
-/**
- *  * Parse an unquoted application. If a term is printed, applications
- *    are always quoted. But when typing aterms, it is convenient not to be
- *    forced to type quoted around each string. Therefore non quoted 
- *    function symbols are still allowed.
- *   */
+/** Parse an unquoted string. */
 
-
-static aterm_appl fparse_unquoted_appl(int* c, istream &is)
+static string fparse_unquoted_string(int* c, istream &is)
 {
+std::cerr << "FPARSE UNQUOTED STRING " << char(*c) << "\n";
   std::string function_string;
   if (*c != '(')
   {
     /* First parse the identifier */
-    while (isalnum(*c)
-           || *c == '-' || *c == '_' || *c == '+' || *c == '*' || *c == '$')
+    while (*c!='"' && *c!='(' && *c!=')' && *c!=']' && *c!=']' && *c!=',' && *c!=' ' && *c!='\n' && *c!='\t' && *c!='\r' && *c!=EOF)
     {
       function_string+= *c;
       fnext_char(c, is);
@@ -363,10 +359,14 @@ static aterm_appl fparse_unquoted_appl(int* c, istream &is)
 
     fskip_layout(c, is);
   }
+  return function_string;
+}
 
-  if (function_string.empty())
+static aterm_appl parse_arguments(const string &f, int *c, istream &is)
+{
+  if (f.empty())
   {
-    return aterm_appl();
+    throw atermpp::runtime_error("Parsed term has empty function symbol");
   }
 
   /* Time to parse the arguments */
@@ -379,15 +379,15 @@ static aterm_appl fparse_unquoted_appl(int* c, istream &is)
       args = fparse_terms(c, is);
     }
 
-    if (!args.defined() || *c != ')')
+    if (*c != ')')
     {
-      return aterm_appl();
+      throw atermpp::runtime_error("Missing ')' while parsing term");
     }
     fnext_skip_layout(c, is);
   }
 
   /* Wrap up this function application */
-  const function_symbol sym(function_string, args.size());
+  const function_symbol sym(f, args.size());
   return aterm_appl(sym, args.begin(), args.end());
 }
 
@@ -420,51 +420,48 @@ static aterm fparse_num(int* c, istream &is)
 }
 
 /**
- * Parse a term from file.
+ * Parse a term from a stream.
  */
 
 static aterm fparse_term(int* c, istream &is)
 {
-  aterm result;
-
+cerr << "FPARSE TERM " << char(*c) << "\n";
   switch (*c)
   {
     case '"':
-      result = (aterm) fparse_quoted_appl(c, is);
-      break;
+    { 
+      string f=fparse_quoted_string(c, is);
+      return parse_arguments(f,c,is);
+    }
     case '[':
+    { 
       fnext_skip_layout(c, is);
       if (*c == ']')
       {
-        result = aterm_list();
+        fnext_skip_layout(c, is);
+        return aterm_list(); // The empty list has just been parsed.
       }
       else
       {
-        result = fparse_terms(c, is);
-        if (!result.defined() || *c != ']')
+        const aterm result = fparse_terms(c, is);
+        if (*c != ']')
         {
-          return aterm();
+          throw atermpp::runtime_error("Expecting ']' while parsing term");
         }
+        fnext_skip_layout(c, is);
+        return result;
       }
-      fnext_skip_layout(c, is);
-      break;
+    }
     default:
-      if (isalpha(*c) || *c == '(')
+    { 
+      if (isdigit(*c) || *c == '-')
       {
-        result = fparse_unquoted_appl(c, is);
+        return fparse_num(c, is);
       }
-      else if (isdigit(*c) || *c == '-')
-      {
-        result = fparse_num(c, is);
-      }
-      else
-      {
-        result = aterm();
-      }
-      break;
+      string f=fparse_unquoted_string(c, is);
+      return parse_arguments(f,c,is);
+    }
   }
-
-  return result;
 }
 
 /**
@@ -473,26 +470,32 @@ static aterm fparse_term(int* c, istream &is)
 
 aterm read_term_from_string(const std::string& s)
 {
+std::cerr << "STRING " << s << "\n";
   stringstream ss(s);
   return  read_term_from_text_stream(ss);
 }
 
 aterm read_term_from_text_stream(istream &is)
 {
+  // Initialise global io (esp. for windows)
   aterm_io_init();
-  int             c;
 
+  // Initialise error handling.
+  line = 0;
+  col = 0;
+  error_buf.clear();
+
+  int c;
   fnext_skip_layout(&c, is);
 
-  aterm term = fparse_term(&c, is);
-
-  if (!term.defined())
+  try
   {
-    mCRL2log(mcrl2::log::error) << "ATreadFromString: parse error at or near:" << std::endl
-                                << is << std::endl;
+    return fparse_term(&c, is);
   }
-
-  return term;
+  catch (atermpp::runtime_error &e)
+  {
+    throw atermpp::runtime_error(e.what() + string("\n") + print_parse_error_position());
+  }
 }
 
 bool is_binary_aterm_stream(std::istream& is)

@@ -89,12 +89,13 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   /* Test 3*/
   data_expression t3d1 = parse_data_expression("forall x: Nat. exists y: Nat. y == x");
   data_expression t3d2 = parse_data_expression("true");
-  BOOST_CHECK(r(t3d1) == r(t3d2));
+  BOOST_CHECK(r(t3d1) == r(t3d2)); 
 
   /* Test 4*/
   data_expression t4d1 = parse_data_expression("exists s: S.( is_s1(s) && is_s2(s) )", specification);
   data_expression t4d2 = parse_data_expression("false");
   BOOST_CHECK(r(t4d1) == r(t4d2));
+ 
 
   /* Test 5*/
   data_expression t5d1 = parse_data_expression("exists s: S.( s == s2 && is_s2(s) )", specification);
