@@ -266,12 +266,12 @@ class lts2pbes_tool : public input_output_tool
     {
       action_summand_vector action_summands;
       const variable process_parameter("x", mcrl2::data::sort_pos::pos());
-      const variable_list process_parameters = push_back(variable_list(), process_parameter);
+      const variable_list process_parameters = make_list(process_parameter);
       const std::set<data::variable> global_variables;
       // Add a single delta.
       const deadlock_summand_vector deadlock_summands(1, deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
       const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
-      const process_initializer initial_process(push_back(assignment_list(), assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
+      const process_initializer initial_process(make_list(assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
       return lps::specification(l.data(),l.action_labels(),global_variables,lps,initial_process);
     }
 

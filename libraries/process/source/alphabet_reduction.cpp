@@ -532,7 +532,7 @@ namespace mcrl2
         return untypes[MAct];
       }
 
-      core::identifier_string_list r=untypeMA(pop_front(MAct));
+      core::identifier_string_list r=untypeMA(MAct.tail());
       r.push_front(MAct.front().name());
       r=detail::gsaATsortList(r);
       untypes[MAct]=r;
@@ -839,7 +839,7 @@ namespace mcrl2
       while (r.size() > 0)
       {
         lps::action_label a = r.front();  
-        r = pop_front(r);
+        r.pop_front();
         bool applied=false;
         for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
         {
@@ -2352,7 +2352,7 @@ namespace mcrl2
           todo=make_list<process_identifier>(INIT_KEY());
         }
 
-        for (; !todo.empty(); todo=pop_front(todo))
+        for (; !todo.empty(); todo.pop_front())
         {
           process_identifier pn=todo.front();
           process_identifier_list old_dep;
@@ -2385,7 +2385,7 @@ namespace mcrl2
       {
         todo=make_list<process_identifier>(INIT_KEY());
       }
-      for (; !todo.empty(); todo=pop_front(todo))
+      for (; !todo.empty(); todo.pop_front())
       {
         process_identifier p=todo.front();
         process_identifier_list dep=deps[p];
@@ -2417,7 +2417,7 @@ namespace mcrl2
         {
           todo=make_list(INIT_KEY());
         }
-        for (; !todo.empty(); todo=pop_front(todo))
+        for (; !todo.empty(); todo.pop_front())
         {
           process_identifier p=todo.front();
           bool is_pCRL=gsaGetProp(procs[p],p);

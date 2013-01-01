@@ -117,7 +117,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
       args[i]=-1;
     }
 
-    for (; !rules.empty(); rules=pop_front(rules))
+    for (; !rules.empty(); rules.pop_front())
     {
       if (aterm_cast<aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),2)).function().arity() == arity + 1)
       {
@@ -140,7 +140,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
             for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
             {
               int j=0;
-              const atermpp::term_list <variable_list> next_vars=pop_front(vars);
+              const atermpp::term_list <variable_list> next_vars=vars.tail();
               for (atermpp::term_list <variable_list>::const_iterator o=next_vars.begin(); o!=next_vars.end(); ++o)
               {
                 if (std::find(o->begin(),o->end(),*v) != o->end())
@@ -150,7 +150,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
                 j++;
               }
             }
-            vars = push_back(vars,get_vars(atermpp::aterm_cast<const atermpp::aterm_appl>(pars(i+1))));
+            vars.push_back(get_vars(atermpp::aterm_cast<const atermpp::aterm_appl>(pars(i+1))));
           }
           else
           {
@@ -172,7 +172,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
             {
               bs[i] = true;
             }
-            vars = push_back(vars,get_vars(aterm_cast<const atermpp::aterm_appl>(pars(i+1))));
+            vars.push_back(get_vars(aterm_cast<const atermpp::aterm_appl>(pars(i+1))));
           }
         }
 
@@ -199,11 +199,11 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
     while (!m.empty())
     {
       aterm_list m2;
-      for (; !m.empty(); m=pop_front(m))
+      for (; !m.empty(); m.pop_front())
       {
         if (aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()).empty())
         {
-          aterm rule = pop_front(aterm_cast<const aterm_list>(m.front())).front();
+          aterm rule = aterm_cast<const aterm_list>(m.front()).tail().front();
           strat.push_front(rule);
           size_t len = aterm_cast<const aterm_list>(aterm_cast<const aterm_list>(rule).front()).size();
           if (len>MAX_LEN) 
@@ -244,9 +244,9 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
         aterm_int k(static_cast<size_t>(maxidx));
         strat.push_front(k);
         m2 = aterm_list();
-        for (; !m.empty(); m=pop_front(m))
+        for (; !m.empty(); m.pop_front())
         {
-          aterm_list temp=pop_front(aterm_cast<const aterm_list>(m.front()));
+          aterm_list temp=aterm_cast<const aterm_list>(m.front()).tail();
           temp.push_front(remove_one_element<aterm>(aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()), k));
           m2.push_front(temp);
         }

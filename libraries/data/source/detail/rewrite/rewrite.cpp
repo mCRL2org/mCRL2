@@ -788,7 +788,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
     {
       assert(i < arity);
       list.push_front(fromInner(aterm_cast<const atermpp::aterm_appl>(term(i))));
-      sort_dom = pop_front(sort_dom);
+      sort_dom.pop_front();
       ++i;
     }
     list = reverse(list);

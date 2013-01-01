@@ -27,11 +27,11 @@ namespace detail
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, atermpp::term_list< CompatibleExpression > m)
+atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression > &l, const atermpp::term_list< CompatibleExpression > &m)
 {
   BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
 
-  return atermpp::term_list< Expression >(l+static_cast< atermpp::term_list<Expression > >(m));
+  return atermpp::term_list< Expression >(l+aterm_cast< atermpp::term_list<Expression > >(m));
 }
 
 /// \brief Returns the concatenation of the lists l and m
@@ -41,11 +41,13 @@ atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, a
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, CompatibleExpression const& m)
+atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression > &l, const CompatibleExpression &m)
 {
   BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
 
-  return atermpp::push_back(l, static_cast< Expression >(m));
+  atermpp::term_list< Expression > resultl=l;
+  resultl.push_back(aterm_cast< Expression >(m));
+  return resultl;
 }
 
 /// \brief Returns the concatenation of the lists l and m
@@ -55,7 +57,7 @@ atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, C
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(CompatibleExpression const& m, atermpp::term_list< Expression > l)
+atermpp::term_list< Expression > operator+(const CompatibleExpression &m, const atermpp::term_list< Expression > &l)
 {
   BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
   atermpp::term_list< Expression > result=l;

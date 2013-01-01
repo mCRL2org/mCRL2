@@ -2354,7 +2354,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(const data_equation_list &eqns,
   }
   else
   {
-    return make_ar_and(build_ar_expr_aux(eqns.front(),arg,arity),build_ar_expr(pop_front(eqns),arg,arity));
+    return make_ar_and(build_ar_expr_aux(eqns.front(),arg,arity),build_ar_expr(eqns.tail(),arg,arity));
   }
 }
 
@@ -2477,8 +2477,7 @@ static aterm toInner_list_odd(const data_expression &t)
     atermpp::term_list <atermpp::aterm_appl > translated_assignments;
     for (assignment_expression_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
     {
-      translated_assignments=push_back(translated_assignments,
-                                   core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
+      translated_assignments.push_back(core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
     }
     return gsMakeWhr((aterm_appl)toInner_list_odd(w.body()),
                      (aterm_list)reverse(translated_assignments));

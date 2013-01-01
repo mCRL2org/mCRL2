@@ -98,12 +98,12 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           while (!v_iterate_over_set.empty())
           {
             v_guard_from_set = v_iterate_over_set.front();
-            v_iterate_over_set = pop_front(v_iterate_over_set);
+            v_iterate_over_set.pop_front();
             v_iterate_over_path = a_path;
             while (!v_iterate_over_path.empty())
             {
               v_guard_from_path = v_iterate_over_path.front();
-              v_iterate_over_path = pop_front(v_iterate_over_path);
+              v_iterate_over_path.pop_front();
               if (variables_overlap(v_guard_from_set, v_guard_from_path))
               {
                 v_set.push_front(v_guard_from_path);

@@ -73,7 +73,7 @@ data_expression get_subst_equation_from_assignments(
     if (!a_assignments_1.empty() && v_next_1)
     {
       const assignment v_assignment_1 = a_assignments_1.front();
-      a_assignments_1 = pop_front(a_assignments_1);
+      a_assignments_1.pop_front();
       v_variable_1 = v_assignment_1.lhs();
       v_expression_1 = v_assignment_1.rhs();
       v_expression_1 = data::replace_free_variables(v_expression_1,
@@ -82,7 +82,7 @@ data_expression get_subst_equation_from_assignments(
     if (!a_assignments_2.empty() && v_next_2)
     {
       const assignment v_assignment_2 = a_assignments_2.front();
-      a_assignments_2 = pop_front(a_assignments_2);
+      a_assignments_2.pop_front();
       v_variable_2 = v_assignment_2.lhs();
       v_expression_2 = v_assignment_2.rhs();
       v_expression_2 = data::replace_free_variables(v_expression_2,
@@ -138,14 +138,14 @@ data_expression get_equation_from_assignments(
       {
         // Create a condition from the assigments from both lists.
         v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), a_assignments_2.front().rhs()));
-        a_assignments_2=pop_front(a_assignments_2);
+        a_assignments_2.pop_front();
       }
       else
       {
         // Create a condition from first assigment only.
         v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), v_variable));
       }
-      a_assignments_1=pop_front(a_assignments_1);
+      a_assignments_1.pop_front();
     }
     else
     {
@@ -153,7 +153,7 @@ data_expression get_equation_from_assignments(
       {
         // Create a condition from the second assigments only.
         v_result = sort_bool::and_(v_result, equal_to(v_variable, a_assignments_2.front().rhs()));
-        a_assignments_2=pop_front(a_assignments_2);
+        a_assignments_2.pop_front();
       }
     }
   }

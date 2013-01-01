@@ -771,7 +771,7 @@ class SMT_LIB_Solver: public SMT_Solver
       while (!a_formula.empty())
       {
         v_clause = a_formula.front();
-        a_formula = pop_front(a_formula);
+        a_formula.pop_front();
         f_formula = f_formula + " ";
         translate_clause(v_clause, true);
       }

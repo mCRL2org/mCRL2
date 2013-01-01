@@ -73,7 +73,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
     return condition;
   }
 
-  const atermpp::aterm_appl first_argument=add_negations(condition,pop_front(negation_term_list),negated);
+  const atermpp::aterm_appl first_argument=add_negations(condition,negation_term_list.tail(),negated);
   atermpp::aterm_appl second_argument= negation_term_list.front();
   if (!negated)
   {
@@ -125,7 +125,7 @@ atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(co
   {
     return l;
   }
-  atermpp::term_list< atermpp::aterm_appl > result=negate(pop_front(l));
+  atermpp::term_list< atermpp::aterm_appl > result=negate(l.tail());
   result.push_front(Apply1(m_enclosing_enumerator->rewr_obj->internal_not,l.front()));
   return result;
 }
@@ -293,8 +293,8 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_single(
   assert(substituted_vars.size()==exprs.size());
   while (!substituted_vars.empty() && t!=substituted_vars.front())
   {
-    substituted_vars=pop_front(substituted_vars);
-    exprs=pop_front(exprs);
+    substituted_vars.pop_front();
+    exprs.pop_front();
   }
 
   if (substituted_vars.empty())
@@ -303,7 +303,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_single(
   }
   else
   {
-    return build_solution_aux(exprs.front(),pop_front(substituted_vars),pop_front(exprs));
+    return build_solution_aux(exprs.front(),substituted_vars.tail(),exprs.tail());
   }
 }
 
@@ -389,7 +389,7 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   }
   else
   {
-    atermpp::term_list < atermpp::aterm_appl> result=build_solution2(pop_front(vars),substituted_vars,exprs);
+    atermpp::term_list < atermpp::aterm_appl> result=build_solution2(vars.tail(),substituted_vars,exprs);
     result.push_front(m_enclosing_enumerator->rewr_obj->rewrite_internal(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
     return result;
   }
@@ -431,7 +431,7 @@ bool EnumeratorSolutionsStandard::next(
       assert(e.expr()!=m_enclosing_enumerator->rewr_obj->internal_false);
       const variable &var = e.vars().front();
       const sort_expression &sort = var.sort();
-      const variable_list &uvars = pop_front(e.vars());
+      const variable_list &uvars = e.vars().tail();
 
 
       if (is_function_sort(sort))

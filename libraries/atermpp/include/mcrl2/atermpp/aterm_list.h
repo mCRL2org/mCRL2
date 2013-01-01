@@ -160,7 +160,14 @@ class term_list:public aterm
     /// \return The tail of the list.
     const term_list<Term> &tail() const
     {
+      assert(!empty());
       return (reinterpret_cast<const detail::_aterm_list<Term>*>(m_term))->tail;
+    }
+    
+    /// \brief Removes the first element of the list.
+    const void pop_front()
+    {
+      *this=tail();
     }
 
     /// \brief Returns the first element of the list.
@@ -171,9 +178,14 @@ class term_list:public aterm
     }
 
     /// \brief Inserts a new element at the beginning of the current list.
-    /// \param elem The term that is added
-    inline
+    /// \param el The term that is added.
     void push_front(const Term &el);
+
+    /// \brief Appends a new element at the end of the list. Note
+    /// that the complexity of this function is O(n), with n the number of
+    /// elements in the list!!!
+    /// \param elem A term.
+    void push_back(const Term &el);
 
     /// \brief Returns the size of the term_list.
     /// \detail The complexity of this function is linear in the size of the list.
@@ -238,110 +250,22 @@ static const size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(s
 // typedef term_list<aterm> aterm_list;
 typedef term_list<aterm> aterm_list;
 
-/// \brief Returns the list obtained by inserting a new element at the beginning.
-/// \param l A list.
-/// \param elem A term
-/// \return The list with an element inserted in front of it.
-/* template <typename Term>
-inline
-term_list<Term> push_front(const term_list<Term> &l, const Term &el);
-*/
-
-/// \brief Returns the list obtained by inserting a new element at the end. Note
-/// that the complexity of this function is O(n), with n the number of
-/// elements in the list!!!
-/// \param l A list.
-/// \param elem A term
-/// \return The list with an element appended to it.
-template <typename Term>
-inline
-term_list<Term> push_back(const term_list<Term> &l, const Term &elem)
-{
-  size_t len = l.size();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
-
-  /* Collect all elements of list in buffer */
-  size_t j=0;
-  for (typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i, ++j)
-  {
-    buffer[j] = i->address();
-  }
-
-  term_list<Term> result;
-  result.push_front(elem);
-
-  /* Insert elements at the front of the list */
-  for (size_t j=len; j>0; j--)
-  {
-    result.push_front(Term(buffer[j-1]));
-  }
-
-  return result;
-}
-
-/// \brief Returns the list obtained by removing the first element.
-/// \param l A list.
-/// \return The list with the first element removed.
-template <typename Term>
-inline
-term_list<Term> pop_front(const term_list<Term> &l)
-{
-  return l.tail();
-}
 
 /// \brief Returns the list with the elements in reversed order.
 /// \param l A list.
 /// \return The reversed list.
 template <typename Term>
 inline
-term_list<Term> reverse(const term_list<Term> &l)
-{
-  term_list<Term> result;
-  for(typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
-  {
-    result.push_front(*i);
-  }
-  return result;
-}
+term_list<Term> reverse(const term_list<Term> &l);
+
 
 /// \brief Returns the list l with one occurrence of the element x removed, or l if x is not present.
 /// \param l A list.
 /// \param x A list element.
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
-{
-  size_t i = 0;
-  term_list<Term> l = list;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,list.size());
+term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t);
 
-  while (l!=term_list<Term>())
-  {
-    if (l.front()==t)
-    {
-      break;
-    }
-    buffer[i++] = l.front().address();
-    l = l.tail();
-  }
-
-  if (l.empty())
-  {
-    return list;
-  }
-
-  l = l.tail();
-  term_list<Term> result = l; /* Skip element to be removed */
-
-  /* We found the element. Add all elements prior to this
-        one to the tail of the list. */
-  for ( ; i>0; i--)
-  {
-    result.push_front(Term(buffer[i-1]));
-  }
-
-  return result;
-}
 
 /// \brief Applies a function to all elements of the list and returns the result.
 /// \param l The list that is transformed.
@@ -351,13 +275,9 @@ template <typename Term, typename Function>
 inline
 aterm_list apply(term_list<Term> l, const Function f)
 {
-  aterm_list result;
-  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
-  {
-    result.push_front(f(*i));
-  }
-  return reverse(result);
+ return term_list<Term>(l.begin(),l.end(),f);
 }
+
 
 /// \brief Returns the concatenation of two lists.
 /// \param l A list.
@@ -365,38 +285,7 @@ aterm_list apply(term_list<Term> l, const Function f)
 /// \return The concatenation of the lists.
 template <typename Term>
 inline
-term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
-{
-
-  if (m.empty())
-  {
-    return l;
-  }
-
-  size_t len = l.size();
-
-  if (len == 0)
-  {
-    return m;
-  }
-
-  term_list<Term> result = m;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
-  
-  size_t j=0;
-  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++j)
-  {
-    buffer[j] = i->address();
-  }
-
-  /* Insert elements at the front of the list */
-  for (size_t j=len; j>0; j--)
-  {
-    result.push_front(Term(buffer[j-1]));
-  }
-
-  return result;
-}
+term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m);
 
 
 /// \brief Returns an element at a certain position in a list
@@ -407,35 +296,14 @@ template <typename Term>
 inline
 const Term &element_at(const term_list<Term> &l, size_t m)
 {
+  assert(l.size()>m);
   typename term_list<Term>::const_iterator i=l.begin();
-  for( ; m>0; --m, ++i)
-  {
-    assert(i!=l.end());
-  }
-  assert(i!=l.end());
+  for( ; m>0; --m, ++i) {}
   return *i;
 }
 
 } // namespace atermpp
 
-
-/* namespace std
-{
-
-/// \brief Swaps two term lists.
-/// \details This operation is more efficient than exchanging terms by an assignment,
-///          as swapping does not require to change the protection of terms.
-/// \param t1 The first term
-/// \param t2 The second term
-
-template <class T>
-inline void swap(atermpp::term_list<T> &t1, atermpp::term_list<T> &t2)
-{
-  t1.swap(t2);
-}
-
-} // namespace std
-*/
 
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
 

@@ -105,7 +105,7 @@ class Induction
       while (!v_constructors.empty())
       {
         v_constructor = v_constructors.front();
-        v_constructors = pop_front(v_constructors);
+        v_constructors.pop_front();
         v_constructor_name = v_constructor.name();
         if (v_constructor_name == f_cons_name)
         {
@@ -168,9 +168,9 @@ class Induction
           while (!a_list_of_variables.size())
           {
             variable v_variable(a_list_of_variables.front());
-            a_list_of_variables = pop_front(a_list_of_variables);
+            a_list_of_variables.pop_front();
             data_expression v_dummy(a_list_of_dummies.front());
-            a_list_of_dummies = pop_front(a_list_of_dummies);
+            a_list_of_dummies.pop_front();
             const substitution v_substitution(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
             v_clause = sort_bool::and_(v_clause, aterm_cast<data_expression>(v_substitution(a_hypothesis)));
           }
@@ -271,11 +271,11 @@ class Induction
         mCRL2log(log::verbose) << "Induction on " << f_count << " variables." << std::endl;
         data_expression_list v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, variable_list(), variable_list());
         v_result = v_list_of_clauses.front();
-        v_list_of_clauses = pop_front(v_list_of_clauses);
+        v_list_of_clauses.pop_front();
         while (!v_list_of_clauses.empty())
         {
           data_expression v_clause(v_list_of_clauses.front());
-          v_list_of_clauses = pop_front(v_list_of_clauses);
+          v_list_of_clauses.pop_front();
           v_result = sort_bool::and_(data_expression(v_result), v_clause);
         }
       }

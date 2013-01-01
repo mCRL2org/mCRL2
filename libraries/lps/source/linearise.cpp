@@ -317,7 +317,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return ma.front();
       }
-      return process::sync(ma.front(),action_list_to_process(pop_front(ma)));
+      return process::sync(ma.front(),action_list_to_process(ma.tail()));
     }
 
     action_list to_action_list(const process_expression p)
@@ -504,7 +504,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return t;
       }
-      data_expression_list result=RewriteTermList(pop_front(t));
+      data_expression_list result=RewriteTermList(t.tail());
       result.push_front(RewriteTerm(t.front()));
       return result;
     }
@@ -726,7 +726,7 @@ class specification_basic_type:public boost::noncopyable
       }
       action_list result= linInsertActionInMultiActionList(
                           act,
-                          pop_front(multiAction));
+                          multiAction.tail());
       result.push_front(firstAction);
       return result;
     }
@@ -1422,16 +1422,16 @@ class specification_basic_type:public boost::noncopyable
           if (lhs==rhs)
           {
             return substitute_assignmentlist(
-                     pop_front(assignments),
-                     pop_front(parameters),
+                     assignments.tail(),
+                     parameters.tail(),
                      replacelhs,
                      replacerhs,
                      sigma);
           }
           assignment_list result=
                    substitute_assignmentlist(
-                     pop_front(assignments),
-                     pop_front(parameters),
+                     assignments.tail(),
+                     parameters.tail(),
                      replacelhs,
                      replacerhs,
                      sigma);
@@ -1463,7 +1463,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return substitute_assignmentlist(
                  assignments,
-                 pop_front(parameters),
+                 parameters.tail(),
                  replacelhs,
                  replacerhs,
                  sigma);
@@ -1471,7 +1471,7 @@ class specification_basic_type:public boost::noncopyable
       assignment_list result=
                substitute_assignmentlist(
                  assignments,
-                 pop_front(parameters),
+                 parameters.tail(),
                  replacelhs,
                  replacerhs,
                  sigma);
@@ -1543,8 +1543,8 @@ class specification_basic_type:public boost::noncopyable
 
         for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
         {
-          vars=push_back(vars,i->first);
-          terms=push_back(terms,i->second);
+          vars.push_back(i->first);
+          terms.push_back(i->second);
         }
         
         std::map < variable, data_expression > local_sigma=sigma;
@@ -1646,7 +1646,7 @@ class specification_basic_type:public boost::noncopyable
         return parameters;
       }
 
-      variable_list parameters1=parameters_that_occur_in_body(pop_front(parameters),body);
+      variable_list parameters1=parameters_that_occur_in_body(parameters.tail(),body);
       if (occursinpCRLterm(parameters.front(),body,0))
       {
         
@@ -1810,7 +1810,7 @@ class specification_basic_type:public boost::noncopyable
 
       sort_expression sort=sortlist.front();
 
-      variable_list result=make_pars(pop_front(sortlist));
+      variable_list result=make_pars(sortlist.tail());
       result.push_front(get_fresh_variable("a",sort));
       return result;
     }
@@ -3095,7 +3095,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       /* otherwise it can be present in vl */
-      return alreadypresent(var,pop_front(vl),n);
+      return alreadypresent(var,vl.tail(),n);
     }
 
     variable_list joinparameters(const variable_list par1,
@@ -3110,7 +3110,7 @@ class specification_basic_type:public boost::noncopyable
       variable var2=par2.front();
       assert(is_variable(var2));
 
-      variable_list result=joinparameters(par1,pop_front(par2),n);
+      variable_list result=joinparameters(par1,par2.tail(),n);
       if (alreadypresent(var2,par1,n))
       {
         return result;
@@ -3373,7 +3373,7 @@ class specification_basic_type:public boost::noncopyable
         function_symbol_list l(enumeratedtypes[e].elementnames);
         for (; i>0 ; i--)
         {
-          l=pop_front(l);
+          l.pop_front();
         }
         data_expression_list result=t;
         result.push_front(data_expression(l.front()));
@@ -3555,7 +3555,7 @@ class specification_basic_type:public boost::noncopyable
 
       const action act=action(multiAction.front());
 
-      action_list result=adapt_multiaction_to_stack_rec(pop_front(multiAction),stack,vars);
+      action_list result=adapt_multiaction_to_stack_rec(multiAction.tail(),stack,vars);
       
       result.push_front(
                action(act.label(),
@@ -3631,7 +3631,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return t2;
       }
-      data_expression_list result=findarguments(pars,pop_front(parlist),args,t2,stack,vars,regular);
+      data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,regular);
       result.push_front(find_(parlist.front(),pars,args,stack,vars,regular));
       return result;
     }
@@ -3783,14 +3783,14 @@ class specification_basic_type:public boost::noncopyable
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
-        data_expression_list result=pushdummyrec(pop_front(totalpars),pars,stack,regular); 
+        data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular); 
         result.push_front(data_expression(par));
         return result;
       }
       /* otherwise the value of this argument is irrelevant, so
          make it Nil, if a regular translation is made. If a translation
          with stacks is made, then yield a default `unique' term. */
-      data_expression_list result=pushdummyrec(pop_front(totalpars),pars,stack,regular);
+      data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular);
       result.push_front(representative_generator_internal(par.sort()));
       return result;
     }
@@ -4264,7 +4264,7 @@ class specification_basic_type:public boost::noncopyable
                           application(functionname,tempargs),
                           auxvars.front()));
 
-        auxvars=pop_front(auxvars);
+        auxvars.pop_front();
       }
     }
 
@@ -4448,7 +4448,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return cl;
       }
-      data_expression_list result=extend(c,pop_front(cl));
+      data_expression_list result=extend(c,cl.tail());
       result.push_front(data_expression(lazy::and_(c,cl.front())));
       return result;
     }
@@ -4473,7 +4473,7 @@ class specification_basic_type:public boost::noncopyable
       const variable var=matchinglist.front();
       data_expression unique=representative_generator_internal(var.sort(),false);
       return lazy::and_(
-               transform_matching_list(pop_front(matchinglist)),
+               transform_matching_list(matchinglist.tail()),
                equal_to(data_expression(var),unique));
     }
 
@@ -4566,21 +4566,21 @@ class specification_basic_type:public boost::noncopyable
       {
         assert(!terms.empty());
         const data_expression t=terms.front();
-        terms=pop_front(terms);
+        terms.pop_front();
         return t;
       }
 
       assert(!sums.empty());
       variable casevar=sums.front();
 
-      const data_expression t=construct_binary_case_tree_rec(n / 2,pop_front(sums),terms,termsort,e);
+      const data_expression t=construct_binary_case_tree_rec(n / 2,sums.tail(),terms,termsort,e);
 
       if (terms.empty())
       {
         return t;
       }
 
-      const data_expression t1=construct_binary_case_tree_rec(n / 2,pop_front(sums),terms,termsort,e);
+      const data_expression t1=construct_binary_case_tree_rec(n / 2,sums.tail(),terms,termsort,e);
 
       if (t==t1)
       {
@@ -5768,9 +5768,9 @@ class specification_basic_type:public boost::noncopyable
       for (action_list::const_iterator walker=multiaction.begin();
            walker!=multiaction.end(); ++walker)
       {
-        for (identifier_string_list i=encaplist; !i.empty(); i=pop_front(i))
+        for (identifier_string_list::const_iterator i=encaplist.begin(); i!=encaplist.end(); ++i)
         {
-          const identifier_string s1= i.front();
+          const identifier_string s1= *i;
           const identifier_string s2=walker->label().name();
           if (s1==s2)
           {
@@ -5942,7 +5942,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return 0;
       }
-      vl=pop_front(vl);
+      vl.pop_front();
       const variable var1=vl.front();
       if (var==var1)
       {
@@ -6003,7 +6003,7 @@ class specification_basic_type:public boost::noncopyable
         }
         if (var3!=var2)
         {
-          t1=construct_renaming(pars1,pop_front(pars2),t,t2,unique);
+          t1=construct_renaming(pars1,pars2.tail(),t,t2,unique);
           t1.push_front(var3);
 
           pars4=t2;
@@ -6013,7 +6013,7 @@ class specification_basic_type:public boost::noncopyable
         }
         else
         {
-          t1=construct_renaming(pars1,pop_front(pars2),t,pars4,unique);
+          t1=construct_renaming(pars1,pars2.tail(),t,pars4,unique);
           pars3=t;
           pars3.push_front(var2);
         }
@@ -6044,7 +6044,7 @@ class specification_basic_type:public boost::noncopyable
         result.push_front(action);
         return result;
       }
-      identifier_string_list result=insertActionLabel(action,pop_front(actionlabels));
+      identifier_string_list result=insertActionLabel(action,actionlabels.tail());
       result.push_front(firstAction);
       return result;
     }
@@ -6067,7 +6067,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return sort_expression_list();
       }
-      sort_expression_list result=get_sorts(pop_front(l));
+      sort_expression_list result=get_sorts(l.tail());
       result.push_front(l.front().sort());
       return result;
     }
@@ -6097,7 +6097,7 @@ class specification_basic_type:public boost::noncopyable
         return sort_bool::false_();
       }
 
-      data_expression result=pairwiseMatch(pop_front(l1),pop_front(l2));
+      data_expression result=pairwiseMatch(l1.tail(),l2.tail());
 
       return lazy::and_(result,RewriteTerm(equal_to(t1,t2)));
     }
@@ -6202,7 +6202,7 @@ class specification_basic_type:public boost::noncopyable
           else
           {
             // possible match; on to next action
-            comm_table.tmp[i] = pop_front(comm_table.tmp[i]);
+            comm_table.tmp[i].pop_front();
             comm_ok = true;
           }
         }
@@ -6282,7 +6282,7 @@ class specification_basic_type:public boost::noncopyable
             else
             {
               // ignore actions that are not in m
-              comm_table.tmp[i] = pop_front(comm_table.tmp[i]);
+              comm_table.tmp[i].pop_front();
               if (comm_table.tmp[i].empty())
               {
                 comm_table.match_failed[i]=true;
@@ -6292,7 +6292,7 @@ class specification_basic_type:public boost::noncopyable
           }
           if (actionname==commname) // actionname found
           {
-            comm_table.tmp[i]=pop_front(comm_table.tmp[i]);
+            comm_table.tmp[i].pop_front();
             comm_ok = true;
           }
         }
@@ -6338,7 +6338,7 @@ class specification_basic_type:public boost::noncopyable
             // find it in rest[i]
             while (commname!=(restname = rest[i].front().label().name()))
             {
-              rest[i] = pop_front(rest[i]);
+              rest[i].pop_front();
               if (rest[i].empty()) // no more
               {
                 rest_is_null[i] = true;
@@ -6350,8 +6350,8 @@ class specification_basic_type:public boost::noncopyable
               break;
             }
             // action found; try next
-            rest[i] = pop_front(rest[i]);
-            comm_table.tmp[i] = pop_front(comm_table.tmp[i]);
+            rest[i].pop_front();
+            comm_table.tmp[i].pop_front();
           }
 
           if (!rest_is_null[i]) // lhs was found in rest[i]
@@ -6405,20 +6405,26 @@ class specification_basic_type:public boost::noncopyable
       }
       /* if n=[a(f)] \oplus o */
       const action firstaction=n.front();
-      const action_list o=pop_front(n);
+      const action_list o=n.tail();
       const data_expression condition=pairwiseMatch(d,firstaction.arguments());
       if (condition==sort_bool::false_())
       {
-        return phi(m,d,push_back(w,firstaction),o,r,r_is_null,comm_table);
+        action_list tempw=w;
+        tempw.push_back(firstaction);
+        return phi(m,d,tempw,o,r,r_is_null,comm_table);
       }
       else
       {
-        const tuple_list T=phi(push_back(m,firstaction),d,w,o,r,r_is_null,comm_table);
+        action_list tempm=m;
+        tempm.push_back(firstaction);
+        const tuple_list T=phi(tempm,d,w,o,r,r_is_null,comm_table);
+        action_list tempw=w;
+        tempw.push_back(firstaction);
         return addActionCondition(
                  action(),
                  condition,
                  T,
-                 phi(m,d,push_back(w,firstaction),o,r,r_is_null,comm_table));
+                 phi(m,d,tempw,o,r,r_is_null,comm_table));
       }
     }
 
@@ -6438,8 +6444,9 @@ class specification_basic_type:public boost::noncopyable
       else
       {
         const action a = beta.front();
-        const action_list l = push_back(alpha,a);
-        const action_list beta_next = pop_front(beta);
+        action_list l=alpha;
+        l.push_back(a);
+        const action_list beta_next = beta.tail();
 
         if (can_communicate(l,comm_table)!=action_label())
         {
@@ -6463,20 +6470,20 @@ class specification_basic_type:public boost::noncopyable
       while (!alpha.empty())
       {
         const action a = alpha.front();
-        action_list beta = pop_front(alpha);
+        action_list beta = alpha.tail();
 
         while (!beta.empty())
         {
           const action_list actl=make_list(a,beta.front());
-          if (might_communicate(actl,comm_table,pop_front(beta),false) && xi(actl,pop_front(beta),comm_table))
+          if (might_communicate(actl,comm_table,beta.tail(),false) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
             cond = lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments()));
           }
-          beta = pop_front(beta);
+          beta.pop_front();
         }
 
-        alpha = pop_front(alpha);
+        alpha.pop_front();
       }
       return lazy::not_(cond);
     }
@@ -6500,7 +6507,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       const action firstaction=multiaction.front();
-      const action_list remainingmultiaction=pop_front(multiaction); /* This is m in [1] */
+      const action_list remainingmultiaction=multiaction.tail(); /* This is m in [1] */
 
       const tuple_list S=phi(make_list(firstaction),
                              firstaction.arguments(),

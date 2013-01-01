@@ -72,6 +72,118 @@ void term_list<Term>::push_front(const Term &el)
 // }
 
 
+template <typename Term>
+inline
+void term_list<Term>::push_back(const Term &el)
+{
+  size_t len = size();
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
+
+  /* Collect all elements of list in buffer */
+  size_t j=0;
+  for (typename term_list<Term>::const_iterator i=begin(); i!=end(); ++i, ++j)
+  {
+    buffer[j] = i->address();
+  }
+
+  *this=term_list<Term>();
+  push_front(el);
+
+  /* Insert elements at the front of the list */
+  for (size_t j=len; j>0; j--)
+  {
+    push_front(Term(buffer[j-1]));
+  }
+}
+
+template <typename Term>
+inline
+term_list<Term> reverse(const term_list<Term> &l)
+{
+  term_list<Term> result;
+  for(typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
+  {
+    result.push_front(*i);
+  }
+  return result;
+}
+
+
+template <typename Term>
+inline
+term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
+{
+  size_t i = 0;
+  term_list<Term> l = list;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,list.size());
+
+  while (l!=term_list<Term>())
+  {
+    if (l.front()==t)
+    {
+      break;
+    }
+    buffer[i++] = l.front().address();
+    l = l.tail();
+  }
+
+  if (l.empty())
+  {
+    return list;
+  }
+
+  l = l.tail();
+  term_list<Term> result = l; /* Skip element to be removed */
+
+  /* We found the element. Add all elements prior to this
+           one to the tail of the list. */
+  for ( ; i>0; i--)
+  {
+    result.push_front(Term(buffer[i-1]));
+  }
+
+  return result;
+}
+
+template <typename Term>
+inline
+term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
+{
+
+  if (m.empty())
+  {
+    return l;
+  }
+
+  size_t len = l.size();
+
+  if (len == 0)
+  {
+    return m;
+  }
+
+  term_list<Term> result = m;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
+
+  size_t j=0;
+  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++j)
+  {
+    buffer[j] = i->address();
+  }
+
+  /* Insert elements at the front of the list */
+  for (size_t j=len; j>0; j--)
+  {
+    result.push_front(Term(buffer[j-1]));
+  }
+
+  return result;
+}
+
+
+
+
+
 namespace detail
 {
   template <class Term, class Iter, class ATermConverter>

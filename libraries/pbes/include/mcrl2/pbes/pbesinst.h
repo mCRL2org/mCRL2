@@ -130,7 +130,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
       if (is_function_symbol(*p))
       {
         // If p is a correct data operation
-        finite_expression = push_back(finite_expression, *p);
+        finite_expression.push_back(*p);
       }
       else if (is_variable(*p))
       {
@@ -145,7 +145,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
     else
     {
       //sort is infinite
-      infinite_expression = push_back(infinite_expression, *p);
+      infinite_expression.push_back(*p);
     }
   }
 
@@ -342,7 +342,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
         for (std::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
         {
           current_values = *inst_i;
-          current_values.infinite_var = push_back(current_values.infinite_var, *p);
+          current_values.infinite_var.push_back(*p);
 
           intermediate_instantiation_list.push_back(current_values);
         }
@@ -350,14 +350,15 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
       else
       {
         // The sort is finite
-        current_values.finite_var = push_back(current_values.finite_var, *p);
+        current_values.finite_var.push_back(*p);
         data::data_expression_list enumerations = static_cast<data::data_expression_list>(sort_enumerations.get(p->sort()));
 
         for (std::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
         {
           for (data::data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
           {
-            current_values.finite_exp = push_back(inst_i->finite_exp, *e);
+            current_values.finite_exp = inst_i->finite_exp;
+            current_values.finite_exp.push_back(*e);
             intermediate_instantiation_list.push_back(current_values);
           }
         }
