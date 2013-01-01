@@ -592,7 +592,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
   for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = pbes_equation_to_aterm(*i);
-    eqn_list = atermpp::push_front(eqn_list, a);
+    eqn_list.push_front(a);
   }
   atermpp::aterm_appl equations = core::detail::gsMakePBEqnSpec(eqn_list);
   atermpp::aterm_appl initial_state = core::detail::gsMakePBInit(p.initial_state());

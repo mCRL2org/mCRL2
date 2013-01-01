@@ -125,9 +125,9 @@ atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(co
   {
     return l;
   }
-  return push_front(negate(pop_front(l)),Apply1(
-                                             m_enclosing_enumerator->rewr_obj->internal_not,
-                                             l.front()));
+  atermpp::term_list< atermpp::aterm_appl > result=negate(pop_front(l));
+  result.push_front(Apply1(m_enclosing_enumerator->rewr_obj->internal_not,l.front()));
+  return result;
 }
 
 void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewriting(
@@ -152,9 +152,10 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
   {
     assert(condition.size()==3);
     push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition(1)),negated_term_list,negated);
-
+    atermpp::term_list< atermpp::aterm_appl > temp=negated_term_list;
+    temp.push_front(aterm_cast<const atermpp::aterm_appl>(condition(1)));
     push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition(2)),
-                           push_front(negated_term_list,aterm_cast<const atermpp::aterm_appl>(condition(1))),negated);
+                           temp,negated);
   }
   else
   {
@@ -260,8 +261,8 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   while (!vars.empty() && find_equality(expr,vars,var,val))
   {
     vars = remove_one_element(vars, var);
-    substituted_vars=push_front(substituted_vars,var);
-    vals = push_front(vals,val);
+    substituted_vars.push_front(var);
+    vals.push_front(val);
 
     // Use a rewrite here to remove occurrences of subexpressions the form t==t caused by
     // replacing in x==t the variable x by t.
@@ -388,8 +389,9 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   }
   else
   {
-    return push_front(build_solution2(pop_front(vars),substituted_vars,exprs),
-               m_enclosing_enumerator->rewr_obj->rewrite_internal(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
+    atermpp::term_list < atermpp::aterm_appl> result=build_solution2(pop_front(vars),substituted_vars,exprs);
+    result.push_front(m_enclosing_enumerator->rewr_obj->rewrite_internal(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
+    return result;
   }
 }
 
@@ -523,7 +525,7 @@ bool EnumeratorSolutionsStandard::next(
           for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
           {
             const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
-            var_list = push_front(var_list,fv);
+            var_list.push_front(fv);
             var_array.push_back(fv);
 
             used_vars++;
@@ -578,11 +580,15 @@ bool EnumeratorSolutionsStandard::next(
           enum_sigma[var]=term_rf;
           const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
           enum_sigma[var]=old_substituted_value;
+          variable_list templist1=e.substituted_vars();
+          templist1.push_front(var);
+          atermpp::term_list<atermpp::aterm_appl> templist2=e.vals();
+          templist2.push_front(term_rf);
           push_on_fs_stack_and_split_or_without_rewriting(
                                   fs_stack,
                                   uvars+var_list,
-                                  push_front(e.substituted_vars(),var),
-                                  push_front(e.vals(),term_rf),
+                                  templist1,
+                                  templist2,
                                   rewritten_expr,
                                   atermpp::term_list < atermpp::aterm_appl > (),
                                   false);

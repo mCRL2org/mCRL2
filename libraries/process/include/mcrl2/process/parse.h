@@ -64,7 +64,8 @@ struct process_actions: public lps::action_actions
   {
     core::identifier_string id = parse_Id(node.child(0));
     core::identifier_string_list ids = parse_IdList(node.child(2));
-    action_name_multiset lhs(atermpp::push_front(ids, id));
+    ids.push_front(id);
+    action_name_multiset lhs(ids);
     core::identifier_string rhs = parse_Id(node.child(4));
     return process::communication_expression(lhs, rhs);
   }

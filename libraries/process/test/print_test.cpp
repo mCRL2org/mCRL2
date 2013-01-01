@@ -49,8 +49,8 @@ void test_action_name_multiset()
   BOOST_CHECK(text == "a | b | c");
 
   atermpp::term_list<action_name_multiset> w;
-  w = atermpp::push_front(w, A);
-  w = atermpp::push_front(w, A);
+  w.push_front(A);
+  w.push_front(A);
   text = process::pp(w);
   BOOST_CHECK(text == "a | b | c, a | b | c");
 }

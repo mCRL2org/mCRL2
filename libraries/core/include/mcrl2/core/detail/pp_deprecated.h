@@ -121,7 +121,7 @@ aterm_list ATgetSlice(const aterm_list &list_in, const size_t start, const size_
 
   for (i=size; i>0; i--)
   {
-    result = push_front(result, aterm(buffer[i-1]));
+    result.push_front(buffer[i-1]);
   }
 
   return result;
@@ -1820,7 +1820,7 @@ reconstruct_container_expression(aterm_appl Part)
     {
       variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
                                     static_cast<aterm_list>(context), true), static_cast<aterm_appl>(*i)));
-      context = atermpp::push_front(context, data_expression(var));
+      context.push_front(data_expression(var));
       variables.push_back(var);
     }
 
@@ -1933,7 +1933,7 @@ reconstruct_container_expression(aterm_appl Part)
     {
       variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
                                     static_cast<aterm_list>(context), true), static_cast<aterm_appl>(*i)));
-      context = atermpp::push_front(context, data_expression(var));
+      context.push_front(data_expression(var));
       variables.push_back(var);
     }
 
@@ -3034,7 +3034,7 @@ aterm_list GetAssignmentsRHS(aterm_list Assignments)
   aterm_list l;
   while (!Assignments.empty())
   {
-    l = push_front(l, ATAgetFirst(Assignments)(1));
+    l.push_front(ATAgetFirst(Assignments)(1));
     Assignments = Assignments.tail();
   }
   return reverse(l);
@@ -3053,11 +3053,16 @@ aterm_list gsGroupDeclsBySort(aterm_list Decls)
       aterm_appl Decl = ATAgetFirst(Decls);
       aterm_appl DeclSort = ATAgetArgument(Decl, 1);
       aterm_list CorDecls = aterm_cast<aterm_list>(SortDeclsTable.get(DeclSort));
-      SortDeclsTable.put(DeclSort,
-                 (CorDecls == aterm())
-                 ?make_list<aterm>(Decl)
-                 :push_front(CorDecls, aterm(Decl))
-                );
+      if (CorDecls.defined())
+      {
+        aterm_list temp=CorDecls;
+        temp.push_front(Decl);
+        SortDeclsTable.put(DeclSort,temp);
+      }
+      else
+      { 
+        SortDeclsTable.put(DeclSort,make_list<aterm>(Decl));
+      }
       Decls = Decls.tail();
     }
     //Return the hash table as a list of variable declarations

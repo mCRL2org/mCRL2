@@ -155,7 +155,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
           // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
           for (enumerator_type::iterator j=enumerator.begin(
-                           push_front(data::variable_list(),par),
+                           atermpp::make_list<data::variable>(par),
                            data::data_expression(data::sort_bool::true_()));
                 j != enumerator.end() ; ++j)
           {

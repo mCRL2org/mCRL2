@@ -405,7 +405,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           if (!data.is_constructor_sort(i->sort()))
           {
             /* The sort of variable i is not a constructor sort.  */
-            new_data_vars = atermpp::push_front(new_data_vars, *i);
+            new_data_vars.push_front(*i);
           }
           else
           {
@@ -456,8 +456,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                         mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
-                    function_arguments = atermpp::push_front(function_arguments, new_variable);
+                    new_data_vars.push_front(new_variable);
+                    function_arguments.push_front(new_variable);
                   }
 
                   const data::data_expression d((!function_arguments.empty())?
@@ -584,7 +584,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           if (!data.is_constructor_sort(i->sort()))
           {
             /* The sort of variable i is not a constructor sort.  */
-            new_data_vars = atermpp::push_front(new_data_vars, *i);
+            new_data_vars.push_front(*i);
           }
           else
           {
@@ -634,8 +634,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                         mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
-                    function_arguments = atermpp::push_front(function_arguments, new_variable);
+                    new_data_vars.push_front(new_variable);
+                    function_arguments.push_front(new_variable);
                   }
                   const data::data_expression d((!function_arguments.empty())?
                                     static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
@@ -715,7 +715,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for (data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
-        parameters = atermpp::push_front(parameters, (data::data_expression)r(*l,sigma));
+        parameters.push_front(atermpp::aterm_cast<data::data_expression>(r(*l,sigma)));
       }
       parameters = atermpp::reverse(parameters);
     }

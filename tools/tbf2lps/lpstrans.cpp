@@ -94,7 +94,7 @@ static void add_id(aterm_list* ids, aterm_appl id)
 {
   if (std::find(ids->begin(),ids->end(),(aterm) id) == ids->end())
   {
-    *ids = (*ids)+push_front<aterm>(aterm_list(),id);
+    *ids = (*ids)+make_list<aterm>(id);
   }
 }
 
@@ -172,7 +172,7 @@ static aterm_appl dataterm2ATermAppl(aterm_appl t, aterm_list args)
     aterm_list m;
     for (aterm_appl::const_iterator l=t.begin(); l!=t.end(); ++l)
     {
-      m = m+push_front<aterm>(aterm_list(),dataterm2ATermAppl(aterm_cast<aterm_appl>(*l),args));
+      m = m+make_list<aterm>(dataterm2ATermAppl(aterm_cast<aterm_appl>(*l),args));
     }
 
     return application(mcrl2::data::function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,m))), atermpp::convert<data_expression_list>(atermpp::aterm_list(m)));
@@ -190,7 +190,7 @@ static aterm_list get_lps_acts(aterm_appl lps, aterm_list* ids)
       aterm_appl a = aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(sums.front())(2))(0)).front())(0));
       if (std::find(acts.begin(),acts.end(),a) == acts.end())
       {
-        acts = push_front<aterm>(acts,a);
+        acts.push_front(a);
         add_id(ids,aterm_cast<aterm_appl>(a(0)));
       }
     }
@@ -269,7 +269,7 @@ static aterm_list convert_sorts(aterm_appl spec, aterm_list* ids)
     if (!remove_sort_decl(aterm_cast<aterm_appl>(sorts.front())))
     {
       add_id(ids,aterm_cast<aterm_appl>(sorts.front()));
-      r = push_front<aterm>(r,mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(sorts.front()))));
+      r.push_front(mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(sorts.front()))));
     }
   }
 
@@ -294,7 +294,7 @@ static aterm_list convert_funcs(aterm_list funcs, aterm_list* ids, bool funcs_ar
     sort = static_cast<aterm_appl>(mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())(2)))));
     for (; !l.empty(); l=l.tail())
     {
-      sorts = push_front<aterm>(sorts, mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(l.front()))));
+      sorts.push_front(mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(l.front()))));
     }
     if (!sorts.empty())
     {
@@ -313,10 +313,10 @@ static aterm_list convert_funcs(aterm_list funcs, aterm_list* ids, bool funcs_ar
         exit(1);
       }
       add_id(ids,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())(0)));
-      r = push_front<aterm>(r,f);
+      r.push_front(f);
     }
 
-    typelist = push_front<aterm>(typelist,f);
+    typelist.push_front(f);
   }
 
   return reverse(r);
@@ -345,7 +345,7 @@ static aterm_list convert_datas(aterm_appl spec, aterm_list* ids)
     args = aterm_list();
     for (; !l.empty(); l=l.tail())
     {
-      args = args+push_front<aterm>(aterm_list(),mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
+      args = args+make_list<aterm>(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
                     mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1))))));
       add_id(ids,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0)));
     }
@@ -355,7 +355,7 @@ static aterm_list convert_datas(aterm_appl spec, aterm_list* ids)
       // No match.
       lhs = dataterm2ATermAppl(lhs_before_translation,args);
       rhs = dataterm2ATermAppl(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(eqns.front())(2)),args);
-      r = r+push_front<aterm>(aterm_list(),gsMakeDataEqn(args,sort_bool::true_(),lhs,rhs));
+      r = r+make_list<aterm>(gsMakeDataEqn(args,sort_bool::true_(),lhs,rhs));
     }
   }
 
@@ -372,8 +372,7 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
   for (; !vars.empty(); vars=vars.tail())
   {
     aterm_appl v = aterm_cast<aterm_appl>(vars.front());
-    pars = push_front<aterm>(pars,
-                    mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(0))),
+    pars.push_front(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(0))),
                                     mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(1)))))
                    );
     add_id(ids,aterm_cast<aterm_appl>(v(0)));
@@ -388,8 +387,7 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
     aterm_list m;
     for (; !l.empty(); l=l.tail())
     {
-      m = push_front<aterm>(m,
-                   mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
+      m.push_front(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
                                mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1)))))
                   );
       add_id(ids,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0)));
@@ -399,8 +397,7 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
     aterm_list o = pars;
     for (; !l.empty(); l=l.tail())
     {
-      o = push_front<aterm>(o,
-                   mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
+      o.push_front(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(0))),
                         mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())(1)))))
                   );
     }
@@ -421,8 +418,8 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
     aterm_list as;
     for (; !l.empty(); l=l.tail())
     {
-      al = push_front<aterm>(al, dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o));
-      as = push_front<aterm>(as,mcrl2::data::data_expression(aterm_cast<aterm_appl>(al.front())).sort());
+      al.push_front(dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o));
+      as.push_front(mcrl2::data::data_expression(aterm_cast<aterm_appl>(al.front())).sort());
     }
     aterm_appl a = gsMakeAction(gsMakeActId(aterm_cast<aterm_appl>(s(1)),as),al);
     if (as.empty() && "tau"==aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(a(0))(0)).function().name())
@@ -431,7 +428,7 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
     }
     else
     {
-      a = gsMakeMultAct(push_front<aterm>(aterm_list(),a));
+      a = gsMakeMultAct(make_list<aterm>(a));
     }
 
     l = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(s(3))(0));
@@ -443,12 +440,12 @@ static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
       aterm_appl val = dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o);
       if (par!=val)
       {
-        n = push_front<aterm>(n,mcrl2::data::assignment(mcrl2::data::variable(par),mcrl2::data::data_expression(val)));
+        n.push_front(mcrl2::data::assignment(mcrl2::data::variable(par),mcrl2::data::data_expression(val)));
       }
     }
     n = reverse(n);
 
-    smds = push_front<aterm>(smds,gsMakeLinearProcessSummand(m,c,a,gsMakeNil(),n));
+    smds.push_front(gsMakeLinearProcessSummand(m,c,a,gsMakeNil(),n));
   }
 
   return gsMakeLinearProcess(pars,reverse(smds));
@@ -463,8 +460,7 @@ static aterm_list convert_init(aterm_appl spec, aterm_list* /*ids*/)
   for (; !vars.empty(); vars=vars.tail(),vals=vals.tail())
   {
     aterm_appl v = aterm_cast<aterm_appl>(vars.front());
-    l = push_front<aterm>(l,
-                 mcrl2::data::assignment(
+    l.push_front(mcrl2::data::assignment(
                        mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(0))),mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v(1))))),
                        mcrl2::data::data_expression(dataterm2ATermAppl(aterm_cast<aterm_appl>(vals.front()),aterm_list())))
                 );

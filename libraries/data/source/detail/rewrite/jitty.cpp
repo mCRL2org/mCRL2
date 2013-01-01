@@ -42,7 +42,7 @@ static variable_list get_vars(const atermpp::aterm_appl &a)
 {
   if (is_variable(a))
   {
-    return push_front(variable_list(),variable(a));
+    return make_list(aterm_cast<variable>(a));
   }
   else
   {
@@ -87,12 +87,12 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
   aterm_list rules=aterm_list();
   for(data_equation_list::const_iterator j=rules1.begin(); j!=rules1.end(); ++j)
   {
-    rules = push_front<aterm>(rules,
-                       push_front<aterm>(push_front<aterm>(push_front<aterm>(push_front<aterm>(aterm_list(),
-                                         toRewriteFormat(j->rhs())),
-                                         toRewriteFormat(j->lhs())),
-                                         toRewriteFormat(j->condition())),
-                                         aterm_cast<const aterm_list>(j->variables())));
+    const aterm list_representing_rewrite_rule=make_list<aterm>(
+                                         aterm_cast<const aterm_list>(j->variables()),
+                                         toRewriteFormat(j->condition()),
+                                         toRewriteFormat(j->lhs()),
+                                         toRewriteFormat(j->rhs()));
+    rules.push_front(list_representing_rewrite_rule);
   }
   rules = reverse(rules);
 
@@ -122,7 +122,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
       if (aterm_cast<aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),2)).function().arity() == arity + 1)
       {
         const atermpp::aterm_appl &cond = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),1));
-        atermpp::term_list <variable_list> vars = push_front(atermpp::term_list <variable_list>(),get_vars(cond));
+        atermpp::term_list <variable_list> vars = make_list<variable_list>(get_vars(cond));
         const atermpp::aterm_appl &pars = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),2));
 
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs, bool, arity);
@@ -182,17 +182,17 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
           if (bs[i] && !used[i])
           {
             assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
-            deps = push_front(deps,static_cast<const aterm>(aterm_int(i)));
+            deps.push_front(aterm_int(i));
             args[i] += 1;
           }
         }
         deps = reverse(deps);
 
-        m = push_front<aterm>(m,push_front<aterm>(push_front<aterm>(aterm_list(),rules.front()),deps));
+        m.push_front(make_list<aterm>(deps,rules.front())); 
       }
       else
       {
-        l = push_front(l,rules.front());
+        l.push_front(rules.front());
       }
     }
 
@@ -204,7 +204,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
         if (aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()).empty())
         {
           aterm rule = pop_front(aterm_cast<const aterm_list>(m.front())).front();
-          strat = push_front(strat, rule);
+          strat.push_front(rule);
           size_t len = aterm_cast<const aterm_list>(aterm_cast<const aterm_list>(rule).front()).size();
           if (len>MAX_LEN) 
           {
@@ -213,7 +213,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
         }
         else
         {
-          m2 = push_front(m2,m.front());
+          m2.push_front(m.front());
         }
       }
       m = reverse(m2);
@@ -242,13 +242,13 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
         used[maxidx] = true;
 
         aterm_int k(static_cast<size_t>(maxidx));
-        strat = push_front(strat,static_cast<aterm>(k));
+        strat.push_front(k);
         m2 = aterm_list();
         for (; !m.empty(); m=pop_front(m))
         {
-          m2 = push_front(m2,static_cast<aterm>(push_front(pop_front(aterm_cast<const aterm_list>(m.front())),
-                    static_cast<aterm>(remove_one_element(aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()),
-                                      static_cast<aterm>(k))))));
+          aterm_list temp=pop_front(aterm_cast<const aterm_list>(m.front()));
+          temp.push_front(remove_one_element<aterm>(aterm_cast<const aterm_list>((aterm_cast<const aterm_list>(m.front())).front()), k));
+          m2.push_front(temp);
         }
         m = reverse(m2);
       }
@@ -312,7 +312,7 @@ RewriterJitty::RewriterJitty(
       {
         max_vars = j->variables().size();
       }
-      n = push_front(n,*j);
+      n.push_front(*j);
       jitty_eqns[lhs_head_index] = n;
     }
   }
@@ -365,7 +365,7 @@ bool RewriterJitty::addRewriteRule(const data_equation &rule)
   {
     max_vars = rule.variables().size();
   }
-  n = push_front(n,rule);
+  n.push_front(rule);
   jitty_eqns[lhs_head_index] = n;
   make_jitty_strat_sufficiently_larger(lhs_head_index.value());
   jitty_strat[lhs_head_index.value()] = aterm_list(aterm()); //create_strategy(n);
@@ -500,7 +500,7 @@ static atermpp::aterm subst_values(
     atermpp::term_list < atermpp::aterm_appl > new_assignment_list;
     for(std::vector < atermpp::aterm_appl >::reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
     {
-      new_assignment_list=push_front(new_assignment_list,*it);
+      new_assignment_list.push_front(*it);
     }
     return gsMakeWhr(body,new_assignment_list);
   }
@@ -786,7 +786,6 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
 
           if (arity == rule_arity)
           {
-// std::cerr << "RHS " << rhs << "\n";
             const aterm_appl result=rewrite_aux(aterm_cast<const aterm_appl>(subst_values(vars,vals,number_of_vars,rhs)),sigma);
             for (size_t i=0; i<arity; i++)
             {

@@ -20,6 +20,8 @@ namespace atermpp
 namespace detail
 {
 
+const size_t AS_LIST_NUMBER=2;
+
 struct constant_function_symbols
 {
   public:
@@ -36,7 +38,7 @@ struct constant_function_symbols
     {
       assert(AS_DEFAULT.number()==0);
       assert(AS_INT.number()==1);
-      assert(AS_LIST.number()==2);
+      assert(AS_LIST.number()==AS_LIST_NUMBER);
       assert(AS_EMPTY_LIST.number()==3);
     } 
 
@@ -59,7 +61,7 @@ struct constant_function_symbols
       // function symbols (e.g. type_is_appl).
       assert(AS_DEFAULT.number()==0);
       assert(AS_INT.number()==1);
-      assert(AS_LIST.number()==2);
+      assert(AS_LIST.number()==AS_LIST_NUMBER);
       assert(AS_EMPTY_LIST.number()==3);
     }
 };

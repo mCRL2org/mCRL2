@@ -201,7 +201,7 @@ class action_label_lts:public mcrl2::lps::multi_action
         if (std::find(tau_actions.begin(),tau_actions.end(),
                       string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
         {
-          new_action_list=push_front(new_action_list,a);
+          new_action_list.push_front(a);
         }
       }
       const bool is_tau=new_action_list.empty();

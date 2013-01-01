@@ -64,7 +64,7 @@ void type_check(
   for (std::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
        i!=mult_actions.end(); ++i)
   {
-    l=atermpp::push_front(l,atermpp::aterm(i->actions()));
+    l.push_front(i->actions());
   }
   l=core::type_check_mult_actions(
       reverse(l),

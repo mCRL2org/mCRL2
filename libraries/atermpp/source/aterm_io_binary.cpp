@@ -1315,7 +1315,9 @@ static aterm read_term(sym_read_entry* sym, istream &is)
   }
   else if (sym->sym==detail::function_adm.AS_LIST)
   {
-      result = push_front((aterm_list)args[1], args[0]);
+      aterm_list temp=(aterm_list)args[1];
+      temp.push_front(args[0]);
+      result=temp;
   }
   else if (sym->sym==detail::function_adm.AS_EMPTY_LIST)
   {

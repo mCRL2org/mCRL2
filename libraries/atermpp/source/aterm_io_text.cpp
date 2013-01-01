@@ -274,20 +274,20 @@ static void fnext_skip_layout(int* c, istream &is)
 
 static aterm_list fparse_terms(int* c, istream &is)
 {
-cerr << "FPARSE TERMS " << char(*c) << "\n";
   if (*c==']' || *c==')')  // The termlist must be empty.
   {
     return aterm_list();
   }
 
   aterm el = fparse_term(c, is);
-  aterm_list list = push_front(aterm_list(), el);
+  aterm_list list;
+  list.push_front(el);
 
   while (*c == ',')
   {
     fnext_skip_layout(c, is);
     el = fparse_term(c, is);
-    list = push_front(list, el);
+    list.push_front(el);
   }
   return reverse(list);
 }
@@ -346,7 +346,6 @@ static string fparse_quoted_string(int* c, istream &is)
 
 static string fparse_unquoted_string(int* c, istream &is)
 {
-std::cerr << "FPARSE UNQUOTED STRING " << char(*c) << "\n";
   std::string function_string;
   if (*c != '(')
   {
@@ -425,7 +424,6 @@ static aterm fparse_num(int* c, istream &is)
 
 static aterm fparse_term(int* c, istream &is)
 {
-cerr << "FPARSE TERM " << char(*c) << "\n";
   switch (*c)
   {
     case '"':
@@ -470,7 +468,6 @@ cerr << "FPARSE TERM " << char(*c) << "\n";
 
 aterm read_term_from_string(const std::string& s)
 {
-std::cerr << "STRING " << s << "\n";
   stringstream ss(s);
   return  read_term_from_text_stream(ss);
 }

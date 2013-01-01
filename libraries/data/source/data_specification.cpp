@@ -269,8 +269,7 @@ sort_expression find_normal_form(
     for (sort_expression_list::const_iterator i=domain.begin();
          i!=domain.end(); ++i)
     {
-      normalised_domain=push_front(normalised_domain,
-                                   find_normal_form(*i,map1,map2,sorts_already_seen));
+      normalised_domain.push_front(find_normal_form(*i,map1,map2,sorts_already_seen));
     }
     return function_sort(reverse(normalised_domain),normalised_codomain);
   }
@@ -297,13 +296,11 @@ sort_expression find_normal_form(
       for (structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
            j!=ssca.end(); ++j)
       {
-        normalised_ssa=push_front(normalised_ssa,
-                                  structured_sort_constructor_argument(j->name(),
+        normalised_ssa.push_front(structured_sort_constructor_argument(j->name(),
                                       find_normal_form(j->sort(),map1,map2,sorts_already_seen)));
       }
 
-      normalised_constructors=push_front(
-                                normalised_constructors,
+      normalised_constructors.push_front(
                                 structured_sort_constructor(
                                   constructor.name(),
                                   reverse(normalised_ssa),

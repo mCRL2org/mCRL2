@@ -188,12 +188,12 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
   for (deadlock_summand_vector::const_reverse_iterator i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
   {
     atermpp::aterm_appl s = deadlock_summand_to_aterm(*i);
-    summands = atermpp::push_front(summands, s);
+    summands.push_front(s);
   }
   for (action_summand_vector::const_reverse_iterator i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
   {
     atermpp::aterm_appl s = action_summand_to_aterm(*i);
-    summands = atermpp::push_front(summands, s);
+    summands.push_front(s);
   }
 
   return core::detail::gsMakeLinearProcess(

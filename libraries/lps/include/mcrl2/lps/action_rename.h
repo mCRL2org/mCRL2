@@ -639,7 +639,7 @@ lps::specification action_rename(
             for (std::vector < variable_list > :: iterator i=lps_new_sum_vars.begin() ;
                  i!=lps_new_sum_vars.end() ; i++)
             {
-              *i = push_front(*i, *sdvi);
+              i->push_front(*sdvi);
             }
           }
 
@@ -664,7 +664,7 @@ lps::specification action_rename(
               {
                 if (!*i_is_delta) // the action is not delta
                 {
-                  *i=push_front(*i,renamed_rule_new_action);
+                  i->push_front(renamed_rule_new_action);
                 }
               }
             }
@@ -677,7 +677,7 @@ lps::specification action_rename(
             {
               if (!*i_is_delta) // The action does not equal delta.
               {
-                *i=push_front(*i,lps_old_action);
+                i->push_front(lps_old_action);
               }
             }
 
@@ -703,7 +703,7 @@ lps::specification action_rename(
                 }
                 else
                 {
-                  *i=push_front(*i,renamed_rule_new_action);
+                  i->push_front(renamed_rule_new_action);
                   *i_is_delta=false;
                 }
               }
@@ -714,7 +714,7 @@ lps::specification action_rename(
                  i!=lps_new_actions_temp.end() ; ++i)
             {
               lps_new_actions_is_delta.push_back(false); // An non renamed action is not delta;
-              *i=push_front(*i,lps_old_action);
+              i->push_front(lps_old_action);
             }
 
             lps_new_actions.insert(lps_new_actions.end(),
@@ -755,7 +755,7 @@ lps::specification action_rename(
           for (std::vector < action_list > :: iterator i=lps_new_actions.begin() ;
                i!=lps_new_actions.end() ; ++i)
           {
-            *i = push_front(*i, lps_old_action);
+            i->push_front(lps_old_action);
           }
         }
         mCRL2log(log::debug) << "Action done\n";
@@ -810,7 +810,7 @@ lps::specification action_rename(
              action_rename_spec.action_labels().end(),*i)==action_rename_spec.action_labels().end())
     {
       // Not found;
-      all=push_front(all,*i);
+      all.push_front(*i);
     }
   }
   specification lps_new_spec = specification(

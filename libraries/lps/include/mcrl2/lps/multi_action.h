@@ -67,7 +67,7 @@ class multi_action
 
     /// \brief Constructor
     multi_action(const action& l)
-      : m_actions(atermpp::push_front(action_list(), l)),
+      : m_actions(atermpp::make_list<action>(l)),
         m_time(core::detail::gsMakeNil())
     {}
 

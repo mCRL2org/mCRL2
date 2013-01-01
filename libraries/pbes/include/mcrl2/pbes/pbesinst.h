@@ -223,12 +223,12 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     for (std::set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
     {
       propositional_variable_instantiation temp_pvi = propositional_variable_instantiation(create_propvar_name(pvi->name(), pvi->parameters()), empty_data_expression_list);
-      oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
+      oldpropvarinst_list.push_front(*pvi);
       if (states_done.index(temp_pvi) == -1)  // I.e., temp_pvi is not found.
       {
         states_todo.insert(*pvi);
       }
-      newpropvarinst_list = push_front(newpropvarinst_list, temp_pvi);
+      newpropvarinst_list.push_front(temp_pvi);
     }
 
     // Replace the propvarinsts with the new ones
@@ -304,7 +304,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
             {
               //const data_expression d=i->find(x)->second;
               const data_expression d=(*i)(x);
-              l=push_front(l,d);
+              l.push_front(d);
             }
           sort_enumerations.put(current_sort, l);
         }
@@ -382,9 +382,9 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
 
       for (std::set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
       {
-        oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
+        oldpropvarinst_list.push_front(*pvi);
         propositional_variable_instantiation newpropvarinst = create_naive_propositional_variable_instantiation(*pvi, &sort_enumerations);
-        newpropvarinst_list = push_front(newpropvarinst_list, newpropvarinst);
+        newpropvarinst_list.push_front(newpropvarinst);
       }
 
       //current_expression = propositional_variable_sequence_replace(current_expression, oldpropvarinst_list, newpropvarinst_list);

@@ -1262,7 +1262,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     {
       if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
-        occurred_data_vars = push_front(occurred_data_vars, *i);
+        occurred_data_vars.push_front(*i);
       }
     }
 
@@ -1287,7 +1287,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     {
       if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
-        occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
+        occurred_data_vars.push_front(*i);
       }
     }
 
@@ -1311,7 +1311,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     for (data::data_expression_list::const_iterator l=current_parameters.begin();
          l != current_parameters.end(); ++l)
     {
-      parameters = atermpp::push_front(parameters,
+      parameters.push_front(
                 ((opt_precompile_pbes?
                        data::data_expression(R.rewrite_internal(R.convert_to(*l),sigma_internal)):
                        R(*l,sigma))));
@@ -2350,7 +2350,7 @@ class boolean_equation_system
               data_expression_list resulting_pars;
               for(data_expression_list::const_iterator it=pars.begin(); it!=pars.end(); ++it)
               {
-                resulting_pars=push_front(resulting_pars,Mucks_rewriter.convert_from(*it));
+                resulting_pars.push_front(Mucks_rewriter.convert_from(*it));
               }
               prop_var=propositional_variable_instantiation(prop_var.name(),reverse(resulting_pars));
             }

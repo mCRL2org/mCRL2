@@ -63,7 +63,7 @@ data::variable_list mu_variables(state_formulas::state_formula f)
   data::variable_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = atermpp::push_front(result, i->lhs());
+    result.push_front(i->lhs());
   }
   return atermpp::reverse(result);
 }
@@ -79,7 +79,7 @@ data::data_expression_list mu_expressions(state_formulas::state_formula f)
   data::data_expression_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = atermpp::push_front(result, i->rhs());
+    result.push_front(i->rhs());
   }
   return atermpp::reverse(result);
 }

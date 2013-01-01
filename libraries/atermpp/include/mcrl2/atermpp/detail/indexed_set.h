@@ -65,7 +65,7 @@ inline aterm_list tableContent(const std::vector< std::vector<aterm> > &tableind
     t = tableGet(tableindex, i-1);
     if (t.defined())
     {
-      result = push_front(result, t);
+      result.push_front(t);
     }
   }
   return result;

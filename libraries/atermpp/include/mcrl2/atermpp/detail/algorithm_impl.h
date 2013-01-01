@@ -34,7 +34,7 @@ aterm_list list_apply(const term_list<Term> &l, const Function f)
   aterm_list result;
   for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = push_front(result, aterm(f(*i)));
+    result.push_front(f(*i));
   }
   return reverse(result);
 }

@@ -191,10 +191,12 @@ class Induction
       using namespace atermpp;
       const variable v_variable = f_list_variables[a_variable_number];
       const sort_expression v_variable_sort = data_expression(v_variable).sort();
-      const variable_list v_list_of_variables = push_front(a_list_of_variables, v_variable);
+      variable_list v_list_of_variables = a_list_of_variables;
+      v_list_of_variables.push_front(v_variable);
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_variable);
       const variable v_dummy = get_fresh_dummy(v_dummy_sort);
-      const variable_list v_list_of_dummies = push_front(a_list_of_dummies, v_dummy);
+      variable_list v_list_of_dummies = a_list_of_dummies;
+      v_list_of_dummies.push_front(v_dummy);
       const substitution v_substitution1(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
       const data_expression v_formula_1 = aterm_cast<data_expression>(v_substitution1(a_formula));
       const substitution v_substitution2(v_variable, sort_list::empty(sort_expression(v_variable_sort)));

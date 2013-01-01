@@ -142,23 +142,23 @@ void test_replace_summand_variables()
 void test_action_list()
 {
   sort_expression_list s;
-  s = atermpp::push_front(s, sort_expression(sort_nat::nat()));
+  s.push_front(sort_expression(sort_nat::nat()));
   action_label label(core::identifier_string("a"), s);
 
   variable b("b", data::sort_bool::bool_());
   variable c("c", data::sort_bool::bool_());
   data_expression_list e1;
-  e1 = atermpp::push_front(e1, data_expression(sort_bool::and_(b, c)));
+  e1.push_front(data_expression(sort_bool::and_(b, c)));
   data_expression_list e2;
-  e2 = atermpp::push_front(e2, data_expression(sort_bool::and_(c, c)));
+  e2.push_front(data_expression(sort_bool::and_(c, c)));
 
   action_list l1;
   action a1(label, e1);
-  l1 = atermpp::push_front(l1, a1);
+  l1.push_front(a1);
 
   action_list l2;
   action a2(label, e2);
-  l2 = atermpp::push_front(l2, a2);
+  l2.push_front(a2);
 
   data::mutable_map_substitution<> sigma;
   sigma[b] = c;

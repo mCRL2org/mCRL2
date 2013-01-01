@@ -63,7 +63,7 @@ static aterm_list list_minus(aterm_list l, aterm_list m)
   {
     if (std::find(m.begin(),m.end(),l.front()) == m.end())
     {
-      n = push_front(n,l.front());
+      n.push_front(l.front());
     }
   }
   return reverse(n);
@@ -261,7 +261,9 @@ inline aterm_list ATinsertUnique(const aterm_list &list, const aterm &el)
 {
   if (std::find(list.begin(),list.end(), el) == list.end())
   {
-    return push_front(list, el);
+    aterm_list result=list;
+    result.push_front(el);
+    return result;
   }
   return list;
 }
@@ -290,11 +292,11 @@ aterm_list ATreplace(const aterm_list &list_in, const aterm &el, const size_t id
   /* Skip the old element */
   list = list.tail();
   /* Add the new element */
-  list = push_front(list, el);
+  list.push_front(el);
   /* Add the prefix */
   for (i=idx; i>0; i--)
   {
-    list = push_front(list, aterm(buffer[i-1]));
+    list.push_front(buffer[i-1]);
   }
 
   return list;
@@ -335,8 +337,7 @@ static aterm gsSubstValuesTable(const table &Substs, const aterm &t)
     aterm_list Result;
     while (!((aterm_list) Term).empty())
     {
-      Result = push_front<aterm>(Result,
-                        gsSubstValuesTable(Substs, ((aterm_list) Term).front()));
+      Result.push_front(gsSubstValuesTable(Substs, ((aterm_list) Term).front()));
       Term = ((aterm_list) Term).tail();
     }
     return reverse(Result);
@@ -640,7 +641,7 @@ aterm_appl type_check_mult_act(
           return aterm_appl();
           // return NULL;
         }
-        r=push_front<aterm>(r,o);
+        r.push_front(o);
       }
       Result=mult_act.set_argument(reverse(r),0);
     }
@@ -698,9 +699,9 @@ aterm_list type_check_mult_actions(
         {
           throw mcrl2::runtime_error("Typechecking action failed: "+ core::pp_deprecated(ATAgetFirst(l)));
         }
-        r=push_front<aterm>(r,o);
+        r.push_front(o);
       }
-      result = push_front<aterm>(result,reverse(r));
+      result.push_front(reverse(r));
     }
   }
   else
@@ -932,7 +933,7 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
             break;
           }
 
-          NewRules=push_front<aterm>(NewRules,gsMakeActionRenameRule(VarList,Cond,Left,Right));
+          NewRules.push_front(gsMakeActionRenameRule(VarList,Cond,Left,Right));
         }
         if (!b)
         {
@@ -1104,11 +1105,11 @@ void gstcSplitSortDecls(aterm_list SortDecls, aterm_list* PSortIds,
     aterm_appl SortDecl = ATAgetFirst(SortDecls);
     if (gsIsSortRef(SortDecl))
     {
-      SortRefs = push_front<aterm>(SortRefs, SortDecl);
+      SortRefs.push_front(SortDecl);
     }
     else     //gsIsSortId(SortDecl)
     {
-      SortIds = push_front<aterm>(SortIds, SortDecl);
+      SortIds.push_front(SortDecl);
     }
     SortDecls = SortDecls.tail();
   }
@@ -1240,7 +1241,7 @@ aterm_list gstcFoldSortRefsInSortRefs(aterm_list SortRefs)
     aterm_appl SortRef = ATAgetFirst(SortRefs);
     if (gsMakeSortId(aterm_cast<aterm_appl>(SortRef(0)))!=aterm_cast<aterm_appl>(SortRef(1)))
     {
-      l = push_front<aterm>(l, SortRef);
+      l.push_front(SortRef);
     }
     SortRefs = SortRefs.tail();
   }
@@ -1745,7 +1746,7 @@ static bool gstc_check_for_empty_constructor_domains(aterm_list constructor_list
         for (function_symbol_vector::const_iterator j=r.begin();
              j!=r.end(); ++j)
         {
-          constructor_list=push_front<aterm>(constructor_list,static_cast<aterm_appl>(*j));
+          constructor_list.push_front(aterm_cast<aterm_appl>(*j));
         }
       }
 
@@ -1755,7 +1756,7 @@ static bool gstc_check_for_empty_constructor_domains(aterm_list constructor_list
         for (function_symbol_vector::const_iterator i=r.begin();
              i!=r.end(); ++i)
         {
-          constructor_list=push_front<aterm>(constructor_list,static_cast<aterm_appl>(*i));
+          constructor_list.push_front(aterm_cast<aterm_appl>(*i));
         }
       }
 
@@ -1959,7 +1960,7 @@ static bool gstcReadInActs(aterm_list Acts)
       }
       else
       {
-        Types=Types+push_front<aterm>(aterm_list(),ActType);
+        Types=Types+make_list<aterm>(ActType);
       }
     }
     context.actions.put(ActName,Types);
@@ -2006,7 +2007,7 @@ static bool gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
       }
       else
       {
-        Types=Types+push_front<aterm>(aterm_list(),ProcType);
+        Types=Types+make_list<aterm>(ProcType);
       }
     }
     context.processes.put(ProcName,Types);
@@ -2044,7 +2045,7 @@ static bool gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
     aterm_list PBType;
     for (aterm_list l=PBVars; !l.empty(); l=l.tail())
     {
-      PBType=push_front<aterm>(PBType,aterm_cast<aterm_appl>(ATAgetFirst(l)(1)));
+      PBType.push_front(aterm_cast<aterm_appl>(ATAgetFirst(l)(1)));
     }
     PBType=reverse(PBType);
 
@@ -2073,7 +2074,7 @@ static bool gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
       }
       else
       {
-        Types=Types+push_front<aterm>(aterm_list(),PBType);
+        Types=Types+make_list<aterm>(PBType);
       }
     }
     context.PBs.put(PBName,Types);
@@ -2101,7 +2102,7 @@ static aterm_list gstcWriteProcs(aterm_list oldprocs)
     {
       continue;
     }
-    Result=push_front<aterm>(Result,gsMakeProcEqn(ProcVar,
+    Result.push_front(gsMakeProcEqn(ProcVar,
                     aterm_cast<aterm_list>(body.proc_pars.get(ProcVar)),
                     aterm_cast<aterm_appl>(body.proc_bodies.get(ProcVar))
                                                )
@@ -2122,7 +2123,7 @@ static aterm_list gstcWritePBES(aterm_list oldPBES)
     aterm_list PBType;
     for (aterm_list l=aterm_cast<aterm_list>(PBESVar(1)); !l.empty(); l=l.tail())
     {
-      PBType=push_front<aterm>(PBType,aterm_cast<aterm_appl>(ATAgetFirst(l)(1)));
+      PBType.push_front(aterm_cast<aterm_appl>(ATAgetFirst(l)(1)));
     }
     PBType=reverse(PBType);
 
@@ -2132,7 +2133,7 @@ static aterm_list gstcWritePBES(aterm_list oldPBES)
     {
       continue;
     }
-    Result=push_front<aterm>(Result,PBEqn.set_argument(aterm_cast<aterm_appl>(body.proc_bodies.get(Index)),2));
+    Result.push_front(PBEqn.set_argument(aterm_cast<aterm_appl>(body.proc_bodies.get(Index)),2));
   }
   return reverse(Result);
 }
@@ -2247,7 +2248,7 @@ static bool gstcTransformVarConsTypeData(void)
       }
     }
     DeclaredVars.clear();
-    NewEqns=push_front<aterm>(NewEqns,gsMakeDataEqn(VarList,Cond,Left,Right));
+    NewEqns.push_front(gsMakeDataEqn(VarList,Cond,Left,Right));
   }
   if (b)
   {
@@ -2560,7 +2561,7 @@ static bool gstcReadInSortStruct(aterm_appl SortExpr)
         {
           return false;
         }
-        ConstructorType=push_front<aterm>(ConstructorType,ProjSort);
+        ConstructorType.push_front(ProjSort);
       }
       if (!gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(reverse(ConstructorType),SortExpr)),"constructor"))
       {
@@ -2652,7 +2653,7 @@ static bool gstcAddFunction(aterm_appl OpId, const char* msg, bool allow_double_
     {
       Types=aterm_list();
     }
-    Types=Types+push_front<aterm>(aterm_list(),Sort);
+    Types=Types+make_list<aterm>(Sort);
     context.functions.put(Name,Types);
   }
   mCRL2log(debug) << "Read-in " << msg << " " << core::pp_deprecated(Name) << ". Type " << core::pp_deprecated(Types) << "" << std::endl;
@@ -2673,7 +2674,7 @@ static void gstcAddSystemConstant(aterm_appl OpId)
   {
     Types=aterm_list();
   }
-  Types=Types+push_front<aterm>(aterm_list(),Type);
+  Types=Types+make_list<aterm>(Type);
   gssystem.constants.put(OpIdName,Types);
 }
 
@@ -2692,7 +2693,7 @@ static void gstcAddSystemFunction(aterm_appl OpId)
   {
     Types=aterm_list();
   }
-  Types=Types+push_front<aterm>(aterm_list(),Type);  // TODO: Avoid concatenate but the order is essential.
+  Types=Types+make_list<aterm>(Type);  // TODO: Avoid concatenate but the order is essential.
   gssystem.functions.put(OpIdName,Types);
 }
 
@@ -2810,7 +2811,7 @@ static aterm_appl gstcRewrActProc(const table &Vars, aterm_appl ProcTerm, bool i
       aterm_list Par=ATLgetFirst(ParList);
       if (Par.size()==nFactPars)
       {
-        NewParList=push_front<aterm>(NewParList,Par);
+        NewParList.push_front(Par);
       }
     }
     ParList=reverse(NewParList);
@@ -2854,8 +2855,8 @@ static aterm_appl gstcRewrActProc(const table &Vars, aterm_appl ProcTerm, bool i
       mCRL2log(error) << "cannot typecheck " << core::pp_deprecated(Par) << " as type " << core::pp_deprecated(gstcExpandNumTypesDown(PosType)) << " (while typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       return aterm_appl();
     }
-    NewPars=push_front<aterm>(NewPars,Par);
-    NewPosTypeList=push_front<aterm>(NewPosTypeList,NewPosType);
+    NewPars.push_front(Par);
+    NewPosTypeList.push_front(NewPosType);
   }
   NewPars=reverse(NewPars);
   NewPosTypeList=reverse(NewPosTypeList);
@@ -2883,8 +2884,8 @@ static aterm_appl gstcRewrActProc(const table &Vars, aterm_appl ProcTerm, bool i
         return aterm_appl();
       }
 
-      NewPars=push_front<aterm>(NewPars,Par);
-      CastedPosTypeList=push_front<aterm>(CastedPosTypeList,CastedNewPosType);
+      NewPars.push_front(Par);
+      CastedPosTypeList.push_front(CastedNewPosType);
     }
     NewPars=reverse(NewPars);
     NewPosTypeList=reverse(CastedPosTypeList);
@@ -2978,13 +2979,13 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
         aterm_list FormalParNames;
         for (; !FormalPars.empty(); FormalPars=FormalPars.tail())
         {
-          FormalParNames=push_front<aterm>(FormalParNames,aterm_cast<aterm_appl>(ATAgetFirst(FormalPars)(0)));
+          FormalParNames.push_front(aterm_cast<aterm_appl>(ATAgetFirst(FormalPars)(0)));
         }
 
         aterm_list l=list_minus(As.keys(),FormalParNames);
         if (l.empty())
         {
-          NewParList=push_front<aterm>(NewParList,Par);
+          NewParList.push_front(Par);
         }
         else
         {
@@ -3020,7 +3021,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
         {
           ActualPar=gsMakeId(FormalParName);
         }
-        ActualPars=push_front<aterm>(ActualPars,ActualPar);
+        ActualPars.push_front(ActualPar);
       }
       ActualPars=reverse(ActualPars);
     }
@@ -3054,7 +3055,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
       {
         continue;
       }
-      TypedAssignments=push_front<aterm>(TypedAssignments,a);
+      TypedAssignments.push_front(a);
     }
     TypedAssignments=reverse(TypedAssignments);
 
@@ -3225,7 +3226,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
             aterm_appl Act=ATAgetFirst(MActFrom);
             if (std::find(Acts.begin(),Acts.end(),Act)==Acts.end())
             {
-              Acts=push_front<aterm>(Acts,Act);
+              Acts.push_front(Act);
             }
           }
           for (; !Acts.empty(); Acts=Acts.tail())
@@ -3238,7 +3239,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
             }
             else
             {
-              ActsFrom=push_front<aterm>(ActsFrom,Act);
+              ActsFrom.push_front(Act);
             }
           }
         }
@@ -3280,7 +3281,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
           }
           else
           {
-            MActs=push_front<aterm>(MActs,MAct);
+            MActs.push_front(MAct);
           }
         }
       }
@@ -3689,8 +3690,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
         // The variable in WhereElem is just a string and needs to be transformed to a DataVarId.
         NewWhereVar=gsMakeDataVarId(aterm_cast<aterm_appl>(WhereElem(0)),WhereType);
       }
-      WhereVarList=push_front<aterm>(WhereVarList,NewWhereVar);
-      NewWhereList=push_front<aterm>(NewWhereList,gsMakeDataVarIdInit(NewWhereVar,WhereTerm));
+      WhereVarList.push_front(NewWhereVar);
+      NewWhereList.push_front(gsMakeDataVarIdInit(NewWhereVar,WhereTerm));
     }
     NewWhereList=reverse(NewWhereList);
 
@@ -3766,7 +3767,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
               return aterm_appl();
             }
           }
-          NewArguments=push_front<aterm>(NewArguments,Argument);
+          NewArguments.push_front(Argument);
           Type_is_stable=Type_is_stable && (Type==Type0);
           Type=Type0;
         }
@@ -3784,7 +3785,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
             {
               return aterm_appl();
             }
-            NewArguments=push_front<aterm>(NewArguments,Argument);
+            NewArguments.push_front(Argument);
             Type=Type0;
           }
         }
@@ -3850,7 +3851,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument) << ")" << std::endl;
             return aterm_appl();
           }
-          NewArguments=push_front<aterm>(NewArguments,Argument);
+          NewArguments.push_front(Argument);
           Type=Type0;
         }
         Arguments=reverse(NewArguments);
@@ -3926,8 +3927,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
             mCRL2log(error) << "not possible to cast number to " << core::pp_deprecated(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
             return aterm_appl();
           }
-          NewArguments=push_front<aterm>(NewArguments,Argument0);
-          NewArguments=push_front<aterm>(NewArguments,Argument1);
+          NewArguments.push_front(Argument0);
+          NewArguments.push_front(Argument1);
           Type=Type0;
         }
         Arguments=reverse(NewArguments);
@@ -3947,8 +3948,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         return aterm_appl();
       }
-      NewArguments=push_front<aterm>(NewArguments,Arg);
-      NewArgumentTypes=push_front<aterm>(NewArgumentTypes,Type);
+      NewArguments.push_front(Arg);
+      NewArgumentTypes.push_front(Type);
     }
     Arguments=reverse(NewArguments);
     aterm_list ArgumentTypes=reverse(NewArgumentTypes);
@@ -4036,8 +4037,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
           }
           Type=NewArgType;
         }
-        NewArguments=push_front<aterm>(NewArguments,Arg);
-        NewArgumentTypes=push_front<aterm>(NewArgumentTypes,Type);
+        NewArguments.push_front(Arg);
+        NewArgumentTypes.push_front(Type);
       }
       Arguments=reverse(NewArguments);
       ArgumentTypes=reverse(NewArgumentTypes);
@@ -4110,8 +4111,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
           Type=NewArgType;
         }
 
-        NewArguments=push_front<aterm>(NewArguments,Arg);
-        NewArgumentTypes=push_front<aterm>(NewArgumentTypes,Type);
+        NewArguments.push_front(Arg);
+        NewArgumentTypes.push_front(Type);
       }
       Arguments=reverse(NewArguments);
       ArgumentTypes=reverse(NewArgumentTypes);
@@ -4239,7 +4240,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
         aterm_appl Par=ATAgetFirst(ParList);
         if (aterm()!=(Par=gstcTypeMatchA(Par,PosType)))
         {
-          NewParList=push_front<aterm>(NewParList,Par);
+          NewParList.push_front(Par);
         }
       }
       ParList=reverse(NewParList);
@@ -4449,7 +4450,7 @@ static aterm_appl gstcTraverseVarConsTypeDN(
           {
             continue;
           }
-          NewParList=push_front<aterm>(NewParList,Par);
+          NewParList.push_front(Par);
         }
         ParList=reverse(NewParList);
       }
@@ -4854,7 +4855,7 @@ static aterm_list gstcGetNotInferredList(aterm_list TypeListList)
       // Sort=multiple_possible_sorts(atermpp::aterm_list(reverse(Pars[i-1])));
       Sort=multiple_possible_sorts(sort_expression_list(reverse(Pars[i-1])));
     }
-    Result=push_front<aterm>(Result,Sort);
+    Result.push_front(Sort);
   }
   // free(Pars);
   return Result;
@@ -5016,7 +5017,9 @@ static aterm_list gstcInsertType(aterm_list TypeList, aterm_appl Type)
       return TypeList;
     }
   }
-  return push_front<aterm>(TypeList,Type);
+  aterm_list result=TypeList;
+  result.push_front(Type);
+  return result; 
 }
 
 static aterm_list gstcTypeListsIntersect(aterm_list TypeListList1, aterm_list TypeListList2)
@@ -5030,7 +5033,7 @@ static aterm_list gstcTypeListsIntersect(aterm_list TypeListList1, aterm_list Ty
     aterm_list TypeList2=ATLgetFirst(TypeListList2);
     if (gstcInTypesL(TypeList2,TypeListList1))
     {
-      Result=push_front<aterm>(Result,TypeList2);
+      Result.push_front(TypeList2);
     }
   }
   return reverse(Result);
@@ -5064,7 +5067,7 @@ static aterm_list gstcAdjustNotInferredList(aterm_list PosTypeList, aterm_list T
     aterm_list TypeList=ATLgetFirst(TypeListList);
     if (gstcIsTypeAllowedL(TypeList,PosTypeList))
     {
-      NewTypeListList=push_front<aterm>(NewTypeListList,TypeList);
+      NewTypeListList.push_front(TypeList);
     }
   }
   if (NewTypeListList.empty())
@@ -5143,7 +5146,7 @@ static aterm_appl gstcTypeMatchA(aterm_appl Type, aterm_appl PosType)
       {
         mCRL2log(debug) << "Match gstcTypeMatchA Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) <<
                     " New Type: " << core::pp_deprecated(NewPosType) << "" << std::endl;
-        NewTypeList=push_front<aterm>(NewTypeList,NewPosType);
+        NewTypeList.push_front(NewPosType);
       }
     }
     if (NewTypeList.empty())
@@ -5269,7 +5272,7 @@ static aterm_list gstcTypeMatchL(aterm_list TypeList, aterm_list PosTypeList)
     {
       return aterm_list(aterm_appl());
     }
-    Result=push_front<aterm>(Result,Type);
+    Result.push_front(Type);
   }
   return reverse(Result);
 }
@@ -5300,7 +5303,7 @@ static aterm_appl gstcUnwindType(aterm_appl Type)
     aterm_list NewArgs;
     for (; !Args.empty(); Args=Args.tail())
     {
-      NewArgs=push_front<aterm>(NewArgs,gstcUnwindType(ATAgetFirst(Args)));
+      NewArgs.push_front(gstcUnwindType(ATAgetFirst(Args)));
     }
     NewArgs=reverse(NewArgs);
     Type=Type.set_argument(NewArgs,0);
@@ -5354,7 +5357,7 @@ static aterm_appl gstcUnSet(aterm_appl PosType)
       {
         continue;
       }
-      NewPosTypes=push_front<aterm>(NewPosTypes,NewPosType);
+      NewPosTypes.push_front(NewPosType);
     }
     NewPosTypes=reverse(NewPosTypes);
     return multiple_possible_sorts(sort_expression_list(NewPosTypes));
@@ -5397,7 +5400,7 @@ static aterm_appl gstcUnBag(aterm_appl PosType)
       {
         continue;
       }
-      NewPosTypes=push_front<aterm>(NewPosTypes,NewPosType);
+      NewPosTypes.push_front(NewPosType);
     }
     NewPosTypes=reverse(NewPosTypes);
     return multiple_possible_sorts(sort_expression_list(NewPosTypes));
@@ -5440,7 +5443,7 @@ static aterm_appl gstcUnList(aterm_appl PosType)
       {
         continue;
       }
-      NewPosTypes=push_front<aterm>(NewPosTypes,NewPosType);
+      NewPosTypes.push_front(NewPosType);
     }
     NewPosTypes=reverse(NewPosTypes);
     return multiple_possible_sorts(sort_expression_list(NewPosTypes));
@@ -5516,7 +5519,7 @@ static aterm_list gstcGetVarTypes(aterm_list VarDecls)
   aterm_list Result;
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
   {
-    Result=push_front<aterm>(Result,aterm_cast<aterm_appl>(ATAgetFirst(VarDecls)(1)));
+    Result.push_front(aterm_cast<aterm_appl>(ATAgetFirst(VarDecls)(1)));
   }
   return reverse(Result);
 }
@@ -5552,7 +5555,7 @@ static aterm_appl replace_possible_sorts(aterm_appl Type)
     aterm_list NewTypeList;
     for (aterm_list TypeList=aterm_cast<aterm_list>(Type(0)); !TypeList.empty(); TypeList=TypeList.tail())
     {
-      NewTypeList=push_front<aterm>(NewTypeList,replace_possible_sorts(ATAgetFirst(TypeList)));
+      NewTypeList.push_front(replace_possible_sorts(ATAgetFirst(TypeList)));
     }
     aterm_appl ResultType=aterm_cast<aterm_appl>(Type(1));
     return gsMakeSortArrow(reverse(NewTypeList),replace_possible_sorts(ResultType));
@@ -5731,7 +5734,7 @@ static aterm_appl gstcExpandNumTypesUp(aterm_appl Type)
     aterm_list NewTypeList;
     for (aterm_list TypeList=aterm_cast<aterm_list>(Type(0)); !TypeList.empty(); TypeList=TypeList.tail())
     {
-      NewTypeList=push_front<aterm>(NewTypeList,gstcExpandNumTypesUp(gstcUnwindType(ATAgetFirst(TypeList))));
+      NewTypeList.push_front(gstcExpandNumTypesUp(gstcUnwindType(ATAgetFirst(TypeList))));
     }
     aterm_appl ResultType=aterm_cast<aterm_appl>(Type(1));
     if (!gsIsSortArrow(ResultType))
@@ -5829,7 +5832,7 @@ static bool gstcMActEq(aterm_list MAct1, aterm_list MAct2)
     }
     else
     {
-      NewMAct2=push_front<aterm>(NewMAct2,Act2);
+      NewMAct2.push_front(Act2);
     }
   }
   return false;
@@ -6437,7 +6440,7 @@ static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Argument
     {
       continue;
     }
-    NewCandidateList=push_front<aterm>(NewCandidateList,aterm_cast<aterm_list>(Candidate(0)));
+    NewCandidateList.push_front(aterm_cast<aterm_list>(Candidate(0)));
   }
   CandidateList=reverse(NewCandidateList);
 
@@ -6453,12 +6456,12 @@ static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Argument
       aterm_list List=ATLgetFirst(l);
       if (!List.empty())
       {
-        NewList=push_front<aterm>(NewList,ATAgetFirst(List));
+        NewList.push_front(ATAgetFirst(List));
         NewCurrentCandidateList=ATinsertUnique(NewCurrentCandidateList,List.tail());
       }
       else
       {
-        NewCurrentCandidateList=push_front<aterm>(NewCurrentCandidateList,aterm_list());
+        NewCurrentCandidateList.push_front(aterm_list());
       }
     }
     if (NewList.empty())
@@ -6466,7 +6469,7 @@ static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Argument
       break;
     }
     CurrentCandidateList=reverse(NewCurrentCandidateList);
-    CandidateList=push_front<aterm>(CandidateList,reverse(NewList));
+    CandidateList.push_front(reverse(NewList));
   }
   CandidateList=reverse(CandidateList);
 
@@ -6640,7 +6643,7 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
         }
       }
 
-      r=push_front<aterm>(r,Par);
+      r.push_front(Par);
     }
 
     if (!success)
@@ -6705,8 +6708,8 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
         }
       }
 
-      r=push_front<aterm>(r,o.set_argument(VarInit,1));
-      t=push_front<aterm>(t,VarType);
+      r.push_front(o.set_argument(VarInit,1));
+      t.push_front(VarType);
     }
 
     if (!success)
@@ -6880,7 +6883,7 @@ static aterm_appl gstcTraverseActFrm(const table &Vars, aterm_appl ActFrm)
       {
         return aterm_appl();
       }
-      r=push_front<aterm>(r,o);
+      r.push_front(o);
     }
     return ActFrm.set_argument(reverse(r),0);
   }

@@ -707,7 +707,7 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
     const assignment_expression_list lv=assignment_expression_list(t(1));
     for(assignment_expression_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
     {
-      bound_vars=push_front(bound_vars,it->lhs());
+      bound_vars.push_front(it->lhs());
       get_free_variables(it->rhs(),result); 
     } 
     for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)

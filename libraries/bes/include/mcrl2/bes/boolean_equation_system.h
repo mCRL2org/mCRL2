@@ -219,7 +219,7 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
   for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = boolean_equation_to_aterm(*i);
-    eqn_list = atermpp::push_front(eqn_list, a);
+    eqn_list.push_front(a);
   }
   return core::detail::gsMakeBES(eqn_list, p.initial_state());
 }

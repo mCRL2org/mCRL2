@@ -62,7 +62,7 @@ void test_aterm_list()
   atermpp::aterm f = q.front(); // f == 1
   BOOST_CHECK(f == aterm_int(1));
 
-  q = push_front(q, read_term_from_string("[5,6]")); // q == [[5,6],1,2,3,4]
+  q.push_front(read_term_from_string("[5,6]")); // q == [[5,6],1,2,3,4]
 
   stringstream os;
   for (aterm_list::iterator i = q.begin(); i != q.end(); ++i)
@@ -96,12 +96,12 @@ void test_set_operations()
   atermpp::aterm z = read_term_from_string("z");
 
   aterm_list l;
-  l = push_front(l, x);
-  l = push_front(l, y);
+  l.push_front(x);
+  l.push_front(y);
 
   aterm_list m;
-  m = push_front(m, z);
-  m = push_front(m, x);
+  m.push_front(z);
+  m.push_front(x);
 
   // aterm_list lm_union = term_list_union(l, m);
   // BOOST_CHECK(lm_union.size() == 3);

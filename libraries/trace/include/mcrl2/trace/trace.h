@@ -708,7 +708,7 @@ class Trace
         if (i<actions.size())
         {
           assert(actions.size()>i);
-          trace = push_front(trace,atermpp::aterm(makeTimedMAct(actions[i])));
+          trace.push_front(atermpp::aterm(makeTimedMAct(actions[i])));
         }
         if (states.size()>i)
         {
@@ -718,9 +718,9 @@ class Trace
           const state & s=states[i];
           for(mcrl2::lps::state::const_reverse_iterator j=s.rbegin(); j!=s.rend(); ++j)
           {
-            l=push_front(l,atermpp::aterm(*j));
+            l.push_front(atermpp::aterm(*j));
           }
-          trace = push_front(trace,atermpp::aterm(l));
+          trace.push_front(atermpp::aterm(l));
         }
       }
 

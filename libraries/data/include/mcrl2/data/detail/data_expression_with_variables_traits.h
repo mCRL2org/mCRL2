@@ -159,7 +159,7 @@ struct term_traits<data::data_expression_with_variables>
   static inline
   term_type variable2term(variable_type v)
   {
-    return term_type(v, atermpp::push_front(data::variable_list(), v));
+    return term_type(v, make_list(v));
   }
 
   /// \brief Test if a term is a variable

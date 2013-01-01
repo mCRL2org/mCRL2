@@ -73,7 +73,7 @@ variable_list get_real_variables(const variable_list& l)
   {
     if (i->sort() == sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
@@ -90,7 +90,7 @@ variable_list get_nonreal_variables(const variable_list& l)
   {
     if (i->sort() != sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
@@ -114,7 +114,7 @@ assignment_list get_real_assignments(const assignment_list& l)
   {
     if (i->lhs().sort() == sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
@@ -146,7 +146,7 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
   {
     if (i->lhs().sort() != sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
@@ -253,12 +253,12 @@ static void split_condition(
     }
     if (negate)
     {
-      real_conditions.push_back(push_front(data_expression_list(),negate_inequality(e)));
+      real_conditions.push_back(make_list(negate_inequality(e)));
       non_real_conditions.push_back(data_expression_list());
     }
     else
     {
-      real_conditions.push_back(push_front(data_expression_list(),e));
+      real_conditions.push_back(make_list(e));
       non_real_conditions.push_back(data_expression_list());
     }
   }
@@ -276,13 +276,12 @@ static void split_condition(
     }
     if (negate)
     {
-      non_real_conditions.push_back(push_front(data_expression_list(),
-                                    data_expression(sort_bool::not_(e))));
+      non_real_conditions.push_back(make_list(data_expression(sort_bool::not_(e))));
       real_conditions.push_back(data_expression_list());
     }
     else
     {
-      non_real_conditions.push_back(push_front(data_expression_list(),e));
+      non_real_conditions.push_back(make_list(e));
       real_conditions.push_back(data_expression_list());
     }
   }
@@ -352,11 +351,11 @@ static void normalize_specification(
           if (s1.count(*k)==0)
           {
             // The variable does not occur in the parameters. We can eliminate it using Fourier-Motzkin
-            eliminatable_real_sum_variables=push_front(eliminatable_real_sum_variables,*k);
+            eliminatable_real_sum_variables.push_front(*k);
           }
           else
           {
-            real_sum_variables=push_front(real_sum_variables,*k);
+            real_sum_variables.push_front(*k);
           }
         }
 
@@ -670,12 +669,12 @@ static void add_summand(summand_information& summand_info,
       {
         if (negate)
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),
+          nextstate.push_front(assignment(c_complete->get_variable(),
                                make_application(negate_function_symbol(cs.sort()),c->get_variable())));
         }
         else
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),c->get_variable()));
+          nextstate.push_front(assignment(c_complete->get_variable(),c->get_variable()));
         }
         success=true;
       }
@@ -694,7 +693,7 @@ static void add_summand(summand_information& summand_info,
       if (is_inconsistent(nextstate_condition,r))
       {
         // mCRL2log(debug) << "ASSIGNMENT: " << c_complete->get_variable() << " := " << data_expression(cs.larger()) << "\n";
-        nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.larger())));
+        nextstate.push_front(assignment(c_complete->get_variable(),data_expression(cs.larger())));
       }
       else
       {
@@ -702,11 +701,11 @@ static void add_summand(summand_information& summand_info,
             substituted_lowerbound,linear_inequality::less_eq,r);
         if (is_inconsistent(nextstate_condition,r))
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.smaller())));
+          nextstate.push_front(assignment(c_complete->get_variable(),data_expression(cs.smaller())));
         }
         else
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.equal())));
+          nextstate.push_front(assignment(c_complete->get_variable(),data_expression(cs.equal())));
         }
       }
       nextstate_condition.pop_back();
@@ -737,12 +736,12 @@ static void add_summand(summand_information& summand_info,
         action_label_it=(action_label_map.insert(
                            std::pair< std::pair< std::string, sort_expression_list >,std::string>
                            (p,may_action_label))).first;
-        a=push_front(a,action_label(may_action_label,sorts));
+        a.push_front(action_label(may_action_label,sorts));
         protect_against_garbage_collect.push_back(sorts);
       }
 
       action_label may_action_label(action_label_it->second,sorts);
-      resulting_actions=push_front(resulting_actions,action(may_action_label,args));
+      resulting_actions.push_front(action(may_action_label,args));
     }
     new_actions=reverse(resulting_actions);
   }
@@ -804,7 +803,7 @@ assignment_list determine_process_initialization(
       assert(r(greater(left, right)) == sort_bool::true_());
       ass = assignment(i->get_variable(), c.larger());
     }
-    init = push_front(init, ass);
+    init.push_front(ass);
   }
   return reverse(init);
 }
@@ -1082,7 +1081,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   variable_list process_parameters = reverse(nonreal_parameters);
   for (context_type::const_iterator i = context.begin(); i != context.end(); ++i)
   {
-    process_parameters = push_front(process_parameters, i->get_variable());
+    process_parameters.push_front(i->get_variable());
   }
   process_parameters = reverse(process_parameters);
 

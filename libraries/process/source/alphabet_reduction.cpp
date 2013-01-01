@@ -57,7 +57,7 @@ namespace mcrl2
         atermpp::term_list <T> r;
         for (typename std::multiset <T> :: const_iterator i=l.begin(); i!=l.end(); ++i)
         {
-          r=push_front(r,*i);
+          r.push_front(*i);
         }
         return r;
       }
@@ -76,7 +76,7 @@ namespace mcrl2
         {
           if (std::find(m.begin(),m.end(),*i)!=m.end())
           {
-            r=push_front(r,*i);
+            r.push_front(*i);
           }
         }
         return reverse(r);
@@ -90,7 +90,7 @@ namespace mcrl2
         {
           if (*i!=e)
           {
-            r=push_front(r,*i);
+            r.push_front(*i);
           }
         }
         return r;
@@ -118,7 +118,7 @@ namespace mcrl2
         lps::action_label_list r;
         for (identifier_string_list::const_iterator i=ma.begin(); i!=ma.end(); ++i)
         {
-          r=push_front(r,lps::action_label(*i,s));
+          r.push_front(lps::action_label(*i,s));
         }
         return gsaATsortList(r);
       }
@@ -127,11 +127,11 @@ namespace mcrl2
       {
         // Always insert empty list also.
         atermpp::term_list < core::identifier_string_list > result;
-        result=push_front(result,core::identifier_string_list());
+        result.push_front(core::identifier_string_list());
 
         for(action_name_multiset_list::const_iterator i=l.begin(); i!=l.end(); ++i)
         {
-          result=push_front(result,i->names());
+          result.push_front(i->names());
         }
         return reverse(result);
       }
@@ -144,7 +144,7 @@ namespace mcrl2
           // An action_name_multiset_list contains the empty multi_action by default, but it cannot be part of it.
           if (!i->empty())
           { 
-            result=push_front(result,action_name_multiset(*i));
+            result.push_front(action_name_multiset(*i));
           }
         }
         return reverse(result);
@@ -166,7 +166,7 @@ namespace mcrl2
         atermpp::term_list<T> result;
         for (typename std::set<T>::const_iterator i=r.begin(); i!=r.end(); ++i)
         {
-          result=push_front(result,*i);
+          result.push_front(*i);
         }
         return result;
       }
@@ -183,7 +183,7 @@ namespace mcrl2
           {
             if (std::find(m.begin(),m.end(),*i) == m.end()) // Not found
             {
-              n = push_front(n,*i); 
+              n.push_front(*i); 
             }
           }
           return reverse(n);
@@ -196,7 +196,7 @@ namespace mcrl2
         {
           if (std::find(m.begin(),m.end(),i->name()) == m.end())
           {
-            n = push_front(n,*i);
+            n.push_front(*i);
           }
         }
         return reverse(n);
@@ -221,7 +221,7 @@ namespace mcrl2
         atermpp::term_list < core::identifier_string_list > m;
         for (std::vector < std::multiset < identifier_string > > ::const_iterator i=V.begin(); i!=V.end(); ++i)
         {
-          m=push_front(m,detail::to_list(*i));
+          m.push_front(detail::to_list(*i));
         }
         return m;
       }
@@ -268,7 +268,7 @@ namespace mcrl2
         {
           if (std::find(ul.begin(),ul.end(),*i) != ul.end())
           {
-            m = push_front(m,*i);
+            m.push_front(*i);
           }
         }
         return reverse(m);
@@ -280,7 +280,7 @@ namespace mcrl2
         atermpp::term_list < core::identifier_string_list > m;
         for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
         {
-          m = push_front(m,gsaATsortList(*i));
+          m.push_front(gsaATsortList(*i));
         }
 
         return reverse(m);
@@ -294,7 +294,7 @@ namespace mcrl2
         {
           action_name_multiset lhs=i->action_name(); 
           lhs=action_name_multiset(gsaATsortList(lhs.names()));
-          m = push_front(m,communication_expression(lhs,i->name()));
+          m.push_front(communication_expression(lhs,i->name()));
         }
 
         return reverse(m);
@@ -402,7 +402,7 @@ namespace mcrl2
         {
           if (std::find(I.begin(),I.end(),*i)== I.end())
           {
-            r=push_front(r,*i);
+            r.push_front(*i);
           }
         }
         return reverse(r);
@@ -423,7 +423,7 @@ namespace mcrl2
                  std::find(V.begin(),V.end(),maH)!=V.end()) 
                        && std::find(r.begin(),r.end(),ma)==r.end())
           {
-            r=push_front(r,ma);
+            r.push_front(ma);
           }
         }
         return reverse(r);
@@ -445,7 +445,7 @@ namespace mcrl2
         for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
         {
           assert(!gsIsNil(i->name()));
-          l = push_front(l,i->name());
+          l.push_front(i->name());
         }
         return reverse(l);
       }
@@ -482,14 +482,14 @@ namespace mcrl2
           {
             if (i->name()==j->source())
             {
-              m = push_front(m,lps::action_label(j->target(),i->sorts())); 
+              m.push_front(lps::action_label(j->target(),i->sorts())); 
               b=true;
               break;
             }
           }
           if (!b)
           {
-            m = push_front(m,*i);
+            m.push_front(*i);
           }
         }
         return gsaATsortList(m);
@@ -513,7 +513,7 @@ namespace mcrl2
       action_label_list_list m;
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        m = push_front(m,detail::apply_rename(*i,R));
+        m.push_front(detail::apply_rename(*i,R));
       }
       return reverse(m);
     }
@@ -532,7 +532,8 @@ namespace mcrl2
         return untypes[MAct];
       }
 
-      core::identifier_string_list r=push_front(untypeMA(pop_front(MAct)),MAct.front().name());
+      core::identifier_string_list r=untypeMA(pop_front(MAct));
+      r.push_front(MAct.front().name());
       r=detail::gsaATsortList(r);
       untypes[MAct]=r;
       return r;
@@ -550,7 +551,7 @@ namespace mcrl2
       atermpp::term_list < core::identifier_string_list > R;
       for(std::set < core::identifier_string_list >::const_iterator j=name_set.begin(); j!=name_set.end(); ++j)
       { 
-        R=push_front(R,*j);
+        R.push_front(*j);
       }
       return R;
 
@@ -584,7 +585,7 @@ namespace mcrl2
         }
         if (b)
         {
-          m = push_front(m,*i);
+          m.push_front(*i);
         }
       }
       return reverse(m);
@@ -602,12 +603,12 @@ namespace mcrl2
         {
           if (std::find(I.begin(),I.end(),j->name())== I.end())
           {
-            new_ma=push_front(new_ma,*j);
+            new_ma.push_front(*j);
           }
         }
         if (new_ma.size()>0 && std::find(m.begin(),m.end(),new_ma)==m.end())
         {
-          m=push_front(m,reverse(new_ma));
+          m.push_front(reverse(new_ma));
         }
       }
       return reverse(m);
@@ -623,7 +624,7 @@ namespace mcrl2
       {
         if (std::find(V.begin(),V.end(),untypeMA(*i)) != V.end())
         {
-          m = push_front(m,*i);
+          m.push_front(*i);
         }
       }
       return reverse(m);
@@ -650,7 +651,7 @@ namespace mcrl2
         {
           if (VV.count(sync_mact(*i,*j))>0)
           {
-            m = push_front(m,ma);
+            m.push_front(ma);
             break;
           }
         }
@@ -675,7 +676,7 @@ namespace mcrl2
       atermpp::term_list < core::identifier_string_list > result;
       for (std::set <  core::identifier_string_list >::const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
       {
-        result=push_front(result,*i);
+        result.push_front(*i);
       }
       return result;
     }
@@ -714,7 +715,7 @@ namespace mcrl2
       action_label_list_list result;
       for (std::set < lps::action_label_list > :: const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
       {
-        result=push_front(result,*i);
+        result.push_front(*i);
       }
       return result;
     }
@@ -751,7 +752,7 @@ namespace mcrl2
       action_label_list_list result;
       for (std::set < lps::action_label_list > :: const_iterator i=all_set.begin(); i!=all_set.end(); ++i)
       {
-        result=push_front(result,*i);
+        result.push_front(*i);
       }
       return result;
     }
@@ -764,7 +765,7 @@ namespace mcrl2
       //As R is not a bijection, this means applying each renaming c->d in R, and leaving
       //the original in place.
 
-      atermpp::term_list< identifier_string_list > m=push_front(atermpp::term_list< identifier_string_list >(),identifier_string_list());
+      atermpp::term_list< identifier_string_list > m=make_list<identifier_string_list>(identifier_string_list());
       if (l.empty())
       {
         return m;
@@ -777,10 +778,10 @@ namespace mcrl2
         {
           if (*i == j->target())
           {
-            temp=push_front(temp,push_front(identifier_string_list(),j->source()));
+            temp.push_front(make_list<identifier_string>(j->source()));
           }
         }
-        temp=push_front(temp,push_front(identifier_string_list(),*i));    
+        temp.push_front(make_list<identifier_string>(*i));    
 
         m = sync_list(m,temp); 
       }
@@ -822,7 +823,7 @@ namespace mcrl2
       lps::action_label_list ll=detail::list_minus_ignore_type(l,detail::comm_lhs(C));
       if (detail::gsaATsortList(l)==detail::gsaATsortList(ll))
       {
-        return push_front(action_label_list_list(),l);  //C does not apply
+        return make_list<lps::action_label_list>(l);  //C does not apply
       }
       
       l=detail::list_minus(l,ll);  //apply to the rest
@@ -833,7 +834,7 @@ namespace mcrl2
       //the result is definitely c).
       //So, the result is an alphabet, not a single multiaction
 
-      action_label_list_list m=push_front(action_label_list_list(),lps::action_label_list());
+      action_label_list_list m=make_list<lps::action_label_list>(lps::action_label_list());
       lps::action_label_list r=l;
       while (r.size() > 0)
       {
@@ -870,11 +871,10 @@ namespace mcrl2
               action_label_list_list tm;
               if (!s.empty())
               {
-                tm=push_front(action_label_list_list(),detail::add_typeMA(c,s));
+                tm=make_list<lps::action_label_list>(detail::add_typeMA(c,s));
               }
               assert(!gsIsNil(rhs_c));
-              tm=detail::merge_list(tm,push_front(action_label_list_list(),
-                                      push_front(lps::action_label_list(),lps::action_label(rhs_c,s))));
+              tm=detail::merge_list(tm,make_list<lps::action_label_list>(make_list<lps::action_label>(lps::action_label(rhs_c,s))));
               m=sync_list(m,tm);
               break;
             }
@@ -882,18 +882,18 @@ namespace mcrl2
         }
         if (!applied)
         {
-          m=sync_list(m,push_front(action_label_list_list(),push_front(lps::action_label_list(),a)));
+          m=sync_list(m,make_list<lps::action_label_list>(make_list<lps::action_label>(a)));
         }
       }
 
       if (!r.empty())
       {
-        m=sync_list(m,push_front(action_label_list_list(),r));
+        m=sync_list(m,make_list<lps::action_label_list>(r));
       } 
 
       if (!ll.empty())
       {
-        m=sync_list(push_front(action_label_list_list(),ll),m);
+        m=sync_list(make_list<lps::action_label_list>(ll),m);
       } 
 
       return m;
@@ -912,11 +912,11 @@ namespace mcrl2
       atermpp::term_list < core::identifier_string_list> nV;
       for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
       {
-        nV=push_front(nV,*i);
+        nV.push_front(*i);
       }
       nV=reverse(nV);
       
-      nV=push_front(nV,core::identifier_string_list()); //to include possible communications to tau
+      nV.push_front(core::identifier_string_list()); //to include possible communications to tau
 
       atermpp::term_list < core::identifier_string_list > r;
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -927,7 +927,7 @@ namespace mcrl2
           atermpp::term_list < core::identifier_string_list > mas=untypeMAL(apply_comms(*i,C));
           if (!detail::gsaATisDisjoint(nV,mas))
           {
-            r=push_front(r,ma);
+            r.push_front(ma);
           }
         }
       }
@@ -955,7 +955,9 @@ namespace mcrl2
         {
           cur=rev[target];
         }
-        rev[target]=push_front(cur,i->action_name().names());
+        atermpp::term_list < core::identifier_string_list > temp=cur;
+        temp.push_front(i->action_name().names());
+        rev[target]=temp;
       }
 
       // for all elements of V get a set of multiactions using the reverse mapping.
@@ -969,18 +971,17 @@ namespace mcrl2
       for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
       {
         core::identifier_string_list v=*i;
-        atermpp::term_list < identifier_string_list > res=push_front(atermpp::term_list < identifier_string_list >(),identifier_string_list()); 
+        atermpp::term_list < identifier_string_list > res=make_list<identifier_string_list >(identifier_string_list()); 
         for (core::identifier_string_list::const_iterator j=v.begin(); j!=v.end(); ++j)
         {
           atermpp::term_list < core::identifier_string_list >  r;
           if (rev.count(*j)>0)
           {
-            r=detail::merge_list(rev[*j],push_front(atermpp::term_list < core::identifier_string_list >(),
-                                             push_front(core::identifier_string_list(),*j)));
+            r=detail::merge_list(rev[*j],make_list<core::identifier_string_list >(make_list<identifier_string>(*j)));
           }
           else
           {
-            r=push_front(atermpp::term_list < core::identifier_string_list >(),push_front(core::identifier_string_list(),*j));
+            r=make_list<core::identifier_string_list >(make_list<identifier_string>(*j));
           }
           res=sync_list(res,r);
         }
@@ -990,7 +991,7 @@ namespace mcrl2
       atermpp::term_list< identifier_string_list > l;
       for(std::set < identifier_string_list >::const_iterator i=m.begin(); i!=m.end(); ++i)
       {
-        l=push_front(l,*i);
+        l.push_front(*i);
       }
 
       return l;
@@ -1015,7 +1016,7 @@ namespace mcrl2
       action_label_list_list l1;
       for(std::set < lps::action_label_list >::const_iterator i=m.begin(); i!=m.end(); ++i)
       {
-        l1=push_front(l1,*i);
+        l1.push_front(*i);
       }
       return l1;
     }
@@ -1084,11 +1085,11 @@ namespace mcrl2
           if ((std::find(lhs.begin(),lhs.end(),*i) != lhs.end()) || 
                  (std::find(rhs.begin(),rhs.end(),*i) != rhs.end()))
           {
-            Ha = push_front(Ha,*i);
+            Ha.push_front(*i);
           }
           else
           {
-            Hc = push_front(Hc,*i);
+            Hc.push_front(*i);
           }
         }
 
@@ -1226,8 +1227,7 @@ namespace mcrl2
       }
       else if (lps::is_action(a))
       {
-        if (std::find(V.begin(),V.end(),
-                 push_front(core::identifier_string_list(),lps::action(a).label().name()))==V.end())
+        if (std::find(V.begin(),V.end(),make_list<identifier_string>(lps::action(a).label().name()))==V.end())
         {
           return delta();
         }
@@ -1643,16 +1643,16 @@ namespace mcrl2
             {
               if (!bq)
               {
-                Ca = push_front(Ca,*i);
+                Ca.push_front(*i);
               }
               else
               {
-                Cp = push_front(Cp,*i);
+                Cp.push_front(*i);
               }
             }
             else if (!bq)
             {
-              Cq = push_front(Cq,*i);
+              Cq.push_front(*i);
             }
           }
           if (!(Cp.empty() && Cq.empty()))
@@ -1762,12 +1762,12 @@ namespace mcrl2
       else if (is_tau(a))
       {
         // return a list containing the empty multi action.
-        l = push_front(action_label_list_list(),lps::action_label_list());
+        l = make_list<lps::action_label_list>(lps::action_label_list());
       }
       else if (lps::is_action(a))
       {
         lps::action_label lab = lps::action(a).label();
-        l = alphas.count(a)>0?alphas[a]:push_front(action_label_list_list(),push_front(lps::action_label_list(),lab));
+        l = alphas.count(a)>0?alphas[a]:make_list<lps::action_label_list>(make_list<lps::action_label>(lab));
       }
       else if (is_process_instance(a))
       {
@@ -1940,7 +1940,7 @@ namespace mcrl2
       }
       else if (lps::is_action(a))
       {
-        alphas[lps::action(a)]=push_front(action_label_list_list(),push_front(lps::action_label_list(),action(a).label()));
+        alphas[lps::action(a)]=make_list<lps::action_label_list>(make_list<lps::action_label>(action(a).label()));
       }
       else if (is_process_instance(a) || is_process_instance_assignment(a))
       {
@@ -2144,12 +2144,12 @@ namespace mcrl2
       {
         process_identifier pn=is_process_instance(a)?process_instance(a).identifier():
                          process_instance_assignment(a).identifier();
-        const process_identifier_list r=push_front(process_identifier_list(),pn);
+        const process_identifier_list r=make_list<process_identifier>(pn);
         if (deps.count(pn)>0)
         {
           return detail::merge_list(r,deps[pn]);
         }
-        return push_front(process_identifier_list(),pn);
+        return make_list<process_identifier>(pn);
       }
       else if (is_sum(a))
       {
@@ -2344,11 +2344,12 @@ namespace mcrl2
         process_identifier_list todo;
         if (deps.count(INIT_KEY())>0)
         {
-          todo=push_front(deps[INIT_KEY()],INIT_KEY());
+          todo=deps[INIT_KEY()];
+          todo.push_front(INIT_KEY());
         }
         else
         {
-          todo=push_front(process_identifier_list(),INIT_KEY());
+          todo=make_list<process_identifier>(INIT_KEY());
         }
 
         for (; !todo.empty(); todo=pop_front(todo))
@@ -2377,11 +2378,12 @@ namespace mcrl2
 
       if (deps.count(INIT_KEY())>0)
       {
-        todo=push_front(deps[INIT_KEY()],INIT_KEY());
+        todo=deps[INIT_KEY()];
+        todo.push_front(INIT_KEY());
       }
       else
       {
-        todo=push_front(process_identifier_list(),INIT_KEY());
+        todo=make_list<process_identifier>(INIT_KEY());
       }
       for (; !todo.empty(); todo=pop_front(todo))
       {
@@ -2408,11 +2410,12 @@ namespace mcrl2
         process_identifier_list todo;
         if (deps.count(INIT_KEY())>0)
         {
-          todo=push_front(deps[INIT_KEY()],INIT_KEY());
+          todo=deps[INIT_KEY()];
+          todo.push_front(INIT_KEY());
         }
         else
         {
-          todo=push_front(process_identifier_list(),INIT_KEY());
+          todo=make_list(INIT_KEY());
         }
         for (; !todo.empty(); todo=pop_front(todo))
         {
@@ -2440,11 +2443,12 @@ namespace mcrl2
 
       if (deps.count(INIT_KEY())>0)
       {
-        todo=push_front(deps[INIT_KEY()],INIT_KEY());
+        todo=deps[INIT_KEY()];
+        todo.push_front(INIT_KEY());
       }
       else
       {
-        todo=push_front(process_identifier_list(),INIT_KEY());
+        todo=make_list(INIT_KEY());
       }
       for (process_identifier_list::const_iterator pr=todo.begin(); pr!=todo.end(); ++pr)
       {
@@ -2461,11 +2465,12 @@ namespace mcrl2
 
       if (deps.count(INIT_KEY())>0)
       {
-        todo=push_front(deps[INIT_KEY()],INIT_KEY());
+        todo=deps[INIT_KEY()];
+        todo.push_front(INIT_KEY());
       }
       else
       {
-        todo=push_front(process_identifier_list(),INIT_KEY());
+        todo=make_list(INIT_KEY());
       }
       stable=false;
       all_stable=false;
@@ -2512,11 +2517,12 @@ namespace mcrl2
           stable=true;
           if (deps.count(INIT_KEY())>0)
           {
-            todo=push_front(deps[INIT_KEY()],INIT_KEY());
+            todo=deps[INIT_KEY()];
+            todo.push_front(INIT_KEY());
           }
           else
           {
-            todo=push_front(process_identifier_list(),INIT_KEY());
+            todo=make_list(INIT_KEY());
           }
 
           for (process_identifier_list::const_iterator i=todo.begin(); i!=todo.end(); ++i)
@@ -2550,7 +2556,7 @@ namespace mcrl2
         process_expression res=procs[pn];
         if (res!=process_expression())
         {
-          new_pr=push_front(new_pr,process_equation(p.identifier(),p.formal_parameters(),res));
+          new_pr.push_front(process_equation(p.identifier(),p.formal_parameters(),res));
           procs.erase(pn);
         }
       }
@@ -2583,7 +2589,7 @@ namespace mcrl2
             }
           }
 
-          new_pr=push_front(new_pr,process_equation(pn,fpars,procs[pn]));
+          new_pr.push_front(process_equation(pn,fpars,procs[pn]));
         }
       }
       new_pr=reverse(new_pr);

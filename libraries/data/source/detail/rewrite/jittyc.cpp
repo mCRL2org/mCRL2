@@ -285,29 +285,29 @@ static void term2seq(const aterm &t, aterm_list* s, size_t *var_cnt)
 
       if (std::find(s->begin(),s->end(),store) != s->end())
       {
-        *s = push_front<aterm>(*s, static_cast<atermpp::aterm>(atermpp::aterm_appl(afunM,t,dummy,dummy)));
+        s->push_front(atermpp::aterm_appl(afunM,t,dummy,dummy));
       }
       else
       {
         (*var_cnt)++;
-        *s = push_front<aterm>(*s, store);
+        s->push_front(store);
       }
     }
     else
     {
       size_t arity = aterm_cast<aterm_appl>(t).function().arity(); 
 
-      *s = push_front<aterm>(*s, atermpp::aterm_appl(afunF,atermpp::aterm_cast<const aterm_appl>(t)(0),dummy,dummy));
+      s->push_front(atermpp::aterm_appl(afunF,atermpp::aterm_cast<const aterm_appl>(t)(0),dummy,dummy));
 
       for (size_t i=1; i<arity; ++i)
       {
         term2seq(atermpp::aterm_cast<const aterm_appl>(t)(i),s,var_cnt);
         if (i<arity-1)
         {
-          *s = push_front<aterm>(*s, atermpp::aterm_appl(afunN,dummy));
+          s->push_front(atermpp::aterm_appl(afunN,dummy));
         }
       }
-      *s = push_front<aterm>(*s, atermpp::aterm_appl(afunD,dummy));
+      s->push_front(atermpp::aterm_appl(afunD,dummy));
     }
   }
   else
@@ -334,7 +334,7 @@ static void get_used_vars_aux(const aterm &t, aterm_list* vars)
     {
       if (find(vars->begin(),vars->end(),t) == vars->end())
       {
-        *vars = push_front<aterm>(*vars,t);
+        vars->push_front(t);
       }
     }
     else
@@ -370,17 +370,17 @@ static aterm_list create_sequence(const data_equation &rule, size_t* var_cnt, co
     term2seq(pat(i),&rseq,var_cnt);
     if (i<pat_arity-1)
     {
-      rseq = push_front<aterm>(rseq, atermpp::aterm_appl(afunN,dummy));
+      rseq.push_front(atermpp::aterm_appl(afunN,dummy));
     }
   }
 
   if (cond.type_is_int() && cond==true_inner)
   {
-    rseq = push_front<aterm>(rseq,atermpp::aterm_appl(afunRe,rslt,get_used_vars(rslt)));
+    rseq.push_front(atermpp::aterm_appl(afunRe,rslt,get_used_vars(rslt)));
   }
   else
   {
-    rseq = push_front<aterm>(rseq, atermpp::aterm_appl(afunCRe,cond,rslt, get_used_vars(cond), get_used_vars(rslt)));
+    rseq.push_front(atermpp::aterm_appl(afunCRe,cond,rslt, get_used_vars(cond), get_used_vars(rslt)));
   }
 
   return reverse(rseq);
@@ -424,11 +424,11 @@ static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_a
 
     if (isD(aterm_cast<aterm_appl>(e.front())))
     {
-      l = push_front<aterm>(l,e.tail());
+      l.push_front(e.tail());
     }
     else if (isN(aterm_cast<aterm_appl>(e.front())))
     {
-      h = push_front<aterm>(h,e.tail());
+      h.push_front(e.tail());
     }
     else if (isRe(aterm_cast<aterm_appl>(e.front())))
     {
@@ -436,11 +436,13 @@ static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_a
     }
     else
     {
-      *cr = push_front<aterm>(*cr,e.front());
+      cr->push_front(e.front());
     }
   }
 
-  return push_front<aterm>(add_to_stack(stack.tail(),l,r,cr),h);
+  aterm_list result=add_to_stack(stack.tail(),l,r,cr);
+  result.push_front(h);
+  return result;
 }
 
 static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, aterm_list* cr)
@@ -453,19 +455,19 @@ static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, 
 
     if (isD(aterm_cast<aterm_appl>(e.front())) || isN(aterm_cast<aterm_appl>(e.front())))
     {
-      l = push_front<aterm>(l,e);
+      l.push_front(e);
     }
     else if (isS(aterm_cast<aterm_appl>(e.front())))
     {
-      pars->Slist = push_front<aterm>(pars->Slist,e);
+      pars->Slist.push_front(e);
     }
     else if (isMe(aterm_cast<aterm_appl>(e.front())))     // M should not appear at the head of a seq
     {
-      pars->Mlist = push_front<aterm>(pars->Mlist,e);
+      pars->Mlist.push_front(e);
     }
     else if (isF(aterm_cast<aterm_appl>(e.front())))
     {
-      pars->Flist = push_front<aterm>(pars->Flist,e);
+      pars->Flist.push_front(e);
     }
     else if (isRe(aterm_cast<aterm_appl>(e.front())))
     {
@@ -473,7 +475,7 @@ static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, 
     }
     else
     {
-      *cr = push_front<aterm>(*cr,e.front());
+      cr->push_front(e.front());
     }
   }
 
@@ -513,11 +515,11 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
     {
       if (l.front()==old)
       {
-        m = push_front<aterm>(m,num);
+        m.push_front(num);
       }
       else
       {
-        m = push_front<aterm>(m,l.front());
+        m.push_front(l.front());
       }
     }
     l = (aterm_list) head(3);
@@ -526,11 +528,11 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
     {
       if (l.front()==old)
       {
-        n = push_front<aterm>(n,num);
+        n.push_front(num);
       }
       else
       {
-        n = push_front<aterm>(n,l.front());
+        n.push_front(l.front());
       }
     }
     head = atermpp::aterm_appl(afunCRe,substs(head(0)),substs(head(1)),m, n);
@@ -543,17 +545,18 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
     {
       if (l.front()==old)
       {
-        m = push_front<aterm>(m,num);
+        m.push_front(num);
       }
       else
       {
-        m = push_front<aterm>(m,l.front());
+        m.push_front(l.front());
       }
     }
     head = atermpp::aterm_appl(afunRe,substs(head(0)),m);
   }
-
-  return push_front<aterm>(subst_var(l,old,new_val,num,substs), head);
+  aterm_list result=subst_var(l,old,new_val,num,substs);
+  result.push_front(head);
+  return result;
 }
 
 static size_t* treevars_usedcnt;
@@ -588,8 +591,8 @@ static aterm_appl build_tree(build_pars pars, size_t i)
 
       e = subst_var(e,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(e.front())(0)), v,aterm_int(k),substitution(aterm_cast<aterm_appl>(e.front())(0),v));
 
-      l = push_front<aterm>(l,e.front());
-      m = push_front<aterm>(m,e.tail());
+      l.push_front(e.front());
+      m.push_front(e.tail());
     }
 
     aterm_appl r;
@@ -635,11 +638,11 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       if (M==aterm_cast<aterm_list>(pars.Mlist.front()).front())
       {
-        l = push_front<aterm>(l,aterm_cast<aterm_list>(pars.Mlist.front()).tail());
+        l.push_front(aterm_cast<aterm_list>(pars.Mlist.front()).tail());
       }
       else
       {
-        m = push_front<aterm>(m,pars.Mlist.front());
+        m.push_front(pars.Mlist.front());
       }
     }
     pars.Mlist = m;
@@ -691,11 +694,11 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     {
       if (aterm_cast<aterm_list>(pars.Flist.front()).front()==F.front())
       {
-        newupstack = push_front<aterm>(newupstack, aterm_cast<aterm_list>(pars.Flist.front()).tail());
+        newupstack.push_front(aterm_cast<aterm_list>(pars.Flist.front()).tail());
       }
       else
       {
-        l = push_front<aterm>(l,pars.Flist.front());
+        l.push_front(pars.Flist.front());
       }
     }
 
@@ -721,7 +724,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     aterm_appl r;
     aterm_list readies;
 
-    pars.stack = push_front<aterm>(pars.stack,aterm_list());
+    pars.stack.push_front(aterm_list());
     l = pars.upstack;
     pars.upstack = aterm_list();
     add_to_build_pars(&pars,l,&r,&readies);
@@ -766,7 +769,8 @@ static aterm_appl build_tree(build_pars pars, size_t i)
       aterm_appl r ;
       aterm_list readies;
 
-      pars.stack = push_front<aterm>(pars.stack.tail(),aterm_list());
+      pars.stack = pars.stack.tail();
+      pars.stack.push_front(aterm_list());
       add_to_build_pars(&pars,l,&r,&readies);
 
       aterm_appl tree;
@@ -811,7 +815,7 @@ static aterm_appl create_tree(const data_equation_list &rules, size_t /*opid*/, 
   size_t total_rule_vars = 0;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    rule_seqs = push_front<aterm>(rule_seqs, create_sequence(*it,&total_rule_vars, true_inner));
+    rule_seqs.push_front(create_sequence(*it,&total_rule_vars, true_inner));
   }
 
   // Generate initial parameters for built_tree
@@ -881,7 +885,7 @@ static variable_list get_doubles(const data_expression &t)
   {
     if (i->second>1)
     {
-      result=atermpp::push_front<variable>(result,i->first);
+      result.push_front(i->first);
     }
   }
   return result;
@@ -894,7 +898,7 @@ static variable_list get_vars(const data_expression &t)
   variable_list result;
   for(std::set < variable >::const_iterator i=s.begin(); i!=s.end(); ++i)
   {
-    result=atermpp::push_front<variable>(result,*i);
+    result.push_front(*i);
   }
   return result;
 }
@@ -996,7 +1000,7 @@ static aterm_list dep_vars(const data_equation &eqn)
       }
     }
     // Add vars used in expression
-    vars = push_front<aterm>(vars, get_vars(pars(i+1)));
+    vars.push_front(get_vars(pars(i+1)));
   }
 
   aterm_list deps;
@@ -1004,7 +1008,7 @@ static aterm_list dep_vars(const data_equation &eqn)
   {
     if (bs[i] && gsIsDataVarId(aterm_cast<aterm_appl>(pars(i+1))))
     {
-      deps = push_front<aterm>(deps,pars(i+1));
+      deps.push_front(pars(i+1));
     }
   }
 
@@ -1140,7 +1144,7 @@ static aterm_list create_strategy(
         }
       }
       // Add vars used in expression
-      vars = push_front<aterm>(vars, get_vars(pars(i+1)));
+      vars.push_front(get_vars(pars(i+1)));
     }
 
     // Create dependency list for this rule
@@ -1150,7 +1154,7 @@ static aterm_list create_strategy(
       // Only if needed and not already rewritten
       if (bs[i] && !used[i])
       {
-        deps = push_front<aterm>(deps, aterm_int(i));
+        deps.push_front(aterm_int(i));
         // Increase dependency count
         args[i] += 1;
         //fprintf(stderr,"dep of arg %i\n",i);
@@ -1159,7 +1163,7 @@ static aterm_list create_strategy(
     deps = reverse(deps);
 
     // Add rule with its dependencies
-    dep_list = push_front<aterm>(dep_list, make_list<aterm>( deps, (aterm_appl)*it));
+    dep_list.push_front(make_list<aterm>( deps, (aterm_appl)*it));
   }
 
   // Process all rules with their dependencies
@@ -1172,11 +1176,11 @@ static aterm_list create_strategy(
     {
       if (aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()).empty())
       {
-        no_deps = push_front<data_equation>(no_deps, data_equation(aterm_cast<aterm_list>(dep_list.front()).tail().front()));
+        no_deps.push_front(data_equation(aterm_cast<aterm_list>(dep_list.front()).tail().front()));
       }
       else
       {
-        has_deps = push_front<aterm>(has_deps,dep_list.front());
+        has_deps.push_front(dep_list.front());
       }
     }
     dep_list = reverse(has_deps);
@@ -1184,7 +1188,7 @@ static aterm_list create_strategy(
     // Create and add tree of collected rules
     if (!no_deps.empty())
     {
-      strat = push_front<aterm>(strat,  create_tree(no_deps,opid,arity,true_inner));
+      strat.push_front(create_tree(no_deps,opid,arity,true_inner));
     }
 
     // Stop if there are no more rules left
@@ -1213,13 +1217,14 @@ static aterm_list create_strategy(
       used[maxidx] = true;
       aterm_int rewr_arg = aterm_int(maxidx);
 
-      strat = push_front<aterm>(strat, rewr_arg);
+      strat.push_front(rewr_arg);
 
       aterm_list l;
       for (; !dep_list.empty(); dep_list=dep_list.tail())
       {
-        l = push_front<aterm>(l, push_front<aterm>(aterm_cast<aterm_list>(dep_list.front()).tail(),
-                    remove_one_element<aterm>(aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()), rewr_arg)));
+        aterm_list temp= aterm_cast<aterm_list>(dep_list.front()).tail();
+        temp.push_front(remove_one_element<aterm>(aterm_cast<aterm_list>(aterm_cast<aterm_list>(dep_list.front()).front()), rewr_arg));
+        l.push_front(temp);
       }
       dep_list = reverse(l);
     }
@@ -1873,7 +1878,7 @@ static aterm add_args(aterm a, size_t num)
 
     while (num > 0)
     {
-      l = l+push_front<aterm>(aterm_list(),gsMakeNil());
+      l = l+make_list<aterm>(gsMakeNil());
       num--;
     }
     return  l;
@@ -1984,7 +1989,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
       {
         fprintf(f,"%sconst atermpp::aterm_appl &%s = arg_not_nf%lu; // S1\n",whitespace(d*2),
                 aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree(0))(0)).function().name().c_str()+1,cur_arg);
-        nnfvars = push_front<aterm>(nnfvars,tree(0));
+        nnfvars.push_front(tree(0));
       }
     }
     else
@@ -2118,7 +2123,7 @@ void RewriterCompilingJitty::implement_tree(
   {
     if (!used[i])
     {
-      nnfvars = push_front<aterm>(nnfvars, aterm_int(i));
+      nnfvars.push_front(aterm_int(i));
     }
   }
 
@@ -2435,7 +2440,7 @@ static aterm toInner_list_odd(const data_expression &t)
     const data_expression_list a=application(t).arguments();
     for (data_expression_list::const_iterator i=a.begin(); i!=a.end(); ++i )
     {
-      l = push_front<aterm>(l,toInner_list_odd(*i));
+      l.push_front(toInner_list_odd(*i));
     }
 
     l = reverse(l);
@@ -2447,7 +2452,7 @@ static aterm toInner_list_odd(const data_expression &t)
     }
     else
     {
-      l = push_front<aterm>(l, arg0);
+      l.push_front(arg0);
     }
     return  l;
   }
@@ -2742,7 +2747,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     {
       jittyc_eqns.resize(main_op_id_index+1);
     }
-    jittyc_eqns[main_op_id_index] = push_front<data_equation>(jittyc_eqns[main_op_id_index],*it);
+    jittyc_eqns[main_op_id_index].push_front(*it);
   }
   fill_always_rewrite_array();
 

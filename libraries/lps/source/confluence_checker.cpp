@@ -513,7 +513,7 @@ specification Confluence_Checker::check_confluence_and_mark(const data_expressio
   action_label_list v_act_decls=f_lps.action_labels();
   if (v_is_marked && !has_ctau_action(f_lps))
   {
-    v_act_decls = push_front(v_act_decls,make_ctau_act_id());
+    v_act_decls.push_front(make_ctau_act_id());
   }
 
   specification v_lps(f_lps.data(),v_act_decls,f_lps.global_variables(),new_process_equation,f_lps.initial_process());

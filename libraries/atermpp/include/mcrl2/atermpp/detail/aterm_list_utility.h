@@ -58,8 +58,9 @@ inline
 atermpp::term_list< Expression > operator+(CompatibleExpression const& m, atermpp::term_list< Expression > l)
 {
   BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
-
-  return atermpp::push_front(l, static_cast< Expression >(m));
+  atermpp::term_list< Expression > result=l;
+  result.push_front(aterm_cast<Expression>(m));
+  return result;
 }
 
 

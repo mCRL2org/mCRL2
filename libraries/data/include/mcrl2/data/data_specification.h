@@ -870,7 +870,9 @@ class data_specification
         {
           // Add the function sort element_sort->Bool to the specification
           // const sort_expression_list l(element_sort);
-          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_bool::bool_()),
+          sort_expression_list element_sorts;
+          element_sorts.push_front(element_sort);
+          import_system_defined_sort(function_sort(element_sorts,sort_bool::bool_()),
                                      sorts_already_added_to_m_normalised_sorts);
 
           // Add a set to the specification.
@@ -898,7 +900,9 @@ class data_specification
           import_system_defined_sort(sort_set::set_(element_sort),sorts_already_added_to_m_normalised_sorts);
 
           // Add the function sort element_sort->Nat to the specification
-          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_nat::nat()),
+          sort_expression_list element_sorts;
+          element_sorts.push_front(element_sort);
+          import_system_defined_sort(function_sort(element_sorts,sort_nat::nat()),
                                      sorts_already_added_to_m_normalised_sorts);
 
           // Add a bag to the specification.

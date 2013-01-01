@@ -79,7 +79,8 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     {
       if (!a_minimal)
       {
-        return push_front(a_path, a_guard);
+        a_path.push_front(a_guard);
+        return a_path;
       }
       else
       {
@@ -89,7 +90,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
         data_expression v_guard_from_set;
         data_expression v_guard_from_path;
 
-        data_expression_list v_set=push_front(data_expression_list(),a_guard);
+        data_expression_list v_set=make_list(a_guard);
         while (v_set != v_auxiliary_set)
         {
           v_auxiliary_set = v_set;
@@ -105,7 +106,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
               v_iterate_over_path = pop_front(v_iterate_over_path);
               if (variables_overlap(v_guard_from_set, v_guard_from_path))
               {
-                v_set = push_front(v_set, v_guard_from_path);
+                v_set.push_front(v_guard_from_path);
                 a_path = remove_one_element(a_path, v_guard_from_path);
               }
             }
@@ -140,7 +141,8 @@ class BDD_Path_Eliminator: public BDD_Simplifier
       bool v_true_branch_enabled = f_smt_solver->is_satisfiable(v_true_condition);
       if (!v_true_branch_enabled)
       {
-        data_expression_list v_false_path = push_front(a_path, v_negated_guard);
+        data_expression_list v_false_path=a_path;
+        v_false_path.push_front(v_negated_guard);
         return aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path);
       }
       else
@@ -149,13 +151,16 @@ class BDD_Path_Eliminator: public BDD_Simplifier
         bool v_false_branch_enabled = f_smt_solver->is_satisfiable(v_false_condition);
         if (!v_false_branch_enabled)
         {
-          data_expression_list v_true_path = push_front(a_path, v_guard);
+          data_expression_list v_true_path = a_path;
+          v_true_path.push_front(v_guard);
           return aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path);
         }
         else
         {
-          data_expression_list v_true_path = push_front(a_path, v_guard);
-          data_expression_list v_false_path = push_front(a_path, v_negated_guard);
+          data_expression_list v_true_path = a_path;
+          v_true_path.push_front(v_guard);
+          data_expression_list v_false_path = a_path;
+          v_false_path.push_front(v_negated_guard);
           return f_bdd_manipulator.make_reduced_if_then_else(
                    v_guard,
                    aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path),

@@ -56,10 +56,10 @@ int test_main(int argc, char** argv)
   // Test whether the front of an action_label_list is working properly.
   
   action_label_list l;
-  l=push_front(l,aX);
+  l.push_front(aX);
   BOOST_CHECK(l.front()==aX);
-  l=push_front(l,aY);
-  l=push_front(l,aY);
+  l.push_front(aY);
+  l.push_front(aY);
   BOOST_CHECK(l.front()==aY);
   action_label_list l1=l;
   BOOST_CHECK(l1.front()==aY);

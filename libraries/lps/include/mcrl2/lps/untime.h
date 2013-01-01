@@ -120,7 +120,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
         // Add a new summation variable (this is allowed because according to an axiom the following equality holds):
         // c -> a . X == sum t:Real . c -> a@t . X
         data::variable time_var(m_identifier_generator("time_var"), data::sort_real::real_());
-        s.summation_variables() = push_front(s.summation_variables(), time_var);
+        s.summation_variables().push_front(time_var);
 
         // Extend the original condition with an additional argument time_var > m_last_action_time && time_var > 0
         s.condition() = data::lazy::and_(s.condition(),

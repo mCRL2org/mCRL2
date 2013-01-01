@@ -250,7 +250,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   for(std::vector <variable>::reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
   {
-    new_variable_list=push_front(new_variable_list,*it);
+    new_variable_list.push_front(*it);
   }
   const atermpp::aterm_appl a=gsMakeBinder(gsMakeLambda(),new_variable_list,result);
   return a;
@@ -359,7 +359,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
     {
       const variable v_fresh(generator("ex_"), v.sort());
       variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-      vl_new=push_front(vl_new,v_fresh);
+      vl_new.push_front(v_fresh);
     }
   }
 
@@ -450,7 +450,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
     {
       const variable v_fresh(generator("all_"), v.sort());
       variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-      vl_new=push_front(vl_new,v_fresh);
+      vl_new.push_front(v_fresh);
     }
   }
 
@@ -695,20 +695,20 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
     // Reflect the way of encoding the other arguments!
     if (is_variable(arg0) || is_abstraction(arg0) || is_where_clause(arg0))
     {
-      l = push_front<aterm>(l, arg0);
+      l.push_front(arg0);
     }
     else
     {
       size_t arity = arg0.size(); 
       for (size_t i = 0; i < arity; ++i)
       {
-        l = push_front(l, arg0(i));
+        l.push_front(arg0(i));
       }
     }
     const data_expression_list &args= application(term).arguments();
     for (data_expression_list::const_iterator i=args.begin(); i!=args.end(); ++i)
     {
-      l = push_front<aterm>(l, toInner(*i,add_opids));
+      l.push_front(toInner(*i,add_opids));
     }
     l = reverse(l);
     return Apply(l);
@@ -724,7 +724,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
     const std::vector < assignment_expression > lv=atermpp::convert < std::vector < assignment_expression > >(t.declarations());
     for(std::vector < assignment_expression > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
     {
-      l=atermpp::push_front(l,atermpp::aterm(core::detail::gsMakeDataVarIdInit(it->lhs(),toInner(it->rhs(),add_opids))));
+      l.push_front(core::detail::gsMakeDataVarIdInit(it->lhs(),toInner(it->rhs(),add_opids)));
     }
     return gsMakeWhr(toInner(t.body(),add_opids),l);
   }
@@ -787,7 +787,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
     while (!sort_dom.empty())
     {
       assert(i < arity);
-      list = push_front(list, fromInner(aterm_cast<const atermpp::aterm_appl>(term(i))));
+      list.push_front(fromInner(aterm_cast<const atermpp::aterm_appl>(term(i))));
       sort_dom = pop_front(sort_dom);
       ++i;
     }

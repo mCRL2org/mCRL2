@@ -170,6 +170,11 @@ class term_list:public aterm
       return reinterpret_cast<const detail::_aterm_list<Term>*>(m_term)->head;
     }
 
+    /// \brief Inserts a new element at the beginning of the current list.
+    /// \param elem The term that is added
+    inline
+    void push_front(const Term &el);
+
     /// \brief Returns the size of the term_list.
     /// \detail The complexity of this function is linear in the size of the list.
     /// \return The size of the list.
@@ -237,9 +242,10 @@ typedef term_list<aterm> aterm_list;
 /// \param l A list.
 /// \param elem A term
 /// \return The list with an element inserted in front of it.
-template <typename Term>
+/* template <typename Term>
 inline
 term_list<Term> push_front(const term_list<Term> &l, const Term &el);
+*/
 
 /// \brief Returns the list obtained by inserting a new element at the end. Note
 /// that the complexity of this function is O(n), with n the number of
@@ -261,12 +267,13 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &elem)
     buffer[j] = i->address();
   }
 
-  term_list<Term> result=push_front(term_list<Term>(),elem);
+  term_list<Term> result;
+  result.push_front(elem);
 
   /* Insert elements at the front of the list */
   for (size_t j=len; j>0; j--)
   {
-    result = push_front(result, Term(buffer[j-1]));
+    result.push_front(Term(buffer[j-1]));
   }
 
   return result;
@@ -292,7 +299,7 @@ term_list<Term> reverse(const term_list<Term> &l)
   term_list<Term> result;
   for(typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    result = push_front(result, *i);
+    result.push_front(*i);
   }
   return result;
 }
@@ -330,7 +337,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
         one to the tail of the list. */
   for ( ; i>0; i--)
   {
-    result = push_front(result, Term(buffer[i-1]));
+    result.push_front(Term(buffer[i-1]));
   }
 
   return result;
@@ -347,7 +354,7 @@ aterm_list apply(term_list<Term> l, const Function f)
   aterm_list result;
   for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = push_front(result, aterm(f(*i)));
+    result.push_front(f(*i));
   }
   return reverse(result);
 }
@@ -385,7 +392,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   /* Insert elements at the front of the list */
   for (size_t j=len; j>0; j--)
   {
-    result = push_front(result, Term(buffer[j-1]));
+    result.push_front(Term(buffer[j-1]));
   }
 
   return result;

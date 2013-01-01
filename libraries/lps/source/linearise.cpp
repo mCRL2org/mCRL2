@@ -329,7 +329,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_action(p))
       {
-        return push_front(action_list(),action(p));
+        return make_list(action(p));
       }
 
       if (is_sync(p))
@@ -344,7 +344,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_action(multiAction))
       {
-        return push_front(action_label_list(),action(multiAction).label());
+        return make_list(action(multiAction).label());
       }
       assert(is_sync(multiAction));
       return getnames(process::sync(multiAction).left())+getnames(process::sync(multiAction).right());
@@ -368,12 +368,12 @@ class specification_basic_type:public boost::noncopyable
         if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
         {
           const variable v=*l1;
-          result=push_front(result,v);
+          result.push_front(v);
           occurs_set.insert(v);
         }
         else
         {
-          result=push_front(result,variable(get_fresh_variable("a",l1->sort())));
+          result.push_front(variable(get_fresh_variable("a",l1->sort())));
         }
       }
       return reverse(result);
@@ -418,10 +418,10 @@ class specification_basic_type:public boost::noncopyable
         for (size_t i=0 ; i< arity; ++i,++e_walker)
         {
           assert(e_walker!=args.end());
-          temp_args=push_front(temp_args,*e_walker);
+          temp_args.push_front(*e_walker);
         }
         temp_args=reverse(temp_args);
-        result=push_front(result, action(*l,temp_args));
+        result.push_front(action(*l,temp_args));
       }
       assert(e_walker==args.end());
       return reverse(result);
@@ -504,7 +504,9 @@ class specification_basic_type:public boost::noncopyable
       {
         return t;
       }
-      return push_front(RewriteTermList(pop_front(t)), RewriteTerm(t.front()));
+      data_expression_list result=RewriteTermList(pop_front(t));
+      result.push_front(RewriteTerm(t.front()));
+      return result;
     }
 
     action RewriteAction(const action& t)
@@ -701,7 +703,7 @@ class specification_basic_type:public boost::noncopyable
 
     action_list linInsertActionInMultiActionList(
       const action act,
-      const action_list multiAction)
+      action_list multiAction)
     {
       /* store the action in the multiAction, alphabetically
          sorted on the actionname in the actionId. Note that
@@ -709,7 +711,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (multiAction.empty())
       {
-        return push_front(multiAction,act);
+        return make_list(act);
       }
       const action firstAction=multiAction.front();
 
@@ -719,12 +721,14 @@ class specification_basic_type:public boost::noncopyable
          is a safe way to do this. */
       if (actioncompare(act.label(),firstAction.label()))
       {
-        return push_front(multiAction,act);
+        multiAction.push_front(act);
+        return multiAction;
       }
-      return push_front(linInsertActionInMultiActionList(
+      action_list result= linInsertActionInMultiActionList(
                           act,
-                          pop_front(multiAction)),
-                        firstAction);
+                          pop_front(multiAction));
+      result.push_front(firstAction);
+      return result;
     }
 
     action_list linMergeMultiActionList(const action_list ma1, const action_list ma2)
@@ -1312,12 +1316,12 @@ class specification_basic_type:public boost::noncopyable
         if (occursinpCRLterm(var,p,1))
         {
           variable newvar=get_fresh_variable(var.name(),var.sort());
-          newsumvars=push_front(newsumvars,newvar);
+          newsumvars.push_front(newvar);
           sigma[var]=data_expression(newvar);
         }
         else
         {
-          newsumvars=push_front(newsumvars,var);
+          newsumvars.push_front(var);
         }
       }
       sumvars=reverse(newsumvars);
@@ -1345,14 +1349,14 @@ class specification_basic_type:public boost::noncopyable
             occursintermlist(var,occurterms))
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
-          newsumvars=push_front(newsumvars,newvar);
-          /* rename_vars=push_front(rename_vars,var);
-             rename_terms=push_front(rename_terms,data_expression(newvar)); */
+          newsumvars.push_front(newvar);
+          /* rename_vars.push_front(var);
+             rename_terms.push_front(data_expression(newvar)); */
           sigma[var]=data_expression(newvar);
         }
         else
         {
-          newsumvars=push_front(newsumvars,var);
+          newsumvars.push_front(var);
         }
       }
       sumvars=reverse(newsumvars);
@@ -1424,14 +1428,15 @@ class specification_basic_type:public boost::noncopyable
                      replacerhs,
                      sigma);
           }
-          return push_front(
+          assignment_list result=
                    substitute_assignmentlist(
                      pop_front(assignments),
                      pop_front(parameters),
                      replacelhs,
                      replacerhs,
-                     sigma),
-                   assignment(lhs,rhs));
+                     sigma);
+          result.push_front(assignment(lhs,rhs));
+          return result;
         }
       }
 
@@ -1463,14 +1468,15 @@ class specification_basic_type:public boost::noncopyable
                  replacerhs,
                  sigma);
       }
-      return push_front(
+      assignment_list result=
                substitute_assignmentlist(
                  assignments,
                  pop_front(parameters),
                  replacelhs,
                  replacerhs,
-                 sigma),
-               assignment(lhs,rhs));
+                 sigma);
+      result.push_front(assignment(lhs,rhs));
+      return result;
     }
 
     /* The function below calculates sigma(p) and replaces
@@ -1632,18 +1638,19 @@ class specification_basic_type:public boost::noncopyable
     /****************  tovarheadGNF  *********************************/
 
     variable_list parameters_that_occur_in_body(
-      const variable_list parameters,
-      const process_expression body)
+      const variable_list &parameters,
+      const process_expression &body)
     {
       if (parameters.empty())
       {
         return parameters;
       }
 
-      const variable_list parameters1=parameters_that_occur_in_body(pop_front(parameters),body);
+      variable_list parameters1=parameters_that_occur_in_body(pop_front(parameters),body);
       if (occursinpCRLterm(parameters.front(),body,0))
       {
-        return push_front(parameters1,parameters.front());
+        
+        parameters1.push_front(parameters.front());
       }
       return parameters1;
     }
@@ -1803,8 +1810,9 @@ class specification_basic_type:public boost::noncopyable
 
       sort_expression sort=sortlist.front();
 
-      return push_front(
-               make_pars(pop_front(sortlist)),get_fresh_variable("a",sort));
+      variable_list result=make_pars(pop_front(sortlist));
+      result.push_front(get_fresh_variable("a",sort));
+      return result;
     }
 
     process_expression distributeActionOverConditions(
@@ -2297,8 +2305,7 @@ class specification_basic_type:public boost::noncopyable
         /* variable_list vars;
         data_expression_list terms; */
         std::map < variable, data_expression > sigma;
-        alphaconvert(sumvars,sigma,variable_list(),
-                     push_front(data_expression_list(),condition));
+        alphaconvert(sumvars,sigma,variable_list(), make_list(condition));
         return sum(
                  sumvars,
                  distribute_condition(
@@ -3103,11 +3110,14 @@ class specification_basic_type:public boost::noncopyable
       variable var2=par2.front();
       assert(is_variable(var2));
 
+      variable_list result=joinparameters(par1,pop_front(par2),n);
       if (alreadypresent(var2,par1,n))
       {
-        return joinparameters(par1,pop_front(par2),n);
+        return result;
       }
-      return push_front(joinparameters(par1,pop_front(par2),n),var2);
+
+      result.push_front(var2);
+      return result;
     }
 
     variable_list collectparameterlist(
@@ -3162,7 +3172,7 @@ class specification_basic_type:public boost::noncopyable
           for (variable_list::const_iterator l = pl.begin() ; l!=pl.end() ; ++l)
           {
             sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("get" + std::string(l->name())), l->sort()));
-            sorts=push_front(sorts,l->sort());
+            sorts.push_front(l->sort());
           }
           sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("pop"), stack_sort_alias));
           sorts=reverse(sorts);
@@ -3242,7 +3252,7 @@ class specification_basic_type:public boost::noncopyable
             {
               variable name(spec.fresh_identifier_generator("bst"),sort_bool::bool_());
               spec.insertvariable(name,true);
-              booleanStateVariables=push_front(booleanStateVariables,name);
+              booleanStateVariables.push_front(name);
             }
           }
 
@@ -3291,8 +3301,9 @@ class specification_basic_type:public boost::noncopyable
             }
             else
             {
-              opns=(stackoperations*) new stackoperations(push_front(parlist,
-                   variable("state",sort_pos::pos())),spec);
+              variable_list temp=parlist;
+              temp.push_front(variable("state",sort_pos::pos()));
+              opns=(stackoperations*) new stackoperations(temp,spec);
               stackvar = variable(spec.fresh_identifier_generator(s3), opns->stacksort);
               spec.insertvariable(stackvar,true);
             }
@@ -3348,7 +3359,9 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list t(t1);
       if (!options.newstate)
       {
-        return push_front(t,sort_pos::pos(i));
+        data_expression_list result=t;
+        result.push_front(sort_pos::pos(i));
+        return result;
       }
 
       i=i-1; /* below we count from 0 instead from 1 as done in the
@@ -3362,7 +3375,9 @@ class specification_basic_type:public boost::noncopyable
         {
           l=pop_front(l);
         }
-        return push_front(t,data_expression(l.front()));
+        data_expression_list result=t;
+        result.push_front(data_expression(l.front()));
+        return result;
       }
       /* else a sequence of boolean values needs to be generated,
          representing the value i, when there are l->n elements */
@@ -3372,12 +3387,12 @@ class specification_basic_type:public boost::noncopyable
         {
           if ((i % 2)==0)
           {
-            t=push_front(t,data_expression(sort_bool::false_()));
+            t.push_front(data_expression(sort_bool::false_()));
             i=i/2;
           }
           else
           {
-            t=push_front(t,data_expression(sort_bool::true_()));
+            t.push_front(data_expression(sort_bool::true_()));
             i=(i-1)/2;
           }
         }
@@ -3495,9 +3510,8 @@ class specification_basic_type:public boost::noncopyable
         for (assignment_expression_list::const_iterator i=old_declarations.begin();
              i!=old_declarations.end(); ++i)
         {
-          new_vars=push_front(new_vars,i->lhs());
-          new_declarations=push_front(
-                             new_declarations,
+          new_vars.push_front(i->lhs());
+          new_declarations.push_front(
                              assignment_expression(
                                i->lhs(),
                                adapt_term_to_stack(i->rhs(),stack,vars)));
@@ -3541,13 +3555,15 @@ class specification_basic_type:public boost::noncopyable
 
       const action act=action(multiAction.front());
 
-      return push_front(
-               adapt_multiaction_to_stack_rec(pop_front(multiAction),stack,vars),
+      action_list result=adapt_multiaction_to_stack_rec(pop_front(multiAction),stack,vars);
+      
+      result.push_front(
                action(act.label(),
                       atermpp::convert<data_expression_list>(adapt_termlist_to_stack(
                             act.arguments(),
                             stack,
                             vars))));
+      return result;
     }
 
     action_list adapt_multiaction_to_stack(
@@ -3615,9 +3631,9 @@ class specification_basic_type:public boost::noncopyable
       {
         return t2;
       }
-      return push_front(
-               findarguments(pars,pop_front(parlist),args,t2,stack,vars,regular),
-               find_(parlist.front(),pars,args,stack,vars,regular));
+      data_expression_list result=findarguments(pars,pop_front(parlist),args,t2,stack,vars,regular);
+      result.push_front(find_(parlist.front(),pars,args,stack,vars,regular));
+      return result;
     }
 
 
@@ -3646,8 +3662,7 @@ class specification_basic_type:public boost::noncopyable
         return processencoding(i,t,stack);
       }
 
-      return push_front(
-               data_expression_list(),data_expression(application(
+      return make_list(data_expression(application(
                      stack.opns->push,
                      processencoding(i,t,stack))));
     }
@@ -3679,12 +3694,12 @@ class specification_basic_type:public boost::noncopyable
           data_expression_list t3=make_procargs(t2,stack,pcrlprcs,
                                                 vars,regular,singlestate);
           t3=push(procId,t1,t3,stack,pcrlprcs,vars,regular,singlestate);
-          return push_front(data_expression_list(),t3.front());
+          return make_list(t3.front());
         }
 
-        const data_expression_list t3=push(procId,t1,data_expression_list(push_front(function_symbol_list(),stack.opns->emptystack)),
+        const data_expression_list t3=push(procId,t1,data_expression_list(make_list(stack.opns->emptystack)),
                                            stack,pcrlprcs,vars,regular,singlestate);
-        return push_front(data_expression_list(),t3.front());
+        return make_list(t3.front());
       }
 
       if (is_process_instance(t))
@@ -3707,24 +3722,23 @@ class specification_basic_type:public boost::noncopyable
         {
           const data_expression_list t3=push(procId,
                                              t1,
-                                             push_front(data_expression_list(),
-                                                 data_expression(make_application(stack.opns->pop,stack.stackvar))),
+                                             make_list(data_expression(make_application(stack.opns->pop,stack.stackvar))),
                                              stack,
                                              pcrlprcs,
                                              vars,
                                              regular,
                                              singlestate);
-          return push_front(data_expression_list(),t3.front());
+          return make_list(t3.front());
         }
         const data_expression_list t3= push(procId,
                                             t1,
-                                            data_expression_list(push_front(function_symbol_list(),stack.opns->emptystack)),
+                                            data_expression_list(make_list(stack.opns->emptystack)),
                                             stack,
                                             pcrlprcs,
                                             vars,
                                             regular,
                                             singlestate);
-        return push_front(data_expression_list(),t3.front());
+        return make_list(t3.front());
       }
 
       throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
@@ -3763,22 +3777,22 @@ class specification_basic_type:public boost::noncopyable
         {
           return data_expression_list();
         }
-        return push_front(data_expression_list(),data_expression(stack.opns->emptystack));
+        return make_list(data_expression(stack.opns->emptystack));
       }
 
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
-        return push_front(
-                 pushdummyrec(pop_front(totalpars),pars,stack,regular),
-                 data_expression(par));
+        data_expression_list result=pushdummyrec(pop_front(totalpars),pars,stack,regular); 
+        result.push_front(data_expression(par));
+        return result;
       }
       /* otherwise the value of this argument is irrelevant, so
          make it Nil, if a regular translation is made. If a translation
          with stacks is made, then yield a default `unique' term. */
-      return push_front(
-               pushdummyrec(pop_front(totalpars),pars,stack,regular),
-               representative_generator_internal(par.sort()));
+      data_expression_list result=pushdummyrec(pop_front(totalpars),pars,stack,regular);
+      result.push_front(representative_generator_internal(par.sort()));
+      return result;
     }
 
     data_expression_list pushdummy(
@@ -3812,8 +3826,7 @@ class specification_basic_type:public boost::noncopyable
           result= processencoding(i,result,stack);
         }
       }
-      else result=push_front(data_expression_list(),
-                               data_expression(application(stack.opns->push,
+      else result=make_list(data_expression(application(stack.opns->push,
                                                processencoding(i,result,stack))));
       return make_assignment_list(parameters,result);
     }
@@ -3829,7 +3842,6 @@ class specification_basic_type:public boost::noncopyable
       }
 
       return variable_list(processencoding(1,data_expression_list(stack.parameters),stack)); /* Take 1 as dummy indicator */
-      /* return push_front(stack.parameterlist,stack.stackvar); Erroneous, repaired 5/3 */
     }
 
 
@@ -4003,7 +4015,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else if (is_action(summandterm))
       {
-        multiAction=push_front(multiAction,action(summandterm));
+        multiAction.push_front(action(summandterm));
       }
       else if (is_sync(summandterm))
       {
@@ -4034,7 +4046,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
-      procargs=push_front(data_expression_list(),data_expression(make_application(stack.opns->pop,stack.stackvar)));
+      procargs=make_list(data_expression(make_application(stack.opns->pop,stack.stackvar)));
 
       insert_summand(
                 action_summands,deadlock_summands,
@@ -4124,8 +4136,7 @@ class specification_basic_type:public boost::noncopyable
           if (n==2)
           {
             sortId = sort_bool::bool_();
-            elementnames = push_front(push_front(data_expression_list(),
-                                                 data_expression(sort_bool::true_())),data_expression(sort_bool::false_()));
+            elementnames = make_list(data_expression(sort_bool::false_()),data_expression(sort_bool::true_()));
           }
           else
           {
@@ -4141,7 +4152,7 @@ class specification_basic_type:public boost::noncopyable
               const identifier_string s=spec.fresh_identifier_generator(str(boost::format("e%d_%d") % j % n));
               const structured_sort_constructor struct_cons(s,"");
 
-              struct_conss = push_front(struct_conss, struct_cons);
+              struct_conss.push_front(struct_cons);
             }
             structured_sort sort_struct(struct_conss);
 
@@ -4150,7 +4161,8 @@ class specification_basic_type:public boost::noncopyable
 
             //store new declarations in return value w
             sortId = sort_id;
-            elementnames = atermpp::convert< data::data_expression_list >(spec.data.constructors(sort_id));
+            const function_symbol_vector &constructors=spec.data.constructors(sort_id);
+            elementnames = data::data_expression_list(constructors.begin(),constructors.end());
           }
         }
 
@@ -4221,19 +4233,21 @@ class specification_basic_type:public boost::noncopyable
       for (size_t j=0; (j<n); j++)
       {
         const variable v=get_fresh_variable("y",normalised_sort);
-        vars=push_front(vars,v);
-        args=push_front(args,data_expression(v));
-        xxxterm=push_front(xxxterm,data_expression(v1));
+        vars.push_front(v);
+        args.push_front(data_expression(v));
+        xxxterm.push_front(data_expression(v1));
       }
 
       /* I generate here an equation of the form
          C(e,x,x,x,...x)=x for a variable x. */
       const sort_expression s=enumeratedtypes[index].sortId;
       const variable v=get_fresh_variable("e",s);
+      data_expression_list tempxxxterm=xxxterm;
+      tempxxxterm.push_front(data_expression(v));
       data.add_equation(
         data_equation(
-          push_front(push_front(variable_list(),v),v1),
-          application(functionname,push_front(xxxterm,data_expression(v))),
+          make_list(v1,v),
+          application(functionname,tempxxxterm),
           data_expression(v1)));
 
       variable_list auxvars=vars;
@@ -4243,9 +4257,11 @@ class specification_basic_type:public boost::noncopyable
            w!=elementnames.end() ; ++w)
       {
         assert(auxvars.size()>0);
+        data_expression_list tempargs=args;
+        tempargs.push_front(*w);
         data.add_equation(data_equation(
                           vars,
-                          application(functionname,push_front(args,*w)),
+                          application(functionname,tempargs),
                           auxvars.front()));
 
         auxvars=pop_front(auxvars);
@@ -4279,8 +4295,9 @@ class specification_basic_type:public boost::noncopyable
       if (enumeratedtypes[enumeratedtype_index].sortId==sort_bool::bool_())
       {
         /* take the if function on sort 'sort' */
-        const function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
-        enumeratedtypes[enumeratedtype_index].functions=push_front(f,if_(sort));
+        function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
+        f.push_front(if_(sort));
+        enumeratedtypes[enumeratedtype_index].functions=f;
         return;
       }
       // else
@@ -4288,10 +4305,10 @@ class specification_basic_type:public boost::noncopyable
       size_t n=enumeratedtypes[enumeratedtype_index].size;
       for (size_t j=0; j<n ; j++)
       {
-        newsortlist=push_front(newsortlist, sort);
+        newsortlist.push_front(sort);
       }
       sort_expression sid=enumeratedtypes[enumeratedtype_index].sortId;
-      newsortlist=push_front(newsortlist, sid);
+      newsortlist.push_front(sid);
 
       const function_sort newsort(newsortlist,sort);
       const data::function_symbol casefunction(
@@ -4300,8 +4317,9 @@ class specification_basic_type:public boost::noncopyable
         newsort);
       // insertmapping(casefunction,true);
       data.add_mapping(casefunction);
-      const function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
-      enumeratedtypes[enumeratedtype_index].functions=push_front(f,casefunction);
+      function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
+      f.push_front(casefunction);
+      enumeratedtypes[enumeratedtype_index].functions=f;
 
       define_equations_for_case_function(enumeratedtype_index,casefunction,sort);
       return;
@@ -4381,19 +4399,19 @@ class specification_basic_type:public boost::noncopyable
           result=true;
           if (var!=var1)
           {
-            pars=push_front(pars,var);
-            args=push_front(args,data_expression(var1));
+            pars.push_front(var);
+            args.push_front(data_expression(var1));
           }
           /* copy remainder of matching list */
           for (++i ; i!=matchinglist.end(); ++i)
           {
-            auxmatchinglist= push_front(auxmatchinglist,*i);
+            auxmatchinglist.push_front(*i);
           }
           break;
         }
         else
         {
-          auxmatchinglist=push_front(auxmatchinglist,var1);
+          auxmatchinglist.push_front(var1);
         }
       }
 
@@ -4413,9 +4431,9 @@ class specification_basic_type:public boost::noncopyable
           variable var1=*i;
           if (var.name()==var1.name())
           {
-            pars=push_front(pars,var);
+            pars.push_front(var);
             var=get_fresh_variable(var.name(),var.sort());
-            args=push_front(args,data_expression(var));
+            args.push_front(data_expression(var));
             break;
           }
         }
@@ -4430,9 +4448,9 @@ class specification_basic_type:public boost::noncopyable
       {
         return cl;
       }
-
-      return push_front(extend(c,pop_front(cl)),
-                        data_expression(lazy::and_(c,cl.front())));
+      data_expression_list result=extend(c,pop_front(cl));
+      result.push_front(data_expression(lazy::and_(c,cl.front())));
+      return result;
     }
 
     data_expression_list extend_conditions(
@@ -4464,8 +4482,9 @@ class specification_basic_type:public boost::noncopyable
       const variable_list matchinglist,
       const data_expression_list conditionlist)
     {
-      return push_front(conditionlist,
-                        transform_matching_list(matchinglist));
+      data_expression_list result=conditionlist;
+      result.push_front(transform_matching_list(matchinglist));
+      return result;
     }
 
 /* Join the variables of v1 to v2 and rename the variables in v1
@@ -4497,7 +4516,7 @@ class specification_basic_type:public boost::noncopyable
         if (!mergeoccursin(v,v2,
                            matchinglist,renamingpars,renamingargs))
         {
-          result=push_front(result,v);
+          result.push_front(v);
           conditionlist=extend_conditions(v,conditionlist);
         }
       }
@@ -4521,7 +4540,7 @@ class specification_basic_type:public boost::noncopyable
       for (result=tail ; (n>0) ; n=n/2)
       {
         variable sumvar=get_fresh_variable("e",enumtypename);
-        result=push_front(result,sumvar);
+        result.push_front(sumvar);
         if ((n % 2)==0)
         {
           condition=lazy::and_(sumvar,condition);
@@ -4672,7 +4691,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        resultsum=push_front(resultsum,e.var);
+        resultsum.push_front(e.var);
       }
 
       /* we construct the resulting condition */
@@ -4716,7 +4735,7 @@ class specification_basic_type:public boost::noncopyable
             equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
           }
         }
-        auxresult=push_front(auxresult,auxresult1);
+        auxresult.push_front(auxresult1);
       }
       if (options.binary)
       {
@@ -4732,21 +4751,27 @@ class specification_basic_type:public boost::noncopyable
       {
         if (equaluptillnow)
         {
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
           resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              push_front(conditionlist,data_expression(e.var))),
+                              tempconditionlist),
                             equalterm);
         }
         else
         {
+          data_expression_list tempauxresult=auxresult;
+          tempauxresult.push_front(data_expression(e.var));
           resultcondition=application(
                             find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                            push_front(auxresult,data_expression(e.var)));
+                            tempauxresult);
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
           resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              push_front(conditionlist,data_expression(e.var))),
+                              tempconditionlist),
                             resultcondition);
         }
       }
@@ -4822,20 +4847,21 @@ class specification_basic_type:public boost::noncopyable
                 equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
               }
             }
-            auxresult=push_front(auxresult,auxresult1);
+            auxresult.push_front(auxresult1);
           }
           if (equaluptillnow)
           {
-            resultf=push_front(resultf,equalterm);
+            resultf.push_front(equalterm);
           }
           else
           {
             if (!options.binary)
             {
-              resultf=push_front(resultf,
-                                 data_expression(application(
+              data_expression_list tempauxresult=auxresult;
+              tempauxresult.push_front(data_expression(e.var));
+              resultf.push_front(data_expression(application(
                                                    find_case_function(e.enumeratedtype_index,f.sort()),
-                                                   push_front(auxresult,data_expression(e.var)))));
+                                                   tempauxresult)));
             }
             else
             {
@@ -4845,16 +4871,13 @@ class specification_basic_type:public boost::noncopyable
                                      auxresult,
                                      f.sort(),
                                      e);
-              resultf=push_front(resultf,temp);
+              resultf.push_front(temp);
             }
           }
         }
         a=multiActionList[0].begin();
         for (size_t i=1 ; i<multiactioncount ; ++i,++a) {}
-        resultmultiactionlist=
-          push_front(
-            resultmultiactionlist,
-            action(a->label(),resultf));
+        resultmultiactionlist.push_front(action(a->label(),resultf));
       }
 
       /* Construct resulttime, the time of the action ... */
@@ -4884,7 +4907,7 @@ class specification_basic_type:public boost::noncopyable
         {
           // Generate a fresh dummy variable, and add it to the summand variables
           dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
-          resultsum=push_front(resultsum,dummy_time_variable);
+          resultsum.push_front(dummy_time_variable);
         }
         auxrename_list_pars=rename_list_pars.begin();
         auxrename_list_args=rename_list_args.begin();
@@ -4926,12 +4949,12 @@ class specification_basic_type:public boost::noncopyable
                 equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
               }
             }
-            auxresult=push_front(auxresult,auxresult1);
+            auxresult.push_front(auxresult1);
           }
           else
           {
             // this summand does not have time. But some summands have.
-            auxresult=push_front(auxresult,data_expression(dummy_time_variable));
+            auxresult.push_front(data_expression(dummy_time_variable));
             equaluptillnow=false;
           }
         }
@@ -4948,9 +4971,11 @@ class specification_basic_type:public boost::noncopyable
           }
           else
           {
+            data_expression_list tempauxresult=auxresult;
+            tempauxresult.push_front(data_expression(e.var));
             resulttime=application(
                          find_case_function(e.enumeratedtype_index,sort_real::real_()),
-                         push_front(auxresult,data_expression(e.var)));
+                         tempauxresult);
           }
         }
       }
@@ -5010,23 +5035,24 @@ class specification_basic_type:public boost::noncopyable
                                                     is_global_variable(auxresult1)));
           }
 
-          auxresult=push_front(auxresult,auxresult1);
+          auxresult.push_front(auxresult1);
         }
         if (equaluptillnow)
         {
-          resultnextstate=push_front(resultnextstate,equalterm);
+          resultnextstate.push_front(equalterm);
         }
         else
         {
           if (!options.binary)
           {
-            resultnextstate=
-              push_front(resultnextstate,
+            data_expression_list tempauxresult=auxresult;
+            tempauxresult.push_front(data_expression(e.var));
+            resultnextstate.push_front(
                          data_expression(application(
                                            find_case_function(
                                              e.enumeratedtype_index,
                                              var_it->sort()),
-                                           push_front(auxresult,data_expression(e.var)))));
+                                           tempauxresult)));
           }
           else
           {
@@ -5036,7 +5062,7 @@ class specification_basic_type:public boost::noncopyable
                                    auxresult,
                                    var_it->sort(),
                                    e);
-            resultnextstate=push_front(resultnextstate,temp);
+            resultnextstate.push_front(temp);
           }
         }
         fcnt++;
@@ -5093,7 +5119,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        resultsum=push_front(resultsum,e.var);
+        resultsum.push_front(e.var);
       }
 
       /* we construct the resulting condition */
@@ -5137,7 +5163,7 @@ class specification_basic_type:public boost::noncopyable
             equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
           }
         }
-        auxresult=push_front(auxresult,auxresult1);
+        auxresult.push_front(auxresult1);
       }
       if (options.binary)
       {
@@ -5153,21 +5179,27 @@ class specification_basic_type:public boost::noncopyable
       {
         if (equaluptillnow)
         {
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
           resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              push_front(conditionlist,data_expression(e.var))),
+                              tempconditionlist),
                             equalterm);
         }
         else
         {
+          data_expression_list tempauxresult=auxresult;
+          tempauxresult.push_front(data_expression(e.var));
           resultcondition=application(
                             find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                            push_front(auxresult,data_expression(e.var)));
+                            tempauxresult);
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
           resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              push_front(conditionlist,data_expression(e.var))),
+                              tempconditionlist),
                             resultcondition);
         }
       }
@@ -5206,7 +5238,7 @@ class specification_basic_type:public boost::noncopyable
         {
           // Generate a fresh dummy variable, and add it to the summand variables
           dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
-          resultsum=push_front(resultsum,dummy_time_variable);
+          resultsum.push_front(dummy_time_variable);
         }
         auxrename_list_pars=rename_list_pars.begin();
         auxrename_list_args=rename_list_args.begin();
@@ -5248,12 +5280,12 @@ class specification_basic_type:public boost::noncopyable
                 equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
               }
             }
-            auxresult=push_front(auxresult,auxresult1);
+            auxresult.push_front(auxresult1);
           }
           else
           {
             // this summand does not have time. But some summands have.
-            auxresult=push_front(auxresult,data_expression(dummy_time_variable));
+            auxresult.push_front(data_expression(dummy_time_variable));
             equaluptillnow=false;
           }
         }
@@ -5270,9 +5302,11 @@ class specification_basic_type:public boost::noncopyable
           }
           else
           {
+            data_expression_list tempauxresult=auxresult;
+            tempauxresult.push_front(data_expression(e.var));
             resulttime=application(
                          find_case_function(e.enumeratedtype_index,sort_real::real_()),
-                         push_front(auxresult,data_expression(e.var)));
+                         tempauxresult);
           }
         }
       }
@@ -5470,15 +5504,15 @@ class specification_basic_type:public boost::noncopyable
         }
         else  /* !binary or oldstate */
         {
+          variable_list tempparameters=stack.parameters;
+          tempparameters.push_front(stack.stackvar);
           parameters=
-            ((!singlecontrolstate)?
-             push_front(stack.parameters,stack.stackvar):
-             stack.parameters);
+            ((!singlecontrolstate)?tempparameters:stack.parameters);
         }
       }
       else /* not regular, use a stack */
       {
-        parameters=push_front(variable_list(),stack.stackvar);
+        parameters=make_list(stack.stackvar);
       }
 
       init=make_initialstate(procId,stack,pCRLprocs,
@@ -5520,7 +5554,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (std::find(hidelist.begin(),hidelist.end(),walker->label().name())==hidelist.end())
         {
-          resultactionlist=push_front(resultactionlist,*walker);
+          resultactionlist.push_front(*walker);
         }
       }
 
@@ -5670,7 +5704,7 @@ class specification_basic_type:public boost::noncopyable
       action_name_multiset_list result;
       for (action_name_multiset_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        result=push_front(result,sortActionLabels(*i));
+        result.push_front(sortActionLabels(*i));
       }
       return result;
     }
@@ -5682,7 +5716,7 @@ class specification_basic_type:public boost::noncopyable
     bool allowsingleaction(const action_name_multiset allowaction,
                            const action_list multiaction)
     {
-      if (multiaction==push_front(action_list(),terminationAction))
+      if (multiaction==make_list(terminationAction))
       {
         // multiaction is equal to terminate. This action cannot be blocked.
         return true;
@@ -5923,7 +5957,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       result=occursinvarandremove(var,vl);
-      vl=push_front(vl,var1);
+      vl.push_front(var1);
       return result;
     }
 
@@ -5969,15 +6003,19 @@ class specification_basic_type:public boost::noncopyable
         }
         if (var3!=var2)
         {
-          t1=push_front(construct_renaming(pars1,pop_front(pars2),t,t2,unique),var3);
+          t1=construct_renaming(pars1,pop_front(pars2),t,t2,unique);
+          t1.push_front(var3);
 
-          pars4=push_front(t2,var2);
-          pars3=push_front(t,var3);
+          pars4=t2;
+          pars4.push_front(var2);
+          pars3=t;
+          pars3.push_front(var3);
         }
         else
         {
           t1=construct_renaming(pars1,pop_front(pars2),t,pars4,unique);
-          pars3=push_front(t,var2);
+          pars3=t;
+          pars3.push_front(var2);
         }
 
       }
@@ -5995,20 +6033,20 @@ class specification_basic_type:public boost::noncopyable
          list */
       if (actionlabels.empty())
       {
-        return push_front(identifier_string_list(),action);
+        return make_list(action);
       }
 
       const identifier_string firstAction=actionlabels.front();
 
       if (std::string(action)<std::string(firstAction))
       {
-        return push_front(actionlabels,action);
+        identifier_string_list result=actionlabels;
+        result.push_front(action);
+        return result;
       }
-
-      return push_front(insertActionLabel(
-                          action,
-                          pop_front(actionlabels)),
-                        firstAction);
+      identifier_string_list result=insertActionLabel(action,pop_front(actionlabels));
+      result.push_front(firstAction);
+      return result;
     }
 
     action_name_multiset sortActionLabels(const action_name_multiset actionlabels1)
@@ -6029,7 +6067,9 @@ class specification_basic_type:public boost::noncopyable
       {
         return sort_expression_list();
       }
-      return push_front(get_sorts(pop_front(l)), l.front().sort());
+      sort_expression_list result=get_sorts(pop_front(l));
+      result.push_front(l.front().sort());
+      return result;
     }
 
     // Check that the sorts of both termlists match.
@@ -6427,7 +6467,7 @@ class specification_basic_type:public boost::noncopyable
 
         while (!beta.empty())
         {
-          const action_list actl=push_front(push_front(action_list(),beta.front()),a);
+          const action_list actl=make_list(a,beta.front());
           if (might_communicate(actl,comm_table,pop_front(beta),false) && xi(actl,pop_front(beta),comm_table))
           {
             // sort and remove duplicates??
@@ -6462,14 +6502,16 @@ class specification_basic_type:public boost::noncopyable
       const action firstaction=multiaction.front();
       const action_list remainingmultiaction=pop_front(multiaction); /* This is m in [1] */
 
-      const tuple_list S=phi(push_front(action_list(),firstaction),
+      const tuple_list S=phi(make_list(firstaction),
                              firstaction.arguments(),
                              action_list(),
                              remainingmultiaction,
                              r,r_is_null,comm_table);
+      action_list tempr=r;
+      tempr.push_front(firstaction);
       const tuple_list T=makeMultiActionConditionList_aux(
                            remainingmultiaction,comm_table,
-                           (r_is_null)?push_front(action_list(),firstaction):push_front(r,firstaction),false);
+                           (r_is_null)?make_list(firstaction):tempr,false);
       return addActionCondition(firstaction,sort_bool::true_(),T,S);
     }
 
@@ -6504,8 +6546,7 @@ class specification_basic_type:public boost::noncopyable
         {
           throw mcrl2::runtime_error("Right hand side of communication " + process::pp(source) + " in a comm command cannot be empty or tau");
         }
-        resultingCommunications=push_front(resultingCommunications,
-                                           communication_expression(sortActionLabels(source),target));
+        resultingCommunications.push_front(communication_expression(sortActionLabels(source),target));
       }
       communication_expression_list communications1=resultingCommunications;
 
@@ -6541,7 +6582,7 @@ class specification_basic_type:public boost::noncopyable
           if (occursinterm(sumvar,condition) ||
               (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
           {
-            newsumvars=push_front(newsumvars,sumvar);
+            newsumvars.push_front(sumvar);
           }
         }
         newsumvars=reverse(newsumvars);
@@ -6679,13 +6720,13 @@ class specification_basic_type:public boost::noncopyable
                  lazy::and_(
                    condition,
                    less(timevariable,actiontime)));
-        variables=push_front(variables,timevariable);
+        variables.push_front(timevariable);
       }
       for (variable_list::const_iterator i=freevars.begin(); i!=freevars.end(); ++i)
       {
         if (occursinterm(*i,result))
         {
-          variables=push_front(variables,*i);
+          variables.push_front(*i);
         }
       }
 
@@ -6694,7 +6735,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (occursinterm(*p,result))
         {
-          variables=push_front(variables,*p);
+          variables.push_front(*p);
         }
       }
 
@@ -6702,7 +6743,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (occursinterm(*s,result))
         {
-          used_sumvars = push_front(used_sumvars, *s);
+          used_sumvars.push_front(*s);
         }
       }
       used_sumvars = reverse(used_sumvars);
@@ -6769,7 +6810,7 @@ class specification_basic_type:public boost::noncopyable
                                              renamings_pars,
                                              renamings_args,
                                              condition_list);
-        results=push_front(results,ult_del_condition);
+        results.push_front(ult_del_condition);
       }
 
       for (action_summand_vector::const_iterator i=action_summands.begin();
@@ -6791,7 +6832,7 @@ class specification_basic_type:public boost::noncopyable
                                              renamings_pars,
                                              renamings_args,
                                              condition_list);
-        results=push_front(results,ult_del_condition);
+        results.push_front(ult_del_condition);
       }
 
       data_expression result=sort_bool::false_();
@@ -6971,7 +7012,7 @@ class specification_basic_type:public boost::noncopyable
           if (ultimatedelaycondition!=sort_bool::true_())
           {
             actiontime1=timevar;
-            sumvars1=push_front(sumvars1,timevar);
+            sumvars1.push_front(timevar);
             condition1=lazy::and_(ultimatedelaycondition,condition1);
             has_time=true;
           }
@@ -7006,14 +7047,14 @@ class specification_basic_type:public boost::noncopyable
         assignment_list nextstate1=summand1.assignments();
         bool has_time=summand1.has_time();
 
-        if (multiaction1!=push_front(action_list(),terminationAction))
+        if (multiaction1!=make_list(terminationAction))
         {
           if (!has_time)
           {
             if (ultimatedelaycondition!=sort_bool::true_())
             {
               actiontime1=timevar;
-              sumvars1=push_front(sumvars1,timevar);
+              sumvars1.push_front(timevar);
               condition1=lazy::and_(ultimatedelaycondition,condition1);
               has_time=true;
             }
@@ -7059,7 +7100,7 @@ class specification_basic_type:public boost::noncopyable
           if (ultimatedelaycondition!=sort_bool::true_())
           {
             actiontime2=data_expression(timevar);
-            sumvars2=push_front(sumvars2,timevar);
+            sumvars2.push_front(timevar);
             condition2=lazy::and_(ultimatedelaycondition,condition2);
             has_time=true;
           }
@@ -7097,14 +7138,14 @@ class specification_basic_type:public boost::noncopyable
         assignment_list nextstate2=summand2.assignments();
         bool has_time=summand2.multi_action().has_time();
 
-        if (multiaction2!=push_front(action_list(),terminationAction))
+        if (multiaction2!=make_list(terminationAction))
         {
           if (!has_time)
           {
             if (ultimatedelaycondition!=sort_bool::true_())
             {
               actiontime2=data_expression(timevar);
-              sumvars2=push_front(sumvars2,timevar);
+              sumvars2.push_front(timevar);
               condition2=lazy::and_(ultimatedelaycondition,condition2);
               has_time=true;
             }
@@ -7155,12 +7196,12 @@ class specification_basic_type:public boost::noncopyable
           const data_expression condition2=summand2.condition();
           const assignment_list nextstate2=summand2.assignments();
 
-          if ((multiaction1==push_front(action_list(),terminationAction))==(multiaction2==push_front(action_list(),terminationAction)))
+          if ((multiaction1==make_list(terminationAction))==(multiaction2==make_list(terminationAction)))
           {
             action_list multiaction3;
-            if ((multiaction1==push_front(action_list(),terminationAction))&&(multiaction2==push_front(action_list(),terminationAction)))
+            if ((multiaction1==make_list(terminationAction))&&(multiaction2==make_list(terminationAction)))
             {
-              multiaction3=push_front(action_list(),terminationAction);
+              multiaction3.push_front(terminationAction);
             }
             else
             {
@@ -7248,7 +7289,7 @@ class specification_basic_type:public boost::noncopyable
         if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
         {
           // *i does not occur in pars1.
-          pars3=push_front(pars3,*i);
+          pars3.push_front(*i);
         }
       }
 
@@ -7350,7 +7391,7 @@ class specification_basic_type:public boost::noncopyable
                 (lps::search_free_variable(temporary_spec.process().action_summands(),*i) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),*i))
                )          // and it occurs in the summands.
             {
-              pars=push_front(pars,*i);
+              pars.push_front(*i);
             }
           }
 
@@ -8128,9 +8169,9 @@ class specification_basic_type:public boost::noncopyable
       {
         const action_summand smd=*i;
         const action_list multiaction=smd.multi_action().actions();
-        if (multiaction==push_front(action_list(),terminationAction))
+        if (multiaction==make_list(terminationAction))
         {
-          acts=push_front(acts,terminationAction.label());
+          acts.push_front(terminationAction.label());
           mCRL2log(mcrl2::log::warning) << "The action " << lps::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
           return;
         }
@@ -8183,7 +8224,7 @@ class specification_basic_type:public boost::noncopyable
       for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
            i!=vars_result_set.rend() ; ++i)
       {
-        result=push_front(result,*i);
+        result.push_front(*i);
       }
 
       return result;
@@ -8205,7 +8246,7 @@ class specification_basic_type:public boost::noncopyable
       for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
            i!=vars_result_set.rend() ; ++i)
       {
-        result=push_front(result,*i);
+        result.push_front(*i);
       }
 
       return result;
