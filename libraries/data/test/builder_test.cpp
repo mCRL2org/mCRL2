@@ -77,6 +77,9 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
     }
     return sigma(v);
   }
+  #if BOOST_MSVC
+  #include "mcrl2/core/detail/builder_msvc.inc.h"
+  #endif
 };
 
 struct subst: public std::unary_function<data::variable, data::data_expression>
