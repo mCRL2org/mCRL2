@@ -75,7 +75,6 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         using namespace mcrl2::data;
         using namespace mcrl2::lts::detail;
         aterm_appl state_label=(aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) i);
-std::cerr << "STATE LABEL " << state_label << "\n";
         l.add_state(state_label_lts(state_label));
       }
       else

@@ -17,7 +17,6 @@ void term_list<Term>::push_front(const Term &el)
   // of *this is first protected by increasing its reference count by one, but only if a new term is constructed, 
   // and this value is decreased again when assigned.
   *this=aterm_cast<const term_list<Term> > (term_appl<aterm> (detail::function_adm.AS_LIST,el,*this));
-  return;
 } 
 
 // This alternative below has problems with reference counting. 
