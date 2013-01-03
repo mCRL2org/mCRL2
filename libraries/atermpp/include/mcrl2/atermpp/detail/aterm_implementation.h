@@ -93,7 +93,7 @@ typedef struct Block
 {
   struct Block* next_by_size;
   size_t* end;
-  size_t data[BLOCK_SIZE];
+  size_t data[];
 } Block;
 
 typedef struct TermInfo

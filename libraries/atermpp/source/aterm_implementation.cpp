@@ -7,6 +7,7 @@
 #include <set>
 #include <string.h>
 #include <sstream>
+#include <algorithm>
 
 
 #include "mcrl2/utilities/logger.h"
@@ -307,10 +308,15 @@ void initialise_aterm_administration()
   
 }
 
-
+/* allocate a block of memory to contain terms consisting of `size' objects
+ * of type size_t or pointer */
 void allocate_block(const size_t size)
 {
-  Block* newblock = (Block*)malloc(sizeof(Block));
+  const size_t block_header_size=sizeof(struct Block*)+sizeof(size_t*);
+  size_t number_of_terms_in_data_block=(BLOCK_SIZE-block_header_size) / (size*sizeof(size_t));
+  if (number_of_terms_in_data_block==0) number_of_terms_in_data_block=1; // Take care that there is room for at least one term.
+
+  Block* newblock = (Block*)malloc(block_header_size+number_of_terms_in_data_block*size*sizeof(size_t));
   if (newblock == NULL)
   {
     throw std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
@@ -320,7 +326,7 @@ void allocate_block(const size_t size)
   assert(size < terminfo_size);
   TermInfo &ti = terminfo[size];
 
-  newblock->end = (newblock->data) + (BLOCK_SIZE - (BLOCK_SIZE % size));
+  newblock->end = newblock->data + number_of_terms_in_data_block*size;
 
   // Put new terms in the block in the freelist.
   
