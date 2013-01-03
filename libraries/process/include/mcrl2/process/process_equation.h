@@ -76,7 +76,7 @@ class process_equation: public atermpp::aterm_appl
     /// \return The formal parameters of the equation
     data::variable_list formal_parameters() const
     {
-      return data::variable_list((*this)(1));
+      return data::variable_list((*this)[1]);
       /* return data::variable_list(
                atermpp::term_list_iterator<data::variable>(atermpp::list_arg2(*this)),
                atermpp::term_list_iterator<data::variable>()); */

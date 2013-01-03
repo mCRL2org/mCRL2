@@ -145,11 +145,11 @@ static void writeToStream(const aterm &t, std::ostream& os)
       if (sym.arity() > 0)
       {
         os << "(";
-        topWriteToStream(appl(0), os);
+        topWriteToStream(appl[0], os);
         for (size_t i = 1; i < sym.arity(); i++)
         {
           os << ",";
-          topWriteToStream(appl(i), os);
+          topWriteToStream(appl[i], os);
         }
         os << ")";
       }

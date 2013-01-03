@@ -40,7 +40,7 @@ void test_aterm_function()
 
   aterm_appl f ( read_term_from_string("f(g(a,b),c)"));
   aterm_appl g ( read_term_from_string("g(a,b)"));
-  BOOST_CHECK(f(0) == g);
+  BOOST_CHECK(f[0] == g);
 }
 
 int test_main(int argc, char* argv[])

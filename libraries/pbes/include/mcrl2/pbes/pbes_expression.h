@@ -713,7 +713,7 @@ inline
 const data::variable_list &var(const pbes_expression& t)
 {
   assert(is_forall(t) || is_exists(t));
-  return atermpp::aterm_cast<data::variable_list>(t(0));
+  return atermpp::aterm_cast<data::variable_list>(t[0]);
   /* return data::variable_list(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
                              atermpp::term_list_iterator< data::variable >()); */
 }
@@ -735,7 +735,7 @@ inline
 data::data_expression_list param(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
-  return data::data_expression_list(t(1));
+  return data::data_expression_list(t[1]);
   /* return data::data_expression_list(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
                                     atermpp::term_list_iterator< data::data_expression >()); */
 }

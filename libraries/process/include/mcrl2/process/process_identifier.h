@@ -67,7 +67,7 @@ class process_identifier: public atermpp::aterm_appl
     /// \return The sorts of the process identifier
     const data::sort_expression_list &sorts() const
     {
-      return atermpp::aterm_cast<data::sort_expression_list>((*this)(1)); 
+      return atermpp::aterm_cast<data::sort_expression_list>((*this)[1]); 
     }
 };
 

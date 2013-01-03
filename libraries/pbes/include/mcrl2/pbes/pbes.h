@@ -107,11 +107,11 @@ class pbes
       atermpp::aterm_appl::iterator i = t.begin();
       m_data = atermpp::aterm_appl(*i++);
 
-      data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)(0));
+      data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
       m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
 
       atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
-      atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec(0));
+      atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec[0]);
       m_equations.clear();
       for (atermpp::aterm_list::iterator j = eqn.begin(); j != eqn.end(); ++j)
       {
@@ -119,7 +119,7 @@ class pbes
       }
 
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
-      m_initial_state = atermpp::aterm_appl(init(0));
+      m_initial_state = atermpp::aterm_appl(init[0]);
     }
 
     /// \brief Returns the predicate variables appearing in the left hand side of an equation.

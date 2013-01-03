@@ -60,7 +60,7 @@ inline const aterm_appl &ATAelementAt(const aterm_list &List, const size_t Index
  *   **/
 inline const aterm_appl &ATAgetArgument(const aterm_appl &Appl, const size_t Nr)
 {
-  const aterm &Result = Appl(Nr);
+  const aterm &Result = Appl[Nr];
   // assert(ATisApplOrNull(Result));
   return aterm_cast<const aterm_appl>(Result);
 }  
@@ -70,7 +70,7 @@ inline const aterm_appl &ATAgetArgument(const aterm_appl &Appl, const size_t Nr)
 */
 inline const aterm_list &ATLgetArgument(const aterm_appl &Appl, const size_t Nr)
 {
-  const aterm &Result = Appl(Nr);
+  const aterm &Result = Appl[Nr];
   // assert(ATisListOrNull(Result));
   return aterm_cast<const aterm_list>(Result);
 }
@@ -490,7 +490,7 @@ static void IndentedATerm(std::ostream& OutStream, const aterm term, size_t nest
       OutStream <<  "(\n";
       for (size_t i = 0; i < arity; i++)
       {
-        IndentedATerm(OutStream, appl(i), nesting+1);
+        IndentedATerm(OutStream, appl[i], nesting+1);
         if (i+1 < arity)
         {
           OutStream <<  ",\n";
@@ -1322,7 +1322,7 @@ void PrintDecls(std::ostream& OutStream, const aterm_list Decls,
     aterm_list NextDecls = Decls.tail();
     while (!NextDecls.empty())
     {
-      if (Decl(1)==ATAgetFirst(NextDecls)(1))
+      if (Decl[1]==ATAgetFirst(NextDecls)[1])
       {
         PrintDecl(OutStream, Decl, pp_format, false);
         OutStream <<  ",";
@@ -3034,7 +3034,7 @@ aterm_list GetAssignmentsRHS(aterm_list Assignments)
   aterm_list l;
   while (!Assignments.empty())
   {
-    l.push_front(ATAgetFirst(Assignments)(1));
+    l.push_front(ATAgetFirst(Assignments)[1]);
     Assignments = Assignments.tail();
   }
   return reverse(l);
@@ -3096,7 +3096,7 @@ bool gsHasConsistentContext(const table &DataVarDecls,
       //check consistency of variable VarDecls(j) with VarDeclTable
       aterm_appl VarDecl = ATAelementAt(VarDecls, i);
       aterm_appl CorVarDecl =
-        aterm_cast<aterm_appl>(DataVarDecls.get(VarDecl(0)));
+        aterm_cast<aterm_appl>(DataVarDecls.get(VarDecl[0]));
       if (CorVarDecl != aterm())
       {
         //check consistency of VarDecl with CorVarDecl
@@ -3108,7 +3108,7 @@ bool gsHasConsistentContext(const table &DataVarDecls,
   {
     //Part may be an operation; check that its name does not occur in
     //DataVarDecls
-    Result = (DataVarDecls.get(Part(0)) == aterm());
+    Result = (DataVarDecls.get(Part[0]) == aterm());
   }
   //check consistency in the arguments of Part
   if (Result)
@@ -3117,7 +3117,7 @@ bool gsHasConsistentContext(const table &DataVarDecls,
     size_t NrArgs = Head.arity();
     for (size_t i = 0; i < NrArgs && Result; i++)
     {
-      aterm Arg = Part(i);
+      aterm Arg = Part[i];
       if (Arg.type() == AT_APPL)
       {
         Result = gsHasConsistentContext(DataVarDecls, (aterm_appl) Arg);

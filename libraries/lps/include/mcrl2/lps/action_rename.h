@@ -237,9 +237,9 @@ class action_rename_specification
       assert(core::detail::check_rule_ActionRenameSpec(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_data            = atermpp::aterm_appl(*i++);
-      m_action_labels   = action_label_list(atermpp::aterm_appl(*i++)(0));
+      m_action_labels   = action_label_list(atermpp::aterm_appl(*i++)[0]);
 
-      atermpp::aterm_list rules_list = static_cast<atermpp::aterm_list>(atermpp::aterm_appl(*i)(0));
+      atermpp::aterm_list rules_list = static_cast<atermpp::aterm_list>(atermpp::aterm_appl(*i)[0]);
       for (atermpp::aterm_list::const_iterator i=rules_list.begin(); i!=rules_list.end(); ++i)
       {
         m_rules.push_back(action_rename_rule(*i));

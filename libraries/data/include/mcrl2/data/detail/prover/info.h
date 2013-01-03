@@ -255,7 +255,7 @@ class InternalFormatInfo
     InternalFormatInfo(boost::shared_ptr<detail::Rewriter> a_rewriter)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else_bool = atermpp::aterm_int((f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0));
+      f_if_then_else_bool = atermpp::aterm_int((f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))[0]);
     }
 
     /// \brief Destructor with no particular functionality.
@@ -350,13 +350,13 @@ class InternalFormatInfo
     /// \brief Returns the main operator of the term \c a_term;
     atermpp::aterm get_operator(const atermpp::aterm_appl &a_term) 
     {
-      return a_term(0);
+      return a_term[0];
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
     atermpp::aterm_appl get_argument(const atermpp::aterm_appl &a_term, const size_t a_number)
     {
-      return atermpp::aterm_appl(a_term(a_number + 1));
+      return atermpp::aterm_appl(a_term[a_number + 1]);
     }
 
     /// \brief Indicates whether or not a term is equal to \c true.
@@ -375,7 +375,7 @@ class InternalFormatInfo
     /// \brief with type Bool -> Bool -> Bool -> Bool.
     bool is_if_then_else_bool(const atermpp::aterm_appl &a_term)
     {
-      atermpp::aterm v_function = a_term(0);
+      atermpp::aterm v_function = a_term[0];
       return (v_function == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
     }
 

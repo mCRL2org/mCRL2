@@ -86,7 +86,7 @@ inline
 data::variable_list var(const state_formula& t)
 {
   assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
-  return data::variable_list(t(0));
+  return data::variable_list(t[0]);
   /* return data::variable_list(
            atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
            atermpp::term_list_iterator< data::variable >()); */
@@ -122,7 +122,7 @@ inline
 const data::data_expression_list &param(const state_formula& t)
 {
   assert(core::detail::gsIsStateVar(t));
-  return atermpp::aterm_cast<data::data_expression_list>(t(1));
+  return atermpp::aterm_cast<data::data_expression_list>(t[1]);
   /* return data::data_expression_list(
            atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
            atermpp::term_list_iterator< data::data_expression >()); */
@@ -135,7 +135,7 @@ inline
 const data::assignment_list &ass(const state_formula& t)
 {
   assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
-  return atermpp::aterm_cast<data::assignment_list>(t(1));
+  return atermpp::aterm_cast<data::assignment_list>(t[1]);
   /* return data::assignment_list(
            atermpp::term_list_iterator< data::assignment >(atermpp::list_arg2(t)),
            atermpp::term_list_iterator< data::assignment >()); */

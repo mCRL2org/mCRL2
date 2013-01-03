@@ -701,10 +701,10 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
   else if (is_where_clause(t))
   {
     std::set < variable > free_variables_in_body;
-    get_free_variables(t(0),free_variables_in_body);
+    get_free_variables(t[0],free_variables_in_body);
     
     variable_list bound_vars;
-    const assignment_expression_list lv=assignment_expression_list(t(1));
+    const assignment_expression_list lv=assignment_expression_list(t[1]);
     for(assignment_expression_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
     {
       bound_vars.push_front(it->lhs());
@@ -721,8 +721,8 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
   else if (is_abstraction(t))
   {
     std::set < variable > free_variables_in_body;
-    get_free_variables(t(2),free_variables_in_body);
-    const variable_list bound_vars=variable_list(t(1));
+    get_free_variables(t[2],free_variables_in_body);
+    const variable_list bound_vars=variable_list(t[1]);
 
     for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
     {
@@ -736,9 +736,9 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
   {
     for(size_t i=0 ; i<t.size(); ++i)
     {
-      if (!t(i).type_is_int())
+      if (!t[i].type_is_int())
       { 
-        get_free_variables(t(i),result);
+        get_free_variables(t[i],result);
       }
     }
   }

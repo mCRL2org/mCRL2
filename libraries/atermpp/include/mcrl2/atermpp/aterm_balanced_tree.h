@@ -159,7 +159,7 @@ class term_balanced_tree: public aterm
     const term_balanced_tree<Term>&left_branch() const
     {
       assert(is_node());
-      return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))(0));
+      return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))[0]);
     }
 
     /// \brief Get the left branch of the tree
@@ -168,7 +168,7 @@ class term_balanced_tree: public aterm
     const term_balanced_tree<Term>&right_branch() const
     {
       assert(is_node());
-      return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))(1));
+      return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))[1]);
     }
 
     /// \brief Element indexing operator.

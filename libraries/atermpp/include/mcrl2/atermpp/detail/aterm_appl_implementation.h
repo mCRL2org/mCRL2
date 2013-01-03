@@ -417,7 +417,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
   {
     if (i!=n)
     {
-      hnr = detail::COMBINE(hnr, (*this)(i));
+      hnr = detail::COMBINE(hnr, (*this)[i]);
     }
     else
     {
@@ -436,7 +436,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
       {
         if (i!=n)
         {
-          if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i]!=(*this)(i))  
+          if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i]!=(*this)[i])  
           {
             found = false;
             break;
@@ -469,7 +469,7 @@ term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n)
     {
       if (i!=n)
       {
-        new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[i])) Term((*this)(i));
+        new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[i])) Term((*this)[i]);
       }
       else
       {

@@ -93,17 +93,17 @@ class shared_subset
 
         int bit()
         {
-          return atermpp::aterm_int((*this)(0)).value();
+          return atermpp::aterm_int((*this)[0]).value();
         }
 
         bdd_node true_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)(1)));
+          return bdd_node(atermpp::aterm_appl((*this)[1]));
         }
 
         bdd_node false_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)(2)));
+          return bdd_node(atermpp::aterm_appl((*this)[2]));
         }
     };
 

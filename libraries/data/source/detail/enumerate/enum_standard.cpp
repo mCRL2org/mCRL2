@@ -41,7 +41,7 @@ class test_equal
     {
       return m_term==other;
     }
-}; 
+};
 
 atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
                                 const atermpp::aterm_appl &condition,
@@ -64,9 +64,9 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
       {
         return m_enclosing_enumerator->rewr_obj->internal_true;
       }
-      else if (condition.type()==AT_APPL && condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
+      else if (condition.type()==AT_APPL && condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
       {
-        return aterm_cast<const atermpp::aterm_appl>(condition(1));
+        return aterm_cast<const atermpp::aterm_appl>(condition[1]);
       }
       return Apply1(m_enclosing_enumerator->rewr_obj->internal_not, condition);
     }
@@ -85,9 +85,9 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
     {
       return m_enclosing_enumerator->rewr_obj->internal_true;
     }
-    else if (second_argument(0) == m_enclosing_enumerator->rewr_obj->internal_not)
+    else if (second_argument[0] == m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      second_argument=aterm_cast<const atermpp::aterm_appl>(second_argument(1));
+      second_argument=aterm_cast<const atermpp::aterm_appl>(second_argument[1]);
     }
     else
     {
@@ -143,18 +143,18 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
      on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
      store phi and psi /\ !phi separately. This allows the equality eliminator to remove
      more equalities and therefore be more effective. */
-  if (condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
+  if (condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
   {
-    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition(1)),negate(negated_term_list),!negated);
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition[1]),negate(negated_term_list),!negated);
   }
-  else if ((negated && condition(0) == m_enclosing_enumerator->rewr_obj->internal_and) ||
-           (!negated && condition(0) == m_enclosing_enumerator->rewr_obj->internal_or))
+  else if ((negated && condition[0] == m_enclosing_enumerator->rewr_obj->internal_and) ||
+           (!negated && condition[0] == m_enclosing_enumerator->rewr_obj->internal_or))
   {
     assert(condition.size()==3);
-    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition(1)),negated_term_list,negated);
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition[1]),negated_term_list,negated);
     atermpp::term_list< atermpp::aterm_appl > temp=negated_term_list;
-    temp.push_front(aterm_cast<const atermpp::aterm_appl>(condition(1)));
-    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition(2)),
+    temp.push_front(aterm_cast<const atermpp::aterm_appl>(condition[1]));
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition[2]),
                            temp,negated);
   }
   else
@@ -216,16 +216,16 @@ bool EnumeratorSolutionsStandard::find_equality(
     return false;
   }
 
-  if (t(0) == m_enclosing_enumerator->rewr_obj->internal_and)
+  if (t[0] == m_enclosing_enumerator->rewr_obj->internal_and)
   {
     assert(t.size()==3);
-    return find_equality(aterm_cast<const atermpp::aterm_appl>(t(1)),vars,v,e) || find_equality(aterm_cast<const atermpp::aterm_appl>(t(2)),vars,v,e);
+    return find_equality(aterm_cast<const atermpp::aterm_appl>(t[1]),vars,v,e) || find_equality(aterm_cast<const atermpp::aterm_appl>(t[2]),vars,v,e);
   }
-  else if (m_enclosing_enumerator->eqs.find(atermpp::aterm_cast<const atermpp::aterm_int>(t(0))) != 
+  else if (m_enclosing_enumerator->eqs.find(atermpp::aterm_cast<const atermpp::aterm_int>(t[0])) !=
                       m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
   {
-    const atermpp::aterm_appl &a1 = aterm_cast<const atermpp::aterm_appl>(t(1));
-    const atermpp::aterm_appl &a2 = aterm_cast<const atermpp::aterm_appl>(t(2));
+    const atermpp::aterm_appl &a1 = aterm_cast<const atermpp::aterm_appl>(t[1]);
+    const atermpp::aterm_appl &a2 = aterm_cast<const atermpp::aterm_appl>(t[2]);
     if (a1!=a2)
     {
       if (is_variable(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) &&
@@ -324,16 +324,16 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
   else if (is_abstraction(t))
   {
     const atermpp::aterm_appl &t1=t;
-    const atermpp::aterm_appl &binder=aterm_cast<const atermpp::aterm_appl>(t1(0));
-    const variable_list &bound_variables=aterm_cast<const variable_list>(t1(1));
-    const atermpp::aterm_appl &body=build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t1(2)),substituted_vars,exprs);
+    const atermpp::aterm_appl &binder=aterm_cast<const atermpp::aterm_appl>(t1[0]);
+    const variable_list &bound_variables=aterm_cast<const variable_list>(t1[1]);
+    const atermpp::aterm_appl &body=build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t1[2]),substituted_vars,exprs);
     return gsMakeBinder(binder,bound_variables,body);
   }
   else
   {
     // t has the shape #REWR#(u1,...,un)
 
-    atermpp::aterm head = t(0);
+    atermpp::aterm head = t[0];
     size_t arity = t.size();
     size_t extra_arity = 0;
 
@@ -355,15 +355,15 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)
       {
-        new (&args[i])  atermpp::aterm(aterm_cast<const atermpp::aterm_appl>(head)(i));
+        new (&args[i])  atermpp::aterm(aterm_cast<const atermpp::aterm_appl>(head)[i]);
       }
-      head = aterm_cast<const atermpp::aterm_appl>(head)(0);
+      head = aterm_cast<const atermpp::aterm_appl>(head)[0];
     }
 
     new (&args[0]) atermpp::aterm(head);
     for (size_t i=1; i<arity; i++,k++)
     {
-      new (&args[k]) atermpp::aterm(build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t(i)),substituted_vars,exprs));
+      new (&args[k]) atermpp::aterm(build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t[i]),substituted_vars,exprs));
     }
 
     atermpp::aterm_appl r = ApplyArray(arity+extra_arity,&args[0],&args[0]+arity+extra_arity);
@@ -372,8 +372,8 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
     {
       using namespace atermpp;
       args[i].~aterm();
-    } 
-    
+    }
+
     return r;
   }
 }
@@ -408,7 +408,7 @@ bool EnumeratorSolutionsStandard::next(
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
-  vector < atermpp::aterm > var_array; 
+  vector < atermpp::aterm > var_array;
   while (ss_stack.empty() && !fs_stack.empty())
   {
     fs_expr e=fs_stack.front();
@@ -521,7 +521,7 @@ bool EnumeratorSolutionsStandard::next(
           variable_list var_list;
           assert(var_array.size()==0);
           var_array.push_back(OpId2Int(*it));
-          
+
           for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
           {
             const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
@@ -667,7 +667,7 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
     if (i->name().to_string() == "==")
     {
       atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
-      eqs.insert(atermpp::aterm_cast<atermpp::aterm_int>(t(0)));
+      eqs.insert(atermpp::aterm_cast<atermpp::aterm_int>(t[0]));
     }
   }
 }

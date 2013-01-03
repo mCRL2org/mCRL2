@@ -82,7 +82,7 @@ static size_t calcUniqueAFuns(
       arity = sym.arity();
       for (i = 0; i < arity; i++)
       {
-        nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)(i),visited,count);
+        nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)[i],visited,count);
       }
       break;
     }
@@ -673,7 +673,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
           }
           break;
           case AT_APPL:
-            arg = static_cast<aterm_appl>(term)(cur_arg);
+            arg = static_cast<aterm_appl>(term)[cur_arg];
             break;
           default:
             throw std::runtime_error("build_arg_tables: illegal term");
@@ -745,7 +745,7 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
         const size_t cur_arity = sym.arity();
         for (size_t cur_arg=0; cur_arg<cur_arity; cur_arg++)
         {
-          collect_terms(appl(cur_arg),visited,index);
+          collect_terms(appl[cur_arg],visited,index);
         }
       }
       break;
@@ -935,7 +935,7 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
         arity = sym.arity();
         for (arg_idx=0; arg_idx<arity; arg_idx++)
         {
-          aterm cur_arg = static_cast<aterm_appl>(t)(arg_idx);
+          aterm cur_arg = static_cast<aterm_appl>(t)[arg_idx];
           if (!write_arg(trm_sym, cur_arg, arg_idx, index, os))
           {
             return false;

@@ -155,16 +155,16 @@ atermpp::aterm_appl Rewriter::rewrite_where(
                       const atermpp::aterm_appl &term,
                       internal_substitution_type &sigma)
 {
-  const atermpp::term_list < atermpp::aterm_appl > assignment_list(term(1));
-  const atermpp::aterm_appl body(term(0));
+  const atermpp::term_list < atermpp::aterm_appl > assignment_list(term[1]);
+  const atermpp::aterm_appl body(term[0]);
 
   mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
   for(atermpp::term_list < atermpp::aterm_appl >::const_iterator i=assignment_list.begin(); i!=assignment_list.end(); ++i)
   {
-    const variable v=variable((*i)(0));
+    const variable v=variable((*i)[0]);
     const variable v_fresh(generator("whr_"), v.sort());
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    sigma[v_fresh]=rewrite_internal(atermpp::aterm_appl((*i)(1)),sigma);
+    sigma[v_fresh]=rewrite_internal(atermpp::aterm_appl((*i)[1]),sigma);
   }
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(body,variable_renaming),sigma);
 
@@ -269,9 +269,9 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
                       internal_substitution_type &sigma)
 {
   using namespace atermpp;
-  assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
-  const variable_list vl=static_cast<variable_list>(lambda_term(1));
-  const atermpp::aterm_appl lambda_body=rewrite_internal(atermpp::aterm_appl(lambda_term(2)),sigma);
+  assert(lambda_term[0]==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
+  const variable_list vl=static_cast<variable_list>(lambda_term[1]);
+  const atermpp::aterm_appl lambda_body=rewrite_internal(atermpp::aterm_appl(lambda_term[2]),sigma);
   size_t arity=t.size();
   assert(arity>0);
   if (arity==1) // The term has shape #REWR(lambda d..:D...t), i.e. without arguments.
@@ -287,7 +287,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     const variable v= (*i);
     const variable v_fresh(generator("x_"), v.sort());
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    sigma[v_fresh]=rewrite_internal(atermpp::aterm_appl(t(count)),sigma);
+    sigma[v_fresh]=rewrite_internal(atermpp::aterm_appl(t[count]),sigma);
   }
 
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
@@ -304,12 +304,12 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   }
 
   // There are more arguments than bound variables.
-  std::vector < atermpp::aterm > args; 
+  std::vector < atermpp::aterm > args;
   args.push_back(result);
   for(size_t i=1; i<arity-vl.size(); ++i)
   {
     assert(vl.size()+i<arity);
-    args.push_back(t(vl.size()+i));
+    args.push_back(t[vl.size()+i]);
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
   return rewrite_internal(ApplyArray(arity-vl.size(),args.begin(),args.end()),sigma);
@@ -322,12 +322,12 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   // This is a quantifier elimination that works on the existential quantifier as specified
   // in data types, i.e. without applying the implement function anymore.
 
-  assert(is_abstraction(t) && t(0)==gsMakeExists());
+  assert(is_abstraction(t) && t[0]==gsMakeExists());
   /* Get Body of Exists */
-  const atermpp::aterm_appl t1 = atermpp::aterm_appl(t(2));
+  const atermpp::aterm_appl t1 = atermpp::aterm_appl(t[2]);
 
   // Put the variables in the right order in vl.
-  variable_list vl=static_cast<variable_list>(t(1));
+  variable_list vl=static_cast<variable_list>(t[1]);
   return internal_existential_quantifier_enumeration(vl,t1,false,sigma);
 }
 
@@ -415,10 +415,10 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl &t,
      internal_substitution_type &sigma)
 {
-  assert(is_abstraction(t) && t(0)==gsMakeForall());
+  assert(is_abstraction(t) && t[0]==gsMakeForall());
   /* Get Body of forall */
-  const atermpp::aterm_appl t1 = atermpp::aterm_appl(t(2));
-  const variable_list vl=static_cast<variable_list>(t(1));
+  const atermpp::aterm_appl t1 = atermpp::aterm_appl(t[2]);
+  const variable_list vl=static_cast<variable_list>(t[1]);
   return internal_universal_quantifier_enumeration(vl,t1,false,sigma);
 }
 
@@ -490,9 +490,9 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
     {
       evaluated_condition=internal_true;
     }
-    else if (evaluated_condition(0) == internal_not)
+    else if (evaluated_condition[0] == internal_not)
     {
-      evaluated_condition=static_cast<atermpp::aterm_appl>(evaluated_condition(1));
+      evaluated_condition=static_cast<atermpp::aterm_appl>(evaluated_condition[1]);
     }
     else
     {
@@ -699,10 +699,10 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
     }
     else
     {
-      size_t arity = arg0.size(); 
+      size_t arity = arg0.size();
       for (size_t i = 0; i < arity; ++i)
       {
-        l.push_front(arg0(i));
+        l.push_front(arg0[i]);
       }
     }
     const data_expression_list &args= application(term).arguments();
@@ -748,25 +748,25 @@ data_expression fromInner(const atermpp::aterm_appl &term)
 
   if (is_where_clause(term))
   {
-    const data_expression body=fromInner(aterm_cast<const aterm_appl>(term(0)));
-    const term_list<atermpp::aterm_appl> &l=aterm_cast<const term_list<aterm_appl> >(term(1));
+    const data_expression body=fromInner(aterm_cast<const aterm_appl>(term[0]));
+    const term_list<atermpp::aterm_appl> &l=aterm_cast<const term_list<aterm_appl> >(term[1]);
 
     std::vector < assignment_expression > lv;
     for(term_list<aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
     {
       const aterm_appl &ass_expr= *it;
-      lv.push_back(assignment_expression(variable(ass_expr(0)),fromInner(aterm_cast<const aterm_appl>(ass_expr(1)))));
+      lv.push_back(assignment_expression(variable(ass_expr[0]),fromInner(aterm_cast<const aterm_appl>(ass_expr[1]))));
     }
     return where_clause(body,lv);
   }
 
   if (is_abstraction(term))
   {
-    return abstraction(binder_type(aterm_cast<const aterm_appl>(term(0))),variable_list(term(1)),fromInner(aterm_cast<const aterm_appl>(term(2))));
+    return abstraction(binder_type(aterm_cast<const aterm_appl>(term[0])),variable_list(term[1]),fromInner(aterm_cast<const aterm_appl>(term[2])));
   }
 
   size_t arity = term.size();
-  const atermpp::aterm &t = term(0);
+  const atermpp::aterm &t = term[0];
   data_expression a;
 
   if (t.type_is_int())
@@ -787,7 +787,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
     while (!sort_dom.empty())
     {
       assert(i < arity);
-      list.push_front(fromInner(aterm_cast<const atermpp::aterm_appl>(term(i))));
+      list.push_front(fromInner(aterm_cast<const atermpp::aterm_appl>(term[i])));
       sort_dom.pop_front();
       ++i;
     }

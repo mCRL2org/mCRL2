@@ -631,14 +631,14 @@ class Trace
         }
         else if (e.type()==atermpp::AT_APPL && isTimedMAct(static_cast<atermpp::aterm_appl>(e)))
         {
-          if (core::detail::gsIsNil(atermpp::aterm_appl(static_cast<atermpp::aterm_appl>(e)(1))))
+          if (core::detail::gsIsNil(atermpp::aterm_appl(static_cast<atermpp::aterm_appl>(e)[1])))
           {
-            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)(0))));
+            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)[0])));
           }
           else
           {
-            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)(0)),
-                               mcrl2::data::data_expression(static_cast<atermpp::aterm_appl>(e)(1))));
+            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)[0]),
+                               mcrl2::data::data_expression(static_cast<atermpp::aterm_appl>(e)[1])));
           }
         }
         else

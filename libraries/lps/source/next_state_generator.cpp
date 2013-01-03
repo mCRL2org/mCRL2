@@ -311,7 +311,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     size_t parameter = m_pruning_parameters[i];
-    internal_state_argument_t argument = state(parameter);
+    internal_state_argument_t argument = state[parameter];
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
     std::map<internal_state_argument_t, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())
@@ -355,7 +355,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 
   for (size_t i = 0; i < generator->m_process_parameters.size(); i++)
   {
-    (*m_substitution)[generator->m_process_parameters[i]] = state(i);
+    (*m_substitution)[generator->m_process_parameters[i]] = state[i];
   }
 
   increment();
@@ -375,7 +375,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 
   for (size_t i = 0; i < generator->m_process_parameters.size(); i++)
   {
-    (*m_substitution)[generator->m_process_parameters[i]] = state(i);
+    (*m_substitution)[generator->m_process_parameters[i]] = state[i];
   }
 
   increment();
@@ -423,7 +423,7 @@ struct condition_converter
 
   const next_state_generator::rewriter_expression_t &operator()(const size_t parameter) const
   {
-    return m_state(parameter);
+    return m_state[parameter];
   }
 };
 
@@ -473,7 +473,7 @@ void next_state_generator::iterator::increment()
 
       for (size_t i = 0; i < m_summand->condition_parameters.size(); i++)
       {
-        condition_arguments[i] = m_state(m_summand->condition_parameters[i]);
+        condition_arguments[i] = m_state[m_summand->condition_parameters[i]];
       }
       m_enumeration_cache_key = condition_arguments_t(m_summand->condition_arguments_function, condition_arguments.begin(), condition_arguments.end());
       std::map<condition_arguments_t, summand_enumeration_t>::iterator position = m_summand->enumeration_cache.find(m_enumeration_cache_key);

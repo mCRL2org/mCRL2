@@ -111,7 +111,7 @@ class state_label_lts : public atermpp::aterm_appl
     mcrl2::data::data_expression operator [](const size_t i) const
     {
       assert(i<size());
-      return mcrl2::data::data_expression((*this)(i));
+      return mcrl2::data::data_expression((*this)[i]);
     }
 
     /** \brief Set the i-th element of this state label to the indicated value.
@@ -233,7 +233,7 @@ inline action_label_lts parse_lts_action(
 {
   // TODO: rewrite this cryptic code
   atermpp::aterm_appl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(multi_action_string));
-  lps::multi_action ma=lps::action_list(atermpp::aterm_list(t(0)));
+  lps::multi_action ma=lps::action_list(atermpp::aterm_list(t[0]));
   lps::type_check(ma,data_spec,atermpp::aterm_cast<lps::action_label_list>(act_decls));
   lps::translate_user_notation(ma);
   lps::normalize_sorts(ma, data_spec);

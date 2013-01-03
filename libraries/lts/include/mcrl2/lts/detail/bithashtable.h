@@ -96,7 +96,7 @@ class bit_hash_table
             size_t len = aterm_cast<aterm_appl>(t).function().arity();
             for (size_t i=0; i<len; i++)
             {
-              calc_hash_aterm(((aterm_appl) t)(i),sh_a,sh_b,sh_c,sh_i);
+              calc_hash_aterm(((aterm_appl) t)[i],sh_a,sh_b,sh_c,sh_i);
             }
           }
           break;

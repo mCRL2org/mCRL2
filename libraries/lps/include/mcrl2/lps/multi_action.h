@@ -54,7 +54,7 @@ class multi_action
     multi_action(const atermpp::aterm_appl& t) : m_time(core::detail::gsMakeNil())
     {
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
-      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t(0));
+      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
     }
 
     /// \brief Constructor
@@ -62,7 +62,7 @@ class multi_action
     {
       const atermpp::aterm_appl t(t1);
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
-      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t(0));
+      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
     }
 
     /// \brief Constructor

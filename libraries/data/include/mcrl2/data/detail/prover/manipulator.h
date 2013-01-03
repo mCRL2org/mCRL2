@@ -64,9 +64,9 @@ class InternalFormatManipulator
       bool v_is_equality;
 
       v_is_equality = f_info.is_equality(a_guard);
-      if (v_is_equality && a_guard(2) == a_formula)
+      if (v_is_equality && a_guard[2] == a_formula)
       {
-        return atermpp::aterm_appl(a_guard(1));
+        return atermpp::aterm_appl(a_guard[1]);
       }
       if (f_info.is_variable(a_formula))
       {
@@ -82,7 +82,7 @@ class InternalFormatManipulator
       atermpp::aterm v_function;
 
       atermpp::function_symbol v_symbol = a_formula.function();
-      v_function = a_formula(0);
+      v_function = a_formula[0];
       size_t v_arity = v_symbol.arity();
 
       std::vector<atermpp::aterm> v_parts(v_arity);
@@ -90,7 +90,7 @@ class InternalFormatManipulator
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = set_true_auxiliary(atermpp::aterm_appl(a_formula(i)), a_guard,f_set_true);
+        v_parts[i] = set_true_auxiliary(atermpp::aterm_appl(a_formula[i]), a_guard,f_set_true);
       }
       atermpp::aterm_appl v_result = atermpp::aterm_appl(v_symbol, v_parts.begin(),v_parts.end());
       f_set_true[a_formula]=v_result;
@@ -127,14 +127,14 @@ class InternalFormatManipulator
       size_t v_arity;
 
       atermpp::function_symbol v_symbol = a_formula.function();
-      v_function = a_formula(0);
+      v_function = a_formula[0];
       v_arity = v_symbol.arity();
 
       std::vector <atermpp::aterm> v_parts(v_arity);
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = set_false_auxiliary(atermpp::aterm_appl(a_formula(i)), a_guard,f_set_false);
+        v_parts[i] = set_false_auxiliary(atermpp::aterm_appl(a_formula[i]), a_guard,f_set_false);
       }
       atermpp::aterm_appl v_result = atermpp::aterm_appl(v_symbol, v_parts.begin(),v_parts.end());
       f_set_false[a_formula]=v_result;
@@ -159,7 +159,7 @@ class InternalFormatManipulator
       f_info(a_info)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else = static_cast<atermpp::aterm_appl>(a_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
+      f_if_then_else = static_cast<atermpp::aterm_appl>(a_rewriter->toRewriteFormat(if_(sort_bool::bool_())))[0];
     }
 
     /// \brief Destructor with no particular functionality.
@@ -204,7 +204,7 @@ class InternalFormatManipulator
 
 
       atermpp::function_symbol v_symbol = a_term.function();
-      atermpp::aterm v_function = a_term(0);
+      atermpp::aterm v_function = a_term[0];
       size_t v_arity = v_symbol.arity();
 
       // MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity);
@@ -212,14 +212,14 @@ class InternalFormatManipulator
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = orient(atermpp::aterm_appl(a_term(i)));
+        v_parts[i] = orient(atermpp::aterm_appl(a_term[i]));
       }
       atermpp::aterm_appl v_result = atermpp::aterm_appl(v_symbol, v_parts.begin(),v_parts.end());
 
       if (f_info.is_equality(v_result))
       {
-        atermpp::aterm_appl v_term1 = static_cast<atermpp::aterm_appl>(v_result(1));
-        atermpp::aterm_appl v_term2 = static_cast<atermpp::aterm_appl>(v_result(2));
+        atermpp::aterm_appl v_term1 = static_cast<atermpp::aterm_appl>(v_result[1]);
+        atermpp::aterm_appl v_term2 = static_cast<atermpp::aterm_appl>(v_result[2]);
         if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
         {
           v_result = atermpp::aterm_appl(v_symbol, v_function, v_term2, v_term1);

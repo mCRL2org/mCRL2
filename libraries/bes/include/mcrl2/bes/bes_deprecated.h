@@ -217,8 +217,8 @@ void assign_variables_in_tree(
 {
   if (is_pair(t))
   {
-    assign_variables_in_tree(static_cast<atermpp::aterm_appl>(t)(0),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
-    assign_variables_in_tree(static_cast<atermpp::aterm_appl>(t)(1),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(static_cast<atermpp::aterm_appl>(t)[0],var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(static_cast<atermpp::aterm_appl>(t)[1],var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
   }
   else
   {
@@ -667,31 +667,31 @@ inline bool is_if(const bes_expression& b)
 inline bes_expression lhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(0));
+  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)[0]);
 }
 
 inline bes_expression rhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(1));
+  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)[1]);
 }
 
 inline bes_expression condition(const bes_expression& b)
 {
   assert(is_if(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(0));
+  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)[0]);
 }
 
 inline bes_expression then_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(1));
+  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)[1]);
 }
 
 inline bes_expression else_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(2));
+  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)[2]);
 }
 
 inline variable_type get_variable(const bes_expression& b)
@@ -2272,10 +2272,10 @@ class boolean_equation_system
             else
             {
               // t is a pair, with a name as its left hand side.
-              current_pbeq = pbes_equation(pbes_equations.get(static_cast<atermpp::aterm_appl>(t)(0)));
+              current_pbeq = pbes_equation(pbes_equations.get(static_cast<atermpp::aterm_appl>(t)[0]));
               // the right hand side of t are the parameters, in a tree structure.
 
-              t=static_cast<atermpp::aterm_appl>(t)(1);
+              t=static_cast<atermpp::aterm_appl>(t)[1];
               variable_list::iterator iter=current_pbeq.variable().parameters().begin();
               assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes,sigma,sigma_internal);
             }
@@ -2519,8 +2519,8 @@ class boolean_equation_system
       using namespace mcrl2::data;
       if (is_pair(t))
       {
-        print_tree_rec(c,static_cast<atermpp::aterm_appl>(t)(0),f);
-        print_tree_rec(',',static_cast<atermpp::aterm_appl>(t)(1),f);
+        print_tree_rec(c,static_cast<atermpp::aterm_appl>(t)[0],f);
+        print_tree_rec(',',static_cast<atermpp::aterm_appl>(t)[1],f);
       }
       else
       {
@@ -2555,8 +2555,8 @@ class boolean_equation_system
         }
         else
         {
-          f << aterm_cast<aterm_appl>(aterm_cast<atermpp::aterm_appl>(t)(0)).function().name();
-          print_tree_rec('(',aterm_cast<atermpp::aterm_appl>(t)(1),f);
+          f << aterm_cast<aterm_appl>(aterm_cast<atermpp::aterm_appl>(t)[0]).function().name();
+          print_tree_rec('(',aterm_cast<atermpp::aterm_appl>(t)[1],f);
           f << ")";
         }
       }

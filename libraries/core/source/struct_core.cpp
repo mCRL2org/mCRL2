@@ -43,7 +43,7 @@ static bool gsOccurs(const aterm &Elt, const aterm &t)
       const size_t NrArgs = Head.arity();
       for (size_t i = 0; i < NrArgs && !Result; i++)
       {
-        Result = gsOccurs(Elt, ((aterm_appl) Term)(i));
+        Result = gsOccurs(Elt, ((aterm_appl) Term)[i]);
       }
     }
     else if (Term.type() == AT_LIST)

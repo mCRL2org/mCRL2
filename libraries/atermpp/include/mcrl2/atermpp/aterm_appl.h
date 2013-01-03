@@ -268,7 +268,7 @@ class term_appl:public aterm
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.
-    const Term &operator()(const size_type i) const
+    const Term &operator[](const size_type i) const
     {
       assert(i<m_term->function().arity());
       return reinterpret_cast<const detail::_aterm_appl<Term>*>(m_term)->arg[i];
@@ -282,7 +282,7 @@ typedef term_appl<aterm> aterm_appl;
 /* namespace std
 {
 
-/// \brief Swaps two term_appl's 
+/// \brief Swaps two term_appl's
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term

@@ -617,7 +617,7 @@ class pins
       lps::next_state_generator::internal_state_t initial_state = m_generator.internal_initial_state();
       for (size_t i = 0; i < m_state_length; i++)
       {
-        s[i] = state_type_map(i)[initial_state(i)];
+        s[i] = state_type_map(i)[initial_state[i]];
       }
     }
 
@@ -666,7 +666,7 @@ class pins
         lps::next_state_generator::internal_state_t destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
-          dest[j] = state_type_map(j)[destination(j)];
+          dest[j] = state_type_map(j)[destination[j]];
         }
         labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
         f(dest, labels);
@@ -707,7 +707,7 @@ class pins
         lps::next_state_generator::internal_state_t destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
-          dest[j] = state_type_map(j)[destination(j)];
+          dest[j] = state_type_map(j)[destination[j]];
         }
         labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
         f(dest, labels);

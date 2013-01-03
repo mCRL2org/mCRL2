@@ -86,18 +86,18 @@ class linear_process
         assert(core::detail::check_rule_LinearProcessSummand(*j));
         atermpp::aterm_appl t = atermpp::aterm_cast<atermpp::aterm_appl>(*j);
         
-        data::variable_list summation_variables(atermpp::aterm_cast<atermpp::aterm_list>(t(0)));
-        data::data_expression condition         = data::data_expression(t(1));
-        data::data_expression time              = data::data_expression(t(3));
-        data::assignment_list assignments(atermpp::aterm_cast<atermpp::aterm_list>(t(4)));
-        if (core::detail::gsIsDelta(atermpp::aterm_cast<atermpp::aterm_appl>(t(2))))
+        data::variable_list summation_variables(atermpp::aterm_cast<atermpp::aterm_list>(t[0]));
+        data::data_expression condition         = data::data_expression(t[1]);
+        data::data_expression time              = data::data_expression(t[3]);
+        data::assignment_list assignments(atermpp::aterm_cast<atermpp::aterm_list>(t[4]));
+        if (core::detail::gsIsDelta(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])))
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
         }
         else
         {
-          assert(core::detail::gsIsMultAct(atermpp::aterm_cast<atermpp::aterm_appl>(t(2))));
-          action_list actions(atermpp::aterm_cast<atermpp::aterm_list>(atermpp::aterm_cast<atermpp::aterm_appl>(t(2))(0)));
+          assert(core::detail::gsIsMultAct(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])));
+          action_list actions(atermpp::aterm_cast<atermpp::aterm_list>(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])[0]));
           m_action_summands.push_back(action_summand(summation_variables, condition, multi_action(actions, time), assignments));
         }
       }
