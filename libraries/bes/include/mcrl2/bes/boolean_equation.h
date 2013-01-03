@@ -35,8 +35,6 @@ typedef pbes_system::fixpoint_symbol fixpoint_symbol;
 // <BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
 class boolean_equation
 {
-  friend struct atermpp::aterm_traits<boolean_equation>;
-
   protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
@@ -172,17 +170,5 @@ atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
 } // namespace bes
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::bes::boolean_equation>
-{
-};
-
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_BES_BOOLEAN_EQUATION_H

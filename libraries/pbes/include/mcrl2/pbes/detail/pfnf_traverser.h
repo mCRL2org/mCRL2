@@ -21,7 +21,6 @@
 #include <set>
 #include <sstream>
 #include <functional>
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/core/detail/print_utility.h"
@@ -168,26 +167,6 @@ struct pfnf_traverser_expression
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_quantifier>
-{
-};
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_implication>
-{
-};
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_expression>
-{
-};
-
-} // namespace atermpp
 
 namespace mcrl2
 {

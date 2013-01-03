@@ -43,15 +43,6 @@ typedef std::pair<boolean_expression, standard_form_type> standard_form_pair;
 
 } // namespace mcrl2
 
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::bes::detail::standard_form_pair>
-{
-};
-
-} // namespace atermpp
 
 namespace mcrl2
 {

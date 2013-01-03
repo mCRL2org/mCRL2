@@ -47,8 +47,6 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 template <typename Container = std::vector<boolean_equation> >
 class boolean_equation_system
 {
-    friend struct atermpp::aterm_traits<boolean_equation_system>;
-
   protected:
     /// \brief The equations
     Container m_equations;
@@ -227,16 +225,6 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 } // namespace bes
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<typename Container>
-struct aterm_traits<mcrl2::bes::boolean_equation_system<Container> >
-{
-};
-} // namespace atermpp
-/// \endcond
 
 #ifndef MCRL2_BES_FIND_H
 #include "mcrl2/bes/find.h"

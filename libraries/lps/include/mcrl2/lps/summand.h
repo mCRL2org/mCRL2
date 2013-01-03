@@ -46,8 +46,6 @@ namespace lps
 //                  | MultAct(<Action>*)                                    (+ tc)
 class summand_base
 {
-    friend struct atermpp::aterm_traits<summand_base>;
-
   protected:
     /// \brief The summation variables of the summand
     data::variable_list m_summation_variables;
@@ -99,8 +97,6 @@ class summand_base
 /// \brief LPS summand containing a deadlock.
 class deadlock_summand: public summand_base
 {
-    friend struct atermpp::aterm_traits<deadlock_summand>;
-
   protected:
     /// \brief The super class
     typedef summand_base super;
@@ -161,8 +157,6 @@ atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
 /// \brief LPS summand containing a multi-action.
 class action_summand: public summand_base
 {
-    friend struct atermpp::aterm_traits<action_summand>;
-
   protected:
     /// \brief The super class
     typedef summand_base super;
@@ -287,27 +281,5 @@ atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 } // namespace lps
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::lps::summand_base>
-{
-};
-
-template<>
-struct aterm_traits<mcrl2::lps::deadlock_summand>
-{
-};
-
-template<>
-struct aterm_traits<mcrl2::lps::action_summand>
-{
-};
-
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_LPS_SUMMAND_H

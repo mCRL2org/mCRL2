@@ -38,7 +38,6 @@ namespace atermpp
 template <typename T>
 class shared_subset
 {
-  friend struct atermpp::aterm_traits<shared_subset>;
   protected:
     static atermpp::aterm_string &get_true()
     {

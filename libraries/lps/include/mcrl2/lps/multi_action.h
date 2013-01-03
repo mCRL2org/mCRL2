@@ -15,7 +15,6 @@
 #include <iterator>
 #include <stdexcept>
 #include <sstream>
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/data/standard_utility.h"
@@ -34,7 +33,6 @@ namespace lps
 class multi_action
 {
     friend class action_summand;
-    friend struct atermpp::aterm_traits<multi_action>;
 
   protected:
     /// \brief The actions of the summand
@@ -467,15 +465,5 @@ std::string pp(const multi_action_name_set& A)
 } // namespace lps
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::lps::multi_action>
-{
-};
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_LPS_MULTI_ACTION_H

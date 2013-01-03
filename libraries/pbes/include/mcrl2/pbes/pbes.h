@@ -85,8 +85,6 @@ std::set<data::variable> compute_quantifier_variables(Iterator first, Iterator l
 template <typename Container>
 class pbes
 {
-    friend struct atermpp::aterm_traits<pbes<Container> >;
-
   protected:
     /// \brief The data specification
     data::data_specification m_data;
@@ -629,20 +627,5 @@ bool operator==(const pbes<Container1>& p1, const pbes<Container2>& p2)
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<typename Container>
-struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
-{
-  static atermpp::aterm term(const mcrl2::pbes_system::pbes<Container>& t)
-  {
-    atermpp::aterm x = pbes_to_aterm(t);
-    return x;
-  }
-};
-}
-/// \endcond
 
 #endif // MCRL2_PBES_PBES_H

@@ -60,30 +60,6 @@ struct true_false_pair
 
 } // namespace pbes_system
 
-namespace atermpp
-{
-/// \cond INTERNAL_DOCS
-template<typename Term>
-struct aterm_traits<mcrl2::pbes_system::detail::true_false_pair<Term> >
-{
-  static void protect(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
-  {
-    t.TC.protect();
-    t.FC.protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
-  {
-    t.TC.unprotect();
-    t.FC.unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
-  {
-    t.TC.mark();
-    t.FC.mark();
-  }
-};
-} // namespace atermpp
-
 namespace mcrl2
 {
 

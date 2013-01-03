@@ -12,7 +12,6 @@
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H
 
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
@@ -28,7 +27,6 @@ namespace lps
 class deadlock
 {
     friend class deadlock_summand;
-    friend struct atermpp::aterm_traits<deadlock>;
 
   protected:
     /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>

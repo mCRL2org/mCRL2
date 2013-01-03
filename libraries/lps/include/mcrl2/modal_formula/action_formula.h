@@ -16,7 +16,6 @@
 #include <stdexcept>
 #include <string>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"

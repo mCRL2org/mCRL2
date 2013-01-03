@@ -85,20 +85,6 @@ class pbes_expression_with_variables: public pbes_expression
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_variables >
-{
-  static atermpp::aterm term(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    return static_cast<atermpp::aterm>(t);
-  }
-};
-}
-/// \endcond
-
 namespace mcrl2
 {
 

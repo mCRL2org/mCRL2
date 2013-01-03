@@ -49,8 +49,6 @@ extern std::vector < atermpp::function_symbol > state_function_symbols;
 */
 class state_label_lts : public atermpp::aterm_appl
 {
-    friend struct atermpp::aterm_traits<state_label_lts>;
-
   protected:
 
     /** \brief We store functions symbols with varying arity and string "STATE"
@@ -111,7 +109,7 @@ class state_label_lts : public atermpp::aterm_appl
     mcrl2::data::data_expression operator [](const size_t i) const
     {
       assert(i<size());
-      return mcrl2::data::data_expression((*this)[i]);
+      return mcrl2::data::data_expression(atermpp::aterm_cast<atermpp::aterm_appl>(*this)[i]);
     }
 
     /** \brief Set the i-th element of this state label to the indicated value.
@@ -149,8 +147,6 @@ inline std::string pp(const state_label_lts l)
     \details An action label is a multi_action. */
 class action_label_lts:public mcrl2::lps::multi_action
 {
-    friend struct atermpp::aterm_traits<action_label_lts>;
-
   public:
 
     /** \brief Default constructor. */

@@ -69,8 +69,6 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
 /// \brief pbes equation.
 class pbes_equation
 {
-    friend struct atermpp::aterm_traits<pbes_equation>;
-
   protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
@@ -262,17 +260,5 @@ std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::pbes_equation>
-{
-};
-
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_PBES_PBES_EQUATION_H

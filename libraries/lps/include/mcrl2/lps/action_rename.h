@@ -340,20 +340,6 @@ atermpp::aterm_appl action_rename_specification_to_aterm(const action_rename_spe
 }
 }
 
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::lps::action_rename_rule>
-{
-};
-
-template<>
-struct aterm_traits<mcrl2::lps:: action_rename_specification>
-{
-};
-} // namespace atermpp
-/// \endcond
 
 namespace mcrl2
 {

@@ -51,7 +51,6 @@ class next_state_generator
       lps::action_label label;
       std::vector<rewriter_expression_t> arguments;
     };
-    friend struct atermpp::aterm_traits<action_internal_t>;
 
     struct summand_t
     {
@@ -66,14 +65,12 @@ class next_state_generator
       atermpp::aterm_appl condition_arguments_function_dummy;
       std::map<condition_arguments_t, summand_enumeration_t> enumeration_cache;
     };
-    friend struct atermpp::aterm_traits<summand_t>;
 
     struct pruning_tree_node_t
     {
       atermpp::shared_subset<summand_t> summand_subset;
       std::map<internal_state_argument_t, pruning_tree_node_t> children;
     };
-    friend struct atermpp::aterm_traits<pruning_tree_node_t>;
 
   public:
     class iterator;
@@ -112,7 +109,6 @@ class next_state_generator
 
     class transition_t
     {
-      friend struct atermpp::aterm_traits<transition_t>;
       friend class next_state_generator::iterator;
       private:
         next_state_generator *m_generator;
