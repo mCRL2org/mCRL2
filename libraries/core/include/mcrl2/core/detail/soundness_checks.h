@@ -2113,8 +2113,7 @@ bool check_term_BooleanEquation(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  // atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  atermpp::aterm term(t);
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2697,7 +2696,7 @@ bool check_term_PropVarInst(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(t);
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
   {
     return false;
