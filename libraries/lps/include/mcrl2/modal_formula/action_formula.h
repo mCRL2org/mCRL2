@@ -45,19 +45,6 @@ class action_formula: public atermpp::aterm_appl
       assert(core::detail::check_rule_ActFrm(*this));
     }
 //--- start user section action_formula ---//
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    action_formula substitute(Substitution f) const
-    {
-      throw std::runtime_error("action_formula::substitute(Substitution) is a deprecated interface!");
-      return action_formula(f(atermpp::aterm(*this)));
-    }
-
     /// \brief Constructor.
     /// \param term A term
     // TODO: Note that this conversion loses the time of the multi action.

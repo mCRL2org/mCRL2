@@ -73,10 +73,10 @@ action_formula right(action_formula t)
 /// \param t An action formula
 /// \return The variables of a quantification expression
 inline
-data::variable_list var(action_formula t)
+data::variable_list var(const action_formula& t)
 {
   assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-  return data::variable_list(t(0));
+  return data::variable_list(t[0]);
   /* return data::variable_list(
            atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
            atermpp::term_list_iterator< data::variable >());  */
