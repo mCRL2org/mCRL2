@@ -32,8 +32,8 @@ class aterm_string: public aterm_appl
     explicit aterm_string(const aterm &t)
       : aterm_appl(t)
     {
-      assert(t.type_is_appl());
-      assert(aterm_appl(t).size() == 0);
+      assert(size() == 0);
+      assert(function().arity() == 0);
     }
 
     /// \brief Constructor that allows construction from a string.
@@ -41,16 +41,14 @@ class aterm_string: public aterm_appl
     aterm_string(const std::string& s)
       : aterm_appl(function_symbol(s,0))
     {
-      assert(type_is_appl());
       assert(size() == 0);
+      assert(function().arity() == 0);
     }
 
     /// Assignment operator.
     /// \param t An aterm_string.
     aterm_string& operator=(const aterm_string &t)
     {
-      assert(t.type_is_appl());
-      assert(t.function().arity() == 0);
       copy_term(t);
       return *this;
     }
