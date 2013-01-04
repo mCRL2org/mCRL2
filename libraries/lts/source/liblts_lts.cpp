@@ -12,7 +12,7 @@
 #include <sstream>
 #include "svc/svc.h"
 #include "mcrl2/lts/lts_lts.h"
-
+#include "mcrl2/atermpp/aterm_int.h"
 
 using namespace std;
 using namespace mcrl2;

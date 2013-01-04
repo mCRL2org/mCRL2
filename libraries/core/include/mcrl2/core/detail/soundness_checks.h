@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_traits.h"
 
 
 namespace mcrl2
@@ -48,7 +47,7 @@ bool check_term_argument(Term t, CheckFunction f)
 template <typename Term, typename CheckFunction>
 bool check_list_argument(Term t, CheckFunction f, unsigned int minimum_size)
 {
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (t.type() != AT_LIST)
   {
     return false;
@@ -71,7 +70,7 @@ bool check_list_argument(Term t, CheckFunction f, unsigned int minimum_size)
 template <typename Term>
 bool check_rule_String(Term t)
 {
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -87,7 +86,7 @@ bool check_rule_String(Term t)
 template <typename Term>
 bool check_rule_NumberString(Term t)
 {
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1008,7 +1007,7 @@ bool check_term_BooleanOr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1047,7 +1046,7 @@ bool check_term_StateOr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1086,7 +1085,7 @@ bool check_term_Hide(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1125,7 +1124,7 @@ bool check_term_SortArrow(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1164,7 +1163,7 @@ bool check_term_ProcessAssignment(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1203,7 +1202,7 @@ bool check_term_Forall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1230,7 +1229,7 @@ bool check_term_CommExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1269,7 +1268,7 @@ bool check_term_StateNot(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1303,7 +1302,7 @@ bool check_term_BooleanFalse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1330,7 +1329,7 @@ bool check_term_SortFSet(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1357,7 +1356,7 @@ bool check_term_StateImp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1396,7 +1395,7 @@ bool check_term_PBESExists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1435,7 +1434,7 @@ bool check_term_PBESImp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1474,7 +1473,7 @@ bool check_term_Binder(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1518,7 +1517,7 @@ bool check_term_SortsPossible(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1552,7 +1551,7 @@ bool check_term_SortRef(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1591,7 +1590,7 @@ bool check_term_ProcEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1625,7 +1624,7 @@ bool check_term_StateForall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1664,7 +1663,7 @@ bool check_term_BooleanImp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1703,7 +1702,7 @@ bool check_term_SortId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1737,7 +1736,7 @@ bool check_term_StateNu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1781,7 +1780,7 @@ bool check_term_RegNil(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1808,7 +1807,7 @@ bool check_term_DataSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1857,7 +1856,7 @@ bool check_term_Tau(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1884,7 +1883,7 @@ bool check_term_StateYaledTimed(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1918,7 +1917,7 @@ bool check_term_SortCons(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1957,7 +1956,7 @@ bool check_term_DataEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -1991,7 +1990,7 @@ bool check_term_LinearProcessSummand(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2045,7 +2044,7 @@ bool check_term_SortSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2079,7 +2078,7 @@ bool check_term_ActionRenameRules(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2113,7 +2112,7 @@ bool check_term_BooleanEquation(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2157,7 +2156,7 @@ bool check_term_ConsSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2191,7 +2190,7 @@ bool check_term_SortList(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2218,7 +2217,7 @@ bool check_term_Sum(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2257,7 +2256,7 @@ bool check_term_DataVarId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2296,7 +2295,7 @@ bool check_term_ProcVarId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2335,7 +2334,7 @@ bool check_term_ProcessInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2369,7 +2368,7 @@ bool check_term_BES(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2408,7 +2407,7 @@ bool check_term_MapSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2442,7 +2441,7 @@ bool check_term_StateYaled(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2469,7 +2468,7 @@ bool check_term_BooleanAnd(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2508,7 +2507,7 @@ bool check_term_LinProcSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2562,7 +2561,7 @@ bool check_term_SetBagComp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2589,7 +2588,7 @@ bool check_term_Choice(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2628,7 +2627,7 @@ bool check_term_LinearProcessInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2662,7 +2661,7 @@ bool check_term_MultAct(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2696,7 +2695,7 @@ bool check_term_PropVarInst(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2735,7 +2734,7 @@ bool check_term_BagComp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2762,7 +2761,7 @@ bool check_term_StateDelay(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2789,7 +2788,7 @@ bool check_term_IdAssignment(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2828,7 +2827,7 @@ bool check_term_RegAlt(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2867,7 +2866,7 @@ bool check_term_StructCons(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2911,7 +2910,7 @@ bool check_term_IdInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2950,7 +2949,7 @@ bool check_term_Mu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -2977,7 +2976,7 @@ bool check_term_PBEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3011,7 +3010,7 @@ bool check_term_ActNot(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3045,7 +3044,7 @@ bool check_term_BooleanTrue(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3072,7 +3071,7 @@ bool check_term_Block(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3111,7 +3110,7 @@ bool check_term_Rename(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3150,7 +3149,7 @@ bool check_term_Exists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3177,7 +3176,7 @@ bool check_term_Sync(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3216,7 +3215,7 @@ bool check_term_ActExists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3255,7 +3254,7 @@ bool check_term_ProcSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3309,7 +3308,7 @@ bool check_term_StateMu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3353,7 +3352,7 @@ bool check_term_StateFalse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3380,7 +3379,7 @@ bool check_term_PBESForall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3419,7 +3418,7 @@ bool check_term_StateTrue(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3446,7 +3445,7 @@ bool check_term_BInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3485,7 +3484,7 @@ bool check_term_PBESFalse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3512,7 +3511,7 @@ bool check_term_DataAppl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3551,7 +3550,7 @@ bool check_term_RegTrans(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3585,7 +3584,7 @@ bool check_term_StateDelayTimed(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3619,7 +3618,7 @@ bool check_term_Nu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3646,7 +3645,7 @@ bool check_term_SortStruct(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3680,7 +3679,7 @@ bool check_term_AtTime(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3719,7 +3718,7 @@ bool check_term_ActOr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3758,7 +3757,7 @@ bool check_term_Comm(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3797,7 +3796,7 @@ bool check_term_BooleanNot(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3831,7 +3830,7 @@ bool check_term_Delta(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3858,7 +3857,7 @@ bool check_term_StateAnd(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3897,7 +3896,7 @@ bool check_term_LMerge(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3936,7 +3935,7 @@ bool check_term_SetComp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -3963,7 +3962,7 @@ bool check_term_ActForall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4002,7 +4001,7 @@ bool check_term_RenameExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4041,7 +4040,7 @@ bool check_term_Merge(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4080,7 +4079,7 @@ bool check_term_IfThen(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4119,7 +4118,7 @@ bool check_term_BooleanVariable(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4153,7 +4152,7 @@ bool check_term_Action(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4192,7 +4191,7 @@ bool check_term_PBESAnd(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4231,7 +4230,7 @@ bool check_term_Lambda(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4258,7 +4257,7 @@ bool check_term_StateMust(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4297,7 +4296,7 @@ bool check_term_Seq(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4336,7 +4335,7 @@ bool check_term_DataVarIdInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4375,7 +4374,7 @@ bool check_term_Process(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4414,7 +4413,7 @@ bool check_term_ActAnd(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4453,7 +4452,7 @@ bool check_term_ActionRenameSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4497,7 +4496,7 @@ bool check_term_PBES(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4546,7 +4545,7 @@ bool check_term_StateVar(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4585,7 +4584,7 @@ bool check_term_ActionRenameRule(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4634,7 +4633,7 @@ bool check_term_LinearProcess(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4673,7 +4672,7 @@ bool check_term_ActAt(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4712,7 +4711,7 @@ bool check_term_DataEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4761,7 +4760,7 @@ bool check_term_PBESNot(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4795,7 +4794,7 @@ bool check_term_StateExists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4834,7 +4833,7 @@ bool check_term_StateMay(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4873,7 +4872,7 @@ bool check_term_ParamId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4912,7 +4911,7 @@ bool check_term_PBESTrue(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4939,7 +4938,7 @@ bool check_term_MultActName(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -4973,7 +4972,7 @@ bool check_term_IfThenElse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5017,7 +5016,7 @@ bool check_term_Nil(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5044,7 +5043,7 @@ bool check_term_ProcEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5088,7 +5087,7 @@ bool check_term_StructProj(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5127,7 +5126,7 @@ bool check_term_PBEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5171,7 +5170,7 @@ bool check_term_Whr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5210,7 +5209,7 @@ bool check_term_OpId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5249,7 +5248,7 @@ bool check_term_SortSet(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5276,7 +5275,7 @@ bool check_term_ActFalse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5303,7 +5302,7 @@ bool check_term_ActId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5342,7 +5341,7 @@ bool check_term_SortUnknown(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5369,7 +5368,7 @@ bool check_term_PBESOr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5408,7 +5407,7 @@ bool check_term_RegSeq(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5447,7 +5446,7 @@ bool check_term_SortFBag(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5474,7 +5473,7 @@ bool check_term_Allow(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5513,7 +5512,7 @@ bool check_term_PropVarDecl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5552,7 +5551,7 @@ bool check_term_ActImp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5591,7 +5590,7 @@ bool check_term_SortBag(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5618,7 +5617,7 @@ bool check_term_PBInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5652,7 +5651,7 @@ bool check_term_ActTrue(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5679,7 +5678,7 @@ bool check_term_RegTransOrNil(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5713,7 +5712,7 @@ bool check_term_GlobVarSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5747,7 +5746,7 @@ bool check_term_ActSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;
@@ -5781,7 +5780,7 @@ bool check_term_Id(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  atermpp::aterm term(t);
   if (term.type() != AT_APPL)
   {
     return false;

@@ -90,22 +90,4 @@ class data_expression_with_variables: public data_expression
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::data::data_expression_with_variables>
-{
-  static aterm term(mcrl2::data::data_expression_with_variables& t)
-  {
-    return t; // t.term();
-  }
-  static aterm* ptr(mcrl2::data::data_expression_with_variables& t)
-  {
-    return &t; // .term();
-  }
-};
-} // namespace atermpp
-/// \endcond
-
 #endif // MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H
