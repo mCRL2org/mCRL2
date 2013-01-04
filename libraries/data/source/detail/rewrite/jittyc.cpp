@@ -1867,7 +1867,7 @@ static aterm add_args(aterm a, size_t num)
   {
     aterm_list l;
 
-    if (a.type()==AT_LIST)
+    if (a.type_is_list())
     {
       l = (aterm_list) a;
     }
@@ -1994,7 +1994,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     }
     else
     {
-      fprintf(f,"%sconst atermpp::aterm_appl &%s = atermpp::aterm_cast<const atermpp::aterm_appl>(%s%lu(%lu)); // S2\n",whitespace(d*2),
+      fprintf(f,"%sconst atermpp::aterm_appl &%s = atermpp::aterm_cast<const atermpp::aterm_appl>(%s%lu[%lu]); // S2\n",whitespace(d*2),
               aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree[0])[0]).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg);
     }
     implement_tree_aux(f,aterm_cast<aterm_appl>(tree[1]),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
@@ -2012,7 +2012,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     }
     else
     {
-      fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%lu(%lu))) // M\n"
+      fprintf(f,"%sif (%s==static_cast<atermpp::aterm_appl>(%s%lu[%lu])) // M\n"
               "%s{\n",
               whitespace(d*2),aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(tree[0])[0]).function().name().c_str()+1,(level==1)?"arg":"t",parent,cur_arg,
               whitespace(d*2)
@@ -2028,7 +2028,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
   {
     if (level == 0)
     {
-      fprintf(f,"%sif ((arg%lu(0)).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
+      fprintf(f,"%sif ((arg%lu[0]).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n",
               whitespace(d*2),
               cur_arg,
@@ -2038,9 +2038,9 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     }
     else
     {
-      fprintf(f,"%sif (isAppl(%s%lu(%lu)) && (aterm_cast<const atermpp::aterm_appl >(%s%lu(%lu))(0)).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
+      fprintf(f,"%sif (isAppl(%s%lu[%lu]) && (aterm_cast<const atermpp::aterm_appl >(%s%lu[%lu])[0]).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n"
-              "%s  atermpp::aterm_appl t%lu (%s%lu(%lu));\n",
+              "%s  atermpp::aterm_appl t%lu (%s%lu[%lu]);\n",
               whitespace(d*2),
               (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
@@ -2680,7 +2680,7 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
         fprintf(f,  "static inline atermpp::aterm_appl rewr_%zu_%zu_%zu_term(const atermpp::aterm_appl &t) { return rewr_%zu_%zu_%zu(", func_index, a, nfs,func_index, a,nfs);
         for(size_t i = 1; i <= a; ++i)
         {
-          fprintf(f,  "%satermpp::aterm_cast<const atermpp::aterm_appl>(t(%zu))", (i == 1?"":", "), i);
+          fprintf(f,  "%satermpp::aterm_cast<const atermpp::aterm_appl>(t[%zu])", (i == 1?"":", "), i);
         }
         fprintf(f,  "); }\n");
       }
@@ -2838,7 +2838,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "  size_t arity = a.size();\n"
             "  if (arity == 1 )\n"
             "  {\n"
-            "      return %sa(0)", calc_inner_appl_head(i).c_str());
+            "      return %sa[0]", calc_inner_appl_head(i).c_str());
 
     for (size_t j=0; j<i; j++)
     {
@@ -2865,7 +2865,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "\n"
             "    for (size_t i=0; i<arity; i++)\n"
             "    {\n"
-            "      args[i]=a(i).address();\n"
+            "      args[i]=a[i].address();\n"
             "    }\n",i);
     for (size_t j=0; j<i; j++)
     {
@@ -3016,15 +3016,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "\n"
       "atermpp::aterm_appl rewrite_int_aux(const atermpp::aterm_appl &t)\n"
       "{\n"
-//      "  const size_t arity = t.size();\n"
-//      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity));\n"
-//      "  std::vector<atermpp::aterm> args(arity);\n"
-//      "  args[0] = head;\n"
-//      "  for (size_t i=1; i<arity; ++i)\n"
-//      "  {\n"
-//      "    args[i] = rewrite(atermpp::aterm_appl(t(i)));\n"
-//      "  }\n"
-//      "  return atermpp::aterm_appl(t.function(),args.begin(),args.end());\n"
       "  const argument_rewriter_struct argument_rewriter;\n"
       "  return atermpp::aterm_appl(t.function(),t.begin(),t.end(),argument_rewriter);\n"
       "}\n\n");
@@ -3049,7 +3040,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  // variable, u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,\n"
       "  if (mcrl2::data::is_abstraction(head))\n"
       "  {\n"
-      "    const atermpp::aterm_appl binder(head(0));\n"
+      "    const atermpp::aterm_appl binder(head[0]);\n"
       "    if (binder==gsMakeLambda())\n"
       "    {\n"
       "      return this_rewriter->rewrite_lambda_application(head,t,*(this_rewriter->global_sigma));\n"
@@ -3072,7 +3063,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    new (&args[0]) atermpp::aterm(head);\n"
       "    for(size_t i=1; i<arity; ++i)\n"
       "    {\n"
-      "      new (&args[i]) atermpp::aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t(i))));\n"
+      "      new (&args[i]) atermpp::aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t[i])));\n"
       "    }\n"
       "    const aterm_appl result=ApplyArray(arity,&args[0],&args[0]+arity);\n"
       "    for(size_t i=0; i<arity; ++i)\n"
@@ -3087,7 +3078,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
       "  const atermpp::aterm_appl u=head;\n"
       "  const size_t arity_t = t.size();\n"
-      "  const atermpp::aterm head1 = u(0);\n"
+      "  const atermpp::aterm head1 = u[0];\n"
       "  const size_t arity_u=u.size();\n"
       "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity_u+arity_t-1));\n"
 //       "  std::vector<atermpp::aterm> args(arity_u+arity_t-1);\n"
@@ -3097,12 +3088,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
-      "      new (&args[i]) aterm(u(i));\n"
+      "      new (&args[i]) aterm(u[i]);\n"
       "    }\n"
       "    size_t k = arity_u;\n"
       "    for (size_t i=1; i<arity_t; ++i,++k)\n"
       "    {\n"
-      "      new (&args[k]) aterm(t(i));\n"
+      "      new (&args[k]) aterm(t[i]);\n"
       "    }\n"
       "    size_t arity = arity_u+arity_t-2;\n"
       "    const atermpp::aterm_appl intermediate(mcrl2::data::detail::get_appl_afun_value(arity+1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
@@ -3118,12 +3109,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
-      "      new (&args[i]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(u(i))));\n"
+      "      new (&args[i]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(u[i])));\n"
       "    }\n"
       "    size_t k = arity_u;\n"
       "    for (size_t i=1; i<arity_t; ++i,++k)\n"
       "    {\n"
-      "      new (&args[k]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t(i))));\n"
+      "      new (&args[k]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t[i])));\n"
       "    }\n"
       "    const aterm_appl result(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
       "    for(size_t i=0; i<arity_u+arity_t-1; ++i)\n"
@@ -3156,7 +3147,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  }\n"
       "  if (mcrl2::data::is_abstraction(t))\n"
       "  {\n"
-      "    atermpp::aterm_appl binder(t(0));\n"
+      "    atermpp::aterm_appl binder(t[0]);\n"
       "    if (binder==gsMakeExists())\n"
       "    {\n"
       "      return this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
@@ -3168,8 +3159,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    if (binder==gsMakeLambda())\n"
       "    {\n"
       "      return this_rewriter->rewrite_single_lambda(\n"
-      "               atermpp::aterm_cast<const mcrl2::data::variable_list>(t(1)),\n"
-      "               atermpp::aterm_cast<const atermpp::aterm_appl>(t(2)),false,*(this_rewriter->global_sigma));\n"
+      "               atermpp::aterm_cast<const mcrl2::data::variable_list>(t[1]),\n"
+      "               atermpp::aterm_cast<const atermpp::aterm_appl>(t[2]),false,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    assert(0);\n"
       "    return t;\n"
@@ -3187,7 +3178,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (fun==apples[arity])\n"
       "  {\n"
       "    // Term t has the shape #REWR#(t1,...,tn)\n"
-      "    const atermpp::aterm &head = t(0);\n"
+      "    const atermpp::aterm &head = t[0];\n"
       "    if (atermpp::aterm_cast<atermpp::aterm_appl>(head).function().number()==%ld)\n"
       "    {\n"
       "      const size_t function_index = atermpp::aterm_cast<const atermpp::aterm_int>(head).value();\n"

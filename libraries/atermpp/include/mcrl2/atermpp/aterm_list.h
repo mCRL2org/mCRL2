@@ -165,7 +165,7 @@ class term_list:public aterm
     }
     
     /// \brief Removes the first element of the list.
-    const void pop_front()
+    void pop_front()
     {
       *this=tail();
     }
