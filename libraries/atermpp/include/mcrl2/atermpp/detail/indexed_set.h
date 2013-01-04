@@ -13,6 +13,10 @@
 #ifndef MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 #define MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 
+#include <cstdlib>
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+
 namespace atermpp
 {
 namespace detail

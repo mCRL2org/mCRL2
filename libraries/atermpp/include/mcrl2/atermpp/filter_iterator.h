@@ -28,7 +28,6 @@
 #include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list_iterator.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 namespace atermpp

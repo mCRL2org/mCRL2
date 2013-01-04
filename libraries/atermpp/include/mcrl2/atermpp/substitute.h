@@ -45,17 +45,6 @@ struct substitution
   }
 };
 
-/// \brief Convenience function for creating a substitution.
-/// \param src A term
-/// \param dest A term
-/// \return A substitution
-template <typename Src, typename Dest>
-inline
-substitution make_substitution(Src src, Dest dest)
-{
-  return substitution(aterm_traits<Src>::term(src), aterm_traits<Dest>::term(dest));
-}
-
 /// Utility class for applying a substitution to a term.
 template <typename Src, typename Dest>
 struct list_substitution

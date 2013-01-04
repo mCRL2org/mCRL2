@@ -16,7 +16,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <utility>
 #include "mcrl2/atermpp/aterm_int.h"
-
+#include "mcrl2/atermpp/aterm_list.h"
 
 namespace atermpp
 {
