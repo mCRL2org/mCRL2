@@ -33,7 +33,6 @@ class aterm_string: public aterm_appl
       : aterm_appl(t)
     {
       assert(size() == 0);
-      assert(function().arity() == 0);
     }
 
     /// \brief Constructor that allows construction from a string.
@@ -42,7 +41,6 @@ class aterm_string: public aterm_appl
       : aterm_appl(function_symbol(s,0))
     {
       assert(size() == 0);
-      assert(function().arity() == 0);
     }
 
     /// Assignment operator.
