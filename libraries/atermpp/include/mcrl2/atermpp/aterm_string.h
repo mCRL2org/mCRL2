@@ -42,7 +42,7 @@ class aterm_string: public aterm_appl
       : aterm_appl(function_symbol(s,0))
     {
       assert(type() == AT_APPL);
-      assert(aterm_appl(m_term).size() == 0);
+      assert(size() == 0);
     }
 
     /// Assignment operator. 
