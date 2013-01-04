@@ -95,7 +95,7 @@ make_rewrite_data_expressions_with_substitution_builder(Rewriter R, Substitution
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
-             typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R)(x);
@@ -108,7 +108,7 @@ void rewrite(T& x,
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
           Rewriter R,
-          typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
          )
 {
   return data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R)(x);
@@ -122,7 +122,7 @@ template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
              Substitution sigma,
-             typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
             )
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma)(x);
@@ -137,7 +137,7 @@ template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
           Substitution sigma,
-          typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
+          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
          )
 {
   return data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma)(x);
