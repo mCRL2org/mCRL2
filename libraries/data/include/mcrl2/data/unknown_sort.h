@@ -36,7 +36,7 @@ class unknown_sort: public sort_expression
     unknown_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
-      assert(core::detail::check_term_SortUnknown(m_term));
+      assert(core::detail::check_term_SortUnknown(*this));
     }
 };
 //--- end generated class unknown_sort ---//

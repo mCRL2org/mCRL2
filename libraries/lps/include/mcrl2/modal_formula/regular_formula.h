@@ -44,7 +44,7 @@ class regular_formula: public atermpp::aterm_appl
     regular_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_RegFrm(m_term));
+      assert(core::detail::check_rule_RegFrm(*this));
     }
 };
 
@@ -79,7 +79,7 @@ class nil: public regular_formula
     nil(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegNil(m_term));
+      assert(core::detail::check_term_RegNil(*this));
     }
 };
 
@@ -107,7 +107,7 @@ class seq: public regular_formula
     seq(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegSeq(m_term));
+      assert(core::detail::check_term_RegSeq(*this));
     }
 
     /// \brief Constructor.
@@ -150,7 +150,7 @@ class alt: public regular_formula
     alt(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegAlt(m_term));
+      assert(core::detail::check_term_RegAlt(*this));
     }
 
     /// \brief Constructor.
@@ -193,7 +193,7 @@ class trans: public regular_formula
     trans(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegTrans(m_term));
+      assert(core::detail::check_term_RegTrans(*this));
     }
 
     /// \brief Constructor.
@@ -231,7 +231,7 @@ class trans_or_nil: public regular_formula
     trans_or_nil(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegTransOrNil(m_term));
+      assert(core::detail::check_term_RegTransOrNil(*this));
     }
 
     /// \brief Constructor.

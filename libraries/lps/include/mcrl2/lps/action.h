@@ -39,7 +39,7 @@ class action: public atermpp::aterm_appl
     action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_Action(m_term));
+      assert(core::detail::check_term_Action(*this));
     }
 
     /// \brief Constructor.

@@ -41,7 +41,7 @@ class action_name_multiset: public atermpp::aterm_appl
     action_name_multiset(const atermpp::aterm_appl &term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_MultActName(m_term));
+      assert(core::detail::check_term_MultActName(*this));
     }
 
     /// \brief Constructor.
@@ -49,7 +49,7 @@ class action_name_multiset: public atermpp::aterm_appl
     explicit action_name_multiset(const atermpp::aterm &term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_MultActName(m_term));
+      assert(core::detail::check_term_MultActName(*this));
     }
 
     /// \brief Constructor.

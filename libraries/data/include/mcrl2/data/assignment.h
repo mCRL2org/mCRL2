@@ -44,7 +44,7 @@ class assignment_expression: public atermpp::aterm_appl,
     assignment_expression(const aterm &term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_WhrDecl(atermpp::aterm_appl(term)));
+      assert(core::detail::check_rule_WhrDecl(*this));
     }
 
     assignment_expression(const variable v, const data_expression d)
@@ -83,7 +83,7 @@ class assignment: public assignment_expression
     assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
-      assert(core::detail::check_term_DataVarIdInit(m_term));
+      assert(core::detail::check_term_DataVarIdInit(*this));
     }
 
     /// \brief Constructor.
@@ -152,7 +152,7 @@ class identifier_assignment: public assignment_expression
     identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
-      assert(core::detail::check_term_IdInit(m_term));
+      assert(core::detail::check_term_IdInit(*this));
     }
 
     /// \brief Constructor.

@@ -37,7 +37,7 @@ class container_type: public atermpp::aterm_appl
     container_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_SortConsType(m_term));
+      assert(core::detail::check_rule_SortConsType(*this));
     }
 };
 
@@ -62,7 +62,7 @@ class list_container: public container_type
     list_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortList(m_term));
+      assert(core::detail::check_term_SortList(*this));
     }
 };
 
@@ -90,7 +90,7 @@ class set_container: public container_type
     set_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortSet(m_term));
+      assert(core::detail::check_term_SortSet(*this));
     }
 };
 
@@ -118,7 +118,7 @@ class bag_container: public container_type
     bag_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortBag(m_term));
+      assert(core::detail::check_term_SortBag(*this));
     }
 };
 
@@ -146,7 +146,7 @@ class fset_container: public container_type
     fset_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortFSet(m_term));
+      assert(core::detail::check_term_SortFSet(*this));
     }
 };
 
@@ -174,7 +174,7 @@ class fbag_container: public container_type
     fbag_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortFBag(m_term));
+      assert(core::detail::check_term_SortFBag(*this));
     }
 };
 

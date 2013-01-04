@@ -80,7 +80,7 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
     action_rename_rule_rhs(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_ActionRenameRuleRHS(m_term));
+      assert(core::detail::check_rule_ActionRenameRuleRHS(*this));
     }
 
     /// \brief Returns the action.
@@ -638,7 +638,7 @@ lps::specification action_rename(
                    i=lps_new_actions.begin() ;
                    i!=lps_new_actions.end() ; ++i,++i_is_delta)
               {
-                *i=action_list(); // the action becomes delta 
+                *i=action_list(); // the action becomes delta
                 *i_is_delta=true;
               }
             }
@@ -668,7 +668,7 @@ lps::specification action_rename(
             }
 
           }
-          else 
+          else
           {
             /* Duplicate summands, one where the renaming is applied, and one where it is not
                applied. */

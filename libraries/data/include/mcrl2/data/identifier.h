@@ -24,7 +24,7 @@ class identifier: public data_expression
     identifier(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_Id(m_term));
+      assert(core::detail::check_term_Id(*this));
     }
 
     /// \brief Constructor.

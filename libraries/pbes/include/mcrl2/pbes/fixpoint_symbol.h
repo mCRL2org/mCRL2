@@ -42,7 +42,7 @@ class fixpoint_symbol: public atermpp::aterm_appl
     fixpoint_symbol(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_rule_FixPoint(m_term));
+      assert(core::detail::check_rule_FixPoint(*this));
     }
 
     /// \brief Constructor.
@@ -50,13 +50,13 @@ class fixpoint_symbol: public atermpp::aterm_appl
     explicit fixpoint_symbol(const aterm &t)
       : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_rule_FixPoint(m_term));
+      assert(core::detail::check_rule_FixPoint(*this));
     }
 
     /// \brief Assignment operator.
     fixpoint_symbol& operator=(atermpp::aterm t)
     {
-      this->copy_term(t); 
+      this->copy_term(t);
       return *this;
     }
 

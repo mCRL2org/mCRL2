@@ -555,7 +555,7 @@ class ATermConstructor(Constructor):
     <CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
-      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));
+      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''
         return self.expand_text(text)
 
@@ -571,7 +571,7 @@ class ATermConstructor(Constructor):
     <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
-      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));
+      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)

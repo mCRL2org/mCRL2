@@ -46,7 +46,7 @@ class application_base: public data_expression
     application_base(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_DataAppl(m_term));
+      assert(core::detail::check_term_DataAppl(*this));
     }
 
     /// \brief Constructor.
@@ -65,7 +65,7 @@ class application_base: public data_expression
       return data_expression(atermpp::arg1(*this));
     }
 
-    /// \brief Give the arguments of this term as a list. 
+    /// \brief Give the arguments of this term as a list.
     /// \details time for this operation is constant.
     data_expression_list arguments() const
     {

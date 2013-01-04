@@ -40,7 +40,7 @@ class process_identifier: public atermpp::aterm_appl
     process_identifier(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_ProcVarId(m_term));
+      assert(core::detail::check_term_ProcVarId(*this));
     }
 
     /// \brief Constructor.
@@ -48,7 +48,7 @@ class process_identifier: public atermpp::aterm_appl
     explicit process_identifier(const atermpp::aterm &term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_ProcVarId(m_term));
+      assert(core::detail::check_term_ProcVarId(*this));
     }
 
     /// \brief Constructor.
@@ -67,7 +67,7 @@ class process_identifier: public atermpp::aterm_appl
     /// \return The sorts of the process identifier
     const data::sort_expression_list &sorts() const
     {
-      return atermpp::aterm_cast<data::sort_expression_list>((*this)[1]); 
+      return atermpp::aterm_cast<data::sort_expression_list>((*this)[1]);
     }
 };
 

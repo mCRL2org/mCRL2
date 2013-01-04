@@ -42,7 +42,7 @@ class variable: public data_expression
     variable(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_DataVarId(m_term));
+      assert(core::detail::check_term_DataVarId(*this));
     }
 
     /// \brief Constructor.

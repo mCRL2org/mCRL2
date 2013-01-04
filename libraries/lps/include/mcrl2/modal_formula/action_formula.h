@@ -42,7 +42,7 @@ class action_formula: public atermpp::aterm_appl
     action_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_ActFrm(m_term));
+      assert(core::detail::check_rule_ActFrm(*this));
     }
 //--- start user section action_formula ---//
     /// \brief Applies a low level substitution function to this term and returns the result.
@@ -101,7 +101,7 @@ class true_: public action_formula
     true_(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActTrue(m_term));
+      assert(core::detail::check_term_ActTrue(*this));
     }
 };
 
@@ -129,7 +129,7 @@ class false_: public action_formula
     false_(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActFalse(m_term));
+      assert(core::detail::check_term_ActFalse(*this));
     }
 };
 
@@ -157,7 +157,7 @@ class not_: public action_formula
     not_(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActNot(m_term));
+      assert(core::detail::check_term_ActNot(*this));
     }
 
     /// \brief Constructor.
@@ -195,7 +195,7 @@ class and_: public action_formula
     and_(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActAnd(m_term));
+      assert(core::detail::check_term_ActAnd(*this));
     }
 
     /// \brief Constructor.
@@ -238,7 +238,7 @@ class or_: public action_formula
     or_(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActOr(m_term));
+      assert(core::detail::check_term_ActOr(*this));
     }
 
     /// \brief Constructor.
@@ -281,7 +281,7 @@ class imp: public action_formula
     imp(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActImp(m_term));
+      assert(core::detail::check_term_ActImp(*this));
     }
 
     /// \brief Constructor.
@@ -324,7 +324,7 @@ class forall: public action_formula
     forall(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActForall(m_term));
+      assert(core::detail::check_term_ActForall(*this));
     }
 
     /// \brief Constructor.
@@ -367,7 +367,7 @@ class exists: public action_formula
     exists(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActExists(m_term));
+      assert(core::detail::check_term_ActExists(*this));
     }
 
     /// \brief Constructor.
@@ -410,7 +410,7 @@ class at: public action_formula
     at(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_ActAt(m_term));
+      assert(core::detail::check_term_ActAt(*this));
     }
 
     /// \brief Constructor.

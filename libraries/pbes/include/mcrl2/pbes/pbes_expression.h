@@ -52,7 +52,7 @@ class pbes_expression: public atermpp::aterm_appl
     pbes_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_PBExpr(m_term));
+      assert(core::detail::check_rule_PBExpr(*this));
     }
 };
 
@@ -77,7 +77,7 @@ class propositional_variable_instantiation: public pbes_expression
     propositional_variable_instantiation(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PropVarInst(m_term));
+      assert(core::detail::check_term_PropVarInst(*this));
     }
 
     /// \brief Constructor.
@@ -136,7 +136,7 @@ class true_: public pbes_expression
     true_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESTrue(m_term));
+      assert(core::detail::check_term_PBESTrue(*this));
     }
 };
 
@@ -154,7 +154,7 @@ class false_: public pbes_expression
     false_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESFalse(m_term));
+      assert(core::detail::check_term_PBESFalse(*this));
     }
 };
 
@@ -172,7 +172,7 @@ class not_: public pbes_expression
     not_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESNot(m_term));
+      assert(core::detail::check_term_PBESNot(*this));
     }
 
     /// \brief Constructor.
@@ -200,7 +200,7 @@ class and_: public pbes_expression
     and_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESAnd(m_term));
+      assert(core::detail::check_term_PBESAnd(*this));
     }
 
     /// \brief Constructor.
@@ -233,7 +233,7 @@ class or_: public pbes_expression
     or_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESOr(m_term));
+      assert(core::detail::check_term_PBESOr(*this));
     }
 
     /// \brief Constructor.
@@ -266,7 +266,7 @@ class imp: public pbes_expression
     imp(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESImp(m_term));
+      assert(core::detail::check_term_PBESImp(*this));
     }
 
     /// \brief Constructor.
@@ -299,7 +299,7 @@ class forall: public pbes_expression
     forall(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESForall(m_term));
+      assert(core::detail::check_term_PBESForall(*this));
     }
 
     /// \brief Constructor.
@@ -332,7 +332,7 @@ class exists: public pbes_expression
     exists(const atermpp::aterm& term)
       : pbes_expression(term)
     {
-      assert(core::detail::check_term_PBESExists(m_term));
+      assert(core::detail::check_term_PBESExists(*this));
     }
 
     /// \brief Constructor.

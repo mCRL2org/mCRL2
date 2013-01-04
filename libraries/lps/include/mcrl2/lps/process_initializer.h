@@ -55,7 +55,7 @@ class process_initializer: public atermpp::aterm_appl
     process_initializer(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_term_LinearProcessInit(m_term));
+      assert(core::detail::check_term_LinearProcessInit(*this));
       atermpp::aterm_appl::iterator i = t.begin();
       m_assignments = data::assignment_list(*i);
     }

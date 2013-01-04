@@ -66,7 +66,7 @@ class propositional_variable: public atermpp::aterm_appl
     propositional_variable(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_rule_PropVarDecl(m_term));
+      assert(core::detail::check_rule_PropVarDecl(*this));
       iterator i = t.begin();
       m_name = atermpp::aterm_cast<atermpp::aterm_string>(*i++);
       m_parameters = data::variable_list(*i);
@@ -78,7 +78,7 @@ class propositional_variable: public atermpp::aterm_appl
       : atermpp::aterm_appl(t1)
     {
       const atermpp::aterm_appl t(t1);
-      assert(core::detail::check_rule_PropVarDecl(m_term));
+      assert(core::detail::check_rule_PropVarDecl(*this));
       iterator i = t.begin();
       m_name = atermpp::aterm_cast<atermpp::aterm_string>(*i++);
       m_parameters = data::variable_list(*i);

@@ -55,7 +55,7 @@ class boolean_expression: public atermpp::aterm_appl
     boolean_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_BooleanExpression(m_term));
+      assert(core::detail::check_rule_BooleanExpression(*this));
     }
 };
 
@@ -80,7 +80,7 @@ class true_: public boolean_expression
     true_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanTrue(m_term));
+      assert(core::detail::check_term_BooleanTrue(*this));
     }
 };
 
@@ -108,7 +108,7 @@ class false_: public boolean_expression
     false_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanFalse(m_term));
+      assert(core::detail::check_term_BooleanFalse(*this));
     }
 };
 
@@ -136,7 +136,7 @@ class not_: public boolean_expression
     not_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanNot(m_term));
+      assert(core::detail::check_term_BooleanNot(*this));
     }
 
     /// \brief Constructor.
@@ -174,7 +174,7 @@ class and_: public boolean_expression
     and_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanAnd(m_term));
+      assert(core::detail::check_term_BooleanAnd(*this));
     }
 
     /// \brief Constructor.
@@ -217,7 +217,7 @@ class or_: public boolean_expression
     or_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanOr(m_term));
+      assert(core::detail::check_term_BooleanOr(*this));
     }
 
     /// \brief Constructor.
@@ -260,7 +260,7 @@ class imp: public boolean_expression
     imp(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanImp(m_term));
+      assert(core::detail::check_term_BooleanImp(*this));
     }
 
     /// \brief Constructor.
@@ -303,7 +303,7 @@ class boolean_variable: public boolean_expression
     boolean_variable(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanVariable(m_term));
+      assert(core::detail::check_term_BooleanVariable(*this));
     }
 
     /// \brief Constructor.

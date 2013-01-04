@@ -37,7 +37,7 @@ class binder_type: public atermpp::aterm_appl
     binder_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_BindingOperator(m_term));
+      assert(core::detail::check_rule_BindingOperator(*this));
     }
 };
 
@@ -62,7 +62,7 @@ class set_or_bag_comprehension_binder: public binder_type
     set_or_bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_SetBagComp(m_term));
+      assert(core::detail::check_term_SetBagComp(*this));
     }
 };
 
@@ -90,7 +90,7 @@ class set_comprehension_binder: public binder_type
     set_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_SetComp(m_term));
+      assert(core::detail::check_term_SetComp(*this));
     }
 };
 
@@ -118,7 +118,7 @@ class bag_comprehension_binder: public binder_type
     bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_BagComp(m_term));
+      assert(core::detail::check_term_BagComp(*this));
     }
 };
 
@@ -146,7 +146,7 @@ class forall_binder: public binder_type
     forall_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Forall(m_term));
+      assert(core::detail::check_term_Forall(*this));
     }
 };
 
@@ -174,7 +174,7 @@ class exists_binder: public binder_type
     exists_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Exists(m_term));
+      assert(core::detail::check_term_Exists(*this));
     }
 };
 
@@ -202,7 +202,7 @@ class lambda_binder: public binder_type
     lambda_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Lambda(m_term));
+      assert(core::detail::check_term_Lambda(*this));
     }
 };
 

@@ -39,7 +39,7 @@ class communication_expression: public atermpp::aterm_appl
     communication_expression(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_CommExpr(m_term));
+      assert(core::detail::check_term_CommExpr(*this));
     }
 
     /// \brief Constructor.
@@ -47,7 +47,7 @@ class communication_expression: public atermpp::aterm_appl
     explicit communication_expression(const atermpp::aterm &term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_CommExpr(m_term));
+      assert(core::detail::check_term_CommExpr(*this));
     }
 
     /// \brief Constructor.

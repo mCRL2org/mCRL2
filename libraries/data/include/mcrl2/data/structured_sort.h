@@ -73,7 +73,7 @@ class structured_sort_base: public sort_expression
     structured_sort_base(const atermpp::aterm_appl& term)
       : sort_expression(term)
     {
-      assert(core::detail::check_term_SortStruct(m_term));
+      assert(core::detail::check_term_SortStruct(*this));
     }
 
     /// \brief Constructor.

@@ -42,7 +42,7 @@ class basic_sort: public sort_expression
     basic_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
-      assert(core::detail::check_term_SortId(m_term));
+      assert(core::detail::check_term_SortId(*this));
     }
 
     /// \brief Constructor.
