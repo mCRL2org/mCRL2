@@ -65,7 +65,7 @@ class action_formula: public atermpp::aterm_appl
     action_formula(const lps::multi_action& m)
       : atermpp::aterm_appl(core::detail::gsMakeMultAct(m.actions()))
     {
-      assert(core::detail::check_rule_ActFrm(m_term));
+      assert(core::detail::check_rule_ActFrm(*this));
     }
 //--- end user section action_formula ---//
 };

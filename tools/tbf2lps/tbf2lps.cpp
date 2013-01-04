@@ -60,7 +60,7 @@ class tbf2lps_tool: public input_output_tool
 
         mcrl_spec = (aterm_appl) read_term_from_binary_stream(std::cin);
 
-        if (mcrl_spec == 0)
+        if (!mcrl_spec.defined())
         {
           throw mcrl2::runtime_error("could not read mCRL LPS from '" + input_filename() + "'");
         }

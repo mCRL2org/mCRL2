@@ -14,7 +14,7 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
 #include "mcrl2/atermpp/detail/aterm_int.h"
-#include "mcrl2/atermpp/detail/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 
 
 #ifdef DMALLOC
@@ -37,7 +37,7 @@ size_t aterm_table_mask;            // used in memory.h
 const _aterm* * aterm_hashtable;  // used in memory.h
 
 aterm static_undefined_aterm;
-aterm static_empty_aterm_list(detail::aterm0(detail::function_adm.AS_EMPTY_LIST));
+aterm static_empty_aterm_list(aterm_appl(detail::function_adm.AS_EMPTY_LIST));
 
 /* The constants below are not static to prevent some compiler warnings */
 const size_t INITIAL_MAX_TERM_SIZE = 256;

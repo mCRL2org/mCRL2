@@ -113,33 +113,37 @@ template <typename Term>
 inline
 term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
 {
-  size_t i = 0;
-  term_list<Term> l = list;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,list.size());
-
-  while (l!=term_list<Term>())
+  size_t len=0;
+  typename term_list<Term>::const_iterator i=list.begin();
+  for( ; i!=list.end(); ++i, ++len)
   {
-    if (l.front()==t)
+    if (*i==t)
     {
       break;
     }
-    buffer[i++] = l.front().address();
-    l = l.tail();
   }
 
-  if (l.empty())
+  if (i==list.end())
   {
+    // Term t not found in list.
     return list;
   }
 
-  l = l.tail();
-  term_list<Term> result = l; /* Skip element to be removed */
-
-  /* We found the element. Add all elements prior to this
-           one to the tail of the list. */
-  for ( ; i>0; i--)
+  std::vector<Term>buffer;
+  buffer.reserve(len);
+  term_list<Term> result = list; 
+  for(typename term_list<Term>::const_iterator j=list.begin();  j!=i; ++j)
   {
-    result.push_front(Term(buffer[i-1]));
+    buffer.push_back(*j);
+    result.pop_front();
+  }
+  assert(len==buffer.size());
+  assert(result.front()==t);
+  result.pop_front(); // skip the element.
+
+  for (typename std::vector<Term>::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+  {
+    result.push_front(*i);
   }
 
   return result;
@@ -163,18 +167,18 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   }
 
   term_list<Term> result = m;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
+  std::vector<Term>buffer;
+  buffer.reserve(len);
 
-  size_t j=0;
-  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++j)
+  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
   {
-    buffer[j] = i->address();
+    buffer.push_back(*i); 
   }
 
   /* Insert elements at the front of the list */
-  for (size_t j=len; j>0; j--)
+  for (typename std::vector<Term>::const_reverse_iterator j=buffer.rbegin(); j!=buffer.rend(); ++j)
   {
-    result.push_front(Term(buffer[j-1]));
+    result.push_front(*j);
   }
 
   return result;

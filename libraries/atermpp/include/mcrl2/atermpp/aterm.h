@@ -92,7 +92,8 @@ class aterm
       increase_reference_count<false>();
     }
   
-  public: // Should be protected; Does not work, due to a problem in the soundness checks.
+  public: // Should be protected, but this cannot yet be done due to a problem
+          // in the compiling rewriter.
     aterm (const detail::_aterm *t):m_term(t)
     {
       // Note that reference_count can be 0, as this term can just be constructed,
