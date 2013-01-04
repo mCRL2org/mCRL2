@@ -59,7 +59,7 @@ struct for_each_proc
 
   bool operator()(aterm t)
   {
-    if(t.type() == AT_APPL)
+    if(t.type_is_appl())
     {
       return (*this)(aterm_cast<aterm_appl>(t));
     }

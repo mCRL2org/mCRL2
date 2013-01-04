@@ -95,14 +95,14 @@ struct found_term_exception
 template <typename UnaryFunction>
 UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 {
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
       for_each_impl(*i, op);
     }
   }
-  else if (t.type() == AT_APPL)
+  else if (t.type_is_appl())
   {
     if (op(t))
     {
@@ -169,7 +169,7 @@ void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBeg
       find_all_if_impl< MatchPredicate >(*i, op, destBegin);
     }
   }
-  else if (t.type() == AT_APPL)
+  else if (t.type_is_appl())
   {
     aterm_appl a(t);
     if (op(a))
@@ -197,7 +197,7 @@ void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBeg
 template <typename MatchPredicate, typename StopPredicate>
 void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
 {
-  if (t.type() == AT_APPL)
+  if (t.type_is_appl())
   {
     if (match(aterm_appl(t)))
     {
@@ -213,7 +213,7 @@ void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
     }
   }
 
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
@@ -230,7 +230,7 @@ void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
 template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
 void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
 {
-  if (t.type() == AT_APPL)
+  if (t.type_is_appl())
   {
     if (match(aterm_appl(t)))
     {
@@ -246,7 +246,7 @@ void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop,
     }
   }
 
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {

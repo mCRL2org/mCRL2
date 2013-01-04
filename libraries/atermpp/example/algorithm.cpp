@@ -27,7 +27,7 @@ struct is_f
 {
   bool operator()(atermpp::aterm t) const
   {
-    return (t.type() == AT_APPL) && aterm_appl(t).function().name() == "f";
+    return (t.type_is_appl()) && aterm_appl(t).function().name() == "f";
   }
 };
 
@@ -36,7 +36,7 @@ struct is_a_or_b
 {
   bool operator()(atermpp::aterm t) const
   {
-    return (t.type() == AT_APPL) &&
+    return (t.type_is_appl()) &&
            (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");
   }
 };

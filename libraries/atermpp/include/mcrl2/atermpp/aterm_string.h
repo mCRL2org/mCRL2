@@ -41,19 +41,19 @@ class aterm_string: public aterm_appl
     aterm_string(const std::string& s)
       : aterm_appl(function_symbol(s,0))
     {
-      assert(type() == AT_APPL);
+      assert(type_is_appl());
       assert(size() == 0);
     }
 
-    /// Assignment operator. 
+    /// Assignment operator.
     /// \param t An aterm_string.
     aterm_string& operator=(const aterm_string &t)
     {
-      assert(t.type() == AT_APPL);
+      assert(t.type_is_appl());
       assert(t.function().arity() == 0);
-      copy_term(t); 
+      copy_term(t);
       return *this;
-    } 
+    }
 
     /// \brief Conversion operator
     /// \return The term converted to string

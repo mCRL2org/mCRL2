@@ -1335,25 +1335,25 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   {
     return opid_is_nf(static_cast<aterm_int>(t),0);
   }
-  else if (/*t.type() == AT_APPL && */ gsIsNil((aterm_appl) t))
+  else if (/*t.type_is_appl() && */ gsIsNil((aterm_appl) t))
   {
     // assert(startarg>=0); This value may be negative.
     return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) == nnfvars.end());
   }
-  else if (/* t.type() == AT_APPL && */ gsIsDataVarId((aterm_appl) t))
+  else if (/* t.type_is_appl() && */ gsIsDataVarId((aterm_appl) t))
   {
-    assert(t.type() == AT_APPL && gsIsDataVarId((aterm_appl) t));
+    assert(t.type_is_appl() && gsIsDataVarId((aterm_appl) t));
     return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(),t) == nnfvars.end());
   }
   else if (is_abstraction(atermpp::aterm_appl(t)))
   {
-    assert(t.type() == AT_APPL);
+    assert(t.type_is_appl());
     return false; // I assume that lambda, forall and exists are not in normal form by default.
                   // This might be too weak, and may require to be reinvestigated later.
   }
   else
   {
-    assert(t.type() == AT_APPL && is_where_clause(atermpp::aterm_appl(t)));
+    assert(t.type_is_appl() && is_where_clause(atermpp::aterm_appl(t)));
     return false; // I assume that a where clause is not in normal form by default.
                   // This might be too weak, and may require to be reinvestigated later.
   }
@@ -1693,7 +1693,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (gsIsDataVarId((aterm_appl)t))
   {
-    assert(t.type() == AT_APPL);
+    assert(t.type_is_appl());
     stringstream ss;
     /* if (total_arity>5)
     {

@@ -63,9 +63,9 @@ inline const aterm_appl &ATAgetArgument(const aterm_appl &Appl, const size_t Nr)
   const aterm &Result = Appl[Nr];
   // assert(ATisApplOrNull(Result));
   return aterm_cast<const aterm_appl>(Result);
-}  
-  
-/* 
+}
+
+/*
    \brief Gets the argument as aterm_list at the specified position
 */
 inline const aterm_list &ATLgetArgument(const aterm_appl &Appl, const size_t Nr)
@@ -543,12 +543,12 @@ void PrintPart__CXX(std::ostream& OutStream, const aterm Part,
   }
   else
   {
-    if (Part.type() == AT_APPL)
+    if (Part.type_is_appl())
     {
       PrintPart_Appl(OutStream, (aterm_appl) Part, pp_format,
                                  false, 0);
     }
-    else if (Part.type() == AT_LIST)
+    else if (Part.type_is_list())
     {
       OutStream <<  "[";
       PrintPart_List(OutStream, (aterm_list) Part,
@@ -1308,7 +1308,7 @@ void PrintEqns(std::ostream& OutStream, const aterm_list Eqns,
           }
         }
       }
-      //finalisation after printing all (>0) equations      
+      //finalisation after printing all (>0) equations
     }
   }
 }
@@ -3060,7 +3060,7 @@ aterm_list gsGroupDeclsBySort(aterm_list Decls)
         SortDeclsTable.put(DeclSort,temp);
       }
       else
-      { 
+      {
         SortDeclsTable.put(DeclSort,make_list<aterm>(Decl));
       }
       Decls = Decls.tail();

@@ -74,11 +74,11 @@ static void aterm_io_init()
 
 static void write_string_with_escape_symbols(const std::string &s, std::ostream& os)
 {
-  // Check whether the string starts with a - or a number, or contains the symbols 
-  // \, ", (, ), [, ], comma, space, \t, \n or \r. If yes, the string will be 
+  // Check whether the string starts with a - or a number, or contains the symbols
+  // \, ", (, ), [, ], comma, space, \t, \n or \r. If yes, the string will be
   // surrounded by quotes, and the symbols \, ", \t, \n, \r
   // will be preceded by an escape symbol.
-  
+
   assert(s.size()>0);
   char c=s[0];
   bool contains_special_symbols= c=='-' || isdigit(c);
@@ -94,7 +94,7 @@ static void write_string_with_escape_symbols(const std::string &s, std::ostream&
   if (contains_special_symbols)
   {
     /* This function symbol needs quotes */
-    os << "\""; 
+    os << "\"";
     for(std::string::const_iterator i=s.begin(); i!=s.end(); ++i)
     {
       /* We need to escape special characters */
@@ -176,7 +176,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
 
 static void topWriteToStream(const aterm &t, std::ostream& os)
 {
-  if (t.type() == AT_LIST)
+  if (t.type_is_list())
   {
     os << "[";
     writeToStream(t, os);
@@ -427,12 +427,12 @@ static aterm fparse_term(int* c, istream &is)
   switch (*c)
   {
     case '"':
-    { 
+    {
       string f=fparse_quoted_string(c, is);
       return parse_arguments(f,c,is);
     }
     case '[':
-    { 
+    {
       fnext_skip_layout(c, is);
       if (*c == ']')
       {
@@ -451,7 +451,7 @@ static aterm fparse_term(int* c, istream &is)
       }
     }
     default:
-    { 
+    {
       if (isdigit(*c) || *c == '-')
       {
         return fparse_num(c, is);
