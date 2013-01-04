@@ -41,7 +41,7 @@ class regular_formula: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    regular_formula(const atermpp::aterm_appl& term)
+    regular_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_RegFrm(m_term));
@@ -76,7 +76,7 @@ class nil: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    nil(const atermpp::aterm_appl& term)
+    nil(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegNil(m_term));
@@ -104,7 +104,7 @@ class seq: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    seq(const atermpp::aterm_appl& term)
+    seq(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegSeq(m_term));
@@ -115,14 +115,14 @@ class seq: public regular_formula
       : regular_formula(core::detail::gsMakeRegSeq(left, right))
     {}
 
-    regular_formula left() const
+    const regular_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 
-    regular_formula right() const
+    const regular_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -147,7 +147,7 @@ class alt: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    alt(const atermpp::aterm_appl& term)
+    alt(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegAlt(m_term));
@@ -158,14 +158,14 @@ class alt: public regular_formula
       : regular_formula(core::detail::gsMakeRegAlt(left, right))
     {}
 
-    regular_formula left() const
+    const regular_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 
-    regular_formula right() const
+    const regular_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -190,7 +190,7 @@ class trans: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    trans(const atermpp::aterm_appl& term)
+    trans(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegTrans(m_term));
@@ -201,9 +201,9 @@ class trans: public regular_formula
       : regular_formula(core::detail::gsMakeRegTrans(operand))
     {}
 
-    regular_formula operand() const
+    const regular_formula& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 };
 
@@ -228,7 +228,7 @@ class trans_or_nil: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    trans_or_nil(const atermpp::aterm_appl& term)
+    trans_or_nil(const atermpp::aterm& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegTransOrNil(m_term));
@@ -239,9 +239,9 @@ class trans_or_nil: public regular_formula
       : regular_formula(core::detail::gsMakeRegTransOrNil(operand))
     {}
 
-    regular_formula operand() const
+    const regular_formula& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 };
 

@@ -401,20 +401,20 @@ class MemberFunction:
         return text
 
     def inline_definition(self):
-        text = '''    <RETURN_TYPE> <NAME>() const
+        text = '''    const <RETURN_TYPE>& <NAME>() const
     {
-      return atermpp::<ARG>(*this);
+      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
     }'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = '''    <RETURN_TYPE> <NAME>() const;'''
+        text = '''    const <RETURN_TYPE>& <NAME>() const;'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = '''    <INLINE><RETURN_TYPE> <CLASSNAME>::<NAME>() const
+        text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
     {
-      return atermpp::<ARG>(*this);
+      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -552,7 +552,7 @@ class ATermConstructor(Constructor):
     def inline_definition(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(const atermpp::aterm_appl& term)
+    <CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
       assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));
@@ -562,13 +562,13 @@ class ATermConstructor(Constructor):
     def declaration(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(const atermpp::aterm_appl& term);'''
+    <CLASSNAME>(const atermpp::aterm& term);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm_appl& term)
+    <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
       assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));

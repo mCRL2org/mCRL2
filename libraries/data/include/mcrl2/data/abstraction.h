@@ -37,7 +37,7 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    abstraction(const atermpp::aterm_appl& term)
+    abstraction(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Binder(m_term));
@@ -54,17 +54,17 @@ class abstraction: public data_expression
       : data_expression(core::detail::gsMakeBinder(binding_operator, atermpp::convert<variable_list>(variables), body))
     {}
 
-    const binder_type &binding_operator() const
+    const binder_type& binding_operator() const
     {
       return atermpp::aterm_cast<const binder_type>(atermpp::arg1(*this));
     }
 
-    const variable_list &variables() const
+    const variable_list& variables() const
     {
       return atermpp::aterm_cast<const variable_list>(atermpp::list_arg2(*this));
     }
 
-    const data_expression &body() const
+    const data_expression& body() const
     {
       return atermpp::aterm_cast<const data_expression>(atermpp::arg3(*this));
     }

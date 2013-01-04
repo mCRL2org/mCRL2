@@ -38,15 +38,7 @@ class action_label: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit action_label(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_ActId(m_term));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    action_label(const atermpp::aterm_appl& term)
+    action_label(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_ActId(m_term));
@@ -62,14 +54,14 @@ class action_label: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeActId(core::identifier_string(name), sorts))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return core::identifier_string(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::sort_expression_list sorts() const
+    const data::sort_expression_list& sorts() const
     {
-      return data::sort_expression_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::sort_expression_list>(atermpp::list_arg2(*this));
     }
 };
 

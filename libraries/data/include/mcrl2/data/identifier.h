@@ -21,7 +21,7 @@ class identifier: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    identifier(const atermpp::aterm_appl& term)
+    identifier(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Id(m_term));
@@ -37,9 +37,9 @@ class identifier: public data_expression
       : data_expression(core::detail::gsMakeId(core::identifier_string(name)))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 };
 //--- end generated class identifier ---//

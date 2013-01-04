@@ -39,10 +39,10 @@ class variable: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    variable(const aterm& term)
+    variable(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_DataVarId(atermpp::aterm_appl(m_term)));
+      assert(core::detail::check_term_DataVarId(m_term));
     }
 
     /// \brief Constructor.
@@ -55,12 +55,12 @@ class variable: public data_expression
       : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
     {}
 
-    const core::identifier_string &name() const
+    const core::identifier_string& name() const
     {
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    const sort_expression &sort() const
+    const sort_expression& sort() const
     {
       return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }

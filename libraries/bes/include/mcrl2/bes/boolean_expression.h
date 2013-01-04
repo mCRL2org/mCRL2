@@ -52,15 +52,7 @@ class boolean_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    boolean_expression(const atermpp::aterm_appl& term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_rule_BooleanExpression(m_term));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit boolean_expression(const aterm& term)
+    boolean_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_BooleanExpression(m_term));
@@ -85,7 +77,7 @@ class true_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm_appl& term)
+    true_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanTrue(m_term));
@@ -113,7 +105,7 @@ class false_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm_appl& term)
+    false_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanFalse(m_term));
@@ -141,7 +133,7 @@ class not_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm_appl& term)
+    not_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanNot(m_term));
@@ -152,7 +144,7 @@ class not_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanNot(operand))
     {}
 
-    const boolean_expression &operand() const
+    const boolean_expression& operand() const
     {
       return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
@@ -179,7 +171,7 @@ class and_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm_appl& term)
+    and_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanAnd(m_term));
@@ -190,12 +182,12 @@ class and_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanAnd(left, right))
     {}
 
-    const boolean_expression &left() const
+    const boolean_expression& left() const
     {
       return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    const boolean_expression &right() const
+    const boolean_expression& right() const
     {
       return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
@@ -222,7 +214,7 @@ class or_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm_appl& term)
+    or_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanOr(m_term));
@@ -233,12 +225,12 @@ class or_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanOr(left, right))
     {}
 
-    const boolean_expression &left() const
+    const boolean_expression& left() const
     {
       return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    const boolean_expression &right() const
+    const boolean_expression& right() const
     {
       return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
@@ -265,7 +257,7 @@ class imp: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm_appl& term)
+    imp(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanImp(m_term));
@@ -276,12 +268,12 @@ class imp: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanImp(left, right))
     {}
 
-    const boolean_expression &left() const
+    const boolean_expression& left() const
     {
       return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    const boolean_expression &right() const
+    const boolean_expression& right() const
     {
       return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
@@ -308,7 +300,7 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit boolean_variable(const atermpp::aterm& term)
+    boolean_variable(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanVariable(m_term));
@@ -324,7 +316,7 @@ class boolean_variable: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanVariable(core::identifier_string(name)))
     {}
 
-    const core::identifier_string &name() const
+    const core::identifier_string& name() const
     {
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }

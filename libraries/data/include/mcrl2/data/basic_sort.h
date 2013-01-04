@@ -39,7 +39,7 @@ class basic_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    basic_sort(const atermpp::aterm_appl& term)
+    basic_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortId(m_term));
@@ -55,9 +55,9 @@ class basic_sort: public sort_expression
       : sort_expression(core::detail::gsMakeSortId(core::identifier_string(name)))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<atermpp::aterm_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 };
 //--- end generated class basic_sort ---//

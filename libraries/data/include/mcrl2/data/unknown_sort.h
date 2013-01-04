@@ -33,7 +33,7 @@ class unknown_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    unknown_sort(const atermpp::aterm_appl& term)
+    unknown_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortUnknown(m_term));

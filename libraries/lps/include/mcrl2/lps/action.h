@@ -36,15 +36,7 @@ class action: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    action(const atermpp::aterm_appl& term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_Action(m_term));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit action(const atermpp::aterm& term)
+    action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_Action(m_term));
@@ -55,14 +47,14 @@ class action: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments))
     {}
 
-    action_label label() const
+    const action_label& label() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const action_label>(atermpp::arg1(*this));
     }
 
-    data::data_expression_list arguments() const
+    const data::data_expression_list& arguments() const
     {
-      return data::data_expression_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
     }
 };
 

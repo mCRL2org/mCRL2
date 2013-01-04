@@ -38,7 +38,7 @@ class container_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    container_sort(const atermpp::aterm_appl& term)
+    container_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortCons(m_term));
@@ -49,14 +49,14 @@ class container_sort: public sort_expression
       : sort_expression(core::detail::gsMakeSortCons(container_name, element_sort))
     {}
 
-    container_type container_name() const
+    const container_type& container_name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const container_type>(atermpp::arg1(*this));
     }
 
-    sort_expression element_sort() const
+    const sort_expression& element_sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated class container_sort ---//

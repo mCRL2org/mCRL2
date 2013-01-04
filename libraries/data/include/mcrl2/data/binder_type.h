@@ -34,7 +34,7 @@ class binder_type: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    binder_type(const atermpp::aterm_appl& term)
+    binder_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_BindingOperator(m_term));
@@ -59,7 +59,7 @@ class set_or_bag_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    set_or_bag_comprehension_binder(const atermpp::aterm_appl& term)
+    set_or_bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_SetBagComp(m_term));
@@ -87,7 +87,7 @@ class set_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    set_comprehension_binder(const atermpp::aterm_appl& term)
+    set_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_SetComp(m_term));
@@ -115,7 +115,7 @@ class bag_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    bag_comprehension_binder(const atermpp::aterm_appl& term)
+    bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_BagComp(m_term));
@@ -143,7 +143,7 @@ class forall_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    forall_binder(const atermpp::aterm_appl& term)
+    forall_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_Forall(m_term));
@@ -171,7 +171,7 @@ class exists_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    exists_binder(const atermpp::aterm_appl& term)
+    exists_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_Exists(m_term));
@@ -199,7 +199,7 @@ class lambda_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    lambda_binder(const atermpp::aterm_appl& term)
+    lambda_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_Lambda(m_term));

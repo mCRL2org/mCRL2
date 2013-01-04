@@ -33,7 +33,7 @@ class multiple_possible_sorts: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    multiple_possible_sorts(const atermpp::aterm_appl& term)
+    multiple_possible_sorts(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortsPossible(m_term));
@@ -50,9 +50,9 @@ class multiple_possible_sorts: public sort_expression
       : sort_expression(core::detail::gsMakeSortsPossible(atermpp::convert<sort_expression_list>(sorts)))
     {}
 
-    sort_expression_list sorts() const
+    const sort_expression_list& sorts() const
     {
-      return sort_expression_list(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const sort_expression_list>(atermpp::list_arg1(*this));
     }
 };
 //--- end generated class multiple_possible_sorts ---//

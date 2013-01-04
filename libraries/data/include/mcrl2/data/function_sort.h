@@ -44,7 +44,7 @@ class function_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    function_sort(const atermpp::aterm_appl& term)
+    function_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortArrow(m_term));
@@ -53,24 +53,22 @@ class function_sort: public sort_expression
     /// \brief Constructor.
     function_sort(const sort_expression_list& domain, const sort_expression& codomain)
       : sort_expression(core::detail::gsMakeSortArrow(domain, codomain))
-    {
-    }
+    {}
 
     /// \brief Constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
       : sort_expression(core::detail::gsMakeSortArrow(atermpp::convert<sort_expression_list>(domain), codomain))
+    {}
+
+    const sort_expression_list& domain() const
     {
+      return atermpp::aterm_cast<const sort_expression_list>(atermpp::list_arg1(*this));
     }
 
-    sort_expression_list domain() const
+    const sort_expression& codomain() const
     {
-      return sort_expression_list(atermpp::list_arg1(*this));
-    }
-
-    sort_expression codomain() const
-    {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated class function_sort ---//

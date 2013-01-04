@@ -49,15 +49,7 @@ class pbes_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    pbes_expression(const atermpp::aterm_appl& term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_rule_PBExpr(m_term));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit pbes_expression(const atermpp::aterm& term)
+    pbes_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_PBExpr(m_term));
@@ -82,15 +74,7 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit propositional_variable_instantiation(const atermpp::aterm& term)
-      : pbes_expression(term)
-    {
-      assert(core::detail::check_term_PropVarInst(m_term));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    propositional_variable_instantiation(const atermpp::aterm_appl& term)
+    propositional_variable_instantiation(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PropVarInst(m_term));
@@ -106,14 +90,14 @@ class propositional_variable_instantiation: public pbes_expression
       : pbes_expression(core::detail::gsMakePropVarInst(core::identifier_string(name), parameters))
     {}
 
-    const core::identifier_string &name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    const data::data_expression_list &parameters() const
+    const data::data_expression_list& parameters() const
     {
-      return atermpp::aterm_cast<data::data_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
     }
 //--- start user section propositional_variable_instantiation ---//
     /// \brief Type of the parameters.
@@ -149,7 +133,7 @@ class true_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm_appl& term)
+    true_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESTrue(m_term));
@@ -167,7 +151,7 @@ class false_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm_appl& term)
+    false_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESFalse(m_term));
@@ -185,7 +169,7 @@ class not_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm_appl& term)
+    not_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESNot(m_term));
@@ -196,9 +180,9 @@ class not_: public pbes_expression
       : pbes_expression(core::detail::gsMakePBESNot(operand))
     {}
 
-    pbes_expression operand() const
+    const pbes_expression& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 };
 
@@ -213,7 +197,7 @@ class and_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm_appl& term)
+    and_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESAnd(m_term));
@@ -224,14 +208,14 @@ class and_: public pbes_expression
       : pbes_expression(core::detail::gsMakePBESAnd(left, right))
     {}
 
-    pbes_expression left() const
+    const pbes_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 
-    pbes_expression right() const
+    const pbes_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -246,7 +230,7 @@ class or_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm_appl& term)
+    or_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESOr(m_term));
@@ -257,14 +241,14 @@ class or_: public pbes_expression
       : pbes_expression(core::detail::gsMakePBESOr(left, right))
     {}
 
-    pbes_expression left() const
+    const pbes_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 
-    pbes_expression right() const
+    const pbes_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -279,7 +263,7 @@ class imp: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm_appl& term)
+    imp(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESImp(m_term));
@@ -290,14 +274,14 @@ class imp: public pbes_expression
       : pbes_expression(core::detail::gsMakePBESImp(left, right))
     {}
 
-    pbes_expression left() const
+    const pbes_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 
-    pbes_expression right() const
+    const pbes_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -312,7 +296,7 @@ class forall: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    forall(const atermpp::aterm_appl& term)
+    forall(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESForall(m_term));
@@ -323,14 +307,14 @@ class forall: public pbes_expression
       : pbes_expression(core::detail::gsMakePBESForall(variables, body))
     {}
 
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
-      return data::variable_list(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
     }
 
-    pbes_expression body() const
+    const pbes_expression& body() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -345,7 +329,7 @@ class exists: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    exists(const atermpp::aterm_appl& term)
+    exists(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESExists(m_term));
@@ -356,14 +340,14 @@ class exists: public pbes_expression
       : pbes_expression(core::detail::gsMakePBESExists(variables, body))
     {}
 
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
-      return data::variable_list(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
     }
 
-    pbes_expression body() const
+    const pbes_expression& body() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated classes ---//

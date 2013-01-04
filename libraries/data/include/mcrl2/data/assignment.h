@@ -80,8 +80,8 @@ class assignment: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    assignment(const aterm& term)
-      : assignment_expression(atermpp::aterm_appl(term))
+    assignment(const atermpp::aterm& term)
+      : assignment_expression(term)
     {
       assert(core::detail::check_term_DataVarIdInit(m_term));
     }
@@ -91,12 +91,12 @@ class assignment: public assignment_expression
       : assignment_expression(core::detail::gsMakeDataVarIdInit(lhs, rhs))
     {}
 
-    const variable &lhs() const
+    const variable& lhs() const
     {
       return atermpp::aterm_cast<const variable>(atermpp::arg1(*this));
     }
 
-    const data_expression &rhs() const
+    const data_expression& rhs() const
     {
       return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
     }
@@ -149,7 +149,7 @@ class identifier_assignment: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    identifier_assignment(const atermpp::aterm_appl& term)
+    identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_IdInit(m_term));
@@ -165,14 +165,14 @@ class identifier_assignment: public assignment_expression
       : assignment_expression(core::detail::gsMakeIdInit(core::identifier_string(lhs), rhs))
     {}
 
-    core::identifier_string lhs() const
+    const core::identifier_string& lhs() const
     {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data_expression rhs() const
+    const data_expression& rhs() const
     {
-      return data_expression(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
     }
 //--- start user section identifier_assignment ---//
     /// \brief Applies the assignment to a variable

@@ -39,7 +39,7 @@ class action_formula: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    action_formula(const atermpp::aterm_appl& term)
+    action_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_ActFrm(m_term));
@@ -98,7 +98,7 @@ class true_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm_appl& term)
+    true_(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActTrue(m_term));
@@ -126,7 +126,7 @@ class false_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm_appl& term)
+    false_(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActFalse(m_term));
@@ -154,7 +154,7 @@ class not_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm_appl& term)
+    not_(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActNot(m_term));
@@ -165,9 +165,9 @@ class not_: public action_formula
       : action_formula(core::detail::gsMakeActNot(operand))
     {}
 
-    action_formula operand() const
+    const action_formula& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
     }
 };
 
@@ -192,7 +192,7 @@ class and_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm_appl& term)
+    and_(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActAnd(m_term));
@@ -203,14 +203,14 @@ class and_: public action_formula
       : action_formula(core::detail::gsMakeActAnd(left, right))
     {}
 
-    action_formula left() const
+    const action_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
     }
 
-    action_formula right() const
+    const action_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -235,7 +235,7 @@ class or_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm_appl& term)
+    or_(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActOr(m_term));
@@ -246,14 +246,14 @@ class or_: public action_formula
       : action_formula(core::detail::gsMakeActOr(left, right))
     {}
 
-    action_formula left() const
+    const action_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
     }
 
-    action_formula right() const
+    const action_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -278,7 +278,7 @@ class imp: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm_appl& term)
+    imp(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActImp(m_term));
@@ -289,14 +289,14 @@ class imp: public action_formula
       : action_formula(core::detail::gsMakeActImp(left, right))
     {}
 
-    action_formula left() const
+    const action_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
     }
 
-    action_formula right() const
+    const action_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -321,7 +321,7 @@ class forall: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    forall(const atermpp::aterm_appl& term)
+    forall(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActForall(m_term));
@@ -332,14 +332,14 @@ class forall: public action_formula
       : action_formula(core::detail::gsMakeActForall(variables, body))
     {}
 
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
-      return data::variable_list(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
     }
 
-    action_formula body() const
+    const action_formula& body() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -364,7 +364,7 @@ class exists: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    exists(const atermpp::aterm_appl& term)
+    exists(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActExists(m_term));
@@ -375,14 +375,14 @@ class exists: public action_formula
       : action_formula(core::detail::gsMakeActExists(variables, body))
     {}
 
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
-      return  data::variable_list(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
     }
 
-    action_formula body() const
+    const action_formula& body() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -407,7 +407,7 @@ class at: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    at(const atermpp::aterm_appl& term)
+    at(const atermpp::aterm& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActAt(m_term));
@@ -418,14 +418,14 @@ class at: public action_formula
       : action_formula(core::detail::gsMakeActAt(operand, time_stamp))
     {}
 
-    action_formula operand() const
+    const action_formula& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
     }
 
-    data::data_expression time_stamp() const
+    const data::data_expression& time_stamp() const
     {
-      return data::data_expression(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg2(*this));
     }
 };
 

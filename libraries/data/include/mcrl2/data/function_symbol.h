@@ -36,10 +36,9 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    function_symbol(const aterm& term)
+    function_symbol(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(term.address()->reference_count()>0);
       assert(core::detail::check_term_OpId(m_term));
     }
 
@@ -53,14 +52,14 @@ class function_symbol: public data_expression
       : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    sort_expression sort() const
+    const sort_expression& sort() const
     {
-      return atermpp::aterm_cast<sort_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated class function_symbol ---//

@@ -34,7 +34,7 @@ class where_clause: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    where_clause(const atermpp::aterm_appl& term)
+    where_clause(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Whr(m_term));
@@ -51,14 +51,14 @@ class where_clause: public data_expression
       : data_expression(core::detail::gsMakeWhr(body, atermpp::convert<assignment_expression_list>(declarations)))
     {}
 
-    data_expression body() const
+    const data_expression& body() const
     {
-      return data_expression(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
     }
 
-    assignment_expression_list declarations() const
+    const assignment_expression_list& declarations() const
     {
-      return assignment_expression_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const assignment_expression_list>(atermpp::list_arg2(*this));
     }
 };
 //--- end generated class where_clause ---//
