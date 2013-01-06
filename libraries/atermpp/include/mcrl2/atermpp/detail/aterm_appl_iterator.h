@@ -72,7 +72,7 @@ class term_appl_iterator: public boost::iterator_facade<
 
     size_t distance_to(const term_appl_iterator i) const
     {
-      return i-*this;
+      return i.m_term-m_term;
     }
 
     const Term *m_term;

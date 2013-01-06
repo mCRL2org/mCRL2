@@ -33,8 +33,8 @@ namespace detail
 
 static const size_t INITIAL_TERM_TABLE_SIZE = 1<<17;  // Must be a power of 2.
 size_t aterm_table_size;
-size_t aterm_table_mask;            // used in memory.h
-const _aterm* * aterm_hashtable;  // used in memory.h
+size_t aterm_table_mask;           
+const _aterm* * aterm_hashtable;  
 
 aterm static_undefined_aterm;
 aterm static_empty_aterm_list(aterm_appl(detail::function_adm.AS_EMPTY_LIST));

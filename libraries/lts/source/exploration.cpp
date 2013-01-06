@@ -337,13 +337,15 @@ lps2lts_algorithm::generator_state_t lps2lts_algorithm::generator_state(const lp
 {
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
-    return aterm_cast<generator_state_t>(storage_state);
+    // return aterm_cast<generator_state_t>(storage_state);
+    return generator_state_t(aterm_cast<aterm_appl>(storage_state).begin(),aterm_cast<aterm_appl>(storage_state).end());
   }
   else
   {
     const atermpp::term_balanced_tree<atermpp::aterm_appl> &tree=
               atermpp::aterm_cast<atermpp::term_balanced_tree<atermpp::aterm_appl> >(storage_state);
-    return generator_state_t(m_generator->internal_state_function(), tree.begin(), tree.end());
+    // return generator_state_t(m_generator->internal_state_function(), tree.begin(), tree.end());
+    return generator_state_t(tree.begin(), tree.end());
   }
 }
 
@@ -351,7 +353,9 @@ lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(const lps2lt
 {
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
-    return generator_state;
+    // return generator_state;
+    // return aterm_appl(function_symbol("STATE",generator_state.size()),generator_state.begin(),generator_state.end());
+    return aterm_appl(m_generator->internal_state_function(),generator_state.begin(),generator_state.end());
   }
   else
   {

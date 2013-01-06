@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/nextstate/nextstate_options.h"
 #include "mcrl2/lts/lts_lts.h"

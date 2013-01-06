@@ -45,7 +45,8 @@ next_state_generator::next_state_generator(
     summand.summand = &(*i);
     summand.variables = i->summation_variables();
     summand.condition = m_rewriter.convert_to(i->condition());
-    summand.result_state = atermpp::aterm_cast<atermpp::aterm_appl>(get_internal_state(i->next_state(m_specification.process().process_parameters())));
+    // summand.result_state = atermpp::aterm_cast<atermpp::aterm_appl>(get_internal_state(i->next_state(m_specification.process().process_parameters())));
+    summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
 
     for (action_list::iterator j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
@@ -552,8 +553,14 @@ void next_state_generator::iterator::increment()
   }
 
   const state_argument_rewriter sar(m_generator->m_rewriter,m_substitution);
-  const atermpp::aterm_appl &state_args=m_summand->result_state;
-  m_transition.m_state = internal_state_t(m_generator->m_state_function, state_args.begin(), state_args.end(), sar);
+  // const atermpp::aterm_appl &state_args=m_summand->result_state;
+  const internal_state_t &state_args=m_summand->result_state;
+  // m_transition.m_state = internal_state_t(m_generator->m_state_function, state_args.begin(), state_args.end(), sar);
+  m_transition.m_state.clear();
+  for(internal_state_t::const_iterator i=state_args.begin(); i!=state_args.end(); ++i)
+  {
+    m_transition.m_state.push_back(sar(*i));
+  }
 
   std::vector <action> actions;
   actions.resize(m_summand->action_label.size());

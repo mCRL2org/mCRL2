@@ -43,7 +43,8 @@ class next_state_generator
 
     typedef data::rewriter::internal_substitution_type substitution_t;
     typedef rewriter_expression_t internal_state_argument_t;
-    typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;
+    // typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;
+    typedef std::vector<internal_state_argument_t> internal_state_t;
 
   protected:
     struct action_internal_t
@@ -57,7 +58,8 @@ class next_state_generator
       action_summand *summand;
       data::variable_list variables;
       rewriter_expression_t condition;
-      atermpp::aterm_appl result_state;
+      // atermpp::aterm_appl result_state;
+      internal_state_t result_state;
       std::vector<action_internal_t> action_label;
 
       std::vector<size_t> condition_parameters;
@@ -293,7 +295,8 @@ class next_state_generator
     /// \brief Constructs internal states out of internal state arguments.
     internal_state_t get_internal_state(const std::vector<internal_state_argument_t>& internal_arguments) const
     {
-      return internal_state_t(m_state_function, internal_arguments.begin(), internal_arguments.end());
+      return internal_arguments;
+      // return internal_state_t(m_state_function, internal_arguments.begin(), internal_arguments.end());
     }
 
     /// \brief Converts states to internal states.
@@ -306,7 +309,7 @@ class next_state_generator
     atermpp::function_symbol internal_state_function() const
     {
       return m_state_function;
-    }
+    } 
 
     /// \brief Returns a reference to the summand subset containing all summands.
     summand_subset_t &full_subset()
