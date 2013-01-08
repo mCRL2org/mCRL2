@@ -22,6 +22,7 @@
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
+#include "mcrl2/modal_formula/maximal_closed_subformula.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
@@ -260,14 +261,57 @@ BOOST_AUTO_TEST_CASE(test_find_state_variables)
   state_formulas::variable Z("Z", data::data_expression_list());
   state_formula phi = state_formulas::and_(X, Y);
   v = find_state_variables(phi);
-  BOOST_CHECK(v.size() == 2);  
+  BOOST_CHECK(v.size() == 2);
   v = find_free_state_variables(phi);
   BOOST_CHECK(v.size() == 2);
   state_formula psi = state_formulas::mu("X", data::assignment_list(), phi);
   v = find_state_variables(psi);
-  BOOST_CHECK(v.size() == 2);  
+  BOOST_CHECK(v.size() == 2);
   v = find_free_state_variables(psi);
   BOOST_CHECK(v.size() == 1);
+}
+
+inline
+bool contains(const std::set<state_formulas::state_formula>& v, const std::string& s)
+{
+  for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    if (state_formulas::pp(*i) == s)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
+{
+  specification spec;
+  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", spec);
+  std::set<state_formulas::state_formula> v = maximal_closed_subformulas(f);
+  BOOST_CHECK(v.size() == 1);
+
+  f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", spec);
+  v = maximal_closed_subformulas(f);
+  BOOST_CHECK(v.size() == 1);
+
+  state_formula g = exists(f).body();
+  std::cout << "g = " << state_formulas::pp(g) << std::endl;
+  v = maximal_closed_subformulas(g);
+  BOOST_CHECK(v.size() == 2);
+  BOOST_CHECK(contains(v, "true"));
+  BOOST_CHECK(contains(v, "false"));
+
+  state_formula h = forall(g).body();
+  v = maximal_closed_subformulas(h);
+  std::cout << "h = " << state_formulas::pp(h) << std::endl;
+  for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    std::cout << "element " << state_formulas::pp(*i) << std::endl;
+  }
+  BOOST_CHECK(v.size() == 2);
+  BOOST_CHECK(contains(v, "true"));
+  BOOST_CHECK(contains(v, "false"));
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
