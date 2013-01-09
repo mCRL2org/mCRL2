@@ -51,13 +51,11 @@ template <template <class> class Traverser, class Node, class Derived>
 struct bottom_up_traverser: public Traverser<Derived>
 {
   typedef Traverser<Derived> super;
-  using super::enter;
+  using super::enter;   
+#ifndef BOOST_MSVC  
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
+  using super::operator();
 
   Derived& derived()
   {
@@ -111,7 +109,8 @@ struct bottom_up_traverser: public Traverser<Derived>
   }
 
   // This leave function needs to be disabled.
-  // TODO: It seems more logical that this leave function is never be generated.
+  // TODO: It seems more logical that the call to this leave function is not generated in
+  // the traverser, to avoid that the same term is visited twice.
   void leave(const state_formulas::state_formula&)
   {
   }
@@ -154,9 +153,9 @@ std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node
 }
 
 template <typename Derived>
-struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_formula_traverser, maximal_closed_subformula_node, Derived>
+struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_formulas::state_formula_traverser, maximal_closed_subformula_node, Derived>
 {
-  typedef bottom_up_traverser<state_formula_traverser, maximal_closed_subformula_node, Derived> super;
+  typedef bottom_up_traverser<state_formulas::state_formula_traverser, maximal_closed_subformula_node, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -177,7 +176,7 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
   }
 
   template <typename T>
-  void update_free_variables(const T& /* x */, maximal_closed_subformula_node& /* result */)
+  void update_free_variables(const T& x, maximal_closed_subformula_node& result)
   { }
 
   void update_free_variables(const data::data_expression& x, maximal_closed_subformula_node& result)
@@ -247,6 +246,9 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
 struct apply_maximal_closed_subformula_traverser: public maximal_closed_subformula_traverser<apply_maximal_closed_subformula_traverser>
 {
   typedef maximal_closed_subformula_traverser<apply_maximal_closed_subformula_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
   using super::top;
 };
 
