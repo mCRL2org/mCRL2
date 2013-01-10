@@ -37,12 +37,12 @@ aterm_appl gsMake%(name)s(%(parameters)s)
 #---------------------------------------------------------------#
 # generates C++ code for libstruct functions
 #
-def generate_libstruct_functions(rules, filename, ignored_phases = []):
+def generate_libstruct_functions(rules, filename):
     names = {}
     calls = {}
     decls = {}
 
-    functions = find_functions(rules, ignored_phases)
+    functions = find_functions(rules)
 
     for f in functions:
         name = f.name()
@@ -132,15 +132,15 @@ CHECK_TERM_CHILDREN = '''  // check the children
 #---------------------------------------------------------------#
 # generates C++ code for checking if terms are in the right format
 #
-def generate_soundness_check_functions(rules, filename, ignored_phases = []):
+def generate_soundness_check_functions(rules, filename):
     text  = '' # function definitions
     ptext = '' # function declarations (prototypes)
 
-    functions = find_functions(rules, ignored_phases)
+    functions = find_functions(rules)
 
     for rule in rules:
         name = rule.name()
-        rhs_functions = rule.functions(ignored_phases)
+        rhs_functions = rule.functions()
         body = '  return ' + '\n         || '.join(map(lambda x: x.check_name() + '(t)', rhs_functions)) + ';'
         text = text + CHECK_RULE % {
             'name'      : name,
@@ -211,11 +211,11 @@ const atermpp::aterm_appl& construct%(name)s()
 #---------------------------------------------------------------#
 # generates C++ code for constructor functions
 #
-def generate_constructor_functions(rules, filename, ignored_phases = []):
+def generate_constructor_functions(rules, filename):
     text  = ''
     ptext = '' # function declarations (prototypes)
 
-    functions = find_functions(rules, ignored_phases)
+    functions = find_functions(rules)
 
     for f in functions:
         ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
@@ -265,11 +265,11 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
 #---------------------------------------------------------------#
 #                          find_functions
 #---------------------------------------------------------------#
-# find all functions that appear in the rhs of a rule whose phase is not in ignored_phases
-def find_functions(rules, ignored_phases):
+# find all functions that appear in the rhs of a rule
+def find_functions(rules):
     function_map = {}
     for rule in rules:
-        for f in rule.functions(ignored_phases):
+        for f in rule.functions():
             if not f.is_rule():
                 function_map[f.name()] = f
 
@@ -365,20 +365,17 @@ def main():
     rules = parse_ebnf(filename)
 
     if options.soundness_checks:
-        ignored_phases = [] # ['-lin', '-di', '-rft']
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
-        generate_soundness_check_functions(rules, filename, ignored_phases)
+        generate_soundness_check_functions(rules, filename)
 
     if options.libstruct:
-        ignored_phases = []
         filename = '../include/mcrl2/core/detail/struct_core.h'
-        generate_libstruct_functions(rules, filename, ignored_phases)
+        generate_libstruct_functions(rules, filename)
         postprocess_libstruct(filename)
 
     if options.constructors:
-        ignored_phases = []
         filename = '../include/mcrl2/core/detail/constructors.h'
-        generate_constructor_functions(rules, filename, ignored_phases)
+        generate_constructor_functions(rules, filename)
 
     if not options.soundness_checks and not options.libstruct and not options.constructors:
         parser.print_help()
