@@ -138,7 +138,7 @@ deadlock(const data::data_expression& time)                                     
 multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CMS  | None              | A multi-action
 deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS  | None              | A deadlock summand
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS  | None              | An action summand
-process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CMIU | LinearProcessInit | A process initializer
+process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
 linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS   | LinearProcess     | A linear process
 specification(const data::data_specification& data, const action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                                  | MS   | LinProcSpec       | A linear process specification
 '''
@@ -884,8 +884,11 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 classname = c.classname(True)
                 is_function = c.is_function_name(True)
                 namespace = c.namespace()
-                # visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, classname))
-                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<const atermpp::aterm_appl>(x))); }' % (is_function, classname))
+                if 'M' in c.modifiers():
+                    cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                else:
+                    cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s); }' % (is_function, cast))
             vtext = '\n  ' + '\n  else '.join(visit_functions)
             text = re.sub('VISIT_FUNCTIONS', vtext, text)
             return text
@@ -920,10 +923,14 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             updates = []
             for c in classes:
                 is_function = c.is_function_name(True)
+                if 'M' in c.modifiers():
+                    cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                else:
+                    cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
                 updates.append('''if (%s(x))
 {
-  static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
-}''' % (is_function, c.classname(True)))
+  static_cast<Derived&>(*this)(%s);
+}''' % (is_function, cast))
             if len(updates) == 0:
                 visit_text = '// skip'
             else:
@@ -1024,10 +1031,14 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
   result = y;
 }''' % (is_function, c.classname(True)))
                     else:
-                      updates.append('''if (%s(x))
+                        if 'M' in c.modifiers():
+                            cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                        else:
+                            cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                        updates.append('''if (%s(x))
 {
-  result = static_cast<Derived&>(*this)(%s(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
-}''' % (is_function, c.classname(True)))
+  result = static_cast<Derived&>(*this)(%s);
+}''' % (is_function, cast))
                 if len(updates) == 0:
                     visit_text = '// skip'
                     return_statement = 'return x;'

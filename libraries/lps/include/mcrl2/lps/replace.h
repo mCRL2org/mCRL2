@@ -77,7 +77,7 @@ T replace_variables(const T& x,
                     Substitution sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
-{
+{   
   return core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
 }
 

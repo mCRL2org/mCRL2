@@ -209,27 +209,27 @@ struct add_sort_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_abstraction(x))
     {
-      result = static_cast<Derived&>(*this)(data::abstraction(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
     }
     else if (data::is_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(data::identifier(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::identifier>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this)(data::variable(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      result = static_cast<Derived&>(*this)(data::function_symbol(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      result = static_cast<Derived&>(*this)(data::application(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      result = static_cast<Derived&>(*this)(data::where_clause(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -241,11 +241,11 @@ struct add_sort_expressions: public Builder<Derived>
     data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(data::assignment(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
     }
     else if (data::is_identifier_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(data::identifier_assignment(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -257,27 +257,27 @@ struct add_sort_expressions: public Builder<Derived>
     data::sort_expression result;
     if (data::is_basic_sort(x))
     {
-      result = static_cast<Derived&>(*this)(data::basic_sort(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::basic_sort>(x));
     }
     else if (data::is_container_sort(x))
     {
-      result = static_cast<Derived&>(*this)(data::container_sort(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::container_sort>(x));
     }
     else if (data::is_structured_sort(x))
     {
-      result = static_cast<Derived&>(*this)(data::structured_sort(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::structured_sort>(x));
     }
     else if (data::is_function_sort(x))
     {
-      result = static_cast<Derived&>(*this)(data::function_sort(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_sort>(x));
     }
     else if (data::is_unknown_sort(x))
     {
-      result = static_cast<Derived&>(*this)(data::unknown_sort(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::unknown_sort>(x));
     }
     else if (data::is_multiple_possible_sorts(x))
     {
-      result = static_cast<Derived&>(*this)(data::multiple_possible_sorts(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::multiple_possible_sorts>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -289,15 +289,15 @@ struct add_sort_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_forall(x))
     {
-      result = static_cast<Derived&>(*this)(data::forall(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      result = static_cast<Derived&>(*this)(data::exists(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      result = static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -420,27 +420,27 @@ struct add_data_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_abstraction(x))
     {
-      result = static_cast<Derived&>(*this)(data::abstraction(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::abstraction>(x));
     }
     else if (data::is_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(data::identifier(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::identifier>(x));
     }
     else if (data::is_variable(x))
     {
-      result = static_cast<Derived&>(*this)(data::variable(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::variable>(x));
     }
     else if (data::is_function_symbol(x))
     {
-      result = static_cast<Derived&>(*this)(data::function_symbol(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::function_symbol>(x));
     }
     else if (data::is_application(x))
     {
-      result = static_cast<Derived&>(*this)(data::application(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::application>(x));
     }
     else if (data::is_where_clause(x))
     {
-      result = static_cast<Derived&>(*this)(data::where_clause(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::where_clause>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -452,11 +452,11 @@ struct add_data_expressions: public Builder<Derived>
     data::assignment_expression result;
     if (data::is_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(data::assignment(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::assignment>(x));
     }
     else if (data::is_identifier_assignment(x))
     {
-      result = static_cast<Derived&>(*this)(data::identifier_assignment(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::identifier_assignment>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -468,15 +468,15 @@ struct add_data_expressions: public Builder<Derived>
     data::data_expression result;
     if (data::is_forall(x))
     {
-      result = static_cast<Derived&>(*this)(data::forall(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      result = static_cast<Derived&>(*this)(data::exists(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      result = static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_cast<const atermpp::aterm_appl>(x)));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
