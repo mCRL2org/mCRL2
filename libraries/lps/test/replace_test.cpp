@@ -45,7 +45,6 @@ void test_replace()
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
   action_summand t = s;
-  lps::replace_variables(t, a);
 }
 
 std::string SPEC1a =

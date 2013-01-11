@@ -287,7 +287,7 @@ class specification_basic_type:public boost::noncopyable
       {
         objectdata.resize(result.first+1);
       }
-      b=result.second; 
+      b=result.second;
       return result.first;
     }
 
@@ -1539,14 +1539,14 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumargs=sum(p).bound_variables();
         variable_list vars;
-        data_expression_list terms; 
+        data_expression_list terms;
 
         for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
         {
           vars.push_back(i->first);
           terms.push_back(i->second);
         }
-        
+
         std::map < variable, data_expression > local_sigma=sigma;
         alphaconvert(sumargs,local_sigma,vars,terms);
 
@@ -1649,7 +1649,7 @@ class specification_basic_type:public boost::noncopyable
       variable_list parameters1=parameters_that_occur_in_body(parameters.tail(),body);
       if (occursinpCRLterm(parameters.front(),body,0))
       {
-        
+
         parameters1.push_front(parameters.front());
       }
       return parameters1;
@@ -2839,7 +2839,7 @@ class specification_basic_type:public boost::noncopyable
         procstorealGNFrec(t,first,todo,regular);
 
         std::map < variable, data_expression > sigma;
-        
+
         const data_expression_list &dl= process_instance(body).actual_parameters();
         const variable_list &vl=objectdata[n].parameters;
 
@@ -3504,22 +3504,22 @@ class specification_basic_type:public boost::noncopyable
       if (is_where_clause(t))
       {
         const where_clause where_t(t);
-        const assignment_expression_list old_declarations=reverse(where_t.declarations());
+        const assignment_list old_assignments=reverse(where_t.assignments());
         variable_list new_vars=vars;
-        assignment_expression_list new_declarations;
-        for (assignment_expression_list::const_iterator i=old_declarations.begin();
-             i!=old_declarations.end(); ++i)
+        assignment_list new_assignments;
+        for (assignment_list::const_iterator i=old_assignments.begin();
+             i!=old_assignments.end(); ++i)
         {
           new_vars.push_front(i->lhs());
-          new_declarations.push_front(
-                             assignment_expression(
+          new_assignments.push_front(
+                             assignment(
                                i->lhs(),
                                adapt_term_to_stack(i->rhs(),stack,vars)));
 
         }
         return where_clause(
                  adapt_term_to_stack(where_t,stack,new_vars),
-                 new_declarations);
+                 new_assignments);
 
       }
 
@@ -3556,7 +3556,7 @@ class specification_basic_type:public boost::noncopyable
       const action act=action(multiAction.front());
 
       action_list result=adapt_multiaction_to_stack_rec(multiAction.tail(),stack,vars);
-      
+
       result.push_front(
                action(act.label(),
                       atermpp::convert<data_expression_list>(adapt_termlist_to_stack(
@@ -3783,7 +3783,7 @@ class specification_basic_type:public boost::noncopyable
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
-        data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular); 
+        data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular);
         result.push_front(data_expression(par));
         return result;
       }
@@ -3985,7 +3985,7 @@ class specification_basic_type:public boost::noncopyable
                      atTime,stack,sumvars);
           }
         }
-   
+
         insert_summand(action_summands,deadlock_summands,parameters,
                        sumvars,condition1,multiAction,
                        atTime,procargs,has_time,is_delta_summand);
@@ -5208,7 +5208,7 @@ class specification_basic_type:public boost::noncopyable
       /* First we collect all multi-actions in a separate vector
          of multiactions */
       std::vector < action_list > multiActionList;
-      
+
       action_list resultmultiactionlist;
 
       /* Construct resulttime, the time of the action ... */
@@ -5310,7 +5310,7 @@ class specification_basic_type:public boost::noncopyable
           }
         }
       }
-      
+
       return deadlock_summand(resultsum,
                               resultcondition,
                               some_summand_has_time?deadlock(resulttime):deadlock());
@@ -5661,7 +5661,7 @@ class specification_basic_type:public boost::noncopyable
         {
           /* De delta summand is subsumed by action summand *i. So, it does not
              have to be added. */
-          
+
           return;
         }
       }
@@ -5678,7 +5678,7 @@ class specification_basic_type:public boost::noncopyable
              this delta summand to the front, such that it
              is encountered early later on, removing a next
              delta summand */
-          
+
           copy(i,deadlock_summands.end(),back_inserter(result));
           deadlock_summands.swap(result);
           return;
@@ -5854,7 +5854,7 @@ class specification_basic_type:public boost::noncopyable
       if (options.nodeltaelimination)
       {
         deadlock_summands.swap(resultsimpledeltasumlist);
-        copy(resultdeltasumlist.begin(),resultdeltasumlist.end(),back_inserter(deadlock_summands)); 
+        copy(resultdeltasumlist.begin(),resultdeltasumlist.end(),back_inserter(deadlock_summands));
       }
       else
       {
@@ -5928,7 +5928,7 @@ class specification_basic_type:public boost::noncopyable
                            i->condition(),
                            i->multi_action().has_time()?multi_action(actions,i->multi_action().time()):multi_action(actions),
                            i->assignments());
-        
+
       }
     }
 
@@ -6634,7 +6634,7 @@ class specification_basic_type:public boost::noncopyable
             resultsumlist.push_back(new_summand);
           }
         }
-        
+
       }
 
       /* Now the resulting delta summands must be added again */
@@ -6942,9 +6942,9 @@ class specification_basic_type:public boost::noncopyable
       action_summands.swap(result_action_summands);
 
       deadlock_summand_vector result_deadlock_summands;
-      
+
       assert(unique_pars.size()==pars.size());
-      
+
       for (deadlock_summand_vector::const_iterator s=deadlock_summands.begin(); s!=deadlock_summands.end(); ++s)
       {
         const deadlock_summand smmnd= *s;
@@ -7040,7 +7040,7 @@ class specification_basic_type:public boost::noncopyable
         {
           deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
         }
-        
+
       }
 
       for (action_summand_vector::const_iterator walker1=action_summands1.begin();
@@ -7127,11 +7127,11 @@ class specification_basic_type:public boost::noncopyable
         condition2=RewriteTerm(condition2);
         if (condition2!=sort_bool::false_())
         {
-          deadlock_summands.push_back(deadlock_summand(sumvars2, 
+          deadlock_summands.push_back(deadlock_summand(sumvars2,
                                                        condition2,
                                                        has_time?deadlock(actiontime2):deadlock()));
         }
-        
+
       }
 
       for (action_summand_vector::const_iterator walker2=action_summands2.begin();
@@ -7568,7 +7568,7 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(t).bound_variables();
         std::map < variable, data_expression > local_sigma=sigma;
-        
+
         alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
         const process_expression  result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,local_sigma));
         return result;
@@ -8220,7 +8220,7 @@ class specification_basic_type:public boost::noncopyable
 
         filter_vars_by_multiaction(smd.multi_action().actions(),vars_set,vars_result_set);
         filter_vars_by_assignmentlist(smd.assignments(),parameters,vars_set,vars_result_set);
-        
+
         if (smd.multi_action().has_time())
         {
           filter_vars_by_term(smd.multi_action().time(),vars_set,vars_result_set);

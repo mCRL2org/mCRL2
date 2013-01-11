@@ -77,7 +77,7 @@ T replace_variables(const T& x,
                     Substitution sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
-{   
+{
   return core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
 }
 
@@ -161,7 +161,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   {
     data::variable lhs = (*this)(x.lhs());
     data::data_expression rhs = (*this)(x.rhs());
-    return data::assignment_expression(lhs, rhs);
+    return data::assignment(lhs, rhs);
   }
 
   void operator()(lps::deadlock_summand& x)

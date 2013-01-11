@@ -269,20 +269,6 @@ void test_mutable_substitution_composer()
 
   mutable_substitution_composer<mutable_map_substitution< > > g(f);
   BOOST_CHECK(g(x) == y);
-
-  assignment a(y, z);
-  mutable_substitution_composer<assignment> h(a);
-#ifdef MCRL2_DECLTYPE
-  // This will not work until decltype can be used in mCRL2 to determine the appropriate return type.
-  BOOST_CHECK(replace_free_variables(x, h) == x);
-  BOOST_CHECK(replace_free_variables(y, h) == z);
-  h[x] = y;
-  BOOST_CHECK(replace_free_variables(x, h) == y);
-  h[y] = y;
-  BOOST_CHECK(replace_free_variables(y, h) == z);
-  h[z] = x;
-  BOOST_CHECK(replace_free_variables(y, h) == x);
-#endif
 }
 
 void test_mutable_substitution()

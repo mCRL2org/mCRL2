@@ -36,7 +36,7 @@ struct sort_expression_assignment: public std::unary_function<sort_expression, s
 
   const sort_expression &operator()(const sort_expression& x)
   {
-    if (x == lhs) 
+    if (x == lhs)
     {
       return rhs;
     }
@@ -60,7 +60,7 @@ struct data_expression_assignment: public std::unary_function<data_expression, d
 
   const data_expression &operator()(const data_expression& x)
   {
-    if (x == lhs) 
+    if (x == lhs)
     {
       return rhs;
     }
@@ -219,7 +219,7 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
     : m_map(m)
   { }
 
-  const expression_type &operator()(const variable_type& v) const
+  const expression_type operator()(const variable_type& v) const
   {
     typename AssociativeContainer::const_iterator i = m_map.find(v);
     if (i == m_map.end())
@@ -512,7 +512,7 @@ public:
     ExpressionSequence   &m_container;
     std::vector <size_t> &m_index_table;
     std::stack<size_t> &m_free_positions;
-    
+
 
     /// \brief Constructor.
     ///
@@ -539,7 +539,7 @@ public:
         {
           m_index_table.resize(i+1, size_t(-1));
         }
-        
+
         size_t j=m_index_table[i];
         assert(j==size_t(-1) || j<m_container.size());
         if (j==size_t(-1))
@@ -567,7 +567,7 @@ public:
       else
       {
         // Indicate that the current variable is free; postpone deleting the
-        // actual value assigned to the variable. 
+        // actual value assigned to the variable.
         if (i<m_index_table.size())
         {
           size_t j=m_index_table[i];
@@ -577,7 +577,7 @@ public:
             m_index_table[i]=size_t(-1);
           }
         }
-      } 
+      }
     }
   };
 
@@ -586,7 +586,7 @@ public:
   {
     const size_t i = v.name().function().number();
     if (i < m_index_table.size())
-    { 
+    {
       const size_t j = m_index_table[i];
       if (j!=size_t(-1))
       {
@@ -654,7 +654,7 @@ protected:
     assert(i < m_index_table.size());
     assert(m_index_table[i]!=size_t(-1));
     return m_container[m_index_table[i]];
-  } 
+  }
 
 public:
   /// \brief string representation of the substitution
@@ -680,7 +680,7 @@ public:
     }
     result << "]";
     return result.str();
-  } 
+  }
 
 };
 
@@ -702,14 +702,14 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
   {
     std::set < variable > free_variables_in_body;
     get_free_variables(t[0],free_variables_in_body);
-    
+
     variable_list bound_vars;
-    const assignment_expression_list lv=assignment_expression_list(t[1]);
-    for(assignment_expression_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
+    const assignment_list lv=assignment_list(t[1]);
+    for(assignment_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
     {
       bound_vars.push_front(it->lhs());
-      get_free_variables(it->rhs(),result); 
-    } 
+      get_free_variables(it->rhs(),result);
+    }
     for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
     {
       if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
@@ -737,7 +737,7 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
     for(size_t i=0 ; i<t.size(); ++i)
     {
       if (!t[i].type_is_int())
-      { 
+      {
         get_free_variables(t[i],result);
       }
     }
@@ -746,7 +746,7 @@ inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &
 } // end namespace detail
 
 /// \brief Function to get all free variables in the substitution
-///        The rhs' have the shape of an expression in internal rewriter format. 
+///        The rhs' have the shape of an expression in internal rewriter format.
 /// \deprecated
 template<typename VariableType, typename ExpressionSequence>
 std::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
@@ -808,13 +808,13 @@ apply(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sig
   result.m_index_table=sigma.m_index_table;
   result.m_container.resize(sigma.m_container.size(),atermpp::aterm_appl());
   result.m_free_positions=sigma.m_free_positions;
-  
+
   for(std::vector<size_t>::const_iterator i=sigma.m_index_table.begin(); i != sigma.m_index_table.end(); ++i)
   {
     if (*i != size_t(-1))
     {
       assert(*i<result.m_container.size());
-      result.m_container[*i] = f(sigma.m_container[*i]); 
+      result.m_container[*i] = f(sigma.m_container[*i]);
     }
   }
   return result;

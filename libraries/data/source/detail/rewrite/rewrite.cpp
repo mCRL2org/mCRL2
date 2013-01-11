@@ -721,8 +721,8 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
   {
     const where_clause &t=term;
     atermpp::term_list<atermpp::aterm> l;
-    const std::vector < assignment_expression > lv=atermpp::convert < std::vector < assignment_expression > >(t.declarations());
-    for(std::vector < assignment_expression > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
+    const std::vector < assignment > lv=atermpp::convert < std::vector < assignment > >(t.assignments());
+    for(std::vector < assignment > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
     {
       l.push_front(core::detail::gsMakeDataVarIdInit(it->lhs(),toInner(it->rhs(),add_opids)));
     }
@@ -755,7 +755,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
     for(term_list<aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
     {
       const aterm_appl &ass_expr= *it;
-      lv.push_back(assignment_expression(variable(ass_expr[0]),fromInner(aterm_cast<const aterm_appl>(ass_expr[1]))));
+      lv.push_back(assignment(variable(ass_expr[0]),fromInner(aterm_cast<const aterm_appl>(ass_expr[1]))));
     }
     return where_clause(body,lv);
   }

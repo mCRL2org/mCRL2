@@ -53,8 +53,8 @@ void Disjointness_Checker::process_data_expression(const size_t a_summand_number
   {
     const where_clause t(a_expression);
     process_data_expression(a_summand_number,t.body());
-    const assignment_expression_list decls=t.declarations();
-    for (assignment_expression_list::const_iterator i=decls.begin(); i!=decls.end(); ++i)
+    const assignment_list assignments=t.assignments();
+    for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
     {
       process_data_expression(a_summand_number,i->rhs());
     }

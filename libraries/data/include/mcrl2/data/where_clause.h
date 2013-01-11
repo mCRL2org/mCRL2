@@ -60,6 +60,12 @@ class where_clause: public data_expression
     {
       return atermpp::aterm_cast<const assignment_expression_list>(atermpp::list_arg2(*this));
     }
+//--- start user section where_clause ---//
+    const assignment_list& assignments() const
+    {
+      return atermpp::aterm_cast<const assignment_list>(atermpp::list_arg2(*this));
+    }
+//--- end user section where_clause ---//
 };
 //--- end generated class where_clause ---//
 

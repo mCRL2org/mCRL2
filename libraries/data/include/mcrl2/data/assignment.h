@@ -30,44 +30,31 @@ namespace mcrl2
 namespace data
 {
 
-class assignment_expression: public atermpp::aterm_appl,
-  public std::unary_function<variable, data_expression>
+//--- start generated classes ---//
+/// \brief Assignment expression
+class assignment_expression: public atermpp::aterm_appl
 {
   public:
-    typedef variable variable_type;
-    typedef data_expression expression_type;
-
+    /// \brief Default constructor.
     assignment_expression()
       : atermpp::aterm_appl(core::detail::constructWhrDecl())
     {}
 
-    assignment_expression(const aterm &term)
+    /// \brief Constructor.
+    /// \param term A term
+    assignment_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_WhrDecl(*this));
     }
-
-    assignment_expression(const variable v, const data_expression d)
-      : atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(v,d))
-    {}
-
-    variable lhs() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    data_expression rhs() const
-    {
-      return data_expression(atermpp::arg2(*this));
-    }
 };
 
-/// \brief list of assignment expressions
+/// \brief list of assignment_expressions
 typedef atermpp::term_list<assignment_expression> assignment_expression_list;
-/// \brief vector of assignment expressions
+
+/// \brief vector of assignment_expressions
 typedef std::vector<assignment_expression>    assignment_expression_vector;
 
-//--- start generated classes ---//
 
 /// \brief Assignment of a data expression to a variable
 class assignment: public assignment_expression
@@ -319,26 +306,18 @@ variable_list left_hand_sides(const assignment_list& x)
   return variable_list(result.begin(), result.end());
 }
 
-////--- start generated is-functions ---//
-//
-//    /// \brief Test for a assignment expression
-//    /// \param t A term
-//    /// \return True if it is a assignment expression
-//    inline
-//    bool is_assignment(const assignment_expression& t)
-//    {
-//      return core::detail::gsIsDataVarIdInit(t);
-//    }
-//
-//    /// \brief Test for a identifier_assignment expression
-//    /// \param t A term
-//    /// \return True if it is a identifier_assignment expression
-//    inline
-//    bool is_identifier_assignment(const assignment_expression& t)
-//    {
-//      return core::detail::gsIsIdInit(t);
-//    }
-////--- end generated is-functions ---//
+/// \brief Returns true if the term x is an assignment expression
+/// \param x An expression
+/// \return True if the term t is an assignment expression
+inline
+bool is_assignment_expression(const atermpp::aterm_appl& x)
+{
+  // TODO: this code should be generated
+  return
+    core::detail::gsIsDataVarIdInit(x) ||
+    core::detail::gsIsIdInit(x)
+    ;
+}
 
 // template function overloads
 std::string pp(const assignment& x);

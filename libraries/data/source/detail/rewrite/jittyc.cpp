@@ -2473,9 +2473,9 @@ static aterm toInner_list_odd(const data_expression &t)
   else if (is_where_clause(t))
   {
     const where_clause w=t;
-    assignment_expression_list assignments=w.declarations();
+    assignment_list assignments=w.assignments();
     atermpp::term_list <atermpp::aterm_appl > translated_assignments;
-    for (assignment_expression_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+    for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
     {
       translated_assignments.push_back(core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
     }
