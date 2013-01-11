@@ -953,7 +953,7 @@ std::pair<std::string, data_expression_list> parse_variable(std::string const& s
       variables.push_back(data::parse_variable(*i));
     }
   }
-  return std::make_pair(name, make_variable_list(variables));
+  return std::make_pair(name, data_expression_list(variables.begin(), variables.end()));
 }
 } // namespace detail
 /// \endcond

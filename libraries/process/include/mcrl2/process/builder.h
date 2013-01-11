@@ -31,12 +31,12 @@ struct process_expression_builder_base: public core::builder<Derived>
   using super::enter;
   using super::leave;
 
-  process_expression operator()(const lps::action& x)
+  const process_expression& operator()(const lps::action& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    return atermpp::aterm_cast<process_expression>(x);
   }
 };
 

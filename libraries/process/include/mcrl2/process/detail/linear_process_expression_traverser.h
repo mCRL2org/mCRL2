@@ -277,7 +277,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
     if (is_process_instance(x.right()))
     {
-      process_instance q = x.right();
+      process_instance q(x.right());
       if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process(process::pp(q) + " has an unexpected identifier");

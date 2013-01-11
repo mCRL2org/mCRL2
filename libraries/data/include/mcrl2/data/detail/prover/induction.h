@@ -64,7 +64,7 @@ class Induction
         {
           if (std::find(f_list_variables.begin(), f_list_variables.end(),a_expression)==f_list_variables.end()) // not found
           {
-            f_list_variables.push_back(a_expression);
+            f_list_variables.push_back(atermpp::aterm_cast<variable>(a_expression));
           }
         }
       }

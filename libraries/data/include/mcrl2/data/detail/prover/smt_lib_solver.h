@@ -377,15 +377,15 @@ class SMT_LIB_Solver: public SMT_Solver
         }
         else if (sort_nat::is_nat(data_expression(a_clause).sort()))
         {
-          translate_nat_variable(a_clause);
+          translate_nat_variable(atermpp::aterm_cast<variable>(a_clause));
         }
         else if (sort_pos::is_pos(data_expression(a_clause).sort()))
         {
-          translate_pos_variable(a_clause);
+          translate_pos_variable(atermpp::aterm_cast<variable>(a_clause));
         }
         else
         {
-          translate_variable(a_clause);
+          translate_variable(atermpp::aterm_cast<variable>(a_clause));
         }
       }
       else if (is_application(a_clause))
@@ -623,7 +623,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_unknown_operator(const data_expression &a_clause)
     {
-      const data_expression v_operator = application(a_clause).head();
+      data_expression h = application(a_clause).head();
+      const function_symbol& v_operator = atermpp::aterm_cast<function_symbol>(h); 
       std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
@@ -715,7 +716,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_constant(const data_expression &a_clause)
     {
-      const data_expression v_operator = application(a_clause).head();
+      data_expression h = application(a_clause).head();
+      const function_symbol& v_operator = atermpp::aterm_cast<function_symbol>(h); 
       std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.

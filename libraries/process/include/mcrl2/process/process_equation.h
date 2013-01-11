@@ -84,9 +84,9 @@ class process_equation: public atermpp::aterm_appl
 
     /// \brief Returns the expression of the process equation
     /// \return The expression of the process equation
-    process_expression expression() const
+    const process_expression& expression() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<process_expression>(atermpp::arg3(*this));
     }
 };
 

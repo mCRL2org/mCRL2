@@ -41,12 +41,12 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
 
   void enter(const data::where_clause& x)
   {
-    increase_bind_count(make_assignment_left_hand_side_range(x.declarations()));
+    increase_bind_count(make_assignment_left_hand_side_range(x.assignments()));
   }
 
   void leave(const data::where_clause& x)
   {
-    decrease_bind_count(make_assignment_left_hand_side_range(x.declarations()));
+    decrease_bind_count(make_assignment_left_hand_side_range(x.assignments()));
   }
 
   void enter(const data::assignment& x)

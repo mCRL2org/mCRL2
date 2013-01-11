@@ -282,7 +282,8 @@ class data_specification
     inline
     void add_system_defined_constructor(const function_symbol& f) const
     {
-      detail::insert_unique(m_normalised_constructors,normalize_sorts(f,*this));
+      data_expression g = normalize_sorts(f, *this);
+      detail::insert_unique(m_normalised_constructors, atermpp::aterm_cast<function_symbol>(g));
     }
 
     /// \brief Adds a mapping to this specification, and marks it as system
@@ -294,8 +295,8 @@ class data_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_system_defined_mapping(const function_symbol& f) const
     {
-      const function_symbol p=normalize_sorts(f,*this);
-      detail::insert_unique(m_normalised_mappings,p);
+      data_expression g = normalize_sorts(f, *this);
+      detail::insert_unique(m_normalised_mappings, atermpp::aterm_cast<function_symbol>(g));
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -702,9 +703,9 @@ class data_specification
            i!=m_constructors.end(); ++i)
       {
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        const function_symbol normalised_constructor=normalize_sorts(*i,*this);
+        data_expression normalised_constructor = normalize_sorts(*i, *this);
 
-        detail::insert_unique(m_normalised_constructors, normalised_constructor);
+        detail::insert_unique(m_normalised_constructors, atermpp::aterm_cast<function_symbol>(normalised_constructor));
         add_system_defined_sort(normalised_sort);
       }
 
@@ -713,9 +714,9 @@ class data_specification
            i!=m_mappings.end(); ++i)
       {
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        const function_symbol normalised_mapping=normalize_sorts(*i,*this);
+        data_expression normalised_mapping = normalize_sorts(*i, *this);
 
-        detail::insert_unique(m_normalised_mappings, normalised_mapping);
+        detail::insert_unique(m_normalised_mappings, atermpp::aterm_cast<function_symbol>(normalised_mapping));
 
         add_system_defined_sort(normalised_sort);
       }
