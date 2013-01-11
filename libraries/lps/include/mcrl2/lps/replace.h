@@ -181,8 +181,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   {
     count = 0;
     lps::process_initializer result = super::operator()(x);
-    result.assignments() = super::operator()(result.assignments());
-    return result;
+    return lps::process_initializer(super::operator()(result.assignments()));
   }
 
   void operator()(lps::linear_process& x)
