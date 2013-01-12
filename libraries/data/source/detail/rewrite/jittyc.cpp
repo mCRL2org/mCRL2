@@ -142,7 +142,7 @@ static aterm_appl make_ar_and(const aterm_appl &x, const aterm_appl &y)
     return make_ar_false();
   }
 
-  return aterm_appl(afunARand,static_cast<aterm>(x),static_cast<aterm>(y));
+  return aterm_appl(afunARand,x,y);
 }
 
 static aterm_appl make_ar_or(aterm_appl x, aterm_appl y)
@@ -160,7 +160,7 @@ static aterm_appl make_ar_or(aterm_appl x, aterm_appl y)
     return make_ar_true();
   }
 
-  return aterm_appl(afunARor,static_cast<aterm>(x),static_cast<aterm>(y));
+  return aterm_appl(afunARor,x,y);
 }
 
 static aterm_appl make_ar_var(size_t var)
@@ -568,7 +568,7 @@ static void inc_usedcnt(aterm_list l)
     aterm first=l.front();
     if (first.type_is_int())
     {
-      treevars_usedcnt[static_cast<aterm_int>(first).value()]++;
+      treevars_usedcnt[aterm_cast<aterm_int>(first).value()]++;
     }
   }
 }
@@ -621,7 +621,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
 
     if ((treevars_usedcnt[k] > 0) || ((k == 0) && isR(r)))
     {
-       return aterm_appl(afunS,static_cast<aterm>(v),static_cast<aterm>(r));
+       return aterm_appl(afunS,v,r);
     }
     else
     {
@@ -678,7 +678,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
     }
     else
     {
-      treevars_usedcnt[static_cast<aterm_int>(((aterm_appl) M)[1]).value()]++;
+      treevars_usedcnt[aterm_cast<aterm_int>(((aterm_appl) M)[1]).value()]++;
       return atermpp::aterm_appl(afunM,((aterm_appl) M)[0],true_tree,false_tree);
     }
   }
@@ -1255,7 +1255,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const atermpp::aterm_int
   aterm_list strat = create_strategy(eqns,opid.value(),arity,nfs,true_inner);
   while (!strat.empty() && strat.front().type_is_int())
   {
-    nfs.set(static_cast<aterm_int>(strat.front()).value());
+    nfs.set(aterm_cast<aterm_int>(strat.front()).value());
     strat = strat.tail();
   }
 }
@@ -1309,7 +1309,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
     int arity = ((aterm_list) t).size()-1;
     if (((aterm_list) t).front().type_is_int())
     {
-      if (opid_is_nf(static_cast<aterm_int>(((aterm_list) t).front()),arity) && arity != 0)
+      if (opid_is_nf(aterm_cast<aterm_int>(((aterm_list) t).front()),arity) && arity != 0)
       {
         nfs_array args(arity);
         calc_nfs_list(args,arity,((aterm_list) t).tail(),startarg,nnfvars);
@@ -1333,7 +1333,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   }
   else if (t.type_is_int())
   {
-    return opid_is_nf(static_cast<aterm_int>(t),0);
+    return opid_is_nf(aterm_cast<aterm_int>(t),0);
   }
   else if (/*t.type_is_appl() && */ gsIsNil((aterm_appl) t))
   {
@@ -1413,7 +1413,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
 
     if (((aterm_list) t).front().type_is_int())
     {
-      b = opid_is_nf(static_cast<aterm_int>(((aterm_list) t).front()),arity);
+      b = opid_is_nf(aterm_cast<aterm_int>(((aterm_list) t).front()),arity);
 
       if (b || !rewr)
       {
@@ -1428,11 +1428,11 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         if (b || !rewr)
         {
-          ss << "atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(static_cast<aterm_int>(((aterm_list) t).front())) << "))";
+          ss << "atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(aterm_cast<aterm_int>(((aterm_list) t).front())) << "))";
         }
         else
         {
-          ss << "rewr_" << static_cast<aterm_int>(((aterm_list) t).front()).value() << "_0_0()";
+          ss << "rewr_" << aterm_cast<aterm_int>(((aterm_list) t).front()).value() << "_0_0()";
         }
       }
       else
@@ -2458,12 +2458,12 @@ static aterm toInner_list_odd(const data_expression &t)
   }
   else if (is_function_symbol(t))
   {
-    return static_cast<aterm_int>(OpId2Int(data_expression(t)));
+    return aterm_cast<aterm_int>(OpId2Int(aterm_cast<function_symbol>(t)));
   }
   else if (is_variable(t))
   {
     // Here the expression is a binder or a where expression.
-    return (aterm_appl) t;
+    return aterm_cast<aterm_appl>(t);
   }
   else if (is_abstraction(t))
   {
@@ -2762,7 +2762,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   fprintf(f,
           "#define isAppl(x) (atermpp::aterm_cast<atermpp::aterm_appl>(x).function().number() != %li)\n"
-          "\n", static_cast<aterm_appl>(data::variable("x", data::sort_bool::bool_())).function().number()
+          "\n", data::variable("x", data::sort_bool::bool_()).function().number()
          );
 
   //

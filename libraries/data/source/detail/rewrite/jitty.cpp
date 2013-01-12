@@ -64,7 +64,7 @@ static function_symbol get_function_symbol_of_head(const data_expression &t)
 {
   if (is_function_symbol(t))
   {
-    return t;
+    return atermpp::aterm_cast<function_symbol>(t);
   }
   assert(is_application(t));
 

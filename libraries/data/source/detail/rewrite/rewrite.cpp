@@ -715,7 +715,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
   }
   else if (is_function_symbol(term))
   {
-    return Apply0(OpId2Int(term));
+    return Apply0(OpId2Int(atermpp::aterm_cast<function_symbol>(term)));
   }
   else if (is_where_clause(term))
   {
