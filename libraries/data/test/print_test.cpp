@@ -46,17 +46,17 @@ void test_term(const std::string& s)
   atermpp::aterm a = atermpp::read_term_from_string(s);
   if (s.find("DataEqn") == 0)
   {
-    data_equation x = atermpp::aterm_appl((atermpp::aterm_appl) a);
+    data_equation x (a);
     test_term(s, x);
   }
   else if (s.find("SortCons") == 0)
   {
-    sort_expression x = atermpp::aterm_appl((atermpp::aterm_appl) a);
+    sort_expression x (a);
     test_term(s, x);
   }
   else if (s.find("OpId") == 0)
   {
-    data::function_symbol x = atermpp::aterm_appl((atermpp::aterm_appl) a);
+    data::function_symbol x (a);
     test_term(s, x);
   }
   else

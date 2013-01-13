@@ -282,8 +282,8 @@ class data_specification
     inline
     void add_system_defined_constructor(const function_symbol& f) const
     {
-      data_expression g = normalize_sorts(f, *this);
-      detail::insert_unique(m_normalised_constructors, atermpp::aterm_cast<function_symbol>(g));
+      function_symbol g(normalize_sorts(f, *this));
+      detail::insert_unique(m_normalised_constructors, g);
     }
 
     /// \brief Adds a mapping to this specification, and marks it as system
@@ -295,8 +295,8 @@ class data_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_system_defined_mapping(const function_symbol& f) const
     {
-      data_expression g = normalize_sorts(f, *this);
-      detail::insert_unique(m_normalised_mappings, atermpp::aterm_cast<function_symbol>(g));
+      function_symbol g(normalize_sorts(f, *this));
+      detail::insert_unique(m_normalised_mappings, g);
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -703,9 +703,9 @@ class data_specification
            i!=m_constructors.end(); ++i)
       {
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        data_expression normalised_constructor = normalize_sorts(*i, *this);
+        function_symbol normalised_constructor(normalize_sorts(*i, *this));
 
-        detail::insert_unique(m_normalised_constructors, atermpp::aterm_cast<function_symbol>(normalised_constructor));
+        detail::insert_unique(m_normalised_constructors, normalised_constructor);
         add_system_defined_sort(normalised_sort);
       }
 
@@ -714,9 +714,9 @@ class data_specification
            i!=m_mappings.end(); ++i)
       {
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        data_expression normalised_mapping = normalize_sorts(*i, *this);
+        function_symbol normalised_mapping(normalize_sorts(*i, *this));
 
-        detail::insert_unique(m_normalised_mappings, atermpp::aterm_cast<function_symbol>(normalised_mapping));
+        detail::insert_unique(m_normalised_mappings, normalised_mapping);
 
         add_system_defined_sort(normalised_sort);
       }
@@ -1206,14 +1206,14 @@ data_equation_vector find_equations(data_specification const& specification, con
     }
     else if (is_application(i->lhs()))
     {
-      if (static_cast<application>(i->lhs()).head() == d)
+      if (atermpp::aterm_cast<application>(i->lhs()).head() == d)
       {
         result.push_back(*i);
       }
     }
     else if (is_application(i->rhs()))
     {
-      if (static_cast<application>(i->rhs()).head() == d)
+      if (atermpp::aterm_cast<application>(i->rhs()).head() == d)
       {
         result.push_back(*i);
       }
