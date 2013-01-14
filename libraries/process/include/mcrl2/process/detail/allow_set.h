@@ -77,8 +77,7 @@ multi_action_name hide(const action_name_set& I, const multi_action_name& alpha)
 struct allow_set;
 std::ostream& operator<<(std::ostream& out, const allow_set& x);
 
-/// \brief Represents the set AI*, where the attribute A_includes_subsets determines whether subsets
-/// of the elements are included.
+/// \brief Represents the set AI*. If the attribute A_includes_subsets is true, also subsets of the elements are included.
 struct allow_set
 {
   multi_action_name_set A;
@@ -92,15 +91,21 @@ struct allow_set
     : A(A_), A_includes_subsets(A_includes_subsets_), I(I_)
   {}
 
+  /// \brief Returns true if the allow set contains the multi action name alpha.
+  bool contains(const multi_action_name& alpha) const
+  {
+    multi_action_name beta = detail::hide(I, alpha);
+    return beta.empty() || (A_includes_subsets ? detail::includes(A, beta) : detail::contains(A, beta));
+  }
+
+  /// \brief Returns the intersection of the allow set with alphabet.
   multi_action_name_set intersect(const multi_action_name_set& alphabet) const
   {
     multi_action_name_set result;
     for (multi_action_name_set::const_iterator i = alphabet.begin(); i != alphabet.end(); ++i)
     {
-      multi_action_name alpha = *i;
-      multi_action_name beta = detail::hide(I, alpha);
-      bool add = beta.empty() || (A_includes_subsets ? detail::includes(A, beta) : detail::contains(A, beta));
-      if (add)
+      const multi_action_name& alpha = *i;
+      if (contains(alpha))
       {
         result.insert(alpha);
       }

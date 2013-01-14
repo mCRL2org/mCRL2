@@ -106,14 +106,15 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   // used for computing the alphabet
   const atermpp::vector<process_equation>& equations;
+  std::set<process_identifier>& W;
 
   // the parameter A
   const allow_set& A;
 
   atermpp::vector<Node> node_stack;
 
-  push_allow_traverser(const atermpp::vector<process_equation>& equations_, const allow_set& A_)
-    : equations(equations_), A(A_)
+  push_allow_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_, const allow_set& A_)
+    : equations(equations_), W(W_), A(A_)
   {}
 
   Derived& derived()
@@ -171,100 +172,116 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return !is_merge(x) && !is_left_merge(x) && !is_sync(x) && !is_hide(x) && !is_rename(x) && !is_block(x) && !is_allow(x) && !is_comm(x);
   }
 
-  void leave_pcrl(const process_expression& x)
+  void leave(const lps::action& x)
+  {
+    multi_action_name alpha;
+    alpha.insert(x.label().name());
+    if (A.contains(alpha))
+    {
+      multi_action_name_set A1;
+      A1.insert(alpha);
+      push(push_allow_node(A1, x, boost::logic::indeterminate));
+    }
+    else
+    {
+      multi_action_name_set A1;
+      push(push_allow_node(A1, process::delta(), boost::logic::indeterminate));
+    }
+    log(x);
+  }
+
+  void leave(const process::process_instance& x)
+  {
+    if (W.find(x.identifier()) != W.end())
+    {
+      multi_action_name_set A1;
+      push(push_allow_node(A1, x, boost::logic::indeterminate));
+    }
+    else
+    {
+      W.insert(x.identifier());
+      process_expression p = expand_rhs(x, equations);
+      derived()(p);
+    }
+    log(x);
+  }
+
+  void leave(const process::process_instance_assignment& x)
+  {
+    if (W.find(x.identifier()) != W.end())
+    {
+      multi_action_name_set A1;
+      push(push_allow_node(A1, x, boost::logic::indeterminate));
+    }
+    else
+    {
+      W.insert(x.identifier());
+      process_expression p = expand_rhs(x, equations);
+      derived()(p);
+    }
+    log(x);
+  }
+
+  void leave(const process::delta& x)
   {
     push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
     log(x);
   }
 
-  void operator()(const lps::action& x)
+  void leave(const process::tau& x)
   {
-    leave_pcrl(x);
+    push(push_allow_node(process::alphabet(x, equations), x, boost::logic::indeterminate));
+    log(x);
   }
 
-
-  void operator()(const process::process_instance& x)
+  void leave(const process::sum& x)
   {
-    const process_equation& eqn = find_equation(equations, x.identifier());
-    process_expression p = eqn.expression();
-    data::mutable_map_substitution<> sigma;
-    data::variable_list d = eqn.formal_parameters();
-    data::data_expression_list e = x.actual_parameters();
-    data::variable_list::iterator di = d.begin();
-    data::data_expression_list::iterator ei = e.begin();
-    for (; di != d.end(); ++di, ++ei)
-    {
-      sigma[*di] = *ei;
-    }
-    p = process::replace_free_variables(p, sigma);
-    derived()(p);
-    if (is_pcrl(eqn.expression()))
-    {
-      top().m_expression = x;
-    }
+    top().m_expression = process::sum(x.bound_variables(), top().m_expression);
+    log(x);
   }
 
-  void operator()(const process::process_instance_assignment& x)
+  void leave(const process::at& x)
   {
-    const process_equation& eqn = find_equation(equations, x.identifier());
-    process_expression p = eqn.expression();
-    data::mutable_map_substitution<> sigma;
-    data::assignment_list a = x.assignments();
-    for (data::assignment_list::iterator i = a.begin(); i != a.end(); ++i)
-    {
-      sigma[i->lhs()] = i->rhs();
-    }
-    p = process::replace_free_variables(p, sigma);
-    derived()(p);
-    if (is_pcrl(eqn.expression()))
-    {
-      top().m_expression = x;
-    }
+    top().m_expression = process::at(top().m_expression, x.time_stamp());
+    log(x);
   }
 
-  void operator()(const process::delta& x)
+  void leave(const process::seq& x)
   {
-    leave_pcrl(x);
+    Node right = pop();
+    Node left = pop();
+    push(push_allow_node(set_union(left.alphabet, right.alphabet), process::seq(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log(x);
   }
 
-  void operator()(const process::tau& x)
+  void leave(const process::if_then& x)
   {
-    leave_pcrl(x);
+    top().m_expression = process::if_then(x.condition(), top().m_expression);
+    log(x);
   }
 
-  void operator()(const process::sum& x)
+  void leave(const process::if_then_else& x)
   {
-    leave_pcrl(x);
+    Node right = pop();
+    Node left = pop();
+    push(push_allow_node(set_union(left.alphabet, right.alphabet), process::if_then_else(x.condition(), left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log(x);
   }
 
-  void operator()(const process::at& x)
+  void leave(const process::bounded_init& x)
   {
-    leave_pcrl(x);
+    Node right = pop();
+    Node left = pop();
+    push(push_allow_node(set_union(left.alphabet, right.alphabet), process::bounded_init(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log(x);
   }
 
-  void operator()(const process::seq& x)
+  void leave(const process::choice& x)
   {
-    leave_pcrl(x);
-  }
-
-  void operator()(const process::if_then& x)
-  {
-    leave_pcrl(x);
-  }
-
-  void operator()(const process::if_then_else& x)
-  {
-    leave_pcrl(x);
-  }
-
-  void operator()(const process::bounded_init& x)
-  {
-    leave_pcrl(x);
-  }
-
-  void operator()(const process::choice& x)
-  {
-    leave_pcrl(x);
+    Node right = pop();
+    Node left = pop();
+    push(push_allow_node(set_union(left.alphabet, right.alphabet), process::choice(left.m_expression, right.m_expression), boost::logic::indeterminate));
+    log(x);
   }
 
   std::string log_hide(const process::hide& x, const allow_set& A1)
@@ -279,8 +296,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     core::identifier_string_list I = x.hide_set();
     allow_set A1 = allow_set_operations::hide_inverse(I, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
-    node.m_expression = process::hide(I, node.m_expression);
-    push(node);
+    push(push_allow_node(alphabet_operations::hide(I, node.alphabet), process::hide(I, node.m_expression), boost::logic::indeterminate));
     log(x, log_hide(x, A1));
   }
 
@@ -312,8 +328,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     rename_expression_list R = x.rename_set();
     allow_set A1 = allow_set_operations::rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, equations);
-    node.m_expression = process::rename(R, node.m_expression);
-    push(node);
+    push(push_allow_node(alphabet_operations::rename(R, node.alphabet), process::rename(R, node.m_expression), boost::logic::indeterminate));
     log(x, log_rename(x, A1));
   }
 
@@ -410,8 +425,8 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
   using super::leave;
   using super::operator();
 
-  apply_push_allow_traverser(const atermpp::vector<process_equation>& equations, const allow_set& A)
-    : super(equations, A)
+  apply_push_allow_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const allow_set& A)
+    : super(equations, W, A)
   {}
 
 #ifdef BOOST_MSVC
@@ -422,7 +437,8 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
 inline
 push_allow_node push_allow(const process_expression& x, const allow_set& A, const atermpp::vector<process_equation>& equations)
 {
-  apply_push_allow_traverser<push_allow_traverser> f(equations, A);
+  std::set<process_identifier> W;
+  apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
   f(x);
   f.node_stack.back().finish(equations, A);
   return f.node_stack.back();

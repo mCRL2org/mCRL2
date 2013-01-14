@@ -15,8 +15,6 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/logic/tribool_io.hpp>
 #include "mcrl2/process/detail/alphabet_traverser.h"
-#include "mcrl2/process/find.h"
-#include "mcrl2/process/replace.h"
 #include "mcrl2/process/utility.h"
 
 namespace mcrl2 {
@@ -104,32 +102,13 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   process::process_expression operator()(const process::process_instance& x)
   {
-    const process_equation& eqn = find_equation(equations, x.identifier());
-    process_expression p = eqn.expression();
-    data::mutable_map_substitution<> sigma;
-    data::variable_list d = eqn.formal_parameters();
-    data::data_expression_list e = x.actual_parameters();
-    data::variable_list::iterator di = d.begin();
-    data::data_expression_list::iterator ei = e.begin();
-    for (; di != d.end(); ++di, ++ei)
-    {
-      sigma[*di] = *ei;
-    }
-    p = process::replace_free_variables(p, sigma);
+    process_expression p = expand_rhs(x, equations);
     return derived()(p);
   }
 
   process::process_expression operator()(const process::process_instance_assignment& x)
   {
-    const process_equation& eqn = find_equation(equations, x.identifier());
-    process_expression p = eqn.expression();
-    data::mutable_map_substitution<> sigma;
-    data::assignment_list a = x.assignments();
-    for (data::assignment_list::iterator i = a.begin(); i != a.end(); ++i)
-    {
-      sigma[i->lhs()] = i->rhs();
-    }
-    p = process::replace_free_variables(p, sigma);
+    process_expression p = expand_rhs(x, equations);
     return derived()(p);
   }
 
@@ -152,13 +131,13 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   process::process_expression operator()(const process::comm& x)
   {
-    process::process_expression result = process::comm(x.comm_set(), static_cast<Derived&>(*this)(x.operand()));
+    process::process_expression result = process::comm(x.comm_set(), derived()(x.operand()));
     return result;
   }
 
   process::process_expression operator()(const process::allow& x)
   {
-    process::process_expression result = process::allow(x.allow_set(), static_cast<Derived&>(*this)(x.operand()));
+    process::process_expression result = process::allow(x.allow_set(), derived()(x.operand()));
     return result;
   }
 };
