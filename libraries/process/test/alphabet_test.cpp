@@ -311,7 +311,6 @@ void test_push_allow(const std::string& expression, const std::string& Atext, co
   bool A_includes_subsets;
   boost::tuples::tie(A, A_includes_subsets) = parse_multi_action_name_set(Atext);
   process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), allow_set(A, A_includes_subsets), procspec.equations());
-  node.finish(procspec.equations(), allow_set(A, A_includes_subsets));
   std::string result = process::pp(node.m_expression);
   check_result(expression, result, expected_result, "push_allow");
 }
