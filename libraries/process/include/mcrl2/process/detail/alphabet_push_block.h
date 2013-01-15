@@ -12,9 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 
-#include <boost/logic/tribool.hpp>
-#include <boost/logic/tribool_io.hpp>
-#include "mcrl2/process/detail/alphabet_traverser.h"
+#include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/utility.h"
 
 namespace mcrl2 {
@@ -73,14 +71,15 @@ struct push_block_builder: public process_expression_builder<Derived>
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
+  // used for computing the alphabet
+  const atermpp::vector<process_equation>& equations;
+  std::set<process_identifier>& W;
+
   // the parameter B
   const std::set<core::identifier_string>& B;
 
-  // used for computing the alphabet
-  const atermpp::vector<process_equation>& equations;
-
-  push_block_builder(const std::set<core::identifier_string>& B_, const atermpp::vector<process_equation>& equations_)
-    : B(B_), equations(equations_)
+  push_block_builder(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_, const std::set<core::identifier_string>& B_)
+    : equations(equations_), W(W_), B(B_)
   {}
 
   Derived& derived()
@@ -102,14 +101,34 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   process::process_expression operator()(const process::process_instance& x)
   {
-    process_expression p = expand_rhs(x, equations);
-    return derived()(p);
+    if (W.find(x.identifier()) != W.end())
+    {
+    	return x;
+    }
+    else
+    {
+      W.insert(x.identifier());
+      process_expression p = expand_rhs(x, equations);
+      process_expression result = derived()(p);
+      W.erase(x.identifier());
+      return result;
+    }
   }
 
   process::process_expression operator()(const process::process_instance_assignment& x)
   {
-    process_expression p = expand_rhs(x, equations);
-    return derived()(p);
+    if (W.find(x.identifier()) != W.end())
+    {
+    	return x;
+    }
+    else
+    {
+      W.insert(x.identifier());
+      process_expression p = expand_rhs(x, equations);
+      process_expression result = derived()(p);
+      W.erase(x.identifier());
+      return result;
+    }
   }
 
   process::process_expression operator()(const process::block& x)
@@ -131,14 +150,16 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   process::process_expression operator()(const process::comm& x)
   {
-    process::process_expression result = process::comm(x.comm_set(), derived()(x.operand()));
-    return result;
+    return process::comm(x.comm_set(), derived()(x.operand()));
   }
 
   process::process_expression operator()(const process::allow& x)
   {
-    process::process_expression result = process::allow(x.allow_set(), derived()(x.operand()));
-    return result;
+    allow_set A(make_name_set(x.allow_set()));
+    core::identifier_string_list B1(B.begin(), B.end());
+    allow_set A1(alphabet_operations::block(B1, A.A));
+    detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations);
+    return node.m_expression;
   }
 };
 
@@ -150,8 +171,8 @@ struct apply_push_block_builder: public Traverser<apply_push_block_builder<Trave
   using super::leave;
   using super::operator();
 
-  apply_push_block_builder(const std::set<core::identifier_string>& B, const atermpp::vector<process_equation>& equations)
-    : super(B, equations)
+  apply_push_block_builder(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const std::set<core::identifier_string>& B)
+    : super(equations, W, B)
   {}
 
 #ifdef BOOST_MSVC
@@ -162,7 +183,8 @@ struct apply_push_block_builder: public Traverser<apply_push_block_builder<Trave
 inline
 process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, const atermpp::vector<process_equation>& equations)
 {
-  apply_push_block_builder<push_block_builder> f(B, equations);
+  std::set<process_identifier> W;
+  apply_push_block_builder<push_block_builder> f(equations, W, B);
   return f(x);
 }
 

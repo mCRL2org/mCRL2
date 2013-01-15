@@ -190,6 +190,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       process_expression p = expand_rhs(x, equations);
       derived()(p);
       top().apply_allow(A);
+      W.erase(x.identifier());
     }
     log(x);
   }
@@ -207,6 +208,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       process_expression p = expand_rhs(x, equations);
       derived()(p);
       top().apply_allow(A);
+      W.erase(x.identifier());
     }
     log(x);
   }

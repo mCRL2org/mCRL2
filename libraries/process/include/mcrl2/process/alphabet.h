@@ -18,6 +18,7 @@
 #include <sstream>
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
+#include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/traverser.h"
@@ -50,6 +51,11 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
   process_expression operator()(const process::allow& x)
   {
     return push_allow(x.operand(), x.allow_set(), equations);
+  }
+
+  process_expression operator()(const process::block& x)
+  {
+    return push_block(x.block_set(), x.operand(), equations);
   }
 };
 
