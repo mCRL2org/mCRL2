@@ -156,6 +156,19 @@ process_expression make_hide(const core::identifier_string_list& I, const proces
   }
 }
 
+inline
+process_expression make_block(const core::identifier_string_list& B, const process_expression& x)
+{
+  if (B.empty())
+  {
+    return x;
+  }
+  else
+  {
+    return block(B, x);
+  }
+}
+
 // returns true if x is a source of one of the rename rules in R
 inline
 bool is_source(const rename_expression_list& R, const core::identifier_string& x)

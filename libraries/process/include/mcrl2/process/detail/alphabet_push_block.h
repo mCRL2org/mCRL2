@@ -57,6 +57,23 @@ std::set<core::identifier_string> rename_inverse(const rename_expression_list& R
 
 namespace detail {
 
+inline
+std::string print_B(const std::set<core::identifier_string>& B)
+{
+  std::ostringstream out;
+  out << "{";
+  for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
+  {
+    if (i != B.begin())
+    {
+      out << ", ";
+    }
+    out << core::pp(*i);
+  }
+  out << "}";
+  return out.str();
+}
+
 process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, const atermpp::vector<process_equation>& equations);
 
 template <typename Derived>
@@ -148,9 +165,39 @@ struct push_block_builder: public process_expression_builder<Derived>
     return process::rename(R, push_block(block_operations::rename_inverse(R, B), x.operand(), equations));
   }
 
+  bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
+  {
+    std::cerr << "restrict b = " << core::pp(b) << " B = " << print_B(B) << " C = " << process::pp(C) << std::endl;
+    for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+    {
+      core::identifier_string_list gamma = i->action_name().names();
+      core::identifier_string c = i->name();
+      if (std::find(gamma.begin(), gamma.end(), b) != gamma.end() && B.find(c) == B.end())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  std::set<core::identifier_string> restrict_block(const std::set<core::identifier_string>& B, const communication_expression_list& C) const
+  {
+    std::set<core::identifier_string> result;
+    for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
+    {
+      if (!restrict(*i, B, C))
+      {
+        result.insert(*i);
+      }
+    }
+    return result;
+  }
+
   process::process_expression operator()(const process::comm& x)
   {
-    return process::comm(x.comm_set(), derived()(x.operand()));
+    std::set<core::identifier_string> B1 = restrict_block(B, x.comm_set());
+    process_expression y = push_block(B1, x.operand(), equations);
+    return detail::make_block(core::identifier_string_list(B.begin(), B.end()), detail::make_comm(x.comm_set(), y));
   }
 
   process::process_expression operator()(const process::allow& x)
@@ -160,6 +207,14 @@ struct push_block_builder: public process_expression_builder<Derived>
     allow_set A1(alphabet_operations::block(B1, A.A));
     detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations);
     return node.m_expression;
+  }
+
+  // This function is needed because the linearization algorithm does not handle the case 'delta | delta'.
+  process::process_expression operator()(const process::sync& x)
+  {
+    process_expression left = derived()(x.left());
+    process_expression right = derived()(x.right());
+    return detail::make_sync(left, right);
   }
 };
 
