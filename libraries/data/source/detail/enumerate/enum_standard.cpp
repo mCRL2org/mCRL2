@@ -64,7 +64,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
       {
         return m_enclosing_enumerator->rewr_obj->internal_true;
       }
-      else if (condition.type()==AT_APPL && condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
+      else if (condition.type_is_appl() && condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
       {
         return aterm_cast<const atermpp::aterm_appl>(condition[1]);
       }

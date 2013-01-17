@@ -28,7 +28,7 @@ class aterm_string: public aterm_appl
     {}
 
     /// \brief Constructor.
-    /// \param t A term without arguments of type AT_APPL
+    /// \param t A term without arguments of type appl. The string is given by the function symbol.
     explicit aterm_string(const aterm &t)
       : aterm_appl(t)
     {

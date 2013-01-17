@@ -9,10 +9,6 @@
 namespace atermpp
 {
 
-static const size_t AT_APPL = 1;
-static const size_t AT_INT = 2;
-static const size_t AT_LIST = 3;
-
 namespace detail
 {
 
@@ -83,21 +79,6 @@ class _aterm
     {
       m_next=n;
     }
-
-    size_t type() const
-    {
-      const size_t number=m_function_symbol.number();
-      if (number==detail::function_adm.AS_LIST.number() || number==detail::function_adm.AS_EMPTY_LIST.number())
-      {
-        return AT_LIST;
-      }
-      else if (number==detail::function_adm.AS_INT.number())
-      {
-        return AT_INT;
-      }
-      return AT_APPL;
-    }
-
 };
 
 static const size_t TERM_SIZE=sizeof(_aterm)/sizeof(size_t);

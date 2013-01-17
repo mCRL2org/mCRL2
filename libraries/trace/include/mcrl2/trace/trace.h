@@ -555,7 +555,7 @@ class Trace
 
     bool isTimedMAct(const atermpp::aterm_appl &t)
     {
-      return t.type()==atermpp::AT_APPL && t.function()==trace_pair();
+      return t.type_is_appl() && t.function()==trace_pair();
     }
 
     atermpp::aterm_appl makeTimedMAct(const mcrl2::lps::multi_action &ma)
@@ -619,17 +619,17 @@ class Trace
       resetPosition();
       truncate();
       atermpp::aterm_list trace(readATerm(is));
-      assert(trace.type() == atermpp::AT_LIST);
+      assert(trace.type_is_list());
       for (; !trace.empty(); trace=trace.tail())
       {
         using namespace mcrl2::lps;
         atermpp::aterm e = trace.front();
 
-        if (e.type()==atermpp::AT_APPL && core::detail::gsIsMultAct(static_cast<atermpp::aterm_appl>(e)))   // To be compatible with old untimed version
+        if (e.type_is_appl() && core::detail::gsIsMultAct(static_cast<atermpp::aterm_appl>(e)))   // To be compatible with old untimed version
         {
           addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e))));
         }
-        else if (e.type()==atermpp::AT_APPL && isTimedMAct(static_cast<atermpp::aterm_appl>(e)))
+        else if (e.type_is_appl() && isTimedMAct(static_cast<atermpp::aterm_appl>(e)))
         {
           if (core::detail::gsIsNil(atermpp::aterm_appl(static_cast<atermpp::aterm_appl>(e)[1])))
           {

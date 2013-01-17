@@ -64,49 +64,46 @@ static size_t calcUniqueAFuns(
     return 0;
   }
 
-  switch (t.type())
+  if (t.type_is_int())
   {
-    case AT_INT:
-      if (!count[detail::function_adm.AS_INT.number()]++)
-      {
-        nr_unique = 1;
-      }
-      break;
-
-    case AT_APPL:
+    if (!count[detail::function_adm.AS_INT.number()]++)
     {
-      function_symbol sym = aterm_cast<aterm_appl>(t).function(); 
-      assert(detail::function_lookup_table_size>sym.number());
-      nr_unique = count[sym.number()]>0 ? 0 : 1;
-      count[sym.number()]++;
-      arity = sym.arity();
-      for (i = 0; i < arity; i++)
-      {
-        nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)[i],visited,count);
-      }
-      break;
+      nr_unique = 1;
     }
-    case AT_LIST:
-      list = static_cast<aterm_list>(t);
-      while (list!=aterm_list() && visited.count(list)==0)
+  }
+  else if (t.type_is_appl())
+  {
+    function_symbol sym = aterm_cast<aterm_appl>(t).function(); 
+    assert(detail::function_lookup_table_size>sym.number());
+    nr_unique = count[sym.number()]>0 ? 0 : 1;
+    count[sym.number()]++;
+    arity = sym.arity();
+    for (i = 0; i < arity; i++)
+    {
+      nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)[i],visited,count);
+    }
+  }
+  else if (t.type_is_list())
+  {
+    list = static_cast<aterm_list>(t);
+    while (list!=aterm_list() && visited.count(list)==0)
+    {
+      visited.insert(list);
+      if (!count[detail::function_adm.AS_LIST.number()]++)
       {
-        visited.insert(list);
-        if (!count[detail::function_adm.AS_LIST.number()]++)
-        {
-          nr_unique++;
-        }
-        nr_unique += calcUniqueAFuns(list.front(),visited,count);
-        list = list.tail();
+        nr_unique++;
       }
-      if (list==aterm_list() && visited.count(list)==0)
+      nr_unique += calcUniqueAFuns(list.front(),visited,count);
+      list = list.tail();
+    }
+    if (list==aterm_list() && visited.count(list)==0)
+    {
+      visited.insert(list);
+      if (!count[detail::function_adm.AS_EMPTY_LIST.number()]++)
       {
-        visited.insert(list);
-        if (!count[detail::function_adm.AS_EMPTY_LIST.number()]++)
-        {
-          nr_unique++;
-        }
+        nr_unique++;
       }
-      break;
+    }
   }
 
   visited.insert(t);
@@ -531,30 +528,29 @@ static bool write_symbol(const function_symbol sym, ostream &os)
 
 /**
  * Retrieve the top symbol of a term. Could be a special symbol
- * (AS_INT, etc) when the term is not an AT_APPL.
+ * (AS_INT, etc) when the term is not an application.
  */
 
 static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &index)
 {
   function_symbol sym;
 
-  switch (t.type())
+  if (t.type_is_int())
   {
-    case AT_INT:
       sym = detail::function_adm.AS_INT;
-      break;
-    case AT_LIST:
-      sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST);
-      break;
-    case AT_APPL:
-      sym = aterm_cast<aterm_appl>(t).function();
-      break;
-    default:
-      throw std::runtime_error("get_top_symbol: illegal term (" + t.to_string() + ")");
-      // sym = (function_symbol)-1; // error path...
-      // break;
   }
-
+  else if (t.type_is_list())
+  {
+    sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST);
+  }
+  else if (t.type_is_appl())
+  {
+    sym = aterm_cast<aterm_appl>(t).function();
+  }
+  else
+  {
+    throw std::runtime_error("get_top_symbol: illegal term (" + t.to_string() + ")");
+  }
   return &sym_entries[index[sym.number()]];
 }
 
@@ -638,14 +634,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
 
     assert(arity == cur_entry->id.arity());
 
-    /* if (arity == 0)
-    {
-      cur_entry->top_symbols = NULL;
-    }
-    else */
-    {
-      cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
-    }
+    cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
 
     for (cur_arg=0; cur_arg<arity; cur_arg++)
     {
@@ -655,29 +644,27 @@ static void build_arg_tables(const std::vector<size_t> &index)
       {
         aterm term = cur_entry->terms[cur_trm].t;
         aterm arg;
-        switch (term.type())
+        if (term.type_is_list())
         {
-          case AT_LIST:
+          aterm_list list = static_cast<aterm_list>(term);
+          assert(list!=aterm_list());
+          assert(arity == 2);
+          if (cur_arg == 0)
           {
-            aterm_list list = static_cast<aterm_list>(term);
-            assert(list!=aterm_list());
-            assert(arity == 2);
-            if (cur_arg == 0)
-            {
-              arg = list.front();
-            }
-            else
-            {
-              arg = (aterm)(list.tail());
-            }
+            arg = list.front();
           }
-          break;
-          case AT_APPL:
-            arg = static_cast<aterm_appl>(term)[cur_arg];
-            break;
-          default:
-            throw std::runtime_error("build_arg_tables: illegal term");
-            break;
+          else
+          {
+            arg = (aterm)(list.tail());
+          }
+        }
+        else if (term.type_is_appl())
+        {
+          arg = static_cast<aterm_appl>(term)[cur_arg];
+        }
+        else 
+        {
+          throw std::runtime_error("build_arg_tables: illegal term");
         }
         topsym = get_top_symbol(arg,index);
         if (!topsym->nr_times_top++)
@@ -717,42 +704,38 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
 
   if (visited.count(t)==0)
   {
-    switch (t.type())
+    if (t.type_is_int())
     {
-      case AT_INT:
-        sym = detail::function_adm.AS_INT;
-        break;
-      case AT_LIST:
+      sym = detail::function_adm.AS_INT;
+    }
+    else if (t.type_is_list())
+    {
+      aterm_list list(t);
+      if (list==aterm_list())
       {
-        aterm_list list(t);
-        if (list==aterm_list())
-        {
-          sym = detail::function_adm.AS_EMPTY_LIST;
-        }
-        else
-        {
-          sym = detail::function_adm.AS_LIST;
-          collect_terms(list.front(),visited,index);
-          collect_terms((aterm)(list.tail()),visited,index);
-        }
+        sym = detail::function_adm.AS_EMPTY_LIST;
       }
-      break;
-      case AT_APPL:
+      else
       {
-        aterm_appl appl(t);
+        sym = detail::function_adm.AS_LIST;
+        collect_terms(list.front(),visited,index);
+        collect_terms((aterm)(list.tail()),visited,index);
+      }
+    }
+    else if (t.type_is_appl())
+    {
+      aterm_appl appl(t);
 
-        sym = appl.function();
-        const size_t cur_arity = sym.arity();
-        for (size_t cur_arg=0; cur_arg<cur_arity; cur_arg++)
-        {
-          collect_terms(appl[cur_arg],visited,index);
-        }
+      sym = appl.function();
+      const size_t cur_arity = sym.arity();
+      for (size_t cur_arg=0; cur_arg<cur_arity; cur_arg++)
+      {
+        collect_terms(appl[cur_arg],visited,index);
       }
-      break;
-      default:
-        throw std::runtime_error("collect_terms: illegal term");
-        // sym = (function_symbol)(-1); // Kill compiler warnings
-        // break;
+    }
+    else
+    {
+      throw std::runtime_error("collect_terms: illegal term");
     }
     entry = &sym_entries[index[sym.number()]];
 
@@ -895,57 +878,54 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
   size_t arg_idx;
   sym_entry* trm_sym = NULL;
   {
-    switch (t.type())
+    if (t.type_is_int())
     {
-      case AT_INT:
-        /* If aterm integers are > 32 bits, then this can fail. */
-        if (writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os) < 0)
+      /* If aterm integers are > 32 bits, then this can fail. */
+      if (writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os) < 0)
+      {
+        return false;
+      }
+      trm_sym = &sym_entries[index[detail::function_adm.AS_INT.number()]];
+    }
+    else if (t.type_is_list())
+    {
+      aterm_list list (t);
+      if (list==aterm_list())
+      {
+        trm_sym = &sym_entries[index[detail::function_adm.AS_EMPTY_LIST.number()]];
+      }
+      else
+      {
+        trm_sym = &sym_entries[index[detail::function_adm.AS_LIST.number()]];
+        if (!write_arg(trm_sym, list.front(), 0, index, os))
         {
           return false;
         }
-        trm_sym = &sym_entries[index[detail::function_adm.AS_INT.number()]];
-        break;
-      case AT_LIST:
-      {
-        aterm_list list (t);
-        if (list==aterm_list())
+        if (!write_arg(trm_sym, (aterm)(list.tail()), 1, index, os))
         {
-          trm_sym = &sym_entries[index[detail::function_adm.AS_EMPTY_LIST.number()]];
-        }
-        else
-        {
-          trm_sym = &sym_entries[index[detail::function_adm.AS_LIST.number()]];
-          if (!write_arg(trm_sym, list.front(), 0, index, os))
-          {
-            return false;
-          }
-          if (!write_arg(trm_sym, (aterm)(list.tail()), 1, index, os))
-          {
-            return false;
-          }
+          return false;
         }
       }
-      break;
-      case AT_APPL:
+    }
+    else if (t.type_is_appl())
+    {
+      size_t arity;
+      function_symbol sym = aterm_cast<aterm_appl>(t).function();
+      trm_sym = &sym_entries[index[sym.number()]];
+      assert(sym == trm_sym->id);
+      arity = sym.arity();
+      for (arg_idx=0; arg_idx<arity; arg_idx++)
       {
-        size_t arity;
-        function_symbol sym = aterm_cast<aterm_appl>(t).function();
-        trm_sym = &sym_entries[index[sym.number()]];
-        assert(sym == trm_sym->id);
-        arity = sym.arity();
-        for (arg_idx=0; arg_idx<arity; arg_idx++)
+        aterm cur_arg = static_cast<aterm_appl>(t)[arg_idx];
+        if (!write_arg(trm_sym, cur_arg, arg_idx, index, os))
         {
-          aterm cur_arg = static_cast<aterm_appl>(t)[arg_idx];
-          if (!write_arg(trm_sym, cur_arg, arg_idx, index, os))
-          {
-            return false;
-          }
+          return false;
         }
       }
-      break;
-      default:
-        throw std::runtime_error("write_term: illegal term");
-        break;
+    }
+    else
+    {
+      throw std::runtime_error("write_term: illegal term");
     }
   }
   if (trm_sym->terms[trm_sym->cur_index].t != t)

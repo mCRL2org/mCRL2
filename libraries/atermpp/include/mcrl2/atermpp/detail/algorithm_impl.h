@@ -124,30 +124,29 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 template <typename MatchPredicate>
 bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
 {
-  switch (t.type())
+  if (t.type_is_appl())
   {
-  case AT_APPL:
+    aterm_appl appl(t);
+    if (match(appl))
     {
-      aterm_appl appl(t);
-      if (match(appl))
-      {
-        output = appl;
-        return true;
-      }
-      for (aterm_appl::iterator i = appl.begin(); i != appl.end(); ++i)
-      {
-        if (find_if_impl(*i, match, output))
-          return true;
-      }
+      output = appl;
+      return true;
     }
-    break;
-  case AT_LIST:
-    for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+    for (aterm_appl::iterator i = appl.begin(); i != appl.end(); ++i)
     {
       if (find_if_impl(*i, match, output))
         return true;
     }
-    break;
+  }
+  else if (t.type_is_list())
+  { 
+    for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+    {
+      if (find_if_impl(*i, match, output))
+      {
+        return true;
+      }
+    }
   }
   return false;
 }

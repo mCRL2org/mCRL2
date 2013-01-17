@@ -88,31 +88,32 @@ class bit_hash_table
                          size_t& sh_c,
                          size_t& sh_i)
     {
-      switch (t.type())
+      if (t.type_is_appl())
       {
-        case AT_APPL:
-          calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
+        calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
+        {
+          size_t len = aterm_cast<aterm_appl>(t).function().arity();
+          for (size_t i=0; i<len; i++)
           {
-            size_t len = aterm_cast<aterm_appl>(t).function().arity();
-            for (size_t i=0; i<len; i++)
-            {
-              calc_hash_aterm(((aterm_appl) t)[i],sh_a,sh_b,sh_c,sh_i);
-            }
+            calc_hash_aterm(((aterm_appl) t)[i],sh_a,sh_b,sh_c,sh_i);
           }
-          break;
-        case AT_LIST:
-          calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
-          for (aterm_list l=(aterm_list) t; !l.empty(); l=l.tail())
-          {
-            calc_hash_aterm(l.front(),sh_a,sh_b,sh_c,sh_i);
-          }
-          break;
-        case AT_INT:
-          calc_hash_add(((aterm_int) t).value(),sh_a,sh_b,sh_c,sh_i);
-          break;
-        default:
-          calc_hash_add(0xaa143f06,sh_a,sh_b,sh_c,sh_i);
-          break;
+        }
+      }
+      else if (t.type_is_list())
+      {
+        calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
+        for (aterm_list l=(aterm_list) t; !l.empty(); l=l.tail())
+        {
+          calc_hash_aterm(l.front(),sh_a,sh_b,sh_c,sh_i);
+        }
+      }
+      else if (t.type_is_int())
+      {
+        calc_hash_add(((aterm_int) t).value(),sh_a,sh_b,sh_c,sh_i);
+      }
+      else
+      {
+        calc_hash_add(0xaa143f06,sh_a,sh_b,sh_c,sh_i);
       }
     }
 

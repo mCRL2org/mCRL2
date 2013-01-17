@@ -130,46 +130,40 @@ static void topWriteToStream(const aterm &t, std::ostream& os);
 
 static void writeToStream(const aterm &t, std::ostream& os)
 {
-  switch (t.type())
+  if (t.type_is_int())
   {
-    case AT_INT:
+    os << aterm_int(t).value();
+  }
+  else if (t.type_is_appl())
+  {
+    const aterm_appl &appl = aterm_cast<aterm_appl>(t);
+    const function_symbol sym = appl.function();
+    write_string_with_escape_symbols(sym.name(),os);
+    if (sym.arity() > 0)
     {
-      os << aterm_int(t).value();
-      break;
-    }
-    case AT_APPL:
-    {
-      const aterm_appl &appl = aterm_cast<aterm_appl>(t);
-      const function_symbol sym = appl.function();
-      write_string_with_escape_symbols(sym.name(),os);
-      if (sym.arity() > 0)
+      os << "(";
+      topWriteToStream(appl[0], os);
+      for (size_t i = 1; i < sym.arity(); i++)
       {
-        os << "(";
-        topWriteToStream(appl[0], os);
-        for (size_t i = 1; i < sym.arity(); i++)
-        {
-          os << ",";
-          topWriteToStream(appl[i], os);
-        }
-        os << ")";
+        os << ",";
+        topWriteToStream(appl[i], os);
       }
-      break;
+      os << ")";
     }
-    case AT_LIST:
+  }
+  else if (t.type_is_list())
+  {
+    aterm_list list = aterm_cast<aterm_list>(t);
+    if (!list.empty())
     {
-      aterm_list list = aterm_cast<aterm_list>(t);
-      if (!list.empty())
+      topWriteToStream(list.front(), os);
+      list = list.tail();
+      while (!list.empty())
       {
+        os << ",";
         topWriteToStream(list.front(), os);
         list = list.tail();
-        while (!list.empty())
-        {
-          os << ",";
-          topWriteToStream(list.front(), os);
-          list = list.tail();
-        }
       }
-      break;
     }
   }
 }

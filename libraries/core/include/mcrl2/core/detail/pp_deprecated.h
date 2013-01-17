@@ -478,7 +478,7 @@ static void PrintAFun(std::ostream& OutStream, const function_symbol fun)
 static void IndentedATerm(std::ostream& OutStream, const aterm term, size_t nesting)
 {
   std::string prefix(2*nesting, ' ');
-  if (term.type() == AT_APPL)
+  if (term.type_is_appl())
   {
     OutStream <<  prefix.c_str();
     aterm_appl appl = (aterm_appl) term;
@@ -501,7 +501,7 @@ static void IndentedATerm(std::ostream& OutStream, const aterm term, size_t nest
       OutStream <<  ")";
     }
   }
-  else if (term.type() == AT_LIST)
+  else if (term.type_is_list())
   {
     OutStream <<  prefix;
     if (((aterm_list) term).empty())
@@ -3118,11 +3118,11 @@ bool gsHasConsistentContext(const table &DataVarDecls,
     for (size_t i = 0; i < NrArgs && Result; i++)
     {
       aterm Arg = Part[i];
-      if (Arg.type() == AT_APPL)
+      if (Arg.type_is_appl())
       {
         Result = gsHasConsistentContext(DataVarDecls, (aterm_appl) Arg);
       }
-      else //Arg.type() == AT_LIST
+      else //Arg.type_is_list()
       {
         Result = gsHasConsistentContextList(DataVarDecls, (aterm_list) Arg);
       }

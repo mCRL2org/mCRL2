@@ -48,7 +48,7 @@ template <typename Term, typename CheckFunction>
 bool check_list_argument(Term t, CheckFunction f, unsigned int minimum_size)
 {
   atermpp::aterm term(t);
-  if (t.type() != AT_LIST)
+  if (!t.type_is_list())
   {
     return false;
   }
@@ -71,7 +71,7 @@ template <typename Term>
 bool check_rule_String(Term t)
 {
   atermpp::aterm term(t);
-  if (term.type() != AT_APPL)
+  if (!term.type_is_appl())
   {
     return false;
   }
@@ -87,7 +87,7 @@ template <typename Term>
 bool check_rule_NumberString(Term t)
 {
   atermpp::aterm term(t);
-  if (term.type() != AT_APPL)
+  if (!term.type_is_appl())
   {
     return false;
   }

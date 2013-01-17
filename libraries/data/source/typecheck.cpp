@@ -312,7 +312,7 @@ static aterm gsSubstValuesTable(const table &Substs, const aterm &t)
   }
 
   //distribute substitutions over the arguments/elements of Term
-  if (Term.type() == AT_APPL)
+  if (Term.type_is_appl())
   {
     //Term is an aterm_appl; distribute substitutions over the arguments
     atermpp::function_symbol Head = aterm_cast<aterm_appl>(Term).function();
@@ -331,7 +331,7 @@ static aterm gsSubstValuesTable(const table &Substs, const aterm &t)
       return Term;
     }
   }
-  else if (Term.type() == AT_LIST)
+  else if (Term.type_is_list())
   {
     //Term is an aterm_list; distribute substitutions over the elements
     aterm_list Result;

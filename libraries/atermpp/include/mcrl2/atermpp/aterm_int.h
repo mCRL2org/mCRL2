@@ -36,7 +36,7 @@ class aterm_int:public aterm
     /// \details The aterm must be of type AT_INT.
     explicit aterm_int(const aterm &t):aterm(t) 
     {
-      assert(t.type()==AT_INT);
+      assert(t.type_is_int());
     }
     
     /// \brief Constructor.

@@ -277,7 +277,7 @@ static void term2seq(const aterm &t, aterm_list* s, size_t *var_cnt)
   {
     term2seq(make_list<aterm>(t),s,var_cnt);
   }
-  else if (t.type()==AT_APPL)
+  else if (t.type_is_appl())
   {
     if (gsIsDataVarId((aterm_appl) t))
     {
@@ -328,7 +328,7 @@ static void get_used_vars_aux(const aterm &t, aterm_list* vars)
       get_used_vars_aux(*i,vars);
     }
   }
-  else if (t.type()==AT_APPL)
+  else if (t.type_is_appl())
   {
     if (gsIsDataVarId((aterm_appl) t))
     {
@@ -923,7 +923,7 @@ static aterm_list get_vars(const aterm &a)
     }
     return l;
   }
-  else     // a.type() == AT_APPL
+  else     // a.type_is_appl()
   {
     aterm_list l;
     size_t arity = aterm_cast<aterm_appl>(a).function().arity();
@@ -1304,7 +1304,7 @@ void RewriterCompilingJitty::calc_nfs_list(nfs_array &nfs, size_t arity, aterm_l
 
 bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
 {
-  if (t.type()==AT_LIST)
+  if (t.type_is_list())
   {
     int arity = ((aterm_list) t).size()-1;
     if (((aterm_list) t).front().type_is_int())
@@ -1404,7 +1404,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const bool rewr,
                   const size_t total_arity)
 {
-  if (t.type()==AT_LIST)
+  if (t.type_is_list())
   {
     stringstream ss;
     bool b;
@@ -2261,7 +2261,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(const aterm &expr, const aterm_
     return make_ar_false();
   }
 
-  if (expr.type() == AT_APPL && gsIsDataVarId((aterm_appl) expr))
+  if (expr.type_is_appl() && gsIsDataVarId((aterm_appl) expr))
   {
     if (expr==var)
     {
@@ -2316,7 +2316,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
       const size_t idx = int2ar_idx[atermpp::aterm_int(rhs).value()] + ((arity-1)*arity)/2 + arg;
       return make_ar_var(idx);
     }
-    else if (rhs.type()==AT_LIST && ((aterm_list) rhs).front().type_is_int())
+    else if (rhs.type_is_list() && ((aterm_list) rhs).front().type_is_int())
     {
       int rhs_arity = ((aterm_list) rhs).size()-1;
       size_t diff_arity = arity-eqn_arity;

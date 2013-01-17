@@ -131,43 +131,29 @@ class aterm
       decrease_reference_count();
     }
 
-    /// \brief Returns the type of this term.
-    /// Result is one of AT_APPL, AT_INT,
-    /// or AT_LIST.
-    /// \detail Often it is more efficient to use the utility functions
-    ///      type_is_appl, type_is_int or type_is_list.
-    /// \return The type of the term.
-    size_t type() const
-    {
-      return m_term->type(); 
-    }
-
-    /// \brief Returns whether this term has type AT_APPL.
-    /// \detail This function is more efficient than using
-    ///   type()==AT_APPL.
+    /// \brief Returns whether this term is a term_appl.
+    /// \detail This function has constant complexity.
     /// \return True iff term is an term_appl.
     bool type_is_appl() const
     {
-      return m_term->function().number()>detail::function_adm.AS_EMPTY_LIST.number(); 
+      return m_term->function()>detail::function_adm.AS_EMPTY_LIST; 
     }
 
-    /// \brief Returns whether this term has type AT_INT
-    /// \detail This function is more efficient than using
-    ///   type()==AT_INT.
+    /// \brief Returns whether this term has the internal structure of an aterm_int.
+    /// \detail This function has constant complexity.
     /// \return True iff term is an term_int.
     bool type_is_int() const
     {
-      return m_term->function().number()==detail::function_adm.AS_INT.number(); 
+      return m_term->function()==detail::function_adm.AS_INT; 
     }
 
-    /// \brief Returns whether this term has type AT_LIST
-    /// \detail This function is more efficient than using
-    ///   type()==AT_LIST.
+    /// \brief Returns whether this term has the structure of an term_list
+    /// \detail This function has constant complexity.
     /// \return True iff term is an term_list.
     bool type_is_list() const
     {
-      const size_t n=m_term->function().number();
-      return n==detail::function_adm.AS_LIST.number()|| n==detail::function_adm.AS_EMPTY_LIST.number(); 
+      const function_symbol &f=m_term->function();
+      return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST; 
     }
 
 
@@ -264,7 +250,7 @@ class aterm
     bool defined() const
     {
       assert(m_term!=NULL && m_term->reference_count()>0);
-      return this->function().number()!=detail::function_adm.AS_DEFAULT.number();
+      return this->function()!=detail::function_adm.AS_DEFAULT;
     }
 
     /// \brief Swaps this term with its argument.

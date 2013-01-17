@@ -28,16 +28,17 @@
 
 namespace lspparunfold
 {
-	struct unfold_cache_element{
-		  mcrl2::data::sort_expression cached_fresh_basic_sort;
-      mcrl2::data::function_symbol cached_case_function;
-      mcrl2::data::function_symbol cached_determine_function;
-		  mcrl2::data::function_symbol_vector cached_k;
-      mcrl2::data::function_symbol_vector cached_projection_functions;
+  struct unfold_cache_element
+  {
+    mcrl2::data::basic_sort cached_fresh_basic_sort;
+    mcrl2::data::function_symbol cached_case_function;
+    mcrl2::data::function_symbol cached_determine_function;
+    mcrl2::data::function_symbol_vector cached_k;
+    mcrl2::data::function_symbol_vector cached_projection_functions;
 
-		  //mcrl2::data::function_symbol_vector elements_of_new_sorts;
-		  //mcrl2::data::data_equation_vector data_equations;
-	};
+    //mcrl2::data::function_symbol_vector elements_of_new_sorts;
+    //mcrl2::data::data_equation_vector data_equations;
+  };
 }
 
 class lpsparunfold
