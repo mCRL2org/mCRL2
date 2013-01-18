@@ -30,3 +30,6 @@ include(ConfigureUnix)
 # Perform compiler-specific compiler configuration
 include(ConfigureGNU)
 include(ConfigureMSVC)
+
+# Check supported C++11 features
+include(CheckCXX11Features)
