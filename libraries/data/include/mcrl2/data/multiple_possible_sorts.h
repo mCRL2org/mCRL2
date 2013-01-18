@@ -47,7 +47,7 @@ class multiple_possible_sorts: public sort_expression
     /// \brief Constructor.
     template <typename Container>
     multiple_possible_sorts(const Container& sorts, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortsPossible(atermpp::convert<sort_expression_list>(sorts)))
+      : sort_expression(core::detail::gsMakeSortsPossible(sort_expression_list(sorts.begin(),sorts.end())))
     {}
 
     const sort_expression_list& sorts() const

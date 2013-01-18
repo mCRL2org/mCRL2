@@ -696,7 +696,8 @@ class Class:
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
                 arguments2.append('typename atermpp::detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
-                parameters1.append('atermpp::convert<%s>(%s)' % (p.type(False), p.name()))
+#                parameters1.append('atermpp::convert<%s>(%s)' % (p.type(False), p.name()))
+                parameters1.append('%s(%s.begin(),%s.end())' % (p.type(False), p.name(),p.name()))
             else:
                 parameters1.append(p.name())
                 arguments1.append('%s %s' % (p.type(), p.name()))

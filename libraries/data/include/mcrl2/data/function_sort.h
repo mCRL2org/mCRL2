@@ -58,7 +58,7 @@ class function_sort: public sort_expression
     /// \brief Constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortArrow(atermpp::convert<sort_expression_list>(domain), codomain))
+      : sort_expression(core::detail::gsMakeSortArrow(sort_expression_list(domain.begin(),domain.end()), codomain))
     {}
 
     const sort_expression_list& domain() const

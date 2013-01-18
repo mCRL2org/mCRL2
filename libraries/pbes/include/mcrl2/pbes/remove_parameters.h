@@ -19,7 +19,6 @@
 #include <map>
 #include <vector>
 #include <boost/bind.hpp>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/builder.h"
@@ -55,7 +54,7 @@ atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::
       result.push_back(*i);
     }
   }
-  return atermpp::convert< atermpp::term_list< Term > >(result);
+  return atermpp::term_list< Term >(result.begin(),result.end());
 }
 
 template <typename Derived>

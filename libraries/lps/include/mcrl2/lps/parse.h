@@ -13,7 +13,6 @@
 #define MCRL2_LPS_PARSE_H
 
 #include <sstream>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/action_parse.h"

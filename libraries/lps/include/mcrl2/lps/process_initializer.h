@@ -15,7 +15,6 @@
 #include <iterator>
 #include <cassert>
 #include <string>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
@@ -62,7 +61,7 @@ class process_initializer: public atermpp::aterm_appl
     /// \return The initial state of the LPS.
     data::data_expression_list state(const data::variable_list& process_parameters) const
     {
-      return data::replace_free_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+      return data::replace_free_variables(atermpp::aterm_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
 //--- end user section process_initializer ---//
 };

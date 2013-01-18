@@ -61,4 +61,23 @@ class aterm_string: public aterm_appl
 
 } // namespace atermpp
 
+
+namespace std
+{
+
+/// \brief Swaps two aterm_strings.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+///          In order to be used in the standard containers, the declaration must
+///          be preceded by an empty template declaration. 
+/// \param t1 The first term
+/// \param t2 The second term
+
+template <>
+inline void swap(atermpp::aterm_string &t1, atermpp::aterm_string &t2)
+{
+  t1.swap(t2);
+}
+} // namespace std 
+
 #endif // MCRL2_ATERMPP_ATERM_STRING_H

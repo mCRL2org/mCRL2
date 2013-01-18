@@ -16,7 +16,6 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -152,7 +151,7 @@ struct builder
     {
       result.push_back(static_cast<Derived&>(*this)(*i));
     }
-    return atermpp::convert<atermpp::term_list<T> >(result);
+    return atermpp::term_list<T>(result.begin(),result.end());
   }
 
 #ifdef BOOST_MSVC

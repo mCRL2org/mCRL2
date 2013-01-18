@@ -13,7 +13,6 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/find.h"
@@ -47,11 +46,6 @@ bool equal_content(Container1 const& c1, Container2 const& c2)
 
 bool detailed_compare_for_equality(data_specification const& left, data_specification const& right)
 {
-  /*
-  std::set<alias> left_aliases = atermpp::convert(left.aliases());
-  std::set<alias> right_aliases = atermpp::convert(right.aliases());
-  BOOST_CHECK(left_aliases == right_aliases); */
-
   std::set<sort_expression> left_sorts(left.sorts().begin(), left.sorts().end());
   std::set<sort_expression> right_sorts(right.sorts().begin(), right.sorts().end());
   BOOST_CHECK(left_sorts == right_sorts);

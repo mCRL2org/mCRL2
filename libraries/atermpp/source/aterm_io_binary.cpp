@@ -80,12 +80,12 @@ static size_t calcUniqueAFuns(
     arity = sym.arity();
     for (i = 0; i < arity; i++)
     {
-      nr_unique += calcUniqueAFuns(static_cast<aterm_appl>(t)[i],visited,count);
+      nr_unique += calcUniqueAFuns(aterm_cast<const aterm_appl>(t)[i],visited,count);
     }
   }
   else if (t.type_is_list())
   {
-    list = static_cast<aterm_list>(t);
+    list = aterm_cast<const aterm_list>(t);
     while (list!=aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
@@ -646,7 +646,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
         aterm arg;
         if (term.type_is_list())
         {
-          aterm_list list = static_cast<aterm_list>(term);
+          aterm_list list(term);
           assert(list!=aterm_list());
           assert(arity == 2);
           if (cur_arg == 0)
@@ -660,7 +660,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
         }
         else if (term.type_is_appl())
         {
-          arg = static_cast<aterm_appl>(term)[cur_arg];
+          arg = aterm_cast<const aterm_appl>(term)[cur_arg];
         }
         else 
         {
@@ -916,7 +916,7 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
       arity = sym.arity();
       for (arg_idx=0; arg_idx<arity; arg_idx++)
       {
-        aterm cur_arg = static_cast<aterm_appl>(t)[arg_idx];
+        aterm cur_arg = aterm_cast<const aterm_appl>(t)[arg_idx];
         if (!write_arg(trm_sym, cur_arg, arg_idx, index, os))
         {
           return false;

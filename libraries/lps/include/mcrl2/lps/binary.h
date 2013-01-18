@@ -16,7 +16,6 @@
 #include <iterator>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
@@ -199,7 +198,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       mCRL2log(log::debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
-      m_spec.process().process_parameters() = atermpp::convert<data::variable_list>(new_parameters);
+      m_spec.process().process_parameters() = data::variable_list(new_parameters.begin(),new_parameters.end());
     }
 
     /// \brief Replace assignments in v that are of a finite sort with a
@@ -260,7 +259,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       mCRL2log(log::debug) << "Replaced assignment(s) " << data::pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
 
-      return atermpp::convert<data::assignment_list>(result);
+      return data::assignment_list(result.begin(),result.end());
     }
 
     /// \brief Update an action summand with the new Boolean parameters

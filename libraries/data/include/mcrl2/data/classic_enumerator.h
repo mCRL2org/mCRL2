@@ -314,10 +314,6 @@ class classic_enumerator
                       &(m_enclosing_enumerator->m_enumerator),
                       max_internal_variables)
         {
-          /* for (substitution_type::const_iterator i=substitution.begin(); i!=substitution.end(); ++i)
-          {
-            m_enclosing_enumerator->m_evaluator.set_internally_associated_value(i->first,i->second);
-          } */
           increment();
         }
 

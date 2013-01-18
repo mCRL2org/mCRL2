@@ -20,7 +20,6 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/next_state_generator.h"

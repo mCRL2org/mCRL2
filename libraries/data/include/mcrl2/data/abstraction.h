@@ -51,7 +51,7 @@ class abstraction: public data_expression
     /// \brief Constructor.
     template <typename Container>
     abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
-      : data_expression(core::detail::gsMakeBinder(binding_operator, atermpp::convert<variable_list>(variables), body))
+      : data_expression(core::detail::gsMakeBinder(binding_operator, variable_list(variables.begin(),variables.end()), body))
     {}
 
     const binder_type& binding_operator() const

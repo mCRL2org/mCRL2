@@ -249,7 +249,7 @@ class aterm
     /// \return A boolean indicating whether this term equals the default constructor.
     bool defined() const
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
+      assert(m_term->reference_count()>0);
       return this->function()!=detail::function_adm.AS_DEFAULT;
     }
 
@@ -259,11 +259,9 @@ class aterm
     /// \param t The term with which this term is swapped.
     void swap(aterm &t) 
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
-      const detail::_aterm* tmp(t.m_term);
-      t.m_term=m_term;
-      m_term=tmp; 
+      assert(m_term->reference_count()>0);
+      assert(t.m_term->reference_count()>0);
+      std::swap(m_term,t.m_term);
     }
 };
 
@@ -297,12 +295,17 @@ std::ostream& operator<<(std::ostream& out, const aterm& t)
 namespace std
 {
 
-/// \brief Swaps two terms of a type derived from an aterm.
+/// \brief Swaps two aterms.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
+///          In order to be used in the standard containers, the declaration must
+///          be preceded by an empty template declaration. This swap function is
+///          not used for classes that derive from the aterm class. A specific
+///          swap function must be provided for derived classes.
 /// \param t1 The first term
 /// \param t2 The second term
 
+template <>
 inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
 {
   t1.swap(t2);

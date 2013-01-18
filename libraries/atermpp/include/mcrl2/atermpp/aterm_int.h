@@ -63,6 +63,24 @@ class aterm_int:public aterm
 
 } // namespace atermpp
 
+namespace std
+{
+
+/// \brief Swaps two aterm_ints.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+///          In order to be used in the standard containers, the declaration must
+///          be preceded by an empty template declaration.
+/// \param t1 The first term
+/// \param t2 The second term
+
+template <>
+inline void swap(atermpp::aterm_int &t1, atermpp::aterm_int &t2)
+{
+  t1.swap(t2);
+}
+} // namespace std 
+
 #include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/detail/aterm_int_implementation.h"
 

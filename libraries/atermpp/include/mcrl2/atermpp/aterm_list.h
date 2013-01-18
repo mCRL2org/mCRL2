@@ -74,7 +74,7 @@ class term_list:public aterm
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
       // Term list can be undefined; Generally, this is used to indicate an error situation.
       // This use should be discouraged. For this purpose exceptions ought to be used.
-      assert(!defined() || t.type_is_list()); 
+      assert(!defined() || type_is_list()); 
     }
 
     /// \brief Creates a term_list with the elements from first to last.
@@ -273,7 +273,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t);
 /// \return The transformed list.
 template <typename Term, typename Function>
 inline
-aterm_list apply(term_list<Term> l, const Function f)
+aterm_list apply(const term_list<Term> &l, const Function f)
 {
  return term_list<Term>(l.begin(),l.end(),f);
 }
@@ -304,6 +304,22 @@ const Term &element_at(const term_list<Term> &l, size_t m)
 
 } // namespace atermpp
 
+
+namespace std
+{
+
+/// \brief Swaps two term_lists.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+/// \param t1 The first term
+/// \param t2 The second term
+
+template <class T>
+inline void swap(atermpp::term_list<T> &t1, atermpp::term_list<T> &t2)
+{
+  t1.swap(t2);
+}
+} // namespace std 
 
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
 

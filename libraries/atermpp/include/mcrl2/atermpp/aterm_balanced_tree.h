@@ -140,7 +140,6 @@ class term_balanced_tree: public aterm
     term_balanced_tree(ForwardTraversalIterator first, const ForwardTraversalIterator last)
       : aterm(make_tree(first,get_distance(first,last)))
     {
-      // copy_term(make_tree(first,get_distance(first,last)));
     }
 
     /// \brief Creates an term_balanced_tree with a copy of a range. 
@@ -150,13 +149,12 @@ class term_balanced_tree: public aterm
     term_balanced_tree(ForwardTraversalIterator first, const size_t size)
       : aterm(make_tree(first,size))
     {
-      // copy_term(make_tree(first,size));
     }
 
     /// \brief Get the left branch of the tree
     /// \detail It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
-    const term_balanced_tree<Term>&left_branch() const
+    const term_balanced_tree<Term>& left_branch() const
     {
       assert(is_node());
       return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))[0]);
@@ -165,7 +163,7 @@ class term_balanced_tree: public aterm
     /// \brief Get the left branch of the tree
     /// \detail It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
-    const term_balanced_tree<Term>&right_branch() const
+    const term_balanced_tree<Term>& right_branch() const
     {
       assert(is_node());
       return aterm_cast< const term_balanced_tree<Term> >((aterm_cast<const aterm_appl >(*this))[1]);
@@ -343,5 +341,21 @@ typedef term_balanced_tree<aterm> aterm_balanced_tree;
 
 } // namespace atermpp
 
+
+namespace std
+{
+
+/// \brief Swaps two balanced trees.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+/// \param t1 The first term
+/// \param t2 The second term
+
+template <class T>
+inline void swap(atermpp::term_balanced_tree<T> &t1, atermpp::term_balanced_tree<T> &t2)
+{
+  t1.swap(t2);
+}
+} // namespace std 
 
 #endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

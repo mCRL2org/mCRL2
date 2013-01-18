@@ -21,7 +21,6 @@
 #include <set>
 #include <sstream>
 #include <functional>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
@@ -67,7 +66,7 @@ struct variable_variable_substitution: public std::unary_function<data::variable
     {
       result.push_back((*this)(*i));
     }
-    return atermpp::convert<data::variable_list>(result);
+    return data::variable_list(result.begin(),result.end());
   }
 
   std::string to_string() const

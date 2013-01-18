@@ -84,12 +84,12 @@ void test_find()
   aterm_appl a(read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
-  BOOST_CHECK(t == static_cast< aterm_appl>(read_term_from_string("f(y)")));
+  BOOST_CHECK(t == read_term_from_string("f(y)"));
 
   std::vector< aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
-  BOOST_CHECK(v.front() == static_cast< aterm_appl>(read_term_from_string("f(y)")));
-  BOOST_CHECK(v.back() == static_cast< aterm_appl>(read_term_from_string("f(z)")));
+  BOOST_CHECK(v.front() == read_term_from_string("f(y)"));
+  BOOST_CHECK(v.back() == read_term_from_string("f(z)"));
 }
 
 void test_replace()
@@ -100,9 +100,9 @@ void test_replace()
 
   aterm_appl a(read_term_from_string("f(f(x))"));
   aterm_appl b(replace(a, atermpp::aterm_appl(read_term_from_string("f(x)")), atermpp::aterm_appl(read_term_from_string("x"))));
-  BOOST_CHECK(b == static_cast< aterm_appl>(read_term_from_string("f(x)")));
+  BOOST_CHECK(b == read_term_from_string("f(x)"));
   b = bottom_up_replace(a, atermpp::aterm_appl(read_term_from_string("f(x)")), atermpp::aterm_appl(read_term_from_string("x")));
-  BOOST_CHECK(b == static_cast< aterm_appl>(read_term_from_string("x")));
+  BOOST_CHECK(b == read_term_from_string("x"));
 
   atermpp::aterm f = read_term_from_string("[]");
   atermpp::aterm g = replace(f, a, b);

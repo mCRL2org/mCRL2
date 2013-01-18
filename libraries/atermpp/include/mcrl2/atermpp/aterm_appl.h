@@ -255,7 +255,7 @@ class term_appl:public aterm
     /// \return The largest possible number of arguments.
     size_type max_size() const
     {
-      return (std::numeric_limits<unsigned long>::max)();
+      return (std::numeric_limits<size_type>::max)();
     }
 
     /// \brief Returns a copy of the term with the i-th child replaced by t.
@@ -279,10 +279,11 @@ typedef term_appl<aterm> aterm_appl;
 
 } // namespace atermpp
 
-/* namespace std
+
+namespace std
 {
 
-/// \brief Swaps two term_appl's
+/// \brief Swaps two term_applss.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term
@@ -293,8 +294,7 @@ inline void swap(atermpp::term_appl<T> &t1, atermpp::term_appl<T> &t2)
 {
   t1.swap(t2);
 }
-} // namespace std
-*/
+} // namespace std 
 
 #include "mcrl2/atermpp/detail/aterm_appl_implementation.h"
 
