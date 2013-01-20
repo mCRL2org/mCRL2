@@ -17,7 +17,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/combine_iterator.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
@@ -239,20 +238,6 @@ make_assignment_right_hand_side_range(Container const& assignments, typename ate
   return boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >(assignments);
 }
 
-/// \brief Constructs a range of assignments from sequences of variables and expressions by pair-wise combination
-template < typename VariableSequence, typename ExpressionSequence >
-boost::iterator_range< atermpp::detail::combine_iterator< atermpp::detail::construct< assignment >&, typename VariableSequence::const_iterator, typename ExpressionSequence::const_iterator > >
-make_assignment_range(VariableSequence const& variables, ExpressionSequence const& expressions,
-                      typename atermpp::detail::enable_if_container< VariableSequence, variable >::type* = 0,
-                      typename atermpp::detail::enable_if_container< ExpressionSequence, data_expression >::type* = 0)
-{
-  assert(boost::distance(variables) == boost::distance(expressions));
-
-  return boost::make_iterator_range(
-           atermpp::detail::make_combine_iterator(atermpp::detail::construct< assignment >(), variables.begin(), expressions.begin()),
-           atermpp::detail::make_combine_iterator(atermpp::detail::construct< assignment >(), variables.end(), expressions.end()));
-}
-
 /// \brief Constructs an assignment_list by pairwise combining a variable and expression
 /// \param lhs A sequence of data variables
 /// \param rhs A sequence of data expressions
@@ -260,38 +245,27 @@ make_assignment_range(VariableSequence const& variables, ExpressionSequence cons
 template < typename VariableSequence, typename ExpressionSequence >
 assignment_vector make_assignment_vector(VariableSequence const& variables, ExpressionSequence const& expressions)
 {
-  return atermpp::convert< assignment_vector >(make_assignment_vector(variables, expressions));
-}
+  std::vector<assignment> result;
+  typename ExpressionSequence::const_iterator j=expressions.begin();
+  for(typename VariableSequence::const_iterator i=variables.begin(); i!=variables.end(); ++i, ++j)
+  {
+    assert(j!=expressions.end());
+    result.push_back(assignment(*i,*j));
+  }
+  assert(j==expressions.end());
+  return result;
+} 
 
 /// \brief Converts an iterator range to data_expression_list
 /// \param r A range of assignments.
 /// \note This function uses implementation details of the iterator type
 /// and hence is sometimes efficient than copying all elements of the list.
 template < typename VariableSequence, typename ExpressionSequence >
-assignment_list make_assignment_list(VariableSequence const& variables, ExpressionSequence const& expressions)
+assignment_list make_assignment_list(const VariableSequence& variables, const ExpressionSequence& expressions)
 {
-  return atermpp::convert< assignment_list >(make_assignment_range(variables, expressions));
-}
-
-/// \brief Converts an iterator range to data_expression_list
-/// \param r A range of assignments.
-/// \note This function uses implementation details of the iterator type
-/// and hence is sometimes efficient than copying all elements of the list.
-template < typename Container >
-inline assignment_list make_assignment_list(Container const& container, typename atermpp::detail::enable_if_container< Container, assignment >::type* = 0)
-{
-  return atermpp::convert< assignment_list >(container);
-}
-
-/// \brief Converts an iterator range to data_expression_list
-/// \param r A range of assignments.
-/// \note This function uses implementation details of the iterator type
-/// and hence is sometimes efficient than copying all elements of the list.
-template < typename Container >
-inline assignment_list make_assignment_vector(Container const& container, typename atermpp::detail::enable_if_container< Container, assignment >::type* = 0)
-{
-  return atermpp::convert< assignment_vector >(container);
-}
+  std::vector<assignment> result(make_assignment_vector(variables,expressions));
+  return assignment_list(result.begin(),result.end());
+} 
 
 /// \brief Returns the left hand sides of an assignment list
 /// \param x An assignment list

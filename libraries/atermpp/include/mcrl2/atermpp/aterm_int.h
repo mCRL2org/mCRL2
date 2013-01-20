@@ -41,7 +41,7 @@ class aterm_int:public aterm
     
     /// \brief Constructor.
     /// \param value An integer value.
-    aterm_int(size_t value):aterm(detail::aterm_int(value))
+    explicit aterm_int(size_t value):aterm(detail::aterm_int(value))
     {
     }
 

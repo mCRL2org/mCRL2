@@ -1825,7 +1825,7 @@ reconstruct_container_expression(aterm_appl Part)
     }
 
     body = data::application(body, variables);
-    Part = gsMakeBinder(gsMakeSetComp(), atermpp::convert<data_expression_list>(variables), body);
+    Part = gsMakeBinder(gsMakeSetComp(), data_expression_list(variables.begin(),variables.end()), body);
   }
 
   else if (sort_bag::is_constructor_application(expr))
@@ -1938,7 +1938,7 @@ reconstruct_container_expression(aterm_appl Part)
     }
 
     body = data::application(body, variables);
-    Part = gsMakeBinder(gsMakeBagComp(), atermpp::convert<data_expression_list>(variables), body);
+    Part = gsMakeBinder(gsMakeBagComp(), data_expression_list(variables.begin(),variables.end()), body);
   }
   return Part;
 }

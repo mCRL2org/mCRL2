@@ -13,76 +13,40 @@
 #ifndef MCRL2_ATERMPP_CONVERT_H
 #define MCRL2_ATERMPP_CONVERT_H
 
-#include "mcrl2/atermpp/aterm_list.h"
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_base_of.hpp>
+
 #include "mcrl2/atermpp/container_utility.h"
 
 namespace atermpp
 {
 
-/// \cond INTERNAL_DOCS
-namespace detail
+/// \brief Convert container with expressions to a new container with expressions
+
+template < typename TargetContainer, typename SourceContainer >
+const TargetContainer& convert(const SourceContainer &l,
+      typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, TargetContainer>::type>::type* = 0,
+      typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, SourceContainer>::type>::type* = 0)
 {
-
-template < typename Container >
-struct container_value
-{
-  typedef typename Container::value_type type;
-};
-
-template < >
-struct container_value< aterm_list >
-{
-  typedef atermpp::aterm type;
-};
-
-template < typename TargetContainer, typename SourceContainer,
-         typename TargetExpression = typename container_value< TargetContainer >::type,
-         typename SourceExpression = typename container_value< SourceContainer >::type >
-struct converter
-{
-  template < typename Container >
-  static TargetContainer convert(Container const& l)
-  {
-    return TargetContainer(l.begin(), l.end());
-  }
-};
-
-// Specialisation for aterm_list
-/* template < typename TargetContainer, typename TargetExpression >
-struct converter< TargetContainer, aterm_list, TargetExpression, atermpp::aterm > :
-  public converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >
-{
-
-  static TargetContainer convert(aterm_list l)
-  {
-    return converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >::convert(atermpp::term_list< TargetExpression >(l));
-  }
-}; */
-
-// Copy to from term list to term list
-template < typename TargetExpression, typename SourceExpression >
-struct converter< atermpp::term_list< TargetExpression >,
-    atermpp::term_list< SourceExpression >,
-    TargetExpression, SourceExpression >
-{
-
-  static atermpp::term_list< TargetExpression >
-  convert(atermpp::term_list< SourceExpression > const& r)
-  {
-    return atermpp::term_list< TargetExpression >(r);
-  }
-};
-
-} // namespace detail
-/// \endcond
+  return aterm_cast<const TargetContainer>(l);
+}
 
 /// \brief Convert container with expressions to a new container with expressions
 template < typename TargetContainer, typename SourceContainer >
-TargetContainer convert(SourceContainer const& c)
+TargetContainer convert(const SourceContainer& l,
+      typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, TargetContainer>::type>::type* = 0,
+      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, SourceContainer>::type>::type* = 0)
 {
-  return detail::converter< TargetContainer, SourceContainer >::convert(c);
+  return TargetContainer(l.begin(), l.end());
 }
 
+/// \brief Convert container with expressions to a new container with expressions
+template < typename TargetContainer, typename SourceContainer >
+TargetContainer convert(const SourceContainer& l,
+      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, TargetContainer>::type>::type* = 0)
+{
+  return TargetContainer(l.begin(), l.end());
+}
 } // namespace atermpp
 
 #endif // MCRL2_ATERMPP_CONVERT_H
