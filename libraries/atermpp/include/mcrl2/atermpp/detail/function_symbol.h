@@ -12,22 +12,17 @@ namespace detail
 /* The type _function_symbol is used to store information about function_symbols. */
 struct _function_symbol
 {
-    size_t m_arity;
+    size_t arity;
     size_t next;
     size_t reference_count;
     std::string name;
 
-    _function_symbol(const std::string &s, const size_t arity, const size_t n):
-        m_arity(arity),
+    _function_symbol(const std::string &s, const size_t a, const size_t n):
+        arity(a),
         next(n),
         reference_count(0),
         name(s)
     {
-    }
-
-    size_t arity() const    
-    {
-      return m_arity;
     }
 };
 

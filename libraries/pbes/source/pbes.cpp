@@ -49,8 +49,8 @@ bool search_variable(const pbes_system::pbes_expression& x, const data::variable
 //--- end generated pbes_system overloads ---//
 
 // TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return x.to_string(); }
-std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
+std::string pp(const atermpp::aterm& x) { return to_string(x); }
+std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 std::string pp(const core::identifier_string& x) { return core::pp(x); }
 
 } // namespace pbes_system

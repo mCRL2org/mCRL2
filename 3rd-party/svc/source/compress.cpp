@@ -21,6 +21,7 @@
 */
 
 #include <limits.h>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include <svc/compress.h>
@@ -212,7 +213,7 @@ int CSwriteATerm(CompressedStream* cs, aterm term)
 int CSuwriteATerm(CompressedStream* cs, aterm term)
 {
 
-  BSwriteString(cs->bs,term.to_string().c_str());
+  BSwriteString(cs->bs,to_string(term).c_str());
   return 1;
 }
 int CSwriteString(CompressedStream* cs, const char* str)

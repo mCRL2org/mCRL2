@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/transform_iterator.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/structured_sort_constructor_argument.h"
 

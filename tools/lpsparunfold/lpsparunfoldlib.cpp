@@ -112,7 +112,7 @@ function_symbol_vector lpsparunfold::determine_affected_constructors()
 
   for (function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i)
   {
-    mCRL2log(debug) << "\t" <<  i->to_string() << std::endl;
+    mCRL2log(debug) << "\t" <<  *i << std::endl;
   }
   return k;
 }
@@ -168,7 +168,7 @@ mcrl2::data::function_symbol lpsparunfold::create_determine_function()
   mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
   mcrl2::data::sort_expression_list fsl;
   fs = data::function_symbol(idstr , mcrl2::data::make_function_sort(m_unfold_process_parameter , fresh_basic_sort));
-  mCRL2log(debug) << "\t" <<  fs.to_string() << std::endl;
+  mCRL2log(debug) << "\t" <<  fs << std::endl;
 
   return fs;
 }
@@ -198,7 +198,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
   }
   for (function_symbol_vector::iterator i = sfs.begin(); i != sfs.end(); ++i)
   {
-    mCRL2log(debug) << "\t" <<  i->to_string() << std::endl;
+    mCRL2log(debug) << "\t" <<  *i << std::endl;
   }
   return sfs;
 }
@@ -496,7 +496,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
 
         if (is_basic_sort(j -> sort()))
         {
-          mCRL2log(debug) << "- No processed parameter are injected for basic sort: " <<  j->to_string() << std::endl;
+          mCRL2log(debug) << "- No processed parameter are injected for basic sort: " <<  *j << std::endl;
           processed = true;
         }
 

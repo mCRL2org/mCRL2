@@ -70,8 +70,8 @@ bool search_variable(const data::data_expression& x, const data::variable& v) { 
 std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable> >(x); }
 
 // TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return x.to_string(); }
-std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
+std::string pp(const atermpp::aterm& x) { return to_string(x); }
+std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
 } // namespace data
 

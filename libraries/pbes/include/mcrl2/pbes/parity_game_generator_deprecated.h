@@ -121,7 +121,7 @@ public:
     {
       if (m_precompile_pbes)
       {
-        return e.to_string() + " (" + data::pp(from_rewrite_format(e)) + ")";
+        return to_string(e) + " (" + data::pp(from_rewrite_format(e)) + ")";
       }
       else
       {

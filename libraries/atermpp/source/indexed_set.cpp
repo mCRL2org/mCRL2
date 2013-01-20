@@ -38,8 +38,8 @@ static const size_t STEP = 1; /* The position on which the next hash entry //sea
 
 /* in the hashtable we use the following constants to
    indicate designated positions */
-static const size_t EMPTY = (size_t)-1;
-static const size_t DELETED = (size_t)-2;
+static const size_t EMPTY(-1);
+static const size_t DELETED(-2);
 
 static const size_t a_prime_number = 134217689;
 
@@ -73,48 +73,14 @@ static size_t approximatepowerof2(size_t n)
 }
 
 
-static size_t calc_size_t_max()
-{
-  size_t size_t_max;
-
-  size_t try_size_t_max = 1;
-  do
-  {
-    size_t_max = try_size_t_max;
-    try_size_t_max = size_t_max * 2+1;
-  }
-  while (try_size_t_max > size_t_max);
-
-  return size_t_max;
-}
-
-
 static size_t calculateNewSize(size_t sizeMinus1, size_t nr_deletions, size_t nr_entries)
 {
-
-  /* Hack: LONG_MAX (limits.h) is often unreliable, we need to find
-   * out the maximum possible value of a size_t dynamically.
-   */
-  static size_t st_size_t_max = 0;
-
-  /* the resulting length has the form 2^k-1 */
-
   if (nr_deletions >= nr_entries/2)
   {
     return sizeMinus1;
   }
-
-  if (st_size_t_max == 0)
-  {
-    st_size_t_max = calc_size_t_max();
-  }
-
-  if (sizeMinus1 > st_size_t_max / 2)
-  {
-    return st_size_t_max-1;
-  }
-
-  return (2*sizeMinus1)+1;
+  assert(2*sizeMinus1+1>sizeMinus1);
+  return 2*sizeMinus1+1;
 }
 
 

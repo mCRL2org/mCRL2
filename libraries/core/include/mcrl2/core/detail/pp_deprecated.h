@@ -535,7 +535,7 @@ void PrintPart__CXX(std::ostream& OutStream, const aterm Part,
 {
   if (pp_format == ppInternal)
   {
-    OutStream << Part.to_string() << std::endl;
+    OutStream << Part << std::endl;
   }
   else if (pp_format == ppInternalDebug)
   {
@@ -1145,7 +1145,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   {
     mCRL2log(log::error)
         << "the term "
-        << Part.to_string()
+        << Part
         << " is not part of the internal format" << std::endl;
     assert(false);
   }

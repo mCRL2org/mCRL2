@@ -19,11 +19,15 @@ namespace atermpp
 {
 namespace detail
 {
+  const size_t AS_DEFAULT_NUMBER=0;
+  const size_t AS_INT_NUMBER=1;
+  const size_t AS_LIST_NUMBER=2;
+  const size_t AS_EMPTY_LIST_NUMBER=3;
 
-const size_t AS_LIST_NUMBER=2;
 
 struct constant_function_symbols
 {
+
   public:
     atermpp::function_symbol AS_DEFAULT;
     atermpp::function_symbol AS_INT;
@@ -36,10 +40,10 @@ struct constant_function_symbols
        AS_LIST("<list_constructor>",2),
        AS_EMPTY_LIST("<empty_list>",0)
     {
-      assert(AS_DEFAULT.number()==0);
-      assert(AS_INT.number()==1);
+      assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
+      assert(AS_INT.number()==AS_INT_NUMBER);
       assert(AS_LIST.number()==AS_LIST_NUMBER);
-      assert(AS_EMPTY_LIST.number()==3);
+      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER);
     } 
 
 
@@ -59,10 +63,10 @@ struct constant_function_symbols
       // something is most likely wrong. Moreover, some code
       // depends on low numbers to be assigned to the basic 
       // function symbols (e.g. type_is_appl).
-      assert(AS_DEFAULT.number()==0);
-      assert(AS_INT.number()==1);
+      assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
+      assert(AS_INT.number()==AS_INT_NUMBER);
       assert(AS_LIST.number()==AS_LIST_NUMBER);
-      assert(AS_EMPTY_LIST.number()==3);
+      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER);
     }
 };
 

@@ -88,7 +88,7 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
         // }
         else
         {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + del_i->to_string());
+          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + to_string(*del_i));
         }
       }
     }

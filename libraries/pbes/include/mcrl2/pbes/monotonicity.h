@@ -113,7 +113,7 @@ bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& n
     return negated_variables.find(name(f)) == negated_variables.end();
   }
 
-  throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + f.to_string());
+  throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + to_string(f));
   return false;
 }
 

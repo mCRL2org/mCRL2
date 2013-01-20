@@ -179,7 +179,7 @@ public:
     //operation_type get_type() const;
 
     /// \brief Returns a string representation of the state.
-    std::string to_string() const;
+    std::string state_to_string() const;
 };
 
 
@@ -413,7 +413,7 @@ public:
 
     /// \brief Returns a string representation for state <tt>state</tt>.
     /// \param state
-    std::string to_string(const ltsmin_state& state);
+    std::string state_to_string(const ltsmin_state& state);
 
     /// \brief Returns a signature using name and type of a parameter.
     /// \param paramname the parameter name.

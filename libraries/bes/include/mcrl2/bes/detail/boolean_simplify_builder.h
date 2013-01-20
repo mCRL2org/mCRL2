@@ -123,7 +123,7 @@ struct boolean_expr_builder
   /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e, Arg& /* arg */)
   {
-    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + to_string(e));
     return term_type();
   }
 
@@ -304,7 +304,7 @@ struct boolean_expr_builder<Term, void>
   /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e)
   {
-    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + to_string(e));
     return term_type();
   }
 

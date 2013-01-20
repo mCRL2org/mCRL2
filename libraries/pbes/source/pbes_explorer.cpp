@@ -11,6 +11,7 @@
 #include <queue>
 #include <set>
 
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
@@ -992,7 +993,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
 
 
 
-std::string lts_info::to_string(const ltsmin_state& state)
+std::string lts_info::state_to_string(const ltsmin_state& state)
 {
     //std::clog << "info::to_string" << std::endl;
     std::string result;
@@ -1125,14 +1126,14 @@ ltsmin_state::ltsmin_state(const std::string& varname,
             if (*val == novalue)
             {
                 throw(std::runtime_error("Error in ltsmin_state: state expression contains NoValue: "
-                                    + e.to_string()));
+                                    + to_string(e)));
             }
             this->add_parameter_value(*val);
             //std::clog << "ltsmin_state: " << *val << std::endl;
         }
         //std::clog << std::endl;
     } else {
-        throw(std::runtime_error("Not a valid state expression! " + e.to_string()));
+        throw(std::runtime_error("Not a valid state expression! " + to_string(e)));
     }
 }
 
@@ -1179,7 +1180,6 @@ void ltsmin_state::add_parameter_value(const data_expression& value)
 
 pbes_expression ltsmin_state::to_pbes_expression() const
 {
-    //std::clog << "to_pbes_expression (this = " << this->to_string() << ")" << std::endl;
     data_expression_vector parameter_values;
     for (std::vector<data_expression>::const_iterator param_value =
             param_values.begin(); param_value != param_values.end(); ++param_value) {
@@ -1189,14 +1189,12 @@ pbes_expression ltsmin_state::to_pbes_expression() const
     // Create propositional variable instantiation.
     propositional_variable_instantiation expr =
             propositional_variable_instantiation(core::identifier_string(var), parameter_values_list);
-    //std::clog << "to_pbes_expression expr = " << expr.to_string() << std::endl;
     return expr;
 }
 
 
-std::string ltsmin_state::to_string() const
+std::string ltsmin_state::state_to_string() const
 {
-    //std::clog << "ltsmin_state::to_string" << std::endl;
     std::string result;
     std::stringstream ss;
     ss << (type==parity_game_generator::PGAME_AND ? "AND" : "OR");
@@ -1206,7 +1204,7 @@ std::string ltsmin_state::to_string() const
             param_values.begin(); entry != param_values.end(); ++entry) {
         if (entry != param_values.begin())
             ss << std::endl << "  value = ";
-        ss << (*entry).to_string();
+        ss << *entry;
     }
     ss << "]";
     result = ss.str();
@@ -1469,7 +1467,7 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
     if (error)
     {
         throw(std::runtime_error("Error in to_state_vector: NoValue in parameters of dst_state: "
-                            + info->to_string(dst_state) + "."));
+                            + info->state_to_string(dst_state) + "."));
     }
     //std::clog << "-- to_state_vector: done --" << std::endl;
 }

@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
@@ -24,9 +25,9 @@ int test_main(int argc, char* argv[])
   atermpp::aterm x=aterm_appl(function_symbol("x",0));
   atermpp::aterm y=aterm_appl(function_symbol("y",0));
   aterm_appl f(function_symbol("f", 2), x, y);
-  BOOST_CHECK(f.to_string() == "f(x,y)");
+  BOOST_CHECK(to_string(f) == "f(x,y)");
   aterm_appl f1(function_symbol("f", 0));
-  BOOST_CHECK(f1.to_string() == "f");
+  BOOST_CHECK(to_string(f1) == "f");
 
   atermpp::aterm_string s("s"); // g++ 3.4.4 complains if atermpp:: is removed :-(
   // aterm_string s1("s1(x)"); will generate an error!

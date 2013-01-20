@@ -103,14 +103,10 @@ class function_symbol
       return detail::function_lookup_table[m_number].name;
     }
 
-    
     /// \brief Return the number of the function_symbol.
     /// \return The number of the function symbol.
     size_t number() const
     {
-      // First check below is a trick, function symbols with small numbers may
-      // be referred to, while the data structures containing the data about these
-      // functions may already have destroyed.
       assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
       return m_number;
     }
@@ -120,7 +116,7 @@ class function_symbol
     size_t arity() const
     {
       assert(detail::is_valid_function_symbol(m_number));
-      return detail::function_lookup_table[m_number].arity();
+      return detail::function_lookup_table[m_number].arity;
     }
 
 
@@ -190,9 +186,7 @@ class function_symbol
     /// \parameter f The function symbol with which the swap takes place.
     void swap(function_symbol &f)
     {
-      const size_t n=f.m_number;
-      f.m_number=m_number;
-      m_number=n;
+      std::swap(f.m_number,m_number);
     }
 };
 
@@ -205,7 +199,7 @@ std::ostream& operator<<(std::ostream& out, const function_symbol& t)
 } // namespace atermpp
 
 
-/* namespace std
+namespace std
 {
 
 /// \brief Swaps two function symbols.
@@ -214,11 +208,11 @@ std::ostream& operator<<(std::ostream& out, const function_symbol& t)
 /// \param t1 The first term
 /// \param t2 The second term
 
+template <>
 inline void swap(atermpp::function_symbol &t1, atermpp::function_symbol &t2)
 {
   t1.swap(t2);
 }
 } // namespace std
-*/
 
 #endif // MCRL2_ATERMPP_FUNCTION_SYMBOL_H

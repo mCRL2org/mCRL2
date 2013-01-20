@@ -8,6 +8,7 @@
 //
 /// \file core.cpp
 
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/print.h"
 
@@ -19,8 +20,8 @@ namespace core {
 std::string pp(const core::identifier_string& x) { return core::pp< core::identifier_string >(x); }
 //--- end generated core overloads ---//
 
-std::string pp(const atermpp::aterm& x) { return x.to_string(); }
-std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
+std::string pp(const atermpp::aterm& x) { return to_string(x); }
+std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
 } // namespace core
 

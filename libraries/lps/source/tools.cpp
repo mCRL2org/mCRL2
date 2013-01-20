@@ -190,7 +190,7 @@ void lpspp(const std::string& input_filename,
   std::string text;
   if (format == core::print_internal)
   {
-  	text = specification_to_aterm(spec).to_string();
+  	text = to_string(specification_to_aterm(spec));
   }
   else
   {

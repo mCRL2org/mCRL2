@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -245,7 +246,7 @@ class data_expression: public atermpp::aterm_appl
         }
         else
         {
-          throw mcrl2::runtime_error("Sort " + s.to_string() + " of " + atermpp::arg1(*this).to_string() + " is not a function sort.");
+          throw mcrl2::runtime_error("Sort " + to_string(s) + " of " + to_string(atermpp::arg1(*this)) + " is not a function sort.");
         }
       }
       else if (is_where_clause(*this))
@@ -258,7 +259,7 @@ class data_expression: public atermpp::aterm_appl
       }
       else
       {
-        throw mcrl2::runtime_error("Unexpected data expression " + this->to_string() + " occurred.");
+        throw mcrl2::runtime_error("Unexpected data expression " + to_string(*this) + " occurred.");
       }
 
       return result;

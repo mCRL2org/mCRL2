@@ -32,15 +32,14 @@ namespace detail
 // destroyed prematurely.
 
 static const size_t INITIAL_TERM_TABLE_SIZE = 1<<17;  // Must be a power of 2.
+static const size_t INITIAL_MAX_TERM_SIZE = 256;
+
 size_t aterm_table_size;
 size_t aterm_table_mask;           
 const _aterm* * aterm_hashtable;  
 
 aterm static_undefined_aterm;
 aterm static_empty_aterm_list(aterm_appl(detail::function_adm.AS_EMPTY_LIST));
-
-/* The constants below are not static to prevent some compiler warnings */
-const size_t INITIAL_MAX_TERM_SIZE = 256;
 
 // The following is not a vector to avoid that it is prematurely destroyed.
 size_t terminfo_size=0;

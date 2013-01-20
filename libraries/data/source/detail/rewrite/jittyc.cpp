@@ -2392,17 +2392,7 @@ bool RewriterCompilingJitty::calc_ar(const aterm_appl &expr)
 
 void RewriterCompilingJitty::fill_always_rewrite_array()
 {
-  ar=std::vector <aterm_appl> (ar_size); // = (aterm_appl*) malloc(ar_size*sizeof(aterm_appl));
-  /* if (ar == NULL)
-  {
-    throw mcrl2::runtime_error("cannot allocate enough memory (" + utilities::to_string(ar_size*sizeof(aterm_appl)) + "bytes)");
-  }
-  for (size_t i=0; i<ar_size; i++)
-  {
-    ar[i] = NULL;
-  }
-  */
-
+  ar=std::vector <aterm_appl> (ar_size); 
   for(std::map <size_t,size_t> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
     size_t arity = getArity(get_int2term(it->first));
@@ -2890,7 +2880,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     if (data_equation_selector(fs))
     {
-      fprintf(f,  "// %s\n",atermpp::aterm(fs).to_string().c_str());
+      fprintf(f,  "// %s\n",to_string(fs).c_str());
 
       for (size_t a=0; a<=arity; a++)
       {

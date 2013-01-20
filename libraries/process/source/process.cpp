@@ -62,8 +62,8 @@ std::set<core::identifier_string> find_identifiers(const process::process_specif
 //--- end generated process overloads ---//
 
 // TODO: These should be removed when the aterm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return x.to_string(); }
-std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
+std::string pp(const atermpp::aterm& x) { return to_string(x); }
+std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
 } // namespace process
 

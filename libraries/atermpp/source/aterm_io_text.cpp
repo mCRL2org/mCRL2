@@ -186,12 +186,11 @@ static void topWriteToStream(const aterm &t, std::ostream& os)
  * Write a term into its text representation.
  */
 
-std::string aterm::to_string() const
+std::ostream& operator<<(std::ostream& out, const aterm& t)
 {
   aterm_io_init();
-  std::ostringstream oss;
-  topWriteToStream(*this, oss);
-  return oss.str();
+  topWriteToStream(t, out);
+  return out;
 }
 
 void write_term_to_text_stream(const aterm &t, std::ostream &os)

@@ -189,7 +189,7 @@ void data_specification::check_for_alias_loop(
   {
     if (sorts_already_seen.count(s)>0)
     {
-      throw mcrl2::runtime_error("Sort alias " + s.to_string() + " is defined in terms of itself.");
+      throw mcrl2::runtime_error("Sort alias " + to_string(s) + " is defined in terms of itself.");
     }
     for(alias_vector::const_iterator i = m_aliases.begin(); i != m_aliases.end(); ++i)
     {
@@ -399,7 +399,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
         // Choose the normal form on the basis of a lexicographical ordering. This guarantees
         // uniqueness of normal forms over different tools. Ordering on addresses (as used previously)
         // proved to be unstable over different tools.
-        const bool rhs_to_s1 = is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string();
+        const bool rhs_to_s1 = is_basic_sort(s1) && to_string(basic_sort(s1))<=to_string(rhs);
         const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
         const sort_expression pre_normal_form=(rhs_to_s1?s1:rhs);
         assert(is_basic_sort(pre_normal_form));
@@ -418,7 +418,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
           assert(is_basic_sort(i->second));
           // Choose the normal form on the basis of a lexicographical ordering. This guarantees
           // uniqueness of normal forms over different tools.
-          const bool i_second_to_s2 = is_basic_sort(s2) && basic_sort(s2).to_string()<=i->second.to_string();
+          const bool i_second_to_s2 = is_basic_sort(s2) && to_string(basic_sort(s2))<=to_string(i->second);
           const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
           const sort_expression pre_normal_form=(i_second_to_s2?s2:i->second);
           assert(is_basic_sort(pre_normal_form));

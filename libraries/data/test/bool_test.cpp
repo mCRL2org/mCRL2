@@ -13,6 +13,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/bool.h"
 
 
@@ -24,7 +25,7 @@ void bool_sort_test()
 {
   basic_sort b(bool_());
   BOOST_CHECK(b == bool_());
-  BOOST_CHECK(b.name().to_string() == "Bool");
+  BOOST_CHECK(to_string(b.name()) == "Bool");
 }
 
 int test_main(int argc, char** argv)

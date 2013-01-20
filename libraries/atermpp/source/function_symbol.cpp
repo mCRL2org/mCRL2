@@ -127,7 +127,7 @@ namespace detail
       _function_symbol &entry = function_lookup_table[i];
       assert(entry.reference_count>0);
   
-      HashNumber hnr = calculate_hash_of_function_symbol(entry.name, entry.arity() );
+      HashNumber hnr = calculate_hash_of_function_symbol(entry.name, entry.arity );
       hnr &= function_symbol_table_mask;
       entry.next = function_symbol_hashtable[hnr];
       function_symbol_hashtable[hnr] = i;
@@ -158,16 +158,16 @@ function_symbol::function_symbol():m_number(0)
   increase_reference_count<false>();
 }
 
-function_symbol::function_symbol(const std::string &name, const size_t arity)
+function_symbol::function_symbol(const std::string &name, const size_t arity_)
 {
   if (detail::function_symbol_table_size==0)
   {
     detail::initialise_administration();
   }
-  const HashNumber hnr = detail::calculate_hash_of_function_symbol(name, arity) & detail::function_symbol_table_mask;
+  const HashNumber hnr = detail::calculate_hash_of_function_symbol(name, arity_) & detail::function_symbol_table_mask;
   /* Find symbol in table */
   size_t cur = detail::function_symbol_hashtable[hnr];
-  while (cur!=size_t(-1) && !(detail::function_lookup_table[cur].arity()==arity &&
+  while (cur!=size_t(-1) && !(detail::function_lookup_table[cur].arity==arity_ &&
                               detail::function_lookup_table[cur].name==name))
   {
     cur = detail::function_lookup_table[cur].next;
@@ -186,13 +186,13 @@ function_symbol::function_symbol(const std::string &name, const size_t arity)
       assert(detail::first_free==size_t(-1) || detail::first_free<detail::function_lookup_table_size);
       assert(free_entry<detail::function_lookup_table_size);
       assert(detail::function_lookup_table[cur].reference_count==0);
-      detail::function_lookup_table[cur]=detail::_function_symbol(name,arity,detail::function_symbol_hashtable[hnr]);
+      detail::function_lookup_table[cur]=detail::_function_symbol(name,arity_,detail::function_symbol_hashtable[hnr]);
     }
     else
     {
       cur = detail::function_lookup_table_create_free_entry_at_end();
       //placement new.
-      new (&detail::function_lookup_table[cur]) detail::_function_symbol(name,arity,detail::function_symbol_hashtable[hnr]); 
+      new (&detail::function_lookup_table[cur]) detail::_function_symbol(name,arity_,detail::function_symbol_hashtable[hnr]); 
     }
 
     detail::function_symbol_hashtable[hnr] = cur;
@@ -216,7 +216,7 @@ void function_symbol::free_function_symbol() const
   assert(!sym.name.empty());
 
   /* Calculate hashnumber */
-  const HashNumber hnr = detail::calculate_hash_of_function_symbol(sym.name, sym.arity()) & detail::function_symbol_table_mask;
+  const HashNumber hnr = detail::calculate_hash_of_function_symbol(sym.name, sym.arity) & detail::function_symbol_table_mask;
 
   /* Update hashtable */
   if (detail::function_symbol_hashtable[hnr] == m_number)

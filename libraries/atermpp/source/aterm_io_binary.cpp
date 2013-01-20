@@ -549,7 +549,7 @@ static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &inde
   }
   else
   {
-    throw std::runtime_error("get_top_symbol: illegal term (" + t.to_string() + ")");
+    throw std::runtime_error("get_top_symbol: illegal term (" + to_string(t) + ")");
   }
   return &sym_entries[index[sym.number()]];
 }
@@ -931,7 +931,7 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
   if (trm_sym->terms[trm_sym->cur_index].t != t)
   {
     throw std::runtime_error("terms out of sync at pos " + to_string(trm_sym->cur_index) + " of sym " + trm_sym->id.name() +
-                             ", term in table was " + (trm_sym->terms[trm_sym->cur_index].t).to_string() + ", expected " + t.to_string());
+                             ", term in table was " + to_string(trm_sym->terms[trm_sym->cur_index].t) + ", expected " + to_string(t));
   }
   trm_sym->cur_index++;
 

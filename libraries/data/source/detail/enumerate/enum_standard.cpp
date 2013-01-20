@@ -664,7 +664,7 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   const function_symbol_vector mappings(data_spec.mappings());
   for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
   {
-    if (i->name().to_string() == "==")
+    if (to_string(i->name()) == "==")
     {
       atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
       eqs.insert(atermpp::aterm_cast<atermpp::aterm_int>(t[0]));

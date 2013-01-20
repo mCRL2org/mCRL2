@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
@@ -39,7 +40,7 @@ static size_t count_ctau(lps::specification const& s)
     if (al.size()==1)
     {
       const action_label lab=al.front().label();
-      if (lab.name().to_string()=="ctau")
+      if (to_string(lab.name())=="ctau")
       {
         ++result;
       }

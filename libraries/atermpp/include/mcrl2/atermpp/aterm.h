@@ -156,11 +156,6 @@ class aterm
       return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST; 
     }
 
-
-    /// \brief Writes the term to a string.
-    /// \return A string representation of the term.
-    std::string to_string() const;
-
     /// \brief Equality function on two aterms.
     /// \detail Terms are stored in a maximally shared way. This
     ///         means that this equality operator can be calculated
@@ -284,11 +279,9 @@ const ATERM_TYPE_OUT &aterm_cast(const aterm &t)
   return (ATERM_TYPE_OUT &)t;
 }
 
-inline
-std::ostream& operator<<(std::ostream& out, const aterm& t)
-{
-  return out << t.to_string();
-}
+/// \brief Send the term in textual form to the ostream.
+std::ostream& operator<<(std::ostream& out, const aterm& t);
+
 } // namespace atermpp
 
 

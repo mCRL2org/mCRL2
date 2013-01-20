@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string>
 #include <svc/lz.h>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_io.h"
 
 using namespace atermpp;
@@ -199,7 +200,7 @@ int LZwriteATerm(BitStream* bs, LZbuffer* buffer, aterm term)
 {
   char* buf;
 
-  buf=_strdup(term.to_string().c_str());
+  buf=_strdup(to_string(term).c_str());
   compress(bs,buffer,buf);
   free(buf);
 

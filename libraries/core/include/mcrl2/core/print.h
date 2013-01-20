@@ -23,6 +23,7 @@
 #include <vector>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"
@@ -70,7 +71,7 @@ struct printer: public core::traverser<Derived>
   {
 #ifdef MCRL2_DEBUG_PRECEDENCE
     std::cout << "<print_expression> precedence = " << prec << std::endl;
-    std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
+    std::cout << "<x>" << x << " precedence = " << precedence(x) << std::endl;
 #endif
     bool print_parens = (precedence(x) < prec);
     if (print_parens)
@@ -96,9 +97,9 @@ struct printer: public core::traverser<Derived>
   {
 #ifdef MCRL2_DEBUG_PRECEDENCE
     std::cout << "<binary>" << std::endl;
-    std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
-    std::cout << "<left>" << x.left().to_string() << " precedence = " << precedence(x.left()) << std::endl;
-    std::cout << "<right>" << x.right().to_string() << " precedence = " << precedence(x.right()) << std::endl;
+    std::cout << "<x>" << x << " precedence = " << precedence(x) << std::endl;
+    std::cout << "<left>" << x.left() << " precedence = " << precedence(x.left()) << std::endl;
+    std::cout << "<right>" << x.right() << " precedence = " << precedence(x.right()) << std::endl;
 #endif
     print_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
     derived().print(op);
@@ -133,7 +134,7 @@ struct printer: public core::traverser<Derived>
   void operator()(const atermpp::term_appl<T>& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(x.to_string());
+    static_cast<Derived&>(*this).print(to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -178,21 +179,21 @@ struct printer: public core::traverser<Derived>
   void operator()(atermpp::aterm x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(atermpp::aterm(x).to_string());
+    static_cast<Derived&>(*this).print(to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(atermpp::aterm_list x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(atermpp::aterm_list(x).to_string());
+    static_cast<Derived&>(*this).print(to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(atermpp::aterm_appl x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(atermpp::aterm_appl(x).to_string());
+    static_cast<Derived&>(*this).print(to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 };

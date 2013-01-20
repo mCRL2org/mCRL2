@@ -54,7 +54,7 @@ namespace pbes_system {
   template <typename Term>
   std::string print_term(const Term& x)
   {
-    return data::pp(x) + " " + x.to_string();
+    return data::pp(x) + " " + to_string(x);
   }
 
   template <typename Term>
