@@ -134,7 +134,7 @@ struct printer: public core::traverser<Derived>
   void operator()(const atermpp::term_appl<T>& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(to_string(x));
+    static_cast<Derived&>(*this).print(utilities::to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -179,21 +179,21 @@ struct printer: public core::traverser<Derived>
   void operator()(atermpp::aterm x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(to_string(x));
+    static_cast<Derived&>(*this).print(utilities::to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(atermpp::aterm_list x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(to_string(x));
+    static_cast<Derived&>(*this).print(utilities::to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(atermpp::aterm_appl x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(to_string(x));
+    static_cast<Derived&>(*this).print(utilities::to_string(x));
     static_cast<Derived&>(*this).leave(x);
   }
 };

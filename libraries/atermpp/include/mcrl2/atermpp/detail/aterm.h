@@ -12,6 +12,8 @@ namespace atermpp
 namespace detail
 {
 
+static const size_t IN_FREE_LIST(-1);
+
 class _aterm
 {
   protected:
@@ -62,12 +64,12 @@ class _aterm
     void set_reference_count_indicates_in_freelist(const bool check=true) const
     {
       if (check) assert(!reference_count_indicates_is_in_freelist());
-      m_reference_count=size_t(-1);
+      m_reference_count=IN_FREE_LIST;
     }
 
     bool reference_count_indicates_is_in_freelist() const
     {
-      return m_reference_count==size_t(-1);
+      return m_reference_count==IN_FREE_LIST;
     }
 
     const _aterm* next() const

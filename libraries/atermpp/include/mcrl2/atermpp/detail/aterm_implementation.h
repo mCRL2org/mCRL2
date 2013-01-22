@@ -12,41 +12,46 @@ namespace atermpp
 
 namespace detail
 {
-  extern size_t aterm_table_mask;
-  extern size_t aterm_table_size;
-  extern const detail::_aterm* * aterm_hashtable;
 
+static const size_t BLOCK_SIZE = 1<<14; 
 
-  extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
-  extern aterm static_empty_aterm_list;
- 
-  void initialise_administration();
-  void initialise_aterm_administration();
-
-}
-  
-inline
-const detail::_aterm *aterm::undefined_aterm()
+typedef struct Block
 {
-  if (detail::static_undefined_aterm.m_term==NULL)
-  {
-    detail::initialise_administration();
-  }
-  return detail::static_undefined_aterm.m_term;
-} 
+  struct Block* next_by_size;
+  size_t* end;
+  size_t data[];
+} Block;
 
-inline
-const detail::_aterm *aterm::empty_aterm_list()
+typedef struct TermInfo
 {
-  if (detail::static_empty_aterm_list.m_term==NULL)
-  {
-    detail::initialise_administration();
-  }
-  return detail::static_empty_aterm_list.m_term;
-} 
+  Block*       at_block;
+  const _aterm*       at_freelist;
 
-namespace detail
-{
+  TermInfo():at_block(NULL),at_freelist(NULL)
+  {}
+
+} TermInfo;
+
+extern size_t aterm_table_mask;
+extern size_t aterm_table_size;
+extern const detail::_aterm* * aterm_hashtable;
+
+extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
+extern aterm static_empty_aterm_list;
+
+extern size_t terminfo_size;
+extern size_t total_nodes;
+extern TermInfo *terminfo;
+
+extern size_t garbage_collect_count_down;
+
+void initialise_administration();
+void initialise_aterm_administration();
+
+void resize_aterm_hashtable();
+void allocate_block(const size_t size);
+void collect_terms_with_reference_count_0();
+
 
 inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
@@ -86,35 +91,6 @@ inline HashNumber hash_number(const detail::_aterm *t)
 
   return hnr;
 }
-
-static const size_t BLOCK_SIZE = 1<<14; 
-
-typedef struct Block
-{
-  struct Block* next_by_size;
-  size_t* end;
-  size_t data[];
-} Block;
-
-typedef struct TermInfo
-{
-  Block*       at_block;
-  const _aterm*       at_freelist;
-
-  TermInfo():at_block(NULL),at_freelist(NULL)
-  {}
-
-} TermInfo;
-
-void resize_aterm_hashtable();
-void allocate_block(const size_t size);
-void collect_terms_with_reference_count_0();
-
-extern size_t terminfo_size;
-extern size_t total_nodes;
-extern TermInfo *terminfo;
-
-extern size_t garbage_collect_count_down;
 
 inline const _aterm* allocate_term(const size_t size)
 {
@@ -235,6 +211,26 @@ inline const _aterm* aterm0(const function_symbol &sym)
 }
 
 } //namespace detail
+
+inline
+const detail::_aterm *aterm::undefined_aterm()
+{
+  if (detail::static_undefined_aterm.m_term==NULL)
+  {
+    detail::initialise_administration();
+  }
+  return detail::static_undefined_aterm.m_term;
+} 
+
+inline
+const detail::_aterm *aterm::empty_aterm_list()
+{
+  if (detail::static_empty_aterm_list.m_term==NULL)
+  {
+    detail::initialise_administration();
+  }
+  return detail::static_empty_aterm_list.m_term;
+} 
 
 } // namespace atermpp
 

@@ -32,8 +32,6 @@ class function_symbol
     template <bool CHECK>
     void increase_reference_count() const
     {
-      assert(m_number!=size_t(-1));
-
       assert(m_number<detail::function_lookup_table_size);
       if (CHECK) assert(detail::function_lookup_table[m_number].reference_count>0);
       detail::function_lookup_table[m_number].reference_count++;
@@ -41,8 +39,6 @@ class function_symbol
 
     void decrease_reference_count() const
     {
-      assert(m_number!=size_t(-1));
-
       assert(m_number<detail::function_lookup_table_size);
       assert(detail::function_lookup_table[m_number].reference_count>0);
 
@@ -69,7 +65,7 @@ class function_symbol
     /// \deprecated
     explicit function_symbol(const size_t n):m_number(n)
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(m_number));
       increase_reference_count<false>();
     }
 
@@ -83,8 +79,11 @@ class function_symbol
     function_symbol &operator=(const function_symbol &f)
     {
       f.increase_reference_count<true>();
-      decrease_reference_count(); // Decrease after increasing the number, as otherwise this goes wrong when 
-                                                  // carrying out x=x;
+      decrease_reference_count(); // Decrease the reference count after increasing it, 
+                                  // as otherwise the reference count can becomes 0 for
+                                  // a short moment when x=x is executed and the reference
+                                  // count of x is 1. x can then prematurely be garbage collected,
+                                  // depending on the garbage collection scheme.. 
       m_number=f.m_number;
       return *this;
     }
@@ -107,7 +106,7 @@ class function_symbol
     /// \return The number of the function symbol.
     size_t number() const
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(m_number));
       return m_number;
     }
 
@@ -126,8 +125,8 @@ class function_symbol
     /// \returns True iff the function symbols are the same.
     bool operator ==(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
-      assert(f.m_number==size_t(-1) || detail::is_valid_function_symbol(f.m_number));
+      assert(detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(f.m_number));
       return m_number==f.m_number;
     }
 
@@ -136,8 +135,8 @@ class function_symbol
     /// \returns True iff the function symbols are not equal.
     bool operator !=(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
-      assert(f.m_number==size_t(-1) || detail::is_valid_function_symbol(f.m_number));
+      assert(detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(f.m_number));
       return m_number!=f.m_number;
     }
 
@@ -146,8 +145,8 @@ class function_symbol
     /// \returns True iff this function has a lower index than the argument.
     bool operator <(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
-      assert(f.m_number==size_t(-1) || detail::is_valid_function_symbol(f.m_number));
+      assert(detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(f.m_number));
       return m_number<f.m_number;
     }
 
@@ -156,8 +155,8 @@ class function_symbol
     /// \returns True iff this function has a higher index than the argument.
     bool operator >(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
-      assert(f.m_number==size_t(-1) || detail::is_valid_function_symbol(f.m_number));
+      assert(detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(f.m_number));
       return m_number>f.m_number;
     }
 
@@ -166,8 +165,8 @@ class function_symbol
     /// \returns True iff this function has a lower or equal index than the argument.
     bool operator <=(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
-      assert(f.m_number==size_t(-1) || detail::is_valid_function_symbol(f.m_number));
+      assert(detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(f.m_number));
       return m_number<=f.m_number;
     }
 
@@ -176,8 +175,8 @@ class function_symbol
     /// \returns True iff this function has a larger or equal index than the argument.
     bool operator >=(const function_symbol &f) const
     {
-      assert(m_number==size_t(-1) || detail::is_valid_function_symbol(m_number));
-      assert(f.m_number==size_t(-1) || detail::is_valid_function_symbol(f.m_number));
+      assert(detail::is_valid_function_symbol(m_number));
+      assert(detail::is_valid_function_symbol(f.m_number));
       return m_number>=f.m_number;
     }
 
@@ -190,6 +189,7 @@ class function_symbol
     }
 };
 
+/// \brief Sends the name of a function symbol to an ostream.
 inline
 std::ostream& operator<<(std::ostream& out, const function_symbol& t)
 {
