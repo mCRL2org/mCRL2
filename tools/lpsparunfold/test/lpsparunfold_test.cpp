@@ -64,7 +64,7 @@ int test_main(int, char**)
       std::clog << "--- failed test ---" << std::endl;
       std::clog << case_1 << std::endl;
       std::clog << "expected process parameter to be of type Pos" << std::endl;
-      std::clog << "encountered process parameter of type " << p0.front().sort().to_string() << std::endl;
+      std::clog << "encountered process parameter of type " << p0.front().sort() << std::endl;
     }
     BOOST_CHECK(t0.compare("Pos") == 0);
 
