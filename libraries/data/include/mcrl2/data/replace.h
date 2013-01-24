@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
 {
@@ -271,6 +272,139 @@ T substitute_sorts(const T& x,
                   )
 {
   return core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
+}
+
+namespace detail {
+
+template <typename Substitution, typename IdentifierGenerator>
+data::variable_list update_substitution(Substitution& sigma, const data::variable_list& v, const std::set<data::variable>& V, IdentifierGenerator& id_generator)
+{
+	atermpp::vector<data::variable> result;
+  for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+  	if (V.find(*i) == V.end() && sigma(*i) == *i)
+    {
+    	result.push_back(*i);
+    }
+    else
+    {
+    	id_generator.add_identifier(i->name());
+    	data::variable w(id_generator(i->name()), i->sort());
+
+      while (sigma(w) != w || V.find(w) != V.end())
+      {
+      	w = data::variable(id_generator(i->name()), i->sort());
+      }
+
+      sigma[*i] = w;
+      result.push_back(w);
+    }
+  }
+  return data::variable_list(result.begin(), result.end());
+}
+
+template <template <class> class Builder, class Substitution>
+struct replace_variables_capture_avoiding_builder: public Builder<replace_variables_capture_avoiding_builder<Builder, Substitution> >
+{
+  typedef Builder<replace_variables_capture_avoiding_builder<Builder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  Substitution& sigma;
+  std::set<data::variable>& V;
+  data::set_identifier_generator id_generator;
+
+  replace_variables_capture_avoiding_builder(Substitution& sigma_, std::set<data::variable>& V_)
+    : sigma(sigma_), V(V_)
+  { }
+
+  data_expression operator()(const variable& v)
+  {
+    return sigma(v);
+  }
+
+  data_expression operator()(const data::where_clause& x)
+  {
+  	// TODO
+  	throw mcrl2::runtime_error("not implemented yet");
+  	return data_expression();
+  }
+
+  data_expression operator()(const data::forall& x)
+  {
+    data::variable_list v = update_substitution(sigma, x.variables(), V, id_generator);
+    V.insert(v.begin(), v.end());
+    return data::forall(v, (*this)(x.body()));
+  }
+
+  data_expression operator()(const data::exists& x)
+  {
+    data::variable_list v = update_substitution(sigma, x.variables(), V, id_generator);
+    V.insert(v.begin(), v.end());
+    return data::forall(v, (*this)(x.body()));
+  }
+
+  data_expression operator()(const data::lambda& x)
+  {
+    data::variable_list v = update_substitution(sigma, x.variables(), V, id_generator);
+    V.insert(v.begin(), v.end());
+    return data::forall(v, (*this)(x.body()));
+  }
+
+  data_expression operator()(const data::assignment& x)
+  {
+  	// TODO
+  	throw mcrl2::runtime_error("not implemented yet");
+  	return data_expression();
+  }
+
+  void operator()(data::data_equation& x)
+  {
+  	// TODO
+  	throw mcrl2::runtime_error("not implemented yet");
+  }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, class Substitution>
+replace_variables_capture_avoiding_builder<Builder, Substitution>
+make_replace_variables_capture_avoiding_builder(Substitution& sigma, std::set<data::variable>& V)
+{
+  return replace_variables_capture_avoiding_builder<Builder, Substitution>(sigma, V);
+}
+
+} // namespace detail
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+void replace_variables_capture_avoiding(T& x,
+                       Substitution& sigma,
+                       const VariableContainer& sigma_variables,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                      )
+{
+	std::set<data::variable> V = data::find_free_variables(x);
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  data::detail::make_replace_variables_capture_avoiding_builder<data::data_expression_builder>(sigma, V)(x);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_variables_capture_avoiding(const T& x,
+                    Substitution& sigma,
+                    const VariableContainer& sigma_variables,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                   )
+{
+	std::set<data::variable> V = data::find_free_variables(x);
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  return data::detail::make_replace_variables_capture_avoiding_builder<data::data_expression_builder>(sigma, V)(x);
 }
 
 } // namespace data
