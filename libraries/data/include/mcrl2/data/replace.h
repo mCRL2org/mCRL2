@@ -277,28 +277,33 @@ T substitute_sorts(const T& x,
 namespace detail {
 
 template <typename Substitution, typename IdentifierGenerator>
-data::variable_list update_substitution(Substitution& sigma, const data::variable_list& v, const std::set<data::variable>& V, IdentifierGenerator& id_generator)
+data::variable update_substitution(Substitution& sigma, const data::variable& v, const std::set<data::variable>& V, IdentifierGenerator& id_generator)
 {
-	atermpp::vector<data::variable> result;
-  for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  if (V.find(v) == V.end() && sigma(v) == v)
   {
-  	if (V.find(*i) == V.end() && sigma(*i) == *i)
-    {
-    	result.push_back(*i);
-    }
-    else
-    {
-    	id_generator.add_identifier(i->name());
-    	data::variable w(id_generator(i->name()), i->sort());
+    return v;
+  }
+  else
+  {
+    id_generator.add_identifier(v.name());
+    data::variable w(id_generator(v.name()), v.sort());
 
-      while (sigma(w) != w || V.find(w) != V.end())
-      {
-      	w = data::variable(id_generator(i->name()), i->sort());
-      }
-
-      sigma[*i] = w;
-      result.push_back(w);
+    while (sigma(w) != w || V.find(w) != V.end())
+    {
+      w = data::variable(id_generator(v.name()), v.sort());
     }
+    sigma[v] = w;
+    return w;
+  }
+}
+
+template <typename Substitution, typename IdentifierGenerator, typename VariableContainer>
+data::variable_list update_substitution(Substitution& sigma, const VariableContainer& v, const std::set<data::variable>& V, IdentifierGenerator& id_generator)
+{
+  atermpp::vector<data::variable> result;
+  for (typename VariableContainer::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    result.push_back(update_substitution(sigma, *i, V, id_generator));
   }
   return data::variable_list(result.begin(), result.end());
 }
@@ -326,9 +331,19 @@ struct replace_variables_capture_avoiding_builder: public Builder<replace_variab
 
   data_expression operator()(const data::where_clause& x)
   {
-  	// TODO
-  	throw mcrl2::runtime_error("not implemented yet");
-  	return data_expression();
+    data::assignment_list assignments = atermpp::convert<data::assignment_list>(x.declarations());
+
+    // TODO: avoid the construction of the variable_list v
+    data::variable_list v = update_substitution(sigma, make_assignment_left_hand_side_range(assignments), V, id_generator);
+
+    V.insert(v.begin(), v.end());
+    atermpp::vector<data::assignment> a;
+    data::variable_list::const_iterator j = v.begin();
+    for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i, ++j)
+    {
+      a.push_back(data::assignment(*j, (*this)(i->rhs())));
+    }
+    return data::where_clause((*this)(x.body()), data::assignment_list(a.begin(), a.end()));
   }
 
   data_expression operator()(const data::forall& x)
@@ -354,15 +369,14 @@ struct replace_variables_capture_avoiding_builder: public Builder<replace_variab
 
   data_expression operator()(const data::assignment& x)
   {
-  	// TODO
-  	throw mcrl2::runtime_error("not implemented yet");
-  	return data_expression();
+    data::variable v = update_substitution(sigma, x.lhs(), V, id_generator);
+    V.insert(v);
+    return data::assignment(v, (*this)(x.rhs()));
   }
 
   void operator()(data::data_equation& x)
   {
-  	// TODO
-  	throw mcrl2::runtime_error("not implemented yet");
+    throw mcrl2::runtime_error("not implemented yet");
   }
 
 #ifdef BOOST_MSVC
@@ -388,7 +402,7 @@ void replace_variables_capture_avoiding(T& x,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
 {
-	std::set<data::variable> V = data::find_free_variables(x);
+  std::set<data::variable> V = data::find_free_variables(x);
   V.insert(sigma_variables.begin(), sigma_variables.end());
   data::detail::make_replace_variables_capture_avoiding_builder<data::data_expression_builder>(sigma, V)(x);
 }
@@ -402,7 +416,7 @@ T replace_variables_capture_avoiding(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
 {
-	std::set<data::variable> V = data::find_free_variables(x);
+  std::set<data::variable> V = data::find_free_variables(x);
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::make_replace_variables_capture_avoiding_builder<data::data_expression_builder>(sigma, V)(x);
 }
