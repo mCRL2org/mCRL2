@@ -1543,8 +1543,8 @@ class specification_basic_type:public boost::noncopyable
 
         for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
         {
-          vars.push_back(i->first);
-          terms.push_back(i->second);
+          vars=push_back(vars,i->first);
+          terms=push_back(terms,i->second);
         }
 
         std::map < variable, data_expression > local_sigma=sigma;
@@ -6410,16 +6410,16 @@ class specification_basic_type:public boost::noncopyable
       if (condition==sort_bool::false_())
       {
         action_list tempw=w;
-        tempw.push_back(firstaction);
+        tempw=push_back(tempw,firstaction);
         return phi(m,d,tempw,o,r,r_is_null,comm_table);
       }
       else
       {
         action_list tempm=m;
-        tempm.push_back(firstaction);
+        tempm=push_back(tempm,firstaction);
         const tuple_list T=phi(tempm,d,w,o,r,r_is_null,comm_table);
         action_list tempw=w;
-        tempw.push_back(firstaction);
+        tempw=push_back(tempw,firstaction);
         return addActionCondition(
                  action(),
                  condition,
@@ -6445,7 +6445,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const action a = beta.front();
         action_list l=alpha;
-        l.push_back(a);
+        l=push_back(l,a);
         const action_list beta_next = beta.tail();
 
         if (can_communicate(l,comm_table)!=action_label())

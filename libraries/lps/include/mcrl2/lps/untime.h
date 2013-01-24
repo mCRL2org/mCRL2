@@ -110,7 +110,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
                                              data::greater(s.multi_action().time(), data::sort_real::real_(0))));
 
         // Extend original assignments to include m_last_action_time := t.i(d,e.i)
-        s.assignments().push_back(data::assignment(m_last_action_time,s.multi_action().time()));
+        s.assignments()=push_back(s.assignments(),data::assignment(m_last_action_time,s.multi_action().time()));
 
         // Remove time
         s.multi_action() = multi_action(s.multi_action().actions()); // TODO: if Nil is removed, just remove time
@@ -128,7 +128,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
                                              data::greater(time_var, data::sort_real::real_(0))));
 
         // Extend original assignments to include m_last_action_time := time_var
-        s.assignments().push_back(data::assignment(m_last_action_time, time_var));
+        s.assignments()=push_back(s.assignments(),data::assignment(m_last_action_time, time_var));
       } // i->has_time()
 
       // Add the condition m_last_action_time>=0, which holds, and which is generally a useful fact for further processing.
@@ -160,9 +160,9 @@ class untime_algorithm: public lps::detail::lps_algorithm
         // Should happen before updating the process
         m_time_invariant = calculate_time_invariant();
 
-        m_spec.process().process_parameters().push_back(m_last_action_time);
+        m_spec.process().process_parameters()=push_back(m_spec.process().process_parameters(),m_last_action_time);
         data::assignment_list init = m_spec.initial_process().assignments();
-        init.push_back(data::assignment(m_last_action_time, data::sort_real::real_(0)));
+        init=push_back(init,data::assignment(m_last_action_time, data::sort_real::real_(0)));
         m_spec.initial_process() = process_initializer(init);
 
         std::for_each(m_spec.process().action_summands().begin(),

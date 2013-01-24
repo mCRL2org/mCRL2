@@ -256,7 +256,7 @@ class lts2lps_tool : public input_output_tool
         assignment_list assignments;
         if (r->from()!=r->to())
         {
-          assignments.push_back(assignment(process_parameter,sort_pos::pos(r->to()+1)));
+          assignments=push_back(assignments,assignment(process_parameter,sort_pos::pos(r->to()+1)));
         }
 
         const action_summand summand(

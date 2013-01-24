@@ -181,12 +181,6 @@ class term_list:public aterm
     /// \param el The term that is added.
     void push_front(const Term &el);
 
-    /// \brief Appends a new element at the end of the list. Note
-    /// that the complexity of this function is O(n), with n the number of
-    /// elements in the list!!!
-    /// \param elem A term.
-    void push_back(const Term &el);
-
     /// \brief Returns the size of the term_list.
     /// \detail The complexity of this function is linear in the size of the list.
     /// \return The size of the list.
@@ -290,7 +284,9 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m);
 
 /// \brief Returns an element at a certain position in a list
 /// \param l A list
-/// \param i An index. The first element is at position 0.
+/// \param m An index. The first element is at position 0.
+/// \details This operator is linear in the number m. If m>=length of the list
+///          the result is undefined. 
 /// \return The element at position i in the list l.
 template <typename Term>
 inline
@@ -301,6 +297,16 @@ const Term &element_at(const term_list<Term> &l, size_t m)
   for( ; m>0; --m, ++i) {}
   return *i;
 }
+
+/// \brief Appends a new element at the end of the list. Note
+/// that the complexity of this function is O(n), with n the number of
+/// elements in the list!!!
+//  \param l The list to which the term is appended.
+/// \param elem A term.
+/// \return The list l with elem appended at the end.
+template <typename Term>
+inline
+term_list<Term> push_back(const term_list<Term> &l, const Term &el);
 
 } // namespace atermpp
 

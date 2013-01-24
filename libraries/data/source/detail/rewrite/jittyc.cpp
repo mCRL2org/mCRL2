@@ -2467,7 +2467,7 @@ static aterm toInner_list_odd(const data_expression &t)
     atermpp::term_list <atermpp::aterm_appl > translated_assignments;
     for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
     {
-      translated_assignments.push_back(core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
+      translated_assignments=push_back(translated_assignments,core::detail::gsMakeDataVarIdInit(i->lhs(),(aterm_appl)toInner_list_odd(i->rhs())));
     }
     return gsMakeWhr((aterm_appl)toInner_list_odd(w.body()),
                      (aterm_list)reverse(translated_assignments));

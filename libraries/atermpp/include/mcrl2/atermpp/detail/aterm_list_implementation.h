@@ -74,26 +74,27 @@ void term_list<Term>::push_front(const Term &el)
 
 template <typename Term>
 inline
-void term_list<Term>::push_back(const Term &el)
+term_list<Term> push_back(const term_list<Term> &l, const Term &el)
 {
-  size_t len = size();
+  size_t len = l.size();
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
 
   /* Collect all elements of list in buffer */
   size_t j=0;
-  for (typename term_list<Term>::const_iterator i=begin(); i!=end(); ++i, ++j)
+  for (typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i, ++j)
   {
     buffer[j] = i->address();
   }
 
-  *this=term_list<Term>();
-  push_front(el);
+  term_list<Term> result;
+  result.push_front(el);
 
   /* Insert elements at the front of the list */
   for (size_t j=len; j>0; j--)
   {
-    push_front(Term(buffer[j-1]));
+    result.push_front(Term(buffer[j-1]));
   }
+  return result;
 }
 
 template <typename Term>

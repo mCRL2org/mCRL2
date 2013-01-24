@@ -150,7 +150,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
                 j++;
               }
             }
-            vars.push_back(get_vars(atermpp::aterm_cast<const atermpp::aterm_appl>(pars[i+1])));
+            vars=push_back(vars,get_vars(atermpp::aterm_cast<const atermpp::aterm_appl>(pars[i+1])));
           }
           else
           {
@@ -172,7 +172,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
             {
               bs[i] = true;
             }
-            vars.push_back(get_vars(aterm_cast<const atermpp::aterm_appl>(pars[i+1])));
+            vars=push_back(vars,get_vars(aterm_cast<const atermpp::aterm_appl>(pars[i+1])));
           }
         }
 
