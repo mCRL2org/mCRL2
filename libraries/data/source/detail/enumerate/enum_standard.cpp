@@ -509,89 +509,117 @@ bool EnumeratorSolutionsStandard::next(
         for( ; it!=constructors_for_sort.end() ; ++it)
         {
           // Construct the domain and target sort for the constructor.
-          sort_expression target_sort=it->sort();
-          sort_expression_list domain_sorts;
-          if (is_function_sort(target_sort))
+          // sort_expression target_sort=it->sort();
+          // sort_expression_list domain_sorts;
+          const sort_expression &it_sort=it->sort();
+          if (is_function_sort(it_sort))
           {
-            domain_sorts=function_sort(target_sort).domain();
-            target_sort=function_sort(target_sort).codomain();
-          }
-          assert(target_sort==sort);
+            const sort_expression_list& domain_sorts=aterm_cast<function_sort>(it_sort).domain();
+            assert(function_sort(it_sort).codomain()==sort);
 
-          variable_list var_list;
-          assert(var_array.size()==0);
-          var_array.push_back(OpId2Int(*it));
+            variable_list var_list;
+            assert(var_array.size()==0);
+            var_array.push_back(OpId2Int(*it));
 
-          for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
-          {
-            const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
-            var_list.push_front(fv);
-            var_array.push_back(fv);
-
-            used_vars++;
-            if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
+            for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
             {
-              if (solution_possible && max_vars != 0)
+              const variable fv(m_enclosing_enumerator->rewr_obj->generator("@x@",false),*i);
+              var_list.push_front(fv);
+              var_array.push_back(fv);
+
+              used_vars++;
+              if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
               {
-                mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << std::endl;
-                mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";
-                solution_possible=false;
-                return false;
+                if (solution_possible && max_vars != 0)
+                {
+                  mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << std::endl;
+                  mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";
+                  solution_possible=false;
+                  return false;
+                }
+                else
+                {
+                  fs_stack.clear();
+                  stringstream exception_message;
+                  exception_message << "needed more than " << m_max_internal_variables << " variables to find all valuations of ";
+                  for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
+                  {
+                    if (k != enum_vars.begin())
+                    {
+                      exception_message << ", ";
+                    }
+                    exception_message << data::pp(*k) << ":" << data::pp(k->sort());
+                  }
+                  exception_message << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr));
+                  throw mcrl2::runtime_error(exception_message.str());
+                }
               }
-              else
+              else if (used_vars > max_vars)
               {
-                fs_stack.clear();
-                stringstream exception_message;
-                exception_message << "needed more than " << m_max_internal_variables << " variables to find all valuations of ";
+                mCRL2log(log::info) << "need more than " << max_vars << " variables to find all valuations of ";
                 for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
                 {
                   if (k != enum_vars.begin())
                   {
-                    exception_message << ", ";
+                    mCRL2log(log::info) << ", ";
                   }
-                  exception_message << data::pp(*k) << ":" << data::pp(k->sort());
+                  mCRL2log(log::info) << data::pp(*k) << ":" << data::pp(k->sort());
                 }
-                exception_message << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr));
-                throw mcrl2::runtime_error(exception_message.str());
+                mCRL2log(log::info) << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
+                max_vars *= MAX_VARS_FACTOR;
               }
             }
-            else if (used_vars > max_vars)
-            {
-              mCRL2log(log::info) << "need more than " << max_vars << " variables to find all valuations of ";
-              for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
-              {
-                if (k != enum_vars.begin())
-                {
-                  mCRL2log(log::info) << ", ";
-                }
-                mCRL2log(log::info) << data::pp(*k) << ":" << data::pp(k->sort());
-              }
-              mCRL2log(log::info) << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
-              max_vars *= MAX_VARS_FACTOR;
-            }
-          }
-          // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
-          // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
-          // using it is much cheaper than using a default substitution.
-          const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,var_array.begin(), var_array.end()),enum_sigma);
-          var_array.clear();
+            // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
+            // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
+            // using it is much cheaper than using a default substitution.
+            const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,var_array.begin(), var_array.end()),enum_sigma);
+            var_array.clear();
 
-          const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
-          enum_sigma[var]=term_rf;
-          const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
-          enum_sigma[var]=old_substituted_value;
-          variable_list templist1=e.substituted_vars();
-          templist1.push_front(var);
-          atermpp::term_list<atermpp::aterm_appl> templist2=e.vals();
-          templist2.push_front(term_rf);
-          push_on_fs_stack_and_split_or_without_rewriting(
-                                  fs_stack,
-                                  uvars+var_list,
-                                  templist1,
-                                  templist2,
-                                  rewritten_expr,
-                                  atermpp::term_list < atermpp::aterm_appl > (),
-                                  false);
+            const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
+            enum_sigma[var]=term_rf;
+            const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
+            enum_sigma[var]=old_substituted_value;
+            variable_list templist1=e.substituted_vars();
+            templist1.push_front(var);
+            atermpp::term_list<atermpp::aterm_appl> templist2=e.vals();
+            templist2.push_front(term_rf);
+            push_on_fs_stack_and_split_or_without_rewriting(
+                                    fs_stack,
+                                    uvars+var_list,
+                                    templist1,
+                                    templist2,
+                                    rewritten_expr,
+                                    atermpp::term_list < atermpp::aterm_appl > (),
+                                    false);
+          }
+          else 
+          {
+            // is_function_sort(it->sort()) does not hold.
+            // Construct the domain and target sort for the constructor.
+            assert(it->sort()==sort);
+          
+            // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
+            // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
+            // using it is much cheaper than using a default substitution.
+            const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
+
+            const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
+            enum_sigma[var]=term_rf;
+            const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
+            enum_sigma[var]=old_substituted_value;
+            variable_list templist1=e.substituted_vars();
+            templist1.push_front(var);
+            atermpp::term_list<atermpp::aterm_appl> templist2=e.vals();
+            templist2.push_front(term_rf);
+            push_on_fs_stack_and_split_or_without_rewriting(
+                                    fs_stack,
+                                    uvars,
+                                    templist1,
+                                    templist2,
+                                    rewritten_expr,
+                                    atermpp::term_list < atermpp::aterm_appl > (),
+                                    false);
+          }
         }
       }
     }

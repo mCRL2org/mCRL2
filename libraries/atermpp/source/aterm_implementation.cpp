@@ -82,16 +82,24 @@ void free_term(const detail::_aterm* t)
 
 void resize_aterm_hashtable()
 {
+  static bool resizing_aterm_hashtable_has_failed=false;
+  if (resizing_aterm_hashtable_has_failed)
+  {
+    // Not increasing the hashtable has only a slight performance penalty,
+    // as the hashtables get fuller. But it saves memory, and does not lead
+    // to incorrect behaviour.
+    return;
+  }
   const size_t old_size=aterm_table_size;
   aterm_table_size <<=1; // Double the size.
-  const _aterm* * new_hashtable;
-
-  {
-    new_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
-  }
+  // Intentionally do not throw the old hashtable away before allocating the new one. 
+  // It is better when the extra memory is used for blocks of aterms, than for increasing the
+  // hashtable. 
+  const _aterm* * new_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
   
   if (new_hashtable==NULL)
   {
+    resizing_aterm_hashtable_has_failed=true; 
     mCRL2log(mcrl2::log::warning) << "could not resize hashtable to size " << aterm_table_size << ". "; 
     aterm_table_size = old_size;
     return;
