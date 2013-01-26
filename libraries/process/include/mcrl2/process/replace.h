@@ -12,15 +12,46 @@
 #ifndef MCRL2_PROCESS_REPLACE_H
 #define MCRL2_PROCESS_REPLACE_H
 
-#include "mcrl2/data/replace.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/process/add_binding.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/find.h"
 
 namespace mcrl2
 {
 
 namespace process
 {
+
+namespace detail {
+
+/// \cond INTERNAL_DOCS
+template <template <class> class Builder, class Derived, class Substitution>
+struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
+{
+  typedef lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::id_generator;
+  using super::sigma;
+  using super::V;
+
+  add_capture_avoiding_replacement(Substitution& sigma, std::set<data::variable>& V)
+    : super(sigma, V)
+  { }
+
+  process_expression operator()(const sum& x)
+  {
+    data::variable_list v = data::detail::update_substitution(sigma, x.bound_variables(), V, id_generator);
+    V.insert(v.begin(), v.end());
+    process_expression result = sum(v, (*this)(x.operand()));
+    return result;
+  }
+};
+/// \endcond
+
+} // namespace detail
 
 //--- start generated process replace code ---//
 template <typename T, typename Substitution>
@@ -77,7 +108,7 @@ T replace_variables(const T& x,
                     Substitution sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
-{   
+{
   return core::make_update_apply_builder<process::data_expression_builder>(sigma)(x);
 }
 
@@ -117,6 +148,34 @@ T replace_free_variables(const T& x,
                         )
 {
   return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+void replace_variables_capture_avoiding(T& x,
+                       Substitution& sigma,
+                       const VariableContainer& sigma_variables,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                      )
+{
+  std::set<data::variable> V = process::find_free_variables(x);
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_variables_capture_avoiding(const T& x,
+                    Substitution& sigma,
+                    const VariableContainer& sigma_variables,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                   )
+{
+  std::set<data::variable> V = process::find_free_variables(x);
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  return data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
 //--- end generated process replace code ---//
 

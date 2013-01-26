@@ -206,16 +206,30 @@ inline
 atermpp::vector<data::variable> variable_context()
 {
 	atermpp::vector<data::variable> result;
+  result.push_back(make_bool("k"));
+  result.push_back(make_bool("m"));
+  result.push_back(make_bool("n"));
   result.push_back(make_bool("v"));
   result.push_back(make_bool("w"));
   result.push_back(make_bool("x"));
   result.push_back(make_bool("y"));
   result.push_back(make_bool("z"));
+  result.push_back(make_bool("k1"));
+  result.push_back(make_bool("m1"));
+  result.push_back(make_bool("n1"));
   result.push_back(make_bool("v1"));
   result.push_back(make_bool("w1"));
   result.push_back(make_bool("x1"));
   result.push_back(make_bool("y1"));
   result.push_back(make_bool("z1"));
+  result.push_back(make_bool("k2"));
+  result.push_back(make_bool("m2"));
+  result.push_back(make_bool("n2"));
+  result.push_back(make_bool("v2"));
+  result.push_back(make_bool("w2"));
+  result.push_back(make_bool("x2"));
+  result.push_back(make_bool("y2"));
+  result.push_back(make_bool("z2"));
   return result;
 }
 
@@ -275,6 +289,8 @@ void test_replace_variables_capture_avoiding()
 	test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := x", "forall x1: Bool. x1 => x");
 	test_replace_variables_capture_avoiding("forall x: Bool . x => x1 => y", "y: Bool := x", "forall x2: Bool. x2 => x1 => x");
 	test_replace_variables_capture_avoiding("x => x1 => y whr x = y end", "y: Bool := x", "x2 => x1 => x whr x2 = x end");
+	test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => forall k: Bool. k => n");
+	test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => forall n2: Bool. n2 => n");
 }
 
 int test_main(int argc, char** argv)

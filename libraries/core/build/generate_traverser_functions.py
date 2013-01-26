@@ -116,7 +116,7 @@ T replace_variables(const T& x,
                     Substitution sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
-{   
+{
   return core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma)(x);
 }
 
@@ -156,6 +156,34 @@ T replace_free_variables(const T& x,
                         )
 {
   return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+
+/// \\\\brief Applies sigma as a capture avoiding substitution to x
+/// \\\\param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+void replace_variables_capture_avoiding(T& x,
+                       Substitution& sigma,
+                       const VariableContainer& sigma_variables,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                      )
+{
+  std::set<data::variable> V = NAMESPACE::find_free_variables(x);
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+}
+
+/// \\\\brief Applies sigma as a capture avoiding substitution to x
+/// \\\\param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_variables_capture_avoiding(const T& x,
+                    Substitution& sigma,
+                    const VariableContainer& sigma_variables,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                   )
+{
+  std::set<data::variable> V = NAMESPACE::find_free_variables(x);
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  return data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
 '''
 
@@ -291,7 +319,7 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 def generate_code(filename, namespace, label, text):
     text = re.sub('NAMESPACE', namespace, text)
     insert_text_in_file(filename, text, 'generated %s %s code' % (namespace, label))
-    print_labels(namespace, label)   
+    print_labels(namespace, label)
 
 def print_labels(namespace, label):
     print '//--- start generated %s %s code ---//' % (namespace, label)
