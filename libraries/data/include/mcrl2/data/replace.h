@@ -339,8 +339,22 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   data_expression operator()(const data::where_clause& x)
   {
     data::assignment_list assignments = atermpp::convert<data::assignment_list>(x.declarations());
-    assignments = (*this)(assignments);
-    return data::where_clause((*this)(x.body()), assignments);
+    atermpp::vector<data::variable> tmp;
+    for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
+    {
+      tmp.push_back(i->lhs());
+    }
+    atermpp::vector<data::variable> v = update_sigma.push(tmp);
+
+    atermpp::vector<data::assignment> a;
+    atermpp::vector<data::variable>::const_iterator j = v.begin();
+    for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i, ++j)
+    {
+      a.push_back(data::assignment(*j, (*this)(i->rhs())));
+    }
+    data_expression result = data::where_clause((*this)(x.body()), assignment_list(a.begin(), a.end()));
+    update_sigma.pop(v);
+    return result;
   }
 
   data_expression operator()(const data::forall& x)
