@@ -34,8 +34,7 @@ process_expression expand_rhs(const process::process_instance_assignment& x, con
   {
     sigma[i->lhs()] = i->rhs();
   }
-  data::variable_list fp = eqn.formal_parameters();
-  std::set<data::variable> v(fp.begin(), fp.end());
+  std::set<data::variable> v = process::find_free_variables(x);
   process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
   return result;
 }
@@ -54,8 +53,7 @@ process_expression expand_rhs(const process::process_instance& x, const atermpp:
   {
     sigma[*di] = *ei;
   }
-  data::variable_list fp = eqn.formal_parameters();
-  std::set<data::variable> v(fp.begin(), fp.end());
+  std::set<data::variable> v = process::find_free_variables(x);
   process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
   return result;
 }
