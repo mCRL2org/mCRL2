@@ -32,50 +32,49 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::id_generator;
   using super::sigma;
-  using super::V;
+  using super::update_sigma;
 
-  add_capture_avoiding_replacement(Substitution& sigma, std::set<data::variable>& V)
+  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V)
     : super(sigma, V)
   { }
 
   void operator()(action_summand& x)
   {
-    data::variable_list v = data::detail::update_substitution(sigma, x.summation_variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
+    data::variable_list v = update_sigma.push(x.summation_variables());
     x.summation_variables() = v;
     x.condition() = (*this)(x.condition());
     (*this)(x.multi_action());
     x.assignments() = (*this)(x.assignments());
+    update_sigma.pop(v);
   }
 
   void operator()(deadlock_summand& x)
   {
-    data::variable_list v = data::detail::update_substitution(sigma, x.summation_variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
+    data::variable_list v = update_sigma.push(x.summation_variables());
     x.summation_variables() = v;
     x.condition() = (*this)(x.condition());
     (*this)(x.deadlock());
+    update_sigma.pop(v);
   }
 
   void operator()(linear_process& x)
   {
-    data::variable_list v = data::detail::update_substitution(sigma, x.process_parameters(), V, id_generator);
-    V.insert(v.begin(), v.end());
+    data::variable_list v = update_sigma.push(x.process_parameters());
     x.process_parameters() = v;
     (*this)(x.action_summands());
     (*this)(x.deadlock_summands());
+    update_sigma.pop(v);
   }
 
   void operator()(specification& x)
   {
-    atermpp::set<data::variable> v = data::detail::update_substitution(sigma, x.global_variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
+    atermpp::set<data::variable> v = update_sigma(x.global_variables());
     x.global_variables() = v;
     (*this)(x.process());
     x.action_labels() = (*this)(x.action_labels());
     x.initial_process() = (*this)(x.initial_process());
+    update_sigma.pop(v);
   }
 };
 
@@ -187,7 +186,8 @@ void replace_variables_capture_avoiding(T& x,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
 {
-  std::set<data::variable> V = lps::find_free_variables(x);
+  std::multiset<data::variable> V;
+  lps::find_free_variables(x, std::inserter(V, V.begin()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
@@ -201,7 +201,8 @@ T replace_variables_capture_avoiding(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
 {
-  std::set<data::variable> V = lps::find_free_variables(x);
+  std::multiset<data::variable> V;
+  lps::find_free_variables(x, std::inserter(V, V.begin()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }

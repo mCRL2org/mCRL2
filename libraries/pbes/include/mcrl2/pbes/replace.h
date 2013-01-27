@@ -32,52 +32,46 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::id_generator;
   using super::sigma;
-  using super::V;
+  using super::update_sigma;
 
   pbes_expression operator()(const forall& x)
   {
-    data::variable_list v = data::detail::update_substitution(sigma, x.variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
-    return forall(v, (*this)(x.body()));
+    data::variable_list v = update_sigma.push(x.variables());
+    pbes_expression result = forall(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
   }
 
   pbes_expression operator()(const exists& x)
   {
-    data::variable_list v = data::detail::update_substitution(sigma, x.variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
-    return exists(v, (*this)(x.body()));
+    data::variable_list v = update_sigma.push(x.variables());
+    pbes_expression result = exists(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
   }
 
   void operator()(pbes_equation& x)
   {
-    data::variable_list v = data::detail::update_substitution(sigma, x.variable().parameters(), V, id_generator);
-    V.insert(v.begin(), v.end());
+    data::variable_list v = update_sigma.push(x.variable().parameters());
     x.variable() = propositional_variable(x.variable().name(), v);
     x.formula() = (*this)(x.formula());
+    update_sigma.pop(v);
   }
 
   template <typename Container>
   void operator()(pbes<Container>& x)
   {
-    atermpp::set<data::variable> v = data::detail::update_substitution(sigma, x.global_variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
+    atermpp::set<data::variable> v = update_sigma(x.global_variables());
     x.global_variables() = v;
     (*this)(x.equations());
+    update_sigma.pop(v);
   }
 
-  add_capture_avoiding_replacement(Substitution& sigma, std::set<data::variable>& V)
+  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V)
     : super(sigma, V)
   { }
 };
-
-template <template <class> class Builder, class Derived, class Substitution>
-add_capture_avoiding_replacement<Builder, Derived, Substitution>
-make_add_capture_avoiding_replacement(Substitution& sigma, std::set<data::variable>& V)
-{
-  return add_capture_avoiding_replacement<Builder, Derived, Substitution>(sigma, V);
-}
 /// \endcond
 
 } // namespace detail
@@ -188,7 +182,8 @@ void replace_variables_capture_avoiding(T& x,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
 {
-  std::set<data::variable> V = pbes_system::find_free_variables(x);
+  std::multiset<data::variable> V;
+  pbes_system::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
@@ -202,7 +197,8 @@ T replace_variables_capture_avoiding(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
 {
-  std::set<data::variable> V = pbes_system::find_free_variables(x);
+  std::multiset<data::variable> V;
+  pbes_system::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }

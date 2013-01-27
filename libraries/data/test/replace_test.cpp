@@ -283,14 +283,14 @@ void test_replace_variables_capture_avoiding(const std::string& x_text, const st
 
 void test_replace_variables_capture_avoiding()
 {
-	test_replace_variables_capture_avoiding("v", "v: Bool := w", "w");
-	test_replace_variables_capture_avoiding("forall x: Bool . x => y", "x: Bool := z", "forall x1: Bool. x1 => y");
-	test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := z", "forall x: Bool. x => z");
-	test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := x", "forall x1: Bool. x1 => x");
-	test_replace_variables_capture_avoiding("forall x: Bool . x => x1 => y", "y: Bool := x", "forall x2: Bool. x2 => x1 => x");
-	test_replace_variables_capture_avoiding("x => x1 => y whr x = y end", "y: Bool := x", "x2 => x1 => x whr x2 = x end");
-	test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => forall k: Bool. k => n");
-	test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => forall n2: Bool. n2 => n");
+  test_replace_variables_capture_avoiding("v", "v: Bool := w", "w");
+  test_replace_variables_capture_avoiding("forall x: Bool . x => y", "x: Bool := z", "forall x1: Bool. x1 => y");
+  test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := z", "forall x: Bool. x => z");
+  test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := x", "forall x1: Bool. x1 => x");
+  test_replace_variables_capture_avoiding("forall x: Bool . x => x1 => y", "y: Bool := x", "forall x2: Bool. x2 => x1 => x");
+  test_replace_variables_capture_avoiding("x => x1 => y whr x = y end", "y: Bool := x", "x2 => x1 => x whr x2 = x end");
+  test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => forall k: Bool. k => n");
+  test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => forall n2: Bool. n2 => n");
 }
 
 int test_main(int argc, char** argv)

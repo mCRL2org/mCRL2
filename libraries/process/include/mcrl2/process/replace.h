@@ -33,19 +33,18 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::id_generator;
   using super::sigma;
-  using super::V;
+  using super::update_sigma;
 
-  add_capture_avoiding_replacement(Substitution& sigma, std::set<data::variable>& V)
+  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V)
     : super(sigma, V)
   { }
 
   process_expression operator()(const sum& x)
   {
-    data::variable_list v = data::detail::update_substitution(sigma, x.bound_variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
+    data::variable_list v = update_sigma.push(x.bound_variables());
     process_expression result = sum(v, (*this)(x.operand()));
+    update_sigma.pop(v);
     return result;
   }
 };
@@ -159,7 +158,8 @@ void replace_variables_capture_avoiding(T& x,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
 {
-  std::set<data::variable> V = process::find_free_variables(x);
+  std::multiset<data::variable> V;
+  process::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
@@ -173,7 +173,8 @@ T replace_variables_capture_avoiding(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
 {
-  std::set<data::variable> V = process::find_free_variables(x);
+  std::multiset<data::variable> V;
+  process::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }

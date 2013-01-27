@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
@@ -155,8 +156,92 @@ make_replace_free_variables_builder(Substitution sigma, const VariableContainer&
   return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
 }
 
+template <typename Substitution>
+struct substitution_updater
+{
+  Substitution& sigma;
+  std::multiset<data::variable>& V;
+  data::set_identifier_generator id_generator;
+  atermpp::vector<data::assignment> undo;
+  std::vector<std::size_t> undo_sizes;
+
+  substitution_updater(Substitution& sigma_, std::multiset<data::variable>& V_)
+    : sigma(sigma_), V(V_)
+  {}
+
+  data::variable bind(const data::variable& v)
+  {
+    if (V.find(v) == V.end() && sigma(v) == v)
+    {
+      return v;
+    }
+    else
+    {
+      id_generator.add_identifier(v.name());
+      data::variable w(id_generator(v.name()), v.sort());
+      while (sigma(w) != w || V.find(w) != V.end())
+      {
+        w = data::variable(id_generator(v.name()), v.sort());
+      }
+      undo.push_back(data::assignment(v, sigma(v)));
+      sigma[v] = w;
+      return w;
+    }
+  }
+
+  data::variable push(const data::variable& v)
+  {
+    undo_sizes.push_back(undo.size());
+    data::variable result = bind(v);
+    V.insert(result);
+    return result;
+  }
+
+  void pop(const data::variable& v)
+  {
+    V.erase(V.find(v));
+    std::size_t n = undo.size() - undo_sizes.back();
+    undo_sizes.pop_back();
+    if (n > 0)
+    {
+      const data::assignment& a = undo.back();
+      sigma[a.lhs()] = a.rhs();
+      undo.pop_back();
+    }
+  }
+
+  template <typename VariableContainer>
+  VariableContainer push(const VariableContainer& v)
+  {
+    undo_sizes.push_back(undo.size());
+    atermpp::vector<data::variable> result; for (typename VariableContainer::const_iterator i = v.begin(); i != v.end(); ++i) {
+      data::variable w = bind(*i);
+      V.insert(w);
+      result.push_back(w);
+    }
+    return VariableContainer(result.begin(), result.end());
+  }
+
+  template <typename VariableContainer>
+  void pop(const VariableContainer& v)
+  {
+    for (typename VariableContainer::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      V.erase(V.find(*i));
+    }
+    std::size_t n = undo.size() - undo_sizes.back();
+    undo_sizes.pop_back();
+    for (std::size_t i = 0; i < n; i++)
+    {
+      const data::assignment& a = undo.back();
+      sigma[a.lhs()] = a.rhs();
+      undo.pop_back();
+    }
+  }
+};
+
 template <typename Substitution, typename IdentifierGenerator>
-data::variable update_substitution(Substitution& sigma, const data::variable& v, const std::set<data::variable>& V, IdentifierGenerator& id_generator)
+data::variable update_substitution(Substitution& sigma, const data::variable& v, const std::multiset<data::variable>& V, IdentifierGenerator& id_generator)
 {
   if (V.find(v) == V.end() && sigma(v) == v)
   {
@@ -177,7 +262,7 @@ data::variable update_substitution(Substitution& sigma, const data::variable& v,
 }
 
 template <typename Substitution, typename IdentifierGenerator, typename VariableContainer>
-VariableContainer update_substitution(Substitution& sigma, const VariableContainer& v, const std::set<data::variable>& V, IdentifierGenerator& id_generator)
+VariableContainer update_substitution(Substitution& sigma, const VariableContainer& v, const std::multiset<data::variable>& V, IdentifierGenerator& id_generator)
 {
   atermpp::vector<data::variable> result;
   for (typename VariableContainer::const_iterator i = v.begin(); i != v.end(); ++i)
@@ -195,7 +280,7 @@ struct substitute_capture_avoiding_variables_builder: public Binder<Builder, sub
   using super::leave;
   using super::operator();
 
-  substitute_capture_avoiding_variables_builder(Substitution& sigma, std::set<data::variable>& V)
+  substitute_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
     : super(sigma, V)
   { }
 
@@ -206,7 +291,7 @@ struct substitute_capture_avoiding_variables_builder: public Binder<Builder, sub
 
 template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
 substitute_capture_avoiding_variables_builder<Builder, Binder, Substitution>
-apply_replace_capture_avoiding_variables_builder(Substitution& sigma, std::set<data::variable>& V)
+apply_replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
 {
   return substitute_capture_avoiding_variables_builder<Builder, Binder, Substitution>(sigma, V);
 }
@@ -220,11 +305,12 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   using super::operator();
 
   Substitution& sigma;
-  std::set<data::variable>& V;
+  std::multiset<data::variable>& V;
   data::set_identifier_generator id_generator;
+  substitution_updater<Substitution> update_sigma;
 
-  add_capture_avoiding_replacement(Substitution& sigma_, std::set<data::variable>& V_)
-    : sigma(sigma_), V(V_)
+  add_capture_avoiding_replacement(Substitution& sigma_, std::multiset<data::variable>& V_)
+    : sigma(sigma_), V(V_), update_sigma(sigma_, V_)
   { }
 
   data_expression operator()(const variable& v)
@@ -234,20 +320,19 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
 
   data::assignment_list operator()(const data::assignment_list& x)
   {
-    // TODO: cleanup this code
     atermpp::vector<data::variable> tmp;
     for (data::assignment_list::const_iterator i = x.begin(); i != x.end(); ++i)
     {
       tmp.push_back(i->lhs());
     }
-    atermpp::vector<data::variable> v = update_substitution(sigma, tmp, V, id_generator);
-    V.insert(v.begin(), v.end());
+    atermpp::vector<data::variable> v = update_sigma.push(tmp);
     atermpp::vector<data::assignment> a;
     atermpp::vector<data::variable>::const_iterator j = v.begin();
     for (data::assignment_list::const_iterator i = x.begin(); i != x.end(); ++i, ++j)
     {
       a.push_back(data::assignment(*j, (*this)(i->rhs())));
     }
+    update_sigma.pop(v);
     return data::assignment_list(a.begin(), a.end());
   }
 
@@ -260,30 +345,34 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
 
   data_expression operator()(const data::forall& x)
   {
-    data::variable_list v = update_substitution(sigma, x.variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
-    return data::forall(v, (*this)(x.body()));
+    data::variable_list v = update_sigma.push(x.variables());
+    data_expression result = data::forall(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
   }
 
   data_expression operator()(const data::exists& x)
   {
-    data::variable_list v = update_substitution(sigma, x.variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
-    return data::forall(v, (*this)(x.body()));
+    data::variable_list v = update_sigma.push(x.variables());
+    data_expression result = data::exists(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
   }
 
   data_expression operator()(const data::lambda& x)
   {
-    data::variable_list v = update_substitution(sigma, x.variables(), V, id_generator);
-    V.insert(v.begin(), v.end());
-    return data::forall(v, (*this)(x.body()));
+    data::variable_list v = update_sigma.push(x.variables());
+    data_expression result = data::lambda(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
   }
 
-  data_expression operator()(const data::assignment& x)
+  assignment operator()(const data::assignment& x)
   {
-    data::variable v = update_substitution(sigma, x.lhs(), V, id_generator);
-    V.insert(v);
-    return data::assignment(v, (*this)(x.rhs()));
+    data::variable v = update_sigma.push(x.lhs());
+    assignment result(v, (*this)(x.rhs()));
+    update_sigma.pop(v);
+    return result;
   }
 
   void operator()(data::data_equation& x)
@@ -405,7 +494,8 @@ void replace_variables_capture_avoiding(T& x,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
 {
-  std::set<data::variable> V = data::find_free_variables(x);
+  std::multiset<data::variable> V;
+  data::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
@@ -419,7 +509,8 @@ T replace_variables_capture_avoiding(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
 {
-  std::set<data::variable> V = data::find_free_variables(x);
+  std::multiset<data::variable> V;
+  data::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
