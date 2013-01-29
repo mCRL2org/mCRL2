@@ -40,8 +40,7 @@ class ToolCatalog
     QDomDocument m_xml;
     // Maps extensions to file types
     QMultiMap<QString, QString> m_filetypes;
-
-    QMap<QString, QMap<QString, ToolInformation> > m_categories;
+    QMap<QString, QList<ToolInformation> > m_categories;
 };
 
 #endif // TOOLCATALOG_H

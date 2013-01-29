@@ -11,9 +11,12 @@
 #include "mcrl2/utilities/logger.h"
 #include <QTextStream>
 
-ToolInformation::ToolInformation(QString name, QString input, QString input2, QString output, bool guiTool)
-  : name(name), input(input), input2(input2), output(output), guiTool(guiTool), valid(false)
+ToolInformation::ToolInformation(QString name, QString input1, QString input2, QString output, bool guiTool)
+  : name(name), input2(input2), output(output), guiTool(guiTool), valid(false)
 {
+  QStringList inputs = input1.split(';');
+  for (QStringList::iterator it = inputs.begin(); it != inputs.end(); ++it)
+    input.insert(*it);
 
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
 

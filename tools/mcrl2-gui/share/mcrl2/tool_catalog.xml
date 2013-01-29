@@ -23,8 +23,7 @@
 <tool name="ltsinfo" 		input_format="lts"                          category="Analysis"/>
 <tool name="ltsview" 		input_format="lts" 				gui="true"  category="Analysis"/>
 <tool name="mcrl22lps" 		input_format="mcrl2" output_format ="lps"   category="Transformation"/> 
-<tool name="pbes2bool" 		input_format="pbes"                         category="Analysis"/>
-<tool name="pbes2bool" 		input_format="bes"                         category="Analysis"/>
+<tool name="pbes2bool" 		input_format="pbes;bes"                    category="Analysis"/>
 <tool name="pbesconstelm" 	input_format="pbes" output_format ="pbes"   category="Transformation"/> 
 <tool name="pbesinfo" 		input_format="pbes"                         category="Analysis"/>
 <tool name="pbesparelm" 	input_format="pbes" output_format ="pbes"   category="Transformation"/>
@@ -36,8 +35,7 @@
 <tool name="lpsxsim" 		input_format="lps" 				gui="true"  category="Analysis"/>
 <tool name="mcrl2xi" 		input_format="mcrl2" 				gui="true" category="Editing"/>
 <tool name="pbes2bes" 	input_format="pbes" 	output_format ="bes"	category="Transformation"/>
-<tool name="pbespgsolve" 		input_format="pbes"                         category="Analysis"/>
-<tool name="pbespgsolve" 		input_format="bes"                         category="Analysis"/>
+<tool name="pbespgsolve" 	input_format="pbes;bes"                         category="Analysis"/>
 <tool name="besinfo" 		input_format="bes"                         category="Analysis"/>
 <tool name="bespp" 		input_format="bes" output_format ="txt" category="Analysis"/>
 </tool-catalog>
