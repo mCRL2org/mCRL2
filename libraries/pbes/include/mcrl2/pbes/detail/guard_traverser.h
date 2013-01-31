@@ -96,7 +96,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 
   void push(const guard_expression& x)
   {
-    mCRL2log(log::debug) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::debug1) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 
@@ -242,19 +242,19 @@ struct aterm_traits<std::pair<mcrl2::pbes_system::propositional_variable_instant
 {
   static void protect(const std::pair<mcrl2::pbes_system::propositional_variable_instantiation, mcrl2::pbes_system::pbes_expression>& t)
   {
-  	t.first.protect();
+    t.first.protect();
     t.second.protect();
   }
 
   static void unprotect(const std::pair<mcrl2::pbes_system::propositional_variable_instantiation, mcrl2::pbes_system::pbes_expression>& t)
   {
-  	t.first.unprotect();
+    t.first.unprotect();
     t.second.unprotect();
   }
 
   static void mark(const std::pair<mcrl2::pbes_system::propositional_variable_instantiation, mcrl2::pbes_system::pbes_expression>& t)
   {
-  	t.first.mark();
+    t.first.mark();
     t.second.mark();
   }
 };

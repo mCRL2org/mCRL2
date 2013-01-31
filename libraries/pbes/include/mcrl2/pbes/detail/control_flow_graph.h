@@ -597,6 +597,7 @@ class control_flow_graph_algorithm
         const atermpp::vector<pfnf_implication>& implications = eqn.implications();
         if (implications.empty())
         {
+          mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(eqn.h()) << " in vertex " << pbes_system::pp(u.X) << " (empty case)" << std::endl;
           u.guards.insert(eqn.h());
         }
         for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
@@ -624,6 +625,7 @@ class control_flow_graph_algorithm
               vertex_iterator k = insert_control_flow_vertex(Y);
               control_flow_vertex& v = k->second;
               u.guards.insert(guard);
+              mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(guard) << " in vertex " << pbes_system::pp(u.X) << std::endl;
               todo.insert(&v);
               control_flow_vertex* target = &v;
               control_flow_edge e(source, target, label);
@@ -635,6 +637,7 @@ class control_flow_graph_algorithm
             {
               control_flow_vertex& v = q->second;
               u.guards.insert(guard);
+              mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(guard) << " in vertex " << pbes_system::pp(u.X) << std::endl;
               control_flow_vertex* target = &v;
               control_flow_edge e(source, target, label);
               mCRL2log(log::debug, "control_flow") << "[cf] insert edge " << e.print() << std::endl;
