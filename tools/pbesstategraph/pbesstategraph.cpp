@@ -27,12 +27,14 @@ class pbes_stategraph_tool: public input_output_tool
   protected:
     bool m_simplify;
     bool m_apply_to_original;
+    bool m_use_pfnf_variant;
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
       m_simplify = parser.option_argument_as<bool>("simplify");
       m_apply_to_original = parser.option_argument_as<bool>("apply-to-original");
+      m_use_pfnf_variant = parser.option_argument_as<bool>("use-pfnf-variant");
     }
 
     void add_options(interface_description& desc)
@@ -40,6 +42,7 @@ class pbes_stategraph_tool: public input_output_tool
       super::add_options(desc);
       desc.add_option("simplify", make_optional_argument("NAME", "1"), "simplify the PBES during reduction", 's');
       desc.add_option("apply-to-original", make_optional_argument("NAME", "0"), "apply reduction on the original PBES", 'a');
+      desc.add_option("use-pfnf-variant", make_optional_argument("NAME", "0"), "first convert the PBES into PFNF format", 'p');
     }
 
   public:
@@ -62,7 +65,8 @@ class pbes_stategraph_tool: public input_output_tool
       pbesstategraph(input_filename(),
                      output_filename(),
                      m_simplify,
-                     m_apply_to_original
+                     m_apply_to_original,
+                     m_use_pfnf_variant
                     );
       return true;
     }

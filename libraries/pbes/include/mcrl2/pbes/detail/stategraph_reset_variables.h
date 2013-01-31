@@ -134,7 +134,6 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
             std::size_t m = *j;
             data::data_expression_list e = Y.parameters();
             data::data_expression_list::const_iterator k = e.begin();
-            mCRL2log(log::debug, "stategraph") << "m = " << m << " Y = " << pbes_system::pp(Y) << std::endl;
             for (std::size_t p = 0; p < m; ++p)
             {
               ++k;

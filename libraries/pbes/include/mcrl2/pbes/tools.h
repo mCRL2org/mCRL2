@@ -116,6 +116,13 @@ void pbesabsinthe(const std::string& input_filename,
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
                     bool simplify,
+                    bool apply_to_original,
+                    bool use_pfnf_variant
+                   );
+
+void qbesstategraph(const std::string& input_filename,
+                    const std::string& output_filename,
+                    bool simplify,
                     bool apply_to_original
                    );
 
