@@ -47,6 +47,7 @@ class aterm
     template <class Term, class Iter, class ATermConverter>
     friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
 
+    friend const detail::_aterm* detail::address(const aterm &t);
   protected:
     const detail::_aterm* m_term;
 
@@ -98,7 +99,6 @@ class aterm
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
-      assert(t!=NULL);
       increase_reference_count<false>();
     } 
 
@@ -113,7 +113,6 @@ class aterm
     /// \brief Copy constructor
     aterm(const aterm &t):m_term(t.m_term)
     {
-      assert(t.address()!=NULL);
       increase_reference_count<true>();
     }
 
@@ -164,8 +163,8 @@ class aterm
     /// \return true iff t is equal to the current term.
     bool operator ==(const aterm &t) const
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
+      assert(m_term->reference_count()>0);
+      assert(t.m_term->reference_count()>0);
       return m_term==t.m_term;
     }
 
@@ -175,8 +174,8 @@ class aterm
     /// \return false iff t is equal to the current term.
     bool operator !=(const aterm &t) const
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
+      assert(m_term->reference_count()>0);
+      assert(t.m_term->reference_count()>0);
       return m_term!=t.m_term;
     }
 
@@ -189,8 +188,8 @@ class aterm
     /// \return True iff the current term is smaller than the argument.
     bool operator <(const aterm &t) const
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
+      assert(m_term->reference_count()>0);
+      assert(t.m_term->reference_count()>0);
       return m_term<t.m_term;
     }
 
@@ -200,8 +199,8 @@ class aterm
     /// \return True iff the current term is larger than the argument.
     bool operator >(const aterm &t) const
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
+      assert(m_term->reference_count()>0);
+      assert(t.m_term->reference_count()>0);
       return m_term>t.m_term;
     }
 
@@ -211,8 +210,8 @@ class aterm
     /// \return True iff the current term is smaller or equal than the argument.
     bool operator <=(const aterm &t) const
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
+      assert(m_term->reference_count()>0);
+      assert(t.m_term->reference_count()>0);
       return m_term<=t.m_term;
     }
 
@@ -222,19 +221,9 @@ class aterm
     /// \return True iff the current term is larger or equalthan the argument.
     bool operator >=(const aterm &t) const
     {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      assert(t.m_term!=NULL && t.m_term->reference_count()>0);
+      assert(m_term->reference_count()>0);
+      assert(t.m_term->reference_count()>0);
       return m_term>=t.m_term;
-    }
-
-    /// \brief Provide the current address of this aterm.
-    /// \details This address will be stable as long as this aterm
-    ///          exists, i.e., has a reference count larger than 0.
-    /// \return A void* pointer, representing the machine address of the current aterm.
-    const detail::_aterm* address() const
-    {
-      assert(m_term!=NULL && m_term->reference_count()>0);
-      return m_term;
     }
 
     /// \brief Returns true if this term is not equal to the term assigned by

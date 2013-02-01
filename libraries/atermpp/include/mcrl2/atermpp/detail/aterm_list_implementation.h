@@ -62,7 +62,7 @@ void term_list<Term>::push_front(const Term &el)
 //   // new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[1])) Term(*this);
 //   const _aterm** addr_of_tail=reinterpret_cast<const _aterm**>
 //                    (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[1]));
-//   *addr_of_tail =this->address();
+//   *addr_of_tail =detail::address(*this);
 // 
 //   cur->set_next(detail::aterm_hashtable[hnr]);
 //   detail::aterm_hashtable[hnr] = cur;
@@ -83,7 +83,7 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el)
   size_t j=0;
   for (typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i, ++j)
   {
-    buffer[j] = i->address();
+    buffer[j] = detail::address(*i);
   }
 
   term_list<Term> result;

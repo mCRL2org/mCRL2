@@ -262,6 +262,9 @@ class term_appl:public aterm
     /// \deprecated
     /// \param arg The new i-th argument
     /// \param i A positive integer
+    /// \detail This operator is linear in the number of the arguments.
+    ///         It is more efficient to completely reconstruct a term
+    ///         instead of repeatedly applying set_argument.
     /// \return The term with one of its arguments replaced.
     term_appl<Term> set_argument(const Term &arg, const size_type i);
 

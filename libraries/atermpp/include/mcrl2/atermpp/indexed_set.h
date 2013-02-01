@@ -63,7 +63,7 @@ class indexed_set
 
     /// \brief Find the index of elem in set.
     /// The index assigned to elem is returned, except when elem is not in the set, in
-    /// which case the return value is (size_t)-1, i.e. the largest number in size_t.
+    /// which case the return value is atermpp::npos, i.e. the largest number in size_t.
     /// \param elem An element of the set.
     /// \return The index of the element.
     ssize_t index(const aterm& elem) const;
@@ -76,7 +76,7 @@ class indexed_set
     size_t operator[](const aterm& elem)
     {
       std::size_t result = index(elem);
-      if (result == (std::size_t) -1)
+      if (result == atermpp::npos)
       {
         std::pair<size_t, bool> p=put(elem);
         if(!p.second)

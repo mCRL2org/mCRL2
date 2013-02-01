@@ -62,7 +62,7 @@ size_t COMBINE(const HashNumber hnr, const size_t w)
 inline
 size_t COMBINE(const HashNumber hnr, const aterm &w)
 {
-  return COMBINE(hnr,reinterpret_cast<size_t>(w.address()));
+  return COMBINE(hnr,reinterpret_cast<size_t>(address(w)));
 }
 
 inline
@@ -73,8 +73,8 @@ t
 )
 {
   assert(t.defined());
-  assert(!t.address()->reference_count_indicates_is_in_freelist());
-  assert(!t.address()->reference_count_is_zero());
+  assert(!address(t)->reference_count_indicates_is_in_freelist());
+  assert(!address(t)->reference_count_is_zero());
 }
 
 inline HashNumber hash_number(const detail::_aterm *t)
@@ -209,6 +209,11 @@ inline const _aterm* aterm0(const function_symbol &sym)
 
   return cur;
 }
+
+inline const _aterm* address(const aterm &t)
+{
+  return t.m_term;
+} 
 
 } //namespace detail
 

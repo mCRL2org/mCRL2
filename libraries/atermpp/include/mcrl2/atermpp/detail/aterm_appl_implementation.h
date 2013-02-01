@@ -102,7 +102,7 @@ inline const _aterm* ADDRESS(const _aterm* a)
 
 inline const _aterm* ADDRESS(const aterm &a)
 {
-  return a.address();
+  return address(a);
 }
 
 template <class Term, class ForwardIterator>
@@ -128,7 +128,7 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
       ForwardIterator i=begin;
       for (size_t j=0; j<arity; ++i,++j)
       {
-        if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[j].address() != detail::ADDRESS(*i)) 
+        if (address(reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[j]) != detail::ADDRESS(*i)) 
         {
           found = false;
           break;

@@ -195,7 +195,7 @@ class term_list:public aterm
     }
 
     /// \brief Returns true if the list's size is 0.
-    /// \return True if the list is empty.
+    /// \return True iff the list is empty.
     bool empty() const
     {
       return m_term->function()==detail::function_adm.AS_EMPTY_LIST; 
@@ -236,7 +236,7 @@ class _aterm_list:public _aterm
 };
 
 static const size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(size_t);
-}
+} // namespace detail
 /// \endcond
 
 
@@ -247,6 +247,7 @@ typedef term_list<aterm> aterm_list;
 
 /// \brief Returns the list with the elements in reversed order.
 /// \param l A list.
+/// \detail This operator is linear in the size of the list.
 /// \return The reversed list.
 template <typename Term>
 inline
@@ -256,27 +257,18 @@ term_list<Term> reverse(const term_list<Term> &l);
 /// \brief Returns the list l with one occurrence of the element x removed, or l if x is not present.
 /// \param l A list.
 /// \param x A list element.
+/// \details This operator is linear in the length of the list.
+/// \return The original list where the first occurrence of t has been removed, assuming it is in t.
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t);
-
-
-/// \brief Applies a function to all elements of the list and returns the result.
-/// \param l The list that is transformed.
-/// \param f The function that is applied to the elements of the list.
-/// \return The transformed list.
-template <typename Term, typename Function>
-inline
-aterm_list apply(const term_list<Term> &l, const Function f)
-{
- return term_list<Term>(l.begin(),l.end(),f);
-}
+term_list<Term> remove_one_element(const term_list<Term> &l, const Term &t);
 
 
 /// \brief Returns the concatenation of two lists.
 /// \param l A list.
 /// \param m A list.
-/// \return The concatenation of the lists.
+/// \details The complexity of this operator is linear in the length of l.
+/// \return The concatenation of the lists l followed by m..
 template <typename Term>
 inline
 term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m);

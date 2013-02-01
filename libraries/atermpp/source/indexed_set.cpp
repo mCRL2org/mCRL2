@@ -89,7 +89,7 @@ size_t indexed_set::hashPut(const aterm &key, size_t n)
   /* Find a place to insert key,
      and find whether key already exists */
 
-  size_t c = hashcode(key.address(), sizeMinus1);
+  size_t c = hashcode(detail::address(key), sizeMinus1);
 
   while (1)
   {
@@ -148,7 +148,7 @@ indexed_set::indexed_set(size_t initial_size /* = 100 */, unsigned int max_load_
 
 ssize_t indexed_set::index(const aterm& elem) const
 {
-  size_t start = hashcode(elem.address(), sizeMinus1);
+  size_t start = hashcode(detail::address(elem), sizeMinus1);
   size_t c = start;
   do
   {
@@ -173,7 +173,7 @@ ssize_t indexed_set::index(const aterm& elem) const
 
 bool indexed_set::erase(const aterm& key)
 {
-  size_t start = hashcode(key.address(),sizeMinus1);
+  size_t start = hashcode(detail::address(key),sizeMinus1);
   size_t c = start;
   size_t v;
   while (1)

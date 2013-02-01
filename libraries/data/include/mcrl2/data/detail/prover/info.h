@@ -61,8 +61,10 @@ class InternalFormatInfo
               const atermpp::aterm &a_term1, 
               const atermpp::aterm &a_term2)
     {
-      long v_address1 = reinterpret_cast < long >(a_term1.address());
-      long v_address2 = reinterpret_cast < long >(a_term2.address());
+      // The code below does not seem to need to use explicit adresses. Code can
+      // directly use <, >, == on aterms, which also compares adresses.
+      long v_address1 = reinterpret_cast < long >(atermpp::detail::address(a_term1));
+      long v_address2 = reinterpret_cast < long >(atermpp::detail::address(a_term2));
 
       if (v_address1 < v_address2)
       {

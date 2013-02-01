@@ -212,8 +212,8 @@ int SVCputTransition(SVCfile* file,
   labelTerm=HTgetTerm(&file->file.labelTable, labelIndex);
   paramTerm=HTgetTerm(&file->file.parameterTable, paramIndex);
 
-  if (fromStateTerm.address() != NULL && toStateTerm.address()!=NULL &&
-      labelTerm.address()!= NULL     && paramTerm.address()   != NULL)
+  if (detail::address(fromStateTerm) != NULL && detail::address(toStateTerm)!=NULL &&
+      detail::address(labelTerm)!= NULL     && detail::address(paramTerm)   != NULL)
   {
     transition.fromState=fromStateTerm;
     transition.toState=toStateTerm;

@@ -188,7 +188,7 @@ static const atermpp::detail::_aterm* get_int2aterm_value(size_t i)
     }
     for (; old_num < num_int2aterms; old_num++)
     {
-      int2aterms[old_num] = reinterpret_cast<const atermpp::detail::_aterm*>(atermpp::aterm_int(old_num).address());
+      int2aterms[old_num] = reinterpret_cast<const atermpp::detail::_aterm*>(atermpp::detail::address(atermpp::aterm_int(old_num)));
     }
   }
   return int2aterms[i];
@@ -1662,7 +1662,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       set_rewrappl_value(static_cast<aterm_int>(t).value());
       // ss << "mcrl2::data::detail::get_rewrappl_value_without_check(" << static_cast<aterm_int>(t).value() << ")";
       ss << "atermpp::aterm_cast<const atermpp::aterm_appl>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" <<
-                    mcrl2::data::detail::get_rewrappl_value_without_check(static_cast<aterm_int>(t).value()).address() << ")))";
+                    atermpp::detail::address(mcrl2::data::detail::get_rewrappl_value_without_check(static_cast<aterm_int>(t).value())) << ")))";
     }
     return pair<bool,string>(
              rewr || b,
@@ -2028,7 +2028,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
   {
     if (level == 0)
     {
-      fprintf(f,"%sif ((arg%lu[0]).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
+      fprintf(f,"%sif (atermpp::detail::address(arg%lu[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n",
               whitespace(d*2),
               cur_arg,
@@ -2038,7 +2038,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
     }
     else
     {
-      fprintf(f,"%sif (isAppl(%s%lu[%lu]) && (aterm_cast<const atermpp::aterm_appl >(%s%lu[%lu])[0]).address()==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
+      fprintf(f,"%sif (isAppl(%s%lu[%lu]) && atermpp::detail::address(aterm_cast<const atermpp::aterm_appl >(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F\n"
               "%s{\n"
               "%s  atermpp::aterm_appl t%lu (%s%lu[%lu]);\n",
               whitespace(d*2),
@@ -2080,7 +2080,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, aterm_appl tree, size_t
 
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n",
-            (void*)get_rewrappl_value(true_num).address(),
+            (void*)atermpp::detail::address(get_rewrappl_value(true_num)),
             whitespace(d*2)
            );
 
@@ -2135,7 +2135,7 @@ void RewriterCompilingJitty::implement_tree(
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n"
             "%sreturn ",
-            (void*)get_rewrappl_value(true_num).address(),
+            (void*)atermpp::detail::address(get_rewrappl_value(true_num)),
             whitespace(d*2),
             whitespace(d*2)
            );
@@ -2802,7 +2802,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     for (size_t j=0; j<=i; ++j)
     {
-      fprintf(f, "buffer[%zu] = arg%zu.address();\n",j,j);
+      fprintf(f, "buffer[%zu] = atermpp::detail::address(arg%zu);\n",j,j);
     }
 
     fprintf(f, "return aterm_appl(f,buffer,buffer+arity);\n");
@@ -2855,12 +2855,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "\n"
             "    for (size_t i=0; i<arity; i++)\n"
             "    {\n"
-            "      args[i]=a[i].address();\n"
+            "      args[i]=atermpp::detail::address(a[i]);\n"
             "    }\n",i);
     for (size_t j=0; j<i; j++)
     {
       fprintf(f,
-              "    args[arity+%zu]=arg%zu.address();\n",j,j);
+              "    args[arity+%zu]=atermpp::detail::address(arg%zu);\n",j,j);
     }
     fprintf(f,
             "\n"

@@ -9,6 +9,8 @@
 namespace atermpp
 {
 
+class aterm;
+
 namespace detail
 {
 
@@ -95,6 +97,9 @@ inline HashNumber hash_number(const _aterm *t);
 
 template <class Term, class Iter, class ATermConverter>
 const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+
+// Provides the address where the data belonging to this aterm is stored.
+inline const _aterm* address(const aterm &t); 
 
 } // namespace detail
 } // namespace atermpp

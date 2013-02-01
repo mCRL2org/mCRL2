@@ -640,24 +640,26 @@ struct absinthe_algorithm
   {
     data::function_symbol operator()(const data::function_symbol& f) const
     {
+      using namespace data;
       //mCRL2log(log::debug, "absinthe") << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
       std::string name = "Lift" + boost::algorithm::trim_copy(std::string(f.name()));
-      data::sort_expression s = f.sort();
-      if (data::is_basic_sort(s))
+      const sort_expression &s = f.sort();
+      if (is_basic_sort(s))
       {
-        return data::function_symbol(name, make_set()(s));
+        return function_symbol(name, make_set()(s));
       }
-      else if (data::is_function_sort(s))
+      else if (is_function_sort(s))
       {
-        data::function_sort fs(s);
-        return data::function_symbol(name, data::function_sort(atermpp::apply(fs.domain(), make_set()), fs.codomain()));
+        const function_sort fs(s);
+        const sort_expression_list& sl=fs.domain();
+        return function_symbol(name, 
+                 function_sort(sort_expression_list(sl.begin(),sl.end(), make_set()), fs.codomain()));
       }
-      else if (data::is_container_sort(s))
+      else if (is_container_sort(s))
       {
         return data::function_symbol(name, make_set()(s));
       }
       throw mcrl2::runtime_error("absinthe algorithm (lift): unsupported sort " + print_term(s) + " detected!");
-      return data::function_symbol();
     }
   };
 
