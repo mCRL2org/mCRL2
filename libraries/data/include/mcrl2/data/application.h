@@ -72,7 +72,6 @@ class application_base: public data_expression
       return data_expression_list(atermpp::list_arg2(*this));
     }
 };
-
 } // namespace detail
 
 /// \brief application a data expression of a function sort to a number
@@ -82,7 +81,14 @@ class application_base: public data_expression
 /// application, and x,y are the arguments.
 class application: public detail::application_base
 {
+  private:
+    // forbid the use of iterator, which is silently inherited from
+    // aterm_appl. Modifying the arguments of an application through the iterator
+    // is not allowed!
+    typedef data_expression_list::iterator iterator;
+
   public:
+    typedef data_expression_list::const_iterator const_iterator;
 
     /// \brief Default constructor for an application, note that this is not
     ///        a valid data expression.
@@ -114,6 +120,20 @@ class application: public detail::application_base
       // assert(is_function_sort(head.sort()));
       // assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
       assert(!arguments.empty());
+    }
+
+    /// \brief Returns an iterator pointing to the first argument of the
+    ///        application.
+    const_iterator begin() const
+    {
+      return arguments().begin();
+    }
+
+    /// \brief Returns an iterator pointing past the last argument of the
+    ///        application.
+    const_iterator end() const
+    {
+      return arguments().end();
     }
 
     /// \brief Returns the first argument of the application

@@ -117,6 +117,8 @@ void application_test()
   BOOST_CHECK(fxy.sort() == s);
   BOOST_CHECK(fxy.head() == f);
   BOOST_CHECK(fxy.arguments() == xy);
+  BOOST_CHECK(*(fxy.begin()) == x);
+  BOOST_CHECK(*(++fxy.begin()) == y);
 
   data_expression fxy_e(fxy);
   application fxy_e_(fxy_e);
