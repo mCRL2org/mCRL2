@@ -179,7 +179,7 @@ class Confluence_Checker
     const mcrl2::lps::specification& f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
-    bool f_no_marking;
+    // bool f_no_marking;
 
     /// \brief Flag indicating whether or not the process of checking the confluence of a summand stops when
     /// \brief a summand is encountered that is not confluent with the tau summand at hand.

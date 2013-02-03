@@ -110,27 +110,27 @@ class data_equation: public atermpp::aterm_appl
     {}
 
     /// \brief Returns the variables of the data equation.
-    variable_list variables() const
+    const variable_list &variables() const
     {
-      return variable_list(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const variable_list>(atermpp::list_arg1(*this));
     }
 
     /// \brief Returns the condition of the data equation.
-    data_expression condition() const
+    const data_expression &condition() const
     {
-      return data_expression(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
     }
 
     /// \brief Returns the left hand side of the data equation.
-    data_expression lhs() const
+    const data_expression& lhs() const
     {
-      return data_expression(atermpp::arg3(*this));
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg3(*this));
     }
 
     /// \brief Returns the right hand side of the data equation.
-    data_expression rhs() const
+    const data_expression& rhs() const
     {
-      return data_expression(atermpp::arg4(*this));
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg4(*this));
     }
 
 }; // class data_equation

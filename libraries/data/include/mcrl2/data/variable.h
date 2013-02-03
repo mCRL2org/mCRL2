@@ -84,16 +84,6 @@ std::set<data::variable> find_variables(const data::variable& x);
 std::set<data::variable> find_variables(const data::variable_list& x);
 std::set<core::identifier_string> find_identifiers(const data::variable_list& x);
 
-/// \brief Converts an container with variables to a variable_list
-/// \param r A range of variables.
-/// \note This function uses implementation details of the iterator type
-/// and hence is sometimes efficient than copying all elements of the list.
-template < typename Container >
-inline variable_list make_variable_list(Container const& r, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-{
-  return atermpp::convert< variable_list >(r);
-}
-
 } // namespace data
 
 } // namespace mcrl2

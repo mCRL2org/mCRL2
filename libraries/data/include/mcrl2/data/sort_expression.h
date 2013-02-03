@@ -103,15 +103,15 @@ class sort_expression: public atermpp::aterm_appl
     /// \brief Returns the target sort of this expression.
     /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.
     inline
-    sort_expression target_sort() const
+    const sort_expression& target_sort() const
     {
       if (is_function_sort(*this))
       {
-        return atermpp::arg2(*this);
+        return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
       }
       else
       {
-        return *this;
+        return atermpp::aterm_cast<const sort_expression>(*this);
       }
     }
 

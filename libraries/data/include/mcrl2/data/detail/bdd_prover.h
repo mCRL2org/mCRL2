@@ -102,7 +102,7 @@ class BDD_Prover: public Prover
     bool f_apply_induction;
 
     /// \brief A data specification.
-    const data_specification& f_data_spec;
+    // const data_specification& f_data_spec;
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
@@ -445,7 +445,7 @@ class BDD_Prover: public Prover
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
       : Prover(data_spec, equations_selector, a_rewrite_strategy, a_time_limit),
-        f_data_spec(data_spec),
+//        f_data_spec(data_spec),
         f_induction(data_spec)
     {
       f_reverse = true;

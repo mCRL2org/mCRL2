@@ -608,6 +608,7 @@ class Trace
 
     void loadMcrl2(std::istream& is)
     {
+      using namespace atermpp;
       char buf[TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE];
       is.read(buf,TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE);
       if (is.bad() || strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE))
@@ -618,33 +619,33 @@ class Trace
 
       resetPosition();
       truncate();
-      atermpp::aterm_list trace(readATerm(is));
+      aterm_list trace(readATerm(is));
       assert(trace.type_is_list());
       for (; !trace.empty(); trace=trace.tail())
       {
         using namespace mcrl2::lps;
-        atermpp::aterm e = trace.front();
+        const aterm& e = trace.front();
 
-        if (e.type_is_appl() && core::detail::gsIsMultAct(static_cast<atermpp::aterm_appl>(e)))   // To be compatible with old untimed version
+        if (e.type_is_appl() && core::detail::gsIsMultAct(aterm_cast<aterm_appl>(e)))   // To be compatible with old untimed version
         {
-          addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e))));
+          addAction(multi_action(action_list(aterm_cast<aterm_appl>(e))));
         }
-        else if (e.type_is_appl() && isTimedMAct(static_cast<atermpp::aterm_appl>(e)))
+        else if (e.type_is_appl() && isTimedMAct(aterm_cast<aterm_appl>(e)))
         {
-          if (core::detail::gsIsNil(atermpp::aterm_appl(static_cast<atermpp::aterm_appl>(e)[1])))
+          if (core::detail::gsIsNil(aterm_appl(aterm_cast<aterm_appl>(e)[1])))
           {
-            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)[0])));
+            addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0])));
           }
           else
           {
-            addAction(multi_action(action_list(static_cast<atermpp::aterm_appl>(e)[0]),
-                               mcrl2::data::data_expression(static_cast<atermpp::aterm_appl>(e)[1])));
+            addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0]),
+                               mcrl2::data::data_expression(aterm_cast<aterm_appl>(e)[1])));
           }
         }
         else
         {
           // So, e is a list of data expressions.
-          atermpp::aterm_list l(e);
+          aterm_list l(e);
           mcrl2::lps::state s;
           for( ; !l.empty() ; l=l.tail())
           {

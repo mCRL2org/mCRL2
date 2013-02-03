@@ -271,10 +271,10 @@ inline const atermpp::function_symbol& get_appl_afun_value_no_check(const size_t
  *        of Apply and ApplyArray the first element of the list
  *        or array is the function symbol.
  **/
-inline atermpp::aterm_appl Apply(const atermpp::term_list < atermpp::aterm > &l)
-{
-  return atermpp::aterm_appl(get_appl_afun_value(l.size()),l.begin(),l.end());
-}
+// inline atermpp::aterm_appl Apply(const atermpp::term_list < atermpp::aterm > &l)
+// {
+//   return atermpp::aterm_appl(get_appl_afun_value(l.size()),l.begin(),l.end());
+// }
 
 /** \brief See Apply. */
 template <class Iterator>

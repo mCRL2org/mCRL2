@@ -21,25 +21,6 @@ namespace atermpp
 
 namespace detail
 {
-/// \brief Applies the function f to all elements of the list and returns the result.
-/// \param l A sequence of terms
-/// \param f A function on terms
-/// \return The transformed sequence
-template <typename Term, typename Function>
-aterm_list list_apply(const term_list<Term> &l, const Function f)
-{
-  if (l.size() == 0)
-  {
-    return l;
-  }
-  aterm_list result;
-  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
-  {
-    result.push_front(f(*i));
-  }
-  return reverse(result);
-}
-
 /// \brief Applies the function f to all children of a.
 /// \param a A term
 /// \param f A function on terms
@@ -293,7 +274,7 @@ aterm replace_impl(const aterm &t, ReplaceFunction f)
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    return list_apply(l, replace_helper<ReplaceFunction>(f));
+    return aterm_list(l.begin(),l.end(), replace_helper<ReplaceFunction>(f));
   }
   return t;
 }
@@ -363,7 +344,7 @@ aterm partial_replace_impl(const aterm &t, ReplaceFunction f)
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    return list_apply(l, partial_replace_helpsr<ReplaceFunction>(f));
+    return aterm_list(l.begin(),l.end(), partial_replace_helpsr<ReplaceFunction>(f));
   }
   return t;
 }
@@ -406,7 +387,7 @@ aterm bottom_up_replace_impl(const aterm &t, ReplaceFunction f)
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    return list_apply(l, bottom_up_replace_helpsr<ReplaceFunction>(f));
+    return aterm_list(l.begin(),l.end(), bottom_up_replace_helpsr<ReplaceFunction>(f));
   }
   return t;
 }

@@ -462,7 +462,7 @@ Confluence_Checker::Confluence_Checker(
   f_bdd_prover(a_lps.data(), used_data_equation_selector(a_lps.data()), a_rewrite_strategy,
                      a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
   f_lps(a_lps),
-  f_no_marking(a_no_marking),
+//  f_no_marking(a_no_marking),
   f_check_all(a_check_all),
   f_counter_example(a_counter_example),
   f_dot_file_name(a_dot_file_name),

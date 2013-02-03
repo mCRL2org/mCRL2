@@ -52,7 +52,7 @@ class Induction
     std::map < variable, sort_expression > f_lists_to_sorts;
 
     /// \brief
-    BDD_Info f_bdd_info;
+    // BDD_Info f_bdd_info;
 
     /// \brief
     void recurse_expression_for_lists(const data_expression &a_expression)

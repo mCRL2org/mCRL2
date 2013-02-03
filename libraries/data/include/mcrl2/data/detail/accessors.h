@@ -23,13 +23,13 @@ namespace detail {
 namespace data_accessors {
 
 inline
-data::data_expression left(const data::data_expression& x)
+const data::data_expression &left(const data::data_expression& x)
 {
   return data::application(x).left();
 }
 
 inline
-data::data_expression right(const data::data_expression& x)
+const data::data_expression &right(const data::data_expression& x)
 {
   return data::application(x).right();
 }
