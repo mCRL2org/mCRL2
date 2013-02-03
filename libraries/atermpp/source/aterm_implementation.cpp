@@ -32,17 +32,17 @@ namespace detail
 // destroyed prematurely.
 
 static const size_t INITIAL_TERM_TABLE_SIZE = 1<<17;  // Must be a power of 2.
-static const size_t INITIAL_MAX_TERM_SIZE = 256;
+static const size_t INITIAL_MAX_TERM_SIZE = 16;
 
-size_t aterm_table_size;
-size_t aterm_table_mask;           
+size_t aterm_table_size=INITIAL_TERM_TABLE_SIZE;
+size_t aterm_table_mask=INITIAL_TERM_TABLE_SIZE-1;           
 const _aterm* * aterm_hashtable;  
 
 aterm static_undefined_aterm;
 aterm static_empty_aterm_list(aterm_appl(detail::function_adm.AS_EMPTY_LIST));
 
 // The following is not a vector to avoid that it is prematurely destroyed.
-size_t terminfo_size=0;
+size_t terminfo_size=INITIAL_MAX_TERM_SIZE;
 size_t garbage_collect_count_down=0;
 TermInfo *terminfo;
 
@@ -274,8 +274,6 @@ void initialise_aterm_administration()
   // which may be due to the initialisation of a global variable in
   // a .cpp file, or due to the initialisation of a pre-main initialisation
   // of a static variable, which some compilers do.
-  aterm_table_size=INITIAL_TERM_TABLE_SIZE;
-  aterm_table_mask=aterm_table_size-1;
 
   aterm_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
   if (aterm_hashtable==NULL)
@@ -283,7 +281,6 @@ void initialise_aterm_administration()
     throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");
   }
 
-  terminfo_size=INITIAL_MAX_TERM_SIZE;
   terminfo=reinterpret_cast<TermInfo*>(malloc(terminfo_size*sizeof(TermInfo)));
   if (terminfo==NULL)
   {

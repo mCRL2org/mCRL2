@@ -60,16 +60,16 @@ class application_base: public data_expression
       : data_expression(core::detail::gsMakeDataAppl(head, atermpp::convert<data_expression_list>(arguments)))
     {}
 
-    data_expression head() const
+    const data_expression& head() const
     {
-      return data_expression(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
     }
 
     /// \brief Give the arguments of this term as a list.
     /// \details time for this operation is constant.
-    data_expression_list arguments() const
+    const data_expression_list& arguments() const
     {
-      return data_expression_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data_expression_list>(atermpp::list_arg2(*this));
     }
 };
 } // namespace detail
@@ -140,7 +140,7 @@ class application: public detail::application_base
     /// \pre head() is a binary operator
     /// \return arguments()[0]
     inline
-    data_expression left() const
+    const data_expression& left() const
     {
       assert(arguments().size() == 2);
       return *(arguments().begin());
@@ -150,7 +150,7 @@ class application: public detail::application_base
     /// \pre head() is a binary operator
     /// \return arguments()[1]
     inline
-    data_expression right() const
+    const data_expression& right() const
     {
       assert(arguments().size() == 2);
       return *(++(arguments().begin()));
@@ -158,10 +158,9 @@ class application: public detail::application_base
 
     /// \brief Returns the n-th argument of the application, where the first argument has index 0.
     /// \pre The number of arguments must be at least n.
-    data_expression argument(const size_t n)
+    const data_expression& argument(const size_t n)
     {
       assert(arguments().size() > n);
-      const data_expression_list l=arguments();
       data_expression_list::const_iterator i=arguments().begin();
       for(size_t c=0; c==n; ++i,++c)
       {}

@@ -3133,7 +3133,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  // Term t does not have the shape #REWR#(t1,...,tn)\n"
       "  if (mcrl2::data::is_variable(t))\n"
       "  {\n"
-      "    return (*(this_rewriter->global_sigma))(t);\n"
+      "    return (*(this_rewriter->global_sigma))(atermpp::aterm_cast<const mcrl2::data::variable>(t));\n"
       "  }\n"
       "  if (mcrl2::data::is_abstraction(t))\n"
       "  {\n"

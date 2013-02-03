@@ -1,14 +1,14 @@
 Introduction
 ============
 
-The `atermpp` library is a C++ wrapper around the ATerm Library, which is a C
-library for manipulating tree-like data structures. Important features of the
-ATerm Library are maximal subterm sharing, automatic garbage collection, and an
-efficient binary exchange format. The purpose of the `atermpp` library is to
-provide the user with a common C++ interface, and to make the ATerm Library
-compatible with the C++ Standard Library. It also relieves the user from memory
-bookkeeping tasks. Finally it contains some search and replace algorithms on
-ATerms.
+The `atermpp` library is a C++ implementation of the ATerm Library 
+[M.G.T. van den Brand , H.A. de Jong, P. Klint, P.A. Olivier. Efficient annotated terms, Software—Practice & Experience, 30(3):259-291, 2000]. 
+It allows to construct terms, i.e., a function symbol applied to a number of
+terms. Terms can also be numbers or lists. 
+
+Important features of the
+ATerm Library are maximal subterm sharing, automatic garbage collection, and easy
+ways to write terms to and from disk. 
 
 What is an ATerm?
 =================
