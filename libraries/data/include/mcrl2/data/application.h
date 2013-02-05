@@ -27,37 +27,33 @@ namespace mcrl2
 namespace data
 {
 
-namespace detail
-{
 //--- start generated class application ---//
-//--- end generated class application ---//
-
 /// \brief An application of a data expression to a number of arguments
-class application_base: public data_expression
+class application: public data_expression
 {
   public:
     /// \brief Default constructor.
-    application_base()
+    application()
       : data_expression(core::detail::constructDataAppl())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    application_base(const atermpp::aterm_appl& term)
+    application(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataAppl(*this));
     }
 
     /// \brief Constructor.
-    application_base(const data_expression& head, const data_expression_list& arguments)
+    application(const data_expression& head, const data_expression_list& arguments)
       : data_expression(core::detail::gsMakeDataAppl(head, arguments))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    application_base(const data_expression& head, const Container& arguments, typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
-      : data_expression(core::detail::gsMakeDataAppl(head, atermpp::convert<data_expression_list>(arguments)))
+    application(const data_expression& head, const Container& arguments, typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
+      : data_expression(core::detail::gsMakeDataAppl(head, data_expression_list(arguments.begin(), arguments.end())))
     {}
 
     const data_expression& head() const
@@ -65,22 +61,11 @@ class application_base: public data_expression
       return atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
     }
 
-    /// \brief Give the arguments of this term as a list.
-    /// \details time for this operation is constant.
     const data_expression_list& arguments() const
     {
       return atermpp::aterm_cast<const data_expression_list>(atermpp::list_arg2(*this));
     }
-};
-} // namespace detail
-
-/// \brief application a data expression of a function sort to a number
-///        of arguments.
-///
-/// An example of an application is f(x,y), where f is the head of the
-/// application, and x,y are the arguments.
-class application: public detail::application_base
-{
+//--- start user section application ---//
   private:
     // forbid the use of iterator, which is silently inherited from
     // aterm_appl. Modifying the arguments of an application through the iterator
@@ -89,38 +74,6 @@ class application: public detail::application_base
 
   public:
     typedef data_expression_list::const_iterator const_iterator;
-
-    /// \brief Default constructor for an application, note that this is not
-    ///        a valid data expression.
-    ///
-    application()
-      : detail::application_base(core::detail::constructDataAppl())
-    {}
-
-    ///\overload
-    application(atermpp::aterm_appl term)
-      : detail::application_base(term)
-    {}
-
-    ///\overload
-    application(const data_expression& head, data_expression_list const& arguments)
-      : detail::application_base(head, arguments)
-    {}
-
-    ///\overload
-    template < typename Container >
-    application(const data_expression& head,
-                const Container& arguments,
-                typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
-      : detail::application_base(head, arguments)
-    {
-      // Due to sort aliasing, it is possible that the sort of a function symbol is
-      // not a function sort, but an alias of function sort. Therefore, the asserts below are
-      // not always valid.
-      // assert(is_function_sort(head.sort()));
-      // assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
-      assert(!arguments.empty());
-    }
 
     /// \brief Returns an iterator pointing to the first argument of the
     ///        application.
@@ -166,7 +119,9 @@ class application: public detail::application_base
       {}
       return *i;
     }
-}; // class application
+//--- end user section application ---//
+};
+//--- end generated class application ---//
 
 /// \brief Apply data expression to a data expression
 inline application make_application(data_expression const& head,
@@ -225,5 +180,15 @@ int precedence(const application& x);
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::application& t1, mcrl2::data::application& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_APPLICATION_H
