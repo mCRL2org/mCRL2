@@ -66,13 +66,13 @@ identifier_assignment(const core::identifier_string& lhs, const data_expression&
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | SXC | DataExpr  | A data expression
-identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO  | Id        | An identifier
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId      | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU | DataAppl  | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU | Whr       | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder    | An abstraction expression.
+data_expression()                                                                                             : public atermpp::aterm_appl   | SXICU | DataExpr  | A data expression
+identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO    | Id        | An identifier
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC   | DataVarId | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO    | OpId      | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU   | DataAppl  | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU   | Whr       | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO    | Binder    | An abstraction expression.
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
@@ -145,12 +145,12 @@ specification(const data::data_specification& data, const action_label_list& act
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : atermpp::aterm_appl | C | ProcVarId   | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : atermpp::aterm_appl | C | ProcEqn     | A process equation
-rename_expression(core::identifier_string source, core::identifier_string target)                                                                                                : atermpp::aterm_appl | C | RenameExpr  | A rename expression
-communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : atermpp::aterm_appl | C | CommExpr    | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : atermpp::aterm_appl | C | MultActName | A multi-action
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SM | ProcSpec    | A process specification
+process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | SCI | ProcEqn     | A process equation
+rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI  | RenameExpr  | A rename expression
+communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI  | CommExpr    | A communication expression
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI  | MultActName | A multiset of action names
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
@@ -180,7 +180,7 @@ PBES_CLASSES = r'''
 fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl |   | FixPoint    | A fixpoint symbol
 propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl |   | PropVarDecl | A propositional variable declaration
 pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | M | PBEqn       | A PBES equation
-pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                | M | PBES        | A PBES
+pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                    | M | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''

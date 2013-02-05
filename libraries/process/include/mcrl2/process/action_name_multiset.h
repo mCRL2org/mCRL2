@@ -26,6 +26,54 @@ namespace mcrl2
 namespace process
 {
 
+//--- start generated class action_name_multiset ---//
+/// \brief A multiset of action names
+class action_name_multiset: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    action_name_multiset()
+      : atermpp::aterm_appl(core::detail::constructMultActName())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    action_name_multiset(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_MultActName(*this));
+    }
+
+    /// \brief Constructor.
+    action_name_multiset(const core::identifier_string_list& names)
+      : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
+    {}
+
+    const core::identifier_string_list& names() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string_list>(atermpp::list_arg1(*this));
+    }
+};
+
+/// \brief list of action_name_multisets
+typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
+
+/// \brief vector of action_name_multisets
+typedef std::vector<action_name_multiset>    action_name_multiset_vector;
+
+
+/// \brief Test for a action_name_multiset expression
+/// \param t A term
+/// \return True if it is a action_name_multiset expression
+inline
+bool is_action_name_multiset(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsMultActName(t);
+}
+
+//--- end generated class action_name_multiset ---//
+
+/*
 //<MultActName>  ::= MultActName(<String>+)
 /// \brief Multiset of action names
 class action_name_multiset: public atermpp::aterm_appl
@@ -67,6 +115,7 @@ class action_name_multiset: public atermpp::aterm_appl
 
 /// \brief Read-only singly linked list of action_name_multiset expressions
 typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
+*/
 
 // template function overloads
 std::string pp(const action_name_multiset& x);
@@ -74,5 +123,15 @@ std::string pp(const action_name_multiset& x);
 } // namespace process
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::process::action_name_multiset& t1, mcrl2::process::action_name_multiset& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_PROCESS_ACTION_NAME_MULTISET_H

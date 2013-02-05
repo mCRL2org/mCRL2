@@ -25,6 +25,64 @@ namespace mcrl2
 namespace process
 {
 
+//--- start generated class process_identifier ---//
+/// \brief A process identifier
+class process_identifier: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    process_identifier()
+      : atermpp::aterm_appl(core::detail::constructProcVarId())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    process_identifier(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_ProcVarId(*this));
+    }
+
+    /// \brief Constructor.
+    process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, sorts))
+    {}
+
+    /// \brief Constructor.
+    process_identifier(const std::string& name, const data::sort_expression_list& sorts)
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(core::identifier_string(name), sorts))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+    }
+
+    const data::sort_expression_list& sorts() const
+    {
+      return atermpp::aterm_cast<const data::sort_expression_list>(atermpp::list_arg2(*this));
+    }
+};
+
+/// \brief list of process_identifiers
+typedef atermpp::term_list<process_identifier> process_identifier_list;
+
+/// \brief vector of process_identifiers
+typedef std::vector<process_identifier>    process_identifier_vector;
+
+
+/// \brief Test for a process_identifier expression
+/// \param t A term
+/// \return True if it is a process_identifier expression
+inline
+bool is_process_identifier(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsProcVarId(t);
+}
+
+//--- end generated class process_identifier ---//
+
+/*
 /// \brief Process identifier
 //<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
 class process_identifier: public atermpp::aterm_appl
@@ -85,6 +143,7 @@ bool is_process_identifier(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsProcVarId(t);
 }
+*/
 
 // template function overloads
 std::string pp(const process_identifier& x);
@@ -95,5 +154,15 @@ void normalize_sorts(process_identifier_vector& x, const data::data_specificatio
 } // namespace process
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::process::process_identifier& t1, mcrl2::process::process_identifier& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

@@ -48,3 +48,4 @@ if __name__ == "__main__":
     make_classes('../../data/include/mcrl2/data',                            STRUCTURED_SORT_ELEMENTS     , namespace = 'data'            )
     make_classes('../../data/include/mcrl2/data',                            DATA_CLASSES                 , namespace = 'data'            )
     make_classes('../../lps/include/mcrl2/lps',                              LPS_CLASSES                  , namespace = 'lps'             )
+    make_classes('../../process/include/mcrl2/process',                      PROCESS_CLASSES              , namespace = 'process'         )
