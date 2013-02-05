@@ -33,6 +33,94 @@ namespace sort_bool
 function_symbol const& true_();
 }
 
+//--- start generated class data_equation ---//
+/// \brief A data equation
+class data_equation: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    data_equation()
+      : atermpp::aterm_appl(core::detail::constructDataEqn())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    data_equation(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_DataEqn(*this));
+    }
+
+    /// \brief Constructor.
+    data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs)
+      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(variables, condition, lhs, rhs))
+    {}
+
+    /// \brief Constructor.
+    template <typename Container>
+    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
+      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(variable_list(variables.begin(), variables.end()), condition, lhs, rhs))
+    {}
+
+    const variable_list& variables() const
+    {
+      return atermpp::aterm_cast<const variable_list>(atermpp::list_arg1(*this));
+    }
+
+    const data_expression& condition() const
+    {
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
+    }
+
+    const data_expression& lhs() const
+    {
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg3(*this));
+    }
+
+    const data_expression& rhs() const
+    {
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg4(*this));
+    }
+//--- start user section data_equation ---//
+    /// \brief Constructor
+    ///
+    /// \param[in] variables The free variables of the data_equation.
+    /// \param[in] lhs The left hand side of the data_equation.
+    /// \param[in] rhs The right hand side of the data_equation.
+    /// \post this is the data equation representing the input, with
+    ///       condition true
+    template < typename Container >
+    data_equation(const Container& variables,
+                  const data_expression& lhs,
+                  const data_expression& rhs,
+                  typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+                              variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs))
+    {}
+
+    /// \brief Constructor
+    ///
+    /// \param[in] lhs The left hand side of the data equation.
+    /// \param[in] rhs The right hand side of the data equation.
+    /// \post this is the data equations representing the input, without
+    ///       variables, and condition true
+    data_equation(const data_expression& lhs,
+                  const data_expression& rhs)
+      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+                              variable_list(), sort_bool::true_(), lhs, rhs))
+    {}
+//--- end user section data_equation ---//
+};
+
+/// \brief list of data_equations
+typedef atermpp::term_list<data_equation> data_equation_list;
+
+/// \brief vector of data_equations
+typedef std::vector<data_equation>    data_equation_vector;
+
+//--- end generated class data_equation ---//
+
+/*
 /// \brief data data_equation.
 ///
 class data_equation: public atermpp::aterm_appl
@@ -132,7 +220,6 @@ class data_equation: public atermpp::aterm_appl
     {
       return atermpp::aterm_cast<const data_expression>(atermpp::arg4(*this));
     }
-
 }; // class data_equation
 
 /// \brief list of data_equations
@@ -140,6 +227,7 @@ typedef atermpp::term_list< data_equation >    data_equation_list;
 
 /// \brief list of data_equations
 typedef std::vector< data_equation >       data_equation_vector;
+*/
 
 // template function overloads
 std::string pp(const data_equation& x);
@@ -152,6 +240,16 @@ std::set<data::function_symbol> find_function_symbols(const data::data_equation&
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::data_equation& t1, mcrl2::data::data_equation& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_DATA_EQUATION_H
 

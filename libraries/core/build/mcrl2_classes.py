@@ -83,8 +83,9 @@ lambda(const variable_list& variables, const data_expression& body) : public dat
 '''
 
 DATA_CLASSES = r'''
-data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl |   | DataEqn  | A data equation
-data_specification()                                                                                                                    : public atermpp::aterm_appl | S | DataSpec | A data specification
+alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | C   | SortRef  | A sort alias
+data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn  | A data equation
+data_specification()                                                                                                                    : public atermpp::aterm_appl | S   | DataSpec | A data specification
 '''
 
 STATE_FORMULA_CLASSES = r'''
