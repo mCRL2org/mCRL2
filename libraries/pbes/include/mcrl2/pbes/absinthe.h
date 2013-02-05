@@ -741,7 +741,7 @@ struct absinthe_algorithm
         else
         {
           data::function_symbol h = i->second;
-          rhs = create_finite_set(data::application(h, atermpp::make_list(f_x)));
+          rhs = data::detail::create_finite_set(data::application(h, atermpp::make_list(f_x)));
           //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
