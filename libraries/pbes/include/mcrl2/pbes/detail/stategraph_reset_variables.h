@@ -14,6 +14,7 @@
 
 #include "boost/bind.hpp"
 #include "mcrl2/data/representative_generator.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 
 namespace mcrl2 {
@@ -220,36 +221,6 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
       return pbes_expr::join_and(Xij_conjuncts.begin(), Xij_conjuncts.end());
     }
 
-    // generates a PBES from the control flow graph and the marking
-    pbes<> reset_variables()
-    {
-      mCRL2log(log::debug, "stategraph") << "--- resetting variables ---" << std::endl;
-      pbes<> result;
-      result.initial_state() = m_pbes.initial_state();
-      result.data() = m_pbes.data();
-      result.global_variables() = m_pbes.global_variables();
-
-      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
-
-      atermpp::vector<stategraph_equation>& equations = m_pbes.equations();
-      for (atermpp::vector<stategraph_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
-      {
-        stategraph_equation& eqn = *k;
-        mCRL2log(log::debug, "stategraph") << "resetting equation: " << print_equation(eqn) << std::endl;
-        atermpp::vector<pbes_expression> replacements;
-        const predicate_variable_vector& predvars = eqn.predicate_variables();
-        for (predicate_variable_vector::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
-        {
-          replacements.push_back(reset_variable(i->first));
-        }
-        reset_variable_builder f(replacements.begin());
-        eqn.formula() = f(eqn.formula());
-        mCRL2log(log::debug, "stategraph") << "resetted equation:  " << print_equation(eqn) << std::endl;
-        result.equations().push_back(eqn);
-      }
-      return result;
-    }
-
     // Applies resetting of variables to the original PBES p.
     void reset_variables_to_original(pbes<>& p)
     {
@@ -269,23 +240,15 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes<> run(const pbes<>& p, bool simplify = true, bool apply_to_original_pbes = false)
+    pbes<> run(const pbes<>& p, bool simplify = true, bool /* apply_to_original_pbes */ = false)
     {
       m_simplify = simplify;
 
       compute_control_flow_marking();
       mCRL2log(log::verbose) <<  "--- control flow marking ---\n" << print_control_flow_marking();
-
-      if (apply_to_original_pbes)
-      {
-        pbes<> result = p;
-        reset_variables_to_original(result);
-        return result;
-      }
-      else
-      {
-        return reset_variables();
-      }
+      pbes<> result = p;
+      reset_variables_to_original(result);
+      return result;
     }
 };
 
@@ -302,9 +265,24 @@ struct stategraph_reset_variable_rewrite_builder: public pbes_expression_builder
     : algorithm(algorithm_)
   {}
 
+  bool has_equal_variables(const pbes_expression& x, const propositional_variable_instantiation& Y) const
+  {
+  	std::set<propositional_variable_instantiation> v = find_propositional_variable_instantiations(x);
+    for (std::set<propositional_variable_instantiation>::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+    	if (i->name() != Y.name())
+    	{
+    		return false;
+    	}
+    }
+    return true;
+  }
+
   pbes_expression operator()(const propositional_variable_instantiation& x)
   {
-    return algorithm.reset_variable(x);
+    pbes_expression result = algorithm.reset_variable(x);
+    assert(has_equal_variables(result, x));
+    return result;
   }
 };
 
