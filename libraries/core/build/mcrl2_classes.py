@@ -40,7 +40,7 @@ structured_sort_constructor(const core::identifier_string& name, const structure
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-sort_expression()                                                                         : public atermpp::aterm_appl   | SXIOCU | SortExpr      | A sort expression
+sort_expression()                                                                         : public atermpp::aterm_appl   | XIOCU  | SortExpr      | A sort expression
 basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO     | SortId        | A basic sort
 container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO     | SortCons      | A container sort
 structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU   | SortStruct    | A structured sort
@@ -83,7 +83,7 @@ lambda(const variable_list& variables, const data_expression& body) : public dat
 '''
 
 DATA_CLASSES = r'''
-alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | C   | SortRef  | A sort alias
+alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | SC  | SortRef  | A sort alias
 data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn  | A data equation
 data_specification()                                                                                                                    : public atermpp::aterm_appl | S   | DataSpec | A data specification
 '''

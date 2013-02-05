@@ -18,21 +18,13 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
 {
 
 namespace data
 {
-
-/// \brief Returns true if the term t is a sort_expression
-/// \param t A term
-/// \return True if the term is a sort expression.
-inline
-bool is_sort_expression(const atermpp::aterm_appl& t)
-{
-  return core::detail::gsIsSortExpr(t);
-}
 
 /// \brief Returns true if the term t is a basic sort
 inline bool is_basic_sort(const atermpp::aterm_appl& p)
@@ -70,6 +62,60 @@ inline bool is_multiple_possible_sorts(const atermpp::aterm_appl& p)
   return core::detail::gsIsSortsPossible(p);
 }
 
+//--- start generated class sort_expression ---//
+/// \brief A sort expression
+class sort_expression: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    sort_expression()
+      : atermpp::aterm_appl(core::detail::constructSortExpr())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    sort_expression(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_SortExpr(*this));
+    }
+//--- start user section sort_expression ---//
+    /// \brief Returns the target sort of this expression.
+    /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.
+    inline
+    const sort_expression& target_sort() const
+    {
+      if (is_function_sort(*this))
+      {
+        return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      }
+      else
+      {
+        return atermpp::aterm_cast<const sort_expression>(*this);
+      }
+    }
+//--- end user section sort_expression ---//
+};
+
+/// \brief list of sort_expressions
+typedef atermpp::term_list<sort_expression> sort_expression_list;
+
+/// \brief vector of sort_expressions
+typedef std::vector<sort_expression>    sort_expression_vector;
+
+
+/// \brief Test for a sort_expression expression
+/// \param t A term
+/// \return True if it is a sort_expression expression
+inline
+bool is_sort_expression(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsSortExpr(t);
+}
+
+//--- end generated class sort_expression ---//
+
+/*
 /// \brief sort expression.
 ///
 /// A sort expression can be any of:
@@ -121,6 +167,7 @@ class sort_expression: public atermpp::aterm_appl
 typedef atermpp::term_list< sort_expression >  sort_expression_list;
 /// \brief vector of sorts
 typedef std::vector< sort_expression >     sort_expression_vector;
+*/
 
 // template function overloads
 std::string pp(const sort_expression& x);
@@ -131,6 +178,16 @@ std::set<data::sort_expression> find_sort_expressions(const data::sort_expressio
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::sort_expression& t1, mcrl2::data::sort_expression& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

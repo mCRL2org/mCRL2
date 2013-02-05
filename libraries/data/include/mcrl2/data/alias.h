@@ -23,48 +23,6 @@ namespace mcrl2
 namespace data
 {
 
-//--- start generated class alias ---//
-/// \brief A sort alias
-class alias: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Default constructor.
-    alias()
-      : atermpp::aterm_appl(core::detail::constructSortRef())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    alias(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_SortRef(*this));
-    }
-
-    /// \brief Constructor.
-    alias(const basic_sort& name, const sort_expression& reference)
-      : atermpp::aterm_appl(core::detail::gsMakeSortRef(name, reference))
-    {}
-
-    const basic_sort& name() const
-    {
-      return atermpp::aterm_cast<const basic_sort>(atermpp::arg1(*this));
-    }
-
-    const sort_expression& reference() const
-    {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
-    }
-};
-
-/// \brief list of aliass
-typedef atermpp::term_list<alias> alias_list;
-
-/// \brief vector of aliass
-typedef std::vector<alias>    alias_vector;
-
-//--- end generated class alias ---//
-
 /// \brief Returns true iff this expression is a sort alias.
 inline
 bool is_alias(atermpp::aterm_appl const& e)
@@ -72,7 +30,6 @@ bool is_alias(atermpp::aterm_appl const& e)
   return core::detail::gsIsSortRef(e);
 }
 
-/*
 /// \brief alias.
 ///
 /// An alias introduces another name for a sort.
@@ -136,21 +93,10 @@ typedef atermpp::term_list< alias >    alias_list;
 
 /// \brief vector of aliases
 typedef std::vector< alias > alias_vector;
-*/
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::alias& t1, mcrl2::data::alias& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

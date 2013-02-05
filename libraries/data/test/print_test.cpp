@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left));
 
-  data_expression left1 = remove_numeric_casts(left);
+  data_expression left1 = detail::remove_numeric_casts(left);
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left1));
 
@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   BOOST_CHECK(data::sort_nat::is_nat(x.sort()));
   BOOST_CHECK(data::sort_int::is_mod_application(x));
 
-  left1 = remove_numeric_casts(left);
+  left1 = detail::remove_numeric_casts(left);
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left1));
   std::cout << "precedence(left1) = " << precedence(left1) << std::endl;
