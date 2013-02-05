@@ -590,12 +590,13 @@ class stategraph_graph_algorithm
         data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
         mCRL2log(log::debug, "stategraph") << "sigma = " << data::print_substitution(sigma) << std::endl;
+        mCRL2log(log::debug, "stategraph") << eqn.print() << std::endl;
 
         const predicate_variable_vector& predvars = eqn.predicate_variables();
-        if (predvars.empty())
+        if (eqn.is_simple())
         {
           mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(eqn.formula()) << " in vertex " << pbes_system::pp(u.X) << " (empty case)" << std::endl;
-          u.guards.insert(eqn.formula());
+          u.guards.insert(eqn.simple_guard());
         }
         for (predicate_variable_vector::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
         {

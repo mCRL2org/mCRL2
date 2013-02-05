@@ -148,19 +148,22 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   {
     guard_expression right = pop();
     guard_expression left = pop();
+    pbes_expression new_condition = utilities::optimized_and(left.condition, right.condition);
     if (left.is_simple() && right.is_simple())
     {
-      left.condition = utilities::optimized_and(left.condition, right.condition);
+      left.condition = new_condition;
       push(left);
     }
     else if (left.is_simple())
     {
       right.add_guard(left.condition);
+      right.condition = new_condition;
       push(right);
     }
     else if (right.is_simple())
     {
       left.add_guard(right.condition);
+      left.condition = new_condition;
       push(left);
     }
     else
@@ -168,6 +171,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
       left.add_guard(right.condition);
       right.add_guard(left.condition);
       left.guards.insert(left.guards.end(), right.guards.begin(), right.guards.end());
+      left.condition = new_condition;
       push(left);
     }
   }
@@ -176,24 +180,28 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   {
     guard_expression right = pop();
     guard_expression left = pop();
+    pbes_expression new_condition = utilities::optimized_or(left.condition, right.condition);
     if (left.is_simple() && right.is_simple())
     {
-      left.condition = utilities::optimized_or(left.condition, right.condition);
+      left.condition = new_condition;
       push(left);
     }
     else if (left.is_simple())
     {
       right.add_guard(utilities::optimized_not(left.condition));
+      right.condition = new_condition;
       push(right);
     }
     else if (right.is_simple())
     {
       left.add_guard(utilities::optimized_not(right.condition));
+      left.condition = new_condition;
       push(left);
     }
     else
     {
       left.guards.insert(left.guards.end(), right.guards.begin(), right.guards.end());
+      left.condition = new_condition;
       push(left);
     }
   }
@@ -203,26 +211,28 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     guard_expression right = pop();
     guard_expression left = pop();
     left.negate();
+    pbes_expression new_condition = utilities::optimized_or(left.condition, right.condition);
     if (left.is_simple() && right.is_simple())
     {
-      left.condition = utilities::optimized_and(left.condition, right.condition);
+      left.condition = new_condition;
       push(left);
     }
     else if (left.is_simple())
     {
-      right.add_guard(left.condition);
+      right.add_guard(utilities::optimized_not(left.condition));
+      right.condition = new_condition;
       push(right);
     }
     else if (right.is_simple())
     {
-      left.add_guard(right.condition);
+      left.add_guard(utilities::optimized_not(right.condition));
+      left.condition = new_condition;
       push(left);
     }
     else
     {
-      left.add_guard(right.condition);
-      right.add_guard(left.condition);
       left.guards.insert(left.guards.end(), right.guards.begin(), right.guards.end());
+      left.condition = new_condition;
       push(left);
     }
   }

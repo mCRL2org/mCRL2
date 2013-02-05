@@ -24,12 +24,6 @@ namespace pbes_system {
 namespace detail {
 
 inline
-std::string print_equation(const pbes_equation& eq)
-{
-  return (eq.symbol().is_mu() ? "mu " : "nu ")  + pbes_system::pp(eq.variable()) + " = " + pbes_system::pp(eq.formula());
-}
-
-inline
 std::string print_set(const std::set<std::size_t>& v)
 {
   std::ostringstream out;

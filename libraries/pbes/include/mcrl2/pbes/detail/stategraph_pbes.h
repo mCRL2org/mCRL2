@@ -27,11 +27,18 @@ namespace detail {
 
 typedef atermpp::vector<std::pair<propositional_variable_instantiation, pbes_expression> > predicate_variable_vector;
 
+inline
+std::string print_equation(const pbes_equation& eq)
+{
+  return (eq.symbol().is_mu() ? "mu " : "nu ")  + pbes_system::pp(eq.variable()) + " = " + pbes_system::pp(eq.formula());
+}
+
 class stategraph_equation: public pbes_equation
 {
   protected:
     predicate_variable_vector m_predvars;
     std::vector<data::variable> m_parameters;
+    pbes_expression m_condition;
 
   public:
     stategraph_equation(const pbes_equation& eqn)
@@ -39,12 +46,28 @@ class stategraph_equation: public pbes_equation
     {
       pbes_system::detail::guard_traverser f;
       f(eqn.formula());
-      if (!f.expression_stack.back().is_simple())
-      {
-        m_predvars = f.expression_stack.back().guards;
-      }
+      m_predvars = f.expression_stack.back().guards;
+      m_condition = f.expression_stack.back().condition;
       data::variable_list params = variable().parameters();
       m_parameters = std::vector<data::variable>(params.begin(), params.end());
+    }
+
+    bool is_simple() const
+    {
+    	for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+      {
+      	// TODO check this
+      	if (!pbes_system::is_false(i->second))
+        {
+        	return false;
+        }
+      }
+      return true;
+    }
+
+    const pbes_expression& simple_guard() const
+    {
+    	return m_condition;
     }
 
     const std::vector<data::variable>& parameters() const
@@ -62,19 +85,18 @@ class stategraph_equation: public pbes_equation
     	return m_predvars;
     }
 
-    // // computes the equation with the implications replaced by new_implication
-    // pbes_equation apply_implication(const pbes_expression& new_implications) const
-    // {
-    //   pbes_expression phi = new_implications;
-    //   phi = and_(m_h, phi);
-    //
-    //   // apply quantifiers
-    //   for (atermpp::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
-    //   {
-    //     phi = i->apply(phi);
-    //   }
-    //   return pbes_equation(m_symbol, m_X, phi);
-    // }
+    std::string print() const
+    {
+    	std::ostringstream out;
+    	out << "equation = " << print_equation(*this) << std::endl;
+    	out << "guards:" << std::endl;
+    	for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+    	{
+    		out << "variable = " << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << std::endl;
+    	}
+    	out << "simple = " << std::boolalpha << is_simple() << std::endl;
+    	return out.str();
+    }
 };
 
 // explicit representation of a pbes in STATEGRAPH format
