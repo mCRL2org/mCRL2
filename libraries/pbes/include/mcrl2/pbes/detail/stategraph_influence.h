@@ -138,7 +138,7 @@ class stategraph_influence_graph_algorithm
         {
           const propositional_variable_instantiation& Y = i->first;
           std::vector<data::data_expression> Yparameters(Y.parameters().begin(), Y.parameters().end());
-          stategraph_equation eqn = *sgraph::find_equation(m_pbes, Y.name());
+          stategraph_equation eqn = *find_equation(m_pbes, Y.name());
           const std::vector<data::variable> d_Y = eqn.parameters();
           for (std::size_t p = 0; p < Yparameters.size(); p++)
           {

@@ -229,7 +229,7 @@ class control_flow_graph_algorithm
     pbes_expression simplify(const pbes_expression& x) const
     {
       data::detail::simplify_rewriter r;
-      control_flow_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
+      stategraph_simplifying_rewriter<pbes_expression, data::detail::simplify_rewriter> R(r);
       return R(x);
     }
 
@@ -318,7 +318,7 @@ class control_flow_graph_algorithm
                                              ) const
     {
       std::ostringstream out;
-      out << "[cf] " << message << ": " << print_propvar_parameter(Xij.name(), index) << " -> " << std::boolalpha << control_flow_value;
+      out << message << ": " << print_propvar_parameter(Xij.name(), index) << " -> " << std::boolalpha << control_flow_value;
       out << " because of equation " << core::pp(X.name());
       data::variable_list v = X.parameters();
       if (v.size() > 0)
@@ -576,7 +576,7 @@ class control_flow_graph_algorithm
       propositional_variable_instantiation Xinit = project(m_pbes.initial_state());
       vertex_iterator i = insert_control_flow_vertex(Xinit);
       todo.insert(&(i->second));
-      mCRL2log(log::debug, "control_flow") << "[cf] Xinit = " << pbes_system::pp(m_pbes.initial_state()) << " -> " << pbes_system::pp(Xinit) << std::endl;
+      mCRL2log(log::debug, "control_flow") << "Xinit = " << pbes_system::pp(m_pbes.initial_state()) << " -> " << pbes_system::pp(Xinit) << std::endl;
 
       while (!todo.empty())
       {
@@ -584,26 +584,27 @@ class control_flow_graph_algorithm
         todo.erase(i);
         control_flow_vertex& u = **i;
         control_flow_vertex* source = &u;
-        mCRL2log(log::debug, "control_flow") << "[cf] selected todo element " << pbes_system::pp(u.X) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "selected todo element " << pbes_system::pp(u.X) << std::endl;
 
         const pfnf_equation& eqn = *find_equation(m_pbes, u.X.name());
         propositional_variable X = project_variable(eqn.variable());
-        mCRL2log(log::debug, "control_flow") << "[cf] X = " << pbes_system::pp(X) << std::endl;
-        mCRL2log(log::debug, "control_flow") << "[cf] u.X = " << pbes_system::pp(u.X) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "X = " << pbes_system::pp(X) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "u.X = " << pbes_system::pp(u.X) << std::endl;
         data::variable_list d = X.parameters();
         data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
-        mCRL2log(log::debug, "control_flow") << "[cf] sigma = " << data::print_substitution(sigma) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "sigma = " << data::print_substitution(sigma) << std::endl;
         const atermpp::vector<pfnf_implication>& implications = eqn.implications();
         if (implications.empty())
         {
-          mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(eqn.h()) << " in vertex " << pbes_system::pp(u.X) << " (empty case)" << std::endl;
+          mCRL2log(log::debug, "control_flow") << "insert guard " << pbes_system::pp(eqn.h()) << " in vertex " << pbes_system::pp(u.X) << " (empty case)" << std::endl;
           u.guards.insert(eqn.h());
         }
         for (atermpp::vector<pfnf_implication>::const_iterator i = implications.begin(); i != implications.end(); ++i)
         {
           const atermpp::vector<propositional_variable_instantiation>& propvars = i->variables();
           pbes_expression guard = pbesr(and_(eqn.h(), i->g()), sigma);
+          mCRL2log(log::debug, "control_flow") << "guard = " << pbes_system::pp(guard) << std::endl;
           if (is_false(guard))
           {
             continue;
@@ -611,25 +612,25 @@ class control_flow_graph_algorithm
 
           for (atermpp::vector<propositional_variable_instantiation>::const_iterator j = propvars.begin(); j != propvars.end(); ++j)
           {
-            mCRL2log(log::debug, "control_flow") << "[cf] Xij = " << pbes_system::pp(*j) << std::endl;
+            mCRL2log(log::debug, "control_flow") << "Y = " << pbes_system::pp(*j) << std::endl;
             propositional_variable_instantiation Xij = apply_substitution(*j, sigma);
-            mCRL2log(log::debug, "control_flow") << "[cf] Xij_sigma = " << pbes_system::pp(Xij) << std::endl;
+            mCRL2log(log::debug, "control_flow") << "sigma(Y) = " << pbes_system::pp(Xij) << std::endl;
             propositional_variable_instantiation Y = project(Xij);
-            mCRL2log(log::debug, "control_flow") << "[cf] Xij_sigma_projected = " << pbes_system::pp(Y) << std::endl;
+            mCRL2log(log::debug, "control_flow") << "project(sigma(Y)) = " << pbes_system::pp(Y) << std::endl;
             propositional_variable_instantiation label = Xij;
             vertex_iterator q = m_control_vertices.find(Y);
             if (q == m_control_vertices.end())
             {
               // vertex Y does not yet exist
-              mCRL2log(log::debug, "control_flow") << "[cf] discovered " << pbes_system::pp(Y) << std::endl;
+              mCRL2log(log::debug, "control_flow") << "discovered " << pbes_system::pp(Y) << std::endl;
               vertex_iterator k = insert_control_flow_vertex(Y);
               control_flow_vertex& v = k->second;
               u.guards.insert(guard);
-              mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(guard) << " in vertex " << pbes_system::pp(u.X) << std::endl;
+              mCRL2log(log::debug, "control_flow") << "insert guard " << pbes_system::pp(guard) << " in vertex " << pbes_system::pp(u.X) << std::endl;
               todo.insert(&v);
               control_flow_vertex* target = &v;
               control_flow_edge e(source, target, label);
-              mCRL2log(log::debug, "control_flow") << "[cf] insert edge " << e.print() << std::endl;
+              mCRL2log(log::debug, "control_flow") << "insert edge " << e.print() << std::endl;
               u.outgoing_edges.insert(e);
               v.incoming_edges.insert(e);
             }
@@ -637,10 +638,10 @@ class control_flow_graph_algorithm
             {
               control_flow_vertex& v = q->second;
               u.guards.insert(guard);
-              mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(guard) << " in vertex " << pbes_system::pp(u.X) << std::endl;
+              mCRL2log(log::debug, "control_flow") << "insert guard " << pbes_system::pp(guard) << " in vertex " << pbes_system::pp(u.X) << std::endl;
               control_flow_vertex* target = &v;
               control_flow_edge e(source, target, label);
-              mCRL2log(log::debug, "control_flow") << "[cf] insert edge " << e.print() << std::endl;
+              mCRL2log(log::debug, "control_flow") << "insert edge " << e.print() << std::endl;
               u.outgoing_edges.insert(e);
               v.incoming_edges.insert(e);
             }

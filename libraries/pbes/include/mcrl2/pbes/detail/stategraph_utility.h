@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H
 
+#include <sstream>
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
@@ -22,7 +23,39 @@ namespace pbes_system {
 
 namespace detail {
 
-namespace sgraph {
+inline
+std::string print_equation(const pbes_equation& eq)
+{
+  return (eq.symbol().is_mu() ? "mu " : "nu ")  + pbes_system::pp(eq.variable()) + " = " + pbes_system::pp(eq.formula());
+}
+
+inline
+std::string print_set(const std::set<std::size_t>& v)
+{
+  std::ostringstream out;
+  out << "{";
+  for (std::set<std::size_t>::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    if (i != v.begin())
+    {
+      out << ", ";
+    }
+    out << *i;
+  }
+  out << "}";
+  return out.str();
+}
+
+inline
+data::data_expression nth_element(const data::data_expression_list& e, std::size_t n)
+{
+  data::data_expression_list::const_iterator i = e.begin();
+  for (std::size_t j = 0; j < n; ++j)
+  {
+    ++i;
+  }
+  return *i;
+}
 
 inline
 bool is_constant(const data::data_expression& x)
@@ -61,8 +94,6 @@ std::string print_pbes_expressions(const atermpp::set<pbes_expression>& v)
   out << "}";
   return out.str();
 }
-
-} // namespace sgraph
 
 // Adds some simplifications to simplify_rewrite_builder.
 template <typename Term, typename DataRewriter, typename SubstitutionFunction = no_substitution>
