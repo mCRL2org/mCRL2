@@ -961,4 +961,128 @@ std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::process::process_expression& t1, mcrl2::process::process_expression& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::process_instance& t1, mcrl2::process::process_instance& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::process_instance_assignment& t1, mcrl2::process::process_instance_assignment& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::delta& t1, mcrl2::process::delta& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::tau& t1, mcrl2::process::tau& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::sum& t1, mcrl2::process::sum& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::block& t1, mcrl2::process::block& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::hide& t1, mcrl2::process::hide& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::rename& t1, mcrl2::process::rename& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::comm& t1, mcrl2::process::comm& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::allow& t1, mcrl2::process::allow& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::sync& t1, mcrl2::process::sync& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::at& t1, mcrl2::process::at& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::seq& t1, mcrl2::process::seq& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::if_then& t1, mcrl2::process::if_then& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::if_then_else& t1, mcrl2::process::if_then_else& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::bounded_init& t1, mcrl2::process::bounded_init& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::merge& t1, mcrl2::process::merge& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::left_merge& t1, mcrl2::process::left_merge& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::choice& t1, mcrl2::process::choice& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H

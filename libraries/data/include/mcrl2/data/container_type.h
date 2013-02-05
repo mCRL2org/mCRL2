@@ -192,4 +192,45 @@ bool is_fbag_container(const container_type& t)
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::container_type& t1, mcrl2::data::container_type& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::list_container& t1, mcrl2::data::list_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::set_container& t1, mcrl2::data::set_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::bag_container& t1, mcrl2::data::bag_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::fset_container& t1, mcrl2::data::fset_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::fbag_container& t1, mcrl2::data::fbag_container& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_CONTAINER_TYPE_H

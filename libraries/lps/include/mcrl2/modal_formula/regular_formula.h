@@ -287,4 +287,44 @@ std::string pp(const regular_formula& x);
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::regular_formulas::regular_formula& t1, mcrl2::regular_formulas::regular_formula& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::nil& t1, mcrl2::regular_formulas::nil& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::seq& t1, mcrl2::regular_formulas::seq& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::alt& t1, mcrl2::regular_formulas::alt& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::trans& t1, mcrl2::regular_formulas::trans& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::trans_or_nil& t1, mcrl2::regular_formulas::trans_or_nil& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

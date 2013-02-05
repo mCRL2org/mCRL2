@@ -51,7 +51,7 @@ class abstraction: public data_expression
     /// \brief Constructor.
     template <typename Container>
     abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
-      : data_expression(core::detail::gsMakeBinder(binding_operator, variable_list(variables.begin(),variables.end()), body))
+      : data_expression(core::detail::gsMakeBinder(binding_operator, variable_list(variables.begin(), variables.end()), body))
     {}
 
     const binder_type& binding_operator() const
@@ -74,6 +74,16 @@ class abstraction: public data_expression
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::abstraction& t1, mcrl2::data::abstraction& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_ABSTRACTION_H
 

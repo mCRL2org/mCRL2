@@ -48,7 +48,7 @@ class where_clause: public data_expression
     /// \brief Constructor.
     template <typename Container>
     where_clause(const data_expression& body, const Container& declarations, typename atermpp::detail::enable_if_container<Container, assignment_expression>::type* = 0)
-      : data_expression(core::detail::gsMakeWhr(body, assignment_expression_list(declarations.begin(),declarations.end())))
+      : data_expression(core::detail::gsMakeWhr(body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 
     const data_expression& body() const
@@ -72,6 +72,16 @@ class where_clause: public data_expression
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::where_clause& t1, mcrl2::data::where_clause& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_WHERE_CLAUSE_H
 

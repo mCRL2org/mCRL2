@@ -474,4 +474,68 @@ std::set<data::variable> find_variables(const action_formulas::action_formula& x
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::action_formulas::action_formula& t1, mcrl2::action_formulas::action_formula& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::true_& t1, mcrl2::action_formulas::true_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::false_& t1, mcrl2::action_formulas::false_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::not_& t1, mcrl2::action_formulas::not_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::and_& t1, mcrl2::action_formulas::and_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::or_& t1, mcrl2::action_formulas::or_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::imp& t1, mcrl2::action_formulas::imp& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::forall& t1, mcrl2::action_formulas::forall& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::exists& t1, mcrl2::action_formulas::exists& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::action_formulas::at& t1, mcrl2::action_formulas::at& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_MODAL_ACTION_FORMULA_H

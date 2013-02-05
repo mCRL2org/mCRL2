@@ -12,9 +12,11 @@
 #ifndef MCRL2_LPS_PROCESS_INITIALIZER_H
 #define MCRL2_LPS_PROCESS_INITIALIZER_H
 
-#include <iterator>
+#include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <string>
+#include <utility>
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
@@ -91,5 +93,15 @@ std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 } // namespace lps
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::lps::process_initializer& t1, mcrl2::lps::process_initializer& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_LPS_PROCESS_INITIALIZER_H

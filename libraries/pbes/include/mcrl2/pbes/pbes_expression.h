@@ -1532,4 +1532,68 @@ struct term_traits<pbes_system::pbes_expression>
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::pbes_system::pbes_expression& t1, mcrl2::pbes_system::pbes_expression& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::propositional_variable_instantiation& t1, mcrl2::pbes_system::propositional_variable_instantiation& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::true_& t1, mcrl2::pbes_system::true_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::false_& t1, mcrl2::pbes_system::false_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::not_& t1, mcrl2::pbes_system::not_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::and_& t1, mcrl2::pbes_system::and_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::or_& t1, mcrl2::pbes_system::or_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::imp& t1, mcrl2::pbes_system::imp& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::forall& t1, mcrl2::pbes_system::forall& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::pbes_system::exists& t1, mcrl2::pbes_system::exists& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

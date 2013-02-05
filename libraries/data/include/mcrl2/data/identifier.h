@@ -53,4 +53,14 @@ typedef std::vector< identifier > identifier_vector;
 } // namespace data
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::identifier& t1, mcrl2::data::identifier& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif

@@ -884,4 +884,116 @@ bool find_nil(const state_formulas::state_formula& x);
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::state_formulas::state_formula& t1, mcrl2::state_formulas::state_formula& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::true_& t1, mcrl2::state_formulas::true_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::false_& t1, mcrl2::state_formulas::false_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::not_& t1, mcrl2::state_formulas::not_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::and_& t1, mcrl2::state_formulas::and_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::or_& t1, mcrl2::state_formulas::or_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::imp& t1, mcrl2::state_formulas::imp& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::forall& t1, mcrl2::state_formulas::forall& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::exists& t1, mcrl2::state_formulas::exists& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::must& t1, mcrl2::state_formulas::must& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::may& t1, mcrl2::state_formulas::may& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::yaled& t1, mcrl2::state_formulas::yaled& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::yaled_timed& t1, mcrl2::state_formulas::yaled_timed& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::delay& t1, mcrl2::state_formulas::delay& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::delay_timed& t1, mcrl2::state_formulas::delay_timed& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::variable& t1, mcrl2::state_formulas::variable& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::nu& t1, mcrl2::state_formulas::nu& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::mu& t1, mcrl2::state_formulas::mu& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_MODAL_STATE_FORMULA_H

@@ -80,5 +80,15 @@ std::set<data::variable> find_variables(const data::function_symbol& x);
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::function_symbol& t1, mcrl2::data::function_symbol& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

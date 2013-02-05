@@ -718,4 +718,56 @@ std::set<boolean_expression> split_and(const boolean_expression& expr)
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::bes::boolean_expression& t1, mcrl2::bes::boolean_expression& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::true_& t1, mcrl2::bes::true_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::false_& t1, mcrl2::bes::false_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::not_& t1, mcrl2::bes::not_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::and_& t1, mcrl2::bes::and_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::or_& t1, mcrl2::bes::or_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::imp& t1, mcrl2::bes::imp& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::boolean_variable& t1, mcrl2::bes::boolean_variable& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_BES_BOOLEAN_EXPRESSION_H

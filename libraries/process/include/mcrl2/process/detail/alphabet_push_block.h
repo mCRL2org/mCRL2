@@ -61,7 +61,7 @@ std::set<core::identifier_string> rename_inverse(const rename_expression_list& R
 
 namespace detail {
 
-process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, const atermpp::vector<process_equation>& equations);
+process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, const std::vector<process_equation>& equations);
 
 template <typename Derived>
 struct push_block_builder: public process_expression_builder<Derived>
@@ -79,9 +79,9 @@ struct push_block_builder: public process_expression_builder<Derived>
   const std::set<core::identifier_string>& B;
 
   // used for computing the alphabet
-  const atermpp::vector<process_equation>& equations;
+  const std::vector<process_equation>& equations;
 
-  push_block_builder(const std::set<core::identifier_string>& B_, const atermpp::vector<process_equation>& equations_)
+  push_block_builder(const std::set<core::identifier_string>& B_, const std::vector<process_equation>& equations_)
     : B(B_), equations(equations_)
   {}
 
@@ -171,7 +171,7 @@ struct apply_push_block_builder: public Traverser<apply_push_block_builder<Trave
   using super::leave;
   using super::operator();
 
-  apply_push_block_builder(const std::set<core::identifier_string>& B, const atermpp::vector<process_equation>& equations)
+  apply_push_block_builder(const std::set<core::identifier_string>& B, const std::vector<process_equation>& equations)
     : super(B, equations)
   {}
 
@@ -181,7 +181,7 @@ struct apply_push_block_builder: public Traverser<apply_push_block_builder<Trave
 };
 
 inline
-process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, const atermpp::vector<process_equation>& equations)
+process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, const std::vector<process_equation>& equations)
 {
   apply_push_block_builder<push_block_builder> f(B, equations);
   return f(x);
@@ -190,7 +190,7 @@ process_expression push_block(const std::set<core::identifier_string>& B, const 
 } // namespace detail
 
 inline
-process_expression push_block(const core::identifier_string_list& B, const process_expression& x, const atermpp::vector<process_equation>& equations)
+process_expression push_block(const core::identifier_string_list& B, const process_expression& x, const std::vector<process_equation>& equations)
 {
   std::set<core::identifier_string> B1(B.begin(), B.end());
   return detail::push_block(B1, x, equations);

@@ -73,5 +73,15 @@ typedef std::vector<container_sort> container_sort_vector;
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::container_sort& t1, mcrl2::data::container_sort& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_CONTAINER_SORT_H
 

@@ -71,5 +71,15 @@ typedef std::vector<basic_sort> basic_sort_vector;
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::basic_sort& t1, mcrl2::data::basic_sort& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

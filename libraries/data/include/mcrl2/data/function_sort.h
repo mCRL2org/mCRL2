@@ -58,7 +58,7 @@ class function_sort: public sort_expression
     /// \brief Constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortArrow(sort_expression_list(domain.begin(),domain.end()), codomain))
+      : sort_expression(core::detail::gsMakeSortArrow(sort_expression_list(domain.begin(), domain.end()), codomain))
     {}
 
     const sort_expression_list& domain() const
@@ -137,6 +137,16 @@ inline function_sort make_function_sort(const sort_expression& dom1,
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::function_sort& t1, mcrl2::data::function_sort& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_FUNCTION_SORT_H
 

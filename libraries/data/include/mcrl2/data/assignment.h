@@ -302,5 +302,27 @@ std::string pp(const assignment_vector& x);
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::assignment_expression& t1, mcrl2::data::assignment_expression& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::assignment& t1, mcrl2::data::assignment& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::identifier_assignment& t1, mcrl2::data::identifier_assignment& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_ASSIGNMENT_H
 

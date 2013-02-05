@@ -220,4 +220,51 @@ bool is_lambda_binder(const binder_type& t)
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::binder_type& t1, mcrl2::data::binder_type& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::set_or_bag_comprehension_binder& t1, mcrl2::data::set_or_bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::set_comprehension_binder& t1, mcrl2::data::set_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::bag_comprehension_binder& t1, mcrl2::data::bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::forall_binder& t1, mcrl2::data::forall_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::exists_binder& t1, mcrl2::data::exists_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::lambda_binder& t1, mcrl2::data::lambda_binder& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_BINDER_TYPE_H

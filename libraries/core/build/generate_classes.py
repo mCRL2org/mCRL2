@@ -23,10 +23,15 @@ def make_classes(filename, class_text, namespace, add_constructor_overloads = Fa
             fname = path(filename).normcase() / ('%s.h' % c.name())
             text = c.class_inline_definition()
             insert_text_in_file(fname, text, 'generated class %s' % c.name(), handle_user_sections = True)
+            text = c.swap_specialization()
+            insert_text_in_file(fname, text, 'generated swap functions')
     else:
         class_definitions = [c.class_inline_definition() for c in classes]
         ctext = '\n'.join(class_definitions)
         insert_text_in_file(filename, ctext, 'generated classes', handle_user_sections = True)
+        swap_specializations = [c.swap_specialization() for c in classes]
+        text = '\n'.join(swap_specializations)
+        insert_text_in_file(filename, text, 'generated swap functions')
 
 if __name__ == "__main__":
     make_classes('../../bes/include/mcrl2/bes/boolean_expression.h',         BOOLEAN_EXPRESSION_CLASSES   , namespace = 'bes'             )

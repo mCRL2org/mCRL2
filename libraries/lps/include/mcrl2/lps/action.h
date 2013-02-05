@@ -112,4 +112,14 @@ bool equal_signatures(const action& a, const action& b)
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::lps::action& t1, mcrl2::lps::action& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_LPS_ACTION_H

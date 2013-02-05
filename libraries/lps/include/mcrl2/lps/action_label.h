@@ -98,4 +98,14 @@ std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace mcrl2
 
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::lps::action_label& t1, mcrl2::lps::action_label& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_LPS_ACTION_LABEL_H
