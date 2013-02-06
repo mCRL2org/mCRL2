@@ -178,5 +178,13 @@ typedef std::vector< structured_sort_constructor_argument >    structured_sort_c
 
 } // namespace mcrl2
 
+namespace std {
+template <>
+inline void swap(mcrl2::data::structured_sort_constructor_argument& t1, mcrl2::data::structured_sort_constructor_argument& t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
+
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_ARGUMENT_H
 

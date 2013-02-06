@@ -354,5 +354,13 @@ application data_expression::operator()(const data_expression& e1, const data_ex
 }
 }
 
+namespace std {
+template <>
+inline void swap(mcrl2::data::data_expression& t1, mcrl2::data::data_expression& t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
+
 #endif // MCRL2_DATA_DATA_EXPRESSION_H
 

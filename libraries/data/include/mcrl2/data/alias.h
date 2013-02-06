@@ -97,6 +97,13 @@ typedef std::vector< alias > alias_vector;
 } // namespace data
 
 } // namespace mcrl2
+namespace std {
+template <>
+inline void swap(mcrl2::data::alias& t1, mcrl2::data::alias& t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

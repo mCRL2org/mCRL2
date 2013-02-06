@@ -290,4 +290,12 @@ std::string pp(const structured_sort_constructor_vector& x);
 
 } // namespace mcrl2
 
+namespace std {
+template <>
+inline void swap(mcrl2::data::structured_sort_constructor& t1, mcrl2::data::structured_sort_constructor& t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
+
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_H
