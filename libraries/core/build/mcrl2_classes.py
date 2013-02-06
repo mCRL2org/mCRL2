@@ -177,10 +177,10 @@ choice(const process_expression& left, const process_expression& right)         
 '''
 
 PBES_CLASSES = r'''
-fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl |   | FixPoint    | A fixpoint symbol
-propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl |   | PropVarDecl | A propositional variable declaration
-pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | M | PBEqn       | A PBES equation
-pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                    | M | PBES        | A PBES
+fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl | XCU | FixPoint    | A fixpoint symbol
+propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CIU | PropVarDecl | A propositional variable declaration
+pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SM  | PBEqn       | A PBES equation
+pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                    | SM  | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''

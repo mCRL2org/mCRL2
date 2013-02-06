@@ -49,3 +49,4 @@ if __name__ == "__main__":
     make_classes('../../data/include/mcrl2/data',                            DATA_CLASSES                 , namespace = 'data'            )
     make_classes('../../lps/include/mcrl2/lps',                              LPS_CLASSES                  , namespace = 'lps'             )
     make_classes('../../process/include/mcrl2/process',                      PROCESS_CLASSES              , namespace = 'process'         )
+    make_classes('../../pbes/include/mcrl2/pbes',                            PBES_CLASSES                 , namespace = 'pbes_system'     )
