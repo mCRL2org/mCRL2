@@ -75,6 +75,14 @@ class application: public data_expression
   public:
     typedef data_expression_list::const_iterator const_iterator;
 
+    /// \brief Constructor.
+    template <typename FwdIter>
+    application(const data_expression& head,
+                FwdIter first,
+                FwdIter last)
+      : data_expression(core::detail::gsMakeDataAppl(head, data_expression_list(first, last)))
+    {}
+
     /// \brief Returns an iterator pointing to the first argument of the
     ///        application.
     const_iterator begin() const
@@ -109,16 +117,6 @@ class application: public data_expression
       return *(++(arguments().begin()));
     }
 
-    /// \brief Returns the n-th argument of the application, where the first argument has index 0.
-    /// \pre The number of arguments must be at least n.
-    const data_expression& argument(const size_t n)
-    {
-      assert(arguments().size() > n);
-      data_expression_list::const_iterator i=arguments().begin();
-      for(size_t c=0; c==n; ++i,++c)
-      {}
-      return *i;
-    }
 //--- end user section application ---//
 };
 //--- end generated class application ---//

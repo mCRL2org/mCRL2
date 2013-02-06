@@ -37,7 +37,17 @@ const data::data_expression &right(const data::data_expression& x)
 inline
 data::data_expression arg(const data::data_expression& x)
 {
-  return data::application(x).arguments().front();
+  return *(data::application(x).begin());
+}
+
+inline
+data::data_expression argument(const data::data_expression& x, const size_t n)
+{
+  const data::application a(x);
+  data::application::const_iterator arg = a.begin();
+  for(size_t i = 0; i < n; ++i, ++arg)
+  {}
+  return *arg;
 }
 
 } // namespace data_accessors

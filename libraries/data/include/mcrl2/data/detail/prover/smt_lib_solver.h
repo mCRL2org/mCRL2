@@ -22,6 +22,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
+#include "mcrl2/data/detail/accessors.h"
 
 #ifdef HAVE_CVC
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
@@ -420,7 +421,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_not(const data_expression &a_clause)
     {
-      const data_expression v_clause=application(a_clause).argument(0);
+      const data_expression v_clause=data_accessors::arg(a_clause);
       f_formula = f_formula + "(not ";
       translate_clause(v_clause, true);
       f_formula = f_formula + ")";
@@ -428,8 +429,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_equality(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -439,8 +440,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_inequality(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(distinct ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -450,8 +451,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_greater_than(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(> ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -461,8 +462,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_greater_than_or_equal(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(>= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -472,8 +473,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_less_than(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(< ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -483,8 +484,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_less_than_or_equal(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(<= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -494,8 +495,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_plus(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(+ ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -505,7 +506,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_unary_minus(const data_expression &a_clause)
     {
-      const data_expression v_clause = application(a_clause).argument(0);
+      const data_expression v_clause = data_accessors::arg(a_clause);
       f_formula = f_formula + "(~";
       translate_clause(v_clause, false);
       f_formula = f_formula + ")";
@@ -513,8 +514,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_binary_minus(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(- ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -524,8 +525,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_multiplication(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(* ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -535,8 +536,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_max(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(ite (>= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -550,8 +551,8 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_min(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
+      const data_expression v_clause_1 = data_accessors::left(a_clause);
+      const data_expression v_clause_2 = data_accessors::right(a_clause);
       f_formula = f_formula + "(ite (<= ";
       translate_clause(v_clause_1, false);
       f_formula = f_formula + " ";
@@ -565,7 +566,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_abs(const data_expression &a_clause)
     {
-      const data_expression v_clause = application(a_clause).argument(0);
+      const data_expression v_clause = data_accessors::arg(a_clause);
       f_formula = f_formula + "(ite (< 0 ";
       translate_clause(v_clause, false);
       f_formula = f_formula + ") ~";
@@ -577,7 +578,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_succ(const data_expression &a_clause)
     {
-      const data_expression v_clause = application(a_clause).argument(0);
+      const data_expression v_clause = data_accessors::arg(a_clause);
       f_formula = f_formula + "(+ ";
       translate_clause(v_clause, false);
       f_formula = f_formula + " 1)";
@@ -585,7 +586,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_pred(const data_expression &a_clause)
     {
-      const data_expression v_clause = application(a_clause).argument(0);
+      const data_expression v_clause = data_accessors::arg(a_clause);
       f_formula = f_formula + "(- ";
       translate_clause(v_clause, false);
       f_formula = f_formula + " 1)";
@@ -593,9 +594,11 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_add_c(const data_expression &a_clause)
     {
-      const data_expression v_clause_1 = application(a_clause).argument(0);
-      const data_expression v_clause_2 = application(a_clause).argument(1);
-      const data_expression v_clause_3 = application(a_clause).argument(2);
+      const application& v_clause(a_clause);
+      application::const_iterator arg = v_clause.begin();
+      const data_expression v_clause_1 = *arg++;
+      const data_expression v_clause_2 = *arg++;
+      const data_expression v_clause_3 = *arg++;
       f_formula = f_formula + "(ite ";
       translate_clause(v_clause_1, true);
       f_formula = f_formula + " (+ ";
@@ -611,13 +614,13 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_c_nat(const data_expression &a_clause)
     {
-      const data_expression v_clause = application(a_clause).argument(0);
+      const data_expression v_clause = data_accessors::arg(a_clause);
       translate_clause(v_clause, false);
     }
 
     void translate_c_int(const data_expression &a_clause)
     {
-      const data_expression v_clause = application(a_clause).argument(0);
+      const data_expression v_clause = data_accessors::arg(a_clause);
       translate_clause(v_clause, false);
     }
 

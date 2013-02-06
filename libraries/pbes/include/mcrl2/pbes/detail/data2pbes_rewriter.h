@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_DATA2PBES_REWRITER_H
 
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/data/detail/accessors.h"
 
 namespace mcrl2 {
 
@@ -66,17 +67,17 @@ struct data2pbes_builder: public pbes_expression_builder<Derived>
 
   data::data_expression arg0(const data::data_expression& x) const
   {
-    return data::application(x).argument(0);
+    return data::detail::data_accessors::arg(x);
   }
 
   data::data_expression left(const data::data_expression& x) const
   {
-    return data::application(x).left();
+    return data::detail::data_accessors::left(x);
   }
 
   data::data_expression right(const data::data_expression& x) const
   {
-    return data::application(x).right();
+    return data::detail::data_accessors::right(x);
   }
 
   // transforms outer level data operators to their pbes equivalents, for the following operators:
