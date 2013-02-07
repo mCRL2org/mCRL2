@@ -18,7 +18,6 @@
 #include <set>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "boost/iterator/transform_iterator.hpp"
 

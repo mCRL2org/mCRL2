@@ -3,6 +3,7 @@
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -210,13 +211,15 @@ namespace detail
   {
     BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
     BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-    std::vector<Term> temporary_store;  
+    typedef std::vector<Term,mcrl2::utilities::stack_alloc < Term, 64> > vector_type;
+    vector_type temporary_store;  
+    temporary_store.reserve(64);
     for(; first != last; ++first)
     {
       temporary_store.push_back(convert_to_aterm(*first));
     }
 
-    return make_list_backward<Term,typename std::vector<Term>::const_iterator,do_not_convert_term<Term> >
+    return make_list_backward<Term,typename vector_type::const_iterator,do_not_convert_term<Term> >
                (temporary_store.begin(),temporary_store.end(),do_not_convert_term<Term>());
   }
 }

@@ -15,10 +15,8 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
-#include <set>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/basic_sort.h"

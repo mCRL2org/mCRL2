@@ -15,10 +15,11 @@
 #include <cstring>
 #include <limits>
 #include <algorithm>
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/stack_alloc.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
@@ -691,8 +692,9 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 
   if (is_application(term))
   {
-    // atermpp::term_list <atermpp::aterm> l;
-    std::vector<atermpp::aterm> result;
+    std::vector<atermpp::aterm,utilities::stack_alloc < atermpp::aterm, 16> > result;
+    result.reserve(16);
+    
     const application& appl=aterm_cast<application>(term); 
     atermpp::aterm_appl arg0 = toInner(appl.head(), add_opids);
     // Reflect the way of encoding the other arguments!
@@ -708,7 +710,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
         result.push_back(arg0[i]);
       }
     }
-    // const data_expression_list &args= atermpp::aterm_cast<application>(term).arguments();
+
     for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
     {
       result.push_back(toInner(*i,add_opids));

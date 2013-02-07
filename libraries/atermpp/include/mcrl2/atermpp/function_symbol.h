@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <string>
 #include <cstdio>
-#include <vector>
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/detail/function_symbol.h"
 

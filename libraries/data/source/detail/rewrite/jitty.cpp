@@ -24,6 +24,7 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct_core.h"
 
@@ -403,39 +404,31 @@ bool RewriterJitty::removeRewriteRule(const data_equation &rule)
   return true;
 }
 
+template <class T>
 static atermpp::aterm subst_values(
-            const variable** vars,
-            const atermpp::aterm** vals,
-            const size_t number_of_vars,
+            const T& subst,
             const atermpp::aterm &t); //Prototype.
 
+template <class T>
 class subst_values_argument
 {
   private:
-    const variable** m_vars;
-    const atermpp::aterm** m_vals;
-    const size_t m_number_of_vars;
+    const T& m_subst;
 
   public:
-    subst_values_argument(
-              const variable** vars,
-              const atermpp::aterm** vals,
-              const size_t number_of_vars):
-                 m_vars(vars),
-                 m_vals(vals),
-                 m_number_of_vars(number_of_vars)
+    subst_values_argument( const T& subst)
+      : m_subst(subst)
     {}
 
     aterm operator()(const aterm &t) const
     {
-      return subst_values(m_vars,m_vals,m_number_of_vars,t);
+      return subst_values(m_subst,t);
     }
 };
 
+template <class T>
 static atermpp::aterm subst_values(
-            const variable** vars,
-            const atermpp::aterm** vals,
-            const size_t number_of_vars,
+            const T& subst,
             const atermpp::aterm &t)
 {
   if (t.type_is_int())
@@ -444,11 +437,11 @@ static atermpp::aterm subst_values(
   }
   else if (is_variable(t))
   {
-    for (size_t i=0; i<number_of_vars; i++)
+    for (size_t i=0; i<subst.size(); i++)
     {
-      if (t==*vars[i])
+      if (t==subst[i].first)
       {
-        return *vals[i];
+        return subst[i].second;
       }
     }
     return t;
@@ -458,7 +451,7 @@ static atermpp::aterm subst_values(
     const atermpp::aterm_appl &t1=atermpp::aterm_cast<const atermpp::aterm_appl>(t);
     const atermpp::aterm_appl &binder=atermpp::aterm_cast<const atermpp::aterm_appl>(t1[0]);
     const variable_list &bound_variables=atermpp::aterm_cast<const variable_list>(t1[1]);
-    const atermpp::aterm_appl body=atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<const atermpp::aterm_appl>(t1[2])));
+    const atermpp::aterm_appl body=atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(subst,atermpp::aterm_cast<const atermpp::aterm_appl>(t1[2])));
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
     for(size_t i=0; i<number_of_vars; ++i)
@@ -476,7 +469,7 @@ static atermpp::aterm subst_values(
   {
     const atermpp::aterm_appl &t1=atermpp::aterm_cast<const atermpp::aterm_appl>(t);
     const atermpp::term_list < atermpp::aterm_appl > &assignment_list=atermpp::aterm_cast<const atermpp::term_list < atermpp::aterm_appl > >(t1[1]);
-    const atermpp::aterm_appl body=atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<const atermpp::aterm_appl>(t1[0])));
+    const atermpp::aterm_appl body=atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(subst,atermpp::aterm_cast<const atermpp::aterm_appl>(t1[0])));
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
@@ -495,7 +488,7 @@ static atermpp::aterm subst_values(
     {
       const atermpp::aterm_appl &assignment= *it;
       new_assignments.push_back(core::detail::gsMakeDataVarIdInit(variable(assignment[0]),
-    		atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(vars,vals,number_of_vars,atermpp::aterm_cast<const atermpp::aterm_appl>(assignment[1])))));
+    		atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(subst,atermpp::aterm_cast<const atermpp::aterm_appl>(assignment[1])))));
     }
     atermpp::term_list < atermpp::aterm_appl > new_assignment_list;
     for(std::vector < atermpp::aterm_appl >::reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
@@ -508,21 +501,19 @@ static atermpp::aterm subst_values(
   {
     const atermpp::aterm_appl &t1=aterm_cast<const atermpp::aterm_appl>(t);
     const size_t arity = t1.size();
-    const subst_values_argument substitute_values_in_arguments(vars,vals,number_of_vars);
+    const subst_values_argument<T> substitute_values_in_arguments(subst);
     return ApplyArray(arity,t1.begin(),t1.end(),substitute_values_in_arguments);
   }
 }
 
 // Match term t with the lhs p of an equation in internal format.
+template <class T>
 static bool match_jitty(
                     const atermpp::aterm &t,
                     const atermpp::aterm &p,
                     // std::vector <variable> &vars,
                     // std::vector <atermpp::aterm> &vals,
-                    variable const ** vars,
-                    atermpp::aterm const** vals,
-                    size_t &number_of_vars,
-                    const size_t maxlen)
+                    T& subst)
 {
   if (p.type_is_int())
   {
@@ -530,12 +521,11 @@ static bool match_jitty(
   }
   else if (is_variable(p))
   {
-    for (size_t i=0; i<number_of_vars; i++)
+    for (size_t i=0; i<subst.size(); i++)
     {
-      assert(i<maxlen);
-      if (p== *vars[i])
+      if (p== subst[i].first)
       {
-        if (t== *vals[i])
+        if (t== subst[i].second)
         {
           return true;
         }
@@ -545,12 +535,12 @@ static bool match_jitty(
         }
       }
     }
-    assert(number_of_vars<maxlen);
     // vars.push_back(aterm_cast<const variable>(p));
     // vals.push_back(t);
-    vars[number_of_vars]=reinterpret_cast<const variable*>(&p);
-    vals[number_of_vars]=&t;
-    ++number_of_vars;
+    // vars[number_of_vars]=reinterpret_cast<const variable*>(&p);
+    // vals[number_of_vars]=&t;
+    // ++number_of_vars;
+    subst.push_back(std::pair<variable,atermpp::aterm>(aterm_cast<const variable>(p),t));
     return true;
   }
   else
@@ -572,7 +562,7 @@ static bool match_jitty(
 
     for (size_t i=0; i<arity; i++)
     {
-      if (!match_jitty(ta[i],pa[i],vars,vals,number_of_vars,maxlen))
+      if (!match_jitty(ta[i],pa[i],subst))
       {
         return false;
       }
@@ -732,6 +722,9 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   const aterm_list &strat=jitty_strat[op_value];
   if (strat.defined())
   {
+    typedef std::pair<variable, aterm> variable_aterm_pair;
+    std::vector<variable_aterm_pair,utilities::stack_alloc < variable_aterm_pair , 16> > subst;
+    subst.reserve(16);
     for (aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {
       const aterm_list &rule = aterm_cast<const aterm_list>(*strategy_it);
@@ -760,33 +753,34 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        size_t max_len = aterm_cast<const aterm_list>(rule.front()).size();
-        assert(max_len<=MAX_LEN);
-        size_t number_of_vars=0;
+        // size_t max_len = aterm_cast<const aterm_list>(rule.front()).size();
+        // assert(max_len<=MAX_LEN);
+        // size_t number_of_vars=0;
 
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,const aterm*, max_len);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
+        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,const aterm*, max_len);
+        subst.clear();
 
         bool matches = true;
 
         for (size_t i=1; i<rule_arity; i++)
         {
           assert(i<arity);
-          if (!match_jitty(rewritten_defined[i]?rewritten[i]:term[i],lhs[i],vars,vals,number_of_vars,max_len))
+          if (!match_jitty(rewritten_defined[i]?rewritten[i]:term[i],lhs[i],subst))
           {
             matches = false;
             break;
           }
         }
-        assert(number_of_vars<=max_len);
+        // assert(number_of_vars<=max_len);
         if (matches && (element_at(rule,1)==internal_true ||
-                        rewrite_aux(aterm_cast<const aterm_appl>(subst_values(vars,vals,number_of_vars,element_at(rule,1))),sigma)==internal_true))
+                        rewrite_aux(aterm_cast<const aterm_appl>(subst_values(subst,element_at(rule,1))),sigma)==internal_true))
         {
           const aterm_appl &rhs = aterm_cast<const aterm_appl>(element_at(rule,3));
 
           if (arity == rule_arity)
           {
-            const aterm_appl result=rewrite_aux(aterm_cast<const aterm_appl>(subst_values(vars,vals,number_of_vars,rhs)),sigma);
+            const aterm_appl result=rewrite_aux(aterm_cast<const aterm_appl>(subst_values(subst,rhs)),sigma);
             for (size_t i=0; i<arity; i++)
             {
               if (rewritten_defined[i])
@@ -804,7 +798,7 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
             // std::vector < aterm > newargs;
             // newargs.reserve(new_arity);
             // newargs.push_back(subst_values(vars,vals,number_of_vars,rhs));
-            new (&newargs[0]) aterm(subst_values(vars,vals,number_of_vars,rhs));
+            new (&newargs[0]) aterm(subst_values(subst,rhs));
             for(size_t i=1; i<new_arity; ++i)
             {
               assert(rule_arity+i-1<arity);
