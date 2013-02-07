@@ -454,11 +454,11 @@ static atermpp::aterm subst_values(
     const atermpp::aterm_appl body=atermpp::aterm_cast<const atermpp::aterm_appl>(subst_values(subst,atermpp::aterm_cast<const atermpp::aterm_appl>(t1[2])));
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
-    for(size_t i=0; i<number_of_vars; ++i)
+    for(size_t i=0; i<subst.size(); ++i)
     {
       for(variable_list::const_iterator it=bound_variables.begin(); it!=bound_variables.end(); ++it)
       {
-        assert(*it!= *vars[i]);
+        assert(*it!= subst[i].first);
       }
     }
 #endif
@@ -473,11 +473,11 @@ static atermpp::aterm subst_values(
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
-    for(size_t i=0; i<number_of_vars; ++i)
+    for(size_t i=0; i<subst.size(); ++i)
     {
       for(atermpp::term_list < atermpp::aterm_appl >::const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
       {
-        assert(atermpp::aterm_cast<const atermpp::aterm_appl>(*it)[0]!= *vars[i]);
+        assert(atermpp::aterm_cast<const atermpp::aterm_appl>(*it)[0]!= subst[i].first);
       }
     }
 #endif
