@@ -2,10 +2,17 @@
 //
 /// \file mcrl2/utilities/short_alloc.h
 
+/// N.B. A few minor modifications were made to make it compile with Visual C++ 10.
+
 #ifndef MCRL2_UTILITIES_STACK_ALLOC_H
 #define MCRL2_UTILITIES_STACK_ALLOC_H
 
+// TODO: use a cleaner way to find the type_traits header
+#ifdef _MSC_VER
+#define HAS_TYPE_TRAITS 1
+#else
 #define HAS_TYPE_TRAITS 0
+#endif
 
 #if HAS_TYPE_TRAITS
 #include <type_traits>
@@ -14,6 +21,7 @@
 #endif
 
 #include <cstddef>
+#include <vector>
 
 namespace mcrl2
 {
@@ -41,6 +49,9 @@ public:
     typedef const value_type* const_pointer;
     typedef value_type&       reference;
     typedef const value_type& const_reference;
+#ifdef _MSC_VER
+    typedef std::ptrdiff_t difference_type;
+#endif
 
 private:
 #if HAS_TYPE_TRAITS
