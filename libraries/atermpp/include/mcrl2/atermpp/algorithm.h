@@ -55,15 +55,7 @@ aterm_appl find_if(const Term &t, MatchPredicate match)
 template <typename Term, typename MatchPredicate, typename StopPredicate>
 aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
 {
-  try
-  {
-    detail::partial_find_if_impl< typename boost::add_reference< MatchPredicate >::type >(t, match, stop);
-  }
-  catch (detail::found_term_exception& e)
-  {
-    return e.t;
-  }
-  return aterm_appl();
+  return detail::partial_find_if_impl<typename boost::add_reference<MatchPredicate>::type>(t, match, stop);
 }
 
 /// \brief Finds all subterms of t that match a given predicate, and writes the found terms

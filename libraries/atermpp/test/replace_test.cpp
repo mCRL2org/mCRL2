@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/detail/utility.h"
 
 using namespace std;
 using namespace atermpp;
@@ -27,6 +28,24 @@ struct is_f
   bool operator()(aterm_appl t) const
   {
     return t.function().name() == "f";
+  }
+};
+
+// function object to test if it is an aterm_appl with function symbol "g"
+struct is_g
+{
+  bool operator()(aterm_appl t) const
+  {
+    return t.function().name() == "g";
+  }
+};
+
+// function object to test if it is an aterm_appl with function symbol "z"
+struct is_z
+{
+  bool operator()(aterm_appl t) const
+  {
+    return t.function().name() == "z";
   }
 };
 
@@ -84,6 +103,12 @@ void test_find()
   aterm_appl a(read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
+  BOOST_CHECK(t == read_term_from_string("f(y)"));
+
+  aterm_appl a1(read_term_from_string("h(g(x),g(f(y)))"));
+  t = partial_find_if(a1, is_f(), is_g());
+  BOOST_CHECK(t == aterm_appl());
+  t = partial_find_if(a1, is_f(), is_z());
   BOOST_CHECK(t == read_term_from_string("f(y)"));
 
   std::vector< aterm_appl> v;

@@ -120,7 +120,7 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
     }
   }
   else if (t.type_is_list())
-  { 
+  {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
       if (find_if_impl(*i, match, output))
@@ -175,21 +175,25 @@ void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBeg
 /// \param match A predicate function on terms
 /// \param stop A predicate function on terms
 template <typename MatchPredicate, typename StopPredicate>
-void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
+aterm_appl partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
 {
   if (t.type_is_appl())
   {
     if (match(aterm_appl(t)))
     {
-      throw found_term_exception(aterm_appl(t)); // report the match
+      return aterm_appl(t); // report the match
     }
     if (stop(aterm_appl(t)))
     {
-      return; // nothing was found
+      return aterm_appl(); // nothing was found
     }
     for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
     {
-      partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
+      aterm_appl result = partial_find_if_impl<MatchPredicate, StopPredicate>(*i, match, stop);
+      if (result != aterm_appl())
+      {
+        return result;
+      }
     }
   }
 
@@ -197,9 +201,14 @@ void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
   {
     for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
     {
-      partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
+      aterm_appl result = partial_find_if_impl<MatchPredicate, StopPredicate>(*i, match, stop);
+      if (result != aterm_appl())
+      {
+        return result;
+      }
     }
   }
+  return aterm_appl();
 }
 
 /// \brief Implements the partial_find_all_if algorithm
