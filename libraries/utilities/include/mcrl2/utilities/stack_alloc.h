@@ -73,7 +73,9 @@ private:
 public:
     pointer allocate(size_type n, typename stack_alloc<void, N>::const_pointer = 0)
     {
-        if ((pointer)&buf_ + N - ptr_ >= n)
+// Adapted the code to get rid of a "comparison between signed and unsigned integer expressions" warning.
+//        if ((pointer)&buf_ + N - ptr_ >= n)
+        if ((pointer)&buf_ + N >= n + ptr_)
         {
             pointer r = ptr_;
             ptr_ += n;
