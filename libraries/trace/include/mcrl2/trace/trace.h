@@ -632,7 +632,7 @@ class Trace
         }
         else if (e.type_is_appl() && isTimedMAct(aterm_cast<aterm_appl>(e)))
         {
-          if (core::detail::gsIsNil(aterm_appl(aterm_cast<aterm_appl>(e)[1])))
+          if (aterm_cast<aterm_appl>(e)[1]==data::data_expression())  // There is no time tag.
           {
             addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0])));
           }

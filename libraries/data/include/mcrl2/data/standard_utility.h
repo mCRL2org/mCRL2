@@ -276,9 +276,10 @@ inline bool is_positive_constant(data_expression const& n)
 /// Transforms a positive constant n into a character array containing
 /// the decimal representation of n.
 inline
-std::string positive_constant_as_string(data_expression n)
+std::string positive_constant_as_string(const data_expression &n_in)
 {
   std::vector<bool> bits;
+  data_expression n=n_in;
 
   while (sort_pos::is_cdub_application(n))
   {
@@ -887,7 +888,7 @@ application fbag(const sort_expression& s, data_expression_list const& range)
 }
 
 /// \brief Returns true if the term t is equal to nil
-inline bool is_nil(atermpp::aterm_appl t)
+inline bool is_nil(const atermpp::aterm_appl &t)
 {
   return t == core::detail::gsMakeNil();
 }

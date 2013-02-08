@@ -847,7 +847,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print data equation (without variables)
     mCRL2log(log::debug2, "pretty printer") << "printing data equation" << std::endl;
     aterm_appl Condition = ATAgetArgument(Part, 1);
-    if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
+    if (!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
     {
       PrintPart_Appl(OutStream, Condition,
                                  pp_format, ShowSorts, 0);
@@ -1117,7 +1117,7 @@ void PrintPart_Appl(std::ostream& OutStream,
     //print action rename rule (without variables)
     mCRL2log(log::debug2, "pretty printer") << "printing action rename rule" << std::endl;
     aterm_appl Condition = ATAgetArgument(Part, 1);
-    if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
+    if (!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
     {
       PrintPart_Appl(OutStream, Condition,
                                  pp_format, ShowSorts, 0);
@@ -2999,7 +2999,7 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
   }
   //print condition
   aterm_appl Cond = ATAgetArgument(Summand, 1);
-  if (/*!gsIsNil(Cond) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Cond)))   // JK 15/10/2009 condition is always a data expression
+  if (!data::sort_bool::is_true_function_symbol(data::data_expression(Cond)))   // JK 15/10/2009 condition is always a data expression
   {
     PrintDataExpr(OutStream, Cond, pp_format, ShowSorts, gsPrecIdPrefix());
     OutStream <<  " ->\n         ";
@@ -3007,7 +3007,7 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
   //print multiaction
   aterm_appl MultAct = ATAgetArgument(Summand, 2);
   aterm_appl Time = ATAgetArgument(Summand, 3);
-  bool IsTimed = !gsIsNil(Time);
+  bool IsTimed = (Time!=data::data_expression());
   PrintPart_Appl(OutStream, MultAct, pp_format, ShowSorts,
                              (IsTimed)?6:5);
   //print time

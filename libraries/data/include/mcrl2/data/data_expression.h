@@ -139,11 +139,7 @@ class data_expression: public atermpp::aterm_appl
     explicit data_expression(const atermpp::aterm& t)
       : atermpp::aterm_appl(t)
     {
-      // As Nil is used to indicate a non existing time value
-      // in a linear process, we allow the occurrence of a Nil
-      // term as a data_expression. This is a workaround which
-      // should be removed.
-      assert(is_data_expression(atermpp::aterm_cast<const atermpp::aterm_appl>(t)) || core::detail::gsIsNil(atermpp::aterm_cast<const atermpp::aterm_appl>(t)));
+      assert(is_data_expression(atermpp::aterm_cast<const atermpp::aterm_appl>(t)));
     }
     
     /// \brief Constructor.
@@ -152,11 +148,7 @@ class data_expression: public atermpp::aterm_appl
     data_expression(const atermpp::aterm_appl& t)
       : atermpp::aterm_appl(t)
     {
-      // As Nil is used to indicate a non existing time value
-      // in a linear process, we allow the occurrence of a Nil
-      // term as a data_expression. This is a workaround which
-      // should be removed.
-      assert(is_data_expression(atermpp::aterm_cast<const atermpp::aterm_appl>(t)) || core::detail::gsIsNil(atermpp::aterm_cast<const atermpp::aterm_appl>(t)));
+      assert(is_data_expression(atermpp::aterm_cast<const atermpp::aterm_appl>(t)) );
     }
 
     application operator()(const data_expression& e) const;

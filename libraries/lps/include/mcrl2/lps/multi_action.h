@@ -16,7 +16,6 @@
 #include <stdexcept>
 #include <sstream>
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/lps/action.h"
@@ -44,19 +43,19 @@ class multi_action
 
   public:
     /// \brief Constructor
-    multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression(core::detail::gsMakeNil()))
+    multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression())
       : m_actions(actions), m_time(time)
     {}
 
     /// \brief Constructor
-    multi_action(const atermpp::aterm_appl& t) : m_time(core::detail::gsMakeNil())
+    multi_action(const atermpp::aterm_appl& t) : m_time()
     {
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
       m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
     }
 
     /// \brief Constructor
-    explicit multi_action(const atermpp::aterm& t1) : m_time(core::detail::gsMakeNil())
+    explicit multi_action(const atermpp::aterm& t1) : m_time()
     {
       const atermpp::aterm_appl t(t1);
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
@@ -66,15 +65,14 @@ class multi_action
     /// \brief Constructor
     multi_action(const action& l)
       : m_actions(atermpp::make_list<action>(l)),
-        m_time(core::detail::gsMakeNil())
+        m_time()
     {}
 
     /// \brief Returns true if time is available.
     /// \return True if time is available.
     bool has_time() const
     {
-      // TODO: remove the Nil
-      return m_time != core::detail::gsMakeNil();
+      return m_time != data::data_expression();
     }
 
     /// \brief Returns the sequence of actions.

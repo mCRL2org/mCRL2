@@ -35,7 +35,7 @@ class deadlock
 
   public:
     /// \brief Constructor
-    deadlock(data::data_expression time = data::data_expression(core::detail::gsMakeNil()))
+    deadlock(data::data_expression time = data::data_expression())
       : m_time(time)
     {}
 
@@ -43,7 +43,7 @@ class deadlock
     /// \return True if time is available.
     bool has_time() const
     {
-      return m_time != core::detail::gsMakeNil();
+      return m_time != data::data_expression();
     }
 
     /// \brief Returns the time.
