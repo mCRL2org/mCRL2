@@ -97,14 +97,21 @@ class application: public data_expression
       return arguments().end();
     }
 
+    /// \brief Returns an iterator pointing past the last argument of the
+    ///        application.
+    size_t size() const
+    {
+      return arguments().size();
+    }
+
     /// \brief Returns the first argument of the application
     /// \pre head() is a binary operator
     /// \return arguments()[0]
     inline
     const data_expression& left() const
     {
-      assert(arguments().size() == 2);
-      return *(arguments().begin());
+      assert(size() == 2);
+      return *(begin());
     }
 
     /// \brief Returns the second argument of the application
@@ -113,8 +120,8 @@ class application: public data_expression
     inline
     const data_expression& right() const
     {
-      assert(arguments().size() == 2);
-      return *(++(arguments().begin()));
+      assert(size() == 2);
+      return *(++(begin()));
     }
 
 //--- end user section application ---//

@@ -10,7 +10,7 @@
 
 #include <cstdlib>
 #include <vector>
-#include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/utilities/exception.h"
@@ -147,12 +147,14 @@ ptrdiff_t tree_set_store::create_set(vector<ptrdiff_t> &elems)
     return EMPTY_SET;
   }
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(nodes,ptrdiff_t,elems.size());
+  typedef std::vector <ptrdiff_t, mcrl2::utilities::stack_alloc< ptrdiff_t, 128> > vector_t;
+  vector_t nodes;
+  nodes.reserve(elems.size());
   size_t node_size = 0;
   size_t i,j;
   for (i=0; i < elems.size(); ++i)
   {
-    nodes[i] = find_set(elems[i],EMPTY_SET);
+    nodes.push_back(find_set(elems[i],EMPTY_SET));
   }
   node_size = i;
   while (node_size > 1)

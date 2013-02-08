@@ -34,7 +34,6 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 
 // For backwards compatibility
 //using namespace mcrl2::log;
@@ -654,7 +653,6 @@ class pins
     void next_state_all(ltsmin_state_type const& src, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      //MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, lps::next_state_generator::internal_state_argument_t, nparams);
       std::vector<lps::next_state_generator::internal_state_argument_t> state_arguments(nparams);
       for (size_t i = 0; i < nparams; i++)
       {
@@ -695,7 +693,6 @@ class pins
     void next_state_long(ltsmin_state_type const& src, std::size_t group, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      //MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, lps::next_state_generator::internal_state_argument_t, nparams);
       std::vector<lps::next_state_generator::internal_state_argument_t> state_arguments(nparams);
       for (size_t i = 0; i < nparams; i++)
       {

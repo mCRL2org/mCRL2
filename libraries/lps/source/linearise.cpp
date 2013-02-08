@@ -1181,11 +1181,12 @@ class specification_basic_type:public boost::noncopyable
 
       assert(is_application(t));
 
-      filter_vars_by_term(application(t).head(),vars_set,vars_result_set);
-      filter_vars_by_termlist(application(t).arguments(),vars_set,vars_result_set);
+      const application &a=atermpp::aterm_cast<const application>(t);
+      filter_vars_by_term(a.head(),vars_set,vars_result_set);
+      filter_vars_by_termlist(a.begin(),a.end(),vars_set,vars_result_set);
     }
 
-    bool occursintermlist(const variable var, const data_expression_list r)
+    bool occursintermlist(const variable &var, const data_expression_list &r)
     {
       for (data_expression_list::const_iterator l=r.begin() ; l!=r.end() ; ++l)
       {
@@ -1198,35 +1199,37 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void filter_vars_by_termlist(
-      const data_expression_list tl,
+      const data_expression_list::const_iterator begin,
+      const data_expression_list::const_iterator end,
       const std::set < variable > &vars_set,
       std::set < variable > &vars_result_set)
     {
-      for (data_expression_list::const_iterator l=tl.begin(); l!=tl.end(); ++l)
+      for (data_expression_list::const_iterator l=begin; l!=end; ++l)
       {
         filter_vars_by_term(*l,vars_set,vars_result_set);
       }
     }
 
     void filter_vars_by_multiaction(
-      const action_list multiaction,
+      const action_list &multiaction,
       const std::set < variable > &vars_set,
       std::set < variable > &vars_result_set)
     {
       for (action_list::const_iterator ma=multiaction.begin() ; ma!=multiaction.end() ; ++ma)
       {
-        filter_vars_by_termlist(ma->arguments(),vars_set,vars_result_set);
+        filter_vars_by_termlist(ma->arguments().begin(), ma->arguments().end(),vars_set,vars_result_set);
       }
       return;
     }
 
     void filter_vars_by_assignmentlist(
-      const assignment_list assignments,
-      const variable_list parameters,
+      const assignment_list &assignments,
+      const variable_list &parameters,
       const std::set < variable > &vars_set,
       std::set < variable > &vars_result_set)
     {
-      filter_vars_by_termlist(data_expression_list(parameters),vars_set,vars_result_set);
+      const data_expression_list &l=atermpp::aterm_cast<data_expression_list>(parameters);
+      filter_vars_by_termlist(l.begin(),l.end(),vars_set,vars_result_set);
       for (assignment_list::const_iterator i=assignments.begin();
            i!=assignments.end(); ++i)
       {
@@ -3486,14 +3489,15 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_application(t))
       {
+        const application&a=atermpp::aterm_cast<const application>(t);
         return application(
-                 adapt_term_to_stack(application(t).head(),stack,vars),
-                 adapt_termlist_to_stack(application(t).arguments(),stack,vars));
+                 adapt_term_to_stack(a.head(),stack,vars),
+                 adapt_termlist_to_stack(a.begin(),a.end(),stack,vars));
       }
 
       if (is_abstraction(t))
       {
-        const abstraction abs_t(t);
+        const abstraction &abs_t(t);
         return abstraction(
                  abs_t.binding_operator(),
                  abs_t.variables(),
@@ -3526,15 +3530,15 @@ class specification_basic_type:public boost::noncopyable
       return t;   // in case of non-debug mode, try to return something as decent as possible.
     }
 
-    template <typename Container>
     inline
     data_expression_vector adapt_termlist_to_stack(
-      const Container& tl,
+      const data_expression_list::const_iterator begin,
+      const data_expression_list::const_iterator end,
       const stacklisttype& stack,
       const variable_list& vars)
     {
       data_expression_vector result;
-      for (typename Container::const_iterator i = tl.begin(); i != tl.end(); ++i)
+      for (data_expression_list::const_iterator i = begin; i != end; ++i)
       {
         result.push_back(adapt_term_to_stack(*i,stack, vars));
       }
@@ -3559,7 +3563,8 @@ class specification_basic_type:public boost::noncopyable
       result.push_front(
                action(act.label(),
                       atermpp::convert<data_expression_list>(adapt_termlist_to_stack(
-                            act.arguments(),
+                            act.arguments().begin(),
+                            act.arguments().end(),
                             stack,
                             vars))));
       return result;

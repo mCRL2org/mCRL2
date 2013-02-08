@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 
 namespace atermpp
 {

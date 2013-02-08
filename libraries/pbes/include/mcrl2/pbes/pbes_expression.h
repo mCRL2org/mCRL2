@@ -631,7 +631,9 @@ pbes_expression data_arg(const pbes_expression& t)
 {
   if (data::is_data_expression(t))
   {
-    return data::application(t).arguments().front();
+    assert(data::is_application(t));
+    const data::application &a=atermpp::aterm_cast<const data::application>(t);
+    return *(a.begin()); 
   }
   else
   {

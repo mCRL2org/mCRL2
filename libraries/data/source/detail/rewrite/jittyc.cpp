@@ -2427,7 +2427,7 @@ static aterm toInner_list_odd(const data_expression &t)
   if (is_application(t))
   {
     aterm_list l;
-    const data_expression_list a=application(t).arguments();
+    const application &a=atermpp::aterm_cast<application>(t);
     for (data_expression_list::const_iterator i=a.begin(); i!=a.end(); ++i )
     {
       l.push_front(toInner_list_odd(*i));

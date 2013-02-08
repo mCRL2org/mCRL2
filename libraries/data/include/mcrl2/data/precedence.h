@@ -47,9 +47,9 @@ namespace detail {
   inline
   data_expression remove_numeric_casts(data_expression x)
   {
-  	while (is_numeric_cast(x))
+    while (is_numeric_cast(x))
     {
-    	x = static_cast<application>(x).arguments().front();
+    	x = *atermpp::aterm_cast<application>(x).begin();
     }
     return x;
   }

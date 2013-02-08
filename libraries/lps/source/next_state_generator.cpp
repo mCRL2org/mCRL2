@@ -12,7 +12,7 @@
 
 #include <algorithm>
 #include <set>
-#include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/stack_alloc.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -125,12 +125,13 @@ void next_state_generator::declare_constructors()
 
 next_state_generator::internal_state_t next_state_generator::get_internal_state(const state &s) const
 {
-  //rewriter_term_t arguments[s.size()];
-  // MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments, internal_state_argument_t, s.size());
-  std::vector < internal_state_argument_t > arguments(s.size());
-  for (size_t i = 0; i < s.size(); i++)
+  const size_t len=s.size();
+  typedef std::vector < internal_state_argument_t > vector_t;
+  vector_t arguments;
+  arguments.reserve(len);
+  for (size_t i = 0; i < len; i++)
   {
-    arguments[i] = get_internal_state_argument(s[i]);
+    arguments.push_back(get_internal_state_argument(s[i]));
   }
   return get_internal_state(arguments);
 }
@@ -268,8 +269,9 @@ static bool parameter_score_compare(const parameter_score &left, const parameter
 
 void next_state_generator::summand_subset_t::build_pruning_parameters(const action_summand_vector &summands)
 {
-  //parameter_score parameters[m_process_parameters.size()];
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(parameters, parameter_score, m_generator->m_process_parameters.size());
+  typedef std::vector<parameter_score, mcrl2::utilities::stack_alloc< parameter_score, 64 > > vector_t;
+  vector_t parameters(m_generator->m_process_parameters.size());
+
   for (size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
   {
     parameters[i].parameter_id = i;
@@ -281,7 +283,7 @@ void next_state_generator::summand_subset_t::build_pruning_parameters(const acti
     }
   }
 
-  std::sort(parameters, parameters + m_generator->m_process_parameters.size(), parameter_score_compare);
+  std::sort(parameters.begin(), parameters.end(), parameter_score_compare);
 
   for (size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
   {

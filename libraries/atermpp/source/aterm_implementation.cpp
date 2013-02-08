@@ -11,7 +11,6 @@
 
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
 #include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/aterm_appl.h"

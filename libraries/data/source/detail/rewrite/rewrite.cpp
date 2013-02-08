@@ -552,9 +552,12 @@ Rewriter* createRewriter(
 //Prototype
 static void check_vars(const data_expression &expr, const std::set <variable> &vars, std::set <variable> &used_vars);
 
-static void check_vars(const data_expression_list &exprs, const std::set <variable> &vars, std::set <variable> &used_vars)
+static void check_vars(const data_expression_list::const_iterator begin, 
+                       const data_expression_list::const_iterator end, 
+                       const std::set <variable> &vars, 
+                       std::set <variable> &used_vars)
 {
-  for (data_expression_list::const_iterator i=exprs.begin(); i!=exprs.end(); ++i)
+  for (data_expression_list::const_iterator i=begin; i!=end; ++i)
   {
     check_vars(*i,vars,used_vars);
   }
@@ -564,16 +567,18 @@ static void check_vars(const data_expression &expr, const std::set <variable> &v
 {
   if (is_application(expr))
   {
-    check_vars(atermpp::aterm_cast<application>(expr).head(),vars,used_vars);
-    check_vars(atermpp::aterm_cast<application>(expr).arguments(),vars,used_vars);
+    const application &a=atermpp::aterm_cast<const application>(expr);
+    check_vars(a.head(),vars,used_vars);
+    check_vars(a.begin(),a.end(),vars,used_vars);
   }
   else if (is_variable(expr))
   {
-    used_vars.insert(variable(expr));
+    const variable &v=atermpp::aterm_cast<const variable>(expr);
+    used_vars.insert(v);
 
-    if (vars.count(variable(expr))==0)
+    if (vars.count(v)==0)
     {
-      throw variable(expr);
+      throw v; 
     }
   }
 }
@@ -581,9 +586,10 @@ static void check_vars(const data_expression &expr, const std::set <variable> &v
 //Prototype
 static void checkPattern(const data_expression &p);
 
-static void checkPattern(const data_expression_list &l)
+static void checkPattern(const data_expression_list::const_iterator begin, 
+                         const data_expression_list::const_iterator end)
 {
-  for (data_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  for (data_expression_list::const_iterator i=begin; i!=end; ++i)
   {
     checkPattern(*i);
   }
@@ -598,8 +604,9 @@ static void checkPattern(const data_expression &p)
       throw mcrl2::runtime_error(std::string("variable ") + data::pp(application(p).head()) +
                " is used as head symbol in an application, which is not supported");
     }
-    checkPattern(atermpp::aterm_cast<application>(p).head());
-    checkPattern(atermpp::aterm_cast<application>(p).arguments());
+    const application &a=atermpp::aterm_cast<const application>(p);
+    checkPattern(a.head());
+    checkPattern(a.begin(),a.end());
   }
 }
 

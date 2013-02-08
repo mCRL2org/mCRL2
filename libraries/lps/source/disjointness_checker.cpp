@@ -65,10 +65,9 @@ void Disjointness_Checker::process_data_expression(const size_t a_summand_number
   }
   else if (is_application(a_expression))
   {
-    const application t(a_expression);
+    const application &t=atermpp::aterm_cast<application>(a_expression);
     process_data_expression(a_summand_number,t.head());
-    const data_expression_list l=t.arguments();
-    for (data_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    for (data_expression_list::const_iterator i=t.begin(); i!=t.end(); ++i)
     {
       process_data_expression(a_summand_number,*i);
     }

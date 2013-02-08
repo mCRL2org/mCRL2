@@ -18,7 +18,6 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_convertible.hpp>
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 
 namespace atermpp

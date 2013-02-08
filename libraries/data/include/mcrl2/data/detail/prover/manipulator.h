@@ -12,7 +12,7 @@
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
-#include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/data/detail/prover/info.h"
 
 namespace mcrl2
@@ -203,12 +203,12 @@ class InternalFormatManipulator
       }
 
 
-      atermpp::function_symbol v_symbol = a_term.function();
-      atermpp::aterm v_function = a_term[0];
+      const atermpp::function_symbol &v_symbol = a_term.function();
+      const atermpp::aterm &v_function = a_term[0];
       size_t v_arity = v_symbol.arity();
 
-      // MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity);
-      std::vector < atermpp::aterm > v_parts(v_arity);
+      typedef std::vector < atermpp::aterm,mcrl2::utilities::stack_alloc < atermpp::aterm,64> > vector_t;
+      vector_t v_parts(v_arity);
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
@@ -218,8 +218,8 @@ class InternalFormatManipulator
 
       if (f_info.is_equality(v_result))
       {
-        atermpp::aterm_appl v_term1 = static_cast<atermpp::aterm_appl>(v_result[1]);
-        atermpp::aterm_appl v_term2 = static_cast<atermpp::aterm_appl>(v_result[2]);
+        atermpp::aterm_appl v_term1 = atermpp::aterm_cast<atermpp::aterm_appl>(v_result[1]);
+        atermpp::aterm_appl v_term2 = atermpp::aterm_cast<atermpp::aterm_appl>(v_result[2]);
         if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
         {
           v_result = atermpp::aterm_appl(v_symbol, v_function, v_term2, v_term1);

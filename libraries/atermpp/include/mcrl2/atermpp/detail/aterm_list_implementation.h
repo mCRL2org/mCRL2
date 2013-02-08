@@ -2,7 +2,6 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -77,23 +76,25 @@ template <typename Term>
 inline
 term_list<Term> push_back(const term_list<Term> &l, const Term &el)
 {
-  size_t len = l.size();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,len);
+  typedef std::vector <typename term_list<Term>::const_iterator, mcrl2::utilities::stack_alloc<typename term_list<Term>::const_iterator,64> > vector_t;
+  vector_t buffer;
+  const size_t len = l.size();
+  buffer.reserve(len);
 
   /* Collect all elements of list in buffer */
-  size_t j=0;
-  for (typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i, ++j)
+  
+  for (typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    buffer[j] = detail::address(*i);
+    buffer.push_back(i);  
   }
 
   term_list<Term> result;
   result.push_front(el);
 
   /* Insert elements at the front of the list */
-  for (size_t j=len; j>0; j--)
+  for (typename vector_t::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
   {
-    result.push_front(Term(buffer[j-1]));
+    result.push_front(**i);
   }
   return result;
 }
@@ -131,21 +132,23 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
     return list;
   }
 
-  std::vector<Term>buffer;
+  typedef std::vector <typename term_list<Term>::const_iterator, mcrl2::utilities::stack_alloc<typename term_list<Term>::const_iterator,64> > vector_t;
+  vector_t buffer;
   buffer.reserve(len);
+
   term_list<Term> result = list; 
   for(typename term_list<Term>::const_iterator j=list.begin();  j!=i; ++j)
   {
-    buffer.push_back(*j);
+    buffer.push_back(j);
     result.pop_front();
   }
   assert(len==buffer.size());
   assert(result.front()==t);
   result.pop_front(); // skip the element.
 
-  for (typename std::vector<Term>::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+  for (typename vector_t::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
   {
-    result.push_front(*i);
+    result.push_front(**i);
   }
 
   return result;
@@ -169,18 +172,19 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   }
 
   term_list<Term> result = m;
-  std::vector<Term>buffer;
+  typedef std::vector <typename term_list<Term>::const_iterator, mcrl2::utilities::stack_alloc<typename term_list<Term>::const_iterator,64> > vector_t;
+  vector_t buffer;
   buffer.reserve(len);
 
   for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
   {
-    buffer.push_back(*i); 
+    buffer.push_back(i); 
   }
 
   /* Insert elements at the front of the list */
-  for (typename std::vector<Term>::const_reverse_iterator j=buffer.rbegin(); j!=buffer.rend(); ++j)
+  for (typename vector_t::const_reverse_iterator j=buffer.rbegin(); j!=buffer.rend(); ++j)
   {
-    result.push_front(*j);
+    result.push_front(**j);
   }
 
   return result;
