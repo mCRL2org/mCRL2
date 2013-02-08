@@ -70,8 +70,8 @@ class Induction
       }
       else if (is_application(a_expression))
       {
-        data::application a = data::application(data::data_expression(a_expression));
-        for (data_expression_list::const_iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
+        const data::application &a = atermpp::aterm_cast<const data::application>(a_expression);
+        for (data_expression_list::const_iterator i = a.begin(); i != a.end(); ++i)
         {
           recurse_expression_for_lists(*i);
         }

@@ -285,11 +285,12 @@ class function_declaration_list():
       projection = []
              
       if len(index_table) == 1:
-        projection.append("return *boost::next(static_cast< application >(e).arguments().begin(), {0});".format(index_table.keys()[0]))
+#        projection.append("return *boost::next(static_cast< application >(e).arguments().begin(), {0});".format(index_table.keys()[0]))
+        projection.append("return *boost::next(atermpp::aterm_cast<const application >(e).begin(), {0});".format(index_table.keys()[0]))
       else:
         projection_case = '''        if ({0})
         {
-          return *boost::next(static_cast< application >(e).arguments().begin(), %s);\n" % (i)
+          return *boost::next(atermpp::aterm_cast<const application >(e).begin(), %s);\n" % (i)
         }'''.format(" || ".join(["is_{0}_application(e)".format(c[1] for c in index_table[i])]), i)
         projection.append(projection_case)
 

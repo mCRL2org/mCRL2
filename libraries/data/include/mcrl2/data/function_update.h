@@ -111,7 +111,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -123,7 +123,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -135,7 +135,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
       }
 
       /// \brief Give all system defined equations for function_update
