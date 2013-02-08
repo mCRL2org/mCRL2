@@ -346,33 +346,32 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
       }
     }
 
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,arity+extra_arity);
-    // std::vector < atermpp::aterm > args(arity+extra_arity);
+    typedef std::vector < atermpp::aterm, mcrl2::utilities::stack_alloc<atermpp::aterm,64> > args_vector_t;
+    args_vector_t args;
+    args.reserve(arity+extra_arity);
+    
+    
     size_t k = 1;
 
+    args.push_back(aterm()); // First put a dummy element. Replace it later.
     if (!head.type_is_int() && !is_variable(head))
     {
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)
       {
-        new (&args[i])  atermpp::aterm(aterm_cast<const atermpp::aterm_appl>(head)[i]);
+        // new (&args[i])  atermpp::aterm(aterm_cast<const atermpp::aterm_appl>(head)[i]);
+        args.push_back(aterm_cast<const atermpp::aterm_appl>(head)[i]);
       }
       head = aterm_cast<const atermpp::aterm_appl>(head)[0];
     }
+    args[0]=head;
 
-    new (&args[0]) atermpp::aterm(head);
-    for (size_t i=1; i<arity; i++,k++)
+    for (size_t i=1; i<arity; i++)
     {
-      new (&args[k]) atermpp::aterm(build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t[i]),substituted_vars,exprs));
+      args.push_back(build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t[i]),substituted_vars,exprs));
     }
 
-    atermpp::aterm_appl r = ApplyArray(arity+extra_arity,&args[0],&args[0]+arity+extra_arity);
-
-    for(size_t i=0;i<arity+extra_arity; i++)
-    {
-      using namespace atermpp;
-      args[i].~aterm();
-    }
+    atermpp::aterm_appl r = ApplyArray(arity+extra_arity,args.begin(),args.end());
 
     return r;
   }

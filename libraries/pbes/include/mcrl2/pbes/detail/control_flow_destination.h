@@ -94,7 +94,7 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
         {
           out << ", ";
         }
-        if (*i == data::data_expression())
+        if (!i->defined())
         {
           out << "-";
         }
@@ -160,13 +160,13 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
       const pfnf_equation& eqn = m_pbes.equations()[k];
       const pfnf_implication& g = eqn.implications()[i];
       const data::variable d_n = eqn.parameters()[n];
-      if (source(k, i, n) == data::data_expression())
+      if (!source(k, i, n).defined())
       {
         return false;
       }
       for (std::size_t j = 0; j < g.variables().size(); ++j)
       {
-        if (destination(k, i, j, n) == data::data_expression())
+        if (!destination(k, i, j, n).defined())
         {
           return false;
         }
@@ -196,7 +196,7 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
           {
             c.insert(copy(k, i, j, m));
           }
-          if (c.size() > 1 || *c.begin() == data::data_expression())
+          if (c.size() > 1 || !c.begin()->defined())
           {
             return false;
           }

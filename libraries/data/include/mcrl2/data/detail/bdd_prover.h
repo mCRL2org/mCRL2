@@ -380,10 +380,10 @@ class BDD_Prover: public Prover
         data_expression v_true_branch = f_bdd_info.get_true_branch(a_bdd);
         data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         data_expression v_branch = get_branch(v_true_branch, a_polarity);
-        if (v_branch == data_expression())
+        if (!v_branch.defined())
         {
           v_branch = get_branch(v_false_branch, a_polarity);
-          if (v_branch == data_expression())
+          if (!v_branch.defined())
           {
             v_result = data_expression();
           }
@@ -524,7 +524,7 @@ class BDD_Prover: public Prover
       {
         mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression t=get_branch(f_bdd, true);
-        if (t==data_expression())
+        if (!t.defined())
         { throw mcrl2::runtime_error(
             "Cannot provide witness. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
@@ -551,7 +551,7 @@ class BDD_Prover: public Prover
       {
         mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression t=get_branch(f_bdd, false);
-        if (t==data_expression())
+        if (!t.defined())
         { throw mcrl2::runtime_error(
             "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");

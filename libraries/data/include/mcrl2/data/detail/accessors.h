@@ -35,13 +35,13 @@ const data::data_expression &right(const data::data_expression& x)
 }
 
 inline
-data::data_expression arg(const data::data_expression& x)
+const data::data_expression &arg(const data::data_expression& x)
 {
   return *(data::application(x).begin());
 }
 
 inline
-data::data_expression argument(const data::data_expression& x, const size_t n)
+const data::data_expression &argument(const data::data_expression& x, const size_t n)
 {
   const data::application a(x);
   data::application::const_iterator arg = a.begin();

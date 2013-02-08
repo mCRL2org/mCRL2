@@ -438,7 +438,7 @@ void lps2lts_algorithm::value_prioritize(std::list<next_state_generator::transit
       const data::data_expression &argument = i->action().actions().front().arguments().front();
       if (mcrl2::data::sort_nat::is_nat(argument.sort()))
       {
-        if (lowest_value == data::data_expression())
+        if (!lowest_value.defined())
         {
           lowest_value = argument;
         }

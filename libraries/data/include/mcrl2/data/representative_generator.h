@@ -136,7 +136,7 @@ class representative_generator
       {
         data_expression representative = find_representative(*i, maximum_depth - 1);
 
-        if (representative == data_expression())
+        if (!representative.defined())
         {
           return data_expression();
         }

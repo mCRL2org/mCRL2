@@ -36,7 +36,7 @@ void instantiate_global_variables(specification& spec)
   for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     data::data_expression d = default_expression_generator(i->sort());
-    if (d == data::data_expression())
+    if (!d.defined())
     {
       throw mcrl2::runtime_error("Error in lps::instantiate_global_variables: could not instantiate " + data::pp(*i));
     }
