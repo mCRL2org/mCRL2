@@ -104,6 +104,7 @@ class application: public data_expression
       return arguments().size();
     }
 
+/*
     /// \brief Returns the first argument of the application
     /// \pre head() is a binary operator
     /// \return arguments()[0]
@@ -123,7 +124,7 @@ class application: public data_expression
       assert(size() == 2);
       return *(++(begin()));
     }
-
+*/
 //--- end user section application ---//
 };
 //--- end generated class application ---//

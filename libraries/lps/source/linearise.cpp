@@ -5614,26 +5614,26 @@ class specification_basic_type:public boost::noncopyable
 
       if (sort_bool::is_and_application(c2))
       {
-        return implies_condition(c1,application(c2).left()) &&
-               implies_condition(c1,application(c2).right());
+        return implies_condition(c1,data::binary_left(application(c2))) &&
+               implies_condition(c1,data::binary_right(application(c2)));
       }
 
       if (sort_bool::is_or_application(c1))
       {
-        return implies_condition(application(c1).left(),c2) &&
-               implies_condition(application(c1).right(),c2);
+        return implies_condition(data::binary_left(application(c1)),c2) &&
+               implies_condition(data::binary_right(application(c1)),c2);
       }
 
       if (sort_bool::is_and_application(c1))
       {
-        return implies_condition(application(c1).left(),c2) ||
-               implies_condition(application(c1).right(),c2);
+        return implies_condition(data::binary_left(application(c1)),c2) ||
+               implies_condition(data::binary_right(application(c1)),c2);
       }
 
       if (sort_bool::is_or_application(c2))
       {
-        return implies_condition(c1,application(c2).left()) ||
-               implies_condition(c1,application(c2).right());
+        return implies_condition(c1,data::binary_left(application(c2))) ||
+               implies_condition(c1,data::binary_right(application(c2)));
       }
 
       return false;
@@ -6675,8 +6675,8 @@ class specification_basic_type:public boost::noncopyable
 
       if (sort_real::is_plus_application(actiontime))
       {
-        return (check_real_variable_occurrence(sumvars,application(actiontime).left(),condition) ||
-                check_real_variable_occurrence(sumvars,application(actiontime).right(),condition));
+        return (check_real_variable_occurrence(sumvars,data::binary_left(application(actiontime)),condition) ||
+                check_real_variable_occurrence(sumvars,data::binary_right(application(actiontime)),condition));
       }
 
       return false;

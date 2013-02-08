@@ -179,8 +179,8 @@ class linear_inequality
     {
       if (sort_real::is_minus_application(e) && application(e).arguments().size()==2)
       {
-        parse_and_store_expression(application(e).left(),r,negate,factor);
-        parse_and_store_expression(application(e).right(),r,!negate,factor);
+        parse_and_store_expression(data::binary_left(application(e)),r,negate,factor);
+        parse_and_store_expression(data::binary_right(application(e)),r,!negate,factor);
       }
       else if (sort_real::is_negate_application(e) && application(e).arguments().size()==1)
       {
@@ -188,13 +188,13 @@ class linear_inequality
       }
       else if (sort_real::is_plus_application(e))
       {
-        parse_and_store_expression(application(e).left(),r,negate,factor);
-        parse_and_store_expression(application(e).right(),r,negate,factor);
+        parse_and_store_expression(data::binary_left(application(e)),r,negate,factor);
+        parse_and_store_expression(data::binary_right(application(e)),r,negate,factor);
       }
       else if (sort_real::is_times_application(e))
       {
-        data_expression lhs=rewrite_with_memory(application(e).left(),r);
-        data_expression rhs=rewrite_with_memory(application(e).right(),r);
+        data_expression lhs=rewrite_with_memory(data::binary_left(application(e)),r);
+        data_expression rhs=rewrite_with_memory(data::binary_right(application(e)),r);
         if (is_closed_real_number(lhs))
         {
           parse_and_store_expression(rhs,r,negate,sort_real::times(lhs,factor));
@@ -315,8 +315,8 @@ class linear_inequality
         throw mcrl2::runtime_error("Unexpected equality or inequality: " + pp(e) + "\n") ;
       }
 
-      data_expression lhs=application(e).left();
-      data_expression rhs=application(e).right();
+      data_expression lhs=data::binary_left(application(e));
+      data_expression rhs=data::binary_right(application(e));
 
       parse_and_store_expression(lhs,r,negate);
       parse_and_store_expression(rhs,r,!negate);

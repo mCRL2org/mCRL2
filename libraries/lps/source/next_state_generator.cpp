@@ -207,7 +207,8 @@ static float condition_selectivity(const data_expression &e, const variable &v)
 {
   if (sort_bool::is_and_application(e))
   {
-     return condition_selectivity(application(e).left(), v) + condition_selectivity(application(e).right(), v);
+    return condition_selectivity(data::binary_left(atermpp::aterm_cast<data::application>(e)), v)
+        +  condition_selectivity(data::binary_right(atermpp::aterm_cast<data::application>(e)), v);
   }
   else if (sort_bool::is_or_application(e))
   {
@@ -221,8 +222,8 @@ static float condition_selectivity(const data_expression &e, const variable &v)
       terms.pop_front();
       if (sort_bool::is_or_application(expression))
       {
-        terms.push_back(application(expression).left());
-        terms.push_back(application(expression).right());
+        terms.push_back(data::binary_left(atermpp::aterm_cast<data::application>(e)));
+        terms.push_back(data::binary_right(atermpp::aterm_cast<data::application>(e)));
       }
       else
       {
@@ -234,8 +235,8 @@ static float condition_selectivity(const data_expression &e, const variable &v)
   }
   else if (is_equal_to_application(e))
   {
-    data_expression left = application(e).left();
-    data_expression right = application(e).right();
+    data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(e));
+    data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(e));
 
     if (is_variable(left) && variable(left) == v)
     {

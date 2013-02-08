@@ -86,20 +86,20 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       }
       else if (is_and(x)) // x = y && z
       {
-        data_expression y = derived()(x.left());
-        data_expression z = derived()(x.right());
+        data_expression y = derived()(binary_left(x));
+        data_expression z = derived()(binary_right(x));
         result = utilities::optimized_and(y, z);
       }
       else if (is_or(x)) // x = y || z
       {
-        data_expression y = derived()(x.left());
-        data_expression z = derived()(x.right());
+        data_expression y = derived()(binary_left(x));
+        data_expression z = derived()(binary_right(x));
         result = utilities::optimized_or(y, z);
       }
       else if (is_imp(x)) // x = y => z
       {
-        data_expression y = derived()(x.left());
-        data_expression z = derived()(x.right());
+        data_expression y = derived()(binary_left(x));
+        data_expression z = derived()(binary_right(x));
         result = utilities::optimized_imp(y, z);
       }
       else

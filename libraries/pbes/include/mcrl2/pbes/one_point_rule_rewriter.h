@@ -47,8 +47,6 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const exists& x)
   {
-    namespace a = data::detail::data_accessors;
-
     pbes_expression body = static_cast<Derived&>(*this)(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_and(body, true);
     data::mutable_map_substitution<> sigma;
@@ -62,8 +60,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         // check if the term *i corresponds to (v == e), with v a quantifier variable.
         if (data::is_equal_to_application(data::data_expression(*i)))
         {
-          data::data_expression left = a::left(*i);
-          data::data_expression right = a::right(*i);
+          data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(*i));
+          data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(*i));
           if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
           {
             sigma[data::variable(left)] = right;
@@ -112,8 +110,6 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const forall& x)
   {
-    namespace a = data::detail::data_accessors;
-
     pbes_expression body = static_cast<Derived&>(*this)(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_or(body, true);
     data::mutable_map_substitution<> sigma;
@@ -127,8 +123,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         // check if the term *i corresponds to (v != e), with v a quantifier variable.
         if (data::is_not_equal_to_application(data::data_expression(*i)))
         {
-          data::data_expression left = a::left(*i);
-          data::data_expression right = a::right(*i);
+          data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(*i));
+          data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(*i));
           if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
           {
             sigma[data::variable(left)] = right;

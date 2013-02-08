@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <stdlib.h>
 
-#include "mcrl2/data/detail/accessors.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
@@ -35,27 +34,27 @@ static data_expression negate_inequality(const data_expression &e)
 {
   if (is_equal_to_application(e))
   {
-    return not_equal_to(application(e).left(),application(e).right());
+    return not_equal_to(data::binary_left(application(e)),data::binary_right(e));
   }
   if (is_not_equal_to_application(e))
   {
-    return equal_to(application(e).left(),application(e).right());
+    return equal_to(data::binary_left(application(e)),data::binary_right(e));
   }
   else if (is_less_application(e))
   {
-    return greater_equal(application(e).left(),application(e).right());
+    return greater_equal(data::binary_left(application(e)),data::binary_right(e));
   }
   else if (is_less_equal_application(e))
   {
-    return greater(application(e).left(),application(e).right());
+    return greater(data::binary_left(application(e)),data::binary_right(e));
   }
   else if (is_greater_application(e))
   {
-    return less_equal(application(e).left(),application(e).right());
+    return less_equal(data::binary_left(application(e)),data::binary_right(e));
   }
   else if (is_greater_equal_application(e))
   {
-    return less(application(e).left(),application(e).right());
+    return less(data::binary_left(application(e)),data::binary_right(e));
   }
   else
   {
@@ -157,19 +156,25 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
 static const data_expression &condition_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return data::detail::data_accessors::argument(aterm_cast<const application>(e),0);
+  const data::application& a = aterm_cast<const application>(e);
+  data::application::const_iterator i = a.begin();
+  return *i;
 }
 
 static const data_expression &then_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return data::detail::data_accessors::argument(aterm_cast<const application>(e),1);
+  const data::application& a = aterm_cast<const application>(e);
+  data::application::const_iterator i = a.begin();
+  return *(++i);
 }
 
 static const data_expression &else_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return data::detail::data_accessors::argument(aterm_cast<const application>(e),2);
+  const data::application& a = aterm_cast<const application>(e);
+  data::application::const_iterator i = a.begin();
+  return *(++(++i));
 }
 
 
@@ -200,10 +205,10 @@ static void split_condition(
   {
     std::vector < data_expression_list >
     real_conditions_aux1, non_real_conditions_aux1;
-    split_condition(application(e).left(),real_conditions_aux1,non_real_conditions_aux1,negate);
+    split_condition(data::binary_left(application(e)),real_conditions_aux1,non_real_conditions_aux1,negate);
     std::vector < data_expression_list >
     real_conditions_aux2, non_real_conditions_aux2;
-    split_condition(application(e).right(),real_conditions_aux2,non_real_conditions_aux2,negate);
+    split_condition(data::binary_right(e),real_conditions_aux2,non_real_conditions_aux2,negate);
     for (std::vector < data_expression_list >::const_iterator
          i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
          i1r!=real_conditions_aux1.end(); ++i1r, ++i1n)
@@ -219,10 +224,10 @@ static void split_condition(
   }
   else if ((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)))
   {
-    split_condition(application(e).left(),real_conditions,non_real_conditions,negate);
+    split_condition(data::binary_left(application(e)),real_conditions,non_real_conditions,negate);
     std::vector < data_expression_list >
     real_conditions_aux, non_real_conditions_aux;
-    split_condition(application(e).right(),real_conditions_aux,non_real_conditions_aux,negate);
+    split_condition(data::binary_right(e),real_conditions_aux,non_real_conditions_aux,negate);
     for (std::vector < data_expression_list >::const_iterator
          i_r=real_conditions_aux.begin(), i_n=non_real_conditions_aux.begin() ;
          i_r!=real_conditions_aux.end(); ++i_r, ++i_n)
@@ -241,7 +246,7 @@ static void split_condition(
   {
     split_condition(*application(e).arguments().begin(),real_conditions,non_real_conditions,!negate);
   }
-  else if (is_inequality(e) && (application(e).left().sort() == sort_real::real_() || application(e).right().sort() == sort_real::real_()))
+  else if (is_inequality(e) && (data::binary_left(application(e)).sort() == sort_real::real_() || data::binary_right(e).sort() == sort_real::real_()))
   {
     std::set < variable > vars=data::find_variables(e);
     for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)

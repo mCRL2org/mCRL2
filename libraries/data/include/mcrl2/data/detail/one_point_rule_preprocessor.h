@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/detail/accessors.h"
 
 namespace mcrl2 {
 
@@ -27,13 +26,12 @@ one_point_rule_preprocessor
 {
   data::data_expression operator()(const data::data_expression& x) const
   {
-    namespace a = detail::data_accessors;
     if (data::sort_bool::is_not_application(x)) // x == !y
     {
-      data::data_expression y = a::arg(x);
+      data::data_expression y = unary_operand(x);
       if (data::sort_bool::is_not_application(y))
       {
-        return (*this)(a::arg(y));
+        return (*this)(unary_operand(y));
       }
       else if (data::sort_bool::is_and_application(y))
       {
@@ -57,11 +55,11 @@ one_point_rule_preprocessor
       }
       else if (data::is_equal_to_application(y))
       {
-        return data::not_equal_to(a::left(y), a::right(y));
+        return data::not_equal_to(binary_left(y), binary_right(y));
       }
       else if (data::is_not_equal_to_application(y))
       {
-        return data::equal_to(a::left(y), a::right(y));
+        return data::equal_to(binary_left(y), binary_right(y));
       }
     }
     return x;

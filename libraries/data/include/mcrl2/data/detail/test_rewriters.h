@@ -15,7 +15,6 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/detail/accessors.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
@@ -43,7 +42,7 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
   std::multiset<data_expression> split_or(const data_expression& expr)
   {
     std::multiset<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_or_application, data_accessors::left, data_accessors::right);
+    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_or_application, data::binary_left, data::binary_right);
     return result;
   }
 
@@ -56,7 +55,7 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
   std::multiset<data_expression> split_and(const data_expression& expr)
   {
     std::multiset<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_and_application, data_accessors::left, data_accessors::right);
+    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_and_application, data::binary_left, data::binary_right);
     return result;
   }
 
@@ -107,8 +106,8 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
     data_expression y = super::operator()(x);
     if (data::is_equal_to_application(y))
     {
-      data_expression left = application(y).left();
-      data_expression right = application(y).right();
+      data_expression left = binary_left(application(y));
+      data_expression right = binary_right(application(y));
       if (left < right)
       {
         return data::equal_to(left, right);
@@ -120,8 +119,8 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
     }
     else if (data::is_not_equal_to_application(y))
     {
-      data_expression left = application(y).left();
-      data_expression right = application(y).right();
+      data_expression left = binary_left(application(y));
+      data_expression right = binary_right(application(y));
       if (left < right)
       {
         return data::not_equal_to(left, right);

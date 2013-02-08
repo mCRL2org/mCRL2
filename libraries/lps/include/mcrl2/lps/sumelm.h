@@ -86,8 +86,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
 
         if (is_equal_to_application(*i)) // v == e
         {
-          left = application(*i).left();
-          right = application(*i).right();
+          left = data::binary_left(application(*i));
+          right = data::binary_right(application(*i));
         }
         else if (is_variable(*i) && sort_bool::is_bool(i->sort())) // v equal to v == true
         {

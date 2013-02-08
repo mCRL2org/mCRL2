@@ -660,18 +660,18 @@ pbes_expression left(const pbes_expression& t)
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
-/// \param t A PBES expression or a data expression
+/// \param x A PBES expression or a data expression
 /// \return The left hand side of an expression of type and, or or imp.
 inline
-pbes_expression data_left(const pbes_expression& t)
+pbes_expression data_left(const pbes_expression& x)
 {
-  if (data::is_data_expression(t))
+  if (data::is_data_expression(x))
   {
-    return data::application(t).left();
+    return data::binary_left(atermpp::aterm_cast<data::application>(x));
   }
   else
   {
-    return left(t);
+    return left(x);
   }
 }
 
@@ -685,18 +685,18 @@ pbes_expression right(const pbes_expression& t)
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
-/// \param t A PBES expression or a data expression
+/// \param x A PBES expression or a data expression
 /// \return The left hand side of an expression of type and, or or imp.
 inline
-pbes_expression data_right(const pbes_expression& t)
+pbes_expression data_right(const pbes_expression& x)
 {
-  if (data::is_data_expression(t))
+  if (data::is_data_expression(x))
   {
-    return data::application(t).right();
+    return data::binary_right(atermpp::aterm_cast<data::application>(x));
   }
   else
   {
-    return right(t);
+    return right(x);
   }
 }
 
@@ -704,12 +704,10 @@ pbes_expression data_right(const pbes_expression& t)
 /// \param t A PBES expression
 /// \return The variables of a quantification expression
 inline
-const data::variable_list &var(const pbes_expression& t)
+const data::variable_list& var(const pbes_expression& t)
 {
   assert(is_forall(t) || is_exists(t));
   return atermpp::aterm_cast<data::variable_list>(t[0]);
-  /* return data::variable_list(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
-                             atermpp::term_list_iterator< data::variable >()); */
 }
 
 /// \brief Returns the name of a propositional variable expression
@@ -730,8 +728,6 @@ data::data_expression_list param(const pbes_expression& t)
 {
   assert(is_propositional_variable_instantiation(t));
   return data::data_expression_list(t[1]);
-  /* return data::data_expression_list(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
-                                    atermpp::term_list_iterator< data::data_expression >()); */
 }
 } // accessors
 
@@ -1089,14 +1085,7 @@ inline bool is_propositional_variable_instantiation(const pbes_expression& t)
 inline
 pbes_expression left(const pbes_expression& t)
 {
-  if (data::is_data_expression(t))
-  {
-    return data::application(t).left();
-  }
-  else
-  {
-    return atermpp::arg1(t);
-  }
+  return accessors::data_left(t);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -1105,14 +1094,7 @@ pbes_expression left(const pbes_expression& t)
 inline
 pbes_expression right(const pbes_expression& t)
 {
-  if (data::is_data_expression(t))
-  {
-    return data::application(t).right();
-  }
-  else
-  {
-    return atermpp::arg2(t);
-  }
+  return accessors::data_right(t);
 }
 
 }; // namespace pbes_data
