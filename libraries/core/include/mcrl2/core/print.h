@@ -89,7 +89,7 @@ struct printer: public core::traverser<Derived>
   void print_unary_operation(const T& x, const std::string& op)
   {
     derived().print(op);
-    print_expression(x.operand(), precedence(x));
+    print_expression(unary_operand(x), precedence(x));
   }
 
   template <typename T>
@@ -98,12 +98,12 @@ struct printer: public core::traverser<Derived>
 #ifdef MCRL2_DEBUG_PRECEDENCE
     std::cout << "<binary>" << std::endl;
     std::cout << "<x>" << x << " precedence = " << precedence(x) << std::endl;
-    std::cout << "<left>" << x.left() << " precedence = " << precedence(x.left()) << std::endl;
-    std::cout << "<right>" << x.right() << " precedence = " << precedence(x.right()) << std::endl;
+    std::cout << "<left>" << x.left() << " precedence = " << precedence(binary_left(x)) << std::endl;
+    std::cout << "<right>" << x.right() << " precedence = " << precedence(binary_right(x)) << std::endl;
 #endif
-    print_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
+    print_expression(binary_left(x), is_same_different_precedence(x, binary_left(x)) ? precedence(x) + 1 : precedence(x));
     derived().print(op);
-    print_expression(x.right(), is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
+    print_expression(binary_right(x), is_same_different_precedence(x, binary_right(x)) ? precedence(x) + 1 : precedence(x));
   }
 
   template <typename Container>

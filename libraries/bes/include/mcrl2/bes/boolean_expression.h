@@ -367,6 +367,14 @@ inline int precedence(const and_& x) { return precedence(static_cast<const boole
 inline int precedence(const or_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
 inline int precedence(const not_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
 
+inline const boolean_expression& unary_operand(const not_& x) { return x.operand(); }
+inline const boolean_expression& binary_left(const and_& x)   { return x.left(); }
+inline const boolean_expression& binary_right(const and_& x)  { return x.right(); }
+inline const boolean_expression& binary_left(const or_& x)    { return x.left(); }
+inline const boolean_expression& binary_right(const or_& x)   { return x.right(); }
+inline const boolean_expression& binary_left(const imp& x)    { return x.left(); }
+inline const boolean_expression& binary_right(const imp& x)   { return x.right(); }
+
 /// \brief Returns true if the operations have the same precedence, but are different
 inline
 bool is_same_different_precedence(const and_&, const boolean_expression& x)

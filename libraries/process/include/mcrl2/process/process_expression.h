@@ -928,6 +928,27 @@ inline int precedence(const seq& x)          { return precedence(static_cast<con
 inline int precedence(const at& x)           { return precedence(static_cast<const process_expression&>(x)); }
 inline int precedence(const sync& x)         { return precedence(static_cast<const process_expression&>(x)); }
 
+inline const process_expression& unary_operand(const sum& x)         { return x.operand(); }
+inline const process_expression& unary_operand(const block& x)       { return x.operand(); }
+inline const process_expression& unary_operand(const hide& x)        { return x.operand(); }
+inline const process_expression& unary_operand(const rename& x)      { return x.operand(); }
+inline const process_expression& unary_operand(const comm& x)        { return x.operand(); }
+inline const process_expression& unary_operand(const allow& x)       { return x.operand(); }
+inline const process_expression& unary_operand(const at& x)          { return x.operand(); }
+
+inline const process_expression& binary_left(const sync& x)          { return x.left(); }
+inline const process_expression& binary_right(const sync& x)         { return x.right(); }
+inline const process_expression& binary_left(const seq& x)           { return x.left(); }
+inline const process_expression& binary_right(const seq& x)          { return x.right(); }
+inline const process_expression& binary_left(const bounded_init& x)  { return x.left(); }
+inline const process_expression& binary_right(const bounded_init& x) { return x.right(); }
+inline const process_expression& binary_left(const choice& x)        { return x.left(); }
+inline const process_expression& binary_right(const choice& x)       { return x.right(); }
+inline const process_expression& binary_left(const merge& x)         { return x.left(); }
+inline const process_expression& binary_right(const merge& x)        { return x.right(); }
+inline const process_expression& binary_left(const left_merge& x)    { return x.left(); }
+inline const process_expression& binary_right(const left_merge& x)   { return x.right(); }
+
 // template function overloads
 std::string pp(const process_expression& x);
 std::string pp(const process_expression_list& x);

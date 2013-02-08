@@ -570,6 +570,14 @@ inline int precedence(const not_& x)     { return precedence(static_cast<const p
 inline int precedence(const data::data_expression & x)               { return precedence(static_cast<const pbes_expression&>(x)); }
 inline int precedence(const propositional_variable_instantiation& x) { return precedence(static_cast<const pbes_expression&>(x)); }
 
+inline const pbes_expression& unary_operand(const not_& x) { return x.operand(); }
+inline const pbes_expression& binary_left(const and_& x)   { return x.left(); }
+inline const pbes_expression& binary_right(const and_& x)  { return x.right(); }
+inline const pbes_expression& binary_left(const or_& x)    { return x.left(); }
+inline const pbes_expression& binary_right(const or_& x)   { return x.right(); }
+inline const pbes_expression& binary_left(const imp& x)    { return x.left(); }
+inline const pbes_expression& binary_right(const imp& x)   { return x.right(); }
+
 /// \brief Returns true if the operations have the same precedence, but are different
 template <typename T1, typename T2>
 bool is_same_different_precedence(const T1&, const T2&)

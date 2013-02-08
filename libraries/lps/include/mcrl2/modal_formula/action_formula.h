@@ -466,6 +466,15 @@ inline int precedence(const or_& x) { return precedence(static_cast<const action
 inline int precedence(const at& x) { return precedence(static_cast<const action_formula&>(x)); }
 inline int precedence(const not_& x) { return precedence(static_cast<const action_formula&>(x)); }
 
+inline const action_formula& unary_operand(const not_& x) { return x.operand(); }
+inline const action_formula& unary_operand(const at& x)   { return x.operand(); }
+inline const action_formula& binary_left(const and_& x)   { return x.left(); }
+inline const action_formula& binary_right(const and_& x)  { return x.right(); }
+inline const action_formula& binary_left(const or_& x)    { return x.left(); }
+inline const action_formula& binary_right(const or_& x)   { return x.right(); }
+inline const action_formula& binary_left(const imp& x)    { return x.left(); }
+inline const action_formula& binary_right(const imp& x)   { return x.right(); }
+
 // template function overloads
 std::string pp(const action_formula& x);
 std::set<data::variable> find_variables(const action_formulas::action_formula& x);

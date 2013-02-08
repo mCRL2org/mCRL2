@@ -182,6 +182,24 @@ inline application make_application(data_expression const& head,
 int precedence(const data_expression& x);
 int precedence(const application& x);
 
+inline
+const data_expression& unary_operand(const application& x)
+{
+  return *x.begin();
+}
+
+inline
+const data_expression& binary_left(const application& x)
+{
+  return *x.begin();
+}
+
+inline
+const data_expression& binary_right(const application& x)
+{
+  return *(++x.begin());
+}
+
 } // namespace data
 
 } // namespace mcrl2
