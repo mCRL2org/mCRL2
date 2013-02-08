@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <stdlib.h>
 
+#include "mcrl2/data/detail/accessors.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
@@ -30,7 +31,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
 
-static data_expression negate_inequality(const data_expression e)
+static data_expression negate_inequality(const data_expression &e)
 {
   if (is_equal_to_application(e))
   {
@@ -96,7 +97,7 @@ variable_list get_nonreal_variables(const variable_list& l)
   return r;
 }
 
-static data::function_symbol& negate_function_symbol(const sort_expression s)
+static data::function_symbol& negate_function_symbol(const sort_expression &s)
 {
   static data::function_symbol f = data::function_symbol("negate",data::make_function_sort(s,s));
   assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
@@ -153,22 +154,22 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
 }
 
 // Functions below should have been defined in the data library.
-static data_expression condition_part(const data_expression e)
+static const data_expression &condition_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return application(e).argument(0);
+  return data::detail::data_accessors::argument(aterm_cast<const application>(e),0);
 }
 
-static data_expression then_part(const data_expression e)
+static const data_expression &then_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return application(e).argument(1);
+  return data::detail::data_accessors::argument(aterm_cast<const application>(e),1);
 }
 
-static data_expression else_part(const data_expression e)
+static const data_expression &else_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return application(e).argument(2);
+  return data::detail::data_accessors::argument(aterm_cast<const application>(e),2);
 }
 
 
@@ -186,7 +187,7 @@ static data_expression else_part(const data_expression e)
 /// \pre The parameter e must be of sort Bool.
 
 static void split_condition(
-  const data_expression e,
+  const data_expression &e,
   std::vector < data_expression_list > &real_conditions,
   std::vector < data_expression_list > &non_real_conditions,
   const bool negate=false)
@@ -302,8 +303,8 @@ static void split_condition(
 /// \param summand_info Normalized summand information is stored conveniently in summand info.
 
 static void normalize_specification(
-  const specification s,
-  const variable_list real_parameters,
+  const specification &s,
+  const variable_list &real_parameters,
   const rewriter& r,
   std::vector < summand_information > &summand_info)
 {
