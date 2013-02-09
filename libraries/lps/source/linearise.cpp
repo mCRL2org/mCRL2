@@ -4728,7 +4728,7 @@ class specification_basic_type:public boost::noncopyable
         }
 
         const data_expression auxresult1=data::replace_free_variables(condition,make_map_substitution(sigma));
-        if (!equalterm.defined()||is_global_variable(equalterm))
+        if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
         }
@@ -4840,7 +4840,7 @@ class specification_basic_type:public boost::noncopyable
 
             const data_expression auxresult1=data::replace_free_variables(f,make_map_substitution(sigma));
 
-            if (!equalterm.defined()||is_global_variable(equalterm))
+            if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
             }
@@ -4942,7 +4942,7 @@ class specification_basic_type:public boost::noncopyable
             }
 
             const data_expression auxresult1=data::replace_free_variables(actiontime, make_map_substitution(sigma));
-            if (!equalterm.defined()||is_global_variable(equalterm))
+            if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
             }
@@ -5023,7 +5023,7 @@ class specification_basic_type:public boost::noncopyable
           }
 
           data_expression auxresult1=data::replace_free_variables(nextstateparameter, make_map_substitution(sigma));
-          if (!equalterm.defined()||is_global_variable(equalterm))
+          if (equalterm==data_expression()||is_global_variable(equalterm))
           {
             equalterm=auxresult1;
           }
@@ -5035,7 +5035,7 @@ class specification_basic_type:public boost::noncopyable
             // the growth of the state space, as dc1 is not set to a default value, but
             // keeps the value v.
             equaluptillnow=((equalterm==auxresult1)||
-                               ((!equalterm.defined()||is_global_variable(equalterm))&&
+                               ((equalterm==data_expression()||is_global_variable(equalterm))&&
                                                     is_global_variable(auxresult1)));
           }
 
@@ -5156,7 +5156,7 @@ class specification_basic_type:public boost::noncopyable
         }
 
         const data_expression auxresult1=data::replace_free_variables(condition, make_map_substitution(sigma));
-        if (!equalterm.defined()||is_global_variable(equalterm))
+        if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
         }
@@ -5273,7 +5273,7 @@ class specification_basic_type:public boost::noncopyable
             }
 
             const data_expression auxresult1=data::replace_free_variables(actiontime, make_map_substitution(sigma));
-            if (!equalterm.defined()||is_global_variable(equalterm))
+            if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
             }
