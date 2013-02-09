@@ -559,7 +559,7 @@ static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &ne
   return result;
 }
 
-static size_t* treevars_usedcnt;
+static std::vector < size_t> treevars_usedcnt;
 
 static void inc_usedcnt(aterm_list l)
 {
@@ -827,10 +827,9 @@ static aterm_appl create_tree(const data_equation_list &rules, size_t /*opid*/, 
   add_to_build_pars(&init_pars,rule_seqs,&r,&readies);
 
   aterm_appl tree;
-  if (r==aterm_appl())
+  if (!r.defined())
   {
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,size_t,total_rule_vars);
-    treevars_usedcnt = a;
+    treevars_usedcnt=std::vector < size_t> (total_rule_vars);
     tree = build_tree(init_pars,0);
     for (; !readies.empty(); readies=readies.tail())
     {
@@ -938,7 +937,7 @@ static aterm_list get_vars(const aterm &a)
 static aterm_list dep_vars(const data_equation &eqn)
 {
   size_t rule_arity = toInner(eqn.lhs(),true).function().arity()-1;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
+  std::vector < bool > bs(rule_arity);
 
   aterm_appl pars = toInner(eqn.lhs(),true); // pars is actually the lhs of the equation.
   aterm_list vars = make_list<aterm>( get_doubles(eqn.rhs())+ get_vars(eqn.condition())
@@ -1067,14 +1066,9 @@ static aterm_list create_strategy(
   }
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,int,arity);
-  for (size_t i = 0; i < arity; i++)
-  {
-    args[i] = -1;
-  }
-
+  std::vector<int> args(arity,-1);
   // Process all (applicable) rules
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,arity);
+  std::vector<bool> bs(arity);
   aterm_list dep_list;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {

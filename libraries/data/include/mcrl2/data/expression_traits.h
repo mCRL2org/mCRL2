@@ -326,7 +326,7 @@ struct expression_traits : public core::term_traits< Expression >
 
   static const data_expression& head(const data_expression& e)
   {
-    return application(e).head();
+    return atermpp::aterm_cast<application>(e).head();
   }
 
   /* static const data_expression_list& arguments(const data_expression& e)

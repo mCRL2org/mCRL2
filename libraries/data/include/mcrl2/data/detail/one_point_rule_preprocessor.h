@@ -28,10 +28,10 @@ one_point_rule_preprocessor
   {
     if (data::sort_bool::is_not_application(x)) // x == !y
     {
-      data::data_expression y = unary_operand(x);
+      data::data_expression y = unary_operand(atermpp::aterm_cast<application>(x));
       if (data::sort_bool::is_not_application(y))
       {
-        return (*this)(unary_operand(y));
+        return (*this)(unary_operand(atermpp::aterm_cast<application>(y)));
       }
       else if (data::sort_bool::is_and_application(y))
       {
@@ -55,11 +55,11 @@ one_point_rule_preprocessor
       }
       else if (data::is_equal_to_application(y))
       {
-        return data::not_equal_to(binary_left(y), binary_right(y));
+        return data::not_equal_to(binary_left(atermpp::aterm_cast<application>(y)), binary_right(atermpp::aterm_cast<application>(y)));
       }
       else if (data::is_not_equal_to_application(y))
       {
-        return data::equal_to(binary_left(y), binary_right(y));
+        return data::equal_to(binary_left(atermpp::aterm_cast<application>(y)), binary_right(atermpp::aterm_cast<application>(y)));
       }
     }
     return x;

@@ -1125,7 +1125,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
-        x = z;
+        x = atermpp::aterm_cast<data::application>(z);
       }
     }
 

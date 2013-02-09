@@ -231,15 +231,15 @@ bool EnumeratorSolutionsStandard::find_equality(
       if (is_variable(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) &&
                                (atermpp::find_if(a2,test_equal(a1))==atermpp::aterm_appl()))        // true if a1 does not occur in a2.
       {
-        v = a1;
-        e = a2;
+        v = aterm_cast<variable>(a1);
+        e = aterm_cast<variable>(a2);
         return true;
       }
       if (is_variable(a2) && (find(vars.begin(),vars.end(),a2)!=vars.end()) &&
                                (atermpp::find_if(a1,test_equal(a2))==atermpp::aterm_appl()))        // true if a2 does not occur in a1.
       {
-        v = a2;
-        e = a1;
+        v = aterm_cast<variable>(a2);
+        e = aterm_cast<variable>(a1);
         return true;
       }
     }
@@ -407,7 +407,10 @@ bool EnumeratorSolutionsStandard::next(
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
-  vector < atermpp::aterm > var_array;
+  typedef vector < atermpp::aterm, mcrl2::utilities::stack_alloc<aterm, 32> > vector_t;
+  vector_t var_array;
+  var_array.reserve(32);
+
   while (ss_stack.empty() && !fs_stack.empty())
   {
     fs_expr e=fs_stack.front();
@@ -688,7 +691,7 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
 {
   rewr_obj = r;
 
-  const function_symbol_vector mappings(data_spec.mappings());
+  const function_symbol_vector &mappings=data_spec.mappings();
   for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
   {
     if (to_string(i->name()) == "==")

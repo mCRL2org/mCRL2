@@ -173,7 +173,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
   for(mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
       it!=variable_renaming.end(); ++it)
   {
-    sigma[it->second]=it->second;
+    sigma[atermpp::aterm_cast<variable>(it->second)]=it->second;
   }
   return result;
 }
@@ -297,7 +297,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   for(mutable_map_substitution<std::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
                  it!=variable_renaming.end(); ++it)
   {
-    sigma[it->second]=it->second;
+    sigma[atermpp::aterm_cast<variable>(it->second)]=it->second;
   }
   if (vl.size()+1==arity)
   {

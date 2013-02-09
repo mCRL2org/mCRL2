@@ -327,7 +327,7 @@ int infix_precedence_left(const application& x)
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return infix_precedence_left(sort_real::arg(x));
+    return infix_precedence_left(atermpp::aterm_cast<application>(sort_real::arg(x)));
   }
 
   else if (detail::is_implies(x))
@@ -403,7 +403,7 @@ int infix_precedence_right(const application& x)
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return infix_precedence_right(sort_real::arg(x));
+    return infix_precedence_right(atermpp::aterm_cast<application>(sort_real::arg(x)));
   }
 
   else if (detail::is_implies(x))

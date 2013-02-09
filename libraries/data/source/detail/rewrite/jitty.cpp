@@ -100,11 +100,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
   aterm_list strat;
   size_t arity;
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
-  for (size_t i=0; i<max_arity; ++i)
-  {
-    used[i]=false;
-  }
+  std::vector <bool> used(max_arity,false);
 
   arity = 0;
   while (!rules.empty())
@@ -112,11 +108,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
     aterm_list l;
     aterm_list m;
 
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
-    for (size_t i=0; i<arity; ++i)
-    {
-      args[i]=-1;
-    }
+    std::vector<int> args(arity,-1);
 
     for (; !rules.empty(); rules.pop_front())
     {
@@ -126,11 +118,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
         atermpp::term_list <variable_list> vars = make_list<variable_list>(get_vars(cond));
         const atermpp::aterm_appl &pars = aterm_cast<const aterm_appl>(element_at(aterm_cast<const aterm_list>(rules.front()),2));
 
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs, bool, arity);
-        for (size_t i = 0; i < arity; i++)
-        {
-          bs[i]=false;
-        }
+        std::vector < bool> bs(arity,false);
 
         for (size_t i = 0; i < arity; i++)
         {
@@ -578,7 +566,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 {
   if (is_variable(term))
   {
-    return sigma(term);
+    return sigma(atermpp::aterm_cast<variable>(term));
   }
   else if (is_where_clause(term))
   {
@@ -753,12 +741,6 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        // size_t max_len = aterm_cast<const aterm_list>(rule.front()).size();
-        // assert(max_len<=MAX_LEN);
-        // size_t number_of_vars=0;
-
-        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,const variable*, max_len);
-        // MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,const aterm*, max_len);
         subst.clear();
 
         bool matches = true;
