@@ -252,7 +252,6 @@ int precedence(const application& x)
   {
     return precedence(sort_real::left(x));
   }
-
   else if (detail::is_implies(x))
   {
     return 2;
@@ -329,7 +328,6 @@ int infix_precedence_left(const application& x)
   {
     return infix_precedence_left(sort_real::arg(x));
   }
-
   else if (detail::is_implies(x))
   {
     return 3;
@@ -405,7 +403,6 @@ int infix_precedence_right(const application& x)
   {
     return infix_precedence_right(sort_real::arg(x));
   }
-
   else if (detail::is_implies(x))
   {
     return 2;
@@ -480,6 +477,10 @@ int precedence(const data_expression& x)
   {
     return precedence(application(x));
   }
+  else if (is_abstraction(x))
+  {
+    return 1;
+  }
   return max_precedence;
 }
 
@@ -490,6 +491,10 @@ int infix_precedence_left(const data_expression& x)
   {
     return infix_precedence_left(application(x));
   }
+  else if (is_abstraction(x))
+  {
+    return 2;
+  } 
   return max_precedence;
 }
 
@@ -499,6 +504,10 @@ int infix_precedence_right(const data_expression& x)
   if (is_application(x))
   {
     return infix_precedence_right(application(x));
+  }
+  else if (is_abstraction(x))
+  {
+    return 1;
   }
   return max_precedence;
 }
