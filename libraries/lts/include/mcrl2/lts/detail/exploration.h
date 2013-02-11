@@ -111,7 +111,8 @@ class lps2lts_algorithm
     void save_deadlock(const generator_state_t& state);
     void save_error(const generator_state_t& state);
     bool add_transition(const generator_state_t& state, next_state_generator::transition_t &transition);
-    std::list<next_state_generator::transition_t> get_transitions(const generator_state_t& state);
+    void get_transitions(const generator_state_t &state,
+                         std::list<lps2lts_algorithm::next_state_generator::transition_t> &transitions);
 
     void generate_lts_breadth();
     void generate_lts_breadth_bithashing(const generator_state_t &initial_state);

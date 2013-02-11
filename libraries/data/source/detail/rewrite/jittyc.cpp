@@ -2790,16 +2790,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f, ")\n"
             "{\n");
     fprintf(f,
-      "const size_t arity = f.arity();\n"
-
-      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,arity);\n");
+//      "const size_t arity = f.arity();\n"
+      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const detail::_aterm*,%ld);\n",i+1);
 
     for (size_t j=0; j<=i; ++j)
     {
       fprintf(f, "buffer[%zu] = atermpp::detail::address(arg%zu);\n",j,j);
     }
 
-    fprintf(f, "return aterm_appl(f,buffer,buffer+arity);\n");
+    fprintf(f, "return aterm_appl(f,buffer,buffer+%ld);\n",i+1);
 
     fprintf(f, "}\n\n");
   }
