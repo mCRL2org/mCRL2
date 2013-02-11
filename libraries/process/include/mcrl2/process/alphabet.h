@@ -20,6 +20,7 @@
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
+#include "mcrl2/process/detail/expand_process_instance_assignments.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
@@ -71,6 +72,7 @@ process_expression alphabet_reduce(const process_expression& x, const atermpp::v
 inline
 void alphabet_reduce(process_specification& procspec)
 {
+  expand_process_instance_assignments(procspec);
   procspec.init() = detail::alphabet_reduce(procspec.init(), procspec.equations());
 }
 
