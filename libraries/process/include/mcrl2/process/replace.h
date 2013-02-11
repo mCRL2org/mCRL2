@@ -40,6 +40,22 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
     : super(sigma, V)
   { }
 
+  // N.B. We cannot use the default implementation, since the left hand sides of the assignments
+  // may not be renamed. This is because they are defined outside the scope of the expression x.
+  process::process_expression operator()(const process::process_instance_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::assignment_list a = x.assignments();
+    atermpp::vector<data::assignment> v(a.begin(), a.end());
+    for (atermpp::vector<data::assignment>::iterator i = v.begin(); i != v.end(); ++i)
+    {
+      *i = data::assignment(i->lhs(), (*this)(i->rhs()));
+    }
+    process::process_expression result = process::process_instance_assignment(x.identifier(), data::assignment_list(v.begin(), v.end()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   process_expression operator()(const sum& x)
   {
     data::variable_list v = update_sigma.push(x.bound_variables());
