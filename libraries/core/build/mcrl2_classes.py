@@ -66,7 +66,7 @@ identifier_assignment(const core::identifier_string& lhs, const data_expression&
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | SXICU | DataExpr  | A data expression
+data_expression()                                                                                             : public atermpp::aterm_appl   | XICU  | DataExpr  | A data expression
 identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO    | Id        | An identifier
 variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC   | DataVarId | A data variable
 function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO    | OpId      | A function symbol

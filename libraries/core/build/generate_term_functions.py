@@ -221,15 +221,15 @@ def generate_constructor_functions(rules, filename):
         ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
         name  = f.name()
         arity = f.arity()
-#        args = map(lambda x: 'reinterpret_cast<aterm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<aterm>(constructList())', f.arguments)
         args = []
         for x in f.arguments:
             if x.repetitions == '':
                 args.append('construct%s()' % x.name())
-            else:
+            elif x.repetitions == '*':
                 args.append('constructList()')
+            else:
+                args.append('constructList(construct%s())' % x.name())
 
-#        arguments = ', ' + ', '.join(args) if len(args) > 0 else ''
         if len(args) > 0:
             arguments = ', ' + ', '.join(args)
         else:

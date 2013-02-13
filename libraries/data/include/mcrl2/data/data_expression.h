@@ -31,15 +31,6 @@ namespace mcrl2
 namespace data
 {
 
-/// \brief Returns true if the term t is a data expression
-/// \param t A term
-/// \return True if the term is a data expression.
-inline
-bool is_data_expression(const atermpp::aterm_appl &t)
-{
-  return core::detail::gsIsDataExpr(t);
-}
-
 /// \brief Returns true if the term t is an abstraction
 inline bool is_abstraction(const atermpp::aterm_appl &p)
 {
@@ -123,34 +114,25 @@ class application; // prototype
 /// - where clause
 /// - set enumeration
 /// - bag enumeration
+
+//--- start generated class data_expression ---//
+/// \brief A data expression
 class data_expression: public atermpp::aterm_appl
 {
   public:
-
     /// \brief Default constructor.
-    ///
     data_expression()
-      : atermpp::aterm_appl(core::detail::constructOpId())
+      : atermpp::aterm_appl(core::detail::constructDataExpr())
     {}
 
     /// \brief Constructor.
-    ///
-    /// \param[in] t a term adhering to the internal format.
-    explicit data_expression(const atermpp::aterm& t)
-      : atermpp::aterm_appl(t)
+    /// \param term A term
+    data_expression(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(is_data_expression(atermpp::aterm_cast<const atermpp::aterm_appl>(t)));
+      assert(core::detail::check_rule_DataExpr(*this));
     }
-    
-    /// \brief Constructor.
-    ///
-    /// \param[in] t a term adhering to the internal format.
-    data_expression(const atermpp::aterm_appl& t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(is_data_expression(atermpp::aterm_cast<const atermpp::aterm_appl>(t)) );
-    }
-
+//--- start user section data_expression ---//
     application operator()(const data_expression& e) const;
 
     application operator()(const data_expression& e1,
@@ -256,16 +238,26 @@ class data_expression: public atermpp::aterm_appl
 
       return result;
     }
+//--- end user section data_expression ---//
+};
 
-}; // class data_expression
-
-/// \brief list of data expressions
-///
+/// \brief list of data_expressions
 typedef atermpp::term_list<data_expression> data_expression_list;
 
-/// \brief vector of data expressions
-///
-typedef std::vector<data_expression> data_expression_vector;
+/// \brief vector of data_expressions
+typedef std::vector<data_expression>    data_expression_vector;
+
+
+/// \brief Test for a data_expression expression
+/// \param t A term
+/// \return True if it is a data_expression expression
+inline
+bool is_data_expression(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsDataExpr(t);
+}
+
+//--- end generated class data_expression ---//
 
 /// \brief Converts an container with data expressions to data_expression_list
 /// \param r A range of data expressions.
@@ -276,9 +268,6 @@ inline data_expression_list make_data_expression_list(Container const& r, typena
 {
   return atermpp::convert< data_expression_list >(r);
 }
-
-//--- start generated class data_expression ---//
-//--- end generated class data_expression ---//
 
 class variable;
 
@@ -347,11 +336,13 @@ application data_expression::operator()(const data_expression& e1, const data_ex
 }
 
 namespace std {
+//--- start generated swap functions ---//
 template <>
 inline void swap(mcrl2::data::data_expression& t1, mcrl2::data::data_expression& t2)
 {
   t1.swap(t2);
 }
+//--- end generated swap functions ---//
 } // namespace std
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_H

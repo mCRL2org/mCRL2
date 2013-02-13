@@ -39,6 +39,15 @@ const atermpp::aterm_list& constructList()
   return t;
 }
 
+// List
+inline
+const atermpp::aterm_list& constructList(const atermpp::aterm& t)
+{
+  static atermpp::aterm_list result = atermpp::aterm_list();
+  result.push_front(t);
+  return result;
+}
+
 //--- start generated code ---//
 const atermpp::aterm_appl& constructBooleanOr();
 const atermpp::aterm_appl& constructStateOr();
@@ -220,7 +229,7 @@ const atermpp::aterm_appl& constructHide()
 inline
 const atermpp::aterm_appl& constructSortArrow()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortArrow(), constructList(), constructSortExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortArrow(), constructList(constructSortExpr()), constructSortExpr()));
   return t;
 }
 
@@ -284,7 +293,7 @@ const atermpp::aterm_appl& constructStateImp()
 inline
 const atermpp::aterm_appl& constructPBESExists()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PBESExists(), constructList(), constructPBExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PBESExists(), constructList(constructDataVarId()), constructPBExpr()));
   return t;
 }
 
@@ -300,7 +309,7 @@ const atermpp::aterm_appl& constructPBESImp()
 inline
 const atermpp::aterm_appl& constructBinder()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Binder(), constructBindingOperator(), constructList(), constructDataExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Binder(), constructBindingOperator(), constructList(constructDataVarId()), constructDataExpr()));
   return t;
 }
 
@@ -308,7 +317,7 @@ const atermpp::aterm_appl& constructBinder()
 inline
 const atermpp::aterm_appl& constructSortsPossible()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortsPossible(), constructList()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortsPossible(), constructList(constructSortExpr())));
   return t;
 }
 
@@ -332,7 +341,7 @@ const atermpp::aterm_appl& constructProcEqnSpec()
 inline
 const atermpp::aterm_appl& constructStateForall()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StateForall(), constructList(), constructStateFrm()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StateForall(), constructList(constructDataVarId()), constructStateFrm()));
   return t;
 }
 
@@ -460,7 +469,7 @@ const atermpp::aterm_appl& constructSortList()
 inline
 const atermpp::aterm_appl& constructSum()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Sum(), constructList(), constructProcExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Sum(), constructList(constructDataVarId()), constructProcExpr()));
   return t;
 }
 
@@ -684,7 +693,7 @@ const atermpp::aterm_appl& constructSync()
 inline
 const atermpp::aterm_appl& constructActExists()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActExists(), constructList(), constructActFrm()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActExists(), constructList(constructDataVarId()), constructActFrm()));
   return t;
 }
 
@@ -716,7 +725,7 @@ const atermpp::aterm_appl& constructStateFalse()
 inline
 const atermpp::aterm_appl& constructPBESForall()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PBESForall(), constructList(), constructPBExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PBESForall(), constructList(constructDataVarId()), constructPBExpr()));
   return t;
 }
 
@@ -748,7 +757,7 @@ const atermpp::aterm_appl& constructPBESFalse()
 inline
 const atermpp::aterm_appl& constructDataAppl()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_DataAppl(), constructDataExpr(), constructList()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_DataAppl(), constructDataExpr(), constructList(constructDataExpr())));
   return t;
 }
 
@@ -780,7 +789,7 @@ const atermpp::aterm_appl& constructNu()
 inline
 const atermpp::aterm_appl& constructSortStruct()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortStruct(), constructList()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortStruct(), constructList(constructStructCons())));
   return t;
 }
 
@@ -852,7 +861,7 @@ const atermpp::aterm_appl& constructSetComp()
 inline
 const atermpp::aterm_appl& constructActForall()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActForall(), constructList(), constructActFrm()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActForall(), constructList(constructDataVarId()), constructActFrm()));
   return t;
 }
 
@@ -1020,7 +1029,7 @@ const atermpp::aterm_appl& constructPBESNot()
 inline
 const atermpp::aterm_appl& constructStateExists()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StateExists(), constructList(), constructStateFrm()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StateExists(), constructList(constructDataVarId()), constructStateFrm()));
   return t;
 }
 
@@ -1052,7 +1061,7 @@ const atermpp::aterm_appl& constructPBESTrue()
 inline
 const atermpp::aterm_appl& constructMultActName()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_MultActName(), constructList()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_MultActName(), constructList(constructString())));
   return t;
 }
 
@@ -1100,7 +1109,7 @@ const atermpp::aterm_appl& constructPBEqn()
 inline
 const atermpp::aterm_appl& constructWhr()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Whr(), constructDataExpr(), constructList()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Whr(), constructDataExpr(), constructList(constructWhrDecl())));
   return t;
 }
 
