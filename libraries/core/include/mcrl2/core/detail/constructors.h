@@ -41,9 +41,9 @@ const atermpp::aterm_list& constructList()
 
 // List
 inline
-const atermpp::aterm_list& constructList(const atermpp::aterm& t)
+atermpp::aterm_list constructList(const atermpp::aterm& t)
 {
-  static atermpp::aterm_list result = atermpp::aterm_list();
+  atermpp::aterm_list result;
   result.push_front(t);
   return result;
 }
