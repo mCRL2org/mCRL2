@@ -134,14 +134,19 @@ static inline aterm_appl gstcMakeActionOrProc(bool, aterm_appl, aterm_list, ater
 static aterm_appl gstcTraverseActProcVarConstP(const table &, aterm_appl);
 static aterm_appl gstcTraversePBESVarConstPB(const table &, aterm_appl);
 
-static aterm_appl gstcTraverseVarConsTypeD(const table &DeclaredVars, const table &AllowedVars, aterm_appl*, aterm_appl, table &FreeVars, bool strict_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
-static aterm_appl gstcTraverseVarConsTypeD(const table &DeclaredVars, const table &AllowedVars, aterm_appl* t1, aterm_appl t2)
+static aterm_appl gstcTraverseVarConsTypeD(const table &DeclaredVars, 
+                                           const table &AllowedVars, 
+                                           data_expression &, 
+                                           aterm_appl, 
+                                           table &FreeVars, 
+                                           bool strict_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
+static aterm_appl gstcTraverseVarConsTypeD(const table &DeclaredVars, const table &AllowedVars, data_expression &t1, aterm_appl t2)
 {
   table dummy_table;
   return gstcTraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2,
         dummy_table, true, false, true);
 }
-static aterm_appl gstcTraverseVarConsTypeDN(const table &DeclaredVars, const table &AllowedVars, aterm_appl* , aterm_appl,
+static aterm_appl gstcTraverseVarConsTypeDN(const table &DeclaredVars, const table &AllowedVars, data_expression & , aterm_appl,
                table &FreeVars, bool strict_ambiguous=true, size_t nPars = std::string::npos, const bool warn_upcasting=false, const bool print_cast_error=true);
 
 static aterm_list gstcInsertType(aterm_list TypeList, aterm_appl Type);
@@ -161,7 +166,7 @@ static inline aterm_appl INIT_KEY(void)
   return gsMakeProcVarId(gsString2ATermAppl("init"),aterm_list());
 }
 
-static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, aterm_appl* Par, bool warn_upcasting=false);
+static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, data_expression &Par, bool warn_upcasting=false);
 static aterm_appl gstcMaximumType(aterm_appl Type1, aterm_appl Type2);
 
 static aterm_list gstcGetNotInferredList(aterm_list TypeListList);
@@ -524,7 +529,7 @@ aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec)
   return Result;
 }
 
-aterm_appl type_check_data_expr(aterm_appl data_expr, aterm_appl sort_expr, aterm_appl spec, const table &Vars)
+aterm_appl type_check_data_expr(const data_expression &data_expr, aterm_appl sort_expr, aterm_appl spec, const table &Vars)
 {
   mCRL2log(verbose) << "type checking data expression..." << std::endl;
   //check correctness of the data expression in data_expr using
@@ -574,8 +579,8 @@ aterm_appl type_check_data_expr(aterm_appl data_expr, aterm_appl sort_expr, ater
       {
         Vars=table(63,50);
       } */
-      aterm_appl data=data_expr;
-      aterm_appl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,(sort_expr==aterm_appl())?(aterm_appl)data::unknown_sort():sort_expr);
+      data_expression data=data_expr;
+      aterm_appl Type=gstcTraverseVarConsTypeD(Vars,Vars,data,(sort_expr==aterm_appl())?(aterm_appl)data::unknown_sort():sort_expr);
       /* if (destroy_vars)
       {
         ATtableDestroy(Vars);
@@ -917,8 +922,8 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
             }
           }
 
-          aterm_appl Cond=aterm_cast<aterm_appl>(Rule[1]);
-          if (!gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Cond,sort_bool::bool_()).defined())
+          data_expression Cond=aterm_cast<aterm_appl>(Rule[1]);
+          if (!gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,Cond,sort_bool::bool_()).defined())
           {
             b = false;  // JK 15/10/2009 remove gsIsNil check
             break;
@@ -2171,8 +2176,8 @@ static bool gstcTransformVarConsTypeData(void)
       DeclaredVars=NewDeclaredVars;
     }
 
-    aterm_appl Left=aterm_cast<aterm_appl>(Eqn[2]);
-    aterm_appl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,data::unknown_sort(),FreeVars,false,true);
+    data_expression Left=aterm_cast<aterm_appl>(Eqn[2]);
+    aterm_appl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,Left,data::unknown_sort(),FreeVars,false,true);
     if (!LeftType.defined())
     {
       b = false;
@@ -2185,15 +2190,15 @@ static bool gstcTransformVarConsTypeData(void)
       mCRL2log(warning) << "warning occurred while typechecking " << core::pp_deprecated(Left) << " as left hand side of equation " << core::pp_deprecated(Eqn) << std::endl;
     }
 
-    aterm_appl Cond=aterm_cast<aterm_appl>(Eqn[1]);
-    if (!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,sort_bool::bool_()).defined())
+    data_expression Cond=aterm_cast<aterm_appl>(Eqn[1]);
+    if (!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,Cond,sort_bool::bool_()).defined())
     {
       b = false;
       break;
     }
-    aterm_appl Right=aterm_cast<aterm_appl>(Eqn[3]);
+    data_expression Right=aterm_cast<aterm_appl>(Eqn[3]);
     table dummy_empty_table;
-    aterm_appl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,dummy_empty_table,false);
+    data_expression RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,Right,LeftType,dummy_empty_table,false);
     if (!RightType.defined())
     {
       b = false;
@@ -2213,7 +2218,7 @@ static bool gstcTransformVarConsTypeData(void)
       }
       Left=aterm_cast<aterm_appl>(Eqn[2]);
       FreeVars.clear();
-      LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars,true);
+      LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,Left,Type,FreeVars,true);
       if (!LeftType.defined())
       {
         b = false;
@@ -2226,7 +2231,7 @@ static bool gstcTransformVarConsTypeData(void)
         mCRL2log(warning) << "warning occurred while typechecking " << core::pp_deprecated(Left) << " as left hand side of equation " << core::pp_deprecated(Eqn) << std::endl;
       }
       Right=aterm_cast<aterm_appl>(Eqn[3]);
-      RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Right,LeftType,FreeVars);
+      RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,Right,LeftType,FreeVars);
       if (!RightType.defined())
       {
         b = false;
@@ -2841,14 +2846,14 @@ static aterm_appl gstcRewrActProc(const table &Vars, aterm_appl ProcTerm, bool i
   //possible types for the arguments of the action. (not inferred if ambiguous action).
   aterm_list PosTypeList=aterm_cast<aterm_list>(aterm_cast<aterm_appl>(Result[0])[1]);
 
-  aterm_list NewPars;
+  variable_list NewPars;
   aterm_list NewPosTypeList;
   for (aterm_list Pars=aterm_cast<aterm_list>(ProcTerm[1]); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
   {
-    aterm_appl Par=ATAgetFirst(Pars);
+    data_expression Par=ATAgetFirst(Pars);
     aterm_appl PosType=ATAgetFirst(PosTypeList);
 
-    aterm_appl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,PosType); //gstcExpandNumTypesDown(PosType));
+    aterm_appl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,Par,PosType); //gstcExpandNumTypesDown(PosType));
 
     if (!NewPosType.defined())
     {
@@ -2867,15 +2872,15 @@ static aterm_appl gstcRewrActProc(const table &Vars, aterm_appl ProcTerm, bool i
   {
     PosTypeList=aterm_cast<aterm_list>(aterm_cast<aterm_appl>(Result[0])[1]);
     aterm_list Pars=NewPars;
-    NewPars=aterm_list();
+    NewPars=variable_list();
     aterm_list CastedPosTypeList=aterm_list();
     for (; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail(),NewPosTypeList=NewPosTypeList.tail())
     {
-      aterm_appl Par=ATAgetFirst(Pars);
+      data_expression Par=ATAgetFirst(Pars);
       aterm_appl PosType=ATAgetFirst(PosTypeList);
       aterm_appl NewPosType=ATAgetFirst(NewPosTypeList);
 
-      aterm_appl CastedNewPosType=gstcUpCastNumericType(PosType,NewPosType,&Par);
+      aterm_appl CastedNewPosType=gstcUpCastNumericType(PosType,NewPosType,Par);
       if (!CastedNewPosType.defined())
       {
         mCRL2log(error) << "cannot cast " << core::pp_deprecated(NewPosType) << " to "
@@ -3322,8 +3327,8 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
     {
       return aterm_appl();
     }
-    aterm_appl Time=aterm_cast<aterm_appl>(ProcTerm[1]);
-    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(sort_real::real_()));
+    data_expression Time=aterm_cast<data_expression>(ProcTerm[1]);
+    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,Time,gstcExpandNumTypesDown(sort_real::real_()));
     if (!NewType.defined())
     {
       return aterm_appl();
@@ -3332,7 +3337,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
     if (!gstcTypeMatchA(sort_real::real_(),NewType).defined())
     {
       //upcasting
-      aterm_appl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
+      aterm_appl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,Time);
       if (!CastedNewType.defined())
       {
         mCRL2log(error) << "cannot (up)cast time value " << core::pp_deprecated(Time) << " to type Real" << std::endl;
@@ -3345,8 +3350,8 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
 
   if (gsIsIfThen(ProcTerm))
   {
-    aterm_appl Cond=aterm_cast<aterm_appl>(ProcTerm[0]);
-    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,sort_bool::bool_());
+    data_expression Cond=aterm_cast<aterm_appl>(ProcTerm[0]);
+    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
     if (!NewType.defined())
     {
       return aterm_appl();
@@ -3361,8 +3366,8 @@ static aterm_appl gstcTraverseActProcVarConstP(const table &Vars, aterm_appl Pro
 
   if (gsIsIfThenElse(ProcTerm))
   {
-    aterm_appl Cond=aterm_cast<aterm_appl>(ProcTerm[0]);
-    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,sort_bool::bool_());
+    data_expression Cond=aterm_cast<aterm_appl>(ProcTerm[0]);
+    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
     if (!NewType.defined())
     {
       return aterm_appl();
@@ -3410,12 +3415,13 @@ static aterm_appl gstcTraversePBESVarConstPB(const table &Vars, aterm_appl PBEST
 
   if (gsIsDataExpr(PBESTerm))
   {
-    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&PBESTerm,sort_bool::bool_());
+    data_expression d(PBESTerm);
+    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,d,sort_bool::bool_());
     if (!NewType.defined())
     {
       return aterm_appl();
     }
-    return PBESTerm;
+    return d;
   }
 
   if (gsIsPBESTrue(PBESTerm) || gsIsPBESFalse(PBESTerm))
@@ -3480,7 +3486,7 @@ static aterm_appl gstcTraversePBESVarConstPB(const table &Vars, aterm_appl PBEST
 static aterm_appl gstcTraverseVarConsTypeD(
   const table &DeclaredVars,
   const table &AllowedVars,
-  aterm_appl* DataTerm,
+  data_expression &DataTerm,
   aterm_appl PosType,
   table &FreeVars,
   const bool strict_ambiguous,
@@ -3497,19 +3503,19 @@ static aterm_appl gstcTraverseVarConsTypeD(
 
   aterm_appl Result;
 
-  mCRL2log(debug) << "gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(*DataTerm) <<
+  mCRL2log(debug) << "gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(DataTerm) <<
               " with PosType " << core::pp_deprecated(PosType) << "" << std::endl;
 
-  if (is_abstraction(*DataTerm))
+  if (is_abstraction(DataTerm))
   {
     //The variable declaration of a binder should have at least 1 declaration
-    if (!ATAgetFirst(aterm_cast<aterm_list>((*DataTerm)[1])).defined())
+    if (!ATAgetFirst(aterm_cast<aterm_list>((DataTerm)[1])).defined())
     {
-      mCRL2log(error) << "binder " << core::pp_deprecated(*DataTerm) << " should have at least one declared variable" << std::endl;
+      mCRL2log(error) << "binder " << core::pp_deprecated(DataTerm) << " should have at least one declared variable" << std::endl;
       return aterm_appl();
     }
 
-    aterm_appl BindingOperator = aterm_cast<aterm_appl>((*DataTerm)[0]);
+    aterm_appl BindingOperator = aterm_cast<aterm_appl>((DataTerm)[0]);
     table CopyAllowedVars=table(63,50);
     gstcATermTableCopy(AllowedVars,CopyAllowedVars);
     table CopyDeclaredVars=table(63,50);
@@ -3520,14 +3526,14 @@ static aterm_appl gstcTraverseVarConsTypeD(
         gsIsSetComp(BindingOperator) ||
         gsIsBagComp(BindingOperator))
     {
-      aterm_list VarDecls=aterm_cast<aterm_list>((*DataTerm)[1]);
+      aterm_list VarDecls=aterm_cast<aterm_list>((DataTerm)[1]);
       aterm_appl VarDecl=ATAgetFirst(VarDecls);
 
       //A Set/bag comprehension should have exactly one variable declared
       VarDecls=VarDecls.tail();
       if (VarDecls != aterm_list())
       {
-        mCRL2log(error) << "set/bag comprehension " << core::pp_deprecated(*DataTerm) << " should have exactly one declared variable" << std::endl;
+        mCRL2log(error) << "set/bag comprehension " << core::pp_deprecated(DataTerm) << " should have exactly one declared variable" << std::endl;
         return aterm_appl();
       }
 
@@ -3543,30 +3549,30 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         return aterm_appl();
       }
-      aterm_appl Data=aterm_cast<aterm_appl>((*DataTerm)[2]);
+      data_expression Data((DataTerm)[2]);
 
-      aterm_appl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+      aterm_appl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
 
       if (!ResType.defined())
       {
-        mCRL2log(error) << "the condition or count of a set/bag comprehension " << core::pp_deprecated(*DataTerm) << " cannot be determined\n";
+        mCRL2log(error) << "the condition or count of a set/bag comprehension " << core::pp_deprecated(DataTerm) << " cannot be determined\n";
         return aterm_appl();
       }
       if (gstcTypeMatchA(sort_bool::bool_(),ResType).defined())
       {
         NewType=sort_set::set_(sort_expression(NewType));
-        *DataTerm = DataTerm->set_argument(gsMakeSetComp(), 0);
+        DataTerm = DataTerm.set_argument(gsMakeSetComp(), 0);
       }
       else if (gstcTypeMatchA(sort_nat::nat(),ResType).defined())
       {
         NewType=sort_bag::bag(sort_expression(NewType));
-        *DataTerm = DataTerm->set_argument(gsMakeBagComp(), 0);
+        DataTerm = DataTerm.set_argument(gsMakeBagComp(), 0);
       }
       else if (gstcTypeMatchA(sort_pos::pos(),ResType).defined())
       {
         NewType=sort_bag::bag(sort_expression(NewType));
-        *DataTerm = DataTerm->set_argument(gsMakeBagComp(), 0);
-        Data=gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(Data));
+        DataTerm = DataTerm.set_argument(gsMakeBagComp(), 0);
+        Data=make_application(sort_nat::cnat(),Data);
       }
       else
       {
@@ -3577,7 +3583,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
       if (!(NewType=gstcTypeMatchA(NewType,PosType)).defined())
       {
         mCRL2log(error) << "a set or bag comprehension of type " << core::pp_deprecated(aterm_cast<aterm_appl>(VarDecl[1])) << " does not match possible type " <<
-                            core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+                            core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
         return aterm_appl();
       }
 
@@ -3585,13 +3591,13 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         gstcRemoveVars(FreeVars,VarList);
       }
-      *DataTerm=DataTerm->set_argument(Data,2);
+      DataTerm=DataTerm.set_argument(Data,2);
       return NewType;
     }
 
     if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator))
     {
-      aterm_list VarList=aterm_cast<aterm_list>((*DataTerm)[1]);
+      aterm_list VarList=aterm_cast<aterm_list>((DataTerm)[1]);
       table NewAllowedVars;
       if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
@@ -3603,12 +3609,12 @@ static aterm_appl gstcTraverseVarConsTypeD(
         return aterm_appl();
       }
 
-      aterm_appl Data=aterm_cast<aterm_appl>((*DataTerm)[2]);
+      data_expression Data=aterm_cast<aterm_appl>((DataTerm)[2]);
       if (!gstcTypeMatchA(sort_bool::bool_(),PosType).defined())
       {
         return aterm_appl();
       }
-      aterm_appl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,sort_bool::bool_(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+      aterm_appl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,sort_bool::bool_(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
 
       if (!NewType.defined())
       {
@@ -3623,13 +3629,13 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         gstcRemoveVars(FreeVars,VarList);
       }
-      *DataTerm=DataTerm->set_argument(Data,2);
+      DataTerm=DataTerm.set_argument(Data,2);
       return sort_bool::bool_();
     }
 
     if (gsIsLambda(BindingOperator))
     {
-      aterm_list VarList=aterm_cast<aterm_list>((*DataTerm)[1]);
+      aterm_list VarList=aterm_cast<aterm_list>((DataTerm)[1]);
       table NewAllowedVars;
       if (!gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars))
       {
@@ -3645,12 +3651,12 @@ static aterm_appl gstcTraverseVarConsTypeD(
       aterm_appl NewType=gstcUnArrowProd(ArgTypes,PosType);
       if (!NewType.defined())
       {
-        mCRL2log(error) << "no functions with arguments " << core::pp_deprecated(ArgTypes) << " among " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+        mCRL2log(error) << "no functions with arguments " << core::pp_deprecated(ArgTypes) << " among " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
         return aterm_appl();
       }
-      aterm_appl Data=aterm_cast<aterm_appl>((*DataTerm)[2]);
+      data_expression Data=aterm_cast<aterm_appl>((DataTerm)[2]);
 
-      NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+      NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,NewType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
 
       mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
@@ -3662,20 +3668,20 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         return aterm_appl();
       }
-      *DataTerm=DataTerm->set_argument(Data,2);
+      DataTerm=DataTerm.set_argument(Data,2);
       return gsMakeSortArrow(ArgTypes,NewType);
     }
   }
 
-  if (is_where_clause(*DataTerm))
+  if (is_where_clause(DataTerm))
   {
     aterm_list WhereVarList;
     aterm_list NewWhereList;
-    for (aterm_list WhereList=aterm_cast<aterm_list>((*DataTerm)[1]); !WhereList.empty(); WhereList=WhereList.tail())
+    for (aterm_list WhereList=aterm_cast<aterm_list>((DataTerm)[1]); !WhereList.empty(); WhereList=WhereList.tail())
     {
       aterm_appl WhereElem=ATAgetFirst(WhereList);
-      aterm_appl WhereTerm=aterm_cast<aterm_appl>(WhereElem[1]);
-      aterm_appl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+      data_expression WhereTerm=aterm_cast<aterm_appl>(WhereElem[1]);
+      aterm_appl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,WhereTerm,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
       if (!WhereType.defined())
       {
         return aterm_appl();
@@ -3715,8 +3721,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
       return aterm_appl();
     }
 
-    aterm_appl Data=aterm_cast<aterm_appl>((*DataTerm)[0]);
-    aterm_appl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,PosType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+    data_expression Data=aterm_cast<aterm_appl>((DataTerm)[0]);
+    aterm_appl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,PosType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
 
     if (!NewType.defined())
     {
@@ -3726,18 +3732,19 @@ static aterm_appl gstcTraverseVarConsTypeD(
     {
       gstcRemoveVars(FreeVars,VarList);
     }
-    *DataTerm=gsMakeWhr(Data,NewWhereList);
+    DataTerm=gsMakeWhr(Data,NewWhereList);
     return NewType;
   }
 
-  if (gsIsDataAppl(*DataTerm))
+  if (is_application(DataTerm))
   {
     //arguments
-    aterm_list Arguments=aterm_cast<aterm_list>((*DataTerm)[1]);
-    size_t nArguments=Arguments.size();
+    application appl=aterm_cast<application>(DataTerm);
+    // aterm_list Arguments=aterm_cast<aterm_list>((DataTerm)[1]);
+    size_t nArguments=appl.size();
 
     //The following is needed to check enumerations
-    aterm_appl Arg0 = aterm_cast<aterm_appl>((*DataTerm)[0]);
+    data_expression Arg0 = appl.head();
     if (gsIsOpId(Arg0) || gsIsId(Arg0))
     {
       aterm_appl Name = aterm_cast<aterm_appl>(Arg0[0]);
@@ -3746,24 +3753,24 @@ static aterm_appl gstcTraverseVarConsTypeD(
         aterm_appl Type=gstcUnList(PosType);
         if (!Type.defined())
         {
-          mCRL2log(error) << "not possible to cast list to " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(Arguments) << ")" << std::endl;
+          mCRL2log(error) << "not possible to cast list to " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(data_expression_list(appl.begin(),appl.end())) << ")" << std::endl;
           return aterm_appl();
         }
 
-        aterm_list OldArguments=Arguments;
+        // aterm_list OldArguments=Arguments;
 
         //First time to determine the common type only!
-        aterm_list NewArguments;
+        data_expression_list NewArguments;
         bool Type_is_stable=true;
-        for (; !Arguments.empty(); Arguments=Arguments.tail())
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
-          aterm_appl Argument=ATAgetFirst(Arguments);
-          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,false);
+          data_expression Argument= *i; 
+          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,false);
           if (!Type0.defined())
           {
             // Try again, but now without Type as the suggestion.
             // If this does not work, it will be caught in the second pass below.
-            Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+            Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
             if (!Type0.defined())
             {
               return aterm_appl();
@@ -3773,16 +3780,16 @@ static aterm_appl gstcTraverseVarConsTypeD(
           Type_is_stable=Type_is_stable && (Type==Type0);
           Type=Type0;
         }
-        Arguments=OldArguments;
+        // Arguments=OldArguments;
 
         //Second time to do the real work, but only if the elements in the list have different types.
         if (!Type_is_stable)
         {
-          NewArguments=aterm_list();
-          for (; !Arguments.empty(); Arguments=Arguments.tail())
+          NewArguments=data_expression_list();
+          for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i) 
           {
-            aterm_appl Argument=ATAgetFirst(Arguments);
-            aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+            data_expression Argument= *i;
+            aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
             if (!Type0.defined())
             {
               return aterm_appl();
@@ -3791,10 +3798,9 @@ static aterm_appl gstcTraverseVarConsTypeD(
             Type=Type0;
           }
         }
-        Arguments=reverse(NewArguments);
 
         Type=sort_list::list(sort_expression(Type));
-        *DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(Arguments));
+        DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(reverse(NewArguments)));
         return Type;
       }
       if (Name == sort_set::set_enumeration_name())
@@ -3802,18 +3808,19 @@ static aterm_appl gstcTraverseVarConsTypeD(
         aterm_appl Type=gstcUnSet(PosType);
         if (!Type.defined())
         {
-          mCRL2log(error) << "not possible to cast set to " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(Arguments) << ")" << std::endl;
+          mCRL2log(error) << "not possible to cast set to " << core::pp_deprecated(PosType) << " (while typechecking " << 
+                      core::pp_deprecated(data_expression_list(appl.begin(),appl.end())) << ")" << std::endl;
           return aterm_appl();
         }
 
-        aterm_list OldArguments=Arguments;
+        // aterm_list OldArguments=Arguments;
 
         //First time to determine the common type only (which will be NewType)!
         aterm_appl NewType;
-        for (; !Arguments.empty(); Arguments=Arguments.tail())
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
-          aterm_appl Argument=ATAgetFirst(Arguments);
-          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          data_expression Argument= *i;
+          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type0.defined())
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument) << ")" << std::endl;
@@ -3840,14 +3847,14 @@ static aterm_appl gstcTraverseVarConsTypeD(
         // Type is now the most generic type to be used.
         assert(Type!=aterm_appl());
         Type=NewType;
-        Arguments=OldArguments;
+        // Arguments=OldArguments;
 
         //Second time to do the real work.
         aterm_list NewArguments;
-        for (; !Arguments.empty(); Arguments=Arguments.tail())
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
-          aterm_appl Argument=ATAgetFirst(Arguments);
-          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          data_expression Argument= *i;
+          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type0.defined())
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument) << ")" << std::endl;
@@ -3856,9 +3863,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
           NewArguments.push_front(Argument);
           Type=Type0;
         }
-        Arguments=reverse(NewArguments);
         Type=sort_set::set_(sort_expression(Type));
-        *DataTerm=sort_set::set_enumeration(sort_expression(Type),data_expression_list(Arguments));
+        DataTerm=sort_set::set_enumeration(sort_expression(Type),data_expression_list(reverse(NewArguments)));
         return Type;
       }
       if (Name == sort_bag::bag_enumeration_name())
@@ -3866,26 +3872,27 @@ static aterm_appl gstcTraverseVarConsTypeD(
         aterm_appl Type=gstcUnBag(PosType);
         if (!Type.defined())
         {
-          mCRL2log(error) << "not possible to cast bag to " << core::pp_deprecated(PosType) << "(while typechecking " << core::pp_deprecated(Arguments) << ")" << std::endl;
+          mCRL2log(error) << "not possible to cast bag to " << core::pp_deprecated(PosType) << "(while typechecking " << 
+                                      core::pp_deprecated(data_expression_list(appl.begin(),appl.end())) << ")" << std::endl;
           return aterm_appl();
         }
 
-        aterm_list OldArguments=Arguments;
+        // aterm_list OldArguments=Arguments;
 
         //First time to determine the common type only!
         aterm_appl NewType;
-        for (; !Arguments.empty(); Arguments=Arguments.tail())
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
-          aterm_appl Argument0=ATAgetFirst(Arguments);
-          Arguments=Arguments.tail();
-          aterm_appl Argument1=ATAgetFirst(Arguments);
-          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          data_expression Argument0= *i;
+          ++i;
+          data_expression Argument1= *i;
+          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type0.defined())
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument0) << ")" << std::endl;
             return aterm_appl();
           }
-          aterm_appl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          aterm_appl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type1.defined() && print_cast_error)
           {
             mCRL2log(error) << "not possible to cast number to " << core::pp_deprecated(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
@@ -3908,22 +3915,22 @@ static aterm_appl gstcTraverseVarConsTypeD(
         }
         assert(Type!=aterm_appl());
         Type=NewType;
-        Arguments=OldArguments;
+        // Arguments=OldArguments;
 
         //Second time to do the real work.
         aterm_list NewArguments;
-        for (; !Arguments.empty(); Arguments=Arguments.tail())
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
-          aterm_appl Argument0=ATAgetFirst(Arguments);
-          Arguments=Arguments.tail();
-          aterm_appl Argument1=ATAgetFirst(Arguments);
-          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          data_expression Argument0= *i;
+          ++i;
+          data_expression Argument1= *i;
+          aterm_appl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type0.defined() && print_cast_error)
           {
             mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument0) << ")" << std::endl;
             return aterm_appl();
           }
-          aterm_appl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          aterm_appl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!Type1.defined() && print_cast_error)
           {
             mCRL2log(error) << "not possible to cast number to " << core::pp_deprecated(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
@@ -3933,19 +3940,18 @@ static aterm_appl gstcTraverseVarConsTypeD(
           NewArguments.push_front(Argument1);
           Type=Type0;
         }
-        Arguments=reverse(NewArguments);
         Type=sort_bag::bag(sort_expression(Type));
-        *DataTerm=sort_bag::bag_enumeration(sort_expression(Type), data_expression_list(Arguments));
+        DataTerm=sort_bag::bag_enumeration(sort_expression(Type), data_expression_list(reverse(NewArguments)));
         return Type;
       }
     }
     aterm_list NewArgumentTypes;
     aterm_list NewArguments;
 
-    for (; !Arguments.empty(); Arguments=Arguments.tail())
+    for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
     {
-      aterm_appl Arg=ATAgetFirst(Arguments);
-      aterm_appl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,data::unknown_sort(),FreeVars,false,warn_upcasting,print_cast_error);
+      data_expression Arg= *i;
+      aterm_appl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,data::unknown_sort(),FreeVars,false,warn_upcasting,print_cast_error);
       if (!Type.defined())
       {
         return aterm_appl();
@@ -3953,13 +3959,13 @@ static aterm_appl gstcTraverseVarConsTypeD(
       NewArguments.push_front(Arg);
       NewArgumentTypes.push_front(Type);
     }
-    Arguments=reverse(NewArguments);
+    aterm_list Arguments=reverse(NewArguments);
     aterm_list ArgumentTypes=reverse(NewArgumentTypes);
 
     //function
-    aterm_appl Data=aterm_cast<aterm_appl>((*DataTerm)[0]);
+    data_expression Data=appl.head();
     aterm_appl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                      &Data,
+                      Data,
                       data::unknown_sort() /* gsMakeSortArrow(ArgumentTypes,PosType) */,
                       FreeVars,false,nArguments,warn_upcasting,print_cast_error);
     mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
@@ -3974,7 +3980,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         gstcErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes);
       }
-      mCRL2log(error) << "type error while trying to cast " << core::pp_deprecated(gsMakeDataAppl(Data,Arguments)) << " to type " << core::pp_deprecated(PosType) << std::endl;
+      mCRL2log(error) << "type error while trying to cast " << core::pp_deprecated(application(Data,aterm_cast<data_expression_list>(Arguments))) 
+                                << " to type " << core::pp_deprecated(PosType) << std::endl;
       return aterm_appl();
     }
 
@@ -3993,7 +4000,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
          mCRL2log(error) << "need argumens of sorts " << core::pp_deprecated(NeededArgumentTypes) <<
                          " which does not match the number of provided arguments "
                             << core::pp_deprecated(Arguments) << " (while typechecking "
-                            << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+                            << core::pp_deprecated(DataTerm) << ")" << std::endl;
          return aterm_appl();
 
       }
@@ -4005,13 +4012,13 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         assert(!Arguments.empty());
         assert(!NeededArgumentTypes.empty());
-        aterm_appl Arg=ATAgetFirst(Arguments);
+        data_expression Arg=ATAgetFirst(Arguments);
         aterm_appl NeededType=ATAgetFirst(NeededArgumentTypes);
         aterm_appl Type=ATAgetFirst(ArgumentTypes);
         if (!gstcEqTypesA(NeededType,Type))
         {
           //upcasting
-          aterm_appl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg,warn_upcasting);
+          aterm_appl CastedNewType=gstcUpCastNumericType(NeededType,Type,Arg,warn_upcasting);
           if (CastedNewType.defined())
           {
             Type=CastedNewType;
@@ -4029,12 +4036,12 @@ static aterm_appl gstcTraverseVarConsTypeD(
           {
             NewArgType=NeededType;
           }
-          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           mCRL2log(debug) << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Arg) << "" << std::endl;
           if (!NewArgType.defined())
           {
             mCRL2log(error) << "needed type " << core::pp_deprecated(NeededType) << " does not match possible type "
-                            << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Arg) << " in " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+                            << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Arg) << " in " << core::pp_deprecated(DataTerm) << ")" << std::endl;
             return aterm_appl();
           }
           Type=NewArgType;
@@ -4048,7 +4055,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
 
     //the function again
     NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                                      &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments,warn_upcasting,print_cast_error);
+                                      Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments,warn_upcasting,print_cast_error);
 
     mCRL2log(debug) << "Result of gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
@@ -4062,7 +4069,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         gstcErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes);
       }
-      mCRL2log(error) << "type error while trying to cast " << core::pp_deprecated(gsMakeDataAppl(Data,Arguments)) << " to type " << core::pp_deprecated(PosType) << std::endl;
+      mCRL2log(error) << "type error while trying to cast " << core::pp_deprecated(application(Data,aterm_cast<data_expression_list>(Arguments))) 
+                                  << " to type " << core::pp_deprecated(PosType) << std::endl;
       return aterm_appl();
     }
 
@@ -4078,14 +4086,14 @@ static aterm_appl gstcTraverseVarConsTypeD(
       for (; !Arguments.empty(); Arguments=Arguments.tail(),
            ArgumentTypes=ArgumentTypes.tail(),NeededArgumentTypes=NeededArgumentTypes.tail())
       {
-        aterm_appl Arg=ATAgetFirst(Arguments);
+        data_expression Arg=ATAgetFirst(Arguments);
         aterm_appl NeededType=ATAgetFirst(NeededArgumentTypes);
         aterm_appl Type=ATAgetFirst(ArgumentTypes);
 
         if (!gstcEqTypesA(NeededType,Type))
         {
           //upcasting
-          aterm_appl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg,warn_upcasting);
+          aterm_appl CastedNewType=gstcUpCastNumericType(NeededType,Type,Arg,warn_upcasting);
           if (CastedNewType.defined())
           {
             Type=CastedNewType;
@@ -4103,11 +4111,11 @@ static aterm_appl gstcTraverseVarConsTypeD(
           {
             NewArgType=NeededType;
           }
-          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
+          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting,print_cast_error);
           if (!NewArgType.defined())
           {
             mCRL2log(error) << "needed type " << core::pp_deprecated(NeededType) << " does not match possible type "
-                            << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Arg) << " in " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+                            << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Arg) << " in " << core::pp_deprecated(DataTerm) << ")" << std::endl;
             return aterm_appl();
           }
           Type=NewArgType;
@@ -4122,7 +4130,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
 
     mCRL2log(debug) << "Arguments after once more: Arguments " << core::pp_deprecated(Arguments) << ", ArgumentTypes: " << core::pp_deprecated(ArgumentTypes) << "" << std::endl;
 
-    *DataTerm=gsMakeDataAppl(Data,Arguments);
+    DataTerm=application(Data,aterm_cast<data_expression_list>(Arguments));
 
     if (gsIsSortArrow(gstcUnwindType(NewType)))
     {
@@ -4131,15 +4139,15 @@ static aterm_appl gstcTraverseVarConsTypeD(
 
     if (gstcHasUnknown(gstcUnArrowProd(ArgumentTypes,NewType)))
     {
-      mCRL2log(error) << "Fail to properly type " << core::pp_deprecated(*DataTerm) << std::endl;
+      mCRL2log(error) << "Fail to properly type " << core::pp_deprecated(DataTerm) << std::endl;
       return aterm_appl();
     }
     return gstcUnArrowProd(ArgumentTypes,NewType);
   }
 
-  if (gsIsId(*DataTerm)||gsIsOpId(*DataTerm)||gsIsDataVarId(*DataTerm))
+  if (gsIsId(DataTerm)||gsIsOpId(DataTerm)||gsIsDataVarId(DataTerm))
   {
-    aterm_appl Name=aterm_cast<aterm_appl>((*DataTerm)[0]);
+    aterm_appl Name=aterm_cast<aterm_appl>((DataTerm)[0]);
     if (gsIsNumericString(gsATermAppl2String(Name)))
     {
       aterm_appl Sort=sort_int::int_();
@@ -4151,7 +4159,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
       {
         Sort=sort_nat::nat();
       }
-      *DataTerm=gsMakeOpId(Name,Sort);
+      DataTerm=gsMakeOpId(Name,Sort);
 
       if (gstcTypeMatchA(Sort,PosType).defined())
       {
@@ -4162,7 +4170,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
       aterm_appl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm,warn_upcasting);
       if (!CastedNewType.defined())
       {
-        mCRL2log(error) << "cannot (up)cast number " << core::pp_deprecated(*DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
+        mCRL2log(error) << "cannot (up)cast number " << core::pp_deprecated(DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
         return aterm_appl();
       }
       return CastedNewType;
@@ -4172,7 +4180,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
     if (Type.defined())
     {
       mCRL2log(debug) << "Recognised declared variable " << core::pp_deprecated(Name) << ", Type: " << core::pp_deprecated(Type) << "" << std::endl;
-      *DataTerm=gsMakeDataVarId(Name,Type);
+      DataTerm=gsMakeDataVarId(Name,Type);
 
       if (!AllowedVars.get(Name).defined())
       {
@@ -4191,7 +4199,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
         aterm_appl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
         if (!CastedNewType.defined() && print_cast_error)
         {
-          mCRL2log(error) << "cannot (up)cast variable " << core::pp_deprecated(*DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
+          mCRL2log(error) << "cannot (up)cast variable " << core::pp_deprecated(DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
           return aterm_appl();
         }
 
@@ -4213,17 +4221,17 @@ static aterm_appl gstcTraverseVarConsTypeD(
       if (NewType.defined())
       {
         Type=NewType;
-        *DataTerm=gsMakeOpId(Name,Type);
+        DataTerm=gsMakeOpId(Name,Type);
         return Type;
       }
       else
       {
         // The type cannot be unified. Try upcasting the type.
-        *DataTerm=gsMakeOpId(Name,Type);
+        DataTerm=gsMakeOpId(Name,Type);
         aterm_appl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
         if (NewType==aterm_appl())
         {
-          mCRL2log(error) << "no constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
+          mCRL2log(error) << "no constant " << core::pp_deprecated(DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
           return aterm_appl();
         }
         else
@@ -4248,19 +4256,19 @@ static aterm_appl gstcTraverseVarConsTypeD(
       ParList=reverse(NewParList);
       if (ParList.empty())
       {
-        mCRL2log(error) << "no system constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
+        mCRL2log(error) << "no system constant " << core::pp_deprecated(DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
         return aterm_appl();
       }
 
       if (ParList.size()==1)
       {
         Type=ATAgetFirst(ParList);
-        *DataTerm=gsMakeOpId(Name,Type);
+        DataTerm=gsMakeOpId(Name,Type);
         return Type;
       }
       else
       {
-        *DataTerm=gsMakeOpId(Name,data::unknown_sort());
+        DataTerm=gsMakeOpId(Name,data::unknown_sort());
         return data::unknown_sort();
       }
     }
@@ -4285,11 +4293,11 @@ static aterm_appl gstcTraverseVarConsTypeD(
     if (ParList.size()==1)
     {
       aterm_appl Type=ATAgetFirst(ParList);
-      *DataTerm=gsMakeOpId(Name,Type);
+      DataTerm=gsMakeOpId(Name,Type);
       aterm_appl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
       if (NewType==aterm_appl())
       {
-        mCRL2log(error) << "no constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
+        mCRL2log(error) << "no constant " << core::pp_deprecated(DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
         return aterm_appl();
       }
       return NewType;
@@ -4300,8 +4308,8 @@ static aterm_appl gstcTraverseVarConsTypeD(
     }
   }
 
-  // if(gsIsDataVarId(*DataTerm)){
-  //   return aterm_cast<aterm_appl>((*DataTerm)[1]);
+  // if(gsIsDataVarId(DataTerm)){
+  //   return aterm_cast<aterm_appl>((DataTerm)[1]);
   // }
 
   return Result;
@@ -4310,7 +4318,7 @@ static aterm_appl gstcTraverseVarConsTypeD(
 static aterm_appl gstcTraverseVarConsTypeDN(
   const table &DeclaredVars,
   const table &AllowedVars,
-  aterm_appl* DataTerm,
+  data_expression &DataTerm,
   aterm_appl PosType,
   table &FreeVars,
   const bool strict_ambiguous,
@@ -4319,11 +4327,11 @@ static aterm_appl gstcTraverseVarConsTypeDN(
   const bool print_cast_error)
 {
   // std::string::npos for nFactPars means the number of arguments is not known.
-  mCRL2log(debug) << "gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(*DataTerm)
+  mCRL2log(debug) << "gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(DataTerm)
                   << " with PosType " << core::pp_deprecated(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
-  if (gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
+  if (gsIsId(DataTerm)||gsIsOpId(DataTerm))
   {
-    aterm_appl Name=aterm_cast<aterm_appl>((*DataTerm)[0]);
+    aterm_appl Name=aterm_cast<aterm_appl>((DataTerm)[0]);
     bool variable=false;
     aterm_appl Type=aterm_cast<aterm_appl>(DeclaredVars.get(Name));
     if (Type.defined())
@@ -4358,10 +4366,10 @@ static aterm_appl gstcTraverseVarConsTypeDN(
         if (!gstcTypeMatchA(Type,PosType).defined())
         {
           mCRL2log(error) << "the type " << core::pp_deprecated(Type) << " of variable " << core::pp_deprecated(Name)
-                          << " is incompatible with " << core::pp_deprecated(PosType) << " (typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+                          << " is incompatible with " << core::pp_deprecated(PosType) << " (typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
-        *DataTerm=gsMakeDataVarId(Name,Type);
+        DataTerm=gsMakeDataVarId(Name,Type);
         return Type;
       }
       else if ((Type=aterm_cast<aterm_appl>(context.constants.get(Name))).defined())
@@ -4369,10 +4377,10 @@ static aterm_appl gstcTraverseVarConsTypeDN(
         if (!gstcTypeMatchA(Type,PosType).defined())
         {
           mCRL2log(error) << "the type " << core::pp_deprecated(Type) << " of constant " << core::pp_deprecated(Name)
-                          << " is incompatible with " << core::pp_deprecated(PosType) << " (typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+                          << " is incompatible with " << core::pp_deprecated(PosType) << " (typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
-        *DataTerm=gsMakeOpId(Name,Type);
+        DataTerm=gsMakeOpId(Name,Type);
         return Type;
       }
       else
@@ -4382,13 +4390,13 @@ static aterm_appl gstcTraverseVarConsTypeDN(
           if (ParList.size()==1)
           {
             aterm_appl Type=ATAgetFirst(ParList);
-            *DataTerm=gsMakeOpId(Name,Type);
+            DataTerm=gsMakeOpId(Name,Type);
             return Type;
           }
           else
           {
             mCRL2log(warning) << "ambiguous system constant " << core::pp_deprecated(Name) << std::endl;
-            *DataTerm=gsMakeOpId(Name,data::unknown_sort());
+            DataTerm=gsMakeOpId(Name,data::unknown_sort());
             return Type;
           }
         }
@@ -4543,7 +4551,7 @@ static aterm_appl gstcTraverseVarConsTypeDN(
         // Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
         Sort=multiple_possible_sorts(sort_expression_list(CandidateParList));
       }
-      *DataTerm=gsMakeOpId(Name,Sort);
+      DataTerm=gsMakeOpId(Name,Sort);
       if (nFactPars!=std::string::npos)
       {
         mCRL2log(error) << "unknown operation/variable " << core::pp_deprecated(Name)
@@ -4568,9 +4576,9 @@ static aterm_appl gstcTraverseVarConsTypeDN(
         Type=gstcTypeMatchA(Type,PosType);
       }
 
-      if (gstcHasUnknown(Type) && gsIsOpId(*DataTerm))
+      if (gstcHasUnknown(Type) && gsIsOpId(DataTerm))
       {
-        Type=gstcTypeMatchA(Type,aterm_cast<aterm_appl>((*DataTerm)[1]));
+        Type=gstcTypeMatchA(Type,aterm_cast<aterm_appl>((DataTerm)[1]));
       }
       if (Type==aterm_appl())
       {
@@ -4578,193 +4586,193 @@ static aterm_appl gstcTraverseVarConsTypeDN(
         return aterm_appl();
       }
 
-      if (static_cast<aterm_appl>(data::detail::if_symbol())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(data::detail::if_symbol())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing if matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchIf(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function if has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function if has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(data::detail::equal_symbol())==aterm_cast<aterm_appl>((*DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::not_equal_symbol())==aterm_cast<aterm_appl>((*DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::less_symbol())==aterm_cast<aterm_appl>((*DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::less_equal_symbol())==aterm_cast<aterm_appl>((*DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::greater_symbol())==aterm_cast<aterm_appl>((*DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::greater_equal_symbol())==aterm_cast<aterm_appl>((*DataTerm)[0])
+      if (static_cast<aterm_appl>(data::detail::equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::not_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::less_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::less_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::greater_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::greater_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
          )
       {
         mCRL2log(debug) << "Doing ==, !=, <, <=, >= or > matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchEqNeqComparison(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function " << core::pp_deprecated(aterm_cast<aterm_appl>((*DataTerm)[0])) << " has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function " << core::pp_deprecated(aterm_cast<aterm_appl>((DataTerm)[0])) << " has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::cons_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_list::cons_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing |> matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchListOpCons(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function |> has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function |> has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::snoc_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_list::snoc_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing <| matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchListOpSnoc(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function <| has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function <| has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::concat_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_list::concat_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing ++ matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchListOpConcat(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function ++ has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function ++ has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::element_at_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_list::element_at_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
-        mCRL2log(debug) << "Doing @ matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << ", DataTerm: " << core::pp_deprecated(*DataTerm) << "" << std::endl;
+        mCRL2log(debug) << "Doing @ matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << ", DataTerm: " << core::pp_deprecated(DataTerm) << "" << std::endl;
         aterm_appl NewType=gstcMatchListOpEltAt(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function @ has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function @ has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::head_name())==aterm_cast<aterm_appl>((*DataTerm)[0])||
-          static_cast<aterm_appl>(sort_list::rhead_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_list::head_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_list::rhead_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing {R,L}head matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
 // Type==NULL
         aterm_appl NewType=gstcMatchListOpHead(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function {R,L}head has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {R,L}head has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::tail_name())==aterm_cast<aterm_appl>((*DataTerm)[0])||
-          static_cast<aterm_appl>(sort_list::rtail_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_list::tail_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_list::rtail_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing {R,L}tail matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchListOpTail(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function {R,L}tail has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {R,L}tail has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_bag::set2bag_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_bag::set2bag_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing Set2Bag matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchSetOpSet2Bag(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function Set2Bag has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function Set2Bag has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::in_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_list::in_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing {List,Set,Bag} matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchListSetBagOpIn(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function {List,Set,Bag}In has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {List,Set,Bag}In has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_set::union_name())==aterm_cast<aterm_appl>((*DataTerm)[0])||
-          static_cast<aterm_appl>(sort_set::difference_name())==aterm_cast<aterm_appl>((*DataTerm)[0])||
-          static_cast<aterm_appl>(sort_set::intersection_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_set::union_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_set::difference_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_set::intersection_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchSetBagOpUnionDiffIntersect(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_set::complement_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_set::complement_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing SetCompl matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchSetOpSetCompl(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function SetCompl has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function SetCompl has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_bag::bag2set_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_bag::bag2set_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing Bag2Set matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchBagOpBag2Set(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function Bag2Set has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function Bag2Set has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_bag::count_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(sort_bag::count_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing BagCount matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchBagOpBagCount(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "the function BagCount has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function BagCount has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
       }
 
 
-      if (static_cast<aterm_appl>(data::function_update_name())==aterm_cast<aterm_appl>((*DataTerm)[0]))
+      if (static_cast<aterm_appl>(data::function_update_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
       {
         mCRL2log(debug) << "Doing FuncUpdate matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         aterm_appl NewType=gstcMatchFuncUpdate(Type);
         if (!NewType.defined())
         {
-          mCRL2log(error) << "function update has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "function update has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(DataTerm) << ")" << std::endl;
           return aterm_appl();
         }
         Type=NewType;
@@ -4772,10 +4780,10 @@ static aterm_appl gstcTraverseVarConsTypeDN(
 
 
       Type=replace_possible_sorts(Type); // Set the type to one option in possible sorts, if there are more options.
-      *DataTerm=gsMakeOpId(Name,Type);
+      DataTerm=gsMakeOpId(Name,Type);
       if (variable)
       {
-        *DataTerm=gsMakeDataVarId(Name,Type);
+        DataTerm=gsMakeDataVarId(Name,Type);
       }
 
       assert(Type.defined());
@@ -4799,8 +4807,8 @@ static aterm_appl gstcTraverseVarConsTypeDN(
       }
       else
       {
-        //*DataTerm=gsMakeOpId(Name,data::unknown_sort());
-        //if(variable) *DataTerm=gsMakeDataVarId(Name,data::unknown_sort());
+        //DataTerm=gsMakeOpId(Name,data::unknown_sort());
+        //if(variable) DataTerm=gsMakeDataVarId(Name,data::unknown_sort());
         return data::unknown_sort();
       }
     }
@@ -4863,7 +4871,7 @@ static aterm_list gstcGetNotInferredList(aterm_list TypeListList)
   return Result;
 }
 
-static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, aterm_appl* Par, bool warn_upcasting)
+static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, data_expression &Par, bool warn_upcasting)
 {
   // Makes upcasting from Type to Needed Type for Par. Returns the resulting type.
   // Moreover, *Par is extended with the required type transformations.
@@ -4896,7 +4904,7 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     return aterm_appl();
   }
 
-  if (warn_upcasting && gsIsOpId(*Par) && gsIsNumericString(gsATermAppl2String(aterm_cast<aterm_appl>((*Par)[0]))))
+  if (warn_upcasting && gsIsOpId(Par) && gsIsNumericString(gsATermAppl2String(aterm_cast<aterm_appl>((Par)[0]))))
   {
     warn_upcasting=false;
   }
@@ -4915,8 +4923,8 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
   {
     if (gstcTypeMatchA(Type,sort_pos::pos()).defined())
     {
-      aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(*Par));
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_nat::cnat(),Par);
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4935,8 +4943,8 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
   {
     if (gstcTypeMatchA(Type,sort_pos::pos()).defined())
     {
-      aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_int::cint(),make_list<aterm>(gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(*Par))));
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_int::cint(),make_application(sort_nat::cnat(),Par));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4946,8 +4954,8 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     }
     if (gstcTypeMatchA(Type,sort_nat::nat()).defined())
     {
-      aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_int::cint(),make_list<aterm>(*Par));
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_int::cint(),Par);
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4966,10 +4974,10 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
   {
     if (gstcTypeMatchA(Type,sort_pos::pos()).defined())
     {
-      aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_real::creal(),make_list<aterm>(gsMakeDataAppl(sort_int::cint(),
-                          make_list<aterm>(gsMakeDataAppl(sort_nat::cnat(),make_list<aterm>(*Par)))),
-                          (aterm_appl)sort_pos::c1()));
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_real::creal(),
+                              make_application(sort_int::cint(), make_application(sort_nat::cnat(),Par)),
+                              sort_pos::c1());
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4979,9 +4987,10 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     }
     if (gstcTypeMatchA(Type,sort_nat::nat()).defined())
     {
-      aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_real::creal(),make_list<aterm>(gsMakeDataAppl(sort_int::cint(),make_list<aterm>(*Par)),
-                          (aterm_appl)(sort_pos::c1())));
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_real::creal(),
+                             make_application(sort_int::cint(),Par),
+                             sort_pos::c1());
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -4991,9 +5000,8 @@ static aterm_appl gstcUpCastNumericType(aterm_appl NeededType, aterm_appl Type, 
     }
     if (gstcTypeMatchA(Type,sort_int::int_()).defined())
     {
-      aterm_appl OldPar=*Par;
-      *Par=gsMakeDataAppl(sort_real::creal(),make_list<aterm>(*Par,
-                          (aterm_appl)data_expression(sort_pos::c1())));
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_real::creal(),Par, sort_pos::c1());
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -6582,8 +6590,8 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
 
   if (gsIsStateDelayTimed(StateFrm) || gsIsStateYaledTimed(StateFrm))
   {
-    aterm_appl Time=aterm_cast<aterm_appl>(StateFrm[0]);
-    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(sort_real::real_()));
+    data_expression Time=aterm_cast<aterm_appl>(StateFrm[0]);
+    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,Time,gstcExpandNumTypesDown(sort_real::real_()));
     if (!NewType.defined())
     {
       return aterm_appl();
@@ -6592,7 +6600,7 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
     if (!gstcTypeMatchA(sort_real::real_(),NewType).defined())
     {
       //upcasting
-      aterm_appl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
+      aterm_appl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,Time);
       if (!CastedNewType.defined())
       {
         mCRL2log(error) << "cannot (up)cast time value " << core::pp_deprecated(Time) << " to type Real (typechecking state formula " << core::pp_deprecated(StateFrm) << ")" << std::endl;
@@ -6623,9 +6631,9 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
     bool success=true;
     for (; !Pars.empty(); Pars=Pars.tail(),TypeList=TypeList.tail())
     {
-      aterm_appl Par=ATAgetFirst(Pars);
+      data_expression Par=ATAgetFirst(Pars);
       aterm_appl ParType=ATAgetFirst(TypeList);
-      aterm_appl NewParType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,gstcExpandNumTypesDown(ParType));
+      aterm_appl NewParType=gstcTraverseVarConsTypeD(Vars,Vars,Par,gstcExpandNumTypesDown(ParType));
       if (!NewParType.defined())
       {
         mCRL2log(error) << "typechecking " << core::pp_deprecated(StateFrm) << std::endl;
@@ -6636,7 +6644,7 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
       if (!gstcTypeMatchA(ParType,NewParType).defined())
       {
         //upcasting
-        NewParType=gstcUpCastNumericType(ParType,NewParType,&Par);
+        NewParType=gstcUpCastNumericType(ParType,NewParType,Par);
         if (!NewParType.defined())
         {
           mCRL2log(error) << "cannot (up)cast " << core::pp_deprecated(Par) << " to type " << core::pp_deprecated(ParType) << " (typechecking state formula " << core::pp_deprecated(StateFrm) << ")" << std::endl;
@@ -6689,8 +6697,8 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
 
       FormPars.put(VarName, VarType);
 
-      aterm_appl VarInit=aterm_cast<aterm_appl>(o[1]);
-      aterm_appl VarInitType=gstcTraverseVarConsTypeD(Vars,Vars,&VarInit,gstcExpandNumTypesDown(VarType));
+      data_expression VarInit=aterm_cast<aterm_appl>(o[1]);
+      aterm_appl VarInitType=gstcTraverseVarConsTypeD(Vars,Vars,VarInit,gstcExpandNumTypesDown(VarType));
       if (!VarInitType.defined())
       {
         mCRL2log(error) << "typechecking " << core::pp_deprecated(StateFrm) << std::endl;
@@ -6701,7 +6709,7 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
       if (!gstcTypeMatchA(VarType,VarInitType).defined())
       {
         //upcasting
-        VarInitType=gstcUpCastNumericType(VarType,VarInitType,&VarInit);
+        VarInitType=gstcUpCastNumericType(VarType,VarInitType,VarInit);
         if (!VarInitType.defined())
         {
           mCRL2log(error) << "cannot (up)cast " << core::pp_deprecated(VarInit) << " to type " << core::pp_deprecated(VarType) << " (typechecking state formula " << core::pp_deprecated(StateFrm) << std::endl;
@@ -6736,7 +6744,8 @@ static aterm_appl gstcTraverseStateFrm(const table &Vars, const table &StateVars
 
   if (gsIsDataExpr(StateFrm))
   {
-    aterm_appl Type=gstcTraverseVarConsTypeD(Vars, Vars, &StateFrm, sort_bool::bool_());
+    data_expression d(StateFrm);
+    aterm_appl Type=gstcTraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
     if (!Type.defined())
     {
       return aterm_appl();
@@ -6853,8 +6862,8 @@ static aterm_appl gstcTraverseActFrm(const table &Vars, aterm_appl ActFrm)
       return aterm_appl();
     }
 
-    aterm_appl Time=aterm_cast<aterm_appl>(ActFrm[1]);
-    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(sort_real::real_()));
+    data_expression Time=aterm_cast<aterm_appl>(ActFrm[1]);
+    aterm_appl NewType=gstcTraverseVarConsTypeD(Vars,Vars,Time,gstcExpandNumTypesDown(sort_real::real_()));
     if (!NewType.defined())
     {
       return aterm_appl();
@@ -6863,7 +6872,7 @@ static aterm_appl gstcTraverseActFrm(const table &Vars, aterm_appl ActFrm)
     if (!gstcTypeMatchA(sort_real::real_(),NewType).defined())
     {
       //upcasting
-      aterm_appl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
+      aterm_appl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,Time);
       if (!CastedNewType.defined())
       {
         mCRL2log(error) << "cannot (up)cast time value " << core::pp_deprecated(Time) << " to type Real (typechecking action formula " << core::pp_deprecated(ActFrm) << ")" << std::endl;
@@ -6892,7 +6901,8 @@ static aterm_appl gstcTraverseActFrm(const table &Vars, aterm_appl ActFrm)
 
   if (gsIsDataExpr(ActFrm))
   {
-    aterm_appl Type=gstcTraverseVarConsTypeD(Vars, Vars, &ActFrm, sort_bool::bool_());
+    data_expression d(ActFrm);
+    aterm_appl Type=gstcTraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
     if (!Type.defined())
     {
       return aterm_appl();

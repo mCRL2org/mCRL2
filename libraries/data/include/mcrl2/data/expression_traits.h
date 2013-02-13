@@ -255,6 +255,26 @@ struct term_traits<data::data_expression>
     return data::find_variables(t).empty();
   }
 
+  /// \brief Get the n-th argument of a data expression, provided it is an application.
+  /// \param t A term which is an application.
+  /// \param n The index of the argument. The first index has number 0.
+  /// \return the n-th argument of t.
+  /// \detail This function is linear in n.
+  static inline
+  const term_type& argument(const term_type& t, const size_t n)
+  {
+    assert(data::is_application(t));
+    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    assert(a.size()>n);
+    data::application::const_iterator i=a.begin();
+    for(size_t j=0; j<n; ++j, ++i)
+    {
+      assert(i!=a.end());
+    }
+    assert(i!=a.end());
+    return *i;
+  }
+
   static inline
   const term_type& left(const term_type& t)
   {

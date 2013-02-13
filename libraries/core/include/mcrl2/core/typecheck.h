@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/table.h"
+#include "mcrl2/data/data_expression.h" // Bad inclusion. Headers should be moved to data/include.
 
 namespace mcrl2
 {
@@ -106,7 +107,7 @@ aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec);
  *             an appropriate error message is printed and NULL is
  *             returned.
  **/
-aterm_appl type_check_data_expr(aterm_appl data_expr, aterm_appl sort_expr, aterm_appl spec, const table &Vars=table());
+aterm_appl type_check_data_expr(const data::data_expression& data_expr, aterm_appl sort_expr, aterm_appl spec, const table &Vars=table());
 
 
 /** \brief     Type check a parsed mCRL2 multiaction with respect to a
