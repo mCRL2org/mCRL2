@@ -2198,7 +2198,7 @@ static bool gstcTransformVarConsTypeData(void)
     }
     data_expression Right=aterm_cast<aterm_appl>(Eqn[3]);
     table dummy_empty_table;
-    data_expression RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,Right,LeftType,dummy_empty_table,false);
+    aterm_appl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,Right,LeftType,dummy_empty_table,false);
     if (!RightType.defined())
     {
       b = false;
@@ -2846,7 +2846,7 @@ static aterm_appl gstcRewrActProc(const table &Vars, aterm_appl ProcTerm, bool i
   //possible types for the arguments of the action. (not inferred if ambiguous action).
   aterm_list PosTypeList=aterm_cast<aterm_list>(aterm_cast<aterm_appl>(Result[0])[1]);
 
-  variable_list NewPars;
+  aterm_list NewPars;
   aterm_list NewPosTypeList;
   for (aterm_list Pars=aterm_cast<aterm_list>(ProcTerm[1]); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
   {
