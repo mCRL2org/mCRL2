@@ -506,7 +506,8 @@ void replace_variables_capture_avoiding(T& x,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
 {
-  std::multiset<data::variable> V = state_formulas::find_free_variables(x);
+  std::multiset<data::variable> V;
+  state_formulas::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   data::detail::apply_replace_capture_avoiding_variables_builder<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
@@ -520,7 +521,8 @@ T replace_variables_capture_avoiding(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
 {
-  std::multiset<data::variable> V = state_formulas::find_free_variables(x);
+  std::multiset<data::variable> V;
+  state_formulas::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::apply_replace_capture_avoiding_variables_builder<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }

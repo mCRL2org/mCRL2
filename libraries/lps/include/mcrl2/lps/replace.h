@@ -187,7 +187,7 @@ void replace_variables_capture_avoiding(T& x,
                       )
 {
   std::multiset<data::variable> V;
-  lps::find_free_variables(x, std::inserter(V, V.begin()));
+  lps::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
@@ -202,7 +202,7 @@ T replace_variables_capture_avoiding(const T& x,
                    )
 {
   std::multiset<data::variable> V;
-  lps::find_free_variables(x, std::inserter(V, V.begin()));
+  lps::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
