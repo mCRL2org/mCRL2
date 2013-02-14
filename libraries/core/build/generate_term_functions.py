@@ -3,6 +3,7 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import re
+import sys
 from optparse import OptionParser
 from mcrl2_parser import *
 from mcrl2_utility import *
@@ -81,7 +82,7 @@ def generate_libstruct_functions(rules, filename, ignored_phases = []):
         }
     text = string.strip(text + mtext)
     text = text + '\n'
-    insert_text_in_file(filename, text, 'generated code')
+    return insert_text_in_file(filename, text, 'generated code')
 
 CHECK_RULE = '''template <typename Term>
 bool check_rule_%(name)s(Term t)
@@ -185,7 +186,7 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
 
     text = string.strip(ptext + '\n' + text)
     text = text + '\n'
-    insert_text_in_file(filename, text, 'generated code')
+    return insert_text_in_file(filename, text, 'generated code')
 
 CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
@@ -221,7 +222,6 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
         ptext = ptext + 'ATermAppl construct%s();\n' % f.name()
         name  = f.name()
         arity = f.arity()
-#        args = map(lambda x: 'reinterpret_cast<ATerm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<ATerm>(constructList())', f.arguments)
         args = []
         for x in f.arguments:
             if x.repetitions == '':
@@ -229,7 +229,6 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
             else:
                 args.append('reinterpret_cast<ATerm>(constructList())')
 
-#        arguments = ', ' + ', '.join(args) if len(args) > 0 else ''
         if len(args) > 0:
             arguments = ', ' + ', '.join(args)
         else:
@@ -260,7 +259,7 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
             }
 
     text = ptext + '\n' + text
-    insert_text_in_file(filename, text, 'generated code')
+    return insert_text_in_file(filename, text, 'generated code')
 
 #---------------------------------------------------------------#
 #                          find_functions
@@ -361,27 +360,30 @@ def main():
     parser.add_option("-c", "--constructors", action="store_true", help="generate constructor functions from internal mcrl2 format")
     (options, args) = parser.parse_args()
 
+    result = True
     filename = '../../../doc/specs/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
 
     if options.soundness_checks:
         ignored_phases = [] # ['-lin', '-di', '-rft']
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
-        generate_soundness_check_functions(rules, filename, ignored_phases)
+        result = generate_soundness_check_functions(rules, filename, ignored_phases) and result
 
     if options.libstruct:
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/struct_core.h'
-        generate_libstruct_functions(rules, filename, ignored_phases)
+        result = generate_libstruct_functions(rules, filename, ignored_phases) and result
         postprocess_libstruct(filename)
 
     if options.constructors:
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/constructors.h'
-        generate_constructor_functions(rules, filename, ignored_phases)
+        result = generate_constructor_functions(rules, filename, ignored_phases) and result
 
     if not options.soundness_checks and not options.libstruct and not options.constructors:
         parser.print_help()
+    return result
 
 if __name__ == "__main__":
-    main()
+    result = main()
+    sys.exit(not result) # 0 result indicates successful execution
