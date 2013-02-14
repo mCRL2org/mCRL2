@@ -14,17 +14,14 @@ def test_pbesstategraph(p, filename):
     pbesfile1 = filename + 'a.pbes'
     pbesfile2 = filename + 'b.pbes'
     pbesfile3 = filename + 'c.pbes'
-    pbesfile4 = filename + 'd.pbes'
     run_txt2pbes(txtfile, pbesfile1)
     run_pbesstategraph(pbesfile1, pbesfile2)
-    run_pbesstategraph(pbesfile1, pbesfile3, '-s0')
-    run_pbesstategraph(pbesfile1, pbesfile4, '-s0 -a1')
+    run_pbesstategraph(pbesfile1, pbesfile3, '-p1')
     answer1 = run_pbes2bool(pbesfile1)
     answer2 = run_pbes2bool(pbesfile2)
     answer3 = run_pbes2bool(pbesfile3)
-    answer4 = run_pbes2bool(pbesfile4)
-    print filename, answer1, answer2, answer3, answer4
-    answers = [answer1, answer2, answer3, answer4]
+    print filename, answer1, answer2, answer3
+    answers = [answer1, answer2, answer3]
     return not (True in answers and False in answers)
 
 def main():
