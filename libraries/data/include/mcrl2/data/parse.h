@@ -48,7 +48,7 @@ struct sort_expression_actions: public core::default_parser_actions
   data::sort_expression parse_SortExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "SimpleSortExpr")) { return parse_SimpleSortExpr(node.child(0)); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ComplexSortExpr")) { return parse_ComplexSortExpr(node.child(0)); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "HashArgs") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SimpleSortExprList(node.child(0)), parse_SortExpr(node.child(2))); }
     report_unexpected_node(node);
     return data::sort_expression();
   }
@@ -70,14 +70,14 @@ struct sort_expression_actions: public core::default_parser_actions
     return data::sort_expression();
   }
 
-  data::sort_expression parse_ComplexSortExpr(const core::parse_node& node)
-  {
-    return function_sort(parse_SortExprList(node.child(0)), parse_SortExpr(node.child(2)));
-  }
-
   data::sort_expression_list parse_SortExprList(const core::parse_node& node)
   {
     return parse_list<data::sort_expression>(node, "SortExpr", boost::bind(&sort_expression_actions::parse_SortExpr, this, _1));
+  }
+
+  data::sort_expression_list parse_SimpleSortExprList(const core::parse_node& node)
+  {
+    return parse_list<data::sort_expression>(node, "SimpleSortExpr", boost::bind(&sort_expression_actions::parse_SimpleSortExpr, this, _1));
   }
 
   data::structured_sort_constructor parse_ConstrDecl(const core::parse_node& node)
