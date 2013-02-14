@@ -201,9 +201,9 @@ void mutually_recursive_test()
     ;
 
   std::clog << "tree_test1\n";
-  enumerate(mutually_recursive_sort_specification, "x : this;", "true", "", 512,true);
+  enumerate(mutually_recursive_sort_specification, "x : this;", "true", "", 32,true);
   std::clog << "tree_test2\n";
-  enumerate(mutually_recursive_sort_specification, "x : that;", "true", "", 512,true);
+  enumerate(mutually_recursive_sort_specification, "x : that;", "true", "", 32,true);
 }
 
 void check_concepts()

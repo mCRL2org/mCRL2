@@ -198,13 +198,13 @@ class specification_basic_type:public boost::noncopyable
     stackoperations* stack_operations_list;
 
   public:
-    specification_basic_type(const action_label_list as,
+    specification_basic_type(const action_label_list &as,
                              const std::vector< process_equation > &ps,
-                             const variable_list idvs,
-                             const data_specification& ds,
+                             const variable_list &idvs,
+                             const data_specification &ds,
                              const std::set < data::variable > &glob_vars,
-                             const t_lin_options& opt,
-                             const process_specification procspec):
+                             const t_lin_options &opt,
+                             const process_specification &procspec):
       acts(),
       global_variables(glob_vars),
       data(ds),
@@ -448,7 +448,7 @@ class specification_basic_type:public boost::noncopyable
       return n;
     }
 
-    void insertvariable(const variable var, const bool mustbenew)
+    void insertvariable(const variable &var, const bool mustbenew)
     {
       addString(var.name());
 
@@ -464,7 +464,7 @@ class specification_basic_type:public boost::noncopyable
       objectdata[n].object=variable_;
     }
 
-    void insertvariables(const variable_list vars, const bool mustbenew)
+    void insertvariables(const variable_list &vars, const bool mustbenew)
     {
       for (variable_list::const_iterator l=vars.begin(); l!=vars.end(); ++l)
       {
@@ -624,9 +624,9 @@ class specification_basic_type:public boost::noncopyable
     /************ storeprocs *************************************************/
 
     size_t insertProcDeclaration(
-      const process_identifier procId,
-      const variable_list parameters,
-      const process_expression body,
+      const process_identifier procId, // This should not be a reference.
+      const variable_list parameters,  // This should not be a reference.
+      const process_expression &body,
       processstatustype s,
       const bool canterminate,
       const bool containstime)
@@ -670,7 +670,7 @@ class specification_basic_type:public boost::noncopyable
     /************ storeinit *************************************************/
 
   public:
-    process_identifier storeinit(const process_expression init)
+    process_identifier storeinit(const process_expression &init)
     {
       /* init is used as the name of the initial process,
          because it cannot occur as a string in the input */
@@ -683,7 +683,7 @@ class specification_basic_type:public boost::noncopyable
   private:
 
     /********** various functions on action and multi actions  ***************/
-    bool actioncompare(const action_label a1, const action_label a2)
+    bool actioncompare(const action_label &a1, const action_label &a2)
     {
       /* first compare the strings in the actions */
       if (std::string(a1.name())<std::string(a2.name()))
@@ -702,7 +702,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     action_list linInsertActionInMultiActionList(
-      const action act,
+      const action &act,
       action_list multiAction)
     {
       /* store the action in the multiAction, alphabetically
@@ -731,7 +731,7 @@ class specification_basic_type:public boost::noncopyable
       return result;
     }
 
-    action_list linMergeMultiActionList(const action_list ma1, const action_list ma2)
+    action_list linMergeMultiActionList(const action_list &ma1, const action_list &ma2)
     {
       action_list result=ma2;
       for (action_list::const_iterator i=ma1.begin() ; i!=ma1.end() ; ++i)
@@ -742,7 +742,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    action_list linMergeMultiActionListProcess(const process_expression ma1, const process_expression ma2)
+    action_list linMergeMultiActionListProcess(const process_expression &ma1, const process_expression &ma2)
     {
       return linMergeMultiActionList(to_action_list(ma1),to_action_list(ma2));
     }
@@ -750,8 +750,8 @@ class specification_basic_type:public boost::noncopyable
     /************** determine_process_status ********************************/
 
     processstatustype determine_process_statusterm(
-      const process_expression body,
-      const processstatustype status)
+      const process_expression &body,
+      const processstatustype &status)
     {
       /* In this procedure it is determined whether a process
          is of type mCRL, pCRL or a multiAction. pCRL processes
@@ -1002,7 +1002,7 @@ class specification_basic_type:public boost::noncopyable
 
     /***********  collect pcrlprocessen **********************************/
 
-    void collectPcrlProcesses_term(const process_expression body,
+    void collectPcrlProcesses_term(const process_expression &body,
                                    std::vector <process_identifier>  &pcrlprocesses,
                                    std::set <process_identifier>  &visited)
     {
@@ -1487,7 +1487,7 @@ class specification_basic_type:public boost::noncopyable
        variables */
 
     process_expression substitute_pCRLproc(
-      const process_expression p,
+      const process_expression &p,
       const  std::map < variable, data_expression > &sigma)
     {
       if (is_choice(p))
@@ -1608,7 +1608,7 @@ class specification_basic_type:public boost::noncopyable
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
 
-    process_instance transform_process_assignment_to_process(const process_instance_assignment procId)
+    process_instance transform_process_assignment_to_process(const process_instance_assignment &procId)
     {
       size_t n=objectIndex(procId.identifier());
 
@@ -3673,10 +3673,10 @@ class specification_basic_type:public boost::noncopyable
 
 
     data_expression_list make_procargs(
-      const process_expression t,
+      const process_expression &t,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pcrlprcs,
-      const variable_list vars,
+      const variable_list &vars,
       const bool regular,
       const bool singlestate)
     {
@@ -3749,8 +3749,8 @@ class specification_basic_type:public boost::noncopyable
       return data_expression_list();
     }
 
-    bool occursin(const variable name,
-                  const variable_list pars)
+    bool occursin(const variable &name,
+                  const variable_list &pars)
     {
       assert(is_variable(name));
       for (variable_list::const_iterator l=pars.begin() ; l!=pars.end(); ++l)
@@ -3765,10 +3765,10 @@ class specification_basic_type:public boost::noncopyable
 
 
     data_expression_list pushdummyrec(
-      const variable_list totalpars,
-      const variable_list pars,
+      const variable_list &totalpars,
+      const variable_list &pars,
       const stacklisttype& stack,
-      int regular)
+      const bool regular)
     {
       /* totalpars is the total list of parameters of the
          aggregated pCRL process. The variable pars contains
@@ -3800,21 +3800,21 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression_list pushdummy(
-      const variable_list parameters,
+      const variable_list &parameters,
       const stacklisttype& stack,
-      int regular)
+      const bool regular)
     {
       return pushdummyrec(stack.parameters,
                           parameters,stack,regular);
     }
 
     assignment_list make_initialstate(
-      const process_identifier initialProcId,
+      const process_identifier &initialProcId,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pcrlprcs,
-      int regular,
-      int singlecontrolstate,
-      const variable_list parameters)
+      const bool regular,
+      const bool singlecontrolstate,
+      const variable_list &parameters)
     {
       int i;
       for (i=1 ; pcrlprcs[i-1]!=initialProcId ; ++i) {};
@@ -3886,14 +3886,13 @@ class specification_basic_type:public boost::noncopyable
 
 
     void add_summands(
-      const process_identifier procId,
+      const process_identifier &procId,
       action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       process_expression summandterm,
       const std::vector < process_identifier> &pCRLprocs,
-      const variable_list parameters,
+      const variable_list &parameters,
       const stacklisttype& stack,
-      //const bool canterminate,
       const bool regular,
       const bool singlestate)
     {
@@ -4068,11 +4067,11 @@ class specification_basic_type:public boost::noncopyable
 
 
     void collectsumlistterm(
-      const process_identifier procId,
+      const process_identifier &procId,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const process_expression body,
-      const variable_list pars,
+      const process_expression &body,
+      const variable_list &pars,
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate,
@@ -4100,7 +4099,7 @@ class specification_basic_type:public boost::noncopyable
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
       const std::vector < process_identifier> &pCRLprocs,
-      const variable_list pars,
+      const variable_list &pars,
       const stacklisttype& stack,
       bool regular,
       bool singlestate)
@@ -4204,7 +4203,7 @@ class specification_basic_type:public boost::noncopyable
       return w;
     }
 
-    data::function_symbol find_case_function(size_t index, const sort_expression sort)
+    data::function_symbol find_case_function(size_t index, const sort_expression &sort)
     {
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for (function_symbol_list::const_iterator w=functions.begin();
@@ -4224,8 +4223,8 @@ class specification_basic_type:public boost::noncopyable
 
     void define_equations_for_case_function(
       const size_t index,
-      const data::function_symbol functionname,
-      const sort_expression sort)
+      const data::function_symbol &functionname,
+      const sort_expression &sort)
     {
       variable_list vars;
       data_expression_list args;
@@ -4273,7 +4272,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void create_case_function_on_enumeratedtype(
-      const sort_expression sort,
+      const sort_expression &sort,
       const size_t enumeratedtype_index)
     {
       assert(enumeratedtype_index<enumeratedtypes.size());
@@ -4336,8 +4335,8 @@ class specification_basic_type:public boost::noncopyable
         variable var;
 
         enumtype(size_t n,
-                 const sort_expression_list fsorts,
-                 const sort_expression_list gsorts,
+                 const sort_expression_list &fsorts,
+                 const sort_expression_list &gsorts,
                  specification_basic_type& spec)
         {
 
@@ -4364,11 +4363,6 @@ class specification_basic_type:public boost::noncopyable
           }
         }
 
-        /* enumtype(const enumtype &t)
-        { var=t.var;
-          enumeratedtype_index=t.enumeratedtype_index;
-        } */
-
         ~enumtype()
         {
         }
@@ -4378,7 +4372,7 @@ class specification_basic_type:public boost::noncopyable
 
     bool mergeoccursin(
       variable& var,
-      const variable_list v,
+      const variable_list &v,
       variable_list& matchinglist,
       variable_list& pars,
       data_expression_list& args)
@@ -4446,7 +4440,7 @@ class specification_basic_type:public boost::noncopyable
       return result;
     }
 
-    data_expression_list extend(const data_expression c, const data_expression_list cl)
+    data_expression_list extend(const data_expression &c, const data_expression_list &cl)
     {
       if (cl.empty())
       {
@@ -4458,8 +4452,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression_list extend_conditions(
-      const variable var,
-      const data_expression_list conditionlist)
+      const variable &var,
+      const data_expression_list &conditionlist)
     {
       const data_expression unique=representative_generator_internal(var.sort(),false);
       const data_expression newcondition=equal_to(var,unique);
@@ -4467,7 +4461,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    data_expression transform_matching_list(const variable_list matchinglist)
+    data_expression transform_matching_list(const variable_list &matchinglist)
     {
       if (matchinglist.empty())
       {
@@ -4483,8 +4477,8 @@ class specification_basic_type:public boost::noncopyable
 
 
     data_expression_list addcondition(
-      const variable_list matchinglist,
-      const data_expression_list conditionlist)
+      const variable_list &matchinglist,
+      const data_expression_list &conditionlist)
     {
       data_expression_list result=conditionlist;
       result.push_front(transform_matching_list(matchinglist));
@@ -4497,8 +4491,8 @@ class specification_basic_type:public boost::noncopyable
  * renamings to be applied if variables in v1 had to be renamed */
 
    variable_list merge_var(
-      const variable_list v1,
-      const variable_list v2,
+      const variable_list &v1,
+      const variable_list &v2,
       std::vector < variable_list> &renamings_pars,
       std::vector < data_expression_list> &renamings_args,
       data_expression_list& conditionlist)
@@ -4532,9 +4526,9 @@ class specification_basic_type:public boost::noncopyable
 
     variable_list make_binary_sums(
       size_t n,
-      const sort_expression enumtypename,
+      const sort_expression &enumtypename,
       data_expression& condition,
-      const variable_list tail)
+      const variable_list &tail)
     {
       variable_list result;
       assert(n>1);
@@ -4559,9 +4553,9 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression construct_binary_case_tree_rec(
       size_t n,
-      const variable_list sums,
+      const variable_list &sums,
       data_expression_list& terms,
-      const sort_expression termsort,
+      const sort_expression &termsort,
       const enumtype& e)
     {
       assert(!terms.empty());
@@ -4595,9 +4589,9 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression construct_binary_case_tree(
       size_t n,
-      const variable_list sums,
+      const variable_list &sums,
       data_expression_list terms,
-      const sort_expression termsort,
+      const sort_expression &termsort,
       const enumtype& e)
     {
       return construct_binary_case_tree_rec(n-1,sums,terms,termsort,e);
@@ -4642,7 +4636,7 @@ class specification_basic_type:public boost::noncopyable
       return true;
     }
 
-    data_expression getRHSassignment(const variable var, const assignment_list as)
+    data_expression getRHSassignment(const variable &var, const assignment_list &as)
     {
       for (assignment_list::const_iterator i=as.begin(); i!=as.end(); ++i)
       {
@@ -5320,7 +5314,7 @@ class specification_basic_type:public boost::noncopyable
                               some_summand_has_time?deadlock(resulttime):deadlock());
     }
 
-    sort_expression_list getActionSorts(const action_list actionlist)
+    sort_expression_list getActionSorts(const action_list &actionlist)
     {
       sort_expression_list resultsorts;
 
@@ -5334,7 +5328,7 @@ class specification_basic_type:public boost::noncopyable
     void cluster_actions(
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const variable_list pars)
+      const variable_list &pars)
     {
       {
         /* We cluster first the action summands with the action
@@ -5455,8 +5449,7 @@ class specification_basic_type:public boost::noncopyable
 
     void generateLPEpCRL(action_summand_vector &action_summands,
                          deadlock_summand_vector &deadlock_summands,
-                         const process_identifier procId,
-                         /*const bool canterminate,*/
+                         const process_identifier &procId,
                          const bool containstime,
                          const bool regular,
                          variable_list& parameters,
@@ -5549,7 +5542,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** hiding *****************************************/
 
-    action_list hide_(const identifier_string_list hidelist, const action_list multiaction)
+    action_list hide_(const identifier_string_list &hidelist, const action_list &multiaction)
     {
       action_list resultactionlist;
 
@@ -5566,7 +5559,7 @@ class specification_basic_type:public boost::noncopyable
       return reverse(resultactionlist);
     }
 
-    void hidecomposition(const identifier_string_list hidelist, action_summand_vector &action_summands)
+    void hidecomposition(const identifier_string_list &hidelist, action_summand_vector &action_summands)
     {
       for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
       {
@@ -5580,7 +5573,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** allow/block *************************************/
 
-    bool implies_condition(const data_expression c1, const data_expression c2)
+    bool implies_condition(const data_expression &c1, const data_expression &c2)
     {
       if (c2==sort_bool::true_())
       {
@@ -5703,7 +5696,7 @@ class specification_basic_type:public boost::noncopyable
       deadlock_summands.swap(result);
     }
 
-    action_name_multiset_list sortMultiActionLabels(const action_name_multiset_list l)
+    action_name_multiset_list sortMultiActionLabels(const action_name_multiset_list &l)
     {
       action_name_multiset_list result;
       for (action_name_multiset_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -5717,8 +5710,8 @@ class specification_basic_type:public boost::noncopyable
     //         in which case true is delivered. If multiaction is the action Terminate,
     //         then true is also returned.
 
-    bool allowsingleaction(const action_name_multiset allowaction,
-                           const action_list multiaction)
+    bool allowsingleaction(const action_name_multiset &allowaction,
+                           const action_list &multiaction)
     {
       if (multiaction==make_list(terminationAction))
       {
@@ -5747,8 +5740,8 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    bool allow_(const action_name_multiset_list allowlist,
-                const action_list multiaction)
+    bool allow_(const action_name_multiset_list &allowlist,
+                const action_list &multiaction)
     {
       /* The empty multiaction, i.e. tau, is never blocked by allow */
       if (multiaction.empty())
@@ -5767,7 +5760,7 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    bool encap(const identifier_string_list& encaplist, const action_list multiaction)
+    bool encap(const identifier_string_list& encaplist, const action_list &multiaction)
     {
       for (action_list::const_iterator walker=multiaction.begin();
            walker!=multiaction.end(); ++walker)
@@ -5786,7 +5779,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void allowblockcomposition(
-      const action_name_multiset_list allowlist1,  // This is a list of list of identifierstring.
+      const action_name_multiset_list &allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
@@ -5890,7 +5883,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** renaming ******************************************/
 
-    action rename_action(const rename_expression_list renamings, const action act)
+    action rename_action(const rename_expression_list &renamings, const action &act)
     {
       const action_label actionId=act.label();
       const identifier_string s=actionId.name();
@@ -5905,8 +5898,8 @@ class specification_basic_type:public boost::noncopyable
       return act;
     }
 
-    action_list rename_actions(const rename_expression_list renamings,
-                               const action_list multiaction)
+    action_list rename_actions(const rename_expression_list &renamings,
+                               const action_list &multiaction)
     {
       action_list resultactionlist;
 
@@ -5921,7 +5914,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void renamecomposition(
-      const rename_expression_list renamings,
+      const rename_expression_list &renamings,
       action_summand_vector &action_summands)
     {
       for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
@@ -5938,7 +5931,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** equalargs ****************************************/
 
-    bool occursinvarandremove(const variable var, variable_list& vl)
+    bool occursinvarandremove(const variable &var, variable_list& vl)
     {
       bool result=false;
 
@@ -5968,8 +5961,8 @@ class specification_basic_type:public boost::noncopyable
     /********************** construct renaming **************************/
 
     variable_list construct_renaming(
-      const variable_list pars1,
-      const variable_list pars2,
+      const variable_list &pars1,
+      const variable_list &pars2,
       variable_list& pars3,
       variable_list& pars4,
       const bool unique=true)
@@ -6029,8 +6022,8 @@ class specification_basic_type:public boost::noncopyable
     /**************** communication operator composition ****************/
 
     identifier_string_list insertActionLabel(
-      const identifier_string action,
-      const identifier_string_list actionlabels)
+      const identifier_string &action,
+      const identifier_string_list &actionlabels)
     {
       /* assume actionlabels is sorted, and put
          action at the proper place to yield a sorted
@@ -6053,7 +6046,7 @@ class specification_basic_type:public boost::noncopyable
       return result;
     }
 
-    action_name_multiset sortActionLabels(const action_name_multiset actionlabels1)
+    action_name_multiset sortActionLabels(const action_name_multiset &actionlabels1)
     {
       identifier_string_list result;
       const identifier_string_list actionlabels(actionlabels1.names());
@@ -6065,7 +6058,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     template <typename List>
-    sort_expression_list get_sorts(const List l)
+    sort_expression_list get_sorts(const List &l)
     {
       if (l.empty())
       {
@@ -6077,7 +6070,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     // Check that the sorts of both termlists match.
-    data_expression pairwiseMatch(const data_expression_list l1, const data_expression_list l2)
+    data_expression pairwiseMatch(const data_expression_list &l1, const data_expression_list &l2)
     {
       if (l1.empty())
       {
@@ -6115,8 +6108,8 @@ class specification_basic_type:public boost::noncopyable
     } tuple_list;
 
     tuple_list addActionCondition(
-      const action firstaction,
-      const data_expression condition,
+      const action &firstaction,
+      const data_expression &condition,
       const tuple_list& L,
       tuple_list S)
     {
@@ -6145,7 +6138,7 @@ class specification_basic_type:public boost::noncopyable
         std::vector <identifier_string_list> tmp;
         std::vector< bool > match_failed;
 
-        comm_entry(const communication_expression_list communications)
+        comm_entry(const communication_expression_list &communications)
         {
           for (communication_expression_list::const_iterator l=communications.begin();
                l!=communications.end(); ++l)
@@ -6167,7 +6160,7 @@ class specification_basic_type:public boost::noncopyable
         }
     };
 
-    action_label can_communicate(const action_list m, comm_entry& comm_table)
+    action_label can_communicate(const action_list &m, comm_entry& comm_table)
     {
       /* this function indicates whether the actions in m
          consisting of actions and data occur in C, such that
@@ -6234,9 +6227,9 @@ class specification_basic_type:public boost::noncopyable
       return action_label();
     }
 
-    bool might_communicate(const action_list m,
+    bool might_communicate(const action_list &m,
                            comm_entry& comm_table,
-                           const action_list n,
+                           const action_list &n,
                            const bool n_is_null)
     {
       /* this function indicates whether the actions in m
@@ -6369,11 +6362,11 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    tuple_list phi(const action_list m,
-                   const data_expression_list d,
-                   const action_list w,
-                   const action_list n,
-                   const action_list r,
+    tuple_list phi(const action_list &m,
+                   const data_expression_list &d,
+                   const action_list &w,
+                   const action_list &n,
+                   const action_list &r,
                    const bool r_is_null,
                    comm_entry& comm_table)
     {
@@ -6432,7 +6425,7 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    bool xi(const action_list alpha, const action_list beta, comm_entry& comm_table)
+    bool xi(const action_list &alpha, const action_list &beta, comm_entry& comm_table)
     {
       if (beta.empty())
       {
@@ -6467,7 +6460,7 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    data_expression psi(const action_list alpha_in, comm_entry& comm_table)
+    data_expression psi(const action_list &alpha_in, comm_entry& comm_table)
     {
       action_list alpha=reverse(alpha_in);
       data_expression cond = sort_bool::false_();
@@ -6494,9 +6487,9 @@ class specification_basic_type:public boost::noncopyable
 
     // returns a list of tuples.
     tuple_list makeMultiActionConditionList_aux(
-      const action_list multiaction,
+      const action_list &multiaction,
       comm_entry& comm_table,
-      const action_list r,
+      const action_list &r,
       const bool r_is_null)
     {
       /* This is the function gamma(m,C,r) provided
@@ -6527,15 +6520,15 @@ class specification_basic_type:public boost::noncopyable
     }
 
     tuple_list makeMultiActionConditionList(
-      const action_list multiaction,
-      const communication_expression_list communications)
+      const action_list &multiaction,
+      const communication_expression_list &communications)
     {
       comm_entry comm_table(communications);
       return makeMultiActionConditionList_aux(multiaction,comm_table,action_list(),true);
     }
 
     void communicationcomposition(
-      const communication_expression_list communications,
+      const communication_expression_list &communications,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
 
@@ -6657,9 +6650,9 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool check_real_variable_occurrence(
-      const variable_list sumvars,
-      const data_expression actiontime,
-      const data_expression condition)
+      const variable_list &sumvars,
+      const data_expression &actiontime,
+      const data_expression &condition)
     {
       /* Check whether actiontime is an expression
          of the form t1 +...+ tn, where one of the
@@ -6683,12 +6676,12 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression makesingleultimatedelaycondition(
-      const variable_list sumvars,
-      const variable_list freevars,
-      const data_expression condition,
+      const variable_list &sumvars,
+      const variable_list &freevars,
+      const data_expression &condition,
       const bool has_time,
-      const variable timevariable,
-      const data_expression actiontime,
+      const variable &timevariable,
+      const data_expression &actiontime,
       variable_list& used_sumvars)
     {
       /* Generate a condition of the form:
@@ -6765,8 +6758,8 @@ class specification_basic_type:public boost::noncopyable
     data_expression getUltimateDelayCondition(
       const action_summand_vector &action_summands,
       const deadlock_summand_vector &deadlock_summands,
-      const variable_list freevars,
-      const data_expression timevariable,
+      const variable_list &freevars,
+      const data_expression &timevariable,
       variable_list& existentially_quantified_variables)
     {
       assert(existentially_quantified_variables.empty());
@@ -6985,9 +6978,9 @@ class specification_basic_type:public boost::noncopyable
       const deadlock_summand_vector &deadlock_summands1,
       const action_summand_vector &action_summands2,
       const deadlock_summand_vector &deadlock_summands2,
-      const variable_list par1,
-      const variable_list par3,
-      const variable_list parametersOfsumlist2,
+      const variable_list &par1,
+      const variable_list &par3,
+      const variable_list &parametersOfsumlist2,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
 
@@ -7324,7 +7317,7 @@ class specification_basic_type:public boost::noncopyable
     void generateLPEmCRLterm(
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const process_expression t,
+      const process_expression t,    // This process expression cannot be a reference.
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
@@ -7475,7 +7468,7 @@ class specification_basic_type:public boost::noncopyable
     void generateLPEmCRL(
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const process_identifier procIdDecl,
+      const process_identifier &procIdDecl,
       const bool regular,
       variable_list& pars,
       assignment_list& init)
@@ -7509,8 +7502,8 @@ class specification_basic_type:public boost::noncopyable
     /**************** alphaconversion ********************************/
 
     process_expression alphaconversionterm(
-      const process_expression t,
-      const variable_list parameters,
+      const process_expression &t,
+      const variable_list &parameters,
       const std::map < variable, data_expression > &sigma)
     {
       if (is_choice(t))
@@ -7631,7 +7624,7 @@ class specification_basic_type:public boost::noncopyable
       return process_expression();
     }
 
-    void alphaconversion(const process_identifier procId, const variable_list parameters)
+    void alphaconversion(const process_identifier &procId, const variable_list &parameters)
     {
       size_t n=objectIndex(procId);
 
@@ -7666,7 +7659,7 @@ class specification_basic_type:public boost::noncopyable
     /***** determinewhetherprocessescontaintime; **********/
 
     bool containstimebody(
-      const process_expression t,
+      const process_expression &t,
       bool* stable,
       std::set < process_identifier > &visited,
       bool allowrecursion,
@@ -7790,7 +7783,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool containstime_rec(
-      const process_identifier procId,
+      const process_identifier &procId,
       bool* stable,
       std::set < process_identifier > &visited,
       bool& contains_if_then)
@@ -7821,7 +7814,7 @@ class specification_basic_type:public boost::noncopyable
       return (objectdata[n].containstime);
     }
 
-    bool containstimebody(const process_expression t)
+    bool containstimebody(const process_expression &t)
     {
       std::set < process_identifier > visited;
       bool stable;
@@ -7829,7 +7822,7 @@ class specification_basic_type:public boost::noncopyable
       return containstimebody(t,&stable,visited,false,contains_if_then);
     }
 
-    bool determinewhetherprocessescontaintime(const process_identifier procId)
+    bool determinewhetherprocessescontaintime(const process_identifier &procId)
 
     {
       /* This function sets for all reachable processes in the array objectdata
@@ -7850,7 +7843,7 @@ class specification_basic_type:public boost::noncopyable
     /***** determinewhetherprocessescanterminate(init); **********/
 
     bool canterminatebody(
-      const process_expression t,
+      const process_expression &t,
       bool& stable,
       std::set < process_identifier > &visited,
       const bool allowrecursion)
@@ -7971,7 +7964,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool canterminate_rec(
-      const process_identifier procId,
+      const process_identifier &procId,
       bool& stable,
       std::set < process_identifier > &visited)
     {
@@ -7993,14 +7986,14 @@ class specification_basic_type:public boost::noncopyable
       return (objectdata[n].canterminate);
     }
 
-    bool canterminatebody(const process_expression t)
+    bool canterminatebody(const process_expression &t)
     {
       std::set < process_identifier > visited;
       bool stable=false;
       return canterminatebody(t,stable,visited,false);
     }
 
-    void determinewhetherprocessescanterminate(const process_identifier procId)
+    void determinewhetherprocessescanterminate(const process_identifier &procId)
     {
       bool stable=false;
       while (!stable)
@@ -8013,7 +8006,7 @@ class specification_basic_type:public boost::noncopyable
 
     /*****  distinguishmCRLandpCRLprocsAndAddTerminatedAction  ******/
 
-    process_identifier split_process(const process_identifier procId,
+    process_identifier split_process(const process_identifier &procId,
                                      std::map < process_identifier,process_identifier > &visited_id,
                                      std::map < process_expression,process_expression > &visited_proc)
     {
@@ -8063,10 +8056,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression split_body(
-      const process_expression t,
+      const process_expression &t,
       std::map < process_identifier,process_identifier > &visited_id,
       std::map < process_expression,process_expression> &visited_proc,
-      const variable_list parameters)
+      const variable_list &parameters)
     {
       /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and
@@ -8165,7 +8158,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_identifier splitmCRLandpCRLprocsAndAddTerminatedAction(
-      const process_identifier procId)
+      const process_identifier &procId)
     {
       std::map < process_identifier,process_identifier> visited_id;
       std::map < process_expression,process_expression> visited_proc;
@@ -8195,7 +8188,7 @@ class specification_basic_type:public boost::noncopyable
       const std::set <variable> &vars,
       const action_summand_vector &action_summands,
       const deadlock_summand_vector &deadlock_summands,
-      const variable_list parameters)
+      const variable_list &parameters)
     {
       /* In this routine it is checked which free variables
          in vars occur in the summands. Those variables
@@ -8244,8 +8237,8 @@ class specification_basic_type:public boost::noncopyable
   public:
     variable_list SieveProcDataVarsAssignments(
       const std::set <variable> &vars,
-      const assignment_list assignments,
-      const variable_list parameters)
+      const assignment_list &assignments,
+      const variable_list &parameters)
     {
       const std::set < variable > vars_set(vars.begin(),vars.end());
       std::set < variable > vars_result_set;
@@ -8266,7 +8259,7 @@ class specification_basic_type:public boost::noncopyable
     /**************** transform **************************************/
   public:
     void transform(
-      const process_identifier init,
+      const process_identifier &init,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
       variable_list& parameters,

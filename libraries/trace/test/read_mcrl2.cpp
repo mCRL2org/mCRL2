@@ -1,55 +1,13 @@
 #include <boost/test/minimal.hpp>
 #include <exception>
 #include <sstream>
+#include "mcrl2/lps/action_parse.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/core/print.h"
 
 using namespace std;
 using namespace mcrl2::trace;
 
-// data generated from data/abc.mcrl2
-
-
-static char trace_data[] =
-"\x6d\x43\x52\x4c\x32\x54\x72\x61\x63\x65\x01\x00\x00\x8b\xaf\x83"
-"\x00\x13\x37\x12\x3c\x6c\x69\x73\x74\x5f\x63\x6f\x6e\x73\x74\x72"
-"\x75\x63\x74\x6f\x72\x3e\x02\x01\x17\x06\x12\x00\x10\x09\x0c\x0d"
-"\x02\x00\x01\x0c\x3c\x65\x6d\x70\x74\x79\x5f\x6c\x69\x73\x74\x3e"
-"\x00\x01\x01\x05\x66\x61\x6c\x73\x65\x00\x01\x01\x08\x40\x4e\x6f"
-"\x56\x61\x6c\x75\x65\x00\x01\x01\x01\x61\x00\x01\x01\x01\x63\x00"
-"\x01\x01\x05\x41\x63\x74\x49\x64\x02\x01\x03\x03\x05\x07\x04\x02"
-"\x00\x01\x01\x62\x00\x01\x01\x03\x50\x6f\x73\x00\x01\x01\x06\x53"
-"\x6f\x72\x74\x49\x64\x01\x01\x03\x03\x0a\x03\x08\x04\x42\x6f\x6f"
-"\x6c\x00\x01\x01\x04\x74\x72\x75\x65\x00\x01\x01\x06\x41\x63\x74"
-"\x69\x6f\x6e\x02\x01\x03\x01\x06\x02\x00\x01\x04\x4f\x70\x49\x64"
-"\x02\x01\x05\x05\x0b\x02\x11\x03\x0f\x02\x0e\x09\x09\x53\x6f\x72"
-"\x74\x41\x72\x72\x6f\x77\x02\x01\x01\x01\x00\x01\x09\x03\x40\x63"
-"\x31\x00\x01\x01\x08\x44\x61\x74\x61\x41\x70\x70\x6c\x02\x01\x03"
-"\x01\x0d\x01\x00\x05\x40\x63\x44\x75\x62\x00\x01\x01\x04\x70\x61"
-"\x69\x72\x02\x01\x03\x01\x00\x01\x0d\x00\x80\xa0\xc3\x15\x04\x08"
-"\x35\x4d\x50\x59\x44\x24\x63\x20\x8c\x41\x2e\x92\x02\x32\x25\x1a"
-"\x8e\x60\x66\x62\x54\x02\xa4\x4d\x41\x30\xca\x5a\xa4\x04\x44\x36"
-"\x2a\x55\x00\xcf\x25\x3a\xe2\x94";
-
-static size_t trace_data_size = sizeof(trace_data);
-
-static bool read_trace(Trace& t, char* buf, size_t size)
-{
-  stringstream is(ios_base::in | ios_base::out | ios_base::binary);
-  is.write(buf,size);
-
-  try
-  {
-    t.load(is,tfMcrl2);
-  }
-  catch (runtime_error e)
-  {
-    BOOST_ERROR(e.what());
-    return false;
-  }
-
-  return true;
-}
 
 void test_next_action(Trace& t, const char* s)
 {
@@ -65,11 +23,37 @@ void test_next_action(Trace& t, const char* s)
 
 int test_main(int argc, char** argv)
 {
-  Trace t;
+  using namespace mcrl2::data;
+  using namespace mcrl2::lps;
+  using namespace mcrl2::core;
+  mcrl2::data::data_specification data_spec;
+  mcrl2::lps::action_label_list act_decls;
+  act_decls.push_front(action_label(identifier_string("a"),sort_expression_list()));
+  sort_expression_list s;
+  s.push_front(sort_bool::bool_());
+  s.push_front(sort_pos::pos());
+  act_decls.push_front(action_label("b",s));
+  act_decls.push_front(action_label(identifier_string("c"),sort_expression_list()));
+  
+  Trace t(data_spec, act_decls);
+  t.addAction(parse_action("a",act_decls,data_spec));
+  t.addAction(parse_action("b(1,true)",act_decls,data_spec));
+  t.addAction(parse_action("c",act_decls,data_spec));
 
-  BOOST_REQUIRE(read_trace(t,trace_data,trace_data_size));
+  stringstream trace_data;
+  t.save(trace_data);
 
-  BOOST_REQUIRE(t.number_of_actions() == 3);
+  try
+  {
+    t.load(trace_data,tfMcrl2);
+  }
+  catch (runtime_error e)
+  {
+    BOOST_ERROR(e.what());
+    return false;
+  }
+
+  BOOST_CHECK(t.number_of_actions() == 3);
 
   test_next_action(t,"a");
   test_next_action(t,"b(1, true)");
