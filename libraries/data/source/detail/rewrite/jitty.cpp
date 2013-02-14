@@ -715,7 +715,7 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
     subst.reserve(16);
     for (aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {
-      const aterm_list &rule = aterm_cast<const aterm_list>(*strategy_it);
+      const aterm &rule = *strategy_it;
       if (rule.type_is_int())
       {
         const size_t i = (aterm_cast<const aterm_int>(rule)).value()+1;
@@ -733,7 +733,8 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-        const aterm_appl &lhs = aterm_cast<const aterm_appl>(element_at(rule,2));
+        const aterm_list& rule1=aterm_cast<const aterm_list>(rule);
+        const aterm_appl &lhs = aterm_cast<const aterm_appl>(element_at(rule1,2));
         size_t rule_arity = lhs.size();
 
         if (rule_arity > arity)
@@ -755,10 +756,10 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           }
         }
         // assert(number_of_vars<=max_len);
-        if (matches && (element_at(rule,1)==internal_true ||
-                        rewrite_aux(aterm_cast<const aterm_appl>(subst_values(subst,element_at(rule,1))),sigma)==internal_true))
+        if (matches && (element_at(rule1,1)==internal_true ||
+                        rewrite_aux(aterm_cast<const aterm_appl>(subst_values(subst,element_at(rule1,1))),sigma)==internal_true))
         {
-          const aterm_appl &rhs = aterm_cast<const aterm_appl>(element_at(rule,3));
+          const aterm_appl &rhs = aterm_cast<const aterm_appl>(element_at(rule1,3));
 
           if (arity == rule_arity)
           {

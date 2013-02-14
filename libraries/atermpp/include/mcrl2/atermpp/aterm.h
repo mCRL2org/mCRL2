@@ -267,6 +267,11 @@ const ATERM_TYPE_OUT &aterm_cast(const aterm &t)
 {
   BOOST_STATIC_ASSERT((boost::is_base_of<aterm, ATERM_TYPE_OUT>::value));
   BOOST_STATIC_ASSERT((sizeof(ATERM_TYPE_OUT)==sizeof(aterm)));
+#ifndef NDEBUG
+  // This assignment checks whether e has the right type;
+  ATERM_TYPE_OUT t0=(ATERM_TYPE_OUT &)t;
+  // assert(t0); // Prevent warning for not using t;
+#endif
   return (ATERM_TYPE_OUT &)t;
 }
 

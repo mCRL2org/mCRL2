@@ -175,7 +175,7 @@ void tree_test()
     "cons node : tree_with_booleans # tree_with_booleans -> tree_with_booleans; \n"
     ;
 
-  enumerate(tree_specification, "x : tree_with_booleans;", "true", "", 512,true);
+  enumerate(tree_specification, "x : tree_with_booleans;", "true", "",32,true);
 }
 
 void mutually_recursive_test()
@@ -309,7 +309,7 @@ int test_main(int argc, char** argv)
 
   // This test does not seem to terminate after changing the values of the default constructor
   // for some terms. This looks like a bug in the enumerator (Wieger).
-  // mutually_recursive_test();
+  mutually_recursive_test();
 
   equality_substitution_test();
 
