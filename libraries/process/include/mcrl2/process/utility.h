@@ -13,13 +13,50 @@
 #define MCRL2_PROCESS_UTILITY_H
 
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/print.h"
+#include "mcrl2/process/replace.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
 
 namespace process {
+
+inline
+process_expression expand_rhs(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
+{
+  const process_equation& eqn = find_equation(equations, x.identifier());
+  process_expression p = eqn.expression();
+  data::mutable_map_substitution<> sigma;
+  data::assignment_list a = x.assignments();
+  for (data::assignment_list::iterator i = a.begin(); i != a.end(); ++i)
+  {
+    sigma[i->lhs()] = i->rhs();
+  }
+  std::set<data::variable> v = process::find_free_variables(x);
+  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
+  return result;
+}
+
+inline
+process_expression expand_rhs(const process::process_instance& x, const std::vector<process_equation>& equations)
+{
+  const process_equation& eqn = find_equation(equations, x.identifier());
+  process_expression p = eqn.expression();
+  data::mutable_map_substitution<> sigma;
+  data::variable_list d = eqn.formal_parameters();
+  data::data_expression_list e = x.actual_parameters();
+  data::variable_list::iterator di = d.begin();
+  data::data_expression_list::iterator ei = e.begin();
+  for (; di != d.end(); ++di, ++ei)
+  {
+    sigma[*di] = *ei;
+  }
+  std::set<data::variable> v = process::find_free_variables(x);
+  process_expression result = process::replace_variables_capture_avoiding(p, sigma, v);
+  return result;
+}
 
 inline
 multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
@@ -114,6 +151,19 @@ process_expression make_hide(const core::identifier_string_list& I, const proces
   else
   {
     return hide(I, x);
+  }
+}
+
+inline
+process_expression make_block(const core::identifier_string_list& B, const process_expression& x)
+{
+  if (B.empty())
+  {
+    return x;
+  }
+  else
+  {
+    return block(B, x);
   }
 }
 

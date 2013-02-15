@@ -66,7 +66,6 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     std::string print_control_flow_marking() const
     {
       std::ostringstream out;
-      out << "--- control flow marking ---" << std::endl;
       for (std::map<propositional_variable_instantiation, control_flow_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         const control_flow_vertex& v = i->second;
@@ -77,6 +76,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
 
     void compute_control_flow_marking()
     {
+      mCRL2log(log::debug, "control_flow") << "--- compute initial marking ---" << std::endl;
       // initialization
       for (std::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
@@ -84,8 +84,9 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
         std::set<data::variable> fv = v.free_guard_variables();
         std::set<data::variable> dx = propvar_parameters(v.X.name());
         v.marking = data::detail::set_intersection(fv, dx);
-        mCRL2log(log::debug, "control_flow") << "initial marking " << print_control_flow_marking(v) << "\n";
+        mCRL2log(log::debug, "control_flow") << "vertex " << pbes_system::pp(v.X) << " freevars = " << print_variable_set(fv) << " dx = " << print_variable_set(dx) << "\n";
       }
+      mCRL2log(log::debug, "control_flow") << "--- initial control flow marking ---\n" << print_control_flow_marking();
 
       // backwards reachability algorithm
       std::set<control_flow_vertex*> todo;
@@ -94,6 +95,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
         control_flow_vertex& v = i->second;
         todo.insert(&v);
       }
+      mCRL2log(log::debug, "control_flow") << "--- update marking ---" << std::endl;
       while (!todo.empty())
       {
         std::set<control_flow_vertex*>::iterator i = todo.begin();
@@ -107,19 +109,16 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
           control_flow_vertex& u = *(i->source);
           std::size_t last_size = u.marking.size();
           const propositional_variable_instantiation& Xij = i->label;
+          data::data_expression_list e = Xij.parameters();
           std::set<data::variable> dx = propvar_parameters(u.X.name());
+          mCRL2log(log::debug, "control_flow") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << pbes_system::pp(Xij) << " I = " << print_set(I) << " u.marking = " << print_variable_set(u.marking) << std::endl;
           for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
           {
             std::size_t m = *j;
-            data::data_expression_list e = Xij.parameters();
-            data::data_expression_list::const_iterator k = e.begin();
-            for (std::size_t p = 0; p < m; ++p)
-            {
-              ++k;
-            }
-            data::data_expression e_m = *k;
+            data::data_expression e_m = nth_element(e, m);
             std::set<data::variable> fv = pbes_system::find_free_variables(e_m);
             u.marking = data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking);
+            mCRL2log(log::debug, "control_flow") << "  m = " << m << " freevars = " << print_variable_set(fv) << " dx = " << print_variable_set(dx) << "\n";
           }
           if (u.marking.size() > last_size)
           {
@@ -146,7 +145,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     // expands a propositional variable instantiation using the control flow graph
     pbes_expression reset_variable(const propositional_variable_instantiation& x)
     {
-      mCRL2log(log::debug, "control_flow") << "<reset_variable>" << pbes_system::pp(x) << std::endl;
+      mCRL2log(log::debug, "control_flow") << "resetting variable " << pbes_system::pp(x) << std::endl;
       std::vector<pbes_expression> Xij_conjuncts;
       core::identifier_string X = x.name();
       std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
@@ -156,7 +155,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       for (std::set<control_flow_vertex*>::const_iterator q = inst.begin(); q != inst.end(); ++q)
       {
         control_flow_vertex& w = **q;
-        mCRL2log(log::debug, "control_flow") << "  <vertex>" << pbes_system::pp(w.X) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "    vertex X = " << pbes_system::pp(w.X) << std::endl;
         std::vector<data::data_expression> e;
         std::size_t N = w.marked_parameters.size();
         data::data_expression_list::const_iterator s = w.X.parameters().begin();
@@ -168,18 +167,20 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
             data::data_expression v_X_r = *s++;
             condition = data::lazy::and_(condition, data::equal_to(d_X[r], v_X_r));
             e.push_back(v_X_r);
+            mCRL2log(log::debug, "control_flow") << "    X[" << r << "] is a control flow parameter -> " << data::pp(v_X_r) << std::endl;
           }
           else if (w.is_marked_parameter(r))
           {
+            mCRL2log(log::debug, "control_flow") << "    X[" << r << "] is a marked parameter -> " << data::pp(d_X[r]) << std::endl;
             e.push_back(d_X[r]);
           }
           else
           {
+            mCRL2log(log::debug, "control_flow") << "    X[" << r << "] is a default parameter -> " << data::pp(default_value(d_X[r].sort())) << std::endl;
             e.push_back(default_value(d_X[r].sort()));
           }
         }
         propositional_variable_instantiation Xe(X, atermpp::convert<data::data_expression_list>(e));
-        mCRL2log(log::debug, "control_flow") << "  <alternative>" << pbes_system::pp(Xe) << std::endl;
         if (m_simplify)
         {
           condition = m_datar(condition);
@@ -192,6 +193,8 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
         {
           Xij_conjuncts.push_back(imp(condition, Xe));
         }
+        mCRL2log(log::debug, "control_flow") << "    condition = " << data::pp(condition) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "  alternative = " << pbes_system::pp(Xe) << std::endl;
       }
       return pbes_expr::join_and(Xij_conjuncts.begin(), Xij_conjuncts.end());
     }
@@ -199,6 +202,8 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     // generates a PBES from the control flow graph and the marking
     pbes<> reset_variables()
     {
+      mCRL2log(log::debug, "control_flow") << "--- resetting variables ---" << std::endl;
+
       pbes<> result;
       result.initial_state() = m_pbes.initial_state();
       result.data() = m_pbes.data();
@@ -210,7 +215,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       std::vector<pfnf_equation>& equations = m_pbes.equations();
       for (std::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
       {
-        mCRL2log(log::debug, "control_flow") << "<reset equation>" << pbes_system::pp(k->convert()) << std::endl;
+        mCRL2log(log::debug, "control_flow") << "resetting equation: " << print_equation(k->convert()) << std::endl;
         std::vector<pfnf_implication>& implications = k->implications();
         std::vector<pbes_expression> new_implications;
         for (std::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
@@ -233,6 +238,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
         }
         pbes_expression phi = pbes_expr::join_and(new_implications.begin(), new_implications.end());
         pbes_equation eqn = k->apply_implication(phi);
+        mCRL2log(log::debug, "control_flow") << "resetted equation:  " << print_equation(eqn) << std::endl;
         if (!eqn.is_well_typed())
         {
           mCRL2log(log::warning) << "<eqn not well typed>" << pbes_system::pp(eqn) << std::endl;
@@ -244,8 +250,10 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     }
 
     // Applies resetting of variables to the original PBES p.
-    void reset_variables(pbes<>& p)
+    void reset_variables_to_original(pbes<>& p)
     {
+      mCRL2log(log::debug, "control_flow") << "--- resetting variables to the original PBES ---" << std::endl;
+
       // apply the reset variable procedure to all propositional variable instantiations
       pbes_system::pbes_rewrite(p, boost::bind(reset_variable_rewrite, *this, _1));
 
@@ -265,17 +273,17 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       m_simplify = simplify;
 
       compute_control_flow_marking();
-      mCRL2log(log::verbose) << print_control_flow_marking();
+      mCRL2log(log::verbose) << "--- control flow marking ---\n" << print_control_flow_marking();
 
       if (apply_to_original_pbes)
       {
-        return reset_variables();
+        pbes<> result = p;
+        reset_variables_to_original(result);
+        return result;
       }
       else
       {
-        pbes<> result = p;
-        reset_variables(result);
-        return result;
+        return reset_variables();
       }
     }
 };

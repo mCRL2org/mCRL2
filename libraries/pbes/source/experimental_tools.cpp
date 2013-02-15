@@ -36,6 +36,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/pbes/detail/control_flow.h"
+#include "mcrl2/pbes/detail/stategraph.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 
 namespace mcrl2
@@ -243,14 +244,26 @@ void pbespareqelm(const std::string& input_filename,
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
                     bool simplify,
-                    bool apply_to_original
+                    bool apply_to_original,
+                    bool use_pfnf_variant
                    )
 {
   pbes<> p;
   load_pbes(p, input_filename);
   pbes_system::normalize(p);
-  pbes_system::detail::control_flow_algorithm algorithm;
-  pbes<> q = algorithm.run(p, simplify, apply_to_original);
+  pbes<> q;
+
+  if (use_pfnf_variant)
+  {
+    pbes_system::detail::control_flow_algorithm algorithm;
+    q = algorithm.run(p, simplify, apply_to_original);
+  }
+  else
+  {
+    pbes_system::detail::stategraph_algorithm algorithm;
+    q = algorithm.run(p, simplify, apply_to_original);
+  }
+
   q.save(output_filename, true, true);
   if (!q.is_well_typed())
   {

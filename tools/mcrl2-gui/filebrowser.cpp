@@ -117,7 +117,7 @@ void FileBrowser::onOpenFile()
     QString file = m_model.filePath(indexes[0]);
     if (QFileInfo(file).isFile())
     {
-      QDesktopServices::openUrl(QUrl(file));
+      QDesktopServices::openUrl(QUrl::fromLocalFile(file));
     }
   }
 }

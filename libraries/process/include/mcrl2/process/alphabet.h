@@ -18,7 +18,9 @@
 #include <sstream>
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
+#include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
+#include "mcrl2/process/detail/expand_process_instance_assignments.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
@@ -51,6 +53,11 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
   {
     return push_allow(x.operand(), x.allow_set(), equations);
   }
+
+  process_expression operator()(const process::block& x)
+  {
+    return push_block(x.block_set(), x.operand(), equations);
+  }
 };
 
 inline
@@ -65,6 +72,7 @@ process_expression alphabet_reduce(const process_expression& x, const std::vecto
 inline
 void alphabet_reduce(process_specification& procspec)
 {
+  expand_process_instance_assignments(procspec);
   procspec.init() = detail::alphabet_reduce(procspec.init(), procspec.equations());
 }
 

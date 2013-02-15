@@ -22,6 +22,64 @@ namespace mcrl2
 namespace lps
 {
 
+namespace detail {
+
+/// \cond INTERNAL_DOCS
+template <template <class> class Builder, class Derived, class Substitution>
+struct add_capture_avoiding_replacement: public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
+{
+  typedef data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::sigma;
+  using super::update_sigma;
+
+  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V)
+    : super(sigma, V)
+  { }
+
+  void operator()(action_summand& x)
+  {
+    data::variable_list v = update_sigma.push(x.summation_variables());
+    x.summation_variables() = v;
+    x.condition() = (*this)(x.condition());
+    (*this)(x.multi_action());
+    x.assignments() = (*this)(x.assignments());
+    update_sigma.pop(v);
+  }
+
+  void operator()(deadlock_summand& x)
+  {
+    data::variable_list v = update_sigma.push(x.summation_variables());
+    x.summation_variables() = v;
+    x.condition() = (*this)(x.condition());
+    (*this)(x.deadlock());
+    update_sigma.pop(v);
+  }
+
+  void operator()(linear_process& x)
+  {
+    data::variable_list v = update_sigma.push(x.process_parameters());
+    x.process_parameters() = v;
+    (*this)(x.action_summands());
+    (*this)(x.deadlock_summands());
+    update_sigma.pop(v);
+  }
+
+  void operator()(specification& x)
+  {
+    std::set<data::variable> v = update_sigma(x.global_variables());
+    x.global_variables() = v;
+    (*this)(x.process());
+    x.action_labels() = (*this)(x.action_labels());
+    x.initial_process() = (*this)(x.initial_process());
+    update_sigma.pop(v);
+  }
+};
+
+} // namespace detail
+
 //--- start generated lps replace code ---//
 template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
@@ -118,6 +176,36 @@ T replace_free_variables(const T& x,
 {
   return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
 }
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+void replace_variables_capture_avoiding(T& x,
+                       Substitution& sigma,
+                       const VariableContainer& sigma_variables,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                      )
+{
+  std::multiset<data::variable> V;
+  lps::find_free_variables(x, std::inserter(V, V.end()));
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_variables_capture_avoiding(const T& x,
+                    Substitution& sigma,
+                    const VariableContainer& sigma_variables,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                   )
+{
+  std::multiset<data::variable> V;
+  lps::find_free_variables(x, std::inserter(V, V.end()));
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+}
 //--- end generated lps replace code ---//
 
 namespace detail {
@@ -211,12 +299,6 @@ template <typename Substitution>
 void replace_process_parameters(specification& spec, Substitution sigma)
 {
   lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(spec);
-
-  // This does not work!
-  //linear_process& p = spec.process();
-  //p.process_parameters() = data::replace_free_variables(p.process_parameters(), sigma);
-  //lps::replace_free_variables(p.action_summands(), sigma);
-  //lps::replace_free_variables(p.deadlock_summands(), sigma);
 }
 
 /// \brief Applies a substitution to the process parameters of the specification spec.

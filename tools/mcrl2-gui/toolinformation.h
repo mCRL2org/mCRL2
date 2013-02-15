@@ -12,6 +12,7 @@
 
 #include <QString>
 #include <QList>
+#include <QSet>
 #include <QObject>
 #include <QProcess>
 #include <QWidget>
@@ -96,7 +97,8 @@ class ToolInformation
     bool hasOutput() { return !output.isEmpty(); }
     bool hasSecondInput() { return !input2.isEmpty(); }
 
-    QString path, name, input, input2, output, desc, author;
+    QString path, name, input2, output, desc, author;
+    QSet<QString> input;
     bool guiTool, valid;
 
     QList<ToolOption> options;

@@ -1,3 +1,4 @@
+import sys
 from mcrl2_classes import *
 from mcrl2_utility import *
 
@@ -214,30 +215,30 @@ def is_modifiable(type):
 def extract_namespace(classname):
     return re.sub('::.*', '', classname)
 
-def generate_traverser_overloads(classnames, function, return_type, result):
+def generate_traverser_overloads(classnames, function, return_type, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         text = re.sub('>>', '> >', '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (return_type, function, classname, namespace, function, classname))
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
-def generate_builder_overloads(classnames, function, result):
+def generate_builder_overloads(classnames, function, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         if is_modifiable(classname):
             text = 'void %s(%s& x) { %s::%s< %s >(x); }\n' % (function, classname, namespace, function, classname)
         else:
             text = '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (classname, function, classname, namespace, function, classname)
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
 # special because of additional variable argument
-def generate_search_variable_overloads(classnames, function, return_type, result):
+def generate_search_variable_overloads(classnames, function, return_type, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         text = re.sub('>>', '> >', '%s %s(const %s& x, const data::variable& v) { return %s::%s< %s >(x, v); }\n' % (return_type, function, classname, namespace, function, classname))
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
 # special because of additional data_specification argument
-def generate_normalize_sorts_overloads(classnames, result):
+def generate_normalize_sorts_overloads(classnames, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         if is_modifiable(classname):
@@ -247,50 +248,49 @@ def generate_normalize_sorts_overloads(classnames, result):
         if has_specification(classname):
             text = re.sub('x, dataspec', 'x, x.data()', text)
             text = re.sub('& dataspec', '& /* dataspec */', text)
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
-result = {}
+code_map = {}
 for namespace in file_map:
-    result[namespace] = []
+    code_map[namespace] = []
 
 classnames = PP_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'pp', 'std::string', result)
+generate_traverser_overloads(classnames, 'pp', 'std::string', code_map)
 
 classnames = NORMALIZE_SORTS_CLASSNAMES.strip().split()
-generate_normalize_sorts_overloads(classnames, result)
+generate_normalize_sorts_overloads(classnames, code_map)
 
 classnames = TRANSLATE_USER_NOTATION_CLASSNAMES.strip().split()
-generate_builder_overloads(classnames, 'translate_user_notation', result)
+generate_builder_overloads(classnames, 'translate_user_notation', code_map)
 
 classnames = FIND_SORT_EXPRESSIONS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_sort_expressions', 'std::set<data::sort_expression>', result)
+generate_traverser_overloads(classnames, 'find_sort_expressions', 'std::set<data::sort_expression>', code_map)
 
 classnames = FIND_VARIABLES_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_variables', 'std::set<data::variable>', result)
+generate_traverser_overloads(classnames, 'find_variables', 'std::set<data::variable>', code_map)
 
 classnames = FIND_FREE_VARIABLES_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_free_variables', 'std::set<data::variable>', result)
+generate_traverser_overloads(classnames, 'find_free_variables', 'std::set<data::variable>', code_map)
 
 classnames = FIND_FUNCTION_SYMBOLS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_function_symbols', 'std::set<data::function_symbol>', result)
+generate_traverser_overloads(classnames, 'find_function_symbols', 'std::set<data::function_symbol>', code_map)
 
 classnames = FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_propositional_variable_instantiations', 'std::set<pbes_system::propositional_variable_instantiation>', result)
+generate_traverser_overloads(classnames, 'find_propositional_variable_instantiations', 'std::set<pbes_system::propositional_variable_instantiation>', code_map)
 
 classnames = FIND_IDENTIFIERS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', result)
+generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', code_map)
 
 classnames = FIND_NIL_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_nil', 'bool', result)
+generate_traverser_overloads(classnames, 'find_nil', 'bool', code_map)
 
 classnames = SEARCH_VARIABLE_CLASSNAMES.strip().split()
-generate_search_variable_overloads(classnames, 'search_variable', 'bool', result)
+generate_search_variable_overloads(classnames, 'search_variable', 'bool', code_map)
 
-for namespace in result:
+result = True
+for namespace in code_map:
     filename = file_map[namespace]
-    text = ''.join(result[namespace])
+    text = ''.join(code_map[namespace])
     label = 'generated %s overloads' % namespace
-    insert_text_in_file(filename, text, label)
-
-    print '--- %s ---' % namespace
-    print re.sub(' \{.*\}', ';', text)
+    result = insert_text_in_file(filename, text, label) and result
+sys.exit(not result) # 0 result indicates successful execution

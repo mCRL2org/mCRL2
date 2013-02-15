@@ -530,6 +530,13 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{ x: Pos | !g(x) && x in {1, 2} } * { x: Pos | !f(x) && x in {3} }");
 }
 
+BOOST_AUTO_TEST_CASE(test_precedence)
+{
+  data::data_expression x = parse_data_expression("exists b:Bool. true");
+  BOOST_CHECK(is_exists(x));
+  BOOST_CHECK(precedence(x) == 1);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

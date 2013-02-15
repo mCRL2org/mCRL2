@@ -22,6 +22,60 @@ namespace mcrl2
 namespace pbes_system
 {
 
+namespace detail {
+
+/// \cond INTERNAL_DOCS
+template <template <class> class Builder, class Derived, class Substitution>
+struct add_capture_avoiding_replacement: public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
+{
+  typedef data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::sigma;
+  using super::update_sigma;
+
+  pbes_expression operator()(const forall& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    pbes_expression result = forall(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
+  }
+
+  pbes_expression operator()(const exists& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    pbes_expression result = exists(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
+  }
+
+  void operator()(pbes_equation& x)
+  {
+    data::variable_list v = update_sigma.push(x.variable().parameters());
+    x.variable() = propositional_variable(x.variable().name(), v);
+    x.formula() = (*this)(x.formula());
+    update_sigma.pop(v);
+  }
+
+  template <typename Container>
+  void operator()(pbes<Container>& x)
+  {
+    std::set<data::variable> v = update_sigma(x.global_variables());
+    x.global_variables() = v;
+    (*this)(x.equations());
+    update_sigma.pop(v);
+  }
+
+  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V)
+    : super(sigma, V)
+  { }
+};
+/// \endcond
+
+} // namespace detail
+
 //--- start generated pbes_system replace code ---//
 template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
@@ -77,7 +131,7 @@ T replace_variables(const T& x,
                     Substitution sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
-{   
+{
   return core::make_update_apply_builder<pbes_system::data_expression_builder>(sigma)(x);
 }
 
@@ -117,6 +171,36 @@ T replace_free_variables(const T& x,
                         )
 {
   return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+void replace_variables_capture_avoiding(T& x,
+                       Substitution& sigma,
+                       const VariableContainer& sigma_variables,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                      )
+{
+  std::multiset<data::variable> V;
+  pbes_system::find_free_variables(x, std::inserter(V, V.end()));
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x
+/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_variables_capture_avoiding(const T& x,
+                    Substitution& sigma,
+                    const VariableContainer& sigma_variables,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                   )
+{
+  std::multiset<data::variable> V;
+  pbes_system::find_free_variables(x, std::inserter(V, V.end()));
+  V.insert(sigma_variables.begin(), sigma_variables.end());
+  return data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
 //--- end generated pbes_system replace code ---//
 

@@ -14,11 +14,6 @@ ${declare longest_match}
 
 //--- Sort expressions and sort declarations
 
-SortExpr
-  : SimpleSortExpr
-  | ComplexSortExpr
-  ;
-
 SimpleSortExpr
   : 'Bool'                                                          // booleans
   | 'Pos'                                                           // positive numbers
@@ -33,9 +28,13 @@ SimpleSortExpr
   | 'struct' ConstrDeclList                                         // structured sort
   ;
 
-ComplexSortExpr: SortExprList '->' SortExpr ;
+SortExpr
+  : SimpleSortExpr
+  | HashArgs '->' SortExpr ;
 
 SortExprList: (SortExpr '#')* SortExpr ;
+
+HashArgs: SimpleSortExpr ('#' SimpleSortExpr)* ;
 
 SortSpec: 'sort' SortDecl+ ;
 

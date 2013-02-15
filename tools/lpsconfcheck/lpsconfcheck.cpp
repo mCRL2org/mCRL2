@@ -39,8 +39,8 @@ using namespace mcrl2::log;
 /// More information about the tool and the classes used can be found in the corresponding man files.
 
 /// \brief The class confcheck_tool uses an instance of the class Confluence_Checker to check which
-/// \brief tau-summands of an LPS are confluent. The tau-actions of all confluent tau-summands can be
-/// \brief renamed to ctau, depending on the flag m_no_marking.
+/// \brief tau-summands of an LPS are confluent. The tau-actions of all confluent tau-summands are
+/// \brief renamed to ctau
 
 class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 {
@@ -63,9 +63,6 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     /// \brief The flag indicating whether or not the invariance of the formula as found in the file
     /// \brief m_invariant_filename is checked.
     bool m_no_check;
-
-    /// \brief The flag indicating whether or not the tau-actions of the confluent summands should be renamed to ctau.
-    bool m_no_marking;
 
     /// \brief The flag indicating whether or not the confluence of a tau-summand regarding all other summands is checked.
     bool m_check_all;
@@ -96,7 +93,6 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       super::parse_options(parser);
 
       m_no_check            = 0 < parser.options.count("no-check");
-      m_no_marking          = 0 < parser.options.count("no-marking");
       m_generate_invariants = 0 < parser.options.count("generate-invariants");
       m_check_all           = 0 < parser.options.count("check-all");
       m_counter_example     = 0 < parser.options.count("counter-example");
@@ -178,7 +174,6 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       m_summand_number(0),
       m_generate_invariants(false),
       m_no_check(false),
-      m_no_marking(false),
       m_check_all(false),
       m_counter_example(false),
       m_dot_file_name(""),
@@ -221,15 +216,12 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
         Confluence_Checker v_confluence_checker(
           specification, rewrite_strategy(),
           m_time_limit, m_path_eliminator, solver_type(),
-          m_apply_induction, m_no_marking, m_check_all,
+          m_apply_induction, m_check_all,
           m_counter_example, m_generate_invariants, m_dot_file_name);
 
         specification = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
 
-        if (!m_no_marking)
-        {
-          specification.save(m_output_filename);
-        }
+        specification.save(m_output_filename);
       }
 
       return true;

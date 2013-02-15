@@ -160,7 +160,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     }
   }
 
-  void leave(const process::delta& x)
+  void leave(const process::delta& /*x*/)
   {
     push(multi_action_name_set());
   }
