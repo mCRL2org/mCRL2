@@ -15,6 +15,7 @@
 #include <iostream>
 #include "mcrl2/data/find.h"
 #include "mcrl2/modal_formula/traverser.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -70,6 +71,7 @@ struct bottom_up_traverser: public Traverser<Derived>
   void push(const Node& node)
   {
     node_stack.push_back(node);
+    mCRL2log(log::debug, "state_formulas") << "<push>" << node << std::endl;
   }
 
   // Pop the top element of node_stack and return it
@@ -139,12 +141,12 @@ struct maximal_closed_subformula_node: public free_variables_node
 
 std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node& node)
 {
-  out << "<variables>";
+  out << "<node>variables = ";
   for (std::set<data::variable>::const_iterator i = node.variables.begin(); i != node.variables.end(); ++i)
   {
     out << data::pp(*i) << " ";
   }
-  out << "\n<formulas>";
+  out << " formulas = ";
   for (std::set<state_formulas::state_formula>::const_iterator i = node.formulas.begin(); i != node.formulas.end(); ++i)
   {
     out << state_formulas::pp(*i) << " ";

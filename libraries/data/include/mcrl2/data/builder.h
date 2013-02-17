@@ -21,6 +21,7 @@
 #include "mcrl2/data/identifier.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/where_clause.h"
+#include "mcrl2/data/alias.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/nat.h"
@@ -191,6 +192,14 @@ struct add_sort_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     data::structured_sort_constructor result = data::structured_sort_constructor(x.name(), static_cast<Derived&>(*this)(x.arguments()), x.recogniser());
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  data::alias operator()(const data::alias& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::alias result = data::alias(x.name(), static_cast<Derived&>(*this)(x.reference()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

@@ -368,16 +368,16 @@ def main():
 
     if options.soundness_checks:
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
-        result = generate_soundness_check_functions(rules, filename, ignored_phases) and result
+        result = generate_soundness_check_functions(rules, filename) and result
 
     if options.libstruct:
         filename = '../include/mcrl2/core/detail/struct_core.h'
-        result = generate_libstruct_functions(rules, filename, ignored_phases) and result
+        result = generate_libstruct_functions(rules, filename) and result
         postprocess_libstruct(filename)
 
     if options.constructors:
         filename = '../include/mcrl2/core/detail/constructors.h'
-        result = generate_constructor_functions(rules, filename, ignored_phases) and result
+        result = generate_constructor_functions(rules, filename) and result
 
     if not options.soundness_checks and not options.libstruct and not options.constructors:
         parser.print_help()

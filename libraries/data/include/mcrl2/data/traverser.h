@@ -178,6 +178,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const data::alias& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.reference());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const data::data_equation& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -783,6 +790,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this)(x.name());
     static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this)(x.recogniser());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const data::alias& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.name());
+    static_cast<Derived&>(*this)(x.reference());
     static_cast<Derived&>(*this).leave(x);
   }
 

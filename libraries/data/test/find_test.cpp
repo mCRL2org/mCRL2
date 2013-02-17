@@ -96,6 +96,14 @@ int test_main(int argc, char* argv[])
   std::set<variable> vV = find_variables(V);
   BOOST_CHECK(vS == vV);
 
+  //--- find_free_variables ---//
+  v = find_free_variables(x);
+  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
+  BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
+  BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
+  v = find_free_variables(data_expression(n1));
+  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
+
   //--- find_sort_expressions ---//
   std::set<sort_expression> e = find_sort_expressions(q1);
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_nat::nat())   != e.end());
