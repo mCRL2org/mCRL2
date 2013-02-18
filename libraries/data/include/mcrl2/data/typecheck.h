@@ -63,30 +63,30 @@ void type_check(data_expression& data_expr,
   // TODO: replace all this nonsense code by a proper type check implementation
   atermpp::aterm_appl t = data_expr;
 
-  atermpp::table variables;
+  std::map<atermpp::aterm_appl,sort_expression> variables;
   for (VariableIterator v = first; v != last; ++v)
   {
     // The application of atermpp::aterm_string is necessary to take care that
     // the name of the variable is quoted, which is what the typechecker expects.
-    variables.put(atermpp::aterm_string(v->name()),v->sort());
+    variables[atermpp::aterm_string(v->name())]=v->sort();
   }
 
   // The typechecker replaces untyped identifiers by typed identifiers (when typechecking
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
-  t = core::type_check_data_expr(t, atermpp::aterm_appl(), mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
-  if (t == atermpp::aterm())
+  try
+  { 
+    t = core::type_check_data_expr(t, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
+  }
+  catch (mcrl2::runtime_error &e) 
   {
     const data_expression d=data_expr;
     data_expr = data_expression();
-    throw mcrl2::runtime_error("could not type check data expression " + core::pp_deprecated(d));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check data expression " + core::pp_deprecated(d));
   }
-  else
-  {
-    data_expr = data_expression(t);
+  data_expr = data_expression(t);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
-    assert(!search_sort_expression(data_expr, unknown_sort()));
+  assert(!search_sort_expression(data_expr, unknown_sort()));
 #endif
-  }
 }
 
 /** \brief     Type check a data expression.

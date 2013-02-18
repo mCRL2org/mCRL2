@@ -13,7 +13,6 @@
 #define PARSER_TYPECHECK_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/table.h"
 #include "mcrl2/data/data_expression.h" // Bad inclusion. Headers should be moved to data/include.
 
 namespace mcrl2
@@ -31,8 +30,7 @@ using namespace atermpp;
  *  \return    If type checking went well, an equivalent version of
  *             data_spec is returned that adheres to the internal aterm
  *             structure after type checking. If something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_data_spec(aterm_appl data_spec);
 
@@ -44,8 +42,7 @@ aterm_appl type_check_data_spec(aterm_appl data_spec);
  *  \return    If type checking went well, an equivalent version of
  *             proc_spec is returned that adheres to the internal aterm
  *             structure after type checking. If something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_proc_spec(aterm_appl proc_spec);
 
@@ -59,8 +56,7 @@ aterm_appl type_check_proc_spec(aterm_appl proc_spec);
  *  \return    If type checking went well, an equivalent version of
  *             pbes_spec is returned that adheres to the internal aterm
  *             structure after type checking. If something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_pbes_spec(aterm_appl pbes_spec);
 
@@ -77,8 +73,7 @@ aterm_appl type_check_pbes_spec(aterm_appl pbes_spec);
  *  \return    If type checking went well, an equivalent version of
  *             sort_expr is returned that adheres to the internal aterm
  *             structure after type checking. if something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec);
 
@@ -88,26 +83,23 @@ aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec);
  *  \param[in] data_expr An aterm representation of an mCRL2 data
  *             expression that adheres to the initial internal aterm
  *             structure.
- *  \param[in] sort_expr An aterm representation of an mCRL2 sort
- *             expression that adheres to the internal aterm structure
- *             after type checking, or NULL.
  *  \param[in] spec An aterm representation of an mCRL2 process specification,
  *             LPS, PBES or data specification that adheres to the
  *             internal aterm structure after type checking.
- *  \param[in] Vars A table of variables that may occur in the data expression, where:
- *             \li each key is an mCRL2 identifier
- *             \li each value is an mCRL2 sort expression that adheres to
+ *  \param[in] Vars A map of variables that may occur in the data expression, where:
+ *             \li each lhs is an mCRL2 identifier
+ *             \li each rhs is an mCRL2 sort expression that adheres to
  *                 the internal aterm structure after type checking
  *  \post      data_expr is type checked using the declaration from spec
- *             and, if sort_expr is not NULL, it is type checked as
+ *             and, if sort_expr is returned, it is type checked as
  *             being of type sort_expr.
  *  \return    If type checking went well, an equivalent version of
  *             data_expr is returned that adheres to the internal aterm
  *             structure after type checking.  If something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_appl type_check_data_expr(const data::data_expression& data_expr, aterm_appl sort_expr, aterm_appl spec, const table &Vars=table());
+aterm_appl type_check_data_expr(const data::data_expression& data_expr, aterm_appl spec, 
+                                const std::map<atermpp::aterm_appl,data::sort_expression> &Vars=std::map<atermpp::aterm_appl,data::sort_expression>());
 
 
 /** \brief     Type check a parsed mCRL2 multiaction with respect to a
@@ -121,8 +113,7 @@ aterm_appl type_check_data_expr(const data::data_expression& data_expr, aterm_ap
  *  \return    If type checking went well, an equivalent version of
  *             mult_act is returned that adheres to the internal aterm
  *             structure after type checking.  If something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_mult_act(
   aterm_appl mult_act,
@@ -160,8 +151,7 @@ aterm_list type_check_mult_actions(
  *  \return    If type checking went well, an equivalent version of
  *             proc_expr is returned that adheres to the internal aterm
  *             structure after type checking.  If something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_proc_expr(aterm_appl proc_expr, aterm_appl spec);
 
@@ -177,8 +167,7 @@ aterm_appl type_check_proc_expr(aterm_appl proc_expr, aterm_appl spec);
  *  \return    If type checking went well, an equivalent version of
  *             state_formula is returned that adheres to the internal
  *             aterm structure after type checking.  If something went
- *             wrong, an appropriate error message is printed and NULL
- *             is returned.
+ *             wrong, an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_state_frm(aterm_appl state_formula, aterm_appl spec);
 
@@ -195,8 +184,7 @@ aterm_appl type_check_state_frm(aterm_appl state_formula, aterm_appl spec);
  *  \return    If type checking went well, an equivalent version of
  *             ar_spec is returned that adheres to the internal aterm
  *             structure after type checking.  If something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl spec);
 
@@ -213,8 +201,7 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl spec);
  *  \return    If type checking went well, an equivalent version of
  *             data_vars is returned that adheres to the internal aterm
  *             structure after type checking. if something went wrong,
- *             an appropriate error message is printed and NULL is
- *             returned.
+ *             an mcrl2::runtime_error exception is raised.
  **/
 aterm_list type_check_data_vars(aterm_list data_vars, aterm_appl spec);
 
