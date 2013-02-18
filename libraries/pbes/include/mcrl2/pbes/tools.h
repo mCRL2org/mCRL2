@@ -117,13 +117,8 @@ void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
                     bool simplify,
                     bool apply_to_original,
-                    bool use_pfnf_variant
-                   );
-
-void qbesstategraph(const std::string& input_filename,
-                    const std::string& output_filename,
-                    bool simplify,
-                    bool apply_to_original
+                    bool use_pfnf_variant,
+                    bool use_local_variant
                    );
 
 } // namespace pbes_system

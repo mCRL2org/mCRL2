@@ -245,7 +245,8 @@ void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
                     bool simplify,
                     bool apply_to_original,
-                    bool use_pfnf_variant
+                    bool use_pfnf_variant,
+                    bool use_local_variant
                    )
 {
   pbes<> p;
@@ -253,6 +254,10 @@ void pbesstategraph(const std::string& input_filename,
   pbes_system::normalize(p);
   pbes<> q;
 
+  if (use_local_variant)
+  {
+    throw mcrl2::runtime_error("the local variant of pbesstategraph has not been implemented yet!");
+  }
   if (use_pfnf_variant)
   {
     pbes_system::detail::control_flow_algorithm algorithm;

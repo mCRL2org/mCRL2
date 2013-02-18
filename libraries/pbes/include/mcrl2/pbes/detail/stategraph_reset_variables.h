@@ -49,7 +49,7 @@ class stategraph_reset_variables_algorithm;
 pbes_expression stategraph_reset_variable_rewrite(stategraph_reset_variables_algorithm& algorithm, const pbes_expression& x);
 
 /// \brief Adds the reset variables procedure to the stategraph algorithm
-class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
+class stategraph_reset_variables_algorithm: public stategraph_graph_global_algorithm
 {
   protected:
     // if true, the resulting PBES is simplified

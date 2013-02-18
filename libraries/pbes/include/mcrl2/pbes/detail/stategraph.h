@@ -29,7 +29,7 @@ class stategraph_algorithm: public stategraph_reset_variables_algorithm
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
     pbes<> run(const pbes<>& p, bool simplify = true, bool apply_to_original_pbes = false)
     {
-      stategraph_graph_algorithm::run(p);
+      stategraph_graph_global_algorithm::run(p);
       return stategraph_reset_variables_algorithm::run(p, simplify, apply_to_original_pbes);
     }
 };

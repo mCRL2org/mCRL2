@@ -51,9 +51,6 @@ class stategraph_graph_algorithm
     typedef control_flow_graph::vertex_iterator vertex_iterator;
 
   protected:
-    // the control flow graph
-    control_flow_graph m_control_flow_graph;
-
     // the pbes that is considered
     stategraph_pbes m_pbes;
 
@@ -344,6 +341,39 @@ class stategraph_graph_algorithm
       return propositional_variable_instantiation(X.name(), data::replace_free_variables(X.parameters(), sigma));
     }
 
+  public:
+
+    /// \brief Computes the control flow graph
+    void run(const pbes<>& p)
+    {
+      m_pbes = stategraph_pbes(p);
+      m_datar = data::rewriter(p.data());
+      simplify(m_pbes);
+
+      stategraph_influence_graph_algorithm ialgo(m_pbes);
+      ialgo.run();
+
+      //stategraph_destination_algorithm sdalgo(m_pbes);
+      stategraph_source_algorithm sdalgo(m_pbes);
+      sdalgo.compute_source();
+      mCRL2log(log::debug) << sdalgo.print_source();
+      sdalgo.rewrite_propositional_variables();
+
+      //sdalgo.compute_destination();
+      //mCRL2log(log::debug) << sdalgo.print_destination();
+    }
+};
+
+/// \brief Algorithm class for the global variant of the stategraph algorithm
+class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
+{
+  public:
+    typedef stategraph_graph_algorithm super;
+
+  protected:
+    // the control flow graph
+    control_flow_graph m_control_flow_graph;
+
     void compute_stategraph_graph()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute state graph ===" << std::endl;
@@ -425,21 +455,7 @@ class stategraph_graph_algorithm
     /// \brief Computes the control flow graph
     void run(const pbes<>& p)
     {
-      m_pbes = stategraph_pbes(p);
-      m_datar = data::rewriter(p.data());
-      simplify(m_pbes);
-
-      stategraph_influence_graph_algorithm ialgo(m_pbes);
-      ialgo.run();
-
-      //stategraph_destination_algorithm sdalgo(m_pbes);
-      stategraph_source_algorithm sdalgo(m_pbes);
-      sdalgo.compute_source();
-      mCRL2log(log::debug) << sdalgo.print_source();
-      sdalgo.rewrite_propositional_variables();
-
-      //sdalgo.compute_destination();
-      //mCRL2log(log::debug) << sdalgo.print_destination();
+      super::run(p);
 
       compute_stategraph_graph();
       mCRL2log(log::verbose) << m_control_flow_graph.print();
