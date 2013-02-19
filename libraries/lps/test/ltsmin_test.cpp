@@ -183,9 +183,81 @@ static void test_ltsmin(const std::string& rewriter_strategy)
 #endif
 }
 
+template <typename Iter>
+std::string print_vector(Iter first, Iter last)
+{
+  std::ostringstream out;
+  out << "[";
+  for (Iter i = first; i != last; ++i)
+  {
+    if (i != first)
+    {
+      out << ", ";
+    }
+    out << *i;
+  }
+  out << "]";
+  return out.str();
+}
+
+template <typename Container>
+std::string print_vector(const Container& c)
+{
+  return print_vector(c.begin(), c.end());
+}
+
+std::string read_groups(const lps::pins& p)
+{
+  std::ostringstream out;
+  for (std::size_t i = 0; i < p.group_count(); i++)
+  {
+    out << print_vector(p.read_group(i)) << std::endl;
+  }
+  return out.str();
+}
+
+std::string write_groups(const lps::pins& p)
+{
+  std::ostringstream out;
+  for (std::size_t i = 0; i < p.group_count(); i++)
+  {
+    out << print_vector(p.write_group(i)) << std::endl;
+  }
+  return out.str();
+}
+
+void test_dependency_matrix()
+{
+  std::string ONEBIT =
+    "proc P(b: Bool) =          \n"
+    "       tau . P(b = false); \n"
+    "                           \n"
+    "init P(true);              \n"
+    ;
+
+  lps::specification spec = lps::parse_linear_process_specification(ONEBIT);
+  std::string filename = "temporary_onebit.lps";
+  spec.save(filename);
+  lps::pins p(filename, "jitty");
+
+  for (std::size_t i = 0; i < p.group_count(); i++)
+  {
+    std::cout << "\n";
+    std::cout << " read_group(" << i << ") = " << print_vector(p.read_group(i)) << std::endl;
+    std::cout << "write_group(" << i << ") = " << print_vector(p.write_group(i)) << std::endl;
+  }
+  BOOST_CHECK(print_vector(p.read_group(0)) == "[]");
+  BOOST_CHECK(print_vector(p.write_group(0)) == "[0]");
+
+  // cleanup temporary files
+  std::remove(filename.c_str());
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+
+  test_dependency_matrix();
 
   test_ltsmin("jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
