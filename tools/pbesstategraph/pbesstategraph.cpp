@@ -45,7 +45,7 @@ class pbes_stategraph_tool: public input_output_tool
       desc.add_option("simplify", make_optional_argument("NAME", "1"), "simplify the PBES during reduction", 's');
       desc.add_option("apply-to-original", make_optional_argument("NAME", "0"), "apply reduction on the original PBES", 'a');
       desc.add_option("use-pfnf-variant", make_optional_argument("NAME", "0"), "first convert the PBES into PFNF format", 'p');
-      desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'p');
+      desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
     }
 
   public:
