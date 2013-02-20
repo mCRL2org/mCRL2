@@ -65,8 +65,6 @@ BOOST_AUTO_TEST_CASE(test_rename)
 
   BOOST_CHECK(pp(formula) == "(mu X1. X1) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X1. X1)");
 
-  std::cerr << "formula: " << pp(formula) << std::endl;
-
   generator = data::set_identifier_generator();
   generator.add_identifiers(lps::find_identifiers(spec));
   formula = parse_state_formula("mu X. mu X. X", spec, false);
@@ -293,6 +291,7 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
   BOOST_CHECK(v.size() == 1);
 
   f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", spec);
+std::cerr << "FORMULA " << f << "\n";
   v = maximal_closed_subformulas(f);
   BOOST_CHECK(v.size() == 1);
 

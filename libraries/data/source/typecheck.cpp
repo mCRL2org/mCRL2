@@ -100,8 +100,8 @@ static Context context;
 typedef struct
 {
   aterm_list equations;
-  table proc_pars;         //name#type -> List(Vars)
-  table proc_bodies;       //name#type -> rhs
+  std::map <aterm_appl,variable_list> proc_pars; // process_identifier -> variable_list
+  std::map <aterm_appl,aterm_appl> proc_bodies;  // process_identifier -> rhs
 } Body;
 static Body body;
 
@@ -478,7 +478,7 @@ aterm_appl type_check_proc_spec(aterm_appl proc_spec)
   data_spec=data_spec.set_argument(gsMakeDataEqnSpec(body.equations),3);
   Result=proc_spec.set_argument(data_spec,0);
   Result=Result.set_argument(gsMakeProcEqnSpec(gstcWriteProcs(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(proc_spec[3])[0]))),3);
-  Result=Result.set_argument(gsMakeProcessInit(aterm_cast<aterm_appl>(body.proc_bodies.get(INIT_KEY()))),4);
+  Result=Result.set_argument(gsMakeProcessInit(aterm_cast<aterm_appl>(body.proc_bodies[INIT_KEY()])),4);
 
   Result=gstcFoldSortRefs(Result);
 
@@ -1010,7 +1010,7 @@ aterm_appl type_check_pbes_spec(aterm_appl pbes_spec)
   pb_eqn_spec=pb_eqn_spec.set_argument(gstcWritePBES(aterm_cast<aterm_list>(pb_eqn_spec[0])),0);
   Result=Result.set_argument(pb_eqn_spec,2);
 
-  pb_init=pb_init.set_argument(aterm_cast<aterm_appl>(body.proc_bodies.get(INIT_KEY())),0);
+  pb_init=pb_init.set_argument(aterm_cast<aterm_appl>(body.proc_bodies[INIT_KEY()]),0);
   Result=Result.set_argument(pb_init,3);
 
   Result=gstcFoldSortRefs(Result);
@@ -1237,7 +1237,6 @@ void gstcDataInit(void)
 // std::cerr << "STD DATA INIT -----------------------------------------------------------------------------------------------------\n";
   gssystem.constants.clear();
   gssystem.functions.clear();
-  // context.basic_sorts=indexed_set(63,50);
   context.basic_sorts.clear();
   context.defined_sorts.clear();
   context.constants.clear();
@@ -1246,8 +1245,8 @@ void gstcDataInit(void)
   context.processes.clear();
   context.PBs.clear();
   context.glob_vars.clear();
-  body.proc_pars=table(63,50);
-  body.proc_bodies=table(63,50);
+  body.proc_pars.clear();
+  body.proc_bodies.clear();
   body.equations = aterm_list();
 
   //Creation of operation identifiers for system defined operations.
@@ -1965,11 +1964,11 @@ static void gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
       throw mcrl2::runtime_error("the formal variables in process " + pp(Proc) + " are not unique");
     }
 
-    body.proc_pars.put(aterm_cast<aterm_appl>(Proc[0]),aterm_cast<aterm_list>(Proc[1]));
-    body.proc_bodies.put(aterm_cast<aterm_appl>(Proc[0]),aterm_cast<aterm_appl>(Proc[2]));
+    body.proc_pars[aterm_cast<aterm_appl>(Proc[0])]=aterm_cast<variable_list>(Proc[1]);
+    body.proc_bodies[aterm_cast<aterm_appl>(Proc[0])]=aterm_cast<aterm_appl>(Proc[2]);
   }
-  body.proc_pars.put(INIT_KEY(),aterm_list());
-  body.proc_bodies.put(INIT_KEY(),Init);
+  body.proc_pars[INIT_KEY()]=variable_list();
+  body.proc_bodies[INIT_KEY()]=Init;
 
 }
 
@@ -1982,12 +1981,12 @@ static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
     aterm_appl PBEqn=ATAgetFirst(PBEqns);
     aterm_appl PBName=aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(PBEqn[1])[0]);
 
-    aterm_list PBVars=aterm_cast<aterm_list>(aterm_cast<aterm_appl>(PBEqn[1])[1]);
+    const variable_list &PBVars=aterm_cast<variable_list>(aterm_cast<aterm_appl>(PBEqn[1])[1]);
 
     sort_expression_list PBType;
-    for (aterm_list l=PBVars; !l.empty(); l=l.tail())
+    for (variable_list::const_iterator l=PBVars.begin(); l!=PBVars.end(); ++l)
     {
-      PBType.push_front(aterm_cast<aterm_appl>(ATAgetFirst(l)[1]));
+      PBType.push_front(l->sort());
     }
     PBType=reverse(PBType);
 
@@ -2021,11 +2020,11 @@ static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
 
     //This is a fake ProcVarId (There is no PBVarId)
     aterm_appl Index=gsMakeProcVarId(PBName,PBType);
-    body.proc_pars.put(Index,PBVars);
-    body.proc_bodies.put(Index,aterm_cast<aterm_appl>(PBEqn[2]));
+    body.proc_pars[Index]=PBVars;
+    body.proc_bodies[Index]=aterm_cast<aterm_appl>(PBEqn[2]);
   }
-  body.proc_pars.put(INIT_KEY(),aterm_list());
-  body.proc_bodies.put(INIT_KEY(),aterm_cast<aterm_appl>(PBInit[0]));
+  body.proc_pars[INIT_KEY()]=variable_list();
+  body.proc_bodies[INIT_KEY()]=aterm_cast<aterm_appl>(PBInit[0]);
 }
 
 static aterm_list gstcWriteProcs(aterm_list oldprocs)
@@ -2039,10 +2038,8 @@ static aterm_list gstcWriteProcs(aterm_list oldprocs)
       continue;
     }
     Result.push_front(gsMakeProcEqn(ProcVar,
-                    aterm_cast<aterm_list>(body.proc_pars.get(ProcVar)),
-                    aterm_cast<aterm_appl>(body.proc_bodies.get(ProcVar))
-                                               )
-                   );
+                    aterm_cast<aterm_list>(body.proc_pars[ProcVar]),
+                    aterm_cast<aterm_appl>(body.proc_bodies[ProcVar])));
   }
   Result=reverse(Result);
   return Result;
@@ -2069,7 +2066,7 @@ static aterm_list gstcWritePBES(aterm_list oldPBES)
     {
       continue;
     }
-    Result.push_front(PBEqn.set_argument(aterm_cast<aterm_appl>(body.proc_bodies.get(Index)),2));
+    Result.push_front(PBEqn.set_argument(aterm_cast<aterm_appl>(body.proc_bodies[Index]),2));
   }
   return reverse(Result);
 }
@@ -2183,18 +2180,20 @@ static void gstcTransformActProcVarConst(void)
   std::map<aterm_appl,sort_expression> Vars;
 
   //process and data terms in processes and init
-  for (aterm_list ProcVars=body.proc_pars.keys(); !ProcVars.empty(); ProcVars=ProcVars.tail())
+  // for (aterm_list ProcVars=body.proc_pars.keys(); !ProcVars.empty(); ProcVars=ProcVars.tail())
+  for (std::map <aterm_appl,variable_list>::const_iterator i=body.proc_pars.begin(); i!=body.proc_pars.end(); ++i)
   {
-    aterm_appl ProcVar=ATAgetFirst(ProcVars);
+    aterm_appl ProcVar=i->first;
 
     Vars=context.glob_vars;
 
     std::map<aterm_appl,sort_expression> NewVars;
-    gstcAddVars2Table(Vars,aterm_cast<aterm_list>(body.proc_pars.get(ProcVar)),NewVars);
+    // gstcAddVars2Table(Vars,aterm_cast<aterm_list>(body.proc_pars.get(ProcVar)),NewVars);
+    gstcAddVars2Table(Vars,i->second,NewVars);
     Vars=NewVars;
 
-    aterm_appl NewProcTerm=gstcTraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(body.proc_bodies.get(ProcVar)));
-    body.proc_bodies.put(ProcVar,NewProcTerm);
+    aterm_appl NewProcTerm=gstcTraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(body.proc_bodies[ProcVar]));
+    body.proc_bodies[ProcVar]=NewProcTerm;
   }
 }
 
@@ -2203,18 +2202,19 @@ static void gstcTransformPBESVarConst(void)
   std::map<aterm_appl,sort_expression> Vars;
 
   //PBEs and data terms in PBEqns and init
-  for (aterm_list PBVars=body.proc_pars.keys(); !PBVars.empty(); PBVars=PBVars.tail())
+  // for (aterm_list PBVars=body.proc_pars.keys(); !PBVars.empty(); PBVars=PBVars.tail())
+  for (std::map <aterm_appl,variable_list>::const_iterator i=body.proc_pars.begin(); i!=body.proc_pars.end(); ++i)
   {
-    aterm_appl PBVar=ATAgetFirst(PBVars);
+    aterm_appl PBVar=i->first;
     
     Vars=context.glob_vars;
 
     std::map<aterm_appl,sort_expression> NewVars;
-    gstcAddVars2Table(Vars,aterm_cast<aterm_list>(body.proc_pars.get(PBVar)),NewVars);
+    gstcAddVars2Table(Vars,i->second,NewVars);
     Vars=NewVars;
 
-    aterm_appl NewPBTerm=gstcTraversePBESVarConstPB(Vars,aterm_cast<aterm_appl>(body.proc_bodies.get(PBVar)));
-    body.proc_bodies.put(PBVar,NewPBTerm);
+    aterm_appl NewPBTerm=gstcTraversePBESVarConstPB(Vars,aterm_cast<aterm_appl>(body.proc_bodies[PBVar]));
+    body.proc_bodies[PBVar]=NewPBTerm;
   }
 }
 
@@ -2801,7 +2801,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
         sort_expression_list Par=ParList.front();
 
         // get the formal parameter names
-        aterm_list FormalPars=aterm_cast<aterm_list>(body.proc_pars.get(gsMakeProcVarId(Name,Par)));
+        variable_list FormalPars=body.proc_pars[gsMakeProcVarId(Name,Par)];
         // we only need the names of the parameters, not the types
         aterm_list FormalParNames;
         for (; !FormalPars.empty(); FormalPars=FormalPars.tail())
@@ -2833,7 +2833,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
 
     // get the formal parameter names
     aterm_list ActualPars;
-    aterm_list FormalPars=aterm_cast<aterm_list>(body.proc_pars.get(gsMakeProcVarId(Name,ATLgetFirst(ParList))));
+    aterm_list FormalPars=aterm_cast<aterm_list>(body.proc_pars[gsMakeProcVarId(Name,ATLgetFirst(ParList))]);
     {
       // we only need the names of the parameters, not the types
       for (aterm_list l=FormalPars; !l.empty(); l= l.tail())
@@ -6583,7 +6583,7 @@ static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression
   {
     data_expression d(StateFrm);
     aterm_appl Type=gstcTraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
-    return StateFrm;
+    return d;
   }
 
   throw mcrl2::runtime_error("Internal error. The state formula " + pp(StateFrm) + " fails to match any known form in typechecking case analysis");
