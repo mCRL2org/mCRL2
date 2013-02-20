@@ -54,12 +54,12 @@ class stategraph_equation: public pbes_equation
 
     bool is_simple() const
     {
-    	for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+      for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
       {
-      	// TODO check this
-      	if (!pbes_system::is_false(i->second))
+        // TODO check this
+        if (!pbes_system::is_false(i->second))
         {
-        	return false;
+          return false;
         }
       }
       return true;
@@ -67,35 +67,35 @@ class stategraph_equation: public pbes_equation
 
     const pbes_expression& simple_guard() const
     {
-    	return m_condition;
+      return m_condition;
     }
 
     const std::vector<data::variable>& parameters() const
     {
-    	return m_parameters;
+      return m_parameters;
     }
 
     const predicate_variable_vector& predicate_variables() const
     {
-    	return m_predvars;
+      return m_predvars;
     }
 
     predicate_variable_vector& predicate_variables()
     {
-    	return m_predvars;
+      return m_predvars;
     }
 
     std::string print() const
     {
-    	std::ostringstream out;
-    	out << "equation = " << print_equation(*this) << std::endl;
-    	out << "guards:" << std::endl;
-    	for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
-    	{
-    		out << "variable = " << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << std::endl;
-    	}
-    	out << "simple = " << std::boolalpha << is_simple() << std::endl;
-    	return out.str();
+      std::ostringstream out;
+      out << "equation = " << print_equation(*this) << std::endl;
+      out << "guards:" << std::endl;
+      for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+      {
+        out << "variable = " << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << std::endl;
+      }
+      out << "simple = " << std::boolalpha << is_simple() << std::endl;
+      return out.str();
     }
 };
 
