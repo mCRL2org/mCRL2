@@ -190,7 +190,9 @@ class specification_basic_type:public boost::noncopyable
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
     bool timeIsBeingUsed;
-    std::vector < objectdatatype > objectdata;
+    std::deque < objectdatatype > objectdata; // This is a double ended queue to guarantee that the objects will not 
+                                              // be moved to another place when the object data structure grows. This
+                                              // is because objects in this datatype  are passed around by reference.
 
     indexed_set objectIndexTable;
     set_identifier_generator fresh_identifier_generator;
@@ -750,8 +752,8 @@ class specification_basic_type:public boost::noncopyable
     /************** determine_process_status ********************************/
 
     processstatustype determine_process_statusterm(
-      const process_expression &body,
-      const processstatustype &status)
+      const process_expression body,  // intentionally not a reference.
+      const processstatustype status)
     {
       /* In this procedure it is determined whether a process
          is of type mCRL, pCRL or a multiAction. pCRL processes
@@ -1002,7 +1004,7 @@ class specification_basic_type:public boost::noncopyable
 
     /***********  collect pcrlprocessen **********************************/
 
-    void collectPcrlProcesses_term(const process_expression &body,
+    void collectPcrlProcesses_term(const process_expression body,  // Intentionally not a reference.
                                    std::vector <process_identifier>  &pcrlprocesses,
                                    std::set <process_identifier>  &visited)
     {
@@ -1664,8 +1666,8 @@ class specification_basic_type:public boost::noncopyable
     // In such a case a warning is printed suggesting to use regular2.
 
     process_identifier newprocess(
-      const variable_list parameters,
-      const process_expression body,
+      const variable_list parameters,  // Intentionally not a reference.
+      const process_expression body,   // Intentionally not a reference.
       processstatustype ps,
       const bool canterminate,
       const bool containstime)
@@ -1890,9 +1892,9 @@ class specification_basic_type:public boost::noncopyable
 
 
     process_expression bodytovarheadGNF(
-      const process_expression body,
+      const process_expression body, // intentionally not a reference.
       state s,
-      const variable_list freevars,
+      const variable_list freevars, // intentionally not a reference.
       variableposition v)
     {
       /* it is assumed that we only receive processes with
@@ -8056,10 +8058,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression split_body(
-      const process_expression &t,
+      const process_expression t, // intentionally not a reference.
       std::map < process_identifier,process_identifier > &visited_id,
       std::map < process_expression,process_expression> &visited_proc,
-      const variable_list &parameters)
+      const variable_list parameters)  //intentionally not a reference.
     {
       /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and
