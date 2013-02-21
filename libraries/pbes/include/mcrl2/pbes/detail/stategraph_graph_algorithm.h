@@ -357,7 +357,6 @@ class stategraph_graph_algorithm
       stategraph_source_algorithm sdalgo(m_pbes);
       sdalgo.compute_source();
       mCRL2log(log::debug) << sdalgo.print_source();
-      sdalgo.rewrite_propositional_variables();
 
       //sdalgo.compute_destination();
       //mCRL2log(log::debug) << sdalgo.print_destination();
@@ -400,6 +399,7 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
         mCRL2log(log::debug, "stategraph") << "selected todo element u = " << pbes_system::pp(u.X) << std::endl;
 
         const stategraph_equation& eqn = *find_equation(m_pbes, u.X.name());
+mCRL2log(log::debug, "stategraph") << "eqn = " << eqn.print() << std::endl;
         propositional_variable X = project_variable(eqn.variable());
         // mCRL2log(log::debug, "stategraph") << "X = " << pbes_system::pp(X) << std::endl;
         // mCRL2log(log::debug, "stategraph") << "u.X = " << pbes_system::pp(u.X) << std::endl;
@@ -415,17 +415,17 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
           mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(eqn.simple_guard()) << " in vertex u" << std::endl;
           u.guards.insert(eqn.simple_guard());
         }
-        for (predicate_variable_vector::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
+        for (predicate_variable_vector::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
         {
-          mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(i->first) << std::endl;
-          pbes_expression g = pbesr(i->second, sigma);
-          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(g) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->first) << std::endl;
+          pbes_expression g = pbesr(j->second, sigma);
+          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->second) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
           if (is_false(g))
           {
             continue;
           }
           // mCRL2log(log::debug, "stategraph") << "Y = " << pbes_system::pp(i->first) << std::endl;
-          propositional_variable_instantiation Ye = apply_substitution(i->first, sigma);
+          propositional_variable_instantiation Ye = apply_substitution(j->first, sigma);
           // mCRL2log(log::debug, "stategraph") << "sigma(Y) = " << pbes_system::pp(Ye) << std::endl;
           propositional_variable_instantiation Y = project(Ye);
           // mCRL2log(log::debug, "stategraph") << "project(sigma(Y)) = " << pbes_system::pp(Y) << std::endl;
