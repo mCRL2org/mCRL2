@@ -14,7 +14,6 @@
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/test_utilities.h"

@@ -13,7 +13,6 @@
 #define MCRL2_PBES_TYPECHECK_H
 
 #include "mcrl2/core/typecheck.h"
-// #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2

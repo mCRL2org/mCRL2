@@ -14,7 +14,6 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/typecheck.h"
 #include "mcrl2/pbes/parse.h"
 

@@ -86,7 +86,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
     for (size_t i=l.num_action_labels(); i<=(size_t)label; i++)
     {
       aterm_appl lab = (aterm_appl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-      l.add_action((aterm) lab,((ATLgetArgument(lab,0)).empty())?true:false);
+      l.add_action(lab,(aterm_cast<aterm_list>(lab[0]).empty())?true:false);
     }
 
     l.add_transition(transition((size_t) from,
@@ -130,21 +130,21 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
           throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
         }
 
-		try
-		{
-		  aterm data=read_term_from_binary_stream(g);
+        try
+	{
+	  aterm data=read_term_from_binary_stream(g);
           data::data_specification data_spec(atermpp::aterm_appl(((aterm_appl)data)[0]));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
           if (!gsIsNil((aterm_appl)((aterm_appl)data)[1]))
           {
             // The parameters below have the structure "ParamSpec(variable list);
-            l.set_process_parameters(data::variable_list((ATAgetArgument((aterm_appl)data,1))[0]));
+            l.set_process_parameters(data::variable_list((aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(data)[1]))[0]));
           }
           if (!gsIsNil((aterm_appl)((aterm_appl)data)[2]))
           {
             // The parameters below have the structure "ActSpec(variable list);
-            l.set_action_labels(lps::action_label_list((ATAgetArgument((aterm_appl)data,2))[0]));
+            l.set_action_labels(lps::action_label_list((aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(data)[2]))[0]));
           }
         }
 		catch(std::runtime_error& e)

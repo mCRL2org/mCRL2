@@ -15,7 +15,6 @@
 #include <iostream>
 #include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/unknown_sort.h"
@@ -45,7 +44,7 @@ data::sort_expression parse_sort_expression(const std::string& de_in)
   try {
     result = data::parse_sort_expression_new(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
-    std::string de_out = core::pp_deprecated(result);
+    std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
       std::clog << "aterm : " << result << std::endl;
@@ -69,7 +68,7 @@ data::data_expression parse_data_expression(const std::string& de_in)
   try {
     result = data::parse_data_expression_new(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
-    std::string de_out = core::pp_deprecated(result);
+    std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
       std::clog << "aterm : " << result << std::endl;
@@ -93,7 +92,7 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
   try {
     result = data::parse_data_specification_new(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
-    std::string de_out = core::pp_deprecated(result);
+    std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
       std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
@@ -119,14 +118,16 @@ void test_data_expression(const std::string& de_in,
                           const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
+  data::data_expression x(parse_data_expression(de_in));
   std::clog << std::endl
             << "==========================================" << std::endl
             << "Testing type checking of data expression: " << std::endl
-            << "  de_in: " << de_in << std::endl
+            << "  de_in:  " << de_in << std::endl
+            << "  de_out: " << pp(x) << std::endl
             << "  expect success: " << (expect_success?("yes"):("no")) << std::endl
-            << "  expected type: " << expected_sort << std::endl;
+            << "  expected type: " << expected_sort << std::endl
+            << "  detected type: " << pp(x.sort()) << " (before typecheckeing) " << std::endl;
 
-  data::data_expression x(parse_data_expression(de_in));
 
   if (test_type_checker)
   {
@@ -135,20 +136,17 @@ void test_data_expression(const std::string& de_in,
       BOOST_CHECK_NO_THROW(data::type_check(x, begin, end));
       BOOST_CHECK_NE(x, data::data_expression());
 
-      atermpp::aterm de_aterm = x;
-      // If exception was thrown, x is data_expression()
-      if (x != data::data_expression())
+      std::string de_out = data::pp(x);
+      //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
+      BOOST_CHECK_EQUAL(de_in, de_out);
+#endif
+      // TODO: this check should be uncommented
+      //BOOST_CHECK(!search_sort_expression(x.sort(), data::unknown_sort()));
+      if (expected_sort != "")
       {
-        std::string de_out = core::pp_deprecated((atermpp::aterm) de_aterm);
-        //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-        BOOST_CHECK_EQUAL(de_in, de_out);
-        // TODO: this check should be uncommented
-        //BOOST_CHECK(!search_sort_expression(x.sort(), data::unknown_sort()));
-        if (expected_sort != "")
-        {
-          BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
-          std::clog << "    expression x: " << x << std::endl;
-        }
+        BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
+        std::clog << "    expression x in internal format: " << x << std::endl;
       }
       else
       {
@@ -658,16 +656,17 @@ BOOST_AUTO_TEST_CASE(test_sort_as_variable)
   );
 }
 
-BOOST_AUTO_TEST_CASE(test_predefined_aliases)
+/* BOOST_AUTO_TEST_CASE(test_predefined_aliases)   // This test case leads to a parse error, not a typecheck error.
 {
   test_data_specification(
     "sort Nat = Int;\n",
     false, // parse error
     false  // so do not test type checker
   );
-}
+} */
 
-BOOST_AUTO_TEST_CASE(test_conflicting_aliases)
+/* BOOST_AUTO_TEST_CASE(test_conflicting_aliases) // This test case leads to a parse error, due to the use of Nat. 
+                                               // This is not a typecheck error. Therefore this case is outcommented.
 {
   test_data_specification(
     "sort S = Nat;\n"
@@ -675,9 +674,9 @@ BOOST_AUTO_TEST_CASE(test_conflicting_aliases)
     "     T = Int;\n",
     false
   );
-}
+} */
 
-BOOST_AUTO_TEST_CASE(test_conflicting_aliases_predefined_left)
+/* BOOST_AUTO_TEST_CASE(test_conflicting_aliases_predefined_left)  // This test case leads to a parse error, due to the use of Nat.
 {
   test_data_specification(
     "sort Nat = S;\n"
@@ -686,7 +685,7 @@ BOOST_AUTO_TEST_CASE(test_conflicting_aliases_predefined_left)
     false, // parse error
     false  // so do not test type checker
   );
-}
+} */
 
 BOOST_AUTO_TEST_CASE(test_cyclic_aliases)
 {
@@ -873,9 +872,8 @@ void test_data_expression_in_specification_context(const std::string& de_in,
     if (expect_success)
     {
       data::type_check(de, begin, end, ds);
-      atermpp::aterm de_aterm = de;
 
-      std::string de_out = core::pp_deprecated((atermpp::aterm) de_aterm);
+      std::string de_out = data::pp(de);
 
       BOOST_CHECK_EQUAL(de_in, de_out);
       if (expected_sort != "")

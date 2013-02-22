@@ -13,7 +13,6 @@
 #define MCRL2_MODAL_FORMULA_TYPECHECK_H
 
 #include "mcrl2/core/typecheck.h"
-// #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/monotonicity.h"
