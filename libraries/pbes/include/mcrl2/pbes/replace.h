@@ -72,6 +72,44 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
     : super(sigma, V)
   { }
 };
+
+template <template <class> class Builder, class Substitution>
+struct substitute_pbes_expressions_builder: public Builder<substitute_pbes_expressions_builder<Builder, Substitution> >
+{
+  typedef Builder<substitute_pbes_expressions_builder<Builder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  Substitution sigma;
+  bool innermost;
+
+  substitute_pbes_expressions_builder(Substitution sigma_, bool innermost_)
+    : sigma(sigma_),
+      innermost(innermost_)
+  {}
+
+  pbes_expression operator()(const pbes_expression& x)
+  {
+    if (innermost)
+    {
+      pbes_expression y = super::operator()(x);
+      return sigma(y);
+    }
+    return sigma(x);
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, class Substitution>
+substitute_pbes_expressions_builder<Builder, Substitution>
+make_replace_pbes_expressions_builder(Substitution sigma, bool innermost)
+{
+  return substitute_pbes_expressions_builder<Builder, Substitution>(sigma, innermost);
+}
 /// \endcond
 
 } // namespace detail
@@ -222,6 +260,26 @@ T replace_propositional_variables(const T& x,
                                     )
 {
   return core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_pbes_expressions(T& x,
+                              Substitution sigma,
+                              bool innermost = true,
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                             )
+{
+  pbes_system::detail::make_replace_pbes_expressions_builder<pbes_system::pbes_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_pbes_expressions(const T& x,
+                           Substitution sigma,
+                           bool innermost = true,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                          )
+{
+  return pbes_system::detail::make_replace_pbes_expressions_builder<pbes_system::pbes_expression_builder>(sigma, innermost)(x);
 }
 
 } // namespace pbes_system
