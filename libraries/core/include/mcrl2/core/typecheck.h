@@ -75,7 +75,7 @@ aterm_appl type_check_pbes_spec(aterm_appl pbes_spec);
  *             structure after type checking. if something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec);
+data::sort_expression type_check_sort_expr(const data::sort_expression &sort_expr, aterm_appl spec);
 
 
 /** \brief     Type check a parsed mCRL2 data expression with respect to a
@@ -98,7 +98,7 @@ aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec);
  *             structure after type checking.  If something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_appl type_check_data_expr(const data::data_expression& data_expr, aterm_appl spec, 
+data::data_expression type_check_data_expr(const data::data_expression& data_expr, aterm_appl spec, 
                                 const std::map<atermpp::aterm_appl,data::sort_expression> &Vars=std::map<atermpp::aterm_appl,data::sort_expression>());
 
 

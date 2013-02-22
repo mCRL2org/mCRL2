@@ -480,15 +480,13 @@ aterm_appl type_check_proc_spec(aterm_appl proc_spec)
   return Result;
 }
 
-aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec)
+sort_expression type_check_sort_expr(const sort_expression &sort_expr, aterm_appl spec)
 {
   mCRL2log(verbose) << "type checking sort expression..." << std::endl;
   //check correctness of the sort expression in sort_expr
   //using the specification in spec
   assert(gsIsSortExpr(sort_expr));
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
-
-  aterm_appl Result;
 
   mCRL2log(debug) << "type checking phase started" << std::endl;
 
@@ -519,22 +517,16 @@ aterm_appl type_check_sort_expr(aterm_appl sort_expr, aterm_appl spec)
   
   mCRL2log(debug) << "type checking of sort expressions read-in phase finished" << std::endl;
 
-  if (!is_unknown_sort(sort_expr) && !is_multiple_possible_sorts(sort_expr))
-  {
-    gstcIsSortExprDeclared(sort_expr);
-    
-    Result=sort_expr;
-  }
-  else
+  if (is_unknown_sort(sort_expr) || is_multiple_possible_sorts(sort_expr))
   {
     throw mcrl2::runtime_error("type checking of sort expressions failed (" + pp(sort_expr) + ") is not a sort expression)");
   }
-  
-
-  return Result;
+  gstcIsSortExprDeclared(sort_expr);
+    
+  return sort_expr;
 }
 
-aterm_appl type_check_data_expr(const data_expression &data_expr, aterm_appl spec, const std::map<aterm_appl,sort_expression> &Vars)
+data_expression type_check_data_expr(const data_expression &data_expr, aterm_appl spec, const std::map<aterm_appl,sort_expression> &Vars)
 {
   mCRL2log(verbose) << "type checking data expression..." << std::endl;
   //check correctness of the data expression in data_expr using
@@ -543,8 +535,6 @@ aterm_appl type_check_data_expr(const data_expression &data_expr, aterm_appl spe
   //check preconditions
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   assert(gsIsDataExpr(data_expr));
-
-  aterm_appl Result;
 
   mCRL2log(debug) << "type checking phase started" << std::endl;
 
@@ -579,7 +569,7 @@ aterm_appl type_check_data_expr(const data_expression &data_expr, aterm_appl spe
   mCRL2log(debug) << "type checking of data expression read-in phase finished" << std::endl;
 
   data_expression data=data_expr;
-  aterm_appl Type;
+  sort_expression Type; 
   try 
   {
     Type=gstcTraverseVarConsTypeD(Vars,Vars,data,(aterm_appl)data::unknown_sort());
@@ -588,14 +578,13 @@ aterm_appl type_check_data_expr(const data_expression &data_expr, aterm_appl spe
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
   }
-  if (data::is_unknown_sort(data::sort_expression(Type)))
+  if (data::is_unknown_sort(Type))
   {
     throw mcrl2::runtime_error("type checking of data expression failed. Result is an unknown sort.");
   }
   
-  Result=data;
+  return data;
   
-  return Result;
 }
 
 aterm_appl type_check_mult_act(

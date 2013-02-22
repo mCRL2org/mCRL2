@@ -72,6 +72,13 @@ inline bool is_bag_comprehension(const atermpp::aterm_appl &p)
          core::detail::gsIsBagComp(atermpp::arg1(p));
 }
 
+/// \brief Returns true if the term t is a set/bag comprehension.
+inline bool is_set_or_bag_comprehension(const atermpp::aterm_appl &p)
+{
+  return core::detail::gsIsBinder(p) &&
+         core::detail::gsIsSetBagComp(atermpp::arg1(p));
+}
+
 /// \brief Returns true if the term t is a function symbol
 inline bool is_function_symbol(const atermpp::aterm_appl &p)
 {
@@ -183,27 +190,21 @@ class data_expression: public atermpp::aterm_appl
           }
           result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
         }
-        else if (is_set_comprehension(*this) || is_bag_comprehension(*this))
+        else 
         {
+          assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_set_or_bag_comprehension(*this));
           atermpp::term_list<data_expression> v_variables = atermpp::term_list<data_expression> (atermpp::list_arg2(*this));
-          if (v_variables.size() != 1)
-          {
-            throw mcrl2::runtime_error("Set or bag comprehension has multiple bound variables, but may only have 1 bound variable");
-          }
+          assert(v_variables.size() == 1);
 
-          if (is_set_comprehension(*this))
-          {
-            result = container_sort(set_container(), v_variables.begin()->sort());
-          }
-          else
+          if (is_bag_comprehension(*this))
           {
             result = container_sort(bag_container(), v_variables.begin()->sort());
           }
-
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Unexpected abstraction occurred");
+          else // If it is not known whether the term is a set or a bag, it returns the type of a set, as there is 
+               // no setbag type. This can only occur for terms that are not propertly type checked.
+          {
+            result = container_sort(set_container(), v_variables.begin()->sort());
+          }
         }
       }
       else if (is_application(*this))
