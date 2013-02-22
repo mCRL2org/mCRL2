@@ -13,7 +13,7 @@
 #define MCRL2_MODAL_FORMULA_TYPECHECK_H
 
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
+// #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/monotonicity.h"
@@ -36,7 +36,7 @@ void type_check(state_formula& formula, const lps::specification& lps_spec, bool
   atermpp::aterm_appl t = core::type_check_state_frm(formula, specification_to_aterm(lps_spec));
   if (t==atermpp::aterm_appl())
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(formula));
+    throw mcrl2::runtime_error("could not type check " + pp(formula));
   }
   formula = atermpp::aterm_appl(t);
   if (check_monotonicity && !is_monotonous(formula))

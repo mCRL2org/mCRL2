@@ -288,14 +288,6 @@ inline aterm_list ATinsertUnique(const aterm_list &list, const aterm &el)
   return list;
 }
 
-inline
-size_t     ATindexedSetPut(indexed_set &set, const aterm &elem, bool* isnew)
-{
-  std::pair<size_t, bool> p= set.put(elem);
-  *isnew=p.second;
-  return p.first;
-}
-
 
 inline
 aterm_list ATreplace(const aterm_list &list_in, const aterm &el, const size_t idx) // Replace one element of a list.
@@ -1538,7 +1530,6 @@ static void gstcReadInSorts(aterm_list Sorts)
     }
     if (gsIsSortId(Sort))
     {
-      // ATindexedSetPut(context.basic_sorts, SortName, &nnew);
       context.basic_sorts.insert(SortName);
     }
     else if (gsIsSortRef(Sort))
@@ -2237,11 +2228,6 @@ static bool gstcEqTypesA(aterm_appl Type1, aterm_appl Type2)
     return true;
   }
 
-  /* if (!Type1.defined() || !Type2.defined())
-  {
-    return false;
-  } */
-
   return gstcUnwindType(Type1)==gstcUnwindType(Type2);
 }
 
@@ -2538,7 +2524,7 @@ static void gstcAddSystemFunction(aterm_appl OpId)
 static bool gstcVarsUnique(aterm_list VarDecls)
 {
   bool Result=true;
-  indexed_set Temp(63,50);
+  std::set<aterm_appl> Temp;
 
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
   {
@@ -2546,9 +2532,7 @@ static bool gstcVarsUnique(aterm_list VarDecls)
     aterm_appl VarName=aterm_cast<aterm_appl>(VarDecl[0]);
     // if already defined -- replace (other option -- warning)
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
-    bool nnew;
-    ATindexedSetPut(Temp, VarName, &nnew);
-    if (!nnew)
+    if (!Temp.insert(VarName).second) // The VarName is already in the set.
     {
       return false;
     }
@@ -2775,20 +2759,18 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
 
     term_list <sort_expression_list> ParList=j->second;
     // Put the assignments into a table
-    table As=table(63,50);
-    for (aterm_list l=aterm_cast<aterm_list>(ProcTerm[1]); !l.empty(); l=l.tail())
+    std::map <aterm_appl,aterm_appl> As;    // variable -> expression (both untyped, still)
+    const aterm_list &al=aterm_cast<aterm_list>(ProcTerm[1]);
+    for (aterm_list::const_iterator l=al.begin(); l!=al.end(); ++l)
     {
-      aterm_appl a=ATAgetFirst(l);
-      aterm existing_rhs = As.get(a[0]);
-      if (!existing_rhs.defined()) // An assignment of the shape x:=t does not yet exist, this is OK.
+std::cerr << "Assignment " << *l << "\n";
+      const aterm_appl a= aterm_cast<aterm_appl>(*l);
+      const std::map <aterm_appl,aterm_appl>::const_iterator i=As.find(aterm_cast<aterm_appl>(a[0]));
+      if (i!=As.end()) // An assignment of the shape x:=t already exists, this is not OK.
       {
-        As.put(a[0],a[1]);
-        // As.put(aterm_cast<aterm_appl>(a[0]),aterm_cast<aterm_appl>(a[1]));
+        throw mcrl2::runtime_error("Double assignment to variable " + pp(aterm_cast<aterm_appl>(a[0])) + " (detected assigned values are " + pp(i->second) + " and " + pp(aterm_cast<aterm_appl>(a[1])) + ")");
       }
-      else
-      {
-        throw mcrl2::runtime_error("Double assignment to variable " + pp(aterm_cast<aterm_appl>(a[0])) + " (detected assigned values are " + pp(existing_rhs) + " and " + pp(aterm_cast<aterm_appl>(a[1])) + ")");
-      }
+      As[aterm_cast<aterm_appl>(a[0])]=aterm_cast<aterm_appl>(a[1]);
     }
 
     {
@@ -2809,7 +2791,12 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
           FormalParNames.push_front(aterm_cast<aterm_appl>(ATAgetFirst(FormalPars)[0]));
         }
 
-        aterm_list l=list_minus(As.keys(),FormalParNames);
+        aterm_list As_lhss;
+        for(std::map <aterm_appl,aterm_appl> ::const_iterator i=As.begin(); i!=As.end(); ++i)
+        {
+          As_lhss.push_front(i->first);
+        }
+        aterm_list l=list_minus(As_lhss,FormalParNames);
         if (l.empty())
         {
           NewParList.push_front(Par);
@@ -2839,10 +2826,15 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
       for (aterm_list l=FormalPars; !l.empty(); l= l.tail())
       {
         aterm_appl FormalParName=aterm_cast<aterm_appl>(ATAgetFirst(l)[0]);
-        aterm_appl ActualPar=aterm_cast<aterm_appl>(As.get(FormalParName));
-        if (!ActualPar.defined())
+        aterm_appl ActualPar;
+        const std::map <aterm_appl,aterm_appl> ::const_iterator i=As.find(FormalParName);
+        if (i==As.end())  // Not found.
         {
           ActualPar=gsMakeId(FormalParName);
+        }
+        else
+        { 
+          ActualPar=i->second;
         }
         ActualPars.push_front(ActualPar);
       }
@@ -2870,19 +2862,19 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
       {
         continue;  //parameter does not change 
       } */
-      As.put(aterm_cast<aterm_appl>(form_par[0]),gsMakeDataVarIdInit(form_par,act_par));
+      As[aterm_cast<variable>(form_par[0])]=gsMakeDataVarIdInit(form_par,act_par);
     }
 
     aterm_list TypedAssignments;
     for (aterm_list l=aterm_cast<aterm_list>(ProcTerm[1]); !l.empty(); l=l.tail())
     {
       aterm_appl a=ATAgetFirst(l);
-      a=aterm_cast<aterm_appl>(As.get(aterm_cast<aterm_appl>(a[0])));
-      if (!a.defined())
+      const std::map <aterm_appl,aterm_appl> ::const_iterator i=As.find(aterm_cast<aterm_appl>(a[0]));
+      if (i==As.end())
       {
         continue;
       }
-      TypedAssignments.push_front(a);
+      TypedAssignments.push_front(i->second);
     }
     TypedAssignments=reverse(TypedAssignments);
 
@@ -2909,7 +2901,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
         mCRL2log(warning) << msg << " empty set of actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
       }
 
-      indexed_set Acts(63,50);
+      std::set<aterm_appl> Acts;
       for (; !ActList.empty(); ActList=ActList.tail())
       {
         aterm_appl Act=ATAgetFirst(ActList);
@@ -2919,9 +2911,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
         {
           throw mcrl2::runtime_error(msg + " an undefined action " + pp(Act) + " (typechecking " + pp(ProcTerm) + ")");
         }
-        bool nnew;
-        ATindexedSetPut(Acts,Act,&nnew);
-        if (!nnew)
+        if (!Acts.insert(Act).second)  // The action was already in the set.
         {
           mCRL2log(warning) << msg << " action " << pp(Act) << " twice (typechecking " << pp(ProcTerm) << ")" << std::endl;
         }
@@ -2938,7 +2928,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
         mCRL2log(warning) << "renaming empty set of actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
       }
 
-      indexed_set ActsFrom(63,50);
+      std::set<aterm_appl> ActsFrom;
 
       for (; !RenList.empty(); RenList=RenList.tail())
       {
@@ -2972,9 +2962,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
           throw mcrl2::runtime_error("renaming action " + pp(ActFrom) + " into action " + pp(ActTo) + ": these two have no common type (typechecking " + pp(ProcTerm) + ")");
         }
 
-        bool nnew;
-        ATindexedSetPut(ActsFrom,ActFrom,&nnew);
-        if (!nnew)
+        if (!ActsFrom.insert(ActFrom).second) // The element was already in the set.
         {
           throw mcrl2::runtime_error("renaming action " + pp(ActFrom) + " twice (typechecking " + pp(ProcTerm) + ")");
         }

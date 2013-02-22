@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_TYPECHECK_H
 
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
+// #include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
@@ -34,7 +34,7 @@ void type_check(process_expression& proc_expr, const process_specification& proc
   atermpp::aterm_appl t = core::type_check_proc_expr(proc_expr, process_specification_to_aterm(proc_spec));
   if (t==atermpp::aterm_appl())
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp_deprecated(proc_expr));
+    throw mcrl2::runtime_error("could not type check " + pp(proc_expr));
   }
   proc_expr = process_expression(t);
 }
