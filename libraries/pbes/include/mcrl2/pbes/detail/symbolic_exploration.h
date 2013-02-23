@@ -36,7 +36,7 @@ class symbolic_exploration_algorithm
     data::set_identifier_generator m_generator; // used for generating cluster variables
     bool m_optimized;
     bool m_clustered;
-    atermpp::vector<pbes_equation> m_cluster_equations;
+    std::vector<pbes_equation> m_cluster_equations;
 
     std::string pp(const std::vector<data::variable>& v)
     {
@@ -375,8 +375,8 @@ class symbolic_exploration_algorithm
     symbolic_exploration_algorithm(pbes<>& p, bool optimized, bool clustered)
       : m_pbes(p), m_optimized(optimized), m_clustered(clustered)
     {
-      atermpp::vector<pbes_equation>& equations = m_pbes.equations();
-      for (atermpp::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
+      std::vector<pbes_equation>& equations = m_pbes.equations();
+      for (std::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
       {
         m_generator.add_identifier(i->variable().name());
       }
@@ -384,8 +384,8 @@ class symbolic_exploration_algorithm
 
     void run()
     {
-      atermpp::vector<pbes_equation>& equations = m_pbes.equations();
-      for (atermpp::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
+      std::vector<pbes_equation>& equations = m_pbes.equations();
+      for (std::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
       {
         push_variables(i->variable().parameters());
         pbes_expression phi = i->formula();

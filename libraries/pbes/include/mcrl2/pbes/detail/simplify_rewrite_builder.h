@@ -261,7 +261,7 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
     {
       return v;
     }
-    atermpp::vector<data_term_type> d;
+    std::vector<data_term_type> d;
     data_term_sequence_type e = tr::param(v);
     for (typename data_term_sequence_type::const_iterator i = e.begin(); i != e.end(); ++i)
     {

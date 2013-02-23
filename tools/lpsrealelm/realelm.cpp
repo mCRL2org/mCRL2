@@ -30,31 +30,31 @@ using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
 
-static data_expression negate_inequality(const data_expression e)
+static data_expression negate_inequality(const data_expression &e)
 {
   if (is_equal_to_application(e))
   {
-    return not_equal_to(application(e).left(),application(e).right());
+    return not_equal_to(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
   }
   if (is_not_equal_to_application(e))
   {
-    return equal_to(application(e).left(),application(e).right());
+    return equal_to(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
   }
   else if (is_less_application(e))
   {
-    return greater_equal(application(e).left(),application(e).right());
+    return greater_equal(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
   }
   else if (is_less_equal_application(e))
   {
-    return greater(application(e).left(),application(e).right());
+    return greater(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
   }
   else if (is_greater_application(e))
   {
-    return less_equal(application(e).left(),application(e).right());
+    return less_equal(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
   }
   else if (is_greater_equal_application(e))
   {
-    return less(application(e).left(),application(e).right());
+    return less(data::binary_left(atermpp::aterm_cast<application>(e)),data::binary_right(atermpp::aterm_cast<application>(e)));
   }
   else
   {
@@ -73,7 +73,7 @@ variable_list get_real_variables(const variable_list& l)
   {
     if (i->sort() == sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
@@ -90,15 +90,15 @@ variable_list get_nonreal_variables(const variable_list& l)
   {
     if (i->sort() != sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
 }
 
-static data::function_symbol& negate_function_symbol(const sort_expression s)
+static data::function_symbol& negate_function_symbol(const sort_expression &s)
 {
-  static data::function_symbol f = core::detail::initialise_static_expression(f,data::function_symbol("negate",data::make_function_sort(s,s)));
+  static data::function_symbol f = data::function_symbol("negate",data::make_function_sort(s,s));
   assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
   return f;
 }
@@ -114,7 +114,7 @@ assignment_list get_real_assignments(const assignment_list& l)
   {
     if (i->lhs().sort() == sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
@@ -146,29 +146,35 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
   {
     if (i->lhs().sort() != sort_real::real_())
     {
-      r = push_front(r, *i);
+      r.push_front(*i);
     }
   }
   return r;
 }
 
 // Functions below should have been defined in the data library.
-static data_expression condition_part(const data_expression e)
+static const data_expression &condition_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return application(e).argument(0);
+  const data::application& a = aterm_cast<const application>(e);
+  data::application::const_iterator i = a.begin();
+  return *i;
 }
 
-static data_expression then_part(const data_expression e)
+static const data_expression &then_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return application(e).argument(1);
+  const data::application& a = aterm_cast<const application>(e);
+  data::application::const_iterator i = a.begin();
+  return *(++i);
 }
 
-static data_expression else_part(const data_expression e)
+static const data_expression &else_part(const data_expression &e)
 {
   assert(is_if_application(e));
-  return application(e).argument(2);
+  const data::application& a = aterm_cast<const application>(e);
+  data::application::const_iterator i = a.begin();
+  return *(++(++i));
 }
 
 
@@ -186,9 +192,9 @@ static data_expression else_part(const data_expression e)
 /// \pre The parameter e must be of sort Bool.
 
 static void split_condition(
-  const data_expression e,
-  atermpp::vector < data_expression_list > &real_conditions,
-  atermpp::vector < data_expression_list > &non_real_conditions,
+  const data_expression &e,
+  std::vector < data_expression_list > &real_conditions,
+  std::vector < data_expression_list > &non_real_conditions,
   const bool negate=false)
 {
   // mCRL2log(debug) << "Split condition " << data::pp(e) << "\n";
@@ -197,17 +203,17 @@ static void split_condition(
 
   if ((!negate && sort_bool::is_and_application(e))  || (negate && sort_bool::is_or_application(e)))
   {
-    atermpp::vector < data_expression_list >
+    std::vector < data_expression_list >
     real_conditions_aux1, non_real_conditions_aux1;
-    split_condition(application(e).left(),real_conditions_aux1,non_real_conditions_aux1,negate);
-    atermpp::vector < data_expression_list >
+    split_condition(data::binary_left(atermpp::aterm_cast<application>(e)),real_conditions_aux1,non_real_conditions_aux1,negate);
+    std::vector < data_expression_list >
     real_conditions_aux2, non_real_conditions_aux2;
-    split_condition(application(e).right(),real_conditions_aux2,non_real_conditions_aux2,negate);
-    for (atermpp::vector < data_expression_list >::const_iterator
+    split_condition(data::binary_right(atermpp::aterm_cast<application>(e)),real_conditions_aux2,non_real_conditions_aux2,negate);
+    for (std::vector < data_expression_list >::const_iterator
          i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
          i1r!=real_conditions_aux1.end(); ++i1r, ++i1n)
     {
-      for (atermpp::vector < data_expression_list >::const_iterator
+      for (std::vector < data_expression_list >::const_iterator
            i2r=real_conditions_aux2.begin(), i2n=non_real_conditions_aux2.begin() ;
            i2r!=real_conditions_aux2.end(); ++i2r, ++i2n)
       {
@@ -218,11 +224,11 @@ static void split_condition(
   }
   else if ((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)))
   {
-    split_condition(application(e).left(),real_conditions,non_real_conditions,negate);
-    atermpp::vector < data_expression_list >
+    split_condition(data::binary_left(atermpp::aterm_cast<application>(e)),real_conditions,non_real_conditions,negate);
+    std::vector < data_expression_list >
     real_conditions_aux, non_real_conditions_aux;
-    split_condition(application(e).right(),real_conditions_aux,non_real_conditions_aux,negate);
-    for (atermpp::vector < data_expression_list >::const_iterator
+    split_condition(data::binary_right(atermpp::aterm_cast<application>(e)),real_conditions_aux,non_real_conditions_aux,negate);
+    for (std::vector < data_expression_list >::const_iterator
          i_r=real_conditions_aux.begin(), i_n=non_real_conditions_aux.begin() ;
          i_r!=real_conditions_aux.end(); ++i_r, ++i_n)
     {
@@ -238,9 +244,9 @@ static void split_condition(
   }
   else if (sort_bool::is_not_application(e))
   {
-    split_condition(*application(e).arguments().begin(),real_conditions,non_real_conditions,!negate);
+    split_condition(unary_operand(atermpp::aterm_cast<application>(e)),real_conditions,non_real_conditions,!negate);
   }
-  else if (is_inequality(e) && (application(e).left().sort() == sort_real::real_() || application(e).right().sort() == sort_real::real_()))
+  else if (is_inequality(e) && (data::binary_left(atermpp::aterm_cast<application>(e)).sort() == sort_real::real_() || data::binary_right(atermpp::aterm_cast<application>(e)).sort() == sort_real::real_()))
   {
     std::set < variable > vars=data::find_variables(e);
     for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
@@ -253,12 +259,12 @@ static void split_condition(
     }
     if (negate)
     {
-      real_conditions.push_back(push_front(data_expression_list(),negate_inequality(e)));
+      real_conditions.push_back(make_list(negate_inequality(e)));
       non_real_conditions.push_back(data_expression_list());
     }
     else
     {
-      real_conditions.push_back(push_front(data_expression_list(),e));
+      real_conditions.push_back(make_list(e));
       non_real_conditions.push_back(data_expression_list());
     }
   }
@@ -276,13 +282,12 @@ static void split_condition(
     }
     if (negate)
     {
-      non_real_conditions.push_back(push_front(data_expression_list(),
-                                    data_expression(sort_bool::not_(e))));
+      non_real_conditions.push_back(make_list(data_expression(sort_bool::not_(e))));
       real_conditions.push_back(data_expression_list());
     }
     else
     {
-      non_real_conditions.push_back(push_front(data_expression_list(),e));
+      non_real_conditions.push_back(make_list(e));
       real_conditions.push_back(data_expression_list());
     }
   }
@@ -303,8 +308,8 @@ static void split_condition(
 /// \param summand_info Normalized summand information is stored conveniently in summand info.
 
 static void normalize_specification(
-  const specification s,
-  const variable_list real_parameters,
+  const specification &s,
+  const variable_list &real_parameters,
   const rewriter& r,
   std::vector < summand_information > &summand_info)
 {
@@ -312,13 +317,13 @@ static void normalize_specification(
   
   for (lps::action_summand_vector::const_iterator i = action_smds.begin(); i != action_smds.end(); ++i)
   {
-    atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
+    std::vector <data_expression_list> real_conditions, non_real_conditions;
     // mCRL2log(debug) << "SUMMANDNORM: " << lps::pp(*i) << "\n";
     // mCRL2log(debug) << "Condition in: " << data::pp(i->condition()) << "\n";
     split_condition(i->condition(),real_conditions,non_real_conditions);
 
-    for (atermpp::vector <data_expression_list>::const_iterator
-                 j_r=real_conditions.begin(), j_n=non_real_conditions.begin();
+    for (std::vector <data_expression_list>::const_iterator
+         j_r=real_conditions.begin(), j_n=non_real_conditions.begin();
          j_r!=real_conditions.end(); ++j_r, ++j_n)
     {
       const data_expression c=r(lazy::join_and(j_n->begin(), j_n->end()));
@@ -352,11 +357,11 @@ static void normalize_specification(
           if (s1.count(*k)==0)
           {
             // The variable does not occur in the parameters. We can eliminate it using Fourier-Motzkin
-            eliminatable_real_sum_variables=push_front(eliminatable_real_sum_variables,*k);
+            eliminatable_real_sum_variables.push_front(*k);
           }
           else
           {
-            real_sum_variables=push_front(real_sum_variables,*k);
+            real_sum_variables.push_front(*k);
           }
         }
 
@@ -393,7 +398,7 @@ static void normalize_specification(
           } */
 
           // Construct replacements to contain the nextstate values for real variables in a map
-          atermpp::map<variable, data_expression> replacements;
+          std::map<variable, data_expression> replacements;
           for (assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
           {
             if (j->lhs().sort() == sort_real::real_())
@@ -421,12 +426,12 @@ static void normalize_specification(
   const lps::deadlock_summand_vector &deadlock_smds = s.process().deadlock_summands();
   for (lps::deadlock_summand_vector::const_iterator i = deadlock_smds.begin(); i != deadlock_smds.end(); ++i)
   {
-    atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
+    std::vector <data_expression_list> real_conditions, non_real_conditions;
     // mCRL2log(debug) << "SUMMANDNORM: " << lps::pp(*i) << "\n";
     // mCRL2log(debug) << "Condition in: " << data::pp(i->condition()) << "\n";
     split_condition(i->condition(),real_conditions,non_real_conditions);
 
-    for (atermpp::vector <data_expression_list>::const_iterator
+    for (std::vector <data_expression_list>::const_iterator
                  j_r=real_conditions.begin(), j_n=non_real_conditions.begin();
          j_r!=real_conditions.end(); ++j_r, ++j_n)
     {
@@ -492,7 +497,7 @@ static void normalize_specification(
                                       variable_list(), // All sum variables over reals have been eliminated.
                                       get_nonreal_variables(t.summation_variables()),
                                       inequalities,
-                                      atermpp::map<variable, data_expression>());
+                                      std::map<variable, data_expression>());
           summand_info.push_back(s);
         }
       }
@@ -509,8 +514,8 @@ static void normalize_specification(
 /// \ret true iff a variable has been added to the context
 static void add_postponed_inequalities_to_context(
   const std::vector < size_t > &inequalities_to_add_lhs_size,
-  const atermpp::vector < data_expression > &inequalities_to_add_lhs,
-  const atermpp::vector < data_expression > &inequalities_to_add_rhs,
+  const std::vector < data_expression > &inequalities_to_add_lhs,
+  const std::vector < data_expression > &inequalities_to_add_rhs,
   std::vector < summand_information > &summand_info,
   context_type& context,
   const rewriter& r,
@@ -554,8 +559,8 @@ static void add_postponed_inequalities_to_context(
 /// \ret true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
   std::vector < size_t > &inequalities_to_add_lhs_size,
-  atermpp::vector < data_expression > &inequalities_to_add_lhs,
-  atermpp::vector < data_expression > &inequalities_to_add_rhs,
+  std::vector < data_expression > &inequalities_to_add_lhs,
+  std::vector < data_expression > &inequalities_to_add_rhs,
   std::vector < linear_inequality > &l,
   context_type& context,
   const rewriter& r)
@@ -636,7 +641,7 @@ static void add_summand(summand_information& summand_info,
                         deadlock_summand_vector &deadlock_summands)
 {
   // mCRL2log(debug) << "SUMMAND " << lps::pp(summand_info.get_summand()) << "\nCOND " << data::pp(new_condition) << "\n";
-  static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
+  static std::vector < sort_expression_list > protect_against_garbage_collect;
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
   // Used to recall which may actions labels have been
   // introduced, in order to re-use them.
@@ -670,12 +675,12 @@ static void add_summand(summand_information& summand_info,
       {
         if (negate)
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),
+          nextstate.push_front(assignment(c_complete->get_variable(),
                                make_application(negate_function_symbol(cs.sort()),c->get_variable())));
         }
         else
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),c->get_variable()));
+          nextstate.push_front(assignment(c_complete->get_variable(),c->get_variable()));
         }
         success=true;
       }
@@ -694,7 +699,7 @@ static void add_summand(summand_information& summand_info,
       if (is_inconsistent(nextstate_condition,r))
       {
         // mCRL2log(debug) << "ASSIGNMENT: " << c_complete->get_variable() << " := " << data_expression(cs.larger()) << "\n";
-        nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.larger())));
+        nextstate.push_front(assignment(c_complete->get_variable(),data_expression(cs.larger())));
       }
       else
       {
@@ -702,11 +707,11 @@ static void add_summand(summand_information& summand_info,
             substituted_lowerbound,linear_inequality::less_eq,r);
         if (is_inconsistent(nextstate_condition,r))
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.smaller())));
+          nextstate.push_front(assignment(c_complete->get_variable(),data_expression(cs.smaller())));
         }
         else
         {
-          nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.equal())));
+          nextstate.push_front(assignment(c_complete->get_variable(),data_expression(cs.equal())));
         }
       }
       nextstate_condition.pop_back();
@@ -718,6 +723,7 @@ static void add_summand(summand_information& summand_info,
   action_list new_actions=summand_info.get_multi_action().actions();
   if (!summand_info.is_delta_summand() && is_may_summand)
   {
+    new_actions=reinterpret_cast<const action_summand&>(s).multi_action().actions();
     action_list resulting_actions;
     for (action_list::const_iterator i=new_actions.begin();
          i!=new_actions.end(); i++)
@@ -736,12 +742,12 @@ static void add_summand(summand_information& summand_info,
         action_label_it=(action_label_map.insert(
                            std::pair< std::pair< std::string, sort_expression_list >,std::string>
                            (p,may_action_label))).first;
-        a=push_front(a,action_label(may_action_label,sorts));
+        a.push_front(action_label(may_action_label,sorts));
         protect_against_garbage_collect.push_back(sorts);
       }
 
       action_label may_action_label(action_label_it->second,sorts);
-      resulting_actions=push_front(resulting_actions,action(may_action_label,args));
+      resulting_actions.push_front(action(may_action_label,args));
     }
     new_actions=reverse(resulting_actions);
   }
@@ -777,7 +783,7 @@ assignment_list determine_process_initialization(
 {
   assignment_list init = reverse(get_nonreal_assignments(initialization));
   assignment_list real_assignments = get_real_assignments(initialization);
-  mutable_map_substitution< atermpp::map<variable, data_expression> > replacements;
+  mutable_map_substitution< std::map<variable, data_expression> > replacements;
   for (assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
   {
     replacements[i->lhs()] = i->rhs();
@@ -803,7 +809,7 @@ assignment_list determine_process_initialization(
       assert(r(greater(left, right)) == sort_bool::true_());
       ass = assignment(i->get_variable(), c.larger());
     }
-    init = push_front(init, ass);
+    init.push_front(ass);
   }
   return reverse(init);
 }
@@ -866,8 +872,8 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   context_type context; // Contains introduced variables
 
   std::vector < size_t > new_inequalities_sizes;
-  atermpp::vector < data_expression > new_inequalities_lhss;
-  atermpp::vector < data_expression > new_inequalities_rhss;
+  std::vector < data_expression > new_inequalities_lhss;
+  std::vector < data_expression > new_inequalities_rhss;
   int iteration = 0;
   do
   {
@@ -959,7 +965,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
 
   /* Generate the new summand list */
-  // atermpp::vector < data_expression_list > nextstate_context_combinations;
+  // std::vector < data_expression_list > nextstate_context_combinations;
   lps::action_summand_vector action_summands;
   lps::deadlock_summand_vector deadlock_summands;
   action_label_list new_act_declarations;
@@ -970,7 +976,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
     // Construct the real time condition for summand in terms of xi variables.
 
-    /* atermpp::vector < data_expression_list >::const_iterator
+    /* std::vector < data_expression_list >::const_iterator
                          nextstate_value=i->nextstate_value_combinations_begin(); */
 
     for (std::vector < std::vector < linear_inequality > >::iterator
@@ -1081,7 +1087,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   variable_list process_parameters = reverse(nonreal_parameters);
   for (context_type::const_iterator i = context.begin(); i != context.end(); ++i)
   {
-    process_parameters = push_front(process_parameters, i->get_variable());
+    process_parameters.push_front(i->get_variable());
   }
   process_parameters = reverse(process_parameters);
 

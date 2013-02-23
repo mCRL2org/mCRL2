@@ -14,7 +14,6 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
@@ -40,7 +39,7 @@ void Invariant_Checker::print_counter_example()
   if (f_counter_example)
   {
     data_expression v_counter_example(f_bdd_prover.get_counter_example());
-    assert(v_counter_example!=0);
+    assert(v_counter_example.defined());
     mCRL2log(info) << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
@@ -71,7 +70,7 @@ void Invariant_Checker::save_dot_file(size_t a_summand_number)
 
 bool Invariant_Checker::check_init(const data_expression a_invariant)
 {
-  atermpp::map < variable, data_expression> v_substitutions;
+  std::map < variable, data_expression> v_substitutions;
   const assignment_list l=f_init.assignments();
   for (assignment_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
@@ -107,7 +106,7 @@ bool Invariant_Checker::check_summand(
   const data_expression v_condition = a_summand.condition();
   const assignment_list v_assignments = a_summand.assignments();
 
-  atermpp::map < variable, data_expression> v_substitutions;
+  std::map < variable, data_expression> v_substitutions;
 
   for (assignment_list::const_iterator i=v_assignments.begin(); i!=v_assignments.end(); ++i)
   {

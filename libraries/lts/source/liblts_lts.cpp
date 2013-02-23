@@ -11,9 +11,8 @@
 #include <string>
 #include <sstream>
 #include "svc/svc.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lts/lts_lts.h"
-
+#include "mcrl2/atermpp/aterm_int.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -53,7 +52,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
   {
     using namespace mcrl2::data;
     using namespace mcrl2::lts::detail;
-    ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f));
+    aterm_appl state_label=(aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f));
     l.add_state(state_label_lts(state_label));
   }
   else
@@ -75,7 +74,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
       {
         using namespace mcrl2::data;
         using namespace mcrl2::lts::detail;
-        ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i);
+        aterm_appl state_label=(aterm_appl)SVCstate2ATerm(&f,(SVCstateIndex) i);
         l.add_state(state_label_lts(state_label));
       }
       else
@@ -86,8 +85,8 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 
     for (size_t i=l.num_action_labels(); i<=(size_t)label; i++)
     {
-      ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-      l.add_action((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==true)?true:false);
+      aterm_appl lab = (aterm_appl) SVClabel2ATerm(&f,(SVClabelIndex) i);
+      l.add_action(lab,(aterm_cast<aterm_list>(lab[0]).empty())?true:false);
     }
 
     l.add_transition(transition((size_t) from,
@@ -101,16 +100,18 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 
   const std::string error_message="The .lts file " + filename +
                                   " does not appear to contain datatypes, action declarations and process parameters";
-  FILE* g = fopen(filename.c_str(),"rb");
-  if ((g == NULL) ||
-      (fseek(g,-(12+8),SEEK_END) != 0))
+  ifstream g;
+  g.open(filename.c_str(), std::ios::binary);
+  g.seekg(-(12+8),ios_base::end);
+  if (g.fail())  
   {
     throw mcrl2::runtime_error(error_message + " (cannot reopen file)");
   }
   else
   {
     unsigned char buf[8+12];
-    if (fread(&buf,1,8+12,g) != 8+12)
+    g.read((char*)buf,8+12);
+    if (g.fail())
     {
       throw mcrl2::runtime_error(error_message + " (file does not contain control information)");
     }
@@ -118,39 +119,41 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
     {
       if (!strncmp(((char*) buf)+8,"   1STL2LRCm",12))
       {
-        ATerm data;
         long position = 0;
         for (unsigned char i=0; i<8; i++)
         {
           position = (position << 8) + buf[7-i];
         }
-        if ((fseek(g,position,SEEK_SET) != 0) ||
-            ((data = ATreadFromFile(g)) == NULL))
+        g.seekg(position, std::ios_base::beg);
+        if (g.fail())
         {
           throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
         }
-        else
-        {
-          data::data_specification data_spec(ATgetArgument(data,0));
+
+        try
+	{
+	  aterm data=read_term_from_binary_stream(g);
+          data::data_specification data_spec(atermpp::aterm_appl(((aterm_appl)data)[0]));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
-          if (!gsIsNil((ATermAppl)ATgetArgument(data,1)))
+          if (!gsIsNil((aterm_appl)((aterm_appl)data)[1]))
           {
             // The parameters below have the structure "ParamSpec(variable list);
-            l.set_process_parameters(data::variable_list(ATgetArgument(ATgetArgument(data,1),0)));
+            l.set_process_parameters(data::variable_list((aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(data)[1]))[0]));
           }
-          if (!gsIsNil((ATermAppl)ATgetArgument(data,2)))
+          if (!gsIsNil((aterm_appl)((aterm_appl)data)[2]))
           {
             // The parameters below have the structure "ActSpec(variable list);
-            l.set_action_labels(lps::action_label_list(ATgetArgument(ATgetArgument(data,2),0)));
+            l.set_action_labels(lps::action_label_list((aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(data)[2]))[0]));
           }
         }
+		catch(std::runtime_error& e)
+		{
+		  throw mcrl2::runtime_error(e.what() + std::string(" (data information is incorrect)"));
+		}
       }
     }
-    if (g != NULL)
-    {
-      fclose(g);
-    }
+    g.close();
   }
 }
 
@@ -168,55 +171,47 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
 static void add_extra_mcrl2_lts_data(
   const std::string& filename,
   const bool has_data_spec,
-  const ATermAppl& data_spec,
+  const aterm_appl& data_spec,
   const bool has_params,
-  const ATermList& params,
+  const aterm_list& params,
   const bool has_act_labels,
-  const ATermList& act_labels)
+  const aterm_list& act_labels)
 {
-  FILE* f = fopen(filename.c_str(),"ab");
-  if (f == NULL)
+  std::fstream f(filename.c_str(), std::ios::in|std::ios::out|std::ios::binary|std::ios::app); // Open to append.
+  if (f.fail())
   {
     throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
     return;
   }
 
-  ATerm arg1 = (ATerm)(has_data_spec?data_spec:gsMakeNil());
-  ATerm arg2 = (ATerm)(has_params?ATmakeAppl1(ATmakeAFun("ParamSpec",1,false),(ATerm) params):gsMakeNil());
-  ATerm arg3 = (ATerm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
-  ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,false),arg1,arg2,arg3);
+  aterm arg1 = (aterm)(has_data_spec?data_spec:gsMakeNil());
+  aterm arg2 = (aterm)(has_params?aterm_appl(function_symbol("ParamSpec",1),(aterm) params):gsMakeNil());
+  aterm arg3 = (aterm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
+  aterm data = (aterm) aterm_appl(function_symbol("mCRL2LTS1",3),arg1,arg2,arg3);
 
-  /* From the remarks on MSDN:
-   *
-   *   "Note that when a file is opened for appending data, the current file position is determined
-   *    by the last I/O operation, not by where the next write would occur. For example, if a file
-   *    is opened for an append and the last operation was a read, the file position is the point
-   *    where the next read operation would start, not where the next write would start. (When a
-   *    file is opened for appending, the file position is moved to end of file before any write
-   *    operation.) If no I/O operation has yet occurred on a file opened for appending, the file
-   *    position is the beginning of the file."
-   *
-   * In practice, this means that the Microsoft implementation of ftell() returns 0 at this point
-   * in our code. Simply trying to read one byte past the end of the file (the read will fail) seems
-   * to resolve this issue.
-   */
-  char c;
-  fseek(f,0,SEEK_END);
-  if(fread(&c,1,1,f) != 0)
-    throw mcrl2::runtime_error("Unexpectedly able to read past end of file.");
+  /* Determine the position at which the additional information starts.
+     Due to the way in which file operations are implemented on Windows, we need to
+	 use the get pointer for determining the length of the SVC input. (seekp gives invalid
+	 results, leading to a wrong encoded position in the output of the LTS file).
+	 According to the example at http://www.cplusplus.com/reference/istream/istream/seekg/
+	 this is the, more-or-less standard, way to determine the lenght of the file. */
 
-  long position = ftell(f);
+  f.seekg (0, std::ios::end);
+  long position = f.tellg();
+  f.seekg (0, std::ios::beg);
+
   if (position == -1)
   {
-    fclose(f);
+    f.close();
     throw mcrl2::runtime_error("Could not determine file size of '" + filename +
                                "'; not adding extra information.");
     return;
   }
 
-  if (ATwriteToBinaryFile(data,f) == false)
+  write_term_to_binary_stream(data,f);
+  if (f.fail())
   {
-    fclose(f);
+    f.close();
     throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename +
                                "', file could be corrupted.");
     return;
@@ -228,15 +223,17 @@ static void add_extra_mcrl2_lts_data(
     buf[i] = position % 0x100;
     position >>= 8;
   }
-  if (fwrite(buf,1,8+12,f) != 8+12)
+ 
+  f.write((char *)buf,8+12);
+  if (f.fail())
   {
-    fclose(f);
+    f.close();
     throw mcrl2::runtime_error("error writing extra LTS information to '" + filename +
                                "', file could be corrupted.");
     return;
   }
 
-  fclose(f);
+  f.close();
 }
 
 
@@ -261,26 +258,28 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
   SVCsetCreator(&f,const_cast < char* >("liblts (mCRL2)"));
 
   assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
-  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()) : (ATerm) ATmakeInt((int)l.initial_state()) ,&b));
+  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (aterm)(aterm_appl)l.state_label(l.initial_state()) : (aterm)aterm_int(l.initial_state()) ,&b));
 
-  SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
+  SVCparameterIndex param = SVCnewParameter(&f,(aterm)aterm_list(),&b);
 
   const std::vector < transition> &trans=l.get_transitions();
   for (std::vector < transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
   {
     assert(t->from()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->from()) : (ATerm) ATmakeInt((int)t->from()) ,&b);
-    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t->label()).aterm_without_time(), &b);
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (aterm)(aterm_appl)l.state_label(t->from()) : (aterm) aterm_int(t->from()) ,&b);
+    SVClabelIndex label = SVCnewLabel(&f, (aterm)l.action_label(t->label()).aterm_without_time(), &b);
     assert(t->to()< ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t->to()) : (ATerm) ATmakeInt((int)t->to()) ,&b);
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (aterm)(aterm_appl)l.state_label(t->to()) : (aterm) aterm_int(t->to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 
   SVCclose(&f);
 
 
-  ATermAppl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
-  add_extra_mcrl2_lts_data(filename,l.has_data(),data_spec,l.has_process_parameters(),l.process_parameters(),l.has_action_labels(),l.action_labels());
+  aterm_appl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
+  aterm_list params = l.process_parameters();
+  aterm_list act_spec = l.action_labels();
+  add_extra_mcrl2_lts_data(filename,l.has_data(),data_spec,l.has_process_parameters(),params,l.has_action_labels(),act_spec);
 }
 
 namespace mcrl2

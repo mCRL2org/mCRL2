@@ -56,7 +56,7 @@ struct node_t
 inline
 boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, std::string prefix = "X")
 {
-  atermpp::set<boolean_expression> v_prefixed;
+  std::set<boolean_expression> v_prefixed;
   for (std::set<identifier_t>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     std::stringstream id;
@@ -97,7 +97,7 @@ struct pg_actions: public core::default_parser_actions
   void create_boolean_equation_system(boolean_equation_system<Container>& b, bool maxpg)
   {
     // Build Boolean equation system. First we group equations by block
-    std::map<priority_t, atermpp::set<boolean_equation> > blocks;
+    std::map<priority_t, std::set<boolean_equation> > blocks;
     // Translation scheme:
     // prefix every id with X. Owner 0 means ||, owner 1 means &&
 
@@ -117,17 +117,17 @@ struct pg_actions: public core::default_parser_actions
       blocks[i->second.prio].insert(eqn);
     }
 
-    atermpp::vector<boolean_equation> eqns;
+    std::vector<boolean_equation> eqns;
     if(maxpg)
     {
-      for (std::map<priority_t, atermpp::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
+      for (std::map<priority_t, std::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
       {
         eqns.insert(eqns.end(), i->second.begin(), i->second.end());
       }
     }
     else
     {
-      for (std::map<priority_t, atermpp::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
+      for (std::map<priority_t, std::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
       {
         eqns.insert(eqns.end(), i->second.begin(), i->second.end());
       }
@@ -301,7 +301,7 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, b
   }
 
   // Build Boolean equation system. First we group equations by block
-  std::map<priority_t, atermpp::set<boolean_equation> > blocks;
+  std::map<priority_t, std::set<boolean_equation> > blocks;
   // Translation scheme:
   // prefix every id with X. Owner 0 means ||, owner 1 means &&
 
@@ -321,17 +321,17 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, b
     blocks[i->second.prio].insert(eqn);
   }
 
-  atermpp::vector<boolean_equation> eqns;
+  std::vector<boolean_equation> eqns;
   if(maxpg)
   {
-    for (std::map<priority_t, atermpp::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
+    for (std::map<priority_t, std::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
     {
       eqns.insert(eqns.end(), i->second.begin(), i->second.end());
     }
   }
   else
   {
-    for (std::map<priority_t, atermpp::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
+    for (std::map<priority_t, std::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
     {
       eqns.insert(eqns.end(), i->second.begin(), i->second.end());
     }

@@ -12,7 +12,6 @@
 #ifndef __REWR_PROVER_H
 #define __REWR_PROVER_H
 
-#include "mcrl2/aterm/aterm2.h"
 #include <mcrl2/data/detail/bdd_prover.h>
 #include "mcrl2/data/rewriter.h"
 
@@ -46,11 +45,10 @@ class RewriterProver: public Rewriter
          const atermpp::aterm_appl term,
          internal_substitution_type &sigma);
 
-    atermpp::aterm_appl toRewriteFormat(const data_expression term);
-    // data_expression fromRewriteFormat(const atermpp::aterm_appl term);
+    atermpp::aterm_appl toRewriteFormat(const data_expression &term);
 
-    bool addRewriteRule(const data_equation rule);
-    bool removeRewriteRule(const data_equation rule);
+    bool addRewriteRule(const data_equation &rule);
+    bool removeRewriteRule(const data_equation &rule);
 
 };
 

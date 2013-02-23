@@ -36,7 +36,7 @@
 extern char* _strdup(const char* s);
 #endif
 
-using namespace aterm;
+using namespace atermpp;
 
 int svcErrno;
 
@@ -132,7 +132,7 @@ int svcInit(ltsFile* file, char* filename, SVCfileMode fileMode, SVCbool* indexe
 
       /* Reserve space for file index */
 
-      ATfprintf(fp, "                             \n");
+      fprintf(fp, "                             \n");
       file->headerPosition=0L;
       file->bodyPosition=0L;
       file->trailerPosition=0L;
@@ -393,11 +393,11 @@ int svcWriteHeader(ltsFile* file,  struct ltsHeader* header)
 
   if (file->indexFlag)
   {
-    CSwriteIndex(file->csStates, NULL);
+    CSwriteIndex(file->csStates, aterm());
   }
   else
   {
-    CSwriteATerm(file->csStates, NULL);
+    CSwriteATerm(file->csStates, aterm());
   }
 
   CSflush(file->csStates);
@@ -469,12 +469,6 @@ int svcWriteTrailer(ltsFile* file)
   CSflush(file->csStates);
   file->trailerPosition=CStell(file->csStates);
 
-  /*
-     ATfprintf(file->fp, "%t %d\n", SVC_TRAILERLABEL, 666);
-  */
-  /*
-     CSwriteATerm(file->csStates, SVC_TRAILERLABEL);
-  */
   CSwriteInt(file->csStates, 666);
 
   return 0;

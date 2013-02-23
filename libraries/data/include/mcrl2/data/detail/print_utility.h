@@ -167,7 +167,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
     x = data::sort_real::int2real(value);
     if (is_function_symbol(value))
     {
-      core::identifier_string name = atermpp::arg1(value);
+      core::identifier_string name = atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(value));
       if (utilities::is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_real::real_());

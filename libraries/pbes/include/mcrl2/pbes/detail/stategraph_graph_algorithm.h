@@ -35,7 +35,7 @@ class stategraph_graph_algorithm
     // simplify and rewrite the guards of the pbes p
     void simplify(stategraph_pbes& p) const
     {
-      atermpp::vector<stategraph_equation>& equations = p.equations();
+      std::vector<stategraph_equation>& equations = p.equations();
       for (std::size_t k = 0; k < equations.size(); k++)
       {
         stategraph_equation& eqn = equations[k];
@@ -62,8 +62,8 @@ class stategraph_graph_algorithm
 
     propositional_variable find_propvar(const pbes<>& p, const core::identifier_string& X) const
     {
-      const atermpp::vector<pbes_equation>& equations = p.equations();
-      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      const std::vector<pbes_equation>& equations = p.equations();
+      for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         if (i->variable().name() == X)
         {
@@ -78,8 +78,8 @@ class stategraph_graph_algorithm
     {
       std::ostringstream out;
       out << "--- control flow parameters ---" << std::endl;
-      const atermpp::vector<stategraph_equation>& equations = m_pbes.equations();
-      for (atermpp::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
         const std::vector<data::variable>& d_X = k->parameters();
@@ -134,12 +134,12 @@ class stategraph_graph_algorithm
 
     void compute_stategraph_parameters()
     {
-      const atermpp::vector<stategraph_equation>& equations = m_pbes.equations();
+      const std::vector<stategraph_equation>& equations = m_pbes.equations();
       std::map<core::identifier_string, std::vector<data::variable> > V;
 
       // initialize all control flow parameters to true
       // initalize V_km to the empty set
-      for (atermpp::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
         const std::vector<data::variable>& d_X = k->parameters();
@@ -148,7 +148,7 @@ class stategraph_graph_algorithm
       }
 
       // pass 1
-      for (atermpp::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
         const std::vector<data::variable>& d_X = k->parameters();
@@ -184,7 +184,7 @@ class stategraph_graph_algorithm
 
       // pass 2
       std::set<core::identifier_string> todo;
-      for (atermpp::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         todo.insert(k->variable().name());
       }
@@ -275,7 +275,7 @@ class stategraph_graph_algorithm
       const stategraph_equation& eqn = *find_equation(m_pbes, X);
       const std::vector<data::variable>& d = eqn.parameters();
       std::size_t index = 0;
-      for (atermpp::vector<data::variable>::const_iterator i = d.begin(); i != d.end(); ++i, index++)
+      for (std::vector<data::variable>::const_iterator i = d.begin(); i != d.end(); ++i, index++)
       {
         if (b[index])
         {

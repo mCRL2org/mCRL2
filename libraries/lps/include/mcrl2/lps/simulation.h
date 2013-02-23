@@ -10,8 +10,8 @@
 #define MCRL2_LPS_SIMULATION_H
 
 #include <string>
+#include <deque>
 
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -39,7 +39,7 @@ class simulation
     struct state_t
     {
       state source_state;
-      atermpp::vector<transition_t> transitions;
+      std::vector<transition_t> transitions;
       size_t transition_number; // Undefined for the last state in the trace
     };
 
@@ -47,7 +47,7 @@ class simulation
     simulation(const specification& specification, data::rewrite_strategy strategy = data::rewrite_strategy());
 
     /// Returns the current annotated state vector.
-    const atermpp::deque<state_t> &trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
+    const std::deque<state_t> &trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
 
     /// Remove states from the end of the simulation, making \a state_number the last state.
     void truncate(size_t state_number);
@@ -65,11 +65,11 @@ class simulation
     void load(const std::string &filename);
 
   private:
-    atermpp::vector<transition_t> transitions(state source_state);
-    atermpp::vector<transition_t> prioritize(const atermpp::vector<transition_t> &transitions);
+    std::vector<transition_t> transitions(state source_state);
+    std::vector<transition_t> prioritize(const std::vector<transition_t> &transitions);
     bool is_prioritized(const multi_action &action);
     void prioritize_trace();
-    atermpp::deque<state_t> match_trace(atermpp::deque<state_t> trace, const atermpp::vector<transition_t> &transitions, size_t transition_number);
+    std::deque<state_t> match_trace(std::deque<state_t> trace, const std::vector<transition_t> &transitions, size_t transition_number);
     bool match(const state &left, const state &right);
 
   private:
@@ -82,24 +82,14 @@ class simulation
     std::string m_prioritized_action;
 
     // The complete trace.
-    atermpp::deque<state_t> m_full_trace;
+    std::deque<state_t> m_full_trace;
     // The trace with all prioritized in-between states removed.
-    atermpp::deque<state_t> m_prioritized_trace;
+    std::deque<state_t> m_prioritized_trace;
     std::deque<size_t> m_prioritized_originals;
 };
 
 } // namespace lps
 
 } // namespace mcrl2
-
-namespace atermpp
-{
-  template<> struct aterm_traits<mcrl2::lps::simulation::transition_t>
-  {
-    static void protect(const mcrl2::lps::simulation::transition_t &transition) { aterm_traits<mcrl2::lps::multi_action>::protect(transition.action); }
-    static void unprotect(const mcrl2::lps::simulation::transition_t &transition) { aterm_traits<mcrl2::lps::multi_action>::unprotect(transition.action); }
-    static void mark(const mcrl2::lps::simulation::transition_t &transition) { aterm_traits<mcrl2::lps::multi_action>::mark(transition.action); }
-  };
-}
 
 #endif

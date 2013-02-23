@@ -12,30 +12,16 @@
 #ifndef MCRL2_ATERMPP_TABLE_H
 #define MCRL2_ATERMPP_TABLE_H
 
-#include <boost/shared_ptr.hpp>
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/indexed_set.h"
 
 namespace atermpp
 {
-/// \cond INTERNAL_DOCS
-struct table_deleter
-{
-  /// \brief Function call operator
-  /// \param t An ATerm table
-  void operator()(ATermTable t)
-  {
-    ATtableDestroy(t);
-  }
-};
-/// \endcond
-
-/// \brief Table containing ATerms. N.B. Copies of a table refer to the same object.
-class table
+/// \Brief table. Has essentially the  same functionality as a std::map< term, term >;
+class table:public indexed_set
 {
   protected:
-    /// The wrapped ATermTable.
-    boost::shared_ptr<_ATermTable> m_table;
+    
+    std::vector < std::vector < aterm > > m_values;
 
   public:
     /// \brief Constructor Creates a table.
@@ -49,63 +35,41 @@ class table
     /// expansion and rehashing of the table which increases efficiency.
     /// \param initial_size A positive integer
     /// \param max_load_pct A positive integer
-    table(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
-      : m_table(ATtableCreate(initial_size, max_load_pct), table_deleter())
+    table(unsigned int initial_size = 100, unsigned int max_load_pct = 75):
+            indexed_set(initial_size,max_load_pct)
     {}
 
-    /// \brief Resets a table.
+    /// \brief Clears a table.
     /// This function resets an atermtable, without freeing the memory it occupies. Its
     /// effect is the same as the subsequent execution of a destroy and a create of a table, but as no
     /// memory is released and obtained from the C memory management system this function is gen-
     /// erally cheaper. but if subsequent tables differ very much in size, the use of table_destroy and
     /// table_create may be prefered, because in such a way the sizes of the table adapt automatically
     /// to the requirements of the application.
-    void reset()
-    {
-      ATtableReset(m_table.get());
-    }
+    void clear();
 
     /// \brief Add / update a (key, value)-pair in a table.
     /// If key does not already exist in the table, this function adds the (key, value)-pair
     /// to the table. Otherwise, it updates the value to value.
     /// \param key A key value.
     /// \param value A value.
-    void put(aterm key, aterm value)
-    {
-      ATtablePut(m_table.get(), key, value);
-    }
+    void put(const aterm &key, const aterm &value);
 
     /// \brief Get the value belonging to a given key in a table.
     /// \param key A key value.
     /// \return The corresponding value.
-    aterm get(aterm key)
-    {
-      return ATtableGet(m_table.get(), key);
-    }
+    const aterm &get(const aterm &key) const; 
 
     /// \brief Remove the (key, value)-pair from table.
     /// \param key A key value.
-    void remove(aterm key)
-    {
-      ATtableRemove(m_table.get(), key);
-    }
+    bool erase(const aterm &key);
 
-    /// \brief Get a list of all the keys in a table.
-    /// This function can be useful if you need to iterate over all elements in a table. It
-    /// returns an term_list containing all the keys in the table. The corresponding values of each key
-    /// you are interested in can then be retrieved through respective calls to table_get.
-    /// \return A list containing the elements of the table.
-    aterm_list table_keys()
-    {
-      return aterm_list(ATtableKeys(m_table.get()));
-    }
+    /// \brief Get a list of all the values in a table.
+    /// This function can be useful if you need to iterate over all values in a table. It
+    /// returns an term_list containing all the values in the table. 
+    /// \return A list containing the values of the table.
+    aterm_list values() const;
 
-    /// \brief Conversion operator
-    /// \return The wrapped ATermTable pointer
-    operator ATermTable()
-    {
-      return m_table.get();
-    }
 };
 
 } // namespace atermpp

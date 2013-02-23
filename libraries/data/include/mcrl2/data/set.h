@@ -67,7 +67,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& constructor_name()
       {
-        static core::identifier_string constructor_name = core::detail::initialise_static_expression(constructor_name, core::identifier_string("@set"));
+        static core::identifier_string constructor_name = core::identifier_string("@set");
         return constructor_name;
       }
 
@@ -136,7 +136,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("{}"));
+        static core::identifier_string empty_name = core::identifier_string("{}");
         return empty_name;
       }
 
@@ -169,7 +169,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set_fset_name()
       {
-        static core::identifier_string set_fset_name = core::detail::initialise_static_expression(set_fset_name, core::identifier_string("@setfset"));
+        static core::identifier_string set_fset_name = core::identifier_string("@setfset");
         return set_fset_name;
       }
 
@@ -226,7 +226,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set_comprehension_name()
       {
-        static core::identifier_string set_comprehension_name = core::detail::initialise_static_expression(set_comprehension_name, core::identifier_string("@setcomp"));
+        static core::identifier_string set_comprehension_name = core::identifier_string("@setcomp");
         return set_comprehension_name;
       }
 
@@ -283,7 +283,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("in"));
+        static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
       }
 
@@ -341,7 +341,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& complement_name()
       {
-        static core::identifier_string complement_name = core::detail::initialise_static_expression(complement_name, core::identifier_string("!"));
+        static core::identifier_string complement_name = core::identifier_string("!");
         return complement_name;
       }
 
@@ -398,7 +398,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& union_name()
       {
-        static core::identifier_string union_name = core::detail::initialise_static_expression(union_name, core::identifier_string("+"));
+        static core::identifier_string union_name = core::identifier_string("+");
         return union_name;
       }
 
@@ -456,7 +456,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& intersection_name()
       {
-        static core::identifier_string intersection_name = core::detail::initialise_static_expression(intersection_name, core::identifier_string("*"));
+        static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
       }
 
@@ -514,7 +514,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& difference_name()
       {
-        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("-"));
+        static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
       }
 
@@ -572,7 +572,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& false_function_name()
       {
-        static core::identifier_string false_function_name = core::detail::initialise_static_expression(false_function_name, core::identifier_string("@false_"));
+        static core::identifier_string false_function_name = core::identifier_string("@false_");
         return false_function_name;
       }
 
@@ -629,7 +629,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& true_function_name()
       {
-        static core::identifier_string true_function_name = core::detail::initialise_static_expression(true_function_name, core::identifier_string("@true_"));
+        static core::identifier_string true_function_name = core::identifier_string("@true_");
         return true_function_name;
       }
 
@@ -686,7 +686,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& not_function_name()
       {
-        static core::identifier_string not_function_name = core::detail::initialise_static_expression(not_function_name, core::identifier_string("@not_"));
+        static core::identifier_string not_function_name = core::identifier_string("@not_");
         return not_function_name;
       }
 
@@ -743,7 +743,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& and_function_name()
       {
-        static core::identifier_string and_function_name = core::detail::initialise_static_expression(and_function_name, core::identifier_string("@and_"));
+        static core::identifier_string and_function_name = core::identifier_string("@and_");
         return and_function_name;
       }
 
@@ -801,7 +801,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& or_function_name()
       {
-        static core::identifier_string or_function_name = core::detail::initialise_static_expression(or_function_name, core::identifier_string("@or_"));
+        static core::identifier_string or_function_name = core::identifier_string("@or_");
         return or_function_name;
       }
 
@@ -885,7 +885,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -897,7 +897,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_set_fset_application(e) || is_set_comprehension_application(e) || is_complement_application(e) || is_false_function_application(e) || is_true_function_application(e) || is_not_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -909,7 +909,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for set_

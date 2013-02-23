@@ -44,7 +44,7 @@ std::size_t child_count(const state_formula& x)
   else if (state_formulas::is_variable(x))    { return 0; }
   else if (state_formulas::is_nu(x))          { return 1; }
   else if (state_formulas::is_mu(x))          { return 1; }
-  throw mcrl2::runtime_error("child_count: unknown argument " + x.to_string());
+  throw mcrl2::runtime_error("child_count: unknown argument");
   return 0;
 }
 
@@ -64,8 +64,8 @@ struct bottom_up_traverser: public Traverser<Derived>
   }
 
   // Maintain a stack with nodes, used to store intermediate results
-  atermpp::vector<Node> node_stack;
-  typedef typename atermpp::vector<Node>::const_iterator node_iterator;
+  std::vector<Node> node_stack;
+  typedef typename std::vector<Node>::const_iterator node_iterator;
 
   // Push a node to node_stack
   void push(const Node& node)

@@ -18,8 +18,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "lpstrans.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -28,7 +26,7 @@
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using namespace aterm;
+using namespace atermpp;
 
 class tbf2lps_tool: public input_output_tool
 {
@@ -54,15 +52,15 @@ class tbf2lps_tool: public input_output_tool
 
     bool run()
     {
-      ATermAppl mcrl_spec;
+      aterm_appl mcrl_spec;
 
       if (input_filename().empty())
       {
         mCRL2log(verbose) << "reading mCRL LPS from stdin..." << std::endl;
 
-        mcrl_spec = (ATermAppl) ATreadFromFile(stdin);
+        mcrl_spec = (aterm_appl) read_term_from_binary_stream(std::cin);
 
-        if (mcrl_spec == 0)
+        if (!mcrl_spec.defined())
         {
           throw mcrl2::runtime_error("could not read mCRL LPS from '" + input_filename() + "'");
         }
@@ -75,18 +73,19 @@ class tbf2lps_tool: public input_output_tool
       {
         mCRL2log(verbose) << "reading mCRL LPS from '" <<  input_filename() << "'..." << std::endl;
 
-        FILE* in_stream = fopen(input_filename().c_str(), "rb");
+        std::ifstream in_stream;
+        in_stream.open(input_filename().c_str(), std::ios::binary);
 
-        if (in_stream == 0)
+        if (in_stream.fail())
         {
           throw mcrl2::runtime_error("could not open input file '" + input_filename() + "' for reading");
         }
 
-        mcrl_spec = (ATermAppl) ATreadFromFile(in_stream);
+        mcrl_spec = (aterm_appl) read_term_from_binary_stream(in_stream);
 
-        fclose(in_stream);
+        in_stream.close();
 
-        if (mcrl_spec == 0)
+        if (mcrl_spec == aterm())
         {
           throw mcrl2::runtime_error("could not read mCRL LPS from '" + input_filename() + "'");
         }
@@ -96,32 +95,36 @@ class tbf2lps_tool: public input_output_tool
         }
       }
 
-      ATprotectAppl(&mcrl_spec);
+      // ATprotectAppl(&mcrl_spec);
       assert(is_mCRL_spec(mcrl_spec));
 
-      ATermAppl spec = translate(mcrl_spec,true,m_not_convert_mappings);
-      ATprotectAppl(&spec);
+      aterm_appl spec = translate(mcrl_spec,true,m_not_convert_mappings);
+      // ATprotectAppl(&spec);
 
       if (output_filename().empty())
       {
         mCRL2log(verbose) << "writing mCRL2 LPS to stdout..." << std::endl;
 
-        ATwriteToSAFFile((ATerm) spec, stdout);
+        // ATwriteToSAFFile(spec, stdout);
+        write_term_to_binary_stream(spec, std::cout);
       }
       else
       {
         mCRL2log(verbose) << "writing mCRL2 LPS to '" <<  output_filename() << "'..." << std::endl;
 
-        FILE* outstream = fopen(output_filename().c_str(), "wb");
+        // FILE* outstream = fopen(output_filename().c_str(), "wb");
+        std::ofstream outstream;
+        outstream.open(output_filename().c_str());
 
-        if (outstream == NULL)
+        if (outstream.fail())
         {
           throw mcrl2::runtime_error("cannot open output file '" + output_filename() + "'");
         }
 
-        ATwriteToSAFFile((ATerm) spec,outstream);
+        write_term_to_binary_stream(spec,outstream);
+        // ATwriteToSAFFile(spec,outstream);
 
-        fclose(outstream);
+        outstream.close();
       }
       return true;
     }
@@ -145,6 +148,5 @@ class tbf2lps_tool: public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argv)
   return tbf2lps_tool().execute(argc, argv);
 }

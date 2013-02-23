@@ -48,7 +48,7 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
     structured_sort_constructor_argument_base(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_StructProj(m_term));
+      assert(core::detail::check_term_StructProj(*this));
     }
 
     /// \brief Constructor.
@@ -63,12 +63,12 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
 
     core::identifier_string name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
     sort_expression sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<sort_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -96,7 +96,7 @@ static core::identifier_string make_identifier(std::string const& name)
 inline
 static core::identifier_string make_identifier(atermpp::aterm_appl const& a)
 {
-  return (a == atermpp::aterm_appl(core::detail::gsMakeNil())) ? no_identifier() : core::identifier_string(a);
+  return (a == core::detail::gsMakeNil()) ? no_identifier() : core::identifier_string(a);
 }
 }
 /// \endcond
@@ -123,8 +123,8 @@ class structured_sort_constructor_argument: public detail::structured_sort_const
     {}
 
     /// \overload
-    structured_sort_constructor_argument(atermpp::aterm_appl term)
-      : detail::structured_sort_constructor_argument_base(term)
+    structured_sort_constructor_argument(const aterm &term)
+      : detail::structured_sort_constructor_argument_base(atermpp::aterm_appl(term))
     {}
 
     /// \brief Constructor
@@ -172,11 +172,19 @@ class structured_sort_constructor_argument: public detail::structured_sort_const
 /// \brief List of structured_sort_constructor_argument
 typedef atermpp::term_list< structured_sort_constructor_argument > structured_sort_constructor_argument_list;
 /// \brief Vector of structured_sort_constructor_argument
-typedef atermpp::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
+typedef std::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
 
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+template <>
+inline void swap(mcrl2::data::structured_sort_constructor_argument& t1, mcrl2::data::structured_sort_constructor_argument& t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_ARGUMENT_H
 

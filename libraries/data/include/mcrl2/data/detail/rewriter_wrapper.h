@@ -68,7 +68,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
       return m_rewriter->fromRewriteFormat(t);
     } 
   
-    atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t, internal_substitution_type &sigma) const
+    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl &t, internal_substitution_type &sigma) const
     {
       return m_rewriter->rewrite_internal(t,sigma);
     } 

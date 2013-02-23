@@ -82,12 +82,12 @@ namespace detail {
     /// \param phi An instantiated propositional variable
     /// \return The set of variable instantiations (successor states) that appear in the rewritten
     /// right hand side expression.
-    atermpp::set<pbes_expression> get_successors(const pbes_expression& phi)
+    std::set<pbes_expression> get_successors(const pbes_expression& phi)
     {
       //std::clog << "get_successors(psi)" << std::endl;
       initialize_generation();
 
-      atermpp::set<pbes_expression> result;
+      std::set<pbes_expression> result;
       mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression " << print(phi) << std::endl;
 
       // expand the right hand side if needed
@@ -100,16 +100,16 @@ namespace detail {
       }
       else if (tr::is_and(psi))
       {
-        atermpp::set<pbes_expression> terms = pbes_expr::split_and(psi);
-        for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = pbes_expr::split_and(psi);
+        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(*i);
         }
       }
       else if (tr::is_or(psi))
       {
-        atermpp::set<pbes_expression> terms = pbes_expr::split_or(psi);
-        for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = pbes_expr::split_or(psi);
+        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(*i);
         }
@@ -130,7 +130,7 @@ namespace detail {
       }
       else
       {
-        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + print(psi) + "\n" + psi.to_string()));
+        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + print(psi) + "\n" + to_string(psi)));
       }
       mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);
       return result;
@@ -190,11 +190,11 @@ namespace detail {
     /// \param expr The expression associated with the transition group.
     /// \return The set of variable instantiations (successor states) that appear in the rewritten
     /// expression.
-    atermpp::set<pbes_expression> get_successors(const pbes_expression& phi, const std::string& var, const pbes_expression& expr)
+    std::set<pbes_expression> get_successors(const pbes_expression& phi, const std::string& var, const pbes_expression& expr)
     {
       initialize_generation();
 
-      atermpp::set<pbes_expression> result;
+      std::set<pbes_expression> result;
       mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression "  << print(phi) << " (var = " << var
                                                                                                << ", expr = " << print(expr) << ")" <<std::endl;
 
@@ -213,16 +213,16 @@ namespace detail {
         }
         else if (tr::is_and(psi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_and(psi);
-          for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          std::set<pbes_expression> terms = pbes_expr::split_and(psi);
+          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(*i);
           }
         }
         else if (tr::is_or(psi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_or(psi);
-          for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          std::set<pbes_expression> terms = pbes_expr::split_or(psi);
+          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(*i);
           }

@@ -16,7 +16,6 @@
 #include <string>
 #include <iostream>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lps/tools.h"
@@ -76,6 +75,5 @@ class lpspp_tool: public input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return lpspp_tool().execute(argc, argv);
 }

@@ -13,7 +13,6 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/parse.h"
@@ -47,9 +46,9 @@ data::variable make_bool(const std::string& s)
 }
 
 inline
-atermpp::vector<data::variable> variable_context()
+std::vector<data::variable> variable_context()
 {
-  atermpp::vector<data::variable> result;
+  std::vector<data::variable> result;
   result.push_back(make_bool("k"));
   result.push_back(make_bool("m"));
   result.push_back(make_bool("n"));
@@ -90,7 +89,7 @@ process_expression parse_expression(const std::string& text)
 
 /// \brief Parses a string of the form "b: Bool := v, c: Bool := !w", and adds
 inline
-data::mutable_map_substitution<> parse_substitution(const std::string& text, const atermpp::vector<data::variable>& variables = variable_context())
+data::mutable_map_substitution<> parse_substitution(const std::string& text, const std::vector<data::variable>& variables = variable_context())
 {
   data::mutable_map_substitution<> sigma;
   std::vector<std::string> substitutions = utilities::split(text, ";");
@@ -137,8 +136,6 @@ void test_replace_variables_capture_avoiding()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_replace_variables_capture_avoiding();
 
   return EXIT_SUCCESS;

@@ -16,8 +16,6 @@
 #include <mcrl2/lps/untime.h>
 #include <mcrl2/lps/linearise.h>
 #include <mcrl2/lps/find.h>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -144,16 +142,10 @@ void test_case_4()
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERMPP_INIT(ac, av)
-
   test_case_1();
-  core::garbage_collect();
   test_case_2();
-  core::garbage_collect();
   test_case_3();
-  core::garbage_collect();
   test_case_4();
-  core::garbage_collect();
 
   return 0;
 }

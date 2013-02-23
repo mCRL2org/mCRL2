@@ -66,7 +66,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     std::string print_control_flow_marking() const
     {
       std::ostringstream out;
-      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      for (std::map<propositional_variable_instantiation, control_flow_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         const control_flow_vertex& v = i->second;
         out << print_control_flow_marking(v) << std::endl;
@@ -78,7 +78,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     {
       mCRL2log(log::debug, "control_flow") << "--- compute initial marking ---" << std::endl;
       // initialization
-      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      for (std::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         control_flow_vertex& v = i->second;
         std::set<data::variable> fv = v.free_guard_variables();
@@ -90,7 +90,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
 
       // backwards reachability algorithm
       std::set<control_flow_vertex*> todo;
-      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      for (std::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         control_flow_vertex& v = i->second;
         todo.insert(&v);
@@ -104,7 +104,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
         mCRL2log(log::debug, "control_flow") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
         std::set<std::size_t> I = v.marking_variable_indices(m_pbes);
 
-        for (atermpp::set<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
+        for (std::set<control_flow_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
         {
           control_flow_vertex& u = *(i->source);
           std::size_t last_size = u.marking.size();
@@ -129,12 +129,12 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       }
 
       // set the marking_parameters attributes
-      for (atermpp::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      for (std::map<propositional_variable_instantiation, control_flow_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
       {
         control_flow_vertex& v = i->second;
         const pfnf_equation& eqn = *find_equation(m_pbes, v.X.name());
-        const atermpp::vector<data::variable>& d = eqn.parameters();
-        for (atermpp::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
+        const std::vector<data::variable>& d = eqn.parameters();
+        for (std::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
         {
           v.marked_parameters.push_back(v.marking.find(*j) != v.marking.end());
         }
@@ -146,7 +146,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     pbes_expression reset_variable(const propositional_variable_instantiation& x)
     {
       mCRL2log(log::debug, "control_flow") << "resetting variable " << pbes_system::pp(x) << std::endl;
-      atermpp::vector<pbes_expression> Xij_conjuncts;
+      std::vector<pbes_expression> Xij_conjuncts;
       core::identifier_string X = x.name();
       std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
@@ -156,7 +156,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       {
         control_flow_vertex& w = **q;
         mCRL2log(log::debug, "control_flow") << "    vertex X = " << pbes_system::pp(w.X) << std::endl;
-        atermpp::vector<data::data_expression> e;
+        std::vector<data::data_expression> e;
         std::size_t N = w.marked_parameters.size();
         data::data_expression_list::const_iterator s = w.X.parameters().begin();
         data::data_expression condition = data::sort_bool::true_();
@@ -212,17 +212,17 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
 
       // expand the equations, and add them to the result
-      atermpp::vector<pfnf_equation>& equations = m_pbes.equations();
-      for (atermpp::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
+      std::vector<pfnf_equation>& equations = m_pbes.equations();
+      for (std::vector<pfnf_equation>::iterator k = equations.begin(); k != equations.end(); ++k)
       {
         mCRL2log(log::debug, "control_flow") << "resetting equation: " << print_equation(k->convert()) << std::endl;
-        atermpp::vector<pfnf_implication>& implications = k->implications();
-        atermpp::vector<pbes_expression> new_implications;
-        for (atermpp::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
+        std::vector<pfnf_implication>& implications = k->implications();
+        std::vector<pbes_expression> new_implications;
+        for (std::vector<pfnf_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
         {
-          atermpp::vector<propositional_variable_instantiation>& v = i->variables();
-          atermpp::vector<pbes_expression> disjuncts;
-          for (atermpp::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
+          std::vector<propositional_variable_instantiation>& v = i->variables();
+          std::vector<pbes_expression> disjuncts;
+          for (std::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
           {
             disjuncts.push_back(reset_variable(*j));
           }

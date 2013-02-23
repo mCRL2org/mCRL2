@@ -132,8 +132,8 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
       case BOUNDED_EXISTS:
       {
         size_t count = 0;
-        atermpp::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
-        for(atermpp::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
+        std::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
+        for(std::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
         {
           if (!is_simple_expression(*it))
           {
@@ -151,8 +151,8 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
       case EXISTENTIAL:
       {
         size_t count = 0;
-        atermpp::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
-        for(atermpp::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
+        std::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
+        for(std::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
         {
           if (!is_simple_expression(*it))
           {
@@ -196,8 +196,8 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
       case UNIVERSAL:
       {
         size_t count = 0;
-        atermpp::vector<pbes_expression> disjuncts = pbes_expr::split_disjuncts(x);
-        for(atermpp::vector<pbes_expression>::iterator it = disjuncts.begin(); it != disjuncts.end(); ++it)
+        std::vector<pbes_expression> disjuncts = pbes_expr::split_disjuncts(x);
+        for(std::vector<pbes_expression>::iterator it = disjuncts.begin(); it != disjuncts.end(); ++it)
         {
           if (!is_simple_expression(*it))
           {

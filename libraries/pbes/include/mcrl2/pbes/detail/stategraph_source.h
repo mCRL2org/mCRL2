@@ -76,8 +76,8 @@ class stategraph_source_algorithm
           data::data_expression v_i = *i;
           if (data::is_equal_to_application(v_i))
           {
-            data::data_expression left = data::application(v_i).left();
-            data::data_expression right = data::application(v_i).right();
+            data::data_expression left = data::binary_left(v_i);
+            data::data_expression right = data::binary_right(v_i);
             if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && is_constant(right))
             {
               sigma[left] = right;

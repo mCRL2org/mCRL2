@@ -30,7 +30,7 @@ namespace fdr {
 
 class <CLASSNAME>;
 typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
-typedef atermpp::vector<<CLASSNAME>> <CLASSNAME>_vector;
+typedef std::vector<<CLASSNAME>> <CLASSNAME>_vector;
 
 } // namespace fdr
 

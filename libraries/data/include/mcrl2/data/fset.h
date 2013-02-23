@@ -81,7 +81,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("@fset_empty"));
+        static core::identifier_string empty_name = core::identifier_string("@fset_empty");
         return empty_name;
       }
 
@@ -114,7 +114,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cons_name()
       {
-        static core::identifier_string cons_name = core::detail::initialise_static_expression(cons_name, core::identifier_string("@fset_cons"));
+        static core::identifier_string cons_name = core::identifier_string("@fset_cons");
         return cons_name;
       }
 
@@ -184,7 +184,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& insert_name()
       {
-        static core::identifier_string insert_name = core::detail::initialise_static_expression(insert_name, core::identifier_string("@fset_insert"));
+        static core::identifier_string insert_name = core::identifier_string("@fset_insert");
         return insert_name;
       }
 
@@ -242,7 +242,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cinsert_name()
       {
-        static core::identifier_string cinsert_name = core::detail::initialise_static_expression(cinsert_name, core::identifier_string("@fset_cinsert"));
+        static core::identifier_string cinsert_name = core::identifier_string("@fset_cinsert");
         return cinsert_name;
       }
 
@@ -301,7 +301,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("@fset_in"));
+        static core::identifier_string in_name = core::identifier_string("@fset_in");
         return in_name;
       }
 
@@ -359,7 +359,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& union_name()
       {
-        static core::identifier_string union_name = core::detail::initialise_static_expression(union_name, core::identifier_string("@fset_union"));
+        static core::identifier_string union_name = core::identifier_string("@fset_union");
         return union_name;
       }
 
@@ -419,7 +419,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& intersection_name()
       {
-        static core::identifier_string intersection_name = core::detail::initialise_static_expression(intersection_name, core::identifier_string("@fset_inter"));
+        static core::identifier_string intersection_name = core::identifier_string("@fset_inter");
         return intersection_name;
       }
 
@@ -479,7 +479,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& difference_name()
       {
-        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("@fset_diff"));
+        static core::identifier_string difference_name = core::identifier_string("@fset_diff");
         return difference_name;
       }
 
@@ -556,7 +556,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -568,7 +568,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -580,7 +580,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -592,7 +592,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -604,7 +604,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_union_application(e) || is_intersection_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 3);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 3);
       }
 
       ///\brief Function for projecting out argument
@@ -616,7 +616,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for fset

@@ -17,11 +17,9 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "mcrl2/aterm/aterm2.h"
 #include "boost/algorithm/string.hpp"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
@@ -289,7 +287,7 @@ struct data_specification_actions: public data_expression_actions
     : data_expression_actions(table_)
   {}
 
-  bool callback_SortDecl(const core::parse_node& node, atermpp::vector<atermpp::aterm_appl>& result)
+  bool callback_SortDecl(const core::parse_node& node, std::vector<atermpp::aterm_appl>& result)
   {
     if (symbol_name(node) == "SortDecl")
     {
@@ -314,14 +312,14 @@ struct data_specification_actions: public data_expression_actions
     return false;
   };
 
-  atermpp::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node)
+  std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node)
   {
-    atermpp::vector<atermpp::aterm_appl> result;
+    std::vector<atermpp::aterm_appl> result;
     traverse(node, boost::bind(&data_specification_actions::callback_SortDecl, this, _1, boost::ref(result)));
     return result;
   }
 
-  atermpp::vector<atermpp::aterm_appl> parse_SortSpec(const core::parse_node& node)
+  std::vector<atermpp::aterm_appl> parse_SortSpec(const core::parse_node& node)
   {
     return parse_SortDeclList(node.child(1));
   }
@@ -402,8 +400,8 @@ struct data_specification_actions: public data_expression_actions
   {
     if (symbol_name(node) == "SortSpec")
     {
-      atermpp::vector<atermpp::aterm_appl> v = parse_SortSpec(node);
-      for (atermpp::vector<atermpp::aterm_appl>::iterator i = v.begin(); i != v.end(); ++i)
+      std::vector<atermpp::aterm_appl> v = parse_SortSpec(node);
+      for (std::vector<atermpp::aterm_appl>::iterator i = v.begin(); i != v.end(); ++i)
       {
         if (is_alias(*i))
         {
@@ -618,7 +616,7 @@ void parse_variables(std::istream& in,
   // Parse the variables list.
   std::string text = utilities::read_text(in);
   variable_list data_vars = parse_variables_new(text);
-  aterm::ATermList temporary_data_vars = data_vars;
+  atermpp::aterm_list temporary_data_vars = data_vars;
 
   // Type check the variable list.
   /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
@@ -627,11 +625,11 @@ void parse_variables(std::istream& in,
 
   temporary_data_vars = core::type_check_data_vars(data_vars, d);
 
-  if (temporary_data_vars == 0)
+  if (temporary_data_vars == atermpp::aterm_list(atermpp::aterm()))
   {
     throw mcrl2::runtime_error("Error while type checking data variable declarations.");
   }
-  data_vars=temporary_data_vars;
+  data_vars=variable_list(temporary_data_vars);
 
   // Undo sort renamings for compatibility with type checker
   // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
@@ -722,7 +720,7 @@ inline
 variable parse_variable(const std::string& text,
                         const data_specification& data_spec = detail::default_specification())
 {
-  atermpp::vector < variable > variable_store;
+  std::vector < variable > variable_store;
 
   parse_variables(text + ";", std::back_inserter(variable_store),data_spec);
 
@@ -840,7 +838,7 @@ data_expression parse_data_expression(const std::string& text,
                                       const std::string& var_decl,
                                       const data_specification& data_spec = detail::default_specification())
 {
-  atermpp::vector < variable > variable_store;
+  std::vector < variable > variable_store;
   if (!var_decl.empty())
   {
     parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
@@ -955,7 +953,7 @@ std::pair<std::string, data_expression_list> parse_variable(std::string const& s
       variables.push_back(data::parse_variable(*i));
     }
   }
-  return std::make_pair(name, make_variable_list(variables));
+  return std::make_pair(name, data_expression_list(variables.begin(), variables.end()));
 }
 } // namespace detail
 /// \endcond

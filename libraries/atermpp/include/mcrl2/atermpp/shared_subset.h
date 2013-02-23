@@ -13,10 +13,10 @@
 #define MCRL2_ATERMPP_SHARED_SUBSET_H
 
 #include <vector>
+#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/construction_utility.h"
 
 static inline int highest_bit(size_t x)
@@ -39,23 +39,22 @@ namespace atermpp
 template <typename T>
 class shared_subset
 {
-  friend struct atermpp::aterm_traits<shared_subset>;
   protected:
     static atermpp::aterm_string &get_true()
     {
-      static atermpp::aterm_string true_ = mcrl2::core::detail::initialise_static_expression(true_, atermpp::aterm_string("true"));
+      static atermpp::aterm_string true_ = atermpp::aterm_string("true");
       return true_;
     }
 
     static atermpp::aterm_string &get_false()
     {
-      static atermpp::aterm_string false_ = mcrl2::core::detail::initialise_static_expression(false_, atermpp::aterm_string("false"));
+      static atermpp::aterm_string false_ = atermpp::aterm_string("false");
       return false_;
     }
 
     static atermpp::function_symbol &get_node()
     {
-      static atermpp::function_symbol node_ = mcrl2::core::detail::initialise_static_expression(node_, atermpp::function_symbol("node", 3));
+      static atermpp::function_symbol node_ = atermpp::function_symbol("node", 3);
       return node_;
     }
 
@@ -94,17 +93,17 @@ class shared_subset
 
         int bit()
         {
-          return atermpp::aterm_int((*this)(0)).value();
+          return atermpp::aterm_int((*this)[0]).value();
         }
 
         bdd_node true_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)(1)));
+          return bdd_node(atermpp::aterm_appl((*this)[1]));
         }
 
         bdd_node false_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)(2)));
+          return bdd_node(atermpp::aterm_appl((*this)[2]));
         }
     };
 
@@ -165,8 +164,8 @@ class shared_subset
 
         void find_next_index()
         {
-          //bdd_node path_stack[m_subset->m_bits];
-          MCRL2_SYSTEM_SPECIFIC_ALLOCA(path_stack, bdd_node, m_subset->m_bits);
+          typedef std::vector < bdd_node, mcrl2::utilities::stack_alloc < bdd_node, 64> > vector_t;
+          vector_t path_stack(m_subset->m_bits);
           size_t path_stack_index = 0;
           bdd_node node = m_subset->m_bdd_root;
 
@@ -277,8 +276,8 @@ class shared_subset
       : m_set(set.m_set),
         m_bits(set.m_bits)
     {
-      //bdd_node trees[m_bits + 1];
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(trees, bdd_node, m_bits + 1);
+      typedef std::vector < bdd_node, mcrl2::utilities::stack_alloc < bdd_node, 64> > vector_t;
+      vector_t trees(m_bits + 1);
       size_t completed = 0;
       for (iterator i = set.begin(); i != set.end(); i++)
       {
@@ -395,14 +394,6 @@ class shared_subset
     {
       return iterator();
     }
-};
-
-template <typename T>
-struct aterm_traits<shared_subset<T> >
-{
-  static void protect(const shared_subset<T> &subset) { subset.m_bdd_root.protect(); }
-  static void unprotect(const shared_subset<T> &subset) { subset.m_bdd_root.unprotect(); }
-  static void mark(const shared_subset<T> &subset) { subset.m_bdd_root.mark(); }
 };
 
 } // namespace atermpp

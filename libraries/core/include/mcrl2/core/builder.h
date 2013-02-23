@@ -16,8 +16,6 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/atermpp/convert.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -60,7 +58,7 @@ struct builder
   // aterm update
   template <typename T>
   void update(T& x,
-              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
              )
   {
     msg("aterm update");
@@ -70,7 +68,7 @@ struct builder
   // non-aterm update
   template <typename T>
   void update(T& x,
-              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
              )
   {
     msg("non-aterm update");
@@ -80,7 +78,7 @@ struct builder
   // aterm update copy
   template <typename T>
   T update_copy(const T& x,
-                typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                )
   {
     msg("aterm update copy");
@@ -90,7 +88,7 @@ struct builder
   // non-aterm update copy
   template <typename T>
   T& update_copy(T& x,
-                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                 )
   {
     msg("non-aterm update copy");
@@ -123,11 +121,11 @@ struct builder
 
   // aterm set visit
   template <typename T>
-  void visit(atermpp::set<T>& x)
+  void visit(std::set<T>& x)
   {
     msg("aterm set visit");
-    atermpp::set<T> result;
-    for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+    std::set<T> result;
+    for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
     {
       result.insert(update_copy(*i));
     }
@@ -148,31 +146,31 @@ struct builder
   atermpp::term_list<T> visit_copy(const atermpp::term_list<T>& x)
   {
     msg("term_list visit_copy");
-    atermpp::vector<T> result;
+    std::vector<T> result;
     for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
     {
       result.push_back(static_cast<Derived&>(*this)(*i));
     }
-    return atermpp::convert<atermpp::term_list<T> >(result);
+    return atermpp::term_list<T>(result.begin(),result.end());
   }
 
 #ifdef BOOST_MSVC
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #else
-  // ATerm traversal
+  // aterm traversal
   template <typename T>
   T operator()(const T& x,
-               typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+               typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
               )
   {
     msg("aterm traversal");
     return visit_copy(x);
   }
 
-  // non-ATerm traversal
+  // non-aterm traversal
   template <typename T>
   void operator()(T& x,
-                  typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                  typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                  )
   {
     msg("non aterm traversal");

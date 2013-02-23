@@ -12,7 +12,6 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -374,7 +373,5 @@ class ltscompare_tool : public ltscompare_base
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return ltscompare_tool().execute(argc,argv);
 }

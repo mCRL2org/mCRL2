@@ -15,15 +15,11 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::lps;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 typedef data::basic_rewriter<data::data_expression>::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
@@ -837,8 +833,6 @@ BOOST_AUTO_TEST_CASE(bug_1085)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }
 

@@ -66,7 +66,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("[]"));
+        static core::identifier_string empty_name = core::identifier_string("[]");
         return empty_name;
       }
 
@@ -99,7 +99,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cons_name()
       {
-        static core::identifier_string cons_name = core::detail::initialise_static_expression(cons_name, core::identifier_string("|>"));
+        static core::identifier_string cons_name = core::identifier_string("|>");
         return cons_name;
       }
 
@@ -169,7 +169,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("in"));
+        static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
       }
 
@@ -227,7 +227,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& count_name()
       {
-        static core::identifier_string count_name = core::detail::initialise_static_expression(count_name, core::identifier_string("#"));
+        static core::identifier_string count_name = core::identifier_string("#");
         return count_name;
       }
 
@@ -284,7 +284,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& snoc_name()
       {
-        static core::identifier_string snoc_name = core::detail::initialise_static_expression(snoc_name, core::identifier_string("<|"));
+        static core::identifier_string snoc_name = core::identifier_string("<|");
         return snoc_name;
       }
 
@@ -342,7 +342,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& concat_name()
       {
-        static core::identifier_string concat_name = core::detail::initialise_static_expression(concat_name, core::identifier_string("++"));
+        static core::identifier_string concat_name = core::identifier_string("++");
         return concat_name;
       }
 
@@ -400,7 +400,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& element_at_name()
       {
-        static core::identifier_string element_at_name = core::detail::initialise_static_expression(element_at_name, core::identifier_string("."));
+        static core::identifier_string element_at_name = core::identifier_string(".");
         return element_at_name;
       }
 
@@ -458,7 +458,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& head_name()
       {
-        static core::identifier_string head_name = core::detail::initialise_static_expression(head_name, core::identifier_string("head"));
+        static core::identifier_string head_name = core::identifier_string("head");
         return head_name;
       }
 
@@ -515,7 +515,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& tail_name()
       {
-        static core::identifier_string tail_name = core::detail::initialise_static_expression(tail_name, core::identifier_string("tail"));
+        static core::identifier_string tail_name = core::identifier_string("tail");
         return tail_name;
       }
 
@@ -572,7 +572,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& rhead_name()
       {
-        static core::identifier_string rhead_name = core::detail::initialise_static_expression(rhead_name, core::identifier_string("rhead"));
+        static core::identifier_string rhead_name = core::identifier_string("rhead");
         return rhead_name;
       }
 
@@ -629,7 +629,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& rtail_name()
       {
-        static core::identifier_string rtail_name = core::detail::initialise_static_expression(rtail_name, core::identifier_string("rtail"));
+        static core::identifier_string rtail_name = core::identifier_string("rtail");
         return rtail_name;
       }
 
@@ -708,7 +708,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -720,7 +720,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_count_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -732,7 +732,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for list

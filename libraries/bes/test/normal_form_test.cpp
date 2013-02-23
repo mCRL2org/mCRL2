@@ -12,12 +12,10 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -58,13 +56,10 @@ void test_standard_recursive_form()
   test_standard_recursive_form(bes2, false);
   test_standard_recursive_form(bes2, true);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_standard_recursive_form();
 
   return 0;

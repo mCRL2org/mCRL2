@@ -23,7 +23,7 @@ namespace atermpp
 /// \param w A term list.
 /// \return The union of the term lists, interpreted as sets.
 template <typename Term>
-term_list<Term> term_list_union(term_list<Term> v, term_list<Term> w)
+term_list<Term> term_list_union(const term_list<Term> &v, const term_list<Term> &w)
 {
   if (v.empty())
   {
@@ -44,7 +44,7 @@ term_list<Term> term_list_union(term_list<Term> v, term_list<Term> w)
 /// \param w A term list.
 /// \return The difference of the term lists, interpreted as sets.
 template <typename Term>
-term_list<Term> term_list_difference(term_list<Term> v, term_list<Term> w)
+term_list<Term> term_list_difference(const term_list<Term> &v, const term_list<Term> &w)
 {
   if (w.empty())
   {
@@ -56,7 +56,7 @@ term_list<Term> term_list_difference(term_list<Term> v, term_list<Term> w)
   }
   std::set<Term> result;
   result.insert(v.begin(), v.end());
-  for (typename term_list<Term>::iterator i = w.begin(); i != w.end(); ++i)
+  for (typename term_list<Term>::const_iterator i = w.begin(); i != w.end(); ++i)
   {
     result.erase(*i);
   }

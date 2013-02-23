@@ -32,7 +32,7 @@ class lts2pbes_lts
 
   protected:
     lts_type m_map;
-    atermpp::vector<lps::multi_action> m_action_labels;
+    std::vector<lps::multi_action> m_action_labels;
     std::size_t m_state_count;
     edge_list m_empty_edge_list;
 
@@ -70,7 +70,7 @@ class lts2pbes_lts
       }
     }
 
-    const atermpp::vector<lps::multi_action>& action_labels() const
+    const std::vector<lps::multi_action>& action_labels() const
     {
       return m_action_labels;
     }

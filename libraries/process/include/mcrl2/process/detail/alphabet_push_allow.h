@@ -79,7 +79,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
   return out << "alphabet = " << lps::pp(x.alphabet) << " expression = " << process::pp(x.m_expression) << std::endl;
 }
 
-push_allow_node push_allow(const process_expression& x, const allow_set& A, const atermpp::vector<process_equation>& equations);
+push_allow_node push_allow(const process_expression& x, const allow_set& A, const std::vector<process_equation>& equations);
 
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
@@ -94,15 +94,15 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 #endif
 
   // used for computing the alphabet
-  const atermpp::vector<process_equation>& equations;
+  const std::vector<process_equation>& equations;
   std::set<process_identifier>& W;
 
   // the parameter A
   const allow_set& A;
 
-  atermpp::vector<Node> node_stack;
+  std::vector<Node> node_stack;
 
-  push_allow_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_, const allow_set& A_)
+  push_allow_traverser(const std::vector<process_equation>& equations_, std::set<process_identifier>& W_, const allow_set& A_)
     : equations(equations_), W(W_), A(A_)
   {}
 
@@ -420,7 +420,7 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
   using super::leave;
   using super::operator();
 
-  apply_push_allow_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const allow_set& A)
+  apply_push_allow_traverser(const std::vector<process_equation>& equations, std::set<process_identifier>& W, const allow_set& A)
     : super(equations, W, A)
   {}
 
@@ -430,7 +430,7 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
 };
 
 inline
-push_allow_node push_allow(const process_expression& x, const allow_set& A, const atermpp::vector<process_equation>& equations)
+push_allow_node push_allow(const process_expression& x, const allow_set& A, const std::vector<process_equation>& equations)
 {
   std::set<process_identifier> W;
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
@@ -441,7 +441,7 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, cons
 } // namespace detail
 
 inline
-process_expression push_allow(const process_expression& x, const action_name_multiset_list& V, const atermpp::vector<process_equation>& equations)
+process_expression push_allow(const process_expression& x, const action_name_multiset_list& V, const std::vector<process_equation>& equations)
 {
   allow_set A(make_name_set(V));
   detail::push_allow_node node = detail::push_allow(x, A, equations);

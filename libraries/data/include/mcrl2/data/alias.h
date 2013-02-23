@@ -64,7 +64,7 @@ class alias: public atermpp::aterm_appl
     /// \param[in] s The sort for which an alias is created.
     /// \post n and s describe the same sort.
     alias(const basic_sort& b, const sort_expression s)
-      : atermpp::aterm_appl(mcrl2::core::detail::gsMakeSortRef(atermpp::arg1(static_cast< ATermAppl >(b)), s))
+      : atermpp::aterm_appl(mcrl2::core::detail::gsMakeSortRef(atermpp::arg1(static_cast< atermpp::aterm_appl >(b)), s))
     {}
 
     /// \brief Returns the name of this sort.
@@ -73,7 +73,7 @@ class alias: public atermpp::aterm_appl
     inline
     basic_sort name() const
     {
-      return basic_sort(atermpp::aterm_string(atermpp::arg1(*this)));
+      return basic_sort(atermpp::aterm_cast<atermpp::aterm_string>((*this)[0]));
     }
 
     /// \brief Returns the sort to which the name refers.
@@ -83,7 +83,7 @@ class alias: public atermpp::aterm_appl
     inline
     sort_expression reference() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<sort_expression>((*this)[1]);
     }
 
 }; // class alias
@@ -92,11 +92,18 @@ class alias: public atermpp::aterm_appl
 typedef atermpp::term_list< alias >    alias_list;
 
 /// \brief vector of aliases
-typedef atermpp::vector< alias > alias_vector;
+typedef std::vector< alias > alias_vector;
 
 } // namespace data
 
 } // namespace mcrl2
+namespace std {
+template <>
+inline void swap(mcrl2::data::alias& t1, mcrl2::data::alias& t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

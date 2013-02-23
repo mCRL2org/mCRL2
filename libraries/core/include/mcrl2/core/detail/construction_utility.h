@@ -22,26 +22,13 @@ namespace core
 namespace detail
 {
 
-/// Function for initialisation of static variables, takes care of protection
-/// \param[in,out] target a reference to the static variable
-/// \param[in] original the expression that is used to initialise the variable
-/// \ return a reference to original
-template < typename Expression >
-Expression const& initialise_static_expression(Expression& target, Expression const& original)
-{
-  target = original;
-  target.protect();
-
-  return original;
-}
-
 // Component that helps applying the Singleton design pattern
 template < typename Derived, typename Expression = atermpp::aterm_appl >
 struct singleton_expression : public Expression
 {
   static Expression const& instance()
   {
-    static Expression single_instance = initialise_static_expression(single_instance, Expression(Derived::initialise()));
+    static Expression single_instance = Expression(Derived::initialise());
 
     return single_instance;
   }

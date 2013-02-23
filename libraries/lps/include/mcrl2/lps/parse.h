@@ -13,7 +13,6 @@
 #define MCRL2_LPS_PARSE_H
 
 #include <sstream>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/action_parse.h"
@@ -55,16 +54,16 @@ struct action_rename_actions: public lps::action_actions
     return action_rename_rule(core::detail::gsMakeActionRenameRule(data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
   }
 
-  atermpp::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
   {
     return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", boost::bind(&action_rename_actions::parse_ActionRenameRule, this, _1));
   }
 
-  atermpp::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node)
   {
     data::variable_list variables = parse_VarSpec(node.child(0));
-    atermpp::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
-    for (atermpp::vector<lps::action_rename_rule>::iterator i = rules.begin(); i != rules.end(); ++i)
+    std::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
+    for (std::vector<lps::action_rename_rule>::iterator i = rules.begin(); i != rules.end(); ++i)
     {
       i->variables() = variables;
     }
@@ -96,7 +95,7 @@ struct action_rename_actions: public lps::action_actions
     }
     else if (symbol_name(node) == "ActionRenameRuleSpec")
     {
-      atermpp::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleSpec(node);
+      std::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleSpec(node);
       result.rules().insert(result.rules().end(), rules.begin(), rules.end());
       return true;
     }

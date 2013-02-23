@@ -15,9 +15,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -384,8 +382,6 @@ BOOST_AUTO_TEST_CASE(test_boolean_variables)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }
 

@@ -10,8 +10,6 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -188,7 +186,6 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::re
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
   BOOST_CHECK(result == expected_result);
-  core::garbage_collect();
 }
 
 void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& options, bool expected_result)
@@ -203,7 +200,6 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
   BOOST_CHECK(result == expected_result);
-  core::garbage_collect();
 }
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
@@ -276,7 +272,6 @@ void test_abp_frm(const std::string& FORMULA, bool expected_result)
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   std::string abp_text = pbes_system::pp(p);
   test_pbes_solve(abp_text, expected_result);
-  core::garbage_collect();
 }
 
 void test_abp()
@@ -287,8 +282,6 @@ void test_abp()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_all();
   test_abp();
 

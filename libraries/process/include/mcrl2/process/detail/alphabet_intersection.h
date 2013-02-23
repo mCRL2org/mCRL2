@@ -40,7 +40,7 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
 
   const multi_action_name_set& A;
 
-  alphabet_intersection_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A_)
+  alphabet_intersection_traverser(const std::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A_)
     : super(equations, W), A(A_)
   {}
 
@@ -123,13 +123,13 @@ struct apply_alphabet_intersection_traverser: public alphabet_intersection_trave
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  apply_alphabet_intersection_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
+  apply_alphabet_intersection_traverser(const std::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
     : super(equations, W, A)
   {}
 };
 
 inline
-alphabet_node alphabet_intersection(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
+alphabet_node alphabet_intersection(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W, const multi_action_name_set& A)
 {
   apply_alphabet_intersection_traverser f(equations, W, A);
   f(x);
@@ -137,7 +137,7 @@ alphabet_node alphabet_intersection(const process_expression& x, const atermpp::
 }
 
 inline
-multi_action_name_set alphabet_intersection(const process_expression& x, const atermpp::vector<process_equation>& equations, const multi_action_name_set& A)
+multi_action_name_set alphabet_intersection(const process_expression& x, const std::vector<process_equation>& equations, const multi_action_name_set& A)
 {
   std::set<process_identifier> W;
   return detail::alphabet_intersection(x, equations, W, A).alphabet;

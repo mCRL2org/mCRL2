@@ -17,7 +17,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/linearise.h"
@@ -33,7 +32,6 @@
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 using namespace mcrl2;
@@ -222,7 +220,6 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
       std::cout << "pbesinst failed: " << e.what() << std::endl;
     }
   }
-  core::garbage_collect();
 }
 
 void test_pbesinst()
@@ -345,7 +342,6 @@ void test_cabp()
   pbesinst_algorithm algorithm(p.data());
   pbesinst_rewriter& R = algorithm.rewriter();
   pbes_expression z = R(t, sigma);
-  core::garbage_collect();
 }
 
 // Note: this test takes a lot of time!
@@ -476,7 +472,7 @@ void test_pbesinst_finite()
     ;
   pbes<> p1 = txt2pbes(text);
   pbesinst_finite_algorithm algorithm(data::jitty);
-  pbesinst_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");
+  pbesinst_variable_map variable_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p1, "X(*:D)");
   algorithm.run(p1, variable_map);
 }
 
@@ -515,7 +511,7 @@ void test_functions()
   pbes<> p = txt2pbes(text);
   data::rewriter::strategy rewrite_strategy = data::jitty;
   pbesinst_finite_algorithm algorithm(rewrite_strategy);
-  detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, "X(*:D)");
+  mcrl2::pbes_system::detail::pbes_parameter_map parameter_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p, "X(*:D)");
   algorithm.run(p, parameter_map);
 }
 
@@ -537,8 +533,6 @@ void test_pbesinst_symbolic()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "symbolic");
 
   test_pbesinst_symbolic();

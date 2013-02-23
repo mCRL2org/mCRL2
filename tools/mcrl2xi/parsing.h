@@ -20,7 +20,7 @@ namespace mcrl2xi_qt
 {
 
   inline
-  void parseMcrl2Specification(const std::string input, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
+  void parseMcrl2Specification(const std::string input, mcrl2::data::data_specification& data_spec, std::set<mcrl2::data::variable>& vars)
   {
     mCRL2log(info) << "Parsing and type checking specification" << std::endl;
 
@@ -68,7 +68,7 @@ namespace mcrl2xi_qt
   void parseMcrl2Specification(const std::string input)
   {
     mcrl2::data::data_specification data_spec;
-    atermpp::set<mcrl2::data::variable> vars;
+    std::set<mcrl2::data::variable> vars;
     parseMcrl2Specification(input, data_spec, vars);
   }
 

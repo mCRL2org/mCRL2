@@ -140,7 +140,7 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
   {
     if (negated)
     {
-      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + x.to_string());
+      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + to_string(x));
     }
     return x;
   }
@@ -163,7 +163,7 @@ bool is_normalized(const T& x)
 /// \param x an object containing pbes expressions
 template <typename T>
 void normalize(T& x,
-               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+               typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
               )
 {
   normalize_builder f;
@@ -175,7 +175,7 @@ void normalize(T& x,
 /// \param x an object containing pbes expressions
 template <typename T>
 T normalize(const T& x,
-            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+            typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
            )
 {
   normalize_builder f;

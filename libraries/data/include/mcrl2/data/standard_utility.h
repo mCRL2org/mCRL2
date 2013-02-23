@@ -276,9 +276,10 @@ inline bool is_positive_constant(data_expression const& n)
 /// Transforms a positive constant n into a character array containing
 /// the decimal representation of n.
 inline
-std::string positive_constant_as_string(data_expression n)
+std::string positive_constant_as_string(const data_expression &n_in)
 {
   std::vector<bool> bits;
+  data_expression n=n_in;
 
   while (sort_pos::is_cdub_application(n))
   {
@@ -496,9 +497,9 @@ application list(const sort_expression& s,
                  typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   data_expression                list_expression(empty(s));
-  atermpp::vector< data_expression > elements(range.begin(), range.end());
+  std::vector< data_expression > elements(range.begin(), range.end());
 
-  for (atermpp::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
+  for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
   {
     // BOOST_ASSERT(is_convertible(i->sort(), s)); This is not always true, due to type conversion.
 
@@ -513,7 +514,7 @@ application list(const sort_expression& s,
 inline
 core::identifier_string const& list_enumeration_name()
 {
-  static core::identifier_string list_enumeration_name = core::detail::initialise_static_expression(list_enumeration_name, core::identifier_string("@ListEnum"));
+  static core::identifier_string list_enumeration_name = core::identifier_string("@ListEnum");
   return list_enumeration_name;
 }
 
@@ -606,7 +607,7 @@ namespace sort_set
 inline
 core::identifier_string const& set_enumeration_name()
 {
-  static core::identifier_string set_enumeration_name = core::detail::initialise_static_expression(set_enumeration_name, core::identifier_string("@SetEnum"));
+  static core::identifier_string set_enumeration_name = core::identifier_string("@SetEnum");
   return set_enumeration_name;
 }
 
@@ -742,7 +743,7 @@ namespace sort_bag
 inline
 core::identifier_string const& bag_enumeration_name()
 {
-  static core::identifier_string bag_enumeration_name = core::detail::initialise_static_expression(bag_enumeration_name, core::identifier_string("@BagEnum"));
+  static core::identifier_string bag_enumeration_name = core::identifier_string("@BagEnum");
   return bag_enumeration_name;
 }
 
@@ -887,7 +888,7 @@ application fbag(const sort_expression& s, data_expression_list const& range)
 }
 
 /// \brief Returns true if the term t is equal to nil
-inline bool is_nil(atermpp::aterm_appl t)
+inline bool is_nil(const atermpp::aterm_appl &t)
 {
   return t == core::detail::gsMakeNil();
 }

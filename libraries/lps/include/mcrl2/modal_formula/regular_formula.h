@@ -16,9 +16,7 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/precedence.h"
@@ -43,10 +41,10 @@ class regular_formula: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    regular_formula(const atermpp::aterm_appl& term)
+    regular_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_RegFrm(m_term));
+      assert(core::detail::check_rule_RegFrm(*this));
     }
 };
 
@@ -54,7 +52,7 @@ class regular_formula: public atermpp::aterm_appl
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
 /// \brief vector of regular_formulas
-typedef atermpp::vector<regular_formula>    regular_formula_vector;
+typedef std::vector<regular_formula>    regular_formula_vector;
 
 
 /// \brief Test for a regular_formula expression
@@ -78,10 +76,10 @@ class nil: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    nil(const atermpp::aterm_appl& term)
+    nil(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegNil(m_term));
+      assert(core::detail::check_term_RegNil(*this));
     }
 };
 
@@ -106,10 +104,10 @@ class seq: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    seq(const atermpp::aterm_appl& term)
+    seq(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegSeq(m_term));
+      assert(core::detail::check_term_RegSeq(*this));
     }
 
     /// \brief Constructor.
@@ -117,14 +115,14 @@ class seq: public regular_formula
       : regular_formula(core::detail::gsMakeRegSeq(left, right))
     {}
 
-    regular_formula left() const
+    const regular_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 
-    regular_formula right() const
+    const regular_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -149,10 +147,10 @@ class alt: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    alt(const atermpp::aterm_appl& term)
+    alt(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegAlt(m_term));
+      assert(core::detail::check_term_RegAlt(*this));
     }
 
     /// \brief Constructor.
@@ -160,14 +158,14 @@ class alt: public regular_formula
       : regular_formula(core::detail::gsMakeRegAlt(left, right))
     {}
 
-    regular_formula left() const
+    const regular_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 
-    regular_formula right() const
+    const regular_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -192,10 +190,10 @@ class trans: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    trans(const atermpp::aterm_appl& term)
+    trans(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegTrans(m_term));
+      assert(core::detail::check_term_RegTrans(*this));
     }
 
     /// \brief Constructor.
@@ -203,9 +201,9 @@ class trans: public regular_formula
       : regular_formula(core::detail::gsMakeRegTrans(operand))
     {}
 
-    regular_formula operand() const
+    const regular_formula& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 };
 
@@ -230,10 +228,10 @@ class trans_or_nil: public regular_formula
 
     /// \brief Constructor.
     /// \param term A term
-    trans_or_nil(const atermpp::aterm_appl& term)
+    trans_or_nil(const atermpp::aterm& term)
       : regular_formula(term)
     {
-      assert(core::detail::check_term_RegTransOrNil(m_term));
+      assert(core::detail::check_term_RegTransOrNil(*this));
     }
 
     /// \brief Constructor.
@@ -241,9 +239,9 @@ class trans_or_nil: public regular_formula
       : regular_formula(core::detail::gsMakeRegTransOrNil(operand))
     {}
 
-    regular_formula operand() const
+    const regular_formula& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
     }
 };
 
@@ -282,11 +280,58 @@ inline int precedence(const alt& x) { return precedence(static_cast<const regula
 inline int precedence(const trans& x) { return precedence(static_cast<const regular_formula&>(x)); }
 inline int precedence(const trans_or_nil& x) { return precedence(static_cast<const regular_formula&>(x)); }
 
+inline const regular_formula& unary_operand(const trans& x)        { return x.operand(); }
+inline const regular_formula& unary_operand(const trans_or_nil& x) { return x.operand(); }
+inline const regular_formula& binary_left(const seq& x)            { return x.left(); }
+inline const regular_formula& binary_right(const seq& x)           { return x.right(); }
+inline const regular_formula& binary_left(const alt& x)            { return x.left(); }
+inline const regular_formula& binary_right(const alt& x)           { return x.right(); }
+
 // template function overloads
 std::string pp(const regular_formula& x);
 
 } // namespace regular_formulas
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::regular_formulas::regular_formula& t1, mcrl2::regular_formulas::regular_formula& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::nil& t1, mcrl2::regular_formulas::nil& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::seq& t1, mcrl2::regular_formulas::seq& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::alt& t1, mcrl2::regular_formulas::alt& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::trans& t1, mcrl2::regular_formulas::trans& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::regular_formulas::trans_or_nil& t1, mcrl2::regular_formulas::trans_or_nil& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

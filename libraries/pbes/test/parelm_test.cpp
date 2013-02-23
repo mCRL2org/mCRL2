@@ -22,8 +22,6 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -62,10 +60,7 @@ void test_parelm()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_parelm();
-  core::garbage_collect();
 
   return 0;
 }

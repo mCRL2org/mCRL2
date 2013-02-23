@@ -42,7 +42,15 @@ class process_equation: public atermpp::aterm_appl
     process_equation(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_ProcEqn(m_term));
+      assert(core::detail::check_term_ProcEqn(*this));
+    }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit process_equation(const atermpp::aterm &term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_ProcEqn(*this));
     }
 
     /// \brief Constructor.
@@ -52,7 +60,8 @@ class process_equation: public atermpp::aterm_appl
     process_equation(process_identifier name, data::variable_list formal_parameters, process_expression expression)
       : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
                               name,
-                              atermpp::term_list<data::variable>(formal_parameters.begin(), formal_parameters.end()),
+                              // atermpp::term_list<data::variable>(formal_parameters.begin(), formal_parameters.end()),
+                              formal_parameters,
                               expression))
     {}
 
@@ -67,16 +76,17 @@ class process_equation: public atermpp::aterm_appl
     /// \return The formal parameters of the equation
     data::variable_list formal_parameters() const
     {
-      return data::variable_list(
+      return data::variable_list((*this)[1]);
+      /* return data::variable_list(
                atermpp::term_list_iterator<data::variable>(atermpp::list_arg2(*this)),
-               atermpp::term_list_iterator<data::variable>());
+               atermpp::term_list_iterator<data::variable>()); */
     }
 
     /// \brief Returns the expression of the process equation
     /// \return The expression of the process equation
-    process_expression expression() const
+    const process_expression& expression() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<process_expression>(atermpp::arg3(*this));
     }
 };
 
@@ -84,7 +94,7 @@ class process_equation: public atermpp::aterm_appl
 typedef atermpp::term_list<process_equation> process_equation_list;
 
 /// \brief vector of process equations
-typedef atermpp::vector<process_equation> process_equation_vector;
+typedef std::vector<process_equation> process_equation_vector;
 
 // template function overloads
 std::string pp(const process_equation& x);

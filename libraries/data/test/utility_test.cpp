@@ -17,8 +17,6 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -51,34 +49,34 @@ void number_test()
   using namespace sort_int;
   using namespace sort_real;
 
-  BOOST_CHECK(detail::as_decimal_string(1) == "1");
-  BOOST_CHECK(detail::as_decimal_string(2) == "2");
-  BOOST_CHECK(detail::as_decimal_string(3) == "3");
-  BOOST_CHECK(detail::as_decimal_string(4) == "4");
-  BOOST_CHECK(detail::as_decimal_string(144) == "144");
+  BOOST_CHECK(data::detail::as_decimal_string(1) == "1");
+  BOOST_CHECK(data::detail::as_decimal_string(2) == "2");
+  BOOST_CHECK(data::detail::as_decimal_string(3) == "3");
+  BOOST_CHECK(data::detail::as_decimal_string(4) == "4");
+  BOOST_CHECK(data::detail::as_decimal_string(144) == "144");
 
   // Test character array arithmetic
   std::vector< char > numbers;
-  numbers = detail::string_to_vector_number("1");
-  BOOST_CHECK(detail::vector_number_to_string(numbers) == "1");
+  numbers = data::detail::string_to_vector_number("1");
+  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "1");
 
-  detail::decimal_number_multiply_by_two(numbers);
-  BOOST_CHECK(detail::vector_number_to_string(numbers) == "2");
+  data::detail::decimal_number_multiply_by_two(numbers);
+  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "2");
 
-  detail::decimal_number_increment(numbers);
-  BOOST_CHECK(detail::vector_number_to_string(numbers) == "3");
+  data::detail::decimal_number_increment(numbers);
+  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "3");
 
-  detail::decimal_number_increment(numbers);
-  BOOST_CHECK(detail::vector_number_to_string(numbers) == "4");
+  data::detail::decimal_number_increment(numbers);
+  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "4");
 
-  detail::decimal_number_multiply_by_two(numbers);
-  BOOST_CHECK(detail::vector_number_to_string(numbers) == "8");
+  data::detail::decimal_number_multiply_by_two(numbers);
+  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "8");
 
-  detail::decimal_number_multiply_by_two(numbers);
-  BOOST_CHECK(detail::vector_number_to_string(numbers) == "16");
+  data::detail::decimal_number_multiply_by_two(numbers);
+  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "16");
 
-  detail::decimal_number_divide_by_two(numbers);
-  BOOST_CHECK(detail::vector_number_to_string(numbers) == "8");
+  data::detail::decimal_number_divide_by_two(numbers);
+  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "8");
 
   BOOST_CHECK(sort_pos::positive_constant_as_string(number(sort_pos::pos(), "1")) == "1");
   BOOST_CHECK(sort_pos::positive_constant_as_string(number(sort_pos::pos(), "10")) == "10");
@@ -143,21 +141,17 @@ void convert_test()
   BOOST_CHECK(l.size() == al.size());
 
   // Could loop indefinitely if the wrong overload is chosen through type-unsafe conversion
-  std::vector< data_expression > r = atermpp::convert< std::vector< data_expression > >(static_cast< ATermList >(al));
+  // The transformation below does not work, due to lacking conversions. 
+  // std::vector< data_expression > r = atermpp::convert< std::vector< data_expression > >(static_cast< aterm_list >(al));
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   number_test();
-  core::garbage_collect();
 
   list_construction_test();
-  core::garbage_collect();
 
   convert_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

@@ -50,7 +50,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       term_type empty;
       if (tr::is_data(e))
       {
-        atermpp::vector<data::variable> intersection;
+        std::vector<data::variable> intersection;
         data::variable_list free_vars = tr::free_variables(e);
         for (data::variable_list::iterator v = free_vars.begin(); v != free_vars.end(); ++v)
         {
@@ -131,12 +131,12 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       term_type result = tr::true_();
       data::variable_list free_g = tr::free_variables(g);
       data::variable_list free_phi_i_list = tr::free_variables(phi_i);
-      atermpp::set<data::variable> free_phi_i;
+      std::set<data::variable> free_phi_i;
       for (data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
       {
         free_phi_i.insert(*v);
       }
-      atermpp::set<data::variable> free_g_minus_free_phi_i;
+      std::set<data::variable> free_g_minus_free_phi_i;
       for (data::variable_list::iterator v = free_g.begin(); v != free_g.end(); ++v)
       {
         data::variable var = *v;
@@ -144,9 +144,9 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
           free_g_minus_free_phi_i.insert(var);
         }
       }
-      atermpp::vector<data::variable> d_intersects_free_g_minus_free_phi_i;
-      atermpp::set<data::variable> d_minus_free_phi_i;
-      atermpp::set<data::variable> d_intersects_free_phi_i;
+      std::vector<data::variable> d_intersects_free_g_minus_free_phi_i;
+      std::set<data::variable> d_minus_free_phi_i;
+      std::set<data::variable> d_intersects_free_phi_i;
       for (data::variable_list::iterator v = d.begin(); v != d.end(); ++v)
       {
         data::variable var = *v;
@@ -235,14 +235,14 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
           result = e;
         } else if (!qvars.empty() || !(tr::is_or(qexpr) ? tr::is_true(phi) : tr::is_false(phi))) {
           // forall d . phi => psi
-          atermpp::vector<term_type> conjuncts;
+          std::vector<term_type> conjuncts;
           if (tr::is_and(psi)) {
             conjuncts = pbes_expr::split_conjuncts(psi);
           } else {
             conjuncts.push_back(psi);
           }
           term_type conjunction = tr::true_();
-          for (atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+          for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
             term_type phi_i = *c;
             term_type r = rewrite_bqnf_expression(phi_i);
             if (tr::is_or(qexpr)) {
@@ -256,9 +256,9 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
                 r = tr::imp(phi, r);
               }
             }
-            atermpp::vector<data::variable> qvars_i;
+            std::vector<data::variable> qvars_i;
             data::variable_list free_phi_i_list = tr::free_variables(phi_i);
-            atermpp::set<data::variable> free_phi_i;
+            std::set<data::variable> free_phi_i;
             for (data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
             {
               free_phi_i.insert(*v);
@@ -321,9 +321,9 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     {
       //std::clog << "rewrite_and: " << pp(e) << std::endl;
       term_type conjunction = tr::true_();
-      atermpp::vector<equation_type> new_eqns;
-      atermpp::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
-      for (atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+      std::vector<equation_type> new_eqns;
+      std::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
+      for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
         term_type expr = *c;
         term_type r = rewrite_bqnf_expression(expr);
         if (tr::is_true(conjunction)) {
@@ -344,9 +344,9 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     {
       //std::clog << "rewrite_or: " << pp(e) << std::endl;
       term_type disjunction = tr::false_();
-      atermpp::vector<term_type> new_exprs;
-      atermpp::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
-      for (atermpp::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
+      std::vector<term_type> new_exprs;
+      std::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
+      for (std::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
         term_type expr = *d;
         term_type r = rewrite_bqnf_expression(expr);
         if (tr::is_false(disjunction)) {

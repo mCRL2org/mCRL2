@@ -13,8 +13,8 @@
 #define MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_TRAVERSER_H
 
 #include <stdexcept>
+#include <vector>
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/traverser.h"

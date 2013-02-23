@@ -47,23 +47,21 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const exists& x)
   {
-    namespace a = data::detail::data_accessors;
-
     pbes_expression body = static_cast<Derived&>(*this)(x.body());
-    atermpp::set<pbes_expression> terms = pbes_expr::split_and(body, true);
+    std::set<pbes_expression> terms = pbes_expr::split_and(body, true);
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
-    std::vector< atermpp::set<pbes_expression>::iterator > to_be_removed;
+    std::vector< std::set<pbes_expression>::iterator > to_be_removed;
 
-    for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+    for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
     {
       if (data::is_data_expression(*i))
       {
         // check if the term *i corresponds to (v == e), with v a quantifier variable.
         if (data::is_equal_to_application(data::data_expression(*i)))
         {
-          data::data_expression left = a::left(*i);
-          data::data_expression right = a::right(*i);
+          data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(*i));
+          data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(*i));
           if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
           {
             sigma[data::variable(left)] = right;
@@ -91,7 +89,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
     if (!sigma.empty())
     {
-      for (std::vector< atermpp::set<pbes_expression>::iterator >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+      for (std::vector< std::set<pbes_expression>::iterator >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
       {
         terms.erase(*i);
       }
@@ -112,23 +110,21 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const forall& x)
   {
-    namespace a = data::detail::data_accessors;
-
     pbes_expression body = static_cast<Derived&>(*this)(x.body());
-    atermpp::set<pbes_expression> terms = pbes_expr::split_or(body, true);
+    std::set<pbes_expression> terms = pbes_expr::split_or(body, true);
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
-    std::vector< atermpp::set<pbes_expression>::iterator > to_be_removed;
+    std::vector< std::set<pbes_expression>::iterator > to_be_removed;
 
-    for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+    for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
     {
       if (data::is_data_expression(*i))
       {
         // check if the term *i corresponds to (v != e), with v a quantifier variable.
         if (data::is_not_equal_to_application(data::data_expression(*i)))
         {
-          data::data_expression left = a::left(*i);
-          data::data_expression right = a::right(*i);
+          data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(*i));
+          data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(*i));
           if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
           {
             sigma[data::variable(left)] = right;
@@ -160,7 +156,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
     if (!sigma.empty())
     {
-      for (std::vector< atermpp::set<pbes_expression>::iterator >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+      for (std::vector< std::set<pbes_expression>::iterator >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
       {
         terms.erase(*i);
       }

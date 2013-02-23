@@ -10,8 +10,6 @@
 /// \brief Tests for pfnf rewriter.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
@@ -84,7 +82,6 @@ std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
     std::cout << "R(t1) " << pbes_system::pp(R(t1)) << std::endl;
     std::cout << "R(t2) " << pbes_system::pp(R(t2)) << std::endl;
   }
-  core::garbage_collect();
 }
 
 void test_pfnf_visitor()
@@ -93,7 +90,6 @@ void test_pfnf_visitor()
   test_pfnf_expression("X && (Y(3) || X)");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
-  core::garbage_collect();
 }
 
 void test_pfnf(const std::string& pbes_spec)
@@ -108,7 +104,6 @@ void test_pfnf(const std::string& pbes_spec)
   std::cerr << pbes_system::pp(p) << std::endl;
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
   std::cerr << "-----------------" << std::endl;
-  core::garbage_collect();
 }
 
 void test_pfnf_rewriter()
@@ -135,7 +130,6 @@ void test_pfnf_rewriter()
   pfnf_rewriter R;
   pbes_expression x = parse_pbes_expression("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)", VARIABLE_SPECIFICATION);
   pbes_expression y = R(x);
-  core::garbage_collect();
 }
 
 void test_pfnf_rewriter2(const std::string& text)
@@ -163,7 +157,6 @@ void test_pfnf_rewriter2(const std::string& text)
   bool result2 = pbes2_bool_test(p);
 #endif
   BOOST_CHECK(result1 == result2);
-  core::garbage_collect();
 }
 
 void test_pfnf_rewriter2()
@@ -185,7 +178,6 @@ void test_pfnf_rewriter2()
     "init X;                                                                                \n"
     ;
   test_pfnf_rewriter2(text);
-  core::garbage_collect();
 
   // problematic case found by random tests 15-1-2011
   text =
@@ -368,8 +360,6 @@ void test_pfnf_rewriter3()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_pfnf_visitor();
   test_pfnf_rewriter();
   test_pfnf_rewriter2();

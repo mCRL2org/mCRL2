@@ -29,10 +29,10 @@ namespace lps
 
 /// \brief Return a set with all finite sorts in data specification s.
 inline
-atermpp::set<data::sort_expression> finite_sorts(const data::data_specification& s)
+std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 {
   data::sort_expression_vector sorts = s.sorts();
-  atermpp::set<data::sort_expression> result;
+  std::set<data::sort_expression> result;
 
   for(data::sort_expression_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
   {
@@ -52,7 +52,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
   protected:
     /// Sorts to be instantiated
-    atermpp::set<data::sort_expression> m_sorts;
+    std::set<data::sort_expression> m_sorts;
 
     /// Only instantiate tau summands
     bool m_tau_summands_only;
@@ -135,7 +135,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
   public:
     suminst_algorithm(specification& spec,
                       DataRewriter& r,
-                      atermpp::set<data::sort_expression> sorts = atermpp::set<data::sort_expression>(),
+                      std::set<data::sort_expression> sorts = std::set<data::sort_expression>(),
                       bool tau_summands_only = false)
       : lps_algorithm(spec),
         m_sorts(sorts),

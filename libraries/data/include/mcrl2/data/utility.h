@@ -18,7 +18,6 @@
 #include <set>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "boost/iterator/transform_iterator.hpp"
 
@@ -84,7 +83,7 @@ variable_list fresh_variables(const variable_list& variables, std::set<std::stri
     }
     result.push_back(variable(name, i->sort()));
   }
-  return atermpp::convert<variable_list>(result);
+  return variable_list(result.begin(),result.end());
 }
 
 /// \brief Returns a variable that doesn't appear in context

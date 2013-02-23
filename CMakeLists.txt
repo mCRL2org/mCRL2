@@ -210,7 +210,7 @@ add_subdirectory ( 3rd-party/dparser )
 ## mCRL2 libraries
 ##---------------------------------------------------
 
-add_subdirectory ( libraries/aterm )
+# add_subdirectory ( libraries/aterm )
 add_subdirectory ( libraries/atermpp )
 add_subdirectory ( libraries/bes )
 add_subdirectory ( libraries/core )
@@ -352,7 +352,7 @@ include(MCRL2ConfigureComplingRewriters)
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
-    libraries/aterm/include/
+#    libraries/aterm/include/
     libraries/atermpp/include/
     libraries/core/include/
     libraries/data/include/

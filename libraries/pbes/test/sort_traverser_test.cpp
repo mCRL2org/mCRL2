@@ -13,10 +13,8 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -166,13 +164,10 @@ void test_pbes(std::string text)
   std::set<data::sort_expression> sorts;
   pbes_system::find_sort_expressions(p, std::inserter(sorts, sorts.end()));
   std::cerr << "sorts: " << data::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_pbes(t1);
   test_pbes(t2);
   test_pbes(t3);

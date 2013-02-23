@@ -14,10 +14,8 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/print.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -41,7 +39,7 @@ void test_comm()
 
 void test_action_name_multiset()
 {
-  atermpp::vector<core::identifier_string> v;
+  std::vector<core::identifier_string> v;
   v.push_back(core::identifier_string("a"));
   v.push_back(core::identifier_string("b"));
   v.push_back(core::identifier_string("c"));
@@ -51,8 +49,8 @@ void test_action_name_multiset()
   BOOST_CHECK(text == "a | b | c");
 
   atermpp::term_list<action_name_multiset> w;
-  w = atermpp::push_front(w, A);
-  w = atermpp::push_front(w, A);
+  w.push_front(A);
+  w.push_front(A);
   text = process::pp(w);
   BOOST_CHECK(text == "a | b | c, a | b | c");
 }
@@ -90,8 +88,6 @@ void test_process_expressions()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_comm();
   test_action_name_multiset();
   test_process_expressions();

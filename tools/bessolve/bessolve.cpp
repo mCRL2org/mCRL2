@@ -18,7 +18,6 @@
 #include <fstream>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
@@ -173,7 +172,6 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return bessolve_tool().execute(argc, argv);
 }
 

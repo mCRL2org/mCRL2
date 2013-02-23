@@ -14,7 +14,6 @@
 #include <algorithm>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/confluence_checker.h"
@@ -39,9 +38,9 @@ using namespace mcrl2::core::detail;
 // Auxiliary functions ----------------------------------------------------------------------------
 
 static
-atermpp::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments)
+std::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments)
 {
-  atermpp::map < variable,data_expression> v_substitutions;
+  std::map < variable,data_expression> v_substitutions;
 
   for (assignment_list::const_iterator i=a_assignments.begin(); i!=a_assignments.end(); ++i)
   {
@@ -56,8 +55,8 @@ data_expression get_subst_equation_from_assignments(
   const variable_list a_variables,
   assignment_list a_assignments_1,
   assignment_list a_assignments_2,
-  const atermpp::map<variable,data_expression> &a_substitutions_1,
-  const atermpp::map<variable,data_expression> &a_substitutions_2)
+  const std::map<variable,data_expression> &a_substitutions_1,
+  const std::map<variable,data_expression> &a_substitutions_2)
 {
   data_expression v_result = sort_bool::true_();
 
@@ -74,7 +73,7 @@ data_expression get_subst_equation_from_assignments(
     if (!a_assignments_1.empty() && v_next_1)
     {
       const assignment v_assignment_1 = a_assignments_1.front();
-      a_assignments_1 = pop_front(a_assignments_1);
+      a_assignments_1.pop_front();
       v_variable_1 = v_assignment_1.lhs();
       v_expression_1 = v_assignment_1.rhs();
       v_expression_1 = data::replace_free_variables(v_expression_1,
@@ -83,7 +82,7 @@ data_expression get_subst_equation_from_assignments(
     if (!a_assignments_2.empty() && v_next_2)
     {
       const assignment v_assignment_2 = a_assignments_2.front();
-      a_assignments_2 = pop_front(a_assignments_2);
+      a_assignments_2.pop_front();
       v_variable_2 = v_assignment_2.lhs();
       v_expression_2 = v_assignment_2.rhs();
       v_expression_2 = data::replace_free_variables(v_expression_2,
@@ -139,14 +138,14 @@ data_expression get_equation_from_assignments(
       {
         // Create a condition from the assigments from both lists.
         v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), a_assignments_2.front().rhs()));
-        a_assignments_2=pop_front(a_assignments_2);
+        a_assignments_2.pop_front();
       }
       else
       {
         // Create a condition from first assigment only.
         v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), v_variable));
       }
-      a_assignments_1=pop_front(a_assignments_1);
+      a_assignments_1.pop_front();
     }
     else
     {
@@ -154,7 +153,7 @@ data_expression get_equation_from_assignments(
       {
         // Create a condition from the second assigments only.
         v_result = sort_bool::and_(v_result, equal_to(v_variable, a_assignments_2.front().rhs()));
-        a_assignments_2=pop_front(a_assignments_2);
+        a_assignments_2.pop_front();
       }
     }
   }
@@ -169,7 +168,7 @@ data_expression get_equation_from_assignments(
 static
 data_expression get_subst_equation_from_actions(
   const action_list a_actions,
-  const atermpp::map<variable,data_expression> &a_substitutions)
+  const std::map<variable,data_expression> &a_substitutions)
 {
   data_expression v_result = sort_bool::true_();
 
@@ -200,12 +199,12 @@ data_expression get_confluence_condition(
   const data_expression v_condition_1 = a_summand_1.condition();
   const assignment_list v_assignments_1 = a_summand_1.assignments();
 
-  atermpp::map < variable,data_expression> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
+  std::map < variable,data_expression> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
   const data_expression v_condition_2 = a_summand_2.condition();
   const data_expression v_lhs = sort_bool::and_(sort_bool::and_(v_condition_1, v_condition_2), a_invariant);
   const assignment_list v_assignments_2 = a_summand_2.assignments();
 
-  atermpp::map < variable,data_expression> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
+  std::map < variable,data_expression> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
   const data_expression v_subst_condition_1 = data::replace_free_variables(v_condition_1,
       data::make_map_substitution(v_substitutions_2));
   const data_expression v_subst_condition_2 = data::replace_free_variables(v_condition_2,
@@ -453,7 +452,6 @@ Confluence_Checker::Confluence_Checker(
   bool a_path_eliminator,
   smt_solver_type a_solver_type,
   bool a_apply_induction,
-  bool a_no_marking,
   bool a_check_all,
   bool a_counter_example,
   bool a_generate_invariants,
@@ -463,7 +461,6 @@ Confluence_Checker::Confluence_Checker(
   f_bdd_prover(a_lps.data(), used_data_equation_selector(a_lps.data()), a_rewrite_strategy,
                      a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
   f_lps(a_lps),
-  f_no_marking(a_no_marking),
   f_check_all(a_check_all),
   f_counter_example(a_counter_example),
   f_dot_file_name(a_dot_file_name),
@@ -514,7 +511,7 @@ specification Confluence_Checker::check_confluence_and_mark(const data_expressio
   action_label_list v_act_decls=f_lps.action_labels();
   if (v_is_marked && !has_ctau_action(f_lps))
   {
-    v_act_decls = push_front(v_act_decls,make_ctau_act_id());
+    v_act_decls.push_front(make_ctau_act_id());
   }
 
   specification v_lps(f_lps.data(),v_act_decls,f_lps.global_variables(),new_process_equation,f_lps.initial_process());

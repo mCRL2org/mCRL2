@@ -173,7 +173,7 @@ void pbesconstelm(const std::string& input_filename,
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {
-        atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+        std::vector<propositional_variable> V = remove_unreachable_variables(p);
         mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
       }
       break;
@@ -190,7 +190,7 @@ void pbesconstelm(const std::string& input_filename,
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {
-        atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+        std::vector<propositional_variable> V = remove_unreachable_variables(p);
         mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
       }
       break;
@@ -235,7 +235,7 @@ void pbesinfo(const std::string& input_filename,
   if (opt_full)
   {
     std::cout << "Predicate variables:\n";
-    for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+    for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
     {
       std::cout << core::pp(i->symbol()) << "." << pbes_system::pp(i->variable()) << std::endl;
     }

@@ -84,10 +84,10 @@ struct lts_generation_options
     }
     if (detect_action)
     {
-      for (atermpp::set<mcrl2::core::identifier_string>::iterator ta = trace_actions.begin(); ta != trace_actions.end(); ++ta)
+      for (std::set<mcrl2::core::identifier_string>::iterator ta = trace_actions.begin(); ta != trace_actions.end(); ++ta)
       {
         mcrl2::lps::action_label_list::iterator it = specification.action_labels().begin();
-        bool found = (*ta == "tau");
+        bool found = (std::string(*ta) == "tau");
         while (!found && it != specification.action_labels().end())
         {
             found = (it++->name() == *ta);
@@ -127,9 +127,9 @@ struct lts_generation_options
   bool detect_deadlock;
   bool detect_divergence;
   bool detect_action;
-  atermpp::set < mcrl2::core::identifier_string > trace_actions;
+  std::set < mcrl2::core::identifier_string > trace_actions;
   std::set < std::string > trace_multiaction_strings;
-  atermpp::set < mcrl2::lps::multi_action > trace_multiactions;
+  std::set < mcrl2::lps::multi_action > trace_multiactions;
 
   std::auto_ptr< mcrl2::data::rewriter > m_rewriter; /// REMOVE
 

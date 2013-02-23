@@ -11,7 +11,6 @@
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -23,8 +22,6 @@ namespace po = boost::program_options;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   typedef data::rewriter my_data_rewriter;
   typedef data::data_enumerator<number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_pbes_rewriter;

@@ -90,7 +90,7 @@ class lts2pbes_algorithm
       mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
-      atermpp::vector<pbes_equation> eqn = detail::E(f0, f0, lts0, lts1, m_progress_meter);
+      std::vector<pbes_equation> eqn = detail::E(f0, f0, lts0, lts1, m_progress_meter);
 
       // compute the initial state
       state_type s0 = lts0.initial_state();
@@ -98,7 +98,7 @@ class lts2pbes_algorithm
       data::data_expression_list e = detail::mu_expressions(f0);
       propositional_variable_instantiation init(Xs0, e);
 
-      return pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);
+      return pbes<>(lts0.data(), eqn, std::set<data::variable>(), init);
     }
 };
 

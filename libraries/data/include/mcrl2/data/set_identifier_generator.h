@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H
 
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/identifier_generator.h"
 
 namespace mcrl2
@@ -30,7 +29,7 @@ class set_identifier_generator: public identifier_generator<>
 {
   protected:
     /// \brief The context of the identifier generator.
-    atermpp::set<core::identifier_string> m_identifiers;
+    std::set<core::identifier_string> m_identifiers;
 
   public:
     /// \brief Constructor.
@@ -68,7 +67,7 @@ class set_identifier_generator: public identifier_generator<>
 
     /// \brief Returns the context.
     /// \return The context.
-    const atermpp::set<core::identifier_string>& context() const
+    const std::set<core::identifier_string>& context() const
     {
       return m_identifiers;
     }
@@ -86,7 +85,7 @@ class multiset_identifier_generator: public identifier_generator<>
 {
   protected:
     /// \brief The context of the identifier generator.
-    atermpp::multiset<core::identifier_string> m_identifiers;
+    std::multiset<core::identifier_string> m_identifiers;
 
   public:
     /// \brief Constructor.
@@ -111,7 +110,7 @@ class multiset_identifier_generator: public identifier_generator<>
     /// \param s A
     void remove_identifier(const core::identifier_string& s)
     {
-      atermpp::multiset<core::identifier_string>::iterator i = m_identifiers.find(s);
+      std::multiset<core::identifier_string>::iterator i = m_identifiers.find(s);
       if (i != m_identifiers.end())
       {
         m_identifiers.erase(i);
@@ -128,7 +127,7 @@ class multiset_identifier_generator: public identifier_generator<>
 
     /// \brief Returns the context.
     /// \return The context.
-    const atermpp::multiset<core::identifier_string>& context() const
+    const std::multiset<core::identifier_string>& context() const
     {
       return m_identifiers;
     }

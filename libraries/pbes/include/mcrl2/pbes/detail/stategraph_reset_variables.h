@@ -31,9 +31,9 @@ struct reset_variable_builder: public pbes_expression_builder<reset_variable_bui
   using super::leave;
   using super::operator();
 
-  atermpp::vector<pbes_expression>::const_iterator i;
+  std::vector<pbes_expression>::const_iterator i;
 
-  reset_variable_builder(atermpp::vector<pbes_expression>::const_iterator i_)
+  reset_variable_builder(std::vector<pbes_expression>::const_iterator i_)
     : i(i_)
   {}
 
@@ -92,7 +92,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
         mCRL2log(log::debug, "stategraph") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
         std::set<std::size_t> I = v.marking_variable_indices(m_pbes);
 
-        for (atermpp::set<stategraph_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
+        for (std::set<stategraph_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
         {
           stategraph_vertex& u = *(i->source);
           std::size_t last_size = u.marking.size();
@@ -134,7 +134,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
     pbes_expression reset_variable(const propositional_variable_instantiation& x)
     {
       mCRL2log(log::debug, "stategraph") << "  resetting variable " << pbes_system::pp(x) << std::endl;
-      atermpp::vector<pbes_expression> Xij_conjuncts;
+      std::vector<pbes_expression> Xij_conjuncts;
       core::identifier_string X = x.name();
       std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
@@ -144,7 +144,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       {
         stategraph_vertex& w = **q;
         mCRL2log(log::debug, "stategraph") << "    vertex X = " << pbes_system::pp(w.X) << std::endl;
-        atermpp::vector<data::data_expression> e;
+        std::vector<data::data_expression> e;
         std::size_t N = w.marked_parameters.size();
         data::data_expression_list::const_iterator s = w.X.parameters().begin();
         data::data_expression condition = data::sort_bool::true_();

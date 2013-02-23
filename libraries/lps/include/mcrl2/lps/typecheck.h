@@ -13,7 +13,6 @@
 #define MCRL2_LPS_TYPECHECK_H
 
 #include "mcrl2/core/detail/struct_core.h"  // gsMakeMultAct
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/specification.h"
 
@@ -35,13 +34,13 @@ void type_check(
   const action_label_list& action_decls)
 {
   // TODO: replace all this nonsense code by a proper type check implementation
-  ATermAppl t = core::type_check_mult_act(
+  atermpp::aterm_appl t = core::type_check_mult_act(
                   core::detail::gsMakeMultAct(mult_act.actions()),
                   data::detail::data_specification_to_aterm_data_spec(data_spec),
-                  (ATermList)action_decls);
-  if (!t)
+                  action_decls);
+  if (t==atermpp::aterm_appl())
   {
-    throw mcrl2::runtime_error("could not type check multi action " + core::pp_deprecated(lps::detail::multi_action_to_aterm(mult_act)));
+    throw mcrl2::runtime_error("could not type check multi action " + pp(lps::detail::multi_action_to_aterm(mult_act)));
   }
   mult_act = multi_action(t);
 }
@@ -54,27 +53,27 @@ void type_check(
  **/
 inline
 void type_check(
-  atermpp::vector<multi_action>& mult_actions,
+  std::vector<multi_action>& mult_actions,
   const data::data_specification& data_spec,
   const action_label_list& action_decls)
 {
   // TODO: replace all this nonsense code by a proper type check implementation
   // Bleh; do conversions...
-  ATermList l=ATempty;
-  for (atermpp::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
+  atermpp::aterm_list l;
+  for (std::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
        i!=mult_actions.end(); ++i)
   {
-    l=ATinsert(l,(ATerm)(ATermList)i->actions());
+    l.push_front(i->actions());
   }
   l=core::type_check_mult_actions(
-      ATreverse(l),
+      reverse(l),
       data::detail::data_specification_to_aterm_data_spec(data_spec),
-      (ATermList)action_decls);
+      action_decls);
   // And convert back...
   mult_actions.clear();
-  for (; !ATisEmpty(l) ; l=ATgetNext(l))
+  for (atermpp::aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    mult_actions.push_back(multi_action((action_list)ATgetFirst(l)));
+    mult_actions.push_back(multi_action((action_list)(*i)));
   }
 }
 

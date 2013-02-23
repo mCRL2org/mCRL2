@@ -89,30 +89,15 @@ struct stategraph_edge
   }
 
   std::string print() const;
-
-  void protect() const
-  {
-    label.protect();
-  }
-
-  void unprotect() const
-  {
-    label.unprotect();
-  }
-
-  void mark() const
-  {
-    label.mark();
-  }
 };
 
 // vertex of the control flow graph
 struct stategraph_vertex
 {
   propositional_variable_instantiation X;
-  atermpp::set<stategraph_edge> incoming_edges;
-  atermpp::set<stategraph_edge> outgoing_edges;
-  atermpp::set<pbes_expression> guards;
+  std::set<stategraph_edge> incoming_edges;
+  std::set<stategraph_edge> outgoing_edges;
+  std::set<pbes_expression> guards;
   std::set<data::variable> marking;    // used in the reset variables procedure
   std::vector<bool> marked_parameters; // will be set after computing the marking
 
@@ -125,7 +110,7 @@ struct stategraph_vertex
     std::ostringstream out;
     out << pbes_system::pp(X);
     out << " edges:";
-    for (atermpp::set<stategraph_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+    for (std::set<stategraph_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
     {
       out << " " << pbes_system::pp(i->target->X);
     }
@@ -136,7 +121,7 @@ struct stategraph_vertex
   std::set<data::variable> free_guard_variables() const
   {
     std::set<data::variable> result;
-    for (atermpp::set<pbes_expression>::const_iterator i = guards.begin(); i != guards.end(); ++i)
+    for (std::set<pbes_expression>::const_iterator i = guards.begin(); i != guards.end(); ++i)
     {
       pbes_system::find_free_variables(*i, std::inserter(result, result.end()));
     }
@@ -176,20 +161,6 @@ struct stategraph_vertex
     return out.str();
   }
 
-  void protect() const
-  {
-    X.protect();
-  }
-
-  void unprotect() const
-  {
-    X.unprotect();
-  }
-
-  void mark() const
-  {
-    X.mark();
-  }
 };
 
 inline
@@ -203,12 +174,12 @@ std::string stategraph_edge::print() const
 struct control_flow_graph
 {
   // vertices of the control flow graph
-  atermpp::map<propositional_variable_instantiation, stategraph_vertex> m_control_vertices;  // x is a projected value
+  std::map<propositional_variable_instantiation, stategraph_vertex> m_control_vertices;  // x is a projected value
 
   // an index for the vertices in the control flow graph with a given name
   std::map<core::identifier_string, std::set<stategraph_vertex*> > m_stategraph_index;
 
-  typedef atermpp::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
+  typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
 
   // \pre x is not present in m_control_vertices
   vertex_iterator insert_vertex(const propositional_variable_instantiation& X)
@@ -229,7 +200,7 @@ struct control_flow_graph
   void create_index()
   {
     // create an index for the vertices in the control flow graph with a given name
-    for (atermpp::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
     {
       stategraph_vertex& v = i->second;
       m_stategraph_index[v.X.name()].insert(&v);
@@ -238,14 +209,14 @@ struct control_flow_graph
 
   std::set<stategraph_vertex*>& index(const propositional_variable_instantiation& X)
   {
-  	return m_stategraph_index[X];
+    return m_stategraph_index[X.name()];
   }
 
   std::string print() const
   {
     std::ostringstream out;
     out << "--- control flow graph ---" << std::endl;
-    for (atermpp::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
     {
       out << "vertex " << i->second.print() << std::endl;
     }
@@ -255,7 +226,7 @@ struct control_flow_graph
   std::string print_marking() const
   {
     std::ostringstream out;
-    for (atermpp::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
     {
       const stategraph_vertex& v = i->second;
       out << v.print_marking() << std::endl;
@@ -267,45 +238,5 @@ struct control_flow_graph
 } // namespace detail
 } // namespace pbes_system
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::stategraph_vertex>
-{
-  static void protect(const mcrl2::pbes_system::detail::stategraph_vertex& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::detail::stategraph_vertex& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::detail::stategraph_vertex& t)
-  {
-    t.mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::stategraph_edge>
-{
-  static void protect(const mcrl2::pbes_system::detail::stategraph_edge& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::detail::stategraph_edge& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::detail::stategraph_edge& t)
-  {
-    t.mark();
-  }
-};
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_GRAPH_H

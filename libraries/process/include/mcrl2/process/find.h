@@ -264,9 +264,9 @@ std::set<core::identifier_string> find_action_names(const T& x)
 /// \param[in] equations a sequence of process equations
 /// \return The equation with the given process identifier. Throws an exception if no such equation was found.
 inline
-const process_equation& find_equation(const atermpp::vector<process_equation>& equations, const process_identifier& id)
+const process_equation& find_equation(const std::vector<process_equation>& equations, const process_identifier& id)
 {
-  for (atermpp::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  for (std::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
   {
     if (i->identifier() == id)
     {

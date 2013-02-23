@@ -20,8 +20,6 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -41,9 +39,9 @@ std::string EXPRESSIONS =
   "  val(n > 3)                             \n"
   ;
 
-void print(atermpp::set<pbes_expression> q)
+void print(std::set<pbes_expression> q)
 {
-  for (atermpp::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
+  for (std::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
   {
     std::cout << pbes_system::pp(*i) << std::endl;
   }
@@ -60,9 +58,9 @@ void test_accessors()
   variable d(identifier_string("d"), sort_nat::nat());
   variable_list v = make_list(d);
   pbes_expression z = d;
-  propositional_variable_instantiation X(identifier_string("X"), make_list(d));
+  propositional_variable_instantiation X(identifier_string("X"), atermpp::aterm_cast<data::data_expression_list>(make_list(d)));
 
-  atermpp::set<pbes_expression> q;
+  std::set<pbes_expression> q;
   q.insert(x);
   q.insert(y);
   q.insert(z);
@@ -74,7 +72,7 @@ void test_accessors()
     variable_list w;
     identifier_string s;
     data_expression e;
-    atermpp::set<pbes_expression> q1;
+    std::set<pbes_expression> q1;
 
     e = val(z);
 
@@ -116,7 +114,7 @@ void test_accessors()
     BOOST_CHECK(s == identifier_string("X"));
 
     data_expression_list f = param(X);
-    data_expression_list g = make_list(d);
+    data_expression_list g = atermpp::aterm_cast<data::data_expression_list>(make_list(d));
     BOOST_CHECK(f == g);
 
     print(q);
@@ -140,7 +138,7 @@ void test_accessors()
     pbes_expression a;
     identifier_string s;
     data_expression e;
-    atermpp::set<pbes_expression> q1;
+    std::set<pbes_expression> q1;
 
     e = val(z);
 
@@ -157,7 +155,6 @@ void test_accessors()
     q1 = p::split_or(a);
     q1 = p::split_and(a);
   }
-  core::garbage_collect();
 }
 
 void test_pbes_expression_with_variables()
@@ -190,7 +187,6 @@ void test_pbes_expression_with_variables()
 
   pbes_expression_with_variables yz = tr::and_(y, z);
   BOOST_CHECK(yz.variables().size() == 2);
-  core::garbage_collect();
 }
 
 void test_pbes_expression_with_propositional_variables()
@@ -219,7 +215,6 @@ void test_pbes_expression_with_propositional_variables()
   pbes_expression_with_propositional_variables Z = tr::and_(X, Y);
   BOOST_CHECK(Z.variables().size() == 2);
   BOOST_CHECK(Z.propositional_variables().size() == 4);
-  core::garbage_collect();
 }
 
 void test_term_traits()
@@ -314,13 +309,10 @@ void test_term_traits()
   v = tr::var(x);
   z = tr::arg(x);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_term_traits();
   test_accessors();
   test_pbes_expression_with_variables();

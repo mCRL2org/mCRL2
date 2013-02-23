@@ -20,8 +20,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
@@ -82,7 +80,7 @@ struct normalizer
 
   pbes_expression operator()(const pbes_expression& t) const
   {
-    return detail::normalize_and_or(f(t));
+    return pbes_system::detail::normalize_and_or(f(t));
   }
 };
 
@@ -99,7 +97,7 @@ class rewriter_with_substitution
 {
   protected:
     Rewriter& R;
-    data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
+    data::mutable_map_substitution< std::map< data::variable, data::data_expression_with_variables > > sigma;
 
   public:
     /// \brief The term type
@@ -419,7 +417,7 @@ void test_substitutions1()
   data::rewriter  datar(specification);
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
 
-  data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
+  data::mutable_map_substitution< std::map< data::variable, data::data_expression_with_variables > > sigma;
   sigma[data::parse_variable("m: Pos")] = r(data::parse_data_expression("3"));
   sigma[data::parse_variable("n: Pos")] = r(data::parse_data_expression("4"));
 
@@ -434,16 +432,14 @@ void test_substitutions1()
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
   BOOST_CHECK(r(d1, sigma) == r(d2));
-  core::garbage_collect();
 }
 
 template <typename PbesRewriter>
 void test_map_substitution_adapter(PbesRewriter r)
 {
-  atermpp::map<data::variable, data::data_expression_with_variables> sigma;
+  std::map<data::variable, data::data_expression_with_variables> sigma;
   pbes_system::pbes_expression x = data::sort_bool::true_();
   pbes_system::pbes_expression y = r(x, data::make_map_substitution(sigma));
-  core::garbage_collect();
 }
 
 void test_substitutions2()
@@ -565,7 +561,7 @@ void test_substitutions3()
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> r(datarv, datae);
 
-  data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
+  data::mutable_map_substitution< std::map< data::variable, data::data_expression_with_variables > > sigma;
   sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");
@@ -595,8 +591,23 @@ void test_substitutions3()
     ;
 
   pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
-  /* pbes_system::pbes_expression x = */ r(phi, sigma);
-  core::garbage_collect();
+  pbes_system::pbes_expression x = r(phi, sigma);
+}
+
+void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
+{
+  one_point_rule_rewriter R;
+  utilities::detail::test_operation(
+    expr1,
+    expr2,
+    default_parser(),
+    printer<pbes_expression>,
+    std::equal_to<pbes_expression>(),
+    R,
+    "R1",
+    &utilities::detail::identity<pbes_expression>,
+    "R2"
+  );
 }
 
 void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
@@ -634,7 +645,7 @@ void test_one_point_rule_rewriter()
   std::clog << "y = " << pbes_system::pp(y) << std::endl;
   BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
 
-  test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "forall c: Bool. val(false) || val(c)");
+  test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "forall c: Bool. val(c) || val(false)");
 }
 
 void test_data2pbes()
@@ -658,8 +669,6 @@ void test_data2pbes()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
   test_enumerate_quantifiers_rewriter2();

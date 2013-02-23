@@ -13,8 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
 #include "mcrl2/data/function_symbol.h"
@@ -24,7 +22,6 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -58,18 +55,18 @@ void test_data_enumerator()
     data_enumerator e(data_spec, rewr, "x_");
 
     variable x(identifier_string("x"), sort_pos::pos());
-    atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
-    for (atermpp::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
+    std::vector<data_expression_with_variables> values = e.enumerate(x);
+    for (std::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
     {
       std::cout << data::pp(*i) << " " << data::pp(i->variables()) << std::endl;
     }
 
     data_expression_with_variables expr(x, atermpp::make_vector(x));
-    atermpp::vector<data_expression_with_variables> y = e.enumerate(x);
-    for (atermpp::vector<data_expression_with_variables>::const_iterator i = y.begin(); i != y.end(); ++i)
+    std::vector<data_expression_with_variables> y = e.enumerate(x);
+    for (std::vector<data_expression_with_variables>::const_iterator i = y.begin(); i != y.end(); ++i)
     {
-      atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);
-      for (atermpp::vector<data_expression_with_variables>::const_iterator j = z.begin(); j != z.end(); ++j)
+      std::vector<data_expression_with_variables> z = e.enumerate(*i);
+      for (std::vector<data_expression_with_variables>::const_iterator j = z.begin(); j != z.end(); ++j)
       {
         std::cout << data::pp(*j) << " " << data::pp(j->variables()) << std::endl;
       }
@@ -81,7 +78,6 @@ void test_data_enumerator()
     return;
   }
   BOOST_CHECK(false); // this point should not be reached
-  core::garbage_collect();
 }
 
 void test_data_enumerator2()
@@ -99,7 +95,7 @@ void test_data_enumerator2()
 
   try
   {
-    atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
+    std::vector<data_expression_with_variables> values = e.enumerate(x);
   }
   catch (mcrl2::runtime_error)
   {
@@ -107,7 +103,6 @@ void test_data_enumerator2()
     return;
   }
   BOOST_CHECK(false); // this point should not be reached
-  core::garbage_collect();
 }
 
 class A: public data_expression
@@ -120,13 +115,7 @@ class A: public data_expression
 
     /// Constructor.
     ///
-    A(atermpp::aterm_appl term)
-      : data_expression(term)
-    {}
-
-    /// Constructor.
-    ///
-    A(ATermAppl term)
+    A(atermpp::aterm term)
       : data_expression(term)
     {}
 };
@@ -142,7 +131,6 @@ void test2()
   A a = n;
   f(a);
   std::cout << "a = " << data::pp(a) << std::endl;
-  core::garbage_collect();
 }
 
 void test3()
@@ -154,7 +142,6 @@ void test3()
   variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
   data_expression_with_variables x(c, atermpp::make_vector(n));
-  core::garbage_collect();
 }
 
 void test4()
@@ -163,9 +150,8 @@ void test4()
   rewriter datar(data_spec);
   data_enumerator datae(data_spec, datar, "x_");
   variable y = parse_data_expression("n", "n: Nat;\n");
-  atermpp::vector<data_expression_with_variables> z = datae.enumerate(y);
+  std::vector<data_expression_with_variables> z = datae.enumerate(y);
   BOOST_CHECK(z.size() > 0);
-  core::garbage_collect();
 }
 
 // This test verifies that the enumerator is able to find all terms n
@@ -176,20 +162,20 @@ void test5()
   data_spec.add_context_sort(sort_nat::nat());
   rewriter datar(data_spec);
   data_enumerator datae(data_spec, datar, "x_");
-  atermpp::deque<data_expression_with_variables> v;
+  std::deque<data_expression_with_variables> v;
   variable n("n", sort_nat::nat());
   v.push_front(data_expression_with_variables(n, make_list(n)));
   data_expression_with_variables three = sort_nat::nat(3);
 
-  atermpp::vector< data_expression > result;
+  std::vector< data_expression > result;
 
   while (!v.empty())
   {
     data_expression_with_variables e = v.back();
     v.pop_back();
-    atermpp::vector<data_expression_with_variables> z = datae.enumerate(e);
+    std::vector<data_expression_with_variables> z = datae.enumerate(e);
 
-    for (atermpp::vector<data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
+    for (std::vector<data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
     {
       data_expression b = datar(greater(*i, three));
       if (b == sort_bool::false_())
@@ -209,22 +195,21 @@ void test5()
   }
 
   BOOST_CHECK(result.size() == 4);
-  core::garbage_collect();
 }
 
 /// \brief Computes the range of values that a finite sort can take
 /// \param s A sort expression
 /// \return A sequence of all values that s can take
 /// \pre The sort expression s is finite, and s is not a function sort
-atermpp::vector<data::data_expression> value_range(data::sort_expression s, const data::data_specification& data_spec, const data::rewriter& rewr)
+std::vector<data::data_expression> value_range(data::sort_expression s, const data::data_specification& data_spec, const data::rewriter& rewr)
 {
   std::cout << "s = " << data::pp(s) << std::endl;
   data::variable v("dummy", s);
   std::cout << "v = " << data::pp(v) << std::endl;
-  atermpp::vector<data::data_expression> result;
+  std::vector<data::data_expression> result;
   data::data_enumerator e(data_spec, rewr);
-  atermpp::vector<data::data_expression_with_variables> values = e.enumerate(v);
-  for (atermpp::vector<data::data_expression_with_variables>::iterator i = values.begin(); i != values.end(); ++i)
+  std::vector<data::data_expression_with_variables> values = e.enumerate(v);
+  for (std::vector<data::data_expression_with_variables>::iterator i = values.begin(); i != values.end(); ++i)
   {
     result.push_back(*i);
   }
@@ -235,8 +220,8 @@ void test6()
 {
   data_specification data_spec;
   rewriter rewr(data_spec);
-  atermpp::vector<data_expression> values = value_range(sort_bool::bool_(), data_spec, rewr);
-  for (atermpp::vector<data_expression>::const_iterator i = values.begin(); i != values.end(); ++i)
+  std::vector<data_expression> values = value_range(sort_bool::bool_(), data_spec, rewr);
+  for (std::vector<data_expression>::const_iterator i = values.begin(); i != values.end(); ++i)
   {
     std::cout << data::pp(*i) << std::endl;
   }
@@ -251,8 +236,6 @@ void test_enumerator_variable_limit()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_data_enumerator();
   test_data_enumerator2();
   test2();

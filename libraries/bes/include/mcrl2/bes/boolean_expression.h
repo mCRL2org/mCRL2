@@ -20,8 +20,6 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -54,10 +52,10 @@ class boolean_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    boolean_expression(const atermpp::aterm_appl& term)
+    boolean_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_BooleanExpression(m_term));
+      assert(core::detail::check_rule_BooleanExpression(*this));
     }
 };
 
@@ -65,7 +63,7 @@ class boolean_expression: public atermpp::aterm_appl
 typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
 /// \brief vector of boolean_expressions
-typedef atermpp::vector<boolean_expression>    boolean_expression_vector;
+typedef std::vector<boolean_expression>    boolean_expression_vector;
 
 
 /// \brief The value true for boolean expressions
@@ -79,10 +77,10 @@ class true_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm_appl& term)
+    true_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanTrue(m_term));
+      assert(core::detail::check_term_BooleanTrue(*this));
     }
 };
 
@@ -107,10 +105,10 @@ class false_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm_appl& term)
+    false_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanFalse(m_term));
+      assert(core::detail::check_term_BooleanFalse(*this));
     }
 };
 
@@ -135,10 +133,10 @@ class not_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm_appl& term)
+    not_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanNot(m_term));
+      assert(core::detail::check_term_BooleanNot(*this));
     }
 
     /// \brief Constructor.
@@ -146,9 +144,9 @@ class not_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanNot(operand))
     {}
 
-    boolean_expression operand() const
+    const boolean_expression& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 };
 
@@ -173,10 +171,10 @@ class and_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm_appl& term)
+    and_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanAnd(m_term));
+      assert(core::detail::check_term_BooleanAnd(*this));
     }
 
     /// \brief Constructor.
@@ -184,14 +182,14 @@ class and_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanAnd(left, right))
     {}
 
-    boolean_expression left() const
+    const boolean_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    boolean_expression right() const
+    const boolean_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -216,10 +214,10 @@ class or_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm_appl& term)
+    or_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanOr(m_term));
+      assert(core::detail::check_term_BooleanOr(*this));
     }
 
     /// \brief Constructor.
@@ -227,14 +225,14 @@ class or_: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanOr(left, right))
     {}
 
-    boolean_expression left() const
+    const boolean_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    boolean_expression right() const
+    const boolean_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -259,10 +257,10 @@ class imp: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm_appl& term)
+    imp(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanImp(m_term));
+      assert(core::detail::check_term_BooleanImp(*this));
     }
 
     /// \brief Constructor.
@@ -270,14 +268,14 @@ class imp: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanImp(left, right))
     {}
 
-    boolean_expression left() const
+    const boolean_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(*this));
     }
 
-    boolean_expression right() const
+    const boolean_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -302,10 +300,10 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    boolean_variable(const atermpp::aterm_appl& term)
+    boolean_variable(const atermpp::aterm& term)
       : boolean_expression(term)
     {
-      assert(core::detail::check_term_BooleanVariable(m_term));
+      assert(core::detail::check_term_BooleanVariable(*this));
     }
 
     /// \brief Constructor.
@@ -318,9 +316,9 @@ class boolean_variable: public boolean_expression
       : boolean_expression(core::detail::gsMakeBooleanVariable(core::identifier_string(name)))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 };
 
@@ -369,6 +367,14 @@ inline int precedence(const and_& x) { return precedence(static_cast<const boole
 inline int precedence(const or_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
 inline int precedence(const not_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
 
+inline const boolean_expression& unary_operand(const not_& x) { return x.operand(); }
+inline const boolean_expression& binary_left(const and_& x)   { return x.left(); }
+inline const boolean_expression& binary_right(const and_& x)  { return x.right(); }
+inline const boolean_expression& binary_left(const or_& x)    { return x.left(); }
+inline const boolean_expression& binary_right(const or_& x)   { return x.right(); }
+inline const boolean_expression& binary_left(const imp& x)    { return x.left(); }
+inline const boolean_expression& binary_right(const imp& x)   { return x.right(); }
+
 /// \brief Returns true if the operations have the same precedence, but are different
 inline
 bool is_same_different_precedence(const and_&, const boolean_expression& x)
@@ -386,17 +392,17 @@ bool is_same_different_precedence(const or_&, const boolean_expression& x)
 namespace accessors
 {
 inline
-boolean_expression left(boolean_expression const& e)
+const boolean_expression &left(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::arg1(e);
+  return atermpp::aterm_cast<const boolean_expression>(atermpp::arg1(e));
 }
 
 inline
-boolean_expression right(boolean_expression const& e)
+const boolean_expression &right(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::arg2(e);
+  return atermpp::aterm_cast<const boolean_expression>(atermpp::arg2(e));
 }
 
 } // namespace accessors
@@ -573,30 +579,39 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return The requested argument
   static inline
-  term_type arg(const term_type& t)
+  const term_type &arg(const term_type& t)
   {
     assert(is_not(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<const term_type>(atermpp::arg1(t));
   }
 
   /// \brief Returns the left argument of a term of type and, or or imp
   /// \param t A term
   /// \return The left argument of the term
   static inline
-  term_type left(const term_type& t)
+  const term_type &left(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<const term_type>(atermpp::arg1(t));
   }
 
   /// \brief Returns the right argument of a term of type and, or or imp
   /// \param t A term
   /// \return The right argument of the term
   static inline
-  term_type right(const term_type& t)
+  const term_type &right(const term_type& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::arg2(t);
+    return atermpp::aterm_cast<const term_type>(atermpp::arg2(t));
+  }
+
+  /// \brief Returns the argument of a term of type not
+  /// \param t A term
+  static inline
+  const term_type &not_arg(const term_type& t)
+  {
+    assert(is_not(t));
+    return atermpp::aterm_cast<const term_type>(atermpp::arg1(t));
   }
 
   /// \brief Returns the argument of a term of type not
@@ -612,28 +627,28 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return The name of the boolean variable
   static inline
-  string_type name(const term_type& t)
+  const string_type &name(const term_type& t)
   {
     assert(is_variable(t));
-    return atermpp::arg1(t);
+    return atermpp::aterm_cast<const string_type>(atermpp::arg1(t));
   }
 
   /// \brief Conversion from variable to term
   /// \param v A variable
   /// \returns The converted variable
   static inline
-  term_type variable2term(variable_type v)
+  const term_type &variable2term(const variable_type &v)
   {
-    return v;
+    return atermpp::aterm_cast<const term_type>(v);
   }
 
   /// \brief Conversion from term to variable
   /// \param t a term
   /// \returns The converted term
   static inline
-  variable_type term2variable(const term_type& t)
+  const variable_type &term2variable(const term_type& t)
   {
-    return t;
+    return atermpp::aterm_cast<const variable_type>(t);
   }
 
   /// \brief Pretty print function
@@ -680,11 +695,11 @@ boolean_expression join_and(FwdIt first, FwdIt last)
   return utilities::detail::join(first, last, tr::and_, tr::true_());
 }
 
-inline bool
+/* inline bool
 operator<(const boolean_expression& x, const boolean_expression& y)
 {
-  return ATermAppl(x) < ATermAppl(y);
-}
+  return aterm_appl(x) < aterm_appl(y);
+} */
 
 /// \brief Splits a disjunction into a sequence of operands
 /// Given a boolean expression of the form p1 || p2 || .... || pn, this will yield a
@@ -693,11 +708,11 @@ operator<(const boolean_expression& x, const boolean_expression& y)
 /// \param expr A boolean expression
 /// \return A sequence of operands
 inline
-atermpp::set<boolean_expression> split_or(const boolean_expression& expr)
+std::set<boolean_expression> split_or(const boolean_expression& expr)
 {
   using namespace accessors;
-  atermpp::set<boolean_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_or, left, right);
+  std::set<boolean_expression> result;
+  utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_or, left, right);
   return result;
 }
 
@@ -708,16 +723,68 @@ atermpp::set<boolean_expression> split_or(const boolean_expression& expr)
 /// \param expr A boolean expression
 /// \return A sequence of operands
 inline
-atermpp::set<boolean_expression> split_and(const boolean_expression& expr)
+std::set<boolean_expression> split_and(const boolean_expression& expr)
 {
   using namespace accessors;
-  atermpp::set<boolean_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_and, left, right);
+  std::set<boolean_expression> result;
+  utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_and, left, right);
   return result;
 }
 
 } // namespace bes
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::bes::boolean_expression& t1, mcrl2::bes::boolean_expression& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::true_& t1, mcrl2::bes::true_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::false_& t1, mcrl2::bes::false_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::not_& t1, mcrl2::bes::not_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::and_& t1, mcrl2::bes::and_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::or_& t1, mcrl2::bes::or_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::imp& t1, mcrl2::bes::imp& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::bes::boolean_variable& t1, mcrl2::bes::boolean_variable& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_BES_BOOLEAN_EXPRESSION_H

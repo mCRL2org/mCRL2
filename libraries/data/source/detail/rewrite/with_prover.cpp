@@ -14,7 +14,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <memory.h>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/bdd_prover.h"
@@ -43,12 +42,12 @@ RewriterProver::~RewriterProver()
   delete prover_obj;
 }
 
-bool RewriterProver::addRewriteRule(const data_equation Rule)
+bool RewriterProver::addRewriteRule(const data_equation &Rule)
 {
   return rewr_obj->addRewriteRule(Rule);
 }
 
-bool RewriterProver::removeRewriteRule(const data_equation Rule)
+bool RewriterProver::removeRewriteRule(const data_equation &Rule)
 {
   return rewr_obj->removeRewriteRule(Rule);
 }
@@ -88,7 +87,7 @@ atermpp::aterm_appl RewriterProver::rewrite_internal(
   }
 }
 
-atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression Term)
+atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression &Term)
 {
   return rewr_obj->toRewriteFormat(Term);
 }

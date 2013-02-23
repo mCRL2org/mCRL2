@@ -10,7 +10,6 @@
 /// \brief Tests for control flow algorithm.
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -296,7 +295,6 @@ BOOST_AUTO_TEST_CASE(test_stategraph4)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "control_flow");
   return 0;
 }

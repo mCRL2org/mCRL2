@@ -10,6 +10,7 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
@@ -24,7 +25,6 @@
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -43,25 +43,25 @@ void test_term(const std::string& s, const T& x)
 
 void test_term(const std::string& s)
 {
-  ATerm a = atermpp::make_term(s);
+  atermpp::aterm a = atermpp::read_term_from_string(s);
   if (s.find("DataEqn") == 0)
   {
-    data_equation x = atermpp::aterm_appl((ATermAppl) a);
+    data_equation x (a);
     test_term(s, x);
   }
   else if (s.find("SortCons") == 0)
   {
-    sort_expression x = atermpp::aterm_appl((ATermAppl) a);
+    sort_expression x (a);
     test_term(s, x);
   }
   else if (s.find("OpId") == 0)
   {
-    function_symbol x = atermpp::aterm_appl((ATermAppl) a);
+    data::function_symbol x (a);
     test_term(s, x);
   }
   else
   {
-    data_expression x = atermpp::aterm_appl((ATermAppl) a);
+    data_expression x = atermpp::aterm_appl((atermpp::aterm_appl) a);
     test_term(s, x);
   }
 }
@@ -206,15 +206,15 @@ bool print_container_check(Container const& c)
 
 BOOST_AUTO_TEST_CASE(test_function_symbol_print)
 {
-  function_symbol f("f", sort_bool::bool_());
+  data::function_symbol f("f", sort_bool::bool_());
 
   PRINT_CHECK(f, "f");
 }
 
 BOOST_AUTO_TEST_CASE(test_application_print)
 {
-  function_symbol f("f", make_function_sort(bool_(), bool_()));
-  function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
+  data::function_symbol f("f", make_function_sort(bool_(), bool_()));
+  data::function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
 
   PRINT_CHECK(f(true_()), "f(true)");
   PRINT_CHECK(g(false_(), sort_nat::nat(10)), "g(false, 10)");
@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left));
 
-  data_expression left1 = remove_numeric_casts(left);
+  data_expression left1 = detail::remove_numeric_casts(left);
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left1));
 
@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   BOOST_CHECK(data::sort_nat::is_nat(x.sort()));
   BOOST_CHECK(data::sort_int::is_mod_application(x));
 
-  left1 = remove_numeric_casts(left);
+  left1 = detail::remove_numeric_casts(left);
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left1));
   std::cout << "precedence(left1) = " << precedence(left1) << std::endl;
@@ -539,7 +539,5 @@ BOOST_AUTO_TEST_CASE(test_precedence)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

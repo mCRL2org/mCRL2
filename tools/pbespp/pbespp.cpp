@@ -18,7 +18,6 @@
 #include <fstream>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/pbes/tools.h"
@@ -76,7 +75,6 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return pbespp_tool().execute(argc, argv);
 }
 

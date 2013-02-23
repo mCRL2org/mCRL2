@@ -16,10 +16,8 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -44,10 +42,10 @@ class state_formula: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    state_formula(const atermpp::aterm_appl& term)
+    state_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_StateFrm(m_term));
+      assert(core::detail::check_rule_StateFrm(*this));
     }
 //--- start user section state_formula ---//
     /// \brief Returns true if the formula is timed.
@@ -60,7 +58,7 @@ class state_formula: public atermpp::aterm_appl
 typedef atermpp::term_list<state_formula> state_formula_list;
 
 /// \brief vector of state_formulas
-typedef atermpp::vector<state_formula>    state_formula_vector;
+typedef std::vector<state_formula>    state_formula_vector;
 
 
 /// \brief Test for a state_formula expression
@@ -84,10 +82,10 @@ class true_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm_appl& term)
+    true_(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateTrue(m_term));
+      assert(core::detail::check_term_StateTrue(*this));
     }
 };
 
@@ -112,10 +110,10 @@ class false_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm_appl& term)
+    false_(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateFalse(m_term));
+      assert(core::detail::check_term_StateFalse(*this));
     }
 };
 
@@ -140,10 +138,10 @@ class not_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm_appl& term)
+    not_(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateNot(m_term));
+      assert(core::detail::check_term_StateNot(*this));
     }
 
     /// \brief Constructor.
@@ -151,9 +149,9 @@ class not_: public state_formula
       : state_formula(core::detail::gsMakeStateNot(operand))
     {}
 
-    state_formula operand() const
+    const state_formula& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
     }
 };
 
@@ -178,10 +176,10 @@ class and_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm_appl& term)
+    and_(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateAnd(m_term));
+      assert(core::detail::check_term_StateAnd(*this));
     }
 
     /// \brief Constructor.
@@ -189,14 +187,14 @@ class and_: public state_formula
       : state_formula(core::detail::gsMakeStateAnd(left, right))
     {}
 
-    state_formula left() const
+    const state_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
     }
 
-    state_formula right() const
+    const state_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -221,10 +219,10 @@ class or_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm_appl& term)
+    or_(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateOr(m_term));
+      assert(core::detail::check_term_StateOr(*this));
     }
 
     /// \brief Constructor.
@@ -232,14 +230,14 @@ class or_: public state_formula
       : state_formula(core::detail::gsMakeStateOr(left, right))
     {}
 
-    state_formula left() const
+    const state_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
     }
 
-    state_formula right() const
+    const state_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -264,10 +262,10 @@ class imp: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm_appl& term)
+    imp(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateImp(m_term));
+      assert(core::detail::check_term_StateImp(*this));
     }
 
     /// \brief Constructor.
@@ -275,14 +273,14 @@ class imp: public state_formula
       : state_formula(core::detail::gsMakeStateImp(left, right))
     {}
 
-    state_formula left() const
+    const state_formula& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg1(*this));
     }
 
-    state_formula right() const
+    const state_formula& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -307,10 +305,10 @@ class forall: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    forall(const atermpp::aterm_appl& term)
+    forall(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateForall(m_term));
+      assert(core::detail::check_term_StateForall(*this));
     }
 
     /// \brief Constructor.
@@ -318,14 +316,14 @@ class forall: public state_formula
       : state_formula(core::detail::gsMakeStateForall(variables, body))
     {}
 
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
     }
 
-    state_formula body() const
+    const state_formula& body() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -350,10 +348,10 @@ class exists: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    exists(const atermpp::aterm_appl& term)
+    exists(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateExists(m_term));
+      assert(core::detail::check_term_StateExists(*this));
     }
 
     /// \brief Constructor.
@@ -361,14 +359,14 @@ class exists: public state_formula
       : state_formula(core::detail::gsMakeStateExists(variables, body))
     {}
 
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
     }
 
-    state_formula body() const
+    const state_formula& body() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -393,10 +391,10 @@ class must: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    must(const atermpp::aterm_appl& term)
+    must(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateMust(m_term));
+      assert(core::detail::check_term_StateMust(*this));
     }
 
     /// \brief Constructor.
@@ -404,14 +402,14 @@ class must: public state_formula
       : state_formula(core::detail::gsMakeStateMust(formula, operand))
     {}
 
-    regular_formulas::regular_formula formula() const
+    const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formulas::regular_formula>(atermpp::arg1(*this));
     }
 
-    state_formula operand() const
+    const state_formula& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -436,10 +434,10 @@ class may: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    may(const atermpp::aterm_appl& term)
+    may(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateMay(m_term));
+      assert(core::detail::check_term_StateMay(*this));
     }
 
     /// \brief Constructor.
@@ -447,14 +445,14 @@ class may: public state_formula
       : state_formula(core::detail::gsMakeStateMay(formula, operand))
     {}
 
-    regular_formulas::regular_formula formula() const
+    const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const regular_formulas::regular_formula>(atermpp::arg1(*this));
     }
 
-    state_formula operand() const
+    const state_formula& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg2(*this));
     }
 };
 
@@ -479,10 +477,10 @@ class yaled: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    yaled(const atermpp::aterm_appl& term)
+    yaled(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateYaled(m_term));
+      assert(core::detail::check_term_StateYaled(*this));
     }
 };
 
@@ -507,10 +505,10 @@ class yaled_timed: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    yaled_timed(const atermpp::aterm_appl& term)
+    yaled_timed(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateYaledTimed(m_term));
+      assert(core::detail::check_term_StateYaledTimed(*this));
     }
 
     /// \brief Constructor.
@@ -518,9 +516,9 @@ class yaled_timed: public state_formula
       : state_formula(core::detail::gsMakeStateYaledTimed(time_stamp))
     {}
 
-    data::data_expression time_stamp() const
+    const data::data_expression& time_stamp() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
     }
 };
 
@@ -545,10 +543,10 @@ class delay: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    delay(const atermpp::aterm_appl& term)
+    delay(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateDelay(m_term));
+      assert(core::detail::check_term_StateDelay(*this));
     }
 };
 
@@ -573,10 +571,10 @@ class delay_timed: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    delay_timed(const atermpp::aterm_appl& term)
+    delay_timed(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateDelayTimed(m_term));
+      assert(core::detail::check_term_StateDelayTimed(*this));
     }
 
     /// \brief Constructor.
@@ -584,9 +582,9 @@ class delay_timed: public state_formula
       : state_formula(core::detail::gsMakeStateDelayTimed(time_stamp))
     {}
 
-    data::data_expression time_stamp() const
+    const data::data_expression& time_stamp() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
     }
 };
 
@@ -611,10 +609,10 @@ class variable: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    variable(const atermpp::aterm_appl& term)
+    variable(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateVar(m_term));
+      assert(core::detail::check_term_StateVar(*this));
     }
 
     /// \brief Constructor.
@@ -627,14 +625,14 @@ class variable: public state_formula
       : state_formula(core::detail::gsMakeStateVar(core::identifier_string(name), arguments))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::data_expression_list arguments() const
+    const data::data_expression_list& arguments() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
     }
 };
 
@@ -659,10 +657,10 @@ class nu: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    nu(const atermpp::aterm_appl& term)
+    nu(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateNu(m_term));
+      assert(core::detail::check_term_StateNu(*this));
     }
 
     /// \brief Constructor.
@@ -675,19 +673,19 @@ class nu: public state_formula
       : state_formula(core::detail::gsMakeStateNu(core::identifier_string(name), assignments, operand))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::assignment_list assignments() const
+    const data::assignment_list& assignments() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const data::assignment_list>(atermpp::list_arg2(*this));
     }
 
-    state_formula operand() const
+    const state_formula& operand() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg3(*this));
     }
 };
 
@@ -712,10 +710,10 @@ class mu: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    mu(const atermpp::aterm_appl& term)
+    mu(const atermpp::aterm& term)
       : state_formula(term)
     {
-      assert(core::detail::check_term_StateMu(m_term));
+      assert(core::detail::check_term_StateMu(*this));
     }
 
     /// \brief Constructor.
@@ -728,19 +726,19 @@ class mu: public state_formula
       : state_formula(core::detail::gsMakeStateMu(core::identifier_string(name), assignments, operand))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::assignment_list assignments() const
+    const data::assignment_list& assignments() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const data::assignment_list>(atermpp::list_arg2(*this));
     }
 
-    state_formula operand() const
+    const state_formula& operand() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<const state_formula>(atermpp::arg3(*this));
     }
 };
 
@@ -800,6 +798,18 @@ inline int precedence(const or_& x) { return precedence(static_cast<const state_
 inline int precedence(const must& x) { return precedence(static_cast<const state_formula&>(x)); }
 inline int precedence(const may& x) { return precedence(static_cast<const state_formula&>(x)); }
 inline int precedence(const not_& x) { return precedence(static_cast<const state_formula&>(x)); }
+
+inline const state_formula& unary_operand(const not_& x) { return x.operand(); }
+inline const state_formula& unary_operand(const must& x) { return x.operand(); }
+inline const state_formula& unary_operand(const may& x)  { return x.operand(); }
+inline const state_formula& unary_operand(const nu& x)   { return x.operand(); }
+inline const state_formula& unary_operand(const mu& x)   { return x.operand(); }
+inline const state_formula& binary_left(const and_& x)   { return x.left(); }
+inline const state_formula& binary_right(const and_& x)  { return x.right(); }
+inline const state_formula& binary_left(const or_& x)    { return x.left(); }
+inline const state_formula& binary_right(const or_& x)   { return x.right(); }
+inline const state_formula& binary_left(const imp& x)    { return x.left(); }
+inline const state_formula& binary_right(const imp& x)   { return x.right(); }
 
 } // namespace state_formulas
 
@@ -885,5 +895,117 @@ bool find_nil(const state_formulas::state_formula& x);
 } // namespace state_formulas
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::state_formulas::state_formula& t1, mcrl2::state_formulas::state_formula& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::true_& t1, mcrl2::state_formulas::true_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::false_& t1, mcrl2::state_formulas::false_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::not_& t1, mcrl2::state_formulas::not_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::and_& t1, mcrl2::state_formulas::and_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::or_& t1, mcrl2::state_formulas::or_& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::imp& t1, mcrl2::state_formulas::imp& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::forall& t1, mcrl2::state_formulas::forall& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::exists& t1, mcrl2::state_formulas::exists& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::must& t1, mcrl2::state_formulas::must& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::may& t1, mcrl2::state_formulas::may& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::yaled& t1, mcrl2::state_formulas::yaled& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::yaled_timed& t1, mcrl2::state_formulas::yaled_timed& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::delay& t1, mcrl2::state_formulas::delay& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::delay_timed& t1, mcrl2::state_formulas::delay_timed& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::variable& t1, mcrl2::state_formulas::variable& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::nu& t1, mcrl2::state_formulas::nu& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::state_formulas::mu& t1, mcrl2::state_formulas::mu& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

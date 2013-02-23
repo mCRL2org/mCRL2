@@ -48,12 +48,11 @@ class Rule:
     def name(self):
         return self.lhs[1:-1]
 
-    # returns all functions in self.rhs with a phase not in ignored_phases
-    def functions(self, ignored_phases):
+    # returns all functions in self.rhs
+    def functions(self):
         result = []
         for f in self.rhs:
-            if not f.phase in ignored_phases:
-                result.append(f)
+            result.append(f)
         return result
 
     def __repr__(self):
@@ -145,9 +144,9 @@ class Argument:
 
     def type(self):
         if self.repetitions == '*' or self.repetitions == '+':
-            return 'ATermList'
+            return 'aterm_list'
         else:
-            return 'ATermAppl'
+            return 'aterm_appl'
 
     def name(self):
         return self.expressions[0].name()

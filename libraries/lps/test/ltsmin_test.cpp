@@ -14,8 +14,6 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/ltsmin.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -255,7 +253,7 @@ void test_dependency_matrix()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+  test_dependency_matrix();
 
   test_dependency_matrix();
 

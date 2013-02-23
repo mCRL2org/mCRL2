@@ -62,7 +62,7 @@ struct bes_actions: public core::default_parser_actions
     return bes::boolean_equation(parse_FixedPointOperator(node.child(0)), parse_BesVar(node.child(1)), parse_BesExpr(node.child(3)));
   }
 
-  atermpp::vector<boolean_equation> parse_BesEqnSpec(const core::parse_node& node)
+  std::vector<boolean_equation> parse_BesEqnSpec(const core::parse_node& node)
   {
     return parse_BesEqnDeclList(node.child(1));
   }
@@ -77,7 +77,7 @@ struct bes_actions: public core::default_parser_actions
     return bes::boolean_equation_system<>(parse_BesEqnSpec(node.child(0)), parse_BesInit(node.child(1)));
   }
 
-  atermpp::vector<boolean_equation> parse_BesEqnDeclList(const core::parse_node& node)
+  std::vector<boolean_equation> parse_BesEqnDeclList(const core::parse_node& node)
   {
     return parse_vector<bes::boolean_equation>(node, "BesEqnDecl", boost::bind(&bes_actions::parse_BesEqnDecl, this, _1));
   }
@@ -133,8 +133,8 @@ std::istream& operator>>(std::istream& from, boolean_equation_system<Container>&
     throw mcrl2::runtime_error("parsing of boolean equation system failed: it is not a BES!");
   }
 
-  atermpp::vector<boolean_equation> equations;
-  for (typename atermpp::vector<pbes_system::pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  std::vector<boolean_equation> equations;
+  for (typename std::vector<pbes_system::pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     boolean_variable v(i->variable().name());
     boolean_expression rhs = pbes_expression2boolean_expression(i->formula());

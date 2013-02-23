@@ -23,8 +23,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -394,6 +392,7 @@ std::string case_10 =
 
 const std::string expected_10 = "process_parameter_count = 1";
 
+static
 void test_constelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
   specification spec = parse_linear_process_specification(spec_text);
@@ -402,9 +401,9 @@ void test_constelm(const std::string& message, const std::string& spec_text, con
   constelm(spec, R, instantiate_free_variables);
   lps::detail::specification_property_map info(spec);
   BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
-  core::garbage_collect();
 }
 
+static
 void test_constelm()
 {
   test_constelm("case_1" , case_1,  expected_1);
@@ -420,6 +419,7 @@ void test_constelm()
   test_constelm("case_10" , case_10,  expected_10);
 }
 
+static
 void test_abp()
 {
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());
@@ -427,13 +427,10 @@ void test_abp()
   bool instantiate_free_variables = false;
   constelm(spec, R, instantiate_free_variables);
   BOOST_CHECK(is_well_typed(spec));
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_constelm();
   test_abp();
 

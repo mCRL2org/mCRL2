@@ -15,7 +15,6 @@
 
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -51,6 +50,5 @@ class lpsinfo_tool: public input_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return lpsinfo_tool().execute(argc, argv);
 }

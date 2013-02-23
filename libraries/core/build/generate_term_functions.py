@@ -13,22 +13,22 @@ LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
 inline
 atermpp::function_symbol function_symbol_%(name)s()
 {
-  static atermpp::function_symbol function_symbol_%(name)s = core::detail::initialise_static_expression(function_symbol_%(name)s, atermpp::function_symbol("%(name)s", %(arity)d));
+  static atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
   return function_symbol_%(name)s;
 }
 
 inline
 bool gsIs%(name)s(atermpp::aterm_appl Term)
 {
-  return ATgetAFun(Term) == function_symbol_%(name)s();
+  return Term.function() == function_symbol_%(name)s();
 }
 
 '''
 
 LIBSTRUCT_MAKE_FUNCTION = '''inline
-ATermAppl gsMake%(name)s(%(parameters)s)
+aterm_appl gsMake%(name)s(%(parameters)s)
 {
-  return ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s);
+  return term_appl<aterm>(function_symbol_%(name)s()%(arguments)s);
 }
 
 '''
@@ -38,12 +38,12 @@ ATermAppl gsMake%(name)s(%(parameters)s)
 #---------------------------------------------------------------#
 # generates C++ code for libstruct functions
 #
-def generate_libstruct_functions(rules, filename, ignored_phases = []):
+def generate_libstruct_functions(rules, filename):
     names = {}
     calls = {}
     decls = {}
 
-    functions = find_functions(rules, ignored_phases)
+    functions = find_functions(rules)
 
     for f in functions:
         name = f.name()
@@ -108,8 +108,8 @@ bool %(check_name)s(Term t)
 
 '''
 CHECK_TERM_TYPE = '''  // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
   {
     return false;
   }
@@ -133,15 +133,15 @@ CHECK_TERM_CHILDREN = '''  // check the children
 #---------------------------------------------------------------#
 # generates C++ code for checking if terms are in the right format
 #
-def generate_soundness_check_functions(rules, filename, ignored_phases = []):
+def generate_soundness_check_functions(rules, filename):
     text  = '' # function definitions
     ptext = '' # function declarations (prototypes)
 
-    functions = find_functions(rules, ignored_phases)
+    functions = find_functions(rules)
 
     for rule in rules:
         name = rule.name()
-        rhs_functions = rule.functions(ignored_phases)
+        rhs_functions = rule.functions()
         body = '  return ' + '\n         || '.join(map(lambda x: x.check_name() + '(t)', rhs_functions)) + ';'
         text = text + CHECK_RULE % {
             'name'      : name,
@@ -165,11 +165,11 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
             for i in range(arity):
                 arg = f.arguments[i]
                 if arg.repetitions == '':
-                    body = body + '  if (!check_term_argument(a(%d), %s<atermpp::aterm>))\n'    % (i, arg.check_name())
+                    body = body + '  if (!check_term_argument(a[%d], %s<atermpp::aterm>))\n'    % (i, arg.check_name())
                 elif arg.repetitions == '*':
-                    body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 0))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm>, 0))\n' % (i, arg.check_name())
                 elif arg.repetitions == '+':
-                    body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
                 body = body + '  {\n'
                 body = body + '    mCRL2log(log::debug, "soundness_checks") << "%s" << std::endl;\n'                % (arg.check_name())
                 body = body + '    return false;\n'
@@ -192,7 +192,7 @@ CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
 ATermAppl construct%(name)s()
 {
-  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s)));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_%(name)s()%(arguments)s));
   return t;
 }
 
@@ -212,11 +212,11 @@ ATermAppl construct%(name)s()
 #---------------------------------------------------------------#
 # generates C++ code for constructor functions
 #
-def generate_constructor_functions(rules, filename, ignored_phases = []):
+def generate_constructor_functions(rules, filename):
     text  = ''
     ptext = '' # function declarations (prototypes)
 
-    functions = find_functions(rules, ignored_phases)
+    functions = find_functions(rules)
 
     for f in functions:
         ptext = ptext + 'ATermAppl construct%s();\n' % f.name()
@@ -225,9 +225,11 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
         args = []
         for x in f.arguments:
             if x.repetitions == '':
-                args.append('reinterpret_cast<ATerm>(construct%s())' % x.name())
+                args.append('construct%s()' % x.name())
+            elif x.repetitions == '*':
+                args.append('constructList()')
             else:
-                args.append('reinterpret_cast<ATerm>(constructList())')
+                args.append('constructList(construct%s())' % x.name())
 
         if len(args) > 0:
             arguments = ', ' + ', '.join(args)
@@ -264,11 +266,11 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
 #---------------------------------------------------------------#
 #                          find_functions
 #---------------------------------------------------------------#
-# find all functions that appear in the rhs of a rule whose phase is not in ignored_phases
-def find_functions(rules, ignored_phases):
+# find all functions that appear in the rhs of a rule
+def find_functions(rules):
     function_map = {}
     for rule in rules:
-        for f in rule.functions(ignored_phases):
+        for f in rule.functions():
             if not f.is_rule():
                 function_map[f.name()] = f
 
@@ -330,19 +332,19 @@ def parse_ebnf(filename):
 #---------------------------------------------------------------#
 def postprocess_libstruct(filename):
     src = '''inline
-ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
+aterm_appl gsMakeProcess\(aterm_appl ProcVarId_0, aterm_list DataExpr_1\)
 \{
-  return ATmakeAppl2\(gsAFunProcess\(\), \(ATerm\) ProcVarId_0, \(ATerm\) DataExpr_1\);
+  return aterm_appl\(gsAFunProcess\(\), \(aterm\) ProcVarId_0, \(aterm\) DataExpr_1\);
 \}
 '''
     dest = '''inline
-ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
+aterm_appl gsMakeProcess(aterm_appl ProcVarId_0, aterm_list DataExpr_1)
 {
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+  assert(ATgetLength((aterm_list)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  return term_appl<aterm>(gsAFunProcess(), (aterm) ProcVarId_0, (aterm) DataExpr_1);
 }
 '''
     text = path(filename).text()
@@ -365,20 +367,17 @@ def main():
     rules = parse_ebnf(filename)
 
     if options.soundness_checks:
-        ignored_phases = [] # ['-lin', '-di', '-rft']
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
-        result = generate_soundness_check_functions(rules, filename, ignored_phases) and result
+        result = generate_soundness_check_functions(rules, filename) and result
 
     if options.libstruct:
-        ignored_phases = []
         filename = '../include/mcrl2/core/detail/struct_core.h'
-        result = generate_libstruct_functions(rules, filename, ignored_phases) and result
+        result = generate_libstruct_functions(rules, filename) and result
         postprocess_libstruct(filename)
 
     if options.constructors:
-        ignored_phases = []
         filename = '../include/mcrl2/core/detail/constructors.h'
-        result = generate_constructor_functions(rules, filename, ignored_phases) and result
+        result = generate_constructor_functions(rules, filename) and result
 
     if not options.soundness_checks and not options.libstruct and not options.constructors:
         parser.print_help()

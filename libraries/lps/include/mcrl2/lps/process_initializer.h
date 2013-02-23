@@ -12,11 +12,11 @@
 #ifndef MCRL2_LPS_PROCESS_INITIALIZER_H
 #define MCRL2_LPS_PROCESS_INITIALIZER_H
 
-#include <iterator>
+#include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <string>
-#include "mcrl2/atermpp/utility.h"
-#include "mcrl2/atermpp/convert.h"
+#include <utility>
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
@@ -30,51 +30,61 @@ namespace mcrl2
 namespace lps
 {
 
-/// \brief Initial state of a linear process.
-// LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
+//--- start generated class process_initializer ---//
+/// \brief A process initializer
 class process_initializer: public atermpp::aterm_appl
 {
-  protected:
-    /// \brief The assignments of the initializer
-    data::assignment_list m_assignments;
-
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     process_initializer()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcessInit())
+      : atermpp::aterm_appl(core::detail::constructLinearProcessInit())
     {}
 
     /// \brief Constructor.
-    process_initializer(const data::assignment_list& assignments)
-      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments)),
-        m_assignments(assignments)
+    /// \param term A term
+    process_initializer(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
     {
+      assert(core::detail::check_term_LinearProcessInit(*this));
     }
 
     /// \brief Constructor.
-    /// \param t A term
-    process_initializer(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(core::detail::check_term_LinearProcessInit(m_term));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_assignments = *i;
-    }
+    process_initializer(const data::assignment_list& assignments)
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments))
+    {}
 
-    /// \return The sequence of assignments.
-    data::assignment_list assignments() const
+    const data::assignment_list& assignments() const
     {
-      return m_assignments;
+      return atermpp::aterm_cast<const data::assignment_list>(atermpp::list_arg1(*this));
     }
-
+//--- start user section process_initializer ---//
     /// \brief Returns the initial state of the LPS.
     /// \param process_parameters The parameters of the correponding linear process
     /// \return The initial state of the LPS.
     data::data_expression_list state(const data::variable_list& process_parameters) const
     {
-      return data::replace_free_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(m_assignments));
+      return data::replace_free_variables(atermpp::aterm_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
+//--- end user section process_initializer ---//
 };
+
+/// \brief list of process_initializers
+typedef atermpp::term_list<process_initializer> process_initializer_list;
+
+/// \brief vector of process_initializers
+typedef std::vector<process_initializer>    process_initializer_vector;
+
+
+/// \brief Test for a process_initializer expression
+/// \param t A term
+/// \return True if it is a process_initializer expression
+inline
+bool is_process_initializer(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsLinearProcessInit(t);
+}
+
+//--- end generated class process_initializer ---//
 
 // template function overloads
 std::string pp(const process_initializer& x);
@@ -83,5 +93,15 @@ std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 } // namespace lps
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::lps::process_initializer& t1, mcrl2::lps::process_initializer& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_LPS_PROCESS_INITIALIZER_H

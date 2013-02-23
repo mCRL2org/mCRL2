@@ -14,9 +14,7 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
@@ -68,7 +66,6 @@ void test_find()
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 
-  core::garbage_collect();
 }
 
 void test_free_variables()
@@ -76,8 +73,8 @@ void test_free_variables()
   using atermpp::make_list;
 
   data::variable b = bool_("b");
-  data::data_expression_list d = make_list(b);
-  process_identifier P(core::identifier_string("P"), make_list(data::sort_bool::bool_()));
+  data::data_expression_list d = atermpp::aterm_cast<data::data_expression_list>(make_list(b));
+  process_identifier P(core::identifier_string("P"), atermpp::aterm_cast<data::sort_expression_list>(make_list(data::sort_bool::bool_())));
   process_instance pi(P, d);
 
   std::set<data::variable> free_variables = process::find_free_variables(pi);
@@ -87,8 +84,6 @@ void test_free_variables()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_find();
   test_free_variables();
 

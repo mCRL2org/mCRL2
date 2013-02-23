@@ -125,7 +125,7 @@ class pbes_abstract_algorithm
              bool value_true
             )
     {
-      for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (std::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         detail::pbes_parameter_map::const_iterator j = parameter_map.find(i->variable().name());
         if (j != parameter_map.end())

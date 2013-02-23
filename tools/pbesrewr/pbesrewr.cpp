@@ -12,7 +12,6 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -88,6 +87,5 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return pbes_rewriter().execute(argc, argv);
 }

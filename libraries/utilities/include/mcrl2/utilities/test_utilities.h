@@ -17,7 +17,6 @@
 #include <vector>
 #include <cctype>
 #include <fstream>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2
@@ -32,7 +31,7 @@ struct collect_after_test_case
 {
   ~collect_after_test_case()
   {
-    core::garbage_collect();
+    // core::garbage_collect();
   }
 };
 
@@ -90,6 +89,7 @@ std::string rand_alnum_str(const std::string::size_type n)
   return s;
 }
 
+inline
 bool file_exists(const char *filename)
 {
   std::ifstream ifile(filename);
@@ -98,6 +98,7 @@ bool file_exists(const char *filename)
 
 /// \brief Get filename with random suffix
 /// \warning is prone to race conditions
+inline
 std::string temporary_filename(std::string const& prefix = "")
 {
   std::string basename(prefix + "_" + rand_alnum_str(8));

@@ -207,9 +207,10 @@ bool MainWindow::onCloseRequest(int index)
       m_findReplaceDialog->setTextEdit(0);
       m_ui.documentManager->closeDocument(index);
       break;
-    default: 
-      return false;
-      break;
+    default:
+      // Should not occur, but leaving default out triggers
+      // -Wswitch warnings.
+      throw mcrl2::runtime_error("Unhandled answer in message box");
   }
 
   return true;

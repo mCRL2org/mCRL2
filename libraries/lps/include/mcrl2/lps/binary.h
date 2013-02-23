@@ -16,7 +16,6 @@
 #include <iterator>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
@@ -73,10 +72,10 @@ class binary_algorithm: public lps::detail::lps_algorithm
     DataRewriter m_rewriter;
 
     /// Mapping of finite variables to boolean vectors
-    atermpp::map<data::variable, atermpp::vector<data::variable> > m_new_parameters;
+    std::map<data::variable, std::vector<data::variable> > m_new_parameters;
 
     /// Mapping of variables to all values they can be assigned
-    atermpp::map<data::variable, atermpp::vector<data::data_expression> > m_enumerated_elements;
+    std::map<data::variable, std::vector<data::data_expression> > m_enumerated_elements;
 
     /// Mapping of variables to corresponding if-tree
     data::mutable_map_substitution<> m_if_trees;
@@ -155,7 +154,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
           // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
           for (enumerator_type::iterator j=enumerator.begin(
-                           push_front(data::variable_list(),par),
+                           atermpp::make_list<data::variable>(par),
                            data::data_expression(data::sort_bool::true_()));
                 j != enumerator.end() ; ++j)
           {
@@ -199,7 +198,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       mCRL2log(log::debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
-      m_spec.process().process_parameters() = atermpp::convert<data::variable_list>(new_parameters);
+      m_spec.process().process_parameters() = data::variable_list(new_parameters.begin(),new_parameters.end());
     }
 
     /// \brief Replace assignments in v that are of a finite sort with a
@@ -260,7 +259,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       mCRL2log(log::debug) << "Replaced assignment(s) " << data::pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
 
-      return atermpp::convert<data::assignment_list>(result);
+      return data::assignment_list(result.begin(),result.end());
     }
 
     /// \brief Update an action summand with the new Boolean parameters

@@ -13,7 +13,6 @@
 #define MCRL2_DATA_BINDER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -35,10 +34,10 @@ class binder_type: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    binder_type(const atermpp::aterm_appl& term)
+    binder_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_BindingOperator(m_term));
+      assert(core::detail::check_rule_BindingOperator(*this));
     }
 };
 
@@ -46,7 +45,7 @@ class binder_type: public atermpp::aterm_appl
 typedef atermpp::term_list<binder_type> binder_type_list;
 
 /// \brief vector of binder_types
-typedef atermpp::vector<binder_type>    binder_type_vector;
+typedef std::vector<binder_type>    binder_type_vector;
 
 
 /// \brief Binder for set or bag comprehension
@@ -60,10 +59,10 @@ class set_or_bag_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    set_or_bag_comprehension_binder(const atermpp::aterm_appl& term)
+    set_or_bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_SetBagComp(m_term));
+      assert(core::detail::check_term_SetBagComp(*this));
     }
 };
 
@@ -88,10 +87,10 @@ class set_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    set_comprehension_binder(const atermpp::aterm_appl& term)
+    set_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_SetComp(m_term));
+      assert(core::detail::check_term_SetComp(*this));
     }
 };
 
@@ -116,10 +115,10 @@ class bag_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    bag_comprehension_binder(const atermpp::aterm_appl& term)
+    bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_BagComp(m_term));
+      assert(core::detail::check_term_BagComp(*this));
     }
 };
 
@@ -144,10 +143,10 @@ class forall_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    forall_binder(const atermpp::aterm_appl& term)
+    forall_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Forall(m_term));
+      assert(core::detail::check_term_Forall(*this));
     }
 };
 
@@ -172,10 +171,10 @@ class exists_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    exists_binder(const atermpp::aterm_appl& term)
+    exists_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Exists(m_term));
+      assert(core::detail::check_term_Exists(*this));
     }
 };
 
@@ -200,10 +199,10 @@ class lambda_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    lambda_binder(const atermpp::aterm_appl& term)
+    lambda_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Lambda(m_term));
+      assert(core::detail::check_term_Lambda(*this));
     }
 };
 
@@ -221,4 +220,51 @@ bool is_lambda_binder(const binder_type& t)
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::binder_type& t1, mcrl2::data::binder_type& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::set_or_bag_comprehension_binder& t1, mcrl2::data::set_or_bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::set_comprehension_binder& t1, mcrl2::data::set_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::bag_comprehension_binder& t1, mcrl2::data::bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::forall_binder& t1, mcrl2::data::forall_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::exists_binder& t1, mcrl2::data::exists_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::lambda_binder& t1, mcrl2::data::lambda_binder& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_BINDER_TYPE_H

@@ -21,7 +21,7 @@ namespace lps
 {
 
 /** \brief Internal NextState state storage method **/
-typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
+typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (aterm_appl) **/
                , GS_STATE_TREE    /** \brief Store states in a binary tree **/
              } NextStateFormat;
 

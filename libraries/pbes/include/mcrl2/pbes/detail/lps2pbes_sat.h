@@ -40,7 +40,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   const lps::multi_action& a;
   data::set_identifier_generator& id_generator;
-  atermpp::vector<pbes_expression> result_stack;
+  std::vector<pbes_expression> result_stack;
 
   sat_traverser(const lps::multi_action& a_, data::set_identifier_generator& id_generator_)
     : a(a_), id_generator(id_generator_)

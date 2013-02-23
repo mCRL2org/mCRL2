@@ -21,10 +21,10 @@ class identifier: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    identifier(const atermpp::aterm_appl& term)
+    identifier(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_Id(m_term));
+      assert(core::detail::check_term_Id(*this));
     }
 
     /// \brief Constructor.
@@ -37,9 +37,9 @@ class identifier: public data_expression
       : data_expression(core::detail::gsMakeId(core::identifier_string(name)))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 };
 //--- end generated class identifier ---//
@@ -47,10 +47,20 @@ class identifier: public data_expression
 /// \brief list of identifiers
 typedef atermpp::term_list< identifier > identifier_list;
 /// \brief vector of identifiers
-typedef atermpp::vector< identifier > identifier_vector;
+typedef std::vector< identifier > identifier_vector;
 
 
 } // namespace data
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::identifier& t1, mcrl2::data::identifier& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif

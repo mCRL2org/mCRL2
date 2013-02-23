@@ -13,7 +13,6 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/atermpp/map.h"
 
 namespace mcrl2
 {
@@ -35,32 +34,31 @@ class RewriterJitty: public Rewriter
 
     data_expression rewrite(const data_expression term, substitution_type &sigma);
 
-    atermpp::aterm_appl toRewriteFormat(const data_expression term);
-    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl term, internal_substitution_type &sigma);
+    atermpp::aterm_appl toRewriteFormat(const data_expression& term);
+    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl& term, internal_substitution_type &sigma);
 
-    bool addRewriteRule(const data_equation Rule);
-    bool removeRewriteRule(const data_equation Rule);
+    bool addRewriteRule(const data_equation &Rule);
+    bool removeRewriteRule(const data_equation &Rule);
 
   private:
     size_t max_vars;
     bool need_rebuild;
 
-    atermpp::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
-    atermpp::vector < ATermList >  jitty_strat;
+    std::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
+    std::vector < atermpp::aterm_list >  jitty_strat;
     size_t MAX_LEN; 
-
-    atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl term, internal_substitution_type &sigma);
+    atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &term, internal_substitution_type &sigma);
     void build_strategies();
 
     atermpp::aterm_appl rewrite_aux_function_symbol(
-                      const atermpp::aterm_int op,
-                      const atermpp::aterm_appl term,
+                      const atermpp::aterm_int &op,
+                      const atermpp::aterm_appl &term,
                       internal_substitution_type &sigma);
 
     /* Auxiliary function to take care that the array jitty_strat is sufficiently large
        to access element i */
     void make_jitty_strat_sufficiently_larger(const size_t i);
-    ATermList create_strategy(data_equation_list rules1);
+    atermpp::aterm_list create_strategy(const data_equation_list& rules1);
 
 };
 }

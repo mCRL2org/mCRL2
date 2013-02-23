@@ -13,9 +13,7 @@
 #include <sstream>
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/test_utilities.h"
@@ -44,7 +42,6 @@ void test_process_specification(const std::string& ps_in, bool const expected_re
       BOOST_CHECK_THROW(process::type_check(ps), mcrl2::runtime_error);
     }
   }
-  core::garbage_collect();
 }
 
 BOOST_AUTO_TEST_CASE(test_process_reference_assignment)
@@ -106,7 +103,5 @@ BOOST_AUTO_TEST_CASE(test_function_as_equation_condition)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

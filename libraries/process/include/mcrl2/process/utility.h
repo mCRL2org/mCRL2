@@ -24,7 +24,7 @@ namespace mcrl2 {
 namespace process {
 
 inline
-process_expression expand_rhs(const process::process_instance_assignment& x, const atermpp::vector<process_equation>& equations)
+process_expression expand_rhs(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
 {
   const process_equation& eqn = find_equation(equations, x.identifier());
   process_expression p = eqn.expression();
@@ -40,7 +40,7 @@ process_expression expand_rhs(const process::process_instance_assignment& x, con
 }
 
 inline
-process_expression expand_rhs(const process::process_instance& x, const atermpp::vector<process_equation>& equations)
+process_expression expand_rhs(const process::process_instance& x, const std::vector<process_equation>& equations)
 {
   const process_equation& eqn = find_equation(equations, x.identifier());
   process_expression p = eqn.expression();
@@ -114,7 +114,7 @@ process_expression make_allow(const multi_action_name_set& A, const process_expr
   }
 
   // convert A to an action_name_multiset_list B
-  atermpp::vector<action_name_multiset> v;
+  std::vector<action_name_multiset> v;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
   {
     const multi_action_name& alpha = *i;
@@ -181,7 +181,7 @@ bool is_source(const rename_expression_list& R, const core::identifier_string& x
   return false;
 }
 
-typedef atermpp::map<core::identifier_string, std::vector<core::identifier_string> > rename_inverse_map;
+typedef std::map<core::identifier_string, std::vector<core::identifier_string> > rename_inverse_map;
 
 // Example: R = {b -> c}, then rename_inverse(R) = {b -> [], c -> [b, c]}
 inline
@@ -319,7 +319,7 @@ void apply_comm(const communication_expression& c, multi_action_name_set& A)
 inline
 void apply_comm_inverse(const communication_expression& gamma, multi_action_name_set& A)
 {
-  atermpp::vector<multi_action_name> to_be_added;
+  std::vector<multi_action_name> to_be_added;
   core::identifier_string c = gamma.name();
   core::identifier_string_list lhs = gamma.action_name().names();
 

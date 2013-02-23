@@ -13,13 +13,12 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
-#include "mcrl2/atermpp/transform.h"
 #include "mcrl2/atermpp/set_operations.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;
@@ -56,18 +55,20 @@ struct func
 
   atermpp::aterm operator()(atermpp::aterm x) const
   {
-    return make_term("f(" + x.to_string() + ")");
-  }
-};
+    return read_term_from_string("f(" + to_string(x) + ")");
+  } 
+}; 
 
 void test_aterm_balanced_tree()
 {
   aterm_balanced_tree empty_tree;
   BOOST_CHECK(empty_tree.begin() == empty_tree.end());
 
-  aterm_list q = make_term("[0,1,2,3,4,5,6,7,8,9]");
+  aterm_list q(read_term_from_string("[0,1,2,3,4,5,6,7,8,9]"));
+  aterm_list r(read_term_from_string("[0,1,2,3,4,6,1,7,8,9]"));
+  aterm_balanced_tree qtree(q.begin(),10);
+  aterm_balanced_tree rtree(r.begin(),10);
 
-  aterm_balanced_tree qtree(q);
 
   BOOST_CHECK(qtree.size() == 10);
   BOOST_CHECK(!qtree.empty());
@@ -87,29 +88,24 @@ void test_aterm_balanced_tree()
 
   BOOST_CHECK(count == 45);
 
-  qtree = apply(qtree, increment());
-
   count = 0;
 
   std::for_each(qtree.begin(), qtree.end(), counter(count));
 
-  BOOST_CHECK(count == 55);
-
-  aterm_balanced_tree qcopy(q);
+  aterm_balanced_tree qcopy(q.begin(),10);
 
   qtree.swap(qcopy);
 
   BOOST_CHECK(std::equal(qtree.begin(), qtree.end(), q.begin()));
   BOOST_CHECK(std::equal(q.begin(), q.end(), qtree.begin()));
-  BOOST_CHECK(!std::equal(qcopy.begin(), qcopy.end(), q.begin()));
-  BOOST_CHECK(!std::equal(q.begin(), q.end(), qcopy.begin()));
-}
 
-int test_main(int argc, char* argv[])
+  BOOST_CHECK(!std::equal(rtree.begin(), rtree.end(), q.begin()));
+  BOOST_CHECK(!std::equal(q.begin(), q.end(), rtree.begin()));
+} 
+
+int test_main(int , char**)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_aterm_balanced_tree();
+  test_aterm_balanced_tree(); 
 
   return 0;
 }

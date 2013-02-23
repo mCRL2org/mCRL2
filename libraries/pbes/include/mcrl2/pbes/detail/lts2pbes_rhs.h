@@ -63,7 +63,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   const lts2pbes_lts& lts1;
   lts2pbes_state_type s;
   const utilities::progress_meter& m_progress_meter;
-  atermpp::vector<pbes_expression> result_stack;
+  std::vector<pbes_expression> result_stack;
 
   rhs_lts2pbes_traverser(const state_formulas::state_formula& phi0_,
                          const lts::lts_lts_t& lts0_,
@@ -154,7 +154,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 
   void operator()(const state_formulas::must& x)
   {
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     action_formulas::action_formula alpha = x.formula();
     state_formulas::state_formula phi = x.operand();
 
@@ -172,7 +172,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 
   void operator()(const state_formulas::may& x)
   {
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     action_formulas::action_formula alpha = x.formula();
     state_formulas::state_formula phi = x.operand();
 

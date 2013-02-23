@@ -11,6 +11,9 @@
 
 #define MCRL2_STATE_FORMULA_BUILDER_DEBUG
 
+#define BOOST_TEST_MODULE state_formula
+#include <boost/test/included/unit_test.hpp>
+
 #include <iostream>
 #include <iterator>
 #include <set>
@@ -27,8 +30,6 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -36,9 +37,6 @@ using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::state_formulas;
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 BOOST_AUTO_TEST_CASE(test_rename)
 {
@@ -66,8 +64,6 @@ BOOST_AUTO_TEST_CASE(test_rename)
   formula = rename_predicate_variables(formula, generator);
 
   BOOST_CHECK(pp(formula) == "(mu X1. X1) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X1. X1)");
-
-  std::cerr << "formula: " << pp(formula) << std::endl;
 
   generator = data::set_identifier_generator();
   generator.add_identifiers(lps::find_identifiers(spec));
@@ -118,9 +114,10 @@ BOOST_AUTO_TEST_CASE(test_type_checking)
   state_formula formula = parse_state_formula("<a([d])>true", context);
 
   BOOST_CHECK(is_may(formula));
-  BOOST_CHECK(act(formula));
+  BOOST_CHECK(is_regular_formula(act(formula)));
 }
 
+static inline
 state_formula negate_variable(const variable& x)
 {
   return state_formulas::not_(x);
@@ -294,12 +291,17 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
   BOOST_CHECK(v.size() == 1);
 
   f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", spec);
+std::cerr << "FORMULA " << f << "\n";
   v = maximal_closed_subformulas(f);
   BOOST_CHECK(v.size() == 1);
 
   state_formula g = exists(f).body();
   std::cout << "g = " << state_formulas::pp(g) << std::endl;
   v = maximal_closed_subformulas(g);
+  for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    std::cout << "element " << state_formulas::pp(*i) << std::endl;
+  }
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));
   BOOST_CHECK(contains(v, "false"));
@@ -314,11 +316,4 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));
   BOOST_CHECK(contains(v, "false"));
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return 0;
 }

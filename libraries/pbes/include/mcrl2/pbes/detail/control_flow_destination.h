@@ -25,7 +25,7 @@ namespace detail {
 class control_flow_destination_algorithm: public control_flow_source_algorithm
 {
   public:
-    typedef atermpp::vector<data::data_expression> destination_array; // N.B. data_expression() represents a non-existent value in this vector
+    typedef std::vector<data::data_expression> destination_array; // N.B. data_expression() represents a non-existent value in this vector
     typedef std::map<propositional_variable_instantiation, destination_array> destination_map;
 
     control_flow_destination_algorithm(pfnf_pbes& p)
@@ -94,7 +94,7 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
         {
           out << ", ";
         }
-        if (*i == data::data_expression())
+        if (!i->defined())
         {
           out << "-";
         }
@@ -159,14 +159,14 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
     {
       const pfnf_equation& eqn = m_pbes.equations()[k];
       const pfnf_implication& g = eqn.implications()[i];
-      // const data::variable d_n = eqn.parameters()[n];
-      if (source(k, i, n) == data::data_expression())
+      const data::variable d_n = eqn.parameters()[n];
+      if (!source(k, i, n).defined())
       {
         return false;
       }
       for (std::size_t j = 0; j < g.variables().size(); ++j)
       {
-        if (destination(k, i, j, n) == data::data_expression())
+        if (!destination(k, i, j, n).defined())
         {
           return false;
         }
@@ -196,7 +196,7 @@ class control_flow_destination_algorithm: public control_flow_source_algorithm
           {
             c.insert(copy(k, i, j, m));
           }
-          if (c.size() > 1 || *c.begin() == data::data_expression())
+          if (c.size() > 1 || !c.begin()->defined())
           {
             return false;
           }

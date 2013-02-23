@@ -46,7 +46,7 @@ class lambda: public abstraction
     /// \pre variables is not empty.
     lambda(const variable& variable,
            const data_expression& body)
-      : abstraction(lambda_binder(), atermpp::convert< variable_list >(make_list(variable)), body)
+      : abstraction(lambda_binder(), atermpp::aterm_cast<variable_list>(make_list(variable)), body)
     {
     }
 

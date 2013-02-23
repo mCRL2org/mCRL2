@@ -163,12 +163,12 @@ std::string bes_expression2pgsolver(const Expression& p, const VariableMap& vari
   std::string result;
   if (tr::is_and(p))
   {
-    atermpp::set<Expression> expressions = split_and(p);
+    std::set<Expression> expressions = split_and(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
   else if (tr::is_or(p))
   {
-    atermpp::set<Expression> expressions = split_or(p);
+    std::set<Expression> expressions = split_or(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
   else if (tr::is_prop_var(p))
@@ -319,12 +319,12 @@ void save_bes(const boolean_equation_system<>& bes_spec,
     {
       if (aterm_ascii)
       {
-        mCRL2log(log::verbose) << "Saving result in ATerm ascii format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in aterm ascii format..." << std::endl;
         bes_spec.save(outfilename, false);
       }
       else
       {
-        mCRL2log(log::verbose) << "Saving result in ATerm binary format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in aterm binary format..." << std::endl;
         bes_spec.save(outfilename, true);
       }
       break;

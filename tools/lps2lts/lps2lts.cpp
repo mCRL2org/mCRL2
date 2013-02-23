@@ -16,11 +16,8 @@
 #include <string>
 #include <cassert>
 #include <signal.h>
-#include "mcrl2/aterm/aterm2.h"
 
 #include "boost/lexical_cast.hpp"
-
-#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/logger.h"
 
@@ -44,6 +41,7 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
+static
 std::list<std::string> split_actions(const std::string& s)
 {
   size_t pcount = 0;
@@ -384,7 +382,6 @@ void premature_termination_handler(int)
 int main(int argc, char** argv)
 {
   int result;
-  MCRL2_ATERMPP_INIT(argc, argv)
   tool_instance = new lps2lts_tool();
 
   signal(SIGABRT,premature_termination_handler);

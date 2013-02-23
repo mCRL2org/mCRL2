@@ -28,7 +28,6 @@
 #ifndef MCRL2_LTS_LIBLTS_MERGE_H
 #define MCRL2_LTS_LIBLTS_MERGE_H
 
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/lts/lts.h"
 
 namespace mcrl2
@@ -65,7 +64,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
 
   typedef typename LTS_TYPE::action_label_t type1;
   typedef typename LTS_TYPE::labels_size_type type2;
-  atermpp::map < type1,type2 > labs;
+  std::map < type1,type2 > labs;
 
   // Put the labels of the LTS l1 in a map.
   for (size_t i = 0; i < l1.num_action_labels(); ++i)

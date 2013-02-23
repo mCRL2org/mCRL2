@@ -36,14 +36,10 @@
 // linear process libraries.
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/find.h"
-
-// atermpp includes
-#include "mcrl2/atermpp/set.h"
 
 //mCRL2 data
 #include "mcrl2/data/structured_sort.h"
@@ -103,6 +99,7 @@ class objectdatatype
 {
   public:
     identifier_string objectname;
+    action_label_list multi_action_names;
     bool constructor;
     process_expression representedprocess;
     process_identifier process_representing_action; /* for actions target sort is used to
@@ -116,12 +113,7 @@ class objectdatatype
 
     objectdatatype()
     {
-      objectname.protect();
       constructor=false;
-      representedprocess.protect();
-      process_representing_action.protect();
-      processbody.protect();
-      parameters.protect();
       processstatus=unknown;
       object=none;
       canterminate=0;
@@ -131,16 +123,12 @@ class objectdatatype
     objectdatatype(const objectdatatype& o)
     {
       objectname=o.objectname;
-      objectname.protect();
+      multi_action_names=o.multi_action_names;
       constructor=o.constructor;
       representedprocess=o.representedprocess;
-      representedprocess.protect();
       process_representing_action=o.process_representing_action;
-      process_representing_action.protect();
       processbody=o.processbody;
-      processbody.protect();
       parameters=o.parameters;
-      parameters.protect();
       processstatus=o.processstatus;
       object=o.object;
       canterminate=o.canterminate;
@@ -150,16 +138,12 @@ class objectdatatype
     const objectdatatype& operator=(const objectdatatype& o)
     {
       objectname=o.objectname;
-      objectname.protect();
+      multi_action_names=o.multi_action_names;
       constructor=o.constructor;
       representedprocess=o.representedprocess;
-      representedprocess.protect();
       process_representing_action=o.process_representing_action;
-      process_representing_action.protect();
       processbody=o.processbody;
-      processbody.protect();
       parameters=o.parameters;
-      parameters.protect();
       processstatus=o.processstatus;
       object=o.object;
       canterminate=o.canterminate;
@@ -169,11 +153,6 @@ class objectdatatype
 
     ~objectdatatype()
     {
-      objectname.unprotect();
-      representedprocess.unprotect();
-      process_representing_action.unprotect();
-      processbody.unprotect();
-      parameters.unprotect();
     }
 };
 
@@ -182,7 +161,7 @@ class specification_basic_type:public boost::noncopyable
 {
   public:
     action_label_list acts;     /* storage place for actions */
-    atermpp::set < variable > global_variables; /* storage place for free variables occurring
+    std::set < variable > global_variables; /* storage place for free variables occurring
                                    in processes ranging over data */
     variable_list initdatavars; /* storage place for free variables in
                                    init clause */
@@ -194,7 +173,7 @@ class specification_basic_type:public boost::noncopyable
     class enumtype;
     class enumeratedtype;
 
-    atermpp::vector < process_equation > procs;
+    std::vector < process_equation > procs;
     /* storage place for processes,
        uses alt, seq, par, lmer, cond,sum,
        com, bound, at, name, delta,
@@ -205,27 +184,29 @@ class specification_basic_type:public boost::noncopyable
                                             action */
     process_identifier tau_process;
     process_identifier delta_process;
-    atermpp::vector < process_identifier > seq_varnames; /* Contains names of processes which represent a sequence
+    std::vector < process_identifier > seq_varnames; /* Contains names of processes which represent a sequence
                                                             of process variables */
-    std::vector < atermpp::vector < process_instance > > representedprocesses; /* contains the sequences of process
+    std::vector < std::vector < process_instance > > representedprocesses; /* contains the sequences of process
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
     bool timeIsBeingUsed;
-    std::vector < objectdatatype > objectdata;
+    std::deque < objectdatatype > objectdata; // This is a double ended queue to guarantee that the objects will not 
+                                              // be moved to another place when the object data structure grows. This
+                                              // is because objects in this datatype  are passed around by reference.
 
-    ATermIndexedSet objectIndexTable;
+    indexed_set objectIndexTable;
     set_identifier_generator fresh_identifier_generator;
     std::vector < enumeratedtype > enumeratedtypes;
     stackoperations* stack_operations_list;
 
   public:
-    specification_basic_type(const action_label_list as,
-                             const atermpp::vector< process_equation > &ps,
-                             const variable_list idvs,
-                             const data_specification& ds,
-                             const atermpp::set < data::variable > &glob_vars,
-                             const t_lin_options& opt,
-                             const process_specification procspec):
+    specification_basic_type(const action_label_list &as,
+                             const std::vector< process_equation > &ps,
+                             const variable_list &idvs,
+                             const data_specification &ds,
+                             const std::set < data::variable > &glob_vars,
+                             const t_lin_options &opt,
+                             const process_specification &procspec):
       acts(),
       global_variables(glob_vars),
       data(ds),
@@ -233,7 +214,7 @@ class specification_basic_type:public boost::noncopyable
       options(opt),
       timeIsBeingUsed(false)
     {
-      objectIndexTable=ATindexedSetCreate(1024,75);
+      objectIndexTable=indexed_set(1024,75);
 
       // find_identifiers does not find the identifiers in the enclosed data specification.
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
@@ -244,12 +225,10 @@ class specification_basic_type:public boost::noncopyable
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.mappings()));
 
       stack_operations_list=NULL;
-      acts.protect();
       acts=as;
       storeact(acts);
       procs=ps;
       storeprocs(procs);
-      initdatavars.protect();
       initdatavars=idvs;
       /* if (!opt.norewrite)
       {
@@ -257,19 +236,15 @@ class specification_basic_type:public boost::noncopyable
       } */
       // The terminationAction and the terminatedProcId must be defined after initialisation of
       // data as otherwise fresh name does not work properly.
-      terminationAction.protect();
       terminationAction=action(action_label(fresh_identifier_generator("Terminate"),sort_expression_list()),data_expression_list());
-      terminatedProcId.protect();
-      terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"),variable_list());
+      terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"),sort_expression_list());
 // /* Changed delta() to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
       insertProcDeclaration(
         terminatedProcId,
         variable_list(),
         seq(terminationAction,delta()),
         pCRL,0,false);
-      delta_process.protect();
       delta_process=newprocess(variable_list(),delta(),pCRL,0,false);
-      tau_process.protect();
       tau_process=newprocess(variable_list(),tau(),pCRL,1,false);
     }
 
@@ -281,14 +256,7 @@ class specification_basic_type:public boost::noncopyable
         delete stack_operations_list;
         stack_operations_list=temp;
       }
-      acts.unprotect();
-      initdatavars.unprotect();
-      terminationAction.unprotect();
-      terminatedProcId.unprotect();
-      delta_process.unprotect();
-      tau_process.unprotect();
 
-      ATindexedSetDestroy(objectIndexTable);
     }
 
   private:
@@ -313,23 +281,23 @@ class specification_basic_type:public boost::noncopyable
 
     /*****************  store and retrieve basic objects  ******************/
 
-    size_t addObject(ATermAppl o, bool& b)
+    size_t addObject(aterm_appl o, bool& b)
     {
-      bool isnew=false;
-      size_t result=ATindexedSetPut(objectIndexTable,(ATerm)o,&isnew);
-      if (objectdata.size()<=result)
+      // size_t result=ATindexedSetPut(objectIndexTable,(aterm)o,&isnew);
+      std::pair<size_t, bool> result=objectIndexTable.put(o);
+      if (objectdata.size()<=result.first)
       {
-        objectdata.resize(result+1);
+        objectdata.resize(result.first+1);
       }
-      b=isnew?true:false;
-      return result;
+      b=result.second;
+      return result.first;
     }
 
-    size_t objectIndex(ATermAppl o)
+    size_t objectIndex(aterm_appl o)
     {
       // assert(existsObjectIndex(o) >= 0);
-      size_t result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
-      assert(result!=ATERM_NON_EXISTING_POSITION); /* object index must always return the index
+      size_t result=objectIndexTable.index(o);
+      assert(result!=atermpp::npos); /* object index must always return the index
                             of an existing object, because at the
                             places where objectIndex is used, no
                             checks take place */
@@ -351,7 +319,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return ma.front();
       }
-      return process::sync(ma.front(),action_list_to_process(pop_front(ma)));
+      return process::sync(ma.front(),action_list_to_process(ma.tail()));
     }
 
     action_list to_action_list(const process_expression p)
@@ -363,7 +331,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_action(p))
       {
-        return push_front(action_list(),action(p));
+        return make_list(action(p));
       }
 
       if (is_sync(p))
@@ -378,7 +346,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_action(multiAction))
       {
-        return push_front(action_label_list(),action(multiAction).label());
+        return make_list(action(multiAction).label());
       }
       assert(is_sync(multiAction));
       return getnames(process::sync(multiAction).left())+getnames(process::sync(multiAction).right());
@@ -388,7 +356,7 @@ class specification_basic_type:public boost::noncopyable
     // If the expression is a variable not occurring in the occurs_set that variable
     // is used.
     variable_list make_parameters_rec(const data_expression_list l,
-                                      atermpp::set < variable> &occurs_set)
+                                      std::set < variable> &occurs_set)
     {
       variable_list result;
       for (data_expression_list::const_iterator l1=l.begin();
@@ -402,19 +370,19 @@ class specification_basic_type:public boost::noncopyable
         if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
         {
           const variable v=*l1;
-          result=push_front(result,v);
+          result.push_front(v);
           occurs_set.insert(v);
         }
         else
         {
-          result=push_front(result,variable(get_fresh_variable("a",l1->sort())));
+          result.push_front(variable(get_fresh_variable("a",l1->sort())));
         }
       }
       return reverse(result);
     }
 
     variable_list getparameters_rec(const process_expression multiAction,
-                                    atermpp::set < variable> &occurs_set)
+                                    std::set < variable> &occurs_set)
     {
       if (is_action(multiAction))
       {
@@ -427,7 +395,7 @@ class specification_basic_type:public boost::noncopyable
 
     variable_list getparameters(const process_expression multiAction)
     {
-      atermpp::set < variable > occurs_set;
+      std::set < variable > occurs_set;
       return getparameters_rec(multiAction,occurs_set);
     }
 
@@ -452,10 +420,10 @@ class specification_basic_type:public boost::noncopyable
         for (size_t i=0 ; i< arity; ++i,++e_walker)
         {
           assert(e_walker!=args.end());
-          temp_args=push_front(temp_args,*e_walker);
+          temp_args.push_front(*e_walker);
         }
         temp_args=reverse(temp_args);
-        result=push_front(result, action(*l,temp_args));
+        result.push_front(action(*l,temp_args));
       }
       assert(e_walker==args.end());
       return reverse(result);
@@ -464,26 +432,25 @@ class specification_basic_type:public boost::noncopyable
     size_t addMultiAction(const process_expression multiAction, bool& isnew)
     {
       const action_label_list actionnames=getnames(multiAction);
-      size_t n=addObject((ATermAppl)(ATermList)actionnames,isnew);
+      size_t n=addObject((aterm_appl)(aterm_list)actionnames,isnew);
 
       if (isnew)
       {
         // tempvar is needed as objectdata can change during a call
         // of getparameters.
-        const data_expression_list templist=getparameters(multiAction);
+        const variable_list templist=getparameters(multiAction);
         objectdata[n].parameters=templist;
         objectdata[n].object=multiact;
         // must separate assignment below as
         // objectdata may change as a side effect of make
         // multiaction.
-        const action_list tempvar=makemultiaction(actionnames,
-                                  objectdata[n].parameters);
+        const action_list tempvar=makemultiaction(actionnames, data_expression_list(objectdata[n].parameters));
         objectdata[n].processbody=action_list_to_process(tempvar);
       }
       return n;
     }
 
-    void insertvariable(const variable var, const bool mustbenew)
+    void insertvariable(const variable &var, const bool mustbenew)
     {
       addString(var.name());
 
@@ -499,7 +466,7 @@ class specification_basic_type:public boost::noncopyable
       objectdata[n].object=variable_;
     }
 
-    void insertvariables(const variable_list vars, const bool mustbenew)
+    void insertvariables(const variable_list &vars, const bool mustbenew)
     {
       for (variable_list::const_iterator l=vars.begin(); l!=vars.end(); ++l)
       {
@@ -539,7 +506,9 @@ class specification_basic_type:public boost::noncopyable
       {
         return t;
       }
-      return push_front(RewriteTermList(pop_front(t)), RewriteTerm(t.front()));
+      data_expression_list result=RewriteTermList(t.tail());
+      result.push_front(RewriteTerm(t.front()));
+      return result;
     }
 
     action RewriteAction(const action& t)
@@ -657,9 +626,9 @@ class specification_basic_type:public boost::noncopyable
     /************ storeprocs *************************************************/
 
     size_t insertProcDeclaration(
-      const process_identifier procId,
-      const variable_list parameters,
-      const process_expression body,
+      const process_identifier procId, // This should not be a reference.
+      const variable_list parameters,  // This should not be a reference.
+      const process_expression &body,
       processstatustype s,
       const bool canterminate,
       const bool containstime)
@@ -687,9 +656,9 @@ class specification_basic_type:public boost::noncopyable
       return n;
     }
 
-    void storeprocs(const atermpp::vector< process_equation > & procs)
+    void storeprocs(const std::vector< process_equation > & procs)
     {
-      for (atermpp::vector< process_equation >::const_iterator i=procs.begin();
+      for (std::vector< process_equation >::const_iterator i=procs.begin();
            i!=procs.end(); ++i)
       {
         insertProcDeclaration(
@@ -703,7 +672,7 @@ class specification_basic_type:public boost::noncopyable
     /************ storeinit *************************************************/
 
   public:
-    process_identifier storeinit(const process_expression init)
+    process_identifier storeinit(const process_expression &init)
     {
       /* init is used as the name of the initial process,
          because it cannot occur as a string in the input */
@@ -716,7 +685,7 @@ class specification_basic_type:public boost::noncopyable
   private:
 
     /********** various functions on action and multi actions  ***************/
-    bool actioncompare(const action_label a1, const action_label a2)
+    bool actioncompare(const action_label &a1, const action_label &a2)
     {
       /* first compare the strings in the actions */
       if (std::string(a1.name())<std::string(a2.name()))
@@ -735,8 +704,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     action_list linInsertActionInMultiActionList(
-      const action act,
-      const action_list multiAction)
+      const action &act,
+      action_list multiAction)
     {
       /* store the action in the multiAction, alphabetically
          sorted on the actionname in the actionId. Note that
@@ -744,7 +713,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (multiAction.empty())
       {
-        return push_front(multiAction,act);
+        return make_list(act);
       }
       const action firstAction=multiAction.front();
 
@@ -754,15 +723,17 @@ class specification_basic_type:public boost::noncopyable
          is a safe way to do this. */
       if (actioncompare(act.label(),firstAction.label()))
       {
-        return push_front(multiAction,act);
+        multiAction.push_front(act);
+        return multiAction;
       }
-      return push_front(linInsertActionInMultiActionList(
+      action_list result= linInsertActionInMultiActionList(
                           act,
-                          pop_front(multiAction)),
-                        firstAction);
+                          multiAction.tail());
+      result.push_front(firstAction);
+      return result;
     }
 
-    action_list linMergeMultiActionList(const action_list ma1, const action_list ma2)
+    action_list linMergeMultiActionList(const action_list &ma1, const action_list &ma2)
     {
       action_list result=ma2;
       for (action_list::const_iterator i=ma1.begin() ; i!=ma1.end() ; ++i)
@@ -773,7 +744,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    action_list linMergeMultiActionListProcess(const process_expression ma1, const process_expression ma2)
+    action_list linMergeMultiActionListProcess(const process_expression &ma1, const process_expression &ma2)
     {
       return linMergeMultiActionList(to_action_list(ma1),to_action_list(ma2));
     }
@@ -781,7 +752,7 @@ class specification_basic_type:public boost::noncopyable
     /************** determine_process_status ********************************/
 
     processstatustype determine_process_statusterm(
-      const process_expression body,
+      const process_expression body,  // intentionally not a reference.
       const processstatustype status)
     {
       /* In this procedure it is determined whether a process
@@ -1033,9 +1004,9 @@ class specification_basic_type:public boost::noncopyable
 
     /***********  collect pcrlprocessen **********************************/
 
-    void collectPcrlProcesses_term(const process_expression body,
-                                   atermpp::vector <process_identifier>  &pcrlprocesses,
-                                   atermpp::set <process_identifier>  &visited)
+    void collectPcrlProcesses_term(const process_expression body,  // Intentionally not a reference.
+                                   std::vector <process_identifier>  &pcrlprocesses,
+                                   std::set <process_identifier>  &visited)
     {
       if (is_if_then(body))
       {
@@ -1144,8 +1115,8 @@ class specification_basic_type:public boost::noncopyable
 
     void collectPcrlProcesses(
       const process_identifier procDecl,
-      atermpp::vector <process_identifier>  &pcrlprocesses,
-      atermpp::set <process_identifier>  &visited)
+      std::vector <process_identifier>  &pcrlprocesses,
+      std::set <process_identifier>  &visited)
     {
       if (visited.count(procDecl)==0)
       {
@@ -1161,9 +1132,9 @@ class specification_basic_type:public boost::noncopyable
 
     void collectPcrlProcesses(
       const process_identifier procDecl,
-      atermpp::vector <process_identifier>  &pcrlprocesses)
+      std::vector <process_identifier>  &pcrlprocesses)
     {
-      atermpp::set <process_identifier>  visited;
+      std::set <process_identifier>  visited;
       collectPcrlProcesses(procDecl, pcrlprocesses, visited);
     }
 
@@ -1176,8 +1147,8 @@ class specification_basic_type:public boost::noncopyable
 
     void filter_vars_by_term(
       const data_expression t,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
       if (is_variable(t))
       {
@@ -1212,11 +1183,12 @@ class specification_basic_type:public boost::noncopyable
 
       assert(is_application(t));
 
-      filter_vars_by_term(application(t).head(),vars_set,vars_result_set);
-      filter_vars_by_termlist(application(t).arguments(),vars_set,vars_result_set);
+      const application &a=atermpp::aterm_cast<const application>(t);
+      filter_vars_by_term(a.head(),vars_set,vars_result_set);
+      filter_vars_by_termlist(a.begin(),a.end(),vars_set,vars_result_set);
     }
 
-    bool occursintermlist(const variable var, const data_expression_list r)
+    bool occursintermlist(const variable &var, const data_expression_list &r)
     {
       for (data_expression_list::const_iterator l=r.begin() ; l!=r.end() ; ++l)
       {
@@ -1229,35 +1201,37 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void filter_vars_by_termlist(
-      const data_expression_list tl,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const data_expression_list::const_iterator begin,
+      const data_expression_list::const_iterator end,
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
-      for (data_expression_list::const_iterator l=tl.begin(); l!=tl.end(); ++l)
+      for (data_expression_list::const_iterator l=begin; l!=end; ++l)
       {
         filter_vars_by_term(*l,vars_set,vars_result_set);
       }
     }
 
     void filter_vars_by_multiaction(
-      const action_list multiaction,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const action_list &multiaction,
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
       for (action_list::const_iterator ma=multiaction.begin() ; ma!=multiaction.end() ; ++ma)
       {
-        filter_vars_by_termlist(ma->arguments(),vars_set,vars_result_set);
+        filter_vars_by_termlist(ma->arguments().begin(), ma->arguments().end(),vars_set,vars_result_set);
       }
       return;
     }
 
     void filter_vars_by_assignmentlist(
-      const assignment_list assignments,
-      const variable_list parameters,
-      const atermpp::set < variable > &vars_set,
-      atermpp::set < variable > &vars_result_set)
+      const assignment_list &assignments,
+      const variable_list &parameters,
+      const std::set < variable > &vars_set,
+      std::set < variable > &vars_result_set)
     {
-      filter_vars_by_termlist(data_expression_list(parameters),vars_set,vars_result_set);
+      const data_expression_list &l=atermpp::aterm_cast<data_expression_list>(parameters);
+      filter_vars_by_termlist(l.begin(),l.end(),vars_set,vars_result_set);
       for (assignment_list::const_iterator i=assignments.begin();
            i!=assignments.end(); ++i)
       {
@@ -1289,13 +1263,13 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(p))
       {
         if (strict)
-          return occursintermlist(var,sum(p).bound_variables())||
+          return occursintermlist(var,data_expression_list(sum(p).bound_variables()))||
                  occursinpCRLterm(var,sum(p).operand(),strict);
         /* below appears better? , but leads
            to errors. Should be investigated. */
         else
           return
-            (!occursintermlist(var,sum(p).bound_variables()))&&
+            (!occursintermlist(var,data_expression_list(sum(p).bound_variables())))&&
             occursinpCRLterm(var,sum(p).operand(),strict);
       }
       if (is_process_instance(p))
@@ -1347,12 +1321,12 @@ class specification_basic_type:public boost::noncopyable
         if (occursinpCRLterm(var,p,1))
         {
           variable newvar=get_fresh_variable(var.name(),var.sort());
-          newsumvars=push_front(newsumvars,newvar);
+          newsumvars.push_front(newvar);
           sigma[var]=data_expression(newvar);
         }
         else
         {
-          newsumvars=push_front(newsumvars,var);
+          newsumvars.push_front(var);
         }
       }
       sumvars=reverse(newsumvars);
@@ -1380,14 +1354,14 @@ class specification_basic_type:public boost::noncopyable
             occursintermlist(var,occurterms))
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
-          newsumvars=push_front(newsumvars,newvar);
-          /* rename_vars=push_front(rename_vars,var);
-             rename_terms=push_front(rename_terms,data_expression(newvar)); */
+          newsumvars.push_front(newvar);
+          /* rename_vars.push_front(var);
+             rename_terms.push_front(data_expression(newvar)); */
           sigma[var]=data_expression(newvar);
         }
         else
         {
-          newsumvars=push_front(newsumvars,var);
+          newsumvars.push_front(var);
         }
       }
       sumvars=reverse(newsumvars);
@@ -1453,20 +1427,21 @@ class specification_basic_type:public boost::noncopyable
           if (lhs==rhs)
           {
             return substitute_assignmentlist(
-                     pop_front(assignments),
-                     pop_front(parameters),
+                     assignments.tail(),
+                     parameters.tail(),
                      replacelhs,
                      replacerhs,
                      sigma);
           }
-          return push_front(
+          assignment_list result=
                    substitute_assignmentlist(
-                     pop_front(assignments),
-                     pop_front(parameters),
+                     assignments.tail(),
+                     parameters.tail(),
                      replacelhs,
                      replacerhs,
-                     sigma),
-                   assignment(lhs,rhs));
+                     sigma);
+          result.push_front(assignment(lhs,rhs));
+          return result;
         }
       }
 
@@ -1493,19 +1468,20 @@ class specification_basic_type:public boost::noncopyable
       {
         return substitute_assignmentlist(
                  assignments,
-                 pop_front(parameters),
+                 parameters.tail(),
                  replacelhs,
                  replacerhs,
                  sigma);
       }
-      return push_front(
+      assignment_list result=
                substitute_assignmentlist(
                  assignments,
-                 pop_front(parameters),
+                 parameters.tail(),
                  replacelhs,
                  replacerhs,
-                 sigma),
-               assignment(lhs,rhs));
+                 sigma);
+      result.push_front(assignment(lhs,rhs));
+      return result;
     }
 
     /* The function below calculates sigma(p) and replaces
@@ -1513,8 +1489,8 @@ class specification_basic_type:public boost::noncopyable
        variables */
 
     process_expression substitute_pCRLproc(
-      const process_expression p,
-      const  atermpp::map < variable, data_expression > &sigma)
+      const process_expression &p,
+      const  std::map < variable, data_expression > &sigma)
     {
       if (is_choice(p))
       {
@@ -1568,16 +1544,16 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumargs=sum(p).bound_variables();
         variable_list vars;
-        data_expression_list terms; 
+        data_expression_list terms;
 
-        for( atermpp::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
         {
           vars=push_back(vars,i->first);
           terms=push_back(terms,i->second);
         }
-        
-        atermpp::map < variable, data_expression > local_sigma=sigma;
-        alphaconvert(sumargs,local_sigma,terms,vars);
+
+        std::map < variable, data_expression > local_sigma=sigma;
+        alphaconvert(sumargs,local_sigma,vars,terms);
 
         const process_expression result=sum(sumargs,
                                             substitute_pCRLproc(sum(p).operand(),local_sigma));
@@ -1634,14 +1610,14 @@ class specification_basic_type:public boost::noncopyable
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
 
-    process_instance transform_process_assignment_to_process(const process_instance_assignment procId)
+    process_instance transform_process_assignment_to_process(const process_instance_assignment &procId)
     {
       size_t n=objectIndex(procId.identifier());
 
       assignment_list assignments=procId.assignments();
 
       // Transform the assignments into a list of variables and substitutable terms;
-      // atermpp::map < variable, data_expression > sigma;
+      // std::map < variable, data_expression > sigma;
       mutable_map_substitution <> sigma;
       for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
       {
@@ -1667,18 +1643,19 @@ class specification_basic_type:public boost::noncopyable
     /****************  tovarheadGNF  *********************************/
 
     variable_list parameters_that_occur_in_body(
-      const variable_list parameters,
-      const process_expression body)
+      const variable_list &parameters,
+      const process_expression &body)
     {
       if (parameters.empty())
       {
         return parameters;
       }
 
-      const variable_list parameters1=parameters_that_occur_in_body(pop_front(parameters),body);
+      variable_list parameters1=parameters_that_occur_in_body(parameters.tail(),body);
       if (occursinpCRLterm(parameters.front(),body,0))
       {
-        return push_front(parameters1,parameters.front());
+
+        parameters1.push_front(parameters.front());
       }
       return parameters1;
     }
@@ -1689,8 +1666,8 @@ class specification_basic_type:public boost::noncopyable
     // In such a case a warning is printed suggesting to use regular2.
 
     process_identifier newprocess(
-      const variable_list parameters,
-      const process_expression body,
+      const variable_list parameters,  // Intentionally not a reference.
+      const process_expression body,   // Intentionally not a reference.
       processstatustype ps,
       const bool canterminate,
       const bool containstime)
@@ -1746,7 +1723,7 @@ class specification_basic_type:public boost::noncopyable
         process_expression body1=sum(body).operand();
         /* variable_list renamevars;
         data_expression_list renameterms; */
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
         body1=substitute_pCRLproc(body1, sigma);
         const data_expression time1=data::replace_free_variables(time, make_map_substitution(sigma));
@@ -1771,7 +1748,7 @@ class specification_basic_type:public boost::noncopyable
                                          canterminatebody(body),containstimebody(body));
         return at(process_instance(
                     newproc,
-                    objectdata[objectIndex(newproc)].parameters),
+                    data::data_expression_list(objectdata[objectIndex(newproc)].parameters)),
                   time);
       }
 
@@ -1800,7 +1777,7 @@ class specification_basic_type:public boost::noncopyable
          get_fresh_variable will return the same variable for the same s,sort and reuse_triple.
          This feature is added to make it possible to avoid generating too many different variables. */
 
-      std::map < int , atermpp::map < variable,variable > > generated_variables;
+      std::map < int , std::map < variable,variable > > generated_variables;
 
       if (reuse_index<0)
       {
@@ -1833,13 +1810,14 @@ class specification_basic_type:public boost::noncopyable
 
       if (sortlist.empty())
       {
-        return data_expression_list();
+        return variable_list();
       }
 
       sort_expression sort=sortlist.front();
 
-      return push_front(
-               make_pars(pop_front(sortlist)),get_fresh_variable("a",sort));
+      variable_list result=make_pars(sortlist.tail());
+      result.push_front(get_fresh_variable("a",sort));
+      return result;
     }
 
     process_expression distributeActionOverConditions(
@@ -1914,9 +1892,9 @@ class specification_basic_type:public boost::noncopyable
 
 
     process_expression bodytovarheadGNF(
-      const process_expression body,
+      const process_expression body, // intentionally not a reference.
       state s,
-      const variable_list freevars,
+      const variable_list freevars, // intentionally not a reference.
       variableposition v)
     {
       /* it is assumed that we only receive processes with
@@ -1942,7 +1920,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_sum(body))
@@ -1952,7 +1930,7 @@ class specification_basic_type:public boost::noncopyable
           variable_list sumvars=sum(body).bound_variables();
           process_expression body1=sum(body).operand();
 
-          atermpp::map < variable, data_expression > sigma;
+          std::map < variable, data_expression > sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list());
           body1=substitute_pCRLproc(body1, sigma);
           body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first);
@@ -1970,7 +1948,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_if_then(body))
@@ -1988,7 +1966,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body2,pCRL,
                                          canterminatebody(body2),
                                          containstimebody(body2));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
 
       }
 
@@ -2033,7 +2011,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body3,pCRL,
                                          canterminatebody(body3),
                                          containstimebody(body3));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
 
       }
 
@@ -2093,7 +2071,7 @@ class specification_basic_type:public boost::noncopyable
         body1=bodytovarheadGNF(body,alt_state,freevars,first);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1),
                                          containstimebody(body));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_action(body))
@@ -2173,7 +2151,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_process_instance(body))
@@ -2209,10 +2187,10 @@ class specification_basic_type:public boost::noncopyable
       return process_expression();
     }
 
-    void procstovarheadGNF(const atermpp::vector < process_identifier> &procs)
+    void procstovarheadGNF(const std::vector < process_identifier> &procs)
     {
       /* transform the processes in procs into newprocs */
-      for (atermpp::vector < process_identifier >::const_iterator i=procs.begin(); i!=procs.end(); ++i)
+      for (std::vector < process_identifier >::const_iterator i=procs.begin(); i!=procs.end(); ++i)
       {
         size_t n=objectIndex(*i);
 
@@ -2259,7 +2237,7 @@ class specification_basic_type:public boost::noncopyable
             inadvertently bound */
         variable_list sumvars=sum(body1).bound_variables();
 
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         alphaconvertprocess(sumvars,sigma,body2);
         return sum(sumvars,
                    putbehind(substitute_pCRLproc(sum(body1).operand(), sigma),
@@ -2331,9 +2309,8 @@ class specification_basic_type:public boost::noncopyable
         variable_list sumvars=sum(body1).bound_variables();
         /* variable_list vars;
         data_expression_list terms; */
-        atermpp::map < variable, data_expression > sigma;
-        alphaconvert(sumvars,sigma,variable_list(),
-                     push_front(data_expression_list(),condition));
+        std::map < variable, data_expression > sigma;
+        alphaconvert(sumvars,sigma,variable_list(), make_list(condition));
         return sum(
                  sumvars,
                  distribute_condition(
@@ -2352,7 +2329,6 @@ class specification_basic_type:public boost::noncopyable
       }
 
       throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute condition " + process::pp(body1) +".");
-      return data_expression();
     }
 
     process_expression distribute_sum(
@@ -2396,8 +2372,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     int match_sequence(
-      const atermpp::vector < process_instance > &s1,
-      const atermpp::vector < process_instance > &s2,
+      const std::vector < process_instance > &s1,
+      const std::vector < process_instance > &s2,
       const bool regular2)
     {
       /* s1 and s2 are sequences of typed variables of
@@ -2406,8 +2382,8 @@ class specification_basic_type:public boost::noncopyable
          This function yields true if the names and types of
          the processes in s1 and s2 match. */
 
-      atermpp::vector < process_instance >::const_iterator i2=s2.begin();
-      for (atermpp::vector < process_instance >::const_iterator i1=s1.begin();
+      std::vector < process_instance >::const_iterator i2=s2.begin();
+      for (std::vector < process_instance >::const_iterator i1=s1.begin();
            i1!=s1.end(); ++i1,++i2)
       {
         if (i2==s2.end())
@@ -2437,11 +2413,11 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool exists_variable_for_sequence(
-      const atermpp::vector < process_instance > &process_names,
+      const std::vector < process_instance > &process_names,
       process_identifier& result)
     {
-      std::vector < atermpp::vector < process_instance > >::const_iterator rwalker=representedprocesses.begin();
-      for (atermpp::vector < process_identifier >::const_iterator walker=seq_varnames.begin();
+      std::vector < std::vector < process_instance > >::const_iterator rwalker=representedprocesses.begin();
+      for (std::vector < process_identifier >::const_iterator walker=seq_varnames.begin();
            walker!=seq_varnames.end(); ++walker,++rwalker)
       {
         assert(rwalker!=representedprocesses.end());
@@ -2458,7 +2434,7 @@ class specification_basic_type:public boost::noncopyable
 
     void extract_names(
       const process_expression sequence,
-      atermpp::vector < process_instance > &result)
+      std::vector < process_instance > &result)
     {
       if (is_action(sequence)||is_process_instance(sequence))
       {
@@ -2492,7 +2468,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const process_identifier procId=process_instance(oldbody).identifier();
         const variable_list parameters=objectdata[objectIndex(procId)].parameters;
-        newbody=process_instance(procId,parameters);
+        newbody=process_instance(procId,data::data_expression_list(parameters));
         return parameters;
       }
 
@@ -2510,14 +2486,14 @@ class specification_basic_type:public boost::noncopyable
 
             construct_renaming(pars,objectdata[objectIndex(procId)].parameters,pars1,pars2,false);
 
-            newbody=seq(process_instance(procId,pars1),newbody);
+            newbody=seq(process_instance(procId,data::data_expression_list(pars1)),newbody);
             return pars1+pars;
           }
           else
           {
             const process_identifier procId=process_instance(first).identifier();
             const variable_list parameters=objectdata[objectIndex(procId)].parameters;
-            newbody=process_instance(procId,parameters);
+            newbody=process_instance(procId,data::data_expression_list(parameters));
             return parameters;
           }
         }
@@ -2573,7 +2549,7 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression create_regular_invocation(
       const process_expression sequence1,
-      atermpp::vector <process_identifier> &todo,
+      std::vector <process_identifier> &todo,
       const variable_list freevars)
     {
       process_identifier new_process;
@@ -2584,7 +2560,7 @@ class specification_basic_type:public boost::noncopyable
          concatenated with the sequential composition operator */
       sequence=cut_off_unreachable_tail(sequence);
       sequence=pCRLrewrite(sequence);
-      atermpp::vector < process_instance > process_names;
+      std::vector < process_instance > process_names;
       extract_names(sequence,process_names);
       assert(!process_names.empty());
 
@@ -2636,14 +2612,14 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        args=objectdata[objectIndex(new_process)].parameters;
+        args=data::data_expression_list(objectdata[objectIndex(new_process)].parameters);
       }
       return process_instance(new_process,args);
     }
 
     process_expression to_regular_form(
       const process_expression t,
-      atermpp::vector <process_identifier>  &todo,
+      std::vector <process_identifier>  &todo,
       const variable_list freevars)
     /* t has the form of the sum, and condition over actions
        each followed by a sequence of variables. We replace
@@ -2707,7 +2683,7 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
         body1=substitute_pCRLproc(body1, sigma);
         const data_expression time1=data::replace_free_variables(time,make_map_substitution(sigma));
@@ -2758,7 +2734,7 @@ class specification_basic_type:public boost::noncopyable
     process_expression procstorealGNFbody(
       const process_expression body,
       variableposition v,
-      atermpp::vector <process_identifier> &todo,
+      std::vector <process_identifier> &todo,
       const bool regular,
       processstatustype mode,
       const variable_list freevars)
@@ -2866,8 +2842,8 @@ class specification_basic_type:public boost::noncopyable
            we must now substitute */
         procstorealGNFrec(t,first,todo,regular);
 
-        atermpp::map < variable, data_expression > sigma;
-        
+        std::map < variable, data_expression > sigma;
+
         const data_expression_list &dl= process_instance(body).actual_parameters();
         const variable_list &vl=objectdata[n].parameters;
 
@@ -2946,7 +2922,7 @@ class specification_basic_type:public boost::noncopyable
     void procstorealGNFrec(
       const process_identifier procIdDecl,
       variableposition v,
-      atermpp::vector <process_identifier> &todo,
+      std::vector <process_identifier> &todo,
       const bool regular)
 
     /* Do a depth first search on process variables and substitute
@@ -3009,7 +2985,7 @@ class specification_basic_type:public boost::noncopyable
     void procstorealGNF(const process_identifier procsIdDecl,
                         const bool regular)
     {
-      atermpp::vector <process_identifier> todo;
+      std::vector <process_identifier> todo;
       todo.push_back(procsIdDecl);
       for (; !todo.empty() ;)
       {
@@ -3033,7 +3009,7 @@ class specification_basic_type:public boost::noncopyable
     /**************** Make pCRL procs  ******************************/
 
     void makepCRLprocs(const process_expression t,
-                       atermpp::vector <process_identifier> &pCRLprocs)
+                       std::vector <process_identifier> &pCRLprocs)
     {
       if (is_choice(t))
       {
@@ -3112,9 +3088,9 @@ class specification_basic_type:public boost::noncopyable
         // templist is needed as objectdata may be realloced
         // during the substitution. Same applies to tempvar
         // below.
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         sigma[var]=var2;
-        data_expression_list templist=data::replace_free_variables(objectdata[n].parameters, make_map_substitution(sigma));
+        data_expression_list templist=data::replace_free_variables(aterm_cast<data_expression_list>(objectdata[n].parameters), make_map_substitution(sigma));
         objectdata[n].parameters=variable_list(templist);
         process_expression tempvar=substitute_pCRLproc(objectdata[n].processbody, sigma);
         objectdata[n].processbody=tempvar;
@@ -3123,7 +3099,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       /* otherwise it can be present in vl */
-      return alreadypresent(var,pop_front(vl),n);
+      return alreadypresent(var,vl.tail(),n);
     }
 
     variable_list joinparameters(const variable_list par1,
@@ -3138,18 +3114,21 @@ class specification_basic_type:public boost::noncopyable
       variable var2=par2.front();
       assert(is_variable(var2));
 
+      variable_list result=joinparameters(par1,par2.tail(),n);
       if (alreadypresent(var2,par1,n))
       {
-        return joinparameters(par1,pop_front(par2),n);
+        return result;
       }
-      return push_front(joinparameters(par1,pop_front(par2),n),var2);
+
+      result.push_front(var2);
+      return result;
     }
 
     variable_list collectparameterlist(
-      const atermpp::vector < process_identifier> &pCRLprocs)
+      const std::vector < process_identifier> &pCRLprocs)
     {
       variable_list parameters;
-      for (atermpp::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
+      for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
            walker!=pCRLprocs.end(); ++walker)
       {
         size_t n=objectIndex(*walker);
@@ -3161,7 +3140,7 @@ class specification_basic_type:public boost::noncopyable
     /****************  Declare local datatypes  ******************************/
 
     void declare_control_state(
-      const atermpp::vector < process_identifier> &pCRLprocs)
+      const std::vector < process_identifier> &pCRLprocs)
     {
       create_enumeratedtype(pCRLprocs.size());
     }
@@ -3173,26 +3152,17 @@ class specification_basic_type:public boost::noncopyable
         sort_expression stacksort;
         sort_expression_list sorts;
         function_symbol_list get;
-        function_symbol push;
-        function_symbol emptystack;
-        function_symbol empty;
-        function_symbol pop;
-        function_symbol getstate;
+        data::function_symbol push;
+        data::function_symbol emptystack;
+        data::function_symbol empty;
+        data::function_symbol pop;
+        data::function_symbol getstate;
         stackoperations* next;
 
         stackoperations(const variable_list pl,
                         specification_basic_type& spec)
         {
-          parameter_list.protect();
           parameter_list=pl;
-          stacksort.protect();
-          sorts.protect();
-          get.protect();
-          push.protect();
-          emptystack.protect();
-          empty.protect();
-          pop.protect();
-          getstate.protect();
           next=spec.stack_operations_list;
           spec.stack_operations_list=this;
 
@@ -3206,7 +3176,7 @@ class specification_basic_type:public boost::noncopyable
           for (variable_list::const_iterator l = pl.begin() ; l!=pl.end() ; ++l)
           {
             sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("get" + std::string(l->name())), l->sort()));
-            sorts=push_front(sorts,l->sort());
+            sorts.push_front(l->sort());
           }
           sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("pop"), stack_sort_alias));
           sorts=reverse(sorts);
@@ -3221,7 +3191,7 @@ class specification_basic_type:public boost::noncopyable
           push=sc_push.constructor_function(stack_sort_alias);
           emptystack=sc_emptystack.constructor_function(stack_sort_alias);
           empty=sc_emptystack.recogniser_function(stack_sort_alias);
-          const atermpp::vector< function_symbol > projection_functions =
+          const std::vector< data::function_symbol > projection_functions =
             sc_push.projection_functions(stack_sort_alias);
           pop=projection_functions.back();
           getstate=projection_functions.front();
@@ -3230,15 +3200,6 @@ class specification_basic_type:public boost::noncopyable
 
         ~stackoperations()
         {
-          parameter_list.unprotect();
-          stacksort.unprotect();
-          sorts.unprotect();
-          get.unprotect();
-          push.unprotect();
-          emptystack.unprotect();
-          empty.unprotect();
-          pop.unprotect();
-          getstate.unprotect();
         }
     };
 
@@ -3280,12 +3241,9 @@ class specification_basic_type:public boost::noncopyable
         stacklisttype(const variable_list parlist,
                       specification_basic_type& spec,
                       const bool regular,
-                      const atermpp::vector < process_identifier> &pCRLprocs,
+                      const std::vector < process_identifier> &pCRLprocs,
                       const bool singlecontrolstate)
         {
-          booleanStateVariables.protect();
-          stackvar.protect();
-          parameters.protect();
           parameters=parlist;
 
           no_of_states=pCRLprocs.size();
@@ -3298,7 +3256,7 @@ class specification_basic_type:public boost::noncopyable
             {
               variable name(spec.fresh_identifier_generator("bst"),sort_bool::bool_());
               spec.insertvariable(name,true);
-              booleanStateVariables=push_front(booleanStateVariables,name);
+              booleanStateVariables.push_front(name);
             }
           }
 
@@ -3347,8 +3305,9 @@ class specification_basic_type:public boost::noncopyable
             }
             else
             {
-              opns=(stackoperations*) new stackoperations(push_front(parlist,
-                   variable("state",sort_pos::pos())),spec);
+              variable_list temp=parlist;
+              temp.push_front(variable("state",sort_pos::pos()));
+              opns=(stackoperations*) new stackoperations(temp,spec);
               stackvar = variable(spec.fresh_identifier_generator(s3), opns->stacksort);
               spec.insertvariable(stackvar,true);
             }
@@ -3357,9 +3316,6 @@ class specification_basic_type:public boost::noncopyable
 
         ~stacklisttype()
         {
-          stackvar.unprotect();
-          booleanStateVariables.unprotect();
-          parameters.unprotect();
         }
 
     };
@@ -3374,7 +3330,7 @@ class specification_basic_type:public boost::noncopyable
     {
       /* first search whether the variable is a free process variable */
 
-      for (atermpp::set <variable>::const_iterator walker=global_variables.begin() ;
+      for (std::set <variable>::const_iterator walker=global_variables.begin() ;
            walker!=global_variables.end() ; ++walker)
       {
         if (*walker==var)
@@ -3407,7 +3363,9 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list t(t1);
       if (!options.newstate)
       {
-        return push_front(t,sort_pos::pos(i));
+        data_expression_list result=t;
+        result.push_front(sort_pos::pos(i));
+        return result;
       }
 
       i=i-1; /* below we count from 0 instead from 1 as done in the
@@ -3416,12 +3374,14 @@ class specification_basic_type:public boost::noncopyable
       if (!options.binary)
       {
         const size_t e=create_enumeratedtype(stack.no_of_states);
-        function_symbol_list l=enumeratedtypes[e].elementnames;
+        function_symbol_list l(enumeratedtypes[e].elementnames);
         for (; i>0 ; i--)
         {
-          l=pop_front(l);
+          l.pop_front();
         }
-        return push_front(t,data_expression(l.front()));
+        data_expression_list result=t;
+        result.push_front(data_expression(l.front()));
+        return result;
       }
       /* else a sequence of boolean values needs to be generated,
          representing the value i, when there are l->n elements */
@@ -3431,12 +3391,12 @@ class specification_basic_type:public boost::noncopyable
         {
           if ((i % 2)==0)
           {
-            t=push_front(t,data_expression(sort_bool::false_()));
+            t.push_front(data_expression(sort_bool::false_()));
             i=i/2;
           }
           else
           {
-            t=push_front(t,data_expression(sort_bool::true_()));
+            t.push_front(data_expression(sort_bool::true_()));
             i=(i-1)/2;
           }
         }
@@ -3446,7 +3406,7 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression correctstatecond(
       const process_identifier procId,
-      const atermpp::vector < process_identifier> &pCRLproc,
+      const std::vector < process_identifier> &pCRLproc,
       const stacklisttype& stack,
       int regular)
     {
@@ -3531,14 +3491,15 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_application(t))
       {
+        const application&a=atermpp::aterm_cast<const application>(t);
         return application(
-                 adapt_term_to_stack(application(t).head(),stack,vars),
-                 adapt_termlist_to_stack(application(t).arguments(),stack,vars));
+                 adapt_term_to_stack(a.head(),stack,vars),
+                 adapt_termlist_to_stack(a.begin(),a.end(),stack,vars));
       }
 
       if (is_abstraction(t))
       {
-        const abstraction abs_t(t);
+        const abstraction &abs_t(t);
         return abstraction(
                  abs_t.binding_operator(),
                  abs_t.variables(),
@@ -3548,23 +3509,22 @@ class specification_basic_type:public boost::noncopyable
       if (is_where_clause(t))
       {
         const where_clause where_t(t);
-        const assignment_expression_list old_declarations=reverse(where_t.declarations());
+        const assignment_list old_assignments=reverse(where_t.assignments());
         variable_list new_vars=vars;
-        assignment_expression_list new_declarations;
-        for (assignment_expression_list::const_iterator i=old_declarations.begin();
-             i!=old_declarations.end(); ++i)
+        assignment_list new_assignments;
+        for (assignment_list::const_iterator i=old_assignments.begin();
+             i!=old_assignments.end(); ++i)
         {
-          new_vars=push_front(new_vars,i->lhs());
-          new_declarations=push_front(
-                             new_declarations,
-                             assignment_expression(
+          new_vars.push_front(i->lhs());
+          new_assignments.push_front(
+                             assignment(
                                i->lhs(),
                                adapt_term_to_stack(i->rhs(),stack,vars)));
 
         }
         return where_clause(
                  adapt_term_to_stack(where_t,stack,new_vars),
-                 new_declarations);
+                 new_assignments);
 
       }
 
@@ -3572,15 +3532,15 @@ class specification_basic_type:public boost::noncopyable
       return t;   // in case of non-debug mode, try to return something as decent as possible.
     }
 
-    template <typename Container>
     inline
     data_expression_vector adapt_termlist_to_stack(
-      const Container& tl,
+      const data_expression_list::const_iterator begin,
+      const data_expression_list::const_iterator end,
       const stacklisttype& stack,
       const variable_list& vars)
     {
       data_expression_vector result;
-      for (typename Container::const_iterator i = tl.begin(); i != tl.end(); ++i)
+      for (data_expression_list::const_iterator i = begin; i != end; ++i)
       {
         result.push_back(adapt_term_to_stack(*i,stack, vars));
       }
@@ -3600,13 +3560,16 @@ class specification_basic_type:public boost::noncopyable
 
       const action act=action(multiAction.front());
 
-      return push_front(
-               adapt_multiaction_to_stack_rec(pop_front(multiAction),stack,vars),
+      action_list result=adapt_multiaction_to_stack_rec(multiAction.tail(),stack,vars);
+
+      result.push_front(
                action(act.label(),
                       atermpp::convert<data_expression_list>(adapt_termlist_to_stack(
-                            act.arguments(),
+                            act.arguments().begin(),
+                            act.arguments().end(),
                             stack,
                             vars))));
+      return result;
     }
 
     action_list adapt_multiaction_to_stack(
@@ -3674,9 +3637,9 @@ class specification_basic_type:public boost::noncopyable
       {
         return t2;
       }
-      return push_front(
-               findarguments(pars,pop_front(parlist),args,t2,stack,vars,regular),
-               find_(parlist.front(),pars,args,stack,vars,regular));
+      data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,regular);
+      result.push_front(find_(parlist.front(),pars,args,stack,vars,regular));
+      return result;
     }
 
 
@@ -3685,7 +3648,7 @@ class specification_basic_type:public boost::noncopyable
       const data_expression_list args,
       const data_expression_list t2,
       const stacklisttype& stack,
-      const atermpp::vector < process_identifier > &pCRLprcs,
+      const std::vector < process_identifier > &pCRLprcs,
       const variable_list vars,
       bool regular,
       bool singlestate)
@@ -3705,18 +3668,17 @@ class specification_basic_type:public boost::noncopyable
         return processencoding(i,t,stack);
       }
 
-      return push_front(
-               data_expression_list(),data_expression(application(
+      return make_list(data_expression(application(
                      stack.opns->push,
                      processencoding(i,t,stack))));
     }
 
 
     data_expression_list make_procargs(
-      const process_expression t,
+      const process_expression &t,
       const stacklisttype& stack,
-      const atermpp::vector < process_identifier > &pcrlprcs,
-      const variable_list vars,
+      const std::vector < process_identifier > &pcrlprcs,
+      const variable_list &vars,
       const bool regular,
       const bool singlestate)
     {
@@ -3738,12 +3700,12 @@ class specification_basic_type:public boost::noncopyable
           data_expression_list t3=make_procargs(t2,stack,pcrlprcs,
                                                 vars,regular,singlestate);
           t3=push(procId,t1,t3,stack,pcrlprcs,vars,regular,singlestate);
-          return push_front(data_expression_list(),t3.front());
+          return make_list(t3.front());
         }
 
-        const data_expression_list t3=push(procId,t1,push_front(function_symbol_list(),stack.opns->emptystack),
+        const data_expression_list t3=push(procId,t1,data_expression_list(make_list(stack.opns->emptystack)),
                                            stack,pcrlprcs,vars,regular,singlestate);
-        return push_front(data_expression_list(),t3.front());
+        return make_list(t3.front());
       }
 
       if (is_process_instance(t))
@@ -3755,7 +3717,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return push(procId,
                       t1,
-                      function_symbol_list(),
+                      data_expression_list(),
                       stack,
                       pcrlprcs,
                       vars,
@@ -3766,32 +3728,31 @@ class specification_basic_type:public boost::noncopyable
         {
           const data_expression_list t3=push(procId,
                                              t1,
-                                             push_front(data_expression_list(),
-                                                 data_expression(make_application(stack.opns->pop,stack.stackvar))),
+                                             make_list(data_expression(make_application(stack.opns->pop,stack.stackvar))),
                                              stack,
                                              pcrlprcs,
                                              vars,
                                              regular,
                                              singlestate);
-          return push_front(data_expression_list(),t3.front());
+          return make_list(t3.front());
         }
         const data_expression_list t3= push(procId,
                                             t1,
-                                            push_front(function_symbol_list(),stack.opns->emptystack),
+                                            data_expression_list(make_list(stack.opns->emptystack)),
                                             stack,
                                             pcrlprcs,
                                             vars,
                                             regular,
                                             singlestate);
-        return push_front(data_expression_list(),t3.front());
+        return make_list(t3.front());
       }
 
       throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
       return data_expression_list();
     }
 
-    bool occursin(const variable name,
-                  const variable_list pars)
+    bool occursin(const variable &name,
+                  const variable_list &pars)
     {
       assert(is_variable(name));
       for (variable_list::const_iterator l=pars.begin() ; l!=pars.end(); ++l)
@@ -3806,10 +3767,10 @@ class specification_basic_type:public boost::noncopyable
 
 
     data_expression_list pushdummyrec(
-      const variable_list totalpars,
-      const variable_list pars,
+      const variable_list &totalpars,
+      const variable_list &pars,
       const stacklisttype& stack,
-      int regular)
+      const bool regular)
     {
       /* totalpars is the total list of parameters of the
          aggregated pCRL process. The variable pars contains
@@ -3822,40 +3783,40 @@ class specification_basic_type:public boost::noncopyable
         {
           return data_expression_list();
         }
-        return push_front(data_expression_list(),data_expression(stack.opns->emptystack));
+        return make_list(data_expression(stack.opns->emptystack));
       }
 
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
-        return push_front(
-                 pushdummyrec(pop_front(totalpars),pars,stack,regular),
-                 data_expression(par));
+        data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular);
+        result.push_front(data_expression(par));
+        return result;
       }
       /* otherwise the value of this argument is irrelevant, so
          make it Nil, if a regular translation is made. If a translation
          with stacks is made, then yield a default `unique' term. */
-      return push_front(
-               pushdummyrec(pop_front(totalpars),pars,stack,regular),
-               representative_generator_internal(par.sort()));
+      data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular);
+      result.push_front(representative_generator_internal(par.sort()));
+      return result;
     }
 
     data_expression_list pushdummy(
-      const variable_list parameters,
+      const variable_list &parameters,
       const stacklisttype& stack,
-      int regular)
+      const bool regular)
     {
       return pushdummyrec(stack.parameters,
                           parameters,stack,regular);
     }
 
     assignment_list make_initialstate(
-      const process_identifier initialProcId,
+      const process_identifier &initialProcId,
       const stacklisttype& stack,
-      const atermpp::vector < process_identifier > &pcrlprcs,
-      int regular,
-      int singlecontrolstate,
-      const variable_list parameters)
+      const std::vector < process_identifier > &pcrlprcs,
+      const bool regular,
+      const bool singlecontrolstate,
+      const variable_list &parameters)
     {
       int i;
       for (i=1 ; pcrlprcs[i-1]!=initialProcId ; ++i) {};
@@ -3871,8 +3832,7 @@ class specification_basic_type:public boost::noncopyable
           result= processencoding(i,result,stack);
         }
       }
-      else result=push_front(data_expression_list(),
-                               data_expression(application(stack.opns->push,
+      else result=make_list(data_expression(application(stack.opns->push,
                                                processencoding(i,result,stack))));
       return make_assignment_list(parameters,result);
     }
@@ -3887,8 +3847,7 @@ class specification_basic_type:public boost::noncopyable
         return stack.parameters;
       }
 
-      return processencoding(1,stack.parameters,stack); /* Take 1 as dummy indicator */
-      /* return push_front(stack.parameterlist,stack.stackvar); Erroneous, repaired 5/3 */
+      return variable_list(processencoding(1,data_expression_list(stack.parameters),stack)); /* Take 1 as dummy indicator */
     }
 
 
@@ -3929,14 +3888,13 @@ class specification_basic_type:public boost::noncopyable
 
 
     void add_summands(
-      const process_identifier procId,
+      const process_identifier &procId,
       action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       process_expression summandterm,
-      const atermpp::vector < process_identifier> &pCRLprocs,
-      const variable_list parameters,
+      const std::vector < process_identifier> &pCRLprocs,
+      const variable_list &parameters,
       const stacklisttype& stack,
-      //const bool canterminate,
       const bool regular,
       const bool singlestate)
     {
@@ -4032,7 +3990,7 @@ class specification_basic_type:public boost::noncopyable
                      atTime,stack,sumvars);
           }
         }
-   
+
         insert_summand(action_summands,deadlock_summands,parameters,
                        sumvars,condition1,multiAction,
                        atTime,procargs,has_time,is_delta_summand);
@@ -4062,7 +4020,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else if (is_action(summandterm))
       {
-        multiAction=push_front(multiAction,action(summandterm));
+        multiAction.push_front(action(summandterm));
       }
       else if (is_sync(summandterm))
       {
@@ -4086,14 +4044,14 @@ class specification_basic_type:public boost::noncopyable
                        condition1,
                        multiAction,
                        atTime,
-                       dummyparameterlist(stack,(bool) singlestate),
+                       aterm_cast<data_expression_list>(dummyparameterlist(stack,(bool) singlestate)),
                        has_time,
                        is_delta_summand);
         return;
       }
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
-      procargs=push_front(data_expression_list(),data_expression(make_application(stack.opns->pop,stack.stackvar)));
+      procargs=make_list(data_expression(make_application(stack.opns->pop,stack.stackvar)));
 
       insert_summand(
                 action_summands,deadlock_summands,
@@ -4111,15 +4069,15 @@ class specification_basic_type:public boost::noncopyable
 
 
     void collectsumlistterm(
-      const process_identifier procId,
+      const process_identifier &procId,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const process_expression body,
-      const variable_list pars,
+      const process_expression &body,
+      const variable_list &pars,
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate,
-      const atermpp::vector < process_identifier> &pCRLprocs)
+      const std::vector < process_identifier> &pCRLprocs)
     {
       if (is_choice(body))
       {
@@ -4142,13 +4100,13 @@ class specification_basic_type:public boost::noncopyable
     void collectsumlist(
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const atermpp::vector < process_identifier> &pCRLprocs,
-      const variable_list pars,
+      const std::vector < process_identifier> &pCRLprocs,
+      const variable_list &pars,
       const stacklisttype& stack,
       bool regular,
       bool singlestate)
     {
-      for (atermpp::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
+      for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
            walker!=pCRLprocs.end(); ++walker)
       {
         const process_identifier procId= *walker;
@@ -4180,14 +4138,10 @@ class specification_basic_type:public boost::noncopyable
                        specification_basic_type& spec)
         {
           size=n;
-          sortId.protect();
-          elementnames.protect();
-          functions.protect();
           if (n==2)
           {
             sortId = sort_bool::bool_();
-            elementnames = push_front(push_front(data_expression_list(),
-                                                 data_expression(sort_bool::true_())),data_expression(sort_bool::false_()));
+            elementnames = make_list(data_expression(sort_bool::false_()),data_expression(sort_bool::true_()));
           }
           else
           {
@@ -4203,7 +4157,7 @@ class specification_basic_type:public boost::noncopyable
               const identifier_string s=spec.fresh_identifier_generator(str(boost::format("e%d_%d") % j % n));
               const structured_sort_constructor struct_cons(s,"");
 
-              struct_conss = push_front(struct_conss, struct_cons);
+              struct_conss.push_front(struct_cons);
             }
             structured_sort sort_struct(struct_conss);
 
@@ -4212,15 +4166,13 @@ class specification_basic_type:public boost::noncopyable
 
             //store new declarations in return value w
             sortId = sort_id;
-            elementnames = atermpp::convert< data::function_symbol_list >(spec.data.constructors(sort_id));
+            const function_symbol_vector &constructors=spec.data.constructors(sort_id);
+            elementnames = data::data_expression_list(constructors.begin(),constructors.end());
           }
         }
 
         enumeratedtype(const enumeratedtype& e)
         {
-          sortId.protect();
-          elementnames.protect();
-          functions.protect();
           size=e.size;
           sortId=e.sortId;
           elementnames=e.elementnames;
@@ -4229,9 +4181,6 @@ class specification_basic_type:public boost::noncopyable
 
         void operator=(const enumeratedtype& e)
         {
-          sortId.protect();
-          elementnames.protect();
-          functions.protect();
           size=e.size;
           sortId=e.sortId;
           elementnames=e.elementnames;
@@ -4240,9 +4189,6 @@ class specification_basic_type:public boost::noncopyable
 
         ~enumeratedtype()
         {
-          sortId.unprotect();
-          elementnames.unprotect();
-          functions.unprotect();
         }
     };
 
@@ -4259,7 +4205,7 @@ class specification_basic_type:public boost::noncopyable
       return w;
     }
 
-    function_symbol find_case_function(size_t index, const sort_expression sort)
+    data::function_symbol find_case_function(size_t index, const sort_expression &sort)
     {
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for (function_symbol_list::const_iterator w=functions.begin();
@@ -4274,13 +4220,13 @@ class specification_basic_type:public boost::noncopyable
       };
 
       throw mcrl2::runtime_error("searching for nonexisting case function on sort " + data::pp(sort) +".");
-      return function_symbol();
+      return data::function_symbol();
     }
 
     void define_equations_for_case_function(
       const size_t index,
-      const function_symbol functionname,
-      const sort_expression sort)
+      const data::function_symbol &functionname,
+      const sort_expression &sort)
     {
       variable_list vars;
       data_expression_list args;
@@ -4292,19 +4238,21 @@ class specification_basic_type:public boost::noncopyable
       for (size_t j=0; (j<n); j++)
       {
         const variable v=get_fresh_variable("y",normalised_sort);
-        vars=push_front(vars,v);
-        args=push_front(args,data_expression(v));
-        xxxterm=push_front(xxxterm,data_expression(v1));
+        vars.push_front(v);
+        args.push_front(data_expression(v));
+        xxxterm.push_front(data_expression(v1));
       }
 
       /* I generate here an equation of the form
          C(e,x,x,x,...x)=x for a variable x. */
       const sort_expression s=enumeratedtypes[index].sortId;
       const variable v=get_fresh_variable("e",s);
+      data_expression_list tempxxxterm=xxxterm;
+      tempxxxterm.push_front(data_expression(v));
       data.add_equation(
         data_equation(
-          push_front(push_front(variable_list(),v),v1),
-          application(functionname,push_front(xxxterm,data_expression(v))),
+          make_list(v1,v),
+          application(functionname,tempxxxterm),
           data_expression(v1)));
 
       variable_list auxvars=vars;
@@ -4314,17 +4262,19 @@ class specification_basic_type:public boost::noncopyable
            w!=elementnames.end() ; ++w)
       {
         assert(auxvars.size()>0);
+        data_expression_list tempargs=args;
+        tempargs.push_front(*w);
         data.add_equation(data_equation(
                           vars,
-                          application(functionname,push_front(args,*w)),
+                          application(functionname,tempargs),
                           auxvars.front()));
 
-        auxvars=pop_front(auxvars);
+        auxvars.pop_front();
       }
     }
 
     void create_case_function_on_enumeratedtype(
-      const sort_expression sort,
+      const sort_expression &sort,
       const size_t enumeratedtype_index)
     {
       assert(enumeratedtype_index<enumeratedtypes.size());
@@ -4350,8 +4300,9 @@ class specification_basic_type:public boost::noncopyable
       if (enumeratedtypes[enumeratedtype_index].sortId==sort_bool::bool_())
       {
         /* take the if function on sort 'sort' */
-        const function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
-        enumeratedtypes[enumeratedtype_index].functions=push_front(f,if_(sort));
+        function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
+        f.push_front(if_(sort));
+        enumeratedtypes[enumeratedtype_index].functions=f;
         return;
       }
       // else
@@ -4359,20 +4310,21 @@ class specification_basic_type:public boost::noncopyable
       size_t n=enumeratedtypes[enumeratedtype_index].size;
       for (size_t j=0; j<n ; j++)
       {
-        newsortlist=push_front(newsortlist, sort);
+        newsortlist.push_front(sort);
       }
       sort_expression sid=enumeratedtypes[enumeratedtype_index].sortId;
-      newsortlist=push_front(newsortlist, sid);
+      newsortlist.push_front(sid);
 
       const function_sort newsort(newsortlist,sort);
-      const function_symbol casefunction(
+      const data::function_symbol casefunction(
         fresh_identifier_generator(str(boost::format("C%d_%s") % n % (
                          !is_basic_sort(newsort)?"":std::string(basic_sort(sort).name())))),
         newsort);
       // insertmapping(casefunction,true);
       data.add_mapping(casefunction);
-      const function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
-      enumeratedtypes[enumeratedtype_index].functions=push_front(f,casefunction);
+      function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
+      f.push_front(casefunction);
+      enumeratedtypes[enumeratedtype_index].functions=f;
 
       define_equations_for_case_function(enumeratedtype_index,casefunction,sort);
       return;
@@ -4385,11 +4337,10 @@ class specification_basic_type:public boost::noncopyable
         variable var;
 
         enumtype(size_t n,
-                 const sort_expression_list fsorts,
-                 const sort_expression_list gsorts,
+                 const sort_expression_list &fsorts,
+                 const sort_expression_list &gsorts,
                  specification_basic_type& spec)
         {
-          var.protect();
 
           enumeratedtype_index=spec.create_enumeratedtype(n);
 
@@ -4414,15 +4365,8 @@ class specification_basic_type:public boost::noncopyable
           }
         }
 
-        /* enumtype(const enumtype &t)
-        { var=t.var;
-          var.protect();
-          enumeratedtype_index=t.enumeratedtype_index;
-        } */
-
         ~enumtype()
         {
-          var.unprotect();
         }
     };
     /************** Merge summands using enumerated type ***********************/
@@ -4430,7 +4374,7 @@ class specification_basic_type:public boost::noncopyable
 
     bool mergeoccursin(
       variable& var,
-      const variable_list v,
+      const variable_list &v,
       variable_list& matchinglist,
       variable_list& pars,
       data_expression_list& args)
@@ -4455,19 +4399,19 @@ class specification_basic_type:public boost::noncopyable
           result=true;
           if (var!=var1)
           {
-            pars=push_front(pars,var);
-            args=push_front(args,data_expression(var1));
+            pars.push_front(var);
+            args.push_front(data_expression(var1));
           }
           /* copy remainder of matching list */
           for (++i ; i!=matchinglist.end(); ++i)
           {
-            auxmatchinglist= push_front(auxmatchinglist,*i);
+            auxmatchinglist.push_front(*i);
           }
           break;
         }
         else
         {
-          auxmatchinglist=push_front(auxmatchinglist,var1);
+          auxmatchinglist.push_front(var1);
         }
       }
 
@@ -4487,9 +4431,9 @@ class specification_basic_type:public boost::noncopyable
           variable var1=*i;
           if (var.name()==var1.name())
           {
-            pars=push_front(pars,var);
+            pars.push_front(var);
             var=get_fresh_variable(var.name(),var.sort());
-            args=push_front(args,data_expression(var));
+            args.push_front(data_expression(var));
             break;
           }
         }
@@ -4498,20 +4442,20 @@ class specification_basic_type:public boost::noncopyable
       return result;
     }
 
-    data_expression_list extend(const data_expression c, const data_expression_list cl)
+    data_expression_list extend(const data_expression &c, const data_expression_list &cl)
     {
       if (cl.empty())
       {
         return cl;
       }
-
-      return push_front(extend(c,pop_front(cl)),
-                        data_expression(lazy::and_(c,cl.front())));
+      data_expression_list result=extend(c,cl.tail());
+      result.push_front(data_expression(lazy::and_(c,cl.front())));
+      return result;
     }
 
     data_expression_list extend_conditions(
-      const variable var,
-      const data_expression_list conditionlist)
+      const variable &var,
+      const data_expression_list &conditionlist)
     {
       const data_expression unique=representative_generator_internal(var.sort(),false);
       const data_expression newcondition=equal_to(var,unique);
@@ -4519,7 +4463,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    data_expression transform_matching_list(const variable_list matchinglist)
+    data_expression transform_matching_list(const variable_list &matchinglist)
     {
       if (matchinglist.empty())
       {
@@ -4529,17 +4473,18 @@ class specification_basic_type:public boost::noncopyable
       const variable var=matchinglist.front();
       data_expression unique=representative_generator_internal(var.sort(),false);
       return lazy::and_(
-               transform_matching_list(pop_front(matchinglist)),
+               transform_matching_list(matchinglist.tail()),
                equal_to(data_expression(var),unique));
     }
 
 
     data_expression_list addcondition(
-      const variable_list matchinglist,
-      const data_expression_list conditionlist)
+      const variable_list &matchinglist,
+      const data_expression_list &conditionlist)
     {
-      return push_front(conditionlist,
-                        transform_matching_list(matchinglist));
+      data_expression_list result=conditionlist;
+      result.push_front(transform_matching_list(matchinglist));
+      return result;
     }
 
 /* Join the variables of v1 to v2 and rename the variables in v1
@@ -4548,10 +4493,10 @@ class specification_basic_type:public boost::noncopyable
  * renamings to be applied if variables in v1 had to be renamed */
 
    variable_list merge_var(
-      const variable_list v1,
-      const variable_list v2,
-      atermpp::vector < variable_list> &renamings_pars,
-      atermpp::vector < data_expression_list> &renamings_args,
+      const variable_list &v1,
+      const variable_list &v2,
+      std::vector < variable_list> &renamings_pars,
+      std::vector < data_expression_list> &renamings_args,
       data_expression_list& conditionlist)
     {
       data_expression_list renamingargs;
@@ -4571,7 +4516,7 @@ class specification_basic_type:public boost::noncopyable
         if (!mergeoccursin(v,v2,
                            matchinglist,renamingpars,renamingargs))
         {
-          result=push_front(result,v);
+          result.push_front(v);
           conditionlist=extend_conditions(v,conditionlist);
         }
       }
@@ -4583,9 +4528,9 @@ class specification_basic_type:public boost::noncopyable
 
     variable_list make_binary_sums(
       size_t n,
-      const sort_expression enumtypename,
+      const sort_expression &enumtypename,
       data_expression& condition,
-      const variable_list tail)
+      const variable_list &tail)
     {
       variable_list result;
       assert(n>1);
@@ -4595,7 +4540,7 @@ class specification_basic_type:public boost::noncopyable
       for (result=tail ; (n>0) ; n=n/2)
       {
         variable sumvar=get_fresh_variable("e",enumtypename);
-        result=push_front(result,sumvar);
+        result.push_front(sumvar);
         if ((n % 2)==0)
         {
           condition=lazy::and_(sumvar,condition);
@@ -4610,9 +4555,9 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression construct_binary_case_tree_rec(
       size_t n,
-      const variable_list sums,
+      const variable_list &sums,
       data_expression_list& terms,
-      const sort_expression termsort,
+      const sort_expression &termsort,
       const enumtype& e)
     {
       assert(!terms.empty());
@@ -4621,21 +4566,21 @@ class specification_basic_type:public boost::noncopyable
       {
         assert(!terms.empty());
         const data_expression t=terms.front();
-        terms=pop_front(terms);
+        terms.pop_front();
         return t;
       }
 
       assert(!sums.empty());
       variable casevar=sums.front();
 
-      const data_expression t=construct_binary_case_tree_rec(n / 2,pop_front(sums),terms,termsort,e);
+      const data_expression t=construct_binary_case_tree_rec(n / 2,sums.tail(),terms,termsort,e);
 
       if (terms.empty())
       {
         return t;
       }
 
-      const data_expression t1=construct_binary_case_tree_rec(n / 2,pop_front(sums),terms,termsort,e);
+      const data_expression t1=construct_binary_case_tree_rec(n / 2,sums.tail(),terms,termsort,e);
 
       if (t==t1)
       {
@@ -4646,9 +4591,9 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression construct_binary_case_tree(
       size_t n,
-      const variable_list sums,
+      const variable_list &sums,
       data_expression_list terms,
-      const sort_expression termsort,
+      const sort_expression &termsort,
       const enumtype& e)
     {
       return construct_binary_case_tree_rec(n-1,sums,terms,termsort,e);
@@ -4693,7 +4638,7 @@ class specification_basic_type:public boost::noncopyable
       return true;
     }
 
-    data_expression getRHSassignment(const variable var, const assignment_list as)
+    data_expression getRHSassignment(const variable &var, const assignment_list &as)
     {
       for (assignment_list::const_iterator i=as.begin(); i!=as.end(); ++i)
       {
@@ -4723,8 +4668,8 @@ class specification_basic_type:public boost::noncopyable
       action_list resultmultiaction;
       data_expression resulttime;
 
-      atermpp::vector < variable_list > rename_list_pars;
-      atermpp::vector < data_expression_list > rename_list_args;
+      std::vector < variable_list > rename_list_pars;
+      std::vector < data_expression_list > rename_list_args;
       /* rename list is a list of pairs of variable and term lists */
       data_expression_list conditionlist;
       data_expression binarysumcondition;
@@ -4746,13 +4691,13 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        resultsum=push_front(resultsum,e.var);
+        resultsum.push_front(e.var);
       }
 
       /* we construct the resulting condition */
       data_expression_list auxresult;
-      atermpp::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-      atermpp::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+      std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+      std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
 
       data_expression equalterm;
       equaluptillnow=1;
@@ -4766,7 +4711,7 @@ class specification_basic_type:public boost::noncopyable
         ++auxrename_list_pars;
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
@@ -4790,7 +4735,7 @@ class specification_basic_type:public boost::noncopyable
             equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
           }
         }
-        auxresult=push_front(auxresult,auxresult1);
+        auxresult.push_front(auxresult1);
       }
       if (options.binary)
       {
@@ -4806,21 +4751,27 @@ class specification_basic_type:public boost::noncopyable
       {
         if (equaluptillnow)
         {
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
           resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              push_front(conditionlist,data_expression(e.var))),
+                              tempconditionlist),
                             equalterm);
         }
         else
         {
+          data_expression_list tempauxresult=auxresult;
+          tempauxresult.push_front(data_expression(e.var));
           resultcondition=application(
                             find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                            push_front(auxresult,data_expression(e.var)));
+                            tempauxresult);
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
           resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              push_front(conditionlist,data_expression(e.var))),
+                              tempconditionlist),
                             resultcondition);
         }
       }
@@ -4828,7 +4779,7 @@ class specification_basic_type:public boost::noncopyable
       /* now we construct the arguments of the action */
       /* First we collect all multi-actions in a separate vector
          of multiactions */
-      atermpp::vector < action_list > multiActionList;
+      std::vector < action_list > multiActionList;
 
       for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
       {
@@ -4853,9 +4804,9 @@ class specification_basic_type:public boost::noncopyable
           data_expression_list auxresult;
           data_expression equalterm;
           bool equaluptillnow=true;
-          atermpp::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
-          atermpp::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-          atermpp::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
+          std::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
+          std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+          std::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
           for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end();
                ++walker,++multiactionwalker)
           {
@@ -4871,7 +4822,7 @@ class specification_basic_type:public boost::noncopyable
             data_expression_list::const_iterator d1=(a1->arguments()).begin();
             for (size_t i=1; i<fcnt; ++i, ++d1) {};
             f= *d1;
-            atermpp::map < variable, data_expression > sigma;
+            std::map < variable, data_expression > sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -4896,20 +4847,21 @@ class specification_basic_type:public boost::noncopyable
                 equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
               }
             }
-            auxresult=push_front(auxresult,auxresult1);
+            auxresult.push_front(auxresult1);
           }
           if (equaluptillnow)
           {
-            resultf=push_front(resultf,equalterm);
+            resultf.push_front(equalterm);
           }
           else
           {
             if (!options.binary)
             {
-              resultf=push_front(resultf,
-                                 data_expression(application(
+              data_expression_list tempauxresult=auxresult;
+              tempauxresult.push_front(data_expression(e.var));
+              resultf.push_front(data_expression(application(
                                                    find_case_function(e.enumeratedtype_index,f.sort()),
-                                                   push_front(auxresult,data_expression(e.var)))));
+                                                   tempauxresult)));
             }
             else
             {
@@ -4919,16 +4871,13 @@ class specification_basic_type:public boost::noncopyable
                                      auxresult,
                                      f.sort(),
                                      e);
-              resultf=push_front(resultf,temp);
+              resultf.push_front(temp);
             }
           }
         }
         a=multiActionList[0].begin();
         for (size_t i=1 ; i<multiactioncount ; ++i,++a) {}
-        resultmultiactionlist=
-          push_front(
-            resultmultiactionlist,
-            action(a->label(),resultf));
+        resultmultiactionlist.push_front(action(a->label(),resultf));
       }
 
       /* Construct resulttime, the time of the action ... */
@@ -4958,7 +4907,7 @@ class specification_basic_type:public boost::noncopyable
         {
           // Generate a fresh dummy variable, and add it to the summand variables
           dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
-          resultsum=push_front(resultsum,dummy_time_variable);
+          resultsum.push_front(dummy_time_variable);
         }
         auxrename_list_pars=rename_list_pars.begin();
         auxrename_list_args=rename_list_args.begin();
@@ -4976,7 +4925,7 @@ class specification_basic_type:public boost::noncopyable
             const data_expression_list auxargs= *auxrename_list_args;
             ++auxrename_list_args;
 
-            atermpp::map < variable, data_expression > sigma;
+            std::map < variable, data_expression > sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -5000,12 +4949,12 @@ class specification_basic_type:public boost::noncopyable
                 equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
               }
             }
-            auxresult=push_front(auxresult,auxresult1);
+            auxresult.push_front(auxresult1);
           }
           else
           {
             // this summand does not have time. But some summands have.
-            auxresult=push_front(auxresult,data_expression(dummy_time_variable));
+            auxresult.push_front(data_expression(dummy_time_variable));
             equaluptillnow=false;
           }
         }
@@ -5022,9 +4971,11 @@ class specification_basic_type:public boost::noncopyable
           }
           else
           {
+            data_expression_list tempauxresult=auxresult;
+            tempauxresult.push_front(data_expression(e.var));
             resulttime=application(
                          find_case_function(e.enumeratedtype_index,sort_real::real_()),
-                         push_front(auxresult,data_expression(e.var)));
+                         tempauxresult);
           }
         }
       }
@@ -5055,7 +5006,7 @@ class specification_basic_type:public boost::noncopyable
           data_expression nextstateparameter;
           nextstateparameter=getRHSassignment(*var_it,nextstate);
 
-          atermpp::map < variable, data_expression > sigma;
+          std::map < variable, data_expression > sigma;
           data_expression_list::const_iterator j=auxargs.begin();
           for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -5084,23 +5035,24 @@ class specification_basic_type:public boost::noncopyable
                                                     is_global_variable(auxresult1)));
           }
 
-          auxresult=push_front(auxresult,auxresult1);
+          auxresult.push_front(auxresult1);
         }
         if (equaluptillnow)
         {
-          resultnextstate=push_front(resultnextstate,equalterm);
+          resultnextstate.push_front(equalterm);
         }
         else
         {
           if (!options.binary)
           {
-            resultnextstate=
-              push_front(resultnextstate,
+            data_expression_list tempauxresult=auxresult;
+            tempauxresult.push_front(data_expression(e.var));
+            resultnextstate.push_front(
                          data_expression(application(
                                            find_case_function(
                                              e.enumeratedtype_index,
                                              var_it->sort()),
-                                           push_front(auxresult,data_expression(e.var)))));
+                                           tempauxresult)));
           }
           else
           {
@@ -5110,7 +5062,7 @@ class specification_basic_type:public boost::noncopyable
                                    auxresult,
                                    var_it->sort(),
                                    e);
-            resultnextstate=push_front(resultnextstate,temp);
+            resultnextstate.push_front(temp);
           }
         }
         fcnt++;
@@ -5144,8 +5096,8 @@ class specification_basic_type:public boost::noncopyable
       action_list resultmultiaction;
       data_expression resulttime;
 
-      atermpp::vector < variable_list > rename_list_pars;
-      atermpp::vector < data_expression_list > rename_list_args;
+      std::vector < variable_list > rename_list_pars;
+      std::vector < data_expression_list > rename_list_args;
       /* rename list is a list of pairs of variable and term lists */
       data_expression_list conditionlist;
       data_expression binarysumcondition;
@@ -5167,13 +5119,13 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        resultsum=push_front(resultsum,e.var);
+        resultsum.push_front(e.var);
       }
 
       /* we construct the resulting condition */
       data_expression_list auxresult;
-      atermpp::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-      atermpp::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
+      std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
+      std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
 
       data_expression equalterm;
       equaluptillnow=1;
@@ -5187,7 +5139,7 @@ class specification_basic_type:public boost::noncopyable
         ++auxrename_list_pars;
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
@@ -5211,9 +5163,318 @@ class specification_basic_type:public boost::noncopyable
             equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
           }
         }
-        auxresult=push_front(auxresult,auxresult1);
+        auxresult.push_front(auxresult1);
       }
       if (options.binary)
+      {
+        resultcondition=construct_binary_case_tree(n,
+                        resultsum,auxresult,sort_bool::bool_(),e);
+        resultcondition=lazy::and_(binarysumcondition,resultcondition);
+        resultcondition=lazy::and_(
+                          construct_binary_case_tree(n,
+                              resultsum,conditionlist,sort_bool::bool_(),e),
+                          resultcondition);
+      }
+      else
+      {
+        if (equaluptillnow)
+        {
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
+          resultcondition=lazy::and_(
+                            application(
+                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                              tempconditionlist),
+                            equalterm);
+        }
+        else
+        {
+          data_expression_list tempauxresult=auxresult;
+          tempauxresult.push_front(data_expression(e.var));
+          resultcondition=application(
+                            find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                            tempauxresult);
+          data_expression_list tempconditionlist=conditionlist;
+          tempconditionlist.push_front(data_expression(e.var));
+          resultcondition=lazy::and_(
+                            application(
+                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                              tempconditionlist),
+                            resultcondition);
+        }
+      }
+
+      /* now we construct the arguments of the action */
+      /* First we collect all multi-actions in a separate vector
+         of multiactions */
+      std::vector < action_list > multiActionList;
+
+      action_list resultmultiactionlist;
+
+      /* Construct resulttime, the time of the action ... */
+
+      equaluptillnow=true;
+      equalterm=data_expression();
+      bool some_summand_has_time=false;
+      bool all_summands_have_time=true;
+
+      // first find out whether there is a summand with explicit time.
+      for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin() ; walker!=deadlock_summands.end(); ++walker)
+      {
+        if (walker->deadlock().has_time())
+        {
+          some_summand_has_time=true;
+        }
+        else
+        {
+          all_summands_have_time=false;
+        }
+      }
+
+      if ((some_summand_has_time))
+      {
+        variable dummy_time_variable;
+        if (!all_summands_have_time)
+        {
+          // Generate a fresh dummy variable, and add it to the summand variables
+          dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
+          resultsum.push_front(dummy_time_variable);
+        }
+        auxrename_list_pars=rename_list_pars.begin();
+        auxrename_list_args=rename_list_args.begin();
+        auxresult=data_expression_list();
+        for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end(); ++walker)
+        {
+          if (walker->deadlock().has_time())
+          {
+            const data_expression actiontime=walker->deadlock().time();
+
+            assert(auxrename_list_pars!=rename_list_pars.end());
+            assert(auxrename_list_args!=rename_list_args.end());
+            const variable_list auxpars= *auxrename_list_pars;
+            ++auxrename_list_pars;
+            const data_expression_list auxargs= *auxrename_list_args;
+            ++auxrename_list_args;
+
+            std::map < variable, data_expression > sigma;
+            data_expression_list::const_iterator j=auxargs.begin();
+            for (variable_list::const_iterator i=auxpars.begin();
+                 i!=auxpars.end(); ++i, ++j)
+            {
+              /* Substitutions are carried out from left to right. The first applicable substitution counts */
+              if (sigma.count(*i)==0)
+              {
+                sigma[*i]=*j;
+              }
+            }
+
+            const data_expression auxresult1=data::replace_free_variables(actiontime, make_map_substitution(sigma));
+            if (equalterm==data_expression()||is_global_variable(equalterm))
+            {
+              equalterm=auxresult1;
+            }
+            else
+            {
+              if (equaluptillnow)
+              {
+                equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
+              }
+            }
+            auxresult.push_front(auxresult1);
+          }
+          else
+          {
+            // this summand does not have time. But some summands have.
+            auxresult.push_front(data_expression(dummy_time_variable));
+            equaluptillnow=false;
+          }
+        }
+        if (options.binary==1)
+        {
+          resulttime=construct_binary_case_tree(n,
+                                                resultsum,auxresult,sort_real::real_(),e);
+        }
+        else
+        {
+          if (equaluptillnow)
+          {
+            resulttime=equalterm;
+          }
+          else
+          {
+            data_expression_list tempauxresult=auxresult;
+            tempauxresult.push_front(data_expression(e.var));
+            resulttime=application(
+                         find_case_function(e.enumeratedtype_index,sort_real::real_()),
+                         tempauxresult);
+          }
+        }
+      }
+
+      return deadlock_summand(resultsum,
+                              resultcondition,
+                              some_summand_has_time?deadlock(resulttime):deadlock());
+    }
+
+    sort_expression_list getActionSorts(const action_list &actionlist)
+    {
+      sort_expression_list resultsorts;
+
+      for (action_list::const_iterator i=actionlist.begin(); i!=actionlist.end(); ++i)
+      {
+        resultsorts=i->label().sorts()+resultsorts;
+      }
+      return resultsorts;
+    }
+
+    void cluster_actions(
+      action_summand_vector &action_summands,
+      deadlock_summand_vector &deadlock_summands,
+      const variable_list &pars)
+    {
+      {
+        /* We cluster first the action summands with the action
+            occurring in the first summand of sums.
+            These summands are first stored in w1. */
+
+        action_summand_vector result;
+        action_summand_vector reducible_sumlist=action_summands;
+
+        for (action_summand_vector::const_iterator i=action_summands.begin() ; i!=action_summands.end() ; ++i)
+        {
+          const action_summand summand1=*i;
+
+          action_summand_vector w1;
+          action_summand_vector w2;
+          for (action_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+          {
+            const action_summand summand2=*w3;
+            if (summandsCanBeClustered(summand1,summand2))
+            {
+              w1.push_back(summand2);
+            }
+            else
+            {
+              w2.push_back(summand2);
+            }
+          }
+          reducible_sumlist.swap(w2);
+
+          /* In w1 we now find all the summands labelled with
+             similar multiactions, actiontime and terminationstatus.
+             We must now construct its clustered form. */
+          size_t n=w1.size();
+
+          if (n>0)
+          {
+            if (n>1)
+            {
+              const action_list multiaction=w1.front().multi_action().actions();
+              sort_expression_list actionsorts;
+              actionsorts=getActionSorts(multiaction);
+
+              const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
+
+              result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,n,w1,pars));
+            }
+            else
+            {
+              // result=w1 + result;
+              for(action_summand_vector::const_iterator i=result.begin(); i!=result.end(); ++i)
+              {
+                w1.push_back(*i);
+              }
+              w1.swap(result);
+            }
+          }
+        }
+        action_summands=result;
+      }
+
+      // Now the delta summands are clustered.
+      deadlock_summand_vector result;
+      deadlock_summand_vector reducible_sumlist=deadlock_summands;
+
+      for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin() ; i!=deadlock_summands.end() ; ++i)
+      {
+        const deadlock_summand summand1=*i;
+
+        deadlock_summand_vector w1;
+        deadlock_summand_vector w2;
+        for (deadlock_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+        {
+          const deadlock_summand summand2=*w3;
+          if (summand1.deadlock().has_time()!=summand2.deadlock().has_time())
+          {
+            w1.push_back(summand2);
+          }
+          else
+          {
+            w2.push_back(summand2);
+          }
+        }
+        reducible_sumlist.swap(w2);
+
+        /* In w1 we now find all the summands labelled with
+           similar multiactions, actiontime and terminationstatus.
+           We must now construct its clustered form. */
+        size_t n=w1.size();
+
+        if (n>0)
+        {
+          if (n>1)
+          {
+            sort_expression_list actionsorts;
+
+            const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
+
+            result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,n,w1,pars));
+          }
+          else
+          {
+            // result=w1 + result;
+            for(deadlock_summand_vector::const_iterator i=w1.begin(); i!=w1.end(); ++i)
+            {
+              result.push_back(*i);
+            }
+          }
+        }
+      }
+      deadlock_summands.swap(result);
+    }
+
+    /**************** GENERaTE LPEpCRL **********************************/
+
+
+    /* The variable regular indicates that we are interested in generating
+       a LPE assuming the pCRL term under consideration is regular */
+
+    void generateLPEpCRL(action_summand_vector &action_summands,
+                         deadlock_summand_vector &deadlock_summands,
+                         const process_identifier &procId,
+                         const bool containstime,
+                         const bool regular,
+                         variable_list& parameters,
+                         assignment_list& init)
+    /* A pair of initial state and linear process must be extracted
+       from the underlying GNF */
+    {
+      // We use action_summands and deadlock_summands as an output.
+      assert(action_summands.size()==0);
+      assert(deadlock_summands.size()==0);
+
+      bool singlecontrolstate=false;
+      size_t n=objectIndex(procId);
+
+      std::vector < process_identifier > pCRLprocs;
+      pCRLprocs.push_back(procId);
+      makepCRLprocs(objectdata[n].processbody,pCRLprocs);
+      /* now pCRLprocs contains a list of all process id's in this
+         pCRL process */
+
+      /* collect the parameters, but assume that variables
+         have a unique sort */
+      if (pCRLprocs.size()==1)
       {
         resultcondition=construct_binary_case_tree(n,
                         resultsum,auxresult,sort_bool::bool_(),e);
@@ -5544,15 +5805,15 @@ class specification_basic_type:public boost::noncopyable
         }
         else  /* !binary or oldstate */
         {
+          variable_list tempparameters=stack.parameters;
+          tempparameters.push_front(stack.stackvar);
           parameters=
-            ((!singlecontrolstate)?
-             push_front(stack.parameters,stack.stackvar):
-             stack.parameters);
+            ((!singlecontrolstate)?tempparameters:stack.parameters);
         }
       }
       else /* not regular, use a stack */
       {
-        parameters=push_front(variable_list(),stack.stackvar);
+        parameters=make_list(stack.stackvar);
       }
 
       init=make_initialstate(procId,stack,pCRLprocs,
@@ -5585,7 +5846,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** hiding *****************************************/
 
-    action_list hide_(const identifier_string_list hidelist, const action_list multiaction)
+    action_list hide_(const identifier_string_list &hidelist, const action_list &multiaction)
     {
       action_list resultactionlist;
 
@@ -5594,7 +5855,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (std::find(hidelist.begin(),hidelist.end(),walker->label().name())==hidelist.end())
         {
-          resultactionlist=push_front(resultactionlist,*walker);
+          resultactionlist.push_front(*walker);
         }
       }
 
@@ -5602,7 +5863,7 @@ class specification_basic_type:public boost::noncopyable
       return reverse(resultactionlist);
     }
 
-    void hidecomposition(const identifier_string_list hidelist, action_summand_vector &action_summands)
+    void hidecomposition(const identifier_string_list &hidelist, action_summand_vector &action_summands)
     {
       for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
       {
@@ -5616,7 +5877,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** allow/block *************************************/
 
-    bool implies_condition(const data_expression c1, const data_expression c2)
+    bool implies_condition(const data_expression &c1, const data_expression &c2)
     {
       if (c2==sort_bool::true_())
       {
@@ -5650,26 +5911,26 @@ class specification_basic_type:public boost::noncopyable
 
       if (sort_bool::is_and_application(c2))
       {
-        return implies_condition(c1,application(c2).left()) &&
-               implies_condition(c1,application(c2).right());
+        return implies_condition(c1,data::binary_left(application(c2))) &&
+               implies_condition(c1,data::binary_right(application(c2)));
       }
 
       if (sort_bool::is_or_application(c1))
       {
-        return implies_condition(application(c1).left(),c2) &&
-               implies_condition(application(c1).right(),c2);
+        return implies_condition(data::binary_left(application(c1)),c2) &&
+               implies_condition(data::binary_right(application(c1)),c2);
       }
 
       if (sort_bool::is_and_application(c1))
       {
-        return implies_condition(application(c1).left(),c2) ||
-               implies_condition(application(c1).right(),c2);
+        return implies_condition(data::binary_left(application(c1)),c2) ||
+               implies_condition(data::binary_right(application(c1)),c2);
       }
 
       if (sort_bool::is_or_application(c2))
       {
-        return implies_condition(c1,application(c2).left()) ||
-               implies_condition(c1,application(c2).right());
+        return implies_condition(c1,data::binary_left(application(c2))) ||
+               implies_condition(c1,data::binary_right(application(c2)));
       }
 
       return false;
@@ -5701,7 +5962,7 @@ class specification_basic_type:public boost::noncopyable
         {
           /* De delta summand is subsumed by action summand *i. So, it does not
              have to be added. */
-          
+
           return;
         }
       }
@@ -5718,7 +5979,7 @@ class specification_basic_type:public boost::noncopyable
              this delta summand to the front, such that it
              is encountered early later on, removing a next
              delta summand */
-          
+
           copy(i,deadlock_summands.end(),back_inserter(result));
           deadlock_summands.swap(result);
           return;
@@ -5739,12 +6000,12 @@ class specification_basic_type:public boost::noncopyable
       deadlock_summands.swap(result);
     }
 
-    action_name_multiset_list sortMultiActionLabels(const action_name_multiset_list l)
+    action_name_multiset_list sortMultiActionLabels(const action_name_multiset_list &l)
     {
       action_name_multiset_list result;
       for (action_name_multiset_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        result=push_front(result,sortActionLabels(*i));
+        result.push_front(sortActionLabels(*i));
       }
       return result;
     }
@@ -5753,16 +6014,17 @@ class specification_basic_type:public boost::noncopyable
     //         in which case true is delivered. If multiaction is the action Terminate,
     //         then true is also returned.
 
-    bool allowsingleaction(const action_name_multiset allowaction,
-                           const action_list multiaction)
+    bool allowsingleaction(const action_name_multiset &allowaction,
+                           const action_list &multiaction)
     {
-      if (multiaction==push_front(action_list(),terminationAction))
+      if (multiaction==make_list(terminationAction))
       {
         // multiaction is equal to terminate. This action cannot be blocked.
         return true;
       }
       const identifier_string_list names=allowaction.names();
       identifier_string_list::const_iterator i=names.begin();
+
       for (action_list::const_iterator walker=multiaction.begin();
            walker!=multiaction.end(); ++walker,++i)
       {
@@ -5770,7 +6032,6 @@ class specification_basic_type:public boost::noncopyable
         {
           return false;
         }
-
         if (*i!=walker->label().name())
         {
           return false;
@@ -5783,8 +6044,8 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    bool allow_(const action_name_multiset_list allowlist,
-                const action_list multiaction)
+    bool allow_(const action_name_multiset_list &allowlist,
+                const action_list &multiaction)
     {
       /* The empty multiaction, i.e. tau, is never blocked by allow */
       if (multiaction.empty())
@@ -5803,16 +6064,14 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    bool encap(const identifier_string_list encaplist, const action_list multiaction)
+    bool encap(const identifier_string_list& encaplist, const action_list &multiaction)
     {
       for (action_list::const_iterator walker=multiaction.begin();
            walker!=multiaction.end(); ++walker)
       {
-        // for(identifier_string_list::const_iterator i=encaplist.begin(); i!=encaplist.end(); ++i)
-        // building an iterator over an identifier_string_list does not work. TODO.
-        for (identifier_string_list i=encaplist; !i.empty(); i=pop_front(i))
+        for (identifier_string_list::const_iterator i=encaplist.begin(); i!=encaplist.end(); ++i)
         {
-          const identifier_string s1= i.front();
+          const identifier_string s1= *i;
           const identifier_string s2=walker->label().name();
           if (s1==s2)
           {
@@ -5824,7 +6083,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void allowblockcomposition(
-      const action_name_multiset_list allowlist1,  // This is a list of list of identifierstring.
+      const action_name_multiset_list &allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
@@ -5868,7 +6127,7 @@ class specification_basic_type:public boost::noncopyable
 
 
         if ((is_allow && allow_(allowlist,multiaction)) ||
-             (!is_allow && !encap(allowlist,multiaction)))
+             (!is_allow && !encap(aterm_cast<identifier_string_list>(allowlist),multiaction)))
         {
           action_summands.push_back(smmnd);
         }
@@ -5896,7 +6155,7 @@ class specification_basic_type:public boost::noncopyable
       if (options.nodeltaelimination)
       {
         deadlock_summands.swap(resultsimpledeltasumlist);
-        copy(resultdeltasumlist.begin(),resultdeltasumlist.end(),back_inserter(deadlock_summands)); 
+        copy(resultdeltasumlist.begin(),resultdeltasumlist.end(),back_inserter(deadlock_summands));
       }
       else
       {
@@ -5928,7 +6187,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** renaming ******************************************/
 
-    action rename_action(const rename_expression_list renamings, const action act)
+    action rename_action(const rename_expression_list &renamings, const action &act)
     {
       const action_label actionId=act.label();
       const identifier_string s=actionId.name();
@@ -5943,8 +6202,8 @@ class specification_basic_type:public boost::noncopyable
       return act;
     }
 
-    action_list rename_actions(const rename_expression_list renamings,
-                               const action_list multiaction)
+    action_list rename_actions(const rename_expression_list &renamings,
+                               const action_list &multiaction)
     {
       action_list resultactionlist;
 
@@ -5959,7 +6218,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void renamecomposition(
-      const rename_expression_list renamings,
+      const rename_expression_list &renamings,
       action_summand_vector &action_summands)
     {
       for (action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
@@ -5970,13 +6229,13 @@ class specification_basic_type:public boost::noncopyable
                            i->condition(),
                            i->multi_action().has_time()?multi_action(actions,i->multi_action().time()):multi_action(actions),
                            i->assignments());
-        
+
       }
     }
 
     /**************** equalargs ****************************************/
 
-    bool occursinvarandremove(const variable var, variable_list& vl)
+    bool occursinvarandremove(const variable &var, variable_list& vl)
     {
       bool result=false;
 
@@ -5984,7 +6243,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return 0;
       }
-      vl=pop_front(vl);
+      vl.pop_front();
       const variable var1=vl.front();
       if (var==var1)
       {
@@ -5999,15 +6258,15 @@ class specification_basic_type:public boost::noncopyable
       }
 
       result=occursinvarandremove(var,vl);
-      vl=push_front(vl,var1);
+      vl.push_front(var1);
       return result;
     }
 
     /********************** construct renaming **************************/
 
     variable_list construct_renaming(
-      const variable_list pars1,
-      const variable_list pars2,
+      const variable_list &pars1,
+      const variable_list &pars2,
       variable_list& pars3,
       variable_list& pars4,
       const bool unique=true)
@@ -6045,15 +6304,19 @@ class specification_basic_type:public boost::noncopyable
         }
         if (var3!=var2)
         {
-          t1=push_front(construct_renaming(pars1,pop_front(pars2),t,t2,unique),var3);
+          t1=construct_renaming(pars1,pars2.tail(),t,t2,unique);
+          t1.push_front(var3);
 
-          pars4=push_front(t2,var2);
-          pars3=push_front(t,var3);
+          pars4=t2;
+          pars4.push_front(var2);
+          pars3=t;
+          pars3.push_front(var3);
         }
         else
         {
-          t1=construct_renaming(pars1,pop_front(pars2),t,pars4,unique);
-          pars3=push_front(t,var2);
+          t1=construct_renaming(pars1,pars2.tail(),t,pars4,unique);
+          pars3=t;
+          pars3.push_front(var2);
         }
 
       }
@@ -6063,31 +6326,31 @@ class specification_basic_type:public boost::noncopyable
     /**************** communication operator composition ****************/
 
     identifier_string_list insertActionLabel(
-      const identifier_string action,
-      const identifier_string_list actionlabels)
+      const identifier_string &action,
+      const identifier_string_list &actionlabels)
     {
       /* assume actionlabels is sorted, and put
          action at the proper place to yield a sorted
          list */
       if (actionlabels.empty())
       {
-        return push_front(identifier_string_list(),action);
+        return make_list(action);
       }
 
       const identifier_string firstAction=actionlabels.front();
 
       if (std::string(action)<std::string(firstAction))
       {
-        return push_front(actionlabels,action);
+        identifier_string_list result=actionlabels;
+        result.push_front(action);
+        return result;
       }
-
-      return push_front(insertActionLabel(
-                          action,
-                          pop_front(actionlabels)),
-                        firstAction);
+      identifier_string_list result=insertActionLabel(action,actionlabels.tail());
+      result.push_front(firstAction);
+      return result;
     }
 
-    action_name_multiset sortActionLabels(const action_name_multiset actionlabels1)
+    action_name_multiset sortActionLabels(const action_name_multiset &actionlabels1)
     {
       identifier_string_list result;
       const identifier_string_list actionlabels(actionlabels1.names());
@@ -6099,17 +6362,19 @@ class specification_basic_type:public boost::noncopyable
     }
 
     template <typename List>
-    sort_expression_list get_sorts(const List l)
+    sort_expression_list get_sorts(const List &l)
     {
       if (l.empty())
       {
         return sort_expression_list();
       }
-      return push_front(get_sorts(pop_front(l)), l.front().sort());
+      sort_expression_list result=get_sorts(l.tail());
+      result.push_front(l.front().sort());
+      return result;
     }
 
     // Check that the sorts of both termlists match.
-    data_expression pairwiseMatch(const data_expression_list l1, const data_expression_list l2)
+    data_expression pairwiseMatch(const data_expression_list &l1, const data_expression_list &l2)
     {
       if (l1.empty())
       {
@@ -6133,7 +6398,7 @@ class specification_basic_type:public boost::noncopyable
         return sort_bool::false_();
       }
 
-      data_expression result=pairwiseMatch(pop_front(l1),pop_front(l2));
+      data_expression result=pairwiseMatch(l1.tail(),l2.tail());
 
       return lazy::and_(result,RewriteTerm(equal_to(t1,t2)));
     }
@@ -6142,13 +6407,13 @@ class specification_basic_type:public boost::noncopyable
     // can occur.
     typedef struct
     {
-      atermpp::vector < action_list > actions;
-      atermpp::vector < data_expression > conditions;
+      std::vector < action_list > actions;
+      std::vector < data_expression > conditions;
     } tuple_list;
 
     tuple_list addActionCondition(
-      const action firstaction,
-      const data_expression condition,
+      const action &firstaction,
+      const data_expression &condition,
       const tuple_list& L,
       tuple_list S)
     {
@@ -6172,12 +6437,12 @@ class specification_basic_type:public boost::noncopyable
     class comm_entry:public boost::noncopyable
     {
       public:
-        atermpp::vector <identifier_string_list> lhs;
-        atermpp::vector <identifier_string> rhs;
-        atermpp::vector <identifier_string_list> tmp;
+        std::vector <identifier_string_list> lhs;
+        std::vector <identifier_string> rhs;
+        std::vector <identifier_string_list> tmp;
         std::vector< bool > match_failed;
 
-        comm_entry(const communication_expression_list communications)
+        comm_entry(const communication_expression_list &communications)
         {
           for (communication_expression_list::const_iterator l=communications.begin();
                l!=communications.end(); ++l)
@@ -6199,7 +6464,7 @@ class specification_basic_type:public boost::noncopyable
         }
     };
 
-    action_label can_communicate(const action_list m, comm_entry& comm_table)
+    action_label can_communicate(const action_list &m, comm_entry& comm_table)
     {
       /* this function indicates whether the actions in m
          consisting of actions and data occur in C, such that
@@ -6238,7 +6503,7 @@ class specification_basic_type:public boost::noncopyable
           else
           {
             // possible match; on to next action
-            comm_table.tmp[i] = pop_front(comm_table.tmp[i]);
+            comm_table.tmp[i].pop_front();
             comm_ok = true;
           }
         }
@@ -6266,9 +6531,9 @@ class specification_basic_type:public boost::noncopyable
       return action_label();
     }
 
-    bool might_communicate(const action_list m,
+    bool might_communicate(const action_list &m,
                            comm_entry& comm_table,
-                           const action_list n,
+                           const action_list &n,
                            const bool n_is_null)
     {
       /* this function indicates whether the actions in m
@@ -6318,7 +6583,7 @@ class specification_basic_type:public boost::noncopyable
             else
             {
               // ignore actions that are not in m
-              comm_table.tmp[i] = pop_front(comm_table.tmp[i]);
+              comm_table.tmp[i].pop_front();
               if (comm_table.tmp[i].empty())
               {
                 comm_table.match_failed[i]=true;
@@ -6328,7 +6593,7 @@ class specification_basic_type:public boost::noncopyable
           }
           if (actionname==commname) // actionname found
           {
-            comm_table.tmp[i]=pop_front(comm_table.tmp[i]);
+            comm_table.tmp[i].pop_front();
             comm_ok = true;
           }
         }
@@ -6349,7 +6614,7 @@ class specification_basic_type:public boost::noncopyable
 
         // rest[i] contains the part of n in which lhs i has to find matching actions
         // rest_is_null[i] contains indications whether rest[i] is NULL.
-        atermpp::vector < action_list > rest(comm_table.size(),n);
+        std::vector < action_list > rest(comm_table.size(),n);
         std::vector < bool > rest_is_null(comm_table.size(),n_is_null);
 
         // check every lhs
@@ -6374,7 +6639,7 @@ class specification_basic_type:public boost::noncopyable
             // find it in rest[i]
             while (commname!=(restname = rest[i].front().label().name()))
             {
-              rest[i] = pop_front(rest[i]);
+              rest[i].pop_front();
               if (rest[i].empty()) // no more
               {
                 rest_is_null[i] = true;
@@ -6386,8 +6651,8 @@ class specification_basic_type:public boost::noncopyable
               break;
             }
             // action found; try next
-            rest[i] = pop_front(rest[i]);
-            comm_table.tmp[i] = pop_front(comm_table.tmp[i]);
+            rest[i].pop_front();
+            comm_table.tmp[i].pop_front();
           }
 
           if (!rest_is_null[i]) // lhs was found in rest[i]
@@ -6401,11 +6666,11 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    tuple_list phi(const action_list m,
-                   const data_expression_list d,
-                   const action_list w,
-                   const action_list n,
-                   const action_list r,
+    tuple_list phi(const action_list &m,
+                   const data_expression_list &d,
+                   const action_list &w,
+                   const action_list &n,
+                   const action_list &r,
                    const bool r_is_null,
                    comm_entry& comm_table)
     {
@@ -6441,24 +6706,30 @@ class specification_basic_type:public boost::noncopyable
       }
       /* if n=[a(f)] \oplus o */
       const action firstaction=n.front();
-      const action_list o=pop_front(n);
+      const action_list o=n.tail();
       const data_expression condition=pairwiseMatch(d,firstaction.arguments());
       if (condition==sort_bool::false_())
       {
-        return phi(m,d,push_back(w,firstaction),o,r,r_is_null,comm_table);
+        action_list tempw=w;
+        tempw=push_back(tempw,firstaction);
+        return phi(m,d,tempw,o,r,r_is_null,comm_table);
       }
       else
       {
-        const tuple_list T=phi(push_back(m,firstaction),d,w,o,r,r_is_null,comm_table);
+        action_list tempm=m;
+        tempm=push_back(tempm,firstaction);
+        const tuple_list T=phi(tempm,d,w,o,r,r_is_null,comm_table);
+        action_list tempw=w;
+        tempw=push_back(tempw,firstaction);
         return addActionCondition(
                  action(),
                  condition,
                  T,
-                 phi(m,d,push_back(w,firstaction),o,r,r_is_null,comm_table));
+                 phi(m,d,tempw,o,r,r_is_null,comm_table));
       }
     }
 
-    bool xi(const action_list alpha, const action_list beta, comm_entry& comm_table)
+    bool xi(const action_list &alpha, const action_list &beta, comm_entry& comm_table)
     {
       if (beta.empty())
       {
@@ -6474,8 +6745,9 @@ class specification_basic_type:public boost::noncopyable
       else
       {
         const action a = beta.front();
-        const action_list l = push_back(alpha,a);
-        const action_list beta_next = pop_front(beta);
+        action_list l=alpha;
+        l=push_back(l,a);
+        const action_list beta_next = beta.tail();
 
         if (can_communicate(l,comm_table)!=action_label())
         {
@@ -6492,36 +6764,36 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    data_expression psi(const action_list alpha_in, comm_entry& comm_table)
+    data_expression psi(const action_list &alpha_in, comm_entry& comm_table)
     {
       action_list alpha=reverse(alpha_in);
       data_expression cond = sort_bool::false_();
       while (!alpha.empty())
       {
         const action a = alpha.front();
-        action_list beta = pop_front(alpha);
+        action_list beta = alpha.tail();
 
         while (!beta.empty())
         {
-          const action_list actl=push_front(push_front(action_list(),beta.front()),a);
-          if (might_communicate(actl,comm_table,pop_front(beta),false) && xi(actl,pop_front(beta),comm_table))
+          const action_list actl=make_list(a,beta.front());
+          if (might_communicate(actl,comm_table,beta.tail(),false) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
             cond = lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments()));
           }
-          beta = pop_front(beta);
+          beta.pop_front();
         }
 
-        alpha = pop_front(alpha);
+        alpha.pop_front();
       }
       return lazy::not_(cond);
     }
 
     // returns a list of tuples.
     tuple_list makeMultiActionConditionList_aux(
-      const action_list multiaction,
+      const action_list &multiaction,
       comm_entry& comm_table,
-      const action_list r,
+      const action_list &r,
       const bool r_is_null)
     {
       /* This is the function gamma(m,C,r) provided
@@ -6536,29 +6808,31 @@ class specification_basic_type:public boost::noncopyable
       }
 
       const action firstaction=multiaction.front();
-      const action_list remainingmultiaction=pop_front(multiaction); /* This is m in [1] */
+      const action_list remainingmultiaction=multiaction.tail(); /* This is m in [1] */
 
-      const tuple_list S=phi(push_front(action_list(),firstaction),
+      const tuple_list S=phi(make_list(firstaction),
                              firstaction.arguments(),
                              action_list(),
                              remainingmultiaction,
                              r,r_is_null,comm_table);
+      action_list tempr=r;
+      tempr.push_front(firstaction);
       const tuple_list T=makeMultiActionConditionList_aux(
                            remainingmultiaction,comm_table,
-                           (r_is_null)?push_front(action_list(),firstaction):push_front(r,firstaction),false);
+                           (r_is_null)?make_list(firstaction):tempr,false);
       return addActionCondition(firstaction,sort_bool::true_(),T,S);
     }
 
     tuple_list makeMultiActionConditionList(
-      const action_list multiaction,
-      const communication_expression_list communications)
+      const action_list &multiaction,
+      const communication_expression_list &communications)
     {
       comm_entry comm_table(communications);
       return makeMultiActionConditionList_aux(multiaction,comm_table,action_list(),true);
     }
 
     void communicationcomposition(
-      const communication_expression_list communications,
+      const communication_expression_list &communications,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
 
@@ -6580,8 +6854,7 @@ class specification_basic_type:public boost::noncopyable
         {
           throw mcrl2::runtime_error("Right hand side of communication " + process::pp(source) + " in a comm command cannot be empty or tau");
         }
-        resultingCommunications=push_front(resultingCommunications,
-                                           communication_expression(sortActionLabels(source),target));
+        resultingCommunications.push_front(communication_expression(sortActionLabels(source),target));
       }
       communication_expression_list communications1=resultingCommunications;
 
@@ -6617,7 +6890,7 @@ class specification_basic_type:public boost::noncopyable
           if (occursinterm(sumvar,condition) ||
               (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
           {
-            newsumvars=push_front(newsumvars,sumvar);
+            newsumvars.push_front(sumvar);
           }
         }
         newsumvars=reverse(newsumvars);
@@ -6662,7 +6935,7 @@ class specification_basic_type:public boost::noncopyable
             resultsumlist.push_back(new_summand);
           }
         }
-        
+
       }
 
       /* Now the resulting delta summands must be added again */
@@ -6681,9 +6954,9 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool check_real_variable_occurrence(
-      const variable_list sumvars,
-      const data_expression actiontime,
-      const data_expression condition)
+      const variable_list &sumvars,
+      const data_expression &actiontime,
+      const data_expression &condition)
     {
       /* Check whether actiontime is an expression
          of the form t1 +...+ tn, where one of the
@@ -6699,20 +6972,20 @@ class specification_basic_type:public boost::noncopyable
 
       if (sort_real::is_plus_application(actiontime))
       {
-        return (check_real_variable_occurrence(sumvars,application(actiontime).left(),condition) ||
-                check_real_variable_occurrence(sumvars,application(actiontime).right(),condition));
+        return (check_real_variable_occurrence(sumvars,data::binary_left(application(actiontime)),condition) ||
+                check_real_variable_occurrence(sumvars,data::binary_right(application(actiontime)),condition));
       }
 
       return false;
     }
 
     data_expression makesingleultimatedelaycondition(
-      const variable_list sumvars,
-      const variable_list freevars,
-      const data_expression condition,
+      const variable_list &sumvars,
+      const variable_list &freevars,
+      const data_expression &condition,
       const bool has_time,
-      const variable timevariable,
-      const data_expression actiontime,
+      const variable &timevariable,
+      const data_expression &actiontime,
       variable_list& used_sumvars)
     {
       /* Generate a condition of the form:
@@ -6755,22 +7028,22 @@ class specification_basic_type:public boost::noncopyable
                  lazy::and_(
                    condition,
                    less(timevariable,actiontime)));
-        variables=push_front(variables,timevariable);
+        variables.push_front(timevariable);
       }
       for (variable_list::const_iterator i=freevars.begin(); i!=freevars.end(); ++i)
       {
         if (occursinterm(*i,result))
         {
-          variables=push_front(variables,*i);
+          variables.push_front(*i);
         }
       }
 
-      for (atermpp::set<variable>::const_iterator p=global_variables.begin();
+      for (std::set<variable>::const_iterator p=global_variables.begin();
            p!=global_variables.end() ; ++p)
       {
         if (occursinterm(*p,result))
         {
-          variables=push_front(variables,*p);
+          variables.push_front(*p);
         }
       }
 
@@ -6778,7 +7051,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (occursinterm(*s,result))
         {
-          used_sumvars = push_front(used_sumvars, *s);
+          used_sumvars.push_front(*s);
         }
       }
       used_sumvars = reverse(used_sumvars);
@@ -6789,8 +7062,8 @@ class specification_basic_type:public boost::noncopyable
     data_expression getUltimateDelayCondition(
       const action_summand_vector &action_summands,
       const deadlock_summand_vector &deadlock_summands,
-      const variable_list freevars,
-      const data_expression timevariable,
+      const variable_list &freevars,
+      const data_expression &timevariable,
       variable_list& existentially_quantified_variables)
     {
       assert(existentially_quantified_variables.empty());
@@ -6824,8 +7097,8 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression_list results;
       data_expression_list condition_list;
-      atermpp::vector < variable_list> renamings_pars;
-      atermpp::vector < data_expression_list> renamings_args;
+      std::vector < variable_list> renamings_pars;
+      std::vector < data_expression_list> renamings_args;
       for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
            i!=deadlock_summands.end(); ++i)
       {
@@ -6845,7 +7118,7 @@ class specification_basic_type:public boost::noncopyable
                                              renamings_pars,
                                              renamings_args,
                                              condition_list);
-        results=push_front(results,ult_del_condition);
+        results.push_front(ult_del_condition);
       }
 
       for (action_summand_vector::const_iterator i=action_summands.begin();
@@ -6867,7 +7140,7 @@ class specification_basic_type:public boost::noncopyable
                                              renamings_pars,
                                              renamings_args,
                                              condition_list);
-        results=push_front(results,ult_del_condition);
+        results.push_front(ult_del_condition);
       }
 
       data_expression result=sort_bool::false_();
@@ -6876,8 +7149,8 @@ class specification_basic_type:public boost::noncopyable
       assert(results.size()==renamings_pars.size());
       assert(results.size()==renamings_args.size());
 
-      atermpp::vector < variable_list>::const_iterator renamings_par=renamings_pars.begin();
-      atermpp::vector < data_expression_list>::const_iterator renamings_arg=renamings_args.begin();
+      std::vector < variable_list>::const_iterator renamings_par=renamings_pars.begin();
+      std::vector < data_expression_list>::const_iterator renamings_arg=renamings_args.begin();
       condition_list=reverse(condition_list);
       results=reverse(results);
       data_expression_list::const_iterator j=condition_list.begin();
@@ -6887,7 +7160,7 @@ class specification_basic_type:public boost::noncopyable
         const variable_list &auxpars=*renamings_par;
         const data_expression_list &auxargs=*renamings_arg;
 
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         data_expression_list::const_iterator j1=auxargs.begin();
         for (variable_list::const_iterator i1=auxpars.begin();
              i1!=auxpars.end(); ++i1, ++j1)
@@ -6907,14 +7180,14 @@ class specification_basic_type:public boost::noncopyable
 
     /******** make_unique_variables **********************/
 
-    atermpp::map < variable, data_expression > make_unique_variables(
+    std::map < variable, data_expression > make_unique_variables(
       const variable_list &var_list,
       const std::string& hint)
     {
       /* This function generates a list of variables with the same sorts
          as in variable_list, where all names are unique */
 
-      atermpp::map < variable, data_expression > sigma;
+      std::map < variable, data_expression > sigma;
 
       for(variable_list::const_iterator i=var_list.begin(); i!=var_list.end(); ++i)
       {
@@ -6934,7 +7207,7 @@ class specification_basic_type:public boost::noncopyable
     {
       action_summand_vector result_action_summands;
 
-      atermpp::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
+      std::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
       const variable_list unique_pars=data::replace_free_variables(pars,make_map_substitution(sigma));
 
       init=substitute_assignmentlist(init,pars,true,false, make_map_substitution(sigma));  // Only substitute the variables at the lhs.
@@ -6942,7 +7215,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const action_summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
-        atermpp::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
+        std::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
         const variable_list unique_sumvars=data::replace_free_variables(sumvars, make_map_substitution(sigma_sumvars));
 
         data_expression condition=smmnd.condition();
@@ -6970,14 +7243,14 @@ class specification_basic_type:public boost::noncopyable
       action_summands.swap(result_action_summands);
 
       deadlock_summand_vector result_deadlock_summands;
-      
+
       assert(unique_pars.size()==pars.size());
-      
+
       for (deadlock_summand_vector::const_iterator s=deadlock_summands.begin(); s!=deadlock_summands.end(); ++s)
       {
         const deadlock_summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
-        atermpp::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
+        std::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
         const variable_list unique_sumvars=data::replace_free_variables(sumvars, make_map_substitution(sigma_sumvars));
 
         assert(unique_sumvars.size()==sumvars.size());
@@ -7009,9 +7282,9 @@ class specification_basic_type:public boost::noncopyable
       const deadlock_summand_vector &deadlock_summands1,
       const action_summand_vector &action_summands2,
       const deadlock_summand_vector &deadlock_summands2,
-      const variable_list par1,
-      const variable_list par3,
-      const variable_list parametersOfsumlist2,
+      const variable_list &par1,
+      const variable_list &par3,
+      const variable_list &parametersOfsumlist2,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands)
 
@@ -7047,7 +7320,7 @@ class specification_basic_type:public boost::noncopyable
           if (ultimatedelaycondition!=sort_bool::true_())
           {
             actiontime1=timevar;
-            sumvars1=push_front(sumvars1,timevar);
+            sumvars1.push_front(timevar);
             condition1=lazy::and_(ultimatedelaycondition,condition1);
             has_time=true;
           }
@@ -7056,7 +7329,7 @@ class specification_basic_type:public boost::noncopyable
         {
           /* Summand1 has time. Substitute the time expression for
              timevar in ultimatedelaycondition, and extend the condition */
-          atermpp::map < variable, data_expression > sigma;
+          std::map < variable, data_expression > sigma;
           sigma[timevar]=actiontime1;
           const data_expression intermediateultimatedelaycondition=
                       data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
@@ -7068,7 +7341,7 @@ class specification_basic_type:public boost::noncopyable
         {
           deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
         }
-        
+
       }
 
       for (action_summand_vector::const_iterator walker1=action_summands1.begin();
@@ -7082,14 +7355,14 @@ class specification_basic_type:public boost::noncopyable
         assignment_list nextstate1=summand1.assignments();
         bool has_time=summand1.has_time();
 
-        if (multiaction1!=push_front(action_list(),terminationAction))
+        if (multiaction1!=make_list(terminationAction))
         {
           if (!has_time)
           {
             if (ultimatedelaycondition!=sort_bool::true_())
             {
               actiontime1=timevar;
-              sumvars1=push_front(sumvars1,timevar);
+              sumvars1.push_front(timevar);
               condition1=lazy::and_(ultimatedelaycondition,condition1);
               has_time=true;
             }
@@ -7098,7 +7371,7 @@ class specification_basic_type:public boost::noncopyable
           {
             /* Summand1 has time. Substitute the time expression for
                timevar in ultimatedelaycondition, and extend the condition */
-            atermpp::map < variable, data_expression > sigma;
+            std::map < variable, data_expression > sigma;
             sigma[timevar]=actiontime1;
             const data_expression intermediateultimatedelaycondition=
                        data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
@@ -7135,7 +7408,7 @@ class specification_basic_type:public boost::noncopyable
           if (ultimatedelaycondition!=sort_bool::true_())
           {
             actiontime2=data_expression(timevar);
-            sumvars2=push_front(sumvars2,timevar);
+            sumvars2.push_front(timevar);
             condition2=lazy::and_(ultimatedelaycondition,condition2);
             has_time=true;
           }
@@ -7144,7 +7417,7 @@ class specification_basic_type:public boost::noncopyable
         {
           /* Summand2 has time. Substitute the time expression for
              timevar in ultimatedelaycondition, and extend the condition */
-          atermpp::map < variable, data_expression > sigma;
+          std::map < variable, data_expression > sigma;
           sigma[timevar]=actiontime2;
 
           const data_expression intermediateultimatedelaycondition=
@@ -7155,11 +7428,11 @@ class specification_basic_type:public boost::noncopyable
         condition2=RewriteTerm(condition2);
         if (condition2!=sort_bool::false_())
         {
-          deadlock_summands.push_back(deadlock_summand(sumvars2, 
+          deadlock_summands.push_back(deadlock_summand(sumvars2,
                                                        condition2,
                                                        has_time?deadlock(actiontime2):deadlock()));
         }
-        
+
       }
 
       for (action_summand_vector::const_iterator walker2=action_summands2.begin();
@@ -7173,14 +7446,14 @@ class specification_basic_type:public boost::noncopyable
         assignment_list nextstate2=summand2.assignments();
         bool has_time=summand2.multi_action().has_time();
 
-        if (multiaction2!=push_front(action_list(),terminationAction))
+        if (multiaction2!=make_list(terminationAction))
         {
           if (!has_time)
           {
             if (ultimatedelaycondition!=sort_bool::true_())
             {
               actiontime2=data_expression(timevar);
-              sumvars2=push_front(sumvars2,timevar);
+              sumvars2.push_front(timevar);
               condition2=lazy::and_(ultimatedelaycondition,condition2);
               has_time=true;
             }
@@ -7189,7 +7462,7 @@ class specification_basic_type:public boost::noncopyable
           {
             /* Summand2 has time. Substitute the time expression for
                timevar in ultimatedelaycondition, and extend the condition */
-            atermpp::map < variable, data_expression > sigma;
+            std::map < variable, data_expression > sigma;
             sigma[timevar]=actiontime2;
 
             const data_expression intermediateultimatedelaycondition=
@@ -7231,12 +7504,12 @@ class specification_basic_type:public boost::noncopyable
           const data_expression condition2=summand2.condition();
           const assignment_list nextstate2=summand2.assignments();
 
-          if ((multiaction1==push_front(action_list(),terminationAction))==(multiaction2==push_front(action_list(),terminationAction)))
+          if ((multiaction1==make_list(terminationAction))==(multiaction2==make_list(terminationAction)))
           {
             action_list multiaction3;
-            if ((multiaction1==push_front(action_list(),terminationAction))&&(multiaction2==push_front(action_list(),terminationAction)))
+            if ((multiaction1==make_list(terminationAction))&&(multiaction2==make_list(terminationAction)))
             {
-              multiaction3=push_front(action_list(),terminationAction);
+              multiaction3.push_front(terminationAction);
             }
             else
             {
@@ -7324,7 +7597,7 @@ class specification_basic_type:public boost::noncopyable
         if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
         {
           // *i does not occur in pars1.
-          pars3=push_front(pars3,*i);
+          pars3.push_front(*i);
         }
       }
 
@@ -7348,7 +7621,7 @@ class specification_basic_type:public boost::noncopyable
     void generateLPEmCRLterm(
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const process_expression t,
+      const process_expression t,    // This process expression cannot be a reference.
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
@@ -7361,7 +7634,7 @@ class specification_basic_type:public boost::noncopyable
         const data_expression_list args=process_instance(t).actual_parameters();
         // init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,false,true);
 
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         data_expression_list::const_iterator j=args.begin();
         const variable_list vars=objectdata[n].parameters;
         for (variable_list::const_iterator i=vars.begin();
@@ -7426,7 +7699,7 @@ class specification_basic_type:public boost::noncopyable
                 (lps::search_free_variable(temporary_spec.process().action_summands(),*i) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),*i))
                )          // and it occurs in the summands.
             {
-              pars=push_front(pars,*i);
+              pars.push_front(*i);
             }
           }
 
@@ -7471,7 +7744,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_block(t))
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,block(t).operand(), regular,rename_variables,pars,init);
-        allowblockcomposition(block(t).block_set(),false,action_summands,deadlock_summands);
+        allowblockcomposition(action_name_multiset_list(block(t).block_set()),false,action_summands,deadlock_summands);
         return;
       }
 
@@ -7499,7 +7772,7 @@ class specification_basic_type:public boost::noncopyable
     void generateLPEmCRL(
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const process_identifier procIdDecl,
+      const process_identifier &procIdDecl,
       const bool regular,
       variable_list& pars,
       assignment_list& init)
@@ -7533,9 +7806,9 @@ class specification_basic_type:public boost::noncopyable
     /**************** alphaconversion ********************************/
 
     process_expression alphaconversionterm(
-      const process_expression t,
-      const variable_list parameters,
-      const atermpp::map < variable, data_expression > &sigma)
+      const process_expression &t,
+      const variable_list &parameters,
+      const std::map < variable, data_expression > &sigma)
     {
       if (is_choice(t))
       {
@@ -7595,8 +7868,8 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(t))
       {
         variable_list sumvars=sum(t).bound_variables();
-        atermpp::map < variable, data_expression > local_sigma=sigma;
-        
+        std::map < variable, data_expression > local_sigma=sigma;
+
         alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
         const process_expression  result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,local_sigma));
         return result;
@@ -7655,7 +7928,7 @@ class specification_basic_type:public boost::noncopyable
       return process_expression();
     }
 
-    void alphaconversion(const process_identifier procId, const variable_list parameters)
+    void alphaconversion(const process_identifier &procId, const variable_list &parameters)
     {
       size_t n=objectIndex(procId);
 
@@ -7665,13 +7938,13 @@ class specification_basic_type:public boost::noncopyable
         objectdata[n].processstatus=GNFalpha;
         // tempvar below is needed as objectdata may be reallocated
         // during a call to alphaconversionterm.
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters, sigma);
         objectdata[n].processbody=tempvar;
       }
       else if (objectdata[n].processstatus==mCRLdone)
       {
-        atermpp::map < variable, data_expression > sigma;
+        std::map < variable, data_expression > sigma;
         alphaconversionterm(objectdata[n].processbody,parameters, sigma);
 
       }
@@ -7690,9 +7963,9 @@ class specification_basic_type:public boost::noncopyable
     /***** determinewhetherprocessescontaintime; **********/
 
     bool containstimebody(
-      const process_expression t,
+      const process_expression &t,
       bool* stable,
-      atermpp::set < process_identifier > &visited,
+      std::set < process_identifier > &visited,
       bool allowrecursion,
       bool& contains_if_then)
     {
@@ -7814,9 +8087,9 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool containstime_rec(
-      const process_identifier procId,
+      const process_identifier &procId,
       bool* stable,
-      atermpp::set < process_identifier > &visited,
+      std::set < process_identifier > &visited,
       bool& contains_if_then)
     {
       size_t n=objectIndex(procId);
@@ -7845,15 +8118,15 @@ class specification_basic_type:public boost::noncopyable
       return (objectdata[n].containstime);
     }
 
-    bool containstimebody(const process_expression t)
+    bool containstimebody(const process_expression &t)
     {
-      atermpp::set < process_identifier > visited;
+      std::set < process_identifier > visited;
       bool stable;
       bool contains_if_then;
       return containstimebody(t,&stable,visited,false,contains_if_then);
     }
 
-    bool determinewhetherprocessescontaintime(const process_identifier procId)
+    bool determinewhetherprocessescontaintime(const process_identifier &procId)
 
     {
       /* This function sets for all reachable processes in the array objectdata
@@ -7865,7 +8138,7 @@ class specification_basic_type:public boost::noncopyable
       bool contains_if_then=false;
       while (!stable)
       {
-        atermpp::set < process_identifier > visited;
+        std::set < process_identifier > visited;
         stable=1;
         containstime_rec(procId,&stable,visited,contains_if_then);
       }
@@ -7874,9 +8147,9 @@ class specification_basic_type:public boost::noncopyable
     /***** determinewhetherprocessescanterminate(init); **********/
 
     bool canterminatebody(
-      const process_expression t,
+      const process_expression &t,
       bool& stable,
-      atermpp::set < process_identifier > &visited,
+      std::set < process_identifier > &visited,
       const bool allowrecursion)
     {
       if (is_merge(t))
@@ -7995,9 +8268,9 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool canterminate_rec(
-      const process_identifier procId,
+      const process_identifier &procId,
       bool& stable,
-      atermpp::set < process_identifier > &visited)
+      std::set < process_identifier > &visited)
     {
       size_t n=objectIndex(procId);
 
@@ -8017,19 +8290,19 @@ class specification_basic_type:public boost::noncopyable
       return (objectdata[n].canterminate);
     }
 
-    bool canterminatebody(const process_expression t)
+    bool canterminatebody(const process_expression &t)
     {
-      atermpp::set < process_identifier > visited;
+      std::set < process_identifier > visited;
       bool stable=false;
       return canterminatebody(t,stable,visited,false);
     }
 
-    void determinewhetherprocessescanterminate(const process_identifier procId)
+    void determinewhetherprocessescanterminate(const process_identifier &procId)
     {
       bool stable=false;
       while (!stable)
       {
-        atermpp::set < process_identifier > visited;
+        std::set < process_identifier > visited;
         stable=true;
         canterminate_rec(procId,stable,visited);
       }
@@ -8037,9 +8310,9 @@ class specification_basic_type:public boost::noncopyable
 
     /*****  distinguishmCRLandpCRLprocsAndAddTerminatedAction  ******/
 
-    process_identifier split_process(const process_identifier procId,
-                                     atermpp::map < process_identifier,process_identifier > &visited_id,
-                                     atermpp::map < process_expression,process_expression > &visited_proc)
+    process_identifier split_process(const process_identifier &procId,
+                                     std::map < process_identifier,process_identifier > &visited_id,
+                                     std::map < process_expression,process_expression > &visited_proc)
     {
       if (visited_id.count(procId)>0)
       {
@@ -8087,10 +8360,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression split_body(
-      const process_expression t,
-      atermpp::map < process_identifier,process_identifier > &visited_id,
-      atermpp::map < process_expression,process_expression> &visited_proc,
-      const variable_list parameters)
+      const process_expression t, // intentionally not a reference.
+      std::map < process_identifier,process_identifier > &visited_id,
+      std::map < process_expression,process_expression> &visited_proc,
+      const variable_list parameters)  //intentionally not a reference.
     {
       /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and
@@ -8170,13 +8443,13 @@ class specification_basic_type:public boost::noncopyable
                                                 pCRL,
                                                 0,
                                                 true);
-          result=process_instance(p,objectdata[objectIndex(p)].parameters);
+          result=process_instance(p,aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
           visited_proc[t]=result;
         }
         else
         {
           const process_identifier p=newprocess(parameters,t,pCRL,0,true);
-          result=process_instance(p,objectdata[objectIndex(p)].parameters);
+          result=process_instance(p,aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
           visited_proc[t]=result;
         }
       }
@@ -8189,10 +8462,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_identifier splitmCRLandpCRLprocsAndAddTerminatedAction(
-      const process_identifier procId)
+      const process_identifier &procId)
     {
-      atermpp::map < process_identifier,process_identifier> visited_id;
-      atermpp::map < process_expression,process_expression> visited_proc;
+      std::map < process_identifier,process_identifier> visited_id;
+      std::map < process_expression,process_expression> visited_proc;
       return split_process(procId,visited_id,visited_proc);
     }
 
@@ -8204,9 +8477,9 @@ class specification_basic_type:public boost::noncopyable
       {
         const action_summand smd=*i;
         const action_list multiaction=smd.multi_action().actions();
-        if (multiaction==push_front(action_list(),terminationAction))
+        if (multiaction==make_list(terminationAction))
         {
-          acts=push_front(acts,terminationAction.label());
+          acts.push_front(terminationAction.label());
           mCRL2log(mcrl2::log::warning) << "The action " << lps::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
           return;
         }
@@ -8216,10 +8489,10 @@ class specification_basic_type:public boost::noncopyable
     /********************** SieveProcDataVars ***********************/
   public:
     variable_list SieveProcDataVarsSummands(
-      const atermpp::set <variable> &vars,
+      const std::set <variable> &vars,
       const action_summand_vector &action_summands,
       const deadlock_summand_vector &deadlock_summands,
-      const variable_list parameters)
+      const variable_list &parameters)
     {
       /* In this routine it is checked which free variables
          in vars occur in the summands. Those variables
@@ -8227,8 +8500,8 @@ class specification_basic_type:public boost::noncopyable
          parameters are needed to check occurrences of vars
          in the assignment list */
 
-      atermpp::set < variable > vars_set(vars.begin(),vars.end());
-      atermpp::set < variable > vars_result_set;
+      std::set < variable > vars_set(vars.begin(),vars.end());
+      std::set < variable > vars_result_set;
 
       for (deadlock_summand_vector::const_iterator smds=deadlock_summands.begin();
            smds!=deadlock_summands.end(); ++smds)
@@ -8248,7 +8521,7 @@ class specification_basic_type:public boost::noncopyable
 
         filter_vars_by_multiaction(smd.multi_action().actions(),vars_set,vars_result_set);
         filter_vars_by_assignmentlist(smd.assignments(),parameters,vars_set,vars_result_set);
-        
+
         if (smd.multi_action().has_time())
         {
           filter_vars_by_term(smd.multi_action().time(),vars_set,vars_result_set);
@@ -8256,10 +8529,10 @@ class specification_basic_type:public boost::noncopyable
         filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
       }
       variable_list result;
-      for (atermpp::set < variable >::reverse_iterator i=vars_result_set.rbegin();
+      for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
            i!=vars_result_set.rend() ; ++i)
       {
-        result=push_front(result,*i);
+        result.push_front(*i);
       }
 
       return result;
@@ -8267,21 +8540,21 @@ class specification_basic_type:public boost::noncopyable
 
   public:
     variable_list SieveProcDataVarsAssignments(
-      const atermpp::set <variable> &vars,
-      const assignment_list assignments,
-      const variable_list parameters)
+      const std::set <variable> &vars,
+      const assignment_list &assignments,
+      const variable_list &parameters)
     {
-      const atermpp::set < variable > vars_set(vars.begin(),vars.end());
-      atermpp::set < variable > vars_result_set;
+      const std::set < variable > vars_set(vars.begin(),vars.end());
+      std::set < variable > vars_result_set;
 
 
       filter_vars_by_assignmentlist(assignments,parameters,vars_set,vars_result_set);
 
       variable_list result;
-      for (atermpp::set < variable >::reverse_iterator i=vars_result_set.rbegin();
+      for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
            i!=vars_result_set.rend() ; ++i)
       {
-        result=push_front(result,*i);
+        result.push_front(*i);
       }
 
       return result;
@@ -8290,7 +8563,7 @@ class specification_basic_type:public boost::noncopyable
     /**************** transform **************************************/
   public:
     void transform(
-      const process_identifier init,
+      const process_identifier &init,
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
       variable_list& parameters,
@@ -8303,7 +8576,7 @@ class specification_basic_type:public boost::noncopyable
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
       determinewhetherprocessescontaintime(init1);
 
-      atermpp::vector <process_identifier> pcrlprocesslist;
+      std::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
       if (pcrlprocesslist.size()==0)
       {
@@ -8347,9 +8620,9 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   s.insert(sort_real::real_());
   data_spec.add_context_sorts(s);
 
-  specification_basic_type spec(type_checked_spec.action_labels(),
+  specification_basic_type spec(aterm_cast<action_label_list>(type_checked_spec.action_labels()),
                                 type_checked_spec.equations(),
-                                action_label_list(atermpp::convert<data::variable_list>(type_checked_spec.global_variables())),
+                                convert<data::variable_list>(type_checked_spec.global_variables()),
                                 data_spec,
                                 type_checked_spec.global_variables(),
                                 lin_options,
@@ -8366,7 +8639,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   // compute global variables
   data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,action_summands,deadlock_summands,parameters);
   data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters);
-  atermpp::set<data::variable> global_variables;
+  std::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 

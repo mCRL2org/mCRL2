@@ -89,7 +89,7 @@ void Solver::solve(QString specification, QString dataExpression)
 
         QString s('[');
 
-        for (atermpp::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
+        for (std::set< mcrl2::data::variable >::const_iterator v=m_vars.begin(); v!=m_vars.end() ; ++v)
         {
           if( v != m_vars.begin() )
           {

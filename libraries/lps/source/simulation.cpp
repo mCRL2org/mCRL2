@@ -59,7 +59,7 @@ void simulation::select(size_t transition_number)
     while (true)
     {
       bool found = false;
-      atermpp::vector<transition_t> &transitions = m_full_trace.back().transitions;
+      std::vector<transition_t> &transitions = m_full_trace.back().transitions;
       for (size_t index = 0; index < transitions.size(); index++)
       {
         if (is_prioritized(transitions[index].action))
@@ -127,7 +127,7 @@ void simulation::load(const std::string &filename)
     initial_state = trace.currentState();
   }
 
-  atermpp::vector<transition_t> transitions;
+  std::vector<transition_t> transitions;
   for (size_t i = 0; i < trace.number_of_actions(); i++)
   {
     transition_t transition;
@@ -140,7 +140,7 @@ void simulation::load(const std::string &filename)
     transitions.push_back(transition);
   }
 
-  atermpp::deque<state_t> target_trace;
+  std::deque<state_t> target_trace;
   state_t initial;
   initial.source_state = m_generator.initial_state();
   if (!initial_state.empty())
@@ -170,11 +170,11 @@ void simulation::load(const std::string &filename)
   }
 }
 
-atermpp::vector<simulation::transition_t> simulation::transitions(state source_state)
+std::vector<simulation::transition_t> simulation::transitions(state source_state)
 {
   try
   {
-    atermpp::vector<simulation::transition_t> output;
+    std::vector<simulation::transition_t> output;
     for (next_state_generator::iterator i = m_generator.begin(source_state, &m_substitution); i != m_generator.end(); i++)
     {
       transition_t transition;
@@ -187,21 +187,21 @@ atermpp::vector<simulation::transition_t> simulation::transitions(state source_s
   catch (mcrl2::runtime_error& e)
   {
     mCRL2log(mcrl2::log::error) << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
-    return atermpp::vector<simulation::transition_t>();
+    return std::vector<simulation::transition_t>();
   }
 }
 
-atermpp::vector<simulation::transition_t> simulation::prioritize(const atermpp::vector<simulation::transition_t> &transitions)
+std::vector<simulation::transition_t> simulation::prioritize(const std::vector<simulation::transition_t> &transitions)
 {
-  atermpp::vector<simulation::transition_t> output;
-  for (atermpp::vector<simulation::transition_t>::const_iterator i = transitions.begin(); i != transitions.end(); i++)
+  std::vector<simulation::transition_t> output;
+  for (std::vector<simulation::transition_t>::const_iterator i = transitions.begin(); i != transitions.end(); i++)
   {
     simulation::transition_t transition = *i;
     while (true)
     {
       bool found = false;
-      atermpp::vector<transition_t> next_transitions = simulation::transitions(transition.destination);
-      for (atermpp::vector<transition_t>::iterator j = next_transitions.begin(); j != next_transitions.end(); j++)
+      std::vector<transition_t> next_transitions = simulation::transitions(transition.destination);
+      for (std::vector<transition_t>::iterator j = next_transitions.begin(); j != next_transitions.end(); j++)
       {
         if (is_prioritized(j->action))
         {
@@ -250,7 +250,7 @@ void simulation::prioritize_trace()
   }
   m_prioritized_originals.push_back(m_full_trace.size() - 1);
 
-  for (atermpp::deque<state_t>::iterator i = m_prioritized_trace.begin(); i != m_prioritized_trace.end(); i++)
+  for (std::deque<state_t>::iterator i = m_prioritized_trace.begin(); i != m_prioritized_trace.end(); i++)
   {
     i->transitions = prioritize(transitions(i->source_state));
   }
@@ -258,14 +258,14 @@ void simulation::prioritize_trace()
 
 /// Tries to match the transitions from \a transition_number onwards to the end of \a trace. Returns the most complete match found.
 /// WARNING: This has exponential worst-case running time when state labels are missing!
-atermpp::deque<simulation::state_t> simulation::match_trace(atermpp::deque<simulation::state_t> trace, const atermpp::vector<simulation::transition_t> &transitions, size_t transition_number)
+std::deque<simulation::state_t> simulation::match_trace(std::deque<simulation::state_t> trace, const std::vector<simulation::transition_t> &transitions, size_t transition_number)
 {
   if (transition_number >= transitions.size())
   {
     return trace;
   }
 
-  atermpp::deque<simulation::state_t> best_trace = trace;
+  std::deque<simulation::state_t> best_trace = trace;
   state_t &base_state = trace.back();
   for (size_t i = 0; i < base_state.transitions.size(); i++)
   {
@@ -278,7 +278,7 @@ atermpp::deque<simulation::state_t> simulation::match_trace(atermpp::deque<simul
       s.transitions = simulation::transitions(s.source_state);
       trace.push_back(s);
 
-      atermpp::deque<simulation::state_t> recursive_trace = match_trace(trace, transitions, transition_number + 1);
+      std::deque<simulation::state_t> recursive_trace = match_trace(trace, transitions, transition_number + 1);
       if (recursive_trace.size() > best_trace.size())
       {
         best_trace = recursive_trace;

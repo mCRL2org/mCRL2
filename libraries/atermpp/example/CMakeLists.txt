@@ -19,23 +19,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 ##---------------------------------------------------
-## Example std_container 
-##--------------------------------------------------- 
-
-set(PROJECT_NAME "${PREFIX}_std_container")
-project( ${PROJECT_NAME} )
-
-add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
-      std_container.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}
-   mcrl2_aterm 
-)
-
-build_and_run_test_example_target( ${PROJECT_NAME} )
-
-##---------------------------------------------------
 ## Example algorithm 
 ##--------------------------------------------------- 
 
@@ -47,7 +30,6 @@ add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
 )
 
 target_link_libraries(${PROJECT_NAME}
-   mcrl2_aterm 
 )
 
 build_and_run_test_example_target( ${PROJECT_NAME} )

@@ -5,7 +5,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include "mcrl2/pbes/bisimulation.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2::data;
@@ -28,8 +27,6 @@ std::string print_type(int type)
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   try {
     std::string infile1;            // location of model LPS
     std::string infile2;            // location of spec LPS

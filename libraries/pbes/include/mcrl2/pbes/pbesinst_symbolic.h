@@ -16,8 +16,6 @@
 #include <set>
 #include <iostream>
 #include <sstream>
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
@@ -54,7 +52,7 @@ class pbesinst_symbolic_rewriter
 
     term_type operator()(const term_type& x) const
     {
-      typedef data::mutable_map_substitution<atermpp::map< variable_type, data_term_type> > substitution_function;
+      typedef data::mutable_map_substitution<std::map< variable_type, data_term_type> > substitution_function;
       typedef core::term_traits<term_type> tr;
       substitution_function sigma;
       detail::enumerate_quantifiers_builder<term_type, data::rewriter_with_variables, data::data_enumerator, substitution_function> r(m_rewriter_with_variables, m_enumerator, m_enumerate_infinite_sorts, m_skip_data);
@@ -87,14 +85,14 @@ class pbesinst_symbolic_algorithm
     pbesinst_symbolic_rewriter m_rewriter;
 
     /// \brief Propositional variable instantiations that need to be handled.
-    atermpp::set<state_type> todo;
+    std::set<state_type> todo;
 
     /// \brief Propositional variable instantiations that have been handled.
-    atermpp::set<state_type> done;
+    std::set<state_type> done;
 
     /// \brief Data structure for storing the result. E[i] corresponds to the equations
     /// generated from the i-th PBES equation.
-    atermpp::multimap<state_type, state_type> edges;
+    std::multimap<state_type, state_type> edges;
 
     /// \brief The initial value.
     state_type init;
@@ -111,7 +109,7 @@ class pbesinst_symbolic_algorithm
 
       // initialize m_equation_index
       std::size_t eqn_index = 0;
-      for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         m_equation_index[i->variable().name()] = eqn_index++;
       }

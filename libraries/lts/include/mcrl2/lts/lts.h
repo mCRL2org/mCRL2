@@ -22,7 +22,6 @@
 #include <vector>
 #include <map>
 #include <stdio.h>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -92,11 +91,11 @@ class lts
 
     /** \brief The sort that contains the indices of states.
     */
-    typedef typename atermpp::vector < STATE_LABEL_T >::size_type states_size_type;
+    typedef typename std::vector < STATE_LABEL_T >::size_type states_size_type;
 
     /** \brief The sort that represents the indices of labels.
     */
-    typedef typename atermpp::vector < ACTION_LABEL_T >::size_type labels_size_type;
+    typedef typename std::vector < ACTION_LABEL_T >::size_type labels_size_type;
 
     /** \brief The sort that contains indices of transitions.
     */
@@ -107,8 +106,8 @@ class lts
     states_size_type m_nstates;
     states_size_type m_init_state;
     std::vector<transition> m_transitions;
-    atermpp::vector<STATE_LABEL_T> m_state_labels;
-    atermpp::vector<ACTION_LABEL_T> m_action_labels;
+    std::vector<STATE_LABEL_T> m_state_labels;
+    std::vector<ACTION_LABEL_T> m_action_labels;
     std::vector<bool> m_taus; // A vector indicating which labels are to be viewed as tau's.
 
   public:
@@ -192,12 +191,12 @@ class lts
         }
         else
         {
-          m_state_labels = atermpp::vector<STATE_LABEL_T>();
+          m_state_labels = std::vector<STATE_LABEL_T>();
         }
       }
       else
       {
-        m_state_labels = atermpp::vector<STATE_LABEL_T>();
+        m_state_labels = std::vector<STATE_LABEL_T>();
       }
     }
 
@@ -333,7 +332,7 @@ class lts
      *           It will not change the number of action labels. */
     void clear_actions()
     {
-      m_action_labels = atermpp::vector<ACTION_LABEL_T>();
+      m_action_labels = std::vector<ACTION_LABEL_T>();
       m_taus = std::vector<bool>();
     }
 
@@ -343,7 +342,7 @@ class lts
      *           state labels */
     void clear_state_labels()
     {
-      m_state_labels = atermpp::vector<STATE_LABEL_T>();
+      m_state_labels = std::vector<STATE_LABEL_T>();
     }
 
     /** \brief Clear the transitions system.

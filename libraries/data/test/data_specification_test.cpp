@@ -13,7 +13,6 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/find.h"
@@ -25,8 +24,6 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -34,8 +31,8 @@ using namespace mcrl2::data;
 template <typename Container1, typename Container2>
 bool equal_content(Container1 const& c1, Container2 const& c2)
 {
-  atermpp::set<typename Container1::value_type> s1(c1.begin(), c1.end());
-  atermpp::set<typename Container2::value_type> s2(c2.begin(), c2.end());
+  std::set<typename Container1::value_type> s1(c1.begin(), c1.end());
+  std::set<typename Container2::value_type> s2(c2.begin(), c2.end());
 
   if (s1 != s2)
   {
@@ -49,25 +46,20 @@ bool equal_content(Container1 const& c1, Container2 const& c2)
 
 bool detailed_compare_for_equality(data_specification const& left, data_specification const& right)
 {
-  /*
-  atermpp::set<alias> left_aliases = atermpp::convert(left.aliases());
-  atermpp::set<alias> right_aliases = atermpp::convert(right.aliases());
-  BOOST_CHECK(left_aliases == right_aliases); */
-
-  atermpp::set<sort_expression> left_sorts(left.sorts().begin(), left.sorts().end());
-  atermpp::set<sort_expression> right_sorts(right.sorts().begin(), right.sorts().end());
+  std::set<sort_expression> left_sorts(left.sorts().begin(), left.sorts().end());
+  std::set<sort_expression> right_sorts(right.sorts().begin(), right.sorts().end());
   BOOST_CHECK(left_sorts == right_sorts);
 
-  atermpp::set<function_symbol> left_constructors(left.constructors().begin(), left.constructors().end());
-  atermpp::set<function_symbol> right_constructors(right.constructors().begin(), right.constructors().end());
+  std::set<data::function_symbol> left_constructors(left.constructors().begin(), left.constructors().end());
+  std::set<data::function_symbol> right_constructors(right.constructors().begin(), right.constructors().end());
   BOOST_CHECK(left_constructors == right_constructors);
 
-  atermpp::set<function_symbol> left_mappings(left.mappings().begin(), left.mappings().end());
-  atermpp::set<function_symbol> right_mappings(right.mappings().begin(), right.mappings().end());
+  std::set<data::function_symbol> left_mappings(left.mappings().begin(), left.mappings().end());
+  std::set<data::function_symbol> right_mappings(right.mappings().begin(), right.mappings().end());
   BOOST_CHECK(left_mappings == right_mappings);
 
-  atermpp::set<data_equation> left_equations(left.equations().begin(), left.equations().end());
-  atermpp::set<data_equation> right_equations(right.equations().begin(), right.equations().end());
+  std::set<data_equation> left_equations(left.equations().begin(), left.equations().end());
+  std::set<data_equation> right_equations(right.equations().begin(), right.equations().end());
   BOOST_CHECK(left_equations == right_equations);
 
   if (/*(left_aliases != right_aliases)*/
@@ -162,7 +154,7 @@ void test_sorts()
   basic_sort s0("S0");
   alias s1(s,basic_sort("S1"));
 
-  atermpp::vector< sort_expression > sl;
+  std::vector< sort_expression > sl;
   sl.push_back(basic_sort("S1"));
   sl.push_back(s0);
 
@@ -203,12 +195,12 @@ void test_aliases()
 
   // BOOST_CHECK(boost::distance(spec.aliases()) == 0);
 
-  atermpp::set< sort_expression > sorts;
+  std::set< sort_expression > sorts;
   sorts.insert(s);
   sorts.insert(t);
   std::for_each(sorts.begin(), sorts.end(), boost::bind(&data_specification::add_sort, &spec, _1));
 
-  /* atermpp::set< sort_expression > aliases;
+  /* std::set< sort_expression > aliases;
   aliases.insert(s1);
   aliases.insert(s2);
   spec.add_aliases(boost::make_iterator_range(aliases));
@@ -225,9 +217,9 @@ void test_constructors()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(atermpp::make_vector(sort_expression(s0)),s);
-  function_symbol f("f", s);
-  function_symbol g("g", s0s);
-  function_symbol h("h", s0);
+  data::function_symbol f("f", s);
+  data::function_symbol g("g", s0s);
+  data::function_symbol h("h", s0);
   function_symbol_vector fgl(atermpp::make_vector(f,g));
   function_symbol_vector hl(atermpp::make_vector(h));
   function_symbol_vector fghl(atermpp::make_vector(f,g,h));
@@ -256,8 +248,8 @@ void test_constructors()
   BOOST_CHECK(spec.constructors(s0) == hl);
   BOOST_CHECK(spec1.constructors(s) == fgl);
   BOOST_CHECK(spec1.constructors(s0) == hl);
-  spec.add_constructor(function_symbol("i", s0));
-  function_symbol i("i", s0);
+  spec.add_constructor(data::function_symbol("i", s0));
+  data::function_symbol i("i", s0);
   spec.remove_constructor(i);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
@@ -278,9 +270,9 @@ void test_functions()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
-  function_symbol f("f", s);
-  function_symbol g("g", s0s);
-  function_symbol h("h", s0);
+  data::function_symbol f("f", s);
+  data::function_symbol g("g", s0s);
+  data::function_symbol h("h", s0);
 
   function_symbol_vector fgl(atermpp::make_vector(f,g));
   function_symbol_vector hl(atermpp::make_vector(h));
@@ -313,7 +305,7 @@ void test_functions()
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), g) != spec1.mappings(s).end());
   BOOST_CHECK(std::find(spec1.mappings(s0).begin(), spec1.mappings(s0).end(), h) != spec1.mappings(s0).end());
 
-  function_symbol i("i", s0);
+  data::function_symbol i("i", s0);
   spec.add_mapping(i);
   function_symbol_vector il(atermpp::make_vector(i));
   std::for_each(il.begin(), il.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
@@ -330,7 +322,7 @@ void test_equations()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(atermpp::make_vector(reinterpret_cast<sort_expression&>(s0)), s);
-  function_symbol f("f", s0s);
+  data::function_symbol f("f", s0s);
   variable x("x", s0);
   data_expression_vector xel(atermpp::make_vector(reinterpret_cast<data_expression&>(x)));
   application fx(f, boost::make_iterator_range(xel));
@@ -372,8 +364,8 @@ void test_is_certainly_finite()
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s0(atermpp::make_vector(static_cast<sort_expression&>(s0)), s0);
-  function_symbol f("f", s);
-  function_symbol g("g", s0s0);
+  data::function_symbol f("f", s);
+  data::function_symbol g("g", s0s0);
   variable x("x", s0);
   application gx(g, boost::make_iterator_range(atermpp::make_vector(static_cast<data_expression&>(x))));
   data_specification spec;
@@ -394,8 +386,8 @@ void test_is_certainly_finite()
 
   basic_sort s1("S1");
   basic_sort s2("S2");
-  spec.add_constructor(function_symbol("h", make_function_sort(s1, s2)));
-  spec.add_constructor(function_symbol("i", make_function_sort(s2, s1)));
+  spec.add_constructor(data::function_symbol("h", make_function_sort(s1, s2)));
+  spec.add_constructor(data::function_symbol("i", make_function_sort(s2, s1)));
 
   spec.add_alias(alias(basic_sort("a"), s));
   spec.add_alias(alias(basic_sort("a0"), s0));
@@ -424,13 +416,13 @@ void test_is_certainly_finite()
   BOOST_CHECK(!spec.is_certainly_finite(make_function_sort(s0,s)));
 
   // structured sort
-  atermpp::vector< data::structured_sort_constructor_argument > arguments;
+  std::vector< data::structured_sort_constructor_argument > arguments;
 
   arguments.push_back(data::structured_sort_constructor_argument(s));
   arguments.push_back(data::structured_sort_constructor_argument(s0));
   arguments.push_back(data::structured_sort_constructor_argument(s1));
 
-  atermpp::vector< data::structured_sort_constructor > constructors;
+  std::vector< data::structured_sort_constructor > constructors;
   constructors.push_back(data::structured_sort_constructor("a",
                          boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   constructors.push_back(data::structured_sort_constructor("b",
@@ -462,7 +454,7 @@ void test_constructor()
     "                          \n"
     ;
   data_specification data = parse_data_specification(SPEC);
-  ATermAppl a = data::detail::data_specification_to_aterm_data_spec(data);
+  atermpp::aterm_appl a = data::detail::data_specification_to_aterm_data_spec(data);
   data_specification spec1(a);
 }
 
@@ -515,7 +507,7 @@ void test_system_defined()
 
   // A data specification that is constructed using data_specification_to_aterm_data_spec is assumed not
   // not be type checked. This must be indicated explicitly.
-  data_specification specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy));
+  data_specification specification1=data_specification(data::detail::data_specification_to_aterm_data_spec(copy));
   specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1,specification));
 
@@ -535,24 +527,24 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
 
   copy = specification;
-  specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy));
+  specification1=data_specification(data::detail::data_specification_to_aterm_data_spec(copy));
   specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1, specification));
 
   // Check for the non presence of function sort
   BOOST_CHECK(specification.mappings(make_function_sort(basic_sort("D"), sort_bool::bool_())).empty());
 
-  specification.add_mapping(function_symbol("f", make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())));
+  specification.add_mapping(data::function_symbol("f", make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())));
 
   BOOST_CHECK(!specification.mappings(make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())).empty());
 
   // Manually structured sort
-  atermpp::vector< data::structured_sort_constructor_argument > arguments;
+  std::vector< data::structured_sort_constructor_argument > arguments;
 
   // sort that references itself by a name
   arguments.push_back(data::structured_sort_constructor_argument(basic_sort("Q")));
 
-  atermpp::vector< data::structured_sort_constructor > constructors;
+  std::vector< data::structured_sort_constructor > constructors;
   constructors.push_back(data::structured_sort_constructor("q",
                          boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
 
@@ -567,13 +559,13 @@ void test_utility_functionality()
   basic_sort s0("S0");
   basic_sort a("a");
   function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
-  function_symbol f("f", s);
+  data::function_symbol f("f", s);
 
-  function_symbol g("g", s0s);
-  function_symbol h("h", s0);
+  data::function_symbol g("g", s0s);
+  data::function_symbol h("h", s0);
 
   {
-    const atermpp::vector<sort_expression> sorts(spec.sorts());
+    const std::vector<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) == sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) == sorts.end());
     function_symbol_vector constructors(spec.constructors());
@@ -588,7 +580,7 @@ void test_utility_functionality()
   spec.add_mapping(g);
 
   {
-    const atermpp::vector<sort_expression> sorts(spec.sorts());
+    const std::vector<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) != sorts.end()); // Automatically added!
     function_symbol_vector constructors(spec.constructors());
@@ -603,7 +595,7 @@ void test_utility_functionality()
   spec.add_sort(s);
   spec.add_alias(alias(basic_sort("a"),s));
 
-  const atermpp::vector<sort_expression> sorts(spec.sorts());
+  const std::vector<sort_expression> sorts(spec.sorts());
   function_symbol_vector constructors(spec.constructors());
   function_symbol_vector mappings(spec.mappings());
 
@@ -655,12 +647,12 @@ void test_normalisation()
                     "sort A = struct a(B);"
                     "sort B = struct b(A)|c;");
 
-  atermpp::vector< structured_sort_constructor_argument > arguments;
+  std::vector< structured_sort_constructor_argument > arguments;
 
   arguments.push_back(structured_sort_constructor_argument(basic_sort("B")));
   arguments.push_back(structured_sort_constructor_argument(basic_sort("A")));
 
-  atermpp::vector< structured_sort_constructor > constructors;
+  std::vector< structured_sort_constructor > constructors;
 
   constructors.push_back(structured_sort_constructor("a", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   constructors.push_back(structured_sort_constructor("b", boost::make_iterator_range(arguments.begin() + 1, arguments.end())));
@@ -669,7 +661,7 @@ void test_normalisation()
   structured_sort sA(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
   structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
 
-  const atermpp::vector<sort_expression> sorts(specification.sorts());
+  const std::vector<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sA,specification)) != sorts.end());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sB,specification)) != sorts.end());
 
@@ -681,18 +673,18 @@ void test_normalisation()
   specification = parse_data_specification(
                     "sort A = struct f(A) | g;");
 
-  atermpp::vector< structured_sort_constructor_argument > arguments1;
+  std::vector< structured_sort_constructor_argument > arguments1;
   arguments1.push_back(structured_sort_constructor_argument(basic_sort("A")));
 
-  atermpp::vector< structured_sort_constructor > constructors1;
+  std::vector< structured_sort_constructor > constructors1;
   constructors1.push_back(structured_sort_constructor("f", arguments1));
   constructors1.push_back(structured_sort_constructor("g"));
 
   sort_expression s1=structured_sort(constructors1); // s1 has the shape struct f(A)|g
-  atermpp::vector< structured_sort_constructor_argument > arguments2;
+  std::vector< structured_sort_constructor_argument > arguments2;
   arguments2.push_back(structured_sort_constructor_argument(s1));
 
-  atermpp::vector< structured_sort_constructor > constructors2;
+  std::vector< structured_sort_constructor > constructors2;
   constructors2.push_back(structured_sort_constructor("f", arguments2));
   constructors2.push_back(structured_sort_constructor("g"));
 
@@ -720,11 +712,10 @@ void test_copy()
 
   specification = data_specification();
 
-  core::garbage_collect();
 
   BOOST_CHECK(normalize_sorts(basic_sort("A"),other) == normalize_sorts(basic_sort("S"),other));
 
-  const atermpp::vector<sort_expression> sorts(specification.sorts());
+  const std::vector<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), basic_sort("A")) == sorts.end());
 }
 
@@ -935,42 +926,29 @@ void test_bke()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_bke();
 
   test_sorts();
-  core::garbage_collect();
 
   test_constructors();
-  core::garbage_collect();
 
   test_functions();
-  core::garbage_collect();
 
   test_equations();
-  core::garbage_collect();
 
   test_is_certainly_finite();
-  core::garbage_collect();
 
   test_constructor();
-  core::garbage_collect();
 
   test_system_defined();
-  core::garbage_collect();
 
   test_utility_functionality();
-  core::garbage_collect();
 
   test_normalisation();
-  core::garbage_collect();
 
   test_copy();
-  core::garbage_collect();
 
   test_specification();
-  core::garbage_collect();
     
   return EXIT_SUCCESS;
 }

@@ -14,11 +14,9 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/normalize_sorts.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -38,7 +36,7 @@ void test_normalize_sorts()
 
   data_specification dataspec = parse_data_specification(DATASPEC);
 
-  function_symbol f;
+  data::function_symbol f;
   f = parse_function_symbol("abseq : AbsBit # AbsBit -> Set(Bool)", DATASPEC);
   dataspec.add_mapping(f);
   f = parse_function_symbol("absinv : AbsBit -> Set(AbsBit)", DATASPEC);
@@ -50,8 +48,6 @@ void test_normalize_sorts()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_normalize_sorts();
 
   return 0;

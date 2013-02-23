@@ -51,7 +51,6 @@ class linear_process
     /// \brief Constructor.
     linear_process()
     {
-      m_process_parameters.protect();
     }
 
     /// \brief Copy constructor.
@@ -60,7 +59,6 @@ class linear_process
       m_deadlock_summands(other.m_deadlock_summands),
       m_action_summands(other.m_action_summands)
     {
-      m_process_parameters.protect();
     }
 
     /// \brief Constructor.
@@ -73,7 +71,6 @@ class linear_process
       m_deadlock_summands(deadlock_summands),
       m_action_summands(action_summands)
     {
-      m_process_parameters.protect();
     }
 
     /// \brief Constructor.
@@ -82,26 +79,25 @@ class linear_process
     {
       assert(core::detail::check_term_LinearProcess(lps));
       atermpp::aterm_appl::iterator i = lps.begin();
-      m_process_parameters = *i++;
-      m_process_parameters.protect();
-      atermpp::aterm_list summands = *i;
+      m_process_parameters = data::variable_list(*i++);
+      atermpp::aterm_list summands = atermpp::aterm_cast<atermpp::aterm_list>(*i);
       for (atermpp::aterm_list::iterator j = summands.begin(); j != summands.end(); ++j)
       {
         assert(core::detail::check_rule_LinearProcessSummand(*j));
-        atermpp::aterm_appl t = *j;
+        atermpp::aterm_appl t = atermpp::aterm_cast<atermpp::aterm_appl>(*j);
         
-        data::variable_list summation_variables = t(0);
-        data::data_expression condition         = data::data_expression(t(1));
-        data::data_expression time              = data::data_expression(t(3));
-        data::assignment_list assignments       = t(4);
-        if (core::detail::gsIsDelta(t(2)))
+        data::variable_list summation_variables(atermpp::aterm_cast<atermpp::aterm_list>(t[0]));
+        data::data_expression condition         = data::data_expression(t[1]);
+        data::data_expression time              = data::data_expression(t[3]);
+        data::assignment_list assignments(atermpp::aterm_cast<atermpp::aterm_list>(t[4]));
+        if (core::detail::gsIsDelta(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])))
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
         }
         else
         {
-          assert(core::detail::gsIsMultAct(t(2)));
-          action_list actions = atermpp::aterm_appl(t(2))(0);
+          assert(core::detail::gsIsMultAct(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])));
+          action_list actions(atermpp::aterm_cast<atermpp::aterm_list>(atermpp::aterm_cast<atermpp::aterm_appl>(t[2])[0]));
           m_action_summands.push_back(action_summand(summation_variables, condition, multi_action(actions, time), assignments));
         }
       }
@@ -110,7 +106,6 @@ class linear_process
     /// \brief Destructor
     ~linear_process()
     {
-      m_process_parameters.unprotect();
     }
 
     /// \brief Returns the number of LPS summands.
@@ -184,8 +179,8 @@ class linear_process
     }
 };
 
-/// \brief Conversion to ATermAppl.
-/// \return The action summand converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The action summand converted to aterm format.
 inline
 atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 {
@@ -193,12 +188,12 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
   for (deadlock_summand_vector::const_reverse_iterator i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
   {
     atermpp::aterm_appl s = deadlock_summand_to_aterm(*i);
-    summands = atermpp::push_front(summands, s);
+    summands.push_front(s);
   }
   for (action_summand_vector::const_reverse_iterator i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
   {
     atermpp::aterm_appl s = action_summand_to_aterm(*i);
-    summands = atermpp::push_front(summands, s);
+    summands.push_front(s);
   }
 
   return core::detail::gsMakeLinearProcess(

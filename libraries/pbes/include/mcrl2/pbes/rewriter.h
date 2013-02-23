@@ -306,7 +306,7 @@ class enumerate_quantifiers_rewriter
     /// \return The rewrite result.
     term_type operator()(const term_type& x) const
     {
-      typedef data::mutable_map_substitution<atermpp::map< variable_type, data_term_type> > substitution_function;
+      typedef data::mutable_map_substitution<std::map< variable_type, data_term_type> > substitution_function;
       typedef core::term_traits<term_type> tr;
 
       substitution_function sigma;

@@ -15,9 +15,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <sstream>
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/lps/action.h"
@@ -34,7 +32,6 @@ namespace lps
 class multi_action
 {
     friend class action_summand;
-    friend struct atermpp::aterm_traits<multi_action>;
 
   protected:
     /// \brief The actions of the summand
@@ -44,38 +41,38 @@ class multi_action
     /// the multi action has no time.
     data::data_expression m_time;
 
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_time.mark();
-      m_actions.mark();
-    }
-
   public:
     /// \brief Constructor
-    multi_action(action_list actions = action_list(), data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
+    multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression())
       : m_actions(actions), m_time(time)
     {}
 
     /// \brief Constructor
-    multi_action(const atermpp::aterm_appl& t) : m_time(core::detail::gsMakeNil())
+    multi_action(const atermpp::aterm_appl& t) : m_time()
     {
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
-      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t(0));
+      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
+    }
+
+    /// \brief Constructor
+    explicit multi_action(const atermpp::aterm& t1) : m_time()
+    {
+      const atermpp::aterm_appl t(t1);
+      assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
+      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
     }
 
     /// \brief Constructor
     multi_action(const action& l)
-      : m_actions(atermpp::push_front(action_list(), l)),
-        m_time(core::detail::gsMakeNil())
+      : m_actions(atermpp::make_list<action>(l)),
+        m_time()
     {}
 
     /// \brief Returns true if time is available.
     /// \return True if time is available.
     bool has_time() const
     {
-      // TODO: remove the Nil
-      return m_time != core::detail::gsMakeNil();
+      return m_time != data::data_expression();
     }
 
     /// \brief Returns the sequence of actions.
@@ -110,14 +107,14 @@ class multi_action
     /// \return The name of the first action.
     core::identifier_string name() const
     {
-      return atermpp::front(m_actions).label().name();
+      return m_actions.front().label().name();
     }
 
     /// \brief Returns the arguments of the multi action.
     /// \return The arguments of the multi action.
     data::data_expression_list arguments() const
     {
-      return atermpp::front(m_actions).arguments();
+      return m_actions.front().arguments();
     }
 
     /// \brief Joins the actions of both multi actions.
@@ -181,8 +178,8 @@ std::set<data::variable> find_free_variables(const lps::multi_action& x);
 namespace detail
 {
 
-/// \brief Conversion to ATermAppl.
-/// \return The multi action converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The multi action converted to aterm format.
 inline
 atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
 {
@@ -268,11 +265,11 @@ struct equal_data_parameters_builder
 {
   const std::vector<action>& a;
   const std::vector<action>& b;
-  atermpp::set<data::data_expression>& result;
+  std::set<data::data_expression>& result;
 
   equal_data_parameters_builder(const std::vector<action>& a_,
                                 const std::vector<action>& b_,
-                                atermpp::set<data::data_expression>& result_
+                                std::set<data::data_expression>& result_
                                )
     : a(a_),
       b(b_),
@@ -282,15 +279,15 @@ struct equal_data_parameters_builder
   /// \brief Adds the expression 'a == b' to result.
   void operator()()
   {
-    atermpp::vector<data::data_expression> v;
+    std::vector<data::data_expression> v;
     std::vector<action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1, i2;
-      for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
+      data::data_expression_list::iterator i1 = d1.begin(), i2 = d2.begin();
+      for (     ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(data::lazy::equal_to(*i1, *i2));
       }
@@ -308,11 +305,11 @@ struct not_equal_multi_actions_builder
 {
   const std::vector<action>& a;
   const std::vector<action>& b;
-  atermpp::vector<data::data_expression>& result;
+  std::vector<data::data_expression>& result;
 
   not_equal_multi_actions_builder(const std::vector<action>& a_,
                                   const std::vector<action>& b_,
-                                  atermpp::vector<data::data_expression>& result_
+                                  std::vector<data::data_expression>& result_
                                  )
     : a(a_),
       b(b_),
@@ -324,15 +321,15 @@ struct not_equal_multi_actions_builder
   {
     using namespace data::lazy;
 
-    atermpp::vector<data::data_expression> v;
+    std::vector<data::data_expression> v;
     std::vector<action>::const_iterator i, j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1, i2;
-      for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
+      data::data_expression_list::iterator i1=d1.begin(), i2=d2.begin();
+      for (   ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(data::not_equal_to(*i1, *i2));
       }
@@ -385,7 +382,7 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
     first = next;
   }
 
-  atermpp::set<data::data_expression> z;
+  std::set<data::data_expression> z;
   detail::equal_data_parameters_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_or(z.begin(), z.end());
@@ -422,7 +419,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
     intervals.push_back(std::make_pair(first, next));
     first = next;
   }
-  atermpp::vector<data::data_expression> z;
+  std::vector<data::data_expression> z;
   detail::not_equal_multi_actions_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
   data::data_expression result = data::lazy::join_and(z.begin(), z.end());
@@ -430,7 +427,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
 }
 
 /// \brief Represents the name of a multi action
-typedef atermpp::multiset<core::identifier_string> multi_action_name;
+typedef std::multiset<core::identifier_string> multi_action_name;
 
 /// \brief Represents a set of multi action names
 typedef std::set<multi_action_name> multi_action_name_set;
@@ -482,27 +479,5 @@ std::string pp(const multi_action_name_set& A)
 } // namespace lps
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::lps::multi_action>
-{
-  static void protect(const mcrl2::lps::multi_action& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::multi_action& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::multi_action& t)
-  {
-    t.mark();
-  }
-};
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_LPS_MULTI_ACTION_H

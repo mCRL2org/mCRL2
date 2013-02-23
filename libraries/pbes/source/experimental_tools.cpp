@@ -186,7 +186,7 @@ bool pbesinst(const std::string& input_filename,
 
   if (remove_redundant_equations)
   {
-    atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+    std::vector<propositional_variable> V = remove_unreachable_variables(p);
     mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
   }
 

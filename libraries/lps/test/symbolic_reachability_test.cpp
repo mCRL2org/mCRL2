@@ -20,9 +20,6 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -181,8 +178,6 @@ void check_info(mcrl2::lps::specification const& model)
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv);
-
   using namespace mcrl2;
   using namespace mcrl2::lps;
 
@@ -209,7 +204,7 @@ int test_main(int argc, char** argv)
     next_state_generator explorer(model, rewriter);
 
     std::stack< state >     stack;
-    atermpp::set< state >   known;
+    std::set< state >   known;
 
     stack.push(explorer.initial_state());
     known.insert(stack.top());

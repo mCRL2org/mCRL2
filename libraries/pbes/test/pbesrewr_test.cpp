@@ -23,10 +23,8 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -96,8 +94,6 @@ void test_pbesrewr3()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_pbesrewr1();
   test_pbesrewr2();
   test_pbesrewr3();

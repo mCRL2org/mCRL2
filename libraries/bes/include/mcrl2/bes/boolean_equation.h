@@ -35,8 +35,6 @@ typedef pbes_system::fixpoint_symbol fixpoint_symbol;
 // <BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
 class boolean_equation
 {
-  friend struct atermpp::aterm_traits<boolean_equation>;
-
   protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
@@ -46,32 +44,6 @@ class boolean_equation
 
     /// \brief The formula of the equation
     boolean_expression m_formula;
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_symbol.protect();
-      m_variable.protect();
-      m_formula.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_symbol.unprotect();
-      m_variable.unprotect();
-      m_formula.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_symbol.mark();
-      m_variable.mark();
-      m_formula.mark();
-    }
 
   public:
     /// \brief The expression type of the equation.
@@ -89,7 +61,21 @@ class boolean_equation
 
     /// \brief Constructor.
     /// \param t A term
-    boolean_equation(atermpp::aterm_appl t)
+    explicit boolean_equation(const atermpp::aterm &t1)
+    {
+      atermpp::aterm_appl t(t1);
+      assert(core::detail::check_rule_BooleanEquation(t));
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_symbol   = fixpoint_symbol(*i++);
+      atermpp::aterm_appl var(*i++);
+      m_variable = boolean_variable(var);
+      m_formula  = boolean_expression(*i);
+    }
+
+    /// \brief Constructor.
+    /// \brief Constructor.
+    /// \param t A term
+    boolean_equation(const atermpp::aterm_appl &t)
     {
       assert(core::detail::check_rule_BooleanEquation(t));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -170,11 +156,11 @@ operator!=(const boolean_equation& x, const boolean_equation& y)
 inline bool
 operator<(const boolean_equation& x, const boolean_equation& y)
 {
-  return ATermAppl(x.variable()) < ATermAppl(y.variable());
+  return x.variable() < y.variable();
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The boolean equation converted to ATerm format.
+/// \brief Conversion to atermAppl.
+/// \return The boolean equation converted to aterm format.
 inline
 atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
 {
@@ -184,29 +170,5 @@ atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
 } // namespace bes
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::bes::boolean_equation>
-{
-  static void protect(const mcrl2::bes::boolean_equation& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::bes::boolean_equation& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::bes::boolean_equation& t)
-  {
-    t.mark();
-  }
-};
-
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_BES_BOOLEAN_EQUATION_H

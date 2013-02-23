@@ -17,7 +17,6 @@
 #include <utility>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -41,7 +40,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
 {
   IdentifierGenerator& generator;
   std::vector<data::variable_list> quantifier_stack;
-  atermpp::deque<std::pair<data::variable, data::variable> > replacements;
+  std::deque<std::pair<data::variable, data::variable> > replacements;
 
   quantifier_rename_builder(IdentifierGenerator& generator)
     : generator(generator)

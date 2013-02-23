@@ -142,7 +142,7 @@ pbes_expression guard(const propositional_variable_instantiation& X, const pbes_
 
 struct guard_expression
 {
-  atermpp::vector<std::pair<propositional_variable_instantiation, pbes_expression> > guards;
+  std::vector<std::pair<propositional_variable_instantiation, pbes_expression> > guards;
   pbes_expression condition;
 
   bool is_simple() const
@@ -158,7 +158,7 @@ struct guard_expression
     }
     else
     {
-      for (atermpp::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::iterator i = guards.begin(); i != guards.end(); ++i)
+      for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::iterator i = guards.begin(); i != guards.end(); ++i)
       {
         i->second = utilities::optimized_and(guard, i->second);
       }
@@ -173,7 +173,7 @@ struct guard_expression
     }
     else
     {
-      for (atermpp::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::iterator i = guards.begin(); i != guards.end(); ++i)
+      for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::iterator i = guards.begin(); i != guards.end(); ++i)
       {
         i->second = utilities::optimized_not(i->second);
       }
@@ -189,7 +189,7 @@ struct guard_expression
   {
     mCRL2log(log::debug, "stategraph") << "check_guards: x = " << pbes_system::pp(x) << std::endl;
     bool result = true;
-    for (atermpp::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = guards.begin(); i != guards.end(); ++i)
+    for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = guards.begin(); i != guards.end(); ++i)
     {
       try
       {
@@ -220,7 +220,7 @@ std::ostream& operator<<(std::ostream& out, const guard_expression& x)
   }
   else
   {
-    for (atermpp::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = x.guards.begin(); i != x.guards.end(); ++i)
+    for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = x.guards.begin(); i != x.guards.end(); ++i)
     {
       out << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << std::endl;
     }
@@ -236,7 +236,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   using super::leave;
   using super::operator();
 
-  atermpp::vector<guard_expression> expression_stack;
+  std::vector<guard_expression> expression_stack;
 
   void push(const guard_expression& x)
   {
@@ -413,32 +413,5 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<std::pair<mcrl2::pbes_system::propositional_variable_instantiation, mcrl2::pbes_system::pbes_expression> >
-{
-  static void protect(const std::pair<mcrl2::pbes_system::propositional_variable_instantiation, mcrl2::pbes_system::pbes_expression>& t)
-  {
-    t.first.protect();
-    t.second.protect();
-  }
-
-  static void unprotect(const std::pair<mcrl2::pbes_system::propositional_variable_instantiation, mcrl2::pbes_system::pbes_expression>& t)
-  {
-    t.first.unprotect();
-    t.second.unprotect();
-  }
-
-  static void mark(const std::pair<mcrl2::pbes_system::propositional_variable_instantiation, mcrl2::pbes_system::pbes_expression>& t)
-  {
-    t.first.mark();
-    t.second.mark();
-  }
-};
-
-} // namespace atermpp
 
 #endif // MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H

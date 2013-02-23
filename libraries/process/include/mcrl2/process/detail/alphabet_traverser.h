@@ -55,11 +55,11 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     return static_cast<Derived&>(*this);
   }
 
-  const atermpp::vector<process_equation>& equations;
+  const std::vector<process_equation>& equations;
   std::set<process_identifier>& W;
-  atermpp::vector<Node> node_stack;
+  std::vector<Node> node_stack;
 
-  alphabet_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_)
+  alphabet_traverser(const std::vector<process_equation>& equations_, std::set<process_identifier>& W_)
     : equations(equations_), W(W_)
   {}
 
@@ -160,7 +160,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     }
   }
 
-  void leave(const process::delta& x)
+  void leave(const process::delta& /*x*/)
   {
     push(multi_action_name_set());
   }
@@ -257,13 +257,13 @@ struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traver
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  apply_alphabet_traverser(const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
+  apply_alphabet_traverser(const std::vector<process_equation>& equations, std::set<process_identifier>& W)
     : super(equations, W)
   {}
 };
 
 inline
-alphabet_node alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
+alphabet_node alphabet(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W)
 {
   detail::apply_alphabet_traverser f(equations, W);
   f(x);
@@ -273,7 +273,7 @@ alphabet_node alphabet(const process_expression& x, const atermpp::vector<proces
 } // namespace detail
 
 inline
-multi_action_name_set alphabet(const process_expression& x, const atermpp::vector<process_equation>& equations)
+multi_action_name_set alphabet(const process_expression& x, const std::vector<process_equation>& equations)
 {
   std::set<process_identifier> W;
   return detail::alphabet(x, equations, W).alphabet;

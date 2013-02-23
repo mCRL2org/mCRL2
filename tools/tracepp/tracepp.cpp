@@ -16,7 +16,6 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -300,6 +299,5 @@ class tracepp_tool: public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return tracepp_tool().execute(argc, argv);
 }

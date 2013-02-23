@@ -8,9 +8,11 @@
 //
 /// \file ./timeseries.cpp
 
+#include <cassert>
+#include <iostream>
+
 #include "timeseries.h"
 
-#include <iostream>
 using namespace std;
 
 
@@ -2007,8 +2009,9 @@ void TimeSeries::handleHitItems(const int& idx)
       begIdx = shiftStartIdx;
       endIdx = idx;
     }
-    else if (idx < shiftStartIdx)
+    else 
     {
+      assert(idx < shiftStartIdx);
       begIdx = idx;
       endIdx = shiftStartIdx;
     }

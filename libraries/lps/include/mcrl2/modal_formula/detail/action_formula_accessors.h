@@ -32,7 +32,7 @@ inline
 lps::action_list mult_params(action_formula t)
 {
   assert(core::detail::gsIsMultAct(t));
-  return atermpp::list_arg1(t);
+  return lps::action_list(atermpp::list_arg1(t));
 }
 
 /// \brief Returns the action formula argument of an expression of type not, at, exists or forall.
@@ -73,12 +73,13 @@ action_formula right(action_formula t)
 /// \param t An action formula
 /// \return The variables of a quantification expression
 inline
-data::variable_list var(action_formula t)
+data::variable_list var(const action_formula& t)
 {
   assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-  return data::variable_list(
+  return data::variable_list(t[0]);
+  /* return data::variable_list(
            atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
-           atermpp::term_list_iterator< data::variable >());
+           atermpp::term_list_iterator< data::variable >());  */
 }
 
 /// \brief Returns the time of an at expression
@@ -88,7 +89,7 @@ inline
 data::data_expression time(action_formula t)
 {
   assert(core::detail::gsIsActAt(t));
-  return atermpp::arg2(t);
+  return data::data_expression(atermpp::arg2(t));
 }
 
 } // namespace accessors

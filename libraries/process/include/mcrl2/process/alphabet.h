@@ -43,9 +43,9 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #endif
 
-  const atermpp::vector<process_equation>& equations;
+  const std::vector<process_equation>& equations;
 
-  alphabet_reduce_builder(const atermpp::vector<process_equation>& equations_)
+  alphabet_reduce_builder(const std::vector<process_equation>& equations_)
     : equations(equations_)
   {}
 
@@ -61,7 +61,7 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
 };
 
 inline
-process_expression alphabet_reduce(const process_expression& x, const atermpp::vector<process_equation>& equations)
+process_expression alphabet_reduce(const process_expression& x, const std::vector<process_equation>& equations)
 {
   alphabet_reduce_builder f(equations);
   return f(x);

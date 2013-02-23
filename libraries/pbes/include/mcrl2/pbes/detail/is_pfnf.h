@@ -108,8 +108,8 @@ inline
 bool is_pfnf_inner_and(const pbes_expression& x)
 {
   bool result = true;
-  atermpp::set<pbes_expression> terms = pbes_expr::split_and(x);
-  for (atermpp::set<pbes_expression>::const_iterator i = terms.begin(); i != terms.end(); ++i)
+  std::set<pbes_expression> terms = pbes_expr::split_and(x);
+  for (std::set<pbes_expression>::const_iterator i = terms.begin(); i != terms.end(); ++i)
   {
     if (!is_pfnf_imp(*i))
     {

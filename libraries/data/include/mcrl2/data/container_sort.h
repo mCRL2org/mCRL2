@@ -38,10 +38,10 @@ class container_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    container_sort(const atermpp::aterm_appl& term)
+    container_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
-      assert(core::detail::check_term_SortCons(m_term));
+      assert(core::detail::check_term_SortCons(*this));
     }
 
     /// \brief Constructor.
@@ -49,14 +49,14 @@ class container_sort: public sort_expression
       : sort_expression(core::detail::gsMakeSortCons(container_name, element_sort))
     {}
 
-    container_type container_name() const
+    const container_type& container_name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const container_type>(atermpp::arg1(*this));
     }
 
-    sort_expression element_sort() const
+    const sort_expression& element_sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated class container_sort ---//
@@ -67,11 +67,21 @@ typedef atermpp::term_list<container_sort> container_sort_list;
 
 /// \brief list of function sorts
 ///
-typedef atermpp::vector<container_sort> container_sort_vector;
+typedef std::vector<container_sort> container_sort_vector;
 
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::container_sort& t1, mcrl2::data::container_sort& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_CONTAINER_SORT_H
 

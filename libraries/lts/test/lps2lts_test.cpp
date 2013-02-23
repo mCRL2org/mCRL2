@@ -19,8 +19,6 @@
 #include <sstream>
 #include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/detail/exploration.h"
@@ -60,13 +58,9 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   LTS_TYPE result;
   options.outformat = result.type();
   lts::lps2lts_algorithm lps2lts;
-  core::garbage_collect();
   lps2lts.initialise_lts_generation(&options);
-  core::garbage_collect();
   lps2lts.generate_lts();
-  core::garbage_collect();
   lps2lts.finalise_lts_generation();
-  core::garbage_collect();
 
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
@@ -138,7 +132,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "AUT FORMAT\n";
         lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
@@ -147,7 +140,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "LTS FORMAT\n";
         lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
@@ -156,7 +148,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "FSM FORMAT\n";
         lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
@@ -165,7 +156,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "DOT FORMAT\n";
         lts::lts_dot_t result4 = translate_lps_to_lts<lts::lts_dot_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result4.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result4.num_transitions(), expected_transitions);
@@ -188,7 +178,6 @@ static void check_lps2lts_specification(std::string const& specification,
  //          has_tau = has_tau || i->is_tau() ;
  //       }
 
-        core::garbage_collect();
 
         std::cerr << "BCG FORMAT\n";
         BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
@@ -500,9 +489,7 @@ BOOST_AUTO_TEST_CASE(test_max_states)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
  // Initialise random seed to allow parallel running with lps2lts_test_old
-  std::srand(time(NULL) * 13);
   return 0;
 }
 

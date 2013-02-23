@@ -73,11 +73,11 @@ std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_
 }
 
 inline
-std::string print_pbes_expressions(const atermpp::set<pbes_expression>& v)
+std::string print_pbes_expressions(const std::set<pbes_expression>& v)
 {
   std::ostringstream out;
   out << "{";
-  for (atermpp::set<pbes_expression>::const_iterator j = v.begin(); j != v.end(); ++j)
+  for (std::set<pbes_expression>::const_iterator j = v.begin(); j != v.end(); ++j)
   {
     if (j != v.begin())
     {

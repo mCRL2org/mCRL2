@@ -11,10 +11,7 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 
@@ -58,11 +55,6 @@ void test_bqnf_quantifier_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
-  //log::log_level_t log_level = log::debug2;
-  //log::mcrl2_logger::set_reporting_level(log_level);
-
   test_bqnf_quantifier_rewriter();
 
   return 0;

@@ -22,7 +22,6 @@
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -93,7 +92,5 @@ class alphabet_tool : public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return alphabet_tool().execute(argc, argv);
 }

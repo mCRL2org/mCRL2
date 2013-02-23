@@ -15,9 +15,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -58,8 +56,6 @@ void test_parse()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_parse_process_specification();
   test_parse();
 

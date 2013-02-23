@@ -10,7 +10,6 @@
 #define MCRL2_UTILITIES_ATERMTHREAD_H
 
 #include <QThread>
-#include "mcrl2/atermpp/aterm_init.h"
 
 namespace mcrl2
 {
@@ -29,8 +28,6 @@ class AtermThread : public QThread
   protected:
     void run()
     {
-      atermpp::aterm term;
-      atermpp::aterm_init(term);
       exec();
     }
 };

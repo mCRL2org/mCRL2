@@ -14,7 +14,6 @@
 
 #include <string>
 #include <sstream>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -70,8 +69,6 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
 /// \brief pbes equation.
 class pbes_equation
 {
-    friend struct atermpp::aterm_traits<pbes_equation>;
-
   protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
@@ -81,32 +78,6 @@ class pbes_equation
 
     /// \brief The expression on the right hand side of the equation
     pbes_expression m_formula;
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_symbol.protect();
-      m_variable.protect();
-      m_formula.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_symbol.unprotect();
-      m_variable.unprotect();
-      m_formula.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_symbol.mark();
-      m_variable.mark();
-      m_formula.mark();
-    }
 
   public:
     /// \brief The expression type of the equation.
@@ -126,6 +97,18 @@ class pbes_equation
     /// \param t A term
     pbes_equation(atermpp::aterm_appl t)
     {
+      assert(core::detail::check_rule_PBEqn(t));
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_symbol   = fixpoint_symbol(*i++);
+      m_variable = propositional_variable(*i++);
+      m_formula  = pbes_expression(*i);
+    }
+
+    /// \brief Constructor.
+    /// \param t A term
+    explicit pbes_equation(const atermpp::aterm & t1)
+    {
+      atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_PBEqn(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);
@@ -257,8 +240,8 @@ operator!=(const pbes_equation& x, const pbes_equation& y)
   return !(x == y);
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The specification converted to ATerm format.
+/// \brief Conversion to atermaPpl.
+/// \return The specification converted to aterm format.
 inline
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {
@@ -266,7 +249,7 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 }
 
 /// \brief vector of process equations
-typedef atermpp::vector<pbes_equation> pbes_equation_vector;
+typedef std::vector<pbes_equation> pbes_equation_vector;
 
 // template function overloads
 std::string pp(const pbes_equation& x);
@@ -277,29 +260,5 @@ std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::pbes_equation>
-{
-  static void protect(const mcrl2::pbes_system::pbes_equation& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::pbes_equation& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::pbes_equation& t)
-  {
-    t.mark();
-  }
-};
-
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_PBES_PBES_EQUATION_H

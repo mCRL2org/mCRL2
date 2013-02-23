@@ -14,8 +14,6 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
@@ -198,6 +196,5 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return lpsinvelm_tool().execute(argc, argv);
 }

@@ -27,9 +27,9 @@ namespace pbes_system {
 /// \param q A sequence of PBES equations
 /// \return The concatenation result
 inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
+std::vector<pbes_equation> operator+(const std::vector<pbes_equation>& p, const std::vector<pbes_equation>& q)
 {
-  atermpp::vector<pbes_equation> result(p);
+  std::vector<pbes_equation> result(p);
   result.insert(result.end(), q.begin(), q.end());
   return result;
 }
@@ -42,9 +42,9 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
 /// \param e A PBES equation
 /// \return The append result
 inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const pbes_equation& e)
+std::vector<pbes_equation> operator+(const std::vector<pbes_equation>& p, const pbes_equation& e)
 {
-  atermpp::vector<pbes_equation> result(p);
+  std::vector<pbes_equation> result(p);
   result.push_back(e);
   return result;
 }
@@ -63,7 +63,7 @@ data::variable_list mu_variables(state_formulas::state_formula f)
   data::variable_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = atermpp::push_front(result, i->lhs());
+    result.push_front(i->lhs());
   }
   return atermpp::reverse(result);
 }
@@ -79,17 +79,17 @@ data::data_expression_list mu_expressions(state_formulas::state_formula f)
   data::data_expression_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = atermpp::push_front(result, i->rhs());
+    result.push_front(i->rhs());
   }
   return atermpp::reverse(result);
 }
 
 inline
-std::string myprint(const atermpp::vector<pbes_equation>& v)
+std::string myprint(const std::vector<pbes_equation>& v)
 {
   std::ostringstream out;
   out << "[";
-  for (atermpp::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (std::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     out << "\n  " << pbes_system::pp(i->symbol()) << " " << pbes_system::pp(i->variable()) << " = " << pbes_system::pp(i->formula());
   }

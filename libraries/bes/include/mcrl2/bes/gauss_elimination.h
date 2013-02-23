@@ -41,7 +41,8 @@ struct bes_traits
     static inline
     expression_type substitute(const expression_type& t, const variable_type& X, const expression_type& phi)
     {
-      return bes::replace_boolean_variables(t, boolean_variable_substitution(X, phi));
+      expression_type result=bes::replace_boolean_variables(t, boolean_variable_substitution(X, phi));
+      return result;
     }
 
     /// \brief Returns the value true
@@ -105,8 +106,7 @@ struct boolean_equation_solver
   /// \brief Solves the equation e
   void operator()(boolean_equation& e)
   {
-    e.formula() = bes_traits::substitute(e.formula(), e.variable(), sigma(e));
-    e.formula() = m_rewriter(e.formula());
+    e.formula() = m_rewriter(bes_traits::substitute(e.formula(), e.variable(), sigma(e)));
   }
 };
 

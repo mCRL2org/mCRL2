@@ -10,9 +10,7 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/print.h"
@@ -65,7 +63,6 @@ void test_find()
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) != e.end());
 
-  core::garbage_collect();
 }
 
 void test_free_variables()
@@ -124,13 +121,10 @@ void test_find_free_variables()
   std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
   BOOST_CHECK(v.size() == 2);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_find();
   test_free_variables();
   test_find_free_variables();

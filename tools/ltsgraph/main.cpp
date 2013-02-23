@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/aterm/aterm1.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/qt_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -43,9 +42,5 @@ class ltsgraph_tool : public ltsgraph_base
 
 int main(int argc, char *argv[])
 {
-  //Separate thread not needed in this case
-  aterm::ATerm stack;
-  aterm::ATinit(&stack);
-
   return ltsgraph_tool().execute(argc, argv);
 }

@@ -18,8 +18,6 @@
 #include <vector>
 #include <set>
 #include <sstream>
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
@@ -36,10 +34,10 @@ namespace pbes_system
 {
 
 /// \brief Data structure for storing the indices of the variables that should be expanded by the finite pbesinst algorithm.
-typedef atermpp::map<core::identifier_string, std::vector<size_t> > pbesinst_index_map;
+typedef std::map<core::identifier_string, std::vector<size_t> > pbesinst_index_map;
 
 /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
-typedef atermpp::map<core::identifier_string, std::vector<data::variable> > pbesinst_variable_map;
+typedef std::map<core::identifier_string, std::vector<data::variable> > pbesinst_variable_map;
 
 /// \brief Function object for renaming a propositional variable instantiation
 struct pbesinst_finite_rename
@@ -193,7 +191,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
   {
     mCRL2log(log::debug1) << "visit " << data::pp(x) << "\n";
 
-    // TODO: this code contains too much conversion between vectors and ATerm lists
+    // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
     split_parameters(v, m_index_map, finite_parameters, infinite_parameters);
@@ -210,7 +208,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
       di = vi->second;
     }
 
-    atermpp::set<pbes_expression> result;
+    std::set<pbes_expression> result;
     data::classic_enumerator<> enumerator(m_data_spec, super::m_data_rewriter);
     for (data::classic_enumerator<>::iterator i=enumerator.begin(di, data::sort_bool::true_());
               i != enumerator.end(); ++i)
@@ -341,8 +339,8 @@ class pbesinst_finite_algorithm
       detail::pbesinst_finite_builder<data::rewriter, pbesinst_finite_rename, substitution_type> visitor(rewr, pbesinst_finite_rename(), p.data(), index_map, variable_map);
 
       // compute new equations
-      atermpp::vector<pbes_equation> equations;
-      for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      std::vector<pbes_equation> equations;
+      for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         std::vector<data::variable> finite_parameters;
         std::vector<data::variable> infinite_parameters;
@@ -388,7 +386,7 @@ class pbesinst_finite_algorithm
     {
       // put all finite variables in a variable map
       pbesinst_variable_map variable_map;
-      for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         data::variable_list v = i->variable().parameters();
         for (data::variable_list::const_iterator j = v.begin(); j != v.end(); ++j)

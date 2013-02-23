@@ -14,8 +14,6 @@
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/suminst.h>
 #include <mcrl2/lps/linearise.h>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -178,7 +176,7 @@ void test_case_6()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
+  suminst_algorithm<rewriter>(s1, r, atermpp::convert<std::set<data::sort_expression> >(s1.data().sorts())).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -198,7 +196,7 @@ void test_case_7()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
+  suminst_algorithm<rewriter>(s1, r, atermpp::convert<std::set<data::sort_expression> >(s1.data().sorts())).run();
   int sum_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -210,26 +208,18 @@ void test_case_7()
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERMPP_INIT(ac, av)
-
   std::clog << "test case 1" << std::endl;
   test_case_1();
-  core::garbage_collect();
   std::clog << "test case 2" << std::endl;
   test_case_2();
-  core::garbage_collect();
   std::clog << "test case 3" << std::endl;
   test_case_3();
-  core::garbage_collect();
   std::clog << "test case 4" << std::endl;
   test_case_4();
-  core::garbage_collect();
   std::clog << "test case 5" << std::endl;
   test_case_5();
-  core::garbage_collect();
   std::clog << "test case 6" << std::endl;
   test_case_6();
-  core::garbage_collect();
 
   return 0;
 }

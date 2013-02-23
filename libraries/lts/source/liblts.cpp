@@ -18,9 +18,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/utilities/logger.h"
@@ -38,9 +35,6 @@ using namespace mcrl2::log;
 // #include <bcg_user.h>
 #endif
 
-#define ATisAppl(x) (ATgetType(x) == AT_APPL)
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-
 using namespace std;
 
 namespace mcrl2
@@ -50,7 +44,7 @@ namespace lts
 namespace detail
 {
 
-atermpp::vector < ATermAppl > state_label_lts::vector_templates;
+std::vector < atermpp::function_symbol > state_function_symbols;
 
 lts_type guess_format(string const& s)
 {

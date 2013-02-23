@@ -18,8 +18,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -70,6 +68,9 @@ void set_expression_test()
 
   data_expression t1d1 = parse_data_expression("{1,2}");
   data_expression t1d2 = parse_data_expression("{2,1}");
+std::cerr << "T1 " << pp(t1d1) << "   " << pp(t1d2) << "\n";
+std::cerr << "T1 " << t1d1 << "   " << t1d2 << "\n";
+std::cerr << "T1norm " << pp(normaliser(t1d1)) << "   " << pp(normaliser(t1d2)) << "\n";
   BOOST_CHECK(normaliser(t1d1) == normaliser(t1d2));
 
   data_expression t2d1 = parse_data_expression("{1,2} == {1,2}");
@@ -89,10 +90,7 @@ void set_expression_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   set_expression_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

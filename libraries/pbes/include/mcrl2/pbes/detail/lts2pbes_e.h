@@ -20,7 +20,7 @@ namespace pbes_system {
 
 namespace detail {
 
-atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
+std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                                  const state_formulas::state_formula& x,
                                  const lts::lts_lts_t& lts0,
                                  const lts2pbes_lts& lts1,
@@ -39,7 +39,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  typedef atermpp::vector<pbes_equation> result_type;
+  typedef std::vector<pbes_equation> result_type;
 
   const state_formulas::state_formula& phi0; // the original formula
   const lts::lts_lts_t& lts0;
@@ -110,15 +110,15 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
 
   void leave(const state_formulas::and_&)
   {
-    atermpp::vector<pbes_equation> right = pop();
-    atermpp::vector<pbes_equation> left = pop();
+    std::vector<pbes_equation> right = pop();
+    std::vector<pbes_equation> left = pop();
     push(left + right);
   }
 
   void leave(const state_formulas::or_&)
   {
-    atermpp::vector<pbes_equation> right = pop();
-    atermpp::vector<pbes_equation> left = pop();
+    std::vector<pbes_equation> right = pop();
+    std::vector<pbes_equation> left = pop();
     push(left + right);
   }
 
@@ -179,7 +179,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
     core::identifier_string X = x.name();
     data::variable_list d = detail::mu_variables(x);
 
-    atermpp::vector<pbes_equation> v;
+    std::vector<pbes_equation> v;
 
     // traverse all states of the LTS
     for (lts2pbes_state_type s = 0; s < lts1.state_count(); s++)
@@ -226,7 +226,7 @@ struct apply_e_lts2pbes_traverser: public Traverser<apply_e_lts2pbes_traverser<T
 };
 
 inline
-atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
+std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                                  const state_formulas::state_formula& x,
                                  const lts::lts_lts_t& lts0,
                                  const lts2pbes_lts& lts1,

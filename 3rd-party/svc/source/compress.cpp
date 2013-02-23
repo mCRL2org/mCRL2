@@ -21,9 +21,13 @@
 */
 
 #include <limits.h>
+#include "mcrl2/atermpp/detail/utility.h"
+#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/atermpp/aterm_int.h"
 #include <svc/compress.h>
 
-using namespace aterm;
+
+using namespace atermpp;
 
 static char buffer[102400];
 static void calcDelta(CompressedStream*, long*);
@@ -65,13 +69,13 @@ void CSfree(CompressedStream* cs)
 
 }
 
-int CSreadIndex(CompressedStream* cs, ATerm* term)
+int CSreadIndex(CompressedStream* cs, aterm* term)
 {
   long index;
   if (HFdecodeIndex(cs->bs, &cs->tree, &index))
   {
     uncalcDelta(cs,&index);
-    *term=(ATerm)ATmakeInt(index);
+    *term=aterm_int(index);
     HTinsert(cs->indices,*term,NULL); /* IZAK */
     return 1;
   }
@@ -82,13 +86,13 @@ int CSreadIndex(CompressedStream* cs, ATerm* term)
 }
 
 
-int CSreadATerm(CompressedStream* cs, ATerm* term)
+int CSreadATerm(CompressedStream* cs, aterm* term)
 {
 
   if (HFdecodeATerm(cs->bs, &cs->tree, term))
   {
 
-    if (*term==NULL)
+    if (detail::address(*term)==NULL)
     {
       return 0;
     }
@@ -104,12 +108,12 @@ int CSreadATerm(CompressedStream* cs, ATerm* term)
 
 }
 
-int CSureadATerm(CompressedStream* cs, ATerm* term)
+int CSureadATerm(CompressedStream* cs, aterm* term)
 {
 
   if (BSreadString(cs->bs,buffer))
   {
-    *term=ATreadFromString(buffer);
+    *term=read_term_from_string(buffer);
     return 1;
   }
   else
@@ -118,32 +122,20 @@ int CSureadATerm(CompressedStream* cs, ATerm* term)
   }
 }
 
-int CSreadString(CompressedStream* cs, char** str)
+/* static int CSreadString(CompressedStream* cs)
 {
-  ATerm term;
+  aterm term;
 
-  /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<str>", str)){ */
-  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_APPL &&
-      !ATisQuoted(ATgetAFun((ATermAppl)term)))
-  {
-    *str =ATgetName(ATgetAFun((ATermAppl)term));
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
+  HFdecodeATerm(cs->bs, &cs->tree, &term); 
+  return 0;
 
-}
+} */
 
 int CSureadString(CompressedStream* cs, char** str)
 {
 
   if (BSreadString(cs->bs, buffer))
   {
-    /*
-    ATfprintf(stderr, "Uread %s\n", buffer);
-    */
     *str=buffer;
     return 1;
   }
@@ -156,12 +148,12 @@ int CSureadString(CompressedStream* cs, char** str)
 
 int CSreadInt(CompressedStream* cs, long* n)
 {
-  ATerm term;
+  aterm term;
 
   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<int>", &n)) */
-  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_INT)
+  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && term.type_is_int())
   {
-    *n =ATgetInt((ATermInt)term);
+    *n =((aterm_int)term).value();
     return 1;
   }
   else
@@ -190,12 +182,12 @@ int CSureadInt(CompressedStream* cs, long* n)
 
 
 
-int CSwriteIndex(CompressedStream* cs, ATerm term)
+int CSwriteIndex(CompressedStream* cs, aterm term)
 {
   long index;
 
 
-  if (term==NULL)
+  if (detail::address(term)==NULL)
   {
     return HFencodeIndex(cs->bs, &cs->tree, NO_INT);
   }
@@ -212,22 +204,22 @@ int CSwriteIndex(CompressedStream* cs, ATerm term)
 }
 
 
-int CSwriteATerm(CompressedStream* cs, ATerm term)
+int CSwriteATerm(CompressedStream* cs, aterm term)
 {
 
   return HFencodeATerm(cs->bs, &cs->tree, term);
 }
 
-int CSuwriteATerm(CompressedStream* cs, ATerm term)
+int CSuwriteATerm(CompressedStream* cs, aterm term)
 {
 
-  BSwriteString(cs->bs,ATwriteToString(term).c_str());
+  BSwriteString(cs->bs,to_string(term).c_str());
   return 1;
 }
 int CSwriteString(CompressedStream* cs, const char* str)
 {
 
-  return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,false)));
+  return HFencodeATerm(cs->bs, &cs->tree, aterm_appl(function_symbol(str,0)));
 }
 
 int CSuwriteString(CompressedStream* cs, const char* str)
@@ -237,12 +229,7 @@ int CSuwriteString(CompressedStream* cs, const char* str)
 }
 int CSwriteInt(CompressedStream* cs, long n)
 {
-
-  /*
-  ATfprintf(stderr,"Write int %d\n", n);
-  */
-
-  return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeInt(n));
+  return HFencodeATerm(cs->bs, &cs->tree, aterm_int(n));
 }
 int CSuwriteInt(CompressedStream* cs, long n)
 {

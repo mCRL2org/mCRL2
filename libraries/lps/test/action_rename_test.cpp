@@ -12,8 +12,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
@@ -23,6 +21,7 @@ using lps::specification;
 using lps::action_rename_specification;
 // using lps::action_rename;
 
+static
 void test1()
 {
   // Check a renaming when more than one renaming rule
@@ -46,6 +45,7 @@ void test1()
   BOOST_CHECK(new_spec.process().summand_count()==3);
 }
 
+static
 void test2()
 {
   // Check whether new declarations in the rename file
@@ -72,6 +72,7 @@ void test2()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+static
 void test3()
 {
   // Check whether constants in an action_rename file are properly translated.
@@ -94,6 +95,7 @@ void test3()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+static
 void test4()
 {
   const std::string SPEC =
@@ -121,6 +123,7 @@ void test4()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+static
 void test5() // Test whether partial renaming to delta is going well. See bug report #1009.
 {
   const std::string SPEC =
@@ -170,16 +173,10 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   test1();
-  core::garbage_collect();
   test2();
-  core::garbage_collect();
   test3();
-  core::garbage_collect();
   test4();
-  core::garbage_collect();
   test5();
-  core::garbage_collect();
   return 0;
 }

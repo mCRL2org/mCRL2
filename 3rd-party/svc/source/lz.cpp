@@ -27,8 +27,10 @@
 #include <stdlib.h>
 #include <string>
 #include <svc/lz.h>
+#include "mcrl2/atermpp/detail/utility.h"
+#include "mcrl2/atermpp/aterm_io.h"
 
-using namespace aterm;
+using namespace atermpp;
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char* _strdup(const char* s);
@@ -194,11 +196,11 @@ int LZwriteInt(BitStream* bs, LZbuffer*, long n)
 }
 
 
-int LZwriteATerm(BitStream* bs, LZbuffer* buffer, ATerm term)
+int LZwriteATerm(BitStream* bs, LZbuffer* buffer, aterm term)
 {
   char* buf;
 
-  buf=_strdup(ATwriteToString(term).c_str());
+  buf=_strdup(to_string(term).c_str());
   compress(bs,buffer,buf);
   free(buf);
 
@@ -206,15 +208,14 @@ int LZwriteATerm(BitStream* bs, LZbuffer* buffer, ATerm term)
 }
 
 
-int LZreadATerm(BitStream* bs, LZbuffer* buffer, ATerm* term)
+int LZreadATerm(BitStream* bs, LZbuffer* buffer, aterm* term)
 {
   char* str;
 
 
   if (decompress(bs,buffer,&str))
   {
-    *term=ATreadFromString(str);
-    /*    *term=ATmake(str);*/
+    *term=read_term_from_string(str);
     return 1;
   }
   else

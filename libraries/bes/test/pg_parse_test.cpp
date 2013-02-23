@@ -12,8 +12,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/pg_parse.h"
 
 using namespace mcrl2;
@@ -24,7 +22,6 @@ void test_parse_pg(std::string const& in)
   std::stringstream from(in);
   boolean_equation_system<> bes;
   parse_pgsolver(from,bes);
-  core::garbage_collect();
 }
 
 void test_case()
@@ -68,7 +65,6 @@ void test_case()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
   test_case();
   return 0;
 }

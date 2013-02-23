@@ -20,7 +20,6 @@
 #include <utility>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"

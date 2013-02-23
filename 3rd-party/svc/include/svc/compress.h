@@ -23,6 +23,7 @@
 #ifndef __COMPRESS_H
 #define __COMPRESS_H
 
+#include <string>
 #include "huffman.h"
 
 
@@ -38,16 +39,16 @@
 
   CompressedStream* CSinit(HTable*, BitStream*, int);
   void CSfree(CompressedStream*);
-  int   CSreadATerm(CompressedStream*, aterm::ATerm*);
-  int   CSreadIndex(CompressedStream*, aterm::ATerm*);
-  int   CSureadATerm(CompressedStream*, aterm::ATerm*);
-  int   CSreadString(CompressedStream*, char**);
+  int   CSreadATerm(CompressedStream*, atermpp::aterm*);
+  int   CSreadIndex(CompressedStream*, atermpp::aterm*);
+  int   CSureadATerm(CompressedStream*, atermpp::aterm*);
+  int   CSreadString(CompressedStream*, std::string&);
   int   CSureadString(CompressedStream*, char**);
   int CSreadInt(CompressedStream*, long*);
   int CSureadInt(CompressedStream*, long*);
-  int   CSwriteATerm(CompressedStream*, aterm::ATerm);
-  int   CSwriteIndex(CompressedStream*, aterm::ATerm);
-  int   CSuwriteATerm(CompressedStream*, aterm::ATerm);
+  int   CSwriteATerm(CompressedStream*, atermpp::aterm);
+  int   CSwriteIndex(CompressedStream*, atermpp::aterm);
+  int   CSuwriteATerm(CompressedStream*, atermpp::aterm);
   int   CSwriteString(CompressedStream*, const char*);
   int   CSuwriteString(CompressedStream*, const char*);
   int   CSwriteInt(CompressedStream*, long);

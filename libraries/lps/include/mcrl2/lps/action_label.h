@@ -16,7 +16,6 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
@@ -39,10 +38,10 @@ class action_label: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    action_label(const atermpp::aterm_appl& term)
+    action_label(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_ActId(m_term));
+      assert(core::detail::check_term_ActId(*this));
     }
 
     /// \brief Constructor.
@@ -55,14 +54,14 @@ class action_label: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeActId(core::identifier_string(name), sorts))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data::sort_expression_list sorts() const
+    const data::sort_expression_list& sorts() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const data::sort_expression_list>(atermpp::list_arg2(*this));
     }
 };
 
@@ -70,7 +69,7 @@ class action_label: public atermpp::aterm_appl
 typedef atermpp::term_list<action_label> action_label_list;
 
 /// \brief vector of action_labels
-typedef atermpp::vector<action_label>    action_label_vector;
+typedef std::vector<action_label>    action_label_vector;
 
 
 /// \brief Test for a action_label expression
@@ -91,12 +90,22 @@ std::string pp(const action_label_vector& x);
 action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
 std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x);
 
-// TODO: These should be removed when the ATerm code has been replaced.
+// TODO: These should be removed when the aterm code has been replaced.
 std::string pp(const atermpp::aterm& x);
 std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace lps
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::lps::action_label& t1, mcrl2::lps::action_label& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_LPS_ACTION_LABEL_H

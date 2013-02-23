@@ -34,17 +34,17 @@ class alphabet_reduction
       return process_identifier(core::identifier_string("init"),mcrl2::data::sort_expression_list());
     }
 
-    atermpp::map < process_expression, action_label_list_list > alphas;
-    atermpp::map < process_identifier, action_label_list_list > alphas_process_identifiers;
-    atermpp::map < ATermList, action_label_list_list > alphas_length;
-    atermpp::map < ATermAppl, process_identifier > subs_alpha;
-    atermpp::map < process_identifier, process_identifier > subs_alpha_rev;
-    atermpp::map < process_identifier, mcrl2::data::variable_list > form_pars;
+    std::map < process_expression, action_label_list_list > alphas;
+    std::map < process_identifier, action_label_list_list > alphas_process_identifiers;
+    std::map < atermpp::aterm_list, action_label_list_list > alphas_length;
+    std::map < atermpp::aterm_appl, process_identifier > subs_alpha;
+    std::map < process_identifier, process_identifier > subs_alpha_rev;
+    std::map < process_identifier, mcrl2::data::variable_list > form_pars;
  
-    atermpp::map < process_identifier, process_expression > procs;
+    std::map < process_identifier, process_expression > procs;
     bool all_stable;
  
-    atermpp::map < lps::action_label_list, core::identifier_string_list > untypes;
+    std::map < lps::action_label_list, core::identifier_string_list > untypes;
 
     //Classify the *reachable from init* process equations in 3 parts:
     //pCRL
@@ -53,13 +53,13 @@ class alphabet_reduction
     //also check if process name depends recursively on itself.
     //(mCRL processes cannot recursively depend on itself for the *current* linearizer to work)
     //n-parallel pCRL processes always recursively depend on themselves
-    atermpp::set < process_identifier > pCRL_set;
-    atermpp::set < process_identifier > mCRL_set;
-    atermpp::set < process_identifier > recursive_set;
-    atermpp::set < process_identifier > non_recursive_set;
+    std::set < process_identifier > pCRL_set;
+    std::set < process_identifier > mCRL_set;
+    std::set < process_identifier > recursive_set;
+    std::set < process_identifier > non_recursive_set;
 
     //process dependencies : P(Pname,type) -> List(P(Pname,type))
-    atermpp::map < process_identifier, process_identifier_list > deps;
+    std::map < process_identifier, process_identifier_list > deps;
 
     bool push_comm_through_allow; //at some point is set to false to avoid infinite recursion.
 
@@ -81,7 +81,7 @@ class alphabet_reduction
             const action_label_list_list l,                       
             const action_label_list_list m,     
             size_t length=0, 
-            const std::vector < atermpp::multiset < core::identifier_string > > &allowed=std::vector < atermpp::multiset < core::identifier_string > >());
+            const std::vector < std::multiset < core::identifier_string > > &allowed=std::vector < std::multiset < core::identifier_string > >());
     action_label_list_list sync_list_ht(action_label_list_list l1, action_label_list_list l2, bool including_products_of_actions=true);
     atermpp::term_list< core::identifier_string_list > apply_unrename(core::identifier_string_list l, rename_expression_list R);
     atermpp::term_list < core::identifier_string_list > gsaMakeMultActNameL(atermpp::term_list< atermpp::term_list < core::identifier_string > > l);
@@ -100,11 +100,11 @@ class alphabet_reduction
     action_label_list_list gsaGetAlpha(
             process_expression a, 
             size_t length=0, 
-            const std::vector < atermpp::multiset < core::identifier_string > > &allowed=std::vector < atermpp::multiset < core::identifier_string > >());
+            const std::vector < std::multiset < core::identifier_string > > &allowed=std::vector < std::multiset < core::identifier_string > >());
     action_label_list_list gsaGetSyncAlpha(
             process_expression a, 
             size_t length, 
-            const std::vector < atermpp::multiset < core::identifier_string > > &allowed,
+            const std::vector < std::multiset < core::identifier_string > > &allowed,
             bool &success);
     process_expression gsApplyAlpha(process_expression a);
     process_identifier_list gsaGetDeps(process_expression a);

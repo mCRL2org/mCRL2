@@ -11,7 +11,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -77,7 +76,5 @@ class complps2pbes_tool : public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return complps2pbes_tool().execute(argc, argv);
 }

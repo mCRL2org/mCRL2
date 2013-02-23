@@ -21,8 +21,6 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -237,13 +235,10 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   }
   BOOST_CHECK(diff.empty());
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_pbes(t1 , x1 , false);
   test_pbes(t2 , x2 , false);
   test_pbes(t3 , x3 , false);

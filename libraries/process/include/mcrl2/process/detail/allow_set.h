@@ -59,6 +59,7 @@ action_name_set hide(const core::identifier_string_list& I, const action_name_se
   return result;
 }
 
+inline
 multi_action_name hide(const action_name_set& I, const multi_action_name& alpha)
 {
   multi_action_name result;
@@ -163,6 +164,7 @@ action_name_set rename_inverse(const rename_expression_list& R, const action_nam
   return result;
 }
 
+inline
 std::pair<multi_action_name, multi_action_name> apply_comm_inverse(const communication_expression& x, const multi_action_name& alpha1, const multi_action_name& alpha2)
 {
   core::identifier_string c = x.name();

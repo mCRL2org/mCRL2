@@ -11,9 +11,6 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/substitutions.h"
@@ -82,15 +79,35 @@ void test_propositional_variable_substitution()
   // compare textual representations, to avoid conflicts between types
   BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
 
-  core::garbage_collect();
+}
+
+inline
+pbes_expression sigma(const pbes_expression& x)
+{
+  std::string var_decl = "datavar b: Bool; \npredvar X: Bool;";
+  pbes_expression x1 = parse_pbes_expression("X(false)", var_decl);
+  pbes_expression x2 = parse_pbes_expression("X(true) || true", var_decl);
+  return x == x1 ? x2 : x;
+}
+
+void test_replace_pbes_expressions()
+{
+  std::string var_decl = "datavar b: Bool; \npredvar X: Bool;";
+  pbes_expression x = parse_pbes_expression("X(b) || X(false)", var_decl);
+  pbes_expression result = replace_pbes_expressions(x, sigma);
+  pbes_expression expected_result = parse_pbes_expression("X(b) || X(true) || true", var_decl);
+  if (!(result == expected_result))
+  {
+    std::cout << "error: " << pbes_system::pp(result) << " != " << pbes_system::pp(expected_result) << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_substitution();
   test_propositional_variable_substitution();
+  test_replace_pbes_expressions();
 
   return 0;
 }

@@ -3,7 +3,7 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 # This file contains tables that are used to generate classes and traversal functions
-# for these classes. A prerequisite is that each class has a corresponding ATerm
+# for these classes. A prerequisite is that each class has a corresponding aterm
 # representation (the first column of each table). The second column contains the
 # constructor of the classes.
 
@@ -40,7 +40,7 @@ structured_sort_constructor(const core::identifier_string& name, const structure
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-sort_expression()                                                                         : public atermpp::aterm_appl   | SXIOCU | SortExpr      | A sort expression
+sort_expression()                                                                         : public atermpp::aterm_appl   | XIOCU  | SortExpr      | A sort expression
 basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO     | SortId        | A basic sort
 container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO     | SortCons      | A container sort
 structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU   | SortStruct    | A structured sort
@@ -60,19 +60,19 @@ lambda_binder()                   : public data::binder_type    | EIO | Lambda  
 '''
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
-assignment_expression()                                                               : public atermpp::aterm_appl         | SXIOC | WhrDecl       | Assignment expression
+assignment_expression()                                                               : public atermpp::aterm_appl         | XOC   | WhrDecl       | Assignment expression
 assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression | EIOUC | DataVarIdInit | Assignment of a data expression to a variable
 identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | IdInit        | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | SXC | DataExpr  | A data expression
-identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO  | Id        | An identifier
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId      | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | SEO | DataAppl  | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EO  | Whr       | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder    | An abstraction expression.
+data_expression()                                                                                             : public atermpp::aterm_appl   | XICU  | DataExpr  | A data expression
+identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO    | Id        | An identifier
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC   | DataVarId | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO    | OpId      | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU   | DataAppl  | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU   | Whr       | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO    | Binder    | An abstraction expression.
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
@@ -83,8 +83,9 @@ lambda(const variable_list& variables, const data_expression& body) : public dat
 '''
 
 DATA_CLASSES = r'''
-data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl |   | DataEqn  | A data equation
-data_specification()                                                                                                                    : public atermpp::aterm_appl | S | DataSpec | A data specification
+alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | SC  | SortRef  | A sort alias
+data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn  | A data equation
+data_specification()                                                                                                                    : public atermpp::aterm_appl | S   | DataSpec | A data specification
 '''
 
 STATE_FORMULA_CLASSES = r'''
@@ -132,24 +133,24 @@ at(const action_formula& operand, const data::data_expression& time_stamp)  : pu
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
-action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                                                                  : public atermpp::aterm_appl | CI  | ActId             | An action label
-action(const action_label& label, const data::data_expression_list& arguments)                                                                                                                                              : public atermpp::aterm_appl | CI  | Action            | An action
-deadlock(const data::data_expression& time)                                                                                                                                                                                                              | CMS | None              | A deadlock
-multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CMS | None              | A multi-action
-deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS | None              | A deadlock summand
-action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS | None              | An action summand
-process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | S   | LinearProcessInit | A process initializer
-linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS  | LinearProcess     | A linear process
-specification(const data::data_specification& data, const action_label_list& action_labels, const atermpp::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MS  | LinProcSpec       | A linear process specification
+action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                                                                  : public atermpp::aterm_appl | CI   | ActId             | An action label
+action(const action_label& label, const data::data_expression_list& arguments)                                                                                                                                              : public atermpp::aterm_appl | CI   | Action            | An action
+deadlock(const data::data_expression& time)                                                                                                                                                                                                              | CMS  | None              | A deadlock
+multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CMS  | None              | A multi-action
+deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS  | None              | A deadlock summand
+action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS  | None              | An action summand
+process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
+linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS   | LinearProcess     | A linear process
+specification(const data::data_specification& data, const action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                                  | MS   | LinProcSpec       | A linear process specification
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::set<data::variable>& global_variables, const atermpp::vector<process::process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : atermpp::aterm_appl | C | ProcVarId   | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : atermpp::aterm_appl | C | ProcEqn     | A process equation
-rename_expression(core::identifier_string source, core::identifier_string target)                                                                                                : atermpp::aterm_appl | C | RenameExpr  | A rename expression
-communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : atermpp::aterm_appl | C | CommExpr    | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : atermpp::aterm_appl | C | MultActName | A multi-action
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SM | ProcSpec    | A process specification
+process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | SCI | ProcEqn     | A process equation
+rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI  | RenameExpr  | A rename expression
+communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI  | CommExpr    | A communication expression
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI  | MultActName | A multiset of action names
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
@@ -176,10 +177,10 @@ choice(const process_expression& left, const process_expression& right)         
 '''
 
 PBES_CLASSES = r'''
-fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl |   | FixPoint    | A fixpoint symbol
-propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl |   | PropVarDecl | A propositional variable declaration
-pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | M | PBEqn       | A PBES equation
-pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const atermpp::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                | M | PBES        | A PBES
+fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl | XCU | FixPoint    | A fixpoint symbol
+propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CIU | PropVarDecl | A propositional variable declaration
+pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SM  | PBEqn       | A PBES equation
+pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                    | SM  | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
@@ -238,7 +239,7 @@ def indent_text(text, indent):
 # const core::identifier_string& name
 #
 # self.modifiers: ['const', '&', '*'] etc.
-# self.aterm: The corresponding ATerm (default: None)
+# self.aterm: The corresponding aterm (default: None)
 class Parameter:
     def __init__(self, name, type, modifiers, namespace):
         self.name_ = name
@@ -254,7 +255,7 @@ class Parameter:
 
     # Returns true if the type is a list
     #
-    # TODO: make this test accurate using the ATerm grammar
+    # TODO: make this test accurate using the aterm grammar
     def is_list(self):
         return self.type(False).endswith('_list')
 
@@ -289,7 +290,7 @@ class Parameter:
     def name(self):
         return self.name_
 
-    # Returns the corresponding ATerm of the parameter, or None if no such term exists
+    # Returns the corresponding aterm of the parameter, or None if no such term exists
     #
     def aterm(self):
         return self.aterm_
@@ -401,20 +402,20 @@ class MemberFunction:
         return text
 
     def inline_definition(self):
-        text = '''    <RETURN_TYPE> <NAME>() const
+        text = '''    const <RETURN_TYPE>& <NAME>() const
     {
-      return atermpp::<ARG>(*this);
+      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
     }'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = '''    <RETURN_TYPE> <NAME>() const;'''
+        text = '''    const <RETURN_TYPE>& <NAME>() const;'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = '''    <INLINE><RETURN_TYPE> <CLASSNAME>::<NAME>() const
+        text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
     {
-      return atermpp::<ARG>(*this);
+      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -537,7 +538,7 @@ class OverloadedConstructor(Constructor):
             text = re.sub('<INLINE>', '', text)
         return self.expand_text(text)
 
-# Represents a class constructor taking an ATerm as argument
+# Represents a class constructor taking an aterm as argument
 class ATermConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
@@ -552,26 +553,26 @@ class ATermConstructor(Constructor):
     def inline_definition(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(const atermpp::aterm_appl& term)
+    <CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
-      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));
+      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''
         return self.expand_text(text)
 
     def declaration(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(const atermpp::aterm_appl& term);'''
+    <CLASSNAME>(const atermpp::aterm& term);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm_appl& term)
+    <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
-      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));
+      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -585,7 +586,7 @@ class ATermConstructor(Constructor):
 #
 # ActTrue   | true_()  | The value true for action formulas
 #
-# self.aterm:       the name of the corresponding ATerm
+# self.aterm:       the name of the corresponding aterm
 # self.constructor: the constructor of the class
 # self.description: a string description of the class
 class Class:
@@ -696,7 +697,7 @@ class Class:
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
                 arguments2.append('typename atermpp::detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
-                parameters1.append('atermpp::convert<%s>(%s)' % (p.type(False), p.name()))
+                parameters1.append('%s(%s.begin(), %s.end())' % (p.type(False), p.name(),p.name()))
             else:
                 parameters1.append(p.name())
                 arguments1.append('%s %s' % (p.type(), p.name()))
@@ -723,6 +724,16 @@ class Class:
             constructors.append(OverloadedConstructor(classname, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
         return constructors
 
+    # Returns a specialization of the swap function for the std namespace
+    def swap_specialization(self):
+        text = '''template <>
+inline void swap(mcrl2::<NAMESPACE>::<CLASSNAME>& t1, mcrl2::<NAMESPACE>::<CLASSNAME>& t2)
+{
+  t1.swap(t2);
+}
+'''
+        return self.expand_text(text, parameters = '', constructors = '', member_functions = '', namespace = self.namespace())
+
     # Returns the member functions of the class
     def member_functions(self):
         result = []
@@ -734,7 +745,7 @@ class Class:
             return_type = extract_type(p[0].strip())
             name = p[2].strip()
             arg = 'arg' + str(n)
-            # TODO: this check for a list is unsafe; the ATerm grammar should be used to make it precise
+            # TODO: this check for a list is unsafe; the aterm grammar should be used to make it precise
             if return_type.endswith('list'):
                 arg = 'list_' + arg
             result.append(MemberFunction(self.classname(), return_type, name, arg))
@@ -771,7 +782,7 @@ class Class:
 typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 
 /// \\brief vector of <CLASSNAME>s
-typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
+typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;
 '''
         text = re.sub('<CLASSNAME>', self.classname(), text)
         return text
@@ -884,7 +895,11 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 classname = c.classname(True)
                 is_function = c.is_function_name(True)
                 namespace = c.namespace()
-                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, classname))
+                if 'M' in c.modifiers():
+                    cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                else:
+                    cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s); }' % (is_function, cast))
             vtext = '\n  ' + '\n  else '.join(visit_functions)
             text = re.sub('VISIT_FUNCTIONS', vtext, text)
             return text
@@ -919,10 +934,14 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             updates = []
             for c in classes:
                 is_function = c.is_function_name(True)
+                if 'M' in c.modifiers():
+                    cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                else:
+                    cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
                 updates.append('''if (%s(x))
 {
-  static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x)));
-}''' % (is_function, c.classname(True)))
+  static_cast<Derived&>(*this)(%s);
+}''' % (is_function, cast))
             if len(updates) == 0:
                 visit_text = '// skip'
             else:
@@ -1023,10 +1042,14 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
   result = y;
 }''' % (is_function, c.classname(True)))
                     else:
-                      updates.append('''if (%s(x))
+                        if 'M' in c.modifiers():
+                            cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                        else:
+                            cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                        updates.append('''if (%s(x))
 {
-  result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x)));
-}''' % (is_function, c.classname(True)))
+  result = static_cast<Derived&>(*this)(%s);
+}''' % (is_function, cast))
                 if len(updates) == 0:
                     visit_text = '// skip'
                     return_statement = 'return x;'
@@ -1205,9 +1228,9 @@ def make_modifiability_map(all_classes):
 def is_modifiable_type(type, modifiability_map):
     if type in modifiability_map:
         return modifiability_map[type]
-    elif type.startswith('atermpp::vector<'):
+    elif type.startswith('std::vector<'):
         return True
-    elif type.startswith('atermpp::set<'):
+    elif type.startswith('std::set<'):
         return True
     elif type.endswith('Container'): # TODO: handle containers properly
         return True

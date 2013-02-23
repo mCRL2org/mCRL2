@@ -9,10 +9,10 @@
 /// \file mcrl2/core/builder_msvc.inc.h
 /// \brief add your file description here.
 
-// ATerm traversal
+// aterm traversal
 template <typename T>
 T operator()(const T& x,
-             typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+             typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
             )
 {
   core::msg("aterm traversal");
@@ -20,12 +20,12 @@ T operator()(const T& x,
   return x;
 }
 
-// ATerm list traversal
+// aterm list traversal
 template <typename T>
 atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 {
   core::msg("aterm list traversal");
-  atermpp::vector<T> result;
+  std::vector<T> result;
   for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
     result.push_back(update_copy(*i));
@@ -36,7 +36,7 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 // Container traversal
 template <typename T>
 void operator()(T& x,
-                typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0,
+                typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0,
                 typename atermpp::detail::enable_if_container<T>::type* = 0
                )
 {
@@ -47,13 +47,13 @@ void operator()(T& x,
   }
 }
 
-// ATerm set traversal
+// aterm set traversal
 template <typename T>
-void operator()(atermpp::set<T>& x)
+void operator()(std::set<T>& x)
 {
   core::msg("aterm set traversal");
-  atermpp::set<T> result;
-  for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+  std::set<T> result;
+  for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
     result.insert(update_copy(*i));
   }

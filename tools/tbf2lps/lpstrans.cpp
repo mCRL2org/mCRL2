@@ -25,8 +25,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include <assert.h>
 #include <string>
 #include <sstream>
@@ -37,6 +35,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/substitutions.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::core;
@@ -46,46 +45,44 @@ using namespace mcrl2::data;
 static bool remove_bools = true;
 static bool remove_standard_functions = true;
 static bool has_func_T = false;
-static ATermList typelist = NULL;
+static aterm_list typelist;
 
-bool is_mCRL_spec(ATermAppl spec)
+bool is_mCRL_spec(const aterm_appl &spec)
 {
-  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, false);
+  return spec.function() == atermpp::function_symbol("spec2gen", 2);
 }
 
 
-static bool remove_sort_decl(ATermAppl sort)
+static bool remove_sort_decl(aterm_appl sort)
 {
-  return remove_bools && !strcmp("Bool",ATgetName(ATgetAFun(sort)));
+  return remove_bools && "Bool"==sort.function().name();
 }
 
-static bool remove_func_decl(ATermAppl func)
+static bool remove_func_decl(aterm_appl func)
 {
-  const char* name = ATgetName(ATgetAFun(ATAgetArgument(func,0)));
-  if (remove_bools && (!strcmp("T#",name) ||
-                       !strcmp("F#",name)))
+  const std::string name = aterm_cast<aterm_appl>(func[0]).function().name();
+  if (remove_bools && ("T#"==name || "F#"==name))
   {
     return true;
   }
   if (remove_standard_functions)
   {
-    if (!strcmp("and#Bool#Bool",name))
+    if ("and#Bool#Bool"==name)
     {
       return true;
-//    } else if ( !strncmp("if#Bool#",name,8) )
-//    {
-//      const char *s = strchr(name+8,'#');
-//      if ( s != NULL && !strncmp(name+8,s+1,s-name) && s[1+(s-name)] == '\0' )
-//      {
-//        return true;
-//      }
     }
-    else if (!strncmp("eq#",name,3))
+    else if ("eq#"==name.substr(0,2) && name.size()>2)
     {
-      const char* s = strchr(name+3,'#');
-      if (s != NULL && !strncmp(name+3,s+1,s-name-3) && s[1+(s-name-3)] == '\0')
-      {
-        return true;
+      std::string sorts=name.substr(3);
+      size_t second_hash_position=sorts.find_first_of("#");
+      std::string first_sort=name.substr(3,second_hash_position);
+      if (name.size()>second_hash_position)
+      {  
+        sorts=name.substr(second_hash_position);
+        if (sorts==first_sort)
+        {
+          return true;
+        }
       }
     }
   }
@@ -93,28 +90,28 @@ static bool remove_func_decl(ATermAppl func)
 }
 
 
-static void add_id(ATermList* ids, ATermAppl id)
+static void add_id(aterm_list* ids, aterm_appl id)
 {
-  if (ATindexOf(*ids,(ATerm) id,0) == ATERM_NON_EXISTING_POSITION)
+  if (std::find(ids->begin(),ids->end(),(aterm) id) == ids->end())
   {
-    *ids = ATappend(*ids,(ATerm) id);
+    *ids = (*ids)+make_list<aterm>(id);
   }
 }
 
-static bool is_domain(ATermList args, ATermAppl sort)
+static bool is_domain(aterm_list args, aterm_appl sort)
 {
   if (!is_basic_sort(mcrl2::data::sort_expression(sort)))
   {
-    ATermList dom = ATLgetArgument(sort,0);
-    if (ATgetLength(args) != ATgetLength(dom))
+    aterm_list dom = aterm_cast<aterm_list>(sort[0]);
+    if (args.size() != dom.size())
     {
       return false;
     }
     else
     {
-      for (; !ATisEmpty(dom); dom=ATgetNext(dom),args=ATgetNext(args))
+      for (; !dom.empty(); dom=dom.tail(),args=args.tail())
       {
-        if (!ATisEqual(static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(args)).sort()),ATgetFirst(dom)))
+        if (static_cast<aterm_appl>(mcrl2::data::data_expression(aterm_cast<aterm_appl>(args.front())).sort())!=dom.front())
         {
           return false;
         }
@@ -122,7 +119,7 @@ static bool is_domain(ATermList args, ATermAppl sort)
       return true;
     }
   }
-  if (ATisEmpty(args))
+  if (args.empty())
   {
     return true;
   }
@@ -132,89 +129,88 @@ static bool is_domain(ATermList args, ATermAppl sort)
   }
 }
 
-static ATermAppl find_type(ATermAppl a, ATermList args, ATermList types = NULL)
+static aterm_appl find_type(aterm_appl a, aterm_list args, aterm_list types = aterm_list(aterm()))
 {
-  if (types == NULL)
+  if (types == aterm_list(aterm()))
   {
     types = typelist;
   }
-  for (ATermList l=types; !ATisEmpty(l); l=ATgetNext(l))
+  for (aterm_list l=types; !l.empty(); l=l.tail())
   {
-    if (!strcmp(ATgetName(ATgetAFun(a)),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))))
+    if (a.function().name()==aterm_cast<aterm_appl>((aterm_cast<aterm_appl>(l.front()))[0]).function().name())
     {
-      if (is_domain(args,ATAgetArgument(ATAgetFirst(l),1)))
+      if (is_domain(args,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[1])))
       {
-        return ATAgetArgument(ATAgetFirst(l),1);
+        return aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[1]);
       }
     }
   }
 
-  return NULL;
+  return aterm_appl();
 }
 
-static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
+static aterm_appl dataterm2ATermAppl(aterm_appl t, aterm_list args)
 {
   using namespace mcrl2::data;
 
-  ATermList l = ATgetArguments(t);
-  ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,true));
+  aterm_appl t2 = aterm_appl(atermpp::function_symbol(t.function().name(),0));
 
-  if (ATisEmpty(l))
+  if (t.size()==0)
   {
-    ATermAppl r = find_type(t,ATmakeList0(),args);
-    if (r == NULL)
+    aterm_appl r = find_type(t,aterm_list(),args);
+    if (!r.defined())
     {
-      return function_symbol(t2,sort_expression(find_type(t,ATmakeList0())));
+      return mcrl2::data::function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,mcrl2::data::sort_expression_list())));
     }
     else
     {
-      return variable(t2,sort_expression(r));
+      return variable(mcrl2::core::identifier_string(t2),sort_expression(r));
     }
   }
   else
   {
-    ATermList m = ATmakeList0();
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+    aterm_list m;
+    for (aterm_appl::const_iterator l=t.begin(); l!=t.end(); ++l)
     {
-      m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args));
-    }\
+      m = m+make_list<aterm>(dataterm2ATermAppl(aterm_cast<aterm_appl>(*l),args));
+    }
 
-    return application(function_symbol(t2,sort_expression(find_type(t,m))), atermpp::convert<data_expression_list>(atermpp::aterm_list(m)));
+    return application(mcrl2::data::function_symbol(mcrl2::core::identifier_string(t2),sort_expression(find_type(t,m))), atermpp::convert<data_expression_list>(atermpp::aterm_list(m)));
   }
 }
 
-static ATermList get_lps_acts(ATermAppl lps, ATermList* ids)
+static aterm_list get_lps_acts(aterm_appl lps, aterm_list* ids)
 {
-  ATermList acts = ATmakeList0();
-  ATermList sums = ATLgetArgument(lps,1);
-  for (; !ATisEmpty(sums); sums=ATgetNext(sums))
+  aterm_list acts;
+  aterm_list sums = aterm_cast<aterm_list>(lps[1]);
+  for (; !sums.empty(); sums=sums.tail())
   {
-    if (!ATisEmpty(ATLgetArgument(ATAgetArgument(ATAgetFirst(sums),2),0)))
+    if (!(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(sums.front())[2])[0])).empty())
     {
-      ATermAppl a = ATAgetArgument(ATAgetFirst(ATLgetArgument(ATAgetArgument(ATAgetFirst(sums),2),0)),0);
-      if (ATindexOf(acts,(ATerm) a,0) == ATERM_NON_EXISTING_POSITION)
+      aterm_appl a = aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(sums.front())[2])[0]).front())[0]);
+      if (std::find(acts.begin(),acts.end(),a) == acts.end())
       {
-        acts = ATinsert(acts,(ATerm) a);
-        add_id(ids,ATAgetArgument(a,0));
+        acts.push_front(a);
+        add_id(ids,aterm_cast<aterm_appl>(a[0]));
       }
     }
   }
 
-  return ATreverse(acts);
+  return reverse(acts);
 }
 
-static ATermList get_substs(ATermList ids)
+static std::map<aterm,aterm> get_substs(aterm_list ids)
 {
-  atermpp::set < ATerm > used;
-  ATermList substs = ATmakeList0();
+  std::set < aterm > used;
+  std::map<aterm,aterm> substs;
 
-  used.insert((ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)));
+  used.insert((aterm) aterm_appl(atermpp::function_symbol("if",0)));
 
-  for (; !ATisEmpty(ids); ids=ATgetNext(ids))
+  for (; !ids.empty(); ids=ids.tail())
   {
-    char s[100], *t;
-
-    t = ATgetName(ATgetAFun(ATAgetFirst(ids)));
+    char s[100], t1[100], *t;
+    t=&t1[0];
+    strncpy(t,aterm_cast<aterm_appl>(ids.front()).function().name().c_str(),100);
     if ((t[0] >= '0' && t[0] <= '9') || t[0] == '\'')
     {
       s[0] = '_';
@@ -239,17 +235,17 @@ static ATermList get_substs(ATermList ids)
     *t = 0;
 
     size_t i = 0;
-    ATermAppl new_id = 0;
+    aterm_appl new_id;
     while (!is_user_identifier(s) ||
-           (used.count((ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >0))
+           (used.count((aterm)(new_id = aterm_appl(atermpp::function_symbol(s,0)))) >0))
     {
       sprintf(t,"%zu",i);
       i++;
     }
 
-    used.insert((ATerm) new_id);
+    used.insert((aterm) new_id);
 
-    substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) new_id));
+    substs[ids.front()]=new_id;
   }
 
   return substs;
@@ -262,148 +258,150 @@ static ATermList get_substs(ATermList ids)
  ************* Main conversion functions *************
  *****************************************************/
 
-static ATermList convert_sorts(ATermAppl spec, ATermList* ids)
+static aterm_list convert_sorts(aterm_appl spec, aterm_list* ids)
 {
-  ATermList sorts = ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),0);
-  ATermList r;
+  aterm_list sorts = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(spec[0])[0])[0]);
+  aterm_list r;
 
-  r = ATmakeList0();
-  for (; !ATisEmpty(sorts); sorts=ATgetNext(sorts))
+  r = aterm_list();
+  for (; !sorts.empty(); sorts=sorts.tail())
   {
-    if (!remove_sort_decl(ATAgetFirst(sorts)))
+    if (!remove_sort_decl(aterm_cast<aterm_appl>(sorts.front())))
     {
-      add_id(ids,ATAgetFirst(sorts));
-      r = ATinsert(r,(ATerm) static_cast<ATermAppl>(mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetFirst(sorts)))));
+      add_id(ids,aterm_cast<aterm_appl>(sorts.front()));
+      r.push_front(mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(sorts.front()))));
     }
   }
 
-  return ATreverse(r);
+  return reverse(r);
 }
 
-static ATermList convert_funcs(ATermList funcs, ATermList* ids, bool funcs_are_cons = false)
+static aterm_list convert_funcs(aterm_list funcs, aterm_list* ids, bool funcs_are_cons = false)
 {
-  ATermList r,l, sorts;
-  ATermAppl sort;
+  aterm_list r,l, sorts;
+  aterm_appl sort;
 
-  r = ATmakeList0();
-  for (; !ATisEmpty(funcs); funcs=ATgetNext(funcs))
+  r = aterm_list();
+  for (; !funcs.empty(); funcs=funcs.tail())
   {
-    if (funcs_are_cons && !strcmp("T#",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0)))))
+    if (funcs_are_cons && "T#"==aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())[0]).function().name())
     {
       has_func_T = true;
     }
 
-    l = ATreverse(ATLgetArgument(ATAgetFirst(funcs),1));
-    sorts = ATmakeList0();
-    sort = static_cast<ATermAppl>(mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(ATAgetFirst(funcs),2))));
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+    l = reverse(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(funcs.front())[1]));
+    sorts = aterm_list();
+    sort = static_cast<aterm_appl>(mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())[2]))));
+    for (; !l.empty(); l=l.tail())
     {
-      sorts = ATinsert(sorts, (ATerm) static_cast<ATermAppl>(mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetFirst(l)))));
+      sorts.push_front(mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(l.front()))));
     }
-    if (!ATisEmpty(sorts))
+    if (!sorts.empty())
     {
       sort = mcrl2::data::function_sort(atermpp::convert<mcrl2::data::sort_expression_list>(sorts), mcrl2::data::sort_expression(sort));
     }
 
-    ATerm f = (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol(ATAgetArgument(ATAgetFirst(funcs),0),mcrl2::data::sort_expression(sort)));
+    aterm f = mcrl2::data::function_symbol(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())[0])),
+                            mcrl2::data::sort_expression(sort));
 
-    if (!remove_func_decl(ATAgetFirst(funcs)))
+    if (!remove_func_decl(aterm_cast<aterm_appl>(funcs.front())))
     {
-      if (funcs_are_cons && remove_bools && !strcmp("Bool",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),2)))))
+      if (funcs_are_cons && remove_bools && "Bool"==aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())[2]).function().name())
       {
-        std::string name(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0))));
+        std::string name(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())[0]).function().name());
         mCRL2log(error) << "constructor " << name.substr(0, name.find_last_of('#')) << " of sort Bool found (only T and F are allowed)" << std::endl;
         exit(1);
       }
-      add_id(ids,ATAgetArgument(ATAgetFirst(funcs),0));
-      r = ATinsert(r,f);
+      add_id(ids,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(funcs.front())[0]));
+      r.push_front(f);
     }
 
-    typelist = ATinsert(typelist,f);
+    typelist.push_front(f);
   }
 
-  return ATreverse(r);
+  return reverse(r);
 }
 
-static ATermList convert_cons(ATermAppl spec, ATermList* ids)
+static aterm_list convert_cons(aterm_appl spec, aterm_list* ids)
 {
-  return convert_funcs(ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),1),ids, true);
+  return convert_funcs(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(spec[0])[0])[1]),ids, true);
 }
 
-static ATermList convert_maps(ATermAppl spec, ATermList* ids)
+static aterm_list convert_maps(aterm_appl spec, aterm_list* ids)
 {
-  return convert_funcs(ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),2),ids);
+  return convert_funcs(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(spec[0])[0])[2]),ids);
 }
 
-static ATermList convert_datas(ATermAppl spec, ATermList* ids)
+static aterm_list convert_datas(aterm_appl spec, aterm_list* ids)
 {
-  ATermList eqns = ATLgetArgument(ATAgetArgument(spec,0),1);
-  ATermList l,args,r;
-  ATermAppl lhs,rhs;
+  aterm_list eqns = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(spec[0])[1]);
+  aterm_list l,args,r;
+  aterm_appl lhs,rhs;
 
-  r = ATmakeList0();
-  for (; !ATisEmpty(eqns); eqns=ATgetNext(eqns))
+  r = aterm_list();
+  for (; !eqns.empty(); eqns=eqns.tail())
   {
-    l = ATLgetArgument(ATAgetFirst(eqns),0);
-    args = ATmakeList0();
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+    l = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(eqns.front())[0]);
+    args = aterm_list();
+    for (; !l.empty(); l=l.tail())
     {
-      args = ATappend(args,(ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(ATAgetFirst(l),0),mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(ATAgetFirst(l),1))))));
-      add_id(ids,ATAgetArgument(ATAgetFirst(l),0));
+      args = args+make_list<aterm>(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[0])),
+                    mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[1])))));
+      add_id(ids,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[0]));
     }
-    ATermAppl lhs_before_translation=ATAgetArgument(ATAgetFirst(eqns),1);
-    if (strcmp(ATgetName(ATgetAFun(lhs_before_translation)),"eq#Bool#Bool"))
+    aterm_appl lhs_before_translation=aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(eqns.front())[1]);
+    if (lhs_before_translation.function().name()!="eq#Bool#Bool")
     {
       // No match.
       lhs = dataterm2ATermAppl(lhs_before_translation,args);
-      rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);
-      r = ATappend(r,(ATerm) gsMakeDataEqn(args,sort_bool::true_(),lhs,rhs));
+      rhs = dataterm2ATermAppl(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(eqns.front())[2]),args);
+      r = r+make_list<aterm>(gsMakeDataEqn(args,sort_bool::true_(),lhs,rhs));
     }
   }
 
   return r;
 }
 
-static ATermAppl convert_lps(ATermAppl spec, ATermList* ids)
+static aterm_appl convert_lps(aterm_appl spec, aterm_list* ids)
 {
-  ATermList vars = ATLgetArgument(ATAgetArgument(spec,1),1);
-  ATermList sums = ATLgetArgument(ATAgetArgument(spec,1),2);
-  ATermList pars = ATmakeList0();
-  ATermList smds = ATmakeList0();
+  aterm_list vars = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(spec[1])[1]);
+  aterm_list sums = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(spec[1])[2]);
+  aterm_list pars;
+  aterm_list smds;
 
-  for (; !ATisEmpty(vars); vars=ATgetNext(vars))
+  for (; !vars.empty(); vars=vars.tail())
   {
-    ATermAppl v = ATAgetFirst(vars);
-    pars = ATinsert(pars,
-                    (ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(v,0),mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(v,1)))))
+    aterm_appl v = aterm_cast<aterm_appl>(vars.front());
+    pars.push_front(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v[0])),
+                                    mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v[1]))))
                    );
-    add_id(ids,ATAgetArgument(v,0));
+    add_id(ids,aterm_cast<aterm_appl>(v[0]));
   }
-  pars = ATreverse(pars);
+  pars = reverse(pars);
 
-  for (; !ATisEmpty(sums); sums=ATgetNext(sums))
+  for (; !sums.empty(); sums=sums.tail())
   {
-    ATermAppl s = ATAgetFirst(sums);
+    aterm_appl s = aterm_cast<aterm_appl>(sums.front());
 
-    ATermList l = ATreverse(ATLgetArgument(s,0));
-    ATermList m = ATmakeList0();
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+    aterm_list l = reverse(aterm_cast<aterm_list>(s[0]));
+    aterm_list m;
+    for (; !l.empty(); l=l.tail())
     {
-      m = ATinsert(m,
-                   (ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(ATAgetFirst(l),0),mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(ATAgetFirst(l),1)))))
+      m.push_front(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[0])),
+                               mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[1]))))
                   );
-      add_id(ids,ATAgetArgument(ATAgetFirst(l),0));
+      add_id(ids,aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[0]));
     }
 
-    l = ATLgetArgument(s,0);
-    ATermList o = pars;
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+    l = aterm_cast<aterm_list>(s[0]);
+    aterm_list o = pars;
+    for (; !l.empty(); l=l.tail())
     {
-      o = ATinsert(o,
-                   (ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(ATAgetFirst(l),0),mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(ATAgetFirst(l),1)))))
+      o.push_front(mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[0])),
+                        mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[1]))))
                   );
     }
-    ATermAppl c = dataterm2ATermAppl(ATAgetArgument(s,4),o);
+    aterm_appl c = dataterm2ATermAppl(aterm_cast<aterm_appl>(s[4]),o);
     if (! remove_bools)
     {
       assert(has_func_T);
@@ -415,66 +413,60 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList* ids)
       c = mcrl2::data::equal_to(mcrl2::data::data_expression(c), mcrl2::data::function_symbol("T",mcrl2::data::sort_bool::bool_()));
     }
 
-    l = ATreverse(ATLgetArgument(s,2));
-    ATermList al = ATmakeList0();
-    ATermList as = ATmakeList0();
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+    l = reverse(aterm_cast<aterm_list>(s[2]));
+    aterm_list al;
+    aterm_list as;
+    for (; !l.empty(); l=l.tail())
     {
-      al = ATinsert(al,
-                    (ATerm) dataterm2ATermAppl(ATAgetFirst(l),o)
-                   );
-      as = ATinsert(as,(ATerm) static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(al)).sort()));
+      al.push_front(dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o));
+      as.push_front(mcrl2::data::data_expression(aterm_cast<aterm_appl>(al.front())).sort());
     }
-    ATermAppl a = gsMakeAction(gsMakeActId(ATAgetArgument(s,1),as),al);
-    if (ATisEmpty(as) && !strcmp("tau",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(a,0),0)))))
+    aterm_appl a = gsMakeAction(gsMakeActId(aterm_cast<aterm_appl>(s[1]),as),al);
+    if (as.empty() && "tau"==aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(a[0])[0]).function().name())
     {
-      a = gsMakeMultAct(ATmakeList0());
+      a = gsMakeMultAct(aterm_list());
     }
     else
     {
-      a = gsMakeMultAct(ATmakeList1((ATerm) a));
+      a = gsMakeMultAct(make_list<aterm>(a));
     }
 
-    l = ATLgetArgument(ATAgetArgument(s,3),0);
-    ATermList o2 = pars;
-    ATermList n = ATmakeList0();
-    for (; !ATisEmpty(l); l=ATgetNext(l),o2=ATgetNext(o2))
+    l = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(s[3])[0]);
+    aterm_list o2 = pars;
+    aterm_list n;
+    for (; !l.empty(); l=l.tail(),o2=o2.tail())
     {
-      ATermAppl par = ATAgetFirst(o2);
-      ATermAppl val = dataterm2ATermAppl(ATAgetFirst(l),o);
-      if (!ATisEqual(par,val))
+      aterm_appl par = aterm_cast<aterm_appl>(o2.front());
+      aterm_appl val = dataterm2ATermAppl(aterm_cast<aterm_appl>(l.front()),o);
+      if (par!=val)
       {
-        n = ATinsert(n,(ATerm) static_cast<ATermAppl>(mcrl2::data::assignment(mcrl2::data::variable(par),mcrl2::data::data_expression(val))));
+        n.push_front(mcrl2::data::assignment(mcrl2::data::variable(par),mcrl2::data::data_expression(val)));
       }
     }
-    n = ATreverse(n);
+    n = reverse(n);
 
-    smds = ATinsert(smds,
-                    (ATerm) gsMakeLinearProcessSummand(m,c,a,gsMakeNil(),n)
-                   );
+    smds.push_front(gsMakeLinearProcessSummand(m,c,a,gsMakeNil(),n));
   }
 
-  return gsMakeLinearProcess(pars,ATreverse(smds));
+  return gsMakeLinearProcess(pars,reverse(smds));
 }
 
-static ATermList convert_init(ATermAppl spec, ATermList* /*ids*/)
+static aterm_list convert_init(aterm_appl spec, aterm_list* /*ids*/)
 {
-  ATermList vars = ATLgetArgument(ATAgetArgument(spec,1),1);
-  ATermList vals = ATLgetArgument(ATAgetArgument(spec,1),0);
-  ATermList l = ATmakeList0();
+  aterm_list vars = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(spec[1])[1]);
+  aterm_list vals = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(spec[1])[0]);
+  aterm_list l;
 
-  for (; !ATisEmpty(vars); vars=ATgetNext(vars),vals=ATgetNext(vals))
+  for (; !vars.empty(); vars=vars.tail(),vals=vals.tail())
   {
-    ATermAppl v = ATAgetFirst(vars);
-    l = ATinsert(l,
-                 (ATerm) static_cast<ATermAppl>(mcrl2::data::assignment(
-                       mcrl2::data::variable(ATAgetArgument(v,0),mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(v,1)))),
-                       mcrl2::data::data_expression(dataterm2ATermAppl(ATAgetFirst(vals),ATmakeList0())))
-                                               )
+    aterm_appl v = aterm_cast<aterm_appl>(vars.front());
+    l.push_front(mcrl2::data::assignment(
+                       mcrl2::data::variable(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v[0])),mcrl2::data::basic_sort(mcrl2::core::identifier_string(aterm_cast<aterm_appl>(v[1])))),
+                       mcrl2::data::data_expression(dataterm2ATermAppl(aterm_cast<aterm_appl>(vals.front()),aterm_list())))
                 );
   }
 
-  return ATreverse(l);
+  return reverse(l);
 }
 
 
@@ -483,18 +475,17 @@ static ATermList convert_init(ATermAppl spec, ATermList* /*ids*/)
  ******************* Main function *******************
  *****************************************************/
 
-ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
+aterm_appl translate(aterm_appl spec, bool convert_bools, bool convert_funcs)
 {
   assert(is_mCRL_spec(spec));
-  ATermAppl sort_spec,cons_spec,map_spec,data_eqn_spec,data_spec,act_spec,lps,init;
-  ATermList ids;
+  aterm_appl sort_spec,cons_spec,map_spec,data_eqn_spec,data_spec,act_spec,lps,init;
+  aterm_list ids;
 
-  ids = ATmakeList0();
+  ids = aterm_list();
   remove_bools = convert_bools;
   remove_standard_functions = convert_funcs;
   has_func_T = false;
-  typelist = ATmakeList0();
-  ATprotectList(&typelist);
+  typelist = aterm_list();
 
   mCRL2log(verbose) << "converting sort declarations..." << std::endl;
   sort_spec = gsMakeSortSpec(convert_sorts(spec,&ids));
@@ -519,59 +510,36 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
   mCRL2log(verbose) << "constructing action declarations..." << std::endl;
   act_spec = gsMakeActSpec(get_lps_acts(lps,&ids));
 
-  ATermAppl r = gsMakeLinProcSpec(data_spec, act_spec, gsMakeGlobVarSpec(ATmakeList0()), lps, init);
+  aterm_appl r = gsMakeLinProcSpec(data_spec, act_spec, gsMakeGlobVarSpec(aterm_list()), lps, init);
 
-  ATermList substs = ATmakeList0();
+  std::map<aterm,aterm> substs;
 
   if (convert_bools)
   {
-    substs = ATinsert(substs,
-                      (ATerm) gsMakeSubst(
-                        (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol("F#",mcrl2::data::sort_bool::bool_())),
-                        (ATerm) static_cast<ATermAppl>(mcrl2::data::sort_bool::false_())
-                      )
-                     );
-    substs = ATinsert(substs,
-                      (ATerm) gsMakeSubst(
-                        (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol("T#", mcrl2::data::sort_bool::bool_())),
-                        (ATerm) static_cast<ATermAppl>(mcrl2::data::sort_bool::true_())
-                      )
-                     );
+    substs[mcrl2::data::function_symbol("F#",mcrl2::data::sort_bool::bool_())]= mcrl2::data::sort_bool::false_();
+    substs[mcrl2::data::function_symbol("T#", mcrl2::data::sort_bool::bool_())]=mcrl2::data::sort_bool::true_();
   }
 
   if (convert_funcs)
   {
-    ATermAppl bool_func_sort = mcrl2::data::sort_bool::and_().sort();
+    aterm_appl bool_func_sort = mcrl2::data::sort_bool::and_().sort();
 
-    substs = ATinsert(substs,
-                      (ATerm) gsMakeSubst(
-                        (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol("and#Bool#Bool",mcrl2::data::sort_expression(bool_func_sort))),
-                        (ATerm) static_cast<ATermAppl>(mcrl2::data::sort_bool::and_())
-                      )
-                     );
+    substs[mcrl2::data::function_symbol("and#Bool#Bool",mcrl2::data::sort_expression(bool_func_sort))]=mcrl2::data::sort_bool::and_();
 
     mcrl2::data::sort_expression s_bool(mcrl2::data::sort_bool::bool_());
-    for (ATermList l=ATLgetArgument(sort_spec,0); !ATisEmpty(l); l=ATgetNext(l))
+    for (aterm_list l=aterm_cast<aterm_list>(sort_spec[0]); !l.empty(); l=l.tail())
     {
-      mcrl2::data::sort_expression s(ATAgetFirst(l));
-      const char* sort_name = ATgetName(ATgetAFun(ATAgetArgument(s,0)));
-      substs = ATinsert(substs,(ATerm) gsMakeSubst(
-                          (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol(std::string("eq#")+sort_name+"#"+sort_name,
-                              mcrl2::data::make_function_sort(s,s,s_bool))),
-                          (ATerm) static_cast<ATermAppl>(mcrl2::data::equal_to(s))
-                        ));
+      mcrl2::data::sort_expression s(aterm_cast<aterm_appl>(l.front()));
+      const char* sort_name = aterm_cast<aterm_appl>(s[0]).function().name().c_str();
+      substs[mcrl2::data::function_symbol(std::string("eq#")+sort_name+"#"+sort_name,
+                              mcrl2::data::make_function_sort(s,s,s_bool))]=mcrl2::data::equal_to(s);
     }
   }
 
-  r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
+  r = aterm_cast<aterm_appl>(make_map_substitution(substs)(r));
 
 
   substs = get_substs(ids);
 
-  r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
-
-
-  ATunprotectList(&typelist);
-
-  return r;
+  return aterm_cast<aterm_appl>(make_map_substitution(substs)(r));
 }

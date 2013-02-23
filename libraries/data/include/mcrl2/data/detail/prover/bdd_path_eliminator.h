@@ -17,8 +17,6 @@
 #include <iterator>
 #include <cstring>
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
@@ -76,12 +74,13 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \param a_minimal A boolean value indicating whether or not minimal sets of possibly inconsistent guards are constructed.
     data_expression_list create_condition(
                data_expression_list a_path,
-               const data_expression a_guard,
+               const data_expression &a_guard,
                bool a_minimal)
     {
       if (!a_minimal)
       {
-        return push_front(a_path, a_guard);
+        a_path.push_front(a_guard);
+        return a_path;
       }
       else
       {
@@ -91,7 +90,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
         data_expression v_guard_from_set;
         data_expression v_guard_from_path;
 
-        data_expression_list v_set=push_front(data_expression_list(),a_guard);
+        data_expression_list v_set=make_list(a_guard);
         while (v_set != v_auxiliary_set)
         {
           v_auxiliary_set = v_set;
@@ -99,15 +98,15 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           while (!v_iterate_over_set.empty())
           {
             v_guard_from_set = v_iterate_over_set.front();
-            v_iterate_over_set = pop_front(v_iterate_over_set);
+            v_iterate_over_set.pop_front();
             v_iterate_over_path = a_path;
             while (!v_iterate_over_path.empty())
             {
               v_guard_from_path = v_iterate_over_path.front();
-              v_iterate_over_path = pop_front(v_iterate_over_path);
+              v_iterate_over_path.pop_front();
               if (variables_overlap(v_guard_from_set, v_guard_from_path))
               {
-                v_set = push_front(v_set, v_guard_from_path);
+                v_set.push_front(v_guard_from_path);
                 a_path = remove_one_element(a_path, v_guard_from_path);
               }
             }
@@ -121,7 +120,9 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \brief a_path are inconsistent are removed.
     /// \param a_bdd A binary decision diagram.
     /// \param a_path A list of guards and negated guards, representing a path in a BDD.
-    data_expression aux_simplify(const data_expression a_bdd, const data_expression_list a_path)
+    data_expression aux_simplify(
+                        const data_expression &a_bdd, 
+                        const data_expression_list &a_path)
     {
       if (f_deadline != 0 && (f_deadline - time(0)) < 0)
       {
@@ -140,7 +141,8 @@ class BDD_Path_Eliminator: public BDD_Simplifier
       bool v_true_branch_enabled = f_smt_solver->is_satisfiable(v_true_condition);
       if (!v_true_branch_enabled)
       {
-        data_expression_list v_false_path = push_front(a_path, v_negated_guard);
+        data_expression_list v_false_path=a_path;
+        v_false_path.push_front(v_negated_guard);
         return aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path);
       }
       else
@@ -149,13 +151,16 @@ class BDD_Path_Eliminator: public BDD_Simplifier
         bool v_false_branch_enabled = f_smt_solver->is_satisfiable(v_false_condition);
         if (!v_false_branch_enabled)
         {
-          data_expression_list v_true_path = push_front(a_path, v_guard);
+          data_expression_list v_true_path = a_path;
+          v_true_path.push_front(v_guard);
           return aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path);
         }
         else
         {
-          data_expression_list v_true_path = push_front(a_path, v_guard);
-          data_expression_list v_false_path = push_front(a_path, v_negated_guard);
+          data_expression_list v_true_path = a_path;
+          v_true_path.push_front(v_guard);
+          data_expression_list v_false_path = a_path;
+          v_false_path.push_front(v_negated_guard);
           return f_bdd_manipulator.make_reduced_if_then_else(
                    v_guard,
                    aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path),
@@ -168,7 +173,9 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \brief Returns true if the expression a_expression_1 has variables in common with expression a_expression_2.
     /// \param a_expression_1 An arbitrary expression.
     /// \param a_expression_2 An arbitrary expression.
-    bool variables_overlap(const data_expression a_expression_1, const data_expression a_expression_2)
+    bool variables_overlap(
+                    const data_expression &a_expression_1, 
+                    const data_expression &a_expression_2)
     {
       std::set < variable > set1=find_variables(a_expression_1);
       std::set < variable > set2=find_variables(a_expression_2);

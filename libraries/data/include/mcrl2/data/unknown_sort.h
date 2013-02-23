@@ -33,10 +33,10 @@ class unknown_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    unknown_sort(const atermpp::aterm_appl& term)
+    unknown_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
-      assert(core::detail::check_term_SortUnknown(m_term));
+      assert(core::detail::check_term_SortUnknown(*this));
     }
 };
 //--- end generated class unknown_sort ---//
@@ -44,6 +44,16 @@ class unknown_sort: public sort_expression
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::unknown_sort& t1, mcrl2::data::unknown_sort& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_UNKNOWN_SORT_H
 

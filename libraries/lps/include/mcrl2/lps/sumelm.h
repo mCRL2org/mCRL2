@@ -75,10 +75,10 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     {
       using namespace data;
 
-      atermpp::set<data_expression> conjuncts = data::split_and(s.condition());
-      atermpp::set<data_expression> new_conjuncts;
+      std::set<data_expression> conjuncts = data::split_and(s.condition());
+      std::set<data_expression> new_conjuncts;
 
-      for(atermpp::set<data_expression>::const_iterator i = conjuncts.begin(); i != conjuncts.end(); ++i)
+      for(std::set<data_expression>::const_iterator i = conjuncts.begin(); i != conjuncts.end(); ++i)
       {
         bool replacement_added(false);
         data_expression left;
@@ -86,8 +86,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
 
         if (is_equal_to_application(*i)) // v == e
         {
-          left = application(*i).left();
-          right = application(*i).right();
+          left = data::binary_left(application(*i));
+          right = data::binary_right(application(*i));
         }
         else if (is_variable(*i) && sort_bool::is_bool(i->sort())) // v equal to v == true
         {
@@ -191,7 +191,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     {
       using namespace data;
 
-      atermpp::map<variable, data_expression> substitutions;
+      std::map<variable, data_expression> substitutions;
       data::data_expression new_condition = compute_substitutions(s, substitutions);
 
       s.condition() = data::replace_free_variables(new_condition, data::make_map_substitution(substitutions));

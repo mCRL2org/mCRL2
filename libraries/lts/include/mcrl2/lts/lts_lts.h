@@ -41,41 +41,36 @@ namespace lts
 namespace detail
 {
 
+extern std::vector < atermpp::function_symbol > state_function_symbols;
+
 /** \brief This class contains state labels for an labelled transition system in .lts format.
     \details A state label in .lts format consists of a term of the form
              STATE(t1,...,tn) where ti are the data expressions.
 */
 class state_label_lts : public atermpp::aterm_appl
 {
-    friend struct atermpp::aterm_traits<state_label_lts>;
-
   protected:
 
     /** \brief We store functions symbols with varying arity and string "STATE"
-        in this ATermAppl array, as they are automatically protected.
+        in this atermpp::aterm_appl array, as they are automatically protected.
     */
-    static atermpp::vector < ATermAppl > vector_templates;
 
     /** \brief A function to get a protected STATE function symbol of the
                indicated arity.
     */
-    static AFun get_STATE_function_symbol(const size_t arity)
+
+    static atermpp::function_symbol get_STATE_function_symbol(const size_t arity)
     {
-      if (arity>=vector_templates.size())
+
+      if (arity>=state_function_symbols.size())
       {
-        vector_templates.resize(arity+1,NULL);
+        state_function_symbols.resize(arity+1);
       }
-      if (vector_templates[arity]==NULL)
+      if (state_function_symbols[arity]==atermpp::function_symbol())
       {
-        ATermAppl stub=ATmakeAppl0(ATmakeAFun("STUB",0,false));
-        ATermList l=ATempty;
-        for (size_t i=0; i<arity; ++i)
-        {
-          l=ATinsert(l,(ATerm)stub);
-        }
-        vector_templates[arity]=ATmakeApplList(ATmakeAFun("STATE",arity,false),l);
+        state_function_symbols[arity]=atermpp::function_symbol("STATE",arity);
       }
-      return ATgetAFun(vector_templates[arity]);
+      return state_function_symbols[arity];
     }
 
   public:
@@ -88,23 +83,22 @@ class state_label_lts : public atermpp::aterm_appl
 
     /** \brief Constructor. Set the state label to the aterm a.
         \details The aterm a must have the shape "STATE(t1,...,tn).*/
-    state_label_lts(const ATermAppl& a):atermpp::aterm_appl(a)
+    state_label_lts(const atermpp::aterm_appl& a):atermpp::aterm_appl(a)
     {
       // Take care that the STATE function symbol with the desired arity exists.
-      const size_t arity=ATgetArity(ATgetAFun(a));
+      const size_t arity=a.function().arity();
       get_STATE_function_symbol(arity);
-      assert(ATgetAFun(a)==ATgetAFun(vector_templates[arity]));
     }
 
     /** \brief Construct a state label out of a data_expression_list.
     */
     state_label_lts(const mcrl2::data::data_expression_list& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),atermpp::aterm_list(l))
+      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 
     /** \brief Construct a state label out of a data_expression_vector.
     */
-    state_label_lts(const atermpp::vector < mcrl2::data::data_expression > &l):
+    state_label_lts(const std::vector < mcrl2::data::data_expression > &l):
       atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 
@@ -115,7 +109,7 @@ class state_label_lts : public atermpp::aterm_appl
     mcrl2::data::data_expression operator [](const size_t i) const
     {
       assert(i<size());
-      return mcrl2::data::data_expression(this->argument(i));
+      return mcrl2::data::data_expression(atermpp::aterm_cast<atermpp::aterm_appl>(*this)[i]);
     }
 
     /** \brief Set the i-th element of this state label to the indicated value.
@@ -153,8 +147,6 @@ inline std::string pp(const state_label_lts l)
     \details An action label is a multi_action. */
 class action_label_lts:public mcrl2::lps::multi_action
 {
-    friend struct atermpp::aterm_traits<action_label_lts>;
-
   public:
 
     /** \brief Default constructor. */
@@ -162,7 +154,7 @@ class action_label_lts:public mcrl2::lps::multi_action
     {}
 
     /** \brief Constructor. Sets action label to the multi_action a. */
-    action_label_lts(const ATerm a):mcrl2::lps::multi_action(a)
+    action_label_lts(const atermpp::aterm a):mcrl2::lps::multi_action(a)
     {
     }
 
@@ -178,14 +170,14 @@ class action_label_lts:public mcrl2::lps::multi_action
 
     /** \brief Returns this multi_action as an aterm without the time tag.
     */
-    ATerm aterm_without_time() const
+    atermpp::aterm aterm_without_time() const
     {
       if (this->has_time())
       {
         throw mcrl2::runtime_error("Cannot transform multi action " +
-                                   lps::detail::multi_action_print(*this) + " to an ATerm as it contains time.");
+                                   lps::detail::multi_action_print(*this) + " to an atermpp::aterm as it contains time.");
       }
-      return (ATerm)mcrl2::core::detail::gsMakeMultAct(this->actions());
+      return mcrl2::core::detail::gsMakeMultAct(this->actions());
     }
 
     /** \brief Hide the actions with labels in tau_actions.
@@ -205,7 +197,7 @@ class action_label_lts:public mcrl2::lps::multi_action
         if (std::find(tau_actions.begin(),tau_actions.end(),
                       string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
         {
-          new_action_list=push_front(new_action_list,a);
+          new_action_list.push_front(a);
         }
       }
       const bool is_tau=new_action_list.empty();
@@ -236,12 +228,12 @@ inline action_label_lts parse_lts_action(
   const lps::action_list& act_decls)
 {
   // TODO: rewrite this cryptic code
-  ATermAppl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(multi_action_string));
-  lps::multi_action ma=lps::action_list((ATermList)ATgetArgument(t,0));
-  lps::type_check(ma,data_spec,act_decls);
+  atermpp::aterm_appl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(multi_action_string));
+  lps::multi_action ma=lps::action_list(atermpp::aterm_list(t[0]));
+  lps::type_check(ma,data_spec,atermpp::aterm_cast<lps::action_label_list>(act_decls));
   lps::translate_user_notation(ma);
   lps::normalize_sorts(ma, data_spec);
-  return action_label_lts((ATerm)mcrl2::core::detail::gsMakeMultAct(ma.actions()));
+  return action_label_lts(mcrl2::core::detail::gsMakeMultAct(ma.actions()));
 }
 
 
@@ -279,7 +271,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Creates an object containing a muCRL specification.
      * \param[in] t The muCRL specification that will be stored in the object. */
-    lts_lts_t(ATerm t);
+    lts_lts_t(const atermpp::aterm &t);
 
     /** \brief Creates an object containing an mCRL2 specification.
      * \param[in] spec The mCRL2 specification that will be stored in the object. */
@@ -294,10 +286,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
       m_parameters(l.m_parameters),
       m_has_valid_action_decls(l.m_has_valid_action_decls),
       m_action_decls(l.m_action_decls)
-    {
-      m_parameters.protect();
-      m_action_decls.protect();
-    }
+    {}
 
     /** \brief Standard destructor for the class lts_lts
     */
@@ -420,7 +409,10 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     {
       assert(i<m_parameters.size());
       assert(m_has_valid_parameters);
-      return data::variable(ATelementAt(m_parameters,i));
+      data::variable_list::const_iterator j=m_parameters.begin();
+      for(size_t c=0; c!=i; ++j, ++c)
+      {}
+      return data::variable(*j);
     }
 
 
@@ -447,45 +439,5 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 };
 } // namespace lts
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::lts::detail::state_label_lts>
-{
-  static void protect(const mcrl2::lts::detail::state_label_lts& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lts::detail::state_label_lts& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lts::detail::state_label_lts& t)
-  {
-    t.mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::lts::detail::action_label_lts>
-{
-  static void protect(const mcrl2::lts::detail::action_label_lts& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lts::detail::action_label_lts& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lts::detail::action_label_lts& t)
-  {
-    t.mark();
-  }
-};
-} // namespace atermpp
-/// \endcond
-
 
 #endif

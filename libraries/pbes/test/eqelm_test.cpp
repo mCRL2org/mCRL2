@@ -21,9 +21,7 @@
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/pbespgsolve.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -92,7 +90,6 @@ void test_pbes(const std::string& pbes_spec,
   }
   BOOST_CHECK(diff.empty());
 
-  core::garbage_collect();
 }
 
 void test_eqelm(const std::string& pbes_spec)
@@ -124,8 +121,6 @@ std::string random1 =
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   bool compute_conditions = false;
   bool remove_equations = true;
   test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");

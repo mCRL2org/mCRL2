@@ -24,6 +24,64 @@ namespace mcrl2
 namespace process
 {
 
+//--- start generated class communication_expression ---//
+/// \brief A communication expression
+class communication_expression: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    communication_expression()
+      : atermpp::aterm_appl(core::detail::constructCommExpr())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    communication_expression(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_CommExpr(*this));
+    }
+
+    /// \brief Constructor.
+    communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)
+      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
+    {}
+
+    /// \brief Constructor.
+    communication_expression(const action_name_multiset& action_name, const std::string& name)
+      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, core::identifier_string(name)))
+    {}
+
+    const action_name_multiset& action_name() const
+    {
+      return atermpp::aterm_cast<const action_name_multiset>(atermpp::arg1(*this));
+    }
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg2(*this));
+    }
+};
+
+/// \brief list of communication_expressions
+typedef atermpp::term_list<communication_expression> communication_expression_list;
+
+/// \brief vector of communication_expressions
+typedef std::vector<communication_expression>    communication_expression_vector;
+
+
+/// \brief Test for a communication_expression expression
+/// \param t A term
+/// \return True if it is a communication_expression expression
+inline
+bool is_communication_expression(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsCommExpr(t);
+}
+
+//--- end generated class communication_expression ---//
+
+/*
 //<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
 /// \brief Communication expression
 class communication_expression: public atermpp::aterm_appl
@@ -39,7 +97,15 @@ class communication_expression: public atermpp::aterm_appl
     communication_expression(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_CommExpr(m_term));
+      assert(core::detail::check_term_CommExpr(*this));
+    }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit communication_expression(const atermpp::aterm &term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_CommExpr(*this));
     }
 
     /// \brief Constructor.
@@ -49,24 +115,35 @@ class communication_expression: public atermpp::aterm_appl
 
     /// \brief Returns the name of the action
     /// \return The name of the action
-    action_name_multiset action_name() const
+    const action_name_multiset &action_name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<action_name_multiset>(atermpp::arg1(*this));
     }
 
     /// \brief Returns the name of the communication expression
     /// \return The name of the communication expression
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Read-only singly linked list of communication expressions
 typedef atermpp::term_list<communication_expression> communication_expression_list;
+*/
 
 } // namespace process
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::process::communication_expression& t1, mcrl2::process::communication_expression& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_PROCESS_COMMUNICATION_EXPRESSION_H

@@ -69,7 +69,7 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
 
   void operator()(specification& x)
   {
-    atermpp::set<data::variable> v = update_sigma(x.global_variables());
+    std::set<data::variable> v = update_sigma(x.global_variables());
     x.global_variables() = v;
     (*this)(x.process());
     x.action_labels() = (*this)(x.action_labels());
@@ -85,7 +85,7 @@ template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
                               Substitution sigma,
                               bool innermost,
-                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                              )
 {
   data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x);
@@ -95,7 +95,7 @@ template <typename T, typename Substitution>
 T replace_sort_expressions(const T& x,
                            Substitution sigma,
                            bool innermost,
-                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
   return data::detail::make_replace_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x);
@@ -105,7 +105,7 @@ template <typename T, typename Substitution>
 void replace_data_expressions(T& x,
                               Substitution sigma,
                               bool innermost,
-                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                              )
 {
   data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x);
@@ -115,7 +115,7 @@ template <typename T, typename Substitution>
 T replace_data_expressions(const T& x,
                            Substitution sigma,
                            bool innermost,
-                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
   return data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x);
@@ -124,7 +124,7 @@ T replace_data_expressions(const T& x,
 template <typename T, typename Substitution>
 void replace_variables(T& x,
                        Substitution sigma,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                       )
 {
   core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
@@ -133,7 +133,7 @@ void replace_variables(T& x,
 template <typename T, typename Substitution>
 T replace_variables(const T& x,
                     Substitution sigma,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
 {
   return core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
@@ -142,7 +142,7 @@ T replace_variables(const T& x,
 template <typename T, typename Substitution>
 void replace_free_variables(T& x,
                             Substitution sigma,
-                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
   data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x);
@@ -151,7 +151,7 @@ void replace_free_variables(T& x,
 template <typename T, typename Substitution>
 T replace_free_variables(const T& x,
                          Substitution sigma,
-                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
   return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x);
@@ -161,7 +161,7 @@ template <typename T, typename Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
                             Substitution sigma,
                             const VariableContainer& bound_variables,
-                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
   data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
@@ -171,7 +171,7 @@ template <typename T, typename Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
                          Substitution sigma,
                          const VariableContainer& bound_variables,
-                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
   return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
@@ -183,7 +183,7 @@ template <typename T, typename Substitution, typename VariableContainer>
 void replace_variables_capture_avoiding(T& x,
                        Substitution& sigma,
                        const VariableContainer& sigma_variables,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                       )
 {
   std::multiset<data::variable> V;
@@ -198,7 +198,7 @@ template <typename T, typename Substitution, typename VariableContainer>
 T replace_variables_capture_avoiding(const T& x,
                     Substitution& sigma,
                     const VariableContainer& sigma_variables,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
 {
   std::multiset<data::variable> V;
@@ -249,7 +249,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   {
     data::variable lhs = (*this)(x.lhs());
     data::data_expression rhs = (*this)(x.rhs());
-    return data::assignment_expression(lhs, rhs);
+    return data::assignment(lhs, rhs);
   }
 
   void operator()(lps::deadlock_summand& x)
@@ -269,8 +269,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   {
     count = 0;
     lps::process_initializer result = super::operator()(x);
-    result.assignments() = super::operator()(result.assignments());
-    return result;
+    return lps::process_initializer(super::operator()(result.assignments()));
   }
 
   void operator()(lps::linear_process& x)

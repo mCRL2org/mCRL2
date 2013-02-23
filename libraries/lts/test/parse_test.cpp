@@ -17,7 +17,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/lts/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
@@ -354,8 +353,6 @@ void test_dot_abp()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_fsm();
   test_dot_abp();
 

@@ -14,7 +14,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/test_utilities.h"
 
@@ -77,7 +76,5 @@ BOOST_AUTO_TEST_CASE(pbes_val)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

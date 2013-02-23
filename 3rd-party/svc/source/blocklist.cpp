@@ -27,9 +27,9 @@
 #include <svc/blocklist.h>
 #include <svc/huffman.h>
 
-using namespace aterm;
+using namespace atermpp;
 
-void BLdump(FILE*, BList*);
+// void BLdump(FILE*, BList*);
 
 
 
@@ -303,7 +303,7 @@ void Bfree(tBlock* nodeList)
 } */
 
 
-static
+/* static
 void Bdump(FILE* fp, tBlock* block)
 {
   struct HFnode* tmp;
@@ -312,7 +312,7 @@ void Bdump(FILE* fp, tBlock* block)
   for (tmp=block->first; tmp!=NULL; tmp=tmp->next)
   {
     ATfprintf(stderr, "    %t %6d(%p<%p<%p)\n",
-              tmp->term?tmp->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,false)),
+              tmp->term!=ATerm()?&*tmp->term:&*ATmakeAppl0(AFun("nil",0,false)),
               tmp->frequency, tmp->previous, tmp, tmp->next);
     if (tmp==block->last)
     {
@@ -334,4 +334,4 @@ void BLdump(FILE* fp, BList* blockList)
     Bdump(fp, tmp);
   }
 
-}
+} */

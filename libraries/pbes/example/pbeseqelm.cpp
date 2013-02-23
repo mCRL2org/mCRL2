@@ -23,7 +23,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
@@ -115,7 +114,6 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   pbes_eqelm_tool tool;
   return tool.execute(argc, argv);
 }

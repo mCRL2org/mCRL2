@@ -21,7 +21,7 @@ namespace process {
 
 namespace detail {
 
-bool is_guarded(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W);
+bool is_guarded(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W);
 
 struct is_guarded_traverser: public process_expression_traverser<is_guarded_traverser>
 {
@@ -34,11 +34,11 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  const atermpp::vector<process_equation>& equations;
+  const std::vector<process_equation>& equations;
   std::set<process_identifier>& W;
   bool result;
 
-  is_guarded_traverser(const atermpp::vector<process_equation>& equations_, std::set<process_identifier>& W_)
+  is_guarded_traverser(const std::vector<process_equation>& equations_, std::set<process_identifier>& W_)
     : equations(equations_), W(W_), result(true)
   {}
 
@@ -86,7 +86,7 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
 };
 
 inline
-bool is_guarded(const process_expression& x, const atermpp::vector<process_equation>& equations, std::set<process_identifier>& W)
+bool is_guarded(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W)
 {
   detail::is_guarded_traverser f(equations, W);
   f(x);
@@ -96,7 +96,7 @@ bool is_guarded(const process_expression& x, const atermpp::vector<process_equat
 } // detail
 
 inline
-bool is_guarded(const process_expression& x, const atermpp::vector<process_equation>& equations)
+bool is_guarded(const process_expression& x, const std::vector<process_equation>& equations)
 {
   std::set<process_identifier> W;
   return detail::is_guarded(x, equations, W);

@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/detail/accessors.h"
 
 namespace mcrl2 {
 
@@ -27,19 +26,18 @@ one_point_rule_preprocessor
 {
   data::data_expression operator()(const data::data_expression& x) const
   {
-    namespace a = detail::data_accessors;
     if (data::sort_bool::is_not_application(x)) // x == !y
     {
-      data::data_expression y = a::arg(x);
+      data::data_expression y = unary_operand(atermpp::aterm_cast<application>(x));
       if (data::sort_bool::is_not_application(y))
       {
-        return (*this)(a::arg(y));
+        return (*this)(unary_operand(atermpp::aterm_cast<application>(y)));
       }
       else if (data::sort_bool::is_and_application(y))
       {
-        atermpp::set<data::data_expression> args = data::split_and(y);
-        atermpp::vector<data::data_expression> result;
-        for (atermpp::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
+        std::set<data::data_expression> args = data::split_and(y);
+        std::vector<data::data_expression> result;
+        for (std::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
         {
           result.push_back((*this)(data::sort_bool::not_(*i)));
         }
@@ -47,9 +45,9 @@ one_point_rule_preprocessor
       }
       else if (data::sort_bool::is_or_application(y))
       {
-        atermpp::set<data::data_expression> args = data::split_or(y);
-        atermpp::vector<data::data_expression> result;
-        for (atermpp::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
+        std::set<data::data_expression> args = data::split_or(y);
+        std::vector<data::data_expression> result;
+        for (std::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
         {
           result.push_back((*this)(data::sort_bool::not_(*i)));
         }
@@ -57,11 +55,11 @@ one_point_rule_preprocessor
       }
       else if (data::is_equal_to_application(y))
       {
-        return data::not_equal_to(a::left(y), a::right(y));
+        return data::not_equal_to(binary_left(atermpp::aterm_cast<application>(y)), binary_right(atermpp::aterm_cast<application>(y)));
       }
       else if (data::is_not_equal_to_application(y))
       {
-        return data::equal_to(a::left(y), a::right(y));
+        return data::equal_to(binary_left(atermpp::aterm_cast<application>(y)), binary_right(atermpp::aterm_cast<application>(y)));
       }
     }
     return x;

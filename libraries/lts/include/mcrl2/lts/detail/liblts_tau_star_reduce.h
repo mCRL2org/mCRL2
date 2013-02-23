@@ -12,7 +12,6 @@
 #define _LIBLTS_TAUSTARREDUCE_H
 
 #include <cstdlib> // free
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 
@@ -41,8 +40,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   std::vector < transition > local_transitions=l.get_transitions();
 
   size_t* trans_lut = l.get_transition_indices();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,size_t,l.num_states() + 1);
-
+  std::vector <size_t> new_trans_lut(l.num_states()+1);
 
   new_trans_lut[0] = l.num_transitions();
   l.clear_transitions();

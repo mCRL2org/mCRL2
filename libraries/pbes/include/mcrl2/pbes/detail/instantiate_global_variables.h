@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
 #define MCRL2_PBES_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
 
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/pbes.h"
@@ -40,11 +39,11 @@ void instantiate_global_variables(pbes<Container>& p)
   data::mutable_map_substitution<> sigma;
   data::representative_generator default_expression_generator(p.data());
   std::set<data::variable> to_be_removed;
-  const atermpp::set<data::variable>& v = p.global_variables();
-  for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+  const std::set<data::variable>& v = p.global_variables();
+  for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     data::data_expression d = default_expression_generator(i->sort());
-    if (d == data::data_expression())
+    if (!d.defined())
     {
       throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + data::pp(*i));
     }

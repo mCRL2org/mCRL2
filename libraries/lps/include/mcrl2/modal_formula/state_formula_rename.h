@@ -148,13 +148,13 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
   /// \brief The set of identifiers that may not be used as a variable name.
   const std::set<core::identifier_string>& forbidden_identifiers;
 
-  atermpp::map<core::identifier_string, core::identifier_string> generated_identifiers;
+  std::map<core::identifier_string, core::identifier_string> generated_identifiers;
 
   utilities::number_postfix_generator generator;
 
   core::identifier_string create_name(const core::identifier_string& x)
   {
-    atermpp::map<core::identifier_string, core::identifier_string>::iterator i = generated_identifiers.find(x);
+    std::map<core::identifier_string, core::identifier_string>::iterator i = generated_identifiers.find(x);
     if (i != generated_identifiers.end())
     {
       return i->second;

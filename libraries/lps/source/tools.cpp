@@ -190,7 +190,7 @@ void lpspp(const std::string& input_filename,
   std::string text;
   if (format == core::print_internal)
   {
-  	text = specification_to_aterm(spec).to_string();
+  	text = to_string(specification_to_aterm(spec));
   }
   else
   {
@@ -267,7 +267,7 @@ void lpssuminst(const std::string& input_filename,
 {
   lps::specification lps_specification;
   lps_specification.load(input_filename);
-  atermpp::set<data::sort_expression> sorts;
+  std::set<data::sort_expression> sorts;
 
   // Determine set of sorts to be expanded
   if(!sorts_string.empty())
@@ -284,7 +284,8 @@ void lpssuminst(const std::string& input_filename,
   }
   else
   {
-    sorts = atermpp::convert<atermpp::set<data::sort_expression> >(lps_specification.data().sorts());
+    const data::sort_expression_vector& sort_vector=lps_specification.data().sorts();
+    sorts = std::set<data::sort_expression>(sort_vector.begin(),sort_vector.end());
   }
 
   mCRL2log(log::verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;

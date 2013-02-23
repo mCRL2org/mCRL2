@@ -110,7 +110,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
                                              data::greater(s.multi_action().time(), data::sort_real::real_(0))));
 
         // Extend original assignments to include m_last_action_time := t.i(d,e.i)
-        s.assignments() = push_back(s.assignments(), data::assignment(m_last_action_time,s.multi_action().time()));
+        s.assignments()=push_back(s.assignments(),data::assignment(m_last_action_time,s.multi_action().time()));
 
         // Remove time
         s.multi_action() = multi_action(s.multi_action().actions()); // TODO: if Nil is removed, just remove time
@@ -120,7 +120,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
         // Add a new summation variable (this is allowed because according to an axiom the following equality holds):
         // c -> a . X == sum t:Real . c -> a@t . X
         data::variable time_var(m_identifier_generator("time_var"), data::sort_real::real_());
-        s.summation_variables() = push_front(s.summation_variables(), time_var);
+        s.summation_variables().push_front(time_var);
 
         // Extend the original condition with an additional argument time_var > m_last_action_time && time_var > 0
         s.condition() = data::lazy::and_(s.condition(),
@@ -128,7 +128,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
                                              data::greater(time_var, data::sort_real::real_(0))));
 
         // Extend original assignments to include m_last_action_time := time_var
-        s.assignments() = push_back(s.assignments(), data::assignment(m_last_action_time, time_var));
+        s.assignments()=push_back(s.assignments(),data::assignment(m_last_action_time, time_var));
       } // i->has_time()
 
       // Add the condition m_last_action_time>=0, which holds, and which is generally a useful fact for further processing.
@@ -160,9 +160,9 @@ class untime_algorithm: public lps::detail::lps_algorithm
         // Should happen before updating the process
         m_time_invariant = calculate_time_invariant();
 
-        m_spec.process().process_parameters() = push_back(m_spec.process().process_parameters(), m_last_action_time);
+        m_spec.process().process_parameters()=push_back(m_spec.process().process_parameters(),m_last_action_time);
         data::assignment_list init = m_spec.initial_process().assignments();
-        init = push_back(init, data::assignment(m_last_action_time, data::sort_real::real_(0)));
+        init=push_back(init,data::assignment(m_last_action_time, data::sort_real::real_(0)));
         m_spec.initial_process() = process_initializer(init);
 
         std::for_each(m_spec.process().action_summands().begin(),

@@ -14,7 +14,6 @@
 
 #include <cassert>
 #include <vector>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
@@ -37,7 +36,7 @@ struct boolean_expression2pbes_expression_traverser: public bes::boolean_express
   using super::leave;
 
   /// \brief A stack containing PBES expressions.
-  atermpp::vector<pbes_system::pbes_expression> expression_stack;
+  std::vector<pbes_system::pbes_expression> expression_stack;
 
   void push(const pbes_system::pbes_expression& x)
   {

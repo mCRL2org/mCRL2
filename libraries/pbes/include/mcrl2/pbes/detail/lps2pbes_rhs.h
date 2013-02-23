@@ -55,7 +55,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   const lps::linear_process& lps;
   data::set_identifier_generator& id_generator;
   const data::variable& T;
-  atermpp::vector<pbes_expression> result_stack;
+  std::vector<pbes_expression> result_stack;
 
   rhs_traverser(const state_formulas::state_formula& phi0_,
                 const lps::linear_process& lps_,
@@ -174,7 +174,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void handle_must_may(const Expr& x, bool is_must)
   {
     bool timed = is_timed();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     pbes_expression rhs0 = RHS(phi0, x.operand(), lps, id_generator, T, TermTraits());
     action_formulas::action_formula alpha = x.formula();
 
@@ -227,7 +227,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void leave(const state_formulas::yaled_timed& x)
   {
     data::data_expression t = x.time_stamp();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
     {
@@ -257,7 +257,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void leave(const state_formulas::delay_timed& x)
   {
     data::data_expression t = x.time_stamp();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
     {
@@ -368,7 +368,7 @@ pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                data::set_identifier_generator& propvar_generator,
                                data::variable_list& variables,
                                const fixpoint_symbol& sigma,
-                               atermpp::vector<pbes_equation>& Z,
+                               std::vector<pbes_equation>& Z,
                                const data::variable& T,
                                TermTraits tr
                     );
@@ -398,7 +398,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
   std::multiset<data::variable> variables;
   const fixpoint_symbol& sigma;
   data::set_identifier_generator& propvar_generator;
-  atermpp::vector<pbes_equation>& Z; // new equations that are generated on the fly
+  std::vector<pbes_equation>& Z; // new equations that are generated on the fly
 
   rhs_structured_traverser(const state_formulas::state_formula& phi0,
                            const lps::linear_process& lps,
@@ -406,7 +406,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
                            data::set_identifier_generator& propvar_generator_,
                            data::variable_list& variables_,
                            const fixpoint_symbol& sigma_,
-                           atermpp::vector<pbes_equation>& Z_,
+                           std::vector<pbes_equation>& Z_,
                            const data::variable& T,
                            TermTraits tr
                )
@@ -449,7 +449,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
   void handle_must_may(const Expr& x, bool is_must)
   {
     bool timed = is_timed();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
 
     // TODO: can this call to find_free_variables be eliminated?
     std::set<data::variable> fv = state_formulas::find_free_variables(x.operand());
@@ -522,7 +522,7 @@ struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_tra
                                  data::set_identifier_generator& propvar_generator,
                                  data::variable_list& variables,
                                  const fixpoint_symbol& sigma,
-                                 atermpp::vector<pbes_equation>& Z,
+                                 std::vector<pbes_equation>& Z,
                                  const data::variable& T,
                                  TermTraits tr
                                 )
@@ -543,7 +543,7 @@ pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                data::set_identifier_generator& propvar_generator,
                                data::variable_list& variables,
                                const fixpoint_symbol& sigma,
-                               atermpp::vector<pbes_equation>& Z,
+                               std::vector<pbes_equation>& Z,
                                const data::variable& T,
                                TermTraits tr
                     )

@@ -1,0 +1,4 @@
+% This formula expresses that red has a winning strategy in the game "four in a row"
+% as specified in four_in_a_row.mcrl2.
+
+mu X.(<RedWins>true || (exists x:Pos.<RedMoves(x)>([YellowWins]false && forall y:Pos.[YellowMoves(y)]X)))

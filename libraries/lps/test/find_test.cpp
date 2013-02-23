@@ -14,10 +14,8 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
 
 using namespace mcrl2;
@@ -99,7 +97,6 @@ void test_free_variables()
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
   BOOST_CHECK(is_well_typed(specification));
-  core::garbage_collect();
 }
 
 void test_search()
@@ -127,8 +124,6 @@ void test_search_sort_expression()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_find();
   test_free_variables();
   test_search();

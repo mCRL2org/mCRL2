@@ -65,7 +65,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
 
     // N.B. We have to normalize the sorts of the equations. Otherwise predicates like
     // is_list(x) may return the wrong result.
-    atermpp::vector<process_equation> normalized_equations = x.equations();
+    std::vector<process_equation> normalized_equations = x.equations();
     process::normalize_sorts(normalized_equations, x.data());
     print_list(normalized_equations, "proc ", "\n\n", "\n     ");
 

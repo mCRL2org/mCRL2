@@ -11,9 +11,8 @@
 #ifndef _ENUM_STANDARD_H
 #define _ENUM_STANDARD_H
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
 
@@ -80,22 +79,22 @@ class fs_expr
     {
     }
 
-    variable_list vars() const
+    const variable_list &vars() const
     {
       return m_vars;
     }
 
-    variable_list substituted_vars() const
+    const variable_list &substituted_vars() const
     {
       return m_substituted_vars;
     }
 
-    atermpp::term_list< atermpp::aterm_appl > vals() const
+    const atermpp::term_list< atermpp::aterm_appl > &vals() const
     {
       return m_vals;
     }
 
-    atermpp::aterm_appl expr() const
+    const atermpp::aterm_appl &expr() const
     {
       return m_expr;
     }
@@ -119,7 +118,7 @@ class EnumeratorStandard
   public:
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
-    atermpp::set< atermpp::aterm_int > eqs;
+    std::set< atermpp::aterm_int > eqs;
   
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
     ~EnumeratorStandard();
@@ -151,8 +150,8 @@ class EnumeratorSolutionsStandard
     atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
     internal_substitution_type &enum_sigma;
 
-    atermpp::deque < fs_expr> fs_stack;
-    atermpp::vector< ss_solution > ss_stack;
+    std::deque < fs_expr> fs_stack;
+    std::vector< ss_solution > ss_stack;
 
     size_t used_vars;
     size_t max_vars;
@@ -171,8 +170,6 @@ class EnumeratorSolutionsStandard
        enum_sigma(default_sigma()),
        m_max_internal_variables(0)
     {
-      enum_vars.protect();
-      enum_expr.protect();
     } 
 
     /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
@@ -214,16 +211,12 @@ class EnumeratorSolutionsStandard
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
     { 
-      enum_vars.protect();
-      enum_expr.protect();
       reset(not_equal_to_false,expr_is_normal_form);
     }
 
     /// Standard destructor.
     ~EnumeratorSolutionsStandard()
     {
-      enum_vars.unprotect();
-      enum_expr.unprotect();
     }
  
    /**
@@ -273,106 +266,56 @@ class EnumeratorSolutionsStandard
   private:
     void reset(const bool not_equal_to_false, const bool expr_is_normal_form); 
 
-    bool find_equality(const atermpp::aterm_appl T, 
-                            const mcrl2::data::variable_list vars, 
+    bool find_equality(const atermpp::aterm_appl &T, 
+                            const mcrl2::data::variable_list &vars, 
                             mcrl2::data::variable &v, 
-                            atermpp::aterm_appl &e);
+                            atermpp::aterm_appl &e); 
 
     void EliminateVars(fs_expr &e);
 
     atermpp::aterm_appl build_solution_single(
-                 const atermpp::aterm_appl t,
-                 const variable_list substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+                 const atermpp::aterm_appl &t,
+                 variable_list substituted_vars,
+                 atermpp::term_list < atermpp::aterm_appl> exprs) const;
 
     atermpp::term_list < atermpp::aterm_appl> build_solution(
-                 const variable_list vars,
-                 const variable_list substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+                 const variable_list &vars,
+                 const variable_list &substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const;
 
     atermpp::term_list < atermpp::aterm_appl> build_solution2(
-                 const variable_list vars,
-                 const variable_list substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+                 const variable_list &vars,
+                 const variable_list &substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const;
     atermpp::aterm_appl build_solution_aux(
-                 const atermpp::aterm_appl t,
-                 const variable_list substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+                 const atermpp::aterm_appl &t,
+                 const variable_list &substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const;
     atermpp::aterm_appl add_negations(
-                 const atermpp::aterm_appl condition,
-                 const atermpp::term_list< atermpp::aterm_appl > negation_term_list,
+                 const atermpp::aterm_appl &condition,
+                 const atermpp::term_list< atermpp::aterm_appl > &negation_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or(
-                 atermpp::deque < fs_expr> &fs_stack,
-                 const variable_list var_list,
-                 const variable_list substituted_vars,
-                 const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
-                 const atermpp::aterm_appl condition,
-                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list,
+                 std::deque < fs_expr> &fs_stack,
+                 const variable_list &var_list,
+                 const variable_list &substituted_vars,
+                 const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
+                 const atermpp::aterm_appl &condition,
+                 const atermpp::term_list< atermpp::aterm_appl > &negated_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or_without_rewriting(
-                 atermpp::deque < fs_expr> &fs_stack,
-                 const variable_list var_list,
-                 const variable_list substituted_vars,
-                 const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
-                 const atermpp::aterm_appl condition,
-                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list,
+                 std::deque < fs_expr> &fs_stack,
+                 const variable_list &var_list,
+                 const variable_list &substituted_vars,
+                 const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
+                 const atermpp::aterm_appl &condition,
+                 const atermpp::term_list< atermpp::aterm_appl > &negated_term_list,
                  const bool negated) const;
     atermpp::term_list< atermpp::aterm_appl > negate(
-                 const atermpp::term_list< atermpp::aterm_appl > l) const;
+                 const atermpp::term_list< atermpp::aterm_appl > &l) const;
 };
 }
 }
-}
-
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::data::detail::fs_expr>
-{
-  static void protect(const mcrl2::data::detail::fs_expr& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.vars().protect();
-    t.substituted_vars().protect();
-    t.vals().protect();
-    t.expr().protect();
-  }
-  static void unprotect(const mcrl2::data::detail::fs_expr& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.vars().unprotect();
-    t.substituted_vars().unprotect();
-    t.vals().unprotect();
-    t.expr().unprotect();
-  }
-  static void mark(const mcrl2::data::detail::fs_expr& t)
-  {
-    t.vars().mark();
-    t.substituted_vars().mark();
-    t.vals().mark();
-    t.expr().mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::data::detail::ss_solution>
-{
-  static void protect(const mcrl2::data::detail::ss_solution& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.solution().protect();
-  }
-  static void unprotect(const mcrl2::data::detail::ss_solution& t)
-  {
-    assert(0); // This is not being used. This is to check this.
-    t.solution().unprotect();
-  }
-  static void mark(const mcrl2::data::detail::ss_solution& t)
-  {
-    t.solution().mark();
-  }
-};
 } // namespace atermpp
 /// \endcond
 

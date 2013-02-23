@@ -26,9 +26,6 @@
 #include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
-#include "mcrl2/atermpp/aterm_init.h"
-//#include "mcrl2/utilities/rewriter_tool.h"
-//#include "mcrl2/utilities/pbes_rewriter_tool.h"
 
 #include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/pbes/io.h"
@@ -135,6 +132,5 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return pg_solver_tool().execute(argc, argv);
 }

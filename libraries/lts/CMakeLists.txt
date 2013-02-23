@@ -28,7 +28,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 
 set(mcrl2_lts_src
@@ -103,7 +103,6 @@ install(TARGETS dot_syntax fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Lib
 # ##### End generate parser tables ######
 
 target_link_libraries(${PROJECT_NAME}
-  mcrl2_aterm
   svc
   mcrl2_data
   mcrl2_lps

@@ -25,7 +25,6 @@
 #include <deque>
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
@@ -232,8 +231,6 @@ class torx_tool : public rewriter_tool< input_tool >
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc,argv)
-
   return torx_tool().execute(argc, argv);
 }
 

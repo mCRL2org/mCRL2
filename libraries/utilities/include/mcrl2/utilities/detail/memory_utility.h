@@ -32,7 +32,7 @@
 #else
 #include "alloca.h"
 #define MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) alloca((SIZE)*sizeof(TYPE))
-#endif
+#endif 
 
 #endif
 

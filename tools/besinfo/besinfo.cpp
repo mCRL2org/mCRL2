@@ -17,7 +17,6 @@
 
 //MCRL2-specific
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/bes_property_map.h"
@@ -104,7 +103,7 @@ class besinfo_tool: public bes_input_tool<input_tool>
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
-        for (atermpp::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+        for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
         {
           std::cout << core::pp(i->symbol()) << "." << bes::pp(i->variable()) << std::endl;
         }
@@ -116,6 +115,5 @@ class besinfo_tool: public bes_input_tool<input_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return besinfo_tool().execute(argc, argv);
 }

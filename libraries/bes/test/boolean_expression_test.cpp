@@ -13,8 +13,6 @@
 #include <string>
 #include <stdio.h>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
@@ -47,7 +45,6 @@ void test_boolean_expressions()
   q.load(filename);
   BOOST_CHECK(p == q);
   remove(filename.c_str());
-  core::garbage_collect();
 }
 
 void test_bes2pbes()
@@ -78,7 +75,6 @@ void test_bes2pbes()
   std::cout << "----------------" << std::endl;
   std::cout << pbes_system::pp(q) << std::endl;
 
-  core::garbage_collect();
 }
 
 void test_precedence()
@@ -97,8 +93,6 @@ void test_precedence()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_boolean_expressions();
   test_bes2pbes();
   test_precedence();

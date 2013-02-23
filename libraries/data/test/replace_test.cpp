@@ -16,9 +16,7 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
@@ -56,20 +54,6 @@ void test_assignment_list()
   std::cerr << "t  == " << data::pp(t) << std::endl;
   std::cerr << "t2 == " << data::pp(t2) << std::endl;
   BOOST_CHECK(t0 == t2);
-
-  assignment_list m1 = atermpp::make_list(
-                         assignment(d1, d2),
-                         assignment(e1, d1)
-                       );
-  assignment_list m2 = data::replace_variables(m1, assignment(d2, d1));
-  assignment_list m3 = atermpp::make_list(
-                         assignment(d1, d1),
-                         assignment(e1, d1)
-                       );
-  BOOST_CHECK(m2 == m3);
-  std::cout << "<m2>" << data::pp(m2) << std::endl;
-  std::cout << "<m3>" << data::pp(m3) << std::endl;
-  core::garbage_collect();
 }
 
 void test_variable_replace()
@@ -123,7 +107,6 @@ void test_variable_replace()
   BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(v, l)));
   BOOST_CHECK(t1 == replace_free_variables(t, make_mutable_map_substitution(variables, replacements)));
-  core::garbage_collect();
 }
 
 void test_replace_with_binders()
@@ -139,7 +122,6 @@ void test_replace_with_binders()
 
   // variable c is bound and should not be replaced
   BOOST_CHECK(replace_free_variables(input2, sigma) == input2);
-  core::garbage_collect();
 }
 
 inline
@@ -203,9 +185,9 @@ void check_result(const std::string& expression, const std::string& result, cons
 }
 
 inline
-atermpp::vector<data::variable> variable_context()
+std::vector<data::variable> variable_context()
 {
-	atermpp::vector<data::variable> result;
+  std::vector<data::variable> result;
   result.push_back(make_bool("k"));
   result.push_back(make_bool("m"));
   result.push_back(make_bool("n"));
@@ -234,14 +216,14 @@ atermpp::vector<data::variable> variable_context()
 }
 
 inline
-data::data_expression parse_expression(const std::string& text, const atermpp::vector<data::variable>& variables = variable_context())
+data::data_expression parse_expression(const std::string& text, const std::vector<data::variable>& variables = variable_context())
 {
 	return data::parse_data_expression(text, variables.begin(), variables.end());
 }
 
 /// \brief Parses a string of the form "b: Bool := v, c: Bool := !w", and adds
 inline
-data::mutable_map_substitution<> parse_substitution(const std::string& text, const atermpp::vector<data::variable>& variables = variable_context())
+data::mutable_map_substitution<> parse_substitution(const std::string& text, const std::vector<data::variable>& variables = variable_context())
 {
 	data::mutable_map_substitution<> sigma;
   std::vector<std::string> substitutions = utilities::split(text, ";");
@@ -297,8 +279,6 @@ void test_replace_variables_capture_avoiding()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_assignment_list();
   test_variable_replace();
   test_replace_with_binders();

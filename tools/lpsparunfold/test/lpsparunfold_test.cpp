@@ -17,19 +17,15 @@
 #include "mcrl2/data/rewriter.h"
 #include "../lpsparunfoldlib.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 
-int test_main(int /*argc*/, char* argv[])
+int test_main(int, char**)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   {
     /**
       * Unfold Pos process parameter at index 0
@@ -68,13 +64,13 @@ int test_main(int /*argc*/, char* argv[])
       std::clog << "--- failed test ---" << std::endl;
       std::clog << case_1 << std::endl;
       std::clog << "expected process parameter to be of type Pos" << std::endl;
-      std::clog << "encountered process parameter of type " << p0.front().sort().to_string() << std::endl;
+      std::clog << "encountered process parameter of type " << p0.front().sort() << std::endl;
     }
     BOOST_CHECK(t0.compare("Pos") == 0);
 
     /* Return */
 
-    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > unfold_cache;
+    std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > unfold_cache;
     lpsparunfold lpsparunfold(s0, &unfold_cache);
     specification s1 = lpsparunfold.algorithm(0);
     variable_list p1 = s1.process().process_parameters();

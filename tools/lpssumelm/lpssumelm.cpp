@@ -13,7 +13,6 @@
 #include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -65,7 +64,5 @@ class sumelm_tool: public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return sumelm_tool().execute(argc, argv);
 }

@@ -69,7 +69,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& constructor_name()
       {
-        static core::identifier_string constructor_name = core::detail::initialise_static_expression(constructor_name, core::identifier_string("@bag"));
+        static core::identifier_string constructor_name = core::identifier_string("@bag");
         return constructor_name;
       }
 
@@ -138,7 +138,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("{}"));
+        static core::identifier_string empty_name = core::identifier_string("{}");
         return empty_name;
       }
 
@@ -171,7 +171,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bag_fbag_name()
       {
-        static core::identifier_string bag_fbag_name = core::detail::initialise_static_expression(bag_fbag_name, core::identifier_string("@bagfbag"));
+        static core::identifier_string bag_fbag_name = core::identifier_string("@bagfbag");
         return bag_fbag_name;
       }
 
@@ -228,7 +228,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bag_comprehension_name()
       {
-        static core::identifier_string bag_comprehension_name = core::detail::initialise_static_expression(bag_comprehension_name, core::identifier_string("@bagcomp"));
+        static core::identifier_string bag_comprehension_name = core::identifier_string("@bagcomp");
         return bag_comprehension_name;
       }
 
@@ -285,7 +285,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& count_name()
       {
-        static core::identifier_string count_name = core::detail::initialise_static_expression(count_name, core::identifier_string("count"));
+        static core::identifier_string count_name = core::identifier_string("count");
         return count_name;
       }
 
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("in"));
+        static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
       }
 
@@ -401,7 +401,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& join_name()
       {
-        static core::identifier_string join_name = core::detail::initialise_static_expression(join_name, core::identifier_string("+"));
+        static core::identifier_string join_name = core::identifier_string("+");
         return join_name;
       }
 
@@ -459,7 +459,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& intersection_name()
       {
-        static core::identifier_string intersection_name = core::detail::initialise_static_expression(intersection_name, core::identifier_string("*"));
+        static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
       }
 
@@ -517,7 +517,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& difference_name()
       {
-        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("-"));
+        static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
       }
 
@@ -575,7 +575,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bag2set_name()
       {
-        static core::identifier_string bag2set_name = core::detail::initialise_static_expression(bag2set_name, core::identifier_string("Bag2Set"));
+        static core::identifier_string bag2set_name = core::identifier_string("Bag2Set");
         return bag2set_name;
       }
 
@@ -632,7 +632,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set2bag_name()
       {
-        static core::identifier_string set2bag_name = core::detail::initialise_static_expression(set2bag_name, core::identifier_string("Set2Bag"));
+        static core::identifier_string set2bag_name = core::identifier_string("Set2Bag");
         return set2bag_name;
       }
 
@@ -689,7 +689,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& zero_function_name()
       {
-        static core::identifier_string zero_function_name = core::detail::initialise_static_expression(zero_function_name, core::identifier_string("@zero_"));
+        static core::identifier_string zero_function_name = core::identifier_string("@zero_");
         return zero_function_name;
       }
 
@@ -746,7 +746,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& one_function_name()
       {
-        static core::identifier_string one_function_name = core::detail::initialise_static_expression(one_function_name, core::identifier_string("@one_"));
+        static core::identifier_string one_function_name = core::identifier_string("@one_");
         return one_function_name;
       }
 
@@ -803,7 +803,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& add_function_name()
       {
-        static core::identifier_string add_function_name = core::detail::initialise_static_expression(add_function_name, core::identifier_string("@add_"));
+        static core::identifier_string add_function_name = core::identifier_string("@add_");
         return add_function_name;
       }
 
@@ -861,7 +861,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& min_function_name()
       {
-        static core::identifier_string min_function_name = core::detail::initialise_static_expression(min_function_name, core::identifier_string("@min_"));
+        static core::identifier_string min_function_name = core::identifier_string("@min_");
         return min_function_name;
       }
 
@@ -919,7 +919,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& monus_function_name()
       {
-        static core::identifier_string monus_function_name = core::detail::initialise_static_expression(monus_function_name, core::identifier_string("@monus_"));
+        static core::identifier_string monus_function_name = core::identifier_string("@monus_");
         return monus_function_name;
       }
 
@@ -977,7 +977,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& nat2bool_function_name()
       {
-        static core::identifier_string nat2bool_function_name = core::detail::initialise_static_expression(nat2bool_function_name, core::identifier_string("@Nat2Bool_"));
+        static core::identifier_string nat2bool_function_name = core::identifier_string("@Nat2Bool_");
         return nat2bool_function_name;
       }
 
@@ -1034,7 +1034,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bool2nat_function_name()
       {
-        static core::identifier_string bool2nat_function_name = core::detail::initialise_static_expression(bool2nat_function_name, core::identifier_string("@Bool2Nat_"));
+        static core::identifier_string bool2nat_function_name = core::identifier_string("@Bool2Nat_");
         return bool2nat_function_name;
       }
 
@@ -1121,7 +1121,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_join_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1133,7 +1133,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_bag_fbag_application(e) || is_bag_comprehension_application(e) || is_bag2set_application(e) || is_set2bag_application(e) || is_zero_function_application(e) || is_one_function_application(e) || is_nat2bool_function_application(e) || is_bool2nat_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1145,7 +1145,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_join_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for bag

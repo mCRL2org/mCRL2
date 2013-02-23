@@ -13,7 +13,6 @@
 #define MCRL2_PBES_DETAIL_PBESINST_REWRITER_H
 
 #include <iostream>
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
@@ -31,7 +30,7 @@ namespace detail
 {
 
 /// \brief The substitution function used by the pbesinst rewriter.
-typedef data::mutable_map_substitution<atermpp::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
+typedef data::mutable_map_substitution<std::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
 
 /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// As a side effect propositional variable instantiations are being renamed
@@ -89,7 +88,7 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
         // }
         else
         {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + del_i->to_string());
+          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + to_string(*del_i));
         }
       }
     }
@@ -105,7 +104,8 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
   term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbesinst_substitution_function& sigma)
   {
     term_type y = super::visit_propositional_variable(x, v, sigma);
-    term_type result = term_type(rename(y), y.variables(), atermpp::make_list(atermpp::aterm_appl(y)));
+    term_type result = term_type(rename(y), y.variables(), 
+                                 atermpp::aterm_cast<propositional_variable_instantiation_list>(atermpp::make_list(atermpp::aterm_appl(y))));
     return result;
   }
 };

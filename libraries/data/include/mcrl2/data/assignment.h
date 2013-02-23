@@ -17,8 +17,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/atermpp/combine_iterator.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
@@ -31,44 +29,31 @@ namespace mcrl2
 namespace data
 {
 
-class assignment_expression: public atermpp::aterm_appl,
-  public std::unary_function<variable, data_expression>
+//--- start generated classes ---//
+/// \brief Assignment expression
+class assignment_expression: public atermpp::aterm_appl
 {
   public:
-    typedef variable variable_type;
-    typedef data_expression expression_type;
-
+    /// \brief Default constructor.
     assignment_expression()
       : atermpp::aterm_appl(core::detail::constructWhrDecl())
     {}
 
-    assignment_expression(atermpp::aterm_appl term)
+    /// \brief Constructor.
+    /// \param term A term
+    assignment_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_WhrDecl(term));
-    }
-
-    assignment_expression(const variable v, const data_expression d)
-      : atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(v,d))
-    {}
-
-    variable lhs() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    data_expression rhs() const
-    {
-      return atermpp::arg2(*this);
+      assert(core::detail::check_rule_WhrDecl(*this));
     }
 };
 
-/// \brief list of assignment expressions
+/// \brief list of assignment_expressions
 typedef atermpp::term_list<assignment_expression> assignment_expression_list;
-/// \brief vector of assignment expressions
-typedef atermpp::vector<assignment_expression>    assignment_expression_vector;
 
-//--- start generated classes ---//
+/// \brief vector of assignment_expressions
+typedef std::vector<assignment_expression>    assignment_expression_vector;
+
 
 /// \brief Assignment of a data expression to a variable
 class assignment: public assignment_expression
@@ -81,10 +66,10 @@ class assignment: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    assignment(const atermpp::aterm_appl& term)
+    assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
-      assert(core::detail::check_term_DataVarIdInit(m_term));
+      assert(core::detail::check_term_DataVarIdInit(*this));
     }
 
     /// \brief Constructor.
@@ -92,22 +77,22 @@ class assignment: public assignment_expression
       : assignment_expression(core::detail::gsMakeDataVarIdInit(lhs, rhs))
     {}
 
-    variable lhs() const
+    const variable& lhs() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const variable>(atermpp::arg1(*this));
     }
 
-    data_expression rhs() const
+    const data_expression& rhs() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
     }
 //--- start user section assignment ---//
     /// \brief Applies the assignment to a variable
     /// \param[in] x A variable
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
-    data_expression operator()(const variable& x) const
+    const data_expression &operator()(const variable& x) const
     {
-      return x == lhs() ? rhs() : data_expression(x);
+      return x == lhs() ? rhs() : atermpp::aterm_cast<const data_expression>(x);
     }
 
     /// \brief Applies the assignment to a term
@@ -126,7 +111,7 @@ class assignment: public assignment_expression
 typedef atermpp::term_list<assignment> assignment_list;
 
 /// \brief vector of assignments
-typedef atermpp::vector<assignment>    assignment_vector;
+typedef std::vector<assignment>    assignment_vector;
 
 
 /// \brief Test for a assignment expression
@@ -150,10 +135,10 @@ class identifier_assignment: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    identifier_assignment(const atermpp::aterm_appl& term)
+    identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
-      assert(core::detail::check_term_IdInit(m_term));
+      assert(core::detail::check_term_IdInit(*this));
     }
 
     /// \brief Constructor.
@@ -166,14 +151,14 @@ class identifier_assignment: public assignment_expression
       : assignment_expression(core::detail::gsMakeIdInit(core::identifier_string(lhs), rhs))
     {}
 
-    core::identifier_string lhs() const
+    const core::identifier_string& lhs() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    data_expression rhs() const
+    const data_expression& rhs() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
     }
 //--- start user section identifier_assignment ---//
     /// \brief Applies the assignment to a variable
@@ -200,7 +185,7 @@ class identifier_assignment: public assignment_expression
 typedef atermpp::term_list<identifier_assignment> identifier_assignment_list;
 
 /// \brief vector of identifier_assignments
-typedef atermpp::vector<identifier_assignment>    identifier_assignment_vector;
+typedef std::vector<identifier_assignment>    identifier_assignment_vector;
 
 
 /// \brief Test for a identifier_assignment expression
@@ -253,20 +238,6 @@ make_assignment_right_hand_side_range(Container const& assignments, typename ate
   return boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >(assignments);
 }
 
-/// \brief Constructs a range of assignments from sequences of variables and expressions by pair-wise combination
-template < typename VariableSequence, typename ExpressionSequence >
-boost::iterator_range< atermpp::detail::combine_iterator< atermpp::detail::construct< assignment >&, typename VariableSequence::const_iterator, typename ExpressionSequence::const_iterator > >
-make_assignment_range(VariableSequence const& variables, ExpressionSequence const& expressions,
-                      typename atermpp::detail::enable_if_container< VariableSequence, variable >::type* = 0,
-                      typename atermpp::detail::enable_if_container< ExpressionSequence, data_expression >::type* = 0)
-{
-  assert(boost::distance(variables) == boost::distance(expressions));
-
-  return boost::make_iterator_range(
-           atermpp::detail::make_combine_iterator(atermpp::detail::construct< assignment >(), variables.begin(), expressions.begin()),
-           atermpp::detail::make_combine_iterator(atermpp::detail::construct< assignment >(), variables.end(), expressions.end()));
-}
-
 /// \brief Constructs an assignment_list by pairwise combining a variable and expression
 /// \param lhs A sequence of data variables
 /// \param rhs A sequence of data expressions
@@ -274,38 +245,27 @@ make_assignment_range(VariableSequence const& variables, ExpressionSequence cons
 template < typename VariableSequence, typename ExpressionSequence >
 assignment_vector make_assignment_vector(VariableSequence const& variables, ExpressionSequence const& expressions)
 {
-  return atermpp::convert< assignment_vector >(make_assignment_vector(variables, expressions));
-}
+  std::vector<assignment> result;
+  typename ExpressionSequence::const_iterator j=expressions.begin();
+  for(typename VariableSequence::const_iterator i=variables.begin(); i!=variables.end(); ++i, ++j)
+  {
+    assert(j!=expressions.end());
+    result.push_back(assignment(*i,*j));
+  }
+  assert(j==expressions.end());
+  return result;
+} 
 
 /// \brief Converts an iterator range to data_expression_list
 /// \param r A range of assignments.
 /// \note This function uses implementation details of the iterator type
 /// and hence is sometimes efficient than copying all elements of the list.
 template < typename VariableSequence, typename ExpressionSequence >
-assignment_list make_assignment_list(VariableSequence const& variables, ExpressionSequence const& expressions)
+assignment_list make_assignment_list(const VariableSequence& variables, const ExpressionSequence& expressions)
 {
-  return atermpp::convert< assignment_list >(make_assignment_range(variables, expressions));
-}
-
-/// \brief Converts an iterator range to data_expression_list
-/// \param r A range of assignments.
-/// \note This function uses implementation details of the iterator type
-/// and hence is sometimes efficient than copying all elements of the list.
-template < typename Container >
-inline assignment_list make_assignment_list(Container const& container, typename atermpp::detail::enable_if_container< Container, assignment >::type* = 0)
-{
-  return atermpp::convert< assignment_list >(container);
-}
-
-/// \brief Converts an iterator range to data_expression_list
-/// \param r A range of assignments.
-/// \note This function uses implementation details of the iterator type
-/// and hence is sometimes efficient than copying all elements of the list.
-template < typename Container >
-inline assignment_list make_assignment_vector(Container const& container, typename atermpp::detail::enable_if_container< Container, assignment >::type* = 0)
-{
-  return atermpp::convert< assignment_vector >(container);
-}
+  std::vector<assignment> result(make_assignment_vector(variables,expressions));
+  return assignment_list(result.begin(),result.end());
+} 
 
 /// \brief Returns the left hand sides of an assignment list
 /// \param x An assignment list
@@ -320,26 +280,18 @@ variable_list left_hand_sides(const assignment_list& x)
   return variable_list(result.begin(), result.end());
 }
 
-////--- start generated is-functions ---//
-//
-//    /// \brief Test for a assignment expression
-//    /// \param t A term
-//    /// \return True if it is a assignment expression
-//    inline
-//    bool is_assignment(const assignment_expression& t)
-//    {
-//      return core::detail::gsIsDataVarIdInit(t);
-//    }
-//
-//    /// \brief Test for a identifier_assignment expression
-//    /// \param t A term
-//    /// \return True if it is a identifier_assignment expression
-//    inline
-//    bool is_identifier_assignment(const assignment_expression& t)
-//    {
-//      return core::detail::gsIsIdInit(t);
-//    }
-////--- end generated is-functions ---//
+/// \brief Returns true if the term x is an assignment expression
+/// \param x An expression
+/// \return True if the term t is an assignment expression
+inline
+bool is_assignment_expression(const atermpp::aterm_appl& x)
+{
+  // TODO: this code should be generated
+  return
+    core::detail::gsIsDataVarIdInit(x) ||
+    core::detail::gsIsIdInit(x)
+    ;
+}
 
 // template function overloads
 std::string pp(const assignment& x);
@@ -349,6 +301,28 @@ std::string pp(const assignment_vector& x);
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::assignment_expression& t1, mcrl2::data::assignment_expression& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::assignment& t1, mcrl2::data::assignment& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::identifier_assignment& t1, mcrl2::data::identifier_assignment& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_ASSIGNMENT_H
 

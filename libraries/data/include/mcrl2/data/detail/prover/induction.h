@@ -12,9 +12,8 @@
 #ifndef INDUCTION_H
 #define INDUCTION_H
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
@@ -47,16 +46,16 @@ class Induction
     core::identifier_string f_cons_name;
 
     /// \brief
-    atermpp::vector < variable >  f_list_variables;
+    std::vector < variable >  f_list_variables;
 
     /// \brief
-    atermpp::map < variable, sort_expression > f_lists_to_sorts;
+    std::map < variable, sort_expression > f_lists_to_sorts;
 
     /// \brief
-    BDD_Info f_bdd_info;
+    // BDD_Info f_bdd_info;
 
     /// \brief
-    void recurse_expression_for_lists(const data_expression a_expression)
+    void recurse_expression_for_lists(const data_expression &a_expression)
     {
       if (is_variable(a_expression))
       {
@@ -65,14 +64,14 @@ class Induction
         {
           if (std::find(f_list_variables.begin(), f_list_variables.end(),a_expression)==f_list_variables.end()) // not found
           {
-            f_list_variables.push_back(a_expression);
+            f_list_variables.push_back(atermpp::aterm_cast<variable>(a_expression));
           }
         }
       }
       else if (is_application(a_expression))
       {
-        data::application a = data::application(data::data_expression(a_expression));
-        for (data_expression_list::const_iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
+        const data::application &a = atermpp::aterm_cast<const data::application>(a_expression);
+        for (data_expression_list::const_iterator i = a.begin(); i != a.end(); ++i)
         {
           recurse_expression_for_lists(*i);
         }
@@ -82,7 +81,7 @@ class Induction
     /// \brief
     void map_lists_to_sorts()
     {
-      for(atermpp::vector < variable >::const_iterator it=f_list_variables.begin(); it!=f_list_variables.end(); ++it)
+      for(std::vector < variable >::const_iterator it=f_list_variables.begin(); it!=f_list_variables.end(); ++it)
       {
         const variable v_list_variable = *it;
         const sort_expression v_sort = get_sort_of_list_elements(v_list_variable);
@@ -91,7 +90,7 @@ class Induction
     }
 
     /// \brief
-    sort_expression get_sort_of_list_elements(const variable a_list_variable)
+    sort_expression get_sort_of_list_elements(const variable &a_list_variable)
     {
       function_symbol_list v_constructors;
       function_symbol v_constructor;
@@ -106,7 +105,7 @@ class Induction
       while (!v_constructors.empty())
       {
         v_constructor = v_constructors.front();
-        v_constructors = pop_front(v_constructors);
+        v_constructors.pop_front();
         v_constructor_name = v_constructor.name();
         if (v_constructor_name == f_cons_name)
         {
@@ -124,7 +123,7 @@ class Induction
     }
 
     /// \brief
-    variable get_fresh_dummy(const sort_expression a_sort)
+    variable get_fresh_dummy(const sort_expression &a_sort)
     {
       return variable(fresh_identifier_generator("dummy$"),a_sort);
     }
@@ -133,41 +132,30 @@ class Induction
     /// \brief
     data_expression apply_induction_one()
     {
-      variable v_induction_variable;
-      sort_expression v_induction_variable_sort;
-      variable v_dummy_variable;
-      sort_expression v_dummy_sort;
-      ATermAppl v_substitution;
-      ATermList v_substitution_list;
-      data_expression v_base_case;
-      data_expression v_induction_step;
-      data_expression v_result;
+      using namespace atermpp;
 
-      v_induction_variable = f_list_variables.front();
-      v_induction_variable_sort = v_induction_variable.sort();
+      const variable v_induction_variable = f_list_variables.front();
+      const sort_expression v_induction_variable_sort = v_induction_variable.sort();
 
-      v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
-      v_dummy_variable = get_fresh_dummy(v_dummy_sort);
+      const sort_expression v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
+      const variable v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::empty(sort_expression(v_induction_variable_sort)));
-      v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      v_base_case = data_expression(gsSubstValues_Appl(v_substitution_list, f_formula, true));
+      const substitution v_substitution1(v_induction_variable, sort_list::empty(sort_expression(v_induction_variable_sort)));
+      const data_expression v_base_case = aterm_cast<data_expression>(v_substitution1(f_formula));
 
-      v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
-      v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      v_induction_step = data_expression(gsSubstValues_Appl(v_substitution_list, f_formula, true));
-      v_induction_step = sort_bool::implies(data_expression(f_formula), data_expression(v_induction_step));
+      substitution v_substitution2 = substitution(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
+      const data_expression v_induction_step = sort_bool::implies(data_expression(f_formula), aterm_cast<data_expression>(v_substitution2(f_formula)));
 
-      v_result = sort_bool::and_(data_expression(v_base_case), data_expression(v_induction_step));
-      return v_result;
+      return sort_bool::and_(data_expression(v_base_case), data_expression(v_induction_step));
     }
 
     /// \brief
     data_expression create_hypotheses(
-                        const data_expression a_hypothesis,
+                        const data_expression &a_hypothesis,
                         variable_list a_list_of_variables,
                         data_expression_list a_list_of_dummies)
     {
+      using namespace atermpp;
       if (a_list_of_variables.empty())
       {
         return sort_bool::true_();
@@ -180,12 +168,11 @@ class Induction
           while (!a_list_of_variables.size())
           {
             variable v_variable(a_list_of_variables.front());
-            a_list_of_variables = pop_front(a_list_of_variables);
+            a_list_of_variables.pop_front();
             data_expression v_dummy(a_list_of_dummies.front());
-            a_list_of_dummies = pop_front(a_list_of_dummies);
-            ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
-            ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
-            v_clause = sort_bool::and_(v_clause, data_expression(gsSubstValues_Appl(v_substitution_list, a_hypothesis, true)));
+            a_list_of_dummies.pop_front();
+            const substitution v_substitution(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
+            v_clause = sort_bool::and_(v_clause, aterm_cast<data_expression>(v_substitution(a_hypothesis)));
           }
         }
 
@@ -194,26 +181,27 @@ class Induction
     }
 
     /// \brief
-    data_expression_list create_clauses(const atermpp::aterm_appl a_formula,
-                             const atermpp::aterm_appl a_hypothesis,
+    data_expression_list create_clauses(const atermpp::aterm_appl &a_formula,
+                             const atermpp::aterm_appl &a_hypothesis,
                              const size_t a_variable_number,
                              const size_t a_number_of_variables,
-                             const variable_list a_list_of_variables,
-                             const variable_list a_list_of_dummies)
+                             const variable_list &a_list_of_variables,
+                             const variable_list &a_list_of_dummies)
     {
+      using namespace atermpp;
       const variable v_variable = f_list_variables[a_variable_number];
       const sort_expression v_variable_sort = data_expression(v_variable).sort();
-      const variable_list v_list_of_variables = push_front(a_list_of_variables, v_variable);
+      variable_list v_list_of_variables = a_list_of_variables;
+      v_list_of_variables.push_front(v_variable);
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_variable);
       const variable v_dummy = get_fresh_dummy(v_dummy_sort);
-      const variable_list v_list_of_dummies = push_front(a_list_of_dummies, v_dummy);
-      ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
-      ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      data_expression v_formula_1 = data_expression(gsSubstValues_Appl(v_substitution_list, a_formula, true));
-      v_substitution = gsMakeSubst_Appl(v_variable, sort_list::empty(sort_expression(v_variable_sort)));
-      v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      data_expression v_formula_2 = data_expression(gsSubstValues_Appl(v_substitution_list, a_formula, true));
-      data_expression v_hypothesis = data_expression(gsSubstValues_Appl(v_substitution_list, a_hypothesis, true));
+      variable_list v_list_of_dummies = a_list_of_dummies;
+      v_list_of_dummies.push_front(v_dummy);
+      const substitution v_substitution1(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
+      const data_expression v_formula_1 = aterm_cast<data_expression>(v_substitution1(a_formula));
+      const substitution v_substitution2(v_variable, sort_list::empty(sort_expression(v_variable_sort)));
+      const data_expression v_formula_2 = aterm_cast<data_expression>(v_substitution2(a_formula));
+      const data_expression v_hypothesis = aterm_cast<data_expression>(v_substitution2(a_hypothesis));
 
       if (a_variable_number < a_number_of_variables - 1)
       {
@@ -223,8 +211,8 @@ class Induction
       }
       else
       {
-        data_expression v_hypotheses_1 = create_hypotheses(a_hypothesis, v_list_of_variables, v_list_of_dummies);
-        data_expression v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, a_list_of_dummies);
+        data_expression v_hypotheses_1 = create_hypotheses(data_expression(a_hypothesis), v_list_of_variables, data_expression_list(v_list_of_dummies));
+        data_expression v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, data_expression_list(a_list_of_dummies));
         return data_expression_list(sort_bool::implies(v_hypotheses_1, v_formula_1))+
                    data_expression_list(sort_bool::implies(v_hypotheses_2, v_formula_2));
       }
@@ -234,7 +222,7 @@ class Induction
     /// \brief
     Induction(const data_specification& a_data_spec)
     {
-      f_constructors=atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors());
+      f_constructors=function_symbol_list(atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors()));
       f_cons_name = sort_list::cons_name();
     }
 
@@ -244,7 +232,7 @@ class Induction
     }
 
     /// \brief
-    void initialize(const data_expression a_formula)
+    void initialize(const data_expression &a_formula)
     {
       f_formula = a_formula;
       f_list_variables.clear();
@@ -281,13 +269,13 @@ class Induction
       else
       {
         mCRL2log(log::verbose) << "Induction on " << f_count << " variables." << std::endl;
-        data_expression_list v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, variable_list(), data_expression_list());
+        data_expression_list v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, variable_list(), variable_list());
         v_result = v_list_of_clauses.front();
-        v_list_of_clauses = pop_front(v_list_of_clauses);
+        v_list_of_clauses.pop_front();
         while (!v_list_of_clauses.empty())
         {
           data_expression v_clause(v_list_of_clauses.front());
-          v_list_of_clauses = pop_front(v_list_of_clauses);
+          v_list_of_clauses.pop_front();
           v_result = sort_bool::and_(data_expression(v_result), v_clause);
         }
       }

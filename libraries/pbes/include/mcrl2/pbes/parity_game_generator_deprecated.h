@@ -19,8 +19,6 @@
 #include <set>
 #include <utility>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
@@ -55,10 +53,10 @@ class parity_game_generator_deprecated: public parity_game_generator
     data::detail::legacy_rewriter datar_internal;
 
     /// \brief Maps propositional variables to corresponding PBES equations.
-    std::map<core::identifier_string, atermpp::vector<internal_equation_t>::const_iterator > m_pbes_equation_index;
+    std::map<core::identifier_string, std::vector<internal_equation_t>::const_iterator > m_pbes_equation_index;
 
     /// \brief Stores an internal representation of equations
-    atermpp::vector<internal_equation_t> m_internal_equations;
+    std::vector<internal_equation_t> m_internal_equations;
 public:
     pbes_expression from_rewrite_format(const pbes_expression& e)
     {
@@ -123,7 +121,7 @@ public:
     {
       if (m_precompile_pbes)
       {
-        return e.to_string() + " (" + data::pp(from_rewrite_format(e)) + ")";
+        return to_string(e) + " (" + data::pp(from_rewrite_format(e)) + ")";
       }
       else
       {
@@ -199,7 +197,7 @@ protected:
     {
       data::detail::legacy_rewriter::substitution_type sigma;
       data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-      for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
       {
         m_internal_equations.push_back(
           pbes_equation_to_aterm(
@@ -245,7 +243,7 @@ protected:
     virtual
     void compute_equation_index_map()
     {
-      for (atermpp::vector<internal_equation_t>::const_iterator i = m_internal_equations.begin(); i != m_internal_equations.end(); ++i)
+      for (std::vector<internal_equation_t>::const_iterator i = m_internal_equations.begin(); i != m_internal_equations.end(); ++i)
       {
         m_pbes_equation_index[pbes_equation(*i).variable().name()] = i;
       }
@@ -265,7 +263,7 @@ protected:
         if (m_precompile_pbes)
         {
           // datar_internal.set_internally_associated_value(*i,(atermpp::aterm)(*j));
-          sigma_internal[*i]=atermpp::aterm(*j);
+          sigma_internal[*i]=*j;
         }
         else
         {

@@ -33,9 +33,9 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #endif
 
-  const atermpp::vector<process_equation>& equations;
+  const std::vector<process_equation>& equations;
 
-  expand_process_instance_assignments_builder(const atermpp::vector<process_equation>& equations_)
+  expand_process_instance_assignments_builder(const std::vector<process_equation>& equations_)
     : equations(equations_)
   {}
 

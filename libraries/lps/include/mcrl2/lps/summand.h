@@ -19,8 +19,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/utility.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
@@ -48,21 +46,12 @@ namespace lps
 //                  | MultAct(<Action>*)                                    (+ tc)
 class summand_base
 {
-    friend struct atermpp::aterm_traits<summand_base>;
-
   protected:
     /// \brief The summation variables of the summand
     data::variable_list m_summation_variables;
 
     /// \brief The condition of the summand
     data::data_expression m_condition;
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_summation_variables.mark();
-      m_condition.mark();
-    }
 
   public:
     /// \brief Constructor.
@@ -103,57 +92,17 @@ class summand_base
       return m_condition;
     }
     
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_summation_variables.protect();
-      m_condition.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_summation_variables.unprotect();
-      m_condition.unprotect();
-    }
 };
 
 /// \brief LPS summand containing a deadlock.
 class deadlock_summand: public summand_base
 {
-    friend struct atermpp::aterm_traits<deadlock_summand>;
-
   protected:
     /// \brief The super class
     typedef summand_base super;
 
     /// \brief The deadlock of the summand
     lps::deadlock m_deadlock;
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      super::protect();
-      m_deadlock.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      super::unprotect();
-      m_deadlock.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      super::mark();
-      m_deadlock.mark();
-    }
 
     /// \brief Returns true if time is available.
     /// \return True if time is available.
@@ -188,28 +137,26 @@ class deadlock_summand: public summand_base
 };
 
 /// \brief Vector of deadlock summands
-typedef atermpp::vector<deadlock_summand> deadlock_summand_vector;
+typedef std::vector<deadlock_summand> deadlock_summand_vector;
 
-/// \brief Conversion to ATermAppl.
-/// \return The deadlock summand converted to ATerm format.
+/// \brief Conversion to atermappl.
+/// \return The deadlock summand converted to aterm format.
 inline
 atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
 {
-  ATermAppl result = core::detail::gsMakeLinearProcessSummand(
+  atermpp::aterm_appl result = core::detail::gsMakeLinearProcessSummand(
                        s.summation_variables(),
                        s.condition(),
                        core::detail::gsMakeDelta(),
                        s.deadlock().time(),
                        data::assignment_list()
                      );
-  return atermpp::aterm_appl(result);
+  return result;
 }
 
 /// \brief LPS summand containing a multi-action.
 class action_summand: public summand_base
 {
-    friend struct atermpp::aterm_traits<action_summand>;
-
   protected:
     /// \brief The super class
     typedef summand_base super;
@@ -219,15 +166,6 @@ class action_summand: public summand_base
 
     /// \brief The assignments of the next state
     data::assignment_list m_assignments;
-
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      super::mark();
-      m_multi_action.mark();
-      m_assignments.mark();
-    }
 
   public:
     /// \brief Constructor.
@@ -259,11 +197,11 @@ class action_summand: public summand_base
     const data::assignment_list& assignments() const
     {
       return m_assignments;
-    }
+    } 
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    data::assignment_list& assignments()
+    data::assignment_list &assignments()
     {
       return m_assignments;
     }
@@ -334,7 +272,7 @@ bool operator<(const action_summand& x, const action_summand& y)
 }
 
 /// \brief Vector of action summands
-typedef atermpp::vector<action_summand> action_summand_vector;
+typedef std::vector<action_summand> action_summand_vector;
 
 /// \brief Equality operator of action summands
 inline
@@ -343,81 +281,23 @@ bool operator==(const action_summand& x, const action_summand& y)
   return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The action summand converted to ATerm format.
+/// \brief Conversion to atermAppl.
+/// \return The action summand converted to aterm format.
 inline
 atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
-  ATermAppl result = core::detail::gsMakeLinearProcessSummand(
+  atermpp::aterm_appl result = core::detail::gsMakeLinearProcessSummand(
                        s.summation_variables(),
                        s.condition(),
                        lps::detail::multi_action_to_aterm(s.multi_action()),
                        s.multi_action().time(),
                        s.assignments()
                      );
-  return atermpp::aterm_appl(result);
+  return result;
 }
 
 } // namespace lps
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::lps::summand_base>
-{
-  static void protect(const mcrl2::lps::summand_base& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::summand_base& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::summand_base& t)
-  {
-    t.mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::lps::deadlock_summand>
-{
-  static void protect(const mcrl2::lps::deadlock_summand& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::deadlock_summand& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::deadlock_summand& t)
-  {
-    t.mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::lps::action_summand>
-{
-  static void protect(const mcrl2::lps::action_summand& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::action_summand& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::action_summand& t)
-  {
-    t.mark();
-  }
-};
-
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_LPS_SUMMAND_H

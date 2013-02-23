@@ -22,7 +22,6 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
@@ -786,7 +785,5 @@ class mcrl2parse_tool : public input_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return mcrl2parse_tool().execute(argc, argv);
 }

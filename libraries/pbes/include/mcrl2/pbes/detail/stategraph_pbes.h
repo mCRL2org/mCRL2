@@ -25,7 +25,7 @@ namespace pbes_system {
 
 namespace detail {
 
-typedef atermpp::vector<std::pair<propositional_variable_instantiation, pbes_expression> > predicate_variable_vector;
+typedef std::vector<std::pair<propositional_variable_instantiation, pbes_expression> > predicate_variable_vector;
 
 inline
 std::string print_equation(const pbes_equation& eq)
@@ -104,8 +104,8 @@ class stategraph_pbes
 {
   protected:
     data::data_specification m_data;
-    atermpp::vector<stategraph_equation> m_equations;
-    atermpp::set<data::variable> m_global_variables;
+    std::vector<stategraph_equation> m_equations;
+    std::set<data::variable> m_global_variables;
     pbes_expression m_initial_state;
 
   public:
@@ -117,29 +117,29 @@ class stategraph_pbes
     stategraph_pbes(const pbes<>& p)
       : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
-      const atermpp::vector<pbes_equation>& equations = p.equations();
-      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      const std::vector<pbes_equation>& equations = p.equations();
+      for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         m_equations.push_back(stategraph_equation(*i));
       }
     }
 
-    const atermpp::vector<stategraph_equation>& equations() const
+    const std::vector<stategraph_equation>& equations() const
     {
       return m_equations;
     }
 
-    atermpp::vector<stategraph_equation>& equations()
+    std::vector<stategraph_equation>& equations()
     {
       return m_equations;
     }
 
-    const atermpp::set<data::variable>& global_variables() const
+    const std::set<data::variable>& global_variables() const
     {
       return m_global_variables;
     }
 
-    atermpp::set<data::variable>& global_variables()
+    std::set<data::variable>& global_variables()
     {
       return m_global_variables;
     }

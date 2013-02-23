@@ -66,7 +66,10 @@ struct action_actions: public data::data_specification_actions
   lps::multi_action parse_MultAct(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::multi_action(); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList")) { return lps::multi_action(parse_ActionList(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList")) 
+    { 
+      return lps::multi_action(action_list(parse_ActionList(node.child(0)))); 
+    }
     report_unexpected_node(node);
     return lps::action_list();
   }

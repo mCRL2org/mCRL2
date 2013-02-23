@@ -68,7 +68,7 @@ class specification
     action_label_list m_action_labels;
 
     /// \brief The set of global variables
-    atermpp::set<data::variable> m_global_variables;
+    std::set<data::variable> m_global_variables;
 
     /// \brief The linear process of the specification
     linear_process m_process;
@@ -76,17 +76,17 @@ class specification
     /// \brief The initial state of the specification
     process_initializer m_initial_process;
 
-    /// \brief Initializes the specification with an ATerm.
+    /// \brief Initializes the specification with an aterm.
     /// \param t A term
-    void construct_from_aterm(atermpp::aterm_appl t)
+    void construct_from_aterm(const atermpp::aterm_appl &t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data             = atermpp::aterm_appl(*i++);
-      m_action_labels    = atermpp::aterm_appl(*i++)(0);
-      data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
-      m_process          = atermpp::aterm_appl(*i++);
-      m_initial_process  = atermpp::aterm_appl(*i);
+      m_action_labels    = action_label_list(atermpp::aterm_appl(*i++)[0]);
+      data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
+      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      m_process          = linear_process(atermpp::aterm_cast<atermpp::aterm_appl>(*i++));
+      m_initial_process  = process_initializer(atermpp::aterm_cast<atermpp::aterm_appl>(*i));
       m_data.declare_data_specification_to_be_type_checked();
       complete_data_specification(*this);
     }
@@ -95,26 +95,23 @@ class specification
     /// \brief Constructor.
     specification()
     {
-      m_initial_process.protect();
     }
 
-    specification(specification const& other)
+    specification(const specification &other)
     {
       m_data = other.m_data;
       m_action_labels = other.m_action_labels;
       m_global_variables = other.m_global_variables;
       m_process = other.m_process;
       m_initial_process = other.m_initial_process;
-      m_initial_process.protect();
     }
 
     /// \brief Constructor.
     /// \param t A term
-    specification(atermpp::aterm_appl t)
+    specification(const atermpp::aterm_appl &t)
     {
       assert(core::detail::check_rule_LinProcSpec(t));
       construct_from_aterm(t);
-      m_initial_process.protect();
     }
 
     /// \brief Constructor.
@@ -124,7 +121,7 @@ class specification
     /// \param initial_process A process initializer
     specification(const data::data_specification& data,
                   const action_label_list& action_labels,
-                  const atermpp::set<data::variable>& global_variables,
+                  const std::set<data::variable>& global_variables,
                   const linear_process& lps,
                   const process_initializer& initial_process)
       :
@@ -134,7 +131,6 @@ class specification
       m_process(lps),
       m_initial_process(initial_process)
     {
-      m_initial_process.protect();
     }
 
     /// \brief Reads the specification from file.
@@ -143,8 +139,9 @@ class specification
     /// If filename is empty, input is read from standard input.
     void load(const std::string& filename)
     {
+      using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (!t || t.type() != AT_APPL || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
+      if (!t.defined() || !t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
       }
@@ -218,14 +215,14 @@ class specification
 
     /// \brief Returns the declared free variables of the LPS.
     /// \return The declared free variables of the LPS.
-    const atermpp::set<data::variable>& global_variables() const
+    const std::set<data::variable>& global_variables() const
     {
       return m_global_variables;
     }
 
     /// \brief Returns the declared free variables of the LPS.
     /// \return The declared free variables of the LPS.
-    atermpp::set<data::variable>& global_variables()
+    std::set<data::variable>& global_variables()
     {
       return m_global_variables;
     }
@@ -246,7 +243,6 @@ class specification
 
     ~specification()
     {
-      m_initial_process.unprotect();
     }
 };
 
@@ -268,8 +264,8 @@ void complete_data_specification(lps::specification& spec)
   spec.data().add_context_sorts(s);
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The specification converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The specification converted to aterm format.
 inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {

@@ -21,7 +21,7 @@ namespace pbes_system {
 namespace detail {
 
 template <typename TermTraits>
-atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
+std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                                  const state_formulas::state_formula& x,
                                  const lps::linear_process& lps,
                                  data::set_identifier_generator& id_generator,
@@ -41,7 +41,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  typedef atermpp::vector<pbes_equation> result_type;
+  typedef std::vector<pbes_equation> result_type;
 
   const state_formulas::state_formula& phi0; // the original formula
   const lps::linear_process& lps;
@@ -118,15 +118,15 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void leave(const state_formulas::and_&)
   {
-    atermpp::vector<pbes_equation> right = pop();
-    atermpp::vector<pbes_equation> left = pop();
+    std::vector<pbes_equation> right = pop();
+    std::vector<pbes_equation> left = pop();
     push(left + right);
   }
 
   void leave(const state_formulas::or_&)
   {
-    atermpp::vector<pbes_equation> right = pop();
-    atermpp::vector<pbes_equation> left = pop();
+    std::vector<pbes_equation> right = pop();
+    std::vector<pbes_equation> left = pop();
     push(left + right);
   }
 
@@ -188,12 +188,12 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     data::variable_list xf = detail::mu_variables(x);
     data::variable_list xp = lps.process_parameters();
     state_formulas::state_formula phi = x.operand();
-    data::data_expression_list e = xf + xp + Par(X, data::variable_list(), phi0);
+    data::variable_list e = xf + xp + Par(X, data::variable_list(), phi0);
     e = is_timed() ? T + e : e;
     propositional_variable v(X, e);
     pbes_expression expr = detail::RHS(phi0, phi, lps, id_generator, T, TermTraits());
     pbes_equation eqn(sigma, v, expr);
-    push(atermpp::vector<pbes_equation>() + eqn + E(phi0, phi, lps, id_generator, T, TermTraits()));
+    push(std::vector<pbes_equation>() + eqn + E(phi0, phi, lps, id_generator, T, TermTraits()));
   }
 
   void operator()(const state_formulas::nu& x)
@@ -231,7 +231,7 @@ struct apply_e_traverser: public Traverser<apply_e_traverser<Traverser, TermTrai
 
 template <typename TermTraits>
 inline
-atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
+std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                                  const state_formulas::state_formula& x,
                                  const lps::linear_process& lps,
                                  data::set_identifier_generator& id_generator,
@@ -246,7 +246,7 @@ atermpp::vector<pbes_equation> E(const state_formulas::state_formula& x0,
 }
 
 template <typename TermTraits>
-atermpp::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
+std::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
                                             const state_formulas::state_formula& x,
                                             const lps::linear_process& lps,
                                             data::set_identifier_generator& id_generator,
@@ -276,7 +276,7 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits>
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  // typedef atermpp::vector<pbes_equation> result_type;
+  // typedef std::vector<pbes_equation> result_type;
 
   data::set_identifier_generator& propvar_generator;
 
@@ -307,11 +307,11 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits>
     data::variable_list d = xf + xp + Par(X, data::variable_list(), phi0);
     d = is_timed() ? T + d : d;
     data::data_expression_list e = data::make_data_expression_list(d);
-    propositional_variable v(X, e);
-    atermpp::vector<pbes_equation> Z;
+    propositional_variable v(X, d);
+    std::vector<pbes_equation> Z;
     pbes_expression expr = detail::RHS_structured(phi0, phi, lps, id_generator, propvar_generator, d, sigma, Z, T, TermTraits());
     pbes_equation eqn(sigma, v, expr);
-    push(atermpp::vector<pbes_equation>() + eqn + Z + E_structured(phi0, phi, lps, id_generator, propvar_generator, T, TermTraits()));
+    push(std::vector<pbes_equation>() + eqn + Z + E_structured(phi0, phi, lps, id_generator, propvar_generator, T, TermTraits()));
   }
 
   void operator()(const state_formulas::nu& x)
@@ -349,7 +349,7 @@ struct apply_e_structured_traverser: public Traverser<apply_e_structured_travers
 };
 
 template <typename TermTraits>
-atermpp::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
+std::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
                                             const state_formulas::state_formula& x,
                                             const lps::linear_process& lps,
                                             data::set_identifier_generator& id_generator,

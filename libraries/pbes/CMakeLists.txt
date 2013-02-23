@@ -17,7 +17,7 @@ add_custom_target(${PROJECT_NAME}_headers
 
 # ######### General setup ##########
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)

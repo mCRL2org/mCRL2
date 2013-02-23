@@ -144,18 +144,18 @@ namespace pbes_expr {
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool split_simple_expr = false)
+std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool split_simple_expr = false)
 {
   using namespace accessors;
-  atermpp::vector<pbes_expression> result;
+  std::vector<pbes_expression> result;
 
   if (split_simple_expr)
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_or, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_or, left, right);
   }
   else
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
   }
 
   return result;
@@ -168,18 +168,18 @@ atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bo
 /// \param expr A PBES expression
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool split_simple_expr = false)
+std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool split_simple_expr = false)
 {
   using namespace accessors;
-  atermpp::vector<pbes_expression> result;
+  std::vector<pbes_expression> result;
 
   if (split_simple_expr)
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_and, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_and, left, right);
   }
   else
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
   }
 
   return result;

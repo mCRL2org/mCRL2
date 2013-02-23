@@ -12,13 +12,12 @@
 #include <iostream>
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -41,10 +40,10 @@ static size_t count_ctau(lps::specification const& s)
     if (al.size()==1)
     {
       const action_label lab=al.front().label();
-      if (lab.name()=="ctau")
+      if (to_string(lab.name())=="ctau")
       {
         ++result;
-        }
+      }
     }
   }
   return result;
@@ -210,7 +209,5 @@ BOOST_AUTO_TEST_CASE(case_5)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

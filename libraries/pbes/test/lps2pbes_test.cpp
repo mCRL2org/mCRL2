@@ -29,7 +29,6 @@
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "test_specifications.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -106,10 +105,10 @@ BOOST_AUTO_TEST_CASE(test_timed)
 
   pbes<> p = test_lps2pbes(TIMED_SPECIFICATION, TRIVIAL_FORMULA);
 
-  const atermpp::vector<sort_expression> user_def_sorts(p.data().user_defined_sorts());
+  const std::vector<sort_expression> user_def_sorts(p.data().user_defined_sorts());
   BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
 
-  const atermpp::vector<sort_expression> sorts(p.data().sorts());
+  const std::vector<sort_expression> sorts(p.data().sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), sort_real::real_()) != sorts.end());
 }
 
@@ -333,7 +332,6 @@ void test_directory(int argc, char** argv)
       }
     }
   }
-  core::garbage_collect();
 }
 #endif
 
@@ -460,6 +458,12 @@ BOOST_AUTO_TEST_CASE(test_machine_formula2)
 {
   test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA2);
 }
+
+BOOST_AUTO_TEST_CASE(test_machine_formula3)
+{
+  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA3);
+}
+#endif
 
 BOOST_AUTO_TEST_CASE(test_machine_formula3)
 {
@@ -641,7 +645,5 @@ BOOST_AUTO_TEST_CASE(test_1090)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

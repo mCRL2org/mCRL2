@@ -139,7 +139,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
 
     // N.B. We have to normalize the sorts of the equations first.
-    atermpp::vector<pbes_equation> normalized_equations = x.equations();
+    std::vector<pbes_equation> normalized_equations = x.equations();
     pbes_system::normalize_sorts(normalized_equations, x.data());
     print_list(normalized_equations, "pbes ", "\n\n", "\n     ");
 

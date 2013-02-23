@@ -60,30 +60,6 @@ struct true_false_pair
 
 } // namespace pbes_system
 
-namespace atermpp
-{
-/// \cond INTERNAL_DOCS
-template<typename Term>
-struct aterm_traits<mcrl2::pbes_system::detail::true_false_pair<Term> >
-{
-  static void protect(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
-  {
-    t.TC.protect();
-    t.FC.protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
-  {
-    t.TC.unprotect();
-    t.FC.unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
-  {
-    t.TC.mark();
-    t.FC.mark();
-  }
-};
-} // namespace atermpp
-
 namespace mcrl2
 {
 
@@ -100,7 +76,7 @@ namespace detail
 inline
 bool less_term(atermpp::aterm_appl v, atermpp::aterm_appl w)
 {
-  return ATermAppl(v) < ATermAppl(w);
+  return v < w;
 }
 
 template <typename Term>
@@ -151,7 +127,7 @@ struct constelm_edge_condition
   typedef typename core::term_traits<Term>::term_type term_type;
   typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
   typedef typename core::term_traits<Term> tr;
-  typedef std::multimap<propositional_variable_type, atermpp::vector<true_false_pair<Term> > > condition_map;
+  typedef std::multimap<propositional_variable_type, std::vector<true_false_pair<Term> > > condition_map;
 
   term_type TC;
   term_type FC;
@@ -167,10 +143,10 @@ struct constelm_edge_condition
   /// \brief Returns the condition
   /// \param c A sequence of true-false pairs
   /// \return The condition
-  term_type compute_condition(const atermpp::vector<true_false_pair<Term> >& c) const
+  term_type compute_condition(const std::vector<true_false_pair<Term> >& c) const
   {
     term_type result = tr::true_();
-    for (typename atermpp::vector<true_false_pair<Term> >::const_iterator i = c.begin(); i != c.end(); ++i)
+    for (typename std::vector<true_false_pair<Term> >::const_iterator i = c.begin(); i != c.end(); ++i)
     {
       result = utilities::optimized_and(result, utilities::optimized_not(i->TC));
       result = utilities::optimized_and(result, utilities::optimized_not(i->FC));
@@ -356,7 +332,7 @@ struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edg
   {
     ec.TC = tr::false_();
     ec.FC = tr::false_();
-    atermpp::vector<true_false_pair<Term> > c;
+    std::vector<true_false_pair<Term> > c;
     c.push_back(true_false_pair<Term>(tr::false_(), tr::false_()));
     ec.condition.insert(std::make_pair(v, c));
     return this->stop_recursion;
@@ -454,7 +430,7 @@ class pbes_constelm_algorithm
 
   protected:
     /// \brief A map with constraints on the vertices of the graph
-    typedef atermpp::map<variable_type, data_term_type> constraint_map;
+    typedef std::map<variable_type, data_term_type> constraint_map;
 
     /// \brief Compares data expressions for equality.
     DataRewriter m_data_rewriter;
@@ -624,13 +600,12 @@ class pbes_constelm_algorithm
 
           bool changed = false;
 
-          typename data_term_sequence_type::iterator i;
-          typename variable_sequence_type::iterator j;
           variable_sequence_type params = m_variable.parameters();
 
           if (m_constraints.empty())
           {
-            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+            typename variable_sequence_type::iterator j = params.begin();
+            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
             {
               // TODO: why not use R(t, sigma) interface here?
               data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
@@ -647,7 +622,8 @@ class pbes_constelm_algorithm
           }
           else
           {
-            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+            typename variable_sequence_type::iterator j = params.begin();
+            for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
             {
               typename constraint_map::iterator k = m_constraints.find(*j);
               assert(k != m_constraints.end());
@@ -673,7 +649,7 @@ class pbes_constelm_algorithm
     typedef std::map<string_type, vertex> vertex_map;
 
     /// \brief The storage type for edges
-    typedef std::map<string_type, atermpp::vector<edge> > edge_map;
+    typedef std::map<string_type, std::vector<edge> > edge_map;
 
     /// \brief The vertices of the dependency graph. They are stored in a map, to
     /// support searching for a vertex.
@@ -703,7 +679,7 @@ class pbes_constelm_algorithm
       std::ostringstream out;
       for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
       {
-        for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+        for (typename std::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
         {
           out << j->to_string() << std::endl;
         }
@@ -811,7 +787,7 @@ class pbes_constelm_algorithm
           visitor.visit(i->formula(), ec);
           if (!ec.condition.empty())
           {
-            atermpp::vector<edge>& edges = m_edges[name];
+            std::vector<edge>& edges = m_edges[name];
             for (typename condition_map::iterator j = ec.condition.begin(); j != ec.condition.end(); ++j)
             {
               propositional_variable_type X = j->first;
@@ -826,7 +802,7 @@ class pbes_constelm_algorithm
           std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(i->formula());
           if (!inst.empty())
           {
-            atermpp::vector<edge>& edges = m_edges[name];
+            std::vector<edge>& edges = m_edges[name];
             for (typename std::set<propositional_variable_type>::iterator k = inst.begin(); k != inst.end(); ++k)
             {
               edges.push_back(edge(i->variable(), *k));
@@ -856,9 +832,9 @@ class pbes_constelm_algorithm
         todo.erase(std::remove(todo.begin(), todo.end(), var), todo.end());
 
         const vertex& u = m_vertices[var.name()];
-        atermpp::vector<edge>& u_edges = m_edges[var.name()];
+        std::vector<edge>& u_edges = m_edges[var.name()];
 
-        for (typename atermpp::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
+        for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
         {
           const edge& e = *ei;
           vertex& v = m_vertices[e.target().name()];

@@ -82,7 +82,7 @@ class lps2pbes_algorithm
       id_generator.add_identifiers(ids);
 
       // compute the equations
-      atermpp::vector<pbes_equation> eqn;
+      std::vector<pbes_equation> eqn;
       if (structured)
       {
       	data::set_identifier_generator propvar_generator;

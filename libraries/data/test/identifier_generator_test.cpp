@@ -14,7 +14,6 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 
@@ -94,8 +93,6 @@ void xyz_identifier_generator_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   set_identifier_generator_test();
   multiset_identifier_generator_test();
   xyz_identifier_generator_test();

@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include <string>
+#include "mcrl2/atermpp/detail/utility.h"
 #include <svc/svcerrno.h>
 #include <svc/svc.h>
 
@@ -29,20 +30,20 @@
 extern char* _strdup(const char* s);
 #endif
 
-using namespace aterm;
+using namespace atermpp;
 
 extern int svcErrno;
 int SVCerrno;
 
 
 /* SVCnewLabel assigns a new index to a label
-   of a transition, given as an ATerm. The last
+   of a transition, given as an aterm. The last
    variable indicates whether the addition is
    actually a new one (1=new). SVCnewLabel returns 0 if an
    error occurred, for instance because there
    is no room left to store the new term */
 
-SVClabelIndex SVCnewLabel(SVCfile* file, ATerm term, SVCbool* _new)
+SVClabelIndex SVCnewLabel(SVCfile* file, aterm term, SVCbool* _new)
 {
   SVClabelIndex index;
 
@@ -65,10 +66,10 @@ SVClabelIndex SVCnewLabel(SVCfile* file, ATerm term, SVCbool* _new)
 }
 
 /* SVCaterm2Label gives the label index belonging
-   to an ATerm. If no such label exists, the
+   to an aterm. If no such label exists, the
    value -1 is returned */
 
-SVClabelIndex SVCaterm2Label(SVCfile* file, ATerm term)
+SVClabelIndex SVCaterm2Label(SVCfile* file, aterm term)
 {
   SVClabelIndex index;
 
@@ -84,11 +85,11 @@ SVClabelIndex SVCaterm2Label(SVCfile* file, ATerm term)
 
 }
 
-/* SVClabel2ATerm provides the ATerm that belongs
+/* SVClabel2ATerm provides the aterm that belongs
    to a label index. In case of an error NULL is
    returned */
 
-ATerm SVClabel2ATerm(SVCfile* file, SVClabelIndex index)
+aterm SVClabel2ATerm(SVCfile* file, SVClabelIndex index)
 {
 
   return HTgetTerm(&file->file.labelTable, index);
@@ -96,7 +97,7 @@ ATerm SVClabel2ATerm(SVCfile* file, SVClabelIndex index)
 }
 
 
-SVCstateIndex SVCnewState(SVCfile* file, ATerm term, SVCbool* _new)
+SVCstateIndex SVCnewState(SVCfile* file, aterm term, SVCbool* _new)
 {
   SVCstateIndex index;
 
@@ -120,7 +121,7 @@ SVCstateIndex SVCnewState(SVCfile* file, ATerm term, SVCbool* _new)
 }
 
 
-SVCstateIndex SVCaterm2State(SVCfile* file, ATerm term)
+SVCstateIndex SVCaterm2State(SVCfile* file, aterm term)
 {
   SVCstateIndex index;
 
@@ -136,7 +137,7 @@ SVCstateIndex SVCaterm2State(SVCfile* file, ATerm term)
 
 }
 
-ATerm SVCstate2ATerm(SVCfile* file, SVCstateIndex index)
+aterm SVCstate2ATerm(SVCfile* file, SVCstateIndex index)
 {
 
   return HTgetTerm(&file->file.stateTable, index);
@@ -144,7 +145,7 @@ ATerm SVCstate2ATerm(SVCfile* file, SVCstateIndex index)
 }
 
 
-SVCparameterIndex SVCnewParameter(SVCfile* file, ATerm term, SVCbool* _new)
+SVCparameterIndex SVCnewParameter(SVCfile* file, aterm term, SVCbool* _new)
 {
   SVCparameterIndex index;
 
@@ -168,7 +169,7 @@ SVCparameterIndex SVCnewParameter(SVCfile* file, ATerm term, SVCbool* _new)
 
 
 
-SVCparameterIndex SVCaterm2Parameter(SVCfile* file, ATerm term)
+SVCparameterIndex SVCaterm2Parameter(SVCfile* file, aterm term)
 {
   SVCparameterIndex index;
 
@@ -186,7 +187,7 @@ SVCparameterIndex SVCaterm2Parameter(SVCfile* file, ATerm term)
 
 
 
-ATerm SVCparameter2ATerm(SVCfile* file, SVCparameterIndex index)
+aterm SVCparameter2ATerm(SVCfile* file, SVCparameterIndex index)
 {
 
   return HTgetTerm(&file->file.parameterTable, index);
@@ -200,7 +201,7 @@ int SVCputTransition(SVCfile* file,
                      SVCparameterIndex paramIndex)
 {
   struct ltsTransition transition;
-  ATerm fromStateTerm,
+  aterm fromStateTerm,
         toStateTerm,
         labelTerm,
         paramTerm;
@@ -211,8 +212,8 @@ int SVCputTransition(SVCfile* file,
   labelTerm=HTgetTerm(&file->file.labelTable, labelIndex);
   paramTerm=HTgetTerm(&file->file.parameterTable, paramIndex);
 
-  if (fromStateTerm != NULL && toStateTerm !=NULL &&
-      labelTerm != NULL     && paramTerm   != NULL)
+  if (detail::address(fromStateTerm) != NULL && detail::address(toStateTerm)!=NULL &&
+      detail::address(labelTerm)!= NULL     && detail::address(paramTerm)   != NULL)
   {
     transition.fromState=fromStateTerm;
     transition.toState=toStateTerm;
@@ -308,7 +309,7 @@ int SVCopen(SVCfile* file, char* filename, SVCfileMode mode, SVCbool* indexed)
             svcReadHeader(&file->file, &file->header)==0)
         {
           file->file.formatVersion=version;
-          if (SVCnewState(file, ATreadFromString(file->header.initialState), &_new)<0)
+          if (SVCnewState(file, read_term_from_string(file->header.initialState), &_new)<0)
           {
             SVCerrno=ENEWSTATE;
             return -1;
@@ -386,7 +387,7 @@ SVCbool SVCgetIndexFlag(SVCfile* file)
 SVCstateIndex SVCgetInitialState(SVCfile* file)
 {
 
-  return SVCaterm2State(file, ATreadFromString(file->header.initialState));
+  return SVCaterm2State(file, read_term_from_string(file->header.initialState));
 }
 
 int SVCsetInitialState(SVCfile* file, SVCstateIndex index)
@@ -401,7 +402,7 @@ int SVCsetInitialState(SVCfile* file, SVCstateIndex index)
   }
   else
   {
-    file->header.initialState=_strdup(ATwriteToString(SVCstate2ATerm(file,index)).c_str());
+    file->header.initialState=_strdup(to_string(SVCstate2ATerm(file,index)).c_str());
   }
   return 0;
 }

@@ -15,7 +15,6 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
@@ -40,10 +39,10 @@ class basic_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    basic_sort(const atermpp::aterm_appl& term)
+    basic_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
-      assert(core::detail::check_term_SortId(m_term));
+      assert(core::detail::check_term_SortId(*this));
     }
 
     /// \brief Constructor.
@@ -56,9 +55,9 @@ class basic_sort: public sort_expression
       : sort_expression(core::detail::gsMakeSortId(core::identifier_string(name)))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 };
 //--- end generated class basic_sort ---//
@@ -66,11 +65,21 @@ class basic_sort: public sort_expression
 /// \brief list of basic sorts
 typedef atermpp::term_list<basic_sort> basic_sort_list;
 /// \brief vector of basic sorts
-typedef atermpp::vector<basic_sort> basic_sort_vector;
+typedef std::vector<basic_sort> basic_sort_vector;
 
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::basic_sort& t1, mcrl2::data::basic_sort& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

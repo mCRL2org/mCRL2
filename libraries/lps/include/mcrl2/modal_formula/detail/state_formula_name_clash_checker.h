@@ -13,7 +13,6 @@
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_CHECKER_H
 
 #include <vector>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -41,7 +40,7 @@ class state_formula_name_clash_checker: public state_formulas::state_formula_tra
 #endif
 
     /// \brief The stack of names.
-    atermpp::vector<core::identifier_string> m_name_stack;
+    std::vector<core::identifier_string> m_name_stack;
 
     /// \brief Pops the stack
     void pop()

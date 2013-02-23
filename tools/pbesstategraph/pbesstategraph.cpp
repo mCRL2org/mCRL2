@@ -10,7 +10,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
@@ -81,7 +80,6 @@ class pbes_stategraph_tool: public input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   return pbes_stategraph_tool().execute(argc, argv);
 }
 

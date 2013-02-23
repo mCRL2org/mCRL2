@@ -19,7 +19,6 @@
 #include <sstream>
 #include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -45,11 +44,9 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 
 /// \brief boolean equation system
 // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
-template <typename Container = atermpp::vector<boolean_equation> >
+template <typename Container = std::vector<boolean_equation> >
 class boolean_equation_system
 {
-    friend struct atermpp::aterm_traits<boolean_equation_system>;
-
   protected:
     /// \brief The equations
     Container m_equations;
@@ -62,10 +59,10 @@ class boolean_equation_system
     void init_term(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      atermpp::aterm_list eqn = *i++;
+      atermpp::term_list<atermpp::aterm_appl> eqn = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
       m_initial_state = boolean_expression(*i);
       m_equations.reserve(eqn.size());
-      for (atermpp::aterm_list::iterator j = eqn.begin(); j != eqn.end(); ++j)
+      for (atermpp::term_list<atermpp::aterm_appl>::const_iterator j = eqn.begin(); j != eqn.end(); ++j)
       {
         m_equations.push_back(boolean_equation(*j));
       }
@@ -131,7 +128,7 @@ class boolean_equation_system
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (!t || t.type() != AT_APPL || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
+      if (!t.defined() || !t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
       }
@@ -158,9 +155,9 @@ class boolean_equation_system
       core::detail::save_aterm(t, filename, binary);
     }
 
-    /// \brief Conversion to ATermAppl.
-    /// \return An ATerm representation of the boolean equation system
-    operator ATermAppl() const
+    /// \brief Conversion to aterm_appl.
+    /// \return An aterm representation of the boolean equation system
+    operator atermpp::aterm_appl() const
     {
       atermpp::aterm_list equations(m_equations.begin(), m_equations.end());
       return core::detail::gsMakeBES(equations, m_initial_state);
@@ -200,27 +197,7 @@ class boolean_equation_system
     {
       std::set<boolean_variable> bnd = binding_variables();
       std::set<boolean_variable> occ = occurring_variables();
-      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(initial_state()) != bnd.end();
-    }
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_initial_state.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_initial_state.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_initial_state.mark();
+      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(boolean_variable(initial_state())) != bnd.end();
     }
 };
 
@@ -230,8 +207,8 @@ bool operator==(const boolean_equation_system<Container>& x, const boolean_equat
 	return x.equations() == y.equations() && x.initial_state() == y.initial_state();
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The boolean equation system converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The boolean equation system converted to aterm format.
 template <typename Container>
 atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system<Container>& p)
 {
@@ -240,7 +217,7 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
   for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = boolean_equation_to_aterm(*i);
-    eqn_list = atermpp::push_front(eqn_list, a);
+    eqn_list.push_front(a);
   }
   return core::detail::gsMakeBES(eqn_list, p.initial_state());
 }
@@ -248,28 +225,6 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 } // namespace bes
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<typename Container>
-struct aterm_traits<mcrl2::bes::boolean_equation_system<Container> >
-{
-  static void protect(const mcrl2::bes::boolean_equation_system<Container>& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::bes::boolean_equation_system<Container>& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::bes::boolean_equation_system<Container>& t)
-  {
-    t.mark();
-  }
-};
-} // namespace atermpp
-/// \endcond
 
 #ifndef MCRL2_BES_FIND_H
 #include "mcrl2/bes/find.h"

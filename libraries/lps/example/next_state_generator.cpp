@@ -1,7 +1,6 @@
 #include <iostream>
 #include <queue>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/next_state_generator_old.h"
 
 using namespace mcrl2;
@@ -14,12 +13,12 @@ void traverse_states(const lps::specification& lps_spec, bool per_summand = fals
 
   atermpp::aterm initial_state = generator.initial_state();
 
-  atermpp::set<atermpp::aterm> visited;
-  atermpp::set<atermpp::aterm> seen;
-  atermpp::set<atermpp::aterm_appl> transition_labels;
+  std::set<atermpp::aterm> visited;
+  std::set<atermpp::aterm> seen;
+  std::set<atermpp::aterm_appl> transition_labels;
   size_t transitions = 0;
 
-  std::queue<atermpp::aterm, atermpp::deque<atermpp::aterm> > q;
+  std::queue<atermpp::aterm, std::deque<atermpp::aterm> > q;
   q.push(initial_state);
   seen.insert(initial_state);
 
@@ -67,8 +66,6 @@ void traverse_states(const lps::specification& lps_spec, bool per_summand = fals
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   if (argc != 2)
   {
     mCRL2log(log::warning) << "usage: next_state_generator LPS_FILE" << std::endl;

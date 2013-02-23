@@ -37,7 +37,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& pos_name()
       {
-        static core::identifier_string pos_name = core::detail::initialise_static_expression(pos_name, core::identifier_string("Pos"));
+        static core::identifier_string pos_name = core::identifier_string("Pos");
         return pos_name;
       }
 
@@ -46,7 +46,7 @@ namespace mcrl2 {
       inline
       basic_sort const& pos()
       {
-        static basic_sort pos = core::detail::initialise_static_expression(pos, basic_sort(pos_name()));
+        static basic_sort pos = basic_sort(pos_name());
         return pos;
       }
 
@@ -68,7 +68,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& c1_name()
       {
-        static core::identifier_string c1_name = core::detail::initialise_static_expression(c1_name, core::identifier_string("@c1"));
+        static core::identifier_string c1_name = core::identifier_string("@c1");
         return c1_name;
       }
 
@@ -77,7 +77,7 @@ namespace mcrl2 {
       inline
       function_symbol const& c1()
       {
-        static function_symbol c1 = core::detail::initialise_static_expression(c1, function_symbol(c1_name(), pos()));
+        static function_symbol c1 = function_symbol(c1_name(), pos());
         return c1;
       }
 
@@ -100,7 +100,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cdub_name()
       {
-        static core::identifier_string cdub_name = core::detail::initialise_static_expression(cdub_name, core::identifier_string("@cDub"));
+        static core::identifier_string cdub_name = core::identifier_string("@cDub");
         return cdub_name;
       }
 
@@ -109,7 +109,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cdub()
       {
-        static function_symbol cdub = core::detail::initialise_static_expression(cdub, function_symbol(cdub_name(), make_function_sort(sort_bool::bool_(), pos(), pos())));
+        static function_symbol cdub = function_symbol(cdub_name(), make_function_sort(sort_bool::bool_(), pos(), pos()));
         return cdub;
       }
 
@@ -167,7 +167,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& maximum_name()
       {
-        static core::identifier_string maximum_name = core::detail::initialise_static_expression(maximum_name, core::identifier_string("max"));
+        static core::identifier_string maximum_name = core::identifier_string("max");
         return maximum_name;
       }
 
@@ -176,7 +176,7 @@ namespace mcrl2 {
       inline
       function_symbol const& maximum()
       {
-        static function_symbol maximum = core::detail::initialise_static_expression(maximum, function_symbol(maximum_name(), make_function_sort(pos(), pos(), pos())));
+        static function_symbol maximum = function_symbol(maximum_name(), make_function_sort(pos(), pos(), pos()));
         return maximum;
       }
 
@@ -223,7 +223,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& minimum_name()
       {
-        static core::identifier_string minimum_name = core::detail::initialise_static_expression(minimum_name, core::identifier_string("min"));
+        static core::identifier_string minimum_name = core::identifier_string("min");
         return minimum_name;
       }
 
@@ -232,7 +232,7 @@ namespace mcrl2 {
       inline
       function_symbol const& minimum()
       {
-        static function_symbol minimum = core::detail::initialise_static_expression(minimum, function_symbol(minimum_name(), make_function_sort(pos(), pos(), pos())));
+        static function_symbol minimum = function_symbol(minimum_name(), make_function_sort(pos(), pos(), pos()));
         return minimum;
       }
 
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& succ_name()
       {
-        static core::identifier_string succ_name = core::detail::initialise_static_expression(succ_name, core::identifier_string("succ"));
+        static core::identifier_string succ_name = core::identifier_string("succ");
         return succ_name;
       }
 
@@ -288,7 +288,7 @@ namespace mcrl2 {
       inline
       function_symbol const& succ()
       {
-        static function_symbol succ = core::detail::initialise_static_expression(succ, function_symbol(succ_name(), make_function_sort(pos(), pos())));
+        static function_symbol succ = function_symbol(succ_name(), make_function_sort(pos(), pos()));
         return succ;
       }
 
@@ -334,7 +334,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& pos_predecessor_name()
       {
-        static core::identifier_string pos_predecessor_name = core::detail::initialise_static_expression(pos_predecessor_name, core::identifier_string("@pospred"));
+        static core::identifier_string pos_predecessor_name = core::identifier_string("@pospred");
         return pos_predecessor_name;
       }
 
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       function_symbol const& pos_predecessor()
       {
-        static function_symbol pos_predecessor = core::detail::initialise_static_expression(pos_predecessor, function_symbol(pos_predecessor_name(), make_function_sort(pos(), pos())));
+        static function_symbol pos_predecessor = function_symbol(pos_predecessor_name(), make_function_sort(pos(), pos()));
         return pos_predecessor;
       }
 
@@ -389,7 +389,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& plus_name()
       {
-        static core::identifier_string plus_name = core::detail::initialise_static_expression(plus_name, core::identifier_string("+"));
+        static core::identifier_string plus_name = core::identifier_string("+");
         return plus_name;
       }
 
@@ -398,7 +398,7 @@ namespace mcrl2 {
       inline
       function_symbol const& plus()
       {
-        static function_symbol plus = core::detail::initialise_static_expression(plus, function_symbol(plus_name(), make_function_sort(pos(), pos(), pos())));
+        static function_symbol plus = function_symbol(plus_name(), make_function_sort(pos(), pos(), pos()));
         return plus;
       }
 
@@ -445,7 +445,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& add_with_carry_name()
       {
-        static core::identifier_string add_with_carry_name = core::detail::initialise_static_expression(add_with_carry_name, core::identifier_string("@addc"));
+        static core::identifier_string add_with_carry_name = core::identifier_string("@addc");
         return add_with_carry_name;
       }
 
@@ -454,7 +454,7 @@ namespace mcrl2 {
       inline
       function_symbol const& add_with_carry()
       {
-        static function_symbol add_with_carry = core::detail::initialise_static_expression(add_with_carry, function_symbol(add_with_carry_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos())));
+        static function_symbol add_with_carry = function_symbol(add_with_carry_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos()));
         return add_with_carry;
       }
 
@@ -502,7 +502,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& times_name()
       {
-        static core::identifier_string times_name = core::detail::initialise_static_expression(times_name, core::identifier_string("*"));
+        static core::identifier_string times_name = core::identifier_string("*");
         return times_name;
       }
 
@@ -511,7 +511,7 @@ namespace mcrl2 {
       inline
       function_symbol const& times()
       {
-        static function_symbol times = core::detail::initialise_static_expression(times, function_symbol(times_name(), make_function_sort(pos(), pos(), pos())));
+        static function_symbol times = function_symbol(times_name(), make_function_sort(pos(), pos(), pos()));
         return times;
       }
 
@@ -577,7 +577,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cdub_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -589,7 +589,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_add_with_carry_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -601,7 +601,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_add_with_carry_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -613,7 +613,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_add_with_carry_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -625,7 +625,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_succ_application(e) || is_pos_predecessor_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -637,7 +637,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cdub_application(e) || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for pos

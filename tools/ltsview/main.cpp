@@ -1,4 +1,3 @@
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/qt_tool.h"
 #include "mainwindow.h"

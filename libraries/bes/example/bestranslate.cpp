@@ -15,7 +15,6 @@
 #include <fstream>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
@@ -120,8 +119,6 @@ class bestranslate_tool: public input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   if (argc < 3)
   {
     std::cout << "Usage: bestranslate INFILE OUTFILE" << std::endl;

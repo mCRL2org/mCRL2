@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/transform_iterator.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/structured_sort_constructor_argument.h"
 
@@ -49,7 +48,7 @@ class structured_sort_constructor_base: public atermpp::aterm_appl
     structured_sort_constructor_base(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_StructCons(m_term));
+      assert(core::detail::check_term_StructCons(*this));
     }
 
     /// \brief Constructor.
@@ -65,17 +64,17 @@ class structured_sort_constructor_base: public atermpp::aterm_appl
 
     core::identifier_string name() const
     {
-      return atermpp::arg1(*this);
+      return  atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
     structured_sort_constructor_argument_list arguments() const
     {
-      return atermpp::list_arg2(*this);
+      return structured_sort_constructor_argument_list(atermpp::list_arg2(*this));
     }
 
     core::identifier_string recogniser() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg3(*this));
     }
 };
 
@@ -112,8 +111,8 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
     {
       assert(name != no_identifier());
 
-      return atermpp::aterm_appl(core::detail::gsMakeStructCons(name, arguments,
-                                 (recogniser == no_identifier()) ? core::detail::gsMakeNil() : static_cast< ATermAppl >(recogniser)));
+      return core::detail::gsMakeStructCons(name, arguments,
+                                 (recogniser == no_identifier()) ? core::detail::gsMakeNil() : static_cast< atermpp::aterm_appl >(recogniser));
     }
 
     inline
@@ -142,8 +141,8 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
 
     /// \brief Constructor.
     /// \param term A term
-    structured_sort_constructor(atermpp::aterm_appl term)
-      : detail::structured_sort_constructor_base(term)
+    structured_sort_constructor(const aterm &term)
+      : detail::structured_sort_constructor_base(atermpp::aterm_cast<const atermpp::aterm_appl>(term))
     {}
 
     /// \brief Constructor
@@ -280,7 +279,7 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
 typedef atermpp::term_list< structured_sort_constructor > structured_sort_constructor_list;
 
 /// \brief List of structured_sort_constructor.
-typedef atermpp::vector< structured_sort_constructor >    structured_sort_constructor_vector;
+typedef std::vector< structured_sort_constructor >    structured_sort_constructor_vector;
 
 // template function overloads
 std::string pp(const structured_sort_constructor& x);
@@ -290,5 +289,13 @@ std::string pp(const structured_sort_constructor_vector& x);
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+template <>
+inline void swap(mcrl2::data::structured_sort_constructor& t1, mcrl2::data::structured_sort_constructor& t2)
+{
+  t1.swap(t2);
+}
+} // namespace std
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_H

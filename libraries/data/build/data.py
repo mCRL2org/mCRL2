@@ -285,11 +285,12 @@ class function_declaration_list():
       projection = []
              
       if len(index_table) == 1:
-        projection.append("return *boost::next(static_cast< application >(e).arguments().begin(), {0});".format(index_table.keys()[0]))
+#        projection.append("return *boost::next(static_cast< application >(e).arguments().begin(), {0});".format(index_table.keys()[0]))
+        projection.append("return *boost::next(atermpp::aterm_cast<const application >(e).begin(), {0});".format(index_table.keys()[0]))
       else:
         projection_case = '''        if ({0})
         {
-          return *boost::next(static_cast< application >(e).arguments().begin(), %s);\n" % (i)
+          return *boost::next(atermpp::aterm_cast<const application >(e).begin(), %s);\n" % (i)
         }'''.format(" || ".join(["is_{0}_application(e)".format(c[1] for c in index_table[i])]), i)
         projection.append(projection_case)
 
@@ -338,7 +339,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      core::identifier_string const& %s_name()\n" % (name)
         code += "      {\n"
-        code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (name, name, fullname)
+        code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (name, fullname)
         code += "        return %s_name;\n" % (name)
         code += "      }\n\n"
         return code
@@ -360,7 +361,7 @@ class function_declaration_list():
         else:
           code += "      function_symbol const& %s(%s)\n" % (name, sortparams)
           code += "      {\n"
-          code += "        static function_symbol %s = core::detail::initialise_static_expression(%s, function_symbol(%s_name(), %s));\n" % (name, name, name, sort)
+          code += "        static function_symbol %s = function_symbol(%s_name(), %s);\n" % (name, name, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n\n"
         return code
@@ -537,7 +538,7 @@ class function_declaration_list():
               target_sort += "        }\n"
             target_sort += "        else\n"
             target_sort += "        {\n"
-            target_sort += "          throw mcrl2::runtime_error(\"cannot compute target sort for %s with domain sorts \" + %s);\n" % (self.label, string.join([("%s.to_string()" % new_domain_sorts[j].code(spec)) for j in range(len(sort.domain.elements))], " + \", \" + "))
+            target_sort += "          throw mcrl2::runtime_error(\"cannot compute target sort for %s with domain sorts \" + %s);\n" % (self.label, string.join([("to_string(%s)" % new_domain_sorts[j].code(spec)) for j in range(len(sort.domain.elements))], " + \", \" + "))
             target_sort += "        }\n"
           target_sort_id = sort_identifier(identifier("target_sort"))
           new_sort = sort_arrow(domain(False, new_domain_sorts), target_sort_id)
@@ -1384,7 +1385,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      core::identifier_string const& %s_name()\n" % (label)
     code += "      {\n"
-    code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label, label, id)
+    code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, id)
     code += "        return %s_name;\n" % (label)
     code += "      }\n\n"
     return code
@@ -1394,7 +1395,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      core::identifier_string const& %s_name()\n" % (label)
     code += "      {\n"
-    code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label, label, label)
+    code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, label)
     code += "        return %s_name;\n" % (label)
     code += "      }\n\n"
     return code
@@ -1407,7 +1408,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      basic_sort const& %s()\n" % (label)
     code += "      {\n"
-    code += "        static basic_sort %s = core::detail::initialise_static_expression(%s, basic_sort(%s_name()));\n" % (label, label, label)
+    code += "        static basic_sort %s = basic_sort(%s_name());\n" % (label, label)
     code += "        return %s;\n" % (label)
     code += "      }\n\n"
 

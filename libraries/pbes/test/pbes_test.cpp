@@ -19,10 +19,7 @@
 #include <cstdio>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/utility.h"
-#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
@@ -151,11 +148,14 @@ void test_pbes()
   {
   }
 
-  std::string filename = "write_to_named_text_file.pbes";
+  std::string filename = "write_term_to_text_stream.pbes";
   try
   {
-    atermpp::aterm t = atermpp::make_term("f(x)");
-    atermpp::write_to_named_text_file(t, filename);
+    atermpp::aterm t = atermpp::read_term_from_string("f(x)");
+    std::ofstream os;
+    os.open(filename.c_str());
+    atermpp::write_term_to_text_stream(t, os);
+    os.close();
     p.load(filename);
     BOOST_CHECK(false); // loading is expected to fail
   }
@@ -167,7 +167,6 @@ void test_pbes()
   p.save(filename);
   p.load(filename);
   remove(filename.c_str());
-  core::garbage_collect();
 }
 
 void test_global_variables()
@@ -186,10 +185,9 @@ void test_global_variables()
   pbes<> p;
   std::stringstream s(TEXT);
   s >> p;
-  atermpp::set<variable> freevars = p.global_variables();
+  std::set<variable> freevars = p.global_variables();
   BOOST_CHECK(freevars.size() == 3);  // The global variable k does not occur in the specification,
   // but occurs in the global variables list.
-  core::garbage_collect();
 }
 
 void test_quantifier_rename_builder()
@@ -227,7 +225,6 @@ void test_quantifier_rename_builder()
   std::cout << "q2 = " << mcrl2::pbes_system::pp(q2) << std::endl;
 
   // BOOST_CHECK(false);
-  core::garbage_collect();
 }
 
 void test_complement_method_builder()
@@ -244,7 +241,6 @@ void test_complement_method_builder()
   std::cout << "q             = " << mcrl2::pbes_system::pp(q) << std::endl;
   std::cout << "complement(p) = " << mcrl2::pbes_system::pp(complement(p)) << std::endl;
   BOOST_CHECK(complement(p) == q);
-  core::garbage_collect();
 }
 
 void test_pbes_expression()
@@ -259,7 +255,6 @@ void test_pbes_expression()
   pbes_expression v_expr = propositional_variable_instantiation("v:V");
   propositional_variable_instantiation v1 = v_expr;
   propositional_variable_instantiation v2(v_expr);
-  core::garbage_collect();
 }
 
 void test_trivial()
@@ -269,7 +264,6 @@ void test_trivial()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
-  core::garbage_collect();
 }
 
 void test_instantiate_global_variables()
@@ -289,7 +283,6 @@ void test_instantiate_global_variables()
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
   pbes_system::detail::instantiate_global_variables(p);
   std::cout << "<after>" << pbes_system::pp(p) << std::endl;
-  core::garbage_collect();
 }
 
 void test_find_sort_expressions()
@@ -303,7 +296,6 @@ void test_find_sort_expressions()
   std::set<sort_expression> s;
   pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
   std::cout << core::detail::print_set(s, data::stream_printer()) << std::endl;
-  core::garbage_collect();
 }
 
 #ifdef MCRL2_ENABLE_IO_TEST
@@ -342,8 +334,6 @@ void test_is_bes()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_trivial();
   test_pbes();
   test_global_variables();
