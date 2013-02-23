@@ -13,7 +13,6 @@
 #include <utility>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -213,8 +212,6 @@ void test_guard()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
   test_guard();
 
