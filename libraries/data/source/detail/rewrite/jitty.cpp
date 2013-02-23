@@ -835,7 +835,7 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression &term)
   return toInner(term,true);
 }
 
-data_expression RewriterJitty::rewrite(const data_expression term, substitution_type &sigma)
+data_expression RewriterJitty::rewrite(const data_expression &term, substitution_type &sigma)
 {
   internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterJitty::toRewriteFormat, this, _1));
   data_expression result=fromRewriteFormat(rewrite_internal(toRewriteFormat(term), internal_sigma));
@@ -843,7 +843,7 @@ data_expression RewriterJitty::rewrite(const data_expression term, substitution_
 }
 
 atermpp::aterm_appl RewriterJitty::rewrite_internal(
-     const atermpp::aterm_appl term,
+     const atermpp::aterm_appl &term,
      internal_substitution_type &sigma)
 {
   if (need_rebuild)

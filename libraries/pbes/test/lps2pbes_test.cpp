@@ -465,12 +465,6 @@ BOOST_AUTO_TEST_CASE(test_machine_formula3)
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(test_machine_formula3)
-{
-  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA3);
-}
-#endif
-
 // Submitted by Tim, 2-9-2010
 BOOST_AUTO_TEST_CASE(test_example)
 {

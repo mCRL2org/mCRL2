@@ -33,7 +33,7 @@ void test_propositional_variable()
   v.push_back(3);
   propositional_variable X1 = pbes_system::remove_parameters(X, v);
   variable_list d1 = make_list(nat("n"), bool_("b"));
-  BOOST_CHECK(X1 = propvar("X", d1));
+  BOOST_CHECK(X1 == propvar("X", d1));
 }
 
 void test_propositional_variable_instantiation()
@@ -45,7 +45,7 @@ void test_propositional_variable_instantiation()
   v.push_back(3);
   propositional_variable_instantiation X1 = pbes_system::remove_parameters(X, v);
   data_expression_list d1 = atermpp::make_list< data_expression >(nat("n"), bool_("b"));
-  BOOST_CHECK(X1 = propvarinst("X", d1));
+  BOOST_CHECK(X1 == propvarinst("X", d1));
 }
 
 void test_pbes_expression()

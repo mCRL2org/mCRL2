@@ -309,18 +309,6 @@ class next_state_generator
     atermpp::function_symbol internal_state_function() const
     {
       return m_state_function;
-    } 
-
-    /// \brief Returns a reference to the summand subset containing all summands.
-    summand_subset_t &full_subset()
-    {
-      return m_all_summands;
-    }
-
-    /// \brief Returns the function symbol used to construct internal states.
-    atermpp::function_symbol internal_state_function() const
-    {
-      return m_state_function;
     }
 
     /// \brief Returns a reference to the summand subset containing all summands.

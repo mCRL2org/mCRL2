@@ -3111,10 +3111,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       );
 
   fprintf(f,
-      "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t)\n"
+      "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl &t)\n"
       "{\n"
       "  return rewrite(t);\n"
-      "}\n"
+      "}\n\n"
        );
 
   // Moved part of the rewrite function to rewrite_aux, such that the compiler
@@ -3153,7 +3153,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "}\n");
 
   fprintf(f,
-      "static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl t)\n"
+      "static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
       "  const function_symbol &fun=t.function();\n"
@@ -3238,7 +3238,7 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
 }
 
 data_expression RewriterCompilingJitty::rewrite(
-     const data_expression term,
+     const data_expression &term,
      substitution_type &sigma)
 {
   internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterCompilingJitty::toRewriteFormat, this, _1));
@@ -3246,7 +3246,7 @@ data_expression RewriterCompilingJitty::rewrite(
 }
 
 atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
-     const atermpp::aterm_appl term,
+     const atermpp::aterm_appl &term,
      internal_substitution_type &sigma)
 {
   if (need_rebuild)

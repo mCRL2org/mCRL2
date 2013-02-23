@@ -233,23 +233,6 @@ class action_summand: public summand_base
       return data::replace_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      super::protect();
-      m_multi_action.protect();
-      m_assignments.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      super::unprotect();
-      m_multi_action.unprotect();
-      m_assignments.unprotect();
-    }
 };
 
 /// \brief Comparison operator for action summands.

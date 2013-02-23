@@ -614,15 +614,6 @@ struct term_traits<bes::boolean_expression>
     return atermpp::aterm_cast<const term_type>(atermpp::arg1(t));
   }
 
-  /// \brief Returns the argument of a term of type not
-  /// \param t A term
-  static inline
-  term_type not_arg(const term_type& t)
-  {
-    assert(is_not(t));
-    return atermpp::arg1(t);
-  }
-
   /// \brief Returns the name of a boolean variable
   /// \param t A term
   /// \return The name of the boolean variable

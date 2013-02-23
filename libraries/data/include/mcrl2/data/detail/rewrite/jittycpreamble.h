@@ -17,7 +17,7 @@ using namespace atermpp;
 extern "C" {
   DLLEXPORT void rewrite_init(RewriterCompilingJitty *r);
   DLLEXPORT void rewrite_cleanup();
-  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t);
+  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl &t);
 }
 
 

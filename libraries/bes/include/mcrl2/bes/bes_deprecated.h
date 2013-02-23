@@ -719,7 +719,7 @@ inline bes_expression substitute_true_false_rec(
   if (bes_global_variables<size_t>::opt_use_hashtables)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result==bes_expression())
     {
       return result;
     }
@@ -936,7 +936,7 @@ inline bes_expression BDDif_rec(const bes_expression &b1, const bes_expression &
     {
       b1b2b3=if_(b1,b2,b3);
       bes_expression b(hashtable.get(b1b2b3));
-      if (b!=NULL)
+      if (b!=bes_expression())
       {
         return b;
       }
@@ -967,7 +967,7 @@ inline bes_expression BDDif_rec(const bes_expression &b1, const bes_expression &
     /* hence not is_false(b3) */
     b1b2b3=if_(b1,b2,b3);
     bes_expression b(hashtable.get(b1b2b3));
-    if (b!=NULL)
+    if (b!=bes_expression())
     {
       return b;
     }
@@ -1098,7 +1098,7 @@ static bes_expression toBDD_rec(const bes_expression &b1,atermpp::table& hashtab
 
   bes_expression result;
   bes_expression b(hashtable.get(b1));
-  if (b!=NULL)
+  if (b!=bes_expression())
   {
     return b;
   }
@@ -2749,7 +2749,7 @@ static bes_expression substitute_rank(
   if (use_hashtable)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result!=bes_expression())
     {
       return result;
     }
@@ -2940,7 +2940,7 @@ static bes_expression evaluate_bex(
   if (use_hashtable)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result!=bes_expression())
     {
       return result;
     }

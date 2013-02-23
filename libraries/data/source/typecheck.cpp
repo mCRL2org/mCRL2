@@ -5329,7 +5329,7 @@ static bool gstcUnArrowProd(aterm_list ArgTypes, aterm_appl PosType, aterm_appl 
       {
         continue;
       }
-      NewPosTypes=ATinsertUnique(NewPosTypes,(ATerm)NewPosType);
+      NewPosTypes=ATinsertUnique(NewPosTypes,NewPosType);
     }
     NewPosTypes=reverse(NewPosTypes);
     result=multiple_possible_sorts(sort_expression_list(NewPosTypes));

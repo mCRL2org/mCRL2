@@ -151,7 +151,7 @@ class bit_hash_table
       m_bit_hash_table[i] = false;
     }
 
-    void remove_state_from_bithash(atermpp::aterm state)
+    /* void remove_state_from_bithash(atermpp::aterm state)
     {
       remove_state_from_bithash((const aterm)state);
     } */

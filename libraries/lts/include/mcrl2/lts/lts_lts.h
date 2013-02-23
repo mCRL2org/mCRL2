@@ -264,10 +264,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
       m_has_valid_data_spec(false),
       m_has_valid_parameters(false),
       m_has_valid_action_decls(false)
-    {
-      m_parameters.protect();
-      m_action_decls.protect();
-    };
+    {}
 
     /** \brief Creates an object containing a muCRL specification.
      * \param[in] t The muCRL specification that will be stored in the object. */
@@ -291,10 +288,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     /** \brief Standard destructor for the class lts_lts
     */
     ~lts_lts_t()
-    {
-      m_parameters.unprotect();
-      m_action_decls.unprotect();
-    }
+    {}
 
     /** \brief Swap function for this lts. */
     void swap(lts_lts_t& l)

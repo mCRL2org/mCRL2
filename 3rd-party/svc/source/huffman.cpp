@@ -151,13 +151,13 @@ void HFstats(struct HFnode* tree, int level, long* sum)
   {
     if (tree->low==NULL && tree->high==NULL)
     {
-      if (tree->term==NULL)
+      if (&*(tree->term)==NULL)
       {
         fprintf(stderr," (%ld) Term NULL\n", tree->frequency);
       }
       else
       {
-        ATfprintf(stderr," (%d) Term %t\n", tree->frequency, tree->term);
+        ATfprintf(stderr," (%d) Term %t\n", tree->frequency, &*tree->term);
       }
     }
     else

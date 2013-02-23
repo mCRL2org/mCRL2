@@ -1218,7 +1218,6 @@ std::string ltsmin_state::state_to_string() const
 
 explorer::explorer(const std::string& filename, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
 {
-    p.protect();
     p.load(filename);
     for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
                 != p.equations().end(); ++eqn) {
@@ -1247,7 +1246,6 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
 
 explorer::explorer(const pbes<>& p_, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
 {
-    p.protect();
     p = p_;
     this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
@@ -1266,7 +1264,6 @@ explorer::~explorer()
 {
     delete info;
     delete pgg;
-    p.unprotect();
 }
 
 

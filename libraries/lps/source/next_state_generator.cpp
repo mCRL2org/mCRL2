@@ -581,8 +581,6 @@ void next_state_generator::iterator::increment()
 
   m_transition.m_summand_index = (m_summand - &m_generator->m_summands[0]);
 
-  m_transition.m_summand_index = (m_summand - &m_generator->m_summands[0]);
-
   for (variable_list::iterator i = m_summand->variables.begin(); i != m_summand->variables.end(); i++)
   {
     (*m_substitution)[*i] = *i;  // Reset the variable.

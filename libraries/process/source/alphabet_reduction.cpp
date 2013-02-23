@@ -1283,7 +1283,7 @@ namespace mcrl2
 
             mCRL2log(verbose) << "- created process " << pp(new_pn) << "\n";
             process_expression p=procs[pn];
-            assert(p);
+            assert(p!=process_expression());
             p=PushAllow(V,p);
 
             procs[new_pn]=p;
@@ -2208,7 +2208,7 @@ namespace mcrl2
         return gsaGetDeps(bounded_init(a).left());
       }
       assert(0);
-      return NULL; //to suppress warnings
+      return process_identifier_list(); //to suppress warnings
     }
 
     // Delivers true if this is a pCRL term, and false if this is an mCRL term.
@@ -2550,7 +2550,7 @@ namespace mcrl2
         process_equation p= *pr;
         process_identifier pn=p.identifier();
         process_expression res=procs[pn];
-        if (res)
+        if (res!=process_expression())
         {
           new_pr.push_front(process_equation(p.identifier(),p.formal_parameters(),res));
           procs.erase(pn);

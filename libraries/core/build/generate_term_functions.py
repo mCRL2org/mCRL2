@@ -11,14 +11,14 @@ from path import *
 
 LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
 inline
-atermpp::function_symbol function_symbol_%(name)s()
+const atermpp::function_symbol& function_symbol_%(name)s()
 {
   static atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
   return function_symbol_%(name)s;
 }
 
 inline
-bool gsIs%(name)s(atermpp::aterm_appl Term)
+bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_%(name)s();
 }
@@ -190,7 +190,7 @@ def generate_soundness_check_functions(rules, filename):
 
 CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
-ATermAppl construct%(name)s()
+const atermpp::aterm_appl& construct%(name)s()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_%(name)s()%(arguments)s));
   return t;
@@ -200,7 +200,7 @@ ATermAppl construct%(name)s()
 
 CONSTRUCTOR_RULE = '''// %(name)s
 inline
-ATermAppl construct%(name)s()
+const atermpp::aterm_appl& construct%(name)s()
 {
   return construct%(fname)s();
 }
@@ -219,7 +219,7 @@ def generate_constructor_functions(rules, filename):
     functions = find_functions(rules)
 
     for f in functions:
-        ptext = ptext + 'ATermAppl construct%s();\n' % f.name()
+        ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
         name  = f.name()
         arity = f.arity()
         args = []
@@ -253,7 +253,7 @@ def generate_constructor_functions(rules, filename):
                 if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
                     fname = f.name()
                     break
-            ptext = ptext + 'ATermAppl construct%s();\n' % name
+            ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % name
             text = text + CONSTRUCTOR_RULE % {
                 'name'       : name,
                 'name'       : name,

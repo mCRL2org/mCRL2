@@ -89,7 +89,7 @@ class Rewriter
      * \return The normal form of Term.
      **/
 
-    virtual data_expression rewrite(const data_expression term, substitution_type &sigma) = 0;
+    virtual data_expression rewrite(const data_expression &term, substitution_type &sigma) = 0;
 
     /**
      * \brief Rewrite a list of mCRL2 data terms.
@@ -121,7 +121,7 @@ class Rewriter
      * \return The normal form of Term.
      **/
     virtual atermpp::aterm_appl rewrite_internal(
-                     const atermpp::aterm_appl Term,
+                     const atermpp::aterm_appl &Term,
                      internal_substitution_type &sigma);
     /**
      * \brief Rewrite a list of terms in the internal rewriter

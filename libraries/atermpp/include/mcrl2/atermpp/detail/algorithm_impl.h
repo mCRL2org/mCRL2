@@ -127,7 +127,6 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
         return true;
       }
     }
-    break;
   }
   return false;
 }

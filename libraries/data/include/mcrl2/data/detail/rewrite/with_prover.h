@@ -38,11 +38,11 @@ class RewriterProver: public Rewriter
     rewrite_strategy getStrategy();
 
     data_expression rewrite(
-         const data_expression term,
+         const data_expression &term,
          substitution_type &sigma);
 
     atermpp::aterm_appl rewrite_internal(
-         const atermpp::aterm_appl term,
+         const atermpp::aterm_appl &term,
          internal_substitution_type &sigma);
 
     atermpp::aterm_appl toRewriteFormat(const data_expression &term);

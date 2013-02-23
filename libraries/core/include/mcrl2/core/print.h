@@ -147,14 +147,6 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void operator()(const std::list<T>& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    print_list(x, "", "", ", ");
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  template <typename T>
   void operator()(const atermpp::term_list<T>& x)
   {
     static_cast<Derived&>(*this).enter(x);

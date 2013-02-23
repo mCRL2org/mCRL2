@@ -254,9 +254,6 @@ void test_dependency_matrix()
 int test_main(int argc, char* argv[])
 {
   test_dependency_matrix();
-
-  test_dependency_matrix();
-
   test_ltsmin("jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
   test_ltsmin("jittyc");

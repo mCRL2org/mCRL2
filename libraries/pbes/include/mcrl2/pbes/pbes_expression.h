@@ -1501,16 +1501,6 @@ struct term_traits<pbes_system::pbes_expression>
     return term_traits<data::data_expression>::set_intersection(v, w);
   }
 
-  /// \brief Returns the difference of two unordered sets of variables
-  /// \param v A sequence of data variables
-  /// \param w A sequence of data variables
-  /// \return The difference of two sets.
-  static inline
-  variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
-  {
-    return term_traits<data::data_expression>::set_intersection(v, w);
-  }
-
   /// \brief Test if a term is constant
   /// \param t A term
   /// \return True if the term is constant

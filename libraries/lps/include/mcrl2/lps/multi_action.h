@@ -142,22 +142,6 @@ class multi_action
     {
       return m_actions < other.m_actions || (m_actions == other.m_actions && m_time < other.m_time);
     }
-
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_time.protect();
-      m_actions.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_time.unprotect();
-      m_actions.unprotect();
-    }
 };
 
 /// \brief Returns true if the term t is a multi action

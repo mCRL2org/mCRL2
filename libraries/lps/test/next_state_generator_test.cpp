@@ -124,18 +124,6 @@ BOOST_AUTO_TEST_CASE(test_abp)
   // Test all 2**3 possible feature flags
   for (size_t i = 0; i < 8; i++)
   {
-    test_next_state_generator(spec, 2, 1, 1, i & 1, i & 2, i & 4);
-  }
-}
-
-BOOST_AUTO_TEST_CASE(test_abp)
-{
-  specification spec = parse_linear_process_specification(LINEAR_ABP);
-
-  test_initial_state_successors(spec);
-  // Test all 2**3 possible feature flags
-  for (size_t i = 0; i < 8; i++)
-  {
     test_next_state_generator(spec, 74, 92, 19, i & 1, i & 2, i & 4);
   }
 }

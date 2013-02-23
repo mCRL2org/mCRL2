@@ -610,22 +610,6 @@ void test_one_point_rule_rewriter(const std::string& expr1, const std::string& e
   );
 }
 
-void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
-{
-  one_point_rule_rewriter R;
-  utilities::detail::test_operation(
-    expr1,
-    expr2,
-    default_parser(),
-    printer<pbes_expression>,
-    std::equal_to<pbes_expression>(),
-    R,
-    "R1",
-    &utilities::detail::identity<pbes_expression>,
-    "R2"
-  );
-}
-
 void test_one_point_rule_rewriter()
 {
   std::cout << "<test_one_point_rule_rewriter>" << std::endl;
