@@ -67,13 +67,13 @@ class deadlock
     }
 
     /// \brief Comparison operator
-    bool operator==(const deadlock& other)
+    bool operator==(const deadlock& other) const
     {
       return m_time == other.m_time;
     }
 
     /// \brief Comparison operator
-    bool operator!=(const deadlock& other)
+    bool operator!=(const deadlock& other) const
     {
       return !(*this == other);
     }

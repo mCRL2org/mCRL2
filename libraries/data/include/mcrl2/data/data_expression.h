@@ -181,7 +181,7 @@ class data_expression: public atermpp::aterm_appl
         }
         else if (is_lambda(*this))
         {
-          const atermpp::term_list<aterm_appl> &v_variables ((*this)[1]);
+          const atermpp::term_list<aterm_appl> &v_variables = atermpp::aterm_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
           sort_expression_vector s;
           for (atermpp::term_list<aterm_appl>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
           {
@@ -192,7 +192,7 @@ class data_expression: public atermpp::aterm_appl
         else 
         {
           assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_set_or_bag_comprehension(*this));
-          const atermpp::term_list<aterm_appl> &v_variables ((*this)[1]);
+          const atermpp::term_list<aterm_appl> &v_variables  = atermpp::aterm_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
           assert(v_variables.size() == 1);
 
           if (is_bag_comprehension(*this))

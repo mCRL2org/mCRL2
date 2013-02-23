@@ -183,7 +183,9 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
 
   void update_free_variables(const data::data_expression& x, maximal_closed_subformula_node& result)
   {
+std::cout << "<update_free_variables>" << data::pp(x) << " result = " << result << std::endl;
     data::find_free_variables(x, std::inserter(result.variables, result.variables.end()));
+std::cout << " result' = " << result << std::endl;
   }
 
   void update_free_variables(const state_formulas::forall& x, maximal_closed_subformula_node& result)

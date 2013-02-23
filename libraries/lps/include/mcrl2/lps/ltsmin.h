@@ -453,7 +453,7 @@ class pins
           {
             m_read_group[i - summands.begin()].push_back(j - parameters_list.begin());
           }
-          if (!used_read_parameters.empty() && used_write_parameters.find(*j) != used_write_parameters.end())
+          if (!used_write_parameters.empty() && used_write_parameters.find(*j) != used_write_parameters.end())
           {
             m_write_group[i - summands.begin()].push_back(j - parameters_list.begin());
           }

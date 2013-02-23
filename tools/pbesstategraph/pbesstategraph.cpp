@@ -27,6 +27,7 @@ class pbes_stategraph_tool: public input_output_tool
     bool m_simplify;
     bool m_apply_to_original;
     bool m_use_pfnf_variant;
+    bool m_use_local_variant;
 
     void parse_options(const command_line_parser& parser)
     {
@@ -34,6 +35,7 @@ class pbes_stategraph_tool: public input_output_tool
       m_simplify = parser.option_argument_as<bool>("simplify");
       m_apply_to_original = parser.option_argument_as<bool>("apply-to-original");
       m_use_pfnf_variant = parser.option_argument_as<bool>("use-pfnf-variant");
+      m_use_local_variant = parser.option_argument_as<bool>("use-local-variant");
     }
 
     void add_options(interface_description& desc)
@@ -42,6 +44,7 @@ class pbes_stategraph_tool: public input_output_tool
       desc.add_option("simplify", make_optional_argument("NAME", "1"), "simplify the PBES during reduction", 's');
       desc.add_option("apply-to-original", make_optional_argument("NAME", "0"), "apply reduction on the original PBES", 'a');
       desc.add_option("use-pfnf-variant", make_optional_argument("NAME", "0"), "first convert the PBES into PFNF format", 'p');
+      desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
     }
 
   public:
@@ -60,12 +63,16 @@ class pbes_stategraph_tool: public input_output_tool
       mCRL2log(verbose) << "pbesstategraph parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-
+      mCRL2log(verbose) << "  simplify:           " << std::boolalpha << m_simplify << std::endl;
+      mCRL2log(verbose) << "  apply to original:  " << std::boolalpha << m_apply_to_original << std::endl;
+      mCRL2log(verbose) << "  use pfnf variant:   " << std::boolalpha << m_use_pfnf_variant << std::endl;
+      mCRL2log(verbose) << "  use local variant:  " << std::boolalpha << m_use_local_variant << std::endl;
       pbesstategraph(input_filename(),
                      output_filename(),
                      m_simplify,
                      m_apply_to_original,
-                     m_use_pfnf_variant
+                     m_use_pfnf_variant,
+                     m_use_local_variant
                     );
       return true;
     }

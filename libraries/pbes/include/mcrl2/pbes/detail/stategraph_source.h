@@ -169,50 +169,6 @@ class stategraph_source_algorithm
       }
       return out.str();
     }
-
-    // rewrite the parameters of the propositional variables, using the substitutions of the source function
-    // N.B. Modifies the pbes!
-    void rewrite_propositional_variables()
-    {
-//      data::rewriter r(m_pbes.data());
-//      pbes_system::data_rewriter<pbes_expression, data::rewriter> R(r);
-//
-//      std::vector<stategraph_equation>& equations = m_pbes.equations();
-//      for (std::size_t k = 0; k < equations.size(); k++)
-//      {
-//        const std::vector<data::mutable_map_substitution<> >& src = m_source[k];
-//        std::vector<pfnf_implication>& implications = equations[k].implications();
-//
-//        for (std::size_t i = 0; i < implications.size(); i++)
-//        {
-//          const data::mutable_map_substitution<>& sigma = src[i];
-//          std::vector<propositional_variable_instantiation>& v = implications[i].variables();
-//          for (std::vector<propositional_variable_instantiation>::iterator j = v.begin(); j != v.end(); ++j)
-//          {
-//            propositional_variable_instantiation& Y = *j;
-//            Y = pbes_system::rewrite(Y, R, sigma);
-//          }
-//        }
-//      }
-
-      // rewrite the guards
-      data::rewriter r(m_pbes.data());
-      pbes_system::data_rewriter<pbes_expression, data::rewriter> R(r);
-      std::vector<stategraph_equation>& equations = m_pbes.equations();
-      for (std::size_t k = 0; k < equations.size(); k++)
-      {
-        const std::vector<data::mutable_map_substitution<> >& src = m_source[k];
-        stategraph_equation& eqn = equations[k];
-        predicate_variable_vector& predvars = eqn.predicate_variables();
-        for (std::size_t i = 0; i < predvars.size(); i++)
-        {
-          const data::mutable_map_substitution<>& sigma = src[i];
-          std::pair<propositional_variable_instantiation, pbes_expression>& pvar = predvars[i];
-          pvar.first = R(pvar.first, sigma);
-          pvar.second = R(pvar.second, sigma);
-        }
-      }
-    }
 };
 
 } // namespace detail

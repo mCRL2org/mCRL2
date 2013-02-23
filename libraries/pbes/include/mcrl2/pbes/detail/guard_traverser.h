@@ -12,7 +12,9 @@
 #ifndef MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -21,6 +23,122 @@ namespace mcrl2 {
 namespace pbes_system {
 
 namespace detail {
+
+inline
+pbes_expression guard_s(const pbes_expression& x)
+{
+  if (is_simple_expression(x))
+  {
+    return x;
+  }
+  else
+  {
+    return true_();
+  }
+}
+
+inline
+pbes_expression guard_n(const pbes_expression& x)
+{
+  if (is_simple_expression(x))
+  {
+    return utilities::optimized_not(x);
+  }
+  else
+  {
+    return true_();
+  }
+}
+
+inline
+bool has_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& X)
+{
+  std::set<propositional_variable_instantiation> xocc = find_propositional_variable_instantiations(x);
+  return xocc.find(X) != xocc.end();
+}
+
+inline
+pbes_expression guard_impl(const propositional_variable_instantiation& X, const pbes_expression& x)
+{
+  if (data::is_data_expression(x))
+  {
+    return false_();
+  }
+  else if (is_propositional_variable_instantiation(x))
+  {
+    return true_();
+  }
+  else if (pbes_system::is_true(x))
+  {
+    return false_();
+  }
+  else if (pbes_system::is_false(x))
+  {
+    return false_();
+  }
+  else if (pbes_system::is_not(x))
+  {
+    pbes_expression phi = pbes_system::not_(atermpp::aterm_appl(x)).operand();
+    return utilities::optimized_not(guard_impl(X, phi));
+  }
+  else if (pbes_system::is_and(x))
+  {
+    pbes_expression phi = pbes_system::and_(atermpp::aterm_appl(x)).left();
+    pbes_expression psi = pbes_system::and_(atermpp::aterm_appl(x)).right();
+    if (has_propositional_variable(psi, X))
+    {
+      return utilities::optimized_and(guard_s(phi), guard_impl(X, psi));
+    }
+    else
+    {
+      return utilities::optimized_and(guard_s(psi), guard_impl(X, phi));
+    }
+  }
+  else if (pbes_system::is_or(x))
+  {
+    pbes_expression phi = pbes_system::or_(atermpp::aterm_appl(x)).left();
+    pbes_expression psi = pbes_system::or_(atermpp::aterm_appl(x)).right();
+    if (has_propositional_variable(psi, X))
+    {
+      return utilities::optimized_and(guard_n(phi), guard_impl(X, psi));
+    }
+    else
+    {
+      return utilities::optimized_and(guard_n(psi), guard_impl(X, phi));
+    }
+  }
+  else if (pbes_system::is_imp(x))
+  {
+    pbes_expression phi = pbes_system::imp(atermpp::aterm_appl(x)).left();
+    pbes_expression psi = pbes_system::imp(atermpp::aterm_appl(x)).right();
+    return guard_impl(X, or_(not_(phi), psi));
+  }
+  else if (pbes_system::is_forall(x))
+  {
+    pbes_expression phi = pbes_system::forall(atermpp::aterm_appl(x)).body();
+    return guard_impl(X, phi);
+  }
+  else if (pbes_system::is_exists(x))
+  {
+    pbes_expression phi = pbes_system::exists(atermpp::aterm_appl(x)).body();
+    return guard_impl(X, phi);
+  }
+  throw mcrl2::runtime_error("guard_impl: unknown term " + pbes_system::pp(x));
+  return pbes_expression();
+}
+
+// Direct implementation of the definition, to be used for checking results.
+inline
+pbes_expression guard(const propositional_variable_instantiation& X, const pbes_expression& x)
+{
+  std::multiset<propositional_variable_instantiation> xocc;
+  find_propositional_variable_instantiations(x, std::inserter(xocc, xocc.end()));
+  if (xocc.count(X) != 1)
+  {
+    throw mcrl2::runtime_error("guard is undefined for " + pbes_system::pp(X));
+  }
+  return guard_impl(X, x);
+}
 
 struct guard_expression
 {
@@ -65,6 +183,32 @@ struct guard_expression
   guard_expression(const pbes_expression& condition_ = pbes_system::true_())
     : condition(condition_)
   {}
+
+  // Check if the guards were correctly computed with respect to x.
+  bool check_guards(const pbes_expression& x) const
+  {
+    mCRL2log(log::debug, "stategraph") << "check_guards: x = " << pbes_system::pp(x) << std::endl;
+    bool result = true;
+    for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = guards.begin(); i != guards.end(); ++i)
+    {
+      try
+      {
+        const propositional_variable_instantiation& X = i->first;
+        const pbes_expression& g1 = i->second;
+        pbes_expression g2 = guard(X, x);
+        if (g1 != g2)
+        {
+          result = false;
+          mCRL2log(log::debug, "stategraph") << "guard error: X = " << pbes_system::pp(X) << " g1 = " << pbes_system::pp(g1) << " g2 = " << pbes_system::pp(g2) << std::endl;
+        }
+      }
+      catch (mcrl2::runtime_error&)
+      {
+        // do not check multiple instances of predicate variables
+      }
+    }
+    return result;
+  }
 };
 
 inline
@@ -120,6 +264,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   void leave(const data::data_expression& x)
   {
     push(guard_expression(x));
+    assert(top().check_guards(x));
   }
 
   void leave(const pbes_system::propositional_variable_instantiation& x)
@@ -127,21 +272,25 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     guard_expression node;
     node.guards.push_back(std::make_pair(x, pbes_system::true_()));
     push(node);
+    assert(top().check_guards(x));
   }
 
   void leave(const pbes_system::true_& x)
   {
     push(guard_expression(x));
+    assert(top().check_guards(x));
   }
 
   void leave(const pbes_system::false_& x)
   {
     push(guard_expression(x));
+    assert(top().check_guards(x));
   }
 
   void leave(const pbes_system::not_& x)
   {
     top().negate();
+    assert(top().check_guards(x));
   }
 
   void leave(const pbes_system::and_& x)
@@ -168,12 +317,11 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     }
     else
     {
-      left.add_guard(right.condition);
-      right.add_guard(left.condition);
       left.guards.insert(left.guards.end(), right.guards.begin(), right.guards.end());
       left.condition = new_condition;
       push(left);
     }
+    assert(top().check_guards(x));
   }
 
   void leave(const pbes_system::or_& x)
@@ -204,6 +352,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
       left.condition = new_condition;
       push(left);
     }
+    assert(top().check_guards(x));
   }
 
   void leave(const pbes_system::imp& x)
@@ -235,6 +384,27 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
       left.condition = new_condition;
       push(left);
     }
+    assert(top().check_guards(x));
+  }
+
+  void leave(const pbes_system::forall& x)
+  {
+    // If x is a simple expression, quantifiers need to be handled differently!
+    if (top().is_simple())
+    {
+      top().condition = x;
+    }
+    assert(top().check_guards(x));
+  }
+
+  void leave(const pbes_system::exists& x)
+  {
+    // If x is a simple expression, quantifiers need to be handled differently!
+    if (top().is_simple())
+    {
+      top().condition = x;
+    }
+    assert(top().check_guards(x));
   }
 };
 

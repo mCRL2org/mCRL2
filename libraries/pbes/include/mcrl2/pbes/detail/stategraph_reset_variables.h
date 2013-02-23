@@ -15,7 +15,7 @@
 #include "boost/bind.hpp"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/detail/stategraph_graph.h"
+#include "mcrl2/pbes/detail/stategraph_graph_algorithm.h"
 
 namespace mcrl2 {
 
@@ -49,7 +49,7 @@ class stategraph_reset_variables_algorithm;
 pbes_expression stategraph_reset_variable_rewrite(stategraph_reset_variables_algorithm& algorithm, const pbes_expression& x);
 
 /// \brief Adds the reset variables procedure to the stategraph algorithm
-class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
+class stategraph_reset_variables_algorithm: public stategraph_graph_global_algorithm
 {
   protected:
     // if true, the resulting PBES is simplified
@@ -62,45 +62,11 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
       return f(x);
     }
 
-    std::string print_variable_set(const std::set<data::variable>& v) const
-    {
-      std::ostringstream out;
-      out << "{";
-      for (std::set<data::variable>::const_iterator j = v.begin(); j != v.end(); ++j)
-      {
-        if (j != v.begin())
-        {
-          out << ", ";
-        }
-        out << data::pp(*j);
-      }
-      out << "}";
-      return out.str();
-    }
-
-    std::string print_control_flow_marking(const stategraph_vertex& v) const
-    {
-      std::ostringstream out;
-      out << "vertex " << pbes_system::pp(v.X) << " = " << print_variable_set(v.marking);
-      return out.str();
-    }
-
-    std::string print_control_flow_marking() const
-    {
-      std::ostringstream out;
-      for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
-      {
-        const stategraph_vertex& v = i->second;
-        out << print_control_flow_marking(v) << std::endl;
-      }
-      return out.str();
-    }
-
     void compute_control_flow_marking()
     {
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
       // initialization
-      for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      for (vertex_iterator i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
       {
         stategraph_vertex& v = i->second;
         std::set<data::variable> fv = v.free_guard_variables();
@@ -108,11 +74,11 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
         v.marking = data::detail::set_intersection(fv, dx);
         mCRL2log(log::debug, "stategraph") << "vertex " << pbes_system::pp(v.X) << " freevars = " << print_variable_set(fv) << " dx = " << print_variable_set(dx) << "\n";
       }
-      mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << print_control_flow_marking();
+      mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << m_control_flow_graph.print_marking();
 
       // backwards reachability algorithm
       std::set<stategraph_vertex*> todo;
-      for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      for (vertex_iterator i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
       {
         stategraph_vertex& v = i->second;
         todo.insert(&v);
@@ -145,13 +111,13 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
           if (u.marking.size() > last_size)
           {
             todo.insert(&u);
-            mCRL2log(log::debug, "stategraph") << "updated marking " << print_control_flow_marking(u) << " using edge " << pbes_system::pp(Y) << "\n";
+            mCRL2log(log::debug, "stategraph") << "updated marking " << u.print_marking() << " using edge " << pbes_system::pp(Y) << "\n";
           }
         }
       }
 
       // set the marking_parameters attributes
-      for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+      for (vertex_iterator i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
       {
         stategraph_vertex& v = i->second;
         const stategraph_equation& eqn = *find_equation(m_pbes, v.X.name());
@@ -173,7 +139,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
       std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
       // iterate over the alternatives as defined by the control flow graph
-      std::set<stategraph_vertex*>& inst = m_stategraph_index[X];
+      std::set<stategraph_vertex*>& inst = m_control_flow_graph.index(X);
       for (std::set<stategraph_vertex*>::const_iterator q = inst.begin(); q != inst.end(); ++q)
       {
         stategraph_vertex& w = **q;
@@ -245,7 +211,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_algorithm
       m_simplify = simplify;
 
       compute_control_flow_marking();
-      mCRL2log(log::verbose) <<  "--- control flow marking ---\n" << print_control_flow_marking();
+      mCRL2log(log::verbose) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
       pbes<> result = p;
       reset_variables_to_original(result);
       return result;

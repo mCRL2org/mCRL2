@@ -1075,7 +1075,7 @@ void gstcSplitSortDecls(const aterm_list &SortDecls,
   alias_vector SortRefs;
   for(aterm_list::const_iterator i=SortDecls.begin(); i!=SortDecls.end(); ++i)
   {
-    const aterm_appl &SortDecl(*i);
+    const aterm_appl& SortDecl = atermpp::aterm_cast<aterm_appl>(*i);
     if (gsIsSortRef(SortDecl))
     {
       SortRefs.push_back(SortDecl);
