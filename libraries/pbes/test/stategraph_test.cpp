@@ -22,7 +22,7 @@ using namespace pbes_system;
 
 propositional_variable_instantiation propvar(const std::string& name)
 {
-  return propositional_variable_instantiation(core::identifier_string(name), data::sort_expression_list());
+  return propositional_variable_instantiation(core::identifier_string(name), data::data_expression_list());
 }
 
 void check_result(const std::string& expression, const std::string& result, const std::string& expected_result, const std::string& title)
