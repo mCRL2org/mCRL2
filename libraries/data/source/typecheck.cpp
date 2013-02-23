@@ -41,19 +41,6 @@ namespace mcrl2
 namespace core
 {
 
-// Static data
-
-static bool was_warning_upcasting=false;
-static bool was_ambiguous=false;
-
-// system constants and functions
-typedef struct
-{
-  std::map <aterm_appl,sort_expression_list> constants;   //name -> Set(sort expression)
-  std::map <aterm_appl,sort_expression_list> functions;   //name -> Set(sort expression)
-} gsSystem;
-
-static gsSystem gssystem;
 
 static aterm_list list_minus(aterm_list l, aterm_list m)
 {
@@ -81,6 +68,19 @@ static aterm_list list_minus(const std::map<aterm_appl,sort_expression> &l, cons
   return n;
 }
 
+// Static data
+
+static bool was_warning_upcasting=false;
+static bool was_ambiguous=false;
+
+// system constants and functions
+typedef struct
+{
+  std::map <aterm_appl,sort_expression_list> constants;   //name -> Set(sort expression)
+  std::map <aterm_appl,sort_expression_list> functions;   //name -> Set(sort expression)
+} gsSystem;
+
+static gsSystem gssystem;
 // the static context of the spec will be checked and used, not transformed
 typedef struct
 {
@@ -147,20 +147,30 @@ static inline aterm_appl gstcMakeActionOrProc(bool, aterm_appl, aterm_list, ater
 static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_expression> &, aterm_appl);
 static aterm_appl gstcTraversePBESVarConstPB(const std::map<aterm_appl,sort_expression> &, aterm_appl);
 
-static aterm_appl gstcTraverseVarConsTypeD(const std::map<aterm_appl,sort_expression> &DeclaredVars, 
-                                           const std::map<aterm_appl,sort_expression> &AllowedVars, 
-                                           data_expression &, 
-                                           aterm_appl, 
-                                           std::map<aterm_appl,sort_expression> &FreeVars, 
-                                           bool strictly_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
-static aterm_appl gstcTraverseVarConsTypeD(const std::map<aterm_appl,sort_expression> &DeclaredVars, const std::map<aterm_appl,sort_expression> &AllowedVars, data_expression &t1, aterm_appl t2)
+static sort_expression gstcTraverseVarConsTypeD(const std::map<aterm_appl,sort_expression> &DeclaredVars, 
+                                                const std::map<aterm_appl,sort_expression> &AllowedVars, 
+                                                data_expression &, 
+                                                sort_expression, 
+                                                std::map<aterm_appl,sort_expression> &FreeVars, 
+                                                bool strictly_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
+static sort_expression gstcTraverseVarConsTypeD(const std::map<aterm_appl,sort_expression> &DeclaredVars, 
+                                                const std::map<aterm_appl,sort_expression> &AllowedVars, 
+                                                data_expression &t1, 
+                                                sort_expression t2)
 {
   std::map<aterm_appl,sort_expression> dummy_table;
   return gstcTraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2,
         dummy_table, true, false, true);
 }
-static aterm_appl gstcTraverseVarConsTypeDN(const std::map<aterm_appl,sort_expression> &DeclaredVars, const std::map<aterm_appl,sort_expression>&AllowedVars, data_expression & , aterm_appl,
-               std::map<aterm_appl,sort_expression> &FreeVars, bool strictly_ambiguous=true, size_t nPars = std::string::npos, const bool warn_upcasting=false, const bool print_cast_error=true);
+static sort_expression gstcTraverseVarConsTypeDN(const std::map<aterm_appl,sort_expression> &DeclaredVars, 
+                                                 const std::map<aterm_appl,sort_expression>&AllowedVars, 
+                                                 data_expression & , 
+                                                 sort_expression,
+                                                 std::map<aterm_appl,sort_expression> &FreeVars, 
+                                                 bool strictly_ambiguous=true, 
+                                                 size_t nPars = std::string::npos, 
+                                                 const bool warn_upcasting=false, 
+                                                 const bool print_cast_error=true);
 
 static aterm_list gstcInsertType(aterm_list TypeList, aterm_appl Type);
 
@@ -243,12 +253,13 @@ static aterm_appl gstcFoldSortRefs(aterm_appl Spec);
 //       backward substitution
 //     - self references are removed, i.e. sort references of the form A = A
 
-static aterm_list gstcFoldSortRefsInSortRefs(aterm_list SortRefs);
+static alias_list gstcFoldSortRefsInSortRefs(alias_list SortRefs);
 //Pre: SortRefs is a list of sort references
 //Ret: SortRefs in which all sort references are maximally folded
 
-static void gstcSplitSortDecls(aterm_list SortDecls, aterm_list* PSortIds,
-                               aterm_list* PSortRefs);
+static void gstcSplitSortDecls(const aterm_list &SortDecls, 
+                               basic_sort_list &PSortIds,
+                               alias_list &PSortRefs);
 //Pre: SortDecls is a list of SortId's and SortRef's
 //Post:*PSortIds and *PSortRefs contain the SortId's and SortRef's from
 //     SortDecls, in the same order
@@ -290,11 +301,11 @@ inline aterm_list ATinsertUnique(const aterm_list &list, const aterm &el)
 
 
 inline
-aterm_list ATreplace(const aterm_list &list_in, const aterm &el, const size_t idx) // Replace one element of a list.
+alias_list alias_list_replace(const alias_list &list_in, const alias &el, const size_t idx) // Replace one element of a list.
 {
-  aterm_list list=list_in;
+  alias_list list=list_in;
   size_t i;
-  std::vector<aterm> buffer;
+  std::vector<alias> buffer;
 
   for (i=0; i<idx; i++)
   {
@@ -302,7 +313,7 @@ aterm_list ATreplace(const aterm_list &list_in, const aterm &el, const size_t id
     list = list.tail();
   }
   /* Skip the old element */
-  list = list.tail();
+  list.pop_front();
   /* Add the new element */
   list.push_front(el);
   /* Add the prefix */
@@ -321,7 +332,7 @@ static aterm gsSubstValuesTable(const std::map <sort_expression,sort_expression>
   { 
     if (is_sort_expression(aterm_cast<aterm_appl>(Term)))
     {
-      std::map <sort_expression,sort_expression>::const_iterator i=Substs.find(Term);
+      std::map <sort_expression,sort_expression>::const_iterator i=Substs.find(aterm_cast<sort_expression>(Term));
       if (i!=Substs.end())
       {
         return i->second;
@@ -572,7 +583,7 @@ data_expression type_check_data_expr(const data_expression &data_expr, aterm_app
   sort_expression Type; 
   try 
   {
-    Type=gstcTraverseVarConsTypeD(Vars,Vars,data,(aterm_appl)data::unknown_sort());
+    Type=gstcTraverseVarConsTypeD(Vars,Vars,data,data::unknown_sort());
   }
   catch (mcrl2::runtime_error &e)
   {
@@ -915,7 +926,7 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
       actions_from_lps.swap(context.actions);
     }
 
-    data_expression Cond=aterm_cast<aterm_appl>(Rule[1]);
+    data_expression Cond=aterm_cast<data_expression>(Rule[1]);
     gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,Cond,sort_bool::bool_());
 
     aterm_appl Right(Rule[3]);
@@ -1056,27 +1067,26 @@ aterm_list type_check_data_vars(aterm_list data_vars, aterm_appl spec)
 
 // fold functions
 
-void gstcSplitSortDecls(aterm_list SortDecls, 
-                        aterm_list* PSortIds,
-                        aterm_list* PSortRefs)
+void gstcSplitSortDecls(const aterm_list &SortDecls, 
+                        basic_sort_list &PSortIds,
+                        alias_list &PSortRefs)
 {
-  aterm_list SortIds;
-  aterm_list SortRefs;
-  while (!SortDecls.empty())
+  basic_sort_vector SortIds;
+  alias_vector SortRefs;
+  for(aterm_list::const_iterator i=SortDecls.begin(); i!=SortDecls.end(); ++i)
   {
-    aterm_appl SortDecl = ATAgetFirst(SortDecls);
+    const aterm_appl &SortDecl(*i);
     if (gsIsSortRef(SortDecl))
     {
-      SortRefs.push_front(SortDecl);
+      SortRefs.push_back(SortDecl);
     }
     else     //gsIsSortId(SortDecl)
     {
-      SortIds.push_front(SortDecl);
+      SortIds.push_back(SortDecl);
     }
-    SortDecls = SortDecls.tail();
   }
-  *PSortIds = reverse(SortIds);
-  *PSortRefs = reverse(SortRefs);
+  PSortIds = basic_sort_list(SortIds.begin(),SortIds.end());
+  PSortRefs = alias_list(SortRefs.begin(),SortRefs.end());
 }
 
 aterm_appl gstcUpdateSortSpec(aterm_appl Spec, aterm_appl SortSpec)
@@ -1113,9 +1123,9 @@ aterm_appl gstcFoldSortRefs(aterm_appl Spec)
   aterm_appl SortSpec = aterm_cast<aterm_appl>(DataSpec[0]);
   aterm_list SortDecls = aterm_cast<aterm_list>(SortSpec[0]);
   //split sort declarations in sort id's and sort references
-  aterm_list SortIds;
-  aterm_list SortRefs;
-  gstcSplitSortDecls(SortDecls, &SortIds, &SortRefs);
+  basic_sort_list SortIds;
+  alias_list SortRefs;
+  gstcSplitSortDecls(SortDecls, SortIds, SortRefs);
   //fold sort references in the sort references themselves
   SortRefs = gstcFoldSortRefsInSortRefs(SortRefs);
   //substitute sort references in the rest of Spec, i.e.
@@ -1124,13 +1134,13 @@ aterm_appl gstcFoldSortRefs(aterm_appl Spec)
   //(b) build substitution table
   std::map <sort_expression,sort_expression> Substs;
   aterm_list l = SortRefs;
-  while (!l.empty())
+  for(alias_list::const_iterator l=SortRefs.begin(); l!=SortRefs.end(); ++l)
   {
-    aterm_appl SortRef = ATAgetFirst(l);
+    const alias &SortRef = *l;
     //add substitution for SortRef
-    aterm_appl LHS = gsMakeSortId(aterm_cast<aterm_appl>(SortRef[0]));
-    aterm_appl RHS = aterm_cast<aterm_appl>(SortRef[1]);
-    if (gsIsSortId(RHS) || gsIsSortArrow(RHS))
+    const basic_sort LHS = SortRef.name(); 
+    const sort_expression &RHS = SortRef.reference();
+    if (is_basic_sort(RHS) || is_function_sort(RHS))
     {
       //add forward substitution
       Substs[LHS]=RHS;
@@ -1140,7 +1150,6 @@ aterm_appl gstcFoldSortRefs(aterm_appl Spec)
       //add backward substitution
       Substs[RHS]=LHS;
     }
-    l = l.tail();
   }
   //(c) perform substitutions until the specification becomes stable
   aterm_appl NewSpec = Spec;
@@ -1153,16 +1162,16 @@ aterm_appl gstcFoldSortRefs(aterm_appl Spec)
   while (NewSpec!=Spec);
 
   //add the removed sort references back to Spec
-  Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(SortIds+ SortRefs));
+  Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(aterm_cast<aterm_list>(SortIds)+aterm_cast<aterm_list>(SortRefs)));
   mCRL2log(debug) << "specification after folding:\n" << pp(Spec) << "\n" ;
   return Spec;
 }
 
-aterm_list gstcFoldSortRefsInSortRefs(aterm_list SortRefs)
+alias_list gstcFoldSortRefsInSortRefs(alias_list SortRefs)
 {
   //fold sort references in SortRefs by means of repeated forward and backward
   //substitution
-  aterm_list NewSortRefs = SortRefs;
+  alias_list NewSortRefs = SortRefs;
   size_t n = SortRefs.size();
   //perform substitutions until the list of sort references becomes stable
   do
@@ -1188,7 +1197,7 @@ aterm_list gstcFoldSortRefsInSortRefs(aterm_list SortRefs)
           aterm_appl NewSortRef = aterm_cast<aterm_appl>(Subst(OldSortRef));
           if (NewSortRef!=OldSortRef)
           {
-            NewSortRefs = ATreplace(NewSortRefs, NewSortRef, j);
+            NewSortRefs = alias_list_replace(NewSortRefs, NewSortRef, j);
           }
         }
       }
@@ -1197,7 +1206,7 @@ aterm_list gstcFoldSortRefsInSortRefs(aterm_list SortRefs)
   }
   while (NewSortRefs!=SortRefs);
   //remove self references
-  aterm_list l;
+  alias_list l;
   while (!SortRefs.empty())
   {
     aterm_appl SortRef = ATAgetFirst(SortRefs);
@@ -3226,11 +3235,11 @@ static aterm_appl gstcTraversePBESVarConstPB(const std::map<aterm_appl,sort_expr
   throw mcrl2::runtime_error("Internal error. The pbes term " + pp(PBESTerm) + " fails to match any known form in typechecking case analysis");
 }
 
-static aterm_appl gstcTraverseVarConsTypeD(
+static sort_expression gstcTraverseVarConsTypeD(
   const std::map<aterm_appl,sort_expression> &DeclaredVars,
   const std::map<aterm_appl,sort_expression> &AllowedVars,
   data_expression &DataTerm,
-  aterm_appl PosType,
+  sort_expression PosType,
   std::map<aterm_appl,sort_expression> &FreeVars,
   const bool strictly_ambiguous,
   const bool warn_upcasting,
@@ -4081,11 +4090,11 @@ static aterm_appl gstcTraverseVarConsTypeD(
   throw mcrl2::runtime_error("Internal type checking error: " + pp(DataTerm) + " does not match any type checking case." );
 }
 
-static aterm_appl gstcTraverseVarConsTypeDN(
+static sort_expression gstcTraverseVarConsTypeDN(
   const std::map<aterm_appl,sort_expression> &DeclaredVars,
   const std::map<aterm_appl,sort_expression> &AllowedVars,
   data_expression &DataTerm,
-  aterm_appl PosType,
+  sort_expression PosType,
   std::map<aterm_appl,sort_expression> &FreeVars,
   const bool strictly_ambiguous,
   const size_t nFactPars,

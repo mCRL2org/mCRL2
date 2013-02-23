@@ -73,7 +73,7 @@ class alias: public atermpp::aterm_appl
     inline
     basic_sort name() const
     {
-      return basic_sort(atermpp::aterm_string(atermpp::arg1(*this)));
+      return basic_sort(atermpp::aterm_cast<atermpp::aterm_string>((*this)[0]));
     }
 
     /// \brief Returns the sort to which the name refers.
@@ -83,7 +83,7 @@ class alias: public atermpp::aterm_appl
     inline
     sort_expression reference() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<sort_expression>((*this)[1]);
     }
 
 }; // class alias

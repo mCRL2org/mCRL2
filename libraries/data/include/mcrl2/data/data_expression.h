@@ -158,19 +158,18 @@ class data_expression: public atermpp::aterm_appl
     inline
     sort_expression sort() const
     {
-      sort_expression result;
-
+      using namespace atermpp;
       // This implementation is currently done in this class, because there
       // is no elegant solution of distributing the implementation of the
       // derived classes (as we need to support requesting the sort of a
       // data_expression we do need to provide an implementation here).
       if (is_variable(*this))
       {
-        result = atermpp::arg2(*this);
+        return aterm_cast<sort_expression>((*this)[1]);
       }
       else if (is_function_symbol(*this))
       {
-        result = atermpp::arg2(*this);
+        return aterm_cast<sort_expression>((*this)[1]); 
       }
       else if (is_abstraction(*this))
       {
@@ -178,66 +177,53 @@ class data_expression: public atermpp::aterm_appl
         {
           // Workaround for the unavailability of sort_bool::bool_()
           // (because of cyclic dependencies).
-          result = data_expression(atermpp::arg3(*this)).sort();
+          return aterm_cast<data_expression>((*this)[2]).sort();
         }
         else if (is_lambda(*this))
         {
-          atermpp::term_list<data_expression> v_variables = atermpp::term_list<data_expression>(atermpp::list_arg2(*this));
+          const atermpp::term_list<aterm_appl> &v_variables ((*this)[1]);
           sort_expression_vector s;
-          for (atermpp::term_list<data_expression>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+          for (atermpp::term_list<aterm_appl>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
           {
-            s.push_back(i->sort());
+            s.push_back(aterm_cast<sort_expression>((*i)[1])); // Push the sort.
           }
-          result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
+          return function_sort(sort_expression_list(s.begin(),s.end()), aterm_cast<data_expression>((*this)[2]).sort());
         }
         else 
         {
           assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_set_or_bag_comprehension(*this));
-          atermpp::term_list<data_expression> v_variables = atermpp::term_list<data_expression> (atermpp::list_arg2(*this));
+          const atermpp::term_list<aterm_appl> &v_variables ((*this)[1]);
           assert(v_variables.size() == 1);
 
           if (is_bag_comprehension(*this))
           {
-            result = container_sort(bag_container(), v_variables.begin()->sort());
+            return container_sort(bag_container(), aterm_cast<const sort_expression>(v_variables.front()[1]));
           }
           else // If it is not known whether the term is a set or a bag, it returns the type of a set, as there is 
                // no setbag type. This can only occur for terms that are not propertly type checked.
           {
-            result = container_sort(set_container(), v_variables.begin()->sort());
+            return container_sort(set_container(), aterm_cast<sort_expression>(v_variables.front()[1]));
           }
         }
       }
       else if (is_application(*this))
       {
-        const data_expression &head = atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
+        const data_expression &head = atermpp::aterm_cast<const data_expression>((*this)[0]);
         sort_expression s(head.sort());
-        if (s == sort_expression())
-        {
-          result = s;
+        if (is_function_sort(s))
+        { 
+          const function_sort &fs(s);
+          return (fs.codomain());
         }
-        else if (is_function_sort(s))
-        {
-          result = atermpp::arg2(s);
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Sort " + to_string(s) + " of " + to_string(atermpp::arg1(*this)) + " is not a function sort.");
-        }
+        return s;
       }
       else if (is_where_clause(*this))
       {
-        result = data_expression(atermpp::arg1(*this)).sort();
+        return aterm_cast<data_expression>((*this)[0]).sort();
       }
-      else if (is_identifier(*this))
-      {
-        result = sort_expression();
-      }
-      else
-      {
-        throw mcrl2::runtime_error("Unexpected data expression " + to_string(*this) + " occurred.");
-      }
-
-      return result;
+      assert(is_identifier(*this)); // All cases have been deal with here, except this one.
+      return unknown_sort();
+      
     }
 //--- end user section data_expression ---//
 };

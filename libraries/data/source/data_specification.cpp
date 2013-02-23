@@ -504,7 +504,7 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
     }
     else
     {
-      add_sort(*i);
+      add_sort(atermpp::aterm_cast<const sort_expression>(*i));
     }
   }
 
