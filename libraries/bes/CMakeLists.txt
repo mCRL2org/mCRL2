@@ -29,9 +29,11 @@ else(MSVC)
   endif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
 endif(MSVC)
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/libraries/bes/source)
+
 add_custom_command(
-  OUTPUT ${CMAKE_SOURCE_DIR}/libraries/bes/source/pg_syntax.c
-  COMMAND make_dparser -A -H1 -ipg -o${CMAKE_CURRENT_SOURCE_DIR}/source/pg_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/pg-syntax.g
+  OUTPUT ${CMAKE_BINARY_DIR}/libraries/bes/source/pg_syntax.c
+  COMMAND make_dparser -A -H0 -ipg -o${CMAKE_BINARY_DIR}/libraries/bes/source/pg_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/pg-syntax.g
   DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/pg-syntax.g
 )
 
@@ -40,7 +42,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  source/pg_syntax.c
+  ${CMAKE_BINARY_DIR}/libraries/bes/source/pg_syntax.c
 )
 
 target_link_libraries(

@@ -29,9 +29,10 @@ else(MSVC)
   endif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
 endif(MSVC)
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/libraries/core/source)
 add_custom_command(
-  OUTPUT ${CMAKE_SOURCE_DIR}/libraries/core/source/mcrl2_syntax.c
-  COMMAND make_dparser -A -H1 -imcrl2 -o${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
+  OUTPUT ${CMAKE_BINARY_DIR}/libraries/core/source/mcrl2_syntax.c
+  COMMAND make_dparser -A -H0 -imcrl2 -o${CMAKE_BINARY_DIR}/libraries/core/source/mcrl2_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
   DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
 )
 
@@ -40,7 +41,7 @@ include_directories(
 )
 
 add_library(mcrl2_syntax
-  source/mcrl2_syntax.c
+  ${CMAKE_BINARY_DIR}/libraries/core/source/mcrl2_syntax.c
 )
 
 target_link_libraries(mcrl2_syntax
