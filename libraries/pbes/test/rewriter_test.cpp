@@ -309,6 +309,7 @@ void test_enumerate_quantifiers_rewriter()
   test_rewriters(N(R), N(r),  "val(!true) || (((forall m: Nat. val(!(m < 3)) && X3(false, m + 1)) && X2(1, 1) && val(!false) || val(false)) || (exists m: Nat. val(m < 3) || (forall k: Nat. val(k < 3) && val(k < 2)))) && X1(false)", "X1(false)");
   test_rewriters(N(R), N(r),  "forall n: Nat. (val(n < 3) && (exists n: Nat. val(n < 3)))", "false");
   test_rewriters(N(R), N(r),  "Y(n + 1) || forall n: Nat. val(n < 3)", "Y(n + 1)");
+  test_rewriters(N(R), N(r),  "forall b: Bool . val(b) || X1(b)", "X1(false)");
 }
 
 template <typename Rewriter1, typename Rewriter2>
