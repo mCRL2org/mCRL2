@@ -41,10 +41,10 @@ class stategraph_equation: public pbes_equation
     pbes_expression m_condition;
 
   public:
-    stategraph_equation(const pbes_equation& eqn)
+    stategraph_equation(const pbes_equation& eqn, const data::data_specification& dataspec)
       : pbes_equation(eqn)
     {
-      pbes_system::detail::guard_traverser f;
+      pbes_system::detail::guard_traverser f(dataspec);
       f(eqn.formula());
       m_predvars = f.expression_stack.back().guards;
       m_condition = f.expression_stack.back().condition;
@@ -120,7 +120,7 @@ class stategraph_pbes
       const std::vector<pbes_equation>& equations = p.equations();
       for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
-        m_equations.push_back(stategraph_equation(*i));
+        m_equations.push_back(stategraph_equation(*i, m_data));
       }
     }
 

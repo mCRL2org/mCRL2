@@ -139,7 +139,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
       // iterate over the alternatives as defined by the control flow graph
-      std::set<stategraph_vertex*>& inst = m_control_flow_graph.index(X);
+      std::set<stategraph_vertex*>& inst = m_control_flow_graph.index(x);
       for (std::set<stategraph_vertex*>::const_iterator q = inst.begin(); q != inst.end(); ++q)
       {
         stategraph_vertex& w = **q;

@@ -15,6 +15,8 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -185,7 +187,8 @@ struct guard_expression
   {}
 
   // Check if the guards were correctly computed with respect to x.
-  bool check_guards(const pbes_expression& x) const
+  template <typename PbesRewriter>
+  bool check_guards(const pbes_expression& x, PbesRewriter R) const
   {
     mCRL2log(log::debug, "stategraph") << "check_guards: x = " << pbes_system::pp(x) << std::endl;
     bool result = true;
@@ -196,10 +199,10 @@ struct guard_expression
         const propositional_variable_instantiation& X = i->first;
         const pbes_expression& g1 = i->second;
         pbes_expression g2 = guard(X, x);
-        if (g1 != g2)
+        if (pbes_rewrite(g1, R) != pbes_rewrite(g2, R))
         {
           result = false;
-          mCRL2log(log::debug, "stategraph") << "guard error: X = " << pbes_system::pp(X) << " g1 = " << pbes_system::pp(g1) << " g2 = " << pbes_system::pp(g2) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "guard error: X = " << pbes_system::pp(X) << " g1 = " << pbes_system::pp(pbes_rewrite(g1, R)) << " g2 = " << pbes_system::pp(pbes_rewrite(g2, R)) << std::endl;
         }
       }
       catch (mcrl2::runtime_error&)
@@ -236,6 +239,11 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   using super::leave;
   using super::operator();
 
+  guard_traverser(const data::rewriter& r)
+    : R(r)
+  {}
+
+  simplifying_rewriter<pbes_expression, data::rewriter> R;
   std::vector<guard_expression> expression_stack;
 
   void push(const guard_expression& x)
@@ -264,7 +272,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   void leave(const data::data_expression& x)
   {
     push(guard_expression(x));
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::propositional_variable_instantiation& x)
@@ -272,25 +280,25 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     guard_expression node;
     node.guards.push_back(std::make_pair(x, pbes_system::true_()));
     push(node);
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::true_& x)
   {
     push(guard_expression(x));
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::false_& x)
   {
     push(guard_expression(x));
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::not_& x)
   {
     top().negate();
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::and_& x)
@@ -321,7 +329,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
       left.condition = new_condition;
       push(left);
     }
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::or_& x)
@@ -352,7 +360,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
       left.condition = new_condition;
       push(left);
     }
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::imp& x)
@@ -384,7 +392,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
       left.condition = new_condition;
       push(left);
     }
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::forall& x)
@@ -394,7 +402,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     {
       top().condition = x;
     }
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::exists& x)
@@ -404,7 +412,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     {
       top().condition = x;
     }
-    assert(top().check_guards(x));
+    assert(top().check_guards(x, R));
   }
 };
 

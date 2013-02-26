@@ -58,10 +58,11 @@ void test_guard(const std::string& pbesspec, const std::string& X, const std::st
   pbes<> p = txt2pbes(pbesspec, normalize);
   pbes_expression x1 = p.equations().front().formula();
   propositional_variable_instantiation X1 = find_propvar(X, x1);
+  simplifying_rewriter<pbes_expression, data::rewriter> R(p.data());
 
-  detail::guard_traverser f;
+  detail::guard_traverser f(p.data());
   f(x1);
-  BOOST_CHECK(f.expression_stack.back().check_guards(x1));
+  BOOST_CHECK(f.expression_stack.back().check_guards(x1, R));
 
   pbes_expression g = detail::guard(X1, x1);
   std::string result = pbes_system::pp(g);
