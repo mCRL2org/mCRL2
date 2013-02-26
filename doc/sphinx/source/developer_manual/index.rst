@@ -37,6 +37,7 @@ Contents
 
    developer
    guidelines
+   code_generation
    cronjobs
    packaging
    performance/index
