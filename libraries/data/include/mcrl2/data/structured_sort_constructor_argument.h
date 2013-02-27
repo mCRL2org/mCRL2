@@ -61,12 +61,12 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::identifier_string(name), sort))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
       return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
     }
 
-    sort_expression sort() const
+    const sort_expression &sort() const
     {
       return atermpp::aterm_cast<sort_expression>(atermpp::arg2(*this));
     }

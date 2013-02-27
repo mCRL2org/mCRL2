@@ -62,19 +62,19 @@ class structured_sort_constructor_base: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), atermpp::convert<structured_sort_constructor_argument_list>(arguments), core::identifier_string(recogniser)))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string &name() const
     {
-      return  atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
+      return  atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    structured_sort_constructor_argument_list arguments() const
+    const structured_sort_constructor_argument_list &arguments() const
     {
-      return structured_sort_constructor_argument_list(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const structured_sort_constructor_argument_list>(atermpp::list_arg2(*this));
     }
 
-    core::identifier_string recogniser() const
+    const core::identifier_string &recogniser() const
     {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg3(*this));
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg3(*this));
     }
 };
 

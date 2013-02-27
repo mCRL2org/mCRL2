@@ -368,6 +368,7 @@ class data_specification
       m_data_specification_is_type_checked(false),
       m_normalised_data_is_up_to_date(false)
     {
+std::cerr << "BUILD FROM ATERM... \n";
       m_non_typed_checked_data_spec=t;
     }
 
@@ -376,11 +377,14 @@ class data_specification
     ///  access to the data specification using all the utility functions.
     void declare_data_specification_to_be_type_checked()
     {
-      assert(!m_data_specification_is_type_checked); //A data specification can only be declared
       //type checked once.
-      m_data_specification_is_type_checked=true;
-      build_from_aterm(m_non_typed_checked_data_spec);
-      m_non_typed_checked_data_spec=atermpp::aterm_appl();
+      if (!m_data_specification_is_type_checked) //A data specification can only be declared
+      { 
+std::cerr << "DECLARE TYPECHECKED \n";
+        m_data_specification_is_type_checked=true;
+        build_from_aterm(m_non_typed_checked_data_spec);
+        m_non_typed_checked_data_spec=atermpp::aterm_appl();
+      }
     }
 
 
@@ -406,7 +410,6 @@ class data_specification
     inline
     const sort_expression_vector& user_defined_sorts() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_sorts;
     }
 
@@ -428,7 +431,6 @@ class data_specification
     inline
     const function_symbol_vector& user_defined_constructors() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_constructors;
     }
 
@@ -467,7 +469,6 @@ class data_specification
     inline
     const function_symbol_vector& user_defined_mappings() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_mappings;
     }
 
@@ -506,7 +507,6 @@ class data_specification
     inline
     const data_equation_vector& user_defined_equations() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_equations;
     }
 
@@ -527,7 +527,6 @@ class data_specification
     inline
     const alias_vector& user_defined_aliases() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_aliases;
     }
 

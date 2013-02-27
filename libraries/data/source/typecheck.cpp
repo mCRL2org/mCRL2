@@ -25,6 +25,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
@@ -55,10 +56,10 @@ static aterm_list list_minus(aterm_list l, aterm_list m)
   return reverse(n);
 }
 
-static aterm_list list_minus(const std::map<aterm_appl,sort_expression> &l, const std::map<aterm_appl,sort_expression> &m)
+static core::identifier_string_list list_minus(const std::map<core::identifier_string,sort_expression> &l, const std::map<core::identifier_string,sort_expression> &m)
 {
-  aterm_list n;
-  for (std::map<aterm_appl,sort_expression>::const_reverse_iterator i=l.rbegin(); i!=l.rend(); ++i)
+  core::identifier_string_list n;
+  for (std::map<core::identifier_string,sort_expression>::const_reverse_iterator i=l.rbegin(); i!=l.rend(); ++i)
   {
     if (m.count(i->first)==0)
     {
@@ -76,8 +77,8 @@ static bool was_ambiguous=false;
 // system constants and functions
 typedef struct
 {
-  std::map <aterm_appl,sort_expression_list> constants;   //name -> Set(sort expression)
-  std::map <aterm_appl,sort_expression_list> functions;   //name -> Set(sort expression)
+  std::map <core::identifier_string,sort_expression_list> constants;   //name -> Set(sort expression)
+  std::map <core::identifier_string,sort_expression_list> functions;   //name -> Set(sort expression)
 } gsSystem;
 
 static gsSystem gssystem;
@@ -85,13 +86,13 @@ static gsSystem gssystem;
 typedef struct
 {
   std::set <aterm_appl> basic_sorts; // contains basic_sorts.
-  std::map<aterm_appl,sort_expression> defined_sorts; //name -> sort expression
-  std::map<aterm_appl,sort_expression> constants;     //name -> sort expression
-  std::map<aterm_appl,sort_expression_list> functions;     //name -> Set(sort expression)
-  std::map<aterm_appl,term_list<sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
-  std::map<aterm_appl,term_list<sort_expression_list> > processes; //name -> Set(List(sort expression)) because of process polymorphism
-  std::map<aterm_appl,sort_expression> glob_vars;         //name -> Type: global variables (for proc, pbes and init)
-  std::map<aterm_appl,term_list<sort_expression_list> > PBs;
+  std::map<core::identifier_string,sort_expression> defined_sorts; //name -> sort expression
+  std::map<core::identifier_string,sort_expression> constants;     //name -> sort expression
+  std::map<core::identifier_string,sort_expression_list> functions;     //name -> Set(sort expression)
+  std::map<core::identifier_string,term_list<sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
+  std::map<core::identifier_string,term_list<sort_expression_list> > processes; //name -> Set(List(sort expression)) because of process polymorphism
+  std::map<core::identifier_string,sort_expression> glob_vars;         //name -> Type: global variables (for proc, pbes and init)
+  std::map<core::identifier_string,term_list<sort_expression_list> > PBs;
 } Context;
 
 static Context context;
@@ -108,10 +109,10 @@ static Body body;
 // Static function declarations
 static void gstcDataInit(void);
 static void gstcReadInSorts(aterm_list);
-static void gstcReadInConstructors(const std::map<aterm_appl,sort_expression>::const_iterator begin,
-                                   const std::map<aterm_appl,sort_expression>::const_iterator end);
-static void gstcReadInConstructors(const sort_expression_list::const_iterator begin,
-                                   const sort_expression_list::const_iterator end);
+static void gstcReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
+                                   const std::map<core::identifier_string,sort_expression>::const_iterator end);
+static void gstcReadInConstructors(const core::identifier_string_list::const_iterator begin,
+                                   const core::identifier_string_list::const_iterator end);
 static void gstcReadInFuncs(aterm_list, aterm_list);
 static void gstcReadInActs(aterm_list);
 static void gstcReadInProcsAndInit(aterm_list, aterm_appl);
@@ -139,34 +140,34 @@ static void gstcAddFunction(aterm_appl, const std::string, bool allow_double_dec
 static void gstcAddSystemConstant(aterm_appl);
 static void gstcAddSystemFunction(aterm_appl);
 
-static void gstcAddVars2Table(std::map<aterm_appl,sort_expression> &,aterm_list, std::map<aterm_appl,sort_expression> &);
-static std::map<aterm_appl,sort_expression> gstcRemoveVars(std::map<aterm_appl,sort_expression> &Vars, aterm_list VarDecls);
+static void gstcAddVars2Table(std::map<core::identifier_string,sort_expression> &,aterm_list, std::map<core::identifier_string,sort_expression> &);
+static std::map<core::identifier_string,sort_expression> gstcRemoveVars(std::map<core::identifier_string,sort_expression> &Vars, variable_list VarDecls);
 static bool gstcVarsUnique(aterm_list VarDecls);
-static aterm_appl gstcRewrActProc(const std::map<aterm_appl,sort_expression> &, aterm_appl, bool is_pbes=false);
+static aterm_appl gstcRewrActProc(const std::map<core::identifier_string,sort_expression> &, aterm_appl, bool is_pbes=false);
 static inline aterm_appl gstcMakeActionOrProc(bool, aterm_appl, aterm_list, aterm_list);
-static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_expression> &, aterm_appl);
-static aterm_appl gstcTraversePBESVarConstPB(const std::map<aterm_appl,sort_expression> &, aterm_appl);
+static aterm_appl gstcTraverseActProcVarConstP(const std::map<core::identifier_string,sort_expression> &, aterm_appl);
+static aterm_appl gstcTraversePBESVarConstPB(const std::map<core::identifier_string,sort_expression> &, aterm_appl);
 
-static sort_expression gstcTraverseVarConsTypeD(const std::map<aterm_appl,sort_expression> &DeclaredVars, 
-                                                const std::map<aterm_appl,sort_expression> &AllowedVars, 
+static sort_expression gstcTraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression> &DeclaredVars, 
+                                                const std::map<core::identifier_string,sort_expression> &AllowedVars, 
                                                 data_expression &, 
                                                 sort_expression, 
-                                                std::map<aterm_appl,sort_expression> &FreeVars, 
+                                                std::map<core::identifier_string,sort_expression> &FreeVars, 
                                                 bool strictly_ambiguous=true, const bool warn_upcasting=false, const bool print_cast_error=true);
-static sort_expression gstcTraverseVarConsTypeD(const std::map<aterm_appl,sort_expression> &DeclaredVars, 
-                                                const std::map<aterm_appl,sort_expression> &AllowedVars, 
+static sort_expression gstcTraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression> &DeclaredVars, 
+                                                const std::map<core::identifier_string,sort_expression> &AllowedVars, 
                                                 data_expression &t1, 
                                                 sort_expression t2)
 {
-  std::map<aterm_appl,sort_expression> dummy_table;
+  std::map<core::identifier_string,sort_expression> dummy_table;
   return gstcTraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2,
         dummy_table, true, false, true);
 }
-static sort_expression gstcTraverseVarConsTypeDN(const std::map<aterm_appl,sort_expression> &DeclaredVars, 
-                                                 const std::map<aterm_appl,sort_expression>&AllowedVars, 
+static sort_expression gstcTraverseVarConsTypeDN(const std::map<core::identifier_string,sort_expression> &DeclaredVars, 
+                                                 const std::map<core::identifier_string,sort_expression>&AllowedVars, 
                                                  data_expression & , 
                                                  sort_expression,
-                                                 std::map<aterm_appl,sort_expression> &FreeVars, 
+                                                 std::map<core::identifier_string,sort_expression> &FreeVars, 
                                                  bool strictly_ambiguous=true, 
                                                  size_t nPars = std::string::npos, 
                                                  const bool warn_upcasting=false, 
@@ -203,11 +204,11 @@ static bool gstcUnBag(aterm_appl PosType, aterm_appl &result);
 static bool gstcUnList (aterm_appl PosType, aterm_appl &result);
 static bool gstcUnArrowProd(aterm_list ArgTypes, aterm_appl PosType, aterm_appl &result);
 static aterm_list gstcTypeListsIntersect(aterm_list TypeListList1, aterm_list TypeListList2);
-static aterm_list gstcGetVarTypes(aterm_list VarDecls);
+static sort_expression_list gstcGetVarTypes(variable_list VarDecls);
 static bool gstcTypeMatchA(const aterm_appl &Type, const aterm_appl &PosType, aterm_appl &result);
 static bool gstcTypeMatchL(const aterm_list &TypeList, const aterm_list &PosTypeList, aterm_list &result);
 static bool gstcHasUnknown(aterm_appl Type);
-static bool gstcIsNumericType(aterm_appl Type);
+static bool gstcIsNumericType(const sort_expression &Type);
 static aterm_appl gstcExpandNumTypesUp(aterm_appl Type);
 static aterm_appl gstcExpandNumTypesDown(aterm_appl Type);
 static aterm_appl gstcMinType(aterm_list TypeList);
@@ -232,14 +233,14 @@ static bool gstcMatchFuncUpdate(const aterm_appl &Type, aterm_appl &result);
 static aterm_appl replace_possible_sorts(aterm_appl Type);
 
 
-static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Arguments, aterm_list ArgumentTypes);
+static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Arguments, aterm_list ArgumentTypes,std::string previous_reason);
 
 // Typechecking modal formulas
-static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression> &Vars, 
-                                       const std::map<aterm_appl,sort_expression_list> &StateVars, 
+static aterm_appl gstcTraverseStateFrm(const std::map<core::identifier_string,sort_expression> &Vars, 
+                                       const std::map<core::identifier_string,sort_expression_list> &StateVars, 
                                        aterm_appl StateFrm);
-static aterm_appl gstcTraverseRegFrm(const std::map<aterm_appl,sort_expression> &Vars, aterm_appl RegFrm);
-static aterm_appl gstcTraverseActFrm(const std::map<aterm_appl,sort_expression> &Vars, aterm_appl ActFrm);
+static aterm_appl gstcTraverseRegFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl RegFrm);
+static aterm_appl gstcTraverseActFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ActFrm);
 
 
 static aterm_appl gstcFoldSortRefs(aterm_appl Spec);
@@ -288,11 +289,11 @@ static inline std::map<atermpp::aterm,bool> neg_values(std::map<atermpp::aterm,b
  * \param[in] el the aterm to prepend
  * \return el ++ list if not el in list, list if el in list
 **/
-inline aterm_list ATinsertUnique(const aterm_list &list, const aterm &el)
+inline sort_expression_list ATinsertUnique(const sort_expression_list &list, const sort_expression &el)
 {
   if (std::find(list.begin(),list.end(), el) == list.end())
   {
-    aterm_list result=list;
+    sort_expression_list result=list;
     result.push_front(el);
     return result;
   }
@@ -462,7 +463,7 @@ aterm_appl type_check_proc_spec(aterm_appl proc_spec)
   
   aterm_appl glob_var_spec = aterm_cast<aterm_appl>(proc_spec[2]);
   aterm_list glob_vars = aterm_cast<aterm_list>(glob_var_spec[0]);
-  std::map<aterm_appl,sort_expression> dummy;
+  std::map<core::identifier_string,sort_expression> dummy;
   gstcAddVars2Table(context.glob_vars, glob_vars,dummy);
   
   gstcReadInProcsAndInit(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(proc_spec[3])[0]),
@@ -491,6 +492,4029 @@ aterm_appl type_check_proc_spec(aterm_appl proc_spec)
   return Result;
 }
 
+} // namespace core
+
+// ------------------------------  Here starts the new class based sort expression checker -----------------------
+
+bool mcrl2::data::sort_expression_checker::check_for_sort_alias_loop_through_function_sort(
+  const basic_sort& start_search,
+  const basic_sort& end_search,
+  std::set < basic_sort > &visited,
+  const bool observed_a_sort_constructor)
+{
+  const std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.find(start_search.name());
+
+  if (i==defined_sorts.end())
+  {
+    // start_search is not a sort alias, and hence not a recursive sort.
+    return false;
+  }
+  sort_expression aterm_reference= i->second;
+
+  if (start_search==end_search)
+  {
+    // We found a loop.
+    return observed_a_sort_constructor;
+  }
+  if (visited.find(start_search)!=visited.end())
+  {
+    // start_search has already been encountered. end_search will not be found via this path.
+    return false;
+  }
+
+  visited.insert(start_search);
+  const sort_expression reference(aterm_reference);
+  return check_for_sort_alias_loop_through_function_sort_via_expression(reference,end_search,visited,observed_a_sort_constructor);
+}
+
+bool mcrl2::data::sort_expression_checker::check_for_sort_alias_loop_through_function_sort_via_expression(
+  const sort_expression& sort_expression_start_search,
+  const basic_sort& end_search,
+  std::set < basic_sort > &visited,
+  const bool observed_a_sort_constructor)
+{
+  if (is_basic_sort(sort_expression_start_search))
+  {
+    const basic_sort start_search(sort_expression_start_search);
+    if (end_search==start_search)
+    {
+      return observed_a_sort_constructor;
+    }
+    else
+    {
+      return check_for_sort_alias_loop_through_function_sort(start_search,end_search,visited,observed_a_sort_constructor);
+    }
+  }
+
+  if (is_container_sort(sort_expression_start_search))
+  {
+    // A loop through a list container is allowed, but a loop through a set or bag container
+    // is problematic.
+    const container_sort start_search_container(sort_expression_start_search);
+    return check_for_sort_alias_loop_through_function_sort_via_expression(
+             start_search_container.element_sort(),end_search,visited,
+             start_search_container.container_name()!=list_container());
+  }
+
+  if (is_function_sort(sort_expression_start_search))
+  {
+    const function_sort f_start_search(sort_expression_start_search);
+    if (check_for_sort_alias_loop_through_function_sort_via_expression(
+          f_start_search.codomain(),end_search,visited,true))
+    {
+      return true;
+    }
+    for (sort_expression_list::const_iterator i=f_start_search.domain().begin();
+         i!=f_start_search.domain().end(); ++i)
+    {
+      if (check_for_sort_alias_loop_through_function_sort_via_expression(
+            *i,end_search,visited,true))
+      {
+        return true;
+      }
+    }
+    // end_search has not been found, so:
+    return false;
+  }
+
+  if (is_structured_sort(sort_expression_start_search))
+  {
+    const structured_sort struct_start_search(sort_expression_start_search);
+    const function_symbol_vector constructor_functions=struct_start_search.constructor_functions();
+    for (function_symbol_vector::const_iterator i=constructor_functions.begin();
+         i!=constructor_functions.end(); ++i)
+    {
+      if (is_function_sort(i->sort()))
+      {
+        const sort_expression_list domain_sorts=function_sort(i->sort()).domain();
+        for (sort_expression_list::const_iterator j=domain_sorts.begin();
+             j!=domain_sorts.end(); ++j)
+        {
+          if (check_for_sort_alias_loop_through_function_sort_via_expression(
+                *j,end_search,visited,observed_a_sort_constructor))
+          {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+
+  }
+
+  assert(0); // start_search cannot be a multiple_possible_sorts, or an unknown sort.
+  return false;
+}
+
+void mcrl2::data::sort_expression_checker::check_sort(const basic_sort &sort)
+{
+  if (sort_bool::is_bool(sort))
+  {
+    throw mcrl2::runtime_error("attempt to redeclare sort Bool");
+  }
+  if (sort_pos::is_pos(sort))
+  {
+    throw mcrl2::runtime_error("attempt to redeclare sort Pos");
+  }
+  if (sort_nat::is_nat(sort))
+  {
+    throw mcrl2::runtime_error("attempt to redeclare sort Nat");
+  }
+  if (sort_int::is_int(sort))
+  {
+    throw mcrl2::runtime_error("attempt to redeclare sort Int");
+  }
+  if (sort_real::is_real(sort))
+  {
+    throw mcrl2::runtime_error("attempt to redeclare sort Real");
+  }
+  if (basic_sorts.count(sort.name())>0 || defined_sorts.count(sort.name())>0)
+  {
+    throw mcrl2::runtime_error("double declaration of sort " + pp(sort.name()));
+  }
+}
+
+mcrl2::data::sort_expression_checker::sort_expression_checker(
+                const sort_expression_vector::const_iterator sorts_begin,
+                const sort_expression_vector::const_iterator sorts_end,
+                const alias_vector::const_iterator aliases_begin,
+                const alias_vector::const_iterator aliases_end)
+{
+  for (sort_expression_vector::const_iterator i=sorts_begin; i!=sorts_end; ++i)
+  {
+    if (is_basic_sort(*i))
+    {
+      const basic_sort &bsort(*i);
+      check_sort(bsort);
+      basic_sorts.insert(bsort.name());
+    }
+    else
+    {
+std::cerr << "Don't check sort " << pp(*i) << "\n";
+    }
+  }
+
+  for (alias_vector::const_iterator i=aliases_begin; i!=aliases_end; ++i)
+  {
+    check_sort(i->name());
+    defined_sorts[i->name().name()]=i->reference(); 
+    mCRL2log(debug) << "Add sort alias " << pp(i->name()) << "  " << pp(i->reference()) << "" << std::endl;
+  }
+
+  // Check for sorts that are recursive through container sorts.
+  // E.g. sort L=List(L);
+  // This is forbidden.
+
+  for (std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.begin(); 
+              i!=defined_sorts.end(); ++i)
+  {
+    std::set < basic_sort > visited;
+    const basic_sort s(core::identifier_string(i->first));
+    const sort_expression ar(i->second);
+    if (check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
+    {
+      throw mcrl2::runtime_error("sort " + pp(i->first) + " is recursively defined via a function sort, or a set or a bag type container");
+    }
+  }
+}
+
+void mcrl2::data::sort_expression_checker::IsSortDeclared(const basic_sort &SortName)
+{
+
+  if (sort_bool::is_bool(SortName) ||
+      sort_pos::is_pos(SortName) ||
+      sort_nat::is_nat(SortName) ||
+      sort_int::is_int(SortName) ||
+      sort_real::is_real(SortName))
+  {
+    return;
+  }
+  if (basic_sorts.count(SortName.name())>0)
+  {
+    return;
+  }
+  if (defined_sorts.count(SortName.name())>0)
+  {
+    return;
+  }
+  throw mcrl2::runtime_error("basic or defined sort " + pp(SortName) + " is not declared");
+}
+
+void mcrl2::data::sort_expression_checker::IsSortExprListDeclared(const sort_expression_list &SortExprList)
+{
+  for (sort_expression_list::const_iterator i=SortExprList.begin(); i!=SortExprList.end(); ++i)
+  {
+    IsSortExprDeclared(*i);
+  }
+}
+
+
+
+void mcrl2::data::sort_expression_checker::IsSortExprDeclared(const sort_expression &SortExpr)
+{
+  if (is_basic_sort(SortExpr))
+  {
+    IsSortDeclared(aterm_cast<basic_sort>(SortExpr));
+    return;
+  }
+
+  if (is_container_sort(SortExpr))
+  {
+    IsSortExprDeclared(aterm_cast<container_sort>(SortExpr).element_sort());
+    return;
+  }
+
+  if (is_function_sort(SortExpr))
+  {
+    IsSortExprDeclared(aterm_cast<function_sort>(SortExpr).codomain());
+
+    IsSortExprListDeclared(aterm_cast<function_sort>(SortExpr).domain());
+    return;
+  }
+
+  if (is_structured_sort(SortExpr))
+  {
+    const structured_sort &ssort(SortExpr);
+    const structured_sort_constructor_list &constructors(ssort.struct_constructors());
+    for (structured_sort_constructor_list::const_iterator i=constructors.begin(); i!=constructors.end(); ++i)
+    {
+      const structured_sort_constructor &Constr(*i);
+
+      const structured_sort_constructor_argument_list &Projs(Constr.arguments());
+      for (structured_sort_constructor_argument_list::const_iterator j=Projs.begin(); j!=Projs.end(); ++j)
+      {
+        IsSortExprDeclared(j->sort());
+      }
+    }
+    return;
+  }
+
+  throw mcrl2::runtime_error("this is not a sort expression " + pp(SortExpr));
+}
+
+void mcrl2::data::sort_expression_checker::operator ()(const sort_expression &sort_expr)
+{
+  IsSortExprDeclared(sort_expr);
+}
+
+// ------------------------------  Here ends the new class based sort expression checker -----------------------
+// ------------------------------  Here starts the new class based data expression checker -----------------------
+bool mcrl2::data::data_expression_checker::VarsUnique(const variable_list &VarDecls)
+{
+  std::set<core::identifier_string> Temp;
+
+  for (variable_list::const_iterator i=VarDecls.begin(); i!=VarDecls.end(); ++i)
+  {
+    variable VarDecl= *i;
+    core::identifier_string VarName=VarDecl.name();
+    // if already defined -- replace (other option -- warning)
+    // if variable name is a constant name -- it has more priority (other options -- warning, error)
+    if (!Temp.insert(VarName).second) // The VarName is already in the set.
+    {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+
+sort_expression mcrl2::data::data_expression_checker::UpCastNumericType(
+                      sort_expression NeededType, 
+                      sort_expression Type, 
+                      data_expression &Par, 
+                      bool warn_upcasting)
+{
+  // Makes upcasting from Type to Needed Type for Par. Returns the resulting type.
+  // Moreover, *Par is extended with the required type transformations.
+  mCRL2log(debug) << "UpCastNumericType " << pp(NeededType) << " -- " << pp(Type) << "" << std::endl;
+
+  if (data::is_unknown_sort(data::sort_expression(Type)))
+  {
+    return Type;
+  }
+  if (data::is_unknown_sort(data::sort_expression(NeededType)))
+  {
+    return Type;
+  }
+  if (EqTypesA(NeededType,Type))
+  {
+    return Type;
+  }
+
+  if (data::is_multiple_possible_sorts(data::sort_expression(NeededType)))
+  {
+    sort_expression_list l=sort_expression_list(aterm_cast<aterm_list>(NeededType[0]));
+    for(sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    {
+      bool found_solution=true;
+      aterm_appl r;
+      try 
+      {
+        r=UpCastNumericType(*i,Type,Par,warn_upcasting);
+      }
+      catch (mcrl2::runtime_error &e)
+      { 
+        found_solution=false;
+      }
+      if (found_solution)
+      {
+        return r;
+      }
+    }
+    throw mcrl2::runtime_error("cannot transform " + pp(Type) + " to a number."); 
+  }
+
+  if (warn_upcasting && gsIsOpId(Par) && gsIsNumericString(gsATermAppl2String(aterm_cast<aterm_appl>((Par)[0]))))
+  {
+    warn_upcasting=false;
+  }
+
+  // Try Upcasting to Pos
+  sort_expression temp;
+  if (TypeMatchA(NeededType,sort_pos::pos(),temp))
+  {
+    if (TypeMatchA(Type,sort_pos::pos(),temp))
+    {
+      return sort_pos::pos();
+    }
+  }
+
+  // Try Upcasting to Nat
+  if (TypeMatchA(NeededType,sort_nat::nat(),temp))
+  {
+    if (TypeMatchA(Type,sort_pos::pos(),temp))
+    {
+      data_expression OldPar=Par;
+      Par=make_application(sort_nat::cnat(),Par);
+      if (warn_upcasting)
+      {
+        was_warning_upcasting=true;
+        mCRL2log(warning) << "Upcasting " << pp(OldPar) << " to sort Nat by applying Pos2Nat to it." << std::endl;
+      }
+      return sort_nat::nat();
+    }
+    if (TypeMatchA(Type,sort_nat::nat(),temp))
+    {
+      return sort_nat::nat();
+    }
+  }
+
+  // Try Upcasting to Int
+  if (TypeMatchA(NeededType,sort_int::int_(),temp))
+  {
+    if (TypeMatchA(Type,sort_pos::pos(),temp))
+    {
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_int::cint(),make_application(sort_nat::cnat(),Par));
+      if (warn_upcasting)
+      {
+        was_warning_upcasting=true;
+        mCRL2log(warning) << "Upcasting " << pp(OldPar) << " to sort Int by applying Pos2Int to it." << std::endl;
+      }
+      return sort_int::int_();
+    }
+    if (TypeMatchA(Type,sort_nat::nat(),temp))
+    {
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_int::cint(),Par);
+      if (warn_upcasting)
+      {
+        was_warning_upcasting=true;
+        mCRL2log(warning) << "Upcasting " << pp(OldPar) << " to sort Int by applying Nat2Int to it." << std::endl;
+      }
+      return sort_int::int_();
+    }
+    if (TypeMatchA(Type,sort_int::int_(),temp))
+    {
+      return sort_int::int_();
+    }
+  }
+
+  // Try Upcasting to Real
+  if (TypeMatchA(NeededType,sort_real::real_(),temp))
+  {
+    if (TypeMatchA(Type,sort_pos::pos(),temp))
+    {
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_real::creal(),
+                              make_application(sort_int::cint(), make_application(sort_nat::cnat(),Par)),
+                              sort_pos::c1());
+      if (warn_upcasting)
+      {
+        was_warning_upcasting=true;
+        mCRL2log(warning) << "Upcasting " << pp(OldPar) << " to sort Real by applying Pos2Real to it." << std::endl;
+      }
+      return sort_real::real_();
+    }
+    if (TypeMatchA(Type,sort_nat::nat(),temp))
+    {
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_real::creal(),
+                             make_application(sort_int::cint(),Par),
+                             sort_pos::c1());
+      if (warn_upcasting)
+      {
+        was_warning_upcasting=true;
+        mCRL2log(warning) << "Upcasting " << pp(OldPar) << " to sort Real by applying Nat2Real to it." << std::endl;
+      }
+      return sort_real::real_();
+    }
+    if (TypeMatchA(Type,sort_int::int_(),temp))
+    {
+      aterm_appl OldPar=Par;
+      Par=make_application(sort_real::creal(),Par, sort_pos::c1());
+      if (warn_upcasting)
+      {
+        was_warning_upcasting=true;
+        mCRL2log(warning) << "Upcasting " << pp(OldPar) << " to sort Real by applying Int2Real to it." << std::endl;
+      }
+      return sort_real::real_();
+    }
+    if (TypeMatchA(Type,sort_real::real_(),temp))
+    {
+      return sort_real::real_();
+    }
+  }
+
+  throw mcrl2::runtime_error("Upcasting " + pp(Type) + " to a number fails");
+}
+
+void mcrl2::data::data_expression_checker::ErrorMsgCannotCast(
+                        sort_expression CandidateType, 
+                        data_expression_list Arguments, 
+                        sort_expression_list ArgumentTypes,
+                        std::string previous_reason)
+{
+  //prints more information about impossible cast.
+  //at this point we know that Arguments cannot be cast to CandidateType. We need to find out why and print.
+  //The code of this routine is weird. It appears to abuse term_list<sort_expression_list> and sort_expression_list,
+  //which appear to be incorrectly assigned to each other. This needs further investigation.
+  assert(Arguments.size()==ArgumentTypes.size());
+
+  /* sort_expression_list CandidateList;
+  if (gsIsSortsPossible(CandidateType))
+  {
+    CandidateList=aterm_cast<sort_expression_list>(CandidateType[0]);
+  }
+  else
+  {
+    CandidateList=make_list<sort_expression>(CandidateType);
+  }
+
+  sort_expression_list NewCandidateList;
+  for (sort_expression_list l=CandidateList; !l.empty(); l=l.tail())
+  {
+    sort_expression Candidate=l.front();
+    if (!gsIsSortArrow(Candidate))
+    {
+      continue;
+    }
+    NewCandidateList.push_front(aterm_cast<sort_expression_list>(Candidate[0]));
+  }
+  CandidateList=reverse(NewCandidateList);
+
+  sort_expression_list CurrentCandidateList=CandidateList;
+  CandidateList=sort_expression_list();
+  while (true)
+  {
+    sort_expression_list NewCurrentCandidateList;
+    sort_expression_list NewList;
+    for (sort_expression_list l=CurrentCandidateList; !l.empty(); l=l.tail())
+    {
+      sort_expression List=l.front();
+      if (!List.empty())
+      {
+        NewList.push_front(List);
+        NewCurrentCandidateList=core::ATinsertUnique(NewCurrentCandidateList,List);
+      }
+      else
+      {
+        NewCurrentCandidateList.push_front(sort_expression_list());
+      }
+    }
+    if (NewList.empty())
+    {
+      break;
+    }
+    CurrentCandidateList=reverse(NewCurrentCandidateList);
+    CandidateList.push_front(reverse(NewList));
+  }
+  CandidateList=reverse(CandidateList);
+
+  sort_expression_list m=ArgumentTypes;
+  sort_expression_list n=CandidateList;
+  for (data_expression_list l=Arguments; !(l.empty()||m.empty()||n.empty()); l=l.tail(), m=m.tail(), n=n.tail())
+  {
+    sort_expression_list PosTypes=n;
+    sort_expression NeededType=m.front();
+    bool found=true;
+    for (sort_expression_list k=PosTypes; !k.empty(); k=k.tail())
+    {
+      sort_expression temp;
+      if (TypeMatchA(k.front(),NeededType,temp))
+      {
+        found=false;
+        break;
+      }
+    }
+    if (found)
+    {
+      sort_expression Sort;
+      if (PosTypes.size()==1)
+      {
+        Sort=PosTypes.front();
+      }
+      else
+      {
+        // Sort=multiple_possible_sorts(atermpp::aterm_list(PosTypes));
+        Sort=multiple_possible_sorts(sort_expression_list(PosTypes));
+      }
+      throw mcrl2::runtime_error(previous_reason + "\nthis is, for instance, because cannot cast " + pp(l.front()) + " to type " + pp(Sort));
+    }
+  }*/
+  throw mcrl2::runtime_error(previous_reason + "\nfailed to construct additional explanation");
+}
+
+
+bool mcrl2::data::data_expression_checker::UnSet(sort_expression PosType, sort_expression &result) 
+{
+  //select Set(Type), elements, return their list of arguments.
+  if (gsIsSortId(PosType))
+  {
+    PosType=UnwindType(PosType);
+  }
+  if (sort_set::is_set(sort_expression(PosType)))
+  {
+    result=aterm_cast<sort_expression>(PosType[1]);
+    return true;
+  }
+  if (data::is_unknown_sort(data::sort_expression(PosType)))
+  {
+    result=PosType;
+    return true;
+  }
+
+  sort_expression_list NewPosTypes;
+  if (gsIsSortsPossible(PosType))
+  {
+    for (sort_expression_list PosTypes=aterm_cast<sort_expression_list>(PosType[0]); !PosTypes.empty(); PosTypes=PosTypes.tail())
+    {
+      sort_expression NewPosType=PosTypes.front();
+      if (gsIsSortId(NewPosType))
+      {
+        NewPosType=UnwindType(NewPosType);
+      }
+      if (sort_set::is_set(sort_expression(NewPosType)))
+      {
+        NewPosType=aterm_cast<sort_expression>(NewPosType[1]);
+      }
+      else if (!data::is_unknown_sort(data::sort_expression(NewPosType)))
+      {
+        continue;
+      }
+      NewPosTypes.push_front(NewPosType);
+    }
+    NewPosTypes=reverse(NewPosTypes);
+    result=multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    return true;
+  }
+  return false;
+}
+
+bool mcrl2::data::data_expression_checker::UnBag(sort_expression PosType, sort_expression &result) 
+{
+  //select Bag(Type), elements, return their list of arguments.
+  if (gsIsSortId(PosType))
+  {
+    PosType=UnwindType(PosType);
+  }
+  if (sort_bag::is_bag(sort_expression(PosType)))
+  {
+    result=aterm_cast<sort_expression>(PosType[1]);
+    return true;
+  }
+  if (data::is_unknown_sort(data::sort_expression(PosType)))
+  {
+    result=PosType;
+    return true;
+  }
+
+  sort_expression_list NewPosTypes;
+  if (gsIsSortsPossible(PosType))
+  {
+    for (sort_expression_list PosTypes=aterm_cast<sort_expression_list>(PosType[0]); !PosTypes.empty(); PosTypes=PosTypes.tail())
+    {
+      sort_expression NewPosType=PosTypes.front();
+      if (gsIsSortId(NewPosType))
+      {
+        NewPosType=UnwindType(NewPosType);
+      }
+      if (sort_bag::is_bag(sort_expression(NewPosType)))
+      {
+        NewPosType=aterm_cast<sort_expression>(NewPosType[1]);
+      }
+      else if (!data::is_unknown_sort(data::sort_expression(NewPosType)))
+      {
+        continue;
+      }
+      NewPosTypes.push_front(NewPosType);
+    }
+    NewPosTypes=reverse(NewPosTypes);
+    result=multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    return true;
+  }
+  return false;
+}
+
+bool mcrl2::data::data_expression_checker::UnList(sort_expression PosType, sort_expression &result)
+{
+  //select List(Type), elements, return their list of arguments.
+  if (gsIsSortId(PosType))
+  {
+    PosType=UnwindType(PosType);
+  }
+  if (sort_list::is_list(sort_expression(PosType)))
+  {
+    result=aterm_cast<sort_expression>(PosType[1]);
+    return true;
+  }
+  if (data::is_unknown_sort(data::sort_expression(PosType)))
+  {
+    result=PosType;
+    return true;
+  }
+
+  sort_expression_list NewPosTypes;
+  if (gsIsSortsPossible(PosType))
+  {
+    for (sort_expression_list PosTypes=aterm_cast<sort_expression_list>(PosType[0]); !PosTypes.empty(); PosTypes=PosTypes.tail())
+    {
+      sort_expression NewPosType=PosTypes.front();
+      if (gsIsSortId(NewPosType))
+      {
+        NewPosType=UnwindType(NewPosType);
+      }
+      if (sort_list::is_list(sort_expression(NewPosType)))
+      {
+        NewPosType=aterm_cast<sort_expression>(NewPosType[1]);
+      }
+      else if (!data::is_unknown_sort(data::sort_expression(NewPosType)))
+      {
+        continue;
+      }
+      NewPosTypes.push_front(NewPosType);
+    }
+    NewPosTypes=reverse(NewPosTypes);
+    result=multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    return true;
+  }
+  return false;
+}
+
+
+bool mcrl2::data::data_expression_checker::UnArrowProd(sort_expression_list ArgTypes, sort_expression PosType, sort_expression &result)
+{
+  //Filter PosType to contain only functions ArgTypes -> TypeX
+  //result is TypeX if unique, the set of TypeX as NotInferred if many. 
+  //return true if successful, otherwise false.
+
+  if (gsIsSortId(PosType))
+  {
+    PosType=UnwindType(PosType);
+  }
+  if (gsIsSortArrow(PosType))
+  {
+    sort_expression_list PosArgTypes=aterm_cast<sort_expression_list>(PosType[0]);
+
+    if (PosArgTypes.size()!=ArgTypes.size())
+    {
+      return false;
+    }
+    sort_expression_list temp;
+    if (TypeMatchL(PosArgTypes,ArgTypes,temp))
+    {
+      result=aterm_cast<sort_expression>(PosType[1]);
+      return true;
+    }
+  }
+  if (data::is_unknown_sort(data::sort_expression(PosType)))
+  {
+    result=PosType;
+    return true;
+  }
+
+  sort_expression_list NewPosTypes;
+  if (gsIsSortsPossible(PosType))
+  {
+    for (sort_expression_list PosTypes=aterm_cast<sort_expression_list>(PosType[0]); !PosTypes.empty(); PosTypes=PosTypes.tail())
+    {
+      sort_expression NewPosType=PosTypes.front();
+      if (gsIsSortId(NewPosType))
+      {
+        NewPosType=UnwindType(NewPosType);
+      }
+      if (gsIsSortArrow(PosType))
+      {
+        sort_expression_list PosArgTypes=aterm_cast<sort_expression_list>(PosType[0]);
+        if (PosArgTypes.size()!=ArgTypes.size())
+        {
+          continue;
+        }
+        sort_expression_list temp_list;
+        if (TypeMatchL(PosArgTypes,ArgTypes,temp_list))
+        {
+          NewPosType=aterm_cast<sort_expression>(NewPosType[1]);
+        }
+      }
+      else if (!data::is_unknown_sort(data::sort_expression(NewPosType)))
+      {
+        continue;
+      }
+      NewPosTypes=core::ATinsertUnique(NewPosTypes,NewPosType);
+    }
+    NewPosTypes=reverse(NewPosTypes);
+    result=multiple_possible_sorts(sort_expression_list(NewPosTypes));
+    return true;
+  }
+  return false;
+}
+
+bool mcrl2::data::data_expression_checker::UnifyMinType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result)
+{
+  //Find the minimal type that Unifies the 2. If not possible, return false.
+  if (!TypeMatchA(Type1,Type2,result))
+  {
+    if (!TypeMatchA(Type1,ExpandNumTypesUp(Type2),result))
+    {
+      if (!TypeMatchA(Type2,ExpandNumTypesUp(Type1),result))
+      {
+        mCRL2log(debug) << "UnifyMinType: No match: Type1 " << pp(Type1) << "; Type2 " << pp(Type2) << "; " << std::endl;
+        return false;
+      }
+    }
+  }
+
+  if (gsIsSortsPossible(result))
+  {
+    result=aterm_cast<sort_expression_list>(result[0]).front();
+  }
+  mCRL2log(debug) << "UnifyMinType: Type1 " << pp(Type1) << "; Type2 " << pp(Type2) << "; Res: " << pp(result) << "" << std::endl;
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchIf(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types for if.
+  //If some of the parameters are Pos,Nat, or Int do upcasting
+
+  assert(gsIsSortArrow(type));
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  assert((Args.size()==3));
+  Args=Args.tail();
+
+  if (!UnifyMinType(Res,Args.front(),Res))
+  {
+    return false;
+  }
+  Args=Args.tail();
+  if (!UnifyMinType(Res,Args.front(),Res))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(sort_bool::bool_(),Res,Res),Res);
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchEqNeqComparison(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types for ==, !=, <, <=, >= and >.
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==2));
+  sort_expression Arg1=Args.front();
+  Args=Args.tail();
+  sort_expression Arg2=Args.front();
+
+  sort_expression Arg;
+  if (!UnifyMinType(Arg1,Arg2,Arg))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(Arg,Arg),sort_bool::bool_());
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchListOpCons(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  assert(sort_list::is_list(sort_expression(UnwindType(Res))));
+  Res=aterm_cast<sort_expression>(Res[1]);
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==2));
+  sort_expression Arg1=Args.front();
+  Args=Args.tail();
+  sort_expression Arg2=Args.front();
+  if (gsIsSortId(Arg2))
+  {
+    Arg2=UnwindType(Arg2);
+  }
+  assert(sort_list::is_list(sort_expression(Arg2)));
+  Arg2=aterm_cast<sort_expression>(Arg2[1]);
+
+  sort_expression new_result;
+  if (!UnifyMinType(Res,Arg1,new_result))
+  {
+    return false;
+  }
+
+  if (!UnifyMinType(new_result,Arg2,Res))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(Res,static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchListOpSnoc(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  assert(sort_list::is_list(sort_expression(Res)));
+  Res=aterm_cast<sort_expression>(Res[1]);
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==2));
+  sort_expression Arg1=Args.front();
+  if (gsIsSortId(Arg1))
+  {
+    Arg1=UnwindType(Arg1);
+  }
+  assert(sort_list::is_list(sort_expression(Arg1)));
+  Arg1=aterm_cast<sort_expression>(Arg1[1]);
+
+  Args=Args.tail();
+  sort_expression Arg2=Args.front();
+
+  sort_expression new_result;
+  if (!UnifyMinType(Res,Arg1,new_result))
+  {
+    return false;
+  }
+
+  if (!UnifyMinType(new_result,Arg2,Res))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res))),Res),sort_list::list(sort_expression(Res)));
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchListOpConcat(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Concat operations (List(S)xList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  assert(sort_list::is_list(sort_expression(Res)));
+  Res=aterm_cast<sort_expression>(Res[1]);
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==2));
+
+  sort_expression Arg1=Args.front();
+  if (gsIsSortId(Arg1))
+  {
+    Arg1=UnwindType(Arg1);
+  }
+  assert(sort_list::is_list(sort_expression(Arg1)));
+  Arg1=aterm_cast<sort_expression>(Arg1[1]);
+
+  Args=Args.tail();
+
+  sort_expression Arg2=Args.front();
+  if (gsIsSortId(Arg2))
+  {
+    Arg2=UnwindType(Arg2);
+  }
+  assert(sort_list::is_list(sort_expression(Arg2)));
+  Arg2=aterm_cast<sort_expression>(Arg2[1]);
+
+  sort_expression new_result;
+  if (!UnifyMinType(Res,Arg1,new_result))
+  {
+    return false;
+  }
+
+  if (!UnifyMinType(new_result,Arg2,Res))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res))),
+       static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchListOpEltAt(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of EltAt operations (List(S)xNat->S)
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==2));
+
+  sort_expression Arg1=Args.front();
+  if (gsIsSortId(Arg1))
+  {
+    Arg1=UnwindType(Arg1);
+  }
+  assert(sort_list::is_list(sort_expression(Arg1)));
+  Arg1=aterm_cast<sort_expression>(Arg1[1]);
+
+  sort_expression new_result;
+  if (!UnifyMinType(Res,Arg1,new_result))
+  {
+    return false;
+  }
+  Res=new_result;
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res))),
+               static_cast<sort_expression>(sort_nat::nat())),Res);
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchListOpHead(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==1));
+  sort_expression Arg=Args.front();
+  if (gsIsSortId(Arg))
+  {
+    Arg=UnwindType(Arg);
+  }
+  assert(sort_list::is_list(sort_expression(Arg)));
+  Arg=aterm_cast<sort_expression>(Arg[1]);
+
+  sort_expression new_result;
+  if (!UnifyMinType(Res,Arg,new_result))
+  {
+    return false;
+  }
+  Res=new_result;
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),Res);
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchListOpTail(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  assert(sort_list::is_list(sort_expression(Res)));
+  Res=aterm_cast<sort_expression>(Res[1]);
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==1));
+  sort_expression Arg=Args.front();
+  if (gsIsSortId(Arg))
+  {
+    Arg=UnwindType(Arg);
+  }
+  assert(sort_list::is_list(sort_expression(Arg)));
+  Arg=aterm_cast<sort_expression>(Arg[1]);
+
+  sort_expression new_result;
+  if (!UnifyMinType(Res,Arg,new_result))
+  {
+    return false;
+  }
+  Res=new_result;
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),
+                   sort_list::list(sort_expression(Res)));
+  return true;
+}
+
+//Sets
+bool mcrl2::data::data_expression_checker::MatchSetOpSet2Bag(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Set2Bag (Set(S)->Bag(s))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  assert(sort_bag::is_bag(sort_expression(Res)));
+  Res=aterm_cast<sort_expression>(Res[1]);
+
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==1));
+
+  sort_expression Arg=Args.front();
+  if (gsIsSortId(Arg))
+  {
+    Arg=UnwindType(Arg);
+  }
+  assert(sort_set::is_set(sort_expression(Arg)));
+  Arg=aterm_cast<sort_expression>(Arg[1]);
+
+  sort_expression new_result;
+  if (!UnifyMinType(Arg,Res,new_result))
+  {
+    return false;
+  }
+  Arg=new_result;
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_set::set_(sort_expression(Arg)))),
+                  sort_bag::bag(sort_expression(Arg)));
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchListSetBagOpIn(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the type of EltIn (SxList(S)->Bool or SxSet(S)->Bool or SxBag(S)->Bool)
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  //assert(gsIsBool(aterm_cast<sort_expression>(type[1])));
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==2));
+
+  sort_expression Arg1=Args.front();
+
+  Args=Args.tail();
+  sort_expression Arg2=Args.front();
+  if (gsIsSortId(Arg2))
+  {
+    Arg2=UnwindType(Arg2);
+  }
+  assert(gsIsSortCons(Arg2));
+  sort_expression Arg2s=aterm_cast<sort_expression>(Arg2[1]);
+
+  sort_expression Arg;
+  if (!UnifyMinType(Arg1,Arg2s,Arg))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(Arg,Arg2.set_argument(Arg,1)),sort_bool::bool_());
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchSetBagOpUnionDiffIntersect(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Set or Bag Union, Diff or Intersect
+  //operations (Set(S)xSet(S)->Set(S)). It can also be that this operation is
+  //performed on numbers. In this case we do nothing.
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  if (core::gstcIsNumericType(Res))
+  {
+    result=type;
+    return true;
+  }
+  assert(sort_set::is_set(sort_expression(Res))||sort_bag::is_bag(sort_expression(Res)));
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==2));
+
+  sort_expression Arg1=Args.front();
+  if (gsIsSortId(Arg1))
+  {
+    Arg1=UnwindType(Arg1);
+  }
+  if (core::gstcIsNumericType(Arg1))
+  {
+    result=type;
+    return true;
+  }
+  assert(sort_set::is_set(sort_expression(Arg1))||sort_bag::is_bag(sort_expression(Arg1)));
+
+  Args=Args.tail();
+
+  sort_expression Arg2=Args.front();
+  if (gsIsSortId(Arg2))
+  {
+    Arg2=UnwindType(Arg2);
+  }
+  if (core::gstcIsNumericType(Arg2))
+  {
+    result=type;
+    return true;
+  }
+  assert(sort_set::is_set(sort_expression(Arg2))||sort_bag::is_bag(sort_expression(Arg2)));
+
+  sort_expression temp_result;
+  if (!UnifyMinType(Res,Arg1,temp_result))
+  {
+    return false;
+  }
+
+  if (!UnifyMinType(temp_result,Arg2,Res))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(Res,Res),Res);
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchSetOpSetCompl(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of SetCompl operation (Set(S)->Set(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  if (core::gstcIsNumericType(Res))
+  {
+    result=type;
+    return true;
+  }
+  assert(sort_set::is_set(sort_expression(Res)));
+  Res=aterm_cast<sort_expression>(Res[1]);
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==1));
+
+  sort_expression Arg=Args.front();
+  if (gsIsSortId(Arg))
+  {
+    Arg=UnwindType(Arg);
+  }
+  if (core::gstcIsNumericType(Arg))
+  {
+    result=type;
+    return true;
+  }
+  assert(sort_set::is_set(sort_expression(Arg)));
+  Arg=aterm_cast<sort_expression>(Arg[1]);
+
+  sort_expression temp_result;
+  if (!UnifyMinType(Res,Arg,temp_result))
+  {
+    return false;
+  }
+  Res=temp_result;
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_set::set_(sort_expression(Res)))),sort_set::set_(sort_expression(Res)));
+  return true;
+}
+
+//Bags
+bool mcrl2::data::data_expression_checker::MatchBagOpBag2Set(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of Bag2Set (Bag(S)->Set(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  if (gsIsSortId(Res))
+  {
+    Res=UnwindType(Res);
+  }
+  assert(sort_set::is_set(sort_expression(Res)));
+  Res=aterm_cast<sort_expression>(Res[1]);
+
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==1));
+
+  sort_expression Arg=Args.front();
+  if (gsIsSortId(Arg))
+  {
+    Arg=UnwindType(Arg);
+  }
+  assert(sort_bag::is_bag(sort_expression(Arg)));
+  Arg=aterm_cast<sort_expression>(Arg[1]);
+
+  sort_expression temp_result;
+  if (!UnifyMinType(Arg,Res,temp_result))
+  {
+    return false;
+  }
+  Arg=temp_result;
+
+  result=gsMakeSortArrow(make_list<aterm>(static_cast<sort_expression>(sort_bag::bag(sort_expression(Arg)))),sort_set::set_(sort_expression(Arg)));
+  return true;
+}
+
+bool mcrl2::data::data_expression_checker::MatchBagOpBagCount(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of BagCount (SxBag(S)->Nat)
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  //If the second argument is not a Bag, don't match
+
+  if (!gsIsSortArrow(type))
+  {
+    result=type;
+    return true;
+  }
+  //assert(gsIsNat(aterm_cast<sort_expression>(type[1])));
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  if (!(Args.size()==2))
+  {
+    result=type;
+    return true;
+  }
+
+  sort_expression Arg1=Args.front();
+
+  Args=Args.tail();
+  sort_expression Arg2=Args.front();
+  if (gsIsSortId(Arg2))
+  {
+    Arg2=UnwindType(Arg2);
+  }
+  if (!sort_bag::is_bag(sort_expression(Arg2)))
+  {
+    result=type;
+    return true;
+  }
+  Arg2=aterm_cast<sort_expression>(Arg2[1]);
+
+  sort_expression Arg;
+  if (!UnifyMinType(Arg1,Arg2,Arg))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(Arg,static_cast<sort_expression>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
+  return true;
+}
+
+
+bool mcrl2::data::data_expression_checker::MatchFuncUpdate(const sort_expression &type, sort_expression &result)
+{
+  //tries to sort out the types of FuncUpdate ((A->B)xAxB->(A->B))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrow(type));
+  aterm_list Args=aterm_cast<aterm_list>(type[0]);
+  assert((Args.size()==3));
+  sort_expression Arg1=Args.front();
+  assert(gsIsSortArrow(Arg1));
+  Args=Args.tail();
+  sort_expression Arg2=Args.front();
+  Args=Args.tail();
+  sort_expression Arg3=Args.front();
+  sort_expression Res=aterm_cast<sort_expression>(type[1]);
+  assert(gsIsSortArrow(Res));
+
+  sort_expression temp_result;
+  if (!UnifyMinType(Arg1,Res,temp_result))
+  {
+    return false;
+  }
+  Arg1=temp_result;
+
+  // determine A and B from Arg1:
+  aterm_list LA=aterm_cast<aterm_list>(Arg1[0]);
+  assert((LA.size()==1));
+  sort_expression A=LA.front();
+  sort_expression B=aterm_cast<sort_expression>(Arg1[1]);
+
+  if (!UnifyMinType(A,Arg2,temp_result))
+  {
+    return false;
+  }
+  if (!UnifyMinType(B,Arg3,temp_result))
+  {
+    return false;
+  }
+
+  result=gsMakeSortArrow(make_list<aterm>(Arg1,A,B),Arg1);
+  return true;
+}
+
+
+bool mcrl2::data::data_expression_checker::MaximumType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result)
+{
+  // if Type1 is convertible into Type2 or vice versa, the most general
+  // of these types are returned in result. If no conversion is possible false is returned
+  // and result is not changed. Conversions only take place between numerical types
+  if (EqTypesA(Type1,Type2))
+  {
+    result=Type1;
+    return true;
+  }
+  if (data::is_unknown_sort(data::sort_expression(Type1)))
+  {
+    result=Type2;
+    return true;
+  }
+  if (data::is_unknown_sort(data::sort_expression(Type2)))
+  {
+    result=Type1;
+    return true;
+  }
+  if (EqTypesA(Type1,sort_real::real_()))
+  {
+    if (EqTypesA(Type2,sort_int::int_()))
+    {
+      result=Type1;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_nat::nat()))
+    {
+      result=Type1;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_pos::pos()))
+    {
+      result=Type1;
+      return true;
+    }
+    return false;
+  }
+  if (EqTypesA(Type1,sort_int::int_()))
+  {
+    if (EqTypesA(Type2,sort_real::real_()))
+    {
+      result=Type2;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_nat::nat()))
+    {
+      result=Type1;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_pos::pos()))
+    {
+      result=Type1;
+      return true;
+    }
+    return false;
+  }
+  if (EqTypesA(Type1,sort_nat::nat()))
+  {
+    if (EqTypesA(Type2,sort_real::real_()))
+    {
+      result=Type2;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_int::int_()))
+    {
+      result=Type2;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_pos::pos()))
+    {
+      result=Type1;
+      return true;
+    }
+    return false;
+  }
+  if (EqTypesA(Type1,sort_pos::pos()))
+  {
+    if (EqTypesA(Type2,sort_real::real_()))
+    {
+      result=Type2;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_int::int_()))
+    {
+      result=Type2;
+      return true;
+    }
+    if (EqTypesA(Type2,sort_nat::nat()))
+    {
+      result=Type2;
+      return true;
+    }
+    return false;
+  }
+  return false;
+}
+
+sort_expression mcrl2::data::data_expression_checker::ExpandNumTypesUp(sort_expression Type)
+{
+  //Expand Pos.. to possible bigger types.
+  if (data::is_unknown_sort(data::sort_expression(Type)))
+  {
+    return Type;
+  }
+  if (EqTypesA(sort_pos::pos(),Type))
+  {
+    return multiple_possible_sorts(atermpp::make_list(sort_pos::pos(), sort_nat::nat(), sort_int::int_(),sort_real::real_()));
+  }
+  if (EqTypesA(sort_nat::nat(),Type))
+  {
+    return multiple_possible_sorts(atermpp::make_list(sort_nat::nat(), sort_int::int_(),sort_real::real_()));
+  }
+  if (EqTypesA(sort_int::int_(),Type))
+  {
+    return multiple_possible_sorts(atermpp::make_list(sort_int::int_(), sort_real::real_()));
+  }
+  if (gsIsSortId(Type))
+  {
+    return Type;
+  }
+  if (gsIsSortCons(Type))
+  {
+    return Type.set_argument(ExpandNumTypesUp(aterm_cast<aterm_appl>(Type[1])),1);
+  }
+  if (gsIsSortStruct(Type))
+  {
+    return Type;
+  }
+
+  if (gsIsSortArrow(Type))
+  {
+    //the argument types, and if the resulting type is SortArrow -- recursively
+    aterm_list NewTypeList;
+    for (aterm_list TypeList=aterm_cast<aterm_list>(Type[0]); !TypeList.empty(); TypeList=TypeList.tail())
+    {
+      NewTypeList.push_front(ExpandNumTypesUp(UnwindType(TypeList.front())));
+    }
+    aterm_appl ResultType=aterm_cast<aterm_appl>(Type[1]);
+    if (!gsIsSortArrow(ResultType))
+    {
+      return Type.set_argument(reverse(NewTypeList),0);
+    }
+    else
+    {
+      return gsMakeSortArrow(reverse(NewTypeList),ExpandNumTypesUp(UnwindType(ResultType)));
+    }
+  }
+
+  return Type;
+}
+
+sort_expression mcrl2::data::data_expression_checker::ExpandNumTypesDown(sort_expression Type)
+{
+  // Expand Numeric types down
+  if (data::is_unknown_sort(data::sort_expression(Type)))
+  {
+    return Type;
+  }
+  if (gsIsSortId(Type))
+  {
+    Type=UnwindType(Type);
+  }
+
+  bool function=false;
+  aterm_list Args;
+  if (gsIsSortArrow(Type))
+  {
+    function=true;
+    Args=aterm_cast<aterm_list>(Type[0]);
+    Type=aterm_cast<aterm_appl>(Type[1]);
+  }
+
+  if (EqTypesA(sort_real::real_(),Type))
+  {
+    Type=multiple_possible_sorts(atermpp::make_list(sort_pos::pos(),sort_nat::nat(),sort_int::int_(),sort_real::real_()));
+  }
+  if (EqTypesA(sort_int::int_(),Type))
+  {
+    Type=multiple_possible_sorts(atermpp::make_list(sort_pos::pos(),sort_nat::nat(),sort_int::int_()));
+  }
+  if (EqTypesA(sort_nat::nat(),Type))
+  {
+    Type=multiple_possible_sorts(atermpp::make_list(sort_pos::pos(),sort_nat::nat()));
+  }
+
+  return (function)?gsMakeSortArrow(Args,Type):Type;
+}
+
+
+bool mcrl2::data::data_expression_checker::InTypesA(sort_expression Type, sort_expression_list Types)
+{
+  for (; !Types.empty(); Types=Types.tail())
+    if (EqTypesA(Type,Types.front()))
+    {
+      return true;
+    }
+  return false;
+}
+
+bool mcrl2::data::data_expression_checker::EqTypesA(sort_expression Type1, sort_expression Type2)
+{
+  if (Type1==Type2)
+  {
+    return true;
+  }
+
+  return UnwindType(Type1)==UnwindType(Type2);
+}
+
+bool mcrl2::data::data_expression_checker::InTypesL(sort_expression_list Type, term_list<sort_expression_list> Types)
+{
+  for (; !Types.empty(); Types=Types.tail())
+    if (EqTypesL(Type,Types.front()))
+    {
+      return true;
+    }
+  return false;
+}
+
+bool mcrl2::data::data_expression_checker::EqTypesL(sort_expression_list Type1, sort_expression_list Type2)
+{
+  if (Type1==Type2)
+  {
+    return true;
+  }
+  if (Type1.size()!=Type2.size())
+  {
+    return false;
+  }
+  for (; !Type1.empty(); Type1=Type1.tail(),Type2=Type2.tail())
+    if (!EqTypesA(Type1.front(),Type2.front()))
+    {
+      return false;
+    }
+  return true;
+}
+
+
+sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeDN(
+  const std::map<core::identifier_string,sort_expression> &DeclaredVars,
+  const std::map<core::identifier_string,sort_expression> &AllowedVars,
+  data_expression &DataTerm,
+  sort_expression PosType,
+  std::map<core::identifier_string,sort_expression> &FreeVars,
+  const bool strictly_ambiguous,
+  const size_t nFactPars,
+  const bool warn_upcasting,
+  const bool print_cast_error)
+{
+  // std::string::npos for nFactPars means the number of arguments is not known.
+  mCRL2log(debug) << "TraverseVarConsTypeDN: DataTerm " << pp(DataTerm)
+                  << " with PosType " << pp(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
+  if (gsIsId(DataTerm)||gsIsOpId(DataTerm))
+  {
+    core::identifier_string Name=aterm_cast<core::identifier_string>((DataTerm)[0]);
+    bool variable_=false;
+    bool TypeADefined=false;
+    sort_expression TypeA;
+    std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.find(Name);
+    if (i!=DeclaredVars.end())
+    {
+      TypeA=i->second;
+      TypeADefined=true;
+      const sort_expression Type1(UnwindType(TypeA));
+      if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==nFactPars):(nFactPars==0))
+      {
+        variable_=true;
+        if (AllowedVars.count(Name)==0)
+        {
+          throw mcrl2::runtime_error("variable " + pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side");
+        }
+
+        //Add to free variables list
+        FreeVars[Name]=TypeA;
+      }
+      else
+      {
+        TypeADefined=false;
+      }
+    }
+
+    sort_expression_list ParList;
+    if (nFactPars==0)
+    {
+      std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.find(Name);
+      if (i!=DeclaredVars.end()) 
+      {
+        TypeA=i->second;
+        TypeADefined=true;
+        sort_expression temp;
+        if (!TypeMatchA(TypeA,PosType,temp))
+        {
+          throw mcrl2::runtime_error("the type " + pp(TypeA) + " of variable " + pp(Name)
+                          + " is incompatible with " + pp(PosType) + " (typechecking " + pp(DataTerm) + ")");
+        }
+        DataTerm=gsMakeDataVarId(Name,TypeA);
+        return TypeA;
+      }
+      else 
+      {
+        std::map<core::identifier_string,sort_expression>::const_iterator i=user_constants.find(Name);
+        if (i!=user_constants.end())
+        {
+          TypeA=i->second;
+          TypeADefined=true;
+          sort_expression temp;
+          if (!TypeMatchA(TypeA,PosType,temp))
+          {
+            throw mcrl2::runtime_error("the type " + pp(TypeA) + " of constant " + pp(Name)
+                            + " is incompatible with " + pp(PosType) + " (typechecking " + pp(DataTerm) + ")");
+          }
+          DataTerm=gsMakeOpId(Name,TypeA);
+          return TypeA;
+        }
+        else
+        {
+          std::map<core::identifier_string,sort_expression_list>::const_iterator j=system_constants.find(Name);
+          
+          if (j!=system_constants.end())
+          {
+            ParList=j->second; 
+            if (ParList.size()==1)
+            {
+              sort_expression Type1=ParList.front();
+              DataTerm=function_symbol(Name,Type1);
+              return Type1;
+            }
+            else
+            {
+              DataTerm=gsMakeOpId(Name,data::unknown_sort());
+              throw  mcrl2::runtime_error("ambiguous system constant " + pp(Name));
+            }
+          }
+          else
+          {
+            throw mcrl2::runtime_error("unknown constant " + pp(Name));
+          }
+        }
+      }
+    }
+
+    if (TypeADefined)
+    {
+      ParList=make_list<sort_expression>(UnwindType(TypeA));
+    }
+    else
+    {
+      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=user_functions.find(Name);
+      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=system_functions.find(Name);
+
+      if (j_context==user_functions.end())   
+      {
+        if (j_gssystem!=system_functions.end())        
+        { 
+          ParList=j_gssystem->second; // The function only occurs in the system.
+        }
+        else // None are defined.
+        {
+          if (nFactPars!=std::string::npos)
+          {
+            throw mcrl2::runtime_error("unknown operation " + pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":""));
+          }
+          else
+          {
+            throw mcrl2::runtime_error("unknown operation " + pp(Name));
+          }
+        }
+      }
+      else if (j_gssystem==system_functions.end())          
+      {
+        ParList=j_context->second; // only the context sorts are defined.
+      }
+      else  // Both are defined.
+      {
+        ParList=j_gssystem->second+j_context->second;
+      }
+    }
+
+    mCRL2log(debug) << "Possible types for Op/Var " << pp(Name) << " with " << nFactPars <<
+                " argument are (ParList: " << pp(ParList) << "; PosType: " << pp(PosType) << ")" << std::endl;
+
+    sort_expression_list CandidateParList=ParList;
+
+    {
+      // filter ParList keeping only functions A_0#...#A_nFactPars->A
+      sort_expression_list NewParList;
+      if (nFactPars!=std::string::npos)
+      {
+        for (; !ParList.empty(); ParList=ParList.tail())
+        {
+          sort_expression Par=ParList.front();
+          if (!gsIsSortArrow(Par))
+          {
+            continue;
+          }
+          if (aterm_cast<aterm_list>(Par[0]).size()!=nFactPars)
+          {
+            continue;
+          }
+          NewParList.push_front(Par);
+        }
+        ParList=reverse(NewParList);
+      }
+
+      if (!ParList.empty())
+      {
+        CandidateParList=ParList;
+      }
+
+      // filter ParList keeping only functions of the right type
+      sort_expression_list BackupParList=ParList;
+      NewParList=sort_expression_list();
+      for (; !ParList.empty(); ParList=ParList.tail())
+      {
+        sort_expression Par=ParList.front();
+        sort_expression result;
+        if (TypeMatchA(Par,PosType,result))
+        {
+          NewParList=aterm_cast<sort_expression_list>(core::ATinsertUnique(NewParList,result));
+        }
+      }
+      NewParList=reverse(NewParList);
+
+      mCRL2log(debug) << "Possible matches w/o casting for Op/Var " << pp(Name) << " with "<< nFactPars << 
+                " argument are (ParList: " << pp(NewParList) << "; PosType: " << pp(PosType) << "" << std::endl;
+
+      if (NewParList.empty())
+      {
+        //Ok, this looks like a type error. We are not that strict.
+        //Pos can be Nat, or even Int...
+        //So lets make PosType more liberal
+        //We change every Pos to NotInferred(Pos,Nat,Int)...
+        //and get the list. Then we take the min of the list.
+
+        ParList=BackupParList;
+        mCRL2log(debug) << "Trying casting for Op " << pp(Name) << " with " << nFactPars << " argument (ParList: " << 
+                            pp(ParList) << "; PosType: " << pp(PosType) << "" << std::endl;
+        PosType=ExpandNumTypesUp(PosType);
+        for (; !ParList.empty(); ParList=ParList.tail())
+        {
+          sort_expression Par=ParList.front();
+          sort_expression result;
+          if (TypeMatchA(Par,PosType,result))
+          {
+            NewParList=aterm_cast<sort_expression_list>(core::ATinsertUnique(NewParList,result));
+          }
+        }
+        NewParList=reverse(NewParList);
+        mCRL2log(debug) << "The result of casting is [1] " << pp(NewParList) << "" << std::endl;
+        if (NewParList.size()>1)
+        {
+          NewParList=make_list<sort_expression>(core::gstcMinType(NewParList));
+        }
+      }
+
+      if (NewParList.empty())
+      {
+        //Ok, casting of the arguments did not help.
+        //Let's try to be more relaxed about the result, e.g. returning Pos or Nat is not a bad idea for int.
+
+        ParList=BackupParList;
+        mCRL2log(debug) << "Trying result casting for Op " << pp(Name) << " with " << nFactPars << " argument (ParList: " << 
+                              "; PosType: " << pp(PosType) << "" << std::endl;
+        PosType=ExpandNumTypesDown(ExpandNumTypesUp(PosType));
+        for (; !ParList.empty(); ParList=ParList.tail())
+        {
+          sort_expression Par=ParList.front();
+          sort_expression result;
+          if (TypeMatchA(Par,PosType,result))
+          {
+            NewParList=aterm_cast<sort_expression_list>(core::ATinsertUnique(NewParList,result));
+          }
+        }
+        NewParList=reverse(NewParList);
+        mCRL2log(debug) << "The result of casting is [2]" << pp(NewParList) << "" << std::endl;
+        if (NewParList.size()>1)
+        {
+          NewParList=make_list<sort_expression>(core::gstcMinType(NewParList));
+        }
+      }
+
+      ParList=NewParList;
+    }
+    if (ParList.empty())
+    {
+      //provide some information to the upper layer for a better error message
+      aterm_appl Sort;
+      if (CandidateParList.size()==1)
+      {
+        Sort=CandidateParList.front();
+      }
+      else
+      {
+        // Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
+        Sort=multiple_possible_sorts(sort_expression_list(CandidateParList));
+      }
+      DataTerm=gsMakeOpId(Name,Sort);
+      if (nFactPars!=std::string::npos)
+      {
+        throw mcrl2::runtime_error("unknown operation/variable " + pp(Name)
+                        + " with " + to_string(nFactPars) + " argument" + ((nFactPars != 1)?"s":"")
+                        + " that matches type " + pp(PosType));
+      }
+      else
+      {
+        throw mcrl2::runtime_error("unknown operation/variable " + pp(Name) + " that matches type " + pp(PosType));
+      }
+    }
+
+    if (ParList.size()==1)
+    {
+      // replace PossibleSorts by a single possibility.
+      sort_expression Type=ParList.front();
+
+      aterm_appl OldType=Type;
+      bool result=true;
+      assert(Type.defined());
+      if (core::gstcHasUnknown(Type))
+      {
+        sort_expression new_type;
+        result=TypeMatchA(Type,PosType,new_type);
+        Type=new_type;
+      }
+
+      if (core::gstcHasUnknown(Type) && gsIsOpId(DataTerm))
+      {
+        sort_expression new_type;
+        result=TypeMatchA(Type,aterm_cast<aterm_appl>((DataTerm)[1]),new_type);
+        Type=new_type;
+      }
+
+      if (!result)
+      {
+        throw mcrl2::runtime_error("fail to match sort " + pp(OldType) + " with " + pp(PosType));
+      }
+
+      if (static_cast<aterm_appl>(data::detail::if_symbol())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing if matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchIf(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function if has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(data::detail::equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::not_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::less_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::less_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::greater_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+          || static_cast<aterm_appl>(data::detail::greater_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+         )
+      {
+        mCRL2log(debug) << "Doing ==, !=, <, <=, >= or > matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchEqNeqComparison(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function " + pp(aterm_cast<aterm_appl>((DataTerm)[0])) + " has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_list::cons_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing |> matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchListOpCons(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function |> has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_list::snoc_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing <| matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchListOpSnoc(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function <| has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_list::concat_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing ++ matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchListOpConcat(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function ++ has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_list::element_at_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing @ matching Type " << pp(Type) << ", PosType " << pp(PosType) << ", DataTerm: " << pp(DataTerm) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchListOpEltAt(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function @ has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_list::head_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_list::rhead_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing {R,L}head matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+
+        sort_expression NewType;
+        if (!MatchListOpHead(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function {R,L}head has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_list::tail_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_list::rtail_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing {R,L}tail matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchListOpTail(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function {R,L}tail has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_bag::set2bag_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing Set2Bag matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchSetOpSet2Bag(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function Set2Bag has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_list::in_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing {List,Set,Bag} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchListSetBagOpIn(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function {List,Set,Bag}In has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_set::union_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_set::difference_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
+          static_cast<aterm_appl>(sort_set::intersection_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchSetBagOpUnionDiffIntersect(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_set::complement_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing SetCompl matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchSetOpSetCompl(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function SetCompl has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_bag::bag2set_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing Bag2Set matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchBagOpBag2Set(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function Bag2Set has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+      if (static_cast<aterm_appl>(sort_bag::count_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing BagCount matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchBagOpBagCount(Type,NewType))
+        {
+          throw mcrl2::runtime_error("the function BagCount has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+
+      if (static_cast<aterm_appl>(data::function_update_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      {
+        mCRL2log(debug) << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
+        sort_expression NewType;
+        if (!MatchFuncUpdate(Type,NewType))
+        {
+          throw mcrl2::runtime_error("function update has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
+        }
+        Type=NewType;
+      }
+
+
+      Type=core::replace_possible_sorts(Type); // Set the type to one option in possible sorts, if there are more options.
+      DataTerm=gsMakeOpId(Name,Type);
+      if (variable_)
+      {
+        DataTerm=gsMakeDataVarId(Name,Type);
+      }
+
+      assert(Type.defined());
+      return Type;
+    }
+    else
+    {
+      was_ambiguous=true;
+      if (strictly_ambiguous)
+      {
+        mCRL2log(debug) << "ambiguous operation " << pp(Name) << " (ParList " << pp(ParList) << ")" << std::endl;
+        if (nFactPars!=std::string::npos)
+        {
+          throw mcrl2::runtime_error("ambiguous operation " + pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":""));
+        }
+        else
+        {
+          throw mcrl2::runtime_error("ambiguous operation " + pp(Name));
+        }
+      }
+      else
+      {
+        return data::unknown_sort();
+      }
+    }
+  }
+  else
+  {
+    return TraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+  }
+}
+
+
+void mcrl2::data::data_expression_checker::AddVars2Table(
+                   std::map<core::identifier_string,sort_expression> &Vars, 
+                   variable_list VarDecls, 
+                   std::map<core::identifier_string,sort_expression> &result)
+{
+  for (variable_list::const_iterator i=VarDecls.begin(); i!=VarDecls.end(); ++i)
+  {
+    variable VarDecl= *i;
+    core::identifier_string VarName=VarDecl.name();
+    sort_expression VarType=VarDecl.sort();
+    //test the type
+    IsSortExprDeclared(VarType);
+
+    // if already defined -- replace (other option -- warning)
+    // if variable name is a constant name -- it has more priority (other options -- warning, error)
+    Vars[VarName]=VarType;
+  }
+  result=Vars;
+}
+
+
+sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeD(
+  const std::map<core::identifier_string,sort_expression> &DeclaredVars,
+  const std::map<core::identifier_string,sort_expression> &AllowedVars,
+  data_expression &DataTerm,
+  sort_expression PosType,
+  std::map<core::identifier_string,sort_expression> &FreeVars,
+  const bool strictly_ambiguous,
+  const bool warn_upcasting,
+  const bool print_cast_error)
+{
+  //Type checks and transforms *DataTerm replacing Unknown datatype with other ones.
+  //Returns the type of the term
+  //which should match the PosType
+  //all the variables should be in AllowedVars
+  //if a variable is in DeclaredVars and not in AllowedVars,
+  //a different error message is generated.
+  //all free variables (if any) are added to FreeVars
+
+  mCRL2log(debug) << "TraverseVarConsTypeD: DataTerm " << pp(DataTerm) <<
+              " with PosType " << pp(PosType) << "" << std::endl;
+
+  if (is_abstraction(DataTerm))
+  {
+    const abstraction abstr=aterm_cast<abstraction>(DataTerm);
+    //The variable declaration of a binder should have at least 1 declaration
+    if (abstr.variables().size()==0)
+    {
+      throw mcrl2::runtime_error("binder " + pp(DataTerm) + " should have at least one declared variable");
+    }
+
+    binder_type BindingOperator = abstr.binding_operator();
+    std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
+    std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
+
+    if (gsIsSetBagComp(BindingOperator) ||
+        gsIsSetComp(BindingOperator) ||
+        gsIsBagComp(BindingOperator))
+    {
+      variable_list VarDecls=abstr.variables();
+
+      //A Set/bag comprehension should have exactly one variable declared
+      if (VarDecls.size()!=1)
+      {
+        throw mcrl2::runtime_error("set/bag comprehension " + pp(DataTerm) + " should have exactly one declared variable");
+      }
+
+      variable VarDecl=VarDecls.front();
+      sort_expression NewType=VarDecl.sort();
+      variable_list VarList=make_list(VarDecl);
+      std::map<core::identifier_string,sort_expression> NewAllowedVars;
+      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      
+      std::map<core::identifier_string,sort_expression> NewDeclaredVars;
+      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      
+      data_expression Data((DataTerm)[2]);
+
+      sort_expression ResType;
+      try
+      {
+        ResType=TraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,data::unknown_sort(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nthe condition or count of a set/bag comprehension " + pp(DataTerm) + " cannot be determined");
+      }
+      sort_expression temp;
+      if (TypeMatchA(sort_bool::bool_(),ResType,temp))
+      {
+        NewType=sort_set::set_(sort_expression(NewType));
+        DataTerm = DataTerm.set_argument(gsMakeSetComp(), 0);
+      }
+      else if (TypeMatchA(sort_nat::nat(),ResType,temp))
+      {
+        NewType=sort_bag::bag(sort_expression(NewType));
+        DataTerm = DataTerm.set_argument(gsMakeBagComp(), 0);
+      }
+      else if (TypeMatchA(sort_pos::pos(),ResType,temp))
+      {
+        NewType=sort_bag::bag(sort_expression(NewType));
+        DataTerm = DataTerm.set_argument(gsMakeBagComp(), 0);
+        Data=make_application(sort_nat::cnat(),Data);
+      }
+      else
+      {
+        throw mcrl2::runtime_error("the condition or count of a set/bag comprehension is not of sort Bool, Nat or Pos, but of sort " + pp(ResType));
+      }
+
+      if (!TypeMatchA(NewType,PosType,NewType))
+      {
+        throw mcrl2::runtime_error("a set or bag comprehension of type " + pp(VarDecl.sort()) + " does not match possible type " +
+                            pp(PosType) + " (while typechecking " + pp(DataTerm) + ")");
+      }
+
+      // if (FreeVars)
+      {
+        core::gstcRemoveVars(FreeVars,VarList);
+      }
+      DataTerm=DataTerm.set_argument(Data,2);
+      return NewType;
+    }
+
+    if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator))
+    {
+      variable_list VarList=abstr.variables();
+      std::map<core::identifier_string,sort_expression> NewAllowedVars;
+      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      
+      std::map<core::identifier_string,sort_expression> NewDeclaredVars;
+      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+
+      data_expression Data=abstr.body();
+      sort_expression temp;
+      if (!TypeMatchA(sort_bool::bool_(),PosType,temp))
+      {
+        throw mcrl2::runtime_error("the type of an exist/forall for " + pp(DataTerm) + " cannot be determined");
+      }
+      sort_expression NewType=TraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,sort_bool::bool_(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+
+      if (!TypeMatchA(sort_bool::bool_(),NewType,temp))
+      {
+        throw mcrl2::runtime_error("the type of an exist/forall for " + pp(DataTerm) + " cannot be determined");
+      }
+
+      // if (FreeVars)
+      {
+        core::gstcRemoveVars(FreeVars,VarList);
+      }
+      DataTerm=DataTerm.set_argument(Data,2);
+      return sort_bool::bool_();
+    }
+
+    if (gsIsLambda(BindingOperator))
+    {
+      variable_list VarList=abstr.variables();
+      std::map<core::identifier_string,sort_expression> NewAllowedVars;
+      AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+      
+      std::map<core::identifier_string,sort_expression> NewDeclaredVars;
+      AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+      
+      sort_expression_list ArgTypes=core::gstcGetVarTypes(VarList);
+      sort_expression NewType;
+      if (!UnArrowProd(ArgTypes,PosType,NewType))
+      {
+        throw mcrl2::runtime_error("no functions with arguments " + pp(ArgTypes) + " among " + pp(PosType) + " (while typechecking " + pp(DataTerm) + ")");
+      }
+      data_expression Data=abstr.body();
+
+      try 
+      {
+        NewType=TraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,NewType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        core::gstcRemoveVars(FreeVars,VarList);
+        throw e;
+      }
+      mCRL2log(debug) << "Result of TraverseVarConsTypeD: DataTerm " << pp(Data) << "" << std::endl;
+
+      core::gstcRemoveVars(FreeVars,VarList);
+      
+      DataTerm=DataTerm.set_argument(Data,2);
+      return gsMakeSortArrow(ArgTypes,NewType);
+    }
+  }
+
+  if (is_where_clause(DataTerm))
+  {
+    const where_clause &where=aterm_cast<const where_clause>(DataTerm);
+    variable_list WhereVarList;
+    aterm_list NewWhereList;
+    const assignment_expression_list& where_asss=where.declarations();
+    for (assignment_expression_list::const_iterator i=where_asss.begin(); i!=where_asss.end(); ++i)
+// aterm_list WhereList=aterm_cast<aterm_list>((DataTerm)[1]); !WhereList.empty(); WhereList=WhereList.tail())
+    {
+      const assignment_expression WhereElem= *i;
+      data_expression WhereTerm=WhereElem[1];
+      sort_expression WhereType=TraverseVarConsTypeD(DeclaredVars,AllowedVars,WhereTerm,data::unknown_sort(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+
+      variable NewWhereVar;
+      if (gsIsDataVarId(aterm_cast<aterm_appl>(WhereElem[0])))
+      {
+        // The variable in WhereElem is type checked, and a proper variable.
+        NewWhereVar=WhereElem[0];
+      }
+      else
+      {
+        // The variable in WhereElem is just a string and needs to be transformed to a DataVarId.
+        NewWhereVar=variable(aterm_cast<core::identifier_string>(WhereElem[0]),WhereType);
+      }
+      WhereVarList.push_front(NewWhereVar);
+      NewWhereList.push_front(gsMakeDataVarIdInit(NewWhereVar,WhereTerm));
+    }
+    NewWhereList=reverse(NewWhereList);
+
+    std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
+    std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
+
+    variable_list VarList=reverse(WhereVarList);
+    std::map<core::identifier_string,sort_expression> NewAllowedVars;
+    AddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
+    
+    std::map<core::identifier_string,sort_expression> NewDeclaredVars;
+    AddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
+    
+    data_expression Data=aterm_cast<aterm_appl>((DataTerm)[0]);
+    sort_expression NewType=TraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,PosType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+
+    core::gstcRemoveVars(FreeVars,VarList);
+    
+    DataTerm=gsMakeWhr(Data,NewWhereList);
+    return NewType;
+  }
+
+  if (is_application(DataTerm))
+  {
+    //arguments
+    application appl=aterm_cast<application>(DataTerm);
+    // aterm_list Arguments=aterm_cast<aterm_list>((DataTerm)[1]);
+    size_t nArguments=appl.size();
+
+    //The following is needed to check enumerations
+    data_expression Arg0 = appl.head();
+    if (gsIsOpId(Arg0) || gsIsId(Arg0))
+    {
+      aterm_appl Name = aterm_cast<aterm_appl>(Arg0[0]);
+      if (Name == sort_list::list_enumeration_name())
+      {
+        sort_expression Type;
+        if (!UnList(PosType,Type))
+        {
+          throw mcrl2::runtime_error("not possible to cast list to " + pp(PosType) + " (while typechecking " + pp(data_expression_list(appl.begin(),appl.end())) + ")");
+        }
+
+        // aterm_list OldArguments=Arguments;
+
+        //First time to determine the common type only!
+        data_expression_list NewArguments;
+        bool Type_is_stable=true;
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        {
+          data_expression Argument= *i; 
+          sort_expression Type0;
+          try
+          {
+            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,false);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            // Try again, but now without Type as the suggestion.
+            // If this does not work, it will be caught in the second pass below.
+            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,data::unknown_sort(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          NewArguments.push_front(Argument);
+          Type_is_stable=Type_is_stable && (Type==Type0);
+          Type=Type0;
+        }
+        // Arguments=OldArguments;
+
+        //Second time to do the real work, but only if the elements in the list have different types.
+        if (!Type_is_stable)
+        {
+          NewArguments=data_expression_list();
+          for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i) 
+          {
+            data_expression Argument= *i;
+            sort_expression Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            NewArguments.push_front(Argument);
+            Type=Type0;
+          }
+        }
+
+        Type=sort_list::list(sort_expression(Type));
+        DataTerm=sort_list::list_enumeration(sort_expression(Type), data_expression_list(reverse(NewArguments)));
+        return Type;
+      }
+      if (Name == sort_set::set_enumeration_name())
+      {
+        sort_expression Type;
+        if (!UnSet(PosType,Type))
+        {
+          throw mcrl2::runtime_error("not possible to cast set to " + pp(PosType) + " (while typechecking " + pp(data_expression_list(appl.begin(),appl.end())) + ")");
+        }
+
+        // aterm_list OldArguments=Arguments;
+
+        //First time to determine the common type only (which will be NewType)!
+        bool NewTypeDefined=false;
+        aterm_appl NewType;
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        {
+          data_expression Argument= *i;
+          sort_expression Type0;
+          try
+          {
+            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + pp(Type) + " (while typechecking " + pp(Argument) + ")");
+          }
+
+          aterm_appl OldNewType=NewType;
+          if (!NewTypeDefined)
+          {
+            NewType=Type0;
+            NewTypeDefined=true;
+          }
+          else
+          {
+            sort_expression temp;
+            if (!MaximumType(NewType,Type0,temp))
+            {
+              throw mcrl2::runtime_error("Set contains incompatible elements of sorts " + pp(OldNewType) + " and " + pp(Type0) + " (while typechecking " + pp(Argument));
+            }
+            NewType=temp;
+            NewTypeDefined=true;
+          }
+        }
+
+        // Type is now the most generic type to be used.
+        assert(Type.defined());
+        assert(NewTypeDefined);
+        Type=NewType;
+        // Arguments=OldArguments;
+
+        //Second time to do the real work.
+        aterm_list NewArguments;
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        {
+          data_expression Argument= *i;
+          sort_expression Type0;
+          try
+          {
+            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + pp(Type) + " (while typechecking " + pp(Argument) + ")");
+          }
+          NewArguments.push_front(Argument);
+          Type=Type0;
+        }
+        Type=sort_set::set_(sort_expression(Type));
+        DataTerm=sort_set::set_enumeration(sort_expression(Type),data_expression_list(reverse(NewArguments)));
+        return Type;
+      }
+      if (Name == sort_bag::bag_enumeration_name())
+      {
+        sort_expression Type;
+        if (!UnBag(PosType,Type))
+        {
+          throw mcrl2::runtime_error("not possible to cast bag to " + pp(PosType) + "(while typechecking " + 
+                                      pp(data_expression_list(appl.begin(),appl.end())) + ")");
+        }
+
+        // aterm_list OldArguments=Arguments;
+
+        //First time to determine the common type only!
+        aterm_appl NewType;
+        bool NewTypeDefined=false;
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        {
+          data_expression Argument0= *i;
+          ++i;
+          data_expression Argument1= *i;
+          sort_expression Type0;
+          try 
+          {
+            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument0,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + pp(Type) + " (while typechecking " + pp(Argument0) + ")");
+          }
+          sort_expression Type1;
+          try 
+          { 
+            Type1=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument1,sort_nat::nat(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            if (print_cast_error)
+            {
+              throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast number to " + pp(sort_nat::nat()) + " (while typechecking " + pp(Argument1) + ")");
+            }
+            else
+            {
+              throw e;
+            }
+          }
+          aterm_appl OldNewType=NewType;
+          if (!NewTypeDefined)
+          {
+            NewType=Type0;
+            NewTypeDefined=true;
+          }
+          else
+          {
+            sort_expression temp;
+            if (!MaximumType(NewType,Type0,temp))
+            {
+              throw mcrl2::runtime_error("Bag contains incompatible elements of sorts " + pp(OldNewType) + " and " + pp(Type0) + " (while typechecking " + pp(Argument0) + ")");
+            }
+
+            NewType=temp;
+            NewTypeDefined=true;
+          }
+        }
+        assert(Type.defined());
+        assert(NewTypeDefined);
+        Type=NewType;
+        // Arguments=OldArguments;
+
+        //Second time to do the real work.
+        aterm_list NewArguments;
+        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        {
+          data_expression Argument0= *i;
+          ++i;
+          data_expression Argument1= *i;
+          sort_expression Type0;
+          try 
+          {
+            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument0,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            if (print_cast_error)
+            {
+              throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + pp(Type) + " (while typechecking " + pp(Argument0) + ")");
+            }
+            else 
+            {
+              throw e;
+            }
+          }
+          sort_expression Type1;
+          try
+          { 
+            Type1=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument1,sort_nat::nat(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            if (print_cast_error)
+            {
+              throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast number to " + pp(sort_nat::nat()) + " (while typechecking " + pp(Argument1) + ")");
+            }
+            else
+            {
+              throw e;
+            }
+          }
+          NewArguments.push_front(Argument0);
+          NewArguments.push_front(Argument1);
+          Type=Type0;
+        }
+        Type=sort_bag::bag(sort_expression(Type));
+        DataTerm=sort_bag::bag_enumeration(sort_expression(Type), data_expression_list(reverse(NewArguments)));
+        return Type;
+      }
+    }
+    sort_expression_list NewArgumentTypes;
+    data_expression_list NewArguments;
+
+    for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+    {
+      data_expression Arg= *i;
+      sort_expression Type=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,data::unknown_sort(),FreeVars,false,warn_upcasting,print_cast_error);
+      assert(Type.defined());
+      NewArguments.push_front(Arg);
+      NewArgumentTypes.push_front(Type);
+    }
+    data_expression_list Arguments=reverse(NewArguments);
+    sort_expression_list ArgumentTypes=reverse(NewArgumentTypes);
+
+    //function
+    data_expression Data=appl.head();
+    sort_expression NewType;
+    try
+    {
+      NewType=TraverseVarConsTypeDN(DeclaredVars,AllowedVars,
+                      Data,
+                      data::unknown_sort() /* gsMakeSortArrow(ArgumentTypes,PosType) */,
+                      FreeVars,false,nArguments,warn_upcasting,print_cast_error);
+      mCRL2log(debug) << "Result of TraverseVarConsTypeD: DataTerm " << pp(Data) << "" << std::endl;
+    }
+    catch (mcrl2::runtime_error &e)
+    {
+      if (was_ambiguous)
+      {
+        was_ambiguous=false;
+      }
+      else if (gsIsOpId(Data)||gsIsDataVarId(Data))
+      {
+        ErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes,e.what());
+      }
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " + 
+                            pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
+    }
+
+    //it is possible that:
+    //1) a cast has happened
+    //2) some parameter Types became sharper.
+    //we do the arguments again with the types.
+
+
+    if (is_function_sort(UnwindType(NewType)))
+    {
+      aterm_list NeededArgumentTypes=aterm_cast<aterm_list>(UnwindType(NewType)[0]);
+
+      if (NeededArgumentTypes.size()!=Arguments.size())
+      {
+         throw mcrl2::runtime_error("need argumens of sorts " + pp(NeededArgumentTypes) +
+                         " which does not match the number of provided arguments "
+                            + pp(Arguments) + " (while typechecking "
+                            + pp(DataTerm) + ")");
+      }
+      //arguments again
+      sort_expression_list NewArgumentTypes;
+      data_expression_list NewArguments;
+      for (; !Arguments.empty(); Arguments=Arguments.tail(),
+           ArgumentTypes=ArgumentTypes.tail(),NeededArgumentTypes=NeededArgumentTypes.tail())
+      {
+        assert(!Arguments.empty());
+        assert(!NeededArgumentTypes.empty());
+        data_expression Arg=Arguments.front();
+        sort_expression NeededType=NeededArgumentTypes.front();
+        sort_expression Type=ArgumentTypes.front();
+        if (!EqTypesA(NeededType,Type))
+        {
+          //upcasting
+          try 
+          { 
+            Type=UpCastNumericType(NeededType,Type,Arg,warn_upcasting);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+          }
+        }
+        if (!EqTypesA(NeededType,Type))
+        {
+          mCRL2log(debug) << "Doing again on [1] " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
+          sort_expression NewArgType;
+          if (!TypeMatchA(NeededType,Type,NewArgType))
+          {
+            if (!TypeMatchA(NeededType,ExpandNumTypesUp(Type),NewArgType))
+            {
+              NewArgType=NeededType;
+            }
+          }
+          try 
+          {
+            NewArgType=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,NewArgType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nneeded type " + pp(NeededType) + " does not match possible type "
+                            + pp(Type) + " (while typechecking " + pp(Arg) + " in " + pp(DataTerm) + ")");
+          }
+          mCRL2log(debug) << "Result of Doing again TraverseVarConsTypeD: DataTerm " << pp(Arg) << "" << std::endl;
+          Type=NewArgType;
+        }
+        NewArguments.push_front(Arg);
+        NewArgumentTypes.push_front(Type);
+      }
+      Arguments=reverse(NewArguments);
+      ArgumentTypes=reverse(NewArgumentTypes);
+    }
+
+    //the function again
+    try 
+    {
+      NewType=TraverseVarConsTypeDN(DeclaredVars,AllowedVars,
+                                        Data,gsMakeSortArrow(ArgumentTypes,PosType),
+                                        FreeVars,strictly_ambiguous,nArguments,warn_upcasting,print_cast_error);
+
+      mCRL2log(debug) << "Result of TraverseVarConsTypeDN: DataTerm " << pp(Data) << "" << std::endl;
+    }
+    catch (mcrl2::runtime_error &e)
+    {
+      if (was_ambiguous)
+      {
+        was_ambiguous=false;
+      }
+      else
+      {
+        ErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes,e.what());
+      }
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " + 
+                   pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
+    }
+
+    mCRL2log(debug) << "Arguments once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " <<
+                pp(ArgumentTypes) << ", NewType: " << pp(NewType) << "" << std::endl;
+
+    //and the arguments once more
+    if (gsIsSortArrow(UnwindType(NewType)))
+    {
+      sort_expression_list NeededArgumentTypes=aterm_cast<sort_expression_list>(UnwindType(NewType)[0]);
+      sort_expression_list NewArgumentTypes;
+      data_expression_list NewArguments;
+      for (; !Arguments.empty(); Arguments=Arguments.tail(),
+           ArgumentTypes=ArgumentTypes.tail(),NeededArgumentTypes=NeededArgumentTypes.tail())
+      {
+        data_expression Arg=Arguments.front();
+        sort_expression NeededType=NeededArgumentTypes.front();
+        sort_expression Type=ArgumentTypes.front();
+
+        if (!EqTypesA(NeededType,Type))
+        {
+          //upcasting
+          try 
+          {
+            Type=UpCastNumericType(NeededType,Type,Arg,warn_upcasting);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+          }
+        }
+        if (!EqTypesA(NeededType,Type))
+        {
+          mCRL2log(debug) << "Doing again on [2] " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
+          sort_expression NewArgType;
+          if (!TypeMatchA(NeededType,Type,NewArgType))
+          {
+            if (!TypeMatchA(NeededType,ExpandNumTypesUp(Type),NewArgType))
+            {
+              NewArgType=NeededType;
+            }
+          }
+          try 
+          {
+            NewArgType=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,NewArgType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nneeded type " + pp(NeededType) + " does not match possible type "
+                            + pp(Type) + " (while typechecking " + pp(Arg) + " in " + pp(DataTerm) + ")");
+          }
+          Type=NewArgType;
+        }
+
+        NewArguments.push_front(Arg);
+        NewArgumentTypes.push_front(Type);
+      }
+      Arguments=reverse(NewArguments);
+      ArgumentTypes=reverse(NewArgumentTypes);
+    }
+
+    mCRL2log(debug) << "Arguments after once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " << pp(ArgumentTypes) << "" << std::endl;
+
+    DataTerm=application(Data,aterm_cast<data_expression_list>(Arguments));
+
+    if (gsIsSortArrow(UnwindType(NewType)))
+    {
+      return aterm_cast<aterm_appl>(UnwindType(NewType)[1]);
+    }
+
+    sort_expression temp_type;
+    if (!UnArrowProd(ArgumentTypes,NewType,temp_type))
+    {
+      throw mcrl2::runtime_error("Fail to properly type " + pp(DataTerm));
+    }
+    if (core::gstcHasUnknown(temp_type))
+    {
+      throw mcrl2::runtime_error("Fail to properly type " + pp(DataTerm));
+    }
+    return temp_type;
+  }
+
+  if (gsIsId(DataTerm)||gsIsOpId(DataTerm)||gsIsDataVarId(DataTerm))
+  {
+    core::identifier_string Name=aterm_cast<core::identifier_string>((DataTerm)[0]);
+    if (gsIsNumericString(gsATermAppl2String(Name)))
+    {
+      aterm_appl Sort=sort_int::int_();
+      if (core::gstcIsPos(Name))
+      {
+        Sort=sort_pos::pos();
+      }
+      else if (core::gstcIsNat(Name))
+      {
+        Sort=sort_nat::nat();
+      }
+      DataTerm=gsMakeOpId(Name,Sort);
+
+      sort_expression temp;
+      if (TypeMatchA(Sort,PosType,temp))
+      {
+        return Sort;
+      }
+
+      //upcasting
+      aterm_appl CastedNewType;
+      try
+      {
+        CastedNewType=UpCastNumericType(PosType,Sort,DataTerm,warn_upcasting);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast number " + pp(DataTerm) + " to type " + pp(PosType));
+      }
+      return CastedNewType;
+    }
+
+    std::map<core::identifier_string,sort_expression>::const_iterator it=DeclaredVars.find(Name);
+    if (it!=DeclaredVars.end())
+    {
+      sort_expression Type=it->second;
+      mCRL2log(debug) << "Recognised declared variable " << pp(Name) << ", Type: " << pp(Type) << "" << std::endl;
+      DataTerm=gsMakeDataVarId(Name,Type);
+
+      if (AllowedVars.count(Name)==0)
+      {
+        throw mcrl2::runtime_error("variable " + pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side");
+      }
+
+      sort_expression NewType;
+      if (TypeMatchA(Type,PosType,NewType))
+      {
+        Type=NewType;
+      }
+      else
+      {
+        //upcasting
+        aterm_appl CastedNewType;
+        try 
+        {
+          CastedNewType=UpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          if (print_cast_error)
+          { 
+            throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast variable " + pp(DataTerm) + " to type " + pp(PosType));
+          }
+          else
+          {
+            throw e;
+          }
+        }
+
+        Type=CastedNewType;
+      }
+
+      //Add to free variables list
+      FreeVars[Name]=Type;
+      return Type;
+    }
+
+    std::map<core::identifier_string,sort_expression>::const_iterator i=user_constants.find(Name);
+    if (i!=user_constants.end())
+    {
+      sort_expression Type=i->second;
+      sort_expression NewType;
+      if (TypeMatchA(Type,PosType,NewType))
+      {
+        Type=NewType;
+        DataTerm=gsMakeOpId(Name,Type);
+        return Type;
+      }
+      else
+      {
+        // The type cannot be unified. Try upcasting the type.
+        DataTerm=gsMakeOpId(Name,Type);
+        try
+        {
+          return UpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string(e.what()) + "\nno constant " + pp(DataTerm) + " with type " + pp(PosType));
+        }
+      }
+    }
+
+    std::map<core::identifier_string,sort_expression_list>::const_iterator j=system_constants.find(Name);
+    if (j!=system_constants.end())
+    {
+      sort_expression_list ParList=j->second;
+      sort_expression_list NewParList;
+      for (; !ParList.empty(); ParList=ParList.tail())
+      {
+        sort_expression Par=ParList.front();
+        sort_expression result;
+        if (TypeMatchA(Par,PosType,result))
+        {
+          NewParList.push_front(result);
+        }
+      }
+      ParList=reverse(NewParList);
+      if (ParList.empty())
+      {
+        throw mcrl2::runtime_error("no system constant " + pp(DataTerm) + " with type " + pp(PosType));
+      }
+
+      if (ParList.size()==1)
+      {
+        sort_expression Type=ParList.front();
+        DataTerm=gsMakeOpId(Name,Type);
+        return Type;
+      }
+      else
+      {
+        DataTerm=gsMakeOpId(Name,data::unknown_sort());
+        return data::unknown_sort();
+      }
+    }
+
+    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=user_functions.find(Name);
+    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=system_functions.find(Name);
+
+    sort_expression_list ParList;
+    if (j_context==user_functions.end())   
+    {
+      if (j_gssystem!=system_functions.end())        
+      { 
+        ParList=j_gssystem->second; // The function only occurs in the system.
+      }
+      else // None are defined.
+      {
+        throw mcrl2::runtime_error("unknown operation " + pp(Name));
+      }
+    }
+    else if (j_gssystem==system_functions.end())          
+    {
+      ParList=j_context->second; // only the context sorts are defined.
+    }
+    else  // Both are defined.
+    {
+      ParList=j_gssystem->second+j_context->second;
+    }
+
+
+    if (ParList.size()==1)
+    {
+      sort_expression Type=ParList.front();
+      DataTerm=gsMakeOpId(Name,Type);
+      try
+      {
+        return UpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nno constant " + pp(DataTerm) + " with type " + pp(PosType));
+      }
+    }
+    else
+    {
+      return TraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strictly_ambiguous, std::string::npos, warn_upcasting,print_cast_error);
+    }
+  }
+
+  throw mcrl2::runtime_error("Internal type checking error: " + pp(DataTerm) + " does not match any type checking case." );
+}
+
+
+std::map < data::sort_expression, data::basic_sort > mcrl2::data::data_expression_checker::construct_normalised_aliases()
+{
+  // This function does the same as data_specification::reconstruct_m_normalised_aliases().
+  // Therefore, it should be replaced by that function, after restructuring the type checker.
+  // First reset the normalised aliases and the mappings and constructors that have been
+  // inherited to basic sort aliases during a previous round of sort normalisation.
+  std::map < data::sort_expression, data::basic_sort > normalised_aliases;
+
+  // Fill normalised_aliases. Simple aliases are stored from left to
+  // right. If the right hand side is non trivial (struct, list, set or bag)
+  // the alias is stored from right to left.
+  for (std::map<core::identifier_string,sort_expression>::const_iterator sort_walker=defined_sorts.begin();  
+               sort_walker!=defined_sorts.end(); ++sort_walker)
+  {
+    const core::identifier_string sort_name(sort_walker->first);
+    const data::basic_sort first(sort_name);
+    const data::sort_expression second(sort_walker->second);
+    if (is_structured_sort(second) ||
+        is_function_sort(second) ||
+        is_container_sort(second))
+    {
+      // We deal here with a declaration of the shape sort A=ComplexType.
+      // Rewrite every occurrence of ComplexType to A. Suppose that there are
+      // two declarations of the shape sort A=ComplexType; B=ComplexType then
+      // ComplexType is rewritten to A and B is also rewritten to A.
+      const std::map< sort_expression, basic_sort >::const_iterator j=normalised_aliases.find(second);
+      if (j!=normalised_aliases.end())
+      {
+        normalised_aliases[first]=j->second;
+      }
+      else
+      {
+        normalised_aliases[second]=first;
+      }
+    }
+    else
+    {
+      // We are dealing with a sort declaration of the shape sort A=B.
+      // Every occurrence of sort A is normalised to sort B.
+      normalised_aliases[first]=second;
+    }
+  }
+
+  // Close the mapping normalised_aliases under itself. If a rewriting
+  // loop is detected, throw a runtime error.
+
+  for (std::map< sort_expression, basic_sort >::iterator i=normalised_aliases.begin();
+       i!=normalised_aliases.end(); i++)
+  {
+    std::set < sort_expression > sort_already_seen;
+    sort_expression result_sort=i->second;
+
+    std::set< sort_expression > all_sorts;
+    if (is_container_sort(i->first) || is_function_sort(i->first))
+    {
+      find_sort_expressions<sort_expression>(i->first, std::inserter(all_sorts, all_sorts.end()));
+    }
+    while (normalised_aliases.count(result_sort)>0)
+    {
+      sort_already_seen.insert(result_sort);
+      result_sort= normalised_aliases.find(result_sort)->second;
+      if (sort_already_seen.count(result_sort))
+      {
+        throw mcrl2::runtime_error("Sort alias " + pp(result_sort) + " is defined in terms of itself.");
+      }
+
+      for (std::set< sort_expression >::const_iterator j = all_sorts.begin(); j != all_sorts.end(); ++j)
+      {
+        if (*j==result_sort)
+        {
+          throw mcrl2::runtime_error("Sort alias " + pp(i->first) + " depends on sort" +
+                                     pp(result_sort) + ", which is circularly defined.\n");
+        }
+      }
+    }
+    // So the normalised sort of i->first is result_sort.
+    i->second=result_sort;
+  }
+  return normalised_aliases;
+}
+
+static sort_expression mapping(sort_expression s,std::map < sort_expression, basic_sort > &m)
+{
+  if (m.find(s)==m.end())
+  {
+    return s;
+  }
+  return m[s];
+}
+
+
+void mcrl2::data::data_expression_checker::check_for_empty_constructor_domains(function_symbol_list constructor_list)
+{
+  // First add the constructors for structured sorts to the constructor list;
+  try
+  {
+    std::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
+    std::set< sort_expression > all_sorts;
+    for (std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.begin();
+              i!=defined_sorts.end(); ++i)
+    {
+      // const basic_sort s(core::identifier_string(gstcUnwindType(i->second)));
+      const sort_expression reference=i->second;
+      // if (is_container_sort(i->first) || is_function_sort(i->first))
+      find_sort_expressions<sort_expression>(reference, std::inserter(all_sorts, all_sorts.end()));
+    }
+
+    for (std::set< sort_expression > ::const_iterator i=all_sorts.begin(); i!=all_sorts.end(); ++i)
+    {
+      if (is_structured_sort(*i))
+      {
+        const function_symbol_vector r=structured_sort(*i).constructor_functions();
+        for (function_symbol_vector::const_iterator j=r.begin(); j!=r.end(); ++j)
+        {
+          constructor_list.push_front(*j);
+        }
+      }
+
+      if (is_structured_sort(*i))
+      {
+        const function_symbol_vector r=structured_sort(*i).constructor_functions();
+        for (function_symbol_vector::const_iterator i=r.begin();
+             i!=r.end(); ++i)
+        {
+          constructor_list.push_front(aterm_cast<aterm_appl>(*i));
+        }
+      }
+
+    }
+
+    std::set < sort_expression > possibly_empty_constructor_sorts;
+    for (aterm_list constructor_list_walker=constructor_list;
+         constructor_list_walker!=aterm_list(); constructor_list_walker=constructor_list_walker.tail())
+    {
+      const sort_expression s=data::function_symbol(constructor_list_walker.front()).sort();
+      if (is_function_sort(s))
+      {
+        // if s is a constant sort, nothing needs to be added.
+        possibly_empty_constructor_sorts.insert(mapping(function_sort(s).codomain(),normalised_aliases));
+      }
+    }
+
+    // Walk through the constructors removing constructor sorts that are not empty,
+    // until no more constructors sorts can be removed.
+    for (bool stable=false ; !stable ;)
+    {
+      stable=true;
+      for (aterm_list constructor_list_walker=constructor_list;
+           constructor_list_walker!=aterm_list(); constructor_list_walker=constructor_list_walker.tail())
+      {
+        const sort_expression s=data::function_symbol(constructor_list_walker.front()).sort();
+        if (!is_function_sort(s))
+        {
+          if (possibly_empty_constructor_sorts.erase(mapping(s,normalised_aliases))==1) // True if one element has been removed.
+          {
+            stable=false;
+          }
+        }
+        else
+        {
+          sort_expression_list r=function_sort(s).domain();
+          bool has_a_domain_sort_possibly_empty_sorts=false;
+          for (sort_expression_list::const_iterator i=r.begin();
+               i!=r.end(); ++i)
+          {
+            if (possibly_empty_constructor_sorts.find(mapping(*i,normalised_aliases))!=possibly_empty_constructor_sorts.end())
+            {
+              //
+              has_a_domain_sort_possibly_empty_sorts=true;
+              continue;
+            }
+          }
+          if (!has_a_domain_sort_possibly_empty_sorts)
+          {
+            // Condition below is true if one element has been removed.
+            if (possibly_empty_constructor_sorts.erase(mapping(function_sort(s).codomain(),normalised_aliases))==1)
+            {
+              stable=false;
+            }
+          }
+        }
+      }
+    }
+    // Print the sorts remaining in possibly_empty_constructor_sorts, as they must be empty
+    if (possibly_empty_constructor_sorts.empty())
+    {
+      return; // There are no empty sorts
+    }
+    else
+    {
+      std::string reason="the following domains are empty due to recursive constructors:";
+      for (std::set < sort_expression >:: const_iterator i=possibly_empty_constructor_sorts.begin();
+           i!=possibly_empty_constructor_sorts.end(); ++i)
+      {
+        reason = reason + "\n" + pp(*i);
+      }
+      throw mcrl2::runtime_error(reason);
+    }
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    throw mcrl2::runtime_error(e.what());
+  }
+}
+
+
+void mcrl2::data::data_expression_checker::ReadInFuncs(const function_symbol_vector &Cons, const function_symbol_vector &Maps)
+{
+  mCRL2log(debug) << "Start Read-in Func" << std::endl;
+
+  size_t constr_number=Cons.size();
+  function_symbol_vector functions_and_constructors=Cons;
+  functions_and_constructors.insert(functions_and_constructors.end(),Maps.begin(),Maps.end());
+  for (function_symbol_vector::const_iterator i=functions_and_constructors.begin(); i!=functions_and_constructors.end(); ++i)
+  {
+    const function_symbol Func= *i;
+    const core::identifier_string FuncName=Func.name();
+    sort_expression FuncType=Func.sort();
+
+    IsSortExprDeclared(FuncType);
+
+    //if FuncType is a defined function sort, unwind it
+    if (is_basic_sort(FuncType))
+    {
+      const sort_expression NewFuncType=UnwindType(FuncType);
+      if (is_function_sort(NewFuncType))
+      {
+        FuncType=NewFuncType;
+      }
+    }
+
+    if (is_function_sort(FuncType))
+    {
+      AddFunction(gsMakeOpId(FuncName,FuncType),"function");
+    }
+    else
+    {
+      try 
+      {
+        AddConstant(gsMakeOpId(FuncName,FuncType),"constant");
+      }
+      catch (mcrl2::runtime_error &e)  
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not add constant");
+      }
+    }
+
+    if (constr_number)
+    {
+      constr_number--;
+
+      //Here checks for the constructors
+      aterm_appl ConstructorType=FuncType;
+      if (gsIsSortArrow(ConstructorType))
+      {
+        ConstructorType=aterm_cast<aterm_appl>(ConstructorType[1]);
+      }
+      ConstructorType=UnwindType(ConstructorType);
+      if (!gsIsSortId(ConstructorType) ||
+          sort_bool::is_bool(sort_expression(ConstructorType)) ||
+          sort_pos::is_pos(sort_expression(ConstructorType)) ||
+          sort_nat::is_nat(sort_expression(ConstructorType)) ||
+          sort_int::is_int(sort_expression(ConstructorType)) ||
+          sort_real::is_real(sort_expression(ConstructorType))
+          )
+      {
+        throw mcrl2::runtime_error("Could not add constructor " + pp(FuncName) + " of sort " + pp(FuncType) + ". Constructors of built-in sorts are not allowed.");
+      }
+    }
+
+    mCRL2log(debug) << "Read-in Func " << pp(FuncName) << ", Types " << pp(FuncType) << "" << std::endl;
+  }
+
+  // Check that the constructors are defined such that they cannot generate an empty sort.
+  // E.g. in the specification sort D; cons f:D->D; the sort D must be necessarily empty, which is
+  // forbidden. The function below checks whether such malicious specifications occur.
+
+  check_for_empty_constructor_domains(function_symbol_list(Cons.begin(),Cons.end())); // throws exception if not ok.
+}
+
+void mcrl2::data::data_expression_checker::AddConstant(const data::function_symbol &f, const std::string msg)
+{
+  core::identifier_string Name = f.name();
+  sort_expression Sort = f.sort();
+
+  if (user_constants.count(Name)>0)
+  {
+    throw mcrl2::runtime_error("double declaration of " + msg + " " + pp(Name));
+  }
+
+  if (system_constants.count(Name)>0 || system_functions.count(Name)>0)
+  {
+    throw mcrl2::runtime_error("attempt to declare a constant with the name that is a built-in identifier (" + pp(Name) + ")");
+  }
+
+  user_constants[Name]=Sort;
+}
+
+
+bool mcrl2::data::data_expression_checker::TypeMatchL(
+                     const sort_expression_list &TypeList, 
+                     const sort_expression_list &PosTypeList, 
+                     sort_expression_list &result)
+{
+  mCRL2log(debug) << "gstcTypeMatchL TypeList: " << pp(TypeList) << ";    PosTypeList: " <<
+              pp(PosTypeList) << "" << std::endl;
+
+  if (TypeList.size()!=PosTypeList.size())
+  {
+    return false;
+  }
+
+  sort_expression_list Result;
+  sort_expression_list::const_iterator j=PosTypeList.begin();
+  for (sort_expression_list::const_iterator i=TypeList.begin(); i!=TypeList.end(); ++i, ++j)
+  {
+    sort_expression Type;
+    if (!TypeMatchA(*i,*j,Type))
+    {
+      return false;
+    }
+    Result.push_front(Type);
+  }
+  result=reverse(Result);
+  return true;
+}
+
+
+sort_expression mcrl2::data::data_expression_checker::UnwindType(const sort_expression &Type)
+{
+  if (is_container_sort(Type))
+  {
+    const container_sort &cs=aterm_cast<const container_sort>(Type);
+    return container_sort(cs.container_name(),UnwindType(cs.element_sort()));
+  }
+  if (is_function_sort(Type))
+  {
+    const function_sort &fs=aterm_cast<function_sort>(Type);
+    aterm_list NewArgs;
+    for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+    {
+      NewArgs.push_front(UnwindType(*i));
+    }
+    NewArgs=reverse(NewArgs);
+    return function_sort(NewArgs,UnwindType(fs.codomain()));
+  }
+
+  if (is_basic_sort(Type))
+  {
+    const basic_sort &bs=aterm_cast<const basic_sort>(Type);
+    std::map<core::identifier_string,sort_expression>::const_iterator i=defined_sorts.find(bs.name());
+    if (i==defined_sorts.end())
+    {
+      return Type;
+    }
+    return UnwindType(i->second);
+  }
+
+  return Type;
+}
+
+bool mcrl2::data::data_expression_checker::TypeMatchA(
+                 const sort_expression &Type_in, 
+                 const sort_expression &PosType_in, 
+                 sort_expression &result)
+{
+  // Checks if Type and PosType match by instantiating unknown sorts.
+  // It returns the matching instantiation of Type in result. If matching fails,
+  // it returns false, otherwise true.
+
+  sort_expression Type=Type_in;
+  sort_expression PosType=PosType_in;
+
+  mCRL2log(debug) << "TypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " " << std::endl;
+
+  if (data::is_unknown_sort(Type))
+  {
+    result=PosType;
+    return true;
+  }
+  if (data::is_unknown_sort(PosType) || EqTypesA(Type,PosType))
+  {
+    result=Type;
+    return true;
+  }
+  if (is_multiple_possible_sorts(Type) && !is_multiple_possible_sorts(PosType))
+  {
+    PosType.swap(Type);
+  }
+  if (is_multiple_possible_sorts(PosType))
+  {
+    sort_expression_list NewTypeList;
+    const multiple_possible_sorts &mps=aterm_cast<const multiple_possible_sorts>(PosType);
+    for (sort_expression_list::const_iterator i=mps.sorts().begin(); i!=mps.sorts().end(); ++i) 
+    {
+      sort_expression NewPosType= *i;
+      mCRL2log(debug) << "Matching candidate TypeMatchA Type: " << pp(Type) << ";    PosType: "
+                  << pp(PosType) << " New Type: " << pp(NewPosType) << "" << std::endl;
+
+      sort_expression new_type;
+      if (TypeMatchA(Type,NewPosType,new_type))
+      {
+        NewPosType=new_type;
+        mCRL2log(debug) << "Match TypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) <<
+                    " New Type: " << pp(NewPosType) << "" << std::endl;
+        NewTypeList.push_front(NewPosType);
+      }
+    }
+    if (NewTypeList.empty())
+    {
+      mCRL2log(debug) << "No match TypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " " << std::endl;
+      return false;
+    }
+
+    if (NewTypeList.tail().empty())
+    {
+      result=NewTypeList.front();
+      return true;
+    }
+
+    result=multiple_possible_sorts(sort_expression_list(reverse(NewTypeList)));
+    return true;
+  }
+
+  if (is_basic_sort(Type))
+  {
+    Type=UnwindType(Type);
+  }
+  if (gsIsSortId(PosType))
+  {
+    PosType=UnwindType(PosType);
+  }
+  if (gsIsSortCons(Type))
+  {
+    aterm_appl ConsType = aterm_cast<aterm_appl>(Type[0]);
+    if (gsIsSortList(ConsType))
+    {
+      if (!sort_list::is_list(sort_expression(PosType)))
+      {
+        return false;
+      }
+      sort_expression Res;
+      if (!TypeMatchA(aterm_cast<aterm_appl>(Type[1]),aterm_cast<aterm_appl>(PosType[1]),Res))
+      {
+        return false;
+      }
+      result=sort_list::list(sort_expression(Res));
+      return true;
+    }
+
+    if (gsIsSortSet(ConsType))
+    {
+      if (!sort_set::is_set(sort_expression(PosType)))
+      {
+        return false;
+      }
+      else
+      {
+        sort_expression Res;
+        if (!TypeMatchA(aterm_cast<aterm_appl>(Type[1]),aterm_cast<aterm_appl>(PosType[1]),Res))
+        {
+          return false;
+        }
+        result=sort_set::set_(sort_expression(Res));
+        return true;
+      }
+    }
+
+    if (gsIsSortBag(ConsType))
+    {
+      if (!sort_bag::is_bag(sort_expression(PosType)))
+      {
+        return false;
+      }
+      else
+      {
+        sort_expression Res;
+        if (!TypeMatchA(aterm_cast<aterm_appl>(Type[1]),aterm_cast<aterm_appl>(PosType[1]),Res))
+        {
+          return false;
+        }
+        result=sort_bag::bag(sort_expression(Res));
+        return true;
+      }
+    }
+  }
+
+  if (is_function_sort(Type))
+  {
+    if (!is_function_sort(PosType))
+    {
+      return false;
+    }
+    else
+    {
+      const function_sort fs=aterm_cast<const function_sort>(Type);
+      const function_sort posfs=aterm_cast<const function_sort>(PosType);
+      sort_expression_list ArgTypes;
+      if (!TypeMatchL(fs.domain(),posfs.domain(),ArgTypes))
+      {
+        return false;
+      }
+      sort_expression ResType;
+      if (!TypeMatchA(fs.codomain(),posfs.codomain(),ResType))
+      {
+        return false;
+      }
+      result=function_sort(ArgTypes,ResType);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+void mcrl2::data::data_expression_checker::AddSystemConstant(const data::function_symbol &f)
+{
+  // append the Type to the entry of the Name of the OpId in system constants table
+
+  const core::identifier_string &OpIdName = f.name();
+  const sort_expression &Type = f.sort();
+
+  std::map<core::identifier_string,sort_expression_list>::const_iterator i=system_constants.find(OpIdName);
+
+  sort_expression_list Types;
+  if (i!=system_constants.end())
+  { 
+    Types=i->second;
+  }
+  Types=push_back(Types,Type);
+  system_constants[OpIdName]=Types;
+}
+
+void mcrl2::data::data_expression_checker::AddSystemFunction(const data::function_symbol &f)
+{
+  //Pre: OpId is an OpId
+  // append the Type to the entry of the Name of the OpId in gssystem.functions table
+  const core::identifier_string &OpIdName = f.name();
+  const sort_expression & Type = f.sort();
+  assert(is_function_sort(Type));
+
+  const std::map <core::identifier_string,sort_expression_list>::const_iterator j=system_functions.find(OpIdName);
+
+  sort_expression_list Types;
+  if (j!=system_functions.end())
+  {
+    Types=j->second;
+  }
+  Types=Types+make_list<sort_expression>(Type);  // TODO: Avoid concatenate but the order is essential.
+  system_functions[OpIdName]=Types;
+}
+
+
+void mcrl2::data::data_expression_checker::initialise_system_defined_functions(void)
+{
+  //Creation of operation identifiers for system defined operations.
+  //Bool
+  AddSystemConstant(sort_bool::true_());
+  AddSystemConstant(sort_bool::false_());
+  AddSystemFunction(sort_bool::not_());
+  AddSystemFunction(sort_bool::and_());
+  AddSystemFunction(sort_bool::or_());
+  AddSystemFunction(sort_bool::implies());
+  AddSystemFunction(equal_to(data::unknown_sort()));
+  AddSystemFunction(not_equal_to(data::unknown_sort()));
+  AddSystemFunction(if_(data::unknown_sort()));
+  AddSystemFunction(less(data::unknown_sort()));
+  AddSystemFunction(less_equal(data::unknown_sort()));
+  AddSystemFunction(greater_equal(data::unknown_sort()));
+  AddSystemFunction(greater(data::unknown_sort()));
+  //Numbers
+  AddSystemFunction(sort_nat::pos2nat());
+  AddSystemFunction(sort_nat::cnat());
+  AddSystemFunction(sort_int::pos2int());
+  AddSystemFunction(sort_real::pos2real());
+  AddSystemFunction(sort_nat::nat2pos());
+  AddSystemFunction(sort_int::nat2int());
+  AddSystemFunction(sort_int::cint());
+  AddSystemFunction(sort_real::nat2real());
+  AddSystemFunction(sort_int::int2pos());
+  AddSystemFunction(sort_int::int2nat());
+  AddSystemFunction(sort_real::int2real());
+  AddSystemFunction(sort_real::creal());
+  AddSystemFunction(sort_real::real2pos());
+  AddSystemFunction(sort_real::real2nat());
+  AddSystemFunction(sort_real::real2int());
+  AddSystemConstant(sort_pos::c1());
+  //more
+  AddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_pos::pos()));
+  AddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_nat::nat()));
+  AddSystemFunction(sort_real::maximum(sort_nat::nat(),sort_pos::pos()));
+  AddSystemFunction(sort_real::maximum(sort_nat::nat(),sort_nat::nat()));
+  AddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_int::int_()));
+  AddSystemFunction(sort_real::maximum(sort_int::int_(),sort_pos::pos()));
+  AddSystemFunction(sort_real::maximum(sort_nat::nat(),sort_int::int_()));
+  AddSystemFunction(sort_real::maximum(sort_int::int_(),sort_nat::nat()));
+  AddSystemFunction(sort_real::maximum(sort_int::int_(),sort_int::int_()));
+  AddSystemFunction(sort_real::maximum(sort_real::real_(),sort_real::real_()));
+  //more
+  AddSystemFunction(sort_real::minimum(sort_pos::pos(), sort_pos::pos()));
+  AddSystemFunction(sort_real::minimum(sort_nat::nat(), sort_nat::nat()));
+  AddSystemFunction(sort_real::minimum(sort_int::int_(), sort_int::int_()));
+  AddSystemFunction(sort_real::minimum(sort_real::real_(), sort_real::real_()));
+  //more
+  // AddSystemFunction(sort_real::abs(sort_pos::pos()));
+  // AddSystemFunction(sort_real::abs(sort_nat::nat()));
+  AddSystemFunction(sort_real::abs(sort_int::int_()));
+  AddSystemFunction(sort_real::abs(sort_real::real_()));
+  //more
+  AddSystemFunction(sort_real::negate(sort_pos::pos()));
+  AddSystemFunction(sort_real::negate(sort_nat::nat()));
+  AddSystemFunction(sort_real::negate(sort_int::int_()));
+  AddSystemFunction(sort_real::negate(sort_real::real_()));
+  AddSystemFunction(sort_real::succ(sort_pos::pos()));
+  AddSystemFunction(sort_real::succ(sort_nat::nat()));
+  AddSystemFunction(sort_real::succ(sort_int::int_()));
+  AddSystemFunction(sort_real::succ(sort_real::real_()));
+  AddSystemFunction(sort_real::pred(sort_pos::pos()));
+  AddSystemFunction(sort_real::pred(sort_nat::nat()));
+  AddSystemFunction(sort_real::pred(sort_int::int_()));
+  AddSystemFunction(sort_real::pred(sort_real::real_()));
+  AddSystemFunction(sort_real::plus(sort_pos::pos(),sort_pos::pos()));
+  AddSystemFunction(sort_real::plus(sort_pos::pos(),sort_nat::nat()));
+  AddSystemFunction(sort_real::plus(sort_nat::nat(),sort_pos::pos()));
+  AddSystemFunction(sort_real::plus(sort_nat::nat(),sort_nat::nat()));
+  AddSystemFunction(sort_real::plus(sort_int::int_(),sort_int::int_()));
+  AddSystemFunction(sort_real::plus(sort_real::real_(),sort_real::real_()));
+  //more
+  AddSystemFunction(sort_real::minus(sort_pos::pos(), sort_pos::pos()));
+  AddSystemFunction(sort_real::minus(sort_nat::nat(), sort_nat::nat()));
+  AddSystemFunction(sort_real::minus(sort_int::int_(), sort_int::int_()));
+  AddSystemFunction(sort_real::minus(sort_real::real_(), sort_real::real_()));
+  AddSystemFunction(sort_real::times(sort_pos::pos(), sort_pos::pos()));
+  AddSystemFunction(sort_real::times(sort_nat::nat(), sort_nat::nat()));
+  AddSystemFunction(sort_real::times(sort_int::int_(), sort_int::int_()));
+  AddSystemFunction(sort_real::times(sort_real::real_(), sort_real::real_()));
+  //more
+  // AddSystemFunction(sort_int::div(sort_pos::pos(), sort_pos::pos()));
+  AddSystemFunction(sort_int::div(sort_nat::nat(), sort_pos::pos()));
+  AddSystemFunction(sort_int::div(sort_int::int_(), sort_pos::pos()));
+  // AddSystemFunction(sort_int::mod(sort_pos::pos(), sort_pos::pos()));
+  AddSystemFunction(sort_int::mod(sort_nat::nat(), sort_pos::pos()));
+  AddSystemFunction(sort_int::mod(sort_int::int_(), sort_pos::pos()));
+  AddSystemFunction(sort_real::divides(sort_pos::pos(), sort_pos::pos()));
+  AddSystemFunction(sort_real::divides(sort_nat::nat(), sort_nat::nat()));
+  AddSystemFunction(sort_real::divides(sort_int::int_(), sort_int::int_()));
+  AddSystemFunction(sort_real::divides(sort_real::real_(), sort_real::real_()));
+  AddSystemFunction(sort_real::exp(sort_pos::pos(), sort_nat::nat()));
+  AddSystemFunction(sort_real::exp(sort_nat::nat(), sort_nat::nat()));
+  AddSystemFunction(sort_real::exp(sort_int::int_(), sort_nat::nat()));
+  AddSystemFunction(sort_real::exp(sort_real::real_(), sort_int::int_()));
+  AddSystemFunction(sort_real::floor());
+  AddSystemFunction(sort_real::ceil());
+  AddSystemFunction(sort_real::round());
+  //Lists
+  AddSystemConstant(sort_list::empty(data::unknown_sort()));
+  AddSystemFunction(sort_list::cons_(data::unknown_sort()));
+  AddSystemFunction(sort_list::count(data::unknown_sort()));
+  AddSystemFunction(sort_list::snoc(data::unknown_sort()));
+  AddSystemFunction(sort_list::concat(data::unknown_sort()));
+  AddSystemFunction(sort_list::element_at(data::unknown_sort()));
+  AddSystemFunction(sort_list::head(data::unknown_sort()));
+  AddSystemFunction(sort_list::tail(data::unknown_sort()));
+  AddSystemFunction(sort_list::rhead(data::unknown_sort()));
+  AddSystemFunction(sort_list::rtail(data::unknown_sort()));
+  AddSystemFunction(sort_list::in(data::unknown_sort()));
+  //Sets
+  AddSystemFunction(sort_bag::set2bag(data::unknown_sort()));
+  AddSystemConstant(sort_set::empty(data::unknown_sort()));
+  AddSystemFunction(sort_set::in(data::unknown_sort()));
+  AddSystemFunction(sort_set::union_(data::unknown_sort()));
+  AddSystemFunction(sort_set::difference(data::unknown_sort()));
+  AddSystemFunction(sort_set::intersection(data::unknown_sort()));
+  AddSystemFunction(sort_set::complement(data::unknown_sort()));
+
+  //Bags
+  AddSystemFunction(sort_bag::bag2set(data::unknown_sort()));
+  AddSystemConstant(sort_bag::empty(data::unknown_sort()));
+  AddSystemFunction(sort_bag::in(data::unknown_sort()));
+  AddSystemFunction(sort_bag::count(data::unknown_sort()));
+  AddSystemFunction(sort_bag::join(data::unknown_sort()));
+  AddSystemFunction(sort_bag::difference(data::unknown_sort()));
+  AddSystemFunction(sort_bag::intersection(data::unknown_sort()));
+
+  // function update
+  AddSystemFunction(data::function_update(data::unknown_sort(),data::unknown_sort()));
+}
+
+void mcrl2::data::data_expression_checker::AddFunction(const data::function_symbol &f, const std::string msg, bool allow_double_decls)
+{
+  const sort_expression_list domain=function_sort(f.sort()).domain();
+  const core::identifier_string Name = f.name();
+  const sort_expression Sort = f.sort();
+
+  if (domain.size()==0)
+  {
+    if (system_constants.count(Name)>0)
+    {
+      throw mcrl2::runtime_error("attempt to redeclare the system constant with " + msg + " " + pp(f));
+    }
+  }
+  else // domain.size()>0
+  {
+    std::map <core::identifier_string,sort_expression_list>::const_iterator j=system_functions.find(Name);
+    if (j!=system_functions.end())
+    {
+      sort_expression_list L= j->second;
+      for (; L!=aterm_list() ; L=L.tail())
+      {
+        sort_expression temp;
+        if (TypeMatchA(Sort,L.front(),temp))
+        {
+          // f matches a predefined function
+          throw mcrl2::runtime_error("attempt to redeclare a system function with " + msg + " " + pp(f) + ":" + pp(Sort));
+        }
+      }
+    }
+  }
+
+  std::map <core::identifier_string,sort_expression_list>::const_iterator j=user_functions.find(Name);
+
+  // the table user_functions contains a list of types for each
+  // function name. We need to check if there is already such a type
+  // in the list. If so -- error, otherwise -- add
+  if (j!=user_functions.end())
+  {
+    sort_expression_list Types=j->second;
+    if (InTypesA(Sort, Types))
+    {
+      if (!allow_double_decls)
+      {
+        throw mcrl2::runtime_error("double declaration of " + msg + " " + pp(Name));
+      }
+    }
+    Types=Types+make_list<sort_expression>(Sort);
+    user_functions[Name]=Types;
+  }
+  else
+  {
+    user_functions[Name]=make_list<sort_expression>(Sort);
+  }
+}
+
+void mcrl2::data::data_expression_checker::ReadInSortStruct(const sort_expression &SortExpr)
+{
+  if (is_basic_sort(SortExpr))
+  {
+    IsSortDeclared(aterm_cast<basic_sort>(SortExpr).name());
+    return;
+  }
+
+  if (is_container_sort(SortExpr))
+  {
+    return ReadInSortStruct(aterm_cast<container_sort>(SortExpr).element_sort());
+  }
+
+  if (is_function_sort(SortExpr))
+  {
+    const function_sort &fs(SortExpr);
+    ReadInSortStruct(fs.codomain());
+
+    for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+    {
+      ReadInSortStruct(*i);
+    }
+    return;
+  }
+
+  if (is_structured_sort(SortExpr))
+  {
+    const structured_sort &struct_sort(SortExpr);
+    // for (aterm_list Constrs=aterm_cast<aterm_list>(SortExpr[0]); !Constrs.empty(); Constrs=Constrs.tail())
+    for (structured_sort_constructor_list::const_iterator i=struct_sort.struct_constructors().begin();
+               i!=struct_sort.struct_constructors().end(); ++i)
+    {
+      const structured_sort_constructor &Constr(*i); 
+
+      // recognizer -- if present -- a function from SortExpr to Bool
+      core::identifier_string Name=Constr.recogniser();
+      if (Name!=no_identifier())
+      {
+        AddFunction(gsMakeOpId(Name,gsMakeSortArrow(make_list<aterm>(SortExpr),sort_bool::bool_())),"recognizer");
+      }
+
+      // constructor type and projections
+      structured_sort_constructor_argument_list Projs=Constr.arguments();
+      Name=Constr.name();
+      if (Projs.empty())
+      {
+        AddConstant(gsMakeOpId(Name,SortExpr),"constructor constant");
+        continue;
+      }
+
+      sort_expression_list ConstructorType;
+      for (structured_sort_constructor_argument_list::const_iterator j=Projs.begin(); j!=Projs.end(); ++j)
+      {
+        structured_sort_constructor_argument Proj= *j;
+        sort_expression ProjSort=Proj.sort(); 
+
+        // not to forget, recursive call for ProjSort ;-)
+        ReadInSortStruct(ProjSort);
+
+        core::identifier_string ProjName=Proj.name();
+        if (ProjName!=no_identifier())
+        {
+          AddFunction(function_symbol(ProjName,function_sort(make_list(SortExpr),ProjSort)),"projection",true);
+        }
+        ConstructorType.push_front(ProjSort);
+      }
+      AddFunction(gsMakeOpId(Name,gsMakeSortArrow(reverse(ConstructorType),SortExpr)),"constructor");
+    }
+    return;
+  }
+}
+
+void mcrl2::data::data_expression_checker::ReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
+                        const std::map<core::identifier_string,sort_expression>::const_iterator end)
+{
+  for (std::map<core::identifier_string,sort_expression>::const_iterator i=begin; i!=end; ++i)
+  {
+    static_cast<sort_expression_checker>(*this)(i->second); // Type check sort expression.
+    ReadInSortStruct(i->second);
+  }
+}
+
+/* void ReadInConstructors(const sort_expression_list::const_iterator begin,
+                                   const sort_expression_list::const_iterator end)
+{
+  for (sort_expression_list::const_iterator i=begin; i!=end; ++i)
+  {
+    assert(user_defined_sorts.count(*i)>0);
+    const sort_expression SortExpr=user_defined_sorts[*i];
+    gstcIsSortExprDeclared(SortExpr);
+
+    gstcReadInSortStruct(SortExpr);
+  }
+} */
+
+
+mcrl2::data::data_expression_checker::data_expression_checker(const data_specification &data_spec)
+      : sort_expression_checker(data_spec),
+        was_warning_upcasting(false),
+        was_ambiguous(false)
+
+{ 
+  mCRL2log(verbose) << "type checking data expression..." << std::endl;
+  initialise_system_defined_functions();
+
+  // aterm_list constructors = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[1])[0]);
+  // aterm_list mappings = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[2])[0]);
+
+  //XXX read-in from spec (not finished)
+  try
+  {
+    ReadInConstructors(defined_sorts.begin(),defined_sorts.end());
+    ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
+  }
+  mCRL2log(debug) << "type checking of data expression read-in phase finished" << std::endl;
+}
+
+data_expression mcrl2::data::data_expression_checker::operator ()(
+           const data_expression &data_expr,
+           const std::map<core::identifier_string,sort_expression> &Vars)
+{
+  data_expression data=data_expr;
+  sort_expression Type; 
+  try 
+  {
+    Type=TraverseVarConsTypeD(Vars,Vars,data,data::unknown_sort());
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
+  }
+  if (data::is_unknown_sort(Type))
+  {
+    throw mcrl2::runtime_error("type checking of data expression failed. Result is an unknown sort.");
+  }
+  
+  return data;
+} 
+
+// ------------------------------  Here ends the new class based data expression checker -----------------------
+// ------------------------------  Here starts the new class based data specification checker -----------------------
+
+// Type check and replace user defined equations.
+void mcrl2::data::data_specification_checker::TransformVarConsTypeData(data_specification &data_spec)
+{
+  std::map<core::identifier_string,sort_expression> DeclaredVars;
+  std::map<core::identifier_string,sort_expression> FreeVars;
+
+  //Create a new specification; admittedly, this is somewhat clumsy.
+  data_specification new_specification;
+  for(sort_expression_vector::const_iterator i=data_spec.user_defined_sorts().begin(); i!=data_spec.user_defined_sorts().end(); ++i)
+  {
+    new_specification.add_sort(*i);
+  }
+  for(alias_vector::const_iterator i=data_spec.user_defined_aliases().begin(); i!=data_spec.user_defined_aliases().end(); ++i)
+  {
+    new_specification.add_alias(*i);
+  }
+  for(function_symbol_vector::const_iterator i=data_spec.user_defined_constructors().begin(); i!=data_spec.user_defined_constructors().end(); ++i)
+  {
+    new_specification.add_constructor(*i);
+  }
+  for(function_symbol_vector::const_iterator i=data_spec.user_defined_mappings().begin(); i!=data_spec.user_defined_mappings().end(); ++i)
+  {
+    new_specification.add_mapping(*i);
+  }
+  
+  data_equation_vector equations=data_spec.user_defined_equations();
+  for (data_equation_vector::const_iterator i=equations.begin(); i!=equations.end(); ++i)
+  {
+    data_equation Eqn= *i;
+    variable_list VarList=Eqn.variables();
+
+    if (!VarsUnique(VarList))
+    {
+      throw mcrl2::runtime_error("the variables " + pp(VarList) + " in equation declaration " + pp(Eqn) + " are not unique");
+    }
+
+    std::map<core::identifier_string,sort_expression> NewDeclaredVars;
+    AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
+    DeclaredVars=NewDeclaredVars;
+
+    data_expression Left=Eqn.lhs();
+
+    sort_expression LeftType;
+    try
+    {
+      LeftType=TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Left,data::unknown_sort(),FreeVars,false,true);
+    }
+    catch (mcrl2::runtime_error &e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nerror occurred while typechecking " + pp(Left) + " as left hand side of equation " + pp(Eqn));
+    }
+    
+    if (was_warning_upcasting)
+    {
+      was_warning_upcasting=false;
+      mCRL2log(warning) << "warning occurred while typechecking " << pp(Left) << " as left hand side of equation " << pp(Eqn) << std::endl;
+    }
+
+    data_expression Cond=Eqn.condition();
+    TraverseVarConsTypeD(DeclaredVars,FreeVars,Cond,sort_bool::bool_());
+    
+    data_expression Right=Eqn.rhs();
+    std::map<core::identifier_string,sort_expression> dummy_empty_table;
+    sort_expression RightType;
+    try
+    {
+      RightType=TraverseVarConsTypeD(DeclaredVars,FreeVars,Right,LeftType,dummy_empty_table,false);
+    }
+    catch (mcrl2::runtime_error &e)
+    { 
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nerror occurred while typechecking " + pp(Right) + " as right hand side of equation " + pp(Eqn));
+    }
+
+    //If the types are not uniquely the same now: do once more:
+    if (!EqTypesA(LeftType,RightType))
+    {
+      sort_expression Type;
+      if (!TypeMatchA(LeftType,RightType,Type))
+      {
+        throw mcrl2::runtime_error("types of the left- (" + pp(LeftType) + ") and right- (" + pp(RightType) + ") hand-sides of the equation " + pp(Eqn) + " do not match.");
+      }
+      Left=Eqn.lhs();
+      FreeVars.clear();
+      try
+      {
+        LeftType=TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Left,Type,FreeVars,true);
+      }
+      catch (mcrl2::runtime_error &e)
+      {      
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntypes of the left- and right-hand-sides of the equation " + pp(Eqn) + " do not match.");
+      }
+      if (was_warning_upcasting)
+      {
+        was_warning_upcasting=false;
+        mCRL2log(warning) << "warning occurred while typechecking " << pp(Left) << " as left hand side of equation " << pp(Eqn) << std::endl;
+      }
+      Right=Eqn.rhs();
+      try 
+      {
+        RightType=TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Right,LeftType,FreeVars);
+      }
+      catch (mcrl2::runtime_error &e)
+      {    
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntypes of the left- and right-hand-sides of the equation " + pp(Eqn) + " do not match.");
+      }
+      if (!TypeMatchA(LeftType,RightType,Type))
+      {
+        throw mcrl2::runtime_error("types of the left- (" + pp(LeftType) + ") and right- (" + pp(RightType) + ") hand-sides of the equation " + pp(Eqn) + " do not match");
+      }
+      if (core::gstcHasUnknown(Type))
+      {
+        throw mcrl2::runtime_error("types of the left- (" + pp(LeftType) + ") and right- (" + pp(RightType) + ") hand-sides of the equation " + pp(Eqn) + " cannot be uniquely determined");
+      }
+    }
+    DeclaredVars.clear();
+    // NewEqns.push_back(data_equation(VarList,Cond,Left,Right));
+    new_specification.add_equation(data_equation(VarList,Cond,Left,Right));
+  }
+  data_spec=new_specification;
+}
+
+mcrl2::data::data_specification_checker::data_specification_checker(const data_specification &data_spec)
+  : data_expression_checker(data_spec)
+{
+  mCRL2log(debug) << "type checking phase started" << std::endl;
+
+  type_checked_spec=data_spec;
+  type_checked_spec.declare_data_specification_to_be_type_checked();
+  
+  // Type check equations and add them to the specification.
+  TransformVarConsTypeData(type_checked_spec);
+  
+  // type_checked_spec = gstcFoldSortRefs(type_checked_spec); TODO OUGHT TO BE ADDED 
+
+  mCRL2log(debug) << "type checking phase finished" << std::endl;
+  
+}
+
+const data_specification mcrl2::data::data_specification_checker::operator()()
+{
+  return type_checked_spec;
+}
+
+// ------------------------------  Here ends the new class based data specification checker -----------------------
+
+
+
+
+
+namespace core 
+{
 sort_expression type_check_sort_expr(const sort_expression &sort_expr, aterm_appl spec)
 {
   mCRL2log(verbose) << "type checking sort expression..." << std::endl;
@@ -537,7 +4561,7 @@ sort_expression type_check_sort_expr(const sort_expression &sort_expr, aterm_app
   return sort_expr;
 }
 
-data_expression type_check_data_expr(const data_expression &data_expr, aterm_appl spec, const std::map<aterm_appl,sort_expression> &Vars)
+data_expression type_check_data_expr(const data_expression &data_expr, aterm_appl spec, const std::map<core::identifier_string,sort_expression> &Vars)
 {
   mCRL2log(verbose) << "type checking data expression..." << std::endl;
   //check correctness of the data expression in data_expr using
@@ -635,7 +4659,7 @@ aterm_appl type_check_mult_act(
 
     if (gsIsMultAct(mult_act))
     {
-      std::map<aterm_appl,sort_expression> Vars;
+      std::map<core::identifier_string,sort_expression> Vars;
       aterm_list r;
       for (aterm_list l=aterm_cast<aterm_list>(mult_act[0]); !l.empty(); l=l.tail())
       {
@@ -691,7 +4715,7 @@ aterm_list type_check_mult_actions(
 
   for (; !mult_actions.empty(); mult_actions=mult_actions.tail())
   {
-    std::map<aterm_appl,sort_expression> Vars;
+    std::map<core::identifier_string,sort_expression> Vars;
     aterm_list r;
 
     for (aterm_list l=(aterm_list)(mult_actions.front()) ; !l.empty(); l=l.tail())
@@ -790,8 +4814,8 @@ aterm_appl type_check_state_frm(aterm_appl state_frm, aterm_appl spec)
   
   mCRL2log(debug) << "type checking of state formulas read-in phase finished" << std::endl;
 
-  std::map<aterm_appl,sort_expression> Vars;
-  std::map<aterm_appl,sort_expression_list> StateVars;
+  std::map<core::identifier_string,sort_expression> Vars;
+  std::map<core::identifier_string,sort_expression_list> StateVars;
   return gstcTraverseStateFrm(Vars,StateVars,state_frm);
   
 }
@@ -810,7 +4834,7 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
 
   mCRL2log(debug) << "type checking of action rename specification read-in phase started" << std::endl;
 
-  std::map<aterm_appl,term_list<sort_expression_list> > actions_from_lps;
+  std::map<core::identifier_string,term_list<sort_expression_list> > actions_from_lps;
 
   aterm_appl lps_data_spec = aterm_cast<aterm_appl>(lps_spec[0]);
   aterm_list lps_sorts = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_data_spec[0])[0]);
@@ -860,14 +4884,14 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
 
   aterm_appl data_spec = aterm_cast<aterm_appl>(ar_spec[0]);
   
-  std::map<aterm_appl,sort_expression> LPSSorts=context.defined_sorts; // remember the sorts from the LPS.
+  std::map<core::identifier_string,sort_expression> LPSSorts=context.defined_sorts; // remember the sorts from the LPS.
   gstcReadInSorts(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[0])[0]));
   
   mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file sorts finished" << std::endl;
 
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
-  sort_expression_list sorts=aterm_cast<const sort_expression_list>(list_minus(context.defined_sorts, LPSSorts));
+  core::identifier_string_list sorts=list_minus(context.defined_sorts, LPSSorts);
   gstcReadInConstructors(sorts.begin(),sorts.end());
 
   mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file constructors finished" << std::endl;
@@ -898,8 +4922,8 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
   aterm_appl ActionRenameRules=aterm_cast<aterm_appl>(ar_spec[2]);
   aterm_list NewRules;
 
-  std::map<aterm_appl,sort_expression> DeclaredVars;
-  std::map<aterm_appl,sort_expression> FreeVars;
+  std::map<core::identifier_string,sort_expression> DeclaredVars;
+  std::map<core::identifier_string,sort_expression> FreeVars;
 
   for (aterm_list l=aterm_cast<aterm_list>(ActionRenameRules[0]); !l.empty(); l=l.tail())
   {
@@ -912,7 +4936,7 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
       throw mcrl2::runtime_error("the variables " + pp(VarList) + " in action rename rule " + pp(Rule) + " are not unique");
     }
 
-    std::map<aterm_appl,sort_expression> NewDeclaredVars;
+    std::map<core::identifier_string,sort_expression> NewDeclaredVars;
     gstcAddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
     
     DeclaredVars=NewDeclaredVars;
@@ -962,7 +4986,7 @@ aterm_appl type_check_pbes_spec(aterm_appl pbes_spec)
   aterm_appl pb_eqn_spec = aterm_cast<aterm_appl>(pbes_spec[2]);
   aterm_appl pb_init = aterm_cast<aterm_appl>(pbes_spec[3]);
   aterm_appl glob_var_spec = aterm_cast<aterm_appl>(pbes_spec[1]);
-  std::map<aterm_appl,sort_expression> dummy;
+  std::map<core::identifier_string,sort_expression> dummy;
 
   gstcReadInSorts(aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[0])[0]));
     
@@ -1047,8 +5071,8 @@ aterm_list type_check_data_vars(aterm_list data_vars, aterm_appl spec)
   
   mCRL2log(debug) << "type checking of data variables read-in phase finished" << std::endl;
 
-  std::map<aterm_appl,sort_expression> Vars;
-  std::map<aterm_appl,sort_expression> NewVars;
+  std::map<core::identifier_string,sort_expression> Vars;
+  std::map<core::identifier_string,sort_expression> NewVars;
   try
   {
     gstcAddVars2Table(Vars,data_vars,NewVars);
@@ -1075,7 +5099,7 @@ void gstcSplitSortDecls(const aterm_list &SortDecls,
   alias_vector SortRefs;
   for(aterm_list::const_iterator i=SortDecls.begin(); i!=SortDecls.end(); ++i)
   {
-    const aterm_appl& SortDecl = atermpp::aterm_cast<aterm_appl>(*i);
+    const aterm_appl &SortDecl(*i);
     if (gsIsSortRef(SortDecl))
     {
       SortRefs.push_back(SortDecl);
@@ -1224,7 +5248,6 @@ alias_list gstcFoldSortRefsInSortRefs(alias_list SortRefs)
 // ========= main processing functions
 void gstcDataInit(void)
 {
-// std::cerr << "STD DATA INIT -----------------------------------------------------------------------------------------------------\n";
   gssystem.constants.clear();
   gssystem.functions.clear();
   context.basic_sorts.clear();
@@ -1376,7 +5399,7 @@ static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
   const sort_expression& sort_expression_start_search,
   const basic_sort& end_search,
   std::set < basic_sort > &visited,
-  const bool observed_a_sort_constructor);
+  const bool observed_a_sort_constructor); 
 
 // This function checks whether there is a path of sort aliases
 // from start_search to end_search.
@@ -1392,7 +5415,7 @@ static bool gstc_check_for_sort_alias_loop_through_function_sort(
   std::set < basic_sort > &visited,
   const bool observed_a_sort_constructor)
 {
-  const std::map<aterm_appl,sort_expression>::const_iterator i=context.defined_sorts.find(static_cast<aterm_appl>(start_search.name()));
+  const std::map<core::identifier_string,sort_expression>::const_iterator i=context.defined_sorts.find(start_search.name());
 
   if (i==context.defined_sorts.end())
   {
@@ -1415,7 +5438,7 @@ static bool gstc_check_for_sort_alias_loop_through_function_sort(
   visited.insert(start_search);
   const sort_expression reference(aterm_reference);
   return gstc_check_for_sort_alias_loop_through_function_sort_via_expression(reference,end_search,visited,observed_a_sort_constructor);
-}
+} 
 
 static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
   const sort_expression& sort_expression_start_search,
@@ -1496,12 +5519,15 @@ static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
   return false;
 }
 
+
+
+
 static void gstcReadInSorts(aterm_list Sorts)
 {
   for (; !Sorts.empty(); Sorts=Sorts.tail())
   {
     aterm_appl Sort=ATAgetFirst(Sorts);
-    aterm_appl SortName=aterm_cast<aterm_appl>(Sort[0]);
+    core::identifier_string SortName=aterm_cast<core::identifier_string>(Sort[0]);
     if (sort_bool::is_bool(basic_sort(core::identifier_string(SortName))))
     {
       throw mcrl2::runtime_error("attempt to redeclare sort Bool");
@@ -1545,7 +5571,7 @@ static void gstcReadInSorts(aterm_list Sorts)
   // E.g. sort L=List(L);
   // This is forbidden.
 
-  for (std::map<aterm_appl,sort_expression>::const_iterator i=context.defined_sorts.begin(); 
+  for (std::map<core::identifier_string,sort_expression>::const_iterator i=context.defined_sorts.begin(); 
               i!=context.defined_sorts.end(); ++i)
   {
     std::set < basic_sort > visited;
@@ -1558,20 +5584,20 @@ static void gstcReadInSorts(aterm_list Sorts)
   }
 }
 
-static void gstcReadInConstructors(const std::map<aterm_appl,sort_expression>::const_iterator begin,
-                                   const std::map<aterm_appl,sort_expression>::const_iterator end)
+static void gstcReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
+                                   const std::map<core::identifier_string,sort_expression>::const_iterator end)
 {
-  for (std::map<aterm_appl,sort_expression>::const_iterator i=begin; i!=end; ++i) 
+  for (std::map<core::identifier_string,sort_expression>::const_iterator i=begin; i!=end; ++i) 
   {
     gstcIsSortExprDeclared(i->second);
     gstcReadInSortStruct(i->second);
   }
 }
 
-static void gstcReadInConstructors(const sort_expression_list::const_iterator begin,
-                                   const sort_expression_list::const_iterator end)
+static void gstcReadInConstructors(const core::identifier_string_list::const_iterator begin,
+                                   const core::identifier_string_list::const_iterator end)
 {
-  for (sort_expression_list::const_iterator i=begin; i!=end; ++i) 
+  for (core::identifier_string_list::const_iterator i=begin; i!=end; ++i) 
   {
     assert(context.defined_sorts.count(*i)>0);
     const sort_expression SortExpr=context.defined_sorts[*i];
@@ -1593,7 +5619,7 @@ std::map < data::sort_expression, data::basic_sort > construct_normalised_aliase
   // Fill normalised_aliases. Simple aliases are stored from left to
   // right. If the right hand side is non trivial (struct, list, set or bag)
   // the alias is stored from right to left.
-  for (std::map<aterm_appl,sort_expression>::const_iterator sort_walker=context.defined_sorts.begin();  
+  for (std::map<core::identifier_string,sort_expression>::const_iterator sort_walker=context.defined_sorts.begin();  
                sort_walker!=context.defined_sorts.end(); ++sort_walker)
   {
     const core::identifier_string sort_name(sort_walker->first);
@@ -1663,15 +5689,6 @@ std::map < data::sort_expression, data::basic_sort > construct_normalised_aliase
   return normalised_aliases;
 }
 
-static sort_expression mapping(sort_expression s,std::map < sort_expression, basic_sort > &m)
-{
-  if (m.find(s)==m.end())
-  {
-    return s;
-  }
-  return m[s];
-}
-
 // Under the assumption that constructor_list contains all the constructors, this
 // function checks whether there are sorts that must be necessarily empty because they
 // have only constructors referring to the domain itself, e.g. sort D; cons f:D->D;
@@ -1691,7 +5708,7 @@ static void gstc_check_for_empty_constructor_domains(aterm_list constructor_list
     // aterm_list defined_sorts=context.defined_sorts.keys();
     std::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
     std::set< sort_expression > all_sorts;
-    for (std::map<aterm_appl,sort_expression>::const_iterator i=context.defined_sorts.begin();
+    for (std::map<core::identifier_string,sort_expression>::const_iterator i=context.defined_sorts.begin();
               i!=context.defined_sorts.end(); ++i)
     {
       // const basic_sort s(core::identifier_string(gstcUnwindType(i->second)));
@@ -1876,12 +5893,12 @@ static void gstcReadInActs(aterm_list Acts)
   for (; !Acts.empty(); Acts=Acts.tail())
   {
     aterm_appl Act=ATAgetFirst(Acts);
-    aterm_appl ActName=aterm_cast<aterm_appl>(Act[0]);
+    core::identifier_string ActName=aterm_cast<core::identifier_string>(Act[0]);
     sort_expression_list ActType=aterm_cast<sort_expression_list>(Act[1]);
 
     gstcIsSortExprListDeclared(ActType);
 
-    const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.actions.find(ActName);
+    const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.actions.find(ActName);
     term_list<sort_expression_list> Types;
     if (j==context.actions.end())
     {
@@ -1912,7 +5929,7 @@ static void gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
   for (; !Procs.empty(); Procs=Procs.tail())
   {
     aterm_appl Proc=ATAgetFirst(Procs);
-    aterm_appl ProcName=aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(Proc[0])[0]);
+    core::identifier_string ProcName=aterm_cast<core::identifier_string>(aterm_cast<aterm_appl>(Proc[0])[0]);
 
     if (context.actions.count(ProcName)>0)
     {
@@ -1923,7 +5940,7 @@ static void gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
 
     gstcIsSortExprListDeclared(ProcType);
 
-    const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.processes.find(ProcName);
+    const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.processes.find(ProcName);
     term_list<sort_expression_list> Types;
     if (j==context.processes.end())
     {
@@ -1968,7 +5985,7 @@ static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
   for (; !PBEqns.empty(); PBEqns=PBEqns.tail())
   {
     aterm_appl PBEqn=ATAgetFirst(PBEqns);
-    aterm_appl PBName=aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(PBEqn[1])[0]);
+    core::identifier_string PBName=aterm_cast<core::identifier_string>(aterm_cast<aterm_appl>(PBEqn[1])[0]);
 
     const variable_list &PBVars=aterm_cast<variable_list>(aterm_cast<aterm_appl>(PBEqn[1])[1]);
 
@@ -1981,7 +5998,7 @@ static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
 
     gstcIsSortExprListDeclared(PBType);
 
-    const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator i=context.PBs.find(PBName);
+    const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator i=context.PBs.find(PBName);
     term_list<sort_expression_list> Types;
     if (i==context.PBs.end())
     {
@@ -2063,8 +6080,8 @@ static aterm_list gstcWritePBES(aterm_list oldPBES)
 
 static void gstcTransformVarConsTypeData(void)
 {
-  std::map<aterm_appl,sort_expression> DeclaredVars;
-  std::map<aterm_appl,sort_expression> FreeVars;
+  std::map<core::identifier_string,sort_expression> DeclaredVars;
+  std::map<core::identifier_string,sort_expression> FreeVars;
 
   //data terms in equations
   aterm_list NewEqns;
@@ -2079,7 +6096,7 @@ static void gstcTransformVarConsTypeData(void)
       throw mcrl2::runtime_error("the variables " + pp(VarList) + " in equation declaration " + pp(Eqn) + " are not unique");
     }
 
-    std::map<aterm_appl,sort_expression> NewDeclaredVars;
+    std::map<core::identifier_string,sort_expression> NewDeclaredVars;
     gstcAddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
     DeclaredVars=NewDeclaredVars;
 
@@ -2105,7 +6122,7 @@ static void gstcTransformVarConsTypeData(void)
     gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,Cond,sort_bool::bool_());
     
     data_expression Right=aterm_cast<aterm_appl>(Eqn[3]);
-    std::map<aterm_appl,sort_expression> dummy_empty_table;
+    std::map<core::identifier_string,sort_expression> dummy_empty_table;
     aterm_appl RightType;
     try
     {
@@ -2166,18 +6183,16 @@ static void gstcTransformVarConsTypeData(void)
 
 static void gstcTransformActProcVarConst(void)
 {
-  std::map<aterm_appl,sort_expression> Vars;
+  std::map<core::identifier_string,sort_expression> Vars;
 
   //process and data terms in processes and init
-  // for (aterm_list ProcVars=body.proc_pars.keys(); !ProcVars.empty(); ProcVars=ProcVars.tail())
   for (std::map <aterm_appl,variable_list>::const_iterator i=body.proc_pars.begin(); i!=body.proc_pars.end(); ++i)
   {
     aterm_appl ProcVar=i->first;
 
     Vars=context.glob_vars;
 
-    std::map<aterm_appl,sort_expression> NewVars;
-    // gstcAddVars2Table(Vars,aterm_cast<aterm_list>(body.proc_pars.get(ProcVar)),NewVars);
+    std::map<core::identifier_string,sort_expression> NewVars;
     gstcAddVars2Table(Vars,i->second,NewVars);
     Vars=NewVars;
 
@@ -2188,7 +6203,7 @@ static void gstcTransformActProcVarConst(void)
 
 static void gstcTransformPBESVarConst(void)
 {
-  std::map<aterm_appl,sort_expression> Vars;
+  std::map<core::identifier_string,sort_expression> Vars;
 
   //PBEs and data terms in PBEqns and init
   // for (aterm_list PBVars=body.proc_pars.keys(); !PBVars.empty(); PBVars=PBVars.tail())
@@ -2198,7 +6213,7 @@ static void gstcTransformPBESVarConst(void)
     
     Vars=context.glob_vars;
 
-    std::map<aterm_appl,sort_expression> NewVars;
+    std::map<core::identifier_string,sort_expression> NewVars;
     gstcAddVars2Table(Vars,i->second,NewVars);
     Vars=NewVars;
 
@@ -2268,11 +6283,11 @@ static void gstcIsSortDeclared(aterm_appl SortName)
   {
     return;
   }
-  if (context.basic_sorts.count(SortName)>0)
+  if (context.basic_sorts.count(aterm_cast<core::identifier_string>(SortName))>0)
   {
     return;
   }
-  if (context.defined_sorts.count(SortName)>0)
+  if (context.defined_sorts.count(aterm_cast<core::identifier_string>(SortName))>0)
   {
     return;
   }
@@ -2406,7 +6421,7 @@ static void gstcAddConstant(aterm_appl OpId, const std::string msg)
 {
   assert(gsIsOpId(OpId));
 
-  aterm_appl Name = data::function_symbol(OpId).name();
+  core::identifier_string Name = data::function_symbol(OpId).name();
   aterm_appl Sort = data::function_symbol(OpId).sort();
 
   if (context.constants.count(Name)>0)
@@ -2427,7 +6442,7 @@ static void gstcAddFunction(aterm_appl OpId, const std::string msg, bool allow_d
   assert(gsIsOpId(OpId));
   const data::function_symbol f(OpId);
   const sort_expression_list domain=function_sort(f.sort()).domain();
-  aterm_appl Name = f.name();
+  core::identifier_string Name = f.name();
   const sort_expression Sort = f.sort();
 
   if (domain.size()==0)
@@ -2439,7 +6454,7 @@ static void gstcAddFunction(aterm_appl OpId, const std::string msg, bool allow_d
   }
   else // domain.size()>0
   {
-    std::map <aterm_appl,sort_expression_list>::const_iterator j=gssystem.functions.find(Name);
+    std::map <core::identifier_string,sort_expression_list>::const_iterator j=gssystem.functions.find(Name);
     if (j!=gssystem.functions.end())
     {
       aterm_list L= j->second;
@@ -2455,7 +6470,7 @@ static void gstcAddFunction(aterm_appl OpId, const std::string msg, bool allow_d
     }
   }
 
-  std::map <aterm_appl,sort_expression_list>::const_iterator j=context.functions.find(Name);
+  std::map <core::identifier_string,sort_expression_list>::const_iterator j=context.functions.find(Name);
 
   // the table context.functions contains a list of types for each
   // function name. We need to check if there is already such a type
@@ -2484,10 +6499,10 @@ static void gstcAddSystemConstant(aterm_appl OpId)
   //Pre: OpId is an OpId
   // append the Type to the entry of the Name of the OpId in gssystem.constants table
   assert(gsIsOpId(OpId));
-  aterm_appl OpIdName = data::function_symbol(OpId).name();
+  core::identifier_string OpIdName = data::function_symbol(OpId).name();
   const sort_expression Type = data::function_symbol(OpId).sort();
 
-  std::map<aterm_appl,sort_expression_list>::const_iterator i=gssystem.constants.find(OpIdName);
+  std::map<core::identifier_string,sort_expression_list>::const_iterator i=gssystem.constants.find(OpIdName);
 
   sort_expression_list Types;
   if (i!=gssystem.constants.end())
@@ -2503,11 +6518,11 @@ static void gstcAddSystemFunction(aterm_appl OpId)
   //Pre: OpId is an OpId
   // append the Type to the entry of the Name of the OpId in gssystem.functions table
   assert(gsIsOpId(OpId));
-  aterm_appl OpIdName = data::function_symbol(OpId).name();
+  core::identifier_string OpIdName = data::function_symbol(OpId).name();
   aterm_appl Type = data::function_symbol(OpId).sort();
   assert(gsIsSortArrow(Type));
 
-  const std::map <aterm_appl,sort_expression_list>::const_iterator j=gssystem.functions.find(OpIdName);
+  const std::map <core::identifier_string,sort_expression_list>::const_iterator j=gssystem.functions.find(OpIdName);
 
   sort_expression_list Types;
   if (j!=gssystem.functions.end())
@@ -2539,12 +6554,12 @@ static bool gstcVarsUnique(aterm_list VarDecls)
   return Result;
 }
 
-static void gstcAddVars2Table(std::map<aterm_appl,sort_expression> &Vars, aterm_list VarDecls, std::map<aterm_appl,sort_expression> &result)
+static void gstcAddVars2Table(std::map<core::identifier_string,sort_expression> &Vars, aterm_list VarDecls, std::map<core::identifier_string,sort_expression> &result)
 {
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
   {
     aterm_appl VarDecl=ATAgetFirst(VarDecls);
-    aterm_appl VarName=aterm_cast<aterm_appl>(VarDecl[0]);
+    core::identifier_string VarName=aterm_cast<core::identifier_string>(VarDecl[0]);
     aterm_appl VarType=aterm_cast<aterm_appl>(VarDecl[1]);
     //test the type
     gstcIsSortExprDeclared(VarType);
@@ -2556,12 +6571,14 @@ static void gstcAddVars2Table(std::map<aterm_appl,sort_expression> &Vars, aterm_
   result=Vars;
 }
 
-static std::map<aterm_appl,sort_expression> gstcRemoveVars(std::map<aterm_appl,sort_expression> &Vars, aterm_list VarDecls)
+static std::map<core::identifier_string,sort_expression> gstcRemoveVars(
+                      std::map<core::identifier_string,sort_expression> &Vars, 
+                      variable_list VarDecls)
 {
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
   {
     aterm_appl VarDecl=ATAgetFirst(VarDecls);
-    aterm_appl VarName=aterm_cast<aterm_appl>(VarDecl[0]);
+    core::identifier_string VarName=aterm_cast<core::identifier_string>(VarDecl[0]);
 
     Vars.erase(VarName);
   }
@@ -2569,17 +6586,17 @@ static std::map<aterm_appl,sort_expression> gstcRemoveVars(std::map<aterm_appl,s
   return Vars;
 }
 
-static aterm_appl gstcRewrActProc(const std::map<aterm_appl,sort_expression> &Vars, aterm_appl ProcTerm, bool is_pbes)
+static aterm_appl gstcRewrActProc(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ProcTerm, bool is_pbes)
 {
   aterm_appl Result;
-  aterm_appl Name(ProcTerm[0]);
+  core::identifier_string Name(ProcTerm[0]);
   term_list<sort_expression_list> ParList;
 
   bool action=false;
 
   if (!is_pbes)
   {
-    const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.actions.find(Name);
+    const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.actions.find(Name);
 
     if (j!=context.actions.end())
     {
@@ -2588,7 +6605,7 @@ static aterm_appl gstcRewrActProc(const std::map<aterm_appl,sort_expression> &Va
     }
     else
     {
-      const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.processes.find(Name);
+      const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.processes.find(Name);
       if (j!=context.processes.end()) 
       {
         ParList=j->second;
@@ -2602,7 +6619,7 @@ static aterm_appl gstcRewrActProc(const std::map<aterm_appl,sort_expression> &Va
   }
   else
   {
-    const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.PBs.find(Name);
+    const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.PBs.find(Name);
     if (j==context.PBs.end())
     {
       throw mcrl2::runtime_error("propositional variable " + pp(Name) + " not declared");
@@ -2735,7 +6752,7 @@ static inline aterm_appl gstcMakeActionOrProc(bool action, aterm_appl Name,
          :gsMakeProcess(gsMakeProcVarId(Name,FormParList),FactParList);
 }
 
-static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_expression> &Vars, aterm_appl ProcTerm)
+static aterm_appl gstcTraverseActProcVarConstP(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ProcTerm)
 {
   size_t n = ProcTerm.size();
   if (n==0)
@@ -2747,8 +6764,8 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
   if (gsIsIdAssignment(ProcTerm))
   {
     mCRL2log(debug) << "typechecking a process call with short-hand assignments " << ProcTerm << "" << std::endl;
-    aterm_appl Name=aterm_cast<aterm_appl>(ProcTerm[0]);
-    const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.processes.find(Name);
+    core::identifier_string Name=aterm_cast<core::identifier_string>(ProcTerm[0]);
+    const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.processes.find(Name);
     
     if (j==context.processes.end())
     {
@@ -2761,7 +6778,6 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<aterm_appl,sort_ex
     const aterm_list &al=aterm_cast<aterm_list>(ProcTerm[1]);
     for (aterm_list::const_iterator l=al.begin(); l!=al.end(); ++l)
     {
-std::cerr << "Assignment " << *l << "\n";
       const aterm_appl a= aterm_cast<aterm_appl>(*l);
       const std::map <aterm_appl,aterm_appl>::const_iterator i=As.find(aterm_cast<aterm_appl>(a[0]));
       if (i!=As.end()) // An assignment of the shape x:=t already exists, this is not OK.
@@ -2893,7 +6909,7 @@ std::cerr << "Assignment " << *l << "\n";
     if (gsIsBlock(ProcTerm) || gsIsHide(ProcTerm))
     {
       const std::string msg=gsIsBlock(ProcTerm)?"Blocking":"Hiding";
-      aterm_list ActList=aterm_cast<aterm_list>(ProcTerm[0]);
+      core::identifier_string_list ActList=aterm_cast<core::identifier_string_list>(ProcTerm[0]);
       if (ActList.empty())
       {
         mCRL2log(warning) << msg << " empty set of actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
@@ -2902,7 +6918,7 @@ std::cerr << "Assignment " << *l << "\n";
       std::set<aterm_appl> Acts;
       for (; !ActList.empty(); ActList=ActList.tail())
       {
-        aterm_appl Act=ATAgetFirst(ActList);
+        core::identifier_string Act=ActList.front();
 
         //Actions must be declared
         if (context.actions.count(Act)==0)
@@ -2931,7 +6947,7 @@ std::cerr << "Assignment " << *l << "\n";
       for (; !RenList.empty(); RenList=RenList.tail())
       {
         aterm_appl Ren=ATAgetFirst(RenList);
-        aterm_appl ActFrom=aterm_cast<aterm_appl>(Ren[0]);
+        core::identifier_string ActFrom=aterm_cast<core::identifier_string>(Ren[0]);
         aterm_appl ActTo=aterm_cast<aterm_appl>(Ren[1]);
 
         if (ActFrom==ActTo)
@@ -2941,13 +6957,13 @@ std::cerr << "Assignment " << *l << "\n";
 
         //Actions must be declared and of the same types
         aterm_list TypesFrom,TypesTo;
-        const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j_from=context.actions.find(ActFrom);
+        const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j_from=context.actions.find(ActFrom);
         if (j_from==context.actions.end())
         {
           throw mcrl2::runtime_error("renaming an undefined action " + pp(ActFrom) + " (typechecking " + pp(ProcTerm) + ")");
         }
         TypesFrom=j_from->second;
-        const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j_to=context.actions.find(ActFrom);
+        const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j_to=context.actions.find(ActFrom);
         if (j_to==context.actions.end())
         {
           throw mcrl2::runtime_error("renaming into an undefined action " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
@@ -2986,7 +7002,7 @@ std::cerr << "Assignment " << *l << "\n";
           aterm_list MActFrom=aterm_cast<aterm_list>(aterm_cast<aterm_appl>(Comm[0])[0]);
           aterm_list BackupMActFrom=MActFrom;
           assert(!MActFrom.empty());
-          aterm_appl ActTo=aterm_cast<aterm_appl>(Comm[1]);
+          core::identifier_string ActTo=aterm_cast<core::identifier_string>(Comm[1]);
 
           if (MActFrom.size()==1)
           {
@@ -2998,7 +7014,7 @@ std::cerr << "Assignment " << *l << "\n";
 
           if (!gsIsNil(ActTo))
           {
-            const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.actions.find(ActTo);
+            const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.actions.find(ActTo);
             if (j==context.actions.end())
             {
               throw mcrl2::runtime_error("synchronizing to an undefined action " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
@@ -3008,8 +7024,8 @@ std::cerr << "Assignment " << *l << "\n";
 
           for (; !MActFrom.empty(); MActFrom=MActFrom.tail())
           {
-            aterm_appl Act=ATAgetFirst(MActFrom);
-            const std::map<aterm_appl,term_list<sort_expression_list> >::const_iterator j=context.actions.find(Act);
+            core::identifier_string Act=aterm_cast<core::identifier_string>(MActFrom.front());
+            const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=context.actions.find(Act);
             term_list<sort_expression_list> Types;
             if (j==context.actions.end())
             {
@@ -3071,7 +7087,7 @@ std::cerr << "Assignment " << *l << "\n";
           //Actions must be declared
           for (; !MAct.empty(); MAct=MAct.tail())
           {
-            aterm_appl Act=ATAgetFirst(MAct);
+            core::identifier_string Act=aterm_cast<core::identifier_string>(MAct.front());
             if (context.actions.count(Act)==0)
             {
               throw mcrl2::runtime_error("allowing an undefined action " + pp(Act) + " in (multi)action " + pp(MAct) + " (typechecking " + pp(ProcTerm) + ")");
@@ -3147,10 +7163,10 @@ std::cerr << "Assignment " << *l << "\n";
 
   if (gsIsSum(ProcTerm))
   {
-    std::map<aterm_appl,sort_expression> CopyVars;
+    std::map<core::identifier_string,sort_expression> CopyVars;
     CopyVars=Vars;
 
-    std::map<aterm_appl,sort_expression> NewVars;
+    std::map<core::identifier_string,sort_expression> NewVars;
     try 
     {
       gstcAddVars2Table(CopyVars,aterm_cast<aterm_list>(ProcTerm[0]),NewVars);
@@ -3174,7 +7190,7 @@ std::cerr << "Assignment " << *l << "\n";
   throw mcrl2::runtime_error("Internal error. Process " + pp(ProcTerm) + " fails to match known processes.");
 }
 
-static aterm_appl gstcTraversePBESVarConstPB(const std::map<aterm_appl,sort_expression> &Vars, aterm_appl PBESTerm)
+static aterm_appl gstcTraversePBESVarConstPB(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl PBESTerm)
 {
 
   if (gsIsDataExpr(PBESTerm))
@@ -3204,9 +7220,9 @@ static aterm_appl gstcTraversePBESVarConstPB(const std::map<aterm_appl,sort_expr
 
   if (gsIsPBESForall(PBESTerm)||gsIsPBESExists(PBESTerm))
   {
-    std::map<aterm_appl,sort_expression> CopyVars(Vars);
+    std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
-    std::map<aterm_appl,sort_expression> NewVars;
+    std::map<core::identifier_string,sort_expression> NewVars;
     try
     {
       gstcAddVars2Table(CopyVars,aterm_cast<aterm_list>(PBESTerm[0]),NewVars);
@@ -3236,11 +7252,11 @@ static aterm_appl gstcTraversePBESVarConstPB(const std::map<aterm_appl,sort_expr
 }
 
 static sort_expression gstcTraverseVarConsTypeD(
-  const std::map<aterm_appl,sort_expression> &DeclaredVars,
-  const std::map<aterm_appl,sort_expression> &AllowedVars,
+  const std::map<core::identifier_string,sort_expression> &DeclaredVars,
+  const std::map<core::identifier_string,sort_expression> &AllowedVars,
   data_expression &DataTerm,
   sort_expression PosType,
-  std::map<aterm_appl,sort_expression> &FreeVars,
+  std::map<core::identifier_string,sort_expression> &FreeVars,
   const bool strictly_ambiguous,
   const bool warn_upcasting,
   const bool print_cast_error)
@@ -3265,8 +7281,8 @@ static sort_expression gstcTraverseVarConsTypeD(
     }
 
     aterm_appl BindingOperator = aterm_cast<aterm_appl>((DataTerm)[0]);
-    std::map<aterm_appl,sort_expression> CopyAllowedVars(AllowedVars);
-    std::map<aterm_appl,sort_expression> CopyDeclaredVars(DeclaredVars);
+    std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
+    std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
 
     if (gsIsSetBagComp(BindingOperator) ||
         gsIsSetComp(BindingOperator) ||
@@ -3283,11 +7299,11 @@ static sort_expression gstcTraverseVarConsTypeD(
       }
 
       aterm_appl NewType=aterm_cast<aterm_appl>(VarDecl[1]);
-      aterm_list VarList=make_list<aterm>(VarDecl);
-      std::map<aterm_appl,sort_expression> NewAllowedVars;
+      variable_list VarList=make_list<variable>(VarDecl);
+      std::map<core::identifier_string,sort_expression> NewAllowedVars;
       gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
       
-      std::map<aterm_appl,sort_expression> NewDeclaredVars;
+      std::map<core::identifier_string,sort_expression> NewDeclaredVars;
       gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
       
       data_expression Data((DataTerm)[2]);
@@ -3339,11 +7355,11 @@ static sort_expression gstcTraverseVarConsTypeD(
 
     if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator))
     {
-      aterm_list VarList=aterm_cast<aterm_list>((DataTerm)[1]);
-      std::map<aterm_appl,sort_expression> NewAllowedVars;
+      variable_list VarList=aterm_cast<variable_list>((DataTerm)[1]);
+      std::map<core::identifier_string,sort_expression> NewAllowedVars;
       gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
       
-      std::map<aterm_appl,sort_expression> NewDeclaredVars;
+      std::map<core::identifier_string,sort_expression> NewDeclaredVars;
       gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
 
       data_expression Data=aterm_cast<aterm_appl>((DataTerm)[2]);
@@ -3369,11 +7385,11 @@ static sort_expression gstcTraverseVarConsTypeD(
 
     if (gsIsLambda(BindingOperator))
     {
-      aterm_list VarList=aterm_cast<aterm_list>((DataTerm)[1]);
-      std::map<aterm_appl,sort_expression> NewAllowedVars;
+      variable_list VarList=aterm_cast<variable_list>((DataTerm)[1]);
+      std::map<core::identifier_string,sort_expression> NewAllowedVars;
       gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
       
-      std::map<aterm_appl,sort_expression> NewDeclaredVars;
+      std::map<core::identifier_string,sort_expression> NewDeclaredVars;
       gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
       
       aterm_list ArgTypes=gstcGetVarTypes(VarList);
@@ -3404,7 +7420,7 @@ static sort_expression gstcTraverseVarConsTypeD(
 
   if (is_where_clause(DataTerm))
   {
-    aterm_list WhereVarList;
+    variable_list WhereVarList;
     aterm_list NewWhereList;
     for (aterm_list WhereList=aterm_cast<aterm_list>((DataTerm)[1]); !WhereList.empty(); WhereList=WhereList.tail())
     {
@@ -3428,14 +7444,14 @@ static sort_expression gstcTraverseVarConsTypeD(
     }
     NewWhereList=reverse(NewWhereList);
 
-    std::map<aterm_appl,sort_expression> CopyAllowedVars(AllowedVars);
-    std::map<aterm_appl,sort_expression> CopyDeclaredVars(DeclaredVars);
+    std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
+    std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
 
-    aterm_list VarList=reverse(WhereVarList);
-    std::map<aterm_appl,sort_expression> NewAllowedVars;
+    variable_list VarList=reverse(WhereVarList);
+    std::map<core::identifier_string,sort_expression> NewAllowedVars;
     gstcAddVars2Table(CopyAllowedVars,VarList,NewAllowedVars);
     
-    std::map<aterm_appl,sort_expression> NewDeclaredVars;
+    std::map<core::identifier_string,sort_expression> NewDeclaredVars;
     gstcAddVars2Table(CopyDeclaredVars,VarList,NewDeclaredVars);
     
     data_expression Data=aterm_cast<aterm_appl>((DataTerm)[0]);
@@ -3695,7 +7711,7 @@ static sort_expression gstcTraverseVarConsTypeD(
         return Type;
       }
     }
-    aterm_list NewArgumentTypes;
+    sort_expression_list NewArgumentTypes;
     aterm_list NewArguments;
 
     for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
@@ -3707,7 +7723,7 @@ static sort_expression gstcTraverseVarConsTypeD(
       NewArgumentTypes.push_front(Type);
     }
     aterm_list Arguments=reverse(NewArguments);
-    aterm_list ArgumentTypes=reverse(NewArgumentTypes);
+    sort_expression_list ArgumentTypes=reverse(NewArgumentTypes);
 
     //function
     data_expression Data=appl.head();
@@ -3728,7 +7744,7 @@ static sort_expression gstcTraverseVarConsTypeD(
       }
       else if (gsIsOpId(Data)||gsIsDataVarId(Data))
       {
-        gstcErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes);
+        gstcErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes,e.what());
       }
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " + 
                             pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
@@ -3752,7 +7768,7 @@ static sort_expression gstcTraverseVarConsTypeD(
                             + pp(DataTerm) + ")");
       }
       //arguments again
-      aterm_list NewArgumentTypes;
+      sort_expression_list NewArgumentTypes;
       aterm_list NewArguments;
       for (; !Arguments.empty(); Arguments=Arguments.tail(),
            ArgumentTypes=ArgumentTypes.tail(),NeededArgumentTypes=NeededArgumentTypes.tail())
@@ -3776,7 +7792,7 @@ static sort_expression gstcTraverseVarConsTypeD(
         if (!gstcEqTypesA(NeededType,Type))
         {
           mCRL2log(debug) << "Doing again on [1] " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
-          aterm_appl NewArgType;
+          sort_expression NewArgType;
           if (!gstcTypeMatchA(NeededType,Type,NewArgType))
           {
             if (!gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type),NewArgType))
@@ -3820,7 +7836,7 @@ static sort_expression gstcTraverseVarConsTypeD(
       }
       else
       {
-        gstcErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes);
+        gstcErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes,e.what());
       }
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " + 
                    pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
@@ -3833,7 +7849,7 @@ static sort_expression gstcTraverseVarConsTypeD(
     if (gsIsSortArrow(gstcUnwindType(NewType)))
     {
       aterm_list NeededArgumentTypes=aterm_cast<aterm_list>(gstcUnwindType(NewType)[0]);
-      aterm_list NewArgumentTypes;
+      sort_expression_list NewArgumentTypes;
       aterm_list NewArguments;
       for (; !Arguments.empty(); Arguments=Arguments.tail(),
            ArgumentTypes=ArgumentTypes.tail(),NeededArgumentTypes=NeededArgumentTypes.tail())
@@ -3856,7 +7872,7 @@ static sort_expression gstcTraverseVarConsTypeD(
         if (!gstcEqTypesA(NeededType,Type))
         {
           mCRL2log(debug) << "Doing again on [2] " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
-          aterm_appl NewArgType;
+          sort_expression NewArgType;
           if (!gstcTypeMatchA(NeededType,Type,NewArgType))
           {
             if (!gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type),NewArgType))
@@ -3906,7 +7922,7 @@ static sort_expression gstcTraverseVarConsTypeD(
 
   if (gsIsId(DataTerm)||gsIsOpId(DataTerm)||gsIsDataVarId(DataTerm))
   {
-    aterm_appl Name=aterm_cast<aterm_appl>((DataTerm)[0]);
+    core::identifier_string Name=aterm_cast<core::identifier_string>((DataTerm)[0]);
     if (gsIsNumericString(gsATermAppl2String(Name)))
     {
       aterm_appl Sort=sort_int::int_();
@@ -3939,7 +7955,7 @@ static sort_expression gstcTraverseVarConsTypeD(
       return CastedNewType;
     }
 
-    std::map<aterm_appl,sort_expression>::const_iterator it=DeclaredVars.find(Name);
+    std::map<core::identifier_string,sort_expression>::const_iterator it=DeclaredVars.find(Name);
     if (it!=DeclaredVars.end())
     {
       sort_expression Type=it->second;
@@ -3984,7 +8000,7 @@ static sort_expression gstcTraverseVarConsTypeD(
       return Type;
     }
 
-    std::map<aterm_appl,sort_expression>::const_iterator i=context.constants.find(Name);
+    std::map<core::identifier_string,sort_expression>::const_iterator i=context.constants.find(Name);
     if (i!=context.constants.end())
     {
       sort_expression Type=i->second;
@@ -4010,7 +8026,7 @@ static sort_expression gstcTraverseVarConsTypeD(
       }
     }
 
-    std::map<aterm_appl,sort_expression_list>::const_iterator j=gssystem.constants.find(Name);
+    std::map<core::identifier_string,sort_expression_list>::const_iterator j=gssystem.constants.find(Name);
     if (j!=gssystem.constants.end())
     {
       sort_expression_list ParList=j->second;
@@ -4043,8 +8059,8 @@ static sort_expression gstcTraverseVarConsTypeD(
       }
     }
 
-    const std::map <aterm_appl,sort_expression_list>::const_iterator j_context=context.functions.find(Name);
-    const std::map <aterm_appl,sort_expression_list>::const_iterator j_gssystem=gssystem.functions.find(Name);
+    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=context.functions.find(Name);
+    const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=gssystem.functions.find(Name);
 
     sort_expression_list ParList;
     if (j_context==context.functions.end())   
@@ -4091,11 +8107,11 @@ static sort_expression gstcTraverseVarConsTypeD(
 }
 
 static sort_expression gstcTraverseVarConsTypeDN(
-  const std::map<aterm_appl,sort_expression> &DeclaredVars,
-  const std::map<aterm_appl,sort_expression> &AllowedVars,
+  const std::map<core::identifier_string,sort_expression> &DeclaredVars,
+  const std::map<core::identifier_string,sort_expression> &AllowedVars,
   data_expression &DataTerm,
   sort_expression PosType,
-  std::map<aterm_appl,sort_expression> &FreeVars,
+  std::map<core::identifier_string,sort_expression> &FreeVars,
   const bool strictly_ambiguous,
   const size_t nFactPars,
   const bool warn_upcasting,
@@ -4106,11 +8122,11 @@ static sort_expression gstcTraverseVarConsTypeDN(
                   << " with PosType " << pp(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
   if (gsIsId(DataTerm)||gsIsOpId(DataTerm))
   {
-    aterm_appl Name=aterm_cast<aterm_appl>((DataTerm)[0]);
+    core::identifier_string Name=aterm_cast<core::identifier_string>((DataTerm)[0]);
     bool variable_=false;
     bool TypeADefined=false;
     sort_expression TypeA;
-    std::map<aterm_appl,sort_expression>::const_iterator i=DeclaredVars.find(Name);
+    std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.find(Name);
     if (i!=DeclaredVars.end())
     {
       TypeA=i->second;
@@ -4136,7 +8152,7 @@ static sort_expression gstcTraverseVarConsTypeDN(
     sort_expression_list ParList;
     if (nFactPars==0)
     {
-      std::map<aterm_appl,sort_expression>::const_iterator i=DeclaredVars.find(Name);
+      std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.find(Name);
       if (i!=DeclaredVars.end()) 
       {
         TypeA=i->second;
@@ -4152,7 +8168,7 @@ static sort_expression gstcTraverseVarConsTypeDN(
       }
       else 
       {
-        std::map<aterm_appl,sort_expression>::const_iterator i=context.constants.find(Name);
+        std::map<core::identifier_string,sort_expression>::const_iterator i=context.constants.find(Name);
         if (i!=context.constants.end())
         {
           TypeA=i->second;
@@ -4168,7 +8184,7 @@ static sort_expression gstcTraverseVarConsTypeDN(
         }
         else
         {
-          std::map<aterm_appl,sort_expression_list>::const_iterator j=gssystem.constants.find(Name);
+          std::map<core::identifier_string,sort_expression_list>::const_iterator j=gssystem.constants.find(Name);
           
           if (j!=gssystem.constants.end())
           {
@@ -4199,8 +8215,8 @@ static sort_expression gstcTraverseVarConsTypeDN(
     }
     else
     {
-      const std::map <aterm_appl,sort_expression_list>::const_iterator j_context=context.functions.find(Name);
-      const std::map <aterm_appl,sort_expression_list>::const_iterator j_gssystem=gssystem.functions.find(Name);
+      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_context=context.functions.find(Name);
+      const std::map <core::identifier_string,sort_expression_list>::const_iterator j_gssystem=gssystem.functions.find(Name);
 
       if (j_context==context.functions.end())   
       {
@@ -4618,11 +8634,6 @@ static aterm_list gstcGetNotInferredList(aterm_list TypeListList)
   aterm_list Result;
   size_t nFormPars=((aterm_list)TypeListList.front()).size();
   std::vector<aterm_list> Pars(nFormPars);
-  /* if (nFormPars > 0)
-  {
-    Pars = (aterm_list*) malloc(nFormPars*sizeof(aterm_list));
-  } */
-  //DECLA(aterm_list,Pars,nFormPars);
   for (size_t i=0; i<nFormPars; i++)
   {
     Pars[i]=aterm_list();
@@ -5125,7 +9136,7 @@ static aterm_appl gstcUnwindType(aterm_appl Type)
 
   if (gsIsSortId(Type))
   {
-    std::map<aterm_appl,sort_expression>::const_iterator i=context.defined_sorts.find(aterm_cast<aterm_appl>(Type[0]));
+    std::map<core::identifier_string,sort_expression>::const_iterator i=context.defined_sorts.find(aterm_cast<core::identifier_string>(Type[0]));
     if (i==context.defined_sorts.end())
     {
       return Type;
@@ -5302,7 +9313,7 @@ static bool gstcUnArrowProd(aterm_list ArgTypes, aterm_appl PosType, aterm_appl 
     return true;
   }
 
-  aterm_list NewPosTypes;
+  sort_expression_list NewPosTypes;
   if (gsIsSortsPossible(PosType))
   {
     for (aterm_list PosTypes=aterm_cast<aterm_list>(PosType[0]); !PosTypes.empty(); PosTypes=PosTypes.tail())
@@ -5338,12 +9349,12 @@ static bool gstcUnArrowProd(aterm_list ArgTypes, aterm_appl PosType, aterm_appl 
   return false;
 }
 
-static aterm_list gstcGetVarTypes(aterm_list VarDecls)
+static sort_expression_list gstcGetVarTypes(variable_list VarDecls)
 {
-  aterm_list Result;
-  for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
+  sort_expression_list Result;
+  for (variable_list::const_iterator i=VarDecls.begin(); i!=VarDecls.end(); ++i)
   {
-    Result.push_front(aterm_cast<aterm_appl>(ATAgetFirst(VarDecls)[1]));
+    Result.push_front(i->sort());
   }
   return reverse(Result);
 }
@@ -5421,19 +9432,19 @@ static bool gstcHasUnknown(aterm_appl Type)
   return true;
 }
 
-static bool gstcIsNumericType(aterm_appl Type)
+static bool gstcIsNumericType(const sort_expression &Type)
 {
   //returns true if Type is Bool,Pos,Nat,Int or Real
   //otherwise return fase
-  if (data::is_unknown_sort(data::sort_expression(Type)))
+  if (data::is_unknown_sort(Type))
   {
     return false;
   }
-  return (bool)(sort_bool::is_bool(sort_expression(Type))||
-                  sort_pos::is_pos(sort_expression(Type))||
-                  sort_nat::is_nat(sort_expression(Type))||
-                  sort_int::is_int(sort_expression(Type))||
-                  sort_real::is_real(sort_expression(Type)));
+  return (bool)(sort_bool::is_bool(Type)||
+                  sort_pos::is_pos(Type)||
+                  sort_nat::is_nat(Type)||
+                  sort_int::is_int(Type)||
+                  sort_real::is_real(Type));
 }
 
 static bool gstcMaximumType(const aterm_appl &Type1, const aterm_appl &Type2, aterm_appl &result)
@@ -6276,13 +10287,13 @@ static bool gstcMatchFuncUpdate(const aterm_appl &type, aterm_appl &result)
   return true;
 }
 
-static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Arguments, aterm_list ArgumentTypes)
+static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Arguments, aterm_list ArgumentTypes,std::string previous_reason)
 {
   //prints more information about impossible cast.
   //at this point we know that Arguments cannot be cast to CandidateType. We need to find out why and print.
   assert(Arguments.size()==ArgumentTypes.size());
 
-  aterm_list CandidateList;
+  /* aterm_list CandidateList;
   if (gsIsSortsPossible(CandidateType))
   {
     CandidateList=aterm_cast<aterm_list>(CandidateType[0]);
@@ -6309,7 +10320,7 @@ static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Argument
   CandidateList=aterm_list();
   while (true)
   {
-    aterm_list NewCurrentCandidateList;
+    sort_expression_list NewCurrentCandidateList;
     aterm_list NewList;
     for (aterm_list l=CurrentCandidateList; !l.empty(); l=l.tail())
     {
@@ -6359,18 +10370,18 @@ static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Argument
         // Sort=multiple_possible_sorts(atermpp::aterm_list(PosTypes));
         Sort=multiple_possible_sorts(sort_expression_list(PosTypes));
       }
-      throw mcrl2::runtime_error("this is, for instance, because cannot cast " + pp(ATAgetFirst(l)) + " to type " + pp(Sort));
-      break;
+      throw mcrl2::runtime_error(previous_reason + "\nthis is, for instance, because cannot cast " + pp(ATAgetFirst(l)) + " to type " + pp(Sort));
     }
-  }
+  } */
+  throw mcrl2::runtime_error(previous_reason + "\nNo attempt is made to explain this further");
 }
 
 //===================================
 // Type checking modal formulas
 //===================================
 
-static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression> &Vars, 
-                                       const std::map<aterm_appl,sort_expression_list> &StateVars, 
+static aterm_appl gstcTraverseStateFrm(const std::map<core::identifier_string,sort_expression> &Vars, 
+                                       const std::map<core::identifier_string,sort_expression_list> &StateVars, 
                                        aterm_appl StateFrm)
 {
   mCRL2log(debug) << "gstcTraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
@@ -6395,10 +10406,10 @@ static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression
 
   if (gsIsStateForall(StateFrm) || gsIsStateExists(StateFrm))
   {
-    std::map<aterm_appl,sort_expression> CopyVars(Vars);
+    std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     aterm_list VarList=aterm_cast<aterm_list>(StateFrm[0]);
-    std::map<aterm_appl,sort_expression> NewVars;
+    std::map<core::identifier_string,sort_expression> NewVars;
     gstcAddVars2Table(CopyVars,VarList,NewVars);
 
     aterm_appl NewArg2=gstcTraverseStateFrm(NewVars,StateVars,aterm_cast<aterm_appl>(StateFrm[1]));
@@ -6436,8 +10447,8 @@ static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression
 
   if (gsIsStateVar(StateFrm))
   {
-    aterm_appl StateVarName=aterm_cast<aterm_appl>(StateFrm[0]);
-    std::map<aterm_appl,sort_expression_list>::const_iterator i=StateVars.find(StateVarName);
+    core::identifier_string StateVarName=aterm_cast<core::identifier_string>(StateFrm[0]);
+    std::map<core::identifier_string,sort_expression_list>::const_iterator i=StateVars.find(StateVarName);
     if (i==StateVars.end())
     {
       throw mcrl2::runtime_error("undefined state variable " + pp(StateVarName) + " (typechecking state formula " + pp(StateFrm) + ")");
@@ -6489,17 +10500,17 @@ static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression
 
   if (gsIsStateNu(StateFrm) || gsIsStateMu(StateFrm))
   {
-    std::map<aterm_appl,sort_expression_list> CopyStateVars(StateVars);
+    std::map<core::identifier_string,sort_expression_list> CopyStateVars(StateVars);
 
     // Make the new state variable:
-    std::map<aterm_appl,sort_expression> FormPars;
+    std::map<core::identifier_string,sort_expression> FormPars;
     aterm_list r;
     sort_expression_list t;
     for (aterm_list l=aterm_cast<aterm_list>(StateFrm[1]); !l.empty(); l=l.tail())
     {
       aterm_appl o=ATAgetFirst(l);
 
-      aterm_appl VarName=aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(o[0])[0]);
+      core::identifier_string VarName=aterm_cast<core::identifier_string>(aterm_cast<aterm_appl>(o[0])[0]);
       if (FormPars.count(VarName)>0)
       {
         throw mcrl2::runtime_error("non-unique formal parameter " + pp(VarName) + " (typechecking " + pp(StateFrm) + ")");
@@ -6547,11 +10558,11 @@ static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression
     }
 
     StateFrm=StateFrm.set_argument(reverse(r),1);
-    std::map<aterm_appl,sort_expression> CopyVars(Vars);
+    std::map<core::identifier_string,sort_expression> CopyVars(Vars);
     CopyVars.insert(FormPars.begin(),FormPars.end());
     
 
-    CopyStateVars[aterm_cast<aterm_appl>(StateFrm[0])]=reverse(t);
+    CopyStateVars[aterm_cast<core::identifier_string>(StateFrm[0])]=reverse(t);
     
     aterm_appl NewArg;
     try
@@ -6575,7 +10586,7 @@ static aterm_appl gstcTraverseStateFrm(const std::map<aterm_appl,sort_expression
   throw mcrl2::runtime_error("Internal error. The state formula " + pp(StateFrm) + " fails to match any known form in typechecking case analysis");
 }
 
-static aterm_appl gstcTraverseRegFrm(const std::map<aterm_appl,sort_expression> &Vars, aterm_appl RegFrm)
+static aterm_appl gstcTraverseRegFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl RegFrm)
 {
   mCRL2log(debug) << "gstcTraverseRegFrm: " + pp(RegFrm) + "" << std::endl;
   if (gsIsRegNil(RegFrm))
@@ -6604,7 +10615,7 @@ static aterm_appl gstcTraverseRegFrm(const std::map<aterm_appl,sort_expression> 
   throw mcrl2::runtime_error("Internal error. The regularformula " + pp(RegFrm) + " fails to match any known form in typechecking case analysis");
 }
 
-static aterm_appl gstcTraverseActFrm(const std::map<aterm_appl,sort_expression> &Vars, aterm_appl ActFrm)
+static aterm_appl gstcTraverseActFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ActFrm)
 {
   mCRL2log(debug) << "gstcTraverseActFrm: " + pp(ActFrm) + "" << std::endl;
 
@@ -6628,10 +10639,10 @@ static aterm_appl gstcTraverseActFrm(const std::map<aterm_appl,sort_expression> 
 
   if (gsIsActForall(ActFrm) || gsIsActExists(ActFrm))
   {
-    std::map<aterm_appl,sort_expression> CopyVars(Vars);
+    std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
     aterm_list VarList=aterm_cast<aterm_list>(ActFrm[0]);
-    std::map<aterm_appl,sort_expression> NewVars;
+    std::map<core::identifier_string,sort_expression> NewVars;
     gstcAddVars2Table(CopyVars,VarList,NewVars);
     
     aterm_appl NewArg2=gstcTraverseActFrm(NewVars,aterm_cast<aterm_appl>(ActFrm[1]));
