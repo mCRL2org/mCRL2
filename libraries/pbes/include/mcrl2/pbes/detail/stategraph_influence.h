@@ -38,7 +38,7 @@ namespace detail {
 class stategraph_influence_graph_algorithm
 {
   public:
-    stategraph_influence_graph_algorithm(stategraph_pbes& p)
+    stategraph_influence_graph_algorithm(const stategraph_pbes& p)
       : m_pbes(p)
     {}
 
@@ -93,7 +93,7 @@ class stategraph_influence_graph_algorithm
 
   protected:
     // the pbes that is considered
-    stategraph_pbes& m_pbes;
+    const stategraph_pbes& m_pbes;
 
     // vertices of the influence graph
     std::vector<influence_vertex> m_influence_vertices;

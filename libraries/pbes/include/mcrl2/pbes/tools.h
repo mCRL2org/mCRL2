@@ -118,7 +118,8 @@ void pbesstategraph(const std::string& input_filename,
                     bool simplify,
                     bool apply_to_original,
                     bool use_pfnf_variant,
-                    bool use_local_variant
+                    bool use_local_variant,
+                    bool print_influence_graph
                    );
 
 } // namespace pbes_system

@@ -247,7 +247,8 @@ void pbesstategraph(const std::string& input_filename,
                     bool simplify,
                     bool apply_to_original,
                     bool use_pfnf_variant,
-                    bool use_local_variant
+                    bool use_local_variant,
+                    bool print_influence_graph
                    )
 {
   pbes<> p;
@@ -266,11 +267,21 @@ void pbesstategraph(const std::string& input_filename,
     {
       pbes_system::detail::stategraph_graph_local_algorithm algorithm;
       algorithm.run(p);
+      if (print_influence_graph)
+      {
+        pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
+        ialgo.run();
+      }
     }
     else
     {
       pbes_system::detail::stategraph_reset_variables_algorithm algorithm;
       q = algorithm.run(p, simplify);
+      if (print_influence_graph)
+      {
+        pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
+        ialgo.run();
+      }
     }
   }
 

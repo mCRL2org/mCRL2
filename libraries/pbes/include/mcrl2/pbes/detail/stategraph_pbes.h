@@ -98,7 +98,6 @@ class stategraph_equation: public pbes_equation
       {
         data::mutable_map_substitution<> sigma;
         find_equality_conjuncts(i->second, m_parameters, sigma);
-        mCRL2log(log::debug, "stategraph") << "<source>" << "X = " << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << " sigma = " << sigma.to_string() << "\n";
         m_source.push_back(sigma);
       }
     }

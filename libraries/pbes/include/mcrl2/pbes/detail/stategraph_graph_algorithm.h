@@ -230,6 +230,8 @@ class stategraph_graph_algorithm
 
     void compute_control_flow_parameters()
     {
+      mCRL2log(log::debug, "stategraph") << "=== compute control flow parameters ===" << std::endl;
+
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       std::map<core::identifier_string, std::vector<data::variable> > V;
 
@@ -446,13 +448,14 @@ class stategraph_graph_algorithm
       m_pbes = stategraph_pbes(p);
       m_datar = data::rewriter(p.data());
       simplify(m_pbes);
-
-      stategraph_influence_graph_algorithm ialgo(m_pbes);
-      ialgo.run();
-
       compute_control_flow_parameters();
 
       mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
+    }
+
+    const stategraph_pbes& get_pbes() const
+    {
+      return m_pbes;
     }
 };
 
