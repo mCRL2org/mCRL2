@@ -166,7 +166,7 @@ class data_expression_checker:public sort_expression_checker
     bool UnBag(sort_expression PosType, sort_expression &result);
     bool UnList(sort_expression PosType, sort_expression &result);
     void ErrorMsgCannotCast(sort_expression CandidateType, data_expression_list Arguments, sort_expression_list ArgumentTypes,std::string previous_reason);
-    sort_expression UpCastNumericType(sort_expression NeededType, sort_expression Type, data_expression &Par, bool warn_upcasting);
+    sort_expression UpCastNumericType(sort_expression NeededType, sort_expression Type, data_expression &Par, bool warn_upcasting=false);
     bool VarsUnique(const variable_list &VarDecls);
 };
 
