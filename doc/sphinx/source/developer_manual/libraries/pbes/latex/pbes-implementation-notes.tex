@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Thursday, February 21, 2013 11:13:43}
+%TCIDATA{LastRevised=Tuesday, February 26, 2013 16:26:49}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -61,7 +61,6 @@
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 \input{include/tcilatex}
-
 \begin{document}
 
 \title{PBES Implementation Notes}
@@ -932,7 +931,7 @@ apply the following as a preprocessing step to data expressions:%
 
 In this section we describe two instantiation algorithms for PBESs.
 
-\subsection{\protect\bigskip Lazy algorithm}
+\subsection{Lazy algorithm}
 
 In this section we describe an implementation of the lazy instantiation
 algorithm \textsc{Pbes2besLazy} that uses instantiation to compute a BES. It
@@ -1622,7 +1621,7 @@ X_{i}\in V_{Even} \\
 \gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
 X_{i}\in V_{Odd}%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 \text{\textbf{return} }(W_{Even},W_{Odd})%
 \end{array}%
 \end{equation*}%
@@ -1636,14 +1635,14 @@ defined as%
 |\{X_{j}\in V\ |\ \mathsf{rank}(X_{j})=i\}| & \mathsf{if}\ i\text{ \textsf{%
 is odd}}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
 and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{Z}\rightarrow 
 \mathbb{N}^{d}$ is defined inductively as%
 \begin{equation*}
 \left\{ 
 \begin{array}{lll}
-\mathsf{inc}(\alpha ,-1) & = & \top  \\ 
+\mathsf{inc}(\alpha ,-1) & = & \top \\ 
 &  &  \\ 
 \mathsf{inc}(\alpha ,i) & = & \left\{ 
 \begin{array}{ll}
@@ -1652,12 +1651,12 @@ and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{Z}\rightarrow
 \lbrack \alpha _{0},\cdots ,\alpha _{i-1},\alpha _{i}+1,\alpha _{i+1},\cdots
 ,\alpha _{d}] & \text{\textsf{otherwise}}%
 \end{array}%
-\right. 
+\right.%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
-and the function $f:\mathbb{N}^{d}\times \mathbb{N}\rightarrow \mathbb{N}^{d}
-$ is defined as:%
+and the function $f:\mathbb{N}^{d}\times \mathbb{N}\rightarrow \mathbb{N}%
+^{d} $ is defined as:%
 \begin{equation*}
 f(X_{j},m)=\left\{ 
 \begin{array}{ll}
@@ -1666,7 +1665,7 @@ _{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ m\text{ is even} \\
 \mathsf{inc}([(\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
 _{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ m\text{ is odd}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
 and%
 \begin{equation*}
@@ -1681,7 +1680,7 @@ and $W_{Even}$ and $W_{Odd}$ are defined as%
 W_{Even} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}<\top \} \\ 
 W_{Odd} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}=\top \}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
 and the function $\mathsf{rank}$ is defined inductively as follows:%
 \begin{equation*}
@@ -1689,46 +1688,67 @@ and the function $\mathsf{rank}$ is defined inductively as follows:%
 \begin{array}{lll}
 \mathsf{rank}(X_{1}) & = & \left\{ 
 \begin{array}{ll}
-0 & \mathsf{if}\ \sigma _{1}=\nu  \\ 
-1 & \mathsf{if}\ \sigma _{1}=\mu 
+0 & \mathsf{if}\ \sigma _{1}=\nu \\ 
+1 & \mathsf{if}\ \sigma _{1}=\mu%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 \mathsf{rank}(X_{i+1}) & = & \left\{ 
 \begin{array}{ll}
 \mathsf{rank}(X_{i}) & \mathsf{if}\ \sigma _{i+1}=\sigma _{i} \\ 
 \mathsf{rank}(X_{i})+1 & \mathsf{if}\ \sigma _{i+1}\neq \sigma _{i}%
 \end{array}%
-\right. 
+\right.%
 \end{array}%
-\right. 
+\right.
 \end{equation*}
 
-\newpage 
+\newpage
 
 \section{Stategraph}
 
+We denote the number of predicate variable instances occurring in a
+predicate formula $\varphi $ by $\mathrm{npred}(\varphi )$. We assume that
+predicate variable instances in $\varphi $ are assigned a unique natural
+number between $1$ and $\mathrm{npred}(\varphi )$.
+
 \begin{definition}
-Let $\varphi $ be a predicate formula in which every predicate variable
-occurs at most once. Provided that $X\in occ(\varphi )$, the guard of $X$ in 
-$\varphi $, denoted $guard^{X}(\varphi )$, is defined inductively as follows:
+Let $\varphi $ be a predicate formula and let $i$ be between $1$ and $%
+\mathrm{npred}(\varphi )$. The functions $\mathrm{pred}(\varphi )$, $\mathrm{%
+data}(\varphi ,i)$ and $\mathrm{PVI}(\varphi ,i)$ are such that the
+predicate variable instance $\mathrm{PVI}(\varphi ,i)$ is the $i^{th}$
+predicate variable instance in $\varphi $, syntactically present as $\mathrm{%
+pred}(\varphi )(\mathrm{data}(\varphi ,i))$. Let $\psi $ be a predicate
+formula. We write $\varphi \lbrack i\rightarrow \psi ]$ to indicate that the
+predicate variable instance at position $i$ is replaced syntactically by $%
+\psi $ in $\varphi $.
+\end{definition}
+
+\begin{definition}
+Let $\varphi $ be a predicate formula. We define the guard of predicate
+variable instantiation $\mathrm{PVI}(\varphi ,i)$ for $i\leq \mathrm{npred}%
+(\varphi )$ inductively as follows:
 \end{definition}
 
 \begin{equation*}
 \begin{array}{lll}
-guard^{X}(c) & = & false \\ 
-guard^{X}(Y) & = & true \\ 
-guard^{X}(\forall d:D.\varphi ) & = & guard^{X}(\varphi ) \\ 
-guard^{X}(\exists d:D.\varphi ) & = & guard^{X}(\varphi ) \\ 
-guard^{X}(\varphi \wedge \psi ) & = & \left\{ 
+guard^{i}(c) & = & false \\ 
+guard^{i}(Y) & = & true \\ 
+guard^{i}(\forall d:D.\varphi ) & = & guard^{i}(\varphi ) \\ 
+guard^{i}(\exists d:D.\varphi ) & = & guard^{i}(\varphi ) \\ 
+guard^{i}(\varphi \wedge \psi ) & = & \left\{ 
 \begin{array}{lll}
-s(\varphi )\wedge guard^{X}(\psi ) &  & \text{if }X\in occ(\psi ) \\ 
-s(\psi )\wedge guard^{X}(\varphi ) &  & \text{if }X\in occ(\varphi )%
+s(\varphi )\wedge guard^{i-\mathrm{npred}(\varphi )}(\psi ) &  & \text{if }i>%
+\mathrm{npred}(\varphi ) \\ 
+s(\psi )\wedge guard^{i}(\varphi ) &  & \text{if }i\leq \mathrm{npred}%
+(\varphi )%
 \end{array}%
 \right. \\ 
-guard^{X}(\varphi \vee \psi ) & = & \left\{ 
+guard^{i}(\varphi \vee \psi ) & = & \left\{ 
 \begin{array}{lll}
-n(\varphi )\wedge guard^{X}(\psi ) &  & \text{if }X\in occ(\psi ) \\ 
-ns(\psi )\wedge guard^{X}(\varphi ) &  & \text{if }X\in occ(\varphi ),%
+n(\varphi )\wedge guard^{i}(\psi ) &  & \text{if }i>\mathrm{npred}(\varphi )
+\\ 
+ns(\psi )\wedge guard^{i}(\varphi ) &  & \text{if }i\leq \mathrm{npred}%
+(\varphi )%
 \end{array}%
 \right.%
 \end{array}%
@@ -1738,26 +1758,63 @@ where%
 \begin{array}{lll}
 s(\varphi ) & = & \left\{ 
 \begin{array}{lll}
-\varphi &  & \text{if }\varphi \text{ is a simple formula} \\ 
+\varphi &  & \text{if }\mathrm{npred}(\varphi )=0 \\ 
 true &  & \text{otherwise}%
 \end{array}%
 \right. \\ 
 ns(\varphi ) & = & \left\{ 
 \begin{array}{lll}
-\lnot \varphi &  & \text{if }\varphi \text{ is a simple formula} \\ 
+\lnot \varphi &  & \text{if }\mathrm{npred}(\varphi )=0 \\ 
 true &  & \text{otherwise}%
 \end{array}%
 \right.%
 \end{array}%
-\end{equation*}%
-Let $X(d:D)=\varphi $ be a PBES equation with $d=[d_{1},\ldots ,d_{N_{X}}]$,
-and let $Y(e)\in occ(\varphi )$. Let $source(Y(e),X)$ be a substitution $%
-[d_{j_{1}}:=f_{1},\ldots ,d_{j_{jm}}:=f_{p}]$, such that $%
-guard^{Y(e)}\Rightarrow \bigwedge_{k=1\ldots p}d_{j_{k}}=f_{k}$.
+\end{equation*}
 
-\textbf{Step 1} of the stategraph algorithm is to apply the transformation $%
-Y(e)\mapsto \sigma (Y(e))$ with $\sigma =source(Y(e),X)$ to all predicate
-variables $Y(e)$ appearing in one of the right hand sides of a PBES equation.
+\subsection{The functions source, dest and copy}
+
+Let $X(d:D)=\varphi $ be a PBES equation. Let $\mathrm{source}$ be a
+function with the property that 
+\begin{equation*}
+\mathrm{source}(X,i,j)=\left\{ 
+\begin{array}{lll}
+e &  & \text{if }guard^{i}(\mathrm{PVI}(\varphi ,i))\Rightarrow d[j]\approx e
+\\ 
+\bot  &  & \text{otherwise}%
+\end{array}%
+\right. 
+\end{equation*}%
+A possible heuristic for obtaining a source function is to look for positive
+occurrences of constraints of the form $d[j]\approx e$ in the guards; these
+can be used to define the source function. Let $\mathrm{sigma}(X,i)$ be the
+substitution defined as%
+\begin{equation*}
+\mathrm{sigma}(X,i)(v)=%
+\begin{array}{lll}
+e &  & \text{if }\mathrm{source}(X,i,j)=e\text{ for some }j \\ 
+v &  & \text{otherwise}%
+\end{array}%
+\end{equation*}
+
+We define the function $\mathrm{dest}$ as follows:%
+\begin{equation*}
+\mathrm{dest}(X,i,j)=\left\{ 
+\begin{array}{lll}
+c &  & \text{if }rewrite(\mathrm{sigma}(X,i)(\mathrm{PVI}(\varphi ,i))[j]=c
+\\ 
+\bot  &  & \text{otherwise}%
+\end{array}%
+\right. 
+\end{equation*}%
+with $c$ a constant. We define the function $\mathrm{copy}$ as follows:%
+\begin{equation*}
+\mathrm{copy}(X,i,j)=\left\{ 
+\begin{array}{lll}
+k &  & \text{if }\mathrm{PVI}(\varphi ,i)[k]=d[j] \\ 
+\bot  &  & \text{otherwise}%
+\end{array}%
+\right. 
+\end{equation*}
 
 \subsection{Control flow parameters}
 
