@@ -30,7 +30,6 @@
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_influence.h"
-#include "mcrl2/pbes/detail/stategraph_source.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -174,7 +173,7 @@ std::string stategraph_edge::print() const
 struct control_flow_graph
 {
   // vertices of the control flow graph
-  std::map<propositional_variable_instantiation, stategraph_vertex> m_control_vertices;  // x is a projected value
+  std::map<propositional_variable_instantiation, stategraph_vertex> m_control_vertices;
 
   // an index for the vertices in the control flow graph with a given name
   std::map<core::identifier_string, std::set<stategraph_vertex*> > m_stategraph_index;
@@ -182,9 +181,9 @@ struct control_flow_graph
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
 
   // \pre x is not present in m_control_vertices
-  vertex_iterator insert_vertex(const propositional_variable_instantiation& X)
+  vertex_iterator insert_vertex(const propositional_variable_instantiation& x)
   {
-    std::pair<vertex_iterator, bool> p = m_control_vertices.insert(std::make_pair(X, stategraph_vertex(X)));
+    std::pair<vertex_iterator, bool> p = m_control_vertices.insert(std::make_pair(x, stategraph_vertex(x)));
     assert(p.second);
     return p.first;
   }

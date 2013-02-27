@@ -14,9 +14,11 @@
 
 #include <cassert>
 #include <iostream>
+#include <sstream>
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
+#include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -27,18 +29,139 @@ namespace detail {
 
 typedef std::vector<std::pair<propositional_variable_instantiation, pbes_expression> > predicate_variable_vector;
 
-inline
-std::string print_equation(const pbes_equation& eq)
-{
-  return (eq.symbol().is_mu() ? "mu " : "nu ")  + pbes_system::pp(eq.variable()) + " = " + pbes_system::pp(eq.formula());
-}
-
 class stategraph_equation: public pbes_equation
 {
   protected:
     predicate_variable_vector m_predvars;
     std::vector<data::variable> m_parameters;
     pbes_expression m_condition;
+
+    // m_source[i], m_dest[i] and m_copy[i] correspond to m_predvars[i]
+    std::vector<data::mutable_map_substitution<> > m_source;
+    std::vector<std::map<std::size_t, data::data_expression> > m_dest;
+    std::vector<std::map<std::size_t, std::size_t> > m_copy;
+
+    void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
+    {
+      namespace a = combined_access;
+      utilities::detail::split(expr, std::back_inserter(result), a::is_and, a::left, a::right);
+    }
+
+    // Extracts all conjuncts d[i] == e from the pbes expression x, for some i in 0 ... d.size(), and with e a constant.
+    // The conjuncts are added to the substitution sigma.
+    void find_equality_conjuncts(const pbes_expression& x, const std::vector<data::variable>& d, data::mutable_map_substitution<>& sigma) const
+    {
+      std::vector<data::data_expression> result;
+
+      std::vector<pbes_expression> v;
+      split_and(x, v);
+      for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+      {
+        if (data::is_data_expression(*i))
+        {
+          data::data_expression v_i = *i;
+          if (data::is_equal_to_application(v_i))
+          {
+            data::data_expression left = data::binary_left(v_i);
+            data::data_expression right = data::binary_right(v_i);
+            if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && is_constant(right))
+            {
+              sigma[left] = right;
+            }
+            else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && is_constant(left))
+            {
+              sigma[right] = left;
+            }
+          }
+          // TODO: handle conjuncts b and !b, with b a variable with sort Bool
+          //else if (data::is_variable(v_i) && sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
+          //{
+          //  sigma[data::variable(v_i)] = sort_bool::true_();
+          //}
+        }
+      }
+    }
+
+    bool is_cf(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, const core::identifier_string& X, std::size_t i) const
+    {
+      std::map<core::identifier_string, std::vector<bool> >::const_iterator j = is_control_flow.find(X);
+      assert(j != is_control_flow.end());
+      const std::vector<bool>& cf = j->second;
+      return cf[i];
+    }
+
+    // computes the source function for a pbes equation
+    // source[i] contains the source parameters of g_i, represented in the form of a substitution
+    void compute_source()
+    {
+      for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
+      {
+        data::mutable_map_substitution<> sigma;
+        find_equality_conjuncts(i->second, m_parameters, sigma);
+        mCRL2log(log::debug, "stategraph") << "<source>" << "X = " << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << " sigma = " << sigma.to_string() << "\n";
+        m_source.push_back(sigma);
+      }
+    }
+
+    void compute_dest(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, data::rewriter& R)
+    {
+      const core::identifier_string& X = variable().name();
+      for (std::size_t i = 0; i < m_predvars.size(); i++)
+      {
+        std::map<std::size_t, data::data_expression> dest;
+
+        // PVI(X, I) = Y(e)
+        const core::identifier_string& Y = m_predvars[i].first.name();
+        const data::data_expression_list& e = m_predvars[i].first.parameters();
+        for (std::size_t j = 0; j < m_parameters.size(); j++)
+        {
+          if (!is_cf(is_control_flow, X, j))
+          {
+            continue;
+          }
+          std::size_t k_index = 0;
+          for (data::data_expression_list::const_iterator k = e.begin(); k != e.end(); ++k, ++k_index)
+          {
+            data::data_expression c = R(*k, m_source[i]);
+            if (is_constant(c) && is_cf(is_control_flow, Y, k_index))
+            {
+              dest[j] = c;
+            }
+          }
+        }
+        m_dest.push_back(dest);
+      }
+    }
+
+    void compute_copy(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow)
+    {
+      const core::identifier_string& X = variable().name();
+      for (std::size_t i = 0; i < m_predvars.size(); i++)
+      {
+        std::map<std::size_t, std::size_t> copy;
+
+        // PVI(X, I) = Y(e)
+        const core::identifier_string& Y = m_predvars[i].first.name();
+        const data::data_expression_list& e = m_predvars[i].first.parameters();
+
+        for (std::size_t j = 0; j < m_parameters.size(); j++)
+        {
+          if (!is_cf(is_control_flow, X, j))
+          {
+            continue;
+          }
+          std::size_t k_index = 0;
+          for (data::data_expression_list::const_iterator k = e.begin(); k != e.end(); ++k, ++k_index)
+          {
+            if (m_parameters[j] == *k && is_cf(is_control_flow, Y, k_index))
+            {
+              copy[j] = k_index;
+            }
+          }
+        }
+        m_copy.push_back(copy);
+      }
+    }
 
   public:
     stategraph_equation(const pbes_equation& eqn, const data::data_specification& dataspec)
@@ -50,6 +173,13 @@ class stategraph_equation: public pbes_equation
       m_condition = f.expression_stack.back().condition;
       data::variable_list params = variable().parameters();
       m_parameters = std::vector<data::variable>(params.begin(), params.end());
+    }
+
+    void compute_source_dest_copy(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, data::rewriter& R)
+    {
+      compute_source();
+      compute_dest(is_control_flow, R);
+      compute_copy(is_control_flow);
     }
 
     bool is_simple() const
@@ -85,6 +215,16 @@ class stategraph_equation: public pbes_equation
       return m_predvars;
     }
 
+    const std::vector<data::mutable_map_substitution<> >& source() const
+    {
+      return m_source;
+    }
+
+    const std::vector<std::map<std::size_t, std::size_t> >& copy() const
+    {
+      return m_copy;
+    }
+
     std::string print() const
     {
       std::ostringstream out;
@@ -95,6 +235,45 @@ class stategraph_equation: public pbes_equation
         out << "variable = " << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << std::endl;
       }
       out << "simple = " << std::boolalpha << is_simple() << std::endl;
+      return out.str();
+    }
+
+    std::string print_source_dest_copy() const
+    {
+      std::ostringstream out;
+      for (std::size_t i = 0; i < m_predvars.size(); i++)
+      {
+        out << "    predvar = " << pbes_system::pp(m_predvars[i].first);
+
+        // source
+        out << " source = " << data::print_substitution(m_source[i]);
+
+        // dest
+        const std::map<std::size_t, data::data_expression>& dest = m_dest[i];
+        out << " dest = {";
+        for (std::map<std::size_t, data::data_expression>::const_iterator j = dest.begin(); j != dest.end(); ++j)
+        {
+          if (j != dest.begin())
+          {
+            out << ", ";
+          }
+          out << "(" << j->first << ", " << data::pp(j->second) << ")";
+        }
+        out << "}";
+
+        // copy
+        out << " copy = {";
+        const std::map<std::size_t, std::size_t>& m = m_copy[i];
+        for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
+        {
+          if (j != m.begin())
+          {
+            out << ", ";
+          }
+          out << "(" << j->first << ", " << j->second << ")";
+        }
+        out << "}" << std::endl;
+      }
       return out.str();
     }
 };
@@ -153,7 +332,59 @@ class stategraph_pbes
     {
       return m_data;
     }
+
+    data::data_expression source(std::size_t k, std::size_t i, std::size_t n) const
+    {
+      const stategraph_equation& eqn = equations()[k];
+      const data::mutable_map_substitution<>& sigma = eqn.source()[i];
+      data::variable d_n = eqn.parameters()[n];
+      data::data_expression x = sigma(d_n);
+      if (x == d_n)
+      {
+        return data::data_expression();
+      }
+      else
+      {
+        return x;
+      }
+    }
+
+    void compute_source_dest_copy(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow)
+    {
+      data::rewriter R(m_data);
+      std::vector<stategraph_equation>& eqn = equations();
+      for (std::vector<stategraph_equation>::iterator i = eqn.begin(); i != eqn.end(); ++i)
+      {
+        i->compute_source_dest_copy(is_control_flow, R);
+      }
+    }
+
+    std::string print_source_dest_copy() const
+    {
+      std::ostringstream out;
+      const std::vector<stategraph_equation>& eqn = equations();
+      for (std::vector<stategraph_equation>::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+      {
+        out << "equation = " << print_equation(*i) << std::endl;
+        out << i->print_source_dest_copy() << std::endl;
+      }
+      return out.str();
+    }
 };
+
+inline
+std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_pbes& p, const core::identifier_string& X)
+{
+  const std::vector<stategraph_equation>& equations = p.equations();
+  for (std::vector<stategraph_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  {
+    if (i->variable().name() == X)
+    {
+      return i;
+    }
+  }
+  return equations.end();
+}
 
 } // namespace detail
 

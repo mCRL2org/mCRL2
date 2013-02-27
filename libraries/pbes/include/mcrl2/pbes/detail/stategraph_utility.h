@@ -14,14 +14,20 @@
 
 #include <sstream>
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
-#include "mcrl2/pbes/detail/stategraph_pbes.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
+
+inline
+std::string print_equation(const pbes_equation& eq)
+{
+  return (eq.symbol().is_mu() ? "mu " : "nu ")  + pbes_system::pp(eq.variable()) + " = " + pbes_system::pp(eq.formula());
+}
 
 inline
 std::string print_set(const std::set<std::size_t>& v)
@@ -56,20 +62,6 @@ bool is_constant(const data::data_expression& x)
 {
   typedef core::term_traits<data::data_expression> tr;
   return tr::is_constant(x);
-}
-
-inline
-std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_pbes& p, const core::identifier_string& X)
-{
-  const std::vector<stategraph_equation>& equations = p.equations();
-  for (std::vector<stategraph_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
-  {
-    if (i->variable().name() == X)
-    {
-      return i;
-    }
-  }
-  return equations.end();
 }
 
 inline

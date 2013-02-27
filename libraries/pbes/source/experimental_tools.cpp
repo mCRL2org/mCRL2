@@ -36,7 +36,8 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/pbes/detail/control_flow.h"
-#include "mcrl2/pbes/detail/stategraph.h"
+#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
+#include "mcrl2/pbes/detail/stategraph_graph_algorithm.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 
 namespace mcrl2
@@ -254,10 +255,6 @@ void pbesstategraph(const std::string& input_filename,
   pbes_system::normalize(p);
   pbes<> q;
 
-  if (use_local_variant)
-  {
-    throw mcrl2::runtime_error("the local variant of pbesstategraph has not been implemented yet!");
-  }
   if (use_pfnf_variant)
   {
     pbes_system::detail::control_flow_algorithm algorithm;
@@ -265,8 +262,16 @@ void pbesstategraph(const std::string& input_filename,
   }
   else
   {
-    pbes_system::detail::stategraph_algorithm algorithm;
-    q = algorithm.run(p, simplify, apply_to_original);
+    if (use_local_variant)
+    {
+      pbes_system::detail::stategraph_graph_local_algorithm algorithm;
+      algorithm.run(p);
+    }
+    else
+    {
+      pbes_system::detail::stategraph_reset_variables_algorithm algorithm;
+      q = algorithm.run(p, simplify);
+    }
   }
 
   q.save(output_filename, true, true);

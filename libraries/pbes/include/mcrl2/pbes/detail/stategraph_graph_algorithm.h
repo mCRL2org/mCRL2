@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GRAPH_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GRAPH_ALGORITHM_H
 
+#include <sstream>
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 
 namespace mcrl2 {
@@ -19,6 +20,101 @@ namespace mcrl2 {
 namespace pbes_system {
 
 namespace detail {
+
+//struct local_vertex;
+//
+//struct local_edge
+//{
+//  local_vertex* source;
+//  local_vertex* target;
+//
+//  local_edge(local_vertex* source_, local_vertex* target_)
+//   : source(source_),
+//     target(target_)
+//   {}
+//
+//  bool operator<(const local_edge& other) const
+//  {
+//    if (source != other.source)
+//    {
+//      return source < other.source;
+//    }
+//    return target < other.target;
+//  }
+//};
+
+struct local_vertex
+{
+  core::identifier_string X;
+  std::size_t p;
+  std::set<local_vertex*> outgoing_edges;
+
+  local_vertex(const core::identifier_string& X_, std::size_t p_)
+    : X(X_), p(p_)
+  {}
+
+  std::string print() const
+  {
+    std::ostringstream out;
+    out << "(" << std::string(X) << ", " << p << ")";
+    return out.str();
+  }
+};
+
+struct local_graph
+{
+  typedef std::map<std::size_t, local_vertex*> vertex_map;
+
+  std::vector<local_vertex> m_vertices;
+  std::map<core::identifier_string, vertex_map> m_graph;
+
+  // @pre: (X, p) is in the graph
+  local_vertex& find_vertex(const core::identifier_string& X, std::size_t p)
+  {
+    vertex_map& m = m_graph[X];
+    vertex_map::iterator i = m.find(p);
+    if (i == m.end())
+    {
+      std::cout << "(X, p) = (" << std::string(X) << ", " << p << ")" << std::endl;
+    }
+    assert (i != m.end());
+    return *(i->second);
+  }
+
+  // @pre: (X, p) is not in the graph
+  local_vertex& insert_vertex(const local_vertex& v)
+  {
+    m_vertices.push_back(v);
+    m_graph[v.X][v.p] = &m_vertices.back();
+    return m_vertices.back();
+  }
+
+  // insert edge between (X, i) and (Y, j)
+  void insert_edge(const core::identifier_string& X, std::size_t i, const core::identifier_string& Y, std::size_t j)
+  {
+    mCRL2log(log::debug, "stategraph") << "insert edge [must] (" << std::string(X) << ", " << i << ") (" << std::string(Y) << ", " << j << ")" << std::endl;
+    local_vertex& u = find_vertex(X, i);
+    local_vertex& v = find_vertex(Y, j);
+    u.outgoing_edges.insert(&v);
+  }
+
+  std::string print()
+  {
+    std::ostringstream out;
+    for (std::vector<local_vertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    {
+      const local_vertex& u = *i;
+      out << u.print() << " connected with";
+      for (std::set<local_vertex*>::const_iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
+      {
+        const local_vertex& v = **j;
+        out << " " << v.print();
+      }
+      out << std::endl;
+    }
+    return out.str();
+  }
+};
 
 /// \brief Algorithm class for the computation of the stategraph graph
 class stategraph_graph_algorithm
@@ -74,7 +170,7 @@ class stategraph_graph_algorithm
       return propositional_variable();
     }
 
-    std::string print_stategraph_parameters()
+    std::string print_control_flow_parameters()
     {
       std::ostringstream out;
       out << "--- control flow parameters ---" << std::endl;
@@ -132,7 +228,7 @@ class stategraph_graph_algorithm
       return out.str();
     }
 
-    void compute_stategraph_parameters()
+    void compute_control_flow_parameters()
     {
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       std::map<core::identifier_string, std::vector<data::variable> > V;
@@ -257,7 +353,8 @@ class stategraph_graph_algorithm
           }
         }
       }
-      mCRL2log(log::debug) << print_stategraph_parameters();
+      m_pbes.compute_source_dest_copy(m_is_control_flow);
+      mCRL2log(log::debug) << print_control_flow_parameters();
     }
 
     const std::vector<bool>& stategraph_values(const core::identifier_string& X) const
@@ -268,7 +365,7 @@ class stategraph_graph_algorithm
     }
 
     // returns the control flow parameters of the propositional variable with name X
-    std::set<data::variable> stategraph_parameters(const core::identifier_string& X) const
+    std::set<data::variable> control_flow_parameters(const core::identifier_string& X) const
     {
       std::set<data::variable> result;
       const std::vector<bool>& b = stategraph_values(X);
@@ -353,13 +450,9 @@ class stategraph_graph_algorithm
       stategraph_influence_graph_algorithm ialgo(m_pbes);
       ialgo.run();
 
-      //stategraph_destination_algorithm sdalgo(m_pbes);
-      stategraph_source_algorithm sdalgo(m_pbes);
-      sdalgo.compute_source();
-      mCRL2log(log::debug) << sdalgo.print_source();
+      compute_control_flow_parameters();
 
-      //sdalgo.compute_destination();
-      //mCRL2log(log::debug) << sdalgo.print_destination();
+      mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
     }
 };
 
@@ -373,11 +466,9 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
     // the control flow graph
     control_flow_graph m_control_flow_graph;
 
-    void compute_stategraph_graph()
+    void compute_control_flow_graph()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute control flow graph ===" << std::endl;
-
-      compute_stategraph_parameters();
 
       data::rewriter datar(m_pbes.data());
       pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
@@ -399,15 +490,11 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
         mCRL2log(log::debug, "stategraph") << "selected todo element u = " << pbes_system::pp(u.X) << std::endl;
 
         const stategraph_equation& eqn = *find_equation(m_pbes, u.X.name());
-mCRL2log(log::debug, "stategraph") << "eqn = " << eqn.print() << std::endl;
+        mCRL2log(log::debug, "stategraph") << "eqn = " << eqn.print() << std::endl;
         propositional_variable X = project_variable(eqn.variable());
-        // mCRL2log(log::debug, "stategraph") << "X = " << pbes_system::pp(X) << std::endl;
-        // mCRL2log(log::debug, "stategraph") << "u.X = " << pbes_system::pp(u.X) << std::endl;
         data::variable_list d = X.parameters();
         data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
-        // mCRL2log(log::debug, "stategraph") << "sigma = " << data::print_substitution(sigma) << std::endl;
-        // mCRL2log(log::debug, "stategraph") << eqn.print() << std::endl;
 
         const predicate_variable_vector& predvars = eqn.predicate_variables();
         if (eqn.is_simple())
@@ -424,11 +511,8 @@ mCRL2log(log::debug, "stategraph") << "eqn = " << eqn.print() << std::endl;
           {
             continue;
           }
-          // mCRL2log(log::debug, "stategraph") << "Y = " << pbes_system::pp(i->first) << std::endl;
           propositional_variable_instantiation Ye = apply_substitution(j->first, sigma);
-          // mCRL2log(log::debug, "stategraph") << "sigma(Y) = " << pbes_system::pp(Ye) << std::endl;
           propositional_variable_instantiation Y = project(Ye);
-          // mCRL2log(log::debug, "stategraph") << "project(sigma(Y)) = " << pbes_system::pp(Y) << std::endl;
           propositional_variable_instantiation label = Ye;
 
           mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;
@@ -459,9 +543,107 @@ mCRL2log(log::debug, "stategraph") << "eqn = " << eqn.print() << std::endl;
     void run(const pbes<>& p)
     {
       super::run(p);
-
-      compute_stategraph_graph();
+      compute_control_flow_graph();
       mCRL2log(log::verbose) << m_control_flow_graph.print();
+    }
+};
+
+/// \brief Algorithm class for the local variant of the stategraph algorithm
+class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
+{
+  public:
+    typedef stategraph_graph_algorithm super;
+
+  protected:
+    // the control flow graph
+    std::vector<control_flow_graph> m_control_flow_graphs;
+    local_graph must_graph;
+    local_graph may_graph;
+
+    void compute_must_graph()
+    {
+      // create vertices
+      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      {
+        propositional_variable X = k->variable();
+        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<bool>& cf = m_is_control_flow[X.name()];
+        for (std::size_t i = 0; i < d_X.size(); ++i)
+        {
+          if (cf[i])
+          {
+            must_graph.insert_vertex(local_vertex(X.name(), i));
+          }
+        }
+      }
+
+      // create edges
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      {
+        const stategraph_equation& eqn = *k;
+        core::identifier_string X = eqn.variable().name();
+        const std::vector<std::map<std::size_t, std::size_t> >& copy = k->copy();
+        for (std::size_t i = 0; i < copy.size(); i++)
+        {
+          const std::map<std::size_t, std::size_t>& m = copy[i];
+          for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
+          {
+            std::size_t p = j->first;
+            std::size_t l = j->second;
+            const core::identifier_string& Y = eqn.predicate_variables()[i].first.name();
+            must_graph.insert_edge(X, p, Y, l);
+          }
+        }
+      }
+      mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
+    }
+
+    void compute_may_graph()
+    {
+      // create vertices
+      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      {
+        propositional_variable X = k->variable();
+        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<bool>& cf = m_is_control_flow[X.name()];
+        for (std::size_t i = 0; i < d_X.size(); ++i)
+        {
+          if (cf[i])
+          {
+            may_graph.insert_vertex(local_vertex(X.name(), i));
+          }
+        }
+      }
+
+      // create edges
+      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      {
+        const stategraph_equation& eqn = *k;
+        core::identifier_string X = eqn.variable().name();
+        const std::vector<std::map<std::size_t, std::size_t> >& copy = k->copy();
+        for (std::size_t i = 0; i < copy.size(); i++)
+        {
+          const std::map<std::size_t, std::size_t>& m = copy[i];
+          for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
+          {
+            std::size_t p = j->first;
+            std::size_t l = j->second;
+            const core::identifier_string& Y = eqn.predicate_variables()[i].first.name();
+            must_graph.insert_edge(X, p, Y, l);
+          }
+        }
+      }
+      mCRL2log(log::debug, "stategraph") << "=== may graph ===\n" << may_graph.print() << std::endl;
+    }
+
+  public:
+    /// \brief Computes the control flow graph
+    void run(const pbes<>& p)
+    {
+      super::run(p);
+      compute_must_graph();
     }
 };
 

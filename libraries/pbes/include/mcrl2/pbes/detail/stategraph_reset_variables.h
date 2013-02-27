@@ -51,6 +51,9 @@ pbes_expression stategraph_reset_variable_rewrite(stategraph_reset_variables_alg
 /// \brief Adds the reset variables procedure to the stategraph algorithm
 class stategraph_reset_variables_algorithm: public stategraph_graph_global_algorithm
 {
+  public:
+    typedef stategraph_graph_global_algorithm super;
+
   protected:
     // if true, the resulting PBES is simplified
     bool m_simplify;
@@ -206,10 +209,10 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes<> run(const pbes<>& p, bool simplify = true, bool /* apply_to_original_pbes */ = false)
+    pbes<> run(const pbes<>& p, bool simplify = true)
     {
+      super::run(p);
       m_simplify = simplify;
-
       compute_control_flow_marking();
       mCRL2log(log::verbose) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
       pbes<> result = p;
