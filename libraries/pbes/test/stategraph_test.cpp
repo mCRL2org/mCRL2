@@ -282,13 +282,37 @@ void test_constraints()
   test_constraints(text, expected_result);
 }
 
+void test_remove_may_transitions(const std::string& must_text, const std::string& may_text)
+{
+  detail::local_graph must_graph = detail::parse_local_graph(must_text);
+  detail::local_graph may_graph = detail::parse_local_graph(may_text);
+  bool result = detail::remove_may_transitions(must_graph, may_graph);
+  BOOST_CHECK(result);
+  BOOST_CHECK(must_graph.check_constraints());
+
+  // check if the source and target of each edge has the same parameter p (which is implied by the test cases)
+  std::vector<detail::local_vertex>& V = must_graph.vertices();
+  for (std::vector<detail::local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+  {
+    const detail::local_vertex& u = *i;
+    const std::set<detail::local_vertex*>& S = u.outgoing_edges;
+    for (std::set<detail::local_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
+    {
+      const detail::local_vertex& v = **j;
+      BOOST_CHECK(u.p == v.p);
+    }
+  }
+}
+
 void test_remove_may_transitions()
 {
-  std::string must_text =
+  std::string must_text;
+  std::string may_text;
+
+  must_text =
     "X 0 ; Y 0 ; X 1 ; Y 1 ; Z 1 \n"
   ;
-
-  std::string may_text =
+  may_text =
     "X 0 ; Y 0 ; X 1 ; Y 1 ; Z 1 \n"
     "Y 0 ; X 0                   \n"
     "Z 1 ; Y 0                   \n"
@@ -297,12 +321,27 @@ void test_remove_may_transitions()
     "X 1 ; Y 0                   \n"
     "X 1 ; Y 1                   \n"
   ;
+  test_remove_may_transitions(must_text, may_text);
 
-  detail::local_graph must_graph = detail::parse_local_graph(must_text);
-  detail::local_graph may_graph = detail::parse_local_graph(may_text);
-  detail::remove_may_transitions(must_graph, may_graph);
-  std::cerr << "--- must graph ---\n" << must_graph.print() << std::endl;
-  // BOOST_CHECK(false);
+  must_text =
+    "X 0 ; Y 0 ; Z 0 ; U 0 ; U 1 ; V 1 ; W 1 \n"
+  ;
+  may_text =
+    "X 0 ; Y 0 ; Z 0 ; U 0 ; U 1 ; V 1 ; W 1 \n"
+    "X 0 ; Y 0                               \n"
+    "X 0 ; V 1                               \n"
+    "Y 0 ; Z 0                               \n"
+    "Y 0 ; V 1                               \n"
+    "Z 0 ; X 0                               \n"
+    "Z 0 ; U 0                               \n"
+    "Z 0 ; V 1                               \n"
+    "Z 0 ; W 1                               \n"
+    "U 0 ; X 0                               \n"
+    "V 1 ; U 1                               \n"
+    "V 1 ; W 1                               \n"
+    "W 1 ; U 1                               \n"
+  ;
+  test_remove_may_transitions(must_text, may_text);
 }
 
 int test_main(int argc, char** argv)

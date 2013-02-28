@@ -255,8 +255,11 @@ struct remove_may_transitions_finished
 
 struct remove_may_transitions_helper
 {
+  // N.B. sources and targets are in the may-graph
   const std::vector<local_vertex*>& sources;
   std::vector<local_vertex*>& targets;
+
+  // G is the must-graph
   local_graph& G;
 
   remove_may_transitions_helper(const std::vector<local_vertex*>& sources_, std::vector<local_vertex*>& targets_, local_graph& G_)
@@ -266,41 +269,44 @@ struct remove_may_transitions_helper
   {}
 
   // checks if G satisfies the constraints after adding edges between sources[i] and targets[i], for i in [0, ..., sources[i].size())
-  bool check_must_graph_constraints()
+  // throws remove_may_transitions_finished() if the constraints are satisfied; the edges of the satisfying assignment are added to G
+  void operator()()
   {
     assert(sources.size() == targets.size());
 
-    // add the edges
+    // add edges to G
     for (std::size_t i = 0; i < sources.size(); i++)
     {
       local_vertex& u = *(sources[i]);
-      // assert(u.outgoing_edges.find(targets[i]) == u.outgoing_edges.end());
-      u.outgoing_edges.insert(targets[i]);
+      local_vertex& v = *(targets[i]);
+      local_vertex& u1 = G.find_vertex(u.X, u.p);
+      local_vertex& v1 = G.find_vertex(v.X, v.p);
+      u1.outgoing_edges.insert(&v1);
     }
 
+std::cerr << "--- checking constraints on graph ---\n" << G.print() << std::endl;
     bool result = G.check_constraints();
-
-    // remove the edges
-    for (std::size_t i = 0; i < sources.size(); i++)
-    {
-      local_vertex& u = *(sources[i]);
-      u.outgoing_edges.erase(targets[i]);
-    }
-
-    return result;
-  }
-
-  void operator()()
-  {
-    if (check_must_graph_constraints())
+std::cerr << "result = " << std::boolalpha << result << std::endl;
+    if (result)
     {
       throw remove_may_transitions_finished();
+    }
+
+    // remove edges from G
+    for (std::size_t i = 0; i < sources.size(); i++)
+    {
+      local_vertex& u = *(sources[i]);
+      local_vertex& v = *(targets[i]);
+      local_vertex& u1 = G.find_vertex(u.X, u.p);
+      local_vertex& v1 = G.find_vertex(v.X, v.p);
+      u1.outgoing_edges.erase(&v1);
     }
   }
 };
 
+// Returns true if a control flow graph is found that satisfies the constraints.
 inline
-void remove_may_transitions(local_graph& must_graph, local_graph& may_graph)
+bool remove_may_transitions(local_graph& must_graph, local_graph& may_graph)
 {
   // pass 1: handle all vertices for which the number of outgoing may transitions is equal to 1
   std::vector<local_vertex>& V = may_graph.vertices();
@@ -331,10 +337,15 @@ void remove_may_transitions(local_graph& must_graph, local_graph& may_graph)
       T.push_back(std::vector<local_vertex*>(S.begin(), S.end()));
     }
   }
-  targets.resize(T.size(), 0);
 
   // sort the sequences T[i] according to some heuristic
   // TODO
+
+  // initialize targets
+  for (std::vector<std::vector<local_vertex*> >::const_iterator i = T.begin(); i != T.end(); ++i)
+  {
+    targets.push_back(i->front());
+  }
 
   // for each possible sequence of targets, check if the must_graph fulfills all constraints
   try
@@ -343,11 +354,10 @@ void remove_may_transitions(local_graph& must_graph, local_graph& may_graph)
   }
   catch(remove_may_transitions_finished&)
   {
-    // success
+    mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
+    return true;
   }
-  std::cerr << "Error: did not find a suitable control flow!" << std::endl;
-
-  mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
+  return false;
 }
 
 } // namespace detail
