@@ -66,27 +66,31 @@ struct local_graph
   typedef std::map<std::size_t, local_vertex*> vertex_map;
 
   std::vector<local_vertex> m_vertices;
-  std::map<core::identifier_string, vertex_map> m_graph;
+
+  // needs to be initialized after inserting vertices!
+  std::map<core::identifier_string, vertex_map> m_index;
 
   // @pre: (X, p) is in the graph
   local_vertex& find_vertex(const core::identifier_string& X, std::size_t p)
   {
-    vertex_map& m = m_graph[X];
-    vertex_map::iterator i = m.find(p);
-    if (i == m.end())
+    if (m_index.find(X) == m_index.end())
+    {
+      std::cerr << "error: entry " << std::string(X) << " not found in the graph!" << std::endl;
+      assert(false);
+    }
+    vertex_map& m = m_index[X];
+    if (m.find(p) == m.end())
     {
       std::cerr << "vertex not found: (X, p) = (" << std::string(X) << ", " << p << ")" << std::endl;
+      assert(false);
     }
-    assert (i != m.end());
-    return *(i->second);
+    return *(m_index[X][p]);
   }
 
   // @pre: (X, p) is not in the graph
-  local_vertex& insert_vertex(const local_vertex& v)
+  void insert_vertex(const core::identifier_string& X, std::size_t p)
   {
-    m_vertices.push_back(v);
-    m_graph[v.X][v.p] = &m_vertices.back();
-    return m_vertices.back();
+    m_vertices.push_back(local_vertex(X, p));
   }
 
   // insert edge between (X, i) and (Y, j)
@@ -113,6 +117,14 @@ struct local_graph
       out << std::endl;
     }
     return out.str();
+  }
+
+  void set_index()
+  {
+    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    {
+      m_index[i->X][i->p] = &(*i);
+    }
   }
 };
 
@@ -569,17 +581,18 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
-        propositional_variable X = k->variable();
+        core::identifier_string X = k->variable().name();
         const std::vector<data::variable>& d_X = k->parameters();
-        const std::vector<bool>& cf = m_is_control_flow[X.name()];
+        const std::vector<bool>& cf = m_is_control_flow[X];
         for (std::size_t i = 0; i < d_X.size(); ++i)
         {
           if (cf[i])
           {
-            must_graph.insert_vertex(local_vertex(X.name(), i));
+            must_graph.insert_vertex(X, i);
           }
         }
       }
+      must_graph.set_index();
 
       // create edges
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
@@ -608,17 +621,18 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
-        propositional_variable X = k->variable();
+        core::identifier_string X = k->variable().name();
         const std::vector<data::variable>& d_X = k->parameters();
-        const std::vector<bool>& cf = m_is_control_flow[X.name()];
+        const std::vector<bool>& cf = m_is_control_flow[X];
         for (std::size_t i = 0; i < d_X.size(); ++i)
         {
           if (cf[i])
           {
-            may_graph.insert_vertex(local_vertex(X.name(), i));
+            may_graph.insert_vertex(X, i);
           }
         }
       }
+      may_graph.set_index();
 
       // create edges
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
@@ -642,8 +656,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
               for (std::map<std::size_t, data::data_expression>::const_iterator k = dest.begin(); k != dest.end(); ++k)
               {
                 std::size_t l = k->first;
-                // N.B. This does not work if l is not a control flow parameter of Y.
-                // may_graph.insert_edge(X, p, Y, l);
+                may_graph.insert_edge(X, p, Y, l);
               }
             }
           }
