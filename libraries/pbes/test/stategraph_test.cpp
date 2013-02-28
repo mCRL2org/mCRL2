@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/detail/stategraph_local_graph.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -211,10 +212,81 @@ void test_guard()
   test_guard(text, "X7", "s == 7");
 }
 
+void test_parse()
+{
+  std::string text =
+    "X 0 ; Y 1 ; Y 2 ; Z 0 \n"
+    "X 0 ; Y 1             \n"
+    "X 0 ; Y 2             \n"
+    "Z 0 ; Y 2             \n"
+  ;
+
+  detail::local_graph G = detail::parse_local_graph(text);
+  std::cout << "G =\n" << G.print() << std::endl;
+  BOOST_CHECK(G.vertices().size() == 4);
+}
+
+void test_constraints(const std::string& text, bool expected_result)
+{
+  detail::local_graph G = detail::parse_local_graph(text);
+  bool result = G.check_constraints();
+  if (!result == expected_result)
+  {
+    std::cout << "--- failure in local_graph::check_constraints ---" << std::endl;
+    std::cout << text << std::endl;
+    std::cout << "result          = " << std::boolalpha << result << std::endl;
+    std::cout << "expected result = " << std::boolalpha << expected_result << std::endl;
+  }
+  BOOST_CHECK(result == expected_result);
+}
+
+void test_constraints()
+{
+  std::string text;
+  bool expected_result;
+
+  text =
+    "X 0 ; Y 0 ; Y 1       \n"
+    "X 0 ; Y 0             \n"
+    "X 0 ; Y 1             \n"
+  ;
+  expected_result = false;
+  test_constraints(text, expected_result);
+
+  text =
+    "X 0 ; Y 0 ; X 1       \n"
+    "X 0 ; Y 0             \n"
+    "Y 0 ; X 1             \n"
+  ;
+  expected_result = false;
+  test_constraints(text, expected_result);
+
+  text =
+    "X 0 ; Y 0 ; Z 0       \n"
+    "X 0 ; Y 0             \n"
+    "Y 0 ; Z 0             \n"
+    "Z 0 ; X 0             \n"
+    "Y 0 ; X 0             \n"
+  ;
+  expected_result = true;
+  test_constraints(text, expected_result);
+
+  text =
+    "X 1 ; Y 0 ; Z 0 ; X 0 \n"
+    "X 0 ; Y 0             \n"
+    "Y 0 ; Z 0             \n"
+    "Z 0 ; X 1             \n"
+    "Y 0 ; X 0             \n"
+  ;
+  expected_result = false;
+  test_constraints(text, expected_result);
+}
+
 int test_main(int argc, char** argv)
 {
   log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
   test_guard();
+  test_parse();
 
   return 0;
 }

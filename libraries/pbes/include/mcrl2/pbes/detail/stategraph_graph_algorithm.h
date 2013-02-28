@@ -14,119 +14,13 @@
 
 #include <sstream>
 #include "mcrl2/pbes/detail/stategraph_graph.h"
+#include "mcrl2/pbes/detail/stategraph_local_graph.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
-
-//struct local_vertex;
-//
-//struct local_edge
-//{
-//  local_vertex* source;
-//  local_vertex* target;
-//
-//  local_edge(local_vertex* source_, local_vertex* target_)
-//   : source(source_),
-//     target(target_)
-//   {}
-//
-//  bool operator<(const local_edge& other) const
-//  {
-//    if (source != other.source)
-//    {
-//      return source < other.source;
-//    }
-//    return target < other.target;
-//  }
-//};
-
-struct local_vertex
-{
-  core::identifier_string X;
-  std::size_t p;
-  std::set<local_vertex*> outgoing_edges;
-
-  local_vertex(const core::identifier_string& X_, std::size_t p_)
-    : X(X_), p(p_)
-  {}
-
-  std::string print() const
-  {
-    std::ostringstream out;
-    out << "(" << std::string(X) << ", " << p << ")";
-    return out.str();
-  }
-};
-
-struct local_graph
-{
-  typedef std::map<std::size_t, local_vertex*> vertex_map;
-
-  std::vector<local_vertex> m_vertices;
-
-  // needs to be initialized after inserting vertices!
-  std::map<core::identifier_string, vertex_map> m_index;
-
-  // @pre: (X, p) is in the graph
-  local_vertex& find_vertex(const core::identifier_string& X, std::size_t p)
-  {
-    if (m_index.find(X) == m_index.end())
-    {
-      std::cerr << "error: entry " << std::string(X) << " not found in the graph!" << std::endl;
-      assert(false);
-    }
-    vertex_map& m = m_index[X];
-    if (m.find(p) == m.end())
-    {
-      std::cerr << "vertex not found: (X, p) = (" << std::string(X) << ", " << p << ")" << std::endl;
-      assert(false);
-    }
-    return *(m_index[X][p]);
-  }
-
-  // @pre: (X, p) is not in the graph
-  void insert_vertex(const core::identifier_string& X, std::size_t p)
-  {
-    m_vertices.push_back(local_vertex(X, p));
-  }
-
-  // insert edge between (X, i) and (Y, j)
-  void insert_edge(const core::identifier_string& X, std::size_t i, const core::identifier_string& Y, std::size_t j)
-  {
-    mCRL2log(log::debug, "stategraph") << "insert edge (" << std::string(X) << ", " << i << ") (" << std::string(Y) << ", " << j << ")" << std::endl;
-    local_vertex& u = find_vertex(X, i);
-    local_vertex& v = find_vertex(Y, j);
-    u.outgoing_edges.insert(&v);
-  }
-
-  std::string print()
-  {
-    std::ostringstream out;
-    for (std::vector<local_vertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
-    {
-      const local_vertex& u = *i;
-      out << u.print() << " connected with";
-      for (std::set<local_vertex*>::const_iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
-      {
-        const local_vertex& v = **j;
-        out << " " << v.print();
-      }
-      out << std::endl;
-    }
-    return out.str();
-  }
-
-  void set_index()
-  {
-    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
-    {
-      m_index[i->X][i->p] = &(*i);
-    }
-  }
-};
 
 /// \brief Algorithm class for the computation of the stategraph graph
 class stategraph_graph_algorithm
@@ -665,6 +559,70 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       mCRL2log(log::debug, "stategraph") << "=== may graph ===\n" << may_graph.print() << std::endl;
     }
 
+    // checks if must_graph satisfies the constraints after adding edges between sources[i] and targets[i], for i in [0, ..., sources[i].size())
+    bool check_must_graph_constraints(const std::vector<local_vertex*>& sources, const std::vector<local_vertex*>& targets)
+    {
+      assert(sources.size() == targets.size());
+
+      // add the edges
+      for (std::size_t i = 0; i < sources.size(); i++)
+      {
+        local_vertex& u = *(sources[i]);
+        assert(u.outgoing_edges.find(targets[i]) == u.outgoing_edges.end());
+        u.outgoing_edges.insert(targets[i]);
+      }
+
+      bool result = must_graph.check_constraints();
+
+      // remove the edges
+      for (std::size_t i = 0; i < sources.size(); i++)
+      {
+        local_vertex& u = *(sources[i]);
+        u.outgoing_edges.erase(targets[i]);
+      }
+
+      return result;
+    }
+
+    void remove_may_transitions()
+    {
+      // pass 1: handle all vertices for which the number of outgoing may transitions is equal to 1
+      std::vector<local_vertex>& V = may_graph.vertices();
+      for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+      {
+        local_vertex& u = *i;
+        if (u.outgoing_edges.size() == 1)
+        {
+          local_vertex v = **(u.outgoing_edges.begin());
+          u.outgoing_edges.clear();
+          must_graph.insert_edge(u.X, u.p, v.X, v.p);
+        }
+      }
+      mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
+
+      // pass 2: handle all vertices for which the number of outgoing may transitions is greater than 1
+      std::vector<local_vertex*> sources;         // the vertices for which the number of outgoing may transitions is greater than 1
+      std::vector<std::vector<local_vertex*> > T; // T[i] contains the targets of the outgoing edges of vertex sources
+      std::vector<local_vertex*> targets;         // targets[i] will hold an element of T[i]
+
+      // initialization of sources and T
+      for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+      {
+        local_vertex& u = *i;
+        if (u.outgoing_edges.size() > 1)
+        {
+          sources.push_back(&u);
+          std::set<local_vertex*>& S = u.outgoing_edges;
+          T.push_back(std::vector<local_vertex*>(S.begin(), S.end()));
+        }
+      }
+
+      // sort the sequences T[i] according to some heuristic
+      // TODO
+
+      // for each possible sequence of targets, check if the must_graph fulfills all constraints
+    }
+
   public:
     /// \brief Computes the control flow graph
     void run(const pbes<>& p)
@@ -672,6 +630,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       super::run(p);
       compute_must_graph();
       compute_may_graph();
+      remove_may_transitions();
     }
 };
 
