@@ -250,6 +250,106 @@ local_graph parse_local_graph(const std::string& text)
   return result;
 }
 
+struct remove_may_transitions_finished
+{};
+
+struct remove_may_transitions_helper
+{
+  const std::vector<local_vertex*>& sources;
+  std::vector<local_vertex*>& targets;
+  local_graph& G;
+
+  remove_may_transitions_helper(const std::vector<local_vertex*>& sources_, std::vector<local_vertex*>& targets_, local_graph& G_)
+    : sources(sources_),
+      targets(targets_),
+      G(G_)
+  {}
+
+  // checks if G satisfies the constraints after adding edges between sources[i] and targets[i], for i in [0, ..., sources[i].size())
+  bool check_must_graph_constraints()
+  {
+    assert(sources.size() == targets.size());
+
+    // add the edges
+    for (std::size_t i = 0; i < sources.size(); i++)
+    {
+      local_vertex& u = *(sources[i]);
+      // assert(u.outgoing_edges.find(targets[i]) == u.outgoing_edges.end());
+      u.outgoing_edges.insert(targets[i]);
+    }
+
+    bool result = G.check_constraints();
+
+    // remove the edges
+    for (std::size_t i = 0; i < sources.size(); i++)
+    {
+      local_vertex& u = *(sources[i]);
+      u.outgoing_edges.erase(targets[i]);
+    }
+
+    return result;
+  }
+
+  void operator()()
+  {
+    if (check_must_graph_constraints())
+    {
+      throw remove_may_transitions_finished();
+    }
+  }
+};
+
+inline
+void remove_may_transitions(local_graph& must_graph, local_graph& may_graph)
+{
+  // pass 1: handle all vertices for which the number of outgoing may transitions is equal to 1
+  std::vector<local_vertex>& V = may_graph.vertices();
+  for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+  {
+    local_vertex& u = *i;
+    if (u.outgoing_edges.size() == 1)
+    {
+      local_vertex v = **(u.outgoing_edges.begin());
+      u.outgoing_edges.clear();
+      must_graph.insert_edge(u.X, u.p, v.X, v.p);
+    }
+  }
+
+  // pass 2: handle all vertices for which the number of outgoing may transitions is greater than 1
+  std::vector<local_vertex*> sources;         // the vertices for which the number of outgoing may transitions is greater than 1
+  std::vector<std::vector<local_vertex*> > T; // T[i] contains the targets of the outgoing edges of vertex sources
+  std::vector<local_vertex*> targets;         // targets[i] will hold an element of T[i]
+
+  // initialization of sources, T and targets
+  for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+  {
+    local_vertex& u = *i;
+    if (u.outgoing_edges.size() > 1)
+    {
+      sources.push_back(&u);
+      std::set<local_vertex*>& S = u.outgoing_edges;
+      T.push_back(std::vector<local_vertex*>(S.begin(), S.end()));
+    }
+  }
+  targets.resize(T.size(), 0);
+
+  // sort the sequences T[i] according to some heuristic
+  // TODO
+
+  // for each possible sequence of targets, check if the must_graph fulfills all constraints
+  try
+  {
+    utilities::foreach_sequence(T, targets.begin(), remove_may_transitions_helper(sources, targets, must_graph));
+  }
+  catch(remove_may_transitions_finished&)
+  {
+    // success
+  }
+  std::cerr << "Error: did not find a suitable control flow!" << std::endl;
+
+  mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
+}
+
 } // namespace detail
 
 } // namespace pbes_system

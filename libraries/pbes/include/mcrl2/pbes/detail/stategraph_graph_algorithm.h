@@ -15,6 +15,7 @@
 #include <sstream>
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/pbes/detail/stategraph_local_graph.h"
+#include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
 
@@ -559,70 +560,6 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       mCRL2log(log::debug, "stategraph") << "=== may graph ===\n" << may_graph.print() << std::endl;
     }
 
-    // checks if must_graph satisfies the constraints after adding edges between sources[i] and targets[i], for i in [0, ..., sources[i].size())
-    bool check_must_graph_constraints(const std::vector<local_vertex*>& sources, const std::vector<local_vertex*>& targets)
-    {
-      assert(sources.size() == targets.size());
-
-      // add the edges
-      for (std::size_t i = 0; i < sources.size(); i++)
-      {
-        local_vertex& u = *(sources[i]);
-        assert(u.outgoing_edges.find(targets[i]) == u.outgoing_edges.end());
-        u.outgoing_edges.insert(targets[i]);
-      }
-
-      bool result = must_graph.check_constraints();
-
-      // remove the edges
-      for (std::size_t i = 0; i < sources.size(); i++)
-      {
-        local_vertex& u = *(sources[i]);
-        u.outgoing_edges.erase(targets[i]);
-      }
-
-      return result;
-    }
-
-    void remove_may_transitions()
-    {
-      // pass 1: handle all vertices for which the number of outgoing may transitions is equal to 1
-      std::vector<local_vertex>& V = may_graph.vertices();
-      for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
-      {
-        local_vertex& u = *i;
-        if (u.outgoing_edges.size() == 1)
-        {
-          local_vertex v = **(u.outgoing_edges.begin());
-          u.outgoing_edges.clear();
-          must_graph.insert_edge(u.X, u.p, v.X, v.p);
-        }
-      }
-      mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
-
-      // pass 2: handle all vertices for which the number of outgoing may transitions is greater than 1
-      std::vector<local_vertex*> sources;         // the vertices for which the number of outgoing may transitions is greater than 1
-      std::vector<std::vector<local_vertex*> > T; // T[i] contains the targets of the outgoing edges of vertex sources
-      std::vector<local_vertex*> targets;         // targets[i] will hold an element of T[i]
-
-      // initialization of sources and T
-      for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
-      {
-        local_vertex& u = *i;
-        if (u.outgoing_edges.size() > 1)
-        {
-          sources.push_back(&u);
-          std::set<local_vertex*>& S = u.outgoing_edges;
-          T.push_back(std::vector<local_vertex*>(S.begin(), S.end()));
-        }
-      }
-
-      // sort the sequences T[i] according to some heuristic
-      // TODO
-
-      // for each possible sequence of targets, check if the must_graph fulfills all constraints
-    }
-
   public:
     /// \brief Computes the control flow graph
     void run(const pbes<>& p)
@@ -630,7 +567,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       super::run(p);
       compute_must_graph();
       compute_may_graph();
-      remove_may_transitions();
+      remove_may_transitions(must_graph, may_graph);
     }
 };
 

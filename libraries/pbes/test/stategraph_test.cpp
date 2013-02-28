@@ -282,11 +282,35 @@ void test_constraints()
   test_constraints(text, expected_result);
 }
 
+void test_remove_may_transitions()
+{
+  std::string must_text =
+    "X 0 ; Y 0 ; X 1 ; Y 1 ; Z 1 \n"
+  ;
+
+  std::string may_text =
+    "X 0 ; Y 0 ; X 1 ; Y 1 ; Z 1 \n"
+    "Y 0 ; X 0                   \n"
+    "Z 1 ; Y 0                   \n"
+    "Z 1 ; Y 1                   \n"
+    "Y 1 ; Z 1                   \n"
+    "X 1 ; Y 0                   \n"
+    "X 1 ; Y 1                   \n"
+  ;
+
+  detail::local_graph must_graph = detail::parse_local_graph(must_text);
+  detail::local_graph may_graph = detail::parse_local_graph(may_text);
+  detail::remove_may_transitions(must_graph, may_graph);
+  std::cerr << "--- must graph ---\n" << must_graph.print() << std::endl;
+  // BOOST_CHECK(false);
+}
+
 int test_main(int argc, char** argv)
 {
   log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
   test_guard();
   test_parse();
+  test_remove_may_transitions();
 
   return 0;
 }
