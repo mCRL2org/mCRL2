@@ -37,7 +37,9 @@ class stategraph_equation: public pbes_equation
     pbes_expression m_condition;
 
     // m_source[i], m_dest[i] and m_copy[i] correspond to m_predvars[i]
-    std::vector<data::mutable_map_substitution<> > m_source;
+    // m_sigma and m_source represent the same information (this should be cleaned up)
+    std::vector<data::mutable_map_substitution<> > m_sigma;
+    std::vector<std::map<std::size_t, data::data_expression> > m_source;
     std::vector<std::map<std::size_t, data::data_expression> > m_dest;
     std::vector<std::map<std::size_t, std::size_t> > m_copy;
 
@@ -92,13 +94,31 @@ class stategraph_equation: public pbes_equation
 
     // computes the source function for a pbes equation
     // source[i] contains the source parameters of g_i, represented in the form of a substitution
-    void compute_source()
+    void compute_source(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow)
     {
+      const core::identifier_string& X = variable().name();
       for (predicate_variable_vector::const_iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
       {
         data::mutable_map_substitution<> sigma;
         find_equality_conjuncts(i->second, m_parameters, sigma);
-        m_source.push_back(sigma);
+        m_sigma.push_back(sigma);
+
+        // convert sigma to source
+        std::map<std::size_t, data::data_expression> source;
+        for (std::size_t j = 0; j < m_parameters.size(); j++)
+        {
+          if (!is_cf(is_control_flow, X, j))
+          {
+            continue;
+          }
+          data::variable d_j = m_parameters[j];
+          data::data_expression e = sigma(d_j);
+          if (e != d_j)
+          {
+            source[j] = e;
+          }
+        }
+        m_source.push_back(source);
       }
     }
 
@@ -121,7 +141,7 @@ class stategraph_equation: public pbes_equation
           std::size_t k_index = 0;
           for (data::data_expression_list::const_iterator k = e.begin(); k != e.end(); ++k, ++k_index)
           {
-            data::data_expression c = R(*k, m_source[i]);
+            data::data_expression c = R(*k, m_sigma[i]);
             if (is_constant(c) && is_cf(is_control_flow, Y, k_index))
             {
               dest[j] = c;
@@ -176,7 +196,7 @@ class stategraph_equation: public pbes_equation
 
     void compute_source_dest_copy(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, data::rewriter& R)
     {
-      compute_source();
+      compute_source(is_control_flow);
       compute_dest(is_control_flow, R);
       compute_copy(is_control_flow);
     }
@@ -214,9 +234,19 @@ class stategraph_equation: public pbes_equation
       return m_predvars;
     }
 
-    const std::vector<data::mutable_map_substitution<> >& source() const
+    const std::vector<data::mutable_map_substitution<> >& sigma() const
+    {
+      return m_sigma;
+    }
+
+    const std::vector<std::map<std::size_t, data::data_expression> >& source() const
     {
       return m_source;
+    }
+
+    const std::vector<std::map<std::size_t, data::data_expression> >& dest() const
+    {
+      return m_dest;
     }
 
     const std::vector<std::map<std::size_t, std::size_t> >& copy() const
@@ -245,7 +275,20 @@ class stategraph_equation: public pbes_equation
         out << "    predvar = " << pbes_system::pp(m_predvars[i].first);
 
         // source
-        out << " source = " << data::print_substitution(m_source[i]);
+        const std::map<std::size_t, data::data_expression>& source = m_source[i];
+        out << " source = {";
+        for (std::map<std::size_t, data::data_expression>::const_iterator j = source.begin(); j != source.end(); ++j)
+        {
+          if (j != source.begin())
+          {
+            out << ", ";
+          }
+          out << "(" << j->first << ", " << data::pp(j->second) << ")";
+        }
+        out << "}";
+        
+        // sigma
+        // out << " sigma = " << data::print_substitution(m_sigma[i]);
 
         // dest
         const std::map<std::size_t, data::data_expression>& dest = m_dest[i];
@@ -335,7 +378,7 @@ class stategraph_pbes
     data::data_expression source(std::size_t k, std::size_t i, std::size_t n) const
     {
       const stategraph_equation& eqn = equations()[k];
-      const data::mutable_map_substitution<>& sigma = eqn.source()[i];
+      const data::mutable_map_substitution<>& sigma = eqn.sigma()[i];
       data::variable d_n = eqn.parameters()[n];
       data::data_expression x = sigma(d_n);
       if (x == d_n)

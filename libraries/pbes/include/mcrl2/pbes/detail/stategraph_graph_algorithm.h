@@ -75,7 +75,7 @@ struct local_graph
     vertex_map::iterator i = m.find(p);
     if (i == m.end())
     {
-      std::cout << "(X, p) = (" << std::string(X) << ", " << p << ")" << std::endl;
+      std::cerr << "vertex not found: (X, p) = (" << std::string(X) << ", " << p << ")" << std::endl;
     }
     assert (i != m.end());
     return *(i->second);
@@ -92,7 +92,7 @@ struct local_graph
   // insert edge between (X, i) and (Y, j)
   void insert_edge(const core::identifier_string& X, std::size_t i, const core::identifier_string& Y, std::size_t j)
   {
-    mCRL2log(log::debug, "stategraph") << "insert edge [must] (" << std::string(X) << ", " << i << ") (" << std::string(Y) << ", " << j << ")" << std::endl;
+    mCRL2log(log::debug, "stategraph") << "insert edge (" << std::string(X) << ", " << i << ") (" << std::string(Y) << ", " << j << ")" << std::endl;
     local_vertex& u = find_vertex(X, i);
     local_vertex& v = find_vertex(Y, j);
     u.outgoing_edges.insert(&v);
@@ -625,16 +625,27 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       {
         const stategraph_equation& eqn = *k;
         core::identifier_string X = eqn.variable().name();
-        const std::vector<std::map<std::size_t, std::size_t> >& copy = k->copy();
-        for (std::size_t i = 0; i < copy.size(); i++)
+        const predicate_variable_vector& predvars = k->predicate_variables();
+
+        for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          const std::map<std::size_t, std::size_t>& m = copy[i];
-          for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
+          const std::map<std::size_t, data::data_expression>& source = k->source()[i];
+          const std::map<std::size_t, data::data_expression>& dest = k->dest()[i];
+          const core::identifier_string& Y = predvars[i].first.name();
+
+          for (std::map<std::size_t, data::data_expression>::const_iterator j = source.begin(); j != source.end(); ++j)
           {
             std::size_t p = j->first;
-            std::size_t l = j->second;
-            const core::identifier_string& Y = eqn.predicate_variables()[i].first.name();
-            must_graph.insert_edge(X, p, Y, l);
+            local_vertex& u = must_graph.find_vertex(X, p);
+            if (u.outgoing_edges.empty())
+            {
+              for (std::map<std::size_t, data::data_expression>::const_iterator k = dest.begin(); k != dest.end(); ++k)
+              {
+                std::size_t l = k->first;
+                // N.B. This does not work if l is not a control flow parameter of Y.
+                // may_graph.insert_edge(X, p, Y, l);
+              }
+            }
           }
         }
       }
@@ -647,6 +658,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
     {
       super::run(p);
       compute_must_graph();
+      compute_may_graph();
     }
 };
 
