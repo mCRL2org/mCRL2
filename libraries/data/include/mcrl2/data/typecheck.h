@@ -37,12 +37,12 @@ class sort_expression_checker
                             const alias_vector::const_iterator aliases_end);
 
 
-    sort_expression_checker(const data_specification &data_spec)
+    /* sort_expression_checker(const data_specification &data_spec)
       :  sort_expression_checker(data_spec.user_defined_sorts().begin(),
                                 data_spec.user_defined_sorts().end(),
                                 data_spec.user_defined_aliases().begin(),
                                 data_spec.user_defined_aliases().end()) 
-    {}
+    {} */
     
     /** \brief     Type check a sort expression.
     *  Throws an exception if the expression is not well typed.
@@ -204,7 +204,10 @@ void type_check(const sort_expression& sort_expr, const data_specification& data
 {
   try
   {
-    sort_expression_checker type_checker(data_spec);
+    sort_expression_checker type_checker(data_spec.user_defined_sorts().begin(),
+                                         data_spec.user_defined_sorts().end(),
+                                         data_spec.user_defined_aliases().begin(),
+                                         data_spec.user_defined_aliases().end());
     type_checker(sort_expr);
   }
   catch (mcrl2::runtime_error &e)

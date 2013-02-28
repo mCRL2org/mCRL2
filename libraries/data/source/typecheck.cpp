@@ -4315,7 +4315,10 @@ void mcrl2::data::data_expression_checker::ReadInConstructors(const std::map<cor
 
 
 mcrl2::data::data_expression_checker::data_expression_checker(const data_specification &data_spec)
-      : sort_expression_checker(data_spec),
+      : sort_expression_checker(data_spec.user_defined_sorts().begin(),
+                                data_spec.user_defined_sorts().end(),
+                                data_spec.user_defined_aliases().begin(),
+                                data_spec.user_defined_aliases().end()),
         was_warning_upcasting(false),
         was_ambiguous(false)
 
@@ -5099,7 +5102,7 @@ void gstcSplitSortDecls(const aterm_list &SortDecls,
   alias_vector SortRefs;
   for(aterm_list::const_iterator i=SortDecls.begin(); i!=SortDecls.end(); ++i)
   {
-    const aterm_appl &SortDecl(*i);
+    const aterm_appl &SortDecl=aterm_cast<aterm_appl>(*i);
     if (gsIsSortRef(SortDecl))
     {
       SortRefs.push_back(SortDecl);
