@@ -282,11 +282,25 @@ void test_constraints()
   test_constraints(text, expected_result);
 }
 
+struct local_vertex_compare
+{
+  const detail::local_vertex* source;
+
+  local_vertex_compare()
+    : source(0)
+  {}
+
+  bool operator()(const detail::local_vertex* u, const detail::local_vertex* v) const
+  {
+    return (source->X == u->X) > (source->X == v->X);
+  }
+};
+
 void test_remove_may_transitions(const std::string& must_text, const std::string& may_text)
 {
   detail::local_graph must_graph = detail::parse_local_graph(must_text);
   detail::local_graph may_graph = detail::parse_local_graph(may_text);
-  bool result = detail::remove_may_transitions(must_graph, may_graph);
+  bool result = detail::remove_may_transitions(must_graph, may_graph, local_vertex_compare());
   BOOST_CHECK(result);
   BOOST_CHECK(must_graph.check_constraints());
 

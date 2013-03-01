@@ -560,6 +560,29 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       mCRL2log(log::debug, "stategraph") << "=== may graph ===\n" << may_graph.print() << std::endl;
     }
 
+    struct local_vertex_compare
+    {
+      const detail::local_vertex* source;
+      const stategraph_pbes& p;
+
+      local_vertex_compare(const stategraph_pbes& p_)
+        : source(0),
+          p(p_)
+      {}
+
+      bool operator()(const detail::local_vertex* u, const detail::local_vertex* v) const
+      {
+        if ((source->X == u->X) != (source->X == v->X))
+        {
+          return (source->X == u->X) > (source->X == v->X);
+        }
+        core::identifier_string s = find_equation(p, source->X)->parameters()[source->p].name();
+        core::identifier_string u1 = find_equation(p, u->X)->parameters()[u->p].name();
+        core::identifier_string v1 = find_equation(p, v->X)->parameters()[v->p].name();
+        return (s == u1) > (s == v1);
+      }
+    };
+
   public:
     /// \brief Computes the control flow graph
     void run(const pbes<>& p)
@@ -567,7 +590,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       super::run(p);
       compute_must_graph();
       compute_may_graph();
-      remove_may_transitions(must_graph, may_graph);
+      remove_may_transitions(must_graph, may_graph, local_vertex_compare(m_pbes));
     }
 };
 

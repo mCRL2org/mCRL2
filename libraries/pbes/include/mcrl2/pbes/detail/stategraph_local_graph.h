@@ -21,6 +21,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/sequence.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
@@ -305,8 +306,8 @@ std::cerr << "result = " << std::boolalpha << result << std::endl;
 };
 
 // Returns true if a control flow graph is found that satisfies the constraints.
-inline
-bool remove_may_transitions(local_graph& must_graph, local_graph& may_graph)
+template <typename VertexCompare>
+bool remove_may_transitions(local_graph& must_graph, local_graph& may_graph, VertexCompare comp)
 {
   // pass 1: handle all vertices for which the number of outgoing may transitions is equal to 1
   std::vector<local_vertex>& V = may_graph.vertices();
@@ -338,8 +339,12 @@ bool remove_may_transitions(local_graph& must_graph, local_graph& may_graph)
     }
   }
 
-  // sort the sequences T[i] according to some heuristic
-  // TODO
+  // sort the sequences T[i] using the supplied function sort_vertices
+  for (std::size_t i = 0; i < T.size(); i++)
+  {
+    comp.source = sources[i];
+    std::sort(T[i].begin(), T[i].end(), comp);
+  }
 
   // initialize targets
   for (std::vector<std::vector<local_vertex*> >::const_iterator i = T.begin(); i != T.end(); ++i)
