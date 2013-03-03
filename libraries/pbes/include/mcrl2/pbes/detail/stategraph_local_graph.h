@@ -239,7 +239,7 @@ local_graph parse_local_graph(const std::string& text)
   for (std::vector<std::string>::const_iterator i = ++lines.begin(); i != lines.end(); ++i)
   {
     std::vector<std::string> vertices = utilities::split(boost::trim_copy(*i), ";");
-    if (!vertices.size() == 2)
+    if (vertices.size() != 2)
     {
       throw mcrl2::runtime_error("error: could not parse local edge " + *i);
     }
