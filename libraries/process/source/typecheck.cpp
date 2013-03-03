@@ -223,11 +223,11 @@ std::pair<bool,sort_expression_list> mcrl2::process::process_expression_checker:
   {
     if (InTypesL(PosTypeList,TypeListList))
     {
-      return std::pair<bool,aterm_list>(true,PosTypeList);
+      return std::make_pair(true,PosTypeList);
     }
     else
     {
-      return std::pair<bool,aterm_list>(false, aterm_list());
+      return std::make_pair(false, sort_expression_list());
     }
   }
 
@@ -244,15 +244,15 @@ std::pair<bool,sort_expression_list> mcrl2::process::process_expression_checker:
   }
   if (NewTypeListList.empty())
   {
-    return std::pair<bool,aterm_list>(false, aterm_list());
+    return std::make_pair(false, sort_expression_list());
   }
   if (NewTypeListList.size()==1)
   {
-    return std::pair<bool,aterm_list>(true,NewTypeListList.front());
+    return std::make_pair(true,NewTypeListList.front());
   }
 
   // otherwise return not inferred.
-  return std::pair<bool,aterm_list>(true,GetNotInferredList(reverse(NewTypeListList)));
+  return std::make_pair(true,GetNotInferredList(reverse(NewTypeListList)));
 }
 
 
