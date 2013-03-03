@@ -76,10 +76,13 @@ abstraction(const binder_type& binding_operator, const variable_list& variables,
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
-abstraction()                                                       : public data::data_expression | XE | None | Abstraction
-forall(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Universal quantification
-exists(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Existential quantification
-lambda(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Lambda abstraction
+abstraction()                                                                         : public data::data_expression | XES | None | Abstraction
+forall(const variable_list& variables, const data_expression& body)                   : public data::abstraction     | E   | None | Universal quantification
+exists(const variable_list& variables, const data_expression& body)                   : public data::abstraction     | E   | None | Existential quantification
+lambda(const variable_list& variables, const data_expression& body)                   : public data::abstraction     | E   | None | Lambda abstraction
+set_comprehension(const variable_list& variables, const data_expression& body)        : public data::abstraction     | E   | None | Set comprehension
+bag_comprehension(const variable_list& variables, const data_expression& body)        : public data::abstraction     | E   | None | Bag comprehension
+set_or_bag_comprehension(const variable_list& variables, const data_expression& body) : public data::abstraction     | E   | None | Set/Bag comprehension
 '''
 
 DATA_CLASSES = r'''

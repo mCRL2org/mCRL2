@@ -18,6 +18,9 @@
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/set_comprehension.h"
+#include "mcrl2/data/bag_comprehension.h"
+#include "mcrl2/data/set_or_bag_comprehension.h"
 #include "mcrl2/data/identifier.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/where_clause.h"
@@ -180,6 +183,30 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
+  data::data_expression operator()(const data::set_comprehension& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::data_expression result = data::set_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  data::data_expression operator()(const data::bag_comprehension& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::data_expression result = data::bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  data::data_expression operator()(const data::set_or_bag_comprehension& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::data_expression result = data::set_or_bag_comprehension(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   data::structured_sort_constructor_argument operator()(const data::structured_sort_constructor_argument& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -308,6 +335,18 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
     }
+    else if (data::is_set_comprehension(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+    }
+    else if (data::is_bag_comprehension(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+    }
+    else if (data::is_set_or_bag_comprehension(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_or_bag_comprehension>(x));
+    }
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -415,6 +454,30 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
+  data::data_expression operator()(const data::set_comprehension& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::data_expression result = data::set_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  data::data_expression operator()(const data::bag_comprehension& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::data_expression result = data::bag_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  data::data_expression operator()(const data::set_or_bag_comprehension& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::data_expression result = data::set_or_bag_comprehension(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   data::data_equation operator()(const data::data_equation& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -486,6 +549,18 @@ struct add_data_expressions: public Builder<Derived>
     else if (data::is_lambda(x))
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::lambda>(x));
+    }
+    else if (data::is_set_comprehension(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_comprehension>(x));
+    }
+    else if (data::is_bag_comprehension(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::bag_comprehension>(x));
+    }
+    else if (data::is_set_or_bag_comprehension(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<data::set_or_bag_comprehension>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
