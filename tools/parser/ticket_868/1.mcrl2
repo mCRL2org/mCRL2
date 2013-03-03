@@ -1,0 +1,2 @@
+act a,b;
+init a@1 | b;
