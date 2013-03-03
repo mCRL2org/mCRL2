@@ -194,6 +194,16 @@ std::string t16 =
   ;
 std::string x16 = "binding_variables = X, Y, Z";
 
+std::string t17 =
+  "sort D = struct d1 | d2 | d3 | d4;\n"
+  "pbes nu X1 =\n"
+  "       X(2);\n"
+  "     mu X(s3_X: Pos) =\n"
+  "       val(s3_X == 4) || val(s3_X == 2) && X(3) || val(s3_X == 2) && X(4) || val(s3_X == 3) && X(1) || val(s3_X == 4) && X(1);\n"
+  "init X1;\n";
+
+std::string x17 = "binding_variables = X1, X";
+
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
@@ -255,6 +265,7 @@ int test_main(int argc, char** argv)
   test_pbes(t14, x14, false);
   test_pbes(t15, x15, false);
   test_pbes(t16, x16, true);
+  test_pbes(t17, x17, false);
 
   return 0;
 }
