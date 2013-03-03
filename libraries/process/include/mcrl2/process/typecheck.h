@@ -23,7 +23,7 @@ namespace process
 {
 
 
-class process_expression_checker:public data::data_expression_checker
+class process_type_checker:public data::data_type_checker
 {
   protected:
     std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
@@ -33,9 +33,10 @@ class process_expression_checker:public data::data_expression_checker
     process_equation_list equations;
     std::map <process_identifier,data::variable_list> proc_pars; // process_identifier -> variable_list
     std::map <process_identifier,process_expression> proc_bodies;  // process_identifier -> rhs
+    process_specification type_checked_process_spec;
 
   public:
-    process_expression_checker(const process_specification &proc_spec);
+    process_type_checker(const process_specification &proc_spec);
 
     /** \brief     Type check a process expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -43,6 +44,7 @@ class process_expression_checker:public data::data_expression_checker
      *  \return    a process expression where all untyped identifiers have been replace by typed ones.
      **/
     process_expression operator()(const process_expression &d);
+    process_specification operator()();
 
   protected:
     void ReadInActs(const lps::action_label_list &Acts);
@@ -67,6 +69,7 @@ class process_expression_checker:public data::data_expression_checker
     atermpp::term_list<data::sort_expression_list> TypeListsIntersect(
                                   const atermpp::term_list<data::sort_expression_list> &TypeListList1, 
                                   const atermpp::term_list<data::sort_expression_list> &TypeListList2);
+    process_equation_list WriteProcs(const process_equation_vector &oldprocs);
 
 };
 
@@ -79,23 +82,15 @@ class process_expression_checker:public data::data_expression_checker
 inline
 void type_check(process_expression& proc_expr, const process_specification& proc_spec)
 {
-  // TODO: replace all this nonsense code by a proper type check implementation
-
-  process_expression_checker type_checker(proc_spec);
   try 
   {
+    process_type_checker type_checker(proc_spec);
     proc_expr=type_checker(proc_expr);
   }
   catch (mcrl2::runtime_error &e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pp(proc_expr));
   }
-  /* atermpp::aterm_appl t = core::type_check_proc_expr(proc_expr, process_specification_to_aterm(proc_spec));
-  if (t==atermpp::aterm_appl())
-  {
-    throw mcrl2::runtime_error("could not type check " + pp(proc_expr));
-  }
-  proc_expr = process_expression(t); */
 }
 
 /** \brief     Type check a parsed mCRL2 process specification.
@@ -107,15 +102,8 @@ void type_check(process_expression& proc_expr, const process_specification& proc
 inline
 void type_check(process_specification& proc_spec)
 {
-  // TODO: replace all this nonsense code by a proper type check implementation
-  atermpp::aterm_appl t = process_specification_to_aterm(proc_spec);
-  t = core::type_check_proc_spec(t);
-  if (t==atermpp::aterm_appl())
-  {
-    throw mcrl2::runtime_error("could not type check process specification");
-  }
-  process_specification result(t);
-  proc_spec = result;
+  process_type_checker type_checker(proc_spec);
+  proc_spec=type_checker();
 }
 
 } // namespace process

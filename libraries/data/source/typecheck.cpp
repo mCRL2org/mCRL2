@@ -496,7 +496,7 @@ aterm_appl type_check_proc_spec(aterm_appl proc_spec)
 
 // ------------------------------  Here starts the new class based sort expression checker -----------------------
 
-bool mcrl2::data::sort_expression_checker::check_for_sort_alias_loop_through_function_sort(
+bool mcrl2::data::sort_type_checker::check_for_sort_alias_loop_through_function_sort(
   const basic_sort& start_search,
   const basic_sort& end_search,
   std::set < basic_sort > &visited,
@@ -527,7 +527,7 @@ bool mcrl2::data::sort_expression_checker::check_for_sort_alias_loop_through_fun
   return check_for_sort_alias_loop_through_function_sort_via_expression(reference,end_search,visited,observed_a_sort_constructor);
 }
 
-bool mcrl2::data::sort_expression_checker::check_for_sort_alias_loop_through_function_sort_via_expression(
+bool mcrl2::data::sort_type_checker::check_for_sort_alias_loop_through_function_sort_via_expression(
   const sort_expression& sort_expression_start_search,
   const basic_sort& end_search,
   std::set < basic_sort > &visited,
@@ -606,7 +606,7 @@ bool mcrl2::data::sort_expression_checker::check_for_sort_alias_loop_through_fun
   return false;
 }
 
-void mcrl2::data::sort_expression_checker::check_sort(const basic_sort &sort)
+void mcrl2::data::sort_type_checker::check_sort(const basic_sort &sort)
 {
   if (sort_bool::is_bool(sort))
   {
@@ -634,7 +634,7 @@ void mcrl2::data::sort_expression_checker::check_sort(const basic_sort &sort)
   }
 }
 
-mcrl2::data::sort_expression_checker::sort_expression_checker(
+mcrl2::data::sort_type_checker::sort_type_checker(
                 const sort_expression_vector::const_iterator sorts_begin,
                 const sort_expression_vector::const_iterator sorts_end,
                 const alias_vector::const_iterator aliases_begin,
@@ -678,7 +678,7 @@ std::cerr << "Don't check sort " << pp(*i) << "\n";
   }
 }
 
-void mcrl2::data::sort_expression_checker::IsSortDeclared(const basic_sort &SortName)
+void mcrl2::data::sort_type_checker::IsSortDeclared(const basic_sort &SortName)
 {
 
   if (sort_bool::is_bool(SortName) ||
@@ -700,7 +700,7 @@ void mcrl2::data::sort_expression_checker::IsSortDeclared(const basic_sort &Sort
   throw mcrl2::runtime_error("basic or defined sort " + pp(SortName) + " is not declared");
 }
 
-void mcrl2::data::sort_expression_checker::IsSortExprListDeclared(const sort_expression_list &SortExprList)
+void mcrl2::data::sort_type_checker::IsSortExprListDeclared(const sort_expression_list &SortExprList)
 {
   for (sort_expression_list::const_iterator i=SortExprList.begin(); i!=SortExprList.end(); ++i)
   {
@@ -710,7 +710,7 @@ void mcrl2::data::sort_expression_checker::IsSortExprListDeclared(const sort_exp
 
 
 
-void mcrl2::data::sort_expression_checker::IsSortExprDeclared(const sort_expression &SortExpr)
+void mcrl2::data::sort_type_checker::IsSortExprDeclared(const sort_expression &SortExpr)
 {
   if (is_basic_sort(SortExpr))
   {
@@ -752,14 +752,14 @@ void mcrl2::data::sort_expression_checker::IsSortExprDeclared(const sort_express
   throw mcrl2::runtime_error("this is not a sort expression " + pp(SortExpr));
 }
 
-void mcrl2::data::sort_expression_checker::operator ()(const sort_expression &sort_expr)
+void mcrl2::data::sort_type_checker::operator ()(const sort_expression &sort_expr)
 {
   IsSortExprDeclared(sort_expr);
 }
 
 // ------------------------------  Here ends the new class based sort expression checker -----------------------
 // ------------------------------  Here starts the new class based data expression checker -----------------------
-bool mcrl2::data::data_expression_checker::VarsUnique(const variable_list &VarDecls)
+bool mcrl2::data::data_type_checker::VarsUnique(const variable_list &VarDecls)
 {
   std::set<core::identifier_string> Temp;
 
@@ -779,7 +779,7 @@ bool mcrl2::data::data_expression_checker::VarsUnique(const variable_list &VarDe
 }
 
 
-sort_expression mcrl2::data::data_expression_checker::UpCastNumericType(
+sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
                       sort_expression NeededType, 
                       sort_expression Type, 
                       data_expression &Par, 
@@ -940,7 +940,7 @@ sort_expression mcrl2::data::data_expression_checker::UpCastNumericType(
   throw mcrl2::runtime_error("Upcasting " + pp(Type) + " to a number fails");
 }
 
-void mcrl2::data::data_expression_checker::ErrorMsgCannotCast(
+void mcrl2::data::data_type_checker::ErrorMsgCannotCast(
                         sort_expression CandidateType, 
                         data_expression_list Arguments, 
                         sort_expression_list ArgumentTypes,
@@ -1037,7 +1037,7 @@ void mcrl2::data::data_expression_checker::ErrorMsgCannotCast(
 }
 
 
-bool mcrl2::data::data_expression_checker::UnSet(sort_expression PosType, sort_expression &result) 
+bool mcrl2::data::data_type_checker::UnSet(sort_expression PosType, sort_expression &result) 
 {
   //select Set(Type), elements, return their list of arguments.
   if (gsIsSortId(PosType))
@@ -1082,7 +1082,7 @@ bool mcrl2::data::data_expression_checker::UnSet(sort_expression PosType, sort_e
   return false;
 }
 
-bool mcrl2::data::data_expression_checker::UnBag(sort_expression PosType, sort_expression &result) 
+bool mcrl2::data::data_type_checker::UnBag(sort_expression PosType, sort_expression &result) 
 {
   //select Bag(Type), elements, return their list of arguments.
   if (gsIsSortId(PosType))
@@ -1127,7 +1127,7 @@ bool mcrl2::data::data_expression_checker::UnBag(sort_expression PosType, sort_e
   return false;
 }
 
-bool mcrl2::data::data_expression_checker::UnList(sort_expression PosType, sort_expression &result)
+bool mcrl2::data::data_type_checker::UnList(sort_expression PosType, sort_expression &result)
 {
   //select List(Type), elements, return their list of arguments.
   if (gsIsSortId(PosType))
@@ -1173,7 +1173,7 @@ bool mcrl2::data::data_expression_checker::UnList(sort_expression PosType, sort_
 }
 
 
-bool mcrl2::data::data_expression_checker::UnArrowProd(sort_expression_list ArgTypes, sort_expression PosType, sort_expression &result)
+bool mcrl2::data::data_type_checker::UnArrowProd(sort_expression_list ArgTypes, sort_expression PosType, sort_expression &result)
 {
   //Filter PosType to contain only functions ArgTypes -> TypeX
   //result is TypeX if unique, the set of TypeX as NotInferred if many. 
@@ -1240,7 +1240,7 @@ bool mcrl2::data::data_expression_checker::UnArrowProd(sort_expression_list ArgT
   return false;
 }
 
-bool mcrl2::data::data_expression_checker::UnifyMinType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result)
+bool mcrl2::data::data_type_checker::UnifyMinType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result)
 {
   //Find the minimal type that Unifies the 2. If not possible, return false.
   if (!TypeMatchA(Type1,Type2,result))
@@ -1263,7 +1263,7 @@ bool mcrl2::data::data_expression_checker::UnifyMinType(const sort_expression &T
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchIf(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchIf(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types for if.
   //If some of the parameters are Pos,Nat, or Int do upcasting
@@ -1288,7 +1288,7 @@ bool mcrl2::data::data_expression_checker::MatchIf(const sort_expression &type, 
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchEqNeqComparison(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchEqNeqComparison(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types for ==, !=, <, <=, >= and >.
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1310,7 +1310,7 @@ bool mcrl2::data::data_expression_checker::MatchEqNeqComparison(const sort_expre
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchListOpCons(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchListOpCons(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Cons operations (SxList(S)->List(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1350,7 +1350,7 @@ bool mcrl2::data::data_expression_checker::MatchListOpCons(const sort_expression
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchListOpSnoc(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchListOpSnoc(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Cons operations (SxList(S)->List(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1391,7 +1391,7 @@ bool mcrl2::data::data_expression_checker::MatchListOpSnoc(const sort_expression
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchListOpConcat(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchListOpConcat(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Concat operations (List(S)xList(S)->List(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1441,7 +1441,7 @@ bool mcrl2::data::data_expression_checker::MatchListOpConcat(const sort_expressi
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchListOpEltAt(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchListOpEltAt(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of EltAt operations (List(S)xNat->S)
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1471,7 +1471,7 @@ bool mcrl2::data::data_expression_checker::MatchListOpEltAt(const sort_expressio
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchListOpHead(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchListOpHead(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Cons operations (SxList(S)->List(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1499,7 +1499,7 @@ bool mcrl2::data::data_expression_checker::MatchListOpHead(const sort_expression
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchListOpTail(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchListOpTail(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Cons operations (SxList(S)->List(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1535,7 +1535,7 @@ bool mcrl2::data::data_expression_checker::MatchListOpTail(const sort_expression
 }
 
 //Sets
-bool mcrl2::data::data_expression_checker::MatchSetOpSet2Bag(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchSetOpSet2Bag(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Set2Bag (Set(S)->Bag(s))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1573,7 +1573,7 @@ bool mcrl2::data::data_expression_checker::MatchSetOpSet2Bag(const sort_expressi
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchListSetBagOpIn(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchListSetBagOpIn(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the type of EltIn (SxList(S)->Bool or SxSet(S)->Bool or SxBag(S)->Bool)
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1604,7 +1604,7 @@ bool mcrl2::data::data_expression_checker::MatchListSetBagOpIn(const sort_expres
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchSetBagOpUnionDiffIntersect(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Set or Bag Union, Diff or Intersect
   //operations (Set(S)xSet(S)->Set(S)). It can also be that this operation is
@@ -1667,7 +1667,7 @@ bool mcrl2::data::data_expression_checker::MatchSetBagOpUnionDiffIntersect(const
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchSetOpSetCompl(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchSetOpSetCompl(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of SetCompl operation (Set(S)->Set(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1713,7 +1713,7 @@ bool mcrl2::data::data_expression_checker::MatchSetOpSetCompl(const sort_express
 }
 
 //Bags
-bool mcrl2::data::data_expression_checker::MatchBagOpBag2Set(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchBagOpBag2Set(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of Bag2Set (Bag(S)->Set(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1750,7 +1750,7 @@ bool mcrl2::data::data_expression_checker::MatchBagOpBag2Set(const sort_expressi
   return true;
 }
 
-bool mcrl2::data::data_expression_checker::MatchBagOpBagCount(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchBagOpBagCount(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of BagCount (SxBag(S)->Nat)
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1796,7 +1796,7 @@ bool mcrl2::data::data_expression_checker::MatchBagOpBagCount(const sort_express
 }
 
 
-bool mcrl2::data::data_expression_checker::MatchFuncUpdate(const sort_expression &type, sort_expression &result)
+bool mcrl2::data::data_type_checker::MatchFuncUpdate(const sort_expression &type, sort_expression &result)
 {
   //tries to sort out the types of FuncUpdate ((A->B)xAxB->(A->B))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -1840,7 +1840,7 @@ bool mcrl2::data::data_expression_checker::MatchFuncUpdate(const sort_expression
 }
 
 
-bool mcrl2::data::data_expression_checker::MaximumType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result)
+bool mcrl2::data::data_type_checker::MaximumType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result)
 {
   // if Type1 is convertible into Type2 or vice versa, the most general
   // of these types are returned in result. If no conversion is possible false is returned
@@ -1939,7 +1939,7 @@ bool mcrl2::data::data_expression_checker::MaximumType(const sort_expression &Ty
   return false;
 }
 
-sort_expression mcrl2::data::data_expression_checker::ExpandNumTypesUp(sort_expression Type)
+sort_expression mcrl2::data::data_type_checker::ExpandNumTypesUp(sort_expression Type)
 {
   //Expand Pos.. to possible bigger types.
   if (data::is_unknown_sort(data::sort_expression(Type)))
@@ -1993,7 +1993,7 @@ sort_expression mcrl2::data::data_expression_checker::ExpandNumTypesUp(sort_expr
   return Type;
 }
 
-sort_expression mcrl2::data::data_expression_checker::ExpandNumTypesDown(sort_expression Type)
+sort_expression mcrl2::data::data_type_checker::ExpandNumTypesDown(sort_expression Type)
 {
   // Expand Numeric types down
   if (data::is_unknown_sort(data::sort_expression(Type)))
@@ -2006,12 +2006,13 @@ sort_expression mcrl2::data::data_expression_checker::ExpandNumTypesDown(sort_ex
   }
 
   bool function=false;
-  aterm_list Args;
+  sort_expression_list Args;
   if (gsIsSortArrow(Type))
   {
+    const function_sort fs=aterm_cast<const function_sort>(Type);
     function=true;
-    Args=aterm_cast<aterm_list>(Type[0]);
-    Type=aterm_cast<aterm_appl>(Type[1]);
+    Args=fs.domain();
+    Type=fs.codomain();
   }
 
   if (EqTypesA(sort_real::real_(),Type))
@@ -2031,7 +2032,7 @@ sort_expression mcrl2::data::data_expression_checker::ExpandNumTypesDown(sort_ex
 }
 
 
-bool mcrl2::data::data_expression_checker::InTypesA(sort_expression Type, sort_expression_list Types)
+bool mcrl2::data::data_type_checker::InTypesA(sort_expression Type, sort_expression_list Types)
 {
   for (; !Types.empty(); Types=Types.tail())
     if (EqTypesA(Type,Types.front()))
@@ -2041,7 +2042,7 @@ bool mcrl2::data::data_expression_checker::InTypesA(sort_expression Type, sort_e
   return false;
 }
 
-bool mcrl2::data::data_expression_checker::EqTypesA(sort_expression Type1, sort_expression Type2)
+bool mcrl2::data::data_type_checker::EqTypesA(sort_expression Type1, sort_expression Type2)
 {
   if (Type1==Type2)
   {
@@ -2051,7 +2052,7 @@ bool mcrl2::data::data_expression_checker::EqTypesA(sort_expression Type1, sort_
   return UnwindType(Type1)==UnwindType(Type2);
 }
 
-bool mcrl2::data::data_expression_checker::InTypesL(sort_expression_list Type, term_list<sort_expression_list> Types)
+bool mcrl2::data::data_type_checker::InTypesL(sort_expression_list Type, term_list<sort_expression_list> Types)
 {
   for (; !Types.empty(); Types=Types.tail())
     if (EqTypesL(Type,Types.front()))
@@ -2061,7 +2062,7 @@ bool mcrl2::data::data_expression_checker::InTypesL(sort_expression_list Type, t
   return false;
 }
 
-bool mcrl2::data::data_expression_checker::EqTypesL(sort_expression_list Type1, sort_expression_list Type2)
+bool mcrl2::data::data_type_checker::EqTypesL(sort_expression_list Type1, sort_expression_list Type2)
 {
   if (Type1==Type2)
   {
@@ -2080,7 +2081,7 @@ bool mcrl2::data::data_expression_checker::EqTypesL(sort_expression_list Type1, 
 }
 
 
-sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeDN(
+sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
   const std::map<core::identifier_string,sort_expression> &DeclaredVars,
   const std::map<core::identifier_string,sort_expression> &AllowedVars,
   data_expression &DataTerm,
@@ -2328,7 +2329,7 @@ sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeDN(
     if (ParList.empty())
     {
       //provide some information to the upper layer for a better error message
-      aterm_appl Sort;
+      sort_expression Sort;
       if (CandidateParList.size()==1)
       {
         Sort=CandidateParList.front();
@@ -2356,7 +2357,7 @@ sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeDN(
       // replace PossibleSorts by a single possibility.
       sort_expression Type=ParList.front();
 
-      aterm_appl OldType=Type;
+      sort_expression OldType=Type;
       bool result=true;
       assert(Type.defined());
       if (core::gstcHasUnknown(Type))
@@ -2594,7 +2595,7 @@ sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeDN(
 }
 
 
-void mcrl2::data::data_expression_checker::AddVars2Table(
+void mcrl2::data::data_type_checker::AddVars2Table(
                    std::map<core::identifier_string,sort_expression> &Vars, 
                    variable_list VarDecls, 
                    std::map<core::identifier_string,sort_expression> &result)
@@ -2615,7 +2616,7 @@ void mcrl2::data::data_expression_checker::AddVars2Table(
 }
 
 
-sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeD(
+sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
   const std::map<core::identifier_string,sort_expression> &DeclaredVars,
   const std::map<core::identifier_string,sort_expression> &AllowedVars,
   data_expression &DataTerm,
@@ -3080,7 +3081,6 @@ sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeD(
     }
     sort_expression_list NewArgumentTypes;
     data_expression_list NewArguments;
-
     for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
     {
       data_expression Arg= *i;
@@ -3436,8 +3436,9 @@ sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeD(
       { 
         ParList=j_gssystem->second; // The function only occurs in the system.
       }
-      else // None are defined.
+      else 
       {
+
         throw mcrl2::runtime_error("unknown operation " + pp(Name));
       }
     }
@@ -3474,7 +3475,7 @@ sort_expression mcrl2::data::data_expression_checker::TraverseVarConsTypeD(
 }
 
 
-std::map < data::sort_expression, data::basic_sort > mcrl2::data::data_expression_checker::construct_normalised_aliases()
+std::map < data::sort_expression, data::basic_sort > mcrl2::data::data_type_checker::construct_normalised_aliases()
 {
   // This function does the same as data_specification::reconstruct_m_normalised_aliases().
   // Therefore, it should be replaced by that function, after restructuring the type checker.
@@ -3565,7 +3566,7 @@ static sort_expression mapping(sort_expression s,std::map < sort_expression, bas
 }
 
 
-void mcrl2::data::data_expression_checker::check_for_empty_constructor_domains(function_symbol_list constructor_list)
+void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(function_symbol_list constructor_list)
 {
   // First add the constructors for structured sorts to the constructor list;
   try
@@ -3680,7 +3681,7 @@ void mcrl2::data::data_expression_checker::check_for_empty_constructor_domains(f
 }
 
 
-void mcrl2::data::data_expression_checker::ReadInFuncs(const function_symbol_vector &Cons, const function_symbol_vector &Maps)
+void mcrl2::data::data_type_checker::ReadInFuncs(const function_symbol_vector &Cons, const function_symbol_vector &Maps)
 {
   mCRL2log(debug) << "Start Read-in Func" << std::endl;
 
@@ -3754,7 +3755,7 @@ void mcrl2::data::data_expression_checker::ReadInFuncs(const function_symbol_vec
   check_for_empty_constructor_domains(function_symbol_list(Cons.begin(),Cons.end())); // throws exception if not ok.
 }
 
-void mcrl2::data::data_expression_checker::AddConstant(const data::function_symbol &f, const std::string msg)
+void mcrl2::data::data_type_checker::AddConstant(const data::function_symbol &f, const std::string msg)
 {
   core::identifier_string Name = f.name();
   sort_expression Sort = f.sort();
@@ -3773,7 +3774,7 @@ void mcrl2::data::data_expression_checker::AddConstant(const data::function_symb
 }
 
 
-bool mcrl2::data::data_expression_checker::TypeMatchL(
+bool mcrl2::data::data_type_checker::TypeMatchL(
                      const sort_expression_list &TypeList, 
                      const sort_expression_list &PosTypeList, 
                      sort_expression_list &result)
@@ -3802,7 +3803,7 @@ bool mcrl2::data::data_expression_checker::TypeMatchL(
 }
 
 
-sort_expression mcrl2::data::data_expression_checker::UnwindType(const sort_expression &Type)
+sort_expression mcrl2::data::data_type_checker::UnwindType(const sort_expression &Type)
 {
   if (is_container_sort(Type))
   {
@@ -3835,7 +3836,7 @@ sort_expression mcrl2::data::data_expression_checker::UnwindType(const sort_expr
   return Type;
 }
 
-bool mcrl2::data::data_expression_checker::TypeMatchA(
+bool mcrl2::data::data_type_checker::TypeMatchA(
                  const sort_expression &Type_in, 
                  const sort_expression &PosType_in, 
                  sort_expression &result)
@@ -3990,7 +3991,7 @@ bool mcrl2::data::data_expression_checker::TypeMatchA(
 }
 
 
-void mcrl2::data::data_expression_checker::AddSystemConstant(const data::function_symbol &f)
+void mcrl2::data::data_type_checker::AddSystemConstant(const data::function_symbol &f)
 {
   // append the Type to the entry of the Name of the OpId in system constants table
 
@@ -4008,7 +4009,7 @@ void mcrl2::data::data_expression_checker::AddSystemConstant(const data::functio
   system_constants[OpIdName]=Types;
 }
 
-void mcrl2::data::data_expression_checker::AddSystemFunction(const data::function_symbol &f)
+void mcrl2::data::data_type_checker::AddSystemFunction(const data::function_symbol &f)
 {
   //Pre: OpId is an OpId
   // append the Type to the entry of the Name of the OpId in gssystem.functions table
@@ -4028,7 +4029,7 @@ void mcrl2::data::data_expression_checker::AddSystemFunction(const data::functio
 }
 
 
-void mcrl2::data::data_expression_checker::initialise_system_defined_functions(void)
+void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
 {
   //Creation of operation identifiers for system defined operations.
   //Bool
@@ -4048,7 +4049,6 @@ void mcrl2::data::data_expression_checker::initialise_system_defined_functions(v
   //Numbers
   AddSystemFunction(sort_nat::pos2nat());
   AddSystemFunction(sort_nat::cnat());
-  AddSystemFunction(sort_int::pos2int());
   AddSystemFunction(sort_real::pos2real());
   AddSystemFunction(sort_nat::nat2pos());
   AddSystemFunction(sort_int::nat2int());
@@ -4141,6 +4141,7 @@ void mcrl2::data::data_expression_checker::initialise_system_defined_functions(v
   AddSystemFunction(sort_list::rhead(data::unknown_sort()));
   AddSystemFunction(sort_list::rtail(data::unknown_sort()));
   AddSystemFunction(sort_list::in(data::unknown_sort()));
+  
   //Sets
   AddSystemFunction(sort_bag::set2bag(data::unknown_sort()));
   AddSystemConstant(sort_set::empty(data::unknown_sort()));
@@ -4149,6 +4150,16 @@ void mcrl2::data::data_expression_checker::initialise_system_defined_functions(v
   AddSystemFunction(sort_set::difference(data::unknown_sort()));
   AddSystemFunction(sort_set::intersection(data::unknown_sort()));
   AddSystemFunction(sort_set::complement(data::unknown_sort()));
+
+  //FSets
+  /* AddSystemConstant(sort_fset::empty(data::unknown_sort()));
+  AddSystemFunction(sort_fset::cons_(data::unknown_sort()));
+  AddSystemFunction(sort_fset::insert(data::unknown_sort()));
+  AddSystemFunction(sort_fset::cinsert(data::unknown_sort()));
+  AddSystemFunction(sort_fset::in(data::unknown_sort()));
+  AddSystemFunction(sort_fset::union_(data::unknown_sort()));
+  AddSystemFunction(sort_fset::intersection(data::unknown_sort()));
+  AddSystemFunction(sort_fset::difference(data::unknown_sort())); */
 
   //Bags
   AddSystemFunction(sort_bag::bag2set(data::unknown_sort()));
@@ -4159,11 +4170,24 @@ void mcrl2::data::data_expression_checker::initialise_system_defined_functions(v
   AddSystemFunction(sort_bag::difference(data::unknown_sort()));
   AddSystemFunction(sort_bag::intersection(data::unknown_sort()));
 
+  //FBags
+  /* AddSystemConstant(sort_fbag::empty(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::cons_(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::insert(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::cinsert(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::count(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::in(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::join(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::intersect(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::difference(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::fbag2fset(data::unknown_sort()));
+  AddSystemFunction(sort_fbag::fset2fbag(data::unknown_sort())); */
+
   // function update
   AddSystemFunction(data::function_update(data::unknown_sort(),data::unknown_sort()));
 }
 
-void mcrl2::data::data_expression_checker::AddFunction(const data::function_symbol &f, const std::string msg, bool allow_double_decls)
+void mcrl2::data::data_type_checker::AddFunction(const data::function_symbol &f, const std::string msg, bool allow_double_decls)
 {
   const sort_expression_list domain=function_sort(f.sort()).domain();
   const core::identifier_string Name = f.name();
@@ -4218,7 +4242,7 @@ void mcrl2::data::data_expression_checker::AddFunction(const data::function_symb
   }
 }
 
-void mcrl2::data::data_expression_checker::ReadInSortStruct(const sort_expression &SortExpr)
+void mcrl2::data::data_type_checker::ReadInSortStruct(const sort_expression &SortExpr)
 {
   if (is_basic_sort(SortExpr))
   {
@@ -4290,12 +4314,12 @@ void mcrl2::data::data_expression_checker::ReadInSortStruct(const sort_expressio
   }
 }
 
-void mcrl2::data::data_expression_checker::ReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
+void mcrl2::data::data_type_checker::ReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
                         const std::map<core::identifier_string,sort_expression>::const_iterator end)
 {
   for (std::map<core::identifier_string,sort_expression>::const_iterator i=begin; i!=end; ++i)
   {
-    static_cast<sort_expression_checker>(*this)(i->second); // Type check sort expression.
+    static_cast<sort_type_checker>(*this)(i->second); // Type check sort expression.
     ReadInSortStruct(i->second);
   }
 }
@@ -4314,11 +4338,11 @@ void mcrl2::data::data_expression_checker::ReadInConstructors(const std::map<cor
 } */
 
 
-mcrl2::data::data_expression_checker::data_expression_checker(const data_specification &data_spec)
-      : sort_expression_checker(data_spec.user_defined_sorts().begin(),
-                                data_spec.user_defined_sorts().end(),
-                                data_spec.user_defined_aliases().begin(),
-                                data_spec.user_defined_aliases().end()),
+mcrl2::data::data_type_checker::data_type_checker(const data_specification &data_spec)
+      : sort_type_checker(data_spec.user_defined_sorts().begin(),
+                          data_spec.user_defined_sorts().end(),
+                          data_spec.user_defined_aliases().begin(),
+                          data_spec.user_defined_aliases().end()),
         was_warning_upcasting(false),
         was_ambiguous(false)
 
@@ -4340,9 +4364,28 @@ mcrl2::data::data_expression_checker::data_expression_checker(const data_specifi
     throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
   }
   mCRL2log(debug) << "type checking of data expression read-in phase finished" << std::endl;
+
+  type_checked_data_spec=data_spec;
+  type_checked_data_spec.declare_data_specification_to_be_type_checked();
+  
+  // Type check equations and add them to the specification.
+  try
+  {
+    TransformVarConsTypeData(type_checked_data_spec);
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    type_checked_data_spec=data_specification(); // Type checking failed. Data specification is not usable.
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nFailed to type check data specification");
+  }
+   
+  
+  // type_checked_data_spec = gstcFoldSortRefs(type_checked_spec); TODO OUGHT TO BE ADDED 
+
+  mCRL2log(debug) << "type checking phase finished" << std::endl;
 }
 
-data_expression mcrl2::data::data_expression_checker::operator ()(
+data_expression mcrl2::data::data_type_checker::operator ()(
            const data_expression &data_expr,
            const std::map<core::identifier_string,sort_expression> &Vars)
 {
@@ -4368,7 +4411,7 @@ data_expression mcrl2::data::data_expression_checker::operator ()(
 // ------------------------------  Here starts the new class based data specification checker -----------------------
 
 // Type check and replace user defined equations.
-void mcrl2::data::data_specification_checker::TransformVarConsTypeData(data_specification &data_spec)
+void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification &data_spec)
 {
   std::map<core::identifier_string,sort_expression> DeclaredVars;
   std::map<core::identifier_string,sort_expression> FreeVars;
@@ -4488,26 +4531,9 @@ void mcrl2::data::data_specification_checker::TransformVarConsTypeData(data_spec
   data_spec=new_specification;
 }
 
-mcrl2::data::data_specification_checker::data_specification_checker(const data_specification &data_spec)
-  : data_expression_checker(data_spec)
+const data_specification mcrl2::data::data_type_checker::operator()()
 {
-  mCRL2log(debug) << "type checking phase started" << std::endl;
-
-  type_checked_spec=data_spec;
-  type_checked_spec.declare_data_specification_to_be_type_checked();
-  
-  // Type check equations and add them to the specification.
-  TransformVarConsTypeData(type_checked_spec);
-  
-  // type_checked_spec = gstcFoldSortRefs(type_checked_spec); TODO OUGHT TO BE ADDED 
-
-  mCRL2log(debug) << "type checking phase finished" << std::endl;
-  
-}
-
-const data_specification mcrl2::data::data_specification_checker::operator()()
-{
-  return type_checked_spec;
+  return type_checked_data_spec;
 }
 
 // ------------------------------  Here ends the new class based data specification checker -----------------------

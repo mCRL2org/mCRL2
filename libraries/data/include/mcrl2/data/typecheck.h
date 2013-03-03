@@ -23,7 +23,7 @@ namespace mcrl2
 namespace data
 {
 
-class sort_expression_checker
+class sort_type_checker
 {
   protected:
     std::set <core::identifier_string> basic_sorts;                  // contains basic_sorts.
@@ -31,14 +31,14 @@ class sort_expression_checker
 
   public:
     /// \brief constructs a sort expression checker.
-    sort_expression_checker(const sort_expression_vector::const_iterator sorts_begin,
-                            const sort_expression_vector::const_iterator sorts_end,
-                            const alias_vector::const_iterator aliases_begin,
-                            const alias_vector::const_iterator aliases_end);
+    sort_type_checker(const sort_expression_vector::const_iterator sorts_begin,
+                      const sort_expression_vector::const_iterator sorts_end,
+                      const alias_vector::const_iterator aliases_begin,
+                      const alias_vector::const_iterator aliases_end);
 
 
-    /* sort_expression_checker(const data_specification &data_spec)
-      :  sort_expression_checker(data_spec.user_defined_sorts().begin(),
+    /* sort_type_checker(const data_specification &data_spec)
+      :  sort_type_checker(data_spec.user_defined_sorts().begin(),
                                 data_spec.user_defined_sorts().end(),
                                 data_spec.user_defined_aliases().begin(),
                                 data_spec.user_defined_aliases().end()) 
@@ -69,7 +69,7 @@ class sort_expression_checker
 };
 
 
-class data_expression_checker:public sort_expression_checker
+class data_type_checker:public sort_type_checker
 {
   protected:
     bool was_warning_upcasting;
@@ -78,17 +78,28 @@ class data_expression_checker:public sort_expression_checker
     std::map <core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression> user_constants;     //name -> sort expression
     std::map<core::identifier_string,sort_expression_list> user_functions;     //name -> Set(sort expression)
-
+    data_specification type_checked_data_spec;
 
   public:
-    data_expression_checker(const data_specification &data_spec);
+    /** \brief     make a data type checker.
+     *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
+     *  \param[in] d A data specification that does not need to have been type checked.
+     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+     **/
+    data_type_checker(const data_specification &data_spec);
 
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] d A data expression that has not been type checked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
+
     data_expression operator()(const data_expression &d,const std::map<core::identifier_string,sort_expression> &Vars);
+    /** \brief     Yields a type checked data specification, provided typechecking was successful.
+     *  \return    a data specification where all untyped identifiers have been replace by typed ones.
+     *  \post      sort_expr is type checked.
+     **/
+    const data_specification operator()();
 
   protected:
     void ReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
@@ -168,31 +179,9 @@ class data_expression_checker:public sort_expression_checker
     void ErrorMsgCannotCast(sort_expression CandidateType, data_expression_list Arguments, sort_expression_list ArgumentTypes,std::string previous_reason);
     sort_expression UpCastNumericType(sort_expression NeededType, sort_expression Type, data_expression &Par, bool warn_upcasting=false);
     bool VarsUnique(const variable_list &VarDecls);
-};
-
-
-class data_specification_checker:public data_expression_checker
-{
-  protected:
-    data_specification type_checked_spec;
-
-  public:
-    /** \brief Read in and simultaneously type check the data specification.
-     *  Throws a mcrl2::runtime_error exception if the equations are not well typed.
-     *  \param[in] An untyped data specification. 
-    */
-
-    data_specification_checker(const data_specification &data_spec);
-
-    /** \brief     Yields a type checked data specification, provided typechecking was successful.
-     *  \return    a data specification where all untyped identifiers have been replace by typed ones.
-     *  \post      sort_expr is type checked.
-     **/
-    const data_specification operator()();
-
-  protected:
     void TransformVarConsTypeData(data_specification &data_spec);
 };
+
 
 /** \brief     Type check a sort expression.
  *  Throws an exception if something went wrong.
@@ -204,7 +193,7 @@ void type_check(const sort_expression& sort_expr, const data_specification& data
 {
   try
   {
-    sort_expression_checker type_checker(data_spec.user_defined_sorts().begin(),
+    sort_type_checker type_checker(data_spec.user_defined_sorts().begin(),
                                          data_spec.user_defined_sorts().end(),
                                          data_spec.user_defined_aliases().begin(),
                                          data_spec.user_defined_aliases().end());
@@ -242,7 +231,7 @@ void type_check(data_expression& data_expr,
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
   try
   { 
-    data_expression_checker type_checker(data_spec);
+    data_type_checker type_checker(data_spec);
     data_expr = type_checker(data_expr,variables);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
     assert(!search_sort_expression(data_expr, unknown_sort()));
@@ -276,7 +265,7 @@ void type_check(data_specification& data_spec)
 {
   try
   {
-    data_specification_checker type_checker(data_spec);
+    data_type_checker type_checker(data_spec);
     data_spec=type_checker();
   }
   catch (mcrl2::runtime_error &e)

@@ -368,7 +368,6 @@ class data_specification
       m_data_specification_is_type_checked(false),
       m_normalised_data_is_up_to_date(false)
     {
-std::cerr << "BUILD FROM ATERM... \n";
       m_non_typed_checked_data_spec=t;
     }
 
@@ -380,7 +379,6 @@ std::cerr << "BUILD FROM ATERM... \n";
       //type checked once.
       if (!m_data_specification_is_type_checked) //A data specification can only be declared
       { 
-std::cerr << "DECLARE TYPECHECKED \n";
         m_data_specification_is_type_checked=true;
         build_from_aterm(m_non_typed_checked_data_spec);
         m_non_typed_checked_data_spec=atermpp::aterm_appl();
@@ -595,7 +593,8 @@ std::cerr << "DECLARE TYPECHECKED \n";
     void add_equation(const data_equation& e)
     {
       assert(m_data_specification_is_type_checked);
-      m_equations.push_back(data::translate_user_notation(e));
+      // m_equations.push_back(data::translate_user_notation(e));
+      m_equations.push_back(e);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -669,7 +668,7 @@ std::cerr << "DECLARE TYPECHECKED \n";
       for (std::vector< data_equation >::const_iterator r(m_equations.begin()); r != m_equations.end(); ++r)
       {
         // make function sort in case of constants to add the corresponding sort as needed
-        detail::insert(dependent_sorts, find_sort_expressions(*r));
+        detail::insert(dependent_sorts, find_sort_expressions(data::translate_user_notation(*r)));
       }
 
       // aliases, with both left and right hand sides.
@@ -724,7 +723,7 @@ std::cerr << "DECLARE TYPECHECKED \n";
       for (std::vector< data_equation >::const_iterator i=m_equations.begin();
            i!=m_equations.end(); ++i)
       {
-        add_system_defined_equation(*i);
+        add_system_defined_equation(data::translate_user_notation(*i));
       }
     }
 
@@ -1009,7 +1008,7 @@ std::cerr << "DECLARE TYPECHECKED \n";
       const data_equation e1=data::translate_user_notation(e);
 
       detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
-      detail::remove(m_equations, e1);
+      detail::remove(m_equations, e);
     }
 
     /// \brief Checks whether two sort expressions represent the same sort
