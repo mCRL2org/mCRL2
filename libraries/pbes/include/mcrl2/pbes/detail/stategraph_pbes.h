@@ -132,20 +132,17 @@ class stategraph_equation: public pbes_equation
         // PVI(X, I) = Y(e)
         const core::identifier_string& Y = m_predvars[i].first.name();
         const data::data_expression_list& e = m_predvars[i].first.parameters();
-        for (std::size_t j = 0; j < m_parameters.size(); j++)
+        std::size_t j_index = 0;
+        for (data::data_expression_list::const_iterator j = e.begin(); j != e.end(); ++j, ++j_index)
         {
-          if (!is_cf(is_control_flow, X, j))
+          if (!is_cf(is_control_flow, X, j_index))
           {
             continue;
           }
-          std::size_t k_index = 0;
-          for (data::data_expression_list::const_iterator k = e.begin(); k != e.end(); ++k, ++k_index)
+          data::data_expression c = R(*j, m_sigma[i]);
+          if (is_constant(c) && is_cf(is_control_flow, Y, j_index))
           {
-            data::data_expression c = R(*k, m_sigma[i]);
-            if (is_constant(c) && is_cf(is_control_flow, Y, k_index))
-            {
-              dest[j] = c;
-            }
+            dest[j_index] = c;
           }
         }
         m_dest.push_back(dest);
@@ -270,51 +267,34 @@ class stategraph_equation: public pbes_equation
     std::string print_source_dest_copy() const
     {
       std::ostringstream out;
+      std::string X(variable().name());
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        out << "    predvar = " << pbes_system::pp(m_predvars[i].first);
+        out << "    predvar[" << i << "] = " << pbes_system::pp(m_predvars[i].first) << " guard = " << pbes_system::pp(m_predvars[i].second) << std::endl;
 
         // source
         const std::map<std::size_t, data::data_expression>& source = m_source[i];
-        out << " source = {";
         for (std::map<std::size_t, data::data_expression>::const_iterator j = source.begin(); j != source.end(); ++j)
         {
-          if (j != source.begin())
-          {
-            out << ", ";
-          }
-          out << "(" << j->first << ", " << data::pp(j->second) << ")";
+          out << "        source(" << X << ", " << i << ", " << j->first << ") = " << data::pp(j->second) << std::endl;
         }
-        out << "}";
         
         // sigma
-        // out << " sigma = " << data::print_substitution(m_sigma[i]);
+        out << "        sigma = " << data::print_substitution(m_sigma[i]) << std::endl;
 
         // dest
         const std::map<std::size_t, data::data_expression>& dest = m_dest[i];
-        out << " dest = {";
         for (std::map<std::size_t, data::data_expression>::const_iterator j = dest.begin(); j != dest.end(); ++j)
         {
-          if (j != dest.begin())
-          {
-            out << ", ";
-          }
-          out << "(" << j->first << ", " << data::pp(j->second) << ")";
+          out << "        dest(" << X << ", " << i << ", " << j->first << ") = " << data::pp(j->second) << std::endl;
         }
-        out << "}";
 
         // copy
-        out << " copy = {";
         const std::map<std::size_t, std::size_t>& m = m_copy[i];
         for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
         {
-          if (j != m.begin())
-          {
-            out << ", ";
-          }
-          out << "(" << j->first << ", " << j->second << ")";
+          out << "        copy(" << X << ", " << i << ", " << j->first << ") = " << j->second << std::endl;
         }
-        out << "}" << std::endl;
       }
       return out.str();
     }
