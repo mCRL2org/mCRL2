@@ -96,7 +96,7 @@ struct stategraph_vertex
   propositional_variable_instantiation X;
   std::set<stategraph_edge> incoming_edges;
   std::set<stategraph_edge> outgoing_edges;
-  std::set<pbes_expression> guards;
+  std::set<data::variable> sig;
   std::set<data::variable> marking;    // used in the reset variables procedure
   std::vector<bool> marked_parameters; // will be set after computing the marking
 
@@ -113,18 +113,8 @@ struct stategraph_vertex
     {
       out << " " << pbes_system::pp(i->target->X);
     }
-    out << " guards: " << print_pbes_expressions(guards);
+    out << " sig: " << print_variable_set(sig);
     return out.str();
-  }
-
-  std::set<data::variable> free_guard_variables() const
-  {
-    std::set<data::variable> result;
-    for (std::set<pbes_expression>::const_iterator i = guards.begin(); i != guards.end(); ++i)
-    {
-      pbes_system::find_free_variables(*i, std::inserter(result, result.end()));
-    }
-    return result;
   }
 
   std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const

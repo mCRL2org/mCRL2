@@ -72,10 +72,9 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       for (vertex_iterator i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
       {
         stategraph_vertex& v = i->second;
-        std::set<data::variable> fv = v.free_guard_variables();
         std::set<data::variable> dx = propvar_parameters(v.X.name());
-        v.marking = data::detail::set_intersection(fv, dx);
-        mCRL2log(log::debug, "stategraph") << "vertex " << pbes_system::pp(v.X) << " freevars = " << print_variable_set(fv) << " dx = " << print_variable_set(dx) << "\n";
+        v.marking = data::detail::set_intersection(v.sig, dx);
+        mCRL2log(log::debug, "stategraph") << "vertex " << pbes_system::pp(v.X) << " sig = " << print_variable_set(v.sig) << " dx = " << print_variable_set(dx) << "\n";
       }
       mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << m_control_flow_graph.print_marking();
 

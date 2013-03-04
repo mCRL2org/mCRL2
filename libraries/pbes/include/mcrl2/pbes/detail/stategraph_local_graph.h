@@ -200,6 +200,30 @@ struct local_graph
     }
     return true;
   }
+
+  void compute_dependency_map(const local_vertex& u, std::map<core::identifier_string, std::size_t>& result) const
+  {
+    if (result.find(u.X) != result.end())
+    {
+      return;
+    }
+    result[u.X] = u.p;
+    const std::set<local_vertex*>& S = u.outgoing_edges;
+    for (std::set<local_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
+    {
+      const local_vertex& v = **j;
+      compute_dependency_map(v, result);
+    }
+  }
+
+  // returns a mapping of names to indices, induced by the graph, and starting in (X, p)
+  std::map<core::identifier_string, std::size_t> dependency_map(core::identifier_string& X, std::size_t p)
+  {
+    std::map<core::identifier_string, std::size_t> result;
+    local_vertex& u = find_vertex(X, p);
+    compute_dependency_map(u, result);
+    return result;
+  }
 };
 
 inline
