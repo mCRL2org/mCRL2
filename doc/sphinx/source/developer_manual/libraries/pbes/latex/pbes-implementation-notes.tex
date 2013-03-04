@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, February 26, 2013 16:26:49}
+%TCIDATA{LastRevised=Monday, March 04, 2013 12:37:58}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -61,6 +61,7 @@
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 \input{include/tcilatex}
+
 \begin{document}
 
 \title{PBES Implementation Notes}
@@ -1780,9 +1781,9 @@ function with the property that
 \begin{array}{lll}
 e &  & \text{if }guard^{i}(\mathrm{PVI}(\varphi ,i))\Rightarrow d[j]\approx e
 \\ 
-\bot  &  & \text{otherwise}%
+\bot &  & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
 A possible heuristic for obtaining a source function is to look for positive
 occurrences of constraints of the form $d[j]\approx e$ in the guards; these
@@ -1802,18 +1803,18 @@ We define the function $\mathrm{dest}$ as follows:%
 \begin{array}{lll}
 c &  & \text{if }rewrite(\mathrm{sigma}(X,i)(\mathrm{PVI}(\varphi ,i))[j]=c
 \\ 
-\bot  &  & \text{otherwise}%
+\bot &  & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
 with $c$ a constant. We define the function $\mathrm{copy}$ as follows:%
 \begin{equation*}
 \mathrm{copy}(X,i,j)=\left\{ 
 \begin{array}{lll}
 k &  & \text{if }\mathrm{PVI}(\varphi ,i)[k]=d[j] \\ 
-\bot  &  & \text{otherwise}%
+\bot &  & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}
 
 \subsection{Control flow parameters}
@@ -1878,40 +1879,83 @@ $\text{\textbf{return} }cf$%
 \end{tabular}%
 \end{equation*}
 
-\subsection{Control flow graph}
+\subsection{Global control flow graph}
 
 \subsubsection{Notations}
 
 In the following algorithm we use a projection that removes all parameters
 of a predicate variable that do not correspond to a control flow parameter.
-This projection applied to the predicate variable $X_{k}(e_{1},\cdots
-,e_{m}) $ is denoted as $\overline{X_{k}(e_{1},\cdots ,e_{m})}$. The mapping 
-$R$ is a rewriter that takes a substitution to data variables as second
-argument.
+This projection applied to the predicate variable $X_{k}(e_{1},\cdots ,e_{m})
+$ is denoted as $\overline{X_{k}(e_{1},\cdots ,e_{m})}$. The mapping $R$ is
+a rewriter that takes a substitution to data variables as second argument.
+We define the function $sig$ recursively as follows:%
+\begin{equation*}
+\begin{array}{lll}
+sig(b) & = & FV(b) \\ 
+sig(\varphi \wedge \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(\varphi \vee \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(X(e)) & = & \emptyset  \\ 
+sig(\exists d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
+sig(\forall d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
+sig(\varphi \Rightarrow \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(\lnot \varphi ) & = & sig(\varphi )%
+\end{array}%
+\end{equation*}
 
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$\textsc{)%
-} \\ 
+\textsc{ComputeGlobalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$%
+\textsc{)} \\ 
 $u_{0}:=\overline{X_{init}(e_{init})}$ \\ 
 $V:=\{u_{0}\}$ \\ 
 $E:=\emptyset $ \\ 
 $todo:=\{u_{0}\}$ \\ 
-$guards(u_{0}):=\emptyset $ \\ 
+$sig(u_{0}):=\emptyset $ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad $\textbf{choose} $u=X_{k}(e_{k})\in todo$ \\ 
+$\qquad $\textbf{choose} $u=X(e)\in todo$ \\ 
 $\qquad todo:=todo\setminus \{u\}$ \\ 
-$\qquad \text{\textbf{if }}occ(\varphi _{k})=\emptyset \text{ \textbf{then }}%
-guards(u):=guards(u)\cup \{guard^{X_{k}}(\varphi _{k})\}$ \\ 
-$\qquad \text{\textbf{for }}Y(e)\in occ(\varphi _{k})\text{ \textbf{do}}$ \\ 
-$\qquad \qquad g:=R(guard^{Y(e)}(\varphi _{k}),[d_{k}:=e_{k}])$ \\ 
+$\qquad sig(u):=sig(R(\varphi _{X},[d_{X}:=e])$ \\ 
+$\qquad \text{\textbf{for }}Y(e)\in occ(\varphi _{X})\text{ \textbf{do}}$ \\ 
+$\qquad \qquad g:=R(guard^{Y(e)}(\varphi _{X}),[d_{X}:=e])$ \\ 
 $\qquad \qquad \text{\textbf{if }}g\neq false$ \\ 
-$\qquad \qquad \qquad v:=\overline{Y(e)[d_{k}:=e_{k}]}$ \\ 
+$\qquad \qquad \qquad v:=\overline{Y(e)[d_{X}:=e]}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
 $\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
-$\qquad \qquad \qquad \qquad guards(v):=\emptyset $ \\ 
 $\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
-$\qquad \qquad \qquad guards(u):=guards(u)\cup \{g\}$ \\ 
+$\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
+$\text{\textbf{return} }(V,E)$%
+\end{tabular}%
+\end{equation*}
+
+\newpage
+
+\subsection{Local control flow graphs}
+
+Let index $p$ correspond to a control flow parameter in the equation of $%
+X_{init}$. Then we define the following algorithm for computing a local
+control flow graph:%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeLocalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$, $p
+$, $\longrightarrow _{must}$\textsc{)} \\ 
+$u_{0}:=X_{init}(e_{init}[p])$ \\ 
+$V:=\{u_{0}\}$ \\ 
+$E:=\emptyset $ \\ 
+$todo:=\{u_{0}\}$ \\ 
+$sig(u_{0}):=\emptyset $ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad $\textbf{choose} $u=X(e)\in todo$ \\ 
+$\qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad sig(u):=sig(R(\varphi _{X},[d_{X}:=e])$ \\ 
+$\qquad \text{\textbf{for }}Y(f)\in occ(\varphi _{X})\text{ \textbf{do}}$ \\ 
+$\qquad \qquad $\textbf{let} $(X,p)\longrightarrow _{must}(Y,q)$ \\ 
+$\qquad \qquad g:=R(guard^{Y(f)}(\varphi _{X}),[d_{X}[p]:=e])$ \\ 
+$\qquad \qquad \text{\textbf{if }}g\neq false\wedge ((X\neq Y)\vee
+(d_{Y}[q]\neq f[q]\wedge source(X,i,q)=\bot ))$ \\ 
+$\qquad \qquad \qquad v:=Y((f[d_{X}:=e])[q])$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
+$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
 $\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
 $\text{\textbf{return} }(V,E)$%
 \end{tabular}%

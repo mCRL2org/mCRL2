@@ -78,6 +78,7 @@ struct local_graph
   // @pre: (X, p) is not in the graph
   void insert_vertex(const core::identifier_string& X, std::size_t p)
   {
+    mCRL2log(log::debug, "stategraph") << "insert vertex (" << std::string(X) << ", " << p << ")" << std::endl;
     m_vertices.push_back(local_vertex(X, p));
   }
 
@@ -217,7 +218,7 @@ struct local_graph
   }
 
   // returns a mapping of names to indices, induced by the graph, and starting in (X, p)
-  std::map<core::identifier_string, std::size_t> dependency_map(core::identifier_string& X, std::size_t p)
+  std::map<core::identifier_string, std::size_t> dependency_map(const core::identifier_string& X, std::size_t p)
   {
     std::map<core::identifier_string, std::size_t> result;
     local_vertex& u = find_vertex(X, p);

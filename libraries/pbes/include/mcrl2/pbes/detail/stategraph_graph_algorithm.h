@@ -395,8 +395,8 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
       while (!todo.empty())
       {
         std::set<stategraph_vertex*>::iterator i = todo.begin();
-        todo.erase(i);
         stategraph_vertex& u = **i;
+        todo.erase(i);
         stategraph_vertex* source = &u;
         mCRL2log(log::debug, "stategraph") << "selected todo element u = " << pbes_system::pp(u.X) << std::endl;
 
@@ -407,8 +407,9 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
         data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
 
-        const predicate_variable_vector& predvars = eqn.predicate_variables();
         u.sig = significant_variables(pbesr(eqn.formula(), sigma));
+
+        const predicate_variable_vector& predvars = eqn.predicate_variables();
         for (predicate_variable_vector::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
         {
           mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->first) << std::endl;
@@ -507,6 +508,8 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
 
     void compute_may_graph()
     {
+      mCRL2log(log::debug, "stategraph") << "=== computing may graph ===" << std::endl;
+
       // create vertices
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
@@ -525,16 +528,16 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       may_graph.set_index();
 
       // create edges
-      for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
+      for (std::vector<stategraph_equation>::const_iterator q = equations.begin(); q != equations.end(); ++q)
       {
-        const stategraph_equation& eqn = *k;
+        const stategraph_equation& eqn = *q;
         core::identifier_string X = eqn.variable().name();
-        const predicate_variable_vector& predvars = k->predicate_variables();
+        const predicate_variable_vector& predvars = q->predicate_variables();
 
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          const std::map<std::size_t, data::data_expression>& source = k->source()[i];
-          const std::map<std::size_t, data::data_expression>& dest = k->dest()[i];
+          const std::map<std::size_t, data::data_expression>& source = q->source()[i];
+          const std::map<std::size_t, data::data_expression>& dest = q->dest()[i];
           const core::identifier_string& Y = predvars[i].first.name();
 
           for (std::map<std::size_t, data::data_expression>::const_iterator j = source.begin(); j != source.end(); ++j)
@@ -588,20 +591,37 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       return propositional_variable_instantiation(X, e);
     }
 
+    void print_control_flow_graphs()
+    {
+      mCRL2log(log::debug, "stategraph") << "=== local control flow graphs ===" << std::endl;
+      propositional_variable_instantiation X_init = m_pbes.initial_state();
+      const stategraph_equation& eqn_init = *find_equation(m_pbes, X_init.name());
+      const std::vector<data::variable>& d_init = eqn_init.parameters();
+      std::size_t index = 0;
+      for (std::size_t k = 0; k < d_init.size(); k++, index++)
+      {
+        if (!m_is_control_flow[X_init.name()][k])
+        {
+          continue;
+        }
+        mCRL2log(log::debug, "stategraph") << "--- graph for control flow parameter " << data::pp(eqn_init.parameters()[k]) << " ---" << std::endl;
+        mCRL2log(log::debug, "stategraph") << m_control_flow_graphs[index].print() << std::endl;
+      }
+    }
+
     void compute_control_flow_graphs()
     {
-/*
       mCRL2log(log::debug, "stategraph") << "=== compute local control flow graphs ===" << std::endl;
 
       data::rewriter datar(m_pbes.data());
       pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
 
       propositional_variable_instantiation X_init = m_pbes.initial_state();
-      stategraph_equation& eqn_init = *find_equation(m_pbes, X_init.name());
+      const stategraph_equation& eqn_init = *find_equation(m_pbes, X_init.name());
       const std::vector<data::variable>& d_init = eqn_init.parameters();
       for (std::size_t k = 0; k < d_init.size(); k++)
       {
-        if (!m_is_control_flow(X_init.name(), k)
+        if (!m_is_control_flow[X_init.name()][k])
         {
           continue;
         }
@@ -609,7 +629,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
         mCRL2log(log::debug, "stategraph") << "compute local control flow graph for index " << k << std::endl;
         control_flow_graph G;
 
-        std::map<core::identifier_string, std::size_t> dependendies = must_graph.dependency_map(X_init.name(), k);
+        std::map<core::identifier_string, std::size_t> dependencies = must_graph.dependency_map(X_init.name(), k);
         std::set<stategraph_vertex*> todo;
 
         // handle the initial state
@@ -621,53 +641,55 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
         while (!todo.empty())
         {
           std::set<stategraph_vertex*>::iterator i = todo.begin();
-          todo.erase(i);
           stategraph_vertex& u = **i;
+          todo.erase(i);
           const core::identifier_string& X = u.X.name();
           std::size_t p = dependencies[X];
+          const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+
           stategraph_vertex* source = &u; // u = (X, p)
-          mCRL2log(log::debug, "stategraph") << "selected todo element u = " << pbes_system::pp(u.X) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "selected todo element u = (" << pbes_system::pp(u.X) << ", " << p << ")" << std::endl;
 
-          const stategraph_equation& eqn = *find_equation(m_pbes, X);
-          mCRL2log(log::debug, "stategraph") << "eqn = " << eqn.print() << std::endl;
+          mCRL2log(log::debug, "stategraph") << "eqn = " << eq_X.print() << std::endl;
 
-          data::variable d_p = X.parameters()[p];
+          data::variable d_p = eq_X.parameters()[p];
           data::data_expression e_p = u.X.parameters().front();
           data::mutable_map_substitution<> sigma;
           sigma[d_p] = e_p;
 
-          const predicate_variable_vector& predvars = eqn.predicate_variables();
-          if (eqn.is_simple())
-          {
-            mCRL2log(log::debug, "stategraph") << "insert guard " << pbes_system::pp(eqn.simple_guard()) << " in vertex u" << std::endl;
-            u.guards.insert(eqn.simple_guard());
-          }
+          u.sig = significant_variables(pbesr(eq_X.formula(), sigma));
+
+          const predicate_variable_vector& predvars = eq_X.predicate_variables();
           for (predicate_variable_vector::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
           {
-            mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->first) << std::endl;
+            const core::identifier_string& Y = (j->first).name();
+            std::size_t q = dependencies[Y];
+            mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->first) << " q = " << q << std::endl;
 
             pbes_expression g = pbesr(j->second, sigma);
             mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->second) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
-            if (is_false(g))
+
+            const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+            const std::map<std::size_t, data::data_expression>& src = eq_Y.source()[j - predvars.begin()];
+            if (is_false(g) || (X == Y && src.find(q) == src.end()))
             {
               continue;
             }
             propositional_variable_instantiation Ye = apply_substitution(j->first, sigma);
-            propositional_variable_instantiation Y = project(Ye);
+            propositional_variable_instantiation Y1 = project(Ye, q);
             propositional_variable_instantiation label = Ye;
 
             mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;
 
-            vertex_iterator q = G.find(Y);
-            bool has_vertex = q != G.end();
+            vertex_iterator vi = G.find(Y1);
+            bool has_vertex = vi != G.end();
             if (!has_vertex)
             {
               mCRL2log(log::debug, "stategraph") << "insert vertex v" << std::endl;
-              q = G.insert_vertex(Y);
-              todo.insert(&(q->second));
+              vi = G.insert_vertex(Y1);
+              todo.insert(&(vi->second));
             }
-            stategraph_vertex& v = q->second;
-            u.guards.insert(g);
+            stategraph_vertex& v = vi->second;
             mCRL2log(log::debug, "stategraph") << "insert guard g in vertex u" << std::endl;
             stategraph_vertex* target = &v;
             stategraph_edge e(source, target, label);
@@ -679,7 +701,8 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
 
         G.create_index();
         m_control_flow_graphs.push_back(G);
-*/
+      }
+      print_control_flow_graphs();
     }
 
   public:
@@ -690,6 +713,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       compute_must_graph();
       compute_may_graph();
       remove_may_transitions(must_graph, may_graph, local_vertex_compare(m_pbes));
+      compute_control_flow_graphs();
     }
 };
 
