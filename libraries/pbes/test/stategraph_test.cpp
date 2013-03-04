@@ -15,11 +15,34 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/stategraph_local_graph.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
+
+// prints the names of the variables (sorted alphabetically)
+std::string print_set(const std::set<data::variable>& v)
+{
+  std::ostringstream out;
+  std::set<std::string> s;
+  for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    s.insert(std::string(i->name()));
+  }
+  out << "{";
+  for (std::set<std::string>::iterator i = s.begin(); i != s.end(); ++i)
+  {
+    if (i != s.begin())
+    {
+      out << ", ";
+    }
+    out << *i;
+  }
+  out << "}";
+  return out.str();
+}
 
 propositional_variable_instantiation propvar(const std::string& name)
 {
@@ -36,6 +59,33 @@ void check_result(const std::string& expression, const std::string& result, cons
     std::cout << "expected result = " << expected_result << std::endl;
     BOOST_CHECK(result == expected_result);
   }
+}
+
+void test_significant_variables(const pbes_expression& x, const std::string& expected_result)
+{
+  std::set<data::variable> v = significant_variables(x);
+  std::string result = print_set(v);
+  check_result(pbes_system::pp(x), result, expected_result, "significant_variables");
+}
+
+void test_significant_variables()
+{
+  std::string text =
+    "pbes                                                    \n"
+    "   mu X0(b: Bool) = val(b);                             \n"
+    "   mu X1 = true;                                        \n"
+    "   mu X2(b: Bool) = val(b) && forall b: Bool. val(b);   \n"
+    "   mu X3(b: Bool) = val(b) && forall c: Bool. val(c);   \n"
+    "init X1;                                                \n"
+    ;
+
+  bool normalize = false;
+  pbes<> p = txt2pbes(text, normalize);
+  const std::vector<pbes_equation>& eqn = p.equations();
+  test_significant_variables(eqn[0].formula(), "{b}");
+  test_significant_variables(eqn[1].formula(), "{}");
+  test_significant_variables(eqn[2].formula(), "{b}");
+  test_significant_variables(eqn[2].formula(), "{b}");
 }
 
 // find propositional variable instantiation with the given name
@@ -364,6 +414,7 @@ int test_main(int argc, char** argv)
   test_guard();
   test_parse();
   test_remove_may_transitions();
+  test_significant_variables();
 
   return 0;
 }
