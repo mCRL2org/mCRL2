@@ -265,6 +265,7 @@ class stategraph_graph_algorithm
       }
       m_pbes.compute_source_dest_copy(m_is_control_flow);
       mCRL2log(log::debug) << print_control_flow_parameters();
+      mCRL2log(log::verbose) << "Computed control flow parameters" << std::endl;
     }
 
     const std::vector<bool>& stategraph_values(const core::identifier_string& X) const
@@ -456,7 +457,8 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
     {
       super::run();
       compute_control_flow_graph();
-      mCRL2log(log::verbose) << m_control_flow_graph.print();
+      mCRL2log(log::verbose) << "Computed control flow graph" << std::endl;
+      mCRL2log(log::debug) << m_control_flow_graph.print();
     }
 };
 

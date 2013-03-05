@@ -220,7 +220,8 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       super::run();
       m_simplify = simplify;
       compute_control_flow_marking();
-      mCRL2log(log::verbose) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
+      mCRL2log(log::verbose) << "Computed control flow marking" << std::endl;
+      mCRL2log(log::debug) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
       pbes<> result = m_original_pbes;
       reset_variables_to_original(result);
       return result;
