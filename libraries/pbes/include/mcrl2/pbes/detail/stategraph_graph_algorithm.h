@@ -350,14 +350,17 @@ class stategraph_graph_algorithm
 
   public:
 
-    /// \brief Computes the control flow graph
-    void run(const pbes<>& p)
+    stategraph_graph_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
     {
       m_pbes = stategraph_pbes(p);
-      m_datar = data::rewriter(p.data());
+      m_datar = data::rewriter(p.data(), rewrite_strategy);
+    }
+
+    /// \brief Computes the control flow graph
+    void run()
+    {
       simplify(m_pbes);
       compute_control_flow_parameters();
-
       mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
     }
 
@@ -381,8 +384,7 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
     {
       mCRL2log(log::debug, "stategraph") << "=== compute control flow graph ===" << std::endl;
 
-      data::rewriter datar(m_pbes.data());
-      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
 
       std::set<stategraph_vertex*> todo;
 
@@ -445,10 +447,14 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
       m_control_flow_graph.create_index();
     }
 
+    stategraph_graph_global_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+      : stategraph_graph_algorithm(p, rewrite_strategy)
+    { }
+
     /// \brief Computes the control flow graph
-    void run(const pbes<>& p)
+    void run()
     {
-      super::run(p);
+      super::run();
       compute_control_flow_graph();
       mCRL2log(log::verbose) << m_control_flow_graph.print();
     }
@@ -613,8 +619,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
     {
       mCRL2log(log::debug, "stategraph") << "=== compute local control flow graphs ===" << std::endl;
 
-      data::rewriter datar(m_pbes.data());
-      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
 
       propositional_variable_instantiation X_init = m_pbes.initial_state();
       const stategraph_equation& eqn_init = *find_equation(m_pbes, X_init.name());
@@ -707,10 +712,14 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
     }
 
   public:
+    stategraph_graph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+      : stategraph_graph_algorithm(p, rewrite_strategy)
+    { }
+
     /// \brief Computes the control flow graph
-    void run(const pbes<>& p)
+    void run()
     {
-      super::run(p);
+      super::run();
       compute_must_graph();
       compute_may_graph();
       remove_may_transitions(must_graph, may_graph, local_vertex_compare(m_pbes));

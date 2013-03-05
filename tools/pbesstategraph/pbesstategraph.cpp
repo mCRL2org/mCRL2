@@ -12,6 +12,7 @@
 
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -19,9 +20,9 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class pbes_stategraph_tool: public input_output_tool
+class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
 {
-  typedef input_output_tool super;
+  typedef rewriter_tool<input_output_tool> super;
 
   protected:
     bool m_simplify;
@@ -73,6 +74,7 @@ class pbes_stategraph_tool: public input_output_tool
       mCRL2log(verbose) << "  print influence graph: " << std::boolalpha << m_print_influence_graph << std::endl;
       pbesstategraph(input_filename(),
                      output_filename(),
+                     rewrite_strategy(),
                      m_simplify,
                      m_apply_to_original,
                      m_use_pfnf_variant,

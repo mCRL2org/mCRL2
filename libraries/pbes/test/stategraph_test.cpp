@@ -421,8 +421,8 @@ void test_local_stategraph()
    ;
   bool normalize = false;
   pbes<> p = txt2pbes(text, normalize);
-  pbes_system::detail::stategraph_graph_local_algorithm algorithm;
-  algorithm.run(p);
+  pbes_system::detail::stategraph_graph_local_algorithm algorithm(p);
+  algorithm.run();
 }
 
 int test_main(int argc, char** argv)

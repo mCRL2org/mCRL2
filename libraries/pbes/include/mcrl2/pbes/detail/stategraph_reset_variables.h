@@ -55,6 +55,8 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
     typedef stategraph_graph_global_algorithm super;
 
   protected:
+    const pbes<>& m_original_pbes;
+
     // if true, the resulting PBES is simplified
     bool m_simplify;
 
@@ -205,16 +207,21 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       }
     }
 
+    stategraph_reset_variables_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+      : stategraph_graph_global_algorithm(p, rewrite_strategy),
+        m_original_pbes(p)
+    {}
+
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes<> run(const pbes<>& p, bool simplify = true)
+    pbes<> run(bool simplify = true)
     {
-      super::run(p);
+      super::run();
       m_simplify = simplify;
       compute_control_flow_marking();
       mCRL2log(log::verbose) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
-      pbes<> result = p;
+      pbes<> result = m_original_pbes;
       reset_variables_to_original(result);
       return result;
     }

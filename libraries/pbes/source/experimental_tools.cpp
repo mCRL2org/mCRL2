@@ -244,6 +244,7 @@ void pbespareqelm(const std::string& input_filename,
 
 void pbesstategraph(const std::string& input_filename,
                     const std::string& output_filename,
+                    data::rewriter::strategy rewrite_strategy,
                     bool simplify,
                     bool apply_to_original,
                     bool use_pfnf_variant,
@@ -265,8 +266,8 @@ void pbesstategraph(const std::string& input_filename,
   {
     if (use_local_variant)
     {
-      pbes_system::detail::stategraph_graph_local_algorithm algorithm;
-      algorithm.run(p);
+      pbes_system::detail::stategraph_graph_local_algorithm algorithm(p, rewrite_strategy);
+      algorithm.run();
       if (print_influence_graph)
       {
         pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
@@ -275,8 +276,8 @@ void pbesstategraph(const std::string& input_filename,
     }
     else
     {
-      pbes_system::detail::stategraph_reset_variables_algorithm algorithm;
-      q = algorithm.run(p, simplify);
+      pbes_system::detail::stategraph_reset_variables_algorithm algorithm(p, rewrite_strategy);
+      q = algorithm.run(simplify);
       if (print_influence_graph)
       {
         pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
