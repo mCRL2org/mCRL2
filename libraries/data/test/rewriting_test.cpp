@@ -1102,6 +1102,27 @@ BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form)
   }
 }
 
+BOOST_AUTO_TEST_CASE(rewrite_using_the_where_construct)
+{
+  std::string s(
+  "map  f: Nat;\n"
+  "eqn f = n whr n = 3 end;\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("Nat2Pos(f)", specification));
+    data::data_expression f(parse_data_expression("3", specification));
+    data_rewrite_test(R, e, f);
+  }
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

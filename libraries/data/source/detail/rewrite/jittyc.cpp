@@ -1798,9 +1798,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       aterm_list assignments=aterm_cast<aterm_list>(w[1]);
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
       {
-        ss << "push_front<aterm>(";
+        ss << "jittyc_local_push_front(";
       }
-      ss << "ATempty";
+      ss << "aterm_list()";
       for( ; !assignments.empty() ; assignments=assignments.tail())
       {
         aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
@@ -1823,9 +1823,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       aterm_list assignments=aterm_cast<aterm_list>(w[1]);
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
       {
-        ss << "push_front<aterm>(";
+        ss << "jittyc_local_push_front(";
       }
-      ss << "ATempty";
+      ss << "aterm_list()";
       for( ; !assignments.empty() ; assignments=assignments.tail())
       {
         aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
@@ -2749,7 +2749,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "\n", data::variable("x", data::sort_bool::bool_()).function().number()
          );
 
-  //
+  // Make a functional push_front to be used in the where clause.
+  fprintf(f,"static aterm_list jittyc_local_push_front(aterm_list l, const aterm &e)\n"
+            "{\n"
+            "  l.push_front(e);\n"
+            "  return l;\n"
+            "}\n");
+  
   // - Calculate maximum occurring arity
   // - Forward declarations of rewr_* functions
   //
