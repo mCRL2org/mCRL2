@@ -124,7 +124,6 @@ class stategraph_equation: public pbes_equation
 
     void compute_dest(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, data::rewriter& R)
     {
-      const core::identifier_string& X = variable().name();
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
         std::map<std::size_t, data::data_expression> dest;
@@ -274,7 +273,7 @@ class stategraph_equation: public pbes_equation
         {
           out << "        source(" << X << ", " << i << ", " << j->first << ") = " << data::pp(j->second) << std::endl;
         }
-        
+
         // sigma
         out << "        sigma = " << data::print_substitution(m_sigma[i]) << std::endl;
 

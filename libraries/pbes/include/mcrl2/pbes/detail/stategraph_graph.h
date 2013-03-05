@@ -66,9 +66,9 @@ struct stategraph_edge
   propositional_variable_instantiation label;
 
   stategraph_edge(stategraph_vertex* source_,
-                    stategraph_vertex* target_,
-                    const propositional_variable_instantiation& label_
-                   )
+                  stategraph_vertex* target_,
+                  const propositional_variable_instantiation& label_
+                 )
    : source(source_),
      target(target_),
      label(label_)
@@ -170,6 +170,16 @@ struct control_flow_graph
 
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
 
+  void create_index()
+  {
+    // create an index for the vertices in the control flow graph with a given name
+    for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    {
+      stategraph_vertex& v = i->second;
+      m_stategraph_index[v.X.name()].insert(&v);
+    }
+  }
+
   bool has_vertex(const stategraph_vertex* u)
   {
     for (vertex_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
@@ -214,12 +224,51 @@ struct control_flow_graph
     }
   }
 
+  control_flow_graph()
+  {}
+
+  control_flow_graph(const control_flow_graph& other)
+    : m_control_vertices(other.m_control_vertices)
+  {
+    // reset the pointers
+    for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    {
+      stategraph_vertex& u = i->second;
+
+      std::vector<stategraph_edge> iedges(u.incoming_edges.begin(), u.incoming_edges.end());
+      for (std::vector<stategraph_edge>::iterator j = iedges.begin(); j != iedges.end(); ++j)
+      {
+        stategraph_vertex& v = *(j->source);
+        stategraph_vertex& v_new = m_control_vertices.find(v.X)->second;
+        j->source = &v_new;
+        stategraph_vertex& w = *(j->target);
+        stategraph_vertex& w_new = m_control_vertices.find(w.X)->second;
+        j->target = &w_new;
+      }
+      u.incoming_edges = std::set<stategraph_edge>(iedges.begin(), iedges.end());
+
+      std::vector<stategraph_edge> oedges(u.outgoing_edges.begin(), u.outgoing_edges.end());
+      for (std::vector<stategraph_edge>::iterator j = oedges.begin(); j != oedges.end(); ++j)
+      {
+        stategraph_vertex& v = *(j->source);
+        stategraph_vertex& v_new = m_control_vertices.find(v.X)->second;
+        j->source = &v_new;
+        stategraph_vertex& w = *(j->target);
+        stategraph_vertex& w_new = m_control_vertices.find(w.X)->second;
+        j->target = &w_new;
+      }
+      u.outgoing_edges = std::set<stategraph_edge>(oedges.begin(), oedges.end());
+    }
+    create_index();
+    // self_check();
+  }
+
   // \pre x is not present in m_control_vertices
   vertex_iterator insert_vertex(const propositional_variable_instantiation& x)
   {
     std::pair<vertex_iterator, bool> p = m_control_vertices.insert(std::make_pair(x, stategraph_vertex(x)));
     assert(p.second);
-    self_check();
+    // self_check();
     return p.first;
   }
 
@@ -236,16 +285,6 @@ struct control_flow_graph
   vertex_iterator end()
   {
     return m_control_vertices.end();
-  }
-
-  void create_index()
-  {
-    // create an index for the vertices in the control flow graph with a given name
-    for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
-    {
-      stategraph_vertex& v = i->second;
-      m_stategraph_index[v.X.name()].insert(&v);
-    }
   }
 
   std::set<stategraph_vertex*>& index(const propositional_variable_instantiation& X)

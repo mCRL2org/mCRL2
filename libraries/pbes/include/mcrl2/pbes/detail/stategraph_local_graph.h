@@ -86,6 +86,39 @@ struct local_graph
     }
   }
 
+  void set_index()
+  {
+    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    {
+      m_index[i->X][i->p] = &(*i);
+    }
+  }
+
+  local_graph()
+  {}
+
+  local_graph(const local_graph& other)
+    : m_vertices(other.m_vertices)
+  {
+    const local_vertex* old_first_vertex = &other.m_vertices[0];
+    local_vertex* new_first_vertex = &m_vertices[0];
+
+    // reset the pointers
+    for (std::size_t i = 0; i < m_vertices.size(); i++)
+    {
+      const std::set<local_vertex*>& old_edges = m_vertices[i].outgoing_edges;
+      std::set<local_vertex*>& new_edges = m_vertices[i].outgoing_edges;
+      new_edges.clear();
+      for (std::set<local_vertex*>::iterator j = old_edges.begin(); j != old_edges.end(); ++j)
+      {
+        std::size_t index = *j - old_first_vertex;
+        new_edges.insert(new_first_vertex + index);
+      }
+    }
+    set_index();
+    //self_check();
+  }
+
   // @pre: (X, p) is in the graph
   local_vertex& find_vertex(const core::identifier_string& X, std::size_t p)
   {
@@ -108,7 +141,7 @@ struct local_graph
   {
     mCRL2log(log::debug, "stategraph") << "insert vertex (" << std::string(X) << ", " << p << ")" << std::endl;
     m_vertices.push_back(local_vertex(X, p));
-    self_check();
+    //self_check();
   }
 
   // insert edge between (X, i) and (Y, j)
@@ -145,14 +178,6 @@ struct local_graph
   std::vector<local_vertex>& vertices()
   {
     return m_vertices;
-  }
-
-  void set_index()
-  {
-    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
-    {
-      m_index[i->X][i->p] = &(*i);
-    }
   }
 
   bool check_constraints(const local_vertex& u, constraint_map& m) const
