@@ -28,6 +28,7 @@
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -244,13 +245,9 @@ class bisimulation_algorithm
         generator.add_identifier(i->name());
       }
 
-      // put the process parameters of q in qvars
-      std::set<data::variable> qvars;
-      data::variable_list pvars = p.process().process_parameters();
-      qvars.insert(pvars.begin(), pvars.end());
-
       // generate renamings for variables appearing in qvars
-      for (std::set<data::variable>::iterator i = qvars.begin(); i != qvars.end(); ++i)
+      data::variable_list qvars = q.process().process_parameters();
+      for (data::variable_list::iterator i = qvars.begin(); i != qvars.end(); ++i)
       {
         data::variable v(generator(i->name()), i->sort());
         if (v != *i)
@@ -321,6 +318,7 @@ class bisimulation_algorithm
         sigma = compute_summand_variable_name_clashes(model, spec);
         lps::replace_summand_variables(spec, data::make_map_substitution(sigma));
       }
+      mCRL2log(log::debug) << "bisimulation spec after resolving name clashes:\n" << lps::pp(spec) << std::endl;
     }
 
     /// \brief Initializes the name lookup table.
