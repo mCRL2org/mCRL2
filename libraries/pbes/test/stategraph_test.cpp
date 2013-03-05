@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/stategraph_local_graph.h"
+#include "mcrl2/pbes/detail/stategraph_graph_algorithm.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -408,6 +409,22 @@ void test_remove_may_transitions()
   test_remove_may_transitions(must_text, may_text);
 }
 
+void test_local_stategraph()
+{
+  std::string text =
+    "sort D = struct d1 | d2;\n"
+    "\n"
+    "pbes nu X(s: Nat, d: D)   = forall v: D. forall e1: D. val(!(e1 == v)) || val(!(s == 1)) || Y(2, e1, v);\n"
+    "     nu Y(s: Nat, d,v: D) = val(!(s == 2)) || Y(3, d, v);\n"
+    "\n"
+    "init X(1, d1);\n"
+   ;
+  bool normalize = false;
+  pbes<> p = txt2pbes(text, normalize);
+  pbes_system::detail::stategraph_graph_local_algorithm algorithm;
+  algorithm.run(p);
+}
+
 int test_main(int argc, char** argv)
 {
   log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
@@ -415,6 +432,7 @@ int test_main(int argc, char** argv)
   test_parse();
   test_remove_may_transitions();
   test_significant_variables();
+  test_local_stategraph();
 
   return 0;
 }
