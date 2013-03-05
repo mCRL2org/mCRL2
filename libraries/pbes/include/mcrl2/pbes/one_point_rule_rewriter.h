@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -42,12 +43,14 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
 
   pbes_expression operator()(const imp& x)
   {
-    return derived()(or_(not_(x.left()), x.right()));
+    pbes_expression result = derived()(or_(not_(x.left()), x.right()));
+    mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
+    return result;
   }
 
   pbes_expression operator()(const exists& x)
   {
-    pbes_expression body = static_cast<Derived&>(*this)(x.body());
+    pbes_expression body = derived()(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_and(body, true);
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
@@ -62,13 +65,13 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         {
           data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(*i));
           data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(*i));
-          if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
+          if (data::is_variable(left) && variables.find(data::variable(left)) == variables.end())
           {
             sigma[data::variable(left)] = right;
             variables.erase(data::variable(left)); // make sure the same variable can only be removed once
             to_be_removed.push_back(i);
           }
-          else if (data::is_variable(right) && variables.find(data::variable(right)) != variables.end())
+          else if (data::is_variable(right) && variables.find(data::variable(right)) == variables.end())
           {
             sigma[data::variable(right)] = left;
             variables.erase(data::variable(right));
@@ -87,6 +90,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
+    pbes_expression result;
     if (!sigma.empty())
     {
       for (std::vector< std::set<pbes_expression>::iterator >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
@@ -97,20 +101,24 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       body = pbes_system::replace_free_variables(body, sigma);
       if (variables.empty())
       {
-        return body;
+        result = body;
       }
       else
       {
-        return exists(data::variable_list(variables.begin(), variables.end()), body);
+        result = exists(data::variable_list(variables.begin(), variables.end()), body);
       }
     }
-
-    return exists(x.variables(), body);
+    else
+    {
+      result = exists(x.variables(), body);
+    }
+    mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
+    return result;
   }
 
   pbes_expression operator()(const forall& x)
   {
-    pbes_expression body = static_cast<Derived&>(*this)(x.body());
+    pbes_expression body = derived()(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_or(body, true);
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
@@ -125,13 +133,13 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         {
           data::data_expression left = data::binary_left(atermpp::aterm_cast<data::application>(*i));
           data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(*i));
-          if (data::is_variable(left) && variables.find(data::variable(left)) != variables.end())
+          if (data::is_variable(left) && variables.find(data::variable(left)) == variables.end())
           {
             sigma[data::variable(left)] = right;
             variables.erase(data::variable(left)); // make sure the same variable can only be removed once
             to_be_removed.push_back(i);
           }
-          else if (data::is_variable(right) && variables.find(data::variable(right)) != variables.end())
+          else if (data::is_variable(right) && variables.find(data::variable(right)) == variables.end())
           {
             sigma[data::variable(right)] = left;
             variables.erase(data::variable(right));
@@ -154,6 +162,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       }
     }
 
+    pbes_expression result;
     if (!sigma.empty())
     {
       for (std::vector< std::set<pbes_expression>::iterator >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
@@ -164,17 +173,20 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       body = pbes_system::replace_free_variables(body, sigma);
       if (variables.empty())
       {
-        return body;
+        result = body;
       }
       else
       {
-        return forall(data::variable_list(variables.begin(), variables.end()), body);
+        result = forall(data::variable_list(variables.begin(), variables.end()), body);
       }
     }
-
-    return forall(x.variables(), body);
+    else
+    {
+      result = forall(x.variables(), body);
+    }
+    mCRL2log(log::debug, "one_point_rewriter") << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
+    return result;
   }
-
 };
 
 } // namespace detail
