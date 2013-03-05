@@ -58,6 +58,34 @@ struct local_graph
   // needs to be initialized after inserting vertices!
   std::map<core::identifier_string, vertex_map> m_index;
 
+  bool has_vertex(const local_vertex* u)
+  {
+    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    {
+      local_vertex& v = *i;
+      if (&v == u)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void self_check()
+  {
+    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    {
+      local_vertex& u = *i;
+      for (std::set<local_vertex*>::iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
+      {
+        if (!has_vertex(*j))
+        {
+          std::cout << "error: vertex not found!" << std::endl;
+        }
+      }
+    }
+  }
+
   // @pre: (X, p) is in the graph
   local_vertex& find_vertex(const core::identifier_string& X, std::size_t p)
   {
@@ -80,6 +108,7 @@ struct local_graph
   {
     mCRL2log(log::debug, "stategraph") << "insert vertex (" << std::string(X) << ", " << p << ")" << std::endl;
     m_vertices.push_back(local_vertex(X, p));
+    self_check();
   }
 
   // insert edge between (X, i) and (Y, j)

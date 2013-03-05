@@ -701,6 +701,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
 
         G.create_index();
         m_control_flow_graphs.push_back(G);
+        mCRL2log(log::debug, "stategraph") << "--- computed local CFG " << G.print() << std::endl;
       }
       print_control_flow_graphs();
     }

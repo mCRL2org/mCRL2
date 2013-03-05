@@ -170,21 +170,73 @@ struct control_flow_graph
 
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
 
+  bool has_vertex(const stategraph_vertex* u)
+  {
+    for (vertex_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    {
+      stategraph_vertex& v = i->second;
+      if (&v == u)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // check internal state
+  void self_check()
+  {
+    for (vertex_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    {
+      stategraph_vertex& u = i->second;
+      for (std::set<stategraph_edge>::iterator j = u.incoming_edges.begin(); j != u.incoming_edges.end(); ++j)
+      {
+        if (!has_vertex(j->source))
+        {
+          std::cout << "error: source not found!" << std::endl;
+        }
+        if (!has_vertex(j->target))
+        {
+          std::cout << "error: target not found!" << std::endl;
+        }
+      }
+      for (std::set<stategraph_edge>::iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
+      {
+        if (!has_vertex(j->source))
+        {
+          std::cout << "error: source not found!" << std::endl;
+        }
+        if (!has_vertex(j->target))
+        {
+          std::cout << "error: target not found!" << std::endl;
+        }
+      }
+    }
+  }
+
   // \pre x is not present in m_control_vertices
   vertex_iterator insert_vertex(const propositional_variable_instantiation& x)
   {
     std::pair<vertex_iterator, bool> p = m_control_vertices.insert(std::make_pair(x, stategraph_vertex(x)));
     assert(p.second);
+    self_check();
     return p.first;
   }
 
   vertex_iterator find(const propositional_variable_instantiation& x)
   {
-  	return m_control_vertices.find(x);
+    return m_control_vertices.find(x);
   }
 
-  vertex_iterator begin() { return m_control_vertices.begin(); }
-  vertex_iterator end() { return m_control_vertices.end(); }
+  vertex_iterator begin()
+  {
+    return m_control_vertices.begin();
+  }
+
+  vertex_iterator end()
+  {
+    return m_control_vertices.end();
+  }
 
   void create_index()
   {

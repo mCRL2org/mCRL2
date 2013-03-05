@@ -89,11 +89,11 @@ class stategraph_equation: public pbes_equation
       std::map<core::identifier_string, std::vector<bool> >::const_iterator j = is_control_flow.find(X);
       assert(j != is_control_flow.end());
       const std::vector<bool>& cf = j->second;
+      assert(i < cf.size());
       return cf[i];
     }
 
     // computes the source function for a pbes equation
-    // source[i] contains the source parameters of g_i, represented in the form of a substitution
     void compute_source(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow)
     {
       const core::identifier_string& X = variable().name();
@@ -135,10 +135,6 @@ class stategraph_equation: public pbes_equation
         std::size_t j_index = 0;
         for (data::data_expression_list::const_iterator j = e.begin(); j != e.end(); ++j, ++j_index)
         {
-          if (!is_cf(is_control_flow, X, j_index))
-          {
-            continue;
-          }
           data::data_expression c = R(*j, m_sigma[i]);
           if (is_constant(c) && is_cf(is_control_flow, Y, j_index))
           {
