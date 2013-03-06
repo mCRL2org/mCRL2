@@ -43,11 +43,10 @@ class stategraph_graph_algorithm
       for (std::size_t k = 0; k < equations.size(); k++)
       {
         stategraph_equation& eqn = equations[k];
-        predicate_variable_vector& predvars = eqn.predicate_variables();
+        std::vector<predicate_variable>& predvars = eqn.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          std::pair<propositional_variable_instantiation, pbes_expression>& pvar = predvars[i];
-          pvar.second = simplify(pvar.second);
+          predvars[i].guard = simplify(predvars[i].guard);
         }
       }
     }
@@ -158,10 +157,10 @@ class stategraph_graph_algorithm
       {
         propositional_variable X = k->variable();
         const std::vector<data::variable>& d_X = k->parameters();
-        const predicate_variable_vector& predvars = k->predicate_variables();
-        for (predicate_variable_vector::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
+        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        for (std::vector<predicate_variable>::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const propositional_variable_instantiation& Y = i->first;
+          const propositional_variable_instantiation& Y = i->X;
           data::data_expression_list e = Y.parameters();
           std::size_t index = 0;
           for (data::data_expression_list::const_iterator q = e.begin(); q != e.end(); ++q, ++index)
@@ -202,10 +201,10 @@ class stategraph_graph_algorithm
         const stategraph_equation& eqn = *find_equation(m_pbes, name);
         propositional_variable X = eqn.variable();
         const std::vector<data::variable>& d_X = eqn.parameters();
-        const predicate_variable_vector& predvars = eqn.predicate_variables();
-        for (predicate_variable_vector::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
+        const std::vector<predicate_variable>& predvars = eqn.predicate_variables();
+        for (std::vector<predicate_variable>::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const propositional_variable_instantiation& Y = i->first;
+          const propositional_variable_instantiation& Y = i->X;
           data::data_expression_list e = Y.parameters();
           std::size_t index = 0;
           for (data::data_expression_list::const_iterator q = e.begin(); q != e.end(); ++q, ++index)
@@ -412,17 +411,17 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
 
         u.sig = significant_variables(pbesr(eqn.formula(), sigma));
 
-        const predicate_variable_vector& predvars = eqn.predicate_variables();
-        for (predicate_variable_vector::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
+        const std::vector<predicate_variable>& predvars = eqn.predicate_variables();
+        for (std::vector<predicate_variable>::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
         {
-          mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->first) << std::endl;
-          pbes_expression g = pbesr(j->second, sigma);
-          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->second) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->X) << std::endl;
+          pbes_expression g = pbesr(j->guard, sigma);
+          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->guard) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
           if (is_false(g))
           {
             continue;
           }
-          propositional_variable_instantiation Ye = apply_substitution(j->first, sigma);
+          propositional_variable_instantiation Ye = apply_substitution(j->X, sigma);
           propositional_variable_instantiation Y = project(Ye);
           propositional_variable_instantiation label = Ye;
 
@@ -498,15 +497,15 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       {
         const stategraph_equation& eqn = *k;
         core::identifier_string X = eqn.variable().name();
-        const std::vector<std::map<std::size_t, std::size_t> >& copy = k->copy();
-        for (std::size_t i = 0; i < copy.size(); i++)
+        const std::vector<predicate_variable>& predvars = eqn.predicate_variables();
+        for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          const std::map<std::size_t, std::size_t>& m = copy[i];
+          const std::map<std::size_t, std::size_t>& m = predvars[i].copy;
           for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
           {
             std::size_t p = j->first;
             std::size_t l = j->second;
-            const core::identifier_string& Y = eqn.predicate_variables()[i].first.name();
+            const core::identifier_string& Y = predvars[i].X.name();
             must_graph.insert_edge(X, p, Y, l);
           }
         }
@@ -540,13 +539,13 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       {
         const stategraph_equation& eqn = *q;
         core::identifier_string X = eqn.variable().name();
-        const predicate_variable_vector& predvars = q->predicate_variables();
+        const std::vector<predicate_variable>& predvars = q->predicate_variables();
 
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          const std::map<std::size_t, data::data_expression>& source = q->source()[i];
-          const std::map<std::size_t, data::data_expression>& dest = q->dest()[i];
-          const core::identifier_string& Y = predvars[i].first.name();
+          const std::map<std::size_t, data::data_expression>& source = predvars[i].source;
+          const std::map<std::size_t, data::data_expression>& dest = predvars[i].dest;
+          const core::identifier_string& Y = predvars[i].X.name();
 
           for (std::map<std::size_t, data::data_expression>::const_iterator j = source.begin(); j != source.end(); ++j)
           {
@@ -666,23 +665,23 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
 
           u.sig = significant_variables(pbesr(eq_X.formula(), sigma));
 
-          const predicate_variable_vector& predvars = eq_X.predicate_variables();
-          for (predicate_variable_vector::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
+          const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+          for (std::vector<predicate_variable>::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
           {
-            const core::identifier_string& Y = (j->first).name();
+            const core::identifier_string& Y = (j->X).name();
             std::size_t q = dependencies[Y];
-            mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->first) << " q = " << q << std::endl;
+            mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->X) << " q = " << q << std::endl;
 
-            pbes_expression g = pbesr(j->second, sigma);
-            mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->second) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
+            pbes_expression g = pbesr(j->guard, sigma);
+            mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->guard) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
 
             const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-            const std::map<std::size_t, data::data_expression>& src = eq_Y.source()[j - predvars.begin()];
+            const std::map<std::size_t, data::data_expression>& src = eq_Y.predicate_variables()[j - predvars.begin()].source;
             if (is_false(g) || (X == Y && src.find(q) == src.end()))
             {
               continue;
             }
-            propositional_variable_instantiation Ye = apply_substitution(j->first, sigma);
+            propositional_variable_instantiation Ye = apply_substitution(j->X, sigma);
             propositional_variable_instantiation Y1 = project(Ye, q);
             propositional_variable_instantiation label = Ye;
 

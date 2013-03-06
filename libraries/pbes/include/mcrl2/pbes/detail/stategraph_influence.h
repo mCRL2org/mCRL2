@@ -133,10 +133,10 @@ class stategraph_influence_graph_algorithm
       {
         const std::vector<data::variable>& d_X = k->parameters();
         const core::identifier_string Xname = k->variable().name();
-        const predicate_variable_vector& predvars = k->predicate_variables();
-        for (predicate_variable_vector::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
+        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        for (std::vector<predicate_variable>::const_iterator i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const propositional_variable_instantiation& Y = i->first;
+          const propositional_variable_instantiation& Y = i->X;
           std::vector<data::data_expression> Yparameters(Y.parameters().begin(), Y.parameters().end());
           stategraph_equation eqn = *find_equation(m_pbes, Y.name());
           const std::vector<data::variable> d_Y = eqn.parameters();

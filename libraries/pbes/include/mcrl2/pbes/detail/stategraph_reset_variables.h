@@ -67,22 +67,22 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       return f(x);
     }
 
-    void compute_control_flow_marking()
+    void compute_control_flow_marking(control_flow_graph& G)
     {
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
       // initialization
-      for (vertex_iterator i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
+      for (vertex_iterator i = G.begin(); i != G.end(); ++i)
       {
         stategraph_vertex& v = i->second;
         std::set<data::variable> dx = propvar_parameters(v.X.name());
         v.marking = data::detail::set_intersection(v.sig, dx);
         mCRL2log(log::debug, "stategraph") << "vertex " << pbes_system::pp(v.X) << " sig = " << print_variable_set(v.sig) << " dx = " << print_variable_set(dx) << "\n";
       }
-      mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << m_control_flow_graph.print_marking();
+      mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << G.print_marking();
 
       // backwards reachability algorithm
       std::set<stategraph_vertex*> todo;
-      for (vertex_iterator i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
+      for (vertex_iterator i = G.begin(); i != G.end(); ++i)
       {
         stategraph_vertex& v = i->second;
         todo.insert(&v);
@@ -121,7 +121,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       }
 
       // set the marking_parameters attributes
-      for (vertex_iterator i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
+      for (vertex_iterator i = G.begin(); i != G.end(); ++i)
       {
         stategraph_vertex& v = i->second;
         const stategraph_equation& eqn = *find_equation(m_pbes, v.X.name());
@@ -135,60 +135,61 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
 
   public:
     // expands a propositional variable instantiation using the control flow graph
+    // x = X(e)
     pbes_expression reset_variable(const propositional_variable_instantiation& x)
     {
       mCRL2log(log::debug, "stategraph") << "  resetting variable " << pbes_system::pp(x) << std::endl;
-      std::vector<pbes_expression> Xij_conjuncts;
+      std::vector<pbes_expression> phi;
       core::identifier_string X = x.name();
-      std::vector<data::data_expression> d_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
+      std::vector<data::data_expression> e_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
       // iterate over the alternatives as defined by the control flow graph
       std::set<stategraph_vertex*>& inst = m_control_flow_graph.index(x);
       for (std::set<stategraph_vertex*>::const_iterator q = inst.begin(); q != inst.end(); ++q)
       {
-        stategraph_vertex& w = **q;
-        mCRL2log(log::debug, "stategraph") << "    vertex X = " << pbes_system::pp(w.X) << std::endl;
-        std::vector<data::data_expression> e;
-        std::size_t N = w.marked_parameters.size();
-        data::data_expression_list::const_iterator s = w.X.parameters().begin();
+        stategraph_vertex& u = **q;
+        mCRL2log(log::debug, "stategraph") << "    vertex X = " << pbes_system::pp(u.X) << std::endl;
+        std::vector<data::data_expression> r;
+        std::size_t N = u.marked_parameters.size();
+        data::data_expression_list::const_iterator i = u.X.parameters().begin();
         data::data_expression condition = data::sort_bool::true_();
-        for (std::size_t r = 0; r < N; ++r)
+        for (std::size_t j = 0; j < N; ++j)
         {
-          if (is_control_flow_parameter(X, r))
+          if (is_control_flow_parameter(X, j))
           {
-            data::data_expression v_X_r = *s++;
-            condition = data::lazy::and_(condition, data::equal_to(d_X[r], v_X_r));
-            mCRL2log(log::debug, "stategraph") << "    X[" << r << "] is a stategraph parameter -> " << data::pp(v_X_r) << std::endl;
-            e.push_back(v_X_r);
+            data::data_expression f_i = *i++;
+            condition = data::lazy::and_(condition, data::equal_to(e_X[j], f_i));
+            mCRL2log(log::debug, "stategraph") << "    X[" << j << "] is a stategraph parameter -> " << data::pp(f_i) << std::endl;
+            r.push_back(f_i);
           }
-          else if (w.is_marked_parameter(r))
+          else if (u.is_marked_parameter(j))
           {
-            mCRL2log(log::debug, "stategraph") << "    X[" << r << "] is a marked parameter -> " << data::pp(d_X[r]) << std::endl;
-            e.push_back(d_X[r]);
+            mCRL2log(log::debug, "stategraph") << "    X[" << j << "] is a marked parameter -> " << data::pp(e_X[j]) << std::endl;
+            r.push_back(e_X[j]);
           }
           else
           {
-            mCRL2log(log::debug, "stategraph") << "    X[" << r << "] is a default parameter -> " << data::pp(default_value(d_X[r].sort())) << std::endl;
-            e.push_back(default_value(d_X[r].sort()));
+            mCRL2log(log::debug, "stategraph") << "    X[" << j << "] is a default parameter -> " << data::pp(default_value(e_X[j].sort())) << std::endl;
+            r.push_back(default_value(e_X[j].sort()));
           }
         }
-        propositional_variable_instantiation Xe(X, atermpp::convert<data::data_expression_list>(e));
+        propositional_variable_instantiation Xe(X, atermpp::convert<data::data_expression_list>(r));
         if (m_simplify)
         {
           condition = m_datar(condition);
           if (condition != data::sort_bool::false_())
           {
-            Xij_conjuncts.push_back(imp(condition, Xe));
+            phi.push_back(imp(condition, Xe));
           }
         }
         else
         {
-          Xij_conjuncts.push_back(imp(condition, Xe));
+          phi.push_back(imp(condition, Xe));
         }
         mCRL2log(log::debug, "stategraph") << "    condition = " << data::pp(condition) << std::endl;
         mCRL2log(log::debug, "stategraph") << "  alternative = " << pbes_system::pp(Xe) << std::endl;
       }
-      return pbes_expr::join_and(Xij_conjuncts.begin(), Xij_conjuncts.end());
+      return pbes_expr::join_and(phi.begin(), phi.end());
     }
 
     // Applies resetting of variables to the original PBES p.
@@ -219,7 +220,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
     {
       super::run();
       m_simplify = simplify;
-      compute_control_flow_marking();
+      compute_control_flow_marking(m_control_flow_graph);
       mCRL2log(log::verbose) << "Computed control flow marking" << std::endl;
       mCRL2log(log::debug) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
       pbes<> result = m_original_pbes;
