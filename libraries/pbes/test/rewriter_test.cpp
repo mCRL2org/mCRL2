@@ -172,7 +172,7 @@ std::string printer(const Term& x)
 template <typename Rewriter1, typename Rewriter2>
 void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string expr2)
 {
-  utilities::detail::test_operation(
+  BOOST_CHECK(utilities::detail::test_operation(
     expr1,
     expr2,
     parser(),
@@ -182,13 +182,13 @@ void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string ex
     "simplify",
     R2,
     "datarewr"
-  );
+  ));
 }
 
 template <typename Rewriter1, typename Rewriter2>
 void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string expr2, const std::string& var_decl = VARIABLE_SPECIFICATION, const std::string& data_spec = "")
 {
-  utilities::detail::test_operation(
+  BOOST_CHECK(utilities::detail::test_operation(
     expr1,
     expr2,
     parser(var_decl, data_spec),
@@ -198,7 +198,7 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
     "R1",
     R2,
     "R2"
-  );
+  ));
 }
 
 void test_simplifying_rewriter()
@@ -595,44 +595,6 @@ void test_substitutions3()
   pbes_system::pbes_expression x = r(phi, sigma);
 }
 
-void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
-{
-  one_point_rule_rewriter R;
-  utilities::detail::test_operation(
-    expr1,
-    expr2,
-    default_parser(),
-    printer<pbes_expression>,
-    std::equal_to<pbes_expression>(),
-    R,
-    "R1",
-    &utilities::detail::identity<pbes_expression>,
-    "R2"
-  );
-}
-
-void test_one_point_rule_rewriter()
-{
-  std::cout << "<test_one_point_rule_rewriter>" << std::endl;
-  one_point_rule_rewriter R;
-  pbes_system::pbes_expression x;
-  pbes_system::pbes_expression y;
-
-  x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3) || val(n == 5)");
-  y = R(x);
-  std::clog << "x = " << pbes_system::pp(x) << std::endl;
-  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
-
-  x = pbes_system::parse_pbes_expression("exists n: Nat. val(n == 3) && val(n == 5)");
-  y = R(x);
-  std::clog << "x = " << pbes_system::pp(x) << std::endl;
-  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
-
-  test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "forall c: Bool. val(c) || val(false)");
-}
-
 void test_data2pbes()
 {
   std::cout << "<test_data2pbes>" << std::endl;
@@ -661,7 +623,6 @@ int test_main(int argc, char* argv[])
   test_substitutions1();
   test_substitutions2();
   test_substitutions3();
-  test_one_point_rule_rewriter();
   test_data2pbes();
 
 #if defined(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG) || defined(MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG)

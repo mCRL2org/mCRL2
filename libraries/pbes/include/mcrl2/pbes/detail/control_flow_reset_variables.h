@@ -15,6 +15,7 @@
 #include "boost/bind.hpp"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/detail/control_flow_graph.h"
+#include "mcrl2/pbes/detail/print_utility.h"
 
 namespace mcrl2 {
 
@@ -40,26 +41,10 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
       return f(x);
     }
 
-    std::string print_variable_set(const std::set<data::variable>& v) const
-    {
-      std::ostringstream out;
-      out << "{";
-      for (std::set<data::variable>::const_iterator j = v.begin(); j != v.end(); ++j)
-      {
-        if (j != v.begin())
-        {
-          out << ", ";
-        }
-        out << data::pp(*j);
-      }
-      out << "}";
-      return out.str();
-    }
-
     std::string print_control_flow_marking(const control_flow_vertex& v) const
     {
       std::ostringstream out;
-      out << "vertex " << pbes_system::pp(v.X) << " = " << print_variable_set(v.marking);
+      out << "vertex " << pbes_system::pp(v.X) << " = " << print_set(v.marking, data_printer());
       return out.str();
     }
 

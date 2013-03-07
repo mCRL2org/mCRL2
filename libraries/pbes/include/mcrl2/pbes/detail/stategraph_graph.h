@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/print_utility.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_influence.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
@@ -38,23 +39,6 @@ namespace mcrl2 {
 namespace pbes_system {
 
 namespace detail {
-
-inline
-std::string print_variable_set(const std::set<data::variable>& v)
-{
-  std::ostringstream out;
-  out << "{";
-  for (std::set<data::variable>::const_iterator j = v.begin(); j != v.end(); ++j)
-  {
-    if (j != v.begin())
-    {
-      out << ", ";
-    }
-    out << data::pp(*j);
-  }
-  out << "}";
-  return out.str();
-}
 
 struct stategraph_vertex;
 
@@ -113,7 +97,7 @@ struct stategraph_vertex
     {
       out << " " << pbes_system::pp(i->target->X);
     }
-    out << " sig: " << print_variable_set(sig);
+    out << " sig: " << print_set(sig, data_printer());
     return out.str();
   }
 
