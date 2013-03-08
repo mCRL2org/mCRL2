@@ -32,7 +32,7 @@ using namespace atermpp;
  *             structure after type checking. If something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_appl type_check_data_spec(aterm_appl data_spec);
+// aterm_appl type_check_data_spec(aterm_appl data_spec);
 
 /** \brief     Type check a parsed mCRL2 process specification.
  *  \param[in] proc_spec An aterm representation of an mCRL2 process
@@ -44,7 +44,7 @@ aterm_appl type_check_data_spec(aterm_appl data_spec);
  *             structure after type checking. If something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_appl type_check_proc_spec(aterm_appl proc_spec);
+// aterm_appl type_check_proc_spec(aterm_appl proc_spec);
 
 
 /** \brief     Type check a parsed mCRL2 parameterised boolean equation
@@ -75,7 +75,7 @@ aterm_appl type_check_pbes_spec(aterm_appl pbes_spec);
  *             structure after type checking. if something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-data::sort_expression type_check_sort_expr(const data::sort_expression &sort_expr, aterm_appl spec);
+// data::sort_expression type_check_sort_expr(const data::sort_expression &sort_expr, aterm_appl spec);
 
 
 /** \brief     Type check a parsed mCRL2 data expression with respect to a
@@ -98,8 +98,8 @@ data::sort_expression type_check_sort_expr(const data::sort_expression &sort_exp
  *             structure after type checking.  If something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-data::data_expression type_check_data_expr(const data::data_expression& data_expr, aterm_appl spec, 
-                                const std::map<atermpp::aterm_appl,data::sort_expression> &Vars=std::map<atermpp::aterm_appl,data::sort_expression>());
+// data::data_expression type_check_data_expr(const data::data_expression& data_expr, aterm_appl spec, 
+//                                const std::map<atermpp::aterm_appl,data::sort_expression> &Vars=std::map<atermpp::aterm_appl,data::sort_expression>());
 
 
 /** \brief     Type check a parsed mCRL2 multiaction with respect to a
@@ -115,10 +115,10 @@ data::data_expression type_check_data_expr(const data::data_expression& data_exp
  *             structure after type checking.  If something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_appl type_check_mult_act(
+/* aterm_appl type_check_mult_act(
   aterm_appl mult_act,
   aterm_appl data_spec,
-  aterm_list action_labels);
+  aterm_list action_labels); */
 
 
 /** \brief     Type check a parsed mCRL2 multiaction list with respect to a
@@ -135,10 +135,10 @@ aterm_appl type_check_mult_act(
  *             structure after type checking.  If something went wrong,
  *             an exception is raised.
  **/
-aterm_list type_check_mult_actions(
+/* aterm_list type_check_mult_actions(
   aterm_list mult_actions,
   aterm_appl data_spec,
-  aterm_list action_labels);
+  aterm_list action_labels); */
 
 
 /** \brief     Type check a parsed mCRL2 process expression with respect to a
@@ -153,7 +153,7 @@ aterm_list type_check_mult_actions(
  *             structure after type checking.  If something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_appl type_check_proc_expr(aterm_appl proc_expr, aterm_appl spec);
+// aterm_appl type_check_proc_expr(aterm_appl proc_expr, aterm_appl spec);
 
 
 /** \brief     Type check a parsed mCRL2 state formula with respect to a
@@ -203,7 +203,7 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl spec);
  *             structure after type checking. if something went wrong,
  *             an mcrl2::runtime_error exception is raised.
  **/
-aterm_list type_check_data_vars(aterm_list data_vars, aterm_appl spec);
+// aterm_list type_check_data_vars(aterm_list data_vars, aterm_appl spec);
 
 }
 }

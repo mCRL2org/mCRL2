@@ -93,8 +93,15 @@ class data_type_checker:public sort_type_checker
      *  \param[in] d A data expression that has not been type checked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
-
     data_expression operator()(const data_expression &d,const std::map<core::identifier_string,sort_expression> &Vars);
+
+    /** \brief     Type check a data expression.
+     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+     *  \param[in] d A data expression that has not been type checked.
+     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+     **/
+    variable_list operator()(const variable_list &l);
+
     /** \brief     Yields a type checked data specification, provided typechecking was successful.
      *  \return    a data specification where all untyped identifiers have been replace by typed ones.
      *  \post      sort_expr is type checked.
@@ -180,6 +187,14 @@ class data_type_checker:public sort_type_checker
     sort_expression UpCastNumericType(sort_expression NeededType, sort_expression Type, data_expression &Par, bool warn_upcasting=false);
     bool VarsUnique(const variable_list &VarDecls);
     void TransformVarConsTypeData(data_specification &data_spec);
+    sort_expression_list GetNotInferredList(const atermpp::term_list<sort_expression_list> &TypeListList);
+    sort_expression_list InsertType(const sort_expression_list TypeList, const sort_expression Type);
+    std::pair<bool,sort_expression_list> AdjustNotInferredList(
+            const sort_expression_list &PosTypeList,
+            const atermpp::term_list<sort_expression_list> &TypeListList);
+    bool IsTypeAllowedA(const sort_expression &Type, const sort_expression &PosType);
+    bool IsTypeAllowedL(const sort_expression_list &TypeList, const sort_expression_list PosTypeList);
+    bool IsNotInferredL(sort_expression_list TypeList);
 };
 
 

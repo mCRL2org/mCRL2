@@ -359,7 +359,10 @@ class data_specification
     data_specification()
       : m_data_specification_is_type_checked(true),
         m_normalised_data_is_up_to_date(false)
-    {}
+    {
+      add_context_sort(sort_bool::bool_());
+      add_context_sort(sort_pos::pos());
+    }
 
     ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.

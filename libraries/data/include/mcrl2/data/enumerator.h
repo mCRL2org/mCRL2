@@ -144,7 +144,6 @@ class data_enumerator
     {
       std::vector<data_expression_with_variables> result;
       const std::vector<function_symbol>& c = constructors(v.sort());
-
       if (c.empty())
       {
         throw mcrl2::runtime_error("Could not enumerate variable " + data::pp(v) + " of sort " + data::pp(v.sort()) + " as there are no constructors.");

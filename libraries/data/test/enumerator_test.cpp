@@ -75,9 +75,9 @@ void test_data_enumerator()
   catch (mcrl2::runtime_error)
   {
     // this is OK
+    BOOST_CHECK(false); // this point should not be reached
     return;
   }
-  BOOST_CHECK(false); // this point should not be reached
 }
 
 void test_data_enumerator2()

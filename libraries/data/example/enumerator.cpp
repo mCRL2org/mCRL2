@@ -11,8 +11,6 @@ using namespace mcrl2::data;
 void enumerate(const std::set<variable>& variables, const data_expression& condition)
 {
   data_specification data_spec;
-  data_spec.add_context_sort(sort_nat::nat());
-  data_spec.add_context_sort(sort_bool::bool_());
   rewriter evaluator(data_spec);
 
   classic_enumerator<> enumerator(data_spec, evaluator);

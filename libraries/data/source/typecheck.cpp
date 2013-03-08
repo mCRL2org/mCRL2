@@ -115,14 +115,14 @@ static void gstcReadInConstructors(const core::identifier_string_list::const_ite
                                    const core::identifier_string_list::const_iterator end);
 static void gstcReadInFuncs(aterm_list, aterm_list);
 static void gstcReadInActs(aterm_list);
-static void gstcReadInProcsAndInit(aterm_list, aterm_appl);
+// static void gstcReadInProcsAndInit(aterm_list, aterm_appl);
 static void gstcReadInPBESAndInit(aterm_appl, aterm_appl);
 
 static void gstcTransformVarConsTypeData(void);
-static void gstcTransformActProcVarConst(void);
+// static void gstcTransformActProcVarConst(void);
 static void gstcTransformPBESVarConst(void);
 
-static aterm_list gstcWriteProcs(aterm_list);
+// static aterm_list gstcWriteProcs(aterm_list);
 static aterm_list gstcWritePBES(aterm_list);
 
 static bool gstcInTypesA(aterm_appl, aterm_list);
@@ -401,7 +401,7 @@ inline const aterm_list &ATLgetFirst(const aterm_list &List)
 //type checking functions
 //-----------------------
 
-aterm_appl type_check_data_spec(aterm_appl data_spec)
+/* aterm_appl type_check_data_spec(aterm_appl data_spec)
 {
   mCRL2log(verbose) << "type checking data specification..." << std::endl;
 
@@ -436,9 +436,9 @@ aterm_appl type_check_data_spec(aterm_appl data_spec)
   
   
   return Result;
-}
+} */
 
-aterm_appl type_check_proc_spec(aterm_appl proc_spec)
+/* aterm_appl type_check_proc_spec(aterm_appl proc_spec)
 {
   mCRL2log(verbose) << "type checking process specification..." << std::endl;
 
@@ -490,7 +490,7 @@ aterm_appl type_check_proc_spec(aterm_appl proc_spec)
   
   
   return Result;
-}
+} */
 
 } // namespace core
 
@@ -4314,6 +4314,157 @@ void mcrl2::data::data_type_checker::ReadInSortStruct(const sort_expression &Sor
   }
 }
 
+sort_expression_list mcrl2::data::data_type_checker::InsertType(const sort_expression_list TypeList, const sort_expression Type)
+{
+  for (sort_expression_list OldTypeList=TypeList; !OldTypeList.empty(); OldTypeList=OldTypeList.tail())
+  {
+    if (EqTypesA(OldTypeList.front(),Type))
+    {
+      return TypeList;
+    }
+  }
+  sort_expression_list result=TypeList;
+  result.push_front(Type);
+  return result;
+}
+
+
+
+
+bool mcrl2::data::data_type_checker::IsTypeAllowedA(const sort_expression &Type, const sort_expression &PosType)
+{
+  //Checks if Type is allowed by PosType
+  if (data::is_unknown_sort(data::sort_expression(PosType)))
+  {
+    return true;
+  }
+  if (gsIsSortsPossible(PosType))
+  {
+    return InTypesA(Type,aterm_cast<const sort_expression_list>(PosType[0]));
+  }
+
+  //PosType is a normal type
+  return EqTypesA(Type,PosType);
+}
+
+bool mcrl2::data::data_type_checker::IsTypeAllowedL(const sort_expression_list &TypeList, const sort_expression_list PosTypeList)
+{
+  //Checks if TypeList is allowed by PosTypeList (each respective element)
+  assert(TypeList.size()==PosTypeList.size());
+  sort_expression_list::const_iterator j=PosTypeList.begin();
+  for (sort_expression_list::const_iterator i=TypeList.begin(); i!=TypeList.end(); ++i,++j)
+    if (!IsTypeAllowedA(*i,*j))
+    {
+      return false;
+    }
+  return true;
+}
+
+bool mcrl2::data::data_type_checker::IsNotInferredL(sort_expression_list TypeList)
+{
+  for (; !TypeList.empty(); TypeList=TypeList.tail())
+  {
+    sort_expression Type=TypeList.front();
+    if (is_unknown_sort(Type) || is_multiple_possible_sorts(Type))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
+std::pair<bool,sort_expression_list> mcrl2::data::data_type_checker::AdjustNotInferredList(
+            const sort_expression_list &PosTypeList, 
+            const term_list<sort_expression_list> &TypeListList)
+{
+  // PosTypeList -- List of Sortexpressions (possibly NotInferred(List Sortexpr))
+  // TypeListList -- List of (Lists of Types)
+  // returns: PosTypeList, adjusted to the elements of TypeListList
+  // NULL if cannot be ajusted.
+
+  //if PosTypeList has only normal types -- check if it is in TypeListList,
+  //if so return PosTypeList, otherwise return false.
+  if (!IsNotInferredL(PosTypeList))
+  {
+    if (InTypesL(PosTypeList,TypeListList))
+    {
+      return std::make_pair(true,PosTypeList);
+    }
+    else
+    {
+      return std::make_pair(false, sort_expression_list());
+    }
+  }
+
+  //Filter TypeListList to contain only compatible with TypeList lists of parameters.
+  term_list<sort_expression_list> NewTypeListList;
+  for (term_list<sort_expression_list>::const_iterator i=TypeListList.begin();
+                    i!=TypeListList.end(); ++i)
+  {
+    sort_expression_list TypeList= *i;
+    if (IsTypeAllowedL(TypeList,PosTypeList))
+    {
+      NewTypeListList.push_front(TypeList);
+    }
+  }
+  if (NewTypeListList.empty())
+  {
+    return std::make_pair(false, sort_expression_list());
+  }
+  if (NewTypeListList.size()==1)
+  {
+    return std::make_pair(true,NewTypeListList.front());
+  }
+
+  // otherwise return not inferred.
+  return std::make_pair(true,GetNotInferredList(reverse(NewTypeListList)));
+}
+
+
+sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const term_list<sort_expression_list> &TypeListList)
+{
+  //we get: List of Lists of SortExpressions
+  //Outer list: possible parameter types 0..nPosParsVectors-1
+  //inner lists: parameter types vectors 0..nFormPars-1
+
+  //we constuct 1 vector (list) of sort expressions (NotInferred if ambiguous)
+  //0..nFormPars-1
+
+  sort_expression_list Result;
+  size_t nFormPars=((aterm_list)TypeListList.front()).size();
+  std::vector<sort_expression_list> Pars(nFormPars);
+  for (size_t i=0; i<nFormPars; i++)
+  {
+    Pars[i]=sort_expression_list();
+  }
+
+  for (term_list<sort_expression_list>::const_iterator j=TypeListList.begin(); j!=TypeListList.end(); ++j)
+  {
+    sort_expression_list TypeList=*j;
+    for (size_t i=0; i<nFormPars; TypeList=TypeList.tail(),i++)
+    {
+      Pars[i]=InsertType(Pars[i],TypeList.front());
+    }
+  }
+
+  for (size_t i=nFormPars; i>0; i--)
+  {
+    aterm_appl Sort;
+    if (Pars[i-1].size()==1)
+    {
+      Sort=Pars[i-1].front();
+    }
+    else
+    {
+      Sort=multiple_possible_sorts(sort_expression_list(reverse(Pars[i-1])));
+    }
+    Result.push_front(Sort);
+  }
+  return Result;
+}
+
 void mcrl2::data::data_type_checker::ReadInConstructors(const std::map<core::identifier_string,sort_expression>::const_iterator begin,
                         const std::map<core::identifier_string,sort_expression>::const_iterator end)
 {
@@ -4406,6 +4557,39 @@ data_expression mcrl2::data::data_type_checker::operator ()(
   
   return data;
 } 
+
+
+variable_list mcrl2::data::data_type_checker::operator ()(
+           const variable_list &l)
+{
+  /* aterm_list sorts = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[0])[0]);
+
+  //XXX read-in from spec (not finished)
+  try
+  {
+    gstcReadInSorts(sorts);
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(to_string(e.what()) + "\nreading from LPS failed");
+  } */
+  
+  mCRL2log(debug) << "type checking of data variables read-in phase finished" << std::endl;
+
+  std::map<core::identifier_string,sort_expression> Vars;
+  std::map<core::identifier_string,sort_expression> NewVars;
+  variable_list data_vars=l;
+  try
+  {
+    AddVars2Table(Vars,data_vars,NewVars);
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking data variables");
+  }
+
+  return data_vars;
+}
 
 // ------------------------------  Here ends the new class based data expression checker -----------------------
 // ------------------------------  Here starts the new class based data specification checker -----------------------
@@ -4544,7 +4728,7 @@ const data_specification mcrl2::data::data_type_checker::operator()()
 
 namespace core 
 {
-sort_expression type_check_sort_expr(const sort_expression &sort_expr, aterm_appl spec)
+/* sort_expression type_check_sort_expr(const sort_expression &sort_expr, aterm_appl spec)
 {
   mCRL2log(verbose) << "type checking sort expression..." << std::endl;
   //check correctness of the sort expression in sort_expr
@@ -4588,9 +4772,9 @@ sort_expression type_check_sort_expr(const sort_expression &sort_expr, aterm_app
   gstcIsSortExprDeclared(sort_expr);
     
   return sort_expr;
-}
+} */
 
-data_expression type_check_data_expr(const data_expression &data_expr, aterm_appl spec, const std::map<core::identifier_string,sort_expression> &Vars)
+/* data_expression type_check_data_expr(const data_expression &data_expr, aterm_appl spec, const std::map<core::identifier_string,sort_expression> &Vars)
 {
   mCRL2log(verbose) << "type checking data expression..." << std::endl;
   //check correctness of the data expression in data_expr using
@@ -4649,9 +4833,9 @@ data_expression type_check_data_expr(const data_expression &data_expr, aterm_app
   
   return data;
   
-}
+} */
 
-aterm_appl type_check_mult_act(
+/* aterm_appl type_check_mult_act(
   aterm_appl mult_act,
   aterm_appl data_spec,
   aterm_list action_labels)
@@ -4705,9 +4889,9 @@ aterm_appl type_check_mult_act(
     }
   }
   return Result;
-}
+} */
 
-aterm_list type_check_mult_actions(
+/* aterm_list type_check_mult_actions(
   aterm_list mult_actions,
   aterm_appl data_spec,
   aterm_list action_labels)
@@ -4765,9 +4949,9 @@ aterm_list type_check_mult_actions(
   }
   
   return reverse(result);
-}
+} */
 
-aterm_appl type_check_proc_expr(aterm_appl proc_expr, aterm_appl spec)
+/* aterm_appl type_check_proc_expr(aterm_appl proc_expr, aterm_appl spec)
 {
   mCRL2log(verbose) << "type checking process expression..." << std::endl;
 
@@ -4776,7 +4960,7 @@ aterm_appl type_check_proc_expr(aterm_appl proc_expr, aterm_appl spec)
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   mCRL2log(warning) << "type checking of process expressions is not yet implemented" << std::endl;
   return proc_expr;
-}
+} */
 
 aterm_appl type_check_state_frm(aterm_appl state_frm, aterm_appl spec)
 {
@@ -5063,57 +5247,6 @@ aterm_appl type_check_pbes_spec(aterm_appl pbes_spec)
   return Result;
 }
 
-aterm_list type_check_data_vars(aterm_list data_vars, aterm_appl spec)
-{
-  mCRL2log(verbose) << "type checking data variables..." << std::endl;
-  //check correctness of the data variable declaration in sort_expr
-  //using the specification in spec
-
-  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
-
-  mCRL2log(debug) << "type checking phase started" << std::endl;
-
-  gstcDataInit();
-
-  mCRL2log(debug) << "type checking of data variables read-in phase started" << std::endl;
-
-  aterm_appl data_spec;
-  if (gsIsDataSpec(spec))
-  {
-    data_spec = spec;
-  }
-  else
-  {
-    data_spec = aterm_cast<aterm_appl>(spec[0]);
-  }
-  aterm_list sorts = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[0])[0]);
-
-  //XXX read-in from spec (not finished)
-  try
-  {
-    gstcReadInSorts(sorts);
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(to_string(e.what()) + "\nreading from LPS failed");
-  }
-  
-  mCRL2log(debug) << "type checking of data variables read-in phase finished" << std::endl;
-
-  std::map<core::identifier_string,sort_expression> Vars;
-  std::map<core::identifier_string,sort_expression> NewVars;
-  try
-  {
-    gstcAddVars2Table(Vars,data_vars,NewVars);
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking data variables");
-  }
-  
-
-  return data_vars;
-}
 
 //local functions
 //---------------
@@ -5953,7 +6086,7 @@ static void gstcReadInActs(aterm_list Acts)
   }
 }
 
-static void gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
+/* static void gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
 {
   for (; !Procs.empty(); Procs=Procs.tail())
   {
@@ -6005,7 +6138,7 @@ static void gstcReadInProcsAndInit(aterm_list Procs, aterm_appl Init)
   body.proc_pars[INIT_KEY()]=variable_list();
   body.proc_bodies[INIT_KEY()]=Init;
 
-}
+} */
 
 static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
 {
@@ -6062,7 +6195,7 @@ static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
   body.proc_bodies[INIT_KEY()]=aterm_cast<aterm_appl>(PBInit[0]);
 }
 
-static aterm_list gstcWriteProcs(aterm_list oldprocs)
+/* static aterm_list gstcWriteProcs(aterm_list oldprocs)
 {
   aterm_list Result;
   for (aterm_list l=oldprocs; !l.empty(); l=l.tail())
@@ -6078,7 +6211,7 @@ static aterm_list gstcWriteProcs(aterm_list oldprocs)
   }
   Result=reverse(Result);
   return Result;
-}
+} */
 
 static aterm_list gstcWritePBES(aterm_list oldPBES)
 {
@@ -6210,7 +6343,7 @@ static void gstcTransformVarConsTypeData(void)
 
 }
 
-static void gstcTransformActProcVarConst(void)
+/* static void gstcTransformActProcVarConst(void)
 {
   std::map<core::identifier_string,sort_expression> Vars;
 
@@ -6228,7 +6361,7 @@ static void gstcTransformActProcVarConst(void)
     aterm_appl NewProcTerm=gstcTraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(body.proc_bodies[ProcVar]));
     body.proc_bodies[ProcVar]=NewProcTerm;
   }
-}
+} */
 
 static void gstcTransformPBESVarConst(void)
 {
