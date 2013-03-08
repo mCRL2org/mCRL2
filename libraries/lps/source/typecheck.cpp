@@ -165,8 +165,6 @@ action mcrl2::lps::multi_action_type_checker::RewrAct(const action &ProcTerm)
 
 action mcrl2::lps::multi_action_type_checker::TraverseAct(const action &ma)
 {
-
-std::cerr << "Form of an action " << ma << "\n";
   size_t n = ma.size();
   if (n==0)
   {
