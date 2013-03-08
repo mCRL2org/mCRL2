@@ -82,7 +82,7 @@ struct pg_actions: public core::default_parser_actions
 
   pg_actions(const core::parser_table& table_)
     : core::default_parser_actions(table_),
-      initial_node(0)
+      initial_node(std::numeric_limits<identifier_t>::max())
   {}
 
   template <typename T, typename Function>
@@ -142,9 +142,18 @@ struct pg_actions: public core::default_parser_actions
   template <typename Container>
   void parse_ParityGame(const core::parse_node& node, boolean_equation_system<Container>& result, bool maxpg)
   {
+    if(node.child_count() == 5)
+    {
+
+      initial_node = parse_Id(node.child(3));
+    }
+    if(node.child_count() == 3 && node.child(0).string() == "start")
+    {
+      initial_node = parse_Id(node.child(1));
+    }
+
     game.clear();
-    initial_node = 0;
-    parse_NodeSpecList(node.child(1));
+    parse_NodeSpecList(node.child(node.child_count()-1));
     create_boolean_equation_system(result, maxpg);
   }
 
@@ -155,7 +164,7 @@ struct pg_actions: public core::default_parser_actions
     result.prio = parse_Priority(node.child(1));
     result.owner = parse_Owner(node.child(2));
     result.successors = parse_Successors(node.child(3));
-    if (game.empty())
+    if (game.empty() && initial_node == std::numeric_limits<identifier_t>::max())
     {
       initial_node = result.id;
     }

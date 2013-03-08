@@ -24,7 +24,7 @@ ${declare longest_match}
 
 //--- pgsolver
 
-ParityGame : ('parity' Id ';')? NodeSpecList ;
+ParityGame : ('parity' Id ';')? ('start' Id ';')? NodeSpecList ;
 
 NodeSpecList : NodeSpec+ ;
 
