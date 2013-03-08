@@ -87,10 +87,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       {
         return eq_stut;
       }
-      else
-      {
-        return eq_none;
-      }
+      return eq_none;
     }
 
     std::string string_for_equivalence(const equivalence_t& eq)
@@ -116,6 +113,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
   protected:
     void initialise_allowed_eqs()
     {
+      m_allowed_equivalences.insert(eq_none);
       m_allowed_equivalences.insert(eq_bisim);
       m_allowed_equivalences.insert(eq_stut);
       m_equivalence_strings[eq_bisim] = "bisim";
@@ -572,8 +570,9 @@ class besconvert_tool: public super
 
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
                       "generate an equivalent BES, preserving equivalence NAME:"
+                      "  'none'  for no reduction (default),\n"
                       "  'bisim' for strong bisimulation,\n"
-                      "  'stuttering' for stuttering equivalence (default)", 'e');
+                      "  'stuttering' for stuttering equivalence", 'e');
       desc.add_option("intermediate", make_file_argument("FILE"),
                       "save the intermediate LTS to FILE", 'l');
       desc.add_option("translation", make_mandatory_argument("TRANSLATION"),
@@ -646,7 +645,7 @@ class besconvert_tool: public super
         "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
         "If INFILE is not "
         "present, stdin is used. If OUTFILE is not present, stdout is used."),
-      equivalence(bes_reduction_algorithm<>::eq_stut),
+      equivalence(bes_reduction_algorithm<>::eq_none),
       m_translation(bes_reduction_algorithm<>::to_lts_selfloop),
       m_no_reduction(false)
     {}
@@ -661,14 +660,18 @@ class besconvert_tool: public super
       mCRL2log(verbose) << "Loading BES from input file...";
       load_bes(b, input_filename(), bes_input_format());
 
-      bool reach = detail::bes_algorithm<>(b).remove_unreachable_equations();
-      if(!reach)
+      if(equivalence != bes_reduction_algorithm<>::eq_none)
       {
-        throw mcrl2::runtime_error("expect all equations to be reachable");
-      }
 
-      mCRL2log(verbose) << "done" << std::endl;
-      bes_reduction_algorithm<std::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
+        bool reach = detail::bes_algorithm<>(b).remove_unreachable_equations();
+        if(!reach)
+        {
+          throw mcrl2::runtime_error("expect all equations to be reachable");
+        }
+
+        mCRL2log(verbose) << "done" << std::endl;
+        bes_reduction_algorithm<std::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
+      }
       save_bes(b, output_filename(), bes_output_format());
 
       return true;
