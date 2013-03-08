@@ -332,11 +332,53 @@ void save_bes(const boolean_equation_system<>& bes_spec,
     case pbes_file_cwi:
     {
       mCRL2log(log::verbose) << "Saving result in CWI format..." << std::endl;
+      // TODO: clean up the code below.
       if(!initial_bes_equation_corresponds_to_initial_state(bes_spec))
       {
-        throw mcrl2::runtime_error("The initial state " + bes::pp(bes_spec.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec.equations().begin()->variable()) + " do not correspond. Cannot save BES to CWI format.");
+        mCRL2log(log::warning) << "The initial state " + bes::pp(bes_spec.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec.equations().begin()->variable()) + " do not correspond." << std::endl;
+        // Determine whether the initial state is in the first block, if so,
+        // swap the two equations.
+        std::vector<boolean_equation> equations(bes_spec.equations().begin(), bes_spec.equations().end());
+        boolean_equation fst = *equations.begin();
+        size_t index = 0;
+        while(index < equations.size() && fst.symbol() == equations[index].symbol())
+        {
+          if(equations[index].variable() == boolean_variable(bes_spec.initial_state()))
+          {
+            break;
+          }
+          ++index;
+        }
+        if(fst.symbol() == equations[index].symbol())
+        {
+          // equation is in the first block, just swap the two
+          std::swap(equations[0], equations[index]);
+          mCRL2log(log::warning) << "Fixed up by swapping the equations for " << pp(equations[0].variable()) << " and " << pp(equations[index].variable()) << std::endl;
+        }
+        else
+        {
+          std::set<boolean_variable> occ = find_boolean_variables(bes_spec);
+          std::set<core::identifier_string> occ_ids;
+          for(std::set<boolean_variable>::const_iterator i = occ.begin(); i != occ.end(); ++i)
+          {
+            occ_ids.insert(i->name());
+          }
+
+          utilities::number_postfix_generator generator(occ_ids.begin(), occ_ids.end(), "X");
+          boolean_variable var = boolean_variable(generator());
+          boolean_equation eqn(fst.symbol(), var, bes_spec.initial_state());
+          equations.insert(equations.begin(), eqn);
+          // bes_spec.initial_state() = var; not used in output
+
+          mCRL2log(log::warning) << "Fixed up by introducing a new initial equation " << pp(eqn) << std::endl;
+        }
+
+        bes::bes2cwi(equations.begin(), equations.end(), outfilename);
       }
-      bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
+      else
+      {
+        bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
+      }
       break;
     }
     case pbes_file_pgsolver:
