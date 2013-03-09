@@ -116,14 +116,14 @@ static void gstcReadInConstructors(const core::identifier_string_list::const_ite
 static void gstcReadInFuncs(aterm_list, aterm_list);
 static void gstcReadInActs(aterm_list);
 // static void gstcReadInProcsAndInit(aterm_list, aterm_appl);
-static void gstcReadInPBESAndInit(aterm_appl, aterm_appl);
+// static void gstcReadInPBESAndInit(aterm_appl, aterm_appl);
 
 static void gstcTransformVarConsTypeData(void);
 // static void gstcTransformActProcVarConst(void);
-static void gstcTransformPBESVarConst(void);
+// static void gstcTransformPBESVarConst(void);
 
 // static aterm_list gstcWriteProcs(aterm_list);
-static aterm_list gstcWritePBES(aterm_list);
+// static aterm_list gstcWritePBES(aterm_list);
 
 static bool gstcInTypesA(aterm_appl, aterm_list);
 static bool gstcEqTypesA(aterm_appl, aterm_appl);
@@ -146,7 +146,7 @@ static bool gstcVarsUnique(aterm_list VarDecls);
 static aterm_appl gstcRewrActProc(const std::map<core::identifier_string,sort_expression> &, aterm_appl, bool is_pbes=false);
 static inline aterm_appl gstcMakeActionOrProc(bool, aterm_appl, aterm_list, aterm_list);
 static aterm_appl gstcTraverseActProcVarConstP(const std::map<core::identifier_string,sort_expression> &, aterm_appl);
-static aterm_appl gstcTraversePBESVarConstPB(const std::map<core::identifier_string,sort_expression> &, aterm_appl);
+// static aterm_appl gstcTraversePBESVarConstPB(const std::map<core::identifier_string,sort_expression> &, aterm_appl);
 
 static sort_expression gstcTraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression> &DeclaredVars, 
                                                 const std::map<core::identifier_string,sort_expression> &AllowedVars, 
@@ -236,11 +236,11 @@ static aterm_appl replace_possible_sorts(aterm_appl Type);
 static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Arguments, aterm_list ArgumentTypes,std::string previous_reason);
 
 // Typechecking modal formulas
-static aterm_appl gstcTraverseStateFrm(const std::map<core::identifier_string,sort_expression> &Vars, 
+/* static aterm_appl gstcTraverseStateFrm(const std::map<core::identifier_string,sort_expression> &Vars, 
                                        const std::map<core::identifier_string,sort_expression_list> &StateVars, 
-                                       aterm_appl StateFrm);
-static aterm_appl gstcTraverseRegFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl RegFrm);
-static aterm_appl gstcTraverseActFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ActFrm);
+                                       aterm_appl StateFrm); */
+// static aterm_appl gstcTraverseRegFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl RegFrm);
+// static aterm_appl gstcTraverseActFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ActFrm);
 
 
 static aterm_appl gstcFoldSortRefs(aterm_appl Spec);
@@ -606,7 +606,7 @@ bool mcrl2::data::sort_type_checker::check_for_sort_alias_loop_through_function_
   return false;
 }
 
-void mcrl2::data::sort_type_checker::check_sort(const basic_sort &sort)
+void mcrl2::data::sort_type_checker::add_basic_sort(const basic_sort &sort)
 {
   if (sort_bool::is_bool(sort))
   {
@@ -632,6 +632,7 @@ void mcrl2::data::sort_type_checker::check_sort(const basic_sort &sort)
   {
     throw mcrl2::runtime_error("double declaration of sort " + pp(sort.name()));
   }
+  basic_sorts.insert(sort.name());
 }
 
 mcrl2::data::sort_type_checker::sort_type_checker(
@@ -642,21 +643,14 @@ mcrl2::data::sort_type_checker::sort_type_checker(
 {
   for (sort_expression_vector::const_iterator i=sorts_begin; i!=sorts_end; ++i)
   {
-    if (is_basic_sort(*i))
-    {
-      const basic_sort &bsort(*i);
-      check_sort(bsort);
-      basic_sorts.insert(bsort.name());
-    }
-    else
-    {
-std::cerr << "Don't check sort " << pp(*i) << "\n";
-    }
+    assert(is_basic_sort(*i));
+    const basic_sort &bsort(*i);
+    add_basic_sort(bsort);
   }
 
   for (alias_vector::const_iterator i=aliases_begin; i!=aliases_end; ++i)
   {
-    check_sort(i->name());
+    add_basic_sort(i->name());
     defined_sorts[i->name().name()]=i->reference(); 
     mCRL2log(debug) << "Add sort alias " << pp(i->name()) << "  " << pp(i->reference()) << "" << std::endl;
   }
@@ -4962,7 +4956,7 @@ namespace core
   return proc_expr;
 } */
 
-aterm_appl type_check_state_frm(aterm_appl state_frm, aterm_appl spec)
+/* aterm_appl type_check_state_frm(aterm_appl state_frm, aterm_appl spec)
 {
   mCRL2log(verbose) << "type checking state formula..." << std::endl;
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
@@ -5031,7 +5025,7 @@ aterm_appl type_check_state_frm(aterm_appl state_frm, aterm_appl spec)
   std::map<core::identifier_string,sort_expression_list> StateVars;
   return gstcTraverseStateFrm(Vars,StateVars,state_frm);
   
-}
+} */
 
 aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec)
 {
@@ -5180,7 +5174,7 @@ aterm_appl type_check_action_rename_spec(aterm_appl ar_spec, aterm_appl lps_spec
   return Result;
 }
 
-aterm_appl type_check_pbes_spec(aterm_appl pbes_spec)
+/* aterm_appl type_check_pbes_spec(aterm_appl pbes_spec)
 {
   //check correctness of the PBES specification in pbes_spec
 
@@ -5245,7 +5239,7 @@ aterm_appl type_check_pbes_spec(aterm_appl pbes_spec)
   Result=gstcFoldSortRefs(Result);
 
   return Result;
-}
+} */
 
 
 //local functions
@@ -6140,7 +6134,7 @@ static void gstcReadInActs(aterm_list Acts)
 
 } */
 
-static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
+/* static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
 {
   aterm_list PBEqns=aterm_cast<aterm_list>(PBEqnSpec[0]);
 
@@ -6193,7 +6187,7 @@ static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
   }
   body.proc_pars[INIT_KEY()]=variable_list();
   body.proc_bodies[INIT_KEY()]=aterm_cast<aterm_appl>(PBInit[0]);
-}
+} */
 
 /* static aterm_list gstcWriteProcs(aterm_list oldprocs)
 {
@@ -6213,7 +6207,7 @@ static void gstcReadInPBESAndInit(aterm_appl PBEqnSpec, aterm_appl PBInit)
   return Result;
 } */
 
-static aterm_list gstcWritePBES(aterm_list oldPBES)
+/* static aterm_list gstcWritePBES(aterm_list oldPBES)
 {
   aterm_list Result;
   for (aterm_list PBEqns=oldPBES; !PBEqns.empty(); PBEqns=PBEqns.tail())
@@ -6237,7 +6231,7 @@ static aterm_list gstcWritePBES(aterm_list oldPBES)
     Result.push_front(PBEqn.set_argument(aterm_cast<aterm_appl>(body.proc_bodies[Index]),2));
   }
   return reverse(Result);
-}
+} */
 
 
 static void gstcTransformVarConsTypeData(void)
@@ -6363,7 +6357,7 @@ static void gstcTransformVarConsTypeData(void)
   }
 } */
 
-static void gstcTransformPBESVarConst(void)
+/* static void gstcTransformPBESVarConst(void)
 {
   std::map<core::identifier_string,sort_expression> Vars;
 
@@ -6382,7 +6376,7 @@ static void gstcTransformPBESVarConst(void)
     aterm_appl NewPBTerm=gstcTraversePBESVarConstPB(Vars,aterm_cast<aterm_appl>(body.proc_bodies[PBVar]));
     body.proc_bodies[PBVar]=NewPBTerm;
   }
-}
+} */
 
 
 // ======== Auxiliary functions
@@ -7352,7 +7346,7 @@ static aterm_appl gstcTraverseActProcVarConstP(const std::map<core::identifier_s
   throw mcrl2::runtime_error("Internal error. Process " + pp(ProcTerm) + " fails to match known processes.");
 }
 
-static aterm_appl gstcTraversePBESVarConstPB(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl PBESTerm)
+/* static aterm_appl gstcTraversePBESVarConstPB(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl PBESTerm)
 {
 
   if (gsIsDataExpr(PBESTerm))
@@ -7411,7 +7405,7 @@ static aterm_appl gstcTraversePBESVarConstPB(const std::map<core::identifier_str
   }
 
   throw mcrl2::runtime_error("Internal error. The pbes term " + pp(PBESTerm) + " fails to match any known form in typechecking case analysis");
-}
+} */
 
 static sort_expression gstcTraverseVarConsTypeD(
   const std::map<core::identifier_string,sort_expression> &DeclaredVars,
@@ -10542,7 +10536,7 @@ static void gstcErrorMsgCannotCast(aterm_appl CandidateType, aterm_list Argument
 // Type checking modal formulas
 //===================================
 
-static aterm_appl gstcTraverseStateFrm(const std::map<core::identifier_string,sort_expression> &Vars, 
+/* static aterm_appl gstcTraverseStateFrm(const std::map<core::identifier_string,sort_expression> &Vars, 
                                        const std::map<core::identifier_string,sort_expression_list> &StateVars, 
                                        aterm_appl StateFrm)
 {
@@ -10746,9 +10740,9 @@ static aterm_appl gstcTraverseStateFrm(const std::map<core::identifier_string,so
   }
 
   throw mcrl2::runtime_error("Internal error. The state formula " + pp(StateFrm) + " fails to match any known form in typechecking case analysis");
-}
+} */
 
-static aterm_appl gstcTraverseRegFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl RegFrm)
+/* static aterm_appl gstcTraverseRegFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl RegFrm)
 {
   mCRL2log(debug) << "gstcTraverseRegFrm: " + pp(RegFrm) + "" << std::endl;
   if (gsIsRegNil(RegFrm))
@@ -10775,9 +10769,9 @@ static aterm_appl gstcTraverseRegFrm(const std::map<core::identifier_string,sort
   }
 
   throw mcrl2::runtime_error("Internal error. The regularformula " + pp(RegFrm) + " fails to match any known form in typechecking case analysis");
-}
+} */
 
-static aterm_appl gstcTraverseActFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ActFrm)
+/* static aterm_appl gstcTraverseActFrm(const std::map<core::identifier_string,sort_expression> &Vars, aterm_appl ActFrm)
 {
   mCRL2log(debug) << "gstcTraverseActFrm: " + pp(ActFrm) + "" << std::endl;
 
@@ -10856,7 +10850,7 @@ static aterm_appl gstcTraverseActFrm(const std::map<core::identifier_string,sort
   }
 
   throw mcrl2::runtime_error("Internal error. The action formula " + pp(ActFrm) + " fails to match any known form in typechecking case analysis");
-}
+} */
 
 }
 }

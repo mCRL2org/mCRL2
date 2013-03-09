@@ -86,14 +86,10 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
     /// \brief Returns the action.
     /// \pre The right hand side must be an action
     /// \return The action.
-    action act() const
+    const action &act() const
     {
-      if (is_tau() || is_delta())
-      {
-        return action();
-      }
-      atermpp::aterm_appl result = *this;
-      return action(result);
+      assert(!is_tau() && !is_delta());
+      return atermpp::aterm_cast<action>(*this);
     }
 };
 
@@ -478,7 +474,10 @@ lps::specification action_rename(
     action rule_old_action =  i->lhs();
     action rule_new_action;
     action_rename_rule_rhs new_element = i->rhs();
-    rule_new_action =  new_element.act();
+    if (!new_element.is_tau() && !new_element.is_delta())
+    {
+      rule_new_action =  new_element.act();
+    }
 
     const bool to_tau = new_element.is_tau();
     const bool to_delta = new_element.is_delta();

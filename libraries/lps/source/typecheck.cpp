@@ -31,8 +31,21 @@ static action MakeAction(
   return action(action_label(Name,FormParList),FactParList);
 }
 
+static std::map<identifier_string,sort_expression> list_minus(const std::map<identifier_string,sort_expression> &l, const std::map<identifier_string,sort_expression> &m)
+{
+  std::map<identifier_string,sort_expression> n;
+  for (std::map<identifier_string,sort_expression>::const_reverse_iterator i=l.rbegin(); i!=l.rend(); ++i)
+  {
+    if (m.count(i->first)==0)
+    {
+      n.insert(*i);
+    }
+  }
+  return n;
+}
 
-action mcrl2::lps::multi_action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const action &ProcTerm)
+
+action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const action &ProcTerm)
 {
   action Result;
   core::identifier_string Name(ProcTerm[0]);
@@ -167,7 +180,7 @@ action mcrl2::lps::multi_action_type_checker::RewrAct(const std::map<core::ident
 
 
 
-action mcrl2::lps::multi_action_type_checker::TraverseAct(const action &ma)
+action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const action &ma)
 {
   size_t n = ma.size();
   if (n==0)
@@ -177,7 +190,6 @@ action mcrl2::lps::multi_action_type_checker::TraverseAct(const action &ma)
 
   if (gsIsParamId(ma))
   {
-    const std::map<core::identifier_string,sort_expression> Vars;
     return RewrAct(Vars,ma);
   }
 
@@ -185,7 +197,7 @@ action mcrl2::lps::multi_action_type_checker::TraverseAct(const action &ma)
 }
 
 
-void mcrl2::lps::multi_action_type_checker::ReadInActs(const action_label_list &Acts)
+void mcrl2::lps::action_type_checker::ReadInActs(const action_label_list &Acts)
 {
   for (lps::action_label_list::const_iterator i=Acts.begin(); i!=Acts.end(); ++i)
   {
@@ -224,7 +236,7 @@ void mcrl2::lps::multi_action_type_checker::ReadInActs(const action_label_list &
 }
 
 
-mcrl2::lps::multi_action_type_checker::multi_action_type_checker(
+mcrl2::lps::action_type_checker::action_type_checker(
             const data::data_specification &data_spec, 
             const action_label_list& action_decls)
   : data_type_checker(data_spec)
@@ -243,7 +255,7 @@ mcrl2::lps::multi_action_type_checker::multi_action_type_checker(
   }
 }
 
-multi_action mcrl2::lps::multi_action_type_checker::operator()(const multi_action &ma)
+multi_action mcrl2::lps::action_type_checker::operator()(const multi_action &ma)
 {
   try
   {
@@ -253,7 +265,8 @@ multi_action mcrl2::lps::multi_action_type_checker::operator()(const multi_actio
     {
       action o= *l;
       assert(gsIsParamId(o));
-      o=TraverseAct(o);
+      const  std::map<core::identifier_string,sort_expression> NewDeclaredVars;
+      o=TraverseAct(NewDeclaredVars,o);
       r.push_front(o);
     }
     if (ma.has_time())
@@ -269,6 +282,117 @@ multi_action mcrl2::lps::multi_action_type_checker::operator()(const multi_actio
     throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of multiaction failed (" + pp(ma) + ")");
   }
 }
+
+/*************************   Here starts the action_rename_typechecker  ************************************/
+
+action_rename_specification mcrl2::lps::action_type_checker::operator()(const action_rename_specification &ar_spec)
+{
+  mCRL2log(verbose) << "type checking action rename specification..." << std::endl;
+
+  //check precondition
+  // assert(gsIsActionRenameSpec(ar_spec));
+
+  mCRL2log(debug) << "type checking phase started" << std::endl;
+
+  std::map<core::identifier_string,term_list<sort_expression_list> > actions_from_lps;
+
+  /* aterm_appl lps_data_spec = aterm_cast<aterm_appl>(lps_spec[0]);
+  aterm_list lps_sorts = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_data_spec[0])[0]);
+  aterm_list lps_constructors = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_data_spec[1])[0]);
+  aterm_list lps_mappings = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_data_spec[2])[0]);
+  aterm_list lps_action_labels = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_spec[1])[0]); */
+
+  data_specification data_spec = ar_spec.data();
+  
+  std::map<core::identifier_string,sort_expression> LPSSorts=defined_sorts; // remember the sorts from the LPS.
+  sort_expression_vector sorts=data_spec.user_defined_sorts();
+  for (sort_expression_vector::const_iterator i=sorts.begin(); i!=sorts.end(); ++i)
+  {
+    assert(is_basic_sort(*i));
+    const basic_sort &bsort(*i);
+    add_basic_sort(bsort);
+    basic_sorts.insert(bsort.name());
+  }
+
+  alias_vector aliases=data_spec.user_defined_aliases();
+  for (alias_vector::const_iterator i=aliases.begin(); i!=aliases.end(); ++i)
+  {
+    add_basic_sort(i->name());
+    defined_sorts[i->name().name()]=i->reference();
+  }
+
+  mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file sorts finished" << std::endl;
+
+  // Check sorts for loops
+  // Unwind sorts to enable equiv and subtype relations
+  const std::map<core::identifier_string,sort_expression> difference_sorts_set=list_minus(defined_sorts, LPSSorts);
+  ReadInConstructors(difference_sorts_set.begin(),difference_sorts_set.end());
+
+  ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
+  
+  TransformVarConsTypeData(data_spec);
+  
+  //Save the actions from LPS only for later use.
+  actions_from_lps=actions;
+  const action_label_list action_labels=ar_spec.action_labels();
+  ReadInActs(action_labels);
+  
+  // data_spec=data_spec.set_argument(gsMakeDataEqnSpec(equations),3);
+  // Result=ar_spec.set_argument(data_spec,0);
+  // Result=gstcFoldSortRefs(Result);
+
+
+  // now the action renaming rules themselves will be typechecked.
+  std::vector <action_rename_rule> ActionRenameRules=ar_spec.rules();
+  std::vector <action_rename_rule> new_rules;
+
+  std::map<core::identifier_string,sort_expression> DeclaredVars;
+  std::map<core::identifier_string,sort_expression> FreeVars;
+
+  for (std::vector <action_rename_rule>::const_iterator l=ActionRenameRules.begin(); l!=ActionRenameRules.end(); ++l)
+  {
+    action_rename_rule Rule= *l;
+
+    variable_list VarList=Rule.variables();
+    if (!VarsUnique(VarList))
+    {
+      throw mcrl2::runtime_error("the variables " + pp(VarList) + " in action rename rule " + pp(Rule.condition()) + " -> " + 
+                               pp(Rule.lhs()) + " => " + (Rule.rhs().is_tau()?"tau":(Rule.rhs().is_delta()?"delta":pp(Rule.rhs().act()))) + " are not unique");
+    }
+
+    std::map<core::identifier_string,sort_expression> NewDeclaredVars;
+    AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
+    
+    DeclaredVars=NewDeclaredVars;
+
+    action Left=Rule.lhs();
+    assert(gsIsParamId(Left));
+    {
+      //extra check requested by Tom: actions in the LHS can only come from the LPS
+      actions.swap(actions_from_lps);
+      Left=TraverseAct(DeclaredVars,Left);
+      actions_from_lps.swap(actions);
+    }
+
+    data_expression Cond=Rule.condition();
+    TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Cond,sort_bool::bool_());
+
+    action_rename_rule_rhs Right=Rule.rhs();
+    assert(gsIsParamId(Right) || gsIsTau(Right) || gsIsDelta(Right));
+    if (!Right.is_delta() && !Right.is_tau())
+    { 
+      Right=TraverseAct(DeclaredVars,Right.act());
+    }
+
+    new_rules.push_back(action_rename_rule(VarList,Cond,Left,Right));
+  }
+
+  mCRL2log(debug) << "type checking transform VarConstTypeData phase finished" << std::endl;
+  
+  return action_rename_specification(data_spec,action_labels,new_rules);
+}
+
+
 
 /*************************   Here starts the state_formula_typechecker  ************************************/
 
@@ -616,7 +740,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 mcrl2::state_formulas::state_formula_type_checker::state_formula_type_checker(
        const data::data_specification &data_spec, 
        const action_label_list& action_decls)
-  :  lps::multi_action_type_checker(data_spec,action_decls)
+  :  lps::action_type_checker(data_spec,action_decls)
 {
 }
      

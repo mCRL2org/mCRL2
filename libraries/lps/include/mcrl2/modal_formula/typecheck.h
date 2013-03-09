@@ -24,7 +24,7 @@ namespace state_formulas
 {
 
 
-class state_formula_type_checker : lps::multi_action_type_checker
+class state_formula_type_checker : lps::action_type_checker
 {
 
   public:

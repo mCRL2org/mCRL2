@@ -965,7 +965,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
 
 
 mcrl2::process::process_type_checker::process_type_checker(const process_specification &proc_spec)
-  : lps::multi_action_type_checker(proc_spec.data(),proc_spec.action_labels())
+  : lps::action_type_checker(proc_spec.data(),proc_spec.action_labels())
 {
   mCRL2log(verbose) << "type checking process specification..." << std::endl;
 

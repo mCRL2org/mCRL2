@@ -16,6 +16,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/action_rename.h"
 
 namespace mcrl2
 {
@@ -24,7 +25,7 @@ namespace lps
 {
 
 
-class multi_action_type_checker:public data::data_type_checker
+class action_type_checker:public data::data_type_checker
 {
   protected:
     std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
@@ -35,7 +36,7 @@ class multi_action_type_checker:public data::data_type_checker
     *  \param[in] d A data specification that does not need to have been type checked.
     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
     **/
-    multi_action_type_checker(const data::data_specification &data_spec, const action_label_list& action_decls);
+    action_type_checker(const data::data_specification &data_spec, const action_label_list& action_decls);
 
     /** \brief     Type check a multi action.
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -44,9 +45,16 @@ class multi_action_type_checker:public data::data_type_checker
     **/
     multi_action operator()(const multi_action &ma);
 
+    /** \brief     Type check a action_rename_specification;
+    *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+    *  \param[in] ars An action rename specification that has not been type checked.
+    *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
+    **/
+    action_rename_specification operator()(const action_rename_specification &ars);
+
   protected:
     void ReadInActs(const lps::action_label_list &Acts);
-    action TraverseAct(const action &ma);
+    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const action &ma);
     action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const action &ma);
 };
 
@@ -62,7 +70,7 @@ void type_check(
   const data::data_specification& data_spec,
   const action_label_list& action_decls)
 {
-  multi_action_type_checker type_checker(data_spec,action_decls);
+  action_type_checker type_checker(data_spec,action_decls);
   try
   {
     mult_act=type_checker(mult_act);
@@ -95,7 +103,7 @@ void type_check(
   const data::data_specification& data_spec,
   const action_label_list& action_decls)
 {
-  multi_action_type_checker type_checker(data_spec,action_decls);
+  action_type_checker type_checker(data_spec,action_decls);
   
   for (std::vector<multi_action>::iterator i=mult_actions.begin(); i!=mult_actions.end(); ++i)
   {
