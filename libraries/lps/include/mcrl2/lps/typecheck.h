@@ -47,7 +47,7 @@ class multi_action_type_checker:public data::data_type_checker
   protected:
     void ReadInActs(const lps::action_label_list &Acts);
     action TraverseAct(const action &ma);
-    action RewrAct(const action &ma);
+    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const action &ma);
 };
 
 
