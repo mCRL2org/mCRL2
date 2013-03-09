@@ -266,7 +266,7 @@ class term_appl:public aterm
     ///         It is more efficient to completely reconstruct a term
     ///         instead of repeatedly applying set_argument.
     /// \return The term with one of its arguments replaced.
-    term_appl<Term> set_argument(const Term &arg, const size_type i);
+    term_appl<Term> set_argument(const Term &arg, const size_type i) const;
 
     /// \brief Returns the i-th argument.
     /// \param i A positive integer

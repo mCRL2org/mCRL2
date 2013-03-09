@@ -404,7 +404,7 @@ const _aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Ter
 
 
 template <class Term>
-term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n) 
+term_appl<Term> term_appl<Term>::set_argument(const Term &arg, const size_t n) const
 {
   bool found;
 

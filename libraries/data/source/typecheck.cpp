@@ -102,7 +102,7 @@ typedef struct
 {
   aterm_list equations;
   std::map <aterm_appl,variable_list> proc_pars; // process_identifier -> variable_list
-  std::map <aterm_appl,aterm_appl> proc_bodies;  // process_identifier -> rhs
+  std::map <aterm_appl,aterm_appl> proc_bodies;  // process_identifier -> rhs   
 } Body;
 static Body body;
 
