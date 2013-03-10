@@ -315,7 +315,7 @@ class pbes_type_checker:public data::data_type_checker
         if (ParList.empty())
         {
           throw mcrl2::runtime_error("no propositional variable " + pp(Name)
-                          + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
+                          + " with " + mcrl2::utilities::to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
                           + " is declared (while typechecking " + pp(ProcTerm) + ")");
         }
       
