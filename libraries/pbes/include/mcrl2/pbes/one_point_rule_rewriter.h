@@ -13,6 +13,7 @@
 #define MCRL2_PBES_ONE_POINT_RULE_REWRITER_H
 
 #include <cassert>
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/substitutions.h"
@@ -185,7 +186,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     mCRL2log(log::debug, "one_point_rewriter") << "x = " << pbes_system::pp(x) << std::endl;
     pbes_expression body = derived()(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_and(body, true);
-    mCRL2log(log::debug, "one_point_rewriter") << "split_and(x.body()) = " << print_set(terms, pbes_printer()) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "split_and(x.body()) = " << pbes_system::detail::print_set(terms) << std::endl;
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
     std::vector< std::set<pbes_expression>::iterator > to_be_removed;
@@ -260,7 +261,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     mCRL2log(log::debug, "one_point_rewriter") << "x = " << pbes_system::pp(x) << std::endl;
     pbes_expression body = derived()(x.body());
     std::set<pbes_expression> terms = pbes_expr::split_or(body, true);
-    mCRL2log(log::debug, "one_point_rewriter") << "split_or(x.body()) = " << print_set(terms, pbes_printer()) << std::endl;
+    mCRL2log(log::debug, "one_point_rewriter") << "split_or(x.body()) = " << pbes_system::detail::print_set(terms) << std::endl;
     data::mutable_map_substitution<> sigma;
     std::set<data::variable> variables = atermpp::convert< std::set<data::variable> >(x.variables());
     std::vector< std::set<pbes_expression>::iterator > to_be_removed;
@@ -286,7 +287,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         }
       }
       mCRL2log(log::debug, "one_point_rewriter") << "sigma     = " << data::print_substitution(sigma) << std::endl;
-      mCRL2log(log::debug, "one_point_rewriter") << "variables = " << print_variable_set(variables) << std::endl;
+      mCRL2log(log::debug, "one_point_rewriter") << "variables = " << data::detail::print_set(variables) << std::endl;
     }
 
     pbes_expression result;

@@ -17,10 +17,12 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/tuple/tuple.hpp>
+#include "mcrl2/process/detail/print_utility.h"
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/process/detail/print_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/test_utilities.h"
 
@@ -150,41 +152,20 @@ rename_expression_list parse_rename_set(const std::string& text)
   return rename_expression_list(result.begin(), result.end());
 }
 
-template <typename Container>
-std::string print_container(const Container& c, const std::string& start = "", const std::string& end = "", const std::string& sep = "")
-{
-  std::ostringstream out;
-  out << start;
-  for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
-  {
-    if (i != c.begin())
-    {
-      out << sep;
-    }
-    out << *i;
-  }
-  out << end;
-  return out.str();
-}
-
-template <typename Container>
-std::string print_set(const Container& c)
-{
-  return print_container(c, "{", "}", ", ");
-}
-
 std::string print(const multi_action_name& alpha)
 {
   if (alpha.empty())
   {
     return "tau";
   }
-  std::multiset<std::string> A;
+  std::ostringstream out;
   for (multi_action_name::const_iterator i = alpha.begin(); i != alpha.end(); ++i)
   {
-    A.insert(std::string(*i));
+    out << std::string(*i);
   }
-  return print_container(A);
+  std::string result = out.str();
+  std::sort(result.begin(), result.end());
+  return result;
 }
 
 std::string print(const multi_action_name_set& A, bool A_includes_subsets = false)
@@ -194,7 +175,7 @@ std::string print(const multi_action_name_set& A, bool A_includes_subsets = fals
   {
     V.insert(print(*i));
   }
-  return print_set(V) + (A_includes_subsets ? "@" : "");
+  return core::detail::print_set(V, core::detail::default_printer(), "", false, false) + (A_includes_subsets ? "@" : "");
 }
 
 std::string print(const allow_set& x)

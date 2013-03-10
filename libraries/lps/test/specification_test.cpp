@@ -14,12 +14,12 @@
 #include <set>
 #include <iterator>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/core/detail/print_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -30,8 +30,7 @@ void test_find_sort_expressions()
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());
   std::set<sort_expression> s;
   lps::find_sort_expressions(spec, std::inserter(s, s.end()));
-  std::cout << core::detail::print_set(s, lps::stream_printer()) << std::endl;
-  // BOOST_CHECK(false);
+  std::cout << data::detail::print_set(s) << std::endl;
 }
 
 void test_system_defined_sorts()

@@ -15,6 +15,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
@@ -36,9 +37,11 @@ struct predicate_variable
   propositional_variable_instantiation X;
   pbes_expression guard;
   data::mutable_map_substitution<> sigma;
-  std::map<std::size_t, data::data_expression> source;
-  std::map<std::size_t, data::data_expression> dest;
-  std::map<std::size_t, std::size_t> copy;
+  std::map<std::size_t, data::data_expression> source; // source[j] = e <=> source(X, i, j) = e
+  std::map<std::size_t, data::data_expression> dest;   // dest[j] = c   <=> dest(X, i, j) = c
+  std::map<std::size_t, std::size_t> copy;             // copy[j] = k   <=> copy(X, i, j) = k
+  std::map<std::size_t, data::variable> used;          // used[j] = d   <=> used(X, i, j) = d
+  std::vector<bool> changed;                           // changed[j] = changed(X, i, j)
 };
 
 class stategraph_equation: public pbes_equation
@@ -47,13 +50,6 @@ class stategraph_equation: public pbes_equation
     std::vector<predicate_variable> m_predvars;
     std::vector<data::variable> m_parameters;
     pbes_expression m_condition;
-
-    // m_source[i], m_dest[i] and m_copy[i] correspond to m_predvars[i]
-    // m_sigma and m_source represent the same information (this should be cleaned up)
-    // std::vector<data::mutable_map_substitution<> > m_sigma;
-    // std::vector<std::map<std::size_t, data::data_expression> > m_source;
-    // std::vector<std::map<std::size_t, data::data_expression> > m_dest;
-    // std::vector<std::map<std::size_t, std::size_t> > m_copy;
 
     void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
     {
@@ -176,6 +172,22 @@ class stategraph_equation: public pbes_equation
       }
     }
 
+    void compute_used(const std::vector<data::variable>& d_X)
+    {
+      for (std::size_t i = 0; i < m_predvars.size(); i++)
+      {
+        predicate_variable& Y = m_predvars[i];
+        std::set<data::variable> v = pbes_system::find_free_variables(Y.guard);
+        for (std::size_t j = 0; j < d_X.size(); j++)
+        {
+          if (v.find(d_X[j]) != v.end())
+          {
+            Y.used[j] = d_X[j];
+          }
+        }
+      }
+    }
+
   public:
     stategraph_equation(const pbes_equation& eqn, const data::data_specification& dataspec)
       : pbes_equation(eqn)
@@ -197,6 +209,7 @@ class stategraph_equation: public pbes_equation
       compute_source(is_control_flow);
       compute_dest(is_control_flow, R);
       compute_copy(is_control_flow);
+      compute_used(m_parameters);
     }
 
     bool is_simple() const
@@ -231,26 +244,6 @@ class stategraph_equation: public pbes_equation
     {
       return m_predvars;
     }
-
-//    const std::vector<data::mutable_map_substitution<> >& sigma() const
-//    {
-//      return m_sigma;
-//    }
-//
-//    const std::vector<std::map<std::size_t, data::data_expression> >& source() const
-//    {
-//      return m_source;
-//    }
-//
-//    const std::vector<std::map<std::size_t, data::data_expression> >& dest() const
-//    {
-//      return m_dest;
-//    }
-//
-//    const std::vector<std::map<std::size_t, std::size_t> >& copy() const
-//    {
-//      return m_copy;
-//    }
 
     std::string print() const
     {

@@ -15,6 +15,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
@@ -173,14 +174,6 @@ normalizer<Function> N(const Function& f)
   return normalizer<Function>(f);
 }
 
-template <typename Term>
-std::string data_printer(const Term& x)
-{
-  std::ostringstream out;
-  out << data::pp(x);
-  return out.str();
-}
-
 inline
 std::string VARIABLE_SPECIFICATION()
 {
@@ -228,7 +221,7 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
     expr1,
     expr2,
     parser(var_decl, data_spec),
-    data_printer<data_expression>,
+    data::detail::data_printer(),
     std::equal_to<data_expression>(),
     R1,
     "R1",

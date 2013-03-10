@@ -22,6 +22,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/detail/concepts.h"
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2;
@@ -280,7 +281,7 @@ void generate_values_test()
     data::sort_expression s = normalize_sorts(*i,dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data::data_expression_vector v = generate_values(dataspec, s, 10);
-    std::clog << " possible values: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
+    std::clog << " possible values: " << data::detail::print_set(v) << std::endl;
     BOOST_CHECK(v.size() <= 10);
     BOOST_CHECK(no_duplicates(v));
   }
@@ -292,7 +293,7 @@ void generate_values_test()
     data::sort_expression s = normalize_sorts(i->reference(),dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data::data_expression_vector v = generate_values(dataspec, s, 10);
-    std::clog << " possible values: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
+    std::clog << " possible values: " << data::detail::print_set(v) << std::endl;
     BOOST_CHECK(v.size() <= 10);
     BOOST_CHECK(no_duplicates(v));
   }

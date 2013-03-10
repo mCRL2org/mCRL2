@@ -20,8 +20,8 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/pbes/find.h"
@@ -295,7 +295,7 @@ void test_find_sort_expressions()
   pbes<> p = lps2pbes(spec, formula, timed);
   std::set<sort_expression> s;
   pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
-  std::cout << core::detail::print_set(s, data::stream_printer()) << std::endl;
+  std::cout << data::detail::print_set(s) << std::endl;
 }
 
 #ifdef MCRL2_ENABLE_IO_TEST

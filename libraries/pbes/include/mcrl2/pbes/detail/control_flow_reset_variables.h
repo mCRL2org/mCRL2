@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_CONTROL_FLOW_RESET_VARIABLES_H
 
 #include "boost/bind.hpp"
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/detail/control_flow_graph.h"
 #include "mcrl2/pbes/detail/print_utility.h"
@@ -44,7 +45,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
     std::string print_control_flow_marking(const control_flow_vertex& v) const
     {
       std::ostringstream out;
-      out << "vertex " << pbes_system::pp(v.X) << " = " << print_set(v.marking, data_printer());
+      out << "vertex " << pbes_system::pp(v.X) << " = " << data::detail::print_set(v.marking);
       return out.str();
     }
 
@@ -69,7 +70,7 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
         std::set<data::variable> fv = v.free_guard_variables();
         std::set<data::variable> dx = propvar_parameters(v.X.name());
         v.marking = data::detail::set_intersection(fv, dx);
-        mCRL2log(log::debug, "control_flow") << "vertex " << pbes_system::pp(v.X) << " freevars = " << print_variable_set(fv) << " dx = " << print_variable_set(dx) << "\n";
+        mCRL2log(log::debug, "control_flow") << "vertex " << pbes_system::pp(v.X) << " freevars = " << data::detail::print_set(fv) << " dx = " << data::detail::print_set(dx) << "\n";
       }
       mCRL2log(log::debug, "control_flow") << "--- initial control flow marking ---\n" << print_control_flow_marking();
 
@@ -96,14 +97,14 @@ class control_flow_reset_variables_algorithm: public control_flow_graph_algorith
           const propositional_variable_instantiation& Xij = i->label;
           data::data_expression_list e = Xij.parameters();
           std::set<data::variable> dx = propvar_parameters(u.X.name());
-          mCRL2log(log::debug, "control_flow") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << pbes_system::pp(Xij) << " I = " << print_set(I) << " u.marking = " << print_variable_set(u.marking) << std::endl;
+          mCRL2log(log::debug, "control_flow") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << pbes_system::pp(Xij) << " I = " << print_set(I) << " u.marking = " << data::detail::print_set(u.marking) << std::endl;
           for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
           {
             std::size_t m = *j;
             data::data_expression e_m = nth_element(e, m);
             std::set<data::variable> fv = pbes_system::find_free_variables(e_m);
             u.marking = data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking);
-            mCRL2log(log::debug, "control_flow") << "  m = " << m << " freevars = " << print_variable_set(fv) << " dx = " << print_variable_set(dx) << "\n";
+            mCRL2log(log::debug, "control_flow") << "  m = " << m << " freevars = " << data::detail::print_set(fv) << " dx = " << data::detail::print_set(dx) << "\n";
           }
           if (u.marking.size() > last_size)
           {

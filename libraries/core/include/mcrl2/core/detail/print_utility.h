@@ -30,10 +30,11 @@ namespace detail
 struct default_printer
 {
   template <typename T>
-  std::ostream& operator()(const T& x, std::ostream& out) const
+  std::string operator()(const T& x) const
   {
-    return out << x;
-    return out;
+    std::ostringstream out;
+    out << x;
+    return out.str();
   }
 };
 
@@ -42,21 +43,25 @@ struct default_printer
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container, typename Printer>
-std::string print_container(const Container& v, Printer print = default_printer(), std::string begin_marker = "(", std::string end_marker = ")", std::string message = "", bool print_index = false)
+std::string print_container(const Container& v, Printer print = default_printer(), std::string begin_marker = "(", std::string end_marker = ")", std::string message = "", bool print_index = false, bool boundary_spaces = true)
 {
   std::ostringstream out;
   if (!message.empty())
   {
     out << "--- " << message << "---" << std::endl;
   }
-  out << begin_marker << " ";
+  out << begin_marker;
+  if (boundary_spaces)
+  {
+    out << " ";
+  }
   int index = 0;
   for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     if (print_index)
     {
       out << index++ << " ";
-      print(*i, out);
+      out << print(*i);
       out << std::endl;
     }
     else
@@ -65,10 +70,14 @@ std::string print_container(const Container& v, Printer print = default_printer(
       {
         out << ", ";
       }
-      print(*i, out);
+      out << print(*i);
     }
   }
-  out << " " << end_marker;
+  if (boundary_spaces)
+  {
+    out << " ";
+  }
+  out << end_marker;
   return out.str();
 }
 
@@ -77,9 +86,9 @@ std::string print_container(const Container& v, Printer print = default_printer(
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container, typename Printer>
-std::string print_list(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false)
+std::string print_list(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false, bool boundary_spaces = true)
 {
-  return print_container(v, print, "[", "]", message, print_index);
+  return print_container(v, print, "[", "]", message, print_index, boundary_spaces);
 }
 
 /// \brief Creates a string representation of a container.
@@ -87,9 +96,9 @@ std::string print_list(const Container& v, Printer print = default_printer(), st
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container, typename Printer>
-std::string print_set(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false)
+std::string print_set(const Container& v, Printer print = default_printer(), std::string message = "", bool print_index = false, bool boundary_spaces = true)
 {
-  return print_container(v, print, "{", "}", message, print_index);
+  return print_container(v, print, "{", "}", message, print_index, boundary_spaces);
 }
 
 } // namespace detail

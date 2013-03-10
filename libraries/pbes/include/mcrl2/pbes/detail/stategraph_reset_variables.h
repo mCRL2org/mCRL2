@@ -76,7 +76,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
         stategraph_vertex& v = i->second;
         std::set<data::variable> dx = propvar_parameters(v.X.name());
         v.marking = data::detail::set_intersection(v.sig, dx);
-        mCRL2log(log::debug, "stategraph") << "vertex " << pbes_system::pp(v.X) << " sig = " << print_variable_set(v.sig) << " dx = " << print_variable_set(dx) << "\n";
+        mCRL2log(log::debug, "stategraph") << "vertex " << pbes_system::pp(v.X) << " sig = " << data::detail::print_set(v.sig) << " dx = " << data::detail::print_set(dx) << "\n";
       }
       mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << G.print_marking();
 
@@ -102,7 +102,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
           std::size_t last_size = u.marking.size();
           const propositional_variable_instantiation& Y = i->label;
           std::set<data::variable> dx = propvar_parameters(u.X.name());
-          mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << pbes_system::pp(Y) << " I = " << print_set(I) << " u.marking = " << print_variable_set(u.marking) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << pbes_system::pp(Y) << " I = " << print_set(I) << " u.marking = " << data::detail::print_set(u.marking) << std::endl;
           for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
           {
             std::size_t m = *j;
@@ -110,7 +110,7 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
             data::data_expression e_m = nth_element(e, m);
             std::set<data::variable> fv = pbes_system::find_free_variables(e_m);
             u.marking = data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking);
-            mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << print_variable_set(fv) << " dx = " << print_variable_set(dx) << "\n";
+            mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << data::detail::print_set(fv) << " dx = " << data::detail::print_set(dx) << "\n";
           }
           if (u.marking.size() > last_size)
           {
