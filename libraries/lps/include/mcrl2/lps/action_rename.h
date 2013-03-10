@@ -15,7 +15,6 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/replace.h"
@@ -51,6 +50,7 @@ namespace mcrl2
 
 namespace lps
 {
+
 
 /// \brief Right hand side of an action rename rule
 class action_rename_rule_rhs: public atermpp::aterm_appl
@@ -182,7 +182,9 @@ class action_rename_rule
 
     /// \brief Returns the left hand side of the rule.
     /// \return The left hand side of the rule.
-    action lhs() const
+    atermpp::aterm_appl lhs() const // Type should be action, but as it can be a ParamId(identifier_string,data_expression_list),
+                                    // which is not accepted by the typechecker, this is a temporary fix, until this option
+                                    // is added to an action.
     {
       return m_lhs;
     }
@@ -346,21 +348,6 @@ namespace lps
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-/// \brief Type checks an action rename specification
-/// \param ar_spec A term
-/// \param spec A term
-/// \return A term in an undocumented format
-inline
-atermpp::aterm_appl type_check_action_rename_specification(const atermpp::aterm_appl &ar_spec, const atermpp::aterm_appl &spec)
-{
-  atermpp::aterm_appl result = core::type_check_action_rename_spec(ar_spec, spec);
-  if (!result.defined())
-  {
-    throw runtime_error("type check error");
-  }
-  return result;
-}
-
 /// \brief Renames variables
 /// \param rcond A data expression
 /// \param rleft An action

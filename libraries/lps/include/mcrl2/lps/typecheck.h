@@ -13,7 +13,6 @@
 #define MCRL2_LPS_TYPECHECK_H
 
 #include "mcrl2/core/detail/struct_core.h"  // gsMakeMultAct
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/action_rename.h"
@@ -54,8 +53,8 @@ class action_type_checker:public data::data_type_checker
 
   protected:
     void ReadInActs(const lps::action_label_list &Acts);
-    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const action &ma);
-    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const action &ma);
+    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const atermpp::aterm_appl &ma);
+    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const atermpp::aterm_appl &ma);
 };
 
 
@@ -79,16 +78,6 @@ void type_check(
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check multi action " + pp(mult_act));
   }
-/*   // TODO: replace all this nonsense code by a proper type check implementation
-  atermpp::aterm_appl t = core::type_check_mult_act(
-                  core::detail::gsMakeMultAct(mult_act.actions()),
-                  data::detail::data_specification_to_aterm_data_spec(data_spec),
-                  action_decls);
-  if (t==atermpp::aterm_appl())
-  {
-    throw mcrl2::runtime_error("could not type check multi action " + pp(lps::detail::multi_action_to_aterm(mult_act)));
-  }
-  mult_act = multi_action(t); */
 }
 
 
@@ -109,26 +98,20 @@ void type_check(
   {
     *i=type_checker(*i); // Change the elements in the vector.
   }
-  
-/*   // TODO: replace all this nonsense code by a proper type check implementation
-  // Bleh; do conversions...
-  atermpp::aterm_list l;
-  for (std::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
-       i!=mult_actions.end(); ++i)
-  {
-    l.push_front(i->actions());
-  }
-  l=core::type_check_mult_actions(
-      reverse(l),
-      data::detail::data_specification_to_aterm_data_spec(data_spec),
-      action_decls);
-  // And convert back...
-  mult_actions.clear();
-  for (atermpp::aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
-  {
-    mult_actions.push_back(multi_action((action_list)(*i)));
-  } */
 }
+
+/// \brief Type checks an action rename specification.
+/// \param ar_spec An action rename specifition.
+/// \param spec A linear process specification, used for the datatypes and action declarations.
+/// \return A type checked rename specification.
+
+inline
+action_rename_specification type_check_action_rename_specification(const action_rename_specification &ar_spec, const lps::specification &spec)
+{
+  lps::action_type_checker type_checker(spec.data(),spec.action_labels());
+  return type_checker(ar_spec);
+}
+
 
 } // namespace lps
 

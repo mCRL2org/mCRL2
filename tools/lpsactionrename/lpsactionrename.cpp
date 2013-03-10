@@ -17,7 +17,6 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"

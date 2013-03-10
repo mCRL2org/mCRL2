@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_TYPECHECK_H
 #define MCRL2_DATA_TYPECHECK_H
 
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/find.h"

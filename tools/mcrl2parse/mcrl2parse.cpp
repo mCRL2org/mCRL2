@@ -27,7 +27,6 @@
 #include "mcrl2/bes/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/detail/dparser_functions.h"
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"

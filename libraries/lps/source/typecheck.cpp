@@ -45,10 +45,10 @@ static std::map<identifier_string,sort_expression> list_minus(const std::map<ide
 }
 
 
-action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const action &ProcTerm)
+action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const aterm_appl &act)
 {
   action Result;
-  core::identifier_string Name(ProcTerm[0]);
+  core::identifier_string Name(act[0]);
   term_list<sort_expression_list> ParList;
 
   bool action=false;
@@ -67,7 +67,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
   assert(!ParList.empty());
 
-  size_t nFactPars=aterm_cast<aterm_list>(ProcTerm[1]).size();
+  size_t nFactPars=aterm_cast<aterm_list>(act[1]).size();
   const std::string msg="action";
 
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
@@ -88,18 +88,18 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
   {
     throw mcrl2::runtime_error("no " + msg + " " + std::string(Name)
                     + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
-                    + " is declared (while typechecking " + pp(ProcTerm) + ")");
+                    + " is declared (while typechecking " + pp(act) + ")");
   }
 
   if (ParList.size()==1)
   {
-    Result=MakeAction(Name,ParList.front(),aterm_cast<data_expression_list>(ProcTerm[1]));
+    Result=MakeAction(Name,ParList.front(),aterm_cast<data_expression_list>(act[1]));
   }
   else
   {
     // we need typechecking to find the correct type of the action.
     // make the list of possible types for the parameters
-    Result=MakeAction(Name,GetNotInferredList(ParList),aterm_cast<data_expression_list>(ProcTerm[1]));
+    Result=MakeAction(Name,GetNotInferredList(ParList),aterm_cast<data_expression_list>(act[1]));
   }
 
   //process the arguments
@@ -109,7 +109,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
-  for (aterm_list Pars=aterm_cast<aterm_list>(ProcTerm[1]); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
+  for (aterm_list Pars=aterm_cast<aterm_list>(act[1]); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
   {
     data_expression Par=Pars.front();
     sort_expression PosType=PosTypeList.front();
@@ -121,7 +121,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + pp(Par) + " as type " + pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + pp(ProcTerm) + ")");
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + pp(Par) + " as type " + pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + pp(act) + ")");
     }
     NewPars.push_front(Par);
     NewPosTypeList.push_front(NewPosType);
@@ -151,7 +151,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
       }
       catch (mcrl2::runtime_error &e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + pp(NewPosType) + " to " + pp(PosType) + "(while typechecking " + pp(Par) + " in " + pp(ProcTerm));
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + pp(NewPosType) + " to " + pp(PosType) + "(while typechecking " + pp(Par) + " in " + pp(act));
       }
 
       NewPars.push_front(Par);
@@ -165,7 +165,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
     if (!p.first)
     {
-      throw mcrl2::runtime_error("no " + msg + " " + std::string(Name) + "with type " + pp(NewPosTypeList) + " is declared (while typechecking " + pp(ProcTerm) + ")");
+      throw mcrl2::runtime_error("no " + msg + " " + std::string(Name) + "with type " + pp(NewPosTypeList) + " is declared (while typechecking " + pp(act) + ")");
     }
   }
 
@@ -180,7 +180,8 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
 
 
-action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const action &ma)
+action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const aterm_appl &ma)
+// last argument should have type action; but this does not allow for a ParamId.
 {
   size_t n = ma.size();
   if (n==0)
@@ -364,8 +365,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
     
     DeclaredVars=NewDeclaredVars;
-
-    action Left=Rule.lhs();
+    aterm_appl Left=Rule.lhs();
     assert(gsIsParamId(Left));
     {
       //extra check requested by Tom: actions in the LHS can only come from the LPS

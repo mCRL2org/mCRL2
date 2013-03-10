@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
 
+using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;

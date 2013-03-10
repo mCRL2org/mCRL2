@@ -1441,7 +1441,7 @@ struct term_traits<pbes_system::pbes_expression>
   const data_term_sequence_type &param(const term_type& t)
   {
     assert(is_prop_var(t));
-    return aterm_cast<data_term_sequence_type>(atermpp::list_arg2(t));
+    return atermpp::aterm_cast<data_term_sequence_type>(atermpp::list_arg2(t));
   }
 
   /// \brief Conversion from variable to term
@@ -1450,7 +1450,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   const term_type &variable2term(const variable_type& v)
   {
-    return aterm_cast<term_type>(v);
+    return atermpp::aterm_cast<term_type>(v);
   }
 
   /// \brief Test if a term is a variable
