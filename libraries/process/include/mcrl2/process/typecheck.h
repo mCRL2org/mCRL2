@@ -23,10 +23,10 @@ namespace process
 {
 
 
-class process_type_checker:public lps::action_type_checker
+class process_type_checker:public data::data_type_checker
 {
   protected:
-//    std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
+    std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
     std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > processes; //name -> Set(List(sort expression)) because of process polymorphism
     std::map<core::identifier_string,data::sort_expression> glob_vars;                  //name -> Type: global variables (for proc, pbes and init)
 

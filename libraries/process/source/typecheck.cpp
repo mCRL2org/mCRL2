@@ -924,7 +924,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
 
 }
 
-/* void mcrl2::process::process_type_checker::ReadInActs(const action_label_list &Acts)
+void mcrl2::process::process_type_checker::ReadInActs(const action_label_list &Acts)
 {
   for (lps::action_label_list::const_iterator i=Acts.begin(); i!=Acts.end(); ++i)
   {
@@ -960,12 +960,12 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
     }
     actions[ActName]=Types;
   }
-} */
+} 
 
 
 
 mcrl2::process::process_type_checker::process_type_checker(const process_specification &proc_spec)
-  : lps::action_type_checker(proc_spec.data(),proc_spec.action_labels())
+  : data_type_checker(proc_spec.data())
 {
   mCRL2log(verbose) << "type checking process specification..." << std::endl;
 
@@ -975,7 +975,7 @@ mcrl2::process::process_type_checker::process_type_checker(const process_specifi
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
 
-  // ReadInActs(proc_spec.action_labels());
+  ReadInActs(proc_spec.action_labels());
  
   const std::set<data::variable> glob_vars_set = proc_spec.global_variables();
   std::map<core::identifier_string,sort_expression> dummy;
