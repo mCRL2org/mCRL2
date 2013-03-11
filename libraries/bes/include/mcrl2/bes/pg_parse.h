@@ -82,7 +82,7 @@ struct pg_actions: public core::default_parser_actions
 
   pg_actions(const core::parser_table& table_)
     : core::default_parser_actions(table_),
-      initial_node(std::numeric_limits<identifier_t>::max())
+      initial_node((std::numeric_limits<identifier_t>::max)())
   {}
 
   template <typename T, typename Function>
@@ -164,7 +164,7 @@ struct pg_actions: public core::default_parser_actions
     result.prio = parse_Priority(node.child(1));
     result.owner = parse_Owner(node.child(2));
     result.successors = parse_Successors(node.child(3));
-    if (game.empty() && initial_node == std::numeric_limits<identifier_t>::max())
+    if (game.empty() && initial_node == (std::numeric_limits<identifier_t>::max)())
     {
       initial_node = result.id;
     }
