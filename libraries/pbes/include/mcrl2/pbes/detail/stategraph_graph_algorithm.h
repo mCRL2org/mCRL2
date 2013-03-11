@@ -663,15 +663,15 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
           assert(u.X.name() == X);
           const stategraph_equation& eq_X = *find_equation(m_pbes, X);
 
-          // z = (Y, q)
-          const local_vertex& z = **y.outgoing_edges.begin();
-          const core::identifier_string& Y = z.X;
-          std::size_t q = z.p;
-
           if (y.outgoing_edges.empty())
           {
             continue;
           }
+
+          // z = (Y, q)
+          const local_vertex& z = **y.outgoing_edges.begin();
+          const core::identifier_string& Y = z.X;
+          std::size_t q = z.p;
 
           for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
           {
