@@ -41,7 +41,7 @@ struct predicate_variable
   std::map<std::size_t, data::data_expression> dest;   // dest[j] = c   <=> dest(X, i, j) = c
   std::map<std::size_t, std::size_t> copy;             // copy[j] = k   <=> copy(X, i, j) = k
   std::map<std::size_t, data::variable> used;          // used[j] = d   <=> used(X, i, j) = d
-  std::vector<bool> changed;                           // changed[j] = changed(X, i, j)
+  std::set<std::size_t> changed;                       // j \in changed <=> changed(X, i, j)
 };
 
 class stategraph_equation: public pbes_equation
@@ -172,8 +172,9 @@ class stategraph_equation: public pbes_equation
       }
     }
 
-    void compute_used(const std::vector<data::variable>& d_X)
+    void compute_used()
     {
+      const std::vector<data::variable>& d_X = m_parameters;
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
         predicate_variable& Y = m_predvars[i];
@@ -183,6 +184,28 @@ class stategraph_equation: public pbes_equation
           if (v.find(d_X[j]) != v.end())
           {
             Y.used[j] = d_X[j];
+          }
+        }
+      }
+    }
+
+    void compute_changed()
+    {
+      const std::vector<data::variable>& d_X = m_parameters;
+      for (std::size_t i = 0; i < m_predvars.size(); i++)
+      {
+        predicate_variable& Y = m_predvars[i];
+        if (Y.X.name() != variable().name())
+        {
+          continue;
+        }
+        std::size_t j_index = 0;
+        const data::data_expression_list& e = Y.X.parameters();
+        for (data::data_expression_list::const_iterator j = e.begin(); j != e.end(); ++j, ++j_index)
+        {
+          if (*j != d_X[j_index])
+          {
+            Y.changed.insert(j_index);
           }
         }
       }
@@ -209,7 +232,8 @@ class stategraph_equation: public pbes_equation
       compute_source(is_control_flow);
       compute_dest(is_control_flow, R);
       compute_copy(is_control_flow);
-      compute_used(m_parameters);
+      compute_used();
+      compute_changed();
     }
 
     bool is_simple() const

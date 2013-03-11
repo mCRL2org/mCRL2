@@ -90,19 +90,22 @@ class stategraph_reset_variables_algorithm: public stategraph_graph_global_algor
       mCRL2log(log::debug, "stategraph") << "--- update marking ---" << std::endl;
       while (!todo.empty())
       {
-        std::set<stategraph_vertex*>::iterator i = todo.begin();
-        todo.erase(i);
-        stategraph_vertex& v = **i;
+        std::set<stategraph_vertex*>::iterator ti = todo.begin();
+        todo.erase(ti);
+        stategraph_vertex& v = **ti;
         mCRL2log(log::debug, "stategraph") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
         std::set<std::size_t> I = v.marking_variable_indices(m_pbes);
 
-        for (std::set<stategraph_edge>::iterator i = v.incoming_edges.begin(); i != v.incoming_edges.end(); ++i)
+        for (std::set<stategraph_edge>::iterator ei = v.incoming_edges.begin(); ei != v.incoming_edges.end(); ++ei)
         {
-          stategraph_vertex& u = *(i->source);
+          stategraph_vertex& u = *(ei->source);
+          std::size_t i = ei->label;
           std::size_t last_size = u.marking.size();
-          const propositional_variable_instantiation& Y = i->label;
+
+          const stategraph_equation& eq_X = *find_equation(m_pbes, u.X.name());
+          const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].X;
           std::set<data::variable> dx = propvar_parameters(u.X.name());
-          mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << pbes_system::pp(Y) << " I = " << print_set(I) << " u.marking = " << data::detail::print_set(u.marking) << std::endl;
+          mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << i << " I = " << print_set(I) << " u.marking = " << data::detail::print_set(u.marking) << std::endl;
           for (std::set<std::size_t>::const_iterator j = I.begin(); j != I.end(); ++j)
           {
             std::size_t m = *j;

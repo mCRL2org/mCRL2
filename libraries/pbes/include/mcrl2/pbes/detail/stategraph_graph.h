@@ -48,11 +48,11 @@ struct stategraph_edge
 {
   stategraph_vertex* source;
   stategraph_vertex* target;
-  propositional_variable_instantiation label;
+  std::size_t label;
 
   stategraph_edge(stategraph_vertex* source_,
                   stategraph_vertex* target_,
-                  const propositional_variable_instantiation& label_
+                  std::size_t label_
                  )
    : source(source_),
      target(target_),
@@ -141,7 +141,7 @@ inline
 std::string stategraph_edge::print() const
 {
   std::ostringstream out;
-  out << "(" << pbes_system::pp(source->X) << ", " << pbes_system::pp(target->X) << ") label = " << pbes_system::pp(label);
+  out << "(" << pbes_system::pp(source->X) << ", " << pbes_system::pp(target->X) << ") label = " << label;
   return out.str();
 }
 

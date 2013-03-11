@@ -396,9 +396,9 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
 
       while (!todo.empty())
       {
-        std::set<stategraph_vertex*>::iterator i = todo.begin();
-        stategraph_vertex& u = **i;
-        todo.erase(i);
+        std::set<stategraph_vertex*>::iterator ti = todo.begin();
+        stategraph_vertex& u = **ti;
+        todo.erase(ti);
         stategraph_vertex* source = &u;
         mCRL2log(log::debug, "stategraph") << "selected todo element u = " << pbes_system::pp(u.X) << std::endl;
 
@@ -412,18 +412,19 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
         u.sig = significant_variables(pbesr(eqn.formula(), sigma));
 
         const std::vector<predicate_variable>& predvars = eqn.predicate_variables();
-        for (std::vector<predicate_variable>::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
+        // for (std::vector<predicate_variable>::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
+        for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->X) << std::endl;
-          pbes_expression g = pbesr(j->guard, sigma);
-          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->guard) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
+          const predicate_variable& PV = predvars[i];
+          mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(PV.X) << std::endl;
+          pbes_expression g = pbesr(PV.guard, sigma);
+          mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(PV.guard) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
           if (is_false(g))
           {
             continue;
           }
-          propositional_variable_instantiation Ye = apply_substitution(j->X, sigma);
+          propositional_variable_instantiation Ye = apply_substitution(PV.X, sigma);
           propositional_variable_instantiation Y = project(Ye);
-          propositional_variable_instantiation label = Ye;
 
           mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;
 
@@ -437,8 +438,8 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
           }
           stategraph_vertex& v = q->second;
           stategraph_vertex* target = &v;
-          stategraph_edge e(source, target, label);
-          mCRL2log(log::debug, "stategraph") << "insert edge (u, v) with label " << pbes_system::pp(label) << std::endl;
+          stategraph_edge e(source, target, i);
+          mCRL2log(log::debug, "stategraph") << "insert edge (u, v) with label " << i << std::endl;
           u.outgoing_edges.insert(e);
           v.incoming_edges.insert(e);
         }
@@ -616,8 +617,13 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       }
     }
 
+    // Notation:
+    // use u, v for vertices in the control flow graph
+    // use y, z for vertices in the must graph
     void compute_control_flow_graphs()
     {
+      typedef std::map<stategraph_vertex*, const local_vertex*> todo_map;
+
       mCRL2log(log::debug, "stategraph") << "=== compute local control flow graphs ===" << std::endl;
 
       pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
@@ -634,72 +640,81 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
 
         mCRL2log(log::debug, "stategraph") << "compute local control flow graph for index " << k << std::endl;
         control_flow_graph G;
-
-        std::map<core::identifier_string, std::size_t> dependencies = must_graph.dependency_map(X_init.name(), k);
-        std::set<stategraph_vertex*> todo;
+        todo_map todo;
 
         // handle the initial state
-        propositional_variable_instantiation u0 = project(X_init, k);
-        vertex_iterator i = G.insert_vertex(u0);
-        todo.insert(&(i->second));
-        mCRL2log(log::debug, "stategraph") << "u0 = " << pbes_system::pp(u0) << std::endl;
+        vertex_iterator i = G.insert_vertex(project(X_init, k));
+        stategraph_vertex& u0 = i->second;
+        const local_vertex& y0 = must_graph.find_vertex(X_init.name(), k);
+        todo[&u0] = &y0;
+
+        mCRL2log(log::debug, "stategraph") << "u0 = " << pbes_system::pp(u0.X) << std::endl;
 
         while (!todo.empty())
         {
-          std::set<stategraph_vertex*>::iterator i = todo.begin();
-          stategraph_vertex& u = **i;
-          todo.erase(i);
-          const core::identifier_string& X = u.X.name();
-          std::size_t p = dependencies[X];
+          todo_map::iterator ti = todo.begin();
+          stategraph_vertex& u = *(ti->first);
+          const local_vertex& y = *(ti->second);
+          todo.erase(ti);
+
+          // y = (X, p)
+          const core::identifier_string& X = y.X;
+          std::size_t p = y.p;
+          assert(u.X.name() == X);
           const stategraph_equation& eq_X = *find_equation(m_pbes, X);
 
-          stategraph_vertex* source = &u; // u = (X, p)
-          mCRL2log(log::debug, "stategraph") << "selected todo element u = (" << pbes_system::pp(u.X) << ", " << p << ")" << std::endl;
+          // z = (Y, q)
+          const local_vertex& z = **y.outgoing_edges.begin();
+          const core::identifier_string& Y = z.X;
+          std::size_t q = z.p;
 
-          mCRL2log(log::debug, "stategraph") << "eqn = " << eq_X.print() << std::endl;
-
-          data::variable d_p = eq_X.parameters()[p];
-          data::data_expression e_p = u.X.parameters().front();
-          data::mutable_map_substitution<> sigma;
-          sigma[d_p] = e_p;
-
-          u.sig = significant_variables(pbesr(eq_X.formula(), sigma));
-
-          const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
-          for (std::vector<predicate_variable>::const_iterator j = predvars.begin(); j != predvars.end(); ++j)
+          if (y.outgoing_edges.empty())
           {
-            const core::identifier_string& Y = (j->X).name();
-            std::size_t q = dependencies[Y];
-            mCRL2log(log::debug, "stategraph") << "Y(e) = " << pbes_system::pp(j->X) << " q = " << q << std::endl;
+            continue;
+          }
 
-            pbes_expression g = pbesr(j->guard, sigma);
-            mCRL2log(log::debug, "stategraph") << "g = " << pbes_system::pp(j->guard) << data::print_substitution(sigma) << " = " << pbes_system::pp(g) << std::endl;
-
-            const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-            const std::map<std::size_t, data::data_expression>& src = eq_Y.predicate_variables()[j - predvars.begin()].source;
-            if (is_false(g) || (X == Y && src.find(q) == src.end()))
+          for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
+          {
+            const predicate_variable& X_i = eq_X.predicate_variables()[i];
+            if (X_i.X.name() != Y) // TODO: check this!
             {
               continue;
             }
-            propositional_variable_instantiation Ye = apply_substitution(j->X, sigma);
-            propositional_variable_instantiation Y1 = project(Ye, q);
-            propositional_variable_instantiation label = Ye;
 
-            mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Y) << std::endl;
+            data::data_expression f;
+            if (X_i.source.find(p) != X_i.source.end() && X_i.dest.find(p) != X_i.dest.end())
+            {
+              f = X_i.dest.find(p)->second;
+            }
+            else if (X_i.source.find(p) == X_i.source.end() && X_i.dest.find(p) != X_i.dest.end() && X != Y)
+            {
+              f = X_i.dest.find(p)->second;
+            }
+            else if (X_i.copy.find(p) != X_i.copy.end() && X_i.copy.find(p)->second == q)
+            {
+              f = u.X.parameters().front();
+            }
+            else
+            {
+              continue;
+            }
+            propositional_variable_instantiation Ye(Y, atermpp::make_list(f));
+            mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Ye) << std::endl;
 
-            vertex_iterator vi = G.find(Y1);
+            vertex_iterator vi = G.find(Ye);
             bool has_vertex = vi != G.end();
             if (!has_vertex)
             {
               mCRL2log(log::debug, "stategraph") << "insert vertex v" << std::endl;
-              vi = G.insert_vertex(Y1);
-              todo.insert(&(vi->second));
+              vi = G.insert_vertex(Ye);
+              stategraph_vertex& v = vi->second;
+              todo[&v] = &z;
             }
+
             stategraph_vertex& v = vi->second;
             mCRL2log(log::debug, "stategraph") << "insert guard g in vertex u" << std::endl;
-            stategraph_vertex* target = &v;
-            stategraph_edge e(source, target, label);
-            mCRL2log(log::debug, "stategraph") << "insert edge (u, v) with label " << pbes_system::pp(label) << std::endl;
+            stategraph_edge e(&u, &v, i);
+            mCRL2log(log::debug, "stategraph") << "insert edge (u, v) with label " << i << std::endl;
             u.outgoing_edges.insert(e);
             v.incoming_edges.insert(e);
           }
