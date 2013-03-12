@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Monday, March 04, 2013 12:37:58}
+%TCIDATA{LastRevised=Tuesday, March 12, 2013 14:00:10}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1714,11 +1714,11 @@ number between $1$ and $\mathrm{npred}(\varphi )$.
 
 \begin{definition}
 Let $\varphi $ be a predicate formula and let $i$ be between $1$ and $%
-\mathrm{npred}(\varphi )$. The functions $\mathrm{pred}(\varphi )$, $\mathrm{%
-data}(\varphi ,i)$ and $\mathrm{PVI}(\varphi ,i)$ are such that the
+\mathrm{npred}(\varphi )$. The functions $\mathrm{pred}(\varphi ,i)$, $%
+\mathrm{data}(\varphi ,i)$ and $\mathrm{PVI}(\varphi ,i)$ are such that the
 predicate variable instance $\mathrm{PVI}(\varphi ,i)$ is the $i^{th}$
 predicate variable instance in $\varphi $, syntactically present as $\mathrm{%
-pred}(\varphi )(\mathrm{data}(\varphi ,i))$. Let $\psi $ be a predicate
+pred}(\varphi ,i)(\mathrm{data}(\varphi ,i))$. Let $\psi $ be a predicate
 formula. We write $\varphi \lbrack i\rightarrow \psi ]$ to indicate that the
 predicate variable instance at position $i$ is replaced syntactically by $%
 \psi $ in $\varphi $.
@@ -1770,6 +1770,19 @@ true &  & \text{otherwise}%
 \end{array}%
 \right.%
 \end{array}%
+\end{equation*}%
+We define the function $sig$ recursively as follows:%
+\begin{equation*}
+\begin{array}{lll}
+sig(b) & = & FV(b) \\ 
+sig(\varphi \wedge \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(\varphi \vee \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(X(e)) & = & \emptyset \\ 
+sig(\exists d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
+sig(\forall d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
+sig(\varphi \Rightarrow \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
+sig(\lnot \varphi ) & = & sig(\varphi )%
+\end{array}%
 \end{equation*}
 
 \subsection{The functions source, dest and copy}
@@ -1779,8 +1792,8 @@ function with the property that
 \begin{equation*}
 \mathrm{source}(X,i,j)=\left\{ 
 \begin{array}{lll}
-e &  & \text{if }guard^{i}(\mathrm{PVI}(\varphi ,i))\Rightarrow d[j]\approx e
-\\ 
+e &  & \text{if }guard^{i}(\mathrm{PVI}(\varphi _{X},i))\Rightarrow
+d[j]\approx e \\ 
 \bot &  & \text{otherwise}%
 \end{array}%
 \right.
@@ -1815,7 +1828,18 @@ k &  & \text{if }\mathrm{PVI}(\varphi ,i)[k]=d[j] \\
 \bot &  & \text{otherwise}%
 \end{array}%
 \right.
+\end{equation*}%
+We define the function $\mathrm{used}$ as follows:%
+\begin{equation*}
+\mathrm{used}(X,i,j)=d_{X}[j]\in FV(guard^{i}(\mathrm{PVI}(\varphi _{X},i)))
+\end{equation*}%
+We define the function $\mathrm{changed}$ as follows:%
+\begin{equation*}
+\mathrm{changed}(X,i,j)=\mathrm{pred}(\varphi _{X},i)=X\wedge d_{X}[j]\neq 
+\mathrm{data}(\varphi _{X},i)[j]
 \end{equation*}
+
+\newpage
 
 \subsection{Control flow parameters}
 
@@ -1839,7 +1863,7 @@ Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots \mathcal{%
 $\text{\textbf{for }}k=1,\cdots ,n\text{ \textbf{do}}$ \\ 
 $\qquad \text{\textbf{for }}i=1,\cdots ,\left\vert par(X_{k})\right\vert 
 \text{ \textbf{do}}$ \\ 
-$\qquad \qquad cf(X_{k},i):=true$ \\ 
+$\qquad \qquad CFP(X_{k},i):=true$ \\ 
 $\qquad \qquad V(X_{k},i):=\bot $ \\ 
 $\text{\textbf{for }}k=1,\cdots ,n\text{ \textbf{do}}$ \\ 
 $\qquad \text{\textbf{for }}Y(e_{1},\cdots ,e_{m})\in occ(\varphi _{k})\text{
@@ -1849,7 +1873,7 @@ $\qquad \qquad \qquad \text{\textbf{if }}$is\_variable$(e_{i})\wedge
 e_{i}\in par(X_{k})$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{if}}$ $V(Y,i)=\bot \text{ \textbf{%
 then }}V(Y,i):=e_{i}$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{else }}cf(Y,i):=(V(Y,i)=e_{i})$
+$\qquad \qquad \qquad \qquad \text{\textbf{else }}CFP(Y,i):=(V(Y,i)=e_{i})$
 \\ 
 $todo:=\{X_{1},\cdots ,X_{n}\}$ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
@@ -1860,22 +1884,22 @@ $\qquad \text{\textbf{for }}Y(e_{1},\cdots ,e_{m})\in occ(\varphi _{k})\text{
 $\qquad \qquad \text{\textbf{for }}i=1,\cdots ,m\text{ \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}$is\_variable$(e_{i})$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{if }}e_{i}\notin par(X_{k})$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}cf(Y,i)\text{ \textbf{%
-then }}cf(Y,i):=false$; $todo:=todo\cup \{Y\}\qquad \qquad \qquad \qquad
-\qquad $ \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
+\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}\qquad \qquad \qquad
+\qquad \qquad $ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{else if }}e_{i}\in
 par(X_{k})\wedge X_{k}=Y\wedge pos(X_{k},e_{i})\neq i$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}cf(Y,i)\text{ \textbf{%
-then }}cf(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
+\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{else if }}e_{i}\in
 par(X_{k})\wedge \lnot cf(X_{k},i)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}cf(Y,i)\text{ \textbf{%
-then }}cf(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
+\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{else if }}\lnot $is\_constant$(e_{i})$
 \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}cf(Y,i)\text{ \textbf{%
-then }}cf(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
-$\text{\textbf{return} }cf$%
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
+\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
+$\text{\textbf{return} }CFP$%
 \end{tabular}%
 \end{equation*}
 
@@ -1885,45 +1909,140 @@ $\text{\textbf{return} }cf$%
 
 In the following algorithm we use a projection that removes all parameters
 of a predicate variable that do not correspond to a control flow parameter.
-This projection applied to the predicate variable $X_{k}(e_{1},\cdots ,e_{m})
-$ is denoted as $\overline{X_{k}(e_{1},\cdots ,e_{m})}$. The mapping $R$ is
-a rewriter that takes a substitution to data variables as second argument.
-We define the function $sig$ recursively as follows:%
-\begin{equation*}
-\begin{array}{lll}
-sig(b) & = & FV(b) \\ 
-sig(\varphi \wedge \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
-sig(\varphi \vee \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
-sig(X(e)) & = & \emptyset  \\ 
-sig(\exists d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
-sig(\forall d:D.\varphi ) & = & sig(\varphi )\setminus \{d\} \\ 
-sig(\varphi \Rightarrow \psi ) & = & sig(\varphi )\cup sig(\psi ) \\ 
-sig(\lnot \varphi ) & = & sig(\varphi )%
-\end{array}%
-\end{equation*}
+This projection applied to the predicate variable $X_{k}(e_{1},\cdots
+,e_{m}) $ is denoted as $\overline{X_{k}(e_{1},\cdots ,e_{m})}$. The mapping 
+$R$ is a rewriter that takes a substitution to data variables as second
+argument.
 
 \begin{equation*}
 \begin{tabular}{l}
 \textsc{ComputeGlobalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$%
 \textsc{)} \\ 
-$u_{0}:=\overline{X_{init}(e_{init})}$ \\ 
+$u_{0}:=X_{init}(\widehat{e_{init}})$ \\ 
 $V:=\{u_{0}\}$ \\ 
 $E:=\emptyset $ \\ 
 $todo:=\{u_{0}\}$ \\ 
 $sig(u_{0}):=\emptyset $ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad $\textbf{choose} $u=X(e)\in todo$ \\ 
+$\qquad $\textbf{choose} $u=X(d=e)\in todo$ \\ 
 $\qquad todo:=todo\setminus \{u\}$ \\ 
-$\qquad sig(u):=sig(R(\varphi _{X},[d_{X}:=e])$ \\ 
-$\qquad \text{\textbf{for }}Y(e)\in occ(\varphi _{X})\text{ \textbf{do}}$ \\ 
-$\qquad \qquad g:=R(guard^{Y(e)}(\varphi _{X}),[d_{X}:=e])$ \\ 
+$\qquad sig(u):=sig(R(\varphi _{X},[d:=e])$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad g:=R(guard^{i}(\varphi _{X}),[d_{X}:=e])$ \\ 
 $\qquad \qquad \text{\textbf{if }}g\neq false$ \\ 
-$\qquad \qquad \qquad v:=\overline{Y(e)[d_{X}:=e]}$ \\ 
+$\qquad \qquad \qquad Y(f):=\mathrm{PVI}(\varphi _{X},i)[d:=e]$ \\ 
+$\qquad \qquad \qquad v:=Y(\widehat{f})$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
 $\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
 $\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
 $\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
+$\qquad \qquad \qquad label(u,v):=i$ \\ 
 $\text{\textbf{return} }(V,E)$%
+\end{tabular}%
+\end{equation*}
+
+\newpage
+
+\subsection{\protect\bigskip Control flow marking}
+
+The following algorithm computes the function $marking$ that denotes which
+parameters are marked in a vertex of the control flow graph $(V,E)$.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeControlFlowMarking(}$\mathcal{E}$, $X_{init}(e_{init})$, $V$, 
+$E$\textsc{)} \\ 
+\textbf{for} $u=X(e)\in V$ \textbf{do }$marking(u):=sig(u)\cap par(X)$ \\ 
+$todo:=V$ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad $\textbf{choose} $v=X(e)\in todo$ \\ 
+$\qquad todo:=todo\setminus \{v\}$ \\ 
+$\qquad \text{\textbf{for }}(u,v)\in E\text{ \textbf{do}}$ \\ 
+$\qquad \qquad $\textbf{let} $X(f)=label(u,v)$ \\ 
+$\qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)$ \\ 
+$\qquad \qquad \qquad M:=(FV(f[j])\setminus marking(u))\cap par(X)$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset $ \\ 
+$\qquad \qquad \qquad \qquad marking(u):=marking(u)\cup M$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$%
+\end{tabular}%
+\end{equation*}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeControlFlowMarkingLocal(}$\mathcal{E}$, $X_{init}(e_{init})$, 
+$(V_{1},E_{1},B_{1}),\cdots ,(V_{K},E_{K},B_{K})$\textsc{)} \\ 
+\textbf{for} $k=1\cdots K$ \textbf{do} \\ 
+$\qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
+$\qquad \qquad marking(u):=sig(u)\cap B_{k}$ \\ 
+$stable:=false$ \\ 
+\textbf{while} $\lnot stable$ \textbf{do} \\ 
+$\qquad $\textbf{for} $k=1\cdots K$ \textbf{do} \\ 
+$\qquad \qquad todo:=V_{k}$ \\ 
+$\qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad \qquad \qquad $\textbf{choose} $v=X(e)\in todo$ \\ 
+$\qquad \qquad \qquad todo:=todo\setminus \{v\}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}(u,v)\in E_{k}\text{ \textbf{do}}$
+\\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $u=Y(f)$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)\text{
+\textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad M:=(FV(f[j])\setminus marking(u))\cap
+B_{k}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset $ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup M$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
+$\qquad \qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )%
+\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $Y=\mathrm{pred}(\varphi _{X},i)$
+\\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{for }}j$ such that $d[j]\in
+(par(X)\cap B_{k})\setminus marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \wedge d[j]\in FV(\mathrm{data}%
+(\varphi _{X},i)[l])$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \wedge (Y,l)\notin B_{k}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{for }}k^{\prime }$ such
+that $(Y,l)\in B_{k^{\prime }}\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}\exists
+w=(Y,v)\in V_{k^{\prime }}:(Y,l)\in marking(w)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup
+\{d[j]\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{break}%
+\end{tabular}%
+\end{equation*}
+
+\newpage
+
+\subsection{Reset variables}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariable(}$X(e)$, $V$\textsc{)} \\ 
+$\varphi :=true$ \\ 
+\textbf{for} $u=X(f)\in V$ \textbf{do} \\ 
+$\qquad c:=true$ \\ 
+$\qquad i:=1$ \\ 
+$\qquad $\textbf{for} $j=1\cdots \left\vert par(X)\right\vert $ \textbf{do}
+\\ 
+$\qquad \qquad r:=[]$ \\ 
+$\qquad \qquad $\textbf{if} $CFP(X,j)$ \textbf{then} \\ 
+$\qquad \qquad \qquad c:=c\wedge (e[j]=f[i])$ \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft f[i]$ \\ 
+$\qquad \qquad $\textbf{else if} $e[j]\in marking(u)$ \textbf{then} \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft e[j]$ \\ 
+$\qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft default\_value(e[j])$ \\ 
+$\qquad \qquad i:=i+1$ \\ 
+$\qquad \varphi :=\varphi \wedge (c\Rightarrow X(r))$ \\ 
+\textbf{return} $\varphi $%
+\end{tabular}%
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ResetVariables(}$\mathcal{E}$, $X_{init}(e_{init})$\textsc{)}%
 \end{tabular}%
 \end{equation*}
 
@@ -1939,25 +2058,74 @@ control flow graph:%
 \textsc{ComputeLocalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$, $p
 $, $\longrightarrow _{must}$\textsc{)} \\ 
 $u_{0}:=X_{init}(e_{init}[p])$ \\ 
+$y_{0}:=(X_{init},p)$ \\ 
 $V:=\{u_{0}\}$ \\ 
 $E:=\emptyset $ \\ 
-$todo:=\{u_{0}\}$ \\ 
-$sig(u_{0}):=\emptyset $ \\ 
+$todo:=\{(u_{0},y_{0})\}$ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad $\textbf{choose} $u=X(e)\in todo$ \\ 
-$\qquad todo:=todo\setminus \{u\}$ \\ 
-$\qquad sig(u):=sig(R(\varphi _{X},[d_{X}:=e])$ \\ 
-$\qquad \text{\textbf{for }}Y(f)\in occ(\varphi _{X})\text{ \textbf{do}}$ \\ 
-$\qquad \qquad $\textbf{let} $(X,p)\longrightarrow _{must}(Y,q)$ \\ 
-$\qquad \qquad g:=R(guard^{Y(f)}(\varphi _{X}),[d_{X}[p]:=e])$ \\ 
-$\qquad \qquad \text{\textbf{if }}g\neq false\wedge ((X\neq Y)\vee
-(d_{Y}[q]\neq f[q]\wedge source(X,i,q)=\bot ))$ \\ 
-$\qquad \qquad \qquad v:=Y((f[d_{X}:=e])[q])$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
-$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
-$\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
-$\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
+$\qquad $\textbf{choose} $(u,y)=(X(e),(X,p))\in todo$ \\ 
+$\qquad todo:=todo\setminus \{(u,y)\}$ \\ 
+$\qquad \text{\textbf{if }}y\nrightarrow _{must}$\textbf{\ then continue} \\ 
+$\qquad $\textbf{let} $(X,p)\longrightarrow _{must}(Y,q)$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
+\textbf{\ then continue} \\ 
+$\qquad \qquad \text{\textbf{if }}\mathrm{source}(X,i,p)\neq \bot \wedge 
+\mathrm{dest}(X,i,p)\neq \bot $ \\ 
+$\qquad \qquad \qquad \{assert(\mathrm{source}(X,i,p)=e\}$ \\ 
+$\qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,p))$ \\ 
+$\qquad \qquad \text{\textbf{else if }}\mathrm{source}(X,i,p)=\bot \wedge 
+\mathrm{dest}(X,i,p)\neq \bot \wedge X\neq Y$ \\ 
+$\qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,p))$ \\ 
+$\qquad \qquad \text{\textbf{else if }}\mathrm{copy}(X,i,p)=q$ \\ 
+$\qquad \qquad \qquad v:=Y(e)$ \\ 
+$\qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{continue}}$ \\ 
+$\qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
+$\qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
+$\qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
+$\qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
+$\qquad \qquad label(u,v):=i$ \\ 
 $\text{\textbf{return} }(V,E)$%
+\end{tabular}%
+\end{equation*}
+
+\newpage
+
+\subsection{Belongs relation}
+
+The following algorithm computes the belongs relation $B_{k}$ that
+corresponds with the local control flow graph $(V_{k}$, $\longrightarrow
+_{k})$.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeBelongs(} $\longrightarrow _{must}$, $X_{0}$, $p_{0}$, $V_{k}$%
+, $\longrightarrow _{k}$\textsc{)} \\ 
+$B_{k}:=\emptyset $ \\ 
+$todo:=\{(X_{0},p_{0})\}$ \\ 
+$visited:=\emptyset $ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad $\textbf{choose} $(X,p)\in todo$ \\ 
+$\qquad todo:=todo\setminus \{(X,p)\}$ \\ 
+$\qquad visited:=visited\cup \{(X,p)\}$ \\ 
+$\qquad \text{\textbf{if }}(X,p)\nrightarrow _{must}$\textbf{\ then continue}
+\\ 
+$\qquad $\textbf{let} $(X,p)\longrightarrow _{must}(Y,q)$ \\ 
+$\qquad belongs:=\{j\mid d[j]$ is data parameter of $X\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
+do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
+\textbf{\ then continue} \\ 
+$\qquad \qquad \text{\textbf{if }}(Y,q)\notin visited$ \\ 
+$\qquad \qquad \qquad todo:=todo\cup \{(Y,q)\}$ \\ 
+$\qquad \qquad \text{\textbf{for }}j\in belongs$ \textbf{do} \\ 
+$\qquad \qquad \qquad $\textbf{if }$(\mathrm{used}(X,i,j)\vee \mathrm{changed%
+}(X,i,j))\wedge (X,\_,\_)\overset{i}{\nrightarrow }_{k}$ \\ 
+$\qquad \qquad \qquad \qquad belongs:=belongs\setminus \{j\}$ \\ 
+$\qquad B_{k}:=B_{k}\cup \{d_{X}[j]\mid j\in belongs\}$ \\ 
+\textbf{return} $B_{k}$%
 \end{tabular}%
 \end{equation*}
 
