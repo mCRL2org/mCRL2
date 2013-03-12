@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GRAPH_ALGORITHM_H
 
 #include <sstream>
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/pbes/detail/stategraph_local_graph.h"
@@ -700,6 +701,15 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       const local_vertex& y0 = must_graph.find_vertex(X_init.name(), p);
       todo[&u0] = &y0;
 
+      // compute sig(u) for marking algorithm
+      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+      data::data_expression e0 = u0.X.parameters().front();
+      const stategraph_equation& eq_X = *find_equation(m_pbes, X_init.name());
+      data::variable d0 = eq_X.parameters()[p];
+      data::mutable_map_substitution<> sigma;
+      sigma[d0] = e0;
+      u0.sig = significant_variables(pbesr(eq_X.formula(), sigma));
+
       mCRL2log(log::debug, "stategraph") << "u0 = " << pbes_system::pp(u0.X) << std::endl;
 
       while (!todo.empty())
@@ -766,6 +776,14 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
               vi = G.insert_vertex(Ye);
               stategraph_vertex& v = vi->second;
               todo[&v] = &z;
+
+              // compute sig(u) for marking algorithm
+              data::data_expression e = v.X.parameters().front();
+              const stategraph_equation& eq_vX = *find_equation(m_pbes, v.X.name());
+              data::variable d = eq_vX.parameters()[q];
+              data::mutable_map_substitution<> sigma;
+              sigma[d] = e;
+              v.sig = significant_variables(pbesr(eq_vX.formula(), sigma));
             }
 
             stategraph_vertex& v = vi->second;
@@ -869,11 +887,11 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
                 ++j;
               }
             }
-            for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
-            {
-              result[X].insert(eq_X.parameters()[*j]);
-            }
           }
+        }
+        for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
+        {
+          result[X].insert(eq_X.parameters()[*j]);
         }
       }
       return result;
@@ -919,12 +937,13 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
         for (std::vector<local_vertex>::iterator i = Vk.begin(); i != Vk.end(); ++i)
         {
           local_vertex& u = *i;
-          u.marking =
-          significant_variables(pbesr(eqn.formula(), sigma));
+          core::identifier_string X = u.X.name();
+          u.marking = data::detail::set_intersection(u.sig, m_belongs[k][X]);
         }
       }
     }
 */
+
   public:
     stategraph_graph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_graph_algorithm(p, rewrite_strategy)

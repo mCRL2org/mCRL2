@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, March 12, 2013 14:35:15}
+%TCIDATA{LastRevised=Tuesday, March 12, 2013 16:27:55}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -2060,6 +2060,7 @@ $, $\longrightarrow _{must}$\textsc{)} \\
 $u_{0}:=X_{init}(e_{init}[p])$ \\ 
 $y_{0}:=(X_{init},p)$ \\ 
 $V:=\{u_{0}\}$ \\ 
+$sig(u_{0}):=sig(R(\varphi _{X},[d_{X}[p]:=e_{init}[p]])$ \\ 
 $E:=\emptyset $ \\ 
 $todo:=\{(u_{0},y_{0})\}$ \\ 
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
@@ -2086,6 +2087,8 @@ $\qquad \qquad \qquad \qquad \text{\textbf{continue}}$ \\
 $\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
 $\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
 $\qquad \qquad \qquad \qquad todo:=todo\cup \{(v,(Y,q)\}$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $v=Y(f)$ \\ 
+$\qquad \qquad \qquad \qquad sig(v):=sig(R(\varphi _{Y},[d_{Y}[q]:=f])$ \\ 
 $\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
 $\qquad \qquad \qquad label(u,v):=i$ \\ 
 $\text{\textbf{return} }(V,E)$%
@@ -2113,9 +2116,9 @@ $\qquad todo:=todo\setminus \{(X,p)\}$ \\
 $\qquad visited:=visited\cup \{(X,p)\}$ \\ 
 $\qquad \text{\textbf{if }}(X,p)\nrightarrow _{must}$\textbf{\ then continue}
 \\ 
+$\qquad belongs:=\{j\mid d[j]$ is data parameter of $X\}$ \\ 
 $\qquad $\textbf{for} $(X,p)\longrightarrow _{must}(Y,q)\text{ \textbf{do}}$
 \\ 
-$\qquad \qquad belongs:=\{j\mid d[j]$ is data parameter of $X\}$ \\ 
 $\qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ 
 \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
