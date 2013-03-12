@@ -692,10 +692,6 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
     {
       typedef std::map<stategraph_vertex*, const local_vertex*> todo_map;
       control_flow_graph G;
-
-      const stategraph_equation& eqn_init = *find_equation(m_pbes, X_init.name());
-      const std::vector<data::variable>& d_init = eqn_init.parameters();
-
       todo_map todo;
 
       // handle the initial state
@@ -718,6 +714,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
         const core::identifier_string& X = y.X;
         std::size_t p = y.p;
         assert(u.X.name() == X);
+        data::data_expression e = u.X.parameters().front();
         const stategraph_equation& eq_X = *find_equation(m_pbes, X);
 
         if (y.outgoing_edges.empty())
@@ -725,55 +722,58 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
           continue;
         }
 
-        // z = (Y, q)
-        const local_vertex& z = **y.outgoing_edges.begin();
-        const core::identifier_string& Y = z.X;
-        std::size_t q = z.p;
-
-        for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
+        const std::set<local_vertex*>& E = y.outgoing_edges;
+        for (std::set<local_vertex*>::const_iterator ei = E.begin(); ei != E.end(); ++ei)
         {
-          const predicate_variable& X_i = eq_X.predicate_variables()[i];
-          if (X_i.X.name() != Y) // TODO: check this!
-          {
-            continue;
-          }
+          // z = (Y, q)
+          const local_vertex& z = **ei;
+          const core::identifier_string& Y = z.X;
+          std::size_t q = z.p;
 
-          data::data_expression f;
-          if (X_i.source.find(p) != X_i.source.end() && X_i.dest.find(p) != X_i.dest.end())
+          for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
           {
-            f = X_i.dest.find(p)->second;
-          }
-          else if (X_i.source.find(p) == X_i.source.end() && X_i.dest.find(p) != X_i.dest.end() && X != Y)
-          {
-            f = X_i.dest.find(p)->second;
-          }
-          else if (X_i.copy.find(p) != X_i.copy.end() && X_i.copy.find(p)->second == q)
-          {
-            f = u.X.parameters().front();
-          }
-          else
-          {
-            continue;
-          }
-          propositional_variable_instantiation Ye(Y, atermpp::make_list(f));
-          mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Ye) << std::endl;
+            const predicate_variable& X_i = eq_X.predicate_variables()[i];
+            if (X_i.X.name() != Y)
+            {
+              continue;
+            }
 
-          vertex_iterator vi = G.find(Ye);
-          bool has_vertex = vi != G.end();
-          if (!has_vertex)
-          {
-            mCRL2log(log::debug, "stategraph") << "insert vertex v" << std::endl;
-            vi = G.insert_vertex(Ye);
+            data::data_expression f;
+            if (X_i.source.find(p) != X_i.source.end() && X_i.source.find(p)->second == e && X_i.dest.find(q) != X_i.dest.end())
+            {
+              f = X_i.dest.find(q)->second;
+            }
+            else if (X_i.source.find(p) == X_i.source.end() && X_i.dest.find(q) != X_i.dest.end() && X != Y)
+            {
+              f = X_i.dest.find(q)->second;
+            }
+            else if (X_i.source.find(p) == X_i.source.end() && X_i.copy.find(p) != X_i.copy.end() && X_i.copy.find(p)->second == q && X != Y)
+            {
+              f = e;
+            }
+            else
+            {
+              continue;
+            }
+            propositional_variable_instantiation Ye(Y, atermpp::make_list(f));
+            mCRL2log(log::debug, "stategraph") << "v = " << pbes_system::pp(Ye) << std::endl;
+
+            vertex_iterator vi = G.find(Ye);
+            bool has_vertex = vi != G.end();
+            if (!has_vertex)
+            {
+              mCRL2log(log::debug, "stategraph") << "insert vertex v" << std::endl;
+              vi = G.insert_vertex(Ye);
+              stategraph_vertex& v = vi->second;
+              todo[&v] = &z;
+            }
+
             stategraph_vertex& v = vi->second;
-            todo[&v] = &z;
+            stategraph_edge edge(&u, &v, i);
+            mCRL2log(log::debug, "stategraph") << "insert edge (u, v) with label " << i << std::endl;
+            u.outgoing_edges.insert(edge);
+            v.incoming_edges.insert(edge);
           }
-
-          stategraph_vertex& v = vi->second;
-          mCRL2log(log::debug, "stategraph") << "insert guard g in vertex u" << std::endl;
-          stategraph_edge e(&u, &v, i);
-          mCRL2log(log::debug, "stategraph") << "insert edge (u, v) with label " << i << std::endl;
-          u.outgoing_edges.insert(e);
-          v.incoming_edges.insert(e);
         }
       }
 
@@ -834,40 +834,44 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
           continue;
         }
 
-        // z = (Y, q)
-        const local_vertex& z = **y.outgoing_edges.begin();
-        const core::identifier_string& Y = z.X;
-        std::size_t q = z.p;
-
-        const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-        std::vector<std::size_t> dp = data_parameter_indices(X);
-        std::set<std::size_t> belongs(dp.begin(), dp.end());
-        for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
+        const std::set<local_vertex*>& E = y.outgoing_edges;
+        for (std::set<local_vertex*>::const_iterator ei = E.begin(); ei != E.end(); ++ei)
         {
-          const predicate_variable& X_i = eq_X.predicate_variables()[i];
-          if (X_i.X.name() != Y)
+          // z = (Y, q)
+          const local_vertex& z = **ei;
+          const core::identifier_string& Y = z.X;
+          std::size_t q = z.p;
+
+          const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+          std::vector<std::size_t> dp = data_parameter_indices(X);
+          std::set<std::size_t> belongs(dp.begin(), dp.end());
+          for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
           {
-            continue;
-          }
-          if (visited.find(&z) == visited.end())
-          {
-            todo.insert(&z);
-            mCRL2log(log::debug1, "stategraph") << " insert todo element (" << core::pp(Y) << ", " << q << ")" << std::endl;
-          }
-          for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
-          {
-            if ((X_i.used.find(*j) != X_i.used.end() || X_i.changed.find(*j) != X_i.changed.end()) && !Vk.has_label(X, i))
+            const predicate_variable& X_i = eq_X.predicate_variables()[i];
+            if (X_i.X.name() != Y)
             {
-              belongs.erase(j++);
+              continue;
             }
-            else
+            if (visited.find(&z) == visited.end())
             {
-              ++j;
+              todo.insert(&z);
+              mCRL2log(log::debug1, "stategraph") << " insert todo element (" << core::pp(Y) << ", " << q << ")" << std::endl;
             }
-          }
-          for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
-          {
-            result[X].insert(eq_X.parameters()[*j]);
+            for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
+            {
+              if ((X_i.used.find(*j) != X_i.used.end() || X_i.changed.find(*j) != X_i.changed.end()) && !Vk.has_label(X, i))
+              {
+                belongs.erase(j++);
+              }
+              else
+              {
+                ++j;
+              }
+            }
+            for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
+            {
+              result[X].insert(eq_X.parameters()[*j]);
+            }
           }
         }
       }
@@ -900,6 +904,26 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       }
       return out.str();
     }
+
+/*
+    void compute_control_flow_marking()
+    {
+      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+
+      std::size_t K = m_control_flow_graphs.size();
+      for (std::size_t k = 0; k < K; k++)
+      {
+        control_flow_graph& Gk = m_control_flow_graphs[k];
+        std::vector<local_vertex>& Vk = Gk.vertices();
+        for (std::vector<local_vertex>::iterator i = Vk.begin(); i != Vk.end(); ++i)
+        {
+          local_vertex& u = *i;
+          u.marking =
+          significant_variables(pbesr(eqn.formula(), sigma));
+        }
+      }
+    }
+*/
 
   public:
     stategraph_graph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)

@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, March 12, 2013 14:00:10}
+%TCIDATA{LastRevised=Tuesday, March 12, 2013 14:35:15}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -2066,27 +2066,28 @@ $todo:=\{(u_{0},y_{0})\}$ \\
 $\qquad $\textbf{choose} $(u,y)=(X(e),(X,p))\in todo$ \\ 
 $\qquad todo:=todo\setminus \{(u,y)\}$ \\ 
 $\qquad \text{\textbf{if }}y\nrightarrow _{must}$\textbf{\ then continue} \\ 
-$\qquad $\textbf{let} $(X,p)\longrightarrow _{must}(Y,q)$ \\ 
-$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
-do}}$ \\ 
-$\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
+$\qquad $\textbf{for} $(X,p)\longrightarrow _{must}(Y,q)\text{ \textbf{do}}$
+\\ 
+$\qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
 \textbf{\ then continue} \\ 
-$\qquad \qquad \text{\textbf{if }}\mathrm{source}(X,i,p)\neq \bot \wedge 
-\mathrm{dest}(X,i,p)\neq \bot $ \\ 
-$\qquad \qquad \qquad \{assert(\mathrm{source}(X,i,p)=e\}$ \\ 
-$\qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,p))$ \\ 
-$\qquad \qquad \text{\textbf{else if }}\mathrm{source}(X,i,p)=\bot \wedge 
-\mathrm{dest}(X,i,p)\neq \bot \wedge X\neq Y$ \\ 
-$\qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,p))$ \\ 
-$\qquad \qquad \text{\textbf{else if }}\mathrm{copy}(X,i,p)=q$ \\ 
-$\qquad \qquad \qquad v:=Y(e)$ \\ 
-$\qquad \qquad \text{\textbf{else}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{continue}}$ \\ 
-$\qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
-$\qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
-$\qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
-$\qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
-$\qquad \qquad label(u,v):=i$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{source}(X,i,p)=e\wedge 
+\mathrm{dest}(X,i,q)\neq \bot $ \\ 
+$\qquad \qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,q))$ \\ 
+$\qquad \qquad \qquad \text{\textbf{else if }}\mathrm{source}(X,i,p)=\bot
+\wedge \mathrm{dest}(X,i,q)\neq \bot \wedge X\neq Y$ \\ 
+$\qquad \qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,q))$ \\ 
+$\qquad \qquad \qquad \text{\textbf{else if }}\mathrm{source}(X,i,p)=\bot
+\wedge \mathrm{copy}(X,i,p)=q\wedge X\neq Y$ \\ 
+$\qquad \qquad \qquad \qquad v:=Y(e)$ \\ 
+$\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{continue}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
+$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{(v,(Y,q)\}$ \\ 
+$\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
+$\qquad \qquad \qquad label(u,v):=i$ \\ 
 $\text{\textbf{return} }(V,E)$%
 \end{tabular}%
 \end{equation*}
@@ -2112,18 +2113,19 @@ $\qquad todo:=todo\setminus \{(X,p)\}$ \\
 $\qquad visited:=visited\cup \{(X,p)\}$ \\ 
 $\qquad \text{\textbf{if }}(X,p)\nrightarrow _{must}$\textbf{\ then continue}
 \\ 
-$\qquad $\textbf{let} $(X,p)\longrightarrow _{must}(Y,q)$ \\ 
-$\qquad belongs:=\{j\mid d[j]$ is data parameter of $X\}$ \\ 
-$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
-do}}$ \\ 
-$\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
+$\qquad $\textbf{for} $(X,p)\longrightarrow _{must}(Y,q)\text{ \textbf{do}}$
+\\ 
+$\qquad \qquad belongs:=\{j\mid d[j]$ is data parameter of $X\}$ \\ 
+$\qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
 \textbf{\ then continue} \\ 
-$\qquad \qquad \text{\textbf{if }}(Y,q)\notin visited$ \\ 
-$\qquad \qquad \qquad todo:=todo\cup \{(Y,q)\}$ \\ 
-$\qquad \qquad \text{\textbf{for }}j\in belongs$ \textbf{do} \\ 
-$\qquad \qquad \qquad $\textbf{if }$(\mathrm{used}(X,i,j)\vee \mathrm{changed%
-}(X,i,j))\wedge (X,\_,\_)\overset{i}{\nrightarrow }_{k}$ \\ 
-$\qquad \qquad \qquad \qquad belongs:=belongs\setminus \{j\}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}(Y,q)\notin visited$ \\ 
+$\qquad \qquad \qquad \qquad todo:=todo\cup \{(Y,q)\}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}j\in belongs$ \textbf{do} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if }$(\mathrm{used}(X,i,j)\vee \mathrm{%
+changed}(X,i,j))\wedge (X,\_,\_)\overset{i}{\nrightarrow }_{k}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad belongs:=belongs\setminus \{j\}$ \\ 
 $\qquad B_{k}:=B_{k}\cup \{d_{X}[j]\mid j\in belongs\}$ \\ 
 \textbf{return} $B_{k}$%
 \end{tabular}%
