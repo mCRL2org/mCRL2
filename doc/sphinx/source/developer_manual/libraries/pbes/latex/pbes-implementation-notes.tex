@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, March 12, 2013 16:27:55}
+%TCIDATA{LastRevised=Tuesday, March 12, 2013 17:52:37}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1974,7 +1974,7 @@ $\qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$%
 $(V_{1},E_{1},B_{1}),\cdots ,(V_{K},E_{K},B_{K})$\textsc{)} \\ 
 \textbf{for} $k=1\cdots K$ \textbf{do} \\ 
 $\qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
-$\qquad \qquad marking(u):=sig(u)\cap B_{k}$ \\ 
+$\qquad \qquad marking(u):=sig(u)\cap \{d\mid (X,d)\in B_{k}\}$ \\ 
 $stable:=false$ \\ 
 \textbf{while} $\lnot stable$ \textbf{do} \\ 
 $\qquad $\textbf{for} $k=1\cdots K$ \textbf{do} \\ 
@@ -1988,7 +1988,7 @@ $\qquad \qquad \qquad \qquad $\textbf{let} $u=Y(f)$ \\
 $\qquad \qquad \qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)\text{
 \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad M:=(FV(f[j])\setminus marking(u))\cap
-B_{k}$ \\ 
+\{d\mid (X,d)\in B_{k}\}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset $ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup M$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$ \\ 
@@ -1996,17 +1996,16 @@ $\qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\
 $\qquad \qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
 $\qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )%
 \text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $Y=\mathrm{pred}(\varphi _{X},i)$
-\\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{for }}j$ such that $d[j]\in
-(par(X)\cap B_{k})\setminus marking(u)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \wedge d[j]\in FV(\mathrm{data}%
-(\varphi _{X},i)[l])$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \wedge (Y,l)\notin B_{k}$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $Y(f)=\mathrm{PVI}(\varphi _{X},i)
+$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{for }}j$ such that $%
+(X,d_{X}[j])\in B_{k}\wedge d_{X}[j]\notin marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \wedge (Y,d_{Y}[l])\notin
+B_{k}\wedge d_{X}[j]\in FV(f[l])$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{for }}k^{\prime }$ such
-that $(Y,l)\in B_{k^{\prime }}\text{ \textbf{do}}$ \\ 
+that $(Y,d_{Y}[l])\in B_{k^{\prime }}\text{ \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}\exists
-w=(Y,v)\in V_{k^{\prime }}:(Y,l)\in marking(w)$ \\ 
+w=Y(g)\in V_{k^{\prime }}$ \textbf{such that} ??? $\in marking(w)$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup
 \{d[j]\}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
@@ -2055,8 +2054,8 @@ X_{init}$. Then we define the following algorithm for computing a local
 control flow graph:%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeLocalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$, $p
-$, $\longrightarrow _{must}$\textsc{)} \\ 
+\textsc{ComputeLocalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$, $%
+p $, $\longrightarrow _{must}$\textsc{)} \\ 
 $u_{0}:=X_{init}(e_{init}[p])$ \\ 
 $y_{0}:=(X_{init},p)$ \\ 
 $V:=\{u_{0}\}$ \\ 
