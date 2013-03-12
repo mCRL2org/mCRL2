@@ -712,6 +712,7 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
         stategraph_vertex& u = *(ti->first);
         const local_vertex& y = *(ti->second);
         todo.erase(ti);
+        mCRL2log(log::debug, "stategraph") << "choose u = " << pbes_system::pp(u.X) << std::endl;
 
         // y = (X, p)
         const core::identifier_string& X = y.X;
