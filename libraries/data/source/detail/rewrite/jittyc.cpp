@@ -279,7 +279,7 @@ static void term2seq(const aterm &t, aterm_list* s, size_t *var_cnt)
   }
   else if (t.type_is_appl())
   {
-    if (gsIsDataVarId((aterm_appl) t))
+    if (is_variable((aterm_appl) t))
     {
       aterm store = atermpp::aterm_appl(afunS, t,dummy);
 
@@ -330,7 +330,7 @@ static void get_used_vars_aux(const aterm &t, aterm_list* vars)
   }
   else if (t.type_is_appl())
   {
-    if (gsIsDataVarId((aterm_appl) t))
+    if (is_variable((aterm_appl) t))
     {
       if (find(vars->begin(),vars->end(),t) == vars->end())
       {
@@ -909,7 +909,7 @@ static aterm_list get_vars(const aterm &a)
   {
     return aterm_list();
   }
-  else if (a.type_is_appl() && gsIsDataVarId((aterm_appl) a))
+  else if (a.type_is_appl() && is_variable((aterm_appl) a))
   {
     return make_list<aterm>(a);
   }
@@ -954,7 +954,7 @@ static aterm_list dep_vars(const data_equation &eqn)
   // Check all arguments
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (!gsIsDataVarId(aterm_cast<aterm_appl>(pars[i+1])))
+    if (!is_variable(aterm_cast<aterm_appl>(pars[i+1])))
     {
       // Argument is not a variable, so it needs to be rewritten
       bs[i] = true;
@@ -1005,7 +1005,7 @@ static aterm_list dep_vars(const data_equation &eqn)
   aterm_list deps;
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (bs[i] && gsIsDataVarId(aterm_cast<aterm_appl>(pars[i+1])))
+    if (bs[i] && is_variable(aterm_cast<aterm_appl>(pars[i+1])))
     {
       deps.push_front(pars[i+1]);
     }
@@ -1093,7 +1093,7 @@ static aterm_list create_strategy(
     // Check all arguments
     for (size_t i = 0; i < rule_arity; i++)
     {
-      if (!gsIsDataVarId(aterm_cast<aterm_appl>(pars[i+1])))
+      if (!is_variable(aterm_cast<aterm_appl>(pars[i+1])))
       {
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
@@ -1334,9 +1334,9 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
     // assert(startarg>=0); This value may be negative.
     return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) == nnfvars.end());
   }
-  else if (/* t.type_is_appl() && */ gsIsDataVarId((aterm_appl) t))
+  else if (/* t.type_is_appl() && */ is_variable((aterm_appl) t))
   {
-    assert(t.type_is_appl() && gsIsDataVarId((aterm_appl) t));
+    assert(t.type_is_appl() && is_variable((aterm_appl) t));
     return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(),t) == nnfvars.end());
   }
   else if (is_abstraction(atermpp::aterm_appl(t)))
@@ -1590,7 +1590,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       else
       {
         // So, t must be a single variable.
-        assert(gsIsDataVarId(atermpp::aterm_appl(((aterm_list) t).front())));
+        assert(is_variable(atermpp::aterm_appl(((aterm_list) t).front())));
         b = rewr;
         pair<bool,string> head = calc_inner_term(((aterm_list) t).front(),startarg,nnfvars,false,arity);
         nfs_array tail_first(arity);
@@ -1685,7 +1685,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     return pair<bool,string>(rewr || !b, ss.str());
 
   }
-  else if (gsIsDataVarId((aterm_appl)t))
+  else if (is_variable((aterm_appl)t))
   {
     assert(t.type_is_appl());
     stringstream ss;
@@ -2255,7 +2255,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr(const aterm &expr, const aterm_
     return make_ar_false();
   }
 
-  if (expr.type_is_appl() && gsIsDataVarId((aterm_appl) expr))
+  if (expr.type_is_appl() && is_variable((aterm_appl) expr))
   {
     if (expr==var)
     {
@@ -2326,7 +2326,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
   }
 
   aterm_appl arg_term = aterm_cast<aterm_appl>(lhs[arg+1]);
-  if (!gsIsDataVarId(arg_term))
+  if (!is_variable(arg_term))
   {
     return make_ar_true();
   }
@@ -3016,7 +3016,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
       "  using namespace atermpp;\n"
-      "  if (mcrl2::core::detail::gsIsDataVarId(head))\n"
+      "  if (mcrl2::data::is_variable(head))\n"
       "  {\n"
       "    head=(*(this_rewriter->global_sigma))(atermpp::aterm_cast<const mcrl2::data::variable>(head));\n"
       "  }\n"
@@ -3046,7 +3046,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  }\n"
       "  \n"
       "  const size_t arity=t.size();\n"
-      "  if (gsIsDataVarId(head))\n"
+      "  if (mcrl2::data::is_variable(head))\n"
       "  {\n"
       "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity);\n"
       "    new (&args[0]) atermpp::aterm(head);\n"

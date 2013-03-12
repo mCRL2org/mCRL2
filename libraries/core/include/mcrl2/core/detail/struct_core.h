@@ -2721,7 +2721,6 @@ std::string gsATermAppl2String(const aterm_appl &term)
 }
 
 inline
-// bool gsIsNumericString(const char* s)
 bool gsIsNumericString(std::string s)
 //Ret: true if s is of form "0 | -? [1-9][0-9]*", false otherwise
 {
