@@ -834,6 +834,10 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
           continue;
         }
 
+        const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+        std::vector<std::size_t> dp = data_parameter_indices(X);
+        std::set<std::size_t> belongs(dp.begin(), dp.end());
+
         const std::set<local_vertex*>& E = y.outgoing_edges;
         for (std::set<local_vertex*>::const_iterator ei = E.begin(); ei != E.end(); ++ei)
         {
@@ -842,9 +846,6 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
           const core::identifier_string& Y = z.X;
           std::size_t q = z.p;
 
-          const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-          std::vector<std::size_t> dp = data_parameter_indices(X);
-          std::set<std::size_t> belongs(dp.begin(), dp.end());
           for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
           {
             const predicate_variable& X_i = eq_X.predicate_variables()[i];
@@ -924,7 +925,6 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       }
     }
 */
-
   public:
     stategraph_graph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_graph_algorithm(p, rewrite_strategy)
