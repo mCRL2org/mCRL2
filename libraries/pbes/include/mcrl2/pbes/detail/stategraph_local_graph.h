@@ -46,6 +46,15 @@ struct local_vertex
     out << "(" << std::string(X) << ", " << p << ")";
     return out.str();
   }
+
+  bool operator<(const local_vertex& other)
+  {
+    if (X != other.X)
+    {
+      return X < other.X;
+    }
+    return (p < other.p);
+  }
 };
 
 struct local_graph

@@ -40,7 +40,7 @@ struct predicate_variable
   std::map<std::size_t, data::data_expression> source; // source[j] = e <=> source(X, i, j) = e
   std::map<std::size_t, data::data_expression> dest;   // dest[j] = c   <=> dest(X, i, j) = c
   std::map<std::size_t, std::size_t> copy;             // copy[j] = k   <=> copy(X, i, j) = k
-  std::map<std::size_t, data::variable> used;          // used[j] = d   <=> used(X, i, j) = d
+  std::set<std::size_t> used;                          // j \in used    <=> used(X, i, j)
   std::set<std::size_t> changed;                       // j \in changed <=> changed(X, i, j)
 };
 
@@ -183,7 +183,7 @@ class stategraph_equation: public pbes_equation
         {
           if (v.find(d_X[j]) != v.end())
           {
-            Y.used[j] = d_X[j];
+            Y.used.insert(j);
           }
         }
       }

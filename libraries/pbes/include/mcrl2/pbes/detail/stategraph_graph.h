@@ -289,9 +289,30 @@ struct control_flow_graph
     return m_control_vertices.end();
   }
 
-  std::set<stategraph_vertex*>& index(const propositional_variable_instantiation& X)
+  const std::set<stategraph_vertex*>& index(const core::identifier_string& X) const
   {
-    return m_stategraph_index[X.name()];
+    std::map<core::identifier_string, std::set<stategraph_vertex*> >::const_iterator i = m_stategraph_index.find(X);
+    assert(i != m_stategraph_index.end());
+    return i->second;
+  }
+
+  // Returns true if there is an edge X(e) -- label --> Y(f) in the graph, for some e, f, Y.
+  bool has_label(const core::identifier_string& X, std::size_t label) const
+  {
+    const std::set<stategraph_vertex*>& inst = index(X);
+    for (std::set<stategraph_vertex*>::const_iterator i = inst.begin(); i != inst.end(); ++i)
+    {
+      stategraph_vertex& u = **i;
+      std::set<stategraph_edge>& E = u.outgoing_edges;
+      for (std::set<stategraph_edge>::const_iterator j = E.begin(); j != E.end(); ++j)
+      {
+        if (j->label == label)
+        {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   std::string print() const
