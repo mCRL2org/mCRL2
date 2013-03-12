@@ -102,6 +102,23 @@ struct stategraph_vertex
     return out.str();
   }
 
+  // also print the parameters
+  std::string print(const data::variable_list& d_X) const
+  {
+    std::ostringstream out;
+    out << core::pp(X.name());
+    out << "(";
+    out << data::pp(data::make_assignment_list(d_X, X.parameters()));
+    out << ")";
+    out << " edges:";
+    for (std::set<stategraph_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+    {
+      out << " " << i->print();
+    }
+    out << " sig: " << data::detail::print_set(sig);
+    return out.str();
+  }
+
   std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const
   {
     std::set<std::size_t> result;
@@ -284,6 +301,18 @@ struct control_flow_graph
     for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
     {
       out << "vertex " << i->second.print() << std::endl;
+    }
+    return out.str();
+  }
+
+  std::string print(const std::map<core::identifier_string, data::variable_list>& variable_map) const
+  {
+    std::ostringstream out;
+    out << "--- control flow graph ---" << std::endl;
+    for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    {
+      const data::variable_list& v = variable_map.find(i->first.name())->second;
+      out << "vertex " << i->second.print(v) << std::endl;
     }
     return out.str();
   }

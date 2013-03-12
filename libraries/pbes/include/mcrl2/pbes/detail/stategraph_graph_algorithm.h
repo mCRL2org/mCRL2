@@ -368,6 +368,15 @@ class stategraph_graph_algorithm
     {
       return m_pbes;
     }
+
+    bool is_CFP(const core::identifier_string& X, std::size_t i) const
+    {
+      std::map<core::identifier_string, std::vector<bool> >::const_iterator j = m_is_control_flow.find(X);
+      assert(j != m_is_control_flow.end());
+      const std::vector<bool>& cf = j->second;
+      assert(i < cf.size());
+      return cf[i];
+    }
 };
 
 /// \brief Algorithm class for the global variant of the stategraph algorithm
@@ -448,6 +457,20 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
       m_control_flow_graph.create_index();
     }
 
+    // used for printing the control flow graph
+    std::map<core::identifier_string, data::variable_list> print_map() const
+    {
+      std::map<core::identifier_string, data::variable_list> result;
+      const std::vector<stategraph_equation>& eqn = m_pbes.equations();
+      for (std::vector<stategraph_equation>::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+      {      
+        propositional_variable X = project_variable(i->variable());
+        result[X.name()] = X.parameters();
+      }
+      return result;
+    }
+
+  public:
     stategraph_graph_global_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_graph_algorithm(p, rewrite_strategy)
     { }
@@ -458,7 +481,7 @@ class stategraph_graph_global_algorithm: public stategraph_graph_algorithm
       super::run();
       compute_control_flow_graph();
       mCRL2log(log::verbose) << "Computed control flow graph" << std::endl;
-      mCRL2log(log::debug) << m_control_flow_graph.print();
+      mCRL2log(log::debug) << m_control_flow_graph.print(print_map());
     }
 };
 
@@ -599,21 +622,51 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       return propositional_variable_instantiation(X, e);
     }
 
+    std::vector<std::size_t> CFP_parameters(const core::identifier_string& X) const
+    {
+      std::vector<std::size_t> result;
+      const stategraph_equation& eqn = *find_equation(m_pbes, X);
+      const std::vector<data::variable>& d_X = eqn.parameters();
+      for (std::size_t k = 0; k < d_X.size(); k++)
+      {
+        if (is_CFP(X, k))
+        {
+          result.push_back(k);
+        }
+      }
+      return result;
+    }
+
+    // used for printing the control flow graphs
+    std::map<core::identifier_string, data::variable_list> print_map(const core::identifier_string& X, std::size_t p)
+    {
+      std::map<core::identifier_string, data::variable_list> result;
+
+      std::map<core::identifier_string, std::size_t> m = must_graph.dependency_map(X, p);
+      for (std::map<core::identifier_string, std::size_t>::iterator i = m.begin(); i != m.end(); ++i)
+      {
+        core::identifier_string Y = i->first;
+        std::size_t q = i->second;
+        const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+        data::variable v = eq_Y.parameters()[q];
+        result[Y] = atermpp::make_list(v);
+      }
+      return result;
+    }
+
     void print_control_flow_graphs()
     {
       mCRL2log(log::debug, "stategraph") << "=== local control flow graphs ===" << std::endl;
       propositional_variable_instantiation X_init = m_pbes.initial_state();
-      const stategraph_equation& eqn_init = *find_equation(m_pbes, X_init.name());
-      const std::vector<data::variable>& d_init = eqn_init.parameters();
-      std::size_t index = 0;
-      for (std::size_t k = 0; k < d_init.size(); k++, index++)
+      const core::identifier_string& X = X_init.name();
+      const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+      const std::vector<data::variable>& d_X = eq_X.parameters();
+      std::vector<std::size_t> CFP = CFP_parameters(X);
+      for (std::size_t i = 0; i < CFP.size(); i++)
       {
-        if (!m_is_control_flow[X_init.name()][k])
-        {
-          continue;
-        }
-        mCRL2log(log::debug, "stategraph") << "--- graph for control flow parameter " << data::pp(eqn_init.parameters()[k]) << " ---" << std::endl;
-        mCRL2log(log::debug, "stategraph") << m_control_flow_graphs[index].print() << std::endl;
+        std::size_t p = CFP[i];
+        mCRL2log(log::debug, "stategraph") << "--- graph for control flow parameter " << data::pp(d_X[p]) << " ---" << std::endl;
+        mCRL2log(log::debug, "stategraph") << m_control_flow_graphs[i].print(print_map(X, p)) << std::endl;
       }
     }
 
