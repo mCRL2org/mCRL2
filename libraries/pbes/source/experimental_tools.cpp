@@ -37,7 +37,7 @@
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/pbes/detail/control_flow.h"
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
-#include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 
 namespace mcrl2
@@ -266,7 +266,7 @@ void pbesstategraph(const std::string& input_filename,
   {
     if (use_local_variant)
     {
-      pbes_system::detail::stategraph_graph_local_algorithm algorithm(p, rewrite_strategy);
+      pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy);
       algorithm.run();
       if (print_influence_graph)
       {
@@ -276,7 +276,7 @@ void pbesstategraph(const std::string& input_filename,
     }
     else
     {
-      pbes_system::detail::stategraph_reset_variables_algorithm algorithm(p, rewrite_strategy);
+      pbes_system::detail::global_reset_variables_algorithm algorithm(p, rewrite_strategy);
       q = algorithm.run(simplify);
       if (print_influence_graph)
       {

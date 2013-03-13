@@ -21,12 +21,12 @@ namespace pbes_system {
 
 namespace detail {
 
-class stategraph_reset_variables_algorithm;
+class global_reset_variables_algorithm;
 
-pbes_expression stategraph_reset_variable_rewrite(stategraph_reset_variables_algorithm& algorithm, const pbes_expression& x);
+pbes_expression stategraph_reset_variable_rewrite(global_reset_variables_algorithm& algorithm, const pbes_expression& x);
 
 /// \brief Adds the reset variables procedure to the stategraph algorithm
-class stategraph_reset_variables_algorithm: public stategraph_global_algorithm
+class global_reset_variables_algorithm: public stategraph_global_algorithm
 {
   public:
     typedef stategraph_global_algorithm super;
@@ -188,7 +188,7 @@ class stategraph_reset_variables_algorithm: public stategraph_global_algorithm
       }
     }
 
-    stategraph_reset_variables_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    global_reset_variables_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_global_algorithm(p, rewrite_strategy),
         m_original_pbes(p)
     {}
@@ -216,21 +216,21 @@ struct stategraph_reset_variable_rewrite_builder: public pbes_expression_builder
   using super::leave;
   using super::operator();
 
-  stategraph_reset_variables_algorithm& algorithm;
+  global_reset_variables_algorithm& algorithm;
 
-  stategraph_reset_variable_rewrite_builder(stategraph_reset_variables_algorithm& algorithm_)
+  stategraph_reset_variable_rewrite_builder(global_reset_variables_algorithm& algorithm_)
     : algorithm(algorithm_)
   {}
 
   bool has_equal_variables(const pbes_expression& x, const propositional_variable_instantiation& Y) const
   {
-  	std::set<propositional_variable_instantiation> v = find_propositional_variable_instantiations(x);
+    std::set<propositional_variable_instantiation> v = find_propositional_variable_instantiations(x);
     for (std::set<propositional_variable_instantiation>::const_iterator i = v.begin(); i != v.end(); ++i)
     {
-    	if (i->name() != Y.name())
-    	{
-    		return false;
-    	}
+      if (i->name() != Y.name())
+      {
+        return false;
+      }
     }
     return true;
   }
@@ -244,7 +244,7 @@ struct stategraph_reset_variable_rewrite_builder: public pbes_expression_builder
 };
 
 inline
-pbes_expression stategraph_reset_variable_rewrite(stategraph_reset_variables_algorithm& algorithm, const pbes_expression& x)
+pbes_expression stategraph_reset_variable_rewrite(global_reset_variables_algorithm& algorithm, const pbes_expression& x)
 {
   stategraph_reset_variable_rewrite_builder f(algorithm);
   return f(x);

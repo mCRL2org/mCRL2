@@ -17,8 +17,8 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
-#include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
+#include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -421,7 +421,7 @@ void test_local_stategraph()
    ;
   bool normalize = false;
   pbes<> p = txt2pbes(text, normalize);
-  pbes_system::detail::stategraph_graph_local_algorithm algorithm(p);
+  pbes_system::detail::local_reset_variables_algorithm algorithm(p);
   algorithm.run();
 }
 

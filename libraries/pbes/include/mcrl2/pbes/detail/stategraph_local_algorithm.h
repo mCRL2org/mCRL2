@@ -22,10 +22,10 @@ namespace pbes_system {
 namespace detail {
 
 /// \brief Algorithm class for the local variant of the stategraph algorithm
-class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
+class stategraph_local_algorithm: public stategraph_algorithm
 {
   public:
-    typedef stategraph_graph_algorithm super;
+    typedef stategraph_algorithm super;
 
   protected:
     // the control flow graph
@@ -583,8 +583,8 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
     }
 
   public:
-    stategraph_graph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
-      : stategraph_graph_algorithm(p, rewrite_strategy)
+    stategraph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+      : stategraph_algorithm(p, rewrite_strategy)
     { }
 
     /// \brief Computes the control flow graph

@@ -25,7 +25,7 @@ namespace pbes_system {
 namespace detail {
 
 /// \brief Algorithm class for the computation of the stategraph graph
-class stategraph_graph_algorithm
+class stategraph_algorithm
 {
   public:
     // simplify and rewrite the expression x
@@ -397,7 +397,7 @@ class stategraph_graph_algorithm
 
   public:
 
-    stategraph_graph_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    stategraph_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
     {
       m_pbes = stategraph_pbes(p);
       m_datar = data::rewriter(p.data(), rewrite_strategy);
