@@ -148,7 +148,7 @@ struct dependency_graph
   // @pre: (X, p) is not in the graph
   void insert_vertex(const core::identifier_string& X, std::size_t p)
   {
-    mCRL2log(log::debug, "stategraph") << "insert vertex (" << std::string(X) << ", " << p << ")" << std::endl;
+    mCRL2log(log::debug1, "stategraph") << "insert vertex (" << std::string(X) << ", " << p << ")" << std::endl;
     m_vertices.push_back(dependency_vertex(X, p));
     //self_check();
   }
@@ -156,7 +156,7 @@ struct dependency_graph
   // insert edge between (X, i) and (Y, j)
   void insert_edge(const core::identifier_string& X, std::size_t i, const core::identifier_string& Y, std::size_t j)
   {
-    mCRL2log(log::debug, "stategraph") << "insert edge (" << std::string(X) << ", " << i << ") (" << std::string(Y) << ", " << j << ")" << std::endl;
+    mCRL2log(log::debug1, "stategraph") << "insert edge (" << std::string(X) << ", " << i << ") (" << std::string(Y) << ", " << j << ")" << std::endl;
     dependency_vertex& u = find_vertex(X, i);
     dependency_vertex& v = find_vertex(Y, j);
     u.outgoing_edges.insert(&v);
@@ -168,11 +168,11 @@ struct dependency_graph
     for (std::vector<dependency_vertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
     {
       const dependency_vertex& u = *i;
-      out << u.print() << " connected with";
+      out << u.print() << " edges = ";
       for (std::set<dependency_vertex*>::const_iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
       {
         const dependency_vertex& v = **j;
-        out << " " << v.print();
+        out << " (" << u.print() << ", " << v.print() << ")";
       }
       out << std::endl;
     }
@@ -373,9 +373,7 @@ struct remove_may_transitions_helper
       u1.outgoing_edges.insert(&v1);
     }
 
-std::cerr << "--- checking constraints on graph ---\n" << G.print() << std::endl;
     bool result = G.check_constraints();
-std::cerr << "result = " << std::boolalpha << result << std::endl;
     if (result)
     {
       throw remove_may_transitions_finished();
@@ -447,7 +445,6 @@ bool remove_may_transitions(dependency_graph& must_graph, dependency_graph& may_
   }
   catch(remove_may_transitions_finished&)
   {
-    mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
     return true;
   }
   return false;

@@ -318,7 +318,6 @@ struct control_flow_graph
   std::string print() const
   {
     std::ostringstream out;
-    out << "--- control flow graph ---" << std::endl;
     for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
     {
       out << "vertex " << i->second.print() << std::endl;

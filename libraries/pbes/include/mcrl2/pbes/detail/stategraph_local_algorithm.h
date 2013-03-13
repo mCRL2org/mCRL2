@@ -77,13 +77,10 @@ class stategraph_local_algorithm: public stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
     }
 
     void compute_may_graph()
     {
-      mCRL2log(log::debug, "stategraph") << "=== computing may graph ===" << std::endl;
-
       // create vertices
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
@@ -129,7 +126,6 @@ class stategraph_local_algorithm: public stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug, "stategraph") << "=== may graph ===\n" << may_graph.print() << std::endl;
     }
 
     struct dependency_vertex_compare
@@ -184,7 +180,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     void print_control_flow_graphs()
     {
-      mCRL2log(log::debug, "stategraph") << "=== local control flow graphs ===" << std::endl;
+      mCRL2log(log::debug, "stategraph") << "\n=== local control flow graphs ===" << std::endl;
       propositional_variable_instantiation X_init = m_pbes.initial_state();
       const core::identifier_string& X = X_init.name();
       const stategraph_equation& eq_X = *find_equation(m_pbes, X);
@@ -306,7 +302,6 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
 
       G.create_index();
-      mCRL2log(log::debug, "stategraph") << "--- computed local CFG " << G.print() << std::endl;
       return G;
     }
 
@@ -315,7 +310,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // use y, z for vertices in the must graph
     void compute_control_flow_graphs()
     {
-      mCRL2log(log::debug, "stategraph") << "=== compute local control flow graphs ===" << std::endl;
+      mCRL2log(log::debug, "stategraph") << "=== computing local control flow graphs ===" << std::endl;
       propositional_variable_instantiation X_init = m_pbes.initial_state();
       std::vector<std::size_t> CFP = control_flow_parameter_indices(X_init.name());
       for (std::vector<std::size_t>::const_iterator k = CFP.begin(); k != CFP.end(); ++k)
@@ -339,7 +334,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
       const dependency_vertex& y0 = must_graph.find_vertex(X0, p0);
       todo.insert(&y0);
-      mCRL2log(log::debug1, "stategraph") << " insert todo element (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
+      mCRL2log(log::debug, "stategraph") << " insert todo element (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
       while (!todo.empty())
       {
         std::set<const dependency_vertex*>::iterator ti = todo.begin();
@@ -351,7 +346,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         todo.erase(ti);
         visited.insert(*ti);
 
-        mCRL2log(log::debug1, "stategraph") << " choose todo element (" << core::pp(X) << ", " << p << ")" << std::endl;
+        mCRL2log(log::debug, "stategraph") << " choose todo element (" << core::pp(X) << ", " << p << ")" << std::endl;
 
         if (y.outgoing_edges.empty())
         {
@@ -380,7 +375,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             if (visited.find(&z) == visited.end())
             {
               todo.insert(&z);
-              mCRL2log(log::debug1, "stategraph") << " insert todo element (" << core::pp(Y) << ", " << q << ")" << std::endl;
+              mCRL2log(log::debug, "stategraph") << " insert todo element (" << core::pp(Y) << ", " << q << ")" << std::endl;
             }
             for (std::set<std::size_t>::iterator j = belongs.begin(); j != belongs.end(); )
             {
@@ -405,6 +400,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     void compute_belongs()
     {
+      mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
       const propositional_variable_instantiation& X_init = m_pbes.initial_state();
       const core::identifier_string& X = X_init.name();
       std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
@@ -415,9 +411,10 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
     }
 
-    std::string print_belongs() const
+    void print_belongs() const
     {
       std::ostringstream out;
+      out << "\n=== belongs relation ===\n";
       for (std::size_t k = 0; k < m_belongs.size(); k++)
       {
         out << "--- belongs " << k << " ---" << std::endl;
@@ -427,7 +424,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           out << core::pp(i->first) << " -> " << data::detail::print_set(i->second) << std::endl;
         }
       }
-      return out.str();
+      mCRL2log(log::debug, "stategraph") << out.str() << std::endl;
     }
 
     // Returns true if there is a local control flow graph Gk such that
@@ -465,6 +462,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     void compute_control_flow_marking()
     {
+      mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
       using data::detail::set_difference;
       using data::detail::set_intersection;
       using data::detail::set_union;
@@ -508,7 +506,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             stategraph_vertex& v = **ti;
             // const core::identifier_string& X = v.X.name();
             std::set<std::size_t> J = v.marking_variable_indices(m_pbes);
-            mCRL2log(log::debug, "stategraph") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
+            mCRL2log(log::debug, "stategraph") << "selected todo element " << pbes_system::pp(v.X) << std::endl;
             for (std::set<stategraph_edge>::iterator ei = v.incoming_edges.begin(); ei != v.incoming_edges.end(); ++ei)
             {
               // u = Y(f)
@@ -574,6 +572,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     void print_control_flow_marking() const
     {
+      mCRL2log(log::debug, "stategraph") << "\n=== control flow marking ===" << std::endl;
       std::size_t K = m_control_flow_graphs.size();
       for (std::size_t k = 0; k < K; k++)
       {
@@ -592,8 +591,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
     {
       super::run();
       compute_must_graph();
+      mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
       compute_may_graph();
+      mCRL2log(log::debug, "stategraph") << "=== may graph ===\n" << may_graph.print() << std::endl;
       remove_may_transitions(must_graph, may_graph, dependency_vertex_compare(m_pbes));
+      mCRL2log(log::debug, "stategraph") << "=== must graph after removing may transitions ===\n" << must_graph.print() << std::endl;
       compute_control_flow_graphs();
       compute_belongs();
       print_belongs();
