@@ -364,8 +364,6 @@ class SMT_LIB_Solver: public SMT_Solver
       else if (sort_int::is_cint_application(a_clause))
       {
         translate_c_int(a_clause);
-        //} else if (gsIsDataExprCReal(a_clause)) {
-        //  translate_c_real(a_clause);
       }
       else if (sort_int::is_integer_constant(a_clause))
       {
@@ -387,7 +385,7 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         translate_false();
       }
-      else if (core::detail::gsIsDataVarId(a_clause))
+      else if (is_variable(a_clause))
       {
         if (a_expecting_predicate)
         {
@@ -417,7 +415,7 @@ class SMT_LIB_Solver: public SMT_Solver
           translate_unknown_operator(a_clause);
         }
       }
-      else if (core::detail::gsIsOpId(a_clause))
+      else if (data::is_function_symbol(a_clause))
       {
         translate_constant(a_clause);
       }

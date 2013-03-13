@@ -46,11 +46,10 @@ state_formula translate_reg_frms(const state_formula &state_frm)
 
 static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_generator &xyz_generator)
 {
-  if (gsIsDataExpr(part) || 
-      is_data_expression(part) ||
-      gsIsMultAct(part) ||
+  if (is_data_expression(part) ||
+      lps::is_multi_action(part) ||
       mcrl2::state_formulas::is_variable(part) || 
-      gsIsDataVarIdInit(part) ||
+      is_assignment(part) ||
       is_true(part) ||
       is_false(part) ||
       is_yaled(part) ||

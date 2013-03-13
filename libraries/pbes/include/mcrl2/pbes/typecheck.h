@@ -71,15 +71,10 @@ class pbes_type_checker:public data::data_type_checker
       
       mCRL2log(debug) << "type checking transform Data+PBES phase finished" << std::endl;
     
-      /* data_spec=data_spec.set_argument(gsMakeDataEqnSpec(equations),3);
-      type_checked_pbes_spec=pbes_spec.set_argument(type_checked_data_spec,0); */
-    
       pbes_equations=WritePBES(pbes_equations);
       pb_eqn_spec=Container(pbes_equations.begin(),pbes_equations.end());
-      /* type_checked_pbes_spec=type_checked_pbes_spec.set_argument(pb_eqn_spec,2); */
     
       pb_init=propositional_variable_instantiation(pbes_bodies[INIT_PBES()]);
-      // type_checked_pbes_spec=type_checked_pbes_spec.set_argument(pb_init,3);
 
       type_checked_pbes_spec=pbes<Container>(type_checked_data_spec,pb_eqn_spec,glob_var_spec,pb_init);
       
@@ -225,7 +220,7 @@ class pbes_type_checker:public data::data_type_checker
           return d;
         }
       
-        if (gsIsPBESTrue(PBESTerm) || gsIsPBESFalse(PBESTerm))
+        if (is_pbes_true(PBESTerm) || is_pbes_false(PBESTerm))
         {
           return PBESTerm;
         }
@@ -236,14 +231,14 @@ class pbes_type_checker:public data::data_type_checker
           return not_(TraversePBESVarConstPB(Vars,argument.operand()));
         }
       
-        if (gsIsPBESAnd(PBESTerm) || gsIsPBESOr(PBESTerm) || gsIsPBESImp(PBESTerm))
+        if (is_pbes_and(PBESTerm) || is_pbes_or(PBESTerm) || is_pbes_imp(PBESTerm))
         {
           const pbes_expression NewLeft=TraversePBESVarConstPB(Vars,aterm_cast<const pbes_expression>(PBESTerm[0]));
           const pbes_expression NewRight=TraversePBESVarConstPB(Vars,aterm_cast<const pbes_expression>(PBESTerm[1]));
           return PBESTerm.set_argument(NewLeft,0).set_argument(NewRight,1);
         }
       
-        if (gsIsPBESForall(PBESTerm)||gsIsPBESExists(PBESTerm))
+        if (is_pbes_forall(PBESTerm)||is_pbes_exists(PBESTerm))
         {
           std::map<core::identifier_string,sort_expression> CopyVars(Vars);
       

@@ -80,11 +80,20 @@ static aterm_list list_minus(const aterm_list &l, const aterm_list &m)
   return reverse(n);
 }
 
-static aterm_appl MakeActionOrProc(bool action, aterm_appl Name,
-    aterm_list FormParList, aterm_list FactParList)
+static process_expression MakeActionOrProc(
+             bool is_action, 
+             const identifier_string &Name,
+             const sort_expression_list &FormParList, 
+             const data_expression_list FactParList)
 {
-  return (action)?gsMakeAction(gsMakeActId(Name,FormParList),FactParList)
-         :gsMakeProcess(gsMakeProcVarId(Name,FormParList),FactParList);
+  if (is_action)
+  {
+    return action(action_label(Name,FormParList),FactParList);
+  }
+  else
+  {
+    return process_instance(process_identifier(Name,FormParList),FactParList);
+  }
 }
 
 process_equation_list mcrl2::process::process_type_checker::WriteProcs(const process_equation_vector &oldprocs)
@@ -172,7 +181,7 @@ bool mcrl2::process::process_type_checker::IsTypeAllowedA(const sort_expression 
   {
     return true;
   }
-  if (gsIsSortsPossible(PosType))
+  if (is_multiple_possible_sorts(PosType))
   {
     return InTypesA(Type,aterm_cast<const sort_expression_list>(PosType[0]));
   }
@@ -316,13 +325,13 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
 
   if (ParList.size()==1)
   {
-    Result=MakeActionOrProc(action,Name,ParList.front(),aterm_cast<aterm_list>(ProcTerm[1]));
+    Result=MakeActionOrProc(action,Name,ParList.front(),aterm_cast<data_expression_list>(ProcTerm[1]));
   }
   else
   {
     // we need typechecking to find the correct type of the action.
     // make the list of possible types for the parameters
-    Result=MakeActionOrProc(action,Name,GetNotInferredList(ParList),aterm_cast<aterm_list>(ProcTerm[1]));
+    Result=MakeActionOrProc(action,Name,GetNotInferredList(ParList),aterm_cast<const data_expression_list>(ProcTerm[1]));
   }
 
   //process the arguments
@@ -330,7 +339,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
   //possible types for the arguments of the action. (not inferred if ambiguous action).
   sort_expression_list PosTypeList=aterm_cast<sort_expression_list>(aterm_cast<aterm_appl>(Result[0])[1]);
 
-  aterm_list NewPars;
+  data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
   for (aterm_list Pars=aterm_cast<aterm_list>(ProcTerm[1]); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
   {
@@ -359,7 +368,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
   {
     PosTypeList=aterm_cast<sort_expression_list>(aterm_cast<aterm_appl>(Result[0])[1]);
     aterm_list Pars=NewPars;
-    NewPars=variable_list();
+    NewPars=data_expression_list();
     sort_expression_list CastedPosTypeList;
     for (; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail(),NewPosTypeList=NewPosTypeList.tail())
     {
@@ -450,7 +459,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         sort_expression_list Par=ParList.front();
 
         // get the formal parameter names
-        variable_list FormalPars=proc_pars[gsMakeProcVarId(Name,Par)];
+        variable_list FormalPars=proc_pars[process_identifier(Name,Par)];
         // we only need the names of the parameters, not the types
         aterm_list FormalParNames;
         for (; !FormalPars.empty(); FormalPars=FormalPars.tail())
@@ -487,17 +496,17 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
     // get the formal parameter names
     aterm_list ActualPars;
-    aterm_list FormalPars=aterm_cast<aterm_list>(proc_pars[gsMakeProcVarId(Name,aterm_cast<const aterm_list>(ParList.front()))]);
+    aterm_list FormalPars=aterm_cast<aterm_list>(proc_pars[process_identifier(Name,ParList.front())]);
     {
       // we only need the names of the parameters, not the types
       for (aterm_list l=FormalPars; !l.empty(); l= l.tail())
       {
-        aterm_appl FormalParName=aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(l.front())[0]);
-        aterm_appl ActualPar;
+        const identifier_string FormalParName=aterm_cast<const identifier_string>(aterm_cast<aterm_appl>(l.front())[0]);
+        data_expression ActualPar;
         const std::map <aterm_appl,aterm_appl> ::const_iterator i=As.find(FormalParName);
         if (i==As.end())  // Not found.
         {
-          ActualPar=gsMakeId(FormalParName);
+          ActualPar=identifier(FormalParName);
         }
         else
         { 
@@ -529,10 +538,10 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       {
         continue;  //parameter does not change 
       } */
-      As[aterm_cast<identifier_string>(form_par[0])]=gsMakeDataVarIdInit(form_par,act_par);
+      As[aterm_cast<identifier_string>(form_par[0])]=assignment(form_par,act_par);
     }
 
-    aterm_list TypedAssignments;
+    assignment_list TypedAssignments;
     for (aterm_list l=aterm_cast<aterm_list>(ProcTerm[1]); !l.empty(); l=l.tail())
     {
       const aterm_appl a=aterm_cast<const aterm_appl>(l.front());
@@ -545,7 +554,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     }
     TypedAssignments=reverse(TypedAssignments);
 
-    return gsMakeProcessAssignment(aterm_cast<aterm_appl>(TypeCheckedProcTerm[0]),TypedAssignments);
+    return process_instance_assignment(aterm_cast<const process_identifier>(TypeCheckedProcTerm[0]),TypedAssignments);
   }
   //Here the section dealing with assignments ends.
 
@@ -555,14 +564,14 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     return result;
   }
 
-  if (gsIsBlock(ProcTerm) || gsIsHide(ProcTerm) ||
-      gsIsRename(ProcTerm) || gsIsComm(ProcTerm) || gsIsAllow(ProcTerm))
+  if (is_block(ProcTerm) || is_hide(ProcTerm) ||
+      is_rename(ProcTerm) || is_comm(ProcTerm) || is_allow(ProcTerm))
   {
 
     //block & hide
-    if (gsIsBlock(ProcTerm) || gsIsHide(ProcTerm))
+    if (is_block(ProcTerm) || is_hide(ProcTerm))
     {
-      const std::string msg=gsIsBlock(ProcTerm)?"Blocking":"Hiding";
+      const std::string msg=is_block(ProcTerm)?"Blocking":"Hiding";
       core::identifier_string_list ActList=aterm_cast<core::identifier_string_list>(ProcTerm[0]);
       if (ActList.empty())
       {
@@ -587,7 +596,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     }
 
     //rename
-    if (gsIsRename(ProcTerm))
+    if (is_rename(ProcTerm))
     {
       rename_expression_list RenList=aterm_cast<rename_expression_list>(ProcTerm[0]);
 
@@ -638,7 +647,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     }
 
     //comm: like renaming multiactions (with the same parameters) to action/tau
-    if (gsIsComm(ProcTerm))
+    if (is_comm(ProcTerm))
     {
       communication_expression_list CommList=aterm_cast<communication_expression_list>(ProcTerm[0]);
 
@@ -766,8 +775,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     return a.set_argument(NewProc,1);
   }
 
-  if (gsIsSync(ProcTerm) || gsIsSeq(ProcTerm) || gsIsBInit(ProcTerm) ||
-      gsIsMerge(ProcTerm) || gsIsLMerge(ProcTerm) || gsIsChoice(ProcTerm))
+  if (is_sync(ProcTerm) || is_seq(ProcTerm) || is_bounded_init(ProcTerm) ||
+      is_merge(ProcTerm) || is_left_merge(ProcTerm) || is_choice(ProcTerm))
   {
     process_expression NewLeft=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[0]));
     process_expression NewRight=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[1]));
@@ -775,7 +784,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     return a.set_argument(NewLeft,0).set_argument(NewRight,1);
   }
 
-  if (gsIsAtTime(ProcTerm))
+  if (is_at(ProcTerm))
   {
     aterm_appl NewProc=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[0]));
     data_expression Time=aterm_cast<data_expression>(ProcTerm[1]);
@@ -796,15 +805,15 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       }
     }
 
-    return gsMakeAtTime(NewProc,Time);
+    return at(NewProc,Time);
   }
 
-  if (gsIsIfThen(ProcTerm))
+  if (is_if_then(ProcTerm))
   {
     data_expression Cond=aterm_cast<aterm_appl>(ProcTerm[0]);
     aterm_appl NewType=TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
     aterm_appl NewThen=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[1]));
-    return gsMakeIfThen(Cond,NewThen);
+    return if_then(Cond,NewThen);
   }
 
   if (is_if_then_else(ProcTerm))

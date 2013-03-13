@@ -245,7 +245,6 @@ mcrl2::lps::action_type_checker::action_type_checker(
   mCRL2log(debug) << "type checking multiaction..." << std::endl;
   //check correctness of the multi-action in mult_act using
   //the process specification or LPS in spec
-  // assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   try
   {
     ReadInActs(action_decls);
@@ -291,7 +290,6 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   mCRL2log(verbose) << "type checking action rename specification..." << std::endl;
 
   //check precondition
-  // assert(gsIsActionRenameSpec(ar_spec));
 
   mCRL2log(debug) << "type checking phase started" << std::endl;
 
@@ -338,10 +336,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   const action_label_list action_labels=ar_spec.action_labels();
   ReadInActs(action_labels);
   
-  // data_spec=data_spec.set_argument(gsMakeDataEqnSpec(equations),3);
-  // Result=ar_spec.set_argument(data_spec,0);
   // Result=gstcFoldSortRefs(Result);
-
 
   // now the action renaming rules themselves will be typechecked.
   std::vector <action_rename_rule> ActionRenameRules=ar_spec.rules();
@@ -378,7 +373,6 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Cond,sort_bool::bool_());
 
     action_rename_rule_rhs Right=Rule.rhs();
-    assert(gsIsParamId(Right) || gsIsTau(Right) || gsIsDelta(Right));
     if (!Right.is_delta() && !Right.is_tau())
     { 
       Right=TraverseAct(DeclaredVars,Right.act());
@@ -402,25 +396,25 @@ regular_formula mcrl2::state_formulas::state_formula_type_checker::TraverseRegFr
           const regular_formula &RegFrm)
 {
   mCRL2log(debug) << "TraverseRegFrm: " << pp(RegFrm) << "" << std::endl;
-  if (gsIsRegNil(RegFrm))
+  if (regular_formulas::is_nil(RegFrm))
   {
     return RegFrm;
   }
 
-  if (gsIsRegSeq(RegFrm) || gsIsRegAlt(RegFrm))
+  if (is_seq(RegFrm) || is_alt(RegFrm))
   {
     regular_formula NewArg1=TraverseRegFrm(Vars,aterm_cast<aterm_appl>(RegFrm[0]));
     regular_formula NewArg2=TraverseRegFrm(Vars,aterm_cast<aterm_appl>(RegFrm[1]));
     return RegFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
   }
 
-  if (gsIsRegTrans(RegFrm) || gsIsRegTransOrNil(RegFrm))
+  if (is_trans(RegFrm) || is_trans_or_nil(RegFrm))
   {
     regular_formula NewArg=TraverseRegFrm(Vars,aterm_cast<aterm_appl>(RegFrm[0]));
     return RegFrm.set_argument(NewArg,0);
   }
 
-  if (gsIsActFrm(RegFrm))
+  if (is_action_formula(RegFrm))
   {
 
     return TraverseActFrm(Vars, RegFrm);
@@ -436,7 +430,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
   using namespace action_formulas;
   mCRL2log(debug) << "TraverseActFrm: " << pp(ActFrm) << std::endl;
 
-  if (gsIsActTrue(ActFrm) || gsIsActFalse(ActFrm))
+  if (action_formulas::is_true(ActFrm) || action_formulas::is_false(ActFrm))
   {
     return ActFrm;
   }
@@ -448,14 +442,14 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     return action_formulas::not_(NewArg); 
   }
 
-  if (gsIsActAnd(ActFrm) || gsIsActOr(ActFrm) || gsIsActImp(ActFrm))
+  if (action_formulas::is_and(ActFrm) || action_formulas::is_or(ActFrm) || action_formulas::is_imp(ActFrm))
   {
     aterm_appl NewArg1=TraverseActFrm(Vars,aterm_cast<aterm_appl>(ActFrm[0]));
     aterm_appl NewArg2=TraverseActFrm(Vars,aterm_cast<aterm_appl>(ActFrm[1]));
     return ActFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
   }
 
-  if (gsIsActForall(ActFrm) || gsIsActExists(ActFrm))
+  if (action_formulas::is_forall(ActFrm) || action_formulas::is_exists(ActFrm))
   {
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
@@ -467,7 +461,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     return ActFrm.set_argument(NewArg2,1);
   }
 
-  if (gsIsActAt(ActFrm))
+  if (action_formulas::is_at(ActFrm))
   {
     action_formula NewArg1=TraverseActFrm(Vars,aterm_cast<action_formula>(ActFrm[0]));
 
@@ -491,7 +485,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     return ActFrm.set_argument(NewArg1,0).set_argument(Time,1);
   }
 
-  if (gsIsMultAct(ActFrm))
+  if (is_multi_action(ActFrm))
   {
     const multi_action ma(ActFrm);
     action_list r;
@@ -506,7 +500,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     return multi_action(reverse(r));
   }
 
-  if (gsIsDataExpr(ActFrm))
+  if (is_data_expression(ActFrm))
   {
     data_expression d(ActFrm);
     aterm_appl Type=TraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
@@ -524,25 +518,25 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 {
   mCRL2log(debug) << "TraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
 
-  if (gsIsStateTrue(StateFrm) || gsIsStateFalse(StateFrm) || gsIsStateDelay(StateFrm) || gsIsStateYaled(StateFrm))
+  if (state_formulas::is_true(StateFrm) || state_formulas::is_false(StateFrm) || state_formulas::is_delay(StateFrm) || state_formulas::is_yaled(StateFrm))
   {
     return StateFrm;
   }
 
-  if (gsIsStateNot(StateFrm))
+  if (state_formulas::is_not(StateFrm))
   {
     state_formula NewArg=TraverseStateFrm(Vars,StateVars,aterm_cast<aterm_appl>(StateFrm[0]));
     return StateFrm.set_argument(NewArg,0);
   }
 
-  if (gsIsStateAnd(StateFrm) || gsIsStateOr(StateFrm) || gsIsStateImp(StateFrm))
+  if (state_formulas::is_and(StateFrm) || state_formulas::is_or(StateFrm) || state_formulas::is_imp(StateFrm))
   {
     state_formula NewArg1=TraverseStateFrm(Vars,StateVars,aterm_cast<aterm_appl>(StateFrm[0]));
     state_formula NewArg2=TraverseStateFrm(Vars,StateVars,aterm_cast<aterm_appl>(StateFrm[1]));
     return StateFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
   }
 
-  if (gsIsStateForall(StateFrm) || gsIsStateExists(StateFrm))
+  if (state_formulas::is_forall(StateFrm) || state_formulas::is_exists(StateFrm))
   {
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
@@ -570,7 +564,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     return must(RegFrm,NewArg2);
   }
 
-  if (gsIsStateDelayTimed(StateFrm) || gsIsStateYaledTimed(StateFrm))
+  if (state_formulas::is_delay_timed(StateFrm) || state_formulas::is_yaled_timed(StateFrm))
   {
     data_expression Time=aterm_cast<aterm_appl>(StateFrm[0]);
     sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
@@ -646,7 +640,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   }
 
-  if (gsIsStateNu(StateFrm) || gsIsStateMu(StateFrm))
+  if (state_formulas::is_nu(StateFrm) || state_formulas::is_mu(StateFrm))
   {
     std::map<core::identifier_string,sort_expression_list> CopyStateVars(StateVars);
 
@@ -724,7 +718,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     return NewStateFrm.set_argument(NewArg,2);
   }
 
-  if (gsIsDataExpr(StateFrm))
+  if (is_data_expression(StateFrm))
   {
     data_expression d(StateFrm);
     aterm_appl Type=TraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());

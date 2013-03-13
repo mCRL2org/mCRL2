@@ -2235,9 +2235,9 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
     std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
 
-    if (gsIsSetBagComp(BindingOperator) ||
-        gsIsSetComp(BindingOperator) ||
-        gsIsBagComp(BindingOperator))
+    if (is_set_or_bag_comprehension_binder(BindingOperator) ||
+        is_set_comprehension_binder(BindingOperator) ||
+        is_bag_comprehension_binder(BindingOperator))
     {
       variable_list VarDecls=abstr.variables();
 
@@ -2303,7 +2303,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       return NewType;
     }
 
-    if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator))
+    if (is_forall_binder(BindingOperator) || is_exists_binder(BindingOperator))
     {
       variable_list VarList=abstr.variables();
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
@@ -2333,7 +2333,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       return sort_bool::bool_();
     }
 
-    if (gsIsLambda(BindingOperator))
+    if (is_lambda_binder(BindingOperator))
     {
       variable_list VarList=abstr.variables();
       std::map<core::identifier_string,sort_expression> NewAllowedVars;
@@ -2393,7 +2393,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         NewWhereVar=variable(aterm_cast<core::identifier_string>(WhereElem[0]),WhereType);
       }
       WhereVarList.push_front(NewWhereVar);
-      NewWhereList.push_front(gsMakeDataVarIdInit(NewWhereVar,WhereTerm));
+      NewWhereList.push_front(assignment(NewWhereVar,WhereTerm));
     }
     NewWhereList=reverse(NewWhereList);
 
@@ -2412,7 +2412,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
     core::RemoveVars(FreeVars,VarList);
     
-    DataTerm=gsMakeWhr(Data,NewWhereList);
+    DataTerm=where_clause(Data,NewWhereList);
     return NewType;
   }
 
