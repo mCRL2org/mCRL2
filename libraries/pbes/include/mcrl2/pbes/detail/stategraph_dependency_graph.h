@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/stategraph_local_graph.h
+/// \file mcrl2/pbes/detail/stategraph_dependency_graph.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_GRAPH_H
-#define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_GRAPH_H
+#ifndef MCRL2_PBES_DETAIL_STATEGRAPH_DEPENDENCY_GRAPH_H
+#define MCRL2_PBES_DETAIL_STATEGRAPH_DEPENDENCY_GRAPH_H
 
 #include <iostream>
 #include <map>
@@ -30,13 +30,13 @@ namespace pbes_system {
 
 namespace detail {
 
-struct local_vertex
+struct dependency_vertex
 {
   core::identifier_string X;
   std::size_t p;
-  std::set<local_vertex*> outgoing_edges;
+  std::set<dependency_vertex*> outgoing_edges;
 
-  local_vertex(const core::identifier_string& X_, std::size_t p_)
+  dependency_vertex(const core::identifier_string& X_, std::size_t p_)
     : X(X_), p(p_)
   {}
 
@@ -47,7 +47,7 @@ struct local_vertex
     return out.str();
   }
 
-  bool operator<(const local_vertex& other)
+  bool operator<(const dependency_vertex& other)
   {
     if (X != other.X)
     {
@@ -57,21 +57,21 @@ struct local_vertex
   }
 };
 
-struct local_graph
+struct dependency_graph
 {
-  typedef std::map<std::size_t, local_vertex*> vertex_map;
-  typedef std::map<core::identifier_string, const local_vertex*> constraint_map;
+  typedef std::map<std::size_t, dependency_vertex*> vertex_map;
+  typedef std::map<core::identifier_string, const dependency_vertex*> constraint_map;
 
-  std::vector<local_vertex> m_vertices;
+  std::vector<dependency_vertex> m_vertices;
 
   // needs to be initialized after inserting vertices!
   std::map<core::identifier_string, vertex_map> m_index;
 
-  bool has_vertex(const local_vertex* u)
+  bool has_vertex(const dependency_vertex* u)
   {
-    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    for (std::vector<dependency_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
     {
-      local_vertex& v = *i;
+      dependency_vertex& v = *i;
       if (&v == u)
       {
         return true;
@@ -82,10 +82,10 @@ struct local_graph
 
   void self_check()
   {
-    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    for (std::vector<dependency_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
     {
-      local_vertex& u = *i;
-      for (std::set<local_vertex*>::iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
+      dependency_vertex& u = *i;
+      for (std::set<dependency_vertex*>::iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
       {
         if (!has_vertex(*j))
         {
@@ -97,28 +97,28 @@ struct local_graph
 
   void set_index()
   {
-    for (std::vector<local_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    for (std::vector<dependency_vertex>::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
     {
       m_index[i->X][i->p] = &(*i);
     }
   }
 
-  local_graph()
+  dependency_graph()
   {}
 
-  local_graph(const local_graph& other)
+  dependency_graph(const dependency_graph& other)
     : m_vertices(other.m_vertices)
   {
-    const local_vertex* old_first_vertex = &other.m_vertices[0];
-    local_vertex* new_first_vertex = &m_vertices[0];
+    const dependency_vertex* old_first_vertex = &other.m_vertices[0];
+    dependency_vertex* new_first_vertex = &m_vertices[0];
 
     // reset the pointers
     for (std::size_t i = 0; i < m_vertices.size(); i++)
     {
-      const std::set<local_vertex*>& old_edges = m_vertices[i].outgoing_edges;
-      std::set<local_vertex*>& new_edges = m_vertices[i].outgoing_edges;
+      const std::set<dependency_vertex*>& old_edges = m_vertices[i].outgoing_edges;
+      std::set<dependency_vertex*>& new_edges = m_vertices[i].outgoing_edges;
       new_edges.clear();
-      for (std::set<local_vertex*>::iterator j = old_edges.begin(); j != old_edges.end(); ++j)
+      for (std::set<dependency_vertex*>::iterator j = old_edges.begin(); j != old_edges.end(); ++j)
       {
         std::size_t index = *j - old_first_vertex;
         new_edges.insert(new_first_vertex + index);
@@ -129,7 +129,7 @@ struct local_graph
   }
 
   // @pre: (X, p) is in the graph
-  local_vertex& find_vertex(const core::identifier_string& X, std::size_t p)
+  dependency_vertex& find_vertex(const core::identifier_string& X, std::size_t p)
   {
     if (m_index.find(X) == m_index.end())
     {
@@ -149,7 +149,7 @@ struct local_graph
   void insert_vertex(const core::identifier_string& X, std::size_t p)
   {
     mCRL2log(log::debug, "stategraph") << "insert vertex (" << std::string(X) << ", " << p << ")" << std::endl;
-    m_vertices.push_back(local_vertex(X, p));
+    m_vertices.push_back(dependency_vertex(X, p));
     //self_check();
   }
 
@@ -157,21 +157,21 @@ struct local_graph
   void insert_edge(const core::identifier_string& X, std::size_t i, const core::identifier_string& Y, std::size_t j)
   {
     mCRL2log(log::debug, "stategraph") << "insert edge (" << std::string(X) << ", " << i << ") (" << std::string(Y) << ", " << j << ")" << std::endl;
-    local_vertex& u = find_vertex(X, i);
-    local_vertex& v = find_vertex(Y, j);
+    dependency_vertex& u = find_vertex(X, i);
+    dependency_vertex& v = find_vertex(Y, j);
     u.outgoing_edges.insert(&v);
   }
 
   std::string print()
   {
     std::ostringstream out;
-    for (std::vector<local_vertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    for (std::vector<dependency_vertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
     {
-      const local_vertex& u = *i;
+      const dependency_vertex& u = *i;
       out << u.print() << " connected with";
-      for (std::set<local_vertex*>::const_iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
+      for (std::set<dependency_vertex*>::const_iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
       {
-        const local_vertex& v = **j;
+        const dependency_vertex& v = **j;
         out << " " << v.print();
       }
       out << std::endl;
@@ -179,17 +179,17 @@ struct local_graph
     return out.str();
   }
 
-  const std::vector<local_vertex>& vertices() const
+  const std::vector<dependency_vertex>& vertices() const
   {
     return m_vertices;
   }
 
-  std::vector<local_vertex>& vertices()
+  std::vector<dependency_vertex>& vertices()
   {
     return m_vertices;
   }
 
-  bool check_constraints(const local_vertex& u, constraint_map& m) const
+  bool check_constraints(const dependency_vertex& u, constraint_map& m) const
   {
     constraint_map::iterator i = m.find(u.X);
     if (i == m.end())
@@ -199,13 +199,13 @@ struct local_graph
     else
     {
       // if we end up in a vertex with known X, then these vertices must coincide
-      const local_vertex& v = *(i->second);
+      const dependency_vertex& v = *(i->second);
       return &u == &v;
     }
-    const std::set<local_vertex*>& S = u.outgoing_edges;
-    for (std::set<local_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
+    const std::set<dependency_vertex*>& S = u.outgoing_edges;
+    for (std::set<dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
     {
-      const local_vertex& v = **j;
+      const dependency_vertex& v = **j;
       if (!check_constraints(v, m))
       {
         return false;
@@ -220,14 +220,14 @@ struct local_graph
   bool check_constraints() const
   {
     // check 1)
-    for (std::vector<local_vertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    for (std::vector<dependency_vertex>::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
     {
-      const local_vertex& u = *i;
+      const dependency_vertex& u = *i;
       std::map<core::identifier_string, std::size_t> index;
-      const std::set<local_vertex*>& S = u.outgoing_edges;
-      for (std::set<local_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
+      const std::set<dependency_vertex*>& S = u.outgoing_edges;
+      for (std::set<dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
       {
-        const local_vertex& v = **j;
+        const dependency_vertex& v = **j;
         std::map<core::identifier_string, std::size_t>::iterator k = index.find(v.X);
         if (k == index.end())
         {
@@ -244,10 +244,10 @@ struct local_graph
     }
 
     // check 2)
-    std::set<const local_vertex*> done;
+    std::set<const dependency_vertex*> done;
     for (std::size_t i = 0; i < m_vertices.size(); i++)
     {
-      const local_vertex& u = m_vertices[i];
+      const dependency_vertex& u = m_vertices[i];
       if (done.find(&u) != done.end())
       {
         continue;
@@ -265,17 +265,17 @@ struct local_graph
     return true;
   }
 
-  void compute_dependency_map(const local_vertex& u, std::map<core::identifier_string, std::size_t>& result) const
+  void compute_dependency_map(const dependency_vertex& u, std::map<core::identifier_string, std::size_t>& result) const
   {
     if (result.find(u.X) != result.end())
     {
       return;
     }
     result[u.X] = u.p;
-    const std::set<local_vertex*>& S = u.outgoing_edges;
-    for (std::set<local_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
+    const std::set<dependency_vertex*>& S = u.outgoing_edges;
+    for (std::set<dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
     {
-      const local_vertex& v = **j;
+      const dependency_vertex& v = **j;
       compute_dependency_map(v, result);
     }
   }
@@ -284,14 +284,14 @@ struct local_graph
   std::map<core::identifier_string, std::size_t> dependency_map(const core::identifier_string& X, std::size_t p)
   {
     std::map<core::identifier_string, std::size_t> result;
-    local_vertex& u = find_vertex(X, p);
+    dependency_vertex& u = find_vertex(X, p);
     compute_dependency_map(u, result);
     return result;
   }
 };
 
 inline
-std::pair<core::identifier_string, std::size_t> parse_local_vertex(const std::string& text)
+std::pair<core::identifier_string, std::size_t> parse_dependency_vertex(const std::string& text)
 {
   std::istringstream from(text);
   std::string X;
@@ -307,9 +307,9 @@ std::pair<core::identifier_string, std::size_t> parse_local_vertex(const std::st
 // The first line contains a ';'-separated sequence of vertices.
 // Each subsequent line contains a ';'-separated sequence of 2 vertices, which is interpreted as an edge.
 inline
-local_graph parse_local_graph(const std::string& text)
+dependency_graph parse_dependency_graph(const std::string& text)
 {
-  local_graph result;
+  dependency_graph result;
 
   std::vector<std::string> lines = utilities::regex_split(text, "\n");
 
@@ -317,7 +317,7 @@ local_graph parse_local_graph(const std::string& text)
   std::vector<std::string> vertices = utilities::split(lines[0], ";");
   for (std::vector<std::string>::const_iterator j = vertices.begin(); j != vertices.end(); ++j)
   {
-    std::pair<core::identifier_string, std::size_t> q = parse_local_vertex(*j);
+    std::pair<core::identifier_string, std::size_t> q = parse_dependency_vertex(*j);
     result.insert_vertex(q.first, q.second);
   }
 
@@ -331,8 +331,8 @@ local_graph parse_local_graph(const std::string& text)
     {
       throw mcrl2::runtime_error("error: could not parse local edge " + *i);
     }
-    std::pair<core::identifier_string, std::size_t> u = parse_local_vertex(vertices[0]);
-    std::pair<core::identifier_string, std::size_t> v = parse_local_vertex(vertices[1]);
+    std::pair<core::identifier_string, std::size_t> u = parse_dependency_vertex(vertices[0]);
+    std::pair<core::identifier_string, std::size_t> v = parse_dependency_vertex(vertices[1]);
     result.insert_edge(u.first, u.second, v.first, v.second);
   }
 
@@ -345,13 +345,13 @@ struct remove_may_transitions_finished
 struct remove_may_transitions_helper
 {
   // N.B. sources and targets are in the may-graph
-  const std::vector<local_vertex*>& sources;
-  std::vector<local_vertex*>& targets;
+  const std::vector<dependency_vertex*>& sources;
+  std::vector<dependency_vertex*>& targets;
 
   // G is the must-graph
-  local_graph& G;
+  dependency_graph& G;
 
-  remove_may_transitions_helper(const std::vector<local_vertex*>& sources_, std::vector<local_vertex*>& targets_, local_graph& G_)
+  remove_may_transitions_helper(const std::vector<dependency_vertex*>& sources_, std::vector<dependency_vertex*>& targets_, dependency_graph& G_)
     : sources(sources_),
       targets(targets_),
       G(G_)
@@ -366,10 +366,10 @@ struct remove_may_transitions_helper
     // add edges to G
     for (std::size_t i = 0; i < sources.size(); i++)
     {
-      local_vertex& u = *(sources[i]);
-      local_vertex& v = *(targets[i]);
-      local_vertex& u1 = G.find_vertex(u.X, u.p);
-      local_vertex& v1 = G.find_vertex(v.X, v.p);
+      dependency_vertex& u = *(sources[i]);
+      dependency_vertex& v = *(targets[i]);
+      dependency_vertex& u1 = G.find_vertex(u.X, u.p);
+      dependency_vertex& v1 = G.find_vertex(v.X, v.p);
       u1.outgoing_edges.insert(&v1);
     }
 
@@ -384,10 +384,10 @@ std::cerr << "result = " << std::boolalpha << result << std::endl;
     // remove edges from G
     for (std::size_t i = 0; i < sources.size(); i++)
     {
-      local_vertex& u = *(sources[i]);
-      local_vertex& v = *(targets[i]);
-      local_vertex& u1 = G.find_vertex(u.X, u.p);
-      local_vertex& v1 = G.find_vertex(v.X, v.p);
+      dependency_vertex& u = *(sources[i]);
+      dependency_vertex& v = *(targets[i]);
+      dependency_vertex& u1 = G.find_vertex(u.X, u.p);
+      dependency_vertex& v1 = G.find_vertex(v.X, v.p);
       u1.outgoing_edges.erase(&v1);
     }
   }
@@ -395,35 +395,35 @@ std::cerr << "result = " << std::boolalpha << result << std::endl;
 
 // Returns true if a control flow graph is found that satisfies the constraints.
 template <typename VertexCompare>
-bool remove_may_transitions(local_graph& must_graph, local_graph& may_graph, VertexCompare comp)
+bool remove_may_transitions(dependency_graph& must_graph, dependency_graph& may_graph, VertexCompare comp)
 {
   // pass 1: handle all vertices for which the number of outgoing may transitions is equal to 1
-  std::vector<local_vertex>& V = may_graph.vertices();
-  for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+  std::vector<dependency_vertex>& V = may_graph.vertices();
+  for (std::vector<dependency_vertex>::iterator i = V.begin(); i != V.end(); ++i)
   {
-    local_vertex& u = *i;
+    dependency_vertex& u = *i;
     if (u.outgoing_edges.size() == 1)
     {
-      local_vertex v = **(u.outgoing_edges.begin());
+      dependency_vertex v = **(u.outgoing_edges.begin());
       u.outgoing_edges.clear();
       must_graph.insert_edge(u.X, u.p, v.X, v.p);
     }
   }
 
   // pass 2: handle all vertices for which the number of outgoing may transitions is greater than 1
-  std::vector<local_vertex*> sources;         // the vertices for which the number of outgoing may transitions is greater than 1
-  std::vector<std::vector<local_vertex*> > T; // T[i] contains the targets of the outgoing edges of vertex sources
-  std::vector<local_vertex*> targets;         // targets[i] will hold an element of T[i]
+  std::vector<dependency_vertex*> sources;         // the vertices for which the number of outgoing may transitions is greater than 1
+  std::vector<std::vector<dependency_vertex*> > T; // T[i] contains the targets of the outgoing edges of vertex sources
+  std::vector<dependency_vertex*> targets;         // targets[i] will hold an element of T[i]
 
   // initialization of sources, T and targets
-  for (std::vector<local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+  for (std::vector<dependency_vertex>::iterator i = V.begin(); i != V.end(); ++i)
   {
-    local_vertex& u = *i;
+    dependency_vertex& u = *i;
     if (u.outgoing_edges.size() > 1)
     {
       sources.push_back(&u);
-      std::set<local_vertex*>& S = u.outgoing_edges;
-      T.push_back(std::vector<local_vertex*>(S.begin(), S.end()));
+      std::set<dependency_vertex*>& S = u.outgoing_edges;
+      T.push_back(std::vector<dependency_vertex*>(S.begin(), S.end()));
     }
   }
 
@@ -435,7 +435,7 @@ bool remove_may_transitions(local_graph& must_graph, local_graph& may_graph, Ver
   }
 
   // initialize targets
-  for (std::vector<std::vector<local_vertex*> >::const_iterator i = T.begin(); i != T.end(); ++i)
+  for (std::vector<std::vector<dependency_vertex*> >::const_iterator i = T.begin(); i != T.end(); ++i)
   {
     targets.push_back(i->front());
   }
@@ -459,4 +459,4 @@ bool remove_may_transitions(local_graph& must_graph, local_graph& may_graph, Ver
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_GRAPH_H
+#endif // MCRL2_PBES_DETAIL_STATEGRAPH_DEPENDENCY_GRAPH_H

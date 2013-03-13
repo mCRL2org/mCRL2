@@ -36,8 +36,8 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/pbes/detail/control_flow.h"
-#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
-#include "mcrl2/pbes/detail/stategraph_graph_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
+#include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 
 namespace mcrl2

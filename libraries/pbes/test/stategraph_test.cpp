@@ -17,8 +17,8 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/stategraph_local_graph.h"
-#include "mcrl2/pbes/detail/stategraph_graph_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -272,18 +272,18 @@ void test_parse()
     "Z 0 ; Y 2             \n"
   ;
 
-  detail::local_graph G = detail::parse_local_graph(text);
+  detail::dependency_graph G = detail::parse_dependency_graph(text);
   std::cout << "G =\n" << G.print() << std::endl;
   BOOST_CHECK(G.vertices().size() == 4);
 }
 
 void test_constraints(const std::string& text, bool expected_result)
 {
-  detail::local_graph G = detail::parse_local_graph(text);
+  detail::dependency_graph G = detail::parse_dependency_graph(text);
   bool result = G.check_constraints();
   if (!result == expected_result)
   {
-    std::cout << "--- failure in local_graph::check_constraints ---" << std::endl;
+    std::cout << "--- failure in dependency_graph::check_constraints ---" << std::endl;
     std::cout << text << std::endl;
     std::cout << "result          = " << std::boolalpha << result << std::endl;
     std::cout << "expected result = " << std::boolalpha << expected_result << std::endl;
@@ -333,15 +333,15 @@ void test_constraints()
   test_constraints(text, expected_result);
 }
 
-struct local_vertex_compare
+struct dependency_vertex_compare
 {
-  const detail::local_vertex* source;
+  const detail::dependency_vertex* source;
 
-  local_vertex_compare()
+  dependency_vertex_compare()
     : source(0)
   {}
 
-  bool operator()(const detail::local_vertex* u, const detail::local_vertex* v) const
+  bool operator()(const detail::dependency_vertex* u, const detail::dependency_vertex* v) const
   {
     return (source->X == u->X) > (source->X == v->X);
   }
@@ -349,21 +349,21 @@ struct local_vertex_compare
 
 void test_remove_may_transitions(const std::string& must_text, const std::string& may_text)
 {
-  detail::local_graph must_graph = detail::parse_local_graph(must_text);
-  detail::local_graph may_graph = detail::parse_local_graph(may_text);
-  bool result = detail::remove_may_transitions(must_graph, may_graph, local_vertex_compare());
+  detail::dependency_graph must_graph = detail::parse_dependency_graph(must_text);
+  detail::dependency_graph may_graph = detail::parse_dependency_graph(may_text);
+  bool result = detail::remove_may_transitions(must_graph, may_graph, dependency_vertex_compare());
   BOOST_CHECK(result);
   BOOST_CHECK(must_graph.check_constraints());
 
   // check if the source and target of each edge has the same parameter p (which is implied by the test cases)
-  std::vector<detail::local_vertex>& V = must_graph.vertices();
-  for (std::vector<detail::local_vertex>::iterator i = V.begin(); i != V.end(); ++i)
+  std::vector<detail::dependency_vertex>& V = must_graph.vertices();
+  for (std::vector<detail::dependency_vertex>::iterator i = V.begin(); i != V.end(); ++i)
   {
-    const detail::local_vertex& u = *i;
-    const std::set<detail::local_vertex*>& S = u.outgoing_edges;
-    for (std::set<detail::local_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
+    const detail::dependency_vertex& u = *i;
+    const std::set<detail::dependency_vertex*>& S = u.outgoing_edges;
+    for (std::set<detail::dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
     {
-      const detail::local_vertex& v = **j;
+      const detail::dependency_vertex& v = **j;
       BOOST_CHECK(u.p == v.p);
     }
   }
