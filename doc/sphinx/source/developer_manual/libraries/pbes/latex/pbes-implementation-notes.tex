@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, March 12, 2013 17:52:37}
+%TCIDATA{LastRevised=Wednesday, March 13, 2013 12:29:19}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1977,6 +1977,7 @@ $\qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\
 $\qquad \qquad marking(u):=sig(u)\cap \{d\mid (X,d)\in B_{k}\}$ \\ 
 $stable:=false$ \\ 
 \textbf{while} $\lnot stable$ \textbf{do} \\ 
+$\qquad stable:=true$ \\ 
 $\qquad $\textbf{for} $k=1\cdots K$ \textbf{do} \\ 
 $\qquad \qquad todo:=V_{k}$ \\ 
 $\qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
@@ -1988,7 +1989,7 @@ $\qquad \qquad \qquad \qquad $\textbf{let} $u=Y(f)$ \\
 $\qquad \qquad \qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)\text{
 \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad M:=(FV(f[j])\setminus marking(u))\cap
-\{d\mid (X,d)\in B_{k}\}$ \\ 
+\{d\mid (Y,d)\in B_{k}\}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset $ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup M$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$ \\ 
@@ -1998,16 +1999,17 @@ $\qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )%
 \text{ \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \qquad $\textbf{let} $Y(f)=\mathrm{PVI}(\varphi _{X},i)
 $ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{for }}j$ such that $%
-(X,d_{X}[j])\in B_{k}\wedge d_{X}[j]\notin marking(u)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \wedge (Y,d_{Y}[l])\notin
-B_{k}\wedge d_{X}[j]\in FV(f[l])$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{for }}k^{\prime }$ such
-that $(Y,d_{Y}[l])\in B_{k^{\prime }}\text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}\exists
-w=Y(g)\in V_{k^{\prime }}$ \textbf{such that} ??? $\in marking(w)$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{for }}l$ such that $%
+(Y,d_{Y}[l])\notin B_{k}\text{ \textbf{do}}\wedge d_{X}[j]\notin marking(u)$
+\\ 
+$\qquad \qquad \qquad \qquad \qquad M:=(\{d\mid (X,d)\in B_{k}\}\cap
+FV(f[l]))\setminus marking(u)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset
+\wedge \exists k^{\prime }$ such that $(Y,d_{Y}[l])\in B_{k^{\prime }}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \wedge \exists w=Y(g)\in
+V_{k^{\prime }}$ \textbf{such that}  $d_{Y}[l]\in marking(w)$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup
-\{d[j]\}$ \\ 
+M$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{break}%
 \end{tabular}%

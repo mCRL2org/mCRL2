@@ -64,6 +64,19 @@ class stategraph_graph_algorithm
     // the control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_control_flow;
 
+    // for readability
+    std::set<data::variable> FV(const data::data_expression& x) const
+    {
+      return data::find_free_variables(x);
+    }
+
+    // for readability
+    template <typename Set>
+    bool contains(const Set& S, const typename Set::value_type& s) const
+    {
+      return S.find(s) != S.end();
+    }
+
     propositional_variable find_propvar(const pbes<>& p, const core::identifier_string& X) const
     {
       const std::vector<pbes_equation>& equations = p.equations();
@@ -924,25 +937,154 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       return out.str();
     }
 
-/*
-    void compute_control_flow_marking()
+    // Returns true if there is a local control flow graph Gk such that
+    // 1) k != k0
+    // 2) (X, d) \in Bk
+    // 3) Gk has a vertex u = X(e) such that d \in marking(u)
+    bool is_marked_in_other_graph(const core::identifier_string& X, const data::variable& d, std::size_t k0)
     {
-      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
-
       std::size_t K = m_control_flow_graphs.size();
       for (std::size_t k = 0; k < K; k++)
       {
-        control_flow_graph& Gk = m_control_flow_graphs[k];
-        std::vector<local_vertex>& Vk = Gk.vertices();
-        for (std::vector<local_vertex>::iterator i = Vk.begin(); i != Vk.end(); ++i)
+        if (!contains(m_belongs[k][X], d))
         {
-          local_vertex& u = *i;
-          core::identifier_string X = u.X.name();
-          u.marking = data::detail::set_intersection(u.sig, m_belongs[k][X]);
+          continue;
+        }
+        control_flow_graph& Gk = m_control_flow_graphs[k];
+        const std::set<stategraph_vertex*>& inst = Gk.index(X);
+        for (std::set<stategraph_vertex*>::const_iterator i = inst.begin(); i != inst.end(); ++i)
+        {
+          const stategraph_vertex& u = **i;
+          if (contains(u.marking, d))
+          {
+            mCRL2log(log::debug, "stategraph") << "is_marked_in_other_graph(" << core::pp(X) << ", " << data::pp(d) << ") = true" << std::endl;
+            mCRL2log(log::debug, "stategraph") << "witness: u = " << pbes_system::pp(u.X) << " in graph " << k << std::endl;
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    void compute_control_flow_marking()
+    {
+      using data::detail::set_difference;
+      using data::detail::set_intersection;
+      using data::detail::set_union;
+
+      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
+      std::size_t K = m_control_flow_graphs.size();
+
+      // initial marking
+      for (std::size_t k = 0; k < K; k++)
+      {
+        control_flow_graph& Gk = m_control_flow_graphs[k];
+        for (control_flow_graph::vertex_iterator i = Gk.begin(); i != Gk.end(); ++i)
+        {
+          stategraph_vertex& u = i->second;
+          const core::identifier_string& X = u.X.name();
+          u.marking = set_intersection(u.sig, m_belongs[k][X]);
+        }
+        mCRL2log(log::debug, "stategraph") << "--- initial control flow marking " << k << "\n" << Gk.print_marking();
+      }
+
+      bool stable = false;
+      while (!stable)
+      {
+        stable = true;
+        for (std::size_t k = 0; k < K; k++)
+        {
+          // initialize todo list
+          control_flow_graph& Gk = m_control_flow_graphs[k];
+          std::set<stategraph_vertex*> todo;
+          for (vertex_iterator gi = Gk.begin(); gi != Gk.end(); ++gi)
+          {
+            stategraph_vertex& v = gi->second;
+            todo.insert(&v);
+          }
+
+          while (!todo.empty())
+          {
+            std::set<stategraph_vertex*>::iterator ti = todo.begin();
+            todo.erase(ti);
+
+            // v = X(e)
+            stategraph_vertex& v = **ti;
+            // const core::identifier_string& X = v.X.name();
+            std::set<std::size_t> J = v.marking_variable_indices(m_pbes);
+            mCRL2log(log::debug, "stategraph") << "selected marking todo element " << pbes_system::pp(v.X) << std::endl;
+            for (std::set<stategraph_edge>::iterator ei = v.incoming_edges.begin(); ei != v.incoming_edges.end(); ++ei)
+            {
+              // u = Y(f)
+              stategraph_vertex& u = *(ei->source);
+              std::size_t label = ei->label;
+              // const stategraph_equation& eq_Y = *find_equation(m_pbes, u.X.name());
+              const core::identifier_string& Y = u.X.name();
+              const data::data_expression_list& f = u.X.parameters();
+              mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << label << " J = " << print_set(J) << " u.marking = " << data::detail::print_set(u.marking) << std::endl;
+
+              for (std::set<std::size_t>::const_iterator ji = J.begin(); ji != J.end(); ++ji)
+              {
+                std::size_t j = *ji;
+                data::data_expression f_j = nth_element(f, j);
+                std::set<data::variable> M = set_intersection(set_difference(FV(f_j), u.marking), m_belongs[k][Y]);
+                if (!M.empty())
+                {
+                  mCRL2log(log::debug, "stategraph") << "update marking u with M = " << data::detail::print_set(M) << std::endl;
+                  u.marking = set_union(u.marking, M);
+                  todo.insert(&u);
+                  stable = false;
+                }
+              }
+            }
+          }
+
+          for (vertex_iterator gi = Gk.begin(); gi != Gk.end(); ++gi)
+          {
+            // u = X(e)
+            stategraph_vertex& u = gi->second;
+            const core::identifier_string& X = u.X.name();
+            const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+            for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
+            {
+              const predicate_variable& X_i = eq_X.predicate_variables()[i];
+              const core::identifier_string& Y = X_i.X.name();
+              const data::data_expression_list& f = X_i.X.parameters();
+              const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+              const std::vector<data::variable>& d_Y = eq_Y.parameters();
+              for (std::size_t l = 0; l < d_Y.size(); ++l)
+              {
+                std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
+                if (contains(Bk[Y], d_Y[l]))
+                {
+                  std::set<data::variable> M = set_difference(set_intersection(m_belongs[k][X], FV(nth_element(f, l))), u.marking);
+                  if (M.empty())
+                  {
+                    continue;
+                  }
+                  if (is_marked_in_other_graph(Y, d_Y[l], k))
+                  {
+                    u.marking = set_union(u.marking, M);
+                    mCRL2log(log::debug, "stategraph") << "update marking u with M = " << data::detail::print_set(M) << std::endl;
+                    stable = false;
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
-*/
+
+    void print_control_flow_marking() const
+    {
+      std::size_t K = m_control_flow_graphs.size();
+      for (std::size_t k = 0; k < K; k++)
+      {
+        const control_flow_graph& Gk = m_control_flow_graphs[k];
+        mCRL2log(log::debug, "stategraph") <<  "--- control flow marking for graph " << k << "\n" << Gk.print_marking() << std::endl;
+      }
+    }
 
   public:
     stategraph_graph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
@@ -958,7 +1100,9 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       remove_may_transitions(must_graph, may_graph, local_vertex_compare(m_pbes));
       compute_control_flow_graphs();
       compute_belongs();
-      mCRL2log(log::debug, "stategraph") << "--- belongs relation ---\n" << print_belongs() << std::endl;
+      print_belongs();
+      compute_control_flow_marking();
+      print_control_flow_marking();
     }
 };
 
