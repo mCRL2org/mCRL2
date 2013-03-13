@@ -819,10 +819,6 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
     void compute_control_flow_graphs()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute local control flow graphs ===" << std::endl;
-
-      // pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
-
-
       propositional_variable_instantiation X_init = m_pbes.initial_state();
       std::vector<std::size_t> CFP = control_flow_parameter_indices(X_init.name());
       for (std::vector<std::size_t>::const_iterator k = CFP.begin(); k != CFP.end(); ++k)
@@ -946,6 +942,10 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       std::size_t K = m_control_flow_graphs.size();
       for (std::size_t k = 0; k < K; k++)
       {
+        if (k == k0)
+        {
+          continue;
+        }
         if (!contains(m_belongs[k][X], d))
         {
           continue;
@@ -972,7 +972,6 @@ class stategraph_graph_local_algorithm: public stategraph_graph_algorithm
       using data::detail::set_intersection;
       using data::detail::set_union;
 
-      pbes_system::simplifying_rewriter<pbes_expression, data::rewriter> pbesr(m_datar);
       std::size_t K = m_control_flow_graphs.size();
 
       // initial marking
