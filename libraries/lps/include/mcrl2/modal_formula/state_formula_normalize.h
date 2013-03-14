@@ -64,7 +64,7 @@ void normalize(T& x, bool negated = false, typename boost::disable_if<typename b
 template <typename T>
 T normalize(const T& x, bool negated = false, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0);
 
-// \brief Visitor for checking if a state formula is normalized.
+// \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>
 {
   typedef state_formula_builder<normalize_builder> super;
@@ -185,12 +185,26 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
 
   state_formula operator()(const must& x)
   {
-    return must(x.formula(), normalize(x.operand(), negated));
+    if (negated)
+    {
+      return may(x.formula(), normalize(x.operand(), negated));
+    }
+    else
+    {
+      return must(x.formula(), normalize(x.operand(), negated));
+    }
   }
 
   state_formula operator()(const may& x)
   {
-    return may(x.formula(), normalize(x.operand(), negated));
+    if (negated)
+    {
+      return must(x.formula(), normalize(x.operand(), negated));
+    }
+    else
+    {
+      return may(x.formula(), normalize(x.operand(), negated));
+    }
   }
 
   state_formula operator()(const mu& x)

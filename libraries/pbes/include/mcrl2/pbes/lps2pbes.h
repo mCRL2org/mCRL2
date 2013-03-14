@@ -62,13 +62,16 @@ class lps2pbes_algorithm
       }
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
+      mCRL2log(log::debug) << "formula before preprocessing: " << state_formulas::pp(formula) << std::endl;
       state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
+      mCRL2log(log::debug) << "formula after preprocessing:  " << state_formulas::pp(f) << std::endl;
 
       // remove occurrences of ! and =>
       if (!state_formulas::is_normalized(f))
       {
         f = state_formulas::normalize(f);
       }
+      mCRL2log(log::debug) << "formula after normalization:  " << state_formulas::pp(f) << std::endl;
       assert(state_formulas::is_normalized(f));
 
       data::set_identifier_generator id_generator;
