@@ -80,9 +80,46 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       return result;
     }
 
-    bool is_relevant(const core::identifier_string& X, const data::variable& d) const
+    bool is_relevant(const core::identifier_string& X, const data::variable& d, const std::vector<data::data_expression>& v) const
     {
-      return true;
+      bool result = true;
+      std::size_t K = m_control_flow_graphs.size();
+      for (std::size_t k = 0; k < K; k++)
+      {
+        const control_flow_graph& Gk = m_control_flow_graphs[k];
+        const std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
+        std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.find(X);
+        if (i == Bk.end())
+        {
+std::cout << X << " " << d << " not found in graph " << k << std::endl;
+          continue;
+        }
+        const std::set<data::variable>& V = i->second;
+        if (contains(V, d))
+        {
+          // determine m such that m_control_flow_index[X][m] == k
+          // TODO: this information is not readily available, resulting in very ugly code...
+          std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator ci = m_control_flow_index.find(X);
+          assert(ci != m_control_flow_index.end());
+          bool found = false;
+          std::size_t m;
+          const std::map<std::size_t, std::size_t>& M = ci->second;
+          for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
+          {
+            if (mi->second == k)
+            {
+              found = true;
+              m = mi->first;
+            }
+          }
+          assert(found);
+          control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[m])));
+          assert(vi != Gk.end());
+          const stategraph_vertex& u = vi->second;
+          result = result && contains(u.marking, d);
+        }
+      }
+      return result;
     }
 
   public:
@@ -123,7 +160,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         }
         else
         {
-          if (is_relevant(Y, d_Y[j]))
+          if (is_relevant(Y, d_Y[j], v))
           {
             r.push_back(e_X[j]);
           }

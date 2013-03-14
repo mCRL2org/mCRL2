@@ -171,6 +171,7 @@ struct control_flow_graph
   std::map<core::identifier_string, std::set<stategraph_vertex*> > m_stategraph_index;
 
   typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
+  typedef std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator vertex_const_iterator;
 
   void create_index()
   {
@@ -279,12 +280,27 @@ struct control_flow_graph
     return m_control_vertices.find(x);
   }
 
+  vertex_const_iterator find(const propositional_variable_instantiation& x) const
+  {
+    return m_control_vertices.find(x);
+  }
+
   vertex_iterator begin()
   {
     return m_control_vertices.begin();
   }
 
+  vertex_const_iterator begin() const
+  {
+    return m_control_vertices.begin();
+  }
+
   vertex_iterator end()
+  {
+    return m_control_vertices.end();
+  }
+
+  vertex_const_iterator end() const
   {
     return m_control_vertices.end();
   }
