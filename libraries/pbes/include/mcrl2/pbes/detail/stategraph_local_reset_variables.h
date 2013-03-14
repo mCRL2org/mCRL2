@@ -25,19 +25,6 @@ namespace detail {
 class local_reset_variables_algorithm;
 pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm, const pbes_expression& x, const stategraph_equation& eq_X);
 
-struct reset_variable_helper
-{
-  local_reset_variables_algorithm& algorithm;
-
-  reset_variable_helper(local_reset_variables_algorithm& algorithm_)
-    : algorithm(algorithm_)
-  {}
-
-  void operator()()
-  {
-  }
-};
-
 /// \brief Adds the reset variables procedure to the stategraph algorithm
 class local_reset_variables_algorithm: public stategraph_local_algorithm
 {
@@ -67,15 +54,17 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       assert(k != m_control_flow_index.end());
       const std::map<std::size_t, std::size_t>& m = k->second;
       std::map<std::size_t, std::size_t>::const_iterator i = m.find(j);
-      assert(i != m.end());
 
-      // find vertices X(e) in Gk
-      control_flow_graph& Gk = m_control_flow_graphs[i->second];
-      const std::set<stategraph_vertex*>& inst = Gk.index(X);
-      for (std::set<stategraph_vertex*>::const_iterator vi = inst.begin(); vi != inst.end(); ++vi)
+      if (i != m.end())
       {
-        const stategraph_vertex& u = **vi;
-        result.push_back(u.X.parameters().front());
+        // find vertices X(e) in Gk
+        control_flow_graph& Gk = m_control_flow_graphs[i->second];
+        const std::set<stategraph_vertex*>& inst = Gk.index(X);
+        for (std::set<stategraph_vertex*>::const_iterator vi = inst.begin(); vi != inst.end(); ++vi)
+        {
+          const stategraph_vertex& u = **vi;
+          result.push_back(u.X.parameters().front());
+        }
       }
       return result;
     }
@@ -124,7 +113,7 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
 
   public:
 
-    pbes_expression reset(const std::vector<data::data_expression>& v_prime, const core::identifier_string& Y, const predicate_variable& X_i, const std::set<std::size_t>& I, const std::vector<data::variable>& d_Y, const std::vector<data::data_expression> e_X)
+    pbes_expression reset(const std::vector<data::data_expression>& v_prime, const core::identifier_string& Y, const predicate_variable& X_i, const std::vector<std::size_t>& I, const std::vector<data::variable>& d_Y, const std::vector<data::data_expression> e_X)
     {
       data::data_expression c = data::sort_bool::true_();
       std::size_t k = 0;
@@ -133,7 +122,7 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
       {
         if (is_control_flow_parameter(Y, j))
         {
-          if (!contains(I, j))
+          if (std::find(I.begin(), I.end(), j) == I.end())
           {
             v.push_back(v_prime[k]);
             k++;
@@ -200,6 +189,8 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
       mCRL2log(log::debug, "stategraph") << "  resetting variable " << pbes_system::pp(x) << std::endl;
       std::vector<pbes_expression> phi;
       core::identifier_string Y = x.name();
+      const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+      const std::vector<data::variable>& d_Y = eq_Y.parameters();
       std::vector<data::data_expression> e_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
       std::vector<std::size_t> I;
@@ -211,17 +202,22 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
         }
       }
 
-      // std::vector<std::vector<data::data_expression> > values;
-      // for (std::vector<std::size_t>::const_iterator ii = I.begin(); ii != I.end(); ++ii)
-      // {
-      //   values.push_back(compute_values(Y, *ii));
-      // }
-      // std::vector<data::data_expression> v;
-      // for (std::vector<std::vector<data::data_expression> >::const_iterator vi = values.begin(); vi != values.end(); ++vi)
-      // {
-      //   v.push_back(vi->front());
-      // }
-      // utilities::foreach_sequence(values, v.begin(), reset_variable_helper(v, ...));
+      std::vector<std::vector<data::data_expression> > values;
+      for (std::vector<std::size_t>::const_iterator ii = I.begin(); ii != I.end(); ++ii)
+      {
+        values.push_back(compute_values(Y, *ii));
+      }
+      std::vector<data::data_expression> v_prime;
+      for (std::vector<std::vector<data::data_expression> >::const_iterator vi = values.begin(); vi != values.end(); ++vi)
+      {
+        assert(!vi->empty());
+        v_prime.push_back(vi->front());
+      }
+      utilities::foreach_sequence(values, v_prime.begin(), [&]()
+        {
+          phi.push_back(reset(v_prime, Y, X_i, I, d_Y, e_X));
+        }
+      );
       return pbes_expr::join_and(phi.begin(), phi.end());
     }
 

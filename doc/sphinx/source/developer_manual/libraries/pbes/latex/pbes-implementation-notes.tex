@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Thursday, March 14, 2013 14:20:15}
+%TCIDATA{LastRevised=Thursday, March 14, 2013 19:22:03}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1997,8 +1997,8 @@ $\qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\
 $\qquad \qquad $\textbf{for} $u=X(e)\in V_{k}$ \textbf{do} \\ 
 $\qquad \qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )%
 \text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $Y(f)=\mathrm{PVI}(\varphi _{X},i)
-$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $Y(f)=\mathrm{PVI}(\varphi
+_{X},i) $ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{for }}l$ such that $%
 (Y,d_{Y}[l])\notin B_{k}\text{ \textbf{do}}\wedge d_{X}[j]\notin marking(u)$
 \\ 
@@ -2047,7 +2047,8 @@ $\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\
 \end{equation*}%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ResetVariableLocal(}$Y(e)$, $i,$ $V_{1},\cdots ,V_{K}$\textsc{)} \\ 
+\textsc{ResetVariableLocal(}$Y(e)$, $i,$ $V_{1},\cdots ,V_{K},B_{1},\cdots
+,B_{K}$\textsc{)} \\ 
 $\varphi :=true$ \\ 
 $I:=\{j\mid \mathrm{dest}(X,i,j)=\bot \}$ \\ 
 \textbf{for all} $v^{\prime }$ \textbf{such that }$\{i_{1},\cdots
@@ -2064,6 +2065,7 @@ $\qquad \qquad \qquad \qquad v:=v\vartriangleleft v^{\prime }[k]$ \\
 $\qquad \qquad \qquad \qquad k:=k+1$ \\ 
 $\qquad \qquad \qquad $\textbf{else} \\ 
 $\qquad \qquad \qquad \qquad v:=v\vartriangleleft \mathrm{dest}(X,i,j)$ \\ 
+$\qquad k:=1$ \\ 
 $\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
 \\ 
 $\qquad \qquad r:=[]$ \\ 
@@ -2074,10 +2076,12 @@ $\qquad \qquad \qquad r:=r\vartriangleleft v[k]$ \\
 $\qquad \qquad \qquad k:=k+1$ \\ 
 $\qquad \qquad $\textbf{else} \\ 
 $\qquad \qquad \qquad relevant:=true$ \\ 
-$\qquad \qquad \qquad $\textbf{for} $d_{Y}[m]$ such that $d_{Y}[j]\in
-belongs(d_{Y}[m])$ \\ 
+$\qquad \qquad \qquad $\textbf{for} $k$ \textbf{such} \textbf{that} $%
+(Y,d_{Y}[j])\in B_{k}$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $m$ \textbf{be such that} $%
+d_{Y}[m]$ \textbf{corresponds to} $G_{k}$ \\ 
 $\qquad \qquad \qquad \qquad relevant:=relevant\wedge d_{Y}[j]\in
-marking(Y,m,v[m])$ \\ 
+marking(Y(v[m]))$ \\ 
 $\qquad \qquad \qquad $\textbf{if} $relevant$ \textbf{then} $%
 r:=r\vartriangleleft e[j]$ \textbf{else} $r:=r\vartriangleleft
 default\_value(e[j])$ \\ 
@@ -2169,7 +2173,7 @@ $\qquad \qquad \qquad \text{\textbf{for }}j\in belongs$ \textbf{do} \\
 $\qquad \qquad \qquad \qquad $\textbf{if }$(\mathrm{used}(X,i,j)\vee \mathrm{%
 changed}(X,i,j))\wedge (X,\_,\_)\overset{i}{\nrightarrow }_{k}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad belongs:=belongs\setminus \{j\}$ \\ 
-$\qquad B_{k}:=B_{k}\cup \{d_{X}[j]\mid j\in belongs\}$ \\ 
+$\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[j])\mid j\in belongs\}$ \\ 
 \textbf{return} $B_{k}$%
 \end{tabular}%
 \end{equation*}
