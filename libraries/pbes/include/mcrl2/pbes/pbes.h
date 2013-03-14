@@ -556,7 +556,7 @@ class pbes
       {
         if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
         {
-          mCRL2log(log::error) << "pbes::is_well_typed() failed: the occurring variable " << data::pp(*i) << " conflicts with its declaration!" << std::endl;
+          mCRL2log(log::error) << "pbes::is_well_typed() failed: the occurring variable " << pbes_system::pp(*i) << " conflicts with its declaration!" << std::endl;
           return false;
         }
       }

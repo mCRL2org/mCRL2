@@ -66,6 +66,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           result.push_back(u.X.parameters().front());
         }
       }
+      mCRL2log(log::debug, "stategraph") << "Possible values of " << X << "," << j << " are: " << data::pp(result) << std::endl;
       return result;
     }
 
@@ -80,7 +81,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.find(X);
         if (i == Bk.end())
         {
-std::cout << X << " " << d << " not found in graph " << k << std::endl;
+          mCRL2log(log::debug, "stategraph") << X << " " << d << " not found in graph " << k << std::endl;
           continue;
         }
         const std::set<data::variable>& V = i->second;
@@ -122,8 +123,9 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
       {
         if (is_control_flow_parameter(Y, j))
         {
-          if (std::find(I.begin(), I.end(), j) == I.end())
+          if (std::find(I.begin(), I.end(), j) != I.end())
           {
+            assert(k < v_prime.size());
             v.push_back(v_prime[k]);
             k++;
           }
@@ -146,6 +148,7 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
             c = data::lazy::and_(c, data::equal_to(d_Y[j], v[k]));
           }
           r.push_back(v[k]);
+          k++;
         }
         else
         {
@@ -160,22 +163,29 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
         }
       }
       propositional_variable_instantiation Yr(Y, atermpp::convert<data::data_expression_list>(r));
+      pbes_expression result = Yr;
       if (m_simplify)
       {
         c = m_datar(c);
-        if (c != data::sort_bool::false_())
+        if (c == data::sort_bool::true_())
         {
-          return imp(c, Yr);
+          result = Yr;
+        }
+        else if (c != data::sort_bool::false_())
+        {
+          result = imp(c, Yr);
         }
         else
         {
-          return data::sort_bool::true_();
+          result = data::sort_bool::true_();
         }
       }
       else
       {
-        return imp(c, Yr);
+        result = imp(c, Yr);
       }
+      mCRL2log(log::debug, "stategraph") << "Resetting " << pbes_system::pp(X_i.X) << " to " << pbes_system::pp(result) << std::endl;
+      return result;
     }
 
     // expands a propositional variable instantiation using the control flow graph
@@ -186,17 +196,17 @@ std::cout << X << " " << d << " not found in graph " << k << std::endl;
       const predicate_variable& X_i = eq_X.predicate_variables()[i];
       assert(X_i.X == x);
 
-      mCRL2log(log::debug, "stategraph") << "  resetting variable " << pbes_system::pp(x) << std::endl;
       std::vector<pbes_expression> phi;
       core::identifier_string Y = x.name();
       const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
       const std::vector<data::variable>& d_Y = eq_Y.parameters();
+      assert(d_Y.size() == X_i.X.parameters().size());
       std::vector<data::data_expression> e_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
       std::vector<std::size_t> I;
       for (std::size_t j = 0; j < eq_X.parameters().size(); j++)
       {
-        if (X_i.dest.find(j) == X_i.dest.end())
+        if (is_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
         {
           I.push_back(j);
         }
