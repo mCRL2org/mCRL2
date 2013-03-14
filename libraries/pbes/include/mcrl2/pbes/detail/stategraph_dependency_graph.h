@@ -463,12 +463,6 @@ bool remove_may_transitions(dependency_graph& must_graph, dependency_graph& may_
     std::sort(T[i].begin(), T[i].end(), comp);
   }
 
-  // initialize targets
-  for (std::vector<std::vector<dependency_vertex*> >::const_iterator i = T.begin(); i != T.end(); ++i)
-  {
-    targets.push_back(i->front());
-  }
-
   // for each possible sequence of targets, check if the must_graph fulfills all constraints
   try
   {
