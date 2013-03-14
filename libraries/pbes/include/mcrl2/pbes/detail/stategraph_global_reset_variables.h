@@ -142,7 +142,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           {
             data::data_expression f_k = *k++;
             const predicate_variable& X_i = eq_X.predicate_variables()[i];
-            if (X_i.dest.find(j) == X_i.dest.end())
+            if (X_i.dest.find(j) == X_i.dest.end() || !m_simplify)
             {
               condition = data::lazy::and_(condition, data::equal_to(e_X[j], f_k));
             }
