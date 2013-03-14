@@ -391,37 +391,68 @@ struct remove_may_transitions_helper
   }
 };
 
+// returns all unique targets of outgoing edges, i.e. with the property
+// (Y, p) and (Y, q) \in targets => p = q
+inline
+std::set<dependency_vertex*> single_target_edges(const dependency_vertex& u)
+{
+  const std::set<dependency_vertex*>& S = u.outgoing_edges;
+  std::map<core::identifier_string, std::vector<dependency_vertex*> > m;
+  for (std::set<dependency_vertex*>::const_iterator i = S.begin(); i != S.end(); ++i)
+  {
+    dependency_vertex& v = **i;
+    m[v.X].push_back(*i);
+  }
+  std::set<dependency_vertex*> result;
+  for (std::map<core::identifier_string, std::vector<dependency_vertex*> >::iterator j = m.begin(); j != m.end(); ++j)
+  {
+    if (j->second.size() == 1)
+    {
+      result.insert(j->second.front());
+    }
+  }
+  return result;
+}
+
 // Returns true if a control flow graph is found that satisfies the constraints.
 template <typename VertexCompare>
 bool remove_may_transitions(dependency_graph& must_graph, dependency_graph& may_graph, VertexCompare comp)
 {
-  // pass 1: handle all vertices for which the number of outgoing may transitions is equal to 1
+  // pass 1: handle all edges for which there is no choice
   std::vector<dependency_vertex>& V = may_graph.vertices();
   for (std::vector<dependency_vertex>::iterator i = V.begin(); i != V.end(); ++i)
   {
     dependency_vertex& u = *i;
-    if (u.outgoing_edges.size() == 1)
+    std::set<dependency_vertex*> E = single_target_edges(u);
+    for (std::set<dependency_vertex*>::const_iterator i = E.begin(); i != E.end(); ++i)
     {
-      dependency_vertex v = **(u.outgoing_edges.begin());
-      u.outgoing_edges.clear();
+      dependency_vertex& v = **i;
+      u.outgoing_edges.erase(*i);
       must_graph.insert_edge(u.X, u.p, v.X, v.p);
     }
   }
 
-  // pass 2: handle all vertices for which the number of outgoing may transitions is greater than 1
-  std::vector<dependency_vertex*> sources;         // the vertices for which the number of outgoing may transitions is greater than 1
-  std::vector<std::vector<dependency_vertex*> > T; // T[i] contains the targets of the outgoing edges of vertex sources
+  // pass 2: handle all edges for which there is a choice
+  std::vector<dependency_vertex*> sources;         // the sources of the edges for which there is a choice
+  std::vector<std::vector<dependency_vertex*> > T; // T[i] contains the possible targets for sources[i]
   std::vector<dependency_vertex*> targets;         // targets[i] will hold an element of T[i]
 
   // initialization of sources, T and targets
   for (std::vector<dependency_vertex>::iterator i = V.begin(); i != V.end(); ++i)
   {
     dependency_vertex& u = *i;
-    if (u.outgoing_edges.size() > 1)
+    const std::set<dependency_vertex*>& S = u.outgoing_edges;
+    std::map<core::identifier_string, std::vector<dependency_vertex*> > m;
+    for (std::set<dependency_vertex*>::const_iterator i = S.begin(); i != S.end(); ++i)
+    {
+      dependency_vertex& v = **i;
+      m[v.X].push_back(*i);
+    }
+    for (std::map<core::identifier_string, std::vector<dependency_vertex*> >::iterator j = m.begin(); j != m.end(); ++j)
     {
       sources.push_back(&u);
-      std::set<dependency_vertex*>& S = u.outgoing_edges;
-      T.push_back(std::vector<dependency_vertex*>(S.begin(), S.end()));
+      T.push_back(j->second);
+      targets.push_back(*(j->second.begin()));
     }
   }
 
