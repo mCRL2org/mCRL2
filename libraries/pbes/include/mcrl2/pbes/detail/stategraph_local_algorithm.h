@@ -460,6 +460,15 @@ class stategraph_local_algorithm: public stategraph_algorithm
       return false;
     }
 
+    std::string print_vertex(const stategraph_vertex& u) const
+    {
+      std::ostringstream out;
+      out << pbes_system::pp(u.X)
+          << " marking = " << data::detail::print_set(u.marking)
+          << " marking indices = " << print_set(u.marking_variable_indices(m_pbes));
+      return out.str();
+    }
+
     void compute_control_flow_marking()
     {
       mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
@@ -504,24 +513,28 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
             // v = X(e)
             stategraph_vertex& v = **ti;
+            std::set<std::size_t> v_index = v.marking_variable_indices(m_pbes);
             // const core::identifier_string& X = v.X.name();
-            std::set<std::size_t> J = v.marking_variable_indices(m_pbes);
-            mCRL2log(log::debug, "stategraph") << "selected todo element " << pbes_system::pp(v.X) << std::endl;
+            mCRL2log(log::debug, "stategraph") << "selected todo element v = " << print_vertex(v) << std::endl;
             for (std::set<stategraph_edge>::iterator ei = v.incoming_edges.begin(); ei != v.incoming_edges.end(); ++ei)
             {
               // u = Y(f)
+              // edge = (u, v) with label i
               stategraph_vertex& u = *(ei->source);
-              std::size_t label = ei->label;
-              // const stategraph_equation& eq_Y = *find_equation(m_pbes, u.X.name());
+              std::set<std::size_t> u_index = u.marking_variable_indices(m_pbes);
+              std::size_t i = ei->label;
+              const stategraph_equation& eq_Y = *find_equation(m_pbes, u.X.name());
+
+              // Y_i = X(g)
+              const predicate_variable& Y_i = eq_Y.predicate_variables()[i];
               const core::identifier_string& Y = u.X.name();
               const data::data_expression_list& f = u.X.parameters();
-              mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(v.X) << " label = " << label << " J = " << print_set(J) << " u.marking = " << data::detail::print_set(u.marking) << std::endl;
-
-              for (std::set<std::size_t>::const_iterator ji = J.begin(); ji != J.end(); ++ji)
+              mCRL2log(log::debug, "stategraph") << "  vertex u = " << print_vertex(u) << std::endl;
+              for (std::set<std::size_t>::const_iterator ji = v_index.begin(); ji != v_index.end(); ++ji)
               {
                 std::size_t j = *ji;
-                data::data_expression f_j = nth_element(f, j);
-                std::set<data::variable> M = set_intersection(set_difference(FV(f_j), u.marking), m_belongs[k][Y]);
+                data::data_expression g_j = nth_element(Y_i.X.parameters(), j);
+                std::set<data::variable> M = set_intersection(set_difference(FV(g_j), u.marking), m_belongs[k][Y]);
                 if (!M.empty())
                 {
                   mCRL2log(log::debug, "stategraph") << "update marking u with M = " << data::detail::print_set(M) << std::endl;

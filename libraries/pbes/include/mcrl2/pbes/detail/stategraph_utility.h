@@ -49,6 +49,7 @@ std::string print_set(const std::set<std::size_t>& v)
 inline
 const data::data_expression& nth_element(const data::data_expression_list& e, std::size_t n)
 {
+  assert(n < e.size());
   data::data_expression_list::const_iterator i = e.begin();
   for (std::size_t j = 0; j < n; ++j)
   {

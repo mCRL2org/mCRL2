@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Wednesday, March 13, 2013 12:29:19}
+%TCIDATA{LastRevised=Thursday, March 14, 2013 09:31:47}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -61,6 +61,7 @@
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 \input{include/tcilatex}
+\input{tcilatex}
 
 \begin{document}
 
@@ -1983,13 +1984,13 @@ $\qquad \qquad todo:=V_{k}$ \\
 $\qquad \qquad $\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
 $\qquad \qquad \qquad $\textbf{choose} $v=X(e)\in todo$ \\ 
 $\qquad \qquad \qquad todo:=todo\setminus \{v\}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{for }}(u,v)\in E_{k}\text{ \textbf{do}}$
-\\ 
+$\qquad \qquad \qquad \text{\textbf{for }}(u,v,i)\in E_{k}\text{ \textbf{do}}
+$ \\ 
 $\qquad \qquad \qquad \qquad $\textbf{let} $u=Y(f)$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{for }}d_{X}[j]\in marking(v)\text{
 \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad M:=(FV(f[j])\setminus marking(u))\cap
-\{d\mid (Y,d)\in B_{k}\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad M:=(FV(data(\varphi _{Y},i)[j]\setminus
+marking(u))\cap \{d\mid (Y,d)\in B_{k}\}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset $ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup M$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad todo:=todo\cup \{u\}$ \\ 
@@ -2007,7 +2008,7 @@ FV(f[l]))\setminus marking(u)$ \\
 $\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}M\neq \emptyset
 \wedge \exists k^{\prime }$ such that $(Y,d_{Y}[l])\in B_{k^{\prime }}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \wedge \exists w=Y(g)\in
-V_{k^{\prime }}$ \textbf{such that}  $d_{Y}[l]\in marking(w)$ \\ 
+V_{k^{\prime }}$ \textbf{such that} $d_{Y}[l]\in marking(w)$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad marking(u):=marking(u)\cup
 M$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad stable:=false$ \\ 
@@ -2021,7 +2022,7 @@ $\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{break}%
 
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ResetVariable(}$X(e)$, $V$\textsc{)} \\ 
+\textsc{ResetVariable(}$k$, $X(e)$, $V$\textsc{)} \\ 
 $\varphi :=true$ \\ 
 \textbf{for} $u=X(f)\in V$ \textbf{do} \\ 
 $\qquad c:=true$ \\ 
@@ -2030,7 +2031,8 @@ $\qquad $\textbf{for} $j=1\cdots \left\vert par(X)\right\vert $ \textbf{do}
 \\ 
 $\qquad \qquad r:=[]$ \\ 
 $\qquad \qquad $\textbf{if} $CFP(X,j)$ \textbf{then} \\ 
-$\qquad \qquad \qquad c:=c\wedge (e[j]=f[i])$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $dest(Y,k,j)=\bot $ \\ 
+$\qquad \qquad \qquad \qquad c:=c\wedge (e[j]=f[i])$ \\ 
 $\qquad \qquad \qquad r:=r\vartriangleleft f[i]$ \\ 
 $\qquad \qquad $\textbf{else if} $e[j]\in marking(u)$ \textbf{then} \\ 
 $\qquad \qquad \qquad r:=r\vartriangleleft e[j]$ \\ 
