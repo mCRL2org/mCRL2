@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Thursday, March 14, 2013 10:43:08}
+%TCIDATA{LastRevised=Thursday, March 14, 2013 14:20:15}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -61,7 +61,6 @@
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 \input{include/tcilatex}
-\input{tcilatex}
 
 \begin{document}
 
@@ -2048,7 +2047,42 @@ $\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\
 \end{equation*}%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ResetVariableLocal()}%
+\textsc{ResetVariableLocal(}$Y(e)$, $i,$ $V_{1},\cdots ,V_{K}$\textsc{)} \\ 
+$\varphi :=true$ \\ 
+$I:=\{j\mid \mathrm{dest}(X,i,j)=\bot \}$ \\ 
+\textbf{for all} $v^{\prime }$ \textbf{such that }$\{i_{1},\cdots
+,i_{\left\vert I\right\vert }\}=I\wedge v^{\prime }[m]\in \mathrm{values}%
+(d_{Y}[i_{m}])$ \textbf{do} \\ 
+$\qquad c:=true$ \\ 
+$\qquad k:=1$ \\ 
+$\qquad v:=[]$ \\ 
+$\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
+\\ 
+$\qquad \qquad $\textbf{if} $\mathrm{CFP}(Y,j)$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,j)=\bot $ \\ 
+$\qquad \qquad \qquad \qquad v:=v\vartriangleleft v^{\prime }[k]$ \\ 
+$\qquad \qquad \qquad \qquad k:=k+1$ \\ 
+$\qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad v:=v\vartriangleleft \mathrm{dest}(X,i,j)$ \\ 
+$\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
+\\ 
+$\qquad \qquad r:=[]$ \\ 
+$\qquad \qquad $\textbf{if} $\mathrm{CFP}(Y,j)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,j)=\bot $ \\ 
+$\qquad \qquad \qquad \qquad c:=c\wedge (d_{Y}[j]=v[k])$ \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft v[k]$ \\ 
+$\qquad \qquad \qquad k:=k+1$ \\ 
+$\qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad relevant:=true$ \\ 
+$\qquad \qquad \qquad $\textbf{for} $d_{Y}[m]$ such that $d_{Y}[j]\in
+belongs(d_{Y}[m])$ \\ 
+$\qquad \qquad \qquad \qquad relevant:=relevant\wedge d_{Y}[j]\in
+marking(Y,m,v[m])$ \\ 
+$\qquad \qquad \qquad $\textbf{if} $relevant$ \textbf{then} $%
+r:=r\vartriangleleft e[j]$ \textbf{else} $r:=r\vartriangleleft
+default\_value(e[j])$ \\ 
+$\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\ 
+\textbf{return} $\varphi $%
 \end{tabular}%
 \end{equation*}
 
