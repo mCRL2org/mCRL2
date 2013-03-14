@@ -31,6 +31,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // the control flow graph
     std::vector<control_flow_graph> m_control_flow_graphs;
 
+    // m_control_flow_index[X][j] = k => d_X[j] corresponds to m_control_flow_graphs[k]
+    std::map<core::identifier_string, std::map<std::size_t, std::size_t> > m_control_flow_index;
+
     // m_belongs[k] corresponds with m_control_flow_graphs[k]
     std::vector<std::map<core::identifier_string, std::set<data::variable> > > m_belongs;
 
@@ -323,6 +326,39 @@ class stategraph_local_algorithm: public stategraph_algorithm
       print_control_flow_graphs();
     }
 
+    // we use the must_graph to determine this
+    void compute_control_flow_index()
+    {
+      propositional_variable_instantiation X_init = m_pbes.initial_state();
+      const core::identifier_string& X = X_init.name();
+      std::vector<std::size_t> CFP = control_flow_parameter_indices(X_init.name());
+      std::size_t K = m_control_flow_graphs.size();
+      assert(K == CFP.size());
+      for (std::size_t k = 0; k < K; k++)
+      {
+        std::map<core::identifier_string, std::size_t> m = must_graph.dependency_map(X, CFP[k]);
+        for (std::map<core::identifier_string, std::size_t>::const_iterator i = m.begin(); i != m.end(); ++i)
+        {
+          m_control_flow_index[i->first][i->second] = k;
+        }
+      }
+    }
+
+    void print_control_flow_index() const
+    {
+      std::ostringstream out;
+      for (std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator i = m_control_flow_index.begin(); i != m_control_flow_index.end(); ++i)
+      {
+        const core::identifier_string& X = i->first;
+        const std::map<std::size_t, std::size_t>& m = i->second;
+        for (std::map<std::size_t, std::size_t>::const_iterator j = m.begin(); j != m.end(); ++j)
+        {
+          out << "(" << core::pp(X) << ", " << j->first << ") is part of graph " << j->second << std::endl;
+        }
+      }
+      mCRL2log(log::debug, "stategraph") << "=== control flow index ===\n" << out.str() << std::endl;
+    }
+
     // @pre: (X0, p0) is in must_graph
     std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const control_flow_graph& Vk)
     {
@@ -610,6 +646,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       remove_may_transitions(must_graph, may_graph, dependency_vertex_compare(m_pbes));
       mCRL2log(log::debug, "stategraph") << "=== must graph after removing may transitions ===\n" << must_graph.print() << std::endl;
       compute_control_flow_graphs();
+      compute_control_flow_index();
+      print_control_flow_index();
       compute_belongs();
       print_belongs();
       compute_control_flow_marking();
