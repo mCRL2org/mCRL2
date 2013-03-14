@@ -528,7 +528,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               // Y_i = X(g)
               const predicate_variable& Y_i = eq_Y.predicate_variables()[i];
               const core::identifier_string& Y = u.X.name();
-              const data::data_expression_list& f = u.X.parameters();
+              // const data::data_expression_list& f = u.X.parameters();
               mCRL2log(log::debug, "stategraph") << "  vertex u = " << print_vertex(u) << std::endl;
               for (std::set<std::size_t>::const_iterator ji = v_index.begin(); ji != v_index.end(); ++ji)
               {

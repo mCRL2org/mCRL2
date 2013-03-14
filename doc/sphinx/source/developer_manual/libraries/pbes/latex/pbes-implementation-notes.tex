@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Thursday, March 14, 2013 09:31:47}
+%TCIDATA{LastRevised=Thursday, March 14, 2013 10:43:08}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -2020,32 +2020,35 @@ $\qquad \qquad \qquad \qquad \qquad \qquad \qquad $\textbf{break}%
 
 \subsection{Reset variables}
 
+Let $\mathrm{PVI}(\varphi _{X},i)=Y(e)$ and let $V$ be the global control
+flow graph. Then we define
+
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ResetVariable(}$k$, $X(e)$, $V$\textsc{)} \\ 
+\textsc{ResetVariableGlobal(}$Y(e)$, $i,$ $V$\textsc{)} \\ 
 $\varphi :=true$ \\ 
-\textbf{for} $u=X(f)\in V$ \textbf{do} \\ 
+\textbf{for} $u=Y(f)\in V$ \textbf{do} \\ 
 $\qquad c:=true$ \\ 
-$\qquad i:=1$ \\ 
-$\qquad $\textbf{for} $j=1\cdots \left\vert par(X)\right\vert $ \textbf{do}
+$\qquad k:=1$ \\ 
+$\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
 \\ 
 $\qquad \qquad r:=[]$ \\ 
-$\qquad \qquad $\textbf{if} $CFP(X,j)$ \textbf{then} \\ 
-$\qquad \qquad \qquad $\textbf{if} $dest(Y,k,j)=\bot $ \\ 
-$\qquad \qquad \qquad \qquad c:=c\wedge (e[j]=f[i])$ \\ 
+$\qquad \qquad $\textbf{if} $CFP(Y,j)$ \textbf{then} \\ 
+$\qquad \qquad \qquad $\textbf{if} $dest(X,i,j)=\bot $ \\ 
+$\qquad \qquad \qquad \qquad c:=c\wedge (e[j]=f[k])$ \\ 
 $\qquad \qquad \qquad r:=r\vartriangleleft f[i]$ \\ 
 $\qquad \qquad $\textbf{else if} $e[j]\in marking(u)$ \textbf{then} \\ 
 $\qquad \qquad \qquad r:=r\vartriangleleft e[j]$ \\ 
 $\qquad \qquad $\textbf{else} \\ 
 $\qquad \qquad \qquad r:=r\vartriangleleft default\_value(e[j])$ \\ 
-$\qquad \qquad i:=i+1$ \\ 
-$\qquad \varphi :=\varphi \wedge (c\Rightarrow X(r))$ \\ 
+$\qquad \qquad k:=k+1$ \\ 
+$\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\ 
 \textbf{return} $\varphi $%
 \end{tabular}%
 \end{equation*}%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ResetVariables(}$\mathcal{E}$, $X_{init}(e_{init})$\textsc{)}%
+\textsc{ResetVariableLocal()}%
 \end{tabular}%
 \end{equation*}
 
