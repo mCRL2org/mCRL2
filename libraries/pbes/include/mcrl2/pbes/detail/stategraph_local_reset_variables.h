@@ -66,12 +66,41 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           result.push_back(u.X.parameters().front());
         }
       }
-      mCRL2log(log::debug, "stategraph") << "Possible values of " << X << "," << j << " are: " << data::pp(result) << std::endl;
+
+      if(mCRL2logEnabled(log::debug, "stategraph"))
+      {
+        mCRL2log(log::debug, "stategraph") << "Possible values of " << X << "," << j << " are: ";
+        for(std::vector<data::data_expression>::const_iterator it = result.begin() ; it != result.end(); ++it)
+        {
+          if(it != result.begin())
+          {
+            mCRL2log(log::debug, "stategraph") << ", ";
+          }
+          mCRL2log(log::debug, "stategraph") << data::pp(*it);
+        }
+        mCRL2log(log::debug, "stategraph") << std::endl;
+      }
       return result;
     }
 
-    bool is_relevant(const core::identifier_string& X, const data::variable& d, const std::vector<data::data_expression>& v) const
+    bool is_relevant(const core::identifier_string& X, const predicate_variable& X_i, const data::variable& d, const std::vector<data::data_expression>& v) const
     {
+      // TODO: Ugly, v only contains control flow parameters, but the analysis
+      // below gives indices into the list of parameters, so we need to map this
+      std::vector<size_t> index_to_cfp_index;
+      std::size_t idx = 0;
+      for (std::size_t j = 0; j < X_i.X.parameters().size(); ++j)
+      {
+        if(is_control_flow_parameter(X, j))
+        {
+          index_to_cfp_index.push_back(idx++);
+        }
+        else
+        {
+          index_to_cfp_index.push_back(std::numeric_limits<std::size_t>::max());
+        }
+      }
+      
       bool result = true;
       std::size_t K = m_control_flow_graphs.size();
       for (std::size_t k = 0; k < K; k++)
@@ -92,7 +121,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator ci = m_control_flow_index.find(X);
           assert(ci != m_control_flow_index.end());
           bool found = false;
-          std::size_t m;
+          std::size_t m = std::numeric_limits<std::size_t>::max();
           const std::map<std::size_t, std::size_t>& M = ci->second;
           for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
           {
@@ -102,8 +131,10 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
               m = mi->first;
             }
           }
+          assert(m != std::numeric_limits<std::size_t>::max());
+          assert(index_to_cfp_index[m] < v.size());
           assert(found);
-          control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[m])));
+          control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
           assert(vi != Gk.end());
           const stategraph_vertex& u = vi->second;
           result = result && contains(u.marking, d);
@@ -152,7 +183,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         }
         else
         {
-          if (is_relevant(Y, d_Y[j], v))
+          if (is_relevant(Y, X_i, d_Y[j], v))
           {
             r.push_back(e_X[j]);
           }
