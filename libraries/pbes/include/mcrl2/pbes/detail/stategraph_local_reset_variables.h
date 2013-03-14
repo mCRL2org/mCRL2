@@ -61,6 +61,22 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     std::vector<data::data_expression> compute_values(const core::identifier_string& X, std::size_t j)
     {
       std::vector<data::data_expression> result;
+
+      // compute control flow index
+      std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator k = m_control_flow_index.find(X);
+      assert(k != m_control_flow_index.end());
+      const std::map<std::size_t, std::size_t>& m = k->second;
+      std::map<std::size_t, std::size_t>::const_iterator i = m.find(j);
+      assert(i != m.end());
+
+      // find vertices X(e) in Gk
+      control_flow_graph& Gk = m_control_flow_graphs[i->second];
+      const std::set<stategraph_vertex*>& inst = Gk.index(X);
+      for (std::set<stategraph_vertex*>::const_iterator vi = inst.begin(); vi != inst.end(); ++vi)
+      {
+        const stategraph_vertex& u = **vi;
+        result.push_back(u.X.parameters().front());
+      }
       return result;
     }
 
