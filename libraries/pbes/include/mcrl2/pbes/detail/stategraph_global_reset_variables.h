@@ -166,7 +166,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         // Now build the actual formula
         std::vector<data::data_expression> r;
         std::size_t N = u.marked_parameters.size();
-        assert(e_X.size() == u.marked_parameters.size());
+        assert(e.size() == u.marked_parameters.size());
         data::data_expression_list::const_iterator k = u.X.parameters().begin();
         data::data_expression condition = data::sort_bool::true_();
         for (std::size_t j = 0; j < N; ++j)

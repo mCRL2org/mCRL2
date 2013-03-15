@@ -190,6 +190,7 @@ struct guard_expression
   template <typename PbesRewriter>
   bool check_guards(const pbes_expression& x, PbesRewriter R) const
   {
+#ifdef MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
     mCRL2log(log::debug, "stategraph") << "check_guards: x = " << pbes_system::pp(x) << std::endl;
     bool result = true;
     for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = guards.begin(); i != guards.end(); ++i)
@@ -211,6 +212,9 @@ struct guard_expression
       }
     }
     return result;
+#else
+    return true;
+#endif
   }
 };
 
