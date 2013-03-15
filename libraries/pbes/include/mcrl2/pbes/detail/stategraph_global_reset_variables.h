@@ -113,6 +113,31 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       }
     }
 
+    // First determine whether this location should be considered
+    bool location_possibly_reachable(const core::identifier_string& Y, const stategraph_vertex& u, const std::vector<data::data_expression>& e_X, const stategraph_equation& eq_X,std::size_t i)
+    {
+      std::size_t N = e_X.size();
+      data::data_expression_list::const_iterator k = u.X.parameters().begin();
+      for (std::size_t j = 0; j < N; ++j)
+      {
+        if (is_control_flow_parameter(Y, j))
+        {
+          const predicate_variable& X_i = eq_X.predicate_variables()[i];
+          std::map<std::size_t, data::data_expression>::const_iterator dest_j = X_i.dest.find(j);
+          if (dest_j != X_i.dest.end())
+          {
+            data::data_expression f_k = *k;
+            if(f_k != dest_j->second)
+            {
+              return false;
+            }
+          }
+          ++k;
+        }
+      }
+      return true;
+    }
+
   public:
     // expands a propositional variable instantiation using the control flow graph
     // x = Y(e)
@@ -132,8 +157,16 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       {
         stategraph_vertex& u = **q;
         mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(u.X) << std::endl;
+
+        if(!location_possibly_reachable(Y, u, e_X, eq_X, i))
+        {
+          continue;
+        }
+
+        // Now build the actual formula
         std::vector<data::data_expression> r;
         std::size_t N = u.marked_parameters.size();
+        assert(e_X.size() == u.marked_parameters.size());
         data::data_expression_list::const_iterator k = u.X.parameters().begin();
         data::data_expression condition = data::sort_bool::true_();
         for (std::size_t j = 0; j < N; ++j)
@@ -147,11 +180,16 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             if (X_i.dest.find(j) == X_i.dest.end() || !m_simplify)
             {
               condition = data::lazy::and_(condition, data::equal_to(e[j], f_k));
+              r.push_back(e_X[j]);
               mCRL2log(log::debug, "stategraph") << " dest(X, i, j) = false";
-              mCRL2log(log::debug, "stategraph") << " c := c && " << data::pp(data::lazy::and_(condition, data::equal_to(e[j], f_k)));
+              mCRL2log(log::debug, "stategraph") << " c := c && " << data::pp(data::equal_to(e[j], f_k));
             }
-            r.push_back(f_k);
-            mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(f_k);
+            else
+            {
+              r.push_back(X_i.dest.find(j)->second);
+            }
+            mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(r.back());
+
           }
           else if (u.is_marked_parameter(j))
           {
