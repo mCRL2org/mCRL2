@@ -158,7 +158,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         stategraph_vertex& u = **q;
         mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(u.X) << std::endl;
 
-        if(!location_possibly_reachable(Y, u, e_X, eq_X, i))
+        if(!location_possibly_reachable(Y, u, e, eq_X, i))
         {
           continue;
         }
@@ -180,7 +180,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             if (X_i.dest.find(j) == X_i.dest.end() || !m_simplify)
             {
               condition = data::lazy::and_(condition, data::equal_to(e[j], f_k));
-              r.push_back(e_X[j]);
+              r.push_back(e[j]);
               mCRL2log(log::debug, "stategraph") << " dest(X, i, j) = false";
               mCRL2log(log::debug, "stategraph") << " c := c && " << data::pp(data::equal_to(e[j], f_k));
             }

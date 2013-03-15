@@ -598,7 +598,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               for (std::size_t l = 0; l < d_Y.size(); ++l)
               {
                 std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
-                if (contains(Bk[Y], d_Y[l]))
+                if (!contains(Bk[Y], d_Y[l]))
                 {
                   std::set<data::variable> M = set_difference(set_intersection(m_belongs[k][X], FV(nth_element(f, l))), u.marking);
                   if (M.empty())

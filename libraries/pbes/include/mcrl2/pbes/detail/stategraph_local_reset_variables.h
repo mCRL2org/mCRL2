@@ -22,6 +22,21 @@ namespace pbes_system {
 
 namespace detail {
 
+template <typename Container>
+std::string print_vector(const Container& v, const std::string& delim)
+{
+  std::ostringstream os;
+  for(typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    if(i != v.begin())
+    {
+      os << delim;
+    }
+    os << data::pp(*i);
+  }
+  return os.str();
+}
+
 class local_reset_variables_algorithm;
 pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm, const pbes_expression& x, const stategraph_equation& eq_X);
 
@@ -67,24 +82,25 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         }
       }
 
-      if(mCRL2logEnabled(log::debug, "stategraph"))
+      if(mCRL2logEnabled(log::debug1, "stategraph"))
       {
-        mCRL2log(log::debug, "stategraph") << "Possible values of " << X << "," << j << " are: ";
+        mCRL2log(log::debug1, "stategraph") << "Possible values of " << X << "," << j << " are: ";
         for(std::vector<data::data_expression>::const_iterator it = result.begin() ; it != result.end(); ++it)
         {
           if(it != result.begin())
           {
-            mCRL2log(log::debug, "stategraph") << ", ";
+            mCRL2log(log::debug1, "stategraph") << ", ";
           }
-          mCRL2log(log::debug, "stategraph") << data::pp(*it);
+          mCRL2log(log::debug1, "stategraph") << data::pp(*it);
         }
-        mCRL2log(log::debug, "stategraph") << std::endl;
+        mCRL2log(log::debug1, "stategraph") << std::endl;
       }
       return result;
     }
 
     bool is_relevant(const core::identifier_string& X, const predicate_variable& X_i, const data::variable& d, const std::vector<data::data_expression>& v) const
     {
+      mCRL2log(log::debug1) << "  checking whether " << data::pp(d) << " is relevant for location " << X << "(" << print_vector(v, ", ") << ")" << std::endl;
       // TODO: Ugly, v only contains control flow parameters, but the analysis
       // below gives indices into the list of parameters, so we need to map this
       std::vector<size_t> index_to_cfp_index;
@@ -100,22 +116,23 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           index_to_cfp_index.push_back(std::numeric_limits<std::size_t>::max());
         }
       }
-      
+
       bool result = true;
       std::size_t K = m_control_flow_graphs.size();
-      for (std::size_t k = 0; k < K; k++)
+      for (std::size_t k = 0; k < K && result; k++)
       {
         const control_flow_graph& Gk = m_control_flow_graphs[k];
         const std::map<core::identifier_string, std::set<data::variable> >& Bk = m_belongs[k];
         std::map<core::identifier_string, std::set<data::variable> >::const_iterator i = Bk.find(X);
         if (i == Bk.end())
         {
-          mCRL2log(log::debug, "stategraph") << X << " " << d << " not found in graph " << k << std::endl;
+          mCRL2log(log::debug1, "stategraph") << X << " " << d << " not found in graph " << k << std::endl;
           continue;
         }
         const std::set<data::variable>& V = i->second;
         if (contains(V, d))
         {
+          mCRL2log(log::debug1) << "    " << data::pp(d) << " belongs to graph " << k << std::endl;
           // determine m such that m_control_flow_index[X][m] == k
           // TODO: this information is not readily available, resulting in very ugly code...
           std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator ci = m_control_flow_index.find(X);
@@ -127,18 +144,30 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           {
             if (mi->second == k)
             {
+              assert(!found);
               found = true;
               m = mi->first;
             }
           }
+          mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
           assert(m != std::numeric_limits<std::size_t>::max());
           assert(index_to_cfp_index[m] < v.size());
           assert(found);
           control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
           assert(vi != Gk.end());
           const stategraph_vertex& u = vi->second;
+          mCRL2log(log::debug1) << "      found vertex " << pp(u.X) << " with marking " << print_vector(u.marking, ", ") << std::endl;
+
           result = result && contains(u.marking, d);
+          if(!result)
+          {
+            mCRL2log(log::debug1) << "    " << data::pp(d) << " is not contained in the marking for " << pp(u.X) << " so it is not relevant" << std::endl;
+          }
         }
+      }
+      if(result)
+      {
+        mCRL2log(log::debug1) << "  " << data::pp(d) << " is relevant for location " << X << "(" << print_vector(v, ", ") << ")" << std::endl;
       }
       return result;
     }
@@ -215,7 +244,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       {
         result = imp(c, Yr);
       }
-      mCRL2log(log::debug, "stategraph") << "Resetting " << pbes_system::pp(X_i.X) << " to " << pbes_system::pp(result) << std::endl;
+      mCRL2log(log::debug1, "stategraph") << "Resetting " << pbes_system::pp(X_i.X) << " to " << pbes_system::pp(result) << std::endl;
       return result;
     }
 
@@ -224,6 +253,8 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // Y(e) = PVI(phi_X, i)
     pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
     {
+      mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
+      assert(i < eq_X.predicate_variables().size());
       const predicate_variable& X_i = eq_X.predicate_variables()[i];
       assert(X_i.X == x);
 
@@ -353,6 +384,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
     pbes_expression result = algorithm.reset_variable(x, eq_X, i);
+    mCRL2log(log::debug1, "stategraph") << "reset variable " << pbes_system::pp(x) << " with index " << i << " to " << pbes_system::pp(result) << std::endl;
     i++;
     push(result);
   }
