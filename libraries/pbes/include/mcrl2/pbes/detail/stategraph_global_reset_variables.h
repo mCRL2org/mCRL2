@@ -148,10 +148,10 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             {
               condition = data::lazy::and_(condition, data::equal_to(e[j], f_k));
               mCRL2log(log::debug, "stategraph") << " dest(X, i, j) = false";
+              mCRL2log(log::debug, "stategraph") << " c := c && " << data::pp(data::lazy::and_(condition, data::equal_to(e[j], f_k)));
             }
-            mCRL2log(log::debug, "stategraph") << " c := c && " << data::pp(data::lazy::and_(condition, data::equal_to(e[j], f_k)));
-            mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(f_k);
             r.push_back(f_k);
+            mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(f_k);
           }
           else if (u.is_marked_parameter(j))
           {
