@@ -14,7 +14,6 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -59,14 +58,8 @@ static bool IsNumericType(const sort_expression &Type);
 static sort_expression MinType(const sort_expression_list &TypeList);
 static sort_expression replace_possible_sorts(const sort_expression &Type);
 
-/* aterm extensions */
-/**
- * \brief Conditional prepend operation on aterm_list
- * \param[in] list an aterm list
- * \param[in] el the aterm to prepend
- * \return el ++ list if not el in list, list if el in list
-**/
-inline sort_expression_list ATinsertUnique(const sort_expression_list &list, const sort_expression &el)
+// Insert an element in the list provided, it did not already occur in the list.
+inline sort_expression_list insert_unique(const sort_expression_list &list, const sort_expression &el)
 {
   if (std::find(list.begin(),list.end(), el) == list.end())
   {
@@ -391,7 +384,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     for(sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
     {
       bool found_solution=true;
-      aterm_appl r;
+      sort_expression r;
       try 
       {
         r=UpCastNumericType(*i,Type,Par,warn_upcasting);
@@ -448,7 +441,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
   {
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
-      aterm_appl OldPar=Par;
+      data_expression OldPar=Par;
       Par=make_application(sort_int::cint(),make_application(sort_nat::cnat(),Par));
       if (warn_upcasting)
       {
@@ -459,7 +452,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     }
     if (TypeMatchA(Type,sort_nat::nat(),temp))
     {
-      aterm_appl OldPar=Par;
+      data_expression OldPar=Par;
       Par=make_application(sort_int::cint(),Par);
       if (warn_upcasting)
       {
@@ -479,7 +472,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
   {
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
-      aterm_appl OldPar=Par;
+      data_expression OldPar=Par;
       Par=make_application(sort_real::creal(),
                               make_application(sort_int::cint(), make_application(sort_nat::cnat(),Par)),
                               sort_pos::c1());
@@ -492,7 +485,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     }
     if (TypeMatchA(Type,sort_nat::nat(),temp))
     {
-      aterm_appl OldPar=Par;
+      data_expression OldPar=Par;
       Par=make_application(sort_real::creal(),
                              make_application(sort_int::cint(),Par),
                              sort_pos::c1());
@@ -505,7 +498,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     }
     if (TypeMatchA(Type,sort_int::int_(),temp))
     {
-      aterm_appl OldPar=Par;
+      data_expression OldPar=Par;
       Par=make_application(sort_real::creal(),Par, sort_pos::c1());
       if (warn_upcasting)
       {
@@ -569,7 +562,7 @@ void mcrl2::data::data_type_checker::ErrorMsgCannotCast(
       if (!List.empty())
       {
         NewList.push_front(List);
-        NewCurrentCandidateList=core::ATinsertUnique(NewCurrentCandidateList,List);
+        NewCurrentCandidateList=core::insert_unique(NewCurrentCandidateList,List);
       }
       else
       {
@@ -818,7 +811,7 @@ bool mcrl2::data::data_type_checker::UnArrowProd(sort_expression_list ArgTypes, 
       {
         continue;
       }
-      NewPosTypes=core::ATinsertUnique(NewPosTypes,NewPosType);
+      NewPosTypes=core::insert_unique(NewPosTypes,NewPosType);
     }
     NewPosTypes=reverse(NewPosTypes);
     result=multiple_possible_sorts(sort_expression_list(NewPosTypes));
@@ -871,7 +864,7 @@ bool mcrl2::data::data_type_checker::MatchIf(const sort_expression &type, sort_e
     return false;
   }
 
-  result=function_sort(make_list<aterm>(sort_bool::bool_(),Res,Res),Res);
+  result=function_sort(make_list<sort_expression>(sort_bool::bool_(),Res,Res),Res);
   return true;
 }
 
@@ -893,7 +886,7 @@ bool mcrl2::data::data_type_checker::MatchEqNeqComparison(const sort_expression 
     return false;
   }
 
-  result=function_sort(make_list<aterm>(Arg,Arg),sort_bool::bool_());
+  result=function_sort(make_list<sort_expression>(Arg,Arg),sort_bool::bool_());
   return true;
 }
 
@@ -933,7 +926,7 @@ bool mcrl2::data::data_type_checker::MatchListOpCons(const sort_expression &type
     return false;
   }
 
-  result=function_sort(make_list<aterm>(Res,static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
+  result=function_sort(make_list<sort_expression>(Res,sort_list::list(sort_expression(Res))),sort_list::list(sort_expression(Res)));
   return true;
 }
 
@@ -974,7 +967,7 @@ bool mcrl2::data::data_type_checker::MatchListOpSnoc(const sort_expression &type
     return false;
   }
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res))),Res),sort_list::list(sort_expression(Res)));
+  result=function_sort(make_list<sort_expression>(sort_list::list(sort_expression(Res)),Res),sort_list::list(sort_expression(Res)));
   return true;
 }
 
@@ -1023,8 +1016,8 @@ bool mcrl2::data::data_type_checker::MatchListOpConcat(const sort_expression &ty
     return false;
   }
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res))),
-       static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
+  result=function_sort(make_list<sort_expression>(sort_list::list(sort_expression(Res)),
+       sort_list::list(sort_expression(Res))),sort_list::list(sort_expression(Res)));
   return true;
 }
 
@@ -1053,8 +1046,7 @@ bool mcrl2::data::data_type_checker::MatchListOpEltAt(const sort_expression &typ
   }
   Res=new_result;
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res))),
-               static_cast<sort_expression>(sort_nat::nat())),Res);
+  result=function_sort(make_list<sort_expression>(sort_list::list(sort_expression(Res)), sort_nat::nat()),Res);
   return true;
 }
 
@@ -1082,7 +1074,7 @@ bool mcrl2::data::data_type_checker::MatchListOpHead(const sort_expression &type
   }
   Res=new_result;
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),Res);
+  result=function_sort(make_list<sort_expression>(sort_list::list(sort_expression(Res))),Res);
   return true;
 }
 
@@ -1116,7 +1108,7 @@ bool mcrl2::data::data_type_checker::MatchListOpTail(const sort_expression &type
   }
   Res=new_result;
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_list::list(sort_expression(Res)))),
+  result=function_sort(make_list<sort_expression>(sort_list::list(sort_expression(Res))),
                    sort_list::list(sort_expression(Res)));
   return true;
 }
@@ -1155,7 +1147,7 @@ bool mcrl2::data::data_type_checker::MatchSetOpSet2Bag(const sort_expression &ty
   }
   Arg=new_result;
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_set::set_(sort_expression(Arg)))),
+  result=function_sort(make_list<sort_expression>(sort_set::set_(sort_expression(Arg))),
                   sort_bag::bag(sort_expression(Arg)));
   return true;
 }
@@ -1186,7 +1178,7 @@ bool mcrl2::data::data_type_checker::MatchListSetBagOpIn(const sort_expression &
     return false;
   }
 
-  result=function_sort(make_list<aterm>(Arg,Arg2.set_argument(Arg,1)),sort_bool::bool_());
+  result=function_sort(make_list<sort_expression>(Arg,Arg2.set_argument(Arg,1)),sort_bool::bool_());
   return true;
 }
 
@@ -1249,7 +1241,7 @@ bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const sort_
     return false;
   }
 
-  result=function_sort(make_list<aterm>(Res,Res),Res);
+  result=function_sort(make_list<sort_expression>(Res,Res),Res);
   return true;
 }
 
@@ -1294,7 +1286,7 @@ bool mcrl2::data::data_type_checker::MatchSetOpSetCompl(const sort_expression &t
   }
   Res=temp_result;
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_set::set_(sort_expression(Res)))),sort_set::set_(sort_expression(Res)));
+  result=function_sort(make_list<sort_expression>(sort_set::set_(sort_expression(Res))),sort_set::set_(sort_expression(Res)));
   return true;
 }
 
@@ -1332,7 +1324,7 @@ bool mcrl2::data::data_type_checker::MatchBagOpBag2Set(const sort_expression &ty
   }
   Arg=temp_result;
 
-  result=function_sort(make_list<aterm>(static_cast<sort_expression>(sort_bag::bag(sort_expression(Arg)))),sort_set::set_(sort_expression(Arg)));
+  result=function_sort(make_list<sort_expression>(sort_bag::bag(sort_expression(Arg))),sort_set::set_(sort_expression(Arg)));
   return true;
 }
 
@@ -1376,7 +1368,7 @@ bool mcrl2::data::data_type_checker::MatchBagOpBagCount(const sort_expression &t
     return false;
   }
 
-  result=function_sort(make_list<aterm>(Arg,static_cast<sort_expression>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
+  result=function_sort(make_list<sort_expression>(Arg,sort_bag::bag(sort_expression(Arg))),sort_nat::nat());
   return true;
 }
 
@@ -1420,7 +1412,7 @@ bool mcrl2::data::data_type_checker::MatchFuncUpdate(const sort_expression &type
     return false;
   }
 
-  result=function_sort(make_list<aterm>(Arg1,A,B),Arg1);
+  result=function_sort(make_list<sort_expression>(Arg1,A,B),Arg1);
   return true;
 }
 
@@ -1564,7 +1556,7 @@ sort_expression mcrl2::data::data_type_checker::ExpandNumTypesUp(sort_expression
     {
       NewTypeList.push_front(ExpandNumTypesUp(UnwindType(TypeList.front())));
     }
-    aterm_appl ResultType=aterm_cast<aterm_appl>(Type[1]);
+    sort_expression ResultType=aterm_cast<sort_expression>(Type[1]);
     if (!is_function_sort(ResultType))
     {
       return Type.set_argument(reverse(NewTypeList),0);
@@ -1846,7 +1838,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         sort_expression result;
         if (TypeMatchA(Par,PosType,result))
         {
-          NewParList=aterm_cast<sort_expression_list>(core::ATinsertUnique(NewParList,result));
+          NewParList=aterm_cast<sort_expression_list>(core::insert_unique(NewParList,result));
         }
       }
       NewParList=reverse(NewParList);
@@ -1872,7 +1864,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
           sort_expression result;
           if (TypeMatchA(Par,PosType,result))
           {
-            NewParList=aterm_cast<sort_expression_list>(core::ATinsertUnique(NewParList,result));
+            NewParList=aterm_cast<sort_expression_list>(core::insert_unique(NewParList,result));
           }
         }
         NewParList=reverse(NewParList);
@@ -1898,7 +1890,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
           sort_expression result;
           if (TypeMatchA(Par,PosType,result))
           {
-            NewParList=aterm_cast<sort_expression_list>(core::ATinsertUnique(NewParList,result));
+            NewParList=aterm_cast<sort_expression_list>(core::insert_unique(NewParList,result));
           }
         }
         NewParList=reverse(NewParList);
@@ -1955,7 +1947,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       if (core::HasUnknown(Type) && data::is_function_symbol(DataTerm))
       {
         sort_expression new_type;
-        result=TypeMatchA(Type,aterm_cast<aterm_appl>((DataTerm)[1]),new_type);
+        result=TypeMatchA(Type,DataTerm.sort(),new_type);
         Type=new_type;
       }
 
@@ -1964,7 +1956,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         throw mcrl2::runtime_error("fail to match sort " + pp(OldType) + " with " + pp(PosType));
       }
 
-      if (static_cast<aterm_appl>(data::detail::if_symbol())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (data::detail::if_symbol()==(DataTerm)[0])
       {
         mCRL2log(debug) << "Doing if matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -1975,12 +1967,12 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(data::detail::equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::not_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::less_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::less_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::greater_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
-          || static_cast<aterm_appl>(data::detail::greater_equal_symbol())==aterm_cast<aterm_appl>((DataTerm)[0])
+      if (data::detail::equal_symbol()==DataTerm[0]
+          || data::detail::not_equal_symbol()==DataTerm[0]
+          || data::detail::less_symbol()==DataTerm[0]
+          || data::detail::less_equal_symbol()==DataTerm[0]
+          || data::detail::greater_symbol()==DataTerm[0]
+          || data::detail::greater_equal_symbol()==DataTerm[0]
          )
       {
         mCRL2log(debug) << "Doing ==, !=, <, <=, >= or > matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
@@ -1992,7 +1984,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::cons_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_list::cons_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing |> matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2003,7 +1995,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::snoc_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_list::snoc_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing <| matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2014,7 +2006,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::concat_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_list::concat_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing ++ matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2025,7 +2017,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::element_at_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_list::element_at_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing @ matching Type " << pp(Type) << ", PosType " << pp(PosType) << ", DataTerm: " << pp(DataTerm) << "" << std::endl;
         sort_expression NewType;
@@ -2036,8 +2028,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::head_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
-          static_cast<aterm_appl>(sort_list::rhead_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_list::head_name()==DataTerm[0]||
+          sort_list::rhead_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing {R,L}head matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
 
@@ -2049,8 +2041,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::tail_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
-          static_cast<aterm_appl>(sort_list::rtail_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_list::tail_name()==DataTerm[0]||
+          sort_list::rtail_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing {R,L}tail matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2061,7 +2053,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_bag::set2bag_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_bag::set2bag_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing Set2Bag matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2072,7 +2064,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_list::in_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_list::in_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing {List,Set,Bag} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2083,9 +2075,9 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_set::union_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
-          static_cast<aterm_appl>(sort_set::difference_name())==aterm_cast<aterm_appl>((DataTerm)[0])||
-          static_cast<aterm_appl>(sort_set::intersection_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_set::union_name()==DataTerm[0]||
+          sort_set::difference_name()==DataTerm[0]||
+          sort_set::intersection_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2096,7 +2088,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_set::complement_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_set::complement_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing SetCompl matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2107,7 +2099,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_bag::bag2set_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_bag::bag2set_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing Bag2Set matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2118,7 +2110,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         Type=NewType;
       }
 
-      if (static_cast<aterm_appl>(sort_bag::count_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (sort_bag::count_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing BagCount matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2130,7 +2122,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       }
 
 
-      if (static_cast<aterm_appl>(data::function_update_name())==aterm_cast<aterm_appl>((DataTerm)[0]))
+      if (data::function_update_name()==DataTerm[0])
       {
         mCRL2log(debug) << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
@@ -2490,7 +2482,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
         //First time to determine the common type only (which will be NewType)!
         bool NewTypeDefined=false;
-        aterm_appl NewType;
+        sort_expression NewType;
         for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           data_expression Argument= *i;
@@ -2504,7 +2496,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
             throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + pp(Type) + " (while typechecking " + pp(Argument) + ")");
           }
 
-          aterm_appl OldNewType=NewType;
+          sort_expression OldNewType=NewType;
           if (!NewTypeDefined)
           {
             NewType=Type0;
@@ -2561,7 +2553,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         // aterm_list OldArguments=Arguments;
 
         //First time to determine the common type only!
-        aterm_appl NewType;
+        sort_expression NewType;
         bool NewTypeDefined=false;
         for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
@@ -2593,7 +2585,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
               throw e;
             }
           }
-          aterm_appl OldNewType=NewType;
+          sort_expression OldNewType=NewType;
           if (!NewTypeDefined)
           {
             NewType=Type0;
@@ -2696,7 +2688,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
       else if (data::is_function_symbol(Data)||is_variable(Data))
       {
-        ErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes,e.what());
+        ErrorMsgCannotCast(Data.sort(),Arguments,ArgumentTypes,e.what());
       }
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " + 
                             pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
@@ -2788,7 +2780,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
       else
       {
-        ErrorMsgCannotCast(aterm_cast<aterm_appl>(Data[1]),Arguments,ArgumentTypes,e.what());
+        ErrorMsgCannotCast(Data.sort(),Arguments,ArgumentTypes,e.what());
       }
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " + 
                    pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
@@ -2877,7 +2869,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     core::identifier_string Name=aterm_cast<core::identifier_string>((DataTerm)[0]);
     if (gsIsNumericString(Name.function().name()))
     {
-      aterm_appl Sort=sort_int::int_();
+      sort_expression Sort=sort_int::int_();
       if (core::IsPos(Name))
       {
         Sort=sort_pos::pos();
@@ -2895,7 +2887,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
 
       //upcasting
-      aterm_appl CastedNewType;
+      sort_expression CastedNewType;
       try
       {
         CastedNewType=UpCastNumericType(PosType,Sort,DataTerm,warn_upcasting);
@@ -2927,7 +2919,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       else
       {
         //upcasting
-        aterm_appl CastedNewType;
+        sort_expression CastedNewType;
         try 
         {
           CastedNewType=UpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
@@ -3184,7 +3176,7 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
         for (function_symbol_vector::const_iterator i=r.begin();
              i!=r.end(); ++i)
         {
-          constructor_list.push_front(aterm_cast<aterm_appl>(*i));
+          constructor_list.push_front(*i);
         }
       }
 
@@ -3312,7 +3304,7 @@ void mcrl2::data::data_type_checker::ReadInFuncs(const function_symbol_vector &C
       constr_number--;
 
       //Here checks for the constructors
-      aterm_appl ConstructorType=FuncType;
+      sort_expression ConstructorType=FuncType;
       if (is_function_sort(ConstructorType))
       {
         ConstructorType=aterm_cast<aterm_appl>(ConstructorType[1]);
@@ -3494,7 +3486,7 @@ bool mcrl2::data::data_type_checker::TypeMatchA(
   }
   if (is_container_sort(Type))
   {
-    aterm_appl ConsType = aterm_cast<aterm_appl>(Type[0]);
+    sort_expression ConsType = aterm_cast<sort_expression>(Type[0]);
     if (is_list_container(ConsType))
     {
       if (!sort_list::is_list(sort_expression(PosType)))
@@ -3502,7 +3494,7 @@ bool mcrl2::data::data_type_checker::TypeMatchA(
         return false;
       }
       sort_expression Res;
-      if (!TypeMatchA(aterm_cast<aterm_appl>(Type[1]),aterm_cast<aterm_appl>(PosType[1]),Res))
+      if (!TypeMatchA(aterm_cast<sort_expression>(Type[1]),aterm_cast<sort_expression>(PosType[1]),Res))
       {
         return false;
       }
@@ -3519,7 +3511,7 @@ bool mcrl2::data::data_type_checker::TypeMatchA(
       else
       {
         sort_expression Res;
-        if (!TypeMatchA(aterm_cast<aterm_appl>(Type[1]),aterm_cast<aterm_appl>(PosType[1]),Res))
+        if (!TypeMatchA(aterm_cast<sort_expression>(Type[1]),aterm_cast<sort_expression>(PosType[1]),Res))
         {
           return false;
         }
@@ -3537,7 +3529,7 @@ bool mcrl2::data::data_type_checker::TypeMatchA(
       else
       {
         sort_expression Res;
-        if (!TypeMatchA(aterm_cast<aterm_appl>(Type[1]),aterm_cast<aterm_appl>(PosType[1]),Res))
+        if (!TypeMatchA(aterm_cast<sort_expression>(Type[1]),aterm_cast<sort_expression>(PosType[1]),Res))
         {
           return false;
         }
@@ -3865,7 +3857,7 @@ void mcrl2::data::data_type_checker::ReadInSortStruct(const sort_expression &Sor
       core::identifier_string Name=Constr.recogniser();
       if (Name!=no_identifier())
       {
-        AddFunction(data::function_symbol(Name,function_sort(make_list<aterm>(SortExpr),sort_bool::bool_())),"recognizer");
+        AddFunction(data::function_symbol(Name,function_sort(make_list<sort_expression>(SortExpr),sort_bool::bool_())),"recognizer");
       }
 
       // constructor type and projections
@@ -4036,7 +4028,7 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
 
   for (size_t i=nFormPars; i>0; i--)
   {
-    aterm_appl Sort;
+    sort_expression Sort;
     if (Pars[i-1].size()==1)
     {
       Sort=Pars[i-1].front();
@@ -4071,9 +4063,6 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification &data
 { 
   mCRL2log(verbose) << "type checking data expression..." << std::endl;
   initialise_system_defined_functions();
-
-  // aterm_list constructors = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[1])[0]);
-  // aterm_list mappings = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(data_spec[2])[0]);
 
   //XXX read-in from spec (not finished)
   try
@@ -4294,7 +4283,7 @@ static std::map<core::identifier_string,sort_expression> RemoveVars(
 {
   for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
   {
-    aterm_appl VarDecl=VarDecls.front();
+    variable VarDecl=VarDecls.front();
     core::identifier_string VarName=aterm_cast<core::identifier_string>(VarDecl[0]);
 
     Vars.erase(VarName);
@@ -4346,7 +4335,7 @@ static sort_expression replace_possible_sorts(const sort_expression &Type)
     {
       NewTypeList.push_front(replace_possible_sorts(TypeList.front()));
     }
-    aterm_appl ResultType=aterm_cast<aterm_appl>(Type[1]);
+    sort_expression ResultType=aterm_cast<sort_expression>(Type[1]);
     return function_sort(reverse(NewTypeList),replace_possible_sorts(ResultType));
   }
   assert(0); // All cases are dealt with above.
@@ -4366,7 +4355,7 @@ static bool HasUnknown(const sort_expression &Type)
   }
   if (is_container_sort(Type))
   {
-    return HasUnknown(aterm_cast<aterm_appl>(Type[1]));
+    return HasUnknown(aterm_cast<sort_expression>(Type[1]));
   }
   if (is_structured_sort(Type))
   {
@@ -4380,7 +4369,7 @@ static bool HasUnknown(const sort_expression &Type)
       {
         return true;
       }
-    return HasUnknown(aterm_cast<aterm_appl>(Type[1]));
+    return HasUnknown(aterm_cast<sort_expression>(Type[1]));
   }
 
   return true;
