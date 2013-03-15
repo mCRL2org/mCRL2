@@ -30,6 +30,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
     bool m_use_pfnf_variant;
     bool m_use_local_variant;
     bool m_print_influence_graph;
+    bool m_use_marking_optimization;
 
     void parse_options(const command_line_parser& parser)
     {
@@ -39,6 +40,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       m_use_pfnf_variant = parser.option_argument_as<bool>("use-pfnf-variant");
       m_use_local_variant = parser.option_argument_as<bool>("use-local-variant");
       m_print_influence_graph = parser.option_argument_as<bool>("print-influence-graph");
+      m_use_marking_optimization = parser.option_argument_as<bool>("use-marking-optimization");
     }
 
     void add_options(interface_description& desc)
@@ -49,6 +51,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       desc.add_option("use-pfnf-variant", make_optional_argument("NAME", "0"), "first convert the PBES into PFNF format", 'p');
       desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
       desc.add_option("print-influence-graph", make_optional_argument("NAME", "0"), "print the influence graph", 'i');
+      desc.add_option("use-marking-optimization", make_optional_argument("NAME", "0"), "apply an optimization during marking", 'm');
     }
 
   public:
@@ -65,13 +68,15 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
     bool run()
     {
       mCRL2log(verbose) << "pbesstategraph parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:            " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:           " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  simplify:              " << std::boolalpha << m_simplify << std::endl;
-      mCRL2log(verbose) << "  apply to original:     " << std::boolalpha << m_apply_to_original << std::endl;
-      mCRL2log(verbose) << "  use pfnf variant:      " << std::boolalpha << m_use_pfnf_variant << std::endl;
-      mCRL2log(verbose) << "  use local variant:     " << std::boolalpha << m_use_local_variant << std::endl;
-      mCRL2log(verbose) << "  print influence graph: " << std::boolalpha << m_print_influence_graph << std::endl;
+      mCRL2log(verbose) << "  input file:               " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:              " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  simplify:                 " << std::boolalpha << m_simplify << std::endl;
+      mCRL2log(verbose) << "  apply to original:        " << std::boolalpha << m_apply_to_original << std::endl;
+      mCRL2log(verbose) << "  use pfnf variant:         " << std::boolalpha << m_use_pfnf_variant << std::endl;
+      mCRL2log(verbose) << "  use local variant:        " << std::boolalpha << m_use_local_variant << std::endl;
+      mCRL2log(verbose) << "  print influence graph:    " << std::boolalpha << m_print_influence_graph << std::endl;
+      mCRL2log(verbose) << "  use marking optimization: " << std::boolalpha << m_use_marking_optimization << std::endl;
+
       pbesstategraph(input_filename(),
                      output_filename(),
                      rewrite_strategy(),
@@ -79,7 +84,8 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
                      m_apply_to_original,
                      m_use_pfnf_variant,
                      m_use_local_variant,
-                     m_print_influence_graph
+                     m_print_influence_graph,
+                     m_use_marking_optimization
                     );
       return true;
     }
