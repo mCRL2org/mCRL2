@@ -119,46 +119,53 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
     // Y(e) = PVI(phi_X, i)
     pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
     {
+      mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
       assert(eq_X.predicate_variables()[i].X == x);
 
-      mCRL2log(log::debug, "stategraph") << "  resetting variable " << pbes_system::pp(x) << std::endl;
       std::vector<pbes_expression> phi;
       core::identifier_string Y = x.name();
-      std::vector<data::data_expression> e_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
+      std::vector<data::data_expression> e = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
       // iterate over the alternatives as defined by the control flow graph
-      const std::set<stategraph_vertex*>& inst = m_control_flow_graph.index(x.name());
+      const std::set<stategraph_vertex*>& inst = m_control_flow_graph.index(Y);
       for (std::set<stategraph_vertex*>::const_iterator q = inst.begin(); q != inst.end(); ++q)
       {
         stategraph_vertex& u = **q;
-        mCRL2log(log::debug, "stategraph") << "    vertex Y = " << pbes_system::pp(u.X) << std::endl;
+        mCRL2log(log::debug, "stategraph") << "  vertex u = " << pbes_system::pp(u.X) << std::endl;
         std::vector<data::data_expression> r;
         std::size_t N = u.marked_parameters.size();
         data::data_expression_list::const_iterator k = u.X.parameters().begin();
         data::data_expression condition = data::sort_bool::true_();
         for (std::size_t j = 0; j < N; ++j)
         {
+          mCRL2log(log::debug, "stategraph") << "    j = " << j;
           if (is_control_flow_parameter(Y, j))
           {
+            mCRL2log(log::debug, "stategraph") << " CFP(Y, j) = true";
             data::data_expression f_k = *k++;
             const predicate_variable& X_i = eq_X.predicate_variables()[i];
             if (X_i.dest.find(j) == X_i.dest.end() || !m_simplify)
             {
-              condition = data::lazy::and_(condition, data::equal_to(e_X[j], f_k));
+              condition = data::lazy::and_(condition, data::equal_to(e[j], f_k));
+              mCRL2log(log::debug, "stategraph") << " dest(X, i, j) = false";
             }
-            mCRL2log(log::debug, "stategraph") << "    Y[" << j << "] is a control flow parameter -> " << data::pp(f_k) << std::endl;
+            mCRL2log(log::debug, "stategraph") << " c := c && " << data::pp(data::lazy::and_(condition, data::equal_to(e[j], f_k)));
+            mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(f_k);
             r.push_back(f_k);
           }
           else if (u.is_marked_parameter(j))
           {
-            mCRL2log(log::debug, "stategraph") << "    Y[" << j << "] is a marked parameter -> " << data::pp(e_X[j]) << std::endl;
-            r.push_back(e_X[j]);
+            mCRL2log(log::debug, "stategraph") << " e[j] is in marking(u)";
+            mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(e[j]);
+            r.push_back(e[j]);
           }
           else
           {
-            mCRL2log(log::debug, "stategraph") << "    Y[" << j << "] is a default parameter -> " << data::pp(default_value(e_X[j].sort())) << std::endl;
-            r.push_back(default_value(e_X[j].sort()));
+            mCRL2log(log::debug, "stategraph") << " default parameter ";
+            mCRL2log(log::debug, "stategraph") << " r := r <| " << data::pp(default_value(e[j].sort()));
+            r.push_back(default_value(e[j].sort()));
           }
+          mCRL2log(log::debug, "stategraph") << std::endl;
         }
         propositional_variable_instantiation Yr(Y, atermpp::convert<data::data_expression_list>(r));
         if (m_simplify)
@@ -173,8 +180,6 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         {
           phi.push_back(imp(condition, Yr));
         }
-        mCRL2log(log::debug, "stategraph") << "    condition = " << data::pp(condition) << std::endl;
-        mCRL2log(log::debug, "stategraph") << "  alternative = " << pbes_system::pp(Yr) << std::endl;
       }
       return pbes_expr::join_and(phi.begin(), phi.end());
     }
@@ -190,6 +195,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
 
       for (std::size_t k = 0; k < p_eqn.size(); k++)
       {
+
         p_eqn[k].formula() = reset_variables(*this, p_eqn[k].formula(), s_eqn[k]);
       }
 
@@ -274,6 +280,7 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
     pbes_expression result = algorithm.reset_variable(x, eq_X, i);
+    mCRL2log(log::debug, "stategraph") << "reset variable " << pbes_system::pp(x) << " with index " << i << " to " << pbes_system::pp(result) << std::endl;
     i++;
     push(result);
   }
