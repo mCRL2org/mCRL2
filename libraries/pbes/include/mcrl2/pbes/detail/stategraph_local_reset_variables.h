@@ -52,6 +52,9 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // if true, the resulting PBES is simplified
     bool m_simplify;
 
+    // if true, an optimization will be applied in the reset_variable procedure
+    bool m_use_marking_optimization;
+
     data::data_expression default_value(const data::sort_expression& x)
     {
       // TODO: make this an attribute
@@ -64,16 +67,11 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     {
       std::vector<data::data_expression> result;
 
-      // compute control flow index
-      std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator k = m_control_flow_index.find(X);
-      assert(k != m_control_flow_index.end());
-      const std::map<std::size_t, std::size_t>& m = k->second;
-      std::map<std::size_t, std::size_t>::const_iterator i = m.find(j);
-
-      if (i != m.end())
+      std::size_t k = control_flow_index(X, j);
+      if (k != std::numeric_limits<std::size_t>::max())
       {
         // find vertices X(e) in Gk
-        control_flow_graph& Gk = m_control_flow_graphs[i->second];
+        control_flow_graph& Gk = m_control_flow_graphs[k];
         const std::set<stategraph_vertex*>& inst = Gk.index(X);
         for (std::set<stategraph_vertex*>::const_iterator vi = inst.begin(); vi != inst.end(); ++vi)
         {
@@ -172,6 +170,28 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       return result;
     }
 
+    // returns true if in the control flow graph corresponding to d_X[j] there is a vertex u = X(e) such that
+    // marking(u) is not empty
+    bool has_non_empty_marking(const core::identifier_string& X, std::size_t j) const
+    {
+      std::size_t k = control_flow_index(X, j);
+      if (k == std::numeric_limits<std::size_t>::max())
+      {
+        return false;
+      }
+      const control_flow_graph& Gk = m_control_flow_graphs[k];
+      const std::set<stategraph_vertex*>& inst = Gk.index(X);
+      for (std::set<stategraph_vertex*>::const_iterator i = inst.begin(); i != inst.end(); ++i)
+      {
+        stategraph_vertex& u = **i;
+        if (!u.marking.empty())
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
   public:
 
     pbes_expression reset(const std::vector<data::data_expression>& v_prime, const core::identifier_string& Y, const predicate_variable& X_i, const std::vector<std::size_t>& I, const std::vector<data::variable>& d_Y, const std::vector<data::data_expression> e_X)
@@ -185,9 +205,16 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         {
           if (std::find(I.begin(), I.end(), j) != I.end())
           {
-            assert(k < v_prime.size());
-            v.push_back(v_prime[k]);
-            k++;
+            if (m_use_marking_optimization && !has_non_empty_marking(Y, j))
+            {
+              v.push_back(d_Y[j]);
+            }
+            else
+            {
+              assert(k < v_prime.size());
+              v.push_back(v_prime[k]);
+              k++;
+            }
           }
           else
           {
@@ -270,7 +297,10 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       {
         if (is_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
         {
-          I.push_back(j);
+          if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
+          {
+            I.push_back(j);
+          }
         }
       }
 
@@ -323,10 +353,11 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes<> run(bool simplify = true)
+    pbes<> run(bool simplify = true, bool use_marking_optimization = false)
     {
       super::run();
       m_simplify = simplify;
+      m_use_marking_optimization = use_marking_optimization;
       pbes<> result = m_original_pbes;
       reset_variables_to_original(result);
       return result;

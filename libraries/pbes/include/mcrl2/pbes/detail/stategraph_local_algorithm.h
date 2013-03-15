@@ -359,6 +359,24 @@ class stategraph_local_algorithm: public stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << "=== control flow index ===\n" << out.str() << std::endl;
     }
 
+    // returns an index k such that d_X[j] corresponds to m_control_flow_graphs[k],
+    // or std::numeric_limits<std::size_t>::max() if no such index was found
+    std::size_t control_flow_index(const core::identifier_string& X, std::size_t j) const
+    {
+      std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator k = m_control_flow_index.find(X);
+      if (k == m_control_flow_index.end())
+      {
+        return std::numeric_limits<std::size_t>::max();
+      }
+      const std::map<std::size_t, std::size_t>& m = k->second;
+      std::map<std::size_t, std::size_t>::const_iterator i = m.find(j);
+      if (i == m.end())
+      {
+        return std::numeric_limits<std::size_t>::max();
+      }
+      return i->second;
+    }
+
     // @pre: (X0, p0) is in must_graph
     std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const control_flow_graph& Vk)
     {
