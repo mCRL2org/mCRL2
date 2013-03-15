@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Thursday, March 14, 2013 19:22:03}
+%TCIDATA{LastRevised=Friday, March 15, 2013 09:44:29}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -262,12 +262,13 @@ h(\lnot \forall d{{:}D}.\varphi ) & =_{def} & \exists d{{:}D}.h(\lnot
 \varphi ) \\ 
 h(\lnot \exists d{{:}D}.\varphi ) & =_{def} & \forall d{{:}D}.h(\lnot
 \varphi ) \\ 
-h(\lnot \lbrack \alpha ]\varphi ) & =_{def} & [\alpha ]h(\lnot \varphi ) \\ 
-h(\lnot \langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
-h(\lnot \varphi ) \\ 
-h(\lnot \nabla ) & =_{def} & \Delta \\ 
+h(\lnot \lbrack \alpha ]\varphi ) & =_{def} & \langle \alpha \rangle h(\lnot
+\varphi ) \\ 
+h(\lnot \langle \alpha \rangle \varphi ) & =_{def} & [\alpha ]h(\lnot
+\varphi ) \\ 
+h(\lnot \nabla ) & =_{def} & \Delta  \\ 
 h(\lnot \nabla (t)) & =_{def} & \Delta (t) \\ 
-h(\lnot \Delta ) & =_{def} & \nabla \\ 
+h(\lnot \Delta ) & =_{def} & \nabla  \\ 
 h(\lnot \Delta (t)) & =_{def} & \nabla (t) \\ 
 h(\lnot X(e)) & =_{def} & undefined \\ 
 h(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \nu X(d{:}%
@@ -282,16 +283,16 @@ h(\mathsf{Q}d{{:}D}.\varphi ) & =_{def} & \mathsf{Q}d{{:}D}.h(\varphi ) \\
 h([\alpha ]\varphi ) & =_{def} & [\alpha ]h(\varphi ) \\ 
 h(\langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
 h(\varphi ) \\ 
-h(\nabla ) & =_{def} & \nabla \\ 
+h(\nabla ) & =_{def} & \nabla  \\ 
 h(\nabla (t)) & =_{def} & \nabla (t) \\ 
-h(\Delta ) & =_{def} & \Delta \\ 
+h(\Delta ) & =_{def} & \Delta  \\ 
 h(\Delta (t)) & =_{def} & \Delta (t) \\ 
 h(X(d)) & =_{def} & X(d) \\ 
 h(\sigma X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \sigma X(d{:}%
 D:=e).~h(\varphi )%
 \end{array}%
 \end{equation*}%
-\newpage
+\newpage 
 
 \subsection{The predicate formula normal form (PFNF)}
 
@@ -2035,7 +2036,7 @@ $\qquad \qquad r:=[]$ \\
 $\qquad \qquad $\textbf{if} $CFP(Y,j)$ \textbf{then} \\ 
 $\qquad \qquad \qquad $\textbf{if} $dest(X,i,j)=\bot $ \\ 
 $\qquad \qquad \qquad \qquad c:=c\wedge (e[j]=f[k])$ \\ 
-$\qquad \qquad \qquad r:=r\vartriangleleft f[i]$ \\ 
+$\qquad \qquad \qquad r:=r\vartriangleleft f[k]$ \\ 
 $\qquad \qquad $\textbf{else if} $e[j]\in marking(u)$ \textbf{then} \\ 
 $\qquad \qquad \qquad r:=r\vartriangleleft e[j]$ \\ 
 $\qquad \qquad $\textbf{else} \\ 
