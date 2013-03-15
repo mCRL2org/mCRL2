@@ -114,16 +114,16 @@ class stategraph_local_algorithm: public stategraph_algorithm
           const std::map<std::size_t, data::data_expression>& dest = predvars[i].dest;
           const core::identifier_string& Y = predvars[i].X.name();
 
-          for (std::map<std::size_t, data::data_expression>::const_iterator j = source.begin(); j != source.end(); ++j)
+          std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
+          for (std::vector<std::size_t>::iterator j = CFP.begin(); j != CFP.end(); ++j)
           {
-            std::size_t p = j->first;
-            dependency_vertex& u = must_graph.find_vertex(X, p);
+            dependency_vertex& u = must_graph.find_vertex(X, *j);
             if (u.outgoing_edges.empty())
             {
               for (std::map<std::size_t, data::data_expression>::const_iterator k = dest.begin(); k != dest.end(); ++k)
               {
                 std::size_t l = k->first;
-                may_graph.insert_edge(X, p, Y, l);
+                may_graph.insert_edge(X, *j, Y, l);
               }
             }
           }
