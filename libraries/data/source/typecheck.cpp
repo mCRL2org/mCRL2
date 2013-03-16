@@ -3770,29 +3770,14 @@ void mcrl2::data::data_type_checker::AddFunction(const data::function_symbol &f,
   const core::identifier_string Name = f.name();
   const sort_expression Sort = f.sort();
 
-  if (domain.size()==0)
+  if (system_constants.count(Name)>0)
   {
-    if (system_constants.count(Name)>0)
-    {
-      throw mcrl2::runtime_error("attempt to redeclare the system constant with " + msg + " " + pp(f));
-    }
+    throw mcrl2::runtime_error("attempt to redeclare the system constant with a " + msg + " " + pp(f));
   }
-  else // domain.size()>0
+  
+  if (system_functions.count(Name)>0)
   {
-    std::map <core::identifier_string,sort_expression_list>::const_iterator j=system_functions.find(Name);
-    if (j!=system_functions.end())
-    {
-      sort_expression_list L= j->second;
-      for (; L!=aterm_list() ; L=L.tail())
-      {
-        sort_expression temp;
-        if (TypeMatchA(Sort,L.front(),temp))
-        {
-          // f matches a predefined function
-          throw mcrl2::runtime_error("attempt to redeclare a system function with " + msg + " " + pp(f) + ":" + pp(Sort));
-        }
-      }
-    }
+    throw mcrl2::runtime_error("attempt to redeclare a system function with a " + msg + " " + pp(f));
   }
 
   std::map <core::identifier_string,sort_expression_list>::const_iterator j=user_functions.find(Name);

@@ -926,6 +926,26 @@ void test_bke()
   }
 }
 
+void test_abuse_of_tail()
+{
+  std::cout << "Test abuse of tail\n";
+  const std::string spec_string = 
+    "map tail:Nat#List(Bool) -> List(Bool);\n"
+    "var vs: List(Bool);\n"
+    "n: Nat;\n"
+    "eqn tail(n, vs) = if(n==0, vs, tail(Int2Nat(n-1),vs));\n";
+  try
+  {
+    data_specification data_spec=parse_data_specification(spec_string);
+    BOOST_CHECK(false); // Typechecking is supposed to fail; one cannot get here.
+  }
+  catch (mcrl2::runtime_error &e)
+  {
+    // It is expected that a runtime error is thrown.
+  }
+}
+
+
 int test_main(int argc, char** argv)
 {
   test_bke();
@@ -951,6 +971,8 @@ int test_main(int argc, char** argv)
   test_copy();
 
   test_specification();
+
+  test_abuse_of_tail();
     
   return EXIT_SUCCESS;
 }
