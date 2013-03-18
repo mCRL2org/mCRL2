@@ -661,7 +661,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << "=== must graph ===\n" << must_graph.print() << std::endl;
       compute_may_graph();
       mCRL2log(log::debug, "stategraph") << "=== may graph ===\n" << may_graph.print() << std::endl;
-      remove_may_transitions(must_graph, may_graph, dependency_vertex_compare(m_pbes));
+      bool result = remove_may_transitions(must_graph, may_graph, dependency_vertex_compare(m_pbes));
+      if (!result)
+      {
+        throw mcrl2::runtime_error("error: could not find a must graph that satisfies all constraints!");
+      }
       mCRL2log(log::debug, "stategraph") << "=== must graph after removing may transitions ===\n" << must_graph.print() << std::endl;
       compute_control_flow_graphs();
       compute_control_flow_index();

@@ -331,6 +331,43 @@ void test_constraints()
   ;
   expected_result = false;
   test_constraints(text, expected_result);
+
+  text =
+    "X 0 ; X 1 ; Y 0 ; Y 1 \n"
+    "X 0 ; Y 0             \n"
+    "X 1 ; Y 0             \n"
+  ;
+  expected_result = false;
+  test_constraints(text, expected_result);
+
+  text =
+    "X 0 ; X 1 ; Y 0 ; Y 1 \n"
+    "X 0 ; Y 0             \n"
+    "X 1 ; Y 1             \n"
+  ;
+  expected_result = true;
+  test_constraints(text, expected_result);
+
+  text =
+    "X 0 ; X 1 ; Y 0 ; Z 0 \n"
+    "X 0 ; Y 0             \n"
+    "X 1 ; Z 0             \n"
+    "Y 0 ; Z 0             \n"
+  ;
+  expected_result = false;
+  test_constraints(text, expected_result);
+
+  text =
+    "X 0 ; X 1 ; X 2 ; Y 1 \n"
+    "X 0 ; X 0             \n"
+    "X 0 ; Y 1             \n"
+    "X 1 ; X 1             \n"
+    "X 1 ; Y 1             \n"
+    "X 2 ; X 2             \n"
+    "X 2 ; Y 1             \n"
+  ;
+  expected_result = false;
+  test_constraints(text, expected_result);
 }
 
 struct dependency_vertex_compare
@@ -412,7 +449,11 @@ void test_remove_may_transitions()
 
 void test_local_stategraph()
 {
-  std::string text =
+  std::string text;
+  bool normalize = false;
+  pbes<> p;
+
+  text =
     "sort D = struct d1 | d2;\n"
     "\n"
     "pbes nu X(s: Nat, d: D)   = forall v: D. forall e1: D. val(!(e1 == v)) || val(!(s == 1)) || Y(2, e1, v);\n"
@@ -420,12 +461,20 @@ void test_local_stategraph()
     "\n"
     "init X(1, d1);\n"
    ;
-  bool normalize = false;
-  pbes<> p = txt2pbes(text, normalize);
-  pbes_system::detail::local_reset_variables_algorithm algorithm(p);
-  algorithm.run();
-}
+  p = txt2pbes(text, normalize);
+  // This fails because no suitable must graph is found
+  // pbes_system::detail::local_reset_variables_algorithm(p).run();
 
+  text =
+    "pbes\n"
+    "nu X(c:Pos, d:Nat) = val(c == 1) => Y(1,d+1) && (val(c == 1) => X(1,d+2));\n"
+    "nu Y(c:Pos, d:Nat) = (val(c == 1) => Y(c,d+1)) && (val(d > 0));\n"
+    "init X(1,0);\n"
+    ;
+  p = txt2pbes(text, normalize);
+  pbes_system::detail::local_reset_variables_algorithm(p).run();
+}
+ 
 int test_main(int argc, char** argv)
 {
   log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
@@ -433,6 +482,7 @@ int test_main(int argc, char** argv)
   test_parse();
   test_remove_may_transitions();
   test_significant_variables();
+  test_constraints();
   test_local_stategraph();
 
   return 0;

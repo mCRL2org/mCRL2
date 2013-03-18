@@ -35,6 +35,7 @@ struct dependency_vertex
   core::identifier_string X;
   std::size_t p;
   std::set<dependency_vertex*> outgoing_edges;
+  std::set<dependency_vertex*> incoming_edges;
 
   dependency_vertex(const core::identifier_string& X_, std::size_t p_)
     : X(X_), p(p_)
@@ -125,7 +126,25 @@ struct dependency_graph
       }
     }
     set_index();
-    //self_check();
+  
+    // reset incoming edges
+    for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    {
+      dependency_vertex& u = *i;
+      u.incoming_edges.clear();
+    }
+    for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+    {
+      dependency_vertex& u = *i;
+      std::set<dependency_vertex*>& S = u.outgoing_edges;
+      for (auto j = S.begin(); j != S.end(); ++j)
+      {
+        dependency_vertex& v = **j;
+        v.incoming_edges.insert(&u);
+      }
+    }
+
+  //self_check();
   }
 
   // @pre: (X, p) is in the graph
@@ -160,6 +179,7 @@ struct dependency_graph
     dependency_vertex& u = find_vertex(X, i);
     dependency_vertex& v = find_vertex(Y, j);
     u.outgoing_edges.insert(&v);
+    v.incoming_edges.insert(&u);
   }
 
   std::string print()
@@ -189,7 +209,7 @@ struct dependency_graph
     return m_vertices;
   }
 
-  bool check_constraints(const dependency_vertex& u, constraint_map& m) const
+  bool check_constraint2(const dependency_vertex& u, constraint_map& m) const
   {
     constraint_map::iterator i = m.find(u.X);
     if (i == m.end())
@@ -206,7 +226,32 @@ struct dependency_graph
     for (std::set<dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
     {
       const dependency_vertex& v = **j;
-      if (!check_constraints(v, m))
+      if (!check_constraint2(v, m))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool check_constraint3(const dependency_vertex& u, constraint_map& m) const
+  {
+    constraint_map::iterator i = m.find(u.X);
+    if (i == m.end())
+    {
+      m[u.X] = &u;
+    }
+    else
+    {
+      // if we end up in a vertex with known X, then these vertices must coincide
+      const dependency_vertex& v = *(i->second);
+      return &u == &v;
+    }
+    const std::set<dependency_vertex*>& S = u.incoming_edges;
+    for (std::set<dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
+    {
+      const dependency_vertex& v = **j;
+      if (!check_constraint3(v, m))
       {
         return false;
       }
@@ -215,8 +260,9 @@ struct dependency_graph
   }
 
   // checks two constraints for all vertices (X, p):
-  // 1) if (X, p) -> (Y, l) and (X, p) -> (Y, m) then l = m
-  // 2) if (X, p) ->* (X, l) then p = l
+  // 1) if (X, p) -> (Y, q) and (X, p) -> (Y, r) then q = r
+  // 2) if (X, p) ->* (X, q) then p = q
+  // 3) if (X, p) ->* (Y, r) and (X, q) ->* (Y, r) then p = q
   bool check_constraints() const
   {
     // check 1)
@@ -253,7 +299,7 @@ struct dependency_graph
         continue;
       }
       constraint_map m;
-      if (!check_constraints(u, m))
+      if (!check_constraint2(u, m))
       {
         return false;
       }
@@ -262,6 +308,27 @@ struct dependency_graph
         done.insert(j->second);
       }
     }
+
+    // check 3)
+    done.clear();
+    for (std::size_t i = 0; i < m_vertices.size(); i++)
+    {
+      const dependency_vertex& u = m_vertices[i];
+      if (done.find(&u) != done.end())
+      {
+        continue;
+      }
+      constraint_map m;
+      if (!check_constraint3(u, m))
+      {
+        return false;
+      }
+      for (constraint_map::const_iterator j = m.begin(); j != m.end(); ++j)
+      {
+        done.insert(j->second);
+      }
+    }
+
     return true;
   }
 
@@ -371,6 +438,7 @@ struct remove_may_transitions_helper
       dependency_vertex& u1 = G.find_vertex(u.X, u.p);
       dependency_vertex& v1 = G.find_vertex(v.X, v.p);
       u1.outgoing_edges.insert(&v1);
+      v1.incoming_edges.insert(&u1);
     }
 
     bool result = G.check_constraints();
@@ -387,6 +455,7 @@ struct remove_may_transitions_helper
       dependency_vertex& u1 = G.find_vertex(u.X, u.p);
       dependency_vertex& v1 = G.find_vertex(v.X, v.p);
       u1.outgoing_edges.erase(&v1);
+      v1.incoming_edges.erase(&u1);
     }
   }
 };
