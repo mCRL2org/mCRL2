@@ -96,9 +96,13 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       return result;
     }
 
-    bool is_relevant(const core::identifier_string& X, const predicate_variable& X_i, const data::variable& d, const std::vector<data::data_expression>& v) const
+    bool is_relevant(const core::identifier_string& X,
+                     const predicate_variable& X_i,
+                     const data::variable& d,
+                     const std::vector<data::data_expression>& v) const
     {
       mCRL2log(log::debug1) << "  checking whether " << data::pp(d) << " is relevant for location " << X << "(" << print_vector(v, ", ") << ")" << std::endl;
+      assert(X == X_i.X.name());
       // TODO: Ugly, v only contains control flow parameters, but the analysis
       // below gives indices into the list of parameters, so we need to map this
       std::vector<size_t> index_to_cfp_index;
@@ -107,7 +111,8 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       {
         if(is_control_flow_parameter(X, j))
         {
-          index_to_cfp_index.push_back(idx++);
+          index_to_cfp_index.push_back(idx);
+          idx++;
         }
         else
         {
@@ -148,9 +153,10 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
             }
           }
           mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
+          assert(found);
           assert(m != std::numeric_limits<std::size_t>::max());
           assert(index_to_cfp_index[m] < v.size());
-          assert(found);
+
           control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
           assert(vi != Gk.end());
           const stategraph_vertex& u = vi->second;
@@ -194,61 +200,69 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 
   public:
 
-    pbes_expression reset(const std::vector<data::data_expression>& v_prime, const core::identifier_string& Y, const predicate_variable& X_i, const std::vector<std::size_t>& I, const std::vector<data::variable>& d_Y, const std::vector<data::data_expression> e_X)
+    pbes_expression reset(const std::vector<data::data_expression>& v_prime,
+                          const core::identifier_string& Y,
+                          const predicate_variable& X_i,
+                          const std::vector<std::size_t>& I,
+                          const std::vector<data::variable>& d_Y,
+                          const std::vector<data::data_expression> e_X,
+                          const stategraph_equation& eq_X)
     {
       data::data_expression c = data::sort_bool::true_();
       std::size_t k = 0;
       std::vector<data::data_expression> v;
+      // Note that v needs to be built first, since it is used in its entirety
+      // in the next loop!
       for (std::size_t j = 0; j < d_Y.size(); j++)
       {
         if (is_control_flow_parameter(Y, j))
         {
-          if (std::find(I.begin(), I.end(), j) != I.end())
+          if (X_i.dest.find(j) != X_i.dest.end())
           {
-            if (m_use_marking_optimization && !has_non_empty_marking(Y, j))
-            {
-              v.push_back(d_Y[j]);
-            }
-            else
-            {
-              assert(k < v_prime.size());
-              v.push_back(v_prime[k]);
-              k++;
-            }
+            v.push_back(X_i.dest.find(j)->second);
+          }
+          else if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
+          {
+            assert(k < v_prime.size());
+            v.push_back(v_prime[k]);
+            k++;
           }
           else
           {
-            assert(X_i.dest.find(j) != X_i.dest.end());
-            v.push_back(X_i.dest.find(j)->second);
+            v.push_back(e_X[j]);
           }
         }
       }
 
-      k = 0;
       std::vector<data::data_expression> r;
+      k = 0;
       for (std::size_t j = 0; j < d_Y.size(); j++)
       {
         if (is_control_flow_parameter(Y, j))
         {
-          if (X_i.dest.find(j) == X_i.dest.end())
+          if (X_i.dest.find(j) != X_i.dest.end())
           {
-            c = data::lazy::and_(c, data::equal_to(d_Y[j], v[k]));
+            c = data::lazy::and_(c, data::equal_to(e_X[j], X_i.dest.find(j)->second));
           }
-          r.push_back(v[k]);
-          k++;
+          else if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
+          {
+            // find the index that is copied to j
+            c = data::lazy::and_(c, data::equal_to(e_X[j], v_prime[k]));
+            k++;
+          }
+          r.push_back(e_X[j]);
+        }
+        else if (is_relevant(Y, X_i, d_Y[j], v))
+        {
+          r.push_back(e_X[j]);
         }
         else
         {
-          if (is_relevant(Y, X_i, d_Y[j], v))
-          {
-            r.push_back(e_X[j]);
-          }
-          else
-          {
-            r.push_back(default_value(e_X[j].sort()));
-          }
+          r.push_back(default_value(e_X[j].sort()));
+          //r.push_back(e_X[j]);
         }
       }
+
       propositional_variable_instantiation Yr(Y, atermpp::convert<data::data_expression_list>(r));
       pbes_expression result = Yr;
       if (m_simplify)
@@ -293,7 +307,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       std::vector<data::data_expression> e_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
 
       std::vector<std::size_t> I;
-      for (std::size_t j = 0; j < eq_X.parameters().size(); j++)
+      for (std::size_t j = 0; j < d_Y.size(); j++)
       {
         if (is_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
         {
@@ -317,7 +331,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
       utilities::foreach_sequence(values, v_prime.begin(), [&]()
         {
-          phi.push_back(reset(v_prime, Y, X_i, I, d_Y, e_X));
+          phi.push_back(reset(v_prime, Y, X_i, I, d_Y, e_X, eq_X));
         }
       );
       return pbes_expr::join_and(phi.begin(), phi.end());
