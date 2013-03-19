@@ -23,10 +23,10 @@ downloaded `here
 or be found in the ``examples/academic/abp/`` directory of your mCRL2 
 installation.
 
-.. _tutorial-img1: ../_static/img/tutorial/mcrl2gui.png
-.. _tutorial-img2: ../_static/img/tutorial/ltsgraph-abp.jpg
-.. _tutorial-img3: ../_static/img/tutorial/ltsgraph-abpbb.jpg
-.. _tutorial-img4: ../_static/img/tutorial/ltsview-abp.jpg
+.. _tutorial-img1: ../../_static/img/tutorial/mcrl2gui.png
+.. _tutorial-img2: ../../_static/img/tutorial/ltsgraph-abp.jpg
+.. _tutorial-img3: ../../_static/img/tutorial/ltsgraph-abpbb.jpg
+.. _tutorial-img4: ../../_static/img/tutorial/ltsview-abp.jpg
 
 +-----------------------------------+------------------------------------+--------------------------------------+-----------------------------------+
 | .. figure:: img/mcrl2gui.png      | .. figure:: img/ltsgraph-abp.jpg   | .. figure:: img/ltsgraph-abpbb.jpg   | .. figure:: img/ltsview-abp.jpg   |
