@@ -142,7 +142,7 @@ sort_expression_list mcrl2::process::process_type_checker::GetNotInferredList(co
   //0..nFormPars-1
 
   sort_expression_list Result;
-  size_t nFormPars=((aterm_list)TypeListList.front()).size();
+  size_t nFormPars=(TypeListList.front()).size();
   std::vector<sort_expression_list> Pars(nFormPars);
   for (size_t i=0; i<nFormPars; i++)
   {
@@ -160,7 +160,7 @@ sort_expression_list mcrl2::process::process_type_checker::GetNotInferredList(co
 
   for (size_t i=nFormPars; i>0; i--)
   {
-    aterm_appl Sort;
+    sort_expression Sort;
     if (Pars[i-1].size()==1)
     {
       Sort=Pars[i-1].front();
@@ -183,7 +183,8 @@ bool mcrl2::process::process_type_checker::IsTypeAllowedA(const sort_expression 
   }
   if (is_multiple_possible_sorts(PosType))
   {
-    return InTypesA(Type,aterm_cast<const sort_expression_list>(PosType[0]));
+    const multiple_possible_sorts& s=aterm_cast<multiple_possible_sorts>(PosType);
+    return InTypesA(Type,s.sorts());
   }
 
   //PosType is a normal type
@@ -269,9 +270,9 @@ std::pair<bool,sort_expression_list> mcrl2::process::process_type_checker::Adjus
 
 
 
-process_expression mcrl2::process::process_type_checker::RewrActProc(const std::map<core::identifier_string,sort_expression> &Vars, process_expression ProcTerm)
+process_expression mcrl2::process::process_type_checker::RewrActProc(const std::map<core::identifier_string,sort_expression> &Vars, process_expression /* ParamId */ ProcTerm)
 {
-  aterm_appl Result;
+  process_expression Result;
   core::identifier_string Name(ProcTerm[0]);
   term_list<sort_expression_list> ParList;
 
@@ -346,7 +347,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
     data_expression Par=Pars.front();
     sort_expression PosType=PosTypeList.front();
 
-    aterm_appl NewPosType;
+    sort_expression NewPosType;
     try
     {
       NewPosType=TraverseVarConsTypeD(Vars,Vars,Par,PosType); 
@@ -376,7 +377,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
       sort_expression PosType=PosTypeList.front();
       sort_expression NewPosType=NewPosTypeList.front();
 
-      aterm_appl CastedNewPosType;
+      sort_expression CastedNewPosType;
       try
       { 
         CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par);
@@ -564,237 +565,283 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     return result;
   }
 
-  if (is_block(ProcTerm) || is_hide(ProcTerm) ||
-      is_rename(ProcTerm) || is_comm(ProcTerm) || is_allow(ProcTerm))
+  if (is_hide(ProcTerm))
   {
-
-    //block & hide
-    if (is_block(ProcTerm) || is_hide(ProcTerm))
+    const hide& t=aterm_cast<const hide>(ProcTerm);
+    const core::identifier_string_list& act_list=t.hide_set();
+    if (act_list.empty())
     {
-      const std::string msg=is_block(ProcTerm)?"Blocking":"Hiding";
-      core::identifier_string_list ActList=aterm_cast<core::identifier_string_list>(ProcTerm[0]);
-      if (ActList.empty())
+      mCRL2log(warning) << "Hiding empty set of actions (typechecking " << pp(t) << ")" << std::endl;
+    }
+
+    std::set<aterm_appl> Acts;
+    for (core::identifier_string_list::const_iterator a=act_list.begin(); a!=act_list.end(); ++a)
+    {
+      //Actions must be declared
+      if (actions.count(*a)==0)
       {
-        mCRL2log(warning) << msg << " empty set of actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
+        throw mcrl2::runtime_error("Hiding an undefined action " + pp(*a) + " (typechecking " + pp(t) + ")");
+      }
+      if (!Acts.insert(*a).second)  // The action was already in the set.
+      {
+        mCRL2log(warning) << "Hiding action " << pp(*a) << " twice (typechecking " << pp(t) << ")" << std::endl;
+      }
+    }
+    return hide(act_list, TraverseActProcVarConstP(Vars,t.operand())); 
+  }
+
+  if (is_block(ProcTerm))
+  {
+    const block& t=aterm_cast<const block>(ProcTerm);
+    const identifier_string_list& act_list=t.block_set();
+    if (act_list.empty())
+    {
+      mCRL2log(warning) << "Blocking empty set of actions (typechecking " << pp(t) << ")" << std::endl;
+    }
+
+    std::set<identifier_string> Acts;
+    for (identifier_string_list::const_iterator a=act_list.begin(); a!=act_list.end(); ++a)
+    {
+      //Actions must be declared
+      if (actions.count(*a)==0)
+      {
+        throw mcrl2::runtime_error("Blocking an undefined action " + pp(*a) + " (typechecking " + pp(t) + ")");
+      }
+      if (!Acts.insert(*a).second)  // The action was already in the set.
+      {
+        mCRL2log(warning) << "Blocking action " << pp(*a) << " twice (typechecking " << pp(t) << ")" << std::endl;
+      }
+    }
+    return block(act_list,TraverseActProcVarConstP(Vars,t.operand()));
+  }
+
+  //rename
+  if (is_rename(ProcTerm))
+  {
+    const rename& t=aterm_cast<const rename>(ProcTerm);
+    const rename_expression_list& RenList=t.rename_set();
+
+    if (RenList.empty())
+    {
+      mCRL2log(warning) << "renaming empty set of actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
+    }
+
+    std::set<identifier_string> ActsFrom;
+
+    for (rename_expression_list::const_iterator r=RenList.begin(); r!=RenList.end(); ++r) 
+    {
+      const rename_expression& Ren= *r;
+      const identifier_string& ActFrom=Ren.source();
+      const identifier_string& ActTo=Ren.target();
+
+      if (ActFrom==ActTo)
+      {
+        mCRL2log(warning) << "renaming action " << pp(ActFrom) << " into itself (typechecking " << pp(ProcTerm) << ")" << std::endl;
       }
 
-      std::set<aterm_appl> Acts;
-      for (; !ActList.empty(); ActList=ActList.tail())
+      //Actions must be declared and of the same types
+      term_list<sort_expression_list> TypesFrom,TypesTo;
+      const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j_from=actions.find(ActFrom);
+      if (j_from==actions.end())
       {
-        core::identifier_string Act=ActList.front();
+        throw mcrl2::runtime_error("renaming an undefined action " + pp(ActFrom) + " (typechecking " + pp(ProcTerm) + ")");
+      }
+      TypesFrom=j_from->second;
+      const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j_to=actions.find(ActFrom);
+      if (j_to==actions.end())
+      {
+        throw mcrl2::runtime_error("renaming into an undefined action " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
+      }
+      TypesTo=j_to->second;
+
+      TypesTo=TypeListsIntersect(TypesFrom,TypesTo);
+      if (TypesTo.empty())
+      {
+        throw mcrl2::runtime_error("renaming action " + pp(ActFrom) + " into action " + pp(ActTo) + ": these two have no common type (typechecking " + pp(ProcTerm) + ")");
+      }
+
+      if (!ActsFrom.insert(ActFrom).second) // The element was already in the set.
+      {
+        throw mcrl2::runtime_error("renaming action " + pp(ActFrom) + " twice (typechecking " + pp(ProcTerm) + ")");
+      }
+    }
+    return rename(RenList,TraverseActProcVarConstP(Vars,t.operand()));
+  }
+
+  //comm: like renaming multiactions (with the same parameters) to action/tau
+  if (is_comm(ProcTerm))
+  {
+    const comm& t=aterm_cast<const comm>(ProcTerm);
+    const communication_expression_list& CommList=t.comm_set();
+
+    if (CommList.empty())
+    {
+      mCRL2log(warning) << "synchronizing empty set of (multi)actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
+    }
+    else
+    {
+      identifier_string_list ActsFrom;
+
+      for (communication_expression_list::const_iterator c=CommList.begin(); c!=CommList.end(); ++c)
+      {
+        const communication_expression& Comm= *c;
+        const identifier_string_list MActFrom=Comm.action_name().names();
+        assert(!MActFrom.empty());
+        core::identifier_string ActTo=Comm.name();
+
+        if (MActFrom.size()==1)
+        {
+          throw mcrl2::runtime_error("using synchronization as renaming/hiding of action " + pp(MActFrom.front()) + " into " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
+        }
 
         //Actions must be declared
-        if (actions.count(Act)==0)
+        term_list<sort_expression_list> ResTypes;
+
+        if (!gsIsNil(ActTo))
         {
-          throw mcrl2::runtime_error(msg + " an undefined action " + pp(Act) + " (typechecking " + pp(ProcTerm) + ")");
-        }
-        if (!Acts.insert(Act).second)  // The action was already in the set.
-        {
-          mCRL2log(warning) << msg << " action " << pp(Act) << " twice (typechecking " << pp(ProcTerm) << ")" << std::endl;
-        }
-      }
-    }
-
-    //rename
-    if (is_rename(ProcTerm))
-    {
-      rename_expression_list RenList=aterm_cast<rename_expression_list>(ProcTerm[0]);
-
-      if (RenList.empty())
-      {
-        mCRL2log(warning) << "renaming empty set of actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
-      }
-
-      std::set<aterm_appl> ActsFrom;
-
-      for (; !RenList.empty(); RenList=RenList.tail())
-      {
-        rename_expression Ren=RenList.front();
-        core::identifier_string ActFrom=aterm_cast<core::identifier_string>(Ren[0]);
-        aterm_appl ActTo=aterm_cast<aterm_appl>(Ren[1]);
-
-        if (ActFrom==ActTo)
-        {
-          mCRL2log(warning) << "renaming action " << pp(ActFrom) << " into itself (typechecking " << pp(ProcTerm) << ")" << std::endl;
-        }
-
-        //Actions must be declared and of the same types
-        term_list<sort_expression_list> TypesFrom,TypesTo;
-        const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j_from=actions.find(ActFrom);
-        if (j_from==actions.end())
-        {
-          throw mcrl2::runtime_error("renaming an undefined action " + pp(ActFrom) + " (typechecking " + pp(ProcTerm) + ")");
-        }
-        TypesFrom=j_from->second;
-        const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j_to=actions.find(ActFrom);
-        if (j_to==actions.end())
-        {
-          throw mcrl2::runtime_error("renaming into an undefined action " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
-        }
-        TypesTo=j_to->second;
-
-        TypesTo=TypeListsIntersect(TypesFrom,TypesTo);
-        if (TypesTo.empty())
-        {
-          throw mcrl2::runtime_error("renaming action " + pp(ActFrom) + " into action " + pp(ActTo) + ": these two have no common type (typechecking " + pp(ProcTerm) + ")");
-        }
-
-        if (!ActsFrom.insert(ActFrom).second) // The element was already in the set.
-        {
-          throw mcrl2::runtime_error("renaming action " + pp(ActFrom) + " twice (typechecking " + pp(ProcTerm) + ")");
-        }
-      }
-    }
-
-    //comm: like renaming multiactions (with the same parameters) to action/tau
-    if (is_comm(ProcTerm))
-    {
-      communication_expression_list CommList=aterm_cast<communication_expression_list>(ProcTerm[0]);
-
-      if (CommList.empty())
-      {
-        mCRL2log(warning) << "synchronizing empty set of (multi)actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
-      }
-      else
-      {
-        aterm_list ActsFrom;
-
-        for (; !CommList.empty(); CommList=CommList.tail())
-        {
-          communication_expression Comm=CommList.front();
-          aterm_list MActFrom=aterm_cast<aterm_list>(aterm_cast<aterm_appl>(Comm[0])[0]);
-          aterm_list BackupMActFrom=MActFrom;
-          assert(!MActFrom.empty());
-          core::identifier_string ActTo=aterm_cast<core::identifier_string>(Comm[1]);
-
-          if (MActFrom.size()==1)
+          const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(ActTo);
+          if (j==actions.end())
           {
-            throw mcrl2::runtime_error("using synchronization as renaming/hiding of action " + pp(MActFrom.front()) + " into " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
+            throw mcrl2::runtime_error("synchronizing to an undefined action " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
           }
+          ResTypes=j->second;
+        }
 
-          //Actions must be declared
-          term_list<sort_expression_list> ResTypes;
-
-          if (!gsIsNil(ActTo))
+        for (identifier_string_list::const_iterator i=MActFrom.begin(); i!=MActFrom.end(); ++i) 
+        {
+          const identifier_string& Act= *i;
+          const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(Act);
+          term_list<sort_expression_list> Types;
+          if (j==actions.end())
           {
-            const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(ActTo);
-            if (j==actions.end())
-            {
-              throw mcrl2::runtime_error("synchronizing to an undefined action " + pp(ActTo) + " (typechecking " + pp(ProcTerm) + ")");
-            }
-            ResTypes=j->second;
+            throw mcrl2::runtime_error("synchronizing an undefined action " + pp(Act) + " in (multi)action " + pp(MActFrom) + " (typechecking " + pp(ProcTerm) + ")");
           }
-
-          for (; !MActFrom.empty(); MActFrom=MActFrom.tail())
+          Types=j->second;
+          ResTypes=TypeListsIntersect(ResTypes,Types);
+          if (ResTypes.empty())
           {
-            core::identifier_string Act=aterm_cast<core::identifier_string>(MActFrom.front());
-            const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(Act);
-            term_list<sort_expression_list> Types;
-            if (j==actions.end())
-            {
-              throw mcrl2::runtime_error("synchronizing an undefined action " + pp(Act) + " in (multi)action " + pp(MActFrom) + " (typechecking " + pp(ProcTerm) + ")");
-            }
-            Types=j->second;
-            ResTypes=TypeListsIntersect(ResTypes,Types);
-            if (ResTypes.empty())
-            {
-              throw mcrl2::runtime_error("synchronizing action " + pp(Act) + " from (multi)action " + pp(BackupMActFrom) + " into action " + pp(ActTo) + ": these have no common type (typechecking " + pp(ProcTerm) + ")");
-            }
-          }
-          MActFrom=BackupMActFrom;
-
-          //the multiactions in the lhss of comm should not intersect.
-          //make the list of unique actions
-          aterm_list Acts;
-          for (; !MActFrom.empty(); MActFrom=MActFrom.tail())
-          {
-            aterm_appl Act=aterm_cast<aterm_appl>(MActFrom.front());
-            if (std::find(Acts.begin(),Acts.end(),Act)==Acts.end())
-            {
-              Acts.push_front(Act);
-            }
-          }
-          for (; !Acts.empty(); Acts=Acts.tail())
-          {
-            aterm_appl Act=aterm_cast<aterm_appl>(Acts.front());
-            if (std::find(ActsFrom.begin(),ActsFrom.end(),Act)!=ActsFrom.end())
-            {
-              throw mcrl2::runtime_error("synchronizing action " + pp(Act) + " in different ways (typechecking " + pp(ProcTerm) + ")");
-            }
-            else
-            {
-              ActsFrom.push_front(Act);
-            }
+            throw mcrl2::runtime_error("synchronizing action " + pp(Act) + " from (multi)action " + pp(MActFrom) + 
+                              " into action " + pp(ActTo) + ": these have no common type (typechecking " + pp(ProcTerm) + ")");
           }
         }
-      }
-    }
 
-    //allow
-    if (is_allow(ProcTerm))
-    {
-      const allow &t=aterm_cast<const allow>(ProcTerm);
-      action_name_multiset_list MActList=t.allow_set();
-
-      if (MActList.empty())
-      {
-        mCRL2log(warning) << "allowing empty set of (multi) actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
-      }
-      else
-      {
-         action_name_multiset_list MActs;
-
-        for (action_name_multiset_list::const_iterator i=MActList.begin(); i!=MActList.end(); ++i)
+        //the multiactions in the lhss of comm should not intersect.
+        //make the list of unique actions
+        identifier_string_list Acts;
+        for (identifier_string_list::const_iterator i=MActFrom.begin(); i!=MActFrom.end(); ++i)
         {
-          identifier_string_list MAct=i->names();
-
-          //Actions must be declared
-          for (identifier_string_list::const_iterator j=MAct.begin(); j!=MAct.end(); ++j)
+          const identifier_string& Act= *i;
+          if (std::find(Acts.begin(),Acts.end(),Act)==Acts.end())
           {
-            identifier_string Act= *j;
-            if (actions.count(Act)==0)
-            {
-              throw mcrl2::runtime_error("allowing an undefined action " + pp(Act) + " in (multi)action " + pp(MAct) + " (typechecking " + pp(ProcTerm) + ")");
-            }
+            Acts.push_front(Act);
           }
-
-          if (MActIn(MAct,MActs))
+        }
+        for (identifier_string_list::const_iterator a=Acts.begin(); a!=Acts.end(); ++a) 
+        {
+          const identifier_string& Act= *a;
+          if (std::find(ActsFrom.begin(),ActsFrom.end(),Act)!=ActsFrom.end())
           {
-            mCRL2log(warning) << "allowing (multi)action " << pp(MAct) << " twice (typechecking " << pp(ProcTerm) << ")" << std::endl;
+            throw mcrl2::runtime_error("synchronizing action " + pp(Act) + " in different ways (typechecking " + pp(ProcTerm) + ")");
           }
           else
           {
-            MActs.push_front(MAct);
+            ActsFrom.push_front(Act);
           }
         }
       }
     }
-
-    aterm_appl NewProc=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[1]));
-    process_expression a=ProcTerm;
-    return a.set_argument(NewProc,1);
+    return comm(CommList,TraverseActProcVarConstP(Vars,t.operand()));
   }
 
-  if (is_sync(ProcTerm) || is_seq(ProcTerm) || is_bounded_init(ProcTerm) ||
-      is_merge(ProcTerm) || is_left_merge(ProcTerm) || is_choice(ProcTerm))
+  //allow
+  if (is_allow(ProcTerm))
   {
-    process_expression NewLeft=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[0]));
-    process_expression NewRight=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[1]));
-    process_expression a=ProcTerm;
-    return a.set_argument(NewLeft,0).set_argument(NewRight,1);
+    const allow& t=aterm_cast<const allow>(ProcTerm);
+    const action_name_multiset_list& MActList=t.allow_set();
+
+    if (MActList.empty())
+    {
+      mCRL2log(warning) << "allowing empty set of (multi) actions (typechecking " << pp(ProcTerm) << ")" << std::endl;
+    }
+    else
+    {
+       action_name_multiset_list MActs;
+
+      for (action_name_multiset_list::const_iterator i=MActList.begin(); i!=MActList.end(); ++i)
+      {
+        identifier_string_list MAct=i->names();
+
+        //Actions must be declared
+        for (identifier_string_list::const_iterator j=MAct.begin(); j!=MAct.end(); ++j)
+        {
+          identifier_string Act= *j;
+          if (actions.count(Act)==0)
+          {
+            throw mcrl2::runtime_error("allowing an undefined action " + pp(Act) + " in (multi)action " + pp(MAct) + " (typechecking " + pp(ProcTerm) + ")");
+          }
+        }
+
+        if (MActIn(MAct,MActs))
+        {
+          mCRL2log(warning) << "allowing (multi)action " << pp(MAct) << " twice (typechecking " << pp(ProcTerm) << ")" << std::endl;
+        }
+        else
+        {
+          MActs.push_front(MAct);
+        }
+      }
+    }
+    return allow(MActList, TraverseActProcVarConstP(Vars,t.operand()));
+  }
+
+  if (is_sync(ProcTerm))
+  {
+    const sync& t=aterm_cast<const sync>(ProcTerm);
+    return sync(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
+  }
+
+  if (is_seq(ProcTerm))
+  {
+    const seq& t=aterm_cast<const seq>(ProcTerm);
+    return seq(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
+  }
+
+  if (is_bounded_init(ProcTerm))
+  {
+    const bounded_init& t=aterm_cast<const bounded_init>(ProcTerm);
+    return bounded_init(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
+  }
+
+  if (is_merge(ProcTerm))
+  {
+    const merge& t=aterm_cast<const merge>(ProcTerm);
+    return merge(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
+  }
+
+  if (is_left_merge(ProcTerm))
+  {
+    const left_merge& t=aterm_cast<const left_merge>(ProcTerm);
+    return left_merge(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
+  }
+
+  if (is_choice(ProcTerm))
+  {
+    const choice& t=aterm_cast<const choice>(ProcTerm);
+    return choice(TraverseActProcVarConstP(Vars,t.left()),TraverseActProcVarConstP(Vars,t.right()));
   }
 
   if (is_at(ProcTerm))
   {
-    aterm_appl NewProc=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[0]));
-    data_expression Time=aterm_cast<data_expression>(ProcTerm[1]);
-    aterm_appl NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
+    const at& t=aterm_cast<const at>(ProcTerm);
+    const process_expression NewProc=TraverseActProcVarConstP(Vars,t.operand());
+    data_expression Time=t.time_stamp();
+    const sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
 
     sort_expression temp;
     if (!TypeMatchA(sort_real::real_(),NewType,temp))
     {
       //upcasting
-      aterm_appl CastedNewType;
+      sort_expression CastedNewType;
       try
       {
         CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
@@ -810,15 +857,16 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (is_if_then(ProcTerm))
   {
-    data_expression Cond=aterm_cast<aterm_appl>(ProcTerm[0]);
-    aterm_appl NewType=TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
-    aterm_appl NewThen=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(ProcTerm[1]));
+    const if_then& t=aterm_cast<const if_then>(ProcTerm);
+    data_expression Cond=t.condition();
+    const process_expression NewType=TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
+    const process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case()); 
     return if_then(Cond,NewThen);
   }
 
   if (is_if_then_else(ProcTerm))
   {
-    const if_then_else t=aterm_cast<const if_then_else>(ProcTerm);
+    const if_then_else& t=aterm_cast<const if_then_else>(ProcTerm);
     data_expression Cond=t.condition();
     sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
     process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case());
@@ -828,7 +876,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (is_sum(ProcTerm))
   {
-    const sum t=aterm_cast<const sum>(ProcTerm);
+    const sum& t=aterm_cast<const sum>(ProcTerm);
     std::map<identifier_string,sort_expression> CopyVars;
     CopyVars=Vars;
 
@@ -938,7 +986,6 @@ void mcrl2::process::process_type_checker::ReadInActs(const action_label_list &A
   for (lps::action_label_list::const_iterator i=Acts.begin(); i!=Acts.end(); ++i)
   {
     action_label Act= *i;
-    // core::identifier_string ActName=aterm_cast<core::identifier_string>(Act[0]);
     core::identifier_string ActName=Act.name();
     sort_expression_list ActType=Act.sorts();
 
