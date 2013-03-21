@@ -859,7 +859,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   {
     const if_then& t=aterm_cast<const if_then>(ProcTerm);
     data_expression Cond=t.condition();
-    const process_expression NewType=TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
+    TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
     const process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case()); 
     return if_then(Cond,NewThen);
   }
@@ -868,9 +868,9 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   {
     const if_then_else& t=aterm_cast<const if_then_else>(ProcTerm);
     data_expression Cond=t.condition();
-    sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
-    process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case());
-    process_expression NewElse=TraverseActProcVarConstP(Vars,t.else_case());
+    TraverseVarConsTypeD(Vars,Vars,Cond,sort_bool::bool_());
+    const process_expression NewThen=TraverseActProcVarConstP(Vars,t.then_case());
+    const process_expression NewElse=TraverseActProcVarConstP(Vars,t.else_case());
     return if_then_else(Cond,NewThen,NewElse);
   }
 
