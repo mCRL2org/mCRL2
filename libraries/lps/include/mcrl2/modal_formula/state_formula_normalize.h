@@ -211,7 +211,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      return mu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+      return nu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
     }
     else
     {
@@ -223,7 +223,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (negated)
     {
-      return nu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
+      return mu(x.name(), x.assignments(), normalize(detail::negate_propositional_variable(x.name(), x.operand()), true));
     }
     else
     {
