@@ -637,6 +637,30 @@ BOOST_AUTO_TEST_CASE(test_1090)
   }
 }
 
+BOOST_AUTO_TEST_CASE(test_1150)
+{
+  const std::string SPEC1 =
+    "act a,b,c;              \n"
+    "proc P(s: Pos) =        \n"
+    "  (s == 1) -> a . P(2)  \n"
+    "+ (s == 1) -> c . P(3)  \n"
+    "+ (s == 2) -> b . P(4); \n"
+    "init P(1);              \n"
+    ;
+
+  const std::string SPEC2 =
+    "proc P = delta; \n"
+    "init P;         \n"
+    ;
+
+  test_lps2pbes_and_solve(SPEC1, "<a>!<c>true", true);
+  test_lps2pbes_and_solve(SPEC1, "<a>[c]false", true);
+  test_lps2pbes_and_solve(SPEC2, "mu X . X",    false);
+  test_lps2pbes_and_solve(SPEC2, "!(mu X . X)", true);
+  test_lps2pbes_and_solve(SPEC2, "nu X . X",    true);
+  test_lps2pbes_and_solve(SPEC2, "!(nu X . X)", false);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;
