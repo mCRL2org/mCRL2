@@ -126,7 +126,7 @@ struct dependency_graph
       }
     }
     set_index();
-  
+
     // reset incoming edges
     for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
     {
@@ -355,6 +355,25 @@ struct dependency_graph
     compute_dependency_map(u, result);
     return result;
   }
+
+  // returns true if this edge can be inserted without violating the constraints
+  bool can_insert_edge(const core::identifier_string& X, std::size_t i, const core::identifier_string& Y, std::size_t j)
+  {
+    dependency_vertex& u = find_vertex(X, i);
+    dependency_vertex& v = find_vertex(Y, j);
+    std::pair<std::set<dependency_vertex*>::iterator, bool> ui = u.outgoing_edges.insert(&v);
+    std::pair<std::set<dependency_vertex*>::iterator, bool> vi = v.incoming_edges.insert(&u);
+    bool result = check_constraints();
+    if (ui.second)
+    {
+      u.outgoing_edges.erase(*(ui.first));
+    }
+    if (vi.second)
+    {
+      v.incoming_edges.erase(*(vi.first));
+    }
+    return result;
+  }
 };
 
 inline
@@ -497,7 +516,10 @@ bool remove_may_transitions(dependency_graph& must_graph, dependency_graph& may_
     {
       dependency_vertex& v = **i;
       u.outgoing_edges.erase(*i);
-      must_graph.insert_edge(u.X, u.p, v.X, v.p);
+      if (must_graph.can_insert_edge(u.X, u.p, v.X, v.p))
+      {
+        must_graph.insert_edge(u.X, u.p, v.X, v.p);
+      }
     }
   }
 
