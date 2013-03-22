@@ -68,7 +68,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       std::vector<data::data_expression> result;
 
       std::size_t k = control_flow_index(X, j);
-      if (k != std::numeric_limits<std::size_t>::max())
+      if (k != (std::numeric_limits<std::size_t>::max)())
       {
         // find vertices X(e) in Gk
         control_flow_graph& Gk = m_control_flow_graphs[k];
@@ -116,7 +116,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         }
         else
         {
-          index_to_cfp_index.push_back(std::numeric_limits<std::size_t>::max());
+          index_to_cfp_index.push_back((std::numeric_limits<std::size_t>::max)());
         }
       }
 
@@ -141,7 +141,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator ci = m_control_flow_index.find(X);
           assert(ci != m_control_flow_index.end());
           bool found = false;
-          std::size_t m = std::numeric_limits<std::size_t>::max();
+          std::size_t m = (std::numeric_limits<std::size_t>::max)();
           const std::map<std::size_t, std::size_t>& M = ci->second;
           for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
           {
@@ -154,7 +154,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           }
           mCRL2log(log::debug1) << "    with parameter index " << m << " (CFP index " << index_to_cfp_index[m] << ")" << std::endl;
           assert(found);
-          assert(m != std::numeric_limits<std::size_t>::max());
+          assert(m != (std::numeric_limits<std::size_t>::max)());
           assert(index_to_cfp_index[m] < v.size());
 
           control_flow_graph::vertex_const_iterator vi = Gk.find(propositional_variable_instantiation(X, atermpp::make_list(v[index_to_cfp_index[m]])));
@@ -181,7 +181,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     bool has_non_empty_marking(const core::identifier_string& X, std::size_t j) const
     {
       std::size_t k = control_flow_index(X, j);
-      if (k == std::numeric_limits<std::size_t>::max())
+      if (k == (std::numeric_limits<std::size_t>::max)())
       {
         return false;
       }

@@ -366,13 +366,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
       std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator k = m_control_flow_index.find(X);
       if (k == m_control_flow_index.end())
       {
-        return std::numeric_limits<std::size_t>::max();
+        return (std::numeric_limits<std::size_t>::max)();
       }
       const std::map<std::size_t, std::size_t>& m = k->second;
       std::map<std::size_t, std::size_t>::const_iterator i = m.find(j);
       if (i == m.end())
       {
-        return std::numeric_limits<std::size_t>::max();
+        return (std::numeric_limits<std::size_t>::max)();
       }
       return i->second;
     }
