@@ -70,7 +70,7 @@ class list_container: public container_type
 /// \param t A term
 /// \return True if it is a list_container expression
 inline
-bool is_list_container(const container_type& t)
+bool is_list_container(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSortList(t);
 }
@@ -98,7 +98,7 @@ class set_container: public container_type
 /// \param t A term
 /// \return True if it is a set_container expression
 inline
-bool is_set_container(const container_type& t)
+bool is_set_container(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSortSet(t);
 }
@@ -126,7 +126,7 @@ class bag_container: public container_type
 /// \param t A term
 /// \return True if it is a bag_container expression
 inline
-bool is_bag_container(const container_type& t)
+bool is_bag_container(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSortBag(t);
 }
@@ -154,7 +154,7 @@ class fset_container: public container_type
 /// \param t A term
 /// \return True if it is a fset_container expression
 inline
-bool is_fset_container(const container_type& t)
+bool is_fset_container(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSortFSet(t);
 }
@@ -182,7 +182,7 @@ class fbag_container: public container_type
 /// \param t A term
 /// \return True if it is a fbag_container expression
 inline
-bool is_fbag_container(const container_type& t)
+bool is_fbag_container(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSortFBag(t);
 }

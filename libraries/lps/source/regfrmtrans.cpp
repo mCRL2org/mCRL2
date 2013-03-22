@@ -46,39 +46,39 @@ state_formula translate_reg_frms(const state_formula &state_frm)
 
 static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_generator &xyz_generator)
 {
-  if (is_data_expression(part) ||
+  if (data::is_data_expression(part) ||
       lps::is_multi_action(part) ||
-      mcrl2::state_formulas::is_variable(part) || 
-      is_assignment(part) ||
-      is_true(part) ||
-      is_false(part) ||
-      is_yaled(part) ||
-      is_yaled_timed(part) ||
-      is_delay(part) ||
-      is_delay_timed(part)
+      state_formulas::is_variable(part) || 
+      data::is_assignment(part) ||
+      state_formulas::is_true(part) ||
+      state_formulas::is_false(part) ||
+      state_formulas::is_yaled(part) ||
+      state_formulas::is_yaled_timed(part) ||
+      state_formulas::is_delay(part) ||
+      state_formulas::is_delay_timed(part)
      )
   {
     //part is a data expression, a multiaction, a state variable or a data
     //variable declaration (with or without initialisation); return part
   }
-  else if (is_must(part))
+  else if (state_formulas::is_must(part))
   {
     //part is the must operator; return equivalent non-regular formula
     const regular_formula reg_frm = must(part).formula();
     const state_formula phi = must(part).operand();
-    if (is_nil(reg_frm))
+    if (regular_formulas::is_nil(reg_frm))
     {
       //red([nil]phi) -> red([false*]phi)
       part = translate_reg_frms_appl(must(trans_or_nil(false_()), phi),xyz_generator);
     }
-    else if (is_seq(reg_frm))
+    else if (regular_formulas::is_seq(reg_frm))
     {
       const regular_formula R1 = seq(reg_frm).left();
       const regular_formula R2 = seq(reg_frm).right(); 
       //red([R1.R2]phi) -> red([R1][R2]phi)
       part = translate_reg_frms_appl(must(R1, must(R2, phi)),xyz_generator);
     }
-    else if (is_alt(reg_frm))
+    else if (regular_formulas::is_alt(reg_frm))
     {
       const regular_formula R1 = alt(reg_frm).left();
       const regular_formula R2 = alt(reg_frm).right();
@@ -88,13 +88,13 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
                translate_reg_frms_appl(must(R2,phi),xyz_generator)
              );
     }
-    else if (is_trans(reg_frm))
+    else if (regular_formulas::is_trans(reg_frm))
     {
       const regular_formula R = trans(atermpp::aterm_appl(reg_frm)).operand();
       //red([R+]phi) -> red([R.R*]phi)
       part = translate_reg_frms_appl(must(seq(R,trans_or_nil(R)),phi),xyz_generator);
     }
-    else if (is_trans_or_nil(reg_frm))
+    else if (regular_formulas::is_trans_or_nil(reg_frm))
     {
       const regular_formula R = trans_or_nil(atermpp::aterm_appl(reg_frm)).operand();
       //red([R*]phi) -> nu X. red(phi) && red([R]X),
@@ -111,24 +111,24 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
       part = must(reg_frm, translate_reg_frms_appl(phi,xyz_generator));
     }
   }
-  else if (is_may(part))
+  else if (state_formulas::is_may(part))
   {
     //part is the may operator; return equivalent non-regular formula
     regular_formula reg_frm = may(part).formula();
     state_formula phi = may(part).operand();
-    if (is_nil(reg_frm))
+    if (regular_formulas::is_nil(reg_frm))
     {
       //red(<nil>phi) -> red(<false*>phi)
       part = translate_reg_frms_appl(may(trans_or_nil(false_()), phi),xyz_generator);
     }
-    else if (is_seq(reg_frm))
+    else if (regular_formulas::is_seq(reg_frm))
     {
       const regular_formula R1 = seq(reg_frm).left();
       const regular_formula R2 = seq(reg_frm).right();
       //red(<R1.R2>phi) -> red(<R1><R2>phi)
       part = translate_reg_frms_appl(may(R1, may(R2, phi)),xyz_generator);
     }
-    else if (is_alt(reg_frm))
+    else if (regular_formulas::is_alt(reg_frm))
     {
       const regular_formula R1 = alt(reg_frm).left();
       const regular_formula R2 = alt(reg_frm).right();
@@ -138,13 +138,13 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
                translate_reg_frms_appl(may(R2,phi),xyz_generator)
              );
     }
-    else if (is_trans(reg_frm))
+    else if (regular_formulas::is_trans(reg_frm))
     {
       const regular_formula R = trans(atermpp::aterm_appl(reg_frm)).operand();
       //red(<R+>phi) -> red(<R.R*>phi)
       part = translate_reg_frms_appl(may(seq(R,trans_or_nil(R)),phi),xyz_generator);
     }
-    else if (is_trans_or_nil(reg_frm))
+    else if (regular_formulas::is_trans_or_nil(reg_frm))
     {
       const regular_formula R = trans_or_nil(atermpp::aterm_appl(reg_frm)).operand();
       //red(<R*>phi) -> mu X. red(phi) || red(<R>X),
@@ -161,45 +161,45 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
       part = may(reg_frm, translate_reg_frms_appl(phi,xyz_generator));
     }
   }
-  else if (is_not(part))
+  else if (state_formulas::is_not(part))
   {
     not_ not_part=atermpp::aterm_appl(part); // This ugly trick is necessary; without adding the
                                              // atermpp::aterm_appl cast, not_part becomes equal to not(part)
                                              // and this is not desired.
     part = not_(translate_reg_frms_appl(not_part.operand(),xyz_generator));
   }
-  else if (is_and(part))
+  else if (state_formulas::is_and(part))
   {
     part = and_(translate_reg_frms_appl(and_(part).left(),xyz_generator),
                 translate_reg_frms_appl(and_(part).right(),xyz_generator));
   }
-  else if (is_or(part))
+  else if (state_formulas::is_or(part))
   {
     part = or_(translate_reg_frms_appl(or_(part).left(),xyz_generator),
                translate_reg_frms_appl(or_(part).right(),xyz_generator));
   }
-  else if (is_imp(part))
+  else if (state_formulas::is_imp(part))
   {
     part = imp(translate_reg_frms_appl(imp(part).left(),xyz_generator),
                 translate_reg_frms_appl(imp(part).right(),xyz_generator));
   }
-  else if (is_forall(part))
+  else if (state_formulas::is_forall(part))
   {
     part = mcrl2::state_formulas::forall(mcrl2::state_formulas::forall(part).variables(),
                   translate_reg_frms_appl(mcrl2::state_formulas::forall(part).body(),xyz_generator));
   }
-  else if (is_exists(part))
+  else if (state_formulas::is_exists(part))
   {
     part = mcrl2::state_formulas::exists(mcrl2::state_formulas::exists(part).variables(),
                   translate_reg_frms_appl(mcrl2::state_formulas::exists(part).body(),xyz_generator));
   }
-  else if (is_nu(part))
+  else if (state_formulas::is_nu(part))
   {
     const nu nu_part=part;
     part = nu(nu_part.name(),nu_part.assignments(),
                   translate_reg_frms_appl(nu_part.operand(),xyz_generator));
   }
-  else if (is_mu(part))
+  else if (state_formulas::is_mu(part))
   {
     const mu mu_part=part;
     part = mu(mu_part.name(),mu_part.assignments(),

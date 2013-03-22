@@ -87,7 +87,7 @@ class nil: public regular_formula
 /// \param t A term
 /// \return True if it is a nil expression
 inline
-bool is_nil(const regular_formula& t)
+bool is_nil(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsRegNil(t);
 }
@@ -130,7 +130,7 @@ class seq: public regular_formula
 /// \param t A term
 /// \return True if it is a seq expression
 inline
-bool is_seq(const regular_formula& t)
+bool is_seq(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsRegSeq(t);
 }
@@ -173,7 +173,7 @@ class alt: public regular_formula
 /// \param t A term
 /// \return True if it is a alt expression
 inline
-bool is_alt(const regular_formula& t)
+bool is_alt(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsRegAlt(t);
 }
@@ -211,7 +211,7 @@ class trans: public regular_formula
 /// \param t A term
 /// \return True if it is a trans expression
 inline
-bool is_trans(const regular_formula& t)
+bool is_trans(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsRegTrans(t);
 }
@@ -249,7 +249,7 @@ class trans_or_nil: public regular_formula
 /// \param t A term
 /// \return True if it is a trans_or_nil expression
 inline
-bool is_trans_or_nil(const regular_formula& t)
+bool is_trans_or_nil(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsRegTransOrNil(t);
 }

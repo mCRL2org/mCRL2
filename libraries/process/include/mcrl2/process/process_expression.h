@@ -115,7 +115,7 @@ class process_instance: public process_expression
 /// \param t A term
 /// \return True if it is a process_instance expression
 inline
-bool is_process_instance(const process_expression& t)
+bool is_process_instance(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsProcess(t);
 }
@@ -158,7 +158,7 @@ class process_instance_assignment: public process_expression
 /// \param t A term
 /// \return True if it is a process_instance_assignment expression
 inline
-bool is_process_instance_assignment(const process_expression& t)
+bool is_process_instance_assignment(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsProcessAssignment(t);
 }
@@ -186,7 +186,7 @@ class delta: public process_expression
 /// \param t A term
 /// \return True if it is a delta expression
 inline
-bool is_delta(const process_expression& t)
+bool is_delta(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsDelta(t);
 }
@@ -214,7 +214,7 @@ class tau: public process_expression
 /// \param t A term
 /// \return True if it is a tau expression
 inline
-bool is_tau(const process_expression& t)
+bool is_tau(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsTau(t);
 }
@@ -257,7 +257,7 @@ class sum: public process_expression
 /// \param t A term
 /// \return True if it is a sum expression
 inline
-bool is_sum(const process_expression& t)
+bool is_sum(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSum(t);
 }
@@ -300,7 +300,7 @@ class block: public process_expression
 /// \param t A term
 /// \return True if it is a block expression
 inline
-bool is_block(const process_expression& t)
+bool is_block(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsBlock(t);
 }
@@ -343,7 +343,7 @@ class hide: public process_expression
 /// \param t A term
 /// \return True if it is a hide expression
 inline
-bool is_hide(const process_expression& t)
+bool is_hide(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsHide(t);
 }
@@ -386,7 +386,7 @@ class rename: public process_expression
 /// \param t A term
 /// \return True if it is a rename expression
 inline
-bool is_rename(const process_expression& t)
+bool is_rename(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsRename(t);
 }
@@ -429,7 +429,7 @@ class comm: public process_expression
 /// \param t A term
 /// \return True if it is a comm expression
 inline
-bool is_comm(const process_expression& t)
+bool is_comm(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsComm(t);
 }
@@ -472,7 +472,7 @@ class allow: public process_expression
 /// \param t A term
 /// \return True if it is a allow expression
 inline
-bool is_allow(const process_expression& t)
+bool is_allow(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsAllow(t);
 }
@@ -515,7 +515,7 @@ class sync: public process_expression
 /// \param t A term
 /// \return True if it is a sync expression
 inline
-bool is_sync(const process_expression& t)
+bool is_sync(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSync(t);
 }
@@ -558,7 +558,7 @@ class at: public process_expression
 /// \param t A term
 /// \return True if it is a at expression
 inline
-bool is_at(const process_expression& t)
+bool is_at(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsAtTime(t);
 }
@@ -601,7 +601,7 @@ class seq: public process_expression
 /// \param t A term
 /// \return True if it is a seq expression
 inline
-bool is_seq(const process_expression& t)
+bool is_seq(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSeq(t);
 }
@@ -644,7 +644,7 @@ class if_then: public process_expression
 /// \param t A term
 /// \return True if it is a if_then expression
 inline
-bool is_if_then(const process_expression& t)
+bool is_if_then(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsIfThen(t);
 }
@@ -692,7 +692,7 @@ class if_then_else: public process_expression
 /// \param t A term
 /// \return True if it is a if_then_else expression
 inline
-bool is_if_then_else(const process_expression& t)
+bool is_if_then_else(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsIfThenElse(t);
 }
@@ -735,7 +735,7 @@ class bounded_init: public process_expression
 /// \param t A term
 /// \return True if it is a bounded_init expression
 inline
-bool is_bounded_init(const process_expression& t)
+bool is_bounded_init(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsBInit(t);
 }
@@ -778,7 +778,7 @@ class merge: public process_expression
 /// \param t A term
 /// \return True if it is a merge expression
 inline
-bool is_merge(const process_expression& t)
+bool is_merge(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsMerge(t);
 }
@@ -821,7 +821,7 @@ class left_merge: public process_expression
 /// \param t A term
 /// \return True if it is a left_merge expression
 inline
-bool is_left_merge(const process_expression& t)
+bool is_left_merge(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsLMerge(t);
 }
@@ -864,7 +864,7 @@ class choice: public process_expression
 /// \param t A term
 /// \return True if it is a choice expression
 inline
-bool is_choice(const process_expression& t)
+bool is_choice(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsChoice(t);
 }
@@ -892,7 +892,7 @@ class parameter_identifier: public process_expression
 /// \param t A term
 /// \return True if it is a parameter_identifier expression
 inline
-bool is_parameter_identifier(const process_expression& t)
+bool is_parameter_identifier(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsParamId(t);
 }
@@ -940,7 +940,7 @@ class id_assignment: public process_expression
 /// \param t A term
 /// \return True if it is a id_assignment expression
 inline
-bool is_id_assignment(const process_expression& t)
+bool is_id_assignment(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsIdAssignment(t);
 }

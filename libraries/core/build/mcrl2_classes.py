@@ -808,7 +808,8 @@ bool is_%s(const %s& t)
         if name[-1] == '_':
             name = name[:-1]
         aterm = self.aterm
-        text = text % (name, name, name, self.superclass(), 'core', aterm)
+        text = text % (name, name, name, 'atermpp::aterm_appl', 'core', aterm)
+#        text = text % (name, name, name, self.superclass(), 'core', aterm)
         return text
 
     def is_function_name(self, include_namespace = True):

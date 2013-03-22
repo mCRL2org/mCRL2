@@ -70,7 +70,7 @@ class set_or_bag_comprehension_binder: public binder_type
 /// \param t A term
 /// \return True if it is a set_or_bag_comprehension_binder expression
 inline
-bool is_set_or_bag_comprehension_binder(const binder_type& t)
+bool is_set_or_bag_comprehension_binder(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSetBagComp(t);
 }
@@ -98,7 +98,7 @@ class set_comprehension_binder: public binder_type
 /// \param t A term
 /// \return True if it is a set_comprehension_binder expression
 inline
-bool is_set_comprehension_binder(const binder_type& t)
+bool is_set_comprehension_binder(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsSetComp(t);
 }
@@ -126,7 +126,7 @@ class bag_comprehension_binder: public binder_type
 /// \param t A term
 /// \return True if it is a bag_comprehension_binder expression
 inline
-bool is_bag_comprehension_binder(const binder_type& t)
+bool is_bag_comprehension_binder(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsBagComp(t);
 }
@@ -154,7 +154,7 @@ class forall_binder: public binder_type
 /// \param t A term
 /// \return True if it is a forall_binder expression
 inline
-bool is_forall_binder(const binder_type& t)
+bool is_forall_binder(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsForall(t);
 }
@@ -182,7 +182,7 @@ class exists_binder: public binder_type
 /// \param t A term
 /// \return True if it is a exists_binder expression
 inline
-bool is_exists_binder(const binder_type& t)
+bool is_exists_binder(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsExists(t);
 }
@@ -210,7 +210,7 @@ class lambda_binder: public binder_type
 /// \param t A term
 /// \return True if it is a lambda_binder expression
 inline
-bool is_lambda_binder(const binder_type& t)
+bool is_lambda_binder(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsLambda(t);
 }

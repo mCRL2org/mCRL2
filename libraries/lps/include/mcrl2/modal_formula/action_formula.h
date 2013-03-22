@@ -96,7 +96,7 @@ class true_: public action_formula
 /// \param t A term
 /// \return True if it is a true expression
 inline
-bool is_true(const action_formula& t)
+bool is_true(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActTrue(t);
 }
@@ -124,7 +124,7 @@ class false_: public action_formula
 /// \param t A term
 /// \return True if it is a false expression
 inline
-bool is_false(const action_formula& t)
+bool is_false(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActFalse(t);
 }
@@ -162,7 +162,7 @@ class not_: public action_formula
 /// \param t A term
 /// \return True if it is a not expression
 inline
-bool is_not(const action_formula& t)
+bool is_not(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActNot(t);
 }
@@ -205,7 +205,7 @@ class and_: public action_formula
 /// \param t A term
 /// \return True if it is a and expression
 inline
-bool is_and(const action_formula& t)
+bool is_and(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActAnd(t);
 }
@@ -248,7 +248,7 @@ class or_: public action_formula
 /// \param t A term
 /// \return True if it is a or expression
 inline
-bool is_or(const action_formula& t)
+bool is_or(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActOr(t);
 }
@@ -291,7 +291,7 @@ class imp: public action_formula
 /// \param t A term
 /// \return True if it is a imp expression
 inline
-bool is_imp(const action_formula& t)
+bool is_imp(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActImp(t);
 }
@@ -334,7 +334,7 @@ class forall: public action_formula
 /// \param t A term
 /// \return True if it is a forall expression
 inline
-bool is_forall(const action_formula& t)
+bool is_forall(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActForall(t);
 }
@@ -377,7 +377,7 @@ class exists: public action_formula
 /// \param t A term
 /// \return True if it is a exists expression
 inline
-bool is_exists(const action_formula& t)
+bool is_exists(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActExists(t);
 }
@@ -420,7 +420,7 @@ class at: public action_formula
 /// \param t A term
 /// \return True if it is a at expression
 inline
-bool is_at(const action_formula& t)
+bool is_at(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActAt(t);
 }
