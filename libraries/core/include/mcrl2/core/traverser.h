@@ -15,6 +15,7 @@
 #include <set>
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/nil.h"
 
 namespace mcrl2
 {
@@ -52,8 +53,14 @@ class traverser
       }
     }
 
-    // TODO: This dependency on identifier_string should be moved elsewhere...
+    // TODO: This dependency on identifier_string and nil should be moved elsewhere...
     void operator()(const core::identifier_string& x)
+    {
+      static_cast<Derived&>(*this).enter(x);
+      static_cast<Derived&>(*this).leave(x);
+    }
+
+    void operator()(const core::nil& x)
     {
       static_cast<Derived&>(*this).enter(x);
       static_cast<Derived&>(*this).leave(x);

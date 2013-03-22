@@ -225,6 +225,20 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::id_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -304,6 +318,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
+    }
+    else if (process::is_parameter_identifier(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+    }
+    else if (process::is_id_assignment(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::id_assignment>(x));
     }
     else if (lps::is_action(x))
     {
@@ -492,6 +514,20 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::id_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -571,6 +607,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
+    }
+    else if (process::is_parameter_identifier(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+    }
+    else if (process::is_id_assignment(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::id_assignment>(x));
     }
     else if (lps::is_action(x))
     {
@@ -756,6 +800,20 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::id_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -835,6 +893,14 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
+    }
+    else if (process::is_parameter_identifier(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+    }
+    else if (process::is_id_assignment(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::id_assignment>(x));
     }
     else if (lps::is_action(x))
     {
@@ -1026,6 +1092,20 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::id_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1105,6 +1185,14 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
+    }
+    else if (process::is_parameter_identifier(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+    }
+    else if (process::is_id_assignment(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::id_assignment>(x));
     }
     else if (lps::is_action(x))
     {
@@ -1336,6 +1424,21 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::id_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.name());
+    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1415,6 +1518,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
+    }
+    else if (process::is_parameter_identifier(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+    }
+    else if (process::is_id_assignment(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::id_assignment>(x));
     }
     else if (lps::is_action(x))
     {
@@ -1601,6 +1712,20 @@ struct add_traverser_action_labels: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::parameter_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const process::id_assignment& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1680,6 +1805,14 @@ struct add_traverser_action_labels: public Traverser<Derived>
     else if (process::is_choice(x))
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
+    }
+    else if (process::is_parameter_identifier(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+    }
+    else if (process::is_id_assignment(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<process::id_assignment>(x));
     }
     else if (lps::is_action(x))
     {

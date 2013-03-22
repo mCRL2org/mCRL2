@@ -23,6 +23,7 @@ import string
 
 CORE_CLASSES = r'''
 identifier_string() : public atermpp::aterm_appl | SC | String | An identifier
+nil() : public atermpp::aterm_appl | C | Nil | The value nil
 '''
 
 CONTAINER_TYPES = r'''
@@ -177,6 +178,8 @@ bounded_init(const process_expression& left, const process_expression& right)   
 merge(const process_expression& left, const process_expression& right)                                                         : public process::process_expression | EI  | Merge             | The merge operator
 left_merge(const process_expression& left, const process_expression& right)                                                    : public process::process_expression | EI  | LMerge            | The left merge operator
 choice(const process_expression& left, const process_expression& right)                                                        : public process::process_expression | EI  | Choice            | The choice operator
+parameter_identifier()                                                                                                         : public process::process_expression | EI  | ParamId           | A parameter identifier (only available before type checking)
+id_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignment)                         : public process::process_expression | EI  | IdAssignment      | An id assignment (only available before type checking)
 '''
 
 PBES_CLASSES = r'''

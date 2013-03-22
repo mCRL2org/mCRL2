@@ -33,6 +33,7 @@ def make_classes(filename, class_text, namespace, add_constructor_overloads = Fa
 
 if __name__ == "__main__":
     result = True
+    result = make_classes('../../core/include/mcrl2/core',                            CORE_CLASSES                 , namespace = 'core'            ) and result
     result = make_classes('../../bes/include/mcrl2/bes/boolean_expression.h',         BOOLEAN_EXPRESSION_CLASSES   , namespace = 'bes'             ) and result
     result = make_classes('../../data/include/mcrl2/data/assignment.h',               ASSIGNMENT_EXPRESSION_CLASSES, namespace = 'data'            ) and result
     result = make_classes('../../data/include/mcrl2/data/binder_type.h',              BINDER_TYPES                 , namespace = 'data'            ) and result

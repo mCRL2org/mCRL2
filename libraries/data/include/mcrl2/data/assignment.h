@@ -118,7 +118,7 @@ typedef std::vector<assignment>    assignment_vector;
 /// \param t A term
 /// \return True if it is a assignment expression
 inline
-bool is_assignment(const atermpp::aterm_appl& t)
+bool is_assignment(const assignment_expression& t)
 {
   return core::detail::gsIsDataVarIdInit(t);
 }

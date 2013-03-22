@@ -869,6 +869,82 @@ bool is_choice(const process_expression& t)
   return core::detail::gsIsChoice(t);
 }
 
+
+/// \brief A parameter identifier (only available before type checking)
+class parameter_identifier: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    parameter_identifier()
+      : process_expression(core::detail::constructParamId())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    parameter_identifier(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_ParamId(*this));
+    }
+};
+
+/// \brief Test for a parameter_identifier expression
+/// \param t A term
+/// \return True if it is a parameter_identifier expression
+inline
+bool is_parameter_identifier(const process_expression& t)
+{
+  return core::detail::gsIsParamId(t);
+}
+
+
+/// \brief An id assignment (only available before type checking)
+class id_assignment: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    id_assignment()
+      : process_expression(core::detail::constructIdAssignment())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    id_assignment(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_IdAssignment(*this));
+    }
+
+    /// \brief Constructor.
+    id_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignment)
+      : process_expression(core::detail::gsMakeIdAssignment(name, assignment))
+    {}
+
+    /// \brief Constructor.
+    id_assignment(const std::string& name, const data::identifier_assignment_list& assignment)
+      : process_expression(core::detail::gsMakeIdAssignment(core::identifier_string(name), assignment))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+    }
+
+    const data::identifier_assignment_list& assignment() const
+    {
+      return atermpp::aterm_cast<const data::identifier_assignment_list>(atermpp::list_arg2(*this));
+    }
+};
+
+/// \brief Test for a id_assignment expression
+/// \param t A term
+/// \return True if it is a id_assignment expression
+inline
+bool is_id_assignment(const process_expression& t)
+{
+  return core::detail::gsIsIdAssignment(t);
+}
+
 //--- end generated classes ---//
 
 // From the documentation:
