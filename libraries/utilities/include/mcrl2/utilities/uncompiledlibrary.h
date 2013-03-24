@@ -129,6 +129,8 @@ public:
 
     virtual ~uncompiled_library()
     {
+#ifndef NDEBUG // In debug mode, the compiled rewriter has not been removed directly after loading, 
+               // and we still have to remove it.
       try
       {
         cleanup();
@@ -137,6 +139,7 @@ public:
       {
         mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
       }
+#endif
     }
 
 };

@@ -32,7 +32,6 @@
 #include "mcrl2/data/detail/enum/standard.h"
 
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/detail/rewrite/nfs_array.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;

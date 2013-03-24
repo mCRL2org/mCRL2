@@ -1164,7 +1164,7 @@ static aterm_list create_strategy(
   while (1)
   {
     // First collect rules without dependencies to the strategy
-    data_equation_list no_deps = data_equation_list(aterm_list());
+    data_equation_list no_deps;
     aterm_list has_deps;
     for (; !dep_list.empty(); dep_list=dep_list.tail())
     {
@@ -2221,7 +2221,6 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, size_
   {
     used.push_back((nf_args & (1 << i)) != 0);
   }
-
   while (!strat.empty())
   {
     if (strat.front().type_is_int())
@@ -2234,6 +2233,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, size_
 
         used[arg] = true;
       }
+fprintf(f,"// Considering arguemnt  %ld\n",arg);
     }
     else
     {
@@ -3221,6 +3221,17 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     rewriter_so->leave_files();
     throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + e.what());
   }
+
+#ifdef NDEBUG // In non debug mode clear compiled files directly after loading.
+  try
+  {
+    rewriter_so->cleanup();
+  }
+  catch (std::runtime_error &error)
+  {
+    mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
+  }
+#endif
 
   so_rewr_init(this);
   need_rebuild = false;
