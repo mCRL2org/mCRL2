@@ -66,6 +66,20 @@ struct term_traits_optimized<pbes_system::pbes_expression>: public core::term_tr
   {
     return utilities::optimized_exists_no_empty_domain(d, x);
   }
+
+  template <typename FwdIt>
+  static inline
+  term_type join_or(FwdIt first, FwdIt last)
+  {
+    return utilities::detail::join(first, last, or_, false_());
+  }
+
+  template <typename FwdIt>
+  static inline
+  term_type join_and(FwdIt first, FwdIt last)
+  {
+    return utilities::detail::join(first, last, and_, true_());
+  }
 };
 
 } // namespace core

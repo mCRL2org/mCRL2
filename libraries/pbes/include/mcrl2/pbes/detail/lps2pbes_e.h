@@ -53,7 +53,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
               const lps::linear_process& lps_,
               data::set_identifier_generator& id_generator_,
               const data::variable& T_,
-              TermTraits /* tr */
+              TermTraits
              )
     : phi0(phi0_), lps(lps_), id_generator(id_generator_), T(T_)
   {}
@@ -230,7 +230,6 @@ struct apply_e_traverser: public Traverser<apply_e_traverser<Traverser, TermTrai
 };
 
 template <typename TermTraits>
-inline
 std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
                                  const state_formulas::state_formula& x,
                                  const lps::linear_process& lps,

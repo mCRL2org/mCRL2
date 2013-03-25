@@ -641,7 +641,7 @@ pbes_expression data_arg(const pbes_expression& t)
   {
     assert(data::is_application(t));
     const data::application &a=atermpp::aterm_cast<const data::application>(t);
-    return *(a.begin()); 
+    return *(a.begin());
   }
   else
   {
@@ -1202,6 +1202,20 @@ struct term_traits<pbes_system::pbes_expression>
   term_type or_(const term_type& p, const term_type& q)
   {
     return atermpp::aterm_appl(core::detail::gsMakePBESOr(p,q));
+  }
+
+  template <typename FwdIt>
+  static inline
+  term_type join_or(FwdIt first, FwdIt last)
+  {
+    return utilities::detail::join(first, last, or_, false_());
+  }
+
+  template <typename FwdIt>
+  static inline
+  term_type join_and(FwdIt first, FwdIt last)
+  {
+    return utilities::detail::join(first, last, and_, true_());
   }
 
   /// \brief Make a sorted conjunction

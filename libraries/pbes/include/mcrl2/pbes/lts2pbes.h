@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/detail/lts2pbes_lts.h"
 #include "mcrl2/pbes/detail/lts2pbes_e.h"
 #include "mcrl2/utilities/progress_meter.h"
+#include "mcrl2/pbes/detail/term_traits_optimized.h"
 
 namespace mcrl2 {
 
@@ -90,7 +91,7 @@ class lts2pbes_algorithm
       mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
-      std::vector<pbes_equation> eqn = detail::E(f0, f0, lts0, lts1, m_progress_meter);
+      std::vector<pbes_equation> eqn = detail::E(f0, f0, lts0, lts1, m_progress_meter, core::term_traits_optimized<pbes_expression>());
 
       // compute the initial state
       state_type s0 = lts0.initial_state();

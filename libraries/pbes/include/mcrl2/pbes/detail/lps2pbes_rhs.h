@@ -192,7 +192,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
       gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
       data::data_expression ti = ai.time();
-      pbes_expression p1 = Sat(ai, alpha, id_generator);
+      pbes_expression p1 = Sat(ai, alpha, id_generator, TermTraits());
       pbes_expression p2 = ci;
       rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
       pbes_expression p = tr::and_(p1, p2);
@@ -205,7 +205,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       v.push_back(p);
     }
 
-    pbes_expression result = is_must ? pbes_expr::join_and(v.begin(), v.end()) : pbes_expr::join_or(v.begin(), v.end());
+    pbes_expression result = is_must ? tr::join_and(v.begin(), v.end()) : tr::join_or(v.begin(), v.end());
     push(result);
   }
 
@@ -246,7 +246,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       pbes_expression p = tr::forall(yj, tr::or_(data::sort_bool::not_(cj), data::greater(t, tj)));
       v.push_back(p);
     }
-    push(tr::and_(pbes_expr::join_or(v.begin(), v.end()), data::greater(t, T)));
+    push(tr::and_(tr::join_or(v.begin(), v.end()), data::greater(t, T)));
   }
 
   void leave(const state_formulas::delay&)
@@ -276,7 +276,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       pbes_expression p = tr::exists(yj, tr::and_(cj, data::less_equal(t, tj)));
       v.push_back(p);
     }
-    push(tr::or_(pbes_expr::join_or(v.begin(), v.end()), data::less_equal(t, T)));
+    push(tr::or_(tr::join_or(v.begin(), v.end()), data::less_equal(t, T)));
   }
 
   void leave(const state_formulas::variable& x)
@@ -473,7 +473,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
       lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
       gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
       data::data_expression ti = ai.time();
-      pbes_expression p1 = Sat(ai, alpha, id_generator);
+      pbes_expression p1 = Sat(ai, alpha, id_generator, TermTraits());
       pbes_expression p2 = ci;
       rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
       pbes_expression p = tr::and_(p1, p2);
@@ -493,7 +493,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
       v.push_back(propositional_variable_instantiation(Y, data::make_data_expression_list(d)));
     }
 
-    pbes_expression result = is_must ? pbes_expr::join_and(v.begin(), v.end()) : pbes_expr::join_or(v.begin(), v.end());
+    pbes_expression result = is_must ? tr::join_and(v.begin(), v.end()) : tr::join_or(v.begin(), v.end());
     push(result);
   }
 
