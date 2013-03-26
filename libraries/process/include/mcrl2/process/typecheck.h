@@ -57,7 +57,11 @@ class process_type_checker:public data::data_type_checker
     process_expression TraverseActProcVarConstP(
           const std::map<core::identifier_string,data::sort_expression> &Vars, 
           const process_expression &ProcTerm);
-    process_expression RewrActProc(const std::map<core::identifier_string,data::sort_expression> &Vars, process_expression ProcTerm);
+    process_expression RewrActProc(
+               const std::map<core::identifier_string,data::sort_expression> &Vars,
+               const core::identifier_string& Name,
+               const data::data_expression_list& pars);
+
     data::sort_expression_list InsertType(const data::sort_expression_list TypeList, const data::sort_expression Type);
     std::pair<bool,data::sort_expression_list> AdjustNotInferredList(
                                   const data::sort_expression_list &PosTypeList, 

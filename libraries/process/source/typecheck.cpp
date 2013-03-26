@@ -67,10 +67,10 @@ static bool MActEq(identifier_string_list MAct1, identifier_string_list MAct2)
 
 
 
-static aterm_list list_minus(const aterm_list &l, const aterm_list &m)
+static identifier_string_list list_minus(const identifier_string_list &l, const identifier_string_list &m)
 {
-  aterm_list n;
-  for (aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  identifier_string_list n;
+  for (identifier_string_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
     if (std::find(m.begin(),m.end(),*i) == m.end())
     {
@@ -270,10 +270,13 @@ std::pair<bool,sort_expression_list> mcrl2::process::process_type_checker::Adjus
 
 
 
-process_expression mcrl2::process::process_type_checker::RewrActProc(const std::map<core::identifier_string,sort_expression> &Vars, process_expression /* ParamId */ ProcTerm)
+process_expression mcrl2::process::process_type_checker::RewrActProc(
+               const std::map<core::identifier_string,sort_expression> &Vars, 
+               const core::identifier_string& Name,
+               const data_expression_list& pars)
 {
   process_expression Result;
-  core::identifier_string Name(ProcTerm[0]);
+  // core::identifier_string Name(ProcTerm[0]);
   term_list<sort_expression_list> ParList;
 
   bool action=false;
@@ -300,7 +303,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
   }
   assert(!ParList.empty());
 
-  size_t nFactPars=aterm_cast<aterm_list>(ProcTerm[1]).size();
+  size_t nFactPars=pars.size();
   const std::string msg=(action)?"action":"process";
 
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
@@ -321,18 +324,18 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
   {
     throw mcrl2::runtime_error("no " + msg + " " + pp(Name)
                     + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
-                    + " is declared (while typechecking " + pp(ProcTerm) + ")");
+                    + " is declared (while typechecking " + pp(Name) + "(" + pp(pars) + "))");
   }
 
   if (ParList.size()==1)
   {
-    Result=MakeActionOrProc(action,Name,ParList.front(),aterm_cast<data_expression_list>(ProcTerm[1]));
+    Result=MakeActionOrProc(action,Name,ParList.front(),pars);
   }
   else
   {
     // we need typechecking to find the correct type of the action.
     // make the list of possible types for the parameters
-    Result=MakeActionOrProc(action,Name,GetNotInferredList(ParList),aterm_cast<const data_expression_list>(ProcTerm[1]));
+    Result=MakeActionOrProc(action,Name,GetNotInferredList(ParList),pars);
   }
 
   //process the arguments
@@ -342,7 +345,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
 
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
-  for (aterm_list Pars=aterm_cast<aterm_list>(ProcTerm[1]); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
+  for (data_expression_list Pars=pars; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
   {
     data_expression Par=Pars.front();
     sort_expression PosType=PosTypeList.front();
@@ -354,7 +357,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + pp(Par) + " as type " + pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + pp(ProcTerm) + ")");
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + pp(Par) + " as type " + pp(ExpandNumTypesDown(PosType)) + " (while typechecking " + pp(Name) + 
+            "(" + pp(pars) + "))");
     }
     NewPars.push_front(Par);
     NewPosTypeList.push_front(NewPosType);
@@ -368,7 +372,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
   if (!p.first)
   {
     PosTypeList=aterm_cast<sort_expression_list>(aterm_cast<aterm_appl>(Result[0])[1]);
-    aterm_list Pars=NewPars;
+    data_expression_list Pars=NewPars;
     NewPars=data_expression_list();
     sort_expression_list CastedPosTypeList;
     for (; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail(),NewPosTypeList=NewPosTypeList.tail())
@@ -384,7 +388,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
       }
       catch (mcrl2::runtime_error &e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + pp(NewPosType) + " to " + pp(PosType) + "(while typechecking " + pp(Par) + " in " + pp(ProcTerm));
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot cast " + pp(NewPosType) + " to " + pp(PosType) + "(while typechecking " + pp(Par) + " in " + 
+                   pp(Name) + "(" + pp(pars) + ")");
       }
 
       NewPars.push_front(Par);
@@ -398,7 +403,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
 
     if (!p.first)
     {
-      throw mcrl2::runtime_error("no " + msg + " " + pp(Name) + "with type " + pp(NewPosTypeList) + " is declared (while typechecking " + pp(ProcTerm) + ")");
+      throw mcrl2::runtime_error("no " + msg + " " + pp(Name) + "with type " + pp(NewPosTypeList) + " is declared (while typechecking " + 
+              pp(Name) + "(" + pp(pars) + "))");
     }
   }
 
@@ -407,8 +413,7 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(const std::
     throw mcrl2::runtime_error("ambiguous " + msg + " " + pp(Name));
   }
 
-  Result=MakeActionOrProc(action,Name,PosTypeList,NewPars);
-  return Result;
+  return MakeActionOrProc(action,Name,PosTypeList,NewPars);
 }
 
 
@@ -423,11 +428,11 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   }
 
   //Here the code for short-hand assignments begins.
-  if (gsIsIdAssignment(ProcTerm))
-  // if (is_process_instance_assignment(ProcTerm)) This is wrong, this case is still missing..
+  if (is_id_assignment(ProcTerm))
   {
-    mCRL2log(debug) << "typechecking a process call with short-hand assignments " << ProcTerm << "" << std::endl;
-    core::identifier_string Name=aterm_cast<core::identifier_string>(ProcTerm[0]);
+    const id_assignment& t=aterm_cast<const id_assignment>(ProcTerm);
+    mCRL2log(debug) << "typechecking a process call with short-hand assignments " << t << "" << std::endl;
+    const core::identifier_string& Name=t.name();
     const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=processes.find(Name);
     
     if (j==processes.end())
@@ -437,24 +442,24 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
     term_list <sort_expression_list> ParList=j->second;
     // Put the assignments into a table
-    std::map <aterm_appl,aterm_appl> As;    // variable -> expression (both untyped, still)
-    const aterm_list &al=aterm_cast<aterm_list>(ProcTerm[1]);
-    for (aterm_list::const_iterator l=al.begin(); l!=al.end(); ++l)
+    std::map <identifier_string,data_expression> As;    // variable -> expression (both untyped, still)
+    const identifier_assignment_list &al=t.assignment();
+    for (identifier_assignment_list::const_iterator l=al.begin(); l!=al.end(); ++l)
     {
-      const aterm_appl a= aterm_cast<aterm_appl>(*l);
-      const std::map <aterm_appl,aterm_appl>::const_iterator i=As.find(aterm_cast<aterm_appl>(a[0]));
+      const identifier_assignment& a= *l;
+      const std::map <identifier_string,data_expression>::const_iterator i=As.find(a.lhs());
       if (i!=As.end()) // An assignment of the shape x:=t already exists, this is not OK.
       {
-        throw mcrl2::runtime_error("Double assignment to variable " + pp(aterm_cast<aterm_appl>(a[0])) + " (detected assigned values are " + pp(i->second) + " and " + pp(aterm_cast<aterm_appl>(a[1])) + ")");
+        throw mcrl2::runtime_error("Double assignment to variable " + pp(a.lhs()) + " (detected assigned values are " + pp(i->second) + " and " + pp(a.rhs()) + ")");
       }
-      As[aterm_cast<aterm_appl>(a[0])]=aterm_cast<aterm_appl>(a[1]);
+      As[a.lhs()]=a.rhs();
     }
 
     {
       // Now filter the ParList to contain only the processes with parameters in this process call with assignments
       term_list <sort_expression_list> NewParList;
       assert(!ParList.empty());
-      aterm_appl Culprit; // Variable used for more intelligible error messages.
+      identifier_string Culprit; // Variable used for more intelligible error messages.
       for (; !ParList.empty(); ParList=ParList.tail())
       {
         sort_expression_list Par=ParList.front();
@@ -462,49 +467,49 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         // get the formal parameter names
         variable_list FormalPars=proc_pars[process_identifier(Name,Par)];
         // we only need the names of the parameters, not the types
-        aterm_list FormalParNames;
-        for (; !FormalPars.empty(); FormalPars=FormalPars.tail())
+        identifier_string_list FormalParNames;
+        for (variable_list::const_iterator i=FormalPars.begin(); i!=FormalPars.end(); ++i)
         {
-          FormalParNames.push_front(aterm_cast<aterm_appl>((FormalPars.front())[0]));
+          FormalParNames.push_front(i->name());
         }
 
-        aterm_list As_lhss;
-        for(std::map <aterm_appl,aterm_appl> ::const_iterator i=As.begin(); i!=As.end(); ++i)
+        identifier_string_list As_lhss;
+        for(std::map <identifier_string,data_expression> ::const_iterator i=As.begin(); i!=As.end(); ++i)
         {
           As_lhss.push_front(i->first);
         }
-        aterm_list l=list_minus(As_lhss,FormalParNames);
+        identifier_string_list l=list_minus(As_lhss,FormalParNames);
         if (l.empty())
         {
           NewParList.push_front(Par);
         }
         else
         {
-          Culprit=aterm_cast<const aterm_appl>(l.front());
+          Culprit=l.front();
         }
       }
       ParList=reverse(NewParList);
 
       if (ParList.empty())
       {
-        throw mcrl2::runtime_error("no process " + pp(Name) + " containing all assignments in " + pp(ProcTerm) + ".\n" + "Problematic variable is " + pp(Culprit) + ".");
+        throw mcrl2::runtime_error("no process " + pp(Name) + " containing all assignments in " + pp(t) + ".\n" + "Problematic variable is " + pp(Culprit) + ".");
       }
       if (!ParList.tail().empty())
       {
-        throw mcrl2::runtime_error("ambiguous process " + pp(Name) + " containing all assignments in " + pp(ProcTerm) + ".");
+        throw mcrl2::runtime_error("ambiguous process " + pp(Name) + " containing all assignments in " + pp(t) + ".");
       }
     }
 
     // get the formal parameter names
-    aterm_list ActualPars;
-    aterm_list FormalPars=aterm_cast<aterm_list>(proc_pars[process_identifier(Name,ParList.front())]);
+    data_expression_list ActualPars;
+    const variable_list& FormalPars=proc_pars[process_identifier(Name,ParList.front())];
     {
       // we only need the names of the parameters, not the types
-      for (aterm_list l=FormalPars; !l.empty(); l= l.tail())
+      for (variable_list::const_iterator l=FormalPars.begin(); l!=FormalPars.end(); ++l)
       {
-        const identifier_string FormalParName=aterm_cast<const identifier_string>(aterm_cast<aterm_appl>(l.front())[0]);
+        const identifier_string& FormalParName=l->name();
         data_expression ActualPar;
-        const std::map <aterm_appl,aterm_appl> ::const_iterator i=As.find(FormalParName);
+        const std::map <identifier_string,data_expression> ::const_iterator i=As.find(FormalParName);
         if (i==As.end())  // Not found.
         {
           ActualPar=identifier(FormalParName);
@@ -518,36 +523,38 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       ActualPars=reverse(ActualPars);
     }
 
-    aterm_appl TypeCheckedProcTerm;
+    process_expression TypeCheckedProcTerm;
     try 
     {
-      TypeCheckedProcTerm=RewrActProc(Vars, gsMakeParamId(Name,ActualPars));
+      TypeCheckedProcTerm=RewrActProc(Vars, Name,ActualPars);
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + pp(ProcTerm));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + pp(t));
     }
 
     //reverse the assignments
     As.clear();
-    for (aterm_list l=aterm_cast<aterm_list>(TypeCheckedProcTerm[1]),m=FormalPars; !l.empty(); l=l.tail(),m=m.tail())
+    std::map <identifier_string,assignment> As_new;
+    variable_list m=FormalPars;
+    for (data_expression_list l=aterm_cast<data_expression_list>(TypeCheckedProcTerm[1]); !l.empty(); l=l.tail(),m=m.tail())
     {
-      const aterm_appl act_par=aterm_cast<const aterm_appl>(l.front());
-      const aterm_appl form_par=aterm_cast<const aterm_appl>(m.front());
+      const data_expression act_par=l.front();
+      const variable form_par=m.front();
       /* if (form_par==act_par) This removal is unsound. Consider P(x:D)=sum x:D.a(x).P(x=x); Here the x=x cannot be removed, as the first
                                 x refers to the parameter of the process, and the second refers to the bound x in the sum.
       {
         continue;  //parameter does not change 
       } */
-      As[aterm_cast<identifier_string>(form_par[0])]=assignment(form_par,act_par);
+      As_new[form_par.name()]=assignment(form_par,act_par);
     }
 
     assignment_list TypedAssignments;
-    for (aterm_list l=aterm_cast<aterm_list>(ProcTerm[1]); !l.empty(); l=l.tail())
+    for (identifier_assignment_list::const_iterator l=t.assignment().begin(); l!=t.assignment().end(); ++l)
     {
-      const aterm_appl a=aterm_cast<const aterm_appl>(l.front());
-      const std::map <aterm_appl,aterm_appl> ::const_iterator i=As.find(aterm_cast<aterm_appl>(a[0]));
-      if (i==As.end())
+      const identifier_assignment a= *l;
+      const std::map <identifier_string,assignment> ::const_iterator i=As_new.find(a.lhs());
+      if (i==As_new.end())
       {
         continue;
       }
@@ -561,7 +568,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
   if (gsIsParamId(ProcTerm))
   {
-    process_expression result= RewrActProc(Vars,ProcTerm);
+    process_expression result= RewrActProc(Vars,aterm_cast<identifier_string>(ProcTerm[0]),aterm_cast<data_expression_list>(ProcTerm[1]));
     return result;
   }
 
@@ -574,7 +581,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       mCRL2log(warning) << "Hiding empty set of actions (typechecking " << pp(t) << ")" << std::endl;
     }
 
-    std::set<aterm_appl> Acts;
+    std::set<identifier_string> Acts;
     for (core::identifier_string_list::const_iterator a=act_list.begin(); a!=act_list.end(); ++a)
     {
       //Actions must be declared
@@ -920,7 +927,7 @@ void mcrl2::process::process_type_checker::TransformActProcVarConst(void)
     AddVars2Table(Vars,i->second,NewVars);
     Vars=NewVars;
 
-    const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,aterm_cast<aterm_appl>(proc_bodies[ProcVar]));
+    const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,proc_bodies[ProcVar]);
     proc_bodies[ProcVar]=NewProcTerm;
   }
 }
