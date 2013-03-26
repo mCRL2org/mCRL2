@@ -63,6 +63,12 @@ class stategraph_algorithm
     // the control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_control_flow;
 
+    // the local control flow parameters
+    std::map<core::identifier_string, std::vector<bool> > m_is_LCFP;
+
+    // the global control flow parameters
+    std::map<core::identifier_string, std::vector<bool> > m_is_GCFP;
+
     // for readability
     std::set<data::variable> FV(const data::data_expression& x) const
     {
@@ -278,6 +284,84 @@ class stategraph_algorithm
       m_pbes.compute_source_dest_copy(m_is_control_flow);
       mCRL2log(log::debug) << print_control_flow_parameters();
       mCRL2log(log::verbose) << "Computed control flow parameters" << std::endl;
+    }
+
+    void compute_local_control_flow_parameters()
+    {
+      mCRL2log(log::debug, "stategraph") << "=== compute local control flow parameters ===" << std::endl;
+
+      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+
+      // initialize all control flow parameters to true
+      for (auto k = equations.begin(); k != equations.end(); ++k)
+      {
+        propositional_variable X = k->variable();
+        const std::vector<data::variable>& d_X = k->parameters();
+        m_is_LCFP[X.name()] = std::vector<bool>(d_X.size(), true);
+      }
+
+      for (auto k = equations.begin(); k != equations.end(); ++k)
+      {
+        propositional_variable X = k->variable();
+        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        for (auto i = predvars.begin(); i != predvars.end(); ++i)
+        {
+          const predicate_variable& pred_X_i = *i;
+          if (pred_X_i.X.name() != X.name())
+          {
+            continue;
+          }
+
+          for (std::size_t n = 0; n < d_X.size(); n++)
+          {
+            std::map<std::size_t, std::size_t>::const_iterator ci = pred_X_i.copy.find(n);
+            if (ci != pred_X_i.copy.end() && ci->second != n)
+            {
+              continue;
+            }
+            if (pred_X_i.source.find(n) == pred_X_i.source.end() || pred_X_i.dest.find(n) == pred_X_i.dest.end())
+            {
+              m_is_LCFP[X.name()][n] = false;
+            }
+          }
+        }
+      }
+    }
+
+    void compute_global_control_flow_parameters()
+    {
+      mCRL2log(log::debug, "stategraph") << "=== compute local control flow parameters ===" << std::endl;
+
+      m_is_GCFP = m_is_LCFP;
+
+      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+      for (auto k = equations.begin(); k != equations.end(); ++k)
+      {
+        propositional_variable X = k->variable();
+        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        for (auto i = predvars.begin(); i != predvars.end(); ++i)
+        {
+          const predicate_variable& pred_X_i = *i;
+          std::set<std::size_t> copied;
+          for (auto j = pred_X_i.copy.begin(); j != pred_X_i.copy.end(); ++j)
+          {
+            copied.insert(j->second);
+          }
+          if (pred_X_i.X.name() == X.name())
+          {
+            continue;
+          }
+          for (std::size_t n = 0; n < d_X.size(); n++)
+          {
+            if (pred_X_i.dest.find(n) == pred_X_i.dest.end() && copied.find(n) == copied.end())
+            {
+              m_is_GCFP[X.name()][n] = false;
+            }
+          }
+        }
+      }
     }
 
     const std::vector<bool>& stategraph_values(const core::identifier_string& X) const
