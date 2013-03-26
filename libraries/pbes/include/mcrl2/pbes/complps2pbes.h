@@ -24,11 +24,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-void complps2pbes(const std::string& input_filename,
-                  const std::string& output_filename,
-                  const std::string& formfilename
-                 );
-
 inline
 pbes_system::pbes<> complps2pbes(const process::process_specification& procspec, const state_formulas::state_formula& /* formula */)
 {

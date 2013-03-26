@@ -32,6 +32,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 set(mcrl2_pbes_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/pbes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/tools2.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/pbes_explorer.cpp
 )
 
@@ -39,6 +40,7 @@ if(MCRL2_ENABLE_EXPERIMENTAL)
   set(mcrl2_pbes_src
     ${mcrl2_pbes_src}
     ${CMAKE_CURRENT_SOURCE_DIR}/source/experimental_tools.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/experimental_tools2.cpp
   )
 endif(MCRL2_ENABLE_EXPERIMENTAL)
 set(mcrl2_pbes_src ${mcrl2_pbes_src} PARENT_SCOPE)

@@ -16,29 +16,20 @@
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/abstract.h"
-#include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/remove_equations.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
-#include "mcrl2/pbes/detail/control_flow.h"
-#include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
-#include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
-#include "mcrl2/pbes/detail/is_pfnf.h"
 
 namespace mcrl2
 {
@@ -240,59 +231,6 @@ void pbespareqelm(const std::string& input_filename,
 
   // save the result
   p.save(output_filename);
-}
-
-void pbesstategraph(const std::string& input_filename,
-                    const std::string& output_filename,
-                    data::rewriter::strategy rewrite_strategy,
-                    bool simplify,
-                    bool apply_to_original,
-                    bool use_pfnf_variant,
-                    bool use_local_variant,
-                    bool print_influence_graph,
-                    bool use_marking_optimization
-                   )
-{
-  pbes<> p;
-  load_pbes(p, input_filename);
-  pbes_system::normalize(p);
-  pbes<> q;
-
-  if (use_pfnf_variant)
-  {
-    pbes_system::detail::control_flow_algorithm algorithm;
-    q = algorithm.run(p, simplify, apply_to_original);
-  }
-  else
-  {
-    if (use_local_variant)
-    {
-      pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy);
-      q = algorithm.run(simplify, use_marking_optimization);
-      if (print_influence_graph)
-      {
-        pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
-        ialgo.run();
-      }
-    }
-    else
-    {
-      pbes_system::detail::global_reset_variables_algorithm algorithm(p, rewrite_strategy);
-      q = algorithm.run(simplify);
-      if (print_influence_graph)
-      {
-        pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
-        ialgo.run();
-      }
-    }
-  }
-
-  q.save(output_filename, true, true);
-  if (!q.is_well_typed())
-  {
-    mCRL2log(log::error) << "pbesstategraph error: not well typed!" << std::endl;
-    mCRL2log(log::error) << pbes_system::pp(q) << std::endl;
-  }
 }
 
 } // namespace pbes_system
