@@ -110,7 +110,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
         for (std::size_t i = 0; i < predvars.size(); i++)
         {
-          const std::map<std::size_t, data::data_expression>& source = predvars[i].source;
+          // const std::map<std::size_t, data::data_expression>& source = predvars[i].source;
           const std::map<std::size_t, data::data_expression>& dest = predvars[i].dest;
           const core::identifier_string& Y = predvars[i].X.name();
 

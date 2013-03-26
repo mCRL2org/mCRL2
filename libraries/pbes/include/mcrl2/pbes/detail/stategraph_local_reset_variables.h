@@ -204,11 +204,11 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
                           const core::identifier_string& Y,
                           const predicate_variable& X_i,
                           const std::vector<std::size_t>& I,
-                          const std::vector<data::variable>& d_Y,
-                          const std::vector<data::data_expression> e_X,
-                          const stategraph_equation& eq_X)
+                          const std::vector<data::variable>& d_Y
+                         )
     {
       data::data_expression c = data::sort_bool::true_();
+      std::vector<data::data_expression> e_X(X_i.X.parameters().begin(), X_i.X.parameters().end());
       std::size_t k = 0;
       std::vector<data::data_expression> v;
       // Note that v needs to be built first, since it is used in its entirety
@@ -292,50 +292,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // expands a propositional variable instantiation using the control flow graph
     // x = Y(e)
     // Y(e) = PVI(phi_X, i)
-    pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
-    {
-      mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
-      assert(i < eq_X.predicate_variables().size());
-      const predicate_variable& X_i = eq_X.predicate_variables()[i];
-      assert(X_i.X == x);
-
-      std::vector<pbes_expression> phi;
-      core::identifier_string Y = x.name();
-      const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-      const std::vector<data::variable>& d_Y = eq_Y.parameters();
-      assert(d_Y.size() == X_i.X.parameters().size());
-      std::vector<data::data_expression> e_X = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
-
-      std::vector<std::size_t> I;
-      for (std::size_t j = 0; j < d_Y.size(); j++)
-      {
-        if (is_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
-        {
-          if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
-          {
-            I.push_back(j);
-          }
-        }
-      }
-
-      std::vector<std::vector<data::data_expression> > values;
-      for (std::vector<std::size_t>::const_iterator ii = I.begin(); ii != I.end(); ++ii)
-      {
-        values.push_back(compute_values(Y, *ii));
-      }
-      std::vector<data::data_expression> v_prime;
-      for (std::vector<std::vector<data::data_expression> >::const_iterator vi = values.begin(); vi != values.end(); ++vi)
-      {
-        assert(!vi->empty());
-        v_prime.push_back(vi->front());
-      }
-      utilities::foreach_sequence(values, v_prime.begin(), [&]()
-        {
-          phi.push_back(reset(v_prime, Y, X_i, I, d_Y, e_X, eq_X));
-        }
-      );
-      return pbes_expr::join_and(phi.begin(), phi.end());
-    }
+    pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i);
 
     // Applies resetting of variables to the original PBES p.
     void reset_variables_to_original(pbes<>& p)
@@ -492,6 +449,88 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
   f(x);
   return f.top();
 }
+
+struct reset_variable_helper
+{
+  local_reset_variables_algorithm& algorithm;
+  std::vector<pbes_expression>& phi;
+  std::vector<data::data_expression>& v_prime;
+  const core::identifier_string& Y;
+  const predicate_variable& X_i;
+  const std::vector<std::size_t>& I;
+  const std::vector<data::variable>& d_Y;
+
+  reset_variable_helper(local_reset_variables_algorithm& algorithm_,
+                        std::vector<pbes_expression>& phi_,
+                        std::vector<data::data_expression>& v_prime_,
+                        const core::identifier_string& Y_,
+                        const predicate_variable& X_i_,
+                        const std::vector<std::size_t>& I_,
+                        const std::vector<data::variable>& d_Y_
+                       )
+   : algorithm (algorithm_),
+     phi       (phi_),
+     v_prime   (v_prime_),
+     Y         (Y_),
+     X_i       (X_i_),
+     I         (I_),
+     d_Y       (d_Y_)
+   {}
+
+   void operator()()
+   {
+     phi.push_back(algorithm.reset(v_prime, Y, X_i, I, d_Y));
+   }
+};
+
+inline
+pbes_expression local_reset_variables_algorithm::reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
+{
+  mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << pbes_system::pp(x) << " with index " << i << std::endl;
+  assert(i < eq_X.predicate_variables().size());
+  const predicate_variable& X_i = eq_X.predicate_variables()[i];
+  assert(X_i.X == x);
+
+  std::vector<pbes_expression> phi;
+  core::identifier_string Y = x.name();
+  const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+  const std::vector<data::variable>& d_Y = eq_Y.parameters();
+  assert(d_Y.size() == X_i.X.parameters().size());
+
+  std::vector<std::size_t> I;
+  for (std::size_t j = 0; j < d_Y.size(); j++)
+  {
+    if (is_control_flow_parameter(X_i.X.name(), j) && X_i.dest.find(j) == X_i.dest.end())
+    {
+      if (!m_use_marking_optimization || has_non_empty_marking(Y, j))
+      {
+        I.push_back(j);
+      }
+    }
+  }
+
+  std::vector<std::vector<data::data_expression> > values;
+  for (std::vector<std::size_t>::const_iterator ii = I.begin(); ii != I.end(); ++ii)
+  {
+    values.push_back(compute_values(Y, *ii));
+  }
+  std::vector<data::data_expression> v_prime;
+  for (std::vector<std::vector<data::data_expression> >::const_iterator vi = values.begin(); vi != values.end(); ++vi)
+  {
+    assert(!vi->empty());
+    v_prime.push_back(vi->front());
+  }
+  utilities::foreach_sequence(values, v_prime.begin(),
+    // N.B. clang 3.0 segfaults on this lambda expression, so use a function object instead...
+    // [&]()
+    // {
+    //   phi.push_back(reset(v_prime, Y, X_i, I, d_Y));
+    // }
+    reset_variable_helper(*this, phi, v_prime, Y, X_i, I, d_Y)
+  );
+  return pbes_expr::join_and(phi.begin(), phi.end());
+}
+
 
 } // namespace detail
 
