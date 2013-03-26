@@ -118,7 +118,6 @@ void pbesstategraph(const std::string& input_filename,
                     data::rewriter::strategy rewrite_strategy,
                     bool simplify,
                     bool apply_to_original,
-                    bool use_pfnf_variant,
                     bool use_local_variant,
                     bool print_influence_graph,
                     bool use_marking_optimization
