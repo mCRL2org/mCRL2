@@ -123,7 +123,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       {
         pbespgsolve_algorithm algorithm(timer(), m_options);
         ParityGame pg;
-        std::ifstream is(input_filename());
+        std::ifstream is(input_filename().c_str());
         pg.read_pgsolver(is);
         value = algorithm.run(pg, 0);
       }
