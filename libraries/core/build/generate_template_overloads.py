@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 from mcrl2_classes import *
 from mcrl2_utility import *

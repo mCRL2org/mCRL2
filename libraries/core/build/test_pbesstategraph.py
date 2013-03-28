@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #~ Copyright 2012 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
