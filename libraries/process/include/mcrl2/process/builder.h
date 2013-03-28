@@ -231,15 +231,15 @@ struct add_sort_expressions: public Builder<Derived>
   process::process_expression operator()(const process::parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    // skip
+    process::process_expression result = process::parameter_identifier(x.name(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    return result;
   }
 
   process::process_expression operator()(const process::id_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result = process::id_assignment(x.name(), static_cast<Derived&>(*this)(x.assignment()));
+    process::process_expression result = process::id_assignment(x.name(), static_cast<Derived&>(*this)(x.assignments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -534,15 +534,15 @@ struct add_data_expressions: public Builder<Derived>
   process::process_expression operator()(const process::parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    // skip
+    process::process_expression result = process::parameter_identifier(x.name(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    return result;
   }
 
   process::process_expression operator()(const process::id_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result = process::id_assignment(x.name(), static_cast<Derived&>(*this)(x.assignment()));
+    process::process_expression result = process::id_assignment(x.name(), static_cast<Derived&>(*this)(x.assignments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

@@ -52,6 +52,8 @@ std::string pp(const process::bounded_init& x) { return process::pp< process::bo
 std::string pp(const process::merge& x) { return process::pp< process::merge >(x); }
 std::string pp(const process::left_merge& x) { return process::pp< process::left_merge >(x); }
 std::string pp(const process::choice& x) { return process::pp< process::choice >(x); }
+std::string pp(const process::id_assignment& x) { return process::pp< process::id_assignment >(x); }
+std::string pp(const process::parameter_identifier& x) { return process::pp< process::parameter_identifier >(x); }
 void normalize_sorts(process::process_equation_vector& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_equation_vector >(x, dataspec); }
 void normalize_sorts(process::process_specification& x, const data::data_specification& /* dataspec */) { process::normalize_sorts< process::process_specification >(x, x.data()); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }

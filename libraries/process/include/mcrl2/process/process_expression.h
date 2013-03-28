@@ -886,6 +886,26 @@ class parameter_identifier: public process_expression
     {
       assert(core::detail::check_term_ParamId(*this));
     }
+
+    /// \brief Constructor.
+    parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
+      : process_expression(core::detail::gsMakeParamId(name, arguments))
+    {}
+
+    /// \brief Constructor.
+    parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
+      : process_expression(core::detail::gsMakeParamId(core::identifier_string(name), arguments))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+    }
+
+    const data::data_expression_list& arguments() const
+    {
+      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
+    }
 };
 
 /// \brief Test for a parameter_identifier expression
@@ -916,13 +936,13 @@ class id_assignment: public process_expression
     }
 
     /// \brief Constructor.
-    id_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignment)
-      : process_expression(core::detail::gsMakeIdAssignment(name, assignment))
+    id_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)
+      : process_expression(core::detail::gsMakeIdAssignment(name, assignments))
     {}
 
     /// \brief Constructor.
-    id_assignment(const std::string& name, const data::identifier_assignment_list& assignment)
-      : process_expression(core::detail::gsMakeIdAssignment(core::identifier_string(name), assignment))
+    id_assignment(const std::string& name, const data::identifier_assignment_list& assignments)
+      : process_expression(core::detail::gsMakeIdAssignment(core::identifier_string(name), assignments))
     {}
 
     const core::identifier_string& name() const
@@ -930,7 +950,7 @@ class id_assignment: public process_expression
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    const data::identifier_assignment_list& assignment() const
+    const data::identifier_assignment_list& assignments() const
     {
       return atermpp::aterm_cast<const data::identifier_assignment_list>(atermpp::list_arg2(*this));
     }
@@ -1048,6 +1068,8 @@ std::string pp(const bounded_init& x);
 std::string pp(const merge& x);
 std::string pp(const left_merge& x);
 std::string pp(const choice& x);
+std::string pp(const process::id_assignment& x);
+std::string pp(const process::parameter_identifier& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 
 // TODO: These should be removed when the aterm code has been replaced.

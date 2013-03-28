@@ -228,14 +228,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const process::parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    // skip
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const process::id_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this)(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -517,14 +517,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const process::parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    // skip
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const process::id_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this)(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1095,14 +1095,14 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const process::parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    // skip
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const process::id_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this)(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1427,7 +1427,8 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   void operator()(const process::parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    // skip
+    static_cast<Derived&>(*this)(x.name());
+    static_cast<Derived&>(*this)(x.arguments());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1435,7 +1436,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.name());
-    static_cast<Derived&>(*this)(x.assignment());
+    static_cast<Derived&>(*this)(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 

@@ -284,6 +284,21 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().leave(x);
   }
 
+  void operator()(const process::id_assignment& x)
+  {
+    derived().enter(x);
+    derived()(x.name());
+    print_assignments(x.assignments(), false);
+    derived().leave(x);
+  }
+
+  void operator()(const process::parameter_identifier& x)
+  {
+    derived().enter(x);
+    derived()(x.name());
+    print_list(x.arguments(), "(", ")", ", ");
+    derived().leave(x);
+  }
 };
 
 } // namespace detail

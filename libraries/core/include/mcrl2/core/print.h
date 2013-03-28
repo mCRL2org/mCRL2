@@ -133,68 +133,75 @@ struct printer: public core::traverser<Derived>
   template <typename T>
   void operator()(const atermpp::term_appl<T>& x)
   {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(utilities::to_string(x));
-    static_cast<Derived&>(*this).leave(x);
+    derived().enter(x);
+    derived().print(utilities::to_string(x));
+    derived().leave(x);
   }
 
   template <typename T>
   void operator()(const std::list<T>& x)
   {
-    static_cast<Derived&>(*this).enter(x);
+    derived().enter(x);
     print_list(x, "", "", ", ");
-    static_cast<Derived&>(*this).leave(x);
+    derived().leave(x);
   }
 
   template <typename T>
   void operator()(const atermpp::term_list<T>& x)
   {
-    static_cast<Derived&>(*this).enter(x);
+    derived().enter(x);
     print_list(x, "", "", ", ");
-    static_cast<Derived&>(*this).leave(x);
+    derived().leave(x);
   }
 
   template <typename T>
   void operator()(const std::set<T>& x)
   {
-    static_cast<Derived&>(*this).enter(x);
+    derived().enter(x);
     print_list(x, "", "", ", ");
-    static_cast<Derived&>(*this).leave(x);
+    derived().leave(x);
   }
 
   void operator()(const core::identifier_string& x)
   {
-    static_cast<Derived&>(*this).enter(x);
+    derived().enter(x);
     if (x == core::identifier_string())
     {
-      static_cast<Derived&>(*this).print("@NoValue");
+      derived().print("@NoValue");
     }
     else
     {
-      static_cast<Derived&>(*this).print(std::string(x));
+      derived().print(std::string(x));
     }
-    static_cast<Derived&>(*this).leave(x);
+    derived().leave(x);
+  }
+
+  void operator()(const core::nil& x)
+  {
+    derived().enter(x);
+    derived().print("nil");
+    derived().leave(x);
   }
 
   void operator()(atermpp::aterm x)
   {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(utilities::to_string(x));
-    static_cast<Derived&>(*this).leave(x);
+    derived().enter(x);
+    derived().print(utilities::to_string(x));
+    derived().leave(x);
   }
 
   void operator()(atermpp::aterm_list x)
   {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(utilities::to_string(x));
-    static_cast<Derived&>(*this).leave(x);
+    derived().enter(x);
+    derived().print(utilities::to_string(x));
+    derived().leave(x);
   }
 
   void operator()(atermpp::aterm_appl x)
   {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(utilities::to_string(x));
-    static_cast<Derived&>(*this).leave(x);
+    derived().enter(x);
+    derived().print(utilities::to_string(x));
+    derived().leave(x);
   }
 };
 
@@ -244,6 +251,7 @@ std::string pp(const T& x)
 /// \brief Prototypes for aterm overloads
 std::string pp(const atermpp::aterm& x);
 std::string pp(const atermpp::aterm_appl& x);
+std::string pp(const nil& x);
 
 } // namespace core
 
