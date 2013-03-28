@@ -118,10 +118,24 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
       mCRL2log(verbose) << "  only generate:   " << std::boolalpha << m_options.only_generate << std::endl;
 
-      pbes<> p;
-      load_pbes(p, input_filename(), pbes_input_format());
+      bool value;
+      if(pbes_input_format() == pbes_file_pgsolver)
+      {
+        pbespgsolve_algorithm algorithm(timer(), m_options);
+        ParityGame pg;
+        std::ifstream is(input_filename());
+        pg.read_pgsolver(is);
+        value = algorithm.run(pg, 0);
+      }
+      else
+      {
+        pbes<> p;
+        timer().start("load");
+        load_pbes(p, input_filename(), pbes_input_format());
+        timer().finish("load");
 
-      bool value = pbespgsolve(p, timer(), m_options);
+        value = pbespgsolve(p, timer(), m_options);
+      }
       std::string result = (value ? "true" : "false");
       mCRL2log(verbose) << "The solution for the initial variable of the pbes is " << result << std::endl;
       std::cout << result << std::endl;
