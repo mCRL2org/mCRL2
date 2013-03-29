@@ -45,10 +45,10 @@ static std::map<identifier_string,sort_expression> list_minus(const std::map<ide
 }
 
 
-action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const aterm_appl &act)
+action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::parameter_identifier &act)
 {
   action Result;
-  core::identifier_string Name(act[0]);
+  core::identifier_string Name(act.name());
   term_list<sort_expression_list> ParList;
 
   bool action=false;
@@ -67,8 +67,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
   assert(!ParList.empty());
 
-  size_t nFactPars=aterm_cast<aterm_list>(act[1]).size();
-  const std::string msg="action";
+  size_t nFactPars=act.arguments().size();
 
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
   {
@@ -86,35 +85,35 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
   if (ParList.empty())
   {
-    throw mcrl2::runtime_error("no " + msg + " " + std::string(Name)
+    throw mcrl2::runtime_error("no action " + std::string(Name)
                     + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":"")
                     + " is declared (while typechecking " + pp(act) + ")");
   }
 
   if (ParList.size()==1)
   {
-    Result=MakeAction(Name,ParList.front(),aterm_cast<data_expression_list>(act[1]));
+    Result=MakeAction(Name,ParList.front(),aterm_cast<data_expression_list>(act.arguments()));
   }
   else
   {
     // we need typechecking to find the correct type of the action.
     // make the list of possible types for the parameters
-    Result=MakeAction(Name,GetNotInferredList(ParList),aterm_cast<data_expression_list>(act[1]));
+    Result=MakeAction(Name,GetNotInferredList(ParList),aterm_cast<data_expression_list>(act.arguments()));
   }
 
   //process the arguments
 
   //possible types for the arguments of the action. (not inferred if ambiguous action).
-  sort_expression_list PosTypeList=aterm_cast<sort_expression_list>(aterm_cast<aterm_appl>(Result[0])[1]);
+  sort_expression_list PosTypeList=Result.label().sorts(); 
 
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
-  for (aterm_list Pars=aterm_cast<aterm_list>(act[1]); !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
+  for (data_expression_list::const_iterator Pars=act.arguments().begin(); Pars!=act.arguments().end(); ++Pars,PosTypeList=PosTypeList.tail())
   {
-    data_expression Par=Pars.front();
-    sort_expression PosType=PosTypeList.front();
+    data_expression Par= *Pars;
+    sort_expression PosType= PosTypeList.front();
 
-    aterm_appl NewPosType;
+    sort_expression NewPosType;
     try
     {
       NewPosType=TraverseVarConsTypeD(Vars,Vars,Par,PosType); 
@@ -134,17 +133,17 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
   if (!p.first)
   {
-    PosTypeList=aterm_cast<sort_expression_list>(aterm_cast<aterm_appl>(Result[0])[1]);
-    aterm_list Pars=NewPars;
+    PosTypeList=Result.label().sorts();
+    data_expression_list Pars=NewPars;
     NewPars=data_expression_list();
     sort_expression_list CastedPosTypeList;
-    for (; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail(),NewPosTypeList=NewPosTypeList.tail())
+    for (data_expression_list::const_iterator Pars=NewPars.begin(); Pars!=NewPars.end(); ++Pars,PosTypeList=PosTypeList.tail(),NewPosTypeList=NewPosTypeList.tail())
     {
-      data_expression Par=Pars.front();
-      sort_expression PosType=PosTypeList.front();
+      data_expression Par= *Pars;
+      sort_expression PosType= PosTypeList.front();
       sort_expression NewPosType=NewPosTypeList.front();
 
-      aterm_appl CastedNewPosType;
+      sort_expression CastedNewPosType;
       try
       { 
         CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par);
@@ -165,13 +164,13 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
     if (!p.first)
     {
-      throw mcrl2::runtime_error("no " + msg + " " + std::string(Name) + "with type " + pp(NewPosTypeList) + " is declared (while typechecking " + pp(act) + ")");
+      throw mcrl2::runtime_error("no action " + std::string(Name) + "with type " + pp(NewPosTypeList) + " is declared (while typechecking " + pp(act) + ")");
     }
   }
 
   if (IsNotInferredL(PosTypeList))
   {
-    throw mcrl2::runtime_error("ambiguous " + msg + " " + std::string(Name));
+    throw mcrl2::runtime_error("ambiguous action " + std::string(Name));
   }
 
   Result=MakeAction(Name,PosTypeList,NewPars);
@@ -180,7 +179,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
 
 
-action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const aterm_appl &ma)
+action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::parameter_identifier &ma)
 // last argument should have type action; but this does not allow for a ParamId.
 {
   size_t n = ma.size();
@@ -203,7 +202,6 @@ void mcrl2::lps::action_type_checker::ReadInActs(const action_label_list &Acts)
   for (lps::action_label_list::const_iterator i=Acts.begin(); i!=Acts.end(); ++i)
   {
     action_label Act= *i;
-    // core::identifier_string ActName=aterm_cast<core::identifier_string>(Act[0]);
     core::identifier_string ActName=Act.name();
     sort_expression_list ActType=Act.sorts();
 
@@ -213,7 +211,6 @@ void mcrl2::lps::action_type_checker::ReadInActs(const action_label_list &Acts)
     term_list<sort_expression_list> Types;
     if (j==actions.end())
     {
-      // Types=make_list<sort_expression_list>(ActType);
       Types=make_list<sort_expression_list>(ActType);
     }
     else
@@ -295,12 +292,6 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
 
   std::map<core::identifier_string,term_list<sort_expression_list> > actions_from_lps;
 
-  /* aterm_appl lps_data_spec = aterm_cast<aterm_appl>(lps_spec[0]);
-  aterm_list lps_sorts = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_data_spec[0])[0]);
-  aterm_list lps_constructors = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_data_spec[1])[0]);
-  aterm_list lps_mappings = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_data_spec[2])[0]);
-  aterm_list lps_action_labels = aterm_cast<aterm_list>(aterm_cast<aterm_appl>(lps_spec[1])[0]); */
-
   data_specification data_spec = ar_spec.data();
   
   std::map<core::identifier_string,sort_expression> LPSSorts=defined_sorts; // remember the sorts from the LPS.
@@ -360,14 +351,12 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
     
     DeclaredVars=NewDeclaredVars;
-    aterm_appl Left=Rule.lhs();
-    assert(gsIsParamId(Left));
-    {
-      //extra check requested by Tom: actions in the LHS can only come from the LPS
-      actions.swap(actions_from_lps);
-      Left=TraverseAct(DeclaredVars,Left);
-      actions_from_lps.swap(actions);
-    }
+    process::parameter_identifier Left=Rule.lhs();
+    
+    //extra check requested by Tom: actions in the LHS can only come from the LPS
+    actions.swap(actions_from_lps);
+    action new_action_at_the_left=TraverseAct(DeclaredVars,Left);
+    actions_from_lps.swap(actions);
 
     data_expression Cond=Rule.condition();
     TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Cond,sort_bool::bool_());
@@ -378,7 +367,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
       Right=TraverseAct(DeclaredVars,Right.act());
     }
 
-    new_rules.push_back(action_rename_rule(VarList,Cond,Left,Right));
+    new_rules.push_back(action_rename_rule(VarList,Cond,new_action_at_the_left,Right));
   }
 
   mCRL2log(debug) << "type checking transform VarConstTypeData phase finished" << std::endl;
@@ -401,17 +390,28 @@ regular_formula mcrl2::state_formulas::state_formula_type_checker::TraverseRegFr
     return RegFrm;
   }
 
-  if (is_seq(RegFrm) || is_alt(RegFrm))
+  if (is_seq(RegFrm))
   {
-    regular_formula NewArg1=TraverseRegFrm(Vars,aterm_cast<aterm_appl>(RegFrm[0]));
-    regular_formula NewArg2=TraverseRegFrm(Vars,aterm_cast<aterm_appl>(RegFrm[1]));
-    return RegFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
+    const seq t=aterm_cast<const seq>(RegFrm);
+    return seq(TraverseRegFrm(Vars,t.left()),TraverseRegFrm(Vars,t.right()));
   }
 
-  if (is_trans(RegFrm) || is_trans_or_nil(RegFrm))
+  if (is_alt(RegFrm))
   {
-    regular_formula NewArg=TraverseRegFrm(Vars,aterm_cast<aterm_appl>(RegFrm[0]));
-    return RegFrm.set_argument(NewArg,0);
+    const alt t=aterm_cast<const alt>(RegFrm);
+    return alt(TraverseRegFrm(Vars,t.left()),TraverseRegFrm(Vars,t.right()));
+  }
+
+  if (is_trans(RegFrm))
+  {
+    const trans t=aterm_cast<const trans>(RegFrm);
+    return trans(TraverseRegFrm(Vars,t.operand()));
+  }
+
+  if (is_trans_or_nil(RegFrm))
+  {
+    const trans t=aterm_cast<const trans>(RegFrm);
+    return trans_or_nil(TraverseRegFrm(Vars,t.operand()));
   }
 
   if (is_action_formula(RegFrm))
@@ -437,42 +437,65 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
 
   if (action_formulas::is_not(ActFrm))
   {
-    const not_ f=aterm_cast<const not_>(ActFrm);
-    action_formula NewArg=TraverseActFrm(Vars,f.operand());
-    return action_formulas::not_(NewArg); 
+    const not_& f=aterm_cast<const not_>(ActFrm);
+    return action_formulas::not_(TraverseActFrm(Vars,f.operand()));
   }
 
-  if (action_formulas::is_and(ActFrm) || action_formulas::is_or(ActFrm) || action_formulas::is_imp(ActFrm))
+  if (action_formulas::is_and(ActFrm))
   {
-    aterm_appl NewArg1=TraverseActFrm(Vars,aterm_cast<aterm_appl>(ActFrm[0]));
-    aterm_appl NewArg2=TraverseActFrm(Vars,aterm_cast<aterm_appl>(ActFrm[1]));
-    return ActFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
+    const action_formulas::and_& t=aterm_cast<action_formulas::and_>(ActFrm);
+    return action_formulas::and_(TraverseActFrm(Vars,t.left()),TraverseActFrm(Vars,t.right()));
   }
 
-  if (action_formulas::is_forall(ActFrm) || action_formulas::is_exists(ActFrm))
+  if (action_formulas::is_or(ActFrm))
   {
+    const action_formulas::or_& t=aterm_cast<action_formulas::or_>(ActFrm);
+    return action_formulas::or_(TraverseActFrm(Vars,t.left()),TraverseActFrm(Vars,t.right()));
+  }
+
+  if (action_formulas::is_imp(ActFrm))
+  {
+    const action_formulas::imp& t=aterm_cast<action_formulas::imp>(ActFrm);
+    return action_formulas::imp(TraverseActFrm(Vars,t.left()),TraverseActFrm(Vars,t.right()));
+  }
+
+  if (action_formulas::is_forall(ActFrm))
+  {
+    const action_formulas::forall& t=aterm_cast<const action_formulas::forall>(ActFrm);
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
-    variable_list VarList=aterm_cast<variable_list>(ActFrm[0]);
+    const variable_list& VarList=t.variables();
     std::map<core::identifier_string,sort_expression> NewVars;
     AddVars2Table(CopyVars,VarList,NewVars);
     
-    aterm_appl NewArg2=TraverseActFrm(NewVars,aterm_cast<aterm_appl>(ActFrm[1]));
-    return ActFrm.set_argument(NewArg2,1);
+    return action_formulas::forall(VarList, TraverseActFrm(NewVars,t.body()));
+  }
+
+  if (action_formulas::is_exists(ActFrm))
+  {
+    const action_formulas::exists& t=aterm_cast<const action_formulas::exists>(ActFrm);
+    std::map<core::identifier_string,sort_expression> CopyVars(Vars);
+
+    const variable_list& VarList=t.variables();
+    std::map<core::identifier_string,sort_expression> NewVars;
+    AddVars2Table(CopyVars,VarList,NewVars);
+    
+    return action_formulas::exists(VarList, TraverseActFrm(NewVars,t.body()));
   }
 
   if (action_formulas::is_at(ActFrm))
   {
-    action_formula NewArg1=TraverseActFrm(Vars,aterm_cast<action_formula>(ActFrm[0]));
+    const action_formulas::at& t=aterm_cast<const action_formulas::at>(ActFrm);
+    action_formula NewArg1=TraverseActFrm(Vars,t.operand());
 
-    data_expression Time=aterm_cast<aterm_appl>(ActFrm[1]);
-    aterm_appl NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
+    data_expression Time=t.time_stamp();
+    sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
 
     sort_expression temp;
     if (!TypeMatchA(sort_real::real_(),NewType,temp))
     {
       //upcasting
-      aterm_appl CastedNewType;
+      sort_expression CastedNewType;
       try
       {
         CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
@@ -482,7 +505,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast time value " + pp(Time) + " to type Real (typechecking action formula " + pp(ActFrm) + ")");
       }
     }
-    return ActFrm.set_argument(NewArg1,0).set_argument(Time,1);
+    return action_formulas::at(NewArg1,Time);
   }
 
   if (is_multi_action(ActFrm))
@@ -503,7 +526,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
   if (is_data_expression(ActFrm))
   {
     data_expression d(ActFrm);
-    aterm_appl Type=TraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
+    sort_expression Type=TraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
     return d;
   }
 
@@ -516,6 +539,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
                 const std::map<core::identifier_string,sort_expression_list> &StateVars, 
                 const state_formula &StateFrm)
 {
+  using namespace state_formulas;
+
   mCRL2log(debug) << "TraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
 
   if (state_formulas::is_true(StateFrm) || state_formulas::is_false(StateFrm) || state_formulas::is_delay(StateFrm) || state_formulas::is_yaled(StateFrm))
@@ -525,55 +550,73 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   if (state_formulas::is_not(StateFrm))
   {
-    state_formula NewArg=TraverseStateFrm(Vars,StateVars,aterm_cast<aterm_appl>(StateFrm[0]));
-    return StateFrm.set_argument(NewArg,0);
+    const  not_& t=aterm_cast<const not_>(StateFrm);
+    return not_(TraverseStateFrm(Vars,StateVars,t.operand()));
   }
 
-  if (state_formulas::is_and(StateFrm) || state_formulas::is_or(StateFrm) || state_formulas::is_imp(StateFrm))
+  if (state_formulas::is_and(StateFrm))
   {
-    state_formula NewArg1=TraverseStateFrm(Vars,StateVars,aterm_cast<aterm_appl>(StateFrm[0]));
-    state_formula NewArg2=TraverseStateFrm(Vars,StateVars,aterm_cast<aterm_appl>(StateFrm[1]));
-    return StateFrm.set_argument(NewArg1,0).set_argument(NewArg2,1);
+    const and_& t=aterm_cast<const and_>(StateFrm);
+    return and_(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
   }
 
-  if (state_formulas::is_forall(StateFrm) || state_formulas::is_exists(StateFrm))
+  if (state_formulas::is_or(StateFrm))
   {
+    const or_& t=aterm_cast<const or_>(StateFrm);
+    return or_(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
+  }
+
+  if (state_formulas::is_imp(StateFrm))
+  {
+    const imp& t=aterm_cast<const imp>(StateFrm);
+    return imp(TraverseStateFrm(Vars,StateVars,t.left()),TraverseStateFrm(Vars,StateVars,t.right()));
+  }
+
+  if (state_formulas::is_forall(StateFrm))
+  {
+    const forall& t=aterm_cast<const forall>(StateFrm);
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
 
-    variable_list VarList=aterm_cast<variable_list>(StateFrm[0]);
     std::map<core::identifier_string,sort_expression> NewVars;
-    AddVars2Table(CopyVars,VarList,NewVars);
+    AddVars2Table(CopyVars,t.variables(),NewVars);
 
-    aterm_appl NewArg2=TraverseStateFrm(NewVars,StateVars,aterm_cast<aterm_appl>(StateFrm[1]));
-    return StateFrm.set_argument(NewArg2,1);
+    return forall(t.variables(),TraverseStateFrm(NewVars,StateVars,t.body()));
+  }
+
+  if (state_formulas::is_exists(StateFrm))
+  {
+    const exists& t=aterm_cast<const exists>(StateFrm);
+    std::map<core::identifier_string,sort_expression> CopyVars(Vars);
+
+    std::map<core::identifier_string,sort_expression> NewVars;
+    AddVars2Table(CopyVars,t.variables(),NewVars);
+
+    return exists(t.variables(),TraverseStateFrm(NewVars,StateVars,t.body()));
   }
 
   if (is_may(StateFrm))
   {
     const may& f=aterm_cast<const may>(StateFrm);
-    const regular_formula RegFrm=TraverseRegFrm(Vars,f.formula());
-    const state_formula NewArg2=TraverseStateFrm(Vars,StateVars,f.operand());
-    return may(RegFrm,NewArg2);
+    return may(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,StateVars,f.operand()));
   }
 
   if (is_must(StateFrm))
   {
     const must& f=aterm_cast<const must>(StateFrm);
-    const regular_formula RegFrm=TraverseRegFrm(Vars,f.formula());
-    const state_formula NewArg2=TraverseStateFrm(Vars,StateVars,f.operand());
-    return must(RegFrm,NewArg2);
+    return must(TraverseRegFrm(Vars,f.formula()),TraverseStateFrm(Vars,StateVars,f.operand()));
   }
 
-  if (state_formulas::is_delay_timed(StateFrm) || state_formulas::is_yaled_timed(StateFrm))
+  if (state_formulas::is_delay_timed(StateFrm))
   {
-    data_expression Time=aterm_cast<aterm_appl>(StateFrm[0]);
+    const delay_timed& f=aterm_cast<const delay_timed>(StateFrm);
+    data_expression Time=f.time_stamp();
     sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
 
     sort_expression temp;
     if (!TypeMatchA(sort_real::real_(),NewType,temp))
     {
       //upcasting
-      aterm_appl CastedNewType;
+      sort_expression CastedNewType;
       try
       {
         CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
@@ -583,7 +626,30 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast time value " + pp(Time) + " to type Real (typechecking state formula " + pp(StateFrm) + ")");
       }
     }
-    return StateFrm.set_argument(Time,0);
+    return delay_timed(Time);
+  }
+
+  if (state_formulas::is_yaled_timed(StateFrm))
+  {
+    const yaled_timed& f=aterm_cast<const yaled_timed>(StateFrm);
+    data_expression Time=f.time_stamp();
+    sort_expression NewType=TraverseVarConsTypeD(Vars,Vars,Time,ExpandNumTypesDown(sort_real::real_()));
+
+    sort_expression temp;
+    if (!TypeMatchA(sort_real::real_(),NewType,temp))
+    {
+      //upcasting
+      sort_expression CastedNewType;
+      try
+      {
+        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast time value " + pp(Time) + " to type Real (typechecking state formula " + pp(StateFrm) + ")");
+      }
+    }
+    return yaled_timed(Time);
   }
 
   if (state_formulas::is_variable(StateFrm))
@@ -640,25 +706,26 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
   }
 
-  if (state_formulas::is_nu(StateFrm) || state_formulas::is_mu(StateFrm))
+  if (state_formulas::is_nu(StateFrm))
   {
+    const nu& f=aterm_cast<const nu>(StateFrm);
     std::map<core::identifier_string,sort_expression_list> CopyStateVars(StateVars);
 
     // Make the new state variable:
     std::map<core::identifier_string,sort_expression> FormPars;
     assignment_list r;
     sort_expression_list t;
-    for (assignment_list l=aterm_cast<data::assignment_list>(StateFrm[1]); !l.empty(); l=l.tail())
+    for (assignment_list::const_iterator l=f.assignments().begin(); l!=f.assignments().end(); ++l)
     {
-      assignment o=l.front();
+      const assignment& o= *l;
 
-      core::identifier_string VarName=aterm_cast<core::identifier_string>(aterm_cast<aterm_appl>(o[0])[0]);
+      core::identifier_string VarName=o.lhs().name();
       if (FormPars.count(VarName)>0)
       {
         throw mcrl2::runtime_error("non-unique formal parameter " + pp(VarName) + " (typechecking " + pp(StateFrm) + ")");
       }
 
-      sort_expression VarType=aterm_cast<aterm_appl>(aterm_cast<aterm_appl>(o[0])[1]);
+      sort_expression VarType=o.lhs().sort();
       try
       {
         IsSortExprDeclared(VarType);
@@ -670,7 +737,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
       FormPars[VarName]=VarType;
 
-      data_expression VarInit=aterm_cast<aterm_appl>(o[1]);
+      data_expression VarInit=o.rhs();
       sort_expression VarInitType;
       try
       {
@@ -695,40 +762,111 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
         }
       }
 
-      r.push_front(o.set_argument(VarInit,1));
+      r.push_front(assignment(o.lhs(),VarInit));
       t.push_front(VarType);
     }
 
-    state_formula NewStateFrm=StateFrm.set_argument(reverse(r),1);
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
     CopyVars.insert(FormPars.begin(),FormPars.end());
     
 
-    CopyStateVars[aterm_cast<core::identifier_string>(NewStateFrm[0])]=reverse(t);
+    CopyStateVars[f.name()]=reverse(t);
     
-    aterm_appl NewArg;
     try
     {
-      NewArg=TraverseStateFrm(CopyVars,CopyStateVars,aterm_cast<aterm_appl>(NewStateFrm[2]));
+      return nu(f.name(),reverse(r),TraverseStateFrm(CopyVars,CopyStateVars,f.operand()));
     }
     catch (mcrl2::runtime_error &e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking TERM TEMPORARILY IN ATERM FORMAT " + mcrl2::utilities::to_string(StateFrm) /* + pp(StateFrm)*/ );
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking TEMPORARILY PRINT AN ATERM " + to_string(f));
     }
-    return NewStateFrm.set_argument(NewArg,2);
+  }
+
+  if (state_formulas::is_mu(StateFrm))
+  {
+    const mu& f=aterm_cast<const mu>(StateFrm);
+    std::map<core::identifier_string,sort_expression_list> CopyStateVars(StateVars);
+
+    // Make the new state variable:
+    std::map<core::identifier_string,sort_expression> FormPars;
+    assignment_list r;
+    sort_expression_list t;
+    for (assignment_list::const_iterator l=f.assignments().begin(); l!=f.assignments().end(); ++l)
+    {
+      const assignment& o= *l;
+
+      core::identifier_string VarName=o.lhs().name();
+      if (FormPars.count(VarName)>0)
+      {
+        throw mcrl2::runtime_error("non-unique formal parameter " + pp(VarName) + " (typechecking " + pp(StateFrm) + ")");
+      }
+
+      sort_expression VarType=o.lhs().sort();
+      try
+      {
+        IsSortExprDeclared(VarType);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking " + pp(StateFrm));
+      }
+
+      FormPars[VarName]=VarType;
+
+      data_expression VarInit=o.rhs();
+      sort_expression VarInitType;
+      try
+      {
+        VarInitType=TraverseVarConsTypeD(Vars,Vars,VarInit,ExpandNumTypesDown(VarType));
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntypechecking " + pp(StateFrm) + ".");
+      }
+
+      sort_expression temp;
+      if (!TypeMatchA(VarType,VarInitType,temp))
+      {
+        //upcasting
+        try 
+        {
+          VarInitType=UpCastNumericType(VarType,VarInitType,VarInit);
+        }
+        catch (mcrl2::runtime_error &e)
+        { 
+          throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast " + pp(VarInit) + " to type " + pp(VarType) + " (typechecking state formula " + pp(StateFrm));
+        }
+      }
+
+      r.push_front(assignment(o.lhs(),VarInit));
+      t.push_front(VarType);
+    }
+
+    std::map<core::identifier_string,sort_expression> CopyVars(Vars);
+    CopyVars.insert(FormPars.begin(),FormPars.end());
+    
+
+    CopyStateVars[f.name()]=reverse(t);
+    
+    try
+    {
+      return mu(f.name(),reverse(r),TraverseStateFrm(CopyVars,CopyStateVars,f.operand()));
+    }
+    catch (mcrl2::runtime_error &e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking TEMPORARILY PRINT AN ATERM " + to_string(f));
+    }
   }
 
   if (is_data_expression(StateFrm))
   {
     data_expression d(StateFrm);
-    aterm_appl Type=TraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
+    sort_expression Type=TraverseVarConsTypeD(Vars, Vars, d, sort_bool::bool_());
     return d;
   }
 
   throw mcrl2::runtime_error("Internal error. The state formula " + pp(StateFrm) + " fails to match any known form in typechecking case analysis");
 }
-
-
 
 
 mcrl2::state_formulas::state_formula_type_checker::state_formula_type_checker(

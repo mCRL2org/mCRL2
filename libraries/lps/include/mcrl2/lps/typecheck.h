@@ -15,6 +15,7 @@
 #include "mcrl2/core/detail/struct_core.h"  // gsMakeMultAct
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/process/process_expression.h"
 #include "mcrl2/lps/action_rename.h"
 
 namespace mcrl2
@@ -53,8 +54,8 @@ class action_type_checker:public data::data_type_checker
 
   protected:
     void ReadInActs(const lps::action_label_list &Acts);
-    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const atermpp::aterm_appl &ma);
-    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const atermpp::aterm_appl &ma);
+    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::parameter_identifier &ma);
+    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::parameter_identifier &ma);
 };
 
 

@@ -42,7 +42,6 @@ class pbes_type_checker:public data::data_type_checker
     
       mCRL2log(verbose) << "type checking PBES specification..." << std::endl;
     
-      // aterm_appl data_spec = aterm_cast<aterm_appl>(pbes_spec[0]);
       Container pb_eqn_spec = pbes_spec.equations();
       propositional_variable_instantiation pb_init = pbes_spec.initial_state();
       std::set<data::variable> glob_var_spec = pbes_spec.global_variables();
@@ -119,7 +118,6 @@ class pbes_type_checker:public data::data_type_checker
         std::map<core::identifier_string,sort_expression> Vars;
       
         //PBEs and data terms in PBEqns and init
-        // for (aterm_list PBVars=proc_pars.keys(); !PBVars.empty(); PBVars=PBVars.tail())
         for (std::map <propositional_variable,pbes_expression>::const_iterator i=pbes_bodies.begin(); i!=pbes_bodies.end(); ++i)
         {
           propositional_variable PBVar=i->first;
@@ -227,40 +225,74 @@ class pbes_type_checker:public data::data_type_checker
       
         if (is_pbes_not(PBESTerm))
         {
-          const not_ argument=aterm_cast<const not_>(PBESTerm);
+          const not_& argument=aterm_cast<const not_>(PBESTerm);
           return not_(TraversePBESVarConstPB(Vars,argument.operand()));
         }
       
-        if (is_pbes_and(PBESTerm) || is_pbes_or(PBESTerm) || is_pbes_imp(PBESTerm))
+        if (is_pbes_and(PBESTerm))
         {
-          const pbes_expression NewLeft=TraversePBESVarConstPB(Vars,aterm_cast<const pbes_expression>(PBESTerm[0]));
-          const pbes_expression NewRight=TraversePBESVarConstPB(Vars,aterm_cast<const pbes_expression>(PBESTerm[1]));
-          return PBESTerm.set_argument(NewLeft,0).set_argument(NewRight,1);
+          const and_& t=aterm_cast<const and_>(PBESTerm);
+          return and_(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
         }
       
-        if (is_pbes_forall(PBESTerm)||is_pbes_exists(PBESTerm))
+        if (is_pbes_or(PBESTerm))
         {
+          const or_& t=aterm_cast<const or_>(PBESTerm);
+          return or_(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
+        }
+      
+        if (is_pbes_imp(PBESTerm))
+        {
+          const imp& t=aterm_cast<const imp>(PBESTerm);
+          return imp(TraversePBESVarConstPB(Vars,t.left()),TraversePBESVarConstPB(Vars,t.right()));
+        }
+      
+        if (is_pbes_forall(PBESTerm))
+        {
+          const forall& t=aterm_cast<const forall>(PBESTerm);
           std::map<core::identifier_string,sort_expression> CopyVars(Vars);
       
           std::map<core::identifier_string,sort_expression> NewVars;
           try
           {
-            AddVars2Table(CopyVars,aterm_cast<variable_list>(PBESTerm[0]),NewVars);
+            AddVars2Table(CopyVars,t.variables(),NewVars);
           }
           catch (mcrl2::runtime_error &e)
           {
             throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + pp(PBESTerm));
           }
-          aterm_appl NewPBES;
           try
           {
-            NewPBES=TraversePBESVarConstPB(NewVars,aterm_cast<aterm_appl>(PBESTerm[1]));
+            return forall(t.variables(),TraversePBESVarConstPB(NewVars,t.body()));
           }
           catch (mcrl2::runtime_error &e)
           {
             throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pp(PBESTerm));
           }
-          return PBESTerm.set_argument(NewPBES,1);
+        }
+      
+        if (is_pbes_exists(PBESTerm))
+        {
+          const exists& t=aterm_cast<const exists>(PBESTerm);
+          std::map<core::identifier_string,sort_expression> CopyVars(Vars);
+      
+          std::map<core::identifier_string,sort_expression> NewVars;
+          try
+          {
+            AddVars2Table(CopyVars,t.variables(),NewVars);
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking " + pp(PBESTerm));
+          }
+          try
+          {
+            return exists(t.variables(),TraversePBESVarConstPB(NewVars,t.body()));
+          }
+          catch (mcrl2::runtime_error &e)
+          {
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pp(PBESTerm));
+          }
         }
       
         if (is_propositional_variable_instantiation(PBESTerm))
@@ -368,7 +400,7 @@ class pbes_type_checker:public data::data_type_checker
             sort_expression PosType=PosTypeList.front();
             sort_expression NewPosType=NewPosTypeList.front();
       
-            aterm_appl CastedNewPosType;
+            sort_expression CastedNewPosType;
             try
             { 
               CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par);
@@ -422,16 +454,6 @@ void type_check(pbes<Container>& pbes_spec)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pp(pbes_spec));
   }
-  /*  
-  // TODO: replace all this nonsense code by a proper type check implementation
-  atermpp::aterm_appl t1 = pbes_to_aterm(pbes_spec);
-  atermpp::aterm_appl t2 = core::type_check_pbes_spec(t1);
-  if (t2==atermpp::aterm_appl())
-  {
-    throw mcrl2::runtime_error("could not type check " + pp(pbes_to_aterm(pbes_spec)));
-  }
-  pbes_spec = pbes<Container>(t2, true); 
-  */
 }
 
 } // namespace pbes_system

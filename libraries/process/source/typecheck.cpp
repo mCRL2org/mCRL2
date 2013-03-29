@@ -276,7 +276,6 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
                const data_expression_list& pars)
 {
   process_expression Result;
-  // core::identifier_string Name(ProcTerm[0]);
   term_list<sort_expression_list> ParList;
 
   bool action=false;

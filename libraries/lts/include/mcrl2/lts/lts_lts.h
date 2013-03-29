@@ -118,8 +118,10 @@ class state_label_lts : public atermpp::aterm_appl
     void set_element(const mcrl2::data::data_expression& e, const size_t i)
     {
       assert(i<this->size());
-      set_argument(e,i);
-    }
+      std::vector<data::data_expression> v(this->begin(),this->end());
+      v[i]=e;
+      *this=atermpp::aterm_appl(get_STATE_function_symbol(v.size()),v.begin(),v.end());
+    } 
 };
 
 /** \brief Pretty print a state value of this LTS.
