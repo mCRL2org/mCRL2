@@ -6,7 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/monotonicity.h"
@@ -188,7 +187,7 @@ action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identif
     return ma;
   }
 
-  if (gsIsParamId(ma))
+  if (process::is_parameter_identifier(ma))
   {
     return RewrAct(Vars,ma);
   }
@@ -261,7 +260,7 @@ multi_action mcrl2::lps::action_type_checker::operator()(const multi_action &ma)
     for (action_list::const_iterator l=ma.actions().begin(); l!=ma.actions().end(); ++l)
     {
       action o= *l;
-      assert(gsIsParamId(o));
+      assert(process::is_parameter_identifier(o));
       const  std::map<core::identifier_string,sort_expression> NewDeclaredVars;
       o=TraverseAct(NewDeclaredVars,o);
       r.push_front(o);
@@ -515,9 +514,9 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     for (action_list::const_iterator l=ma.actions().begin(); l!=ma.actions().end(); ++l)
     {
       action o= *l;
-      assert(gsIsParamId(o));
+      assert(process::is_parameter_identifier(o));
       o=RewrAct(Vars,o);
-      assert(!gsIsParamId(o));
+      assert(!process::is_parameter_identifier(o));
       r.push_front(o);
     }
     return multi_action(reverse(r));

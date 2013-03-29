@@ -6548,7 +6548,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const action_name_multiset source=i->action_name();
         const identifier_string target=i->name();
-        if (gsIsNil(i->name()))  // Right hand side of communication is empty. We receive a bad datatype.
+        if (is_nil(i->name()))  // Right hand side of communication is empty. We receive a bad datatype.
         {
           throw mcrl2::runtime_error("Right hand side of communication " + process::pp(source) + " in a comm command cannot be empty or tau");
         }

@@ -258,16 +258,6 @@ class term_appl:public aterm
       return (std::numeric_limits<size_type>::max)();
     }
 
-    /// \brief Returns a copy of the term with the i-th child replaced by t.
-    /// \deprecated
-    /// \param arg The new i-th argument
-    /// \param i A positive integer
-    /// \detail This operator is linear in the number of the arguments.
-    ///         It is more efficient to completely reconstruct a term
-    ///         instead of repeatedly applying set_argument.
-    /// \return The term with one of its arguments replaced.
-    term_appl<Term> set_argument(const Term &arg, const size_type i) const;
-
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.

@@ -6,7 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/process/typecheck.h"
 
 
@@ -340,7 +339,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
   //process the arguments
 
   //possible types for the arguments of the action. (not inferred if ambiguous action).
-  sort_expression_list PosTypeList=aterm_cast<sort_expression_list>(aterm_cast<aterm_appl>(Result[0])[1]);
+  sort_expression_list PosTypeList=is_action(Result)?  aterm_cast<const process::action>(Result).label().sorts():
+                                                       aterm_cast<const process_instance>(Result).identifier().sorts();
 
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
@@ -370,7 +370,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
 
   if (!p.first)
   {
-    PosTypeList=aterm_cast<sort_expression_list>(aterm_cast<aterm_appl>(Result[0])[1]);
+    PosTypeList=is_action(Result)?  aterm_cast<const process::action>(Result).label().sorts():
+                                    aterm_cast<const process_instance>(Result).identifier().sorts();
     data_expression_list Pars=NewPars;
     NewPars=data_expression_list();
     sort_expression_list CastedPosTypeList;
@@ -536,7 +537,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     As.clear();
     std::map <identifier_string,assignment> As_new;
     variable_list m=FormalPars;
-    for (data_expression_list l=aterm_cast<data_expression_list>(TypeCheckedProcTerm[1]); !l.empty(); l=l.tail(),m=m.tail())
+    data_expression_list l=aterm_cast<const process_instance>(TypeCheckedProcTerm).actual_parameters();
+    for ( ; !l.empty(); l=l.tail(),m=m.tail())
     {
       const data_expression act_par=l.front();
       const variable form_par=m.front();
@@ -561,13 +563,14 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     }
     TypedAssignments=reverse(TypedAssignments);
 
-    return process_instance_assignment(aterm_cast<const process_identifier>(TypeCheckedProcTerm[0]),TypedAssignments);
+    return process_instance_assignment(aterm_cast<const process_instance>(TypeCheckedProcTerm).identifier(),TypedAssignments);
   }
   //Here the section dealing with assignments ends.
 
-  if (gsIsParamId(ProcTerm))
+  if (is_parameter_identifier(ProcTerm))
   {
-    process_expression result= RewrActProc(Vars,aterm_cast<identifier_string>(ProcTerm[0]),aterm_cast<data_expression_list>(ProcTerm[1]));
+    const parameter_identifier& t=aterm_cast<const parameter_identifier>(ProcTerm);
+    process_expression result= RewrActProc(Vars,t.name(), t.arguments());
     return result;
   }
 
@@ -703,7 +706,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         //Actions must be declared
         term_list<sort_expression_list> ResTypes;
 
-        if (!gsIsNil(ActTo))
+        if (!is_nil(ActTo))
         {
           const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(ActTo);
           if (j==actions.end())

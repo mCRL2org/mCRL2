@@ -12,7 +12,6 @@
 #ifndef MCRL2_LPS_TYPECHECK_H
 #define MCRL2_LPS_TYPECHECK_H
 
-#include "mcrl2/core/detail/struct_core.h"  // gsMakeMultAct
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/process_expression.h"

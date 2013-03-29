@@ -626,7 +626,7 @@ class Trace
         using namespace mcrl2::lps;
         const aterm& e = trace.front();
 
-        if (e.type_is_appl() && core::detail::gsIsMultAct(aterm_cast<aterm_appl>(e)))   // To be compatible with old untimed version
+        if (e.type_is_appl() && lps::is_multi_action(aterm_cast<aterm_appl>(e)))   // To be compatible with old untimed version
         {
           addAction(multi_action(action_list(aterm_cast<aterm_appl>(e))));
         }

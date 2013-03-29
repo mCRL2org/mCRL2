@@ -1329,7 +1329,7 @@ bool RewriterCompilingJitty::calc_nfs(aterm t, int startarg, aterm_list nnfvars)
   {
     return opid_is_nf(aterm_cast<aterm_int>(t),0);
   }
-  else if (/*t.type_is_appl() && */ gsIsNil((aterm_appl) t))
+  else if (/*t.type_is_appl() && */ is_nil((aterm_appl) t))
   {
     // assert(startarg>=0); This value may be negative.
     return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) == nnfvars.end());
