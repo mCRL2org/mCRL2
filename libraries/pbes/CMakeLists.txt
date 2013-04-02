@@ -30,6 +30,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 set(mcrl2_pbes_src
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/algorithms.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/pbes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools2.cpp
