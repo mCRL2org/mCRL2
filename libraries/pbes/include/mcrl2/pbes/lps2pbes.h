@@ -77,7 +77,7 @@ class lps2pbes_algorithm
       id_generator.add_identifiers(ids);
       ids = data::find_identifiers(spec.data().mappings());
       id_generator.add_identifiers(ids);
-      ids = state_formulas::algorithms::find_identifiers(f);
+      ids = state_formulas::find_identifiers(f);
       id_generator.add_identifiers(ids);
 
       // compute the equations
@@ -152,7 +152,7 @@ inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::sta
   {
     lps::specification spec_timed = spec;
     std::set<core::identifier_string> id_generator = lps::find_identifiers(spec);
-    std::set<core::identifier_string> fcontext = state_formulas::algorithms::find_identifiers(formula);
+    std::set<core::identifier_string> fcontext = state_formulas::find_identifiers(formula);
     id_generator.insert(fcontext.begin(), fcontext.end());
     data::variable T = fresh_variable(id_generator, data::sort_real::real_(), "T");
     id_generator.insert(T.name());

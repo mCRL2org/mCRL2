@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESPARELM_H
 #define MCRL2_PBES_TOOLS_PBESPARELM_H
 
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/tools.h"

@@ -145,7 +145,12 @@ bool is_normalized(const state_formula& x)
   return state_formulas::is_normalized(x);
 }
 
+std::set<core::identifier_string> find_state_variable_names(const state_formula& x)
+{
+  return state_formulas::find_state_variable_names(x);
 }
+
+} // algorithms
 
 } // namespace state_formulas
 

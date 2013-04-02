@@ -12,6 +12,7 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/translate_user_notation.h"
 
@@ -52,6 +53,20 @@ bool search_variable(const pbes_system::pbes_expression& x, const data::variable
 std::string pp(const atermpp::aterm& x) { return to_string(x); }
 std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 std::string pp(const core::identifier_string& x) { return core::pp(x); }
+
+namespace algorithms {
+
+void remove_parameters(pbes<>& x, const std::set<data::variable>& to_be_removed)
+{
+  pbes_system::remove_parameters(x, to_be_removed);
+}
+
+void remove_parameters(pbes<>& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
+{
+  pbes_system::remove_parameters(x, to_be_removed);
+}
+
+} // algorithms
 
 } // namespace pbes_system
 

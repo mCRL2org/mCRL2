@@ -36,7 +36,6 @@
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/logger.h"
@@ -652,7 +651,7 @@ struct absinthe_algorithm
       {
         const function_sort fs(s);
         const sort_expression_list& sl=fs.domain();
-        return function_symbol(name, 
+        return function_symbol(name,
                  function_sort(sort_expression_list(sl.begin(),sl.end(), make_set()), fs.codomain()));
       }
       else if (is_container_sort(s))

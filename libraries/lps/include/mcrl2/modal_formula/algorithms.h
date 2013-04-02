@@ -58,9 +58,6 @@ state_formula normalize(const state_formula& x);
 /// \return True if the state formula is normalized
 bool is_normalized(const state_formula& x);
 
-/// \brief Returns all identifiers that occur in a state formula.
-std::set<core::identifier_string> find_identifiers(const state_formula& x);
-
 /// \brief Returns the names of the state variables that occur in x.
 std::set<core::identifier_string> find_state_variable_names(const state_formula& x);
 

@@ -20,10 +20,10 @@
 #include <algorithm>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
-#include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
@@ -894,7 +894,7 @@ class pbes_constelm_algorithm
       }
 
       // remove the redundant parameters
-      remove_parameters(p, m_redundant_parameters);
+      pbes_system::algorithms::remove_parameters(p, m_redundant_parameters);
 
       // print the parameters and equation that are removed
       if (mCRL2logEnabled(log::verbose))

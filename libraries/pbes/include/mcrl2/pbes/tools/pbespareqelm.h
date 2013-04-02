@@ -13,6 +13,7 @@
 #define MCRL2_PBES_TOOLS_PBESPAREQELM_H
 
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/rewriter.h"

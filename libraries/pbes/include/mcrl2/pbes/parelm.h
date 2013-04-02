@@ -23,9 +23,9 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/remove_parameters.h"
 
 namespace mcrl2
 {
@@ -280,7 +280,7 @@ class pbes_parelm_algorithm
       }
 
       // remove the parameters
-      remove_parameters(p, removals);
+      pbes_system::algorithms::remove_parameters(p, removals);
     }
 };
 

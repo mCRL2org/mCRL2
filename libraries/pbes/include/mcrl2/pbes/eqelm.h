@@ -19,10 +19,10 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
-#include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -286,7 +286,7 @@ class pbes_eqelm_algorithm
           }
         }
       }
-      remove_parameters(p, to_be_removed);
+      pbes_system::algorithms::remove_parameters(p, to_be_removed);
     }
 
   public:
