@@ -21,7 +21,6 @@
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/detail/print_utility.h"
 #include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -158,7 +157,7 @@ void update_substitution(data::mutable_map_substitution<>& sigma, const data::va
   {
     i->second = data::replace_free_variables(i->second, v_e);
   }
-  sigma[v] = e; 
+  sigma[v] = e;
 }
 
 template <typename Derived>

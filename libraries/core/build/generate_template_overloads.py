@@ -170,6 +170,7 @@ lps::deadlock
 lps::multi_action
 lps::process_initializer
 pbes_system::pbes<>
+pbes_system::pbes_expression
 pbes_system::pbes_equation
 state_formulas::state_formula
 '''

@@ -21,7 +21,6 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/pfnf_pbes.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
@@ -142,7 +141,7 @@ class stategraph_influence_graph_algorithm
           const std::vector<data::variable> d_Y = eqn.parameters();
           for (std::size_t p = 0; p < Yparameters.size(); p++)
           {
-            std::set<data::variable> freevars = pbes_system::find_free_variables(Yparameters[p]);
+            std::set<data::variable> freevars = data::find_free_variables(Yparameters[p]);
             for (std::size_t m = 0; m < d_X.size(); m++)
             {
               if (std::find(freevars.begin(), freevars.end(), d_X[m]) != freevars.end())

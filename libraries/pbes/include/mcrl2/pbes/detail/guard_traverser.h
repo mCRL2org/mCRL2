@@ -20,12 +20,17 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
+#ifdef MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
+#include "mcrl2/pbes/find.h"
+#endif
+
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
 
+#ifdef MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
 inline
 pbes_expression guard_s(const pbes_expression& x)
 {
@@ -141,6 +146,7 @@ pbes_expression guard(const propositional_variable_instantiation& X, const pbes_
   }
   return guard_impl(X, x);
 }
+#endif // MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
 
 struct guard_expression
 {

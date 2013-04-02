@@ -15,9 +15,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
-#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -70,8 +68,8 @@ bool pbesinst(const std::string& input_filename,
 
   if (remove_redundant_equations)
   {
-    std::vector<propositional_variable> V = remove_unreachable_variables(p);
-    mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
+    std::vector<propositional_variable> V = pbes_system::algorithms::remove_unreachable_variables(p);
+    mCRL2log(log::verbose) << pbes_system::algorithms::print_removed_equations(V);
   }
 
   // save the result

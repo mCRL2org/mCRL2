@@ -17,7 +17,6 @@
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/tools.h"
-#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -50,8 +49,8 @@ void pbesconstelm(const std::string& input_filename,
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {
-        std::vector<propositional_variable> V = remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
+        std::vector<propositional_variable> V = pbes_system::algorithms::remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << pbes_system::algorithms::print_removed_equations(V);
       }
       break;
     }
@@ -67,8 +66,8 @@ void pbesconstelm(const std::string& input_filename,
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {
-        std::vector<propositional_variable> V = remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
+        std::vector<propositional_variable> V = pbes_system::algorithms::remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << pbes_system::algorithms::print_removed_equations(V);
       }
       break;
     }

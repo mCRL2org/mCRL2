@@ -78,6 +78,13 @@ void load_pbes(pbes<>& p, const std::string& infilename);
 /// \param x a PBES
 bool is_bes(const pbes<>& x);
 
+/// \brief Print removed equations.
+std::string print_removed_equations(const std::vector<propositional_variable>& removed);
+
+/// \brief Removes equations that are not (syntactically) reachable from the initial state of a PBES.
+/// \return The removed variables
+std::vector<propositional_variable> remove_unreachable_variables(pbes<>& p);
+
 } // namespace algorithms
 
 } // namespace pbes_system

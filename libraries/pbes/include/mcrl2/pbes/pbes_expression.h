@@ -362,6 +362,7 @@ std::string pp(const propositional_variable_instantiation_list& x);
 std::string pp(const propositional_variable_instantiation_vector& x);
 std::set<pbes_system::propositional_variable_instantiation> find_propositional_variable_instantiations(const pbes_system::pbes_expression& x);
 std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expression& x);
+std::set<data::variable> find_free_variables(const pbes_system::pbes_expression& x);
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
 
 // TODO: These should be removed when the aterm code has been replaced.

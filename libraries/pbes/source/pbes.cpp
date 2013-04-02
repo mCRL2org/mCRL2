@@ -43,6 +43,7 @@ void translate_user_notation(pbes_system::pbes<>& x) { pbes_system::translate_us
 std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes<>& x) { return pbes_system::find_sort_expressions< pbes_system::pbes<> >(x); }
 std::set<data::variable> find_variables(const pbes_system::pbes<>& x) { return pbes_system::find_variables< pbes_system::pbes<> >(x); }
 std::set<data::variable> find_free_variables(const pbes_system::pbes<>& x) { return pbes_system::find_free_variables< pbes_system::pbes<> >(x); }
+std::set<data::variable> find_free_variables(const pbes_system::pbes_expression& x) { return pbes_system::find_free_variables< pbes_system::pbes_expression >(x); }
 std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x) { return pbes_system::find_free_variables< pbes_system::pbes_equation >(x); }
 std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes<>& x) { return pbes_system::find_function_symbols< pbes_system::pbes<> >(x); }
 std::set<pbes_system::propositional_variable_instantiation> find_propositional_variable_instantiations(const pbes_system::pbes_expression& x) { return pbes_system::find_propositional_variable_instantiations< pbes_system::pbes_expression >(x); }
