@@ -24,6 +24,7 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbes.h"

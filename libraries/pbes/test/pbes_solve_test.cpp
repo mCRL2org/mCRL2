@@ -13,6 +13,7 @@
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"

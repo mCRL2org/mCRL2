@@ -9,8 +9,8 @@
 /// \file mcrl2/pbes/bes_algorithms.h
 /// \brief Algorithms for boolean equation systems.
 
-#ifndef MCRL2_PBES_ALGORITHMS_H
-#define MCRL2_PBES_ALGORITHMS_H
+#ifndef MCRL2_PBES_BES_ALGORITHMS_H
+#define MCRL2_PBES_BES_ALGORITHMS_H
 
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/data/enumerator.h"
@@ -50,4 +50,4 @@ pbes<> pbesinst(const pbes<>& p, bool lazy = false)
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_ALGORITHMS_H
+#endif // MCRL2_PBES_BES_ALGORITHMS_H

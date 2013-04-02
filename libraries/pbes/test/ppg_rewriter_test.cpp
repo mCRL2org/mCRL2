@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
