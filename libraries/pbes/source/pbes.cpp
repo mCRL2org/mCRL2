@@ -12,10 +12,11 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/normalize_sorts.h"
+#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/remove_parameters.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/translate_user_notation.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 namespace mcrl2
 {
@@ -75,6 +76,16 @@ void normalize(pbes<>& x)
 bool is_normalized(const pbes<>& x)
 {
   return pbes_system::is_normalized(x);
+}
+
+void instantiate_global_variables(pbes<>& p)
+{
+  pbes_system::detail::instantiate_global_variables(p);
+}
+
+void pbesinst_finite(pbes<>& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
+{
+  pbes_system::pbesinst_finite(p, rewrite_strategy, finite_parameter_selection);
 }
 
 } // algorithms

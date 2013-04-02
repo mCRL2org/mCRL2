@@ -21,10 +21,10 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -326,7 +326,7 @@ class pbesinst_finite_algorithm
              const pbesinst_variable_map& variable_map
             )
     {
-      pbes_system::detail::instantiate_global_variables(p);
+      pbes_system::algorithms::instantiate_global_variables(p);
       m_equation_count = 0;
 
       // compute index map corresponding to the variable map
@@ -401,6 +401,14 @@ class pbesinst_finite_algorithm
       run(p, variable_map);
     }
 };
+
+inline
+void pbesinst_finite(pbes<>& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
+{
+  pbesinst_finite_algorithm algorithm(rewrite_strategy);
+  pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, finite_parameter_selection);
+  algorithm.run(p, parameter_map);
+}
 
 } // namespace pbes_system
 

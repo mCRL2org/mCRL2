@@ -17,11 +17,11 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -105,7 +105,7 @@ class pbesinst_symbolic_algorithm
       : m_pbes(p),
         m_rewriter(p.data())
     {
-      pbes_system::detail::instantiate_global_variables(p);
+      pbes_system::algorithms::instantiate_global_variables(p);
 
       // initialize m_equation_index
       std::size_t eqn_index = 0;

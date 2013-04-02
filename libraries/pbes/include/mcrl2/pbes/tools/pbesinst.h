@@ -12,11 +12,10 @@
 #ifndef MCRL2_PBES_TOOLS_PBESINST_H
 #define MCRL2_PBES_TOOLS_PBESINST_H
 
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
-#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
@@ -55,9 +54,7 @@ bool pbesinst(const std::string& input_filename,
   }
   else if (m_strategy == pbesinst_finite)
   {
-    pbesinst_finite_algorithm algorithm(rewrite_strategy);
-    pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, finite_parameter_selection);
-    algorithm.run(p, parameter_map);
+    pbes_system::algorithms::pbesinst_finite(p, rewrite_strategy, finite_parameter_selection);
   }
 
   if (log::mcrl2_logger::get_reporting_level() >= log::verbose)

@@ -13,6 +13,7 @@
 #define MCRL2_PBES_ALGORITHMS_H
 
 #include <set>
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -42,6 +43,14 @@ void normalize(pbes<>& x);
 /// \brief Checks if a PBEs is normalized
 /// \return True if the PBES is normalized
 bool is_normalized(const pbes<>& x);
+
+/// \brief Attempts to eliminate the free variables of a PBES, by substituting
+/// a constant value for them. If no constant value is found for one of the variables,
+/// an exception is thrown.
+void instantiate_global_variables(pbes<>& p);
+
+/// \brief Apply finite instantiation to the given PBES.
+void pbesinst_finite(pbes<>& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection);
 
 } // namespace algorithms
 

@@ -25,7 +25,6 @@
 #include "mcrl2/modal_formula/detail/test_input.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/pbesinst_symbolic.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
