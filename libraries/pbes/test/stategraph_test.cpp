@@ -9,6 +9,8 @@
 /// \file stategraph_test.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
+
 #include <iostream>
 #include <utility>
 #include <set>

@@ -23,7 +23,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/find.h"
 
 // //Action rename rules
 // <ActionRenameRules>

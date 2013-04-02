@@ -13,6 +13,7 @@
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/remove_parameters.h"
+#include "mcrl2/pbes/significant_variables.h"
 
 namespace mcrl2
 {
@@ -52,11 +53,14 @@ std::string print_removed_equations(const std::vector<propositional_variable>& r
   return pbes_system::detail::print_removed_equations(removed);
 }
 
-/// \brief Removes equations that are not (syntactically) reachable from the initial state of a PBES.
-/// \return The removed variables
 std::vector<propositional_variable> remove_unreachable_variables(pbes<>& p)
 {
   return pbes_system::remove_unreachable_variables(p);
+}
+
+std::set<data::variable> significant_variables(const pbes_expression& x)
+{
+  return pbes_system::significant_variables(x);
 }
 
 } // algorithms

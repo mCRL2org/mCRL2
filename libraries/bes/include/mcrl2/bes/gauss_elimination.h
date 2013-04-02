@@ -12,7 +12,7 @@
 #ifndef MCRL2_BES_GAUSS_ELIMINATION_H
 #define MCRL2_BES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/boolean_expression_rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"

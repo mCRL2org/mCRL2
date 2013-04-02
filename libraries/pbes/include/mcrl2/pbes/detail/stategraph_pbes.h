@@ -15,7 +15,6 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"

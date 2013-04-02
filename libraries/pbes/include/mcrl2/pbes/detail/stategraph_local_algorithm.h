@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H
 
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_dependency_graph.h"
 
@@ -217,7 +218,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       data::variable d0 = eq_X.parameters()[p];
       data::mutable_map_substitution<> sigma;
       sigma[d0] = e0;
-      u0.sig = significant_variables(pbesr(eq_X.formula(), sigma));
+      u0.sig = pbes_system::algorithms::significant_variables(pbesr(eq_X.formula(), sigma));
 
       mCRL2log(log::debug, "stategraph") << "u0 = " << pbes_system::pp(u0.X) << std::endl;
 
@@ -292,7 +293,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               data::variable d = eq_vX.parameters()[q];
               data::mutable_map_substitution<> sigma;
               sigma[d] = e;
-              v.sig = significant_variables(pbesr(eq_vX.formula(), sigma));
+              v.sig = pbes_system::algorithms::significant_variables(pbesr(eq_vX.formula(), sigma));
             }
 
             stategraph_vertex& v = vi->second;

@@ -17,7 +17,7 @@
 
 //Rewriters
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/algorithms.h"
 
 //Data framework

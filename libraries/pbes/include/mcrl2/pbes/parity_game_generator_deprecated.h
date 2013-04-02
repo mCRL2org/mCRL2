@@ -25,7 +25,6 @@
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 

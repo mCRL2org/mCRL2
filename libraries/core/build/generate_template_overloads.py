@@ -156,6 +156,7 @@ lps::linear_process
 lps::specification
 lps::deadlock
 lps::multi_action
+lps::action
 pbes_system::pbes<>
 state_formulas::state_formula
 '''

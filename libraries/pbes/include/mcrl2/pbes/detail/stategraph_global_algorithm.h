@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 
 namespace mcrl2 {
@@ -59,7 +60,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
         data::data_expression_list e = u.X.parameters();
         data::sequence_sequence_substitution<data::variable_list, data::data_expression_list> sigma(d, e);
 
-        u.sig = significant_variables(pbesr(eqn.formula(), sigma));
+        u.sig = pbes_system::algorithms::significant_variables(pbesr(eqn.formula(), sigma));
 
         const std::vector<predicate_variable>& predvars = eqn.predicate_variables();
         // for (std::vector<predicate_variable>::const_iterator j = predvars.begin(); j != predvars.end(); ++j)

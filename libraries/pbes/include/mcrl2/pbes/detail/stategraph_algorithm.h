@@ -14,7 +14,6 @@
 
 #include <sstream>
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
-#include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/utilities/sequence.h"
 

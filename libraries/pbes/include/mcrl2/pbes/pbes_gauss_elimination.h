@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 

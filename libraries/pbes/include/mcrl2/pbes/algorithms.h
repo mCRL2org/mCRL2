@@ -85,6 +85,9 @@ std::string print_removed_equations(const std::vector<propositional_variable>& r
 /// \return The removed variables
 std::vector<propositional_variable> remove_unreachable_variables(pbes<>& p);
 
+/// \brief Returns the significant variables of a pbes expression.
+std::set<data::variable> significant_variables(const pbes_expression& x);
+
 } // namespace algorithms
 
 } // namespace pbes_system

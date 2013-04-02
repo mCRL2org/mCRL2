@@ -15,6 +15,7 @@
 #include <set>
 #include <string>
 #include <utility>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/utilities/exception.h"
 

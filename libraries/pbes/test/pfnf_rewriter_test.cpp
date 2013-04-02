@@ -12,6 +12,8 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"

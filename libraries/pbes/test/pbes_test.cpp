@@ -33,7 +33,6 @@
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
@@ -53,7 +52,6 @@ using pbes_system::pbes_expr_builder;
 using pbes_system::pbes_equation;
 using pbes_system::lps2pbes;
 using pbes_system::propositional_variable_instantiation;
-using pbes_system::detail::make_quantifier_rename_builder;
 
 const std::string SPECIFICATION =
   "act a:Nat;                               \n"
@@ -191,43 +189,6 @@ void test_global_variables()
   // but occurs in the global variables list.
 }
 
-void test_quantifier_rename_builder()
-{
-  using namespace pbes_system;
-  using namespace pbes_system::pbes_expr;
-  namespace z = pbes_system::pbes_expr;
-
-  variable mN("m", basic_sort("N"));
-  variable nN("n", basic_sort("N"));
-
-  pbes_expression f = data::equal_to(mN, nN);
-  pbes_expression g = data::not_equal_to(mN, nN);
-
-  multiset_identifier_generator generator;
-  generator.add_identifier(identifier_string("n00"));
-  generator.add_identifier(identifier_string("n01"));
-
-  pbes_expression p1 =
-    z::and_(
-      pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), f)),
-      pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), g))
-    );
-  pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1);
-  std::cout << "p1 = " << mcrl2::pbes_system::pp(p1) << std::endl;
-  std::cout << "q1 = " << mcrl2::pbes_system::pp(q1) << std::endl;
-
-  pbes_expression p2 =
-    z::and_(
-      pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), p1)),
-      pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), q1))
-    );
-  pbes_expression q2 = rename_quantifier_variables(p2, make_list(variable("n00", basic_sort("N")), variable("n01", basic_sort("N"))));
-  std::cout << "p2 = " << mcrl2::pbes_system::pp(p2) << std::endl;
-  std::cout << "q2 = " << mcrl2::pbes_system::pp(q2) << std::endl;
-
-  // BOOST_CHECK(false);
-}
-
 void test_complement_method_builder()
 {
   using namespace pbes_system;
@@ -338,7 +299,6 @@ int test_main(int argc, char** argv)
   test_trivial();
   test_pbes();
   test_global_variables();
-  test_quantifier_rename_builder();
   test_complement_method_builder();
   test_pbes_expression();
   test_instantiate_global_variables();

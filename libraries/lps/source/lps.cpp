@@ -55,6 +55,7 @@ std::set<data::variable> find_variables(const lps::linear_process& x) { return l
 std::set<data::variable> find_variables(const lps::specification& x) { return lps::find_variables< lps::specification >(x); }
 std::set<data::variable> find_variables(const lps::deadlock& x) { return lps::find_variables< lps::deadlock >(x); }
 std::set<data::variable> find_variables(const lps::multi_action& x) { return lps::find_variables< lps::multi_action >(x); }
+std::set<data::variable> find_variables(const lps::action& x) { return lps::find_variables< lps::action >(x); }
 std::set<data::variable> find_free_variables(const lps::action& x) { return lps::find_free_variables< lps::action >(x); }
 std::set<data::variable> find_free_variables(const lps::linear_process& x) { return lps::find_free_variables< lps::linear_process >(x); }
 std::set<data::variable> find_free_variables(const lps::specification& x) { return lps::find_free_variables< lps::specification >(x); }

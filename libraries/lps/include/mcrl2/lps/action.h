@@ -82,6 +82,7 @@ std::string pp(const action_list& x);
 std::string pp(const action_vector& x);
 action normalize_sorts(const action& x, const data::data_specification& dataspec);
 lps::action translate_user_notation(const lps::action& x);
+std::set<data::variable> find_variables(const lps::action& x);
 std::set<data::variable> find_free_variables(const lps::action& x);
 
 /// \brief Compares the signatures of two actions
