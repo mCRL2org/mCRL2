@@ -20,10 +20,9 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/monotonicity.h"
-#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/lps2pbes_rhs.h"
@@ -125,8 +124,8 @@ class lps2pbes_algorithm
 
       pbes<> result(spec.data(), eqn, spec.global_variables(), init);
       assert(is_monotonous(result));
-      pbes_system::normalize(result);
-      assert(pbes_system::is_normalized(result));
+      pbes_system::algorithms::normalize(result);
+      assert(pbes_system::algorithms::is_normalized(result));
       assert(result.is_closed());
       complete_data_specification(result);
       return result;

@@ -22,7 +22,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
@@ -283,7 +283,7 @@ class parity_game_generator
         }
 
         // Normalize the pbes, since the parity game generator currently doesn't handle negation and implication.
-        pbes_system::normalize(m_pbes);
+        pbes_system::algorithms::normalize(m_pbes);
 
         compute_equation_index_map();
         compute_priorities(m_pbes.equations());

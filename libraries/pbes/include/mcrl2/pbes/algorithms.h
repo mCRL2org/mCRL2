@@ -34,6 +34,15 @@ void remove_parameters(pbes<>& x, const std::set<data::variable>& to_be_removed)
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 void remove_parameters(pbes<>& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed);
 
+/// \brief The function normalize brings (embedded) pbes expressions into positive normal form,
+/// i.e. a formula without any occurrences of ! or =>.
+/// \param x an object containing pbes expressions
+void normalize(pbes<>& x);
+
+/// \brief Checks if a PBEs is normalized
+/// \return True if the PBES is normalized
+bool is_normalized(const pbes<>& x);
+
 } // namespace algorithms
 
 } // namespace pbes_system

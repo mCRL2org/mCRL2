@@ -13,9 +13,9 @@
 #define MCRL2_PBES_TOOLS_LPSBISIM2PBES_H
 
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/bisimulation_type.h"
-#include "mcrl2/pbes/normalize.h"
 
 namespace mcrl2 {
 
@@ -51,7 +51,7 @@ void lpsbisim2pbes(const std::string& input_filename1,
   }
   if (normalize)
   {
-    pbes_system::normalize(result);
+    pbes_system::algorithms::normalize(result);
   }
   result.save(output_filename);
 }

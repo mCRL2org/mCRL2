@@ -13,6 +13,7 @@
 
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
 
@@ -1225,7 +1226,7 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
         std::string variable_name = (*eqn).variable().name();
         //std::clog << "varname = " << variable_name << std::endl;
     }
-    pbes_system::normalize(p);
+    pbes_system::algorithms::normalize(p);
     if (!is_ppg(p))
     {
         mCRL2log(log::info) << "Rewriting to PPG..." << std::endl;

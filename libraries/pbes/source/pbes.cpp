@@ -10,6 +10,7 @@
 /// \brief
 
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/remove_parameters.h"
@@ -64,6 +65,16 @@ void remove_parameters(pbes<>& x, const std::set<data::variable>& to_be_removed)
 void remove_parameters(pbes<>& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
   pbes_system::remove_parameters(x, to_be_removed);
+}
+
+void normalize(pbes<>& x)
+{
+  pbes_system::normalize(x);
+}
+
+bool is_normalized(const pbes<>& x)
+{
+  return pbes_system::is_normalized(x);
 }
 
 } // algorithms
