@@ -317,24 +317,6 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
     return sigma(v);
   }
 
-  data::assignment_list operator()(const data::assignment_list& x)
-  {
-    std::vector<data::variable> tmp;
-    for (data::assignment_list::const_iterator i = x.begin(); i != x.end(); ++i)
-    {
-      tmp.push_back(i->lhs());
-    }
-    std::vector<data::variable> v = update_sigma.push(tmp);
-    std::vector<data::assignment> a;
-    std::vector<data::variable>::const_iterator j = v.begin();
-    for (data::assignment_list::const_iterator i = x.begin(); i != x.end(); ++i, ++j)
-    {
-      a.push_back(data::assignment(*j, (*this)(i->rhs())));
-    }
-    update_sigma.pop(v);
-    return data::assignment_list(a.begin(), a.end());
-  }
-
   data_expression operator()(const data::where_clause& x)
   {
     data::assignment_list assignments = atermpp::convert<data::assignment_list>(x.declarations());
@@ -376,14 +358,6 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   {
     data::variable_list v = update_sigma.push(x.variables());
     data_expression result = data::lambda(v, (*this)(x.body()));
-    update_sigma.pop(v);
-    return result;
-  }
-
-  assignment operator()(const data::assignment& x)
-  {
-    data::variable v = update_sigma.push(x.lhs());
-    assignment result(v, (*this)(x.rhs()));
     update_sigma.pop(v);
     return result;
   }
