@@ -14,7 +14,8 @@
 
 #include <fstream>
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/complps2pbes.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/process/parse.h"
@@ -59,7 +60,7 @@ void complps2pbes(const std::string& input_filename,
   {
     throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
+  state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec);
   instream.close();
 
   pbes_system::pbes<> result = pbes_system::complps2pbes(procspec, formula);

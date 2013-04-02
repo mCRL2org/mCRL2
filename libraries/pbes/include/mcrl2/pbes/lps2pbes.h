@@ -15,11 +15,8 @@
 #include <string>
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/modal_formula/find.h"
-#include "mcrl2/modal_formula/monotonicity.h"
-#include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/modal_formula/preprocess_state_formula.h"
-#include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
@@ -56,23 +53,23 @@ class lps2pbes_algorithm
       using atermpp::detail::operator+;
       lps::linear_process lps = spec.process();
 
-      if (!state_formulas::is_monotonous(formula))
+      if (!state_formulas::algorithms::is_monotonous(formula))
       {
         throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
       mCRL2log(log::debug) << "formula before preprocessing: " << state_formulas::pp(formula) << std::endl;
-      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
+      state_formulas::state_formula f = state_formulas::algorithms::preprocess_state_formula(formula, spec);
       mCRL2log(log::debug) << "formula after preprocessing:  " << state_formulas::pp(f) << std::endl;
 
       // remove occurrences of ! and =>
-      if (!state_formulas::is_normalized(f))
+      if (!state_formulas::algorithms::is_normalized(f))
       {
-        f = state_formulas::normalize(f);
+        f = state_formulas::algorithms::normalize(f);
       }
       mCRL2log(log::debug) << "formula after normalization:  " << state_formulas::pp(f) << std::endl;
-      assert(state_formulas::is_normalized(f));
+      assert(state_formulas::algorithms::is_normalized(f));
 
       data::set_identifier_generator id_generator;
       std::set<core::identifier_string> ids = lps::find_identifiers(spec);
@@ -81,7 +78,7 @@ class lps2pbes_algorithm
       id_generator.add_identifiers(ids);
       ids = data::find_identifiers(spec.data().mappings());
       id_generator.add_identifiers(ids);
-      ids = state_formulas::find_identifiers(f);
+      ids = state_formulas::algorithms::find_identifiers(f);
       id_generator.add_identifiers(ids);
 
       // compute the equations
@@ -89,7 +86,7 @@ class lps2pbes_algorithm
       if (structured)
       {
       	data::set_identifier_generator propvar_generator;
-        std::set<core::identifier_string> names = state_formulas::find_state_variable_names(f);
+        std::set<core::identifier_string> names = state_formulas::algorithms::find_state_variable_names(f);
         propvar_generator.add_identifiers(names);
         if (unoptimized)
         {
@@ -156,7 +153,7 @@ inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::sta
   {
     lps::specification spec_timed = spec;
     std::set<core::identifier_string> id_generator = lps::find_identifiers(spec);
-    std::set<core::identifier_string> fcontext = state_formulas::find_identifiers(formula);
+    std::set<core::identifier_string> fcontext = state_formulas::algorithms::find_identifiers(formula);
     id_generator.insert(fcontext.begin(), fcontext.end());
     data::variable T = fresh_variable(id_generator, data::sort_real::real_(), "T");
     id_generator.insert(T.name());
@@ -179,7 +176,7 @@ pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, b
 {
   pbes<> result;
   lps::specification spec = lps::linearise(spec_text);
-  state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
+  state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, spec);
   return lps2pbes(spec, f, timed, structured, unoptimized);
 }
 

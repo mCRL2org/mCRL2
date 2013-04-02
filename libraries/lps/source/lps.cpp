@@ -17,9 +17,13 @@
 #include "mcrl2/lps/translate_user_notation.h"
 
 #include "mcrl2/modal_formula/find.h"
+#include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
+#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
+#include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
 
 namespace mcrl2
@@ -108,6 +112,40 @@ std::set<data::variable> find_free_variables(const state_formulas::state_formula
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
 bool find_nil(const state_formulas::state_formula& x) { return state_formulas::find_nil< state_formulas::state_formula >(x); }
 //--- end generated state_formulas overloads ---//
+
+namespace algorithms {
+
+state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity)
+{
+  return state_formulas::parse_state_formula(in, spec, true);
+}
+
+state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec)
+{
+  return state_formulas::parse_state_formula(formula_text, spec);
+}
+
+state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
+{
+  return state_formulas::preprocess_state_formula(formula, spec);
+}
+
+bool is_monotonous(state_formula f)
+{
+  return state_formulas::is_monotonous(f);
+}
+
+state_formula normalize(const state_formula& x)
+{
+  return state_formulas::normalize(x);
+}
+
+bool is_normalized(const state_formula& x)
+{
+  return state_formulas::is_normalized(x);
+}
+
+}
 
 } // namespace state_formulas
 
