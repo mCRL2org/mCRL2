@@ -17,7 +17,6 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"

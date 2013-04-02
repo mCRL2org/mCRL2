@@ -115,7 +115,7 @@ bool find_nil(const state_formulas::state_formula& x) { return state_formulas::f
 
 namespace algorithms {
 
-state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity)
+state_formula parse_state_formula(std::istream& in, lps::specification& spec)
 {
   return state_formulas::parse_state_formula(in, spec, true);
 }

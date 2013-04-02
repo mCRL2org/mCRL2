@@ -17,16 +17,17 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/pbes/lts2pbes.h"
+#include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/lts2pbes.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -293,7 +294,7 @@ class lts2pbes_tool : public input_output_tool
       {
         throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
       }
-      state_formulas::state_formula formula = state_formulas::parse_state_formula(from, spec);
+      state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(from, spec);
       from.close();
 
       pbes_system::pbes<> result = pbes_system::lts2pbes(l, formula);

@@ -21,6 +21,7 @@
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
@@ -62,7 +63,7 @@ class lts2pbes_algorithm
       namespace sf = state_formulas;
       namespace af = state_formulas::detail::accessors;
 
-      if (!state_formulas::is_monotonous(formula))
+      if (!state_formulas::algorithms::is_monotonous(formula))
       {
         throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
@@ -70,9 +71,9 @@ class lts2pbes_algorithm
       f0 = formula;
 
       // remove occurrences of ! and =>
-      if (!state_formulas::is_normalized(f0))
+      if (!state_formulas::algorithms::is_normalized(f0))
       {
-        f0 = state_formulas::normalize(f0);
+        f0 = state_formulas::algorithms::normalize(f0);
       }
 
       // wrap the formula inside a 'nu' if needed
