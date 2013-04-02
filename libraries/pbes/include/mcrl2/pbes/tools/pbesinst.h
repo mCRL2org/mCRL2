@@ -13,7 +13,6 @@
 #define MCRL2_PBES_TOOLS_PBESINST_H
 
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/remove_equations.h"
@@ -38,7 +37,7 @@ bool pbesinst(const std::string& input_filename,
 {
   // load the pbes
   pbes<> p;
-  load_pbes(p, input_filename, pbes_input_format);
+  pbes_system::algorithms::load_pbes(p, input_filename, pbes_input_format);
 
   if (!p.is_closed())
   {
@@ -59,7 +58,7 @@ bool pbesinst(const std::string& input_filename,
 
   if (log::mcrl2_logger::get_reporting_level() >= log::verbose)
   {
-    if (is_bes(p))
+    if (pbes_system::algorithms::is_bes(p))
     {
       mCRL2log(log::debug) << "The result is a BES.\n";
     }
@@ -76,7 +75,7 @@ bool pbesinst(const std::string& input_filename,
   }
 
   // save the result
-  save_pbes(p, output_filename, pbes_output_format, aterm_ascii);
+  pbes_system::algorithms::save_pbes(p, output_filename, pbes_output_format, aterm_ascii);
 
   return true;
 }

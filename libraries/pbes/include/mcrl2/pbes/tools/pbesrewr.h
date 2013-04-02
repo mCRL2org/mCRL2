@@ -15,7 +15,7 @@
 #include <cassert>
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -38,7 +38,7 @@ void pbesrewr(const std::string& input_filename,
 {
   // load the pbes
   pbes<> p;
-  load_pbes(p, input_filename);
+  pbes_system::algorithms::load_pbes(p, input_filename);
 
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);

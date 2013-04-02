@@ -16,8 +16,8 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/bes/io.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/file_formats.h"
-#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbesinstconversion.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -59,7 +59,7 @@ void save_pbes(const pbes<>& pbes_spec,
     case pbes_file_cwi:
     case pbes_file_pgsolver:
     {
-      if (!is_bes(pbes_spec))
+      if (!pbes_system::algorithms::is_bes(pbes_spec))
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }

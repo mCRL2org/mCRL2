@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESINFO_H
 #define MCRL2_PBES_TOOLS_PBESINFO_
 
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/tools.h"
 
@@ -26,7 +26,7 @@ void pbesinfo(const std::string& input_filename,
              )
 {
   pbes<> p;
-  load_pbes(p, input_filename, file_format);
+  pbes_system::algorithms::load_pbes(p, input_filename, file_format);
 
   pbes_system::detail::pbes_property_map info(p);
 

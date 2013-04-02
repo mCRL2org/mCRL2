@@ -15,7 +15,6 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/eqelm.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/tools.h"
 
@@ -32,7 +31,7 @@ void pbespareqelm(const std::string& input_filename,
 {
   // load the pbes
   pbes<> p;
-  load_pbes(p, input_filename);
+  pbes_system::algorithms::load_pbes(p, input_filename);
 
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);

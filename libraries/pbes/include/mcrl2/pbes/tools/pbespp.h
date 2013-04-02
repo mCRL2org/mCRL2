@@ -13,7 +13,7 @@
 #define MCRL2_PBES_TOOLS_PBESPP_H
 
 #include <fstream>
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -28,7 +28,7 @@ void pbespp(const std::string& input_filename,
            )
 {
   pbes_system::pbes<> p;
-  load_pbes(p, input_filename, pbes_input_format);
+  pbes_system::algorithms::load_pbes(p, input_filename, pbes_input_format);
 
   mCRL2log(log::verbose) << "printing PBES from "
                          << (input_filename.empty()?"standard input":input_filename)

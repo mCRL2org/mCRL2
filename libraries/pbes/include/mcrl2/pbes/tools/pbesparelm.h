@@ -13,7 +13,6 @@
 #define MCRL2_PBES_TOOLS_PBESPARELM_H
 
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/tools.h"
 
@@ -27,7 +26,7 @@ void pbesparelm(const std::string& input_filename,
 {
   // load the pbes
   pbes<> p;
-  load_pbes(p, input_filename);
+  pbes_system::algorithms::load_pbes(p, input_filename);
 
   // apply the algorithm
   pbes_system::pbes_parelm_algorithm algorithm;

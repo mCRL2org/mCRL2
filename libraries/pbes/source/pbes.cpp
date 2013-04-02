@@ -10,11 +10,10 @@
 /// \brief
 
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/normalize_sorts.h"
-#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/print.h"
-#include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/translate_user_notation.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
@@ -58,34 +57,29 @@ std::string pp(const core::identifier_string& x) { return core::pp(x); }
 
 namespace algorithms {
 
-void remove_parameters(pbes<>& x, const std::set<data::variable>& to_be_removed)
-{
-  pbes_system::remove_parameters(x, to_be_removed);
-}
-
-void remove_parameters(pbes<>& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
-{
-  pbes_system::remove_parameters(x, to_be_removed);
-}
-
-void normalize(pbes<>& x)
-{
-  pbes_system::normalize(x);
-}
-
-bool is_normalized(const pbes<>& x)
-{
-  return pbes_system::is_normalized(x);
-}
-
 void instantiate_global_variables(pbes<>& p)
 {
   pbes_system::detail::instantiate_global_variables(p);
 }
 
-void pbesinst_finite(pbes<>& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
+void save_pbes(const pbes<>& pbes_spec, const std::string& outfilename, pbes_file_format output_format, bool aterm_ascii)
 {
-  pbes_system::pbesinst_finite(p, rewrite_strategy, finite_parameter_selection);
+  pbes_system::save_pbes(pbes_spec, outfilename, output_format, aterm_ascii);
+}
+
+void load_pbes(pbes<>& p, const std::string& infilename, const pbes_file_format f)
+{
+  pbes_system::load_pbes(p, infilename, f);
+}
+
+void load_pbes(pbes<>& p, const std::string& infilename)
+{
+  pbes_system::load_pbes(p, infilename);
+}
+
+bool is_bes(const pbes<>& x)
+{
+  return pbes_system::is_bes(x);
 }
 
 } // algorithms

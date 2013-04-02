@@ -16,6 +16,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/file_formats.h"
 
 namespace mcrl2 {
 
@@ -51,6 +52,31 @@ void instantiate_global_variables(pbes<>& p);
 
 /// \brief Apply finite instantiation to the given PBES.
 void pbesinst_finite(pbes<>& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection);
+
+/// \brief Save a PBES in the format specified.
+/// \param pbes_spec The pbes to be stored
+/// \param outfilename The name of the file to which the output is stored.
+/// \param output_format Determines the format in which the result is written.
+/// \param aterm_ascii Determines, if output_format is pbes, whether the file
+///        is written is ascii format.
+void save_pbes(const pbes<>& pbes_spec, const std::string& outfilename, pbes_file_format output_format, bool aterm_ascii = false);
+
+/// \brief Load pbes from file.
+/// \param p The pbes to which the result is loaded.
+/// \param infilename The file from which to load the PBES.
+/// \param f The format that should be assumed for the file in infilename.
+void load_pbes(pbes<>& p, const std::string& infilename, const pbes_file_format f);
+
+/// \brief Load pbes from file.
+/// \param p The pbes to which the result is loaded.
+/// \param infilename The file from which to load the PBES.
+///
+/// The format of the file in infilename is guessed.
+void load_pbes(pbes<>& p, const std::string& infilename);
+
+/// \brief Returns true if a PBES is in BES form.
+/// \param x a PBES
+bool is_bes(const pbes<>& x);
 
 } // namespace algorithms
 

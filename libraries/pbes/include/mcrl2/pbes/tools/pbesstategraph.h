@@ -13,7 +13,6 @@
 #define MCRL2_PBES_TOOLS_PBESSTATEGRAPH_H
 
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/tools.h"
@@ -34,7 +33,7 @@ void pbesstategraph(const std::string& input_filename,
                    )
 {
   pbes<> p;
-  load_pbes(p, input_filename);
+  pbes_system::algorithms::load_pbes(p, input_filename);
   pbes_system::algorithms::normalize(p);
   pbes<> q;
 

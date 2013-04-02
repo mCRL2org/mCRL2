@@ -13,7 +13,7 @@
 #define MCRL2_PBES_TOOLS_PBESABSTRACT_H
 
 #include "mcrl2/pbes/abstract.h"
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
@@ -29,7 +29,7 @@ void pbesabstract(const std::string& input_filename,
 {
   // load the pbes
   pbes<> p;
-  load_pbes(p, input_filename);
+  pbes_system::algorithms::load_pbes(p, input_filename);
 
   // run the algorithm
   pbes_abstract_algorithm algorithm;

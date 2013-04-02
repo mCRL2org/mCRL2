@@ -14,8 +14,8 @@
 
 #include <cassert>
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/pbesinst_symbolic.h"
@@ -415,7 +415,7 @@ void symbolic_exploration(const std::string& input_filename,
 {
   // load the pbes
   pbes<> p;
-  load_pbes(p, input_filename);
+  pbes_system::algorithms::load_pbes(p, input_filename);
 
   // apply the algorithm
   symbolic_exploration_algorithm algorithm(p, optimized, clustered);
