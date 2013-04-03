@@ -31,6 +31,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
 

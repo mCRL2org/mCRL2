@@ -14,16 +14,15 @@
 #include <iostream>
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
-
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/test_utilities.h"
-
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/invelm_algorithm.h"
+#include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/test_utilities.h"
 #include "test_specifications.h"
 
 using mcrl2::utilities::collect_after_test_case;

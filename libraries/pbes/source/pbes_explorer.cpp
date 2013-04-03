@@ -13,6 +13,7 @@
 
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
