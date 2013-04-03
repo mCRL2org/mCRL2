@@ -42,6 +42,7 @@ bool is_well_typed(const Object& o);
 class specification;
 atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
+bool is_well_typed(const specification& spec);
 
 /// \brief Linear process specification.
 // sort ...;
@@ -295,9 +296,5 @@ bool operator!=(const specification& spec1, const specification& spec2)
 } // namespace lps
 
 } // namespace mcrl2
-
-#ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
-#include "mcrl2/lps/detail/lps_well_typed_checker.h"
-#endif
 
 #endif // MCRL2_LPS_SPECIFICATION_H

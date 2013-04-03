@@ -46,14 +46,14 @@ struct compare_propositional_variable_instantiation: public std::unary_function<
 };
 
 /// \brief Function object that returns the name of the binding variable of a pbes equation
-struct pbes_equation_variable_name: public std::unary_function<data::variable, core::identifier_string>
+struct propositional_variable_name: public std::unary_function<propositional_variable, core::identifier_string>
 {
   /// \brief Function call operator
-  /// \param e A PBES equation
-  /// \return The function result
-  core::identifier_string operator()(const pbes_equation& e) const
+  /// \param e A propositional variable
+  /// \return The name of the variable
+  core::identifier_string operator()(const propositional_variable& x) const
   {
-    return e.variable().name();
+    return x.name();
   }
 };
 

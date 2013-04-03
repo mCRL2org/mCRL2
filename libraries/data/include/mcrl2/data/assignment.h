@@ -13,8 +13,6 @@
 #define MCRL2_DATA_ASSIGNMENT_H
 
 #include <stdexcept>
-#include "boost/iterator/transform_iterator.hpp"
-
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -217,27 +215,6 @@ struct right_hand_side : public std::unary_function< const assignment, data_expr
   }
 };
 
-/// \brief Returns the corresponding sequence of left-hand sides for a given sequence assignment (lazy)
-/// \param[in] assignments the sequence of unmutable assignments
-/// \return a sequence r such that assignments.i.lhs() = r.i.lhs() for all i
-template < typename Container >
-inline
-boost::iterator_range< boost::transform_iterator< left_hand_side, typename Container::const_iterator > >
-make_assignment_left_hand_side_range(Container const& assignments, typename atermpp::detail::enable_if_container< Container, assignment >::type* = 0)
-{
-  return boost::iterator_range< boost::transform_iterator< left_hand_side, typename Container::const_iterator > >(assignments);
-}
-
-/// \brief Returns the corresponding sequence of left-hand sides for a given sequence assignment (lazy)
-/// \param[in] assignments the sequence of unmutable assignments
-/// \return a sequence r such that assignments.i.lhs() = r.i.lhs() for all i
-template < typename Container >
-boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >
-make_assignment_right_hand_side_range(Container const& assignments, typename atermpp::detail::enable_if_container< Container, assignment >::type* = 0)
-{
-  return boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >(assignments);
-}
-
 /// \brief Constructs an assignment_list by pairwise combining a variable and expression
 /// \param lhs A sequence of data variables
 /// \param rhs A sequence of data expressions
@@ -254,7 +231,7 @@ assignment_vector make_assignment_vector(VariableSequence const& variables, Expr
   }
   assert(j==expressions.end());
   return result;
-} 
+}
 
 /// \brief Converts an iterator range to data_expression_list
 /// \param r A range of assignments.
@@ -265,7 +242,7 @@ assignment_list make_assignment_list(const VariableSequence& variables, const Ex
 {
   std::vector<assignment> result(make_assignment_vector(variables,expressions));
   return assignment_list(result.begin(),result.end());
-} 
+}
 
 /// \brief Returns the left hand sides of an assignment list
 /// \param x An assignment list

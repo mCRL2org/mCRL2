@@ -17,7 +17,6 @@
 #include <set>
 #include <vector>
 #include <sstream>
-#include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/atermpp/container_utility.h"

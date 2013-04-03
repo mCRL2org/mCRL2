@@ -15,6 +15,7 @@
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/translate_user_notation.h"
+#include "mcrl2/lps/detail/lps_well_typed_checker.h"
 
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/monotonicity.h"
@@ -41,6 +42,7 @@ std::string pp(const lps::action_vector& x) { return lps::pp< lps::action_vector
 std::string pp(const lps::action_label& x) { return lps::pp< lps::action_label >(x); }
 std::string pp(const lps::action_label_list& x) { return lps::pp< lps::action_label_list >(x); }
 std::string pp(const lps::action_label_vector& x) { return lps::pp< lps::action_label_vector >(x); }
+std::string pp(const lps::deadlock& x) { return lps::pp< lps::deadlock >(x); }
 std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
 std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
 std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
@@ -73,6 +75,11 @@ std::string pp_with_summand_numbers(const specification& x)
   printer.print_summand_numbers() = true;
   printer(x);
   return out.str();
+}
+
+bool is_well_typed(const specification& spec)
+{
+  return lps::detail::is_well_typed(spec);
 }
 
 // TODO: These should be removed when the aterm code has been replaced.

@@ -52,6 +52,7 @@ lps::action_vector
 lps::action_label
 lps::action_label_list
 lps::action_label_vector
+lps::deadlock
 lps::multi_action
 lps::process_initializer
 lps::state

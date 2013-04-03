@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/translate_user_notation.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/is_well_typed.h"
 
 namespace mcrl2
 {
@@ -84,6 +85,32 @@ bool is_bes(const pbes<>& x)
 }
 
 } // algorithms
+
+bool is_well_typed(const pbes_equation& eqn)
+{
+  return pbes_system::detail::is_well_typed(eqn);
+}
+
+bool is_well_typed_equation(const pbes_equation& eqn,
+                            const std::set<data::sort_expression>& declared_sorts,
+                            const std::set<data::variable>& declared_global_variables,
+                            const data::data_specification& data_spec
+                           )
+{
+  return pbes_system::detail::is_well_typed_equation(eqn, declared_sorts, declared_global_variables, data_spec);
+}
+
+bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
+                        const std::set<data::variable>& declared_global_variables,
+                        const std::set<data::variable>& occurring_global_variables,
+                        const std::set<propositional_variable>& declared_variables,
+                        const std::set<propositional_variable_instantiation>& occ,
+                        const propositional_variable_instantiation& init,
+                        const data::data_specification& data_spec
+                       )
+{
+  return pbes_system::detail::is_well_typed_pbes(declared_sorts, declared_global_variables, occurring_global_variables, declared_variables, occ, init, data_spec);
+}
 
 } // namespace pbes_system
 

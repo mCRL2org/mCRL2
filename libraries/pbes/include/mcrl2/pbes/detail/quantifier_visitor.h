@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file quantifier_visitor.h
+/// \file mcrl2/pbes/detail/quantifier_visitor.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_PBES_DETAIL_QUANTIFIER_VISITOR_H
@@ -145,6 +145,14 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor<pbes_expres
     pop();
   }
 };
+
+inline
+std::set<data::variable> find_quantifier_variables(const pbes_expression& x)
+{
+  quantifier_visitor visitor;
+  visitor.visit(x);
+  return visitor.variables;
+}
 
 } // namespace detail
 

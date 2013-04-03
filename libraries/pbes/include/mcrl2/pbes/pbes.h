@@ -12,32 +12,17 @@
 #ifndef MCRL2_PBES_PBES_H
 #define MCRL2_PBES_PBES_H
 
-#include <functional>
-#include <iostream>
-#include <utility>
 #include <string>
 #include <cassert>
 #include <map>
 #include <set>
-#include <iterator>
-#include <algorithm>
-#include <iterator>
-#include <stdexcept>
-#include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
-#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
-#include "mcrl2/pbes/detail/pbes_functional.h"
 
 namespace mcrl2
 {
@@ -58,26 +43,23 @@ std::set<data::variable> find_variables(const pbes_system::pbes<>& x);
 std::set<data::variable> find_free_variables(const pbes_system::pbes<>& x);
 std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes<>& x);
 
+bool is_well_typed_equation(const pbes_equation& eqn,
+                            const std::set<data::sort_expression>& declared_sorts,
+                            const std::set<data::variable>& declared_global_variables,
+                            const data::data_specification& data_spec
+                           );
+
+bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
+                        const std::set<data::variable>& declared_global_variables,
+                        const std::set<data::variable>& occurring_global_variables,
+                        const std::set<propositional_variable>& declared_variables,
+                        const std::set<propositional_variable_instantiation>& occ,
+                        const propositional_variable_instantiation& init,
+                        const data::data_specification& data_spec
+                       );
+
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
-
-/// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
-/// \param first Start of a range of pbes equations
-/// \param last End of a range of pbes equations
-/// \return The quantifier variables in the sequence [first, last) of pbes equations.
-template <typename Iterator>
-std::set<data::variable> compute_quantifier_variables(Iterator first, Iterator last)
-{
-  using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-  // collect the set of all quantifier variables in visitor
-  detail::quantifier_visitor visitor;
-  for (Iterator i = first; i != last; ++i)
-  {
-    visitor.visit(i->formula());
-  }
-  return visitor.variables;
-}
 
 /// \brief parameterized boolean equation system
 // <PBES>         ::= PBES(<DataSpec>, <GlobVarSpec>, <PBEqnSpec>, <PBInit>)
@@ -132,28 +114,6 @@ class pbes
       return result;
     }
 
-    /// \brief Checks if the sorts of the variables/expressions in both lists are equal.
-    /// \param v A sequence of data variables
-    /// \param w A sequence of data expressions
-    /// \return True if the sorts match pairwise
-    bool equal_sorts(data::variable_list v, data::data_expression_list w) const
-    {
-      if (v.size() != w.size())
-      {
-        return false;
-      }
-      data::variable_list::iterator i = v.begin();
-      data::data_expression_list::iterator j = w.begin();
-      for (; i != v.end(); ++i, ++j)
-      {
-        if (!m_data.equal_sorts(i->sort(), j->sort()))
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-
     /// \brief Checks if the propositional variable instantiation v appears with the right type in the
     /// sequence of propositional variable declarations [first, last).
     /// \param first Start of a sequence of propositional variable declarations
@@ -161,31 +121,11 @@ class pbes
     /// \return True if the type of \p v is matched correctly
     /// \param v A propositional variable instantiation
     template <typename Iter>
-    bool is_declared_in(Iter first, Iter last, propositional_variable_instantiation v) const
+    bool is_declared_in(Iter first, Iter last, const propositional_variable_instantiation& v, const data::data_specification& data_spec) const
     {
       for (Iter i = first; i != last; ++i)
       {
-        if (i->name() == v.name() && equal_sorts(i->parameters(), v.parameters()))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-
-    /// \brief Checks if the propositional variable instantiation v has a conflict with the
-    /// sequence of propositional variable declarations [first, last).
-    /// \param first Start of a sequence of propositional variable declarations
-    /// \param last End of a sequence of propositional variable declarations
-    /// \return True if a conflict has been detected
-    /// \param v A propositional variable instantiation
-    template <typename Iter>
-    bool has_conflicting_type(Iter first, Iter last, propositional_variable_instantiation v) const
-    {
-      for (Iter i = first; i != last; ++i)
-      {
-        if (i->name() == v.name() && !equal_sorts(i->parameters(), v.parameters()))
+        if (i->name() == v.name() && data::detail::equal_sorts(i->parameters(), v.parameters(), data_spec))
         {
           return true;
         }
@@ -330,10 +270,6 @@ class pbes
       // The well typedness check is only done in debug mode, since for large
       // PBESs it takes too much time
       assert(is_well_typed());
-      //if (!is_well_typed())
-      //{
-      //  throw mcrl2::runtime_error("PBES is not well typed (pbes::load())");
-      //}
     }
 
     /// \brief Writes the pbes to file.
@@ -415,18 +351,7 @@ class pbes
     {
       std::set<propositional_variable> bnd = binding_variables();
       std::set<propositional_variable> occ = occurring_variables();
-      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
-    }
-
-    /// \brief Applies a low level substitution function to this term.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    template <typename Substitution>
-    void substitute(Substitution f)
-    {
-      std::transform(equations().begin(), equations().end(), equations().begin(), f);
+      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state(), data());
     }
 
     /// \brief Checks if the PBES is well typed
@@ -446,126 +371,25 @@ class pbes
     /// N.B. Conflicts between the types of instantiations and declarations of binding variables are not checked!
     bool is_well_typed() const
     {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
       std::set<data::sort_expression> declared_sorts = data::detail::make_set(data().sorts());
       const std::set<data::variable>& declared_global_variables = global_variables();
       std::set<data::variable> occurring_global_variables = pbes_system::find_free_variables(*this);
-      std::set<data::variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
       std::set<propositional_variable> declared_variables = compute_declared_variables();
       std::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
-      // check 1)
-      if (!data::detail::check_sorts(
-            boost::make_transform_iterator(declared_global_variables.begin(), data::detail::sort_of_variable()),
-            boost::make_transform_iterator(declared_global_variables.end()  , data::detail::sort_of_variable()),
-            declared_sorts
-          )
-         )
+      // check 1), 4), 5), 6), 8) and 9)
+      if (!is_well_typed_pbes(declared_sorts, declared_global_variables, occurring_global_variables, declared_variables, occ, initial_state(), data()))
       {
-        mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the free variables "
-                  << data::pp(declared_global_variables)
-                  << " are not declared in the data specification "
-                  << data::pp(data().sorts())
-                  << std::endl;
         return false;
       }
 
-      // check 2)
+      // check 2), 3) and 7)
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
-        const data::variable_list& variables = i->variable().parameters();
-        if (!data::detail::check_sorts(
-              boost::make_transform_iterator(variables.begin(), data::detail::sort_of_variable()),
-              boost::make_transform_iterator(variables.end()  , data::detail::sort_of_variable()),
-              declared_sorts
-            )
-           )
+        if (!is_well_typed_equation(*i, declared_sorts, declared_global_variables, data()))
         {
-          mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
-                    << data::pp(i->variable())
-                    << " are not declared in the data specification "
-                    << data::pp(data().sorts())
-                    << std::endl;
           return false;
         }
-      }
-
-      // check 3)
-      if (!data::detail::check_sorts(
-            boost::make_transform_iterator(quantifier_variables.begin(), data::detail::sort_of_variable()),
-            boost::make_transform_iterator(quantifier_variables.end()  , data::detail::sort_of_variable()),
-            declared_sorts
-          )
-         )
-      {
-        mCRL2log(log::error) << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables "
-                  << data::pp(quantifier_variables)
-                  << " are not declared in the data specification "
-                  << data::pp(data().sorts())
-                  << std::endl;
-        return false;
-      }
-
-      // check 4)
-      if (data::detail::sequence_contains_duplicates(
-            boost::make_transform_iterator(equations().begin(), detail::pbes_equation_variable_name()),
-            boost::make_transform_iterator(equations().end()  , detail::pbes_equation_variable_name())
-          )
-         )
-      {
-        mCRL2log(log::error) << "pbes::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
-        return false;
-      }
-
-      // check 5)
-      if (!std::includes(declared_global_variables.begin(),
-                         declared_global_variables.end(),
-                         occurring_global_variables.begin(),
-                         occurring_global_variables.end()
-                        )
-         )
-      {
-        mCRL2log(log::error) << "pbes::is_well_typed() failed: not all of the free variables are declared\n"
-                  << "free variables: " << data::pp(occurring_global_variables) << "\n"
-                  << "declared free variables: " << data::pp(declared_global_variables)
-                  << std::endl;
-        return false;
-      }
-
-      // check 6)
-      if (data::detail::sequence_contains_duplicates(
-            boost::make_transform_iterator(occurring_global_variables.begin(), data::detail::variable_name()),
-            boost::make_transform_iterator(occurring_global_variables.end()  , data::detail::variable_name())
-          )
-         )
-      {
-        mCRL2log(log::error) << "pbes::is_well_typed() failed: the free variables have no unique names" << std::endl;
-        return false;
-      }
-
-      // check 7)
-      if (!data::detail::set_intersection(declared_global_variables, quantifier_variables).empty())
-      {
-        mCRL2log(log::error) << "pbes::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
-        return false;
-      }
-
-      // check 8)
-      for (std::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
-      {
-        if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
-        {
-          mCRL2log(log::error) << "pbes::is_well_typed() failed: the occurring variable " << pbes_system::pp(*i) << " conflicts with its declaration!" << std::endl;
-          return false;
-        }
-      }
-
-      // check 9)
-      if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), initial_state()))
-      {
-        mCRL2log(log::error) << "pbes::is_well_typed() failed: the initial state " << pbes_system::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
-        return false;
       }
 
       // check 10)

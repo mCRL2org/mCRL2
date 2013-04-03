@@ -19,8 +19,6 @@
 #include <string>
 #include <utility>
 
-#include "boost/iterator/transform_iterator.hpp"
-
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/atermpp/container_utility.h"
@@ -31,35 +29,6 @@ namespace mcrl2
 
 namespace data
 {
-
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-template < typename Container >
-struct sort_range
-{
-  typedef boost::iterator_range< boost::transform_iterator<
-  detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > > type;
-};
-
-} // namespace detail
-/// \endcond
-
-/// \brief Gives a sequence of sorts for a given sequence of expressions
-///
-/// A sequence is a container (as per the STL Container concept) or
-/// iterator range type. The template class / is_container governs what is
-/// recognised as a container.
-//
-/// \param[in] r range of iterators that refer expression objects
-/// \return s1, s2, ..., s3 such that sn = t.front().sort() where t = r.advance_begin(n)
-/// \note Behaviour is lazy, no intermediate containers are constructed
-template < typename Container >
-typename detail::sort_range< Container >::type
-make_sort_range(Container const& container, typename boost::enable_if< typename atermpp::detail::is_container< Container >::type >::type* = 0)
-{
-  return typename detail::sort_range< Container >::type(container);
-}
 
 /// \brief Generates fresh variables with names that do not appear in the given context.
 /// Caveat: the implementation is very inefficient.

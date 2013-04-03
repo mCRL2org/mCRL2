@@ -18,6 +18,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/detail/print_utility.h"
 #include "mcrl2/pbes/builder.h"

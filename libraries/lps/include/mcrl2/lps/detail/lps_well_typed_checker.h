@@ -383,8 +383,6 @@ struct lps_well_typed_checker
   }
 };
 
-} // namespace detail
-
 /// \brief Checks well typedness of an LPS object.
 template <typename Object>
 bool is_well_typed(const Object& o)
@@ -392,6 +390,8 @@ bool is_well_typed(const Object& o)
   lps::detail::lps_well_typed_checker checker;
   return checker(o);
 }
+
+} // namespace detail
 
 } // namespace lps
 

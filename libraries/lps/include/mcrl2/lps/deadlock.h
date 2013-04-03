@@ -83,6 +83,7 @@ class deadlock
 // template function overloads
 std::set<data::variable> find_variables(const lps::deadlock& x);
 std::set<data::variable> find_free_variables(const lps::deadlock& x);
+std::string pp(const lps::deadlock& x);
 
 } // namespace lps
 

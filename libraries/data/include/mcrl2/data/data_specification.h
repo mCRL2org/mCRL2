@@ -381,7 +381,7 @@ class data_specification
     {
       //type checked once.
       if (!m_data_specification_is_type_checked) //A data specification can only be declared
-      { 
+      {
         m_data_specification_is_type_checked=true;
         build_from_aterm(m_non_typed_checked_data_spec);
         m_non_typed_checked_data_spec=atermpp::aterm_appl();
@@ -662,10 +662,16 @@ class data_specification
       dependent_sorts.insert(sort_bool::bool_());
 
       // constructors
-      detail::insert(dependent_sorts, make_sort_range(m_constructors));
+      for (auto i = m_constructors.begin(); i != m_constructors.end(); ++i)
+      {
+        dependent_sorts.insert(i->sort());
+      }
 
       // mappings
-      detail::insert(dependent_sorts, make_sort_range(m_mappings));
+      for (auto i = m_mappings.begin(); i != m_mappings.end(); ++i)
+      {
+        dependent_sorts.insert(i->sort());
+      }
 
       // equations
       for (std::vector< data_equation >::const_iterator r(m_equations.begin()); r != m_equations.end(); ++r)
@@ -1120,7 +1126,7 @@ inline data_specification operator +(data_specification spec1, const data_specif
   {
     spec1.add_context_sort(*i);
   }
- 
+
   const alias_vector av=spec2.user_defined_aliases();
   for(alias_vector::const_iterator i=av.begin(); i!=av.end(); ++i)
   {
