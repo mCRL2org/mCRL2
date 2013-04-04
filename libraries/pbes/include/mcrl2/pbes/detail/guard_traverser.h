@@ -13,7 +13,6 @@
 #define MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewrite.h"

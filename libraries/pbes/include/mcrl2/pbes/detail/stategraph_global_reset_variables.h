@@ -88,7 +88,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             std::size_t m = *j;
             data::data_expression_list e = Y.parameters();
             data::data_expression e_m = nth_element(e, m);
-            std::set<data::variable> fv = pbes_system::find_free_variables(e_m);
+            std::set<data::variable> fv = data::find_free_variables(e_m);
             u.marking = data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking);
             mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << data::detail::print_set(fv) << " dx = " << data::detail::print_set(dx) << "\n";
           }

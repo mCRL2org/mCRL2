@@ -17,7 +17,6 @@
 #include <map>
 #include <set>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"

@@ -24,10 +24,8 @@
 
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
