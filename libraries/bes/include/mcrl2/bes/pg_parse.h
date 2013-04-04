@@ -93,8 +93,7 @@ struct pg_actions: public core::default_parser_actions
     return result;
   }
 
-  template <typename Container>
-  void create_boolean_equation_system(boolean_equation_system<Container>& b, bool maxpg)
+  void create_boolean_equation_system(boolean_equation_system& b, bool maxpg)
   {
     // Build Boolean equation system. First we group equations by block
     std::map<priority_t, std::set<boolean_equation> > blocks;
@@ -139,8 +138,7 @@ struct pg_actions: public core::default_parser_actions
     b.initial_state() = boolean_variable("X" + init_id.str());
   }
 
-  template <typename Container>
-  void parse_ParityGame(const core::parse_node& node, boolean_equation_system<Container>& result, bool maxpg)
+  void parse_ParityGame(const core::parse_node& node, boolean_equation_system& result, bool maxpg)
   {
     if(node.child_count() == 5)
     {
@@ -212,8 +210,8 @@ struct pg_actions: public core::default_parser_actions
 /// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param text A string
 /// \param result A boolean equation system
-template <typename Container>
-void parse_pgsolver_string(const std::string& text, boolean_equation_system<Container>& result, bool maxpg = true)
+inline
+void parse_pgsolver_string(const std::string& text, boolean_equation_system& result, bool maxpg = true)
 {
   core::parser p(parser_tables_pg);
   unsigned int start_symbol_index = p.start_symbol_index("ParityGame");
@@ -226,8 +224,8 @@ void parse_pgsolver_string(const std::string& text, boolean_equation_system<Cont
 /// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param from An input stream
 /// \param result A boolean equation system
-template <typename Container>
-void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& result, bool maxpg = true)
+inline
+void parse_pgsolver(std::istream& from, boolean_equation_system& result, bool maxpg = true)
 {
   std::string text = utilities::read_text(from);
   parse_pgsolver_string(text, result, maxpg);
@@ -249,9 +247,8 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& resu
 // In this N means a natural number.
 // There must be whitespace characters between the following pairs of tokens:
 // <identifier> and <priority>, <priority> and <owner>, <owner> and <identifier>
-template <typename Container>
 inline
-void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, bool maxpg = true)
+void parse_pgsolver(std::istream& from, boolean_equation_system& b, bool maxpg = true)
 {
   while (!isalnum(from.peek()))
   {
@@ -355,8 +352,7 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, b
 
 /// \brief Parse parity game in PGSolver format from filename, and store the
 ///        resulting BES in b.
-template <typename Container>
-inline void parse_pgsolver(const std::string& filename, boolean_equation_system<Container>& b, bool maxpg = true)
+inline void parse_pgsolver(const std::string& filename, boolean_equation_system& b, bool maxpg = true)
 {
   if(filename == "-" || filename.empty())
   {

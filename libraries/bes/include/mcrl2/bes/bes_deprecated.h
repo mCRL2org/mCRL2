@@ -2692,7 +2692,7 @@ static mcrl2::bes::boolean_expression generate_rhs_as_bes_formula(const bes_expr
 }
 
 inline
-mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& bes_equations)
+mcrl2::bes::boolean_equation_system convert_to_bes(boolean_equation_system& bes_equations)
 {
   using namespace mcrl2::pbes_system;
   using namespace mcrl2::bes;
@@ -2718,7 +2718,7 @@ mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& be
     }
   }
 
-  mcrl2::bes::boolean_equation_system<> result(eqns,
+  mcrl2::bes::boolean_equation_system result(eqns,
       boolean_variable("X1"));
 
   return result;

@@ -137,12 +137,11 @@ class bes_property_map : public mcrl2::data::detail::data_property_map< bes_prop
     // compute functions
     //--------------------------------------------//
     /// \brief Computes the number of mu and nu equations and returns them as a pair
-    template <typename Container>
-    std::pair<unsigned int, unsigned int> compute_equation_counts(const boolean_equation_system<Container>& b) const
+    std::pair<unsigned int, unsigned int> compute_equation_counts(const boolean_equation_system& b) const
     {
       unsigned int mu_count = 0;
       unsigned int nu_count = 0;
-      for (typename Container::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+      for (auto i = b.equations().begin(); i != b.equations().end(); ++i)
       {
         if (i->symbol().is_mu())
         {
@@ -157,13 +156,12 @@ class bes_property_map : public mcrl2::data::detail::data_property_map< bes_prop
     }
 
     // number of changes from mu to nu or vice versa
-    template <typename Container>
-    unsigned int compute_block_nesting_depth(const boolean_equation_system<Container>& b) const
+    unsigned int compute_block_nesting_depth(const boolean_equation_system& b) const
     {
       unsigned int block_nesting_depth = 0;
       bool last_symbol_is_mu = false;
 
-      for (typename Container::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+      for (auto i = b.equations().begin(); i != b.equations().end(); ++i)
       {
         if (i != b.equations().begin())
         {
@@ -186,8 +184,7 @@ class bes_property_map : public mcrl2::data::detail::data_property_map< bes_prop
 
     /// \brief Constructor
     /// Initializes the bes_property_map with a boolean equation system
-    template <typename Container>
-    bes_property_map(const boolean_equation_system<Container>& b)
+    bes_property_map(const boolean_equation_system& b)
     {
       std::pair<unsigned int, unsigned int>  equation_counts              = compute_equation_counts(b);
       unsigned int block_nesting_depth                                    = compute_block_nesting_depth(b);

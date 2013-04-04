@@ -206,7 +206,7 @@ exists(const data::variable_list& variables, const pbes_expression& body)       
 
 BOOLEAN_CLASSES = r'''
 boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl |   | BooleanEquation | A boolean equation
-boolean_equation_system<BooleanEquationContainer>(const BooleanEquationContainer& equations, const boolean_expression& initial_state)             | M | BES             | A boolean equation system
+boolean_equation_system(const std::vector<bes::boolean_equation>& equations, const boolean_expression& initial_state)                             | M | BES             | A boolean equation system
 '''
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
@@ -1160,8 +1160,6 @@ def print_dependencies(dependencies, message):
 def is_dependent_type(dependencies, type):
     if type in dependencies:
         return dependencies[type]
-    elif type == 'bes::BooleanEquationContainer':
-        return dependencies['bes::boolean_equation']
     elif type == 'pbes_system::PbesEquationContainer':
         return dependencies['pbes_system::pbes_equation']
     m = re.search('<(.+)>', type)

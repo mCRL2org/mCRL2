@@ -63,7 +63,7 @@ void test_my_search()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -95,7 +95,7 @@ void test_search()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -127,7 +127,7 @@ void test_my_find()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -163,7 +163,7 @@ void test_find()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -199,7 +199,7 @@ void test_bnd_occ()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 

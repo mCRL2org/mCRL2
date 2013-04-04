@@ -258,7 +258,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     }
 
     /// \brief Enter a boolean equation system.
-    void enter(const boolean_equation_system<>& eqn)
+    void enter(const boolean_equation_system& eqn)
     {
       assert(!eqn.equations().empty());
       for (std::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
@@ -268,7 +268,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     }
 
     /// \brief Leave a boolean equation system.
-    void leave(const boolean_equation_system<>&)
+    void leave(const boolean_equation_system&)
     {
       // set the fixpoint symbol for the added equations m_equations2, and move them to m_equations
       assert(!m_equations.empty());

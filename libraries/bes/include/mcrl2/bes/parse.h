@@ -72,9 +72,9 @@ struct bes_actions: public core::default_parser_actions
     return parse_BesVar(node.child(1));
   }
 
-  bes::boolean_equation_system<> parse_BesSpec(const core::parse_node& node)
+  bes::boolean_equation_system parse_BesSpec(const core::parse_node& node)
   {
-    return bes::boolean_equation_system<>(parse_BesEqnSpec(node.child(0)), parse_BesInit(node.child(1)));
+    return bes::boolean_equation_system(parse_BesEqnSpec(node.child(0)), parse_BesInit(node.child(1)));
   }
 
   std::vector<boolean_equation> parse_BesEqnDeclList(const core::parse_node& node)
@@ -97,14 +97,14 @@ boolean_expression parse_boolean_expression_new(const std::string& text)
 }
 
 inline
-boolean_equation_system<> parse_boolean_equation_system_new(const std::string& text)
+boolean_equation_system parse_boolean_equation_system_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("BesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  boolean_equation_system<> result = bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
+  boolean_equation_system result = bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
@@ -123,8 +123,7 @@ boolean_expression pbes_expression2boolean_expression(const pbes_system::pbes_ex
 /// \param from An input stream
 /// \param b A boolean equation system
 /// \return The input stream
-template <typename Container>
-std::istream& operator>>(std::istream& from, boolean_equation_system<Container>& b)
+std::istream& operator>>(std::istream& from, boolean_equation_system& b)
 {
   pbes_system::pbes<> p;
   from >> p;
@@ -142,7 +141,7 @@ std::istream& operator>>(std::istream& from, boolean_equation_system<Container>&
   }
 
   boolean_expression init = pbes_expression2boolean_expression(p.initial_state());
-  b = boolean_equation_system<Container>(Container(equations.begin(), equations.end()), init);
+  b = boolean_equation_system(equations, init);
   return from;
 }
 

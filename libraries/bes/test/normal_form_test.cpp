@@ -22,7 +22,7 @@ using namespace mcrl2::bes;
 
 void test_standard_recursive_form(const std::string& bes_spec, bool recursive_form = false)
 {
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes_spec);
   from >> b;
   std::cout << "before\n" << bes::pp(b) << std::endl;

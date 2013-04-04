@@ -516,7 +516,7 @@ class mcrl2parse_tool : public input_tool
             }
             case besspec_e  :
             {
-              bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
+              bes::boolean_equation_system x = bes::parse_boolean_equation_system_new(text);
               atermpp::aterm_appl a = bes::boolean_equation_system_to_aterm(x);
               if (aterm_format)
               {
@@ -695,7 +695,7 @@ class mcrl2parse_tool : public input_tool
             }
             case besspec_e  :
             {
-              bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
+              bes::boolean_equation_system x = bes::parse_boolean_equation_system_new(text);
               std::cout << bes::pp(x) << std::endl;
               break;
             }

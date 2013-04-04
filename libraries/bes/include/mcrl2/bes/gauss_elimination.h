@@ -120,8 +120,8 @@ boolean_equation_solver<Rewriter> make_boolean_equation_solver(const Rewriter& r
 /// \brief Solves a boolean equation system using Gauss elimination.
 /// \param p A bes
 /// \return The solution of the system
-template <typename Container>
-bool gauss_elimination(boolean_equation_system<Container>& p)
+inline
+bool gauss_elimination(boolean_equation_system& p)
 {
   typedef typename core::term_traits<boolean_expression> tr;
   typedef pbes_system::boolean_expression_rewriter<boolean_expression> bes_rewriter;

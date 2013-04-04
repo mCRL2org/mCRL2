@@ -32,7 +32,7 @@ std::string bes1 =
 
 void test_parse_bes()
 {
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
   std::cout << "b = \n" << bes::pp(b) << std::endl;
@@ -46,7 +46,7 @@ void test_parse_bes()
 
 void test_bes()
 {
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream bes_stream(bes1);
   bes_stream >> b;
 
@@ -66,7 +66,7 @@ void test_pbes()
 
 void test_pgsolver()
 {
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream bes_stream(bes1);
   bes_stream >> b;
 

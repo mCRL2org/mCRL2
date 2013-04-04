@@ -46,7 +46,7 @@ void test_custom_traverser()
   boolean_equation eq;
   t(eq);
 
-  boolean_equation_system<> eqn;
+  boolean_equation_system eqn;
   t(eqn);
 
 }
@@ -108,7 +108,7 @@ void test_traverser1()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 

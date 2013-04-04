@@ -25,16 +25,15 @@ namespace detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
-template <typename Container = std::vector<boolean_equation> >
 class bes_algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
-    boolean_equation_system<Container>& m_bes;
+    boolean_equation_system& m_bes;
 
   public:
     /// \brief Constructor
-    bes_algorithm(boolean_equation_system<Container>& bes)
+    bes_algorithm(boolean_equation_system& bes)
       : m_bes(bes)
     {}
 
@@ -53,7 +52,7 @@ class bes_algorithm
 
       // For efficiency reasons, store equation X = phi as mapping X -> X = phi
       std::map<boolean_variable, boolean_equation> equations;
-      for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for(auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         equations[i->variable()] = *i;
       }
@@ -81,9 +80,9 @@ class bes_algorithm
         return true;
       }
 
-      Container reachable_equations;
+      std::vector<boolean_equation> reachable_equations;
       std::set<boolean_variable> unreachable_equations;
-      for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for(auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         if(reachable.find(i->variable()) != reachable.end())
         {

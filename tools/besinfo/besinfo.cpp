@@ -76,7 +76,7 @@ class besinfo_tool: public bes_input_tool<input_tool>
     /// - Give error
     bool run()
     {
-      boolean_equation_system<> b;
+      boolean_equation_system b;
       load_bes(b,input_filename(), bes_input_format());
 
       bes::detail::bes_property_map info(b);

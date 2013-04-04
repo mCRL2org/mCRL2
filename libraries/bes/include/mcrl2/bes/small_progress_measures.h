@@ -79,7 +79,7 @@ bool is_disjunctive(const boolean_expression& x)
 }
 
 inline
-unsigned int mu_block_count(const boolean_equation_system<>& b)
+unsigned int mu_block_count(const boolean_equation_system& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol = fixpoint_symbol::nu();
@@ -95,7 +95,7 @@ unsigned int mu_block_count(const boolean_equation_system<>& b)
 }
 
 inline
-unsigned int block_count(const boolean_equation_system<>& b)
+unsigned int block_count(const boolean_equation_system& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol;
@@ -111,7 +111,7 @@ unsigned int block_count(const boolean_equation_system<>& b)
 }
 
 inline
-unsigned int maximum_rank(const boolean_equation_system<>& b)
+unsigned int maximum_rank(const boolean_equation_system& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol;
@@ -339,11 +339,11 @@ class small_progress_measures_algorithm
 
     vertex_map m_vertices;
     unsigned int m_d;
-    const boolean_equation_system<>& m_bes;
+    const boolean_equation_system& m_bes;
     std::vector<int> m_beta;
 
   public:
-    small_progress_measures_algorithm(const boolean_equation_system<>& b)
+    small_progress_measures_algorithm(const boolean_equation_system& b)
       : m_bes(b)
     {}
 
@@ -401,7 +401,7 @@ class small_progress_measures_algorithm
 };
 
 inline
-bool small_progress_measures(boolean_equation_system<>& b)
+bool small_progress_measures(boolean_equation_system& b)
 {
   boolean_variable first = b.equations().front().variable();
   make_standard_form(b, true);

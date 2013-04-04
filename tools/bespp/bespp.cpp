@@ -73,7 +73,7 @@ class bespp_tool: public bes_input_tool<input_output_tool>
   private:
     void print_specification()
     {
-      bes::boolean_equation_system<> bes;
+      bes::boolean_equation_system bes;
       load_bes(bes,input_filename(), bes_input_format());
 
       mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())

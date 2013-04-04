@@ -51,7 +51,7 @@ pbes_system::pbes_equation bes2pbes(const boolean_equation& eq)
 /// \brief Converts a BES into a PBES
 /// \param x A boolean expression
 inline
-pbes_system::pbes<> bes2pbes(const boolean_equation_system<>& x)
+pbes_system::pbes<> bes2pbes(const boolean_equation_system& x)
 {
   data::data_specification data_spec;
   std::vector<pbes_system::pbes_equation> equations;

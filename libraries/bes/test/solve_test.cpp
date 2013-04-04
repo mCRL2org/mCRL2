@@ -25,7 +25,7 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void run_all_algorithms(std::string const& b, bool expected_outcome)
 {
-  boolean_equation_system<> b1;
+  boolean_equation_system b1;
   std::stringstream from;
   from << "pbes\n" << b << std::endl;
   from >> b1;

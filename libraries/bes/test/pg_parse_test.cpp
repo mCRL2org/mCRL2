@@ -20,7 +20,7 @@ using namespace mcrl2::bes;
 void test_parse_pg(std::string const& in)
 {
   std::stringstream from(in);
-  boolean_equation_system<> bes;
+  boolean_equation_system bes;
   parse_pgsolver(from,bes);
 }
 

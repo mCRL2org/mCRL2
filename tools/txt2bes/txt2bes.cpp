@@ -54,7 +54,7 @@ class txt2bes_tool: public input_output_tool
         std::ifstream from(input_filename().c_str());
         p = pbes_system::txt2pbes(from);
       }
-      bes::boolean_equation_system<> b = pbes_system::pbesinstconversion(p);
+      bes::boolean_equation_system b = pbes_system::pbesinstconversion(p);
       b.save(output_filename());
       return true;
     }

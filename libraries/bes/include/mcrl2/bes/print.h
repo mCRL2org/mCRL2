@@ -51,12 +51,7 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
     derived().leave(x);
   }
 
-#ifdef BOOST_MSVC
-  void operator()(const bes::boolean_equation_system<>& x)
-#else
-  template <typename Container>
-  void operator()(const bes::boolean_equation_system<Container>& x)
-#endif
+  void operator()(const bes::boolean_equation_system& x)
   {
     print_list(x.equations(), "pbes\n    ", ";\n\n", ";\n    ");
     derived().print("init ");

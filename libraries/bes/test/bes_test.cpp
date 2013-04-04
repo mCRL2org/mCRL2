@@ -154,7 +154,7 @@ void test_bes()
   eqns.push_back(eqY);
   eqns.push_back(eqZ);
 
-  boolean_equation_system<> bes(eqns, X);
+  boolean_equation_system bes(eqns, X);
   BOOST_CHECK(bes.is_closed());
 
   bes::pp(bes);

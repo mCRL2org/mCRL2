@@ -186,14 +186,14 @@ void test_bes()
   //
   // init X;
   boolean_equation e1(mu, X, X);
-  boolean_equation_system<> bes1(empty, X);
+  boolean_equation_system bes1(empty, X);
   bes1.equations().push_back(e1);
 
   // pbes nu X = X;
   //
   // init X;
   boolean_equation e2(nu, X, X);
-  boolean_equation_system<> bes2(empty, X);
+  boolean_equation_system bes2(empty, X);
   bes2.equations().push_back(e2);
 
   // pbes mu X = Y;
@@ -202,7 +202,7 @@ void test_bes()
   // init X;
   boolean_equation e3(mu, X, Y);
   boolean_equation e4(nu, Y, X);
-  boolean_equation_system<> bes3(empty, X);
+  boolean_equation_system bes3(empty, X);
   bes3.equations().push_back(e3);
   bes3.equations().push_back(e4);
 
@@ -210,7 +210,7 @@ void test_bes()
   //      mu X = Y;
   //
   // init X;
-  boolean_equation_system<> bes4(empty, X);
+  boolean_equation_system bes4(empty, X);
   bes4.equations().push_back(e4);
   bes4.equations().push_back(e3);
 

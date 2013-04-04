@@ -256,7 +256,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
         }
       } */
 
-      mcrl2::bes::boolean_equation_system<> b(convert_to_bes(bes_equations));
+      mcrl2::bes::boolean_equation_system b(convert_to_bes(bes_equations));
       mcrl2::bes::save_bes(b, output_filename(), bes_output_format());
 
       return true;

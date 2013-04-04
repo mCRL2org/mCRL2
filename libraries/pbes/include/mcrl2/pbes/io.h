@@ -63,7 +63,7 @@ void save_pbes(const pbes<>& pbes_spec,
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }
-      bes::boolean_equation_system<> bes_spec = pbesinstconversion(pbes_spec);
+      bes::boolean_equation_system bes_spec = pbesinstconversion(pbes_spec);
       bes::save_bes(bes_spec, outfilename, output_format);
       break;
     }
@@ -94,7 +94,7 @@ void load_pbes(pbes<>& p,
     case pbes_file_cwi:
     case pbes_file_pgsolver:
     {
-      bes::boolean_equation_system<> b;
+      bes::boolean_equation_system b;
       bes::load_bes(b, infilename, f);
       p = bes2pbes(b);
       break;

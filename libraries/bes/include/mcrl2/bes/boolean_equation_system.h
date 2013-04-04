@@ -34,22 +34,20 @@ namespace bes
 {
 
 // forward declarations
-template <typename Container> class boolean_equation_system;
+class boolean_equation_system;
 
-template <typename Container, typename OutputIterator>
-void find_boolean_variables(Container const& container, OutputIterator o);
+template <typename Object, typename OutputIterator>
+void find_boolean_variables(const Object& x, OutputIterator o);
 
-template <typename Container>
-atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system<Container>& p);
+atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system& p);
 
 /// \brief boolean equation system
 // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
-template <typename Container = std::vector<boolean_equation> >
 class boolean_equation_system
 {
   protected:
     /// \brief The equations
-    Container m_equations;
+    std::vector<boolean_equation> m_equations;
 
     /// \brief The initial state
     boolean_expression m_initial_state;
@@ -78,7 +76,7 @@ class boolean_equation_system
     /// \param equations A sequence of boolean equations
     /// \param initial_state An initial state
     boolean_equation_system(
-      const Container& equations,
+      const std::vector<boolean_equation>& equations,
       boolean_expression initial_state)
       :
       m_equations(equations),
@@ -87,14 +85,14 @@ class boolean_equation_system
 
     /// \brief Returns the equations.
     /// \return The equations
-    const Container& equations() const
+    const std::vector<boolean_equation>& equations() const
     {
       return m_equations;
     }
 
     /// \brief Returns the equations.
     /// \return The equations
-    Container& equations()
+    std::vector<boolean_equation>& equations()
     {
       return m_equations;
     }
@@ -155,21 +153,13 @@ class boolean_equation_system
       core::detail::save_aterm(t, filename, binary);
     }
 
-    /// \brief Conversion to aterm_appl.
-    /// \return An aterm representation of the boolean equation system
-    operator atermpp::aterm_appl() const
-    {
-      atermpp::aterm_list equations(m_equations.begin(), m_equations.end());
-      return core::detail::gsMakeBES(equations, m_initial_state);
-    }
-
     /// \brief Returns the set of binding variables of the boolean_equation_system, i.e. the
     /// variables that occur on the left hand side of an equation.
     /// \return The binding variables of the equation system
     std::set<boolean_variable> binding_variables() const
     {
       std::set<boolean_variable> result;
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      for (auto i = equations().begin(); i != equations().end(); ++i)
       {
         result.insert(i->variable());
       }
@@ -183,7 +173,7 @@ class boolean_equation_system
     std::set<boolean_variable> occurring_variables() const
     {
       std::set<boolean_variable> result;
-      for (typename Container::const_iterator i = m_equations.begin(); i != m_equations.end(); ++i)
+      for (auto i = m_equations.begin(); i != m_equations.end(); ++i)
       {
         find_boolean_variables(i->formula(), std::inserter(result, result.end()));
       }
@@ -201,20 +191,20 @@ class boolean_equation_system
     }
 };
 
-template <typename Container>
-bool operator==(const boolean_equation_system<Container>& x, const boolean_equation_system<Container>& y)
+inline
+bool operator==(const boolean_equation_system& x, const boolean_equation_system& y)
 {
 	return x.equations() == y.equations() && x.initial_state() == y.initial_state();
 }
 
 /// \brief Conversion to aterm_appl.
 /// \return The boolean equation system converted to aterm format.
-template <typename Container>
-atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system<Container>& p)
+inline
+atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system& p)
 {
   atermpp::aterm_list eqn_list;
-  const Container& eqn = p.equations();
-  for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
+  const std::vector<boolean_equation>& eqn = p.equations();
+  for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = boolean_equation_to_aterm(*i);
     eqn_list.push_front(a);

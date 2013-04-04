@@ -280,7 +280,7 @@ void bes2pgsolver(Iter first, Iter last, const std::string& outfilename)
 // Check that the initial equation has, as a left hand side, the variable that
 // has been designated as initial.
 static
-inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equation_system<>& bes_spec)
+inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equation_system& bes_spec)
 {
   if(is_boolean_variable(bes_spec.initial_state()))
   {
@@ -308,7 +308,7 @@ using pbes_system::pbes_file_unknown;
 /// \param aterm_ascii Determines, if output_format is bes, whether the file
 ///        is written is ascii format.
 inline
-void save_bes(const boolean_equation_system<>& bes_spec,
+void save_bes(const boolean_equation_system& bes_spec,
               const std::string& outfilename,
               const bes_file_format output_format,
               bool aterm_ascii = false)
@@ -384,7 +384,7 @@ void save_bes(const boolean_equation_system<>& bes_spec,
     case pbes_file_pgsolver:
     {
       mCRL2log(log::verbose) << "Saving result in PGSolver format..." << std::endl;
-      boolean_equation_system<> bes_spec_standard_form(bes_spec);
+      boolean_equation_system bes_spec_standard_form(bes_spec);
       make_standard_form(bes_spec_standard_form, true);
       if(!initial_bes_equation_corresponds_to_initial_state(bes_spec_standard_form))
       {
@@ -410,9 +410,8 @@ void save_bes(const boolean_equation_system<>& bes_spec,
 /// \param b The bes to which the result is loaded.
 /// \param infilename The file from which to load the BES.
 /// \param f The format that should be assumed for the file in infilename.
-template <typename Container>
 inline
-void load_bes(boolean_equation_system<Container>& b,
+void load_bes(boolean_equation_system& b,
               const std::string& infilename,
               const bes_file_format f)
 {
@@ -456,9 +455,8 @@ void load_bes(boolean_equation_system<Container>& b,
 /// \param infilename The file from which to load the BES.
 ///
 /// The format of the file in infilename is guessed.
-template <typename Container>
 inline
-void load_bes(boolean_equation_system<Container>& b,
+void load_bes(boolean_equation_system& b,
               const std::string& infilename)
 {
   bes_file_format f = pbes_system::guess_format(infilename);

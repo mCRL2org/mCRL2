@@ -38,8 +38,7 @@ struct add_boolean_expressions: public Builder<Derived>
     return result;
   }
 
-  template <typename BooleanEquationContainer>
-  void operator()(bes::boolean_equation_system<BooleanEquationContainer>& x)
+  void operator()(bes::boolean_equation_system& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());

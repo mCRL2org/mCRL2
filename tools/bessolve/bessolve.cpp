@@ -122,7 +122,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
 
     bool run()
     {
-      bes::boolean_equation_system<> bes;
+      bes::boolean_equation_system bes;
       load_bes(bes,input_filename(),bes_input_format());
 
       mCRL2log(verbose) << "solving BES in " <<

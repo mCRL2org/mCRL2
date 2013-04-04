@@ -32,7 +32,7 @@ void test_boolean_expressions()
   std::cout << bes::pp(e1) << std::endl;
   std::cout << bes::pp(e2) << std::endl;
 
-  boolean_equation_system<> p;
+  boolean_equation_system p;
   p.equations().push_back(e1);
   p.equations().push_back(e2);
   p.initial_state() = X1;
@@ -41,7 +41,7 @@ void test_boolean_expressions()
 
   std::string filename = "boolean_expression_test.out";
   p.save(filename);
-  boolean_equation_system<> q;
+  boolean_equation_system q;
   q.load(filename);
   BOOST_CHECK(p == q);
   remove(filename.c_str());
@@ -63,7 +63,7 @@ void test_bes2pbes()
   std::cout << bes::pp(e2) << std::endl;
   std::cout << bes::pp(e3) << std::endl;
 
-  boolean_equation_system<> p;
+  boolean_equation_system p;
   p.equations().push_back(e1);
   p.equations().push_back(e2);
   p.equations().push_back(e3);
