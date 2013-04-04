@@ -34,9 +34,9 @@ endif()
 
 # Set appropriate C++11 flag
 if(CXX_ACCEPTS_STD_CPP11)
-  set(R_CXXFLAGS "${R_CXXFLAGS} -stc=c++11")
+  set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++11")
 elseif(CXX_ACCEPTS_STD_CPP0X)
-  set(R_CXXFLAGS "${R_CXXFLAGS} -stc=c++0x")
+  set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++0x")
 endif()
 
 # Do not use debug symbols in the rewriter, and build using the appropriate
