@@ -32,9 +32,16 @@ if(CMAKE_BUILD_TYPE)
   endif()
 endif()
 
+# Set appropriate C++11 flag
+if(CXX_ACCEPTS_STD_CPP11)
+  set(R_CXXFLAGS "${R_CXXFLAGS} -stc=c++11")
+elseif(CXX_ACCEPTS_STD_CPP0X)
+  set(R_CXXFLAGS "${R_CXXFLAGS} -stc=c++0x")
+endif()
+
 # Do not use debug symbols in the rewriter, and build using the appropriate
 # flags for the aterm library
-set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++98 -DNDEBUG ${ATERM_FLAGS}")
+set(R_CXXFLAGS "${R_CXXFLAGS} -DNDEBUG ${ATERM_FLAGS}")
 
 # Make sure the shared library for the rewriter is build using position
 # independent code, if we were configured as static build ourselves, otherwise
