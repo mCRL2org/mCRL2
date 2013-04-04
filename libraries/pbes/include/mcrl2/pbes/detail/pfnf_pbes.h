@@ -279,10 +279,10 @@ class pfnf_pbes
 
     /// \brief Constructor
     /// \pre The pbes p must be in PFNF format
-    pfnf_pbes(const pbes<>& p)
+    pfnf_pbes(const pbes& p)
       : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
-      pbes<> q = p;
+      pbes q = p;
       if (!pbes_system::detail::is_pfnf(p))
       {
         mCRL2log(log::verbose) << "converting PBES into PFNF format... " << std::endl;

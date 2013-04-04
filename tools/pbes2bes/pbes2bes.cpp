@@ -159,7 +159,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes
       mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
-      mcrl2::pbes_system::pbes<> p;
+      mcrl2::pbes_system::pbes p;
       load_pbes(p, input_filename(), pbes_input_format());
 
       pbes_system::normalize(p);

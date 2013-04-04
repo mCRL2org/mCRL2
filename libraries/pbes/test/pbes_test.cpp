@@ -132,7 +132,7 @@ void test_pbes()
   specification spec = linearise(SPECIFICATION);
   state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   pbes_expression e = p.equations().front().formula();
 
   BOOST_CHECK(!is_bes(p));
@@ -181,7 +181,7 @@ void test_global_variables()
     "   X1(m, n);                             \n"
     ;
 
-  pbes<> p;
+  pbes p;
   std::stringstream s(TEXT);
   s >> p;
   std::set<variable> freevars = p.global_variables();
@@ -224,7 +224,7 @@ void test_trivial()
   specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
   state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 }
 
@@ -240,7 +240,7 @@ void test_instantiate_global_variables()
   specification spec = linearise(spec_text);
   state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::pbes_system::pp(p) << std::endl;
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
   pbes_system::detail::instantiate_global_variables(p);
@@ -254,7 +254,7 @@ void test_find_sort_expressions()
   specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
   state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   std::set<sort_expression> s;
   pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
   std::cout << data::detail::print_set(s) << std::endl;
@@ -271,7 +271,7 @@ void test_io()
     "                 \n"
     "init X1;         \n"
     ;
-  pbes<> p = txt2pbes(PBES_SPEC);
+  pbes p = txt2pbes(PBES_SPEC);
   save_pbes(p, "pbes_binary.pbes", pbes_output_pbes, false);
   save_pbes(p, "pbes_ascii.txt",   pbes_output_pbes, true);
   save_pbes(p, "pbes_binary.bes",  pbes_output_bes,  false);
@@ -290,7 +290,7 @@ void test_is_bes()
     "                  \n"
     "init X;           \n"
     ;
-  pbes<> p = txt2pbes(text);
+  pbes p = txt2pbes(text);
   BOOST_CHECK(is_bes(p));
 }
 

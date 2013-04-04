@@ -29,7 +29,7 @@ void pbesabsinthe(const std::string& input_filename,
                  )
 {
   // load the pbes
-  pbes<> p;
+  pbes p;
   p.load(input_filename);
 
   if (print_used_function_symbols)

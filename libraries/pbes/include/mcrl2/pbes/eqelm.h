@@ -258,11 +258,11 @@ class pbes_eqelm_algorithm
     /// \brief Chooses one parameter for every equivalence class, and
     /// removes the others. All occurrences of the removed parameters
     /// are replaced by the chosen parameter.
-    template <typename Container>
-    void apply_equivalence_relations(pbes<Container>& p)
+    inline
+    void apply_equivalence_relations(pbes& p)
     {
       // first apply the substitutions to the equations
-      for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type X = i->variable().name();
         data::mutable_map_substitution<> sigma = compute_substitution(X);
@@ -274,7 +274,7 @@ class pbes_eqelm_algorithm
 
       // then remove parameters
       std::map<string_type, std::vector<size_t> > to_be_removed;
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type X = i->variable().name();
         const std::vector<equivalence_class>& eq = m_vertices[X];
@@ -301,15 +301,14 @@ class pbes_eqelm_algorithm
     /// \brief Runs the eqelm algorithm
     /// \param p A pbes
     /// \param ignore_initial_state If true, the initial state is ignored.
-    template <typename Container>
-    void run(pbes<Container>& p, bool ignore_initial_state = false)
+    void run(pbes& p, bool ignore_initial_state = false)
     {
       m_vertices.clear();
       m_edges.clear();
       std::set<string_type> todo;
 
       // compute the vertices and edges of the graph
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type name = i->variable().name();
         m_edges[name] = find_propositional_variable_instantiations(i->formula());

@@ -122,8 +122,8 @@ pbes_equation_solver<Rewriter> make_pbes_equation_solver(const Rewriter& rewrite
 /// \pre The pbes \p p is a bes.
 /// \param p A pbes
 /// \return 0 if the solution is false, 1 if the solution is true, 2 if the solution is unknown
-template <typename Container>
-int gauss_elimination(pbes<Container>& p)
+inline
+int gauss_elimination(pbes& p)
 {
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, data::data_enumerator> my_rewriter;
   typedef typename core::term_traits<pbes_expression> tr;

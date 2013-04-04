@@ -37,7 +37,7 @@ void test_pbesrewr1()
     "pbes mu X(n:Enum)=exists m1,m2:Enum.(X(m1) || X(m2)); \n"
     "init X(e1);                                           \n"
     ;
-  pbes<> p = txt2pbes(pbes_text);
+  pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
   data::data_enumerator datae(p.data(), datar);
   data::rewriter_with_variables datarv(datar);
@@ -52,7 +52,7 @@ void test_pbesrewr2()
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 
   data::rewriter datar(p.data(), data::jitty);
@@ -75,7 +75,7 @@ void test_pbesrewr3()
     "init X;\n"
     ;
 
-  pbes<> p = txt2pbes(pbes_text);
+  pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
   data::data_enumerator datae(p.data(), datar);
   data::rewriter_with_variables datarv(datar);

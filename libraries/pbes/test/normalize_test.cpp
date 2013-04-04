@@ -111,7 +111,7 @@ void test_normalize2()
   lps::specification spec       = lps::linearise("init tau + tau;");
   state_formulas::state_formula formula  = state_formulas::parse_state_formula("nu X. [true]X", spec);
   bool timed = false;
-  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   pbes_system::normalize(p);
 }
 
@@ -124,7 +124,7 @@ void test_normalize3()
                             );
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
-  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   pbes_system::normalize(p);
 }
 

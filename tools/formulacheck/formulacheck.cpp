@@ -169,7 +169,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
 
         try
         {
-          mcrl2::pbes_system::pbes<> p;
+          mcrl2::pbes_system::pbes p;
           p.load(infilename);
           return p.data();
         }

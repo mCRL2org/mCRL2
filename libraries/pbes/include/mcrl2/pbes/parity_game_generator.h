@@ -56,7 +56,7 @@ class parity_game_generator
     bool m_initialized;
 
     /// \brief The PBES that is being solved.
-    pbes<>& m_pbes;
+    pbes& m_pbes;
 
     /// \brief Data rewriter.
     data::rewriter datar;
@@ -303,7 +303,7 @@ class parity_game_generator
     /// \param p A PBES
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-    parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
+    parity_game_generator(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       :
       m_initialized(false),
       m_pbes(p),

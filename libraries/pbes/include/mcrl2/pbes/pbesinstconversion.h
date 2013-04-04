@@ -54,7 +54,7 @@ bes::boolean_equation pbesinstconversion(const pbes_equation& eq)
 /// \param p A PBES
 /// \pre The PBES must be a BES
 inline
-bes::boolean_equation_system pbesinstconversion(const pbes<>& p)
+bes::boolean_equation_system pbesinstconversion(const pbes& p)
 {
   assert(pbes_system::algorithms::is_bes(p));
 

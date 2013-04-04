@@ -30,7 +30,7 @@ namespace detail {
 class symbolic_exploration_algorithm
 {
   protected:
-    pbes<>& m_pbes;
+    pbes& m_pbes;
     std::vector<data::variable> m_variables; // the parameters of the current equation (used for clustering)
     data::set_identifier_generator m_generator; // used for generating cluster variables
     bool m_optimized;
@@ -371,7 +371,7 @@ class symbolic_exploration_algorithm
     }
 
   public:
-    symbolic_exploration_algorithm(pbes<>& p, bool optimized, bool clustered)
+    symbolic_exploration_algorithm(pbes& p, bool optimized, bool clustered)
       : m_pbes(p), m_optimized(optimized), m_clustered(clustered)
     {
       std::vector<pbes_equation>& equations = m_pbes.equations();
@@ -413,7 +413,7 @@ void symbolic_exploration(const std::string& input_filename,
                          )
 {
   // load the pbes
-  pbes<> p;
+  pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename);
 
   // apply the algorithm

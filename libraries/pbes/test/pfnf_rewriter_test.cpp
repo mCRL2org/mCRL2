@@ -97,7 +97,7 @@ void test_pfnf_visitor()
 void test_pfnf(const std::string& pbes_spec)
 {
   std::cerr << "--- test_pfnf ---" << std::endl;
-  pbes<> p = txt2pbes(pbes_spec);
+  pbes p = txt2pbes(pbes_spec);
   std::cerr << "- before:" << std::endl;
   std::cerr << pbes_system::pp(p) << std::endl;
   pfnf_rewriter R;
@@ -136,7 +136,7 @@ void test_pfnf_rewriter()
 
 void test_pfnf_rewriter2(const std::string& text)
 {
-  pbes<> p = txt2pbes(text);
+  pbes p = txt2pbes(text);
   std::cout << "\ntest_pfnf_rewriter2\n" << std::endl;
   std::cout << "--- before ---\n";
   std::cout << pbes_system::pp(p) << std::endl;
@@ -212,7 +212,7 @@ void test_is_pfnf()
     "     nu X11(b: Bool) = val(b) && (X11(b) || X11(!b)) && (X11(b) || X11(!!b)); \n"
     "init X(0);                                  \n"
     ;
-  pbes<> p = txt2pbes(text, false);
+  pbes p = txt2pbes(text, false);
   pbes_expression x;
 
   x = p.equations()[0].formula();
@@ -310,7 +310,7 @@ void test_pfnf_print()
     "     nu Y(n: Nat) = forall c:Bool. forall b:Bool. (X(0) || X(1) && X(0)) && (val(n > 0) => (X(2) || X(3))); \n"
     "init X(0);                                  \n"
     ;
-  pbes<> p = txt2pbes(text);
+  pbes p = txt2pbes(text);
   pfnf_rewriter R;
   pbes_rewrite(p, R);
   std::cout << "--- pfnf print ---" << std::endl;
@@ -353,7 +353,7 @@ void test_pfnf_rewriter3()
     "                                                                             \n"
     "init Y(1, d1, 1, d1);                                                        \n"
     ;
-  pbes<> p = txt2pbes(text, true);
+  pbes p = txt2pbes(text, true);
   BOOST_CHECK(!pbes_system::detail::is_pfnf(p));
   pfnf_rewriter R;
   pbes_system::pbes_rewrite(p, R);

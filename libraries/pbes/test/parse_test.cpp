@@ -35,7 +35,7 @@ const std::string VARSPEC =
 
 void test_parse()
 {
-  pbes<> p;
+  pbes p;
   std::stringstream s(PBESSPEC);
   s >> p;
 

@@ -27,7 +27,7 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void run_monotonicity_test_case(const std::string& pbes_spec, const bool expect_success = true)
 {
-  pbes<> p = txt2pbes(pbes_spec);
+  pbes p = txt2pbes(pbes_spec);
   BOOST_CHECK(is_monotonous(p) == expect_success);
 }
 

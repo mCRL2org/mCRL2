@@ -125,7 +125,7 @@ boolean_expression pbes_expression2boolean_expression(const pbes_system::pbes_ex
 /// \return The input stream
 std::istream& operator>>(std::istream& from, boolean_equation_system& b)
 {
-  pbes_system::pbes<> p;
+  pbes_system::pbes p;
   from >> p;
   if (!is_bes(p))
   {
@@ -133,7 +133,7 @@ std::istream& operator>>(std::istream& from, boolean_equation_system& b)
   }
 
   std::vector<boolean_equation> equations;
-  for (typename std::vector<pbes_system::pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (std::vector<pbes_system::pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     boolean_variable v(i->variable().name());
     boolean_expression rhs = pbes_expression2boolean_expression(i->formula());

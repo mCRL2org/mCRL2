@@ -55,8 +55,8 @@ void test_pbes(const std::string& pbes_spec,
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
 
-  pbes<> p = txt2pbes(pbes_spec);
-  pbes<> q = p;
+  pbes p = txt2pbes(pbes_spec);
+  pbes q = p;
 
   // data rewriter
   data::rewriter datar(q.data());
@@ -96,8 +96,8 @@ void test_eqelm(const std::string& pbes_spec)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
 
-  pbes<> p = txt2pbes(pbes_spec);
-  pbes<> q = p;
+  pbes p = txt2pbes(pbes_spec);
+  pbes q = p;
 
   data::rewriter datar(q.data());
   my_pbes_rewriter pbesr(datar);

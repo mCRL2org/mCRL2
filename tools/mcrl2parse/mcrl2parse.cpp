@@ -213,12 +213,12 @@ void separate_process_specification(const std::string& text, const std::string& 
 }
 
 inline
-void separate_pbes_specification(const std::string& text, const std::string& keyword, pbes_system::pbes<>& pbesspec, std::string& keyword_text)
+void separate_pbes_specification(const std::string& text, const std::string& keyword, pbes_system::pbes& pbesspec, std::string& keyword_text)
 {
   if (!has_keyword(text, keyword))
   {
     keyword_text = text;
-    pbesspec = pbes_system::pbes<>();
+    pbesspec = pbes_system::pbes();
   }
   else
   {
@@ -445,7 +445,7 @@ class mcrl2parse_tool : public input_tool
       data::data_specification dataspec;
       lps::specification lpsspec;
       process::process_specification procspec;
-      pbes_system::pbes<> pbesspec;
+      pbes_system::pbes pbesspec;
 
       core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
       unsigned int start_symbol_index = 0;
@@ -603,7 +603,7 @@ class mcrl2parse_tool : public input_tool
             }
             case pbesspec_e :
             {
-              pbes_system::pbes<> x = pbes_system::parse_pbes_new(text);
+              pbes_system::pbes x = pbes_system::parse_pbes_new(text);
               pbes_system::complete_pbes(x);
               if (aterm_format)
               {
@@ -737,7 +737,7 @@ class mcrl2parse_tool : public input_tool
             }
             case pbesspec_e :
             {
-              pbes_system::pbes<> x = pbes_system::parse_pbes(text);
+              pbes_system::pbes x = pbes_system::parse_pbes(text);
               std::cout << pbes_system::pp(x) << std::endl;
               break;
             }

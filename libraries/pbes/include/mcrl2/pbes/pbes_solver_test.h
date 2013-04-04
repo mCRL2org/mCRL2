@@ -44,8 +44,8 @@ namespace pbes_system
 ///         these. This method uses the same code as pbes2bool (except that
 ///         pbes2bool uses more advanced features).
 
-template < typename Container >
-bool pbes2_bool_test(pbes< Container > &pbes_spec, data::rewriter::strategy rewrite_strategy = data::jitty)
+inline
+bool pbes2_bool_test(pbes &pbes_spec, data::rewriter::strategy rewrite_strategy = data::jitty)
 {
   pbes_system::algorithms::instantiate_global_variables(pbes_spec);
 

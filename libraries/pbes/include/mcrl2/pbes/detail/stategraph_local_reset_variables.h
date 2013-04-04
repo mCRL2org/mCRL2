@@ -47,7 +47,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     typedef stategraph_local_algorithm super;
 
   protected:
-    const pbes<>& m_original_pbes;
+    const pbes& m_original_pbes;
 
     // if true, the resulting PBES is simplified
     bool m_simplify;
@@ -295,7 +295,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i);
 
     // Applies resetting of variables to the original PBES p.
-    void reset_variables_to_original(pbes<>& p)
+    void reset_variables_to_original(pbes& p)
     {
       mCRL2log(log::debug, "stategraph") << "--- resetting variables to the original PBES ---" << std::endl;
 
@@ -316,7 +316,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
     }
 
-    local_reset_variables_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_local_algorithm(p, rewrite_strategy),
         m_original_pbes(p)
     {}
@@ -324,12 +324,12 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes<> run(bool simplify = true, bool use_marking_optimization = false)
+    pbes run(bool simplify = true, bool use_marking_optimization = false)
     {
       super::run();
       m_simplify = simplify;
       m_use_marking_optimization = use_marking_optimization;
-      pbes<> result = m_original_pbes;
+      pbes result = m_original_pbes;
       reset_variables_to_original(result);
       return result;
     }

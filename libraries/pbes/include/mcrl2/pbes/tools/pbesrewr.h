@@ -37,7 +37,7 @@ void pbesrewr(const std::string& input_filename,
              )
 {
   // load the pbes
-  pbes<> p;
+  pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename);
 
   // data rewriter
@@ -104,7 +104,7 @@ void pbesrewr(const std::string& input_filename,
       else
       {
         mCRL2log(log::verbose) << "Rewriting..." << std::endl;
-        pbes<> q = detail::to_ppg(p);
+        pbes q = detail::to_ppg(p);
         mCRL2log(log::verbose) << "Rewriting done." << std::endl;
         ppg = detail::is_ppg(q);
         if (!ppg)

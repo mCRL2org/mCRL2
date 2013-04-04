@@ -108,7 +108,7 @@ std::string BES10 =
 
 void test_bes(std::string bes_spec, bool expected_result)
 {
-  pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
+  pbes_system::pbes p = pbes_system::txt2pbes(bes_spec);
   int result = pbes_system::gauss_elimination(p);
   switch (result)
   {
@@ -150,7 +150,7 @@ void test_abp()
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
 
-  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   int result = pbes_system::gauss_elimination(p);
   switch (result)
   {
@@ -235,7 +235,7 @@ void test_approximate()
   typedef core::term_traits<pbes_expression> tr;
 
   gauss_elimination_algorithm<pbes_traits> algorithm;
-  pbes_system::pbes<> p = pbes_system::txt2pbes(BES4);
+  pbes_system::pbes p = pbes_system::txt2pbes(BES4);
   algorithm.run(p.equations().begin(), p.equations().end(), approximate<pbes_traits, compare_function > (compare));
   if (tr::is_false(p.equations().front().formula()))
   {
@@ -277,7 +277,7 @@ void tutorial1()
     "               \n"
     "init X;        \n"
     ;
-  pbes<> p = txt2pbes(txt);
+  pbes p = txt2pbes(txt);
   gauss_elimination_algorithm<pbes_traits> algorithm;
   algorithm.run(p.equations().begin(), p.equations().end(), fixpoint_equation_solver());
   //]
@@ -293,7 +293,7 @@ void tutorial2()
     "               \n"
     "init X;        \n"
     ;
-  pbes<> p = txt2pbes(txt);
+  pbes p = txt2pbes(txt);
   int solution = gauss_elimination(p);
   assert(solution == 0); // 0 indicates false
   //]

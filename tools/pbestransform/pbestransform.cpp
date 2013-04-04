@@ -22,7 +22,7 @@ using namespace mcrl2::utilities::tools;
 //[pbes_transform_tool
 class pbes_transform_tool: public input_output_tool
 {
-  protected: 
+  protected:
     typedef input_output_tool super;
 
     unsigned int m_iterations;
@@ -58,7 +58,7 @@ class pbes_transform_tool: public input_output_tool
 
     bool run()
     {
-      pbes_system::pbes<> p;
+      pbes_system::pbes p;
       load_pbes(p, input_filename());
       pbes_system::pbes_transform(p, m_iterations, m_mu_value, m_nu_value);
       p.save(output_filename());

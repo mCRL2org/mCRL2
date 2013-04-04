@@ -21,7 +21,7 @@ using namespace mcrl2;
 
 void test_pbes_specification(const std::string& pbes_in, bool test_type_checker = true)
 {
-  pbes_system::pbes<> p = pbes_system::parse_pbes_new(pbes_in);
+  pbes_system::pbes p = pbes_system::parse_pbes_new(pbes_in);
   if (test_type_checker)
   {
     pbes_system::type_check(p);

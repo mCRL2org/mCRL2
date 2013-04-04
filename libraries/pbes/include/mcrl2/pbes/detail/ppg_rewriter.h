@@ -439,12 +439,12 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
 /// \brief Rewrites a PBES to a PPG.
 /// \param x a PBES
 /// \return a PPG.
-template <typename Container>
-pbes<Container> to_ppg(const pbes<Container>& x)
+inline
+pbes to_ppg(const pbes& x)
 {
   ppg_rewriter f(x.equations());
   f(x);
-  pbes<Container> result(
+  pbes result(
       x.data(),
       f.equations,
       x.initial_state());

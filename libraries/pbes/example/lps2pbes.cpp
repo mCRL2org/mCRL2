@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
   specification spec = linearise(utilities::read_text(spec_file));
   state_formula sf = parse_state_formula(utilities::read_text(mcf_file), spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, sf, timed);
+  pbes p = lps2pbes(spec, sf, timed);
   p.save(pbes_file);
 
   return 0;

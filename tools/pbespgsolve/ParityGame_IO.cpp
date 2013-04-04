@@ -167,7 +167,7 @@ void ParityGame::read_pbes( const std::string &file_path, verti *goal_vertex,
                             StaticGraph::EdgeDirection edge_dir )
 {
 #ifdef WITH_MCRL2
-    mcrl2::pbes_system::pbes<> pbes;
+    mcrl2::pbes_system::pbes pbes;
     pbes.load(file_path);  // TODO: handle exceptions raised here?
     assign_pbes(pbes, goal_vertex, edge_dir);
 #else /* ifdef WITH_MCRL2 */

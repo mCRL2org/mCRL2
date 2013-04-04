@@ -135,10 +135,10 @@ bool is_monotonous(const pbes_equation& e)
 }
 
 /// \brief Returns true if the pbes is monotonous.
-template <typename Container>
-bool is_monotonous(const pbes<Container>& p)
+inline
+bool is_monotonous(const pbes& p)
 {
-  for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     if (!is_monotonous(*i))
     {

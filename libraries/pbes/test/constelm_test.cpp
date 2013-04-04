@@ -208,8 +208,8 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
 
-  pbes<> p = txt2pbes(pbes_spec);
-  pbes<> q = p;
+  pbes p = txt2pbes(pbes_spec);
+  pbes q = p;
 
   // data rewriter
   data::rewriter datar(q.data());

@@ -113,7 +113,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
     }
 
   public:
-    stategraph_global_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    stategraph_global_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_algorithm(p, rewrite_strategy)
     { }
 

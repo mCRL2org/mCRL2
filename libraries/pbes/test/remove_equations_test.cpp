@@ -42,8 +42,8 @@ std::string r2 = "binding_variable_names = X, Y, Z";
 
 void test_remove_unreachable_variables(const std::string& pbes_spec, const std::string& expected_result)
 {
-  pbes<> p = txt2pbes(pbes_spec);
-  pbes<> q = p;
+  pbes p = txt2pbes(pbes_spec);
+  pbes q = p;
   remove_unreachable_variables(q);
   BOOST_CHECK(q.is_well_typed());
   pbes_system::detail::pbes_property_map info1(q);

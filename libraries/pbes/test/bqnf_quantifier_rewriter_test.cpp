@@ -22,12 +22,12 @@ using namespace mcrl2::pbes_system;
 
 void rewrite_bqnf_quantifier(std::string source_text, std::string target_text)
 {
-  pbes<> p = txt2pbes(source_text);
+  pbes p = txt2pbes(source_text);
   bqnf_rewriter pbesr;
   pbes_rewrite(p, pbesr);
   normalize(p);
   //std::clog << pp(p);
-  pbes<> target = txt2pbes(target_text);
+  pbes target = txt2pbes(target_text);
   normalize(target);
   BOOST_CHECK(p==target);
 }

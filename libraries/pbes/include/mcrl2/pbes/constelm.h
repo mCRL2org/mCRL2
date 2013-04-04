@@ -766,15 +766,14 @@ class pbes_constelm_algorithm
     /// in the pbes \p p
     /// \param compute_conditions If true, propagation conditions are computed. Note
     /// that the currently implementation has exponential behavior.
-    template <typename Container>
-    void run(pbes<Container>& p, bool compute_conditions = false)
+    void run(pbes& p, bool compute_conditions = false)
     {
       m_vertices.clear();
       m_edges.clear();
       m_redundant_parameters.clear();
 
       // compute the vertices and edges of the dependency graph
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type name = i->variable().name();
         m_vertices[name] = vertex(i->variable());
@@ -863,7 +862,7 @@ class pbes_constelm_algorithm
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
 
       // compute the redundant parameters and the redundant equations
-      for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type name = i->variable().name();
         vertex& v = m_vertices[name];
@@ -878,7 +877,7 @@ class pbes_constelm_algorithm
       }
 
       // Apply the constraints to the equations.
-      for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type name = i->variable().name();
         vertex& v = m_vertices[name];

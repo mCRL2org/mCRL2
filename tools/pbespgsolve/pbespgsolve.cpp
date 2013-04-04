@@ -129,7 +129,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       }
       else
       {
-        pbes<> p;
+        pbes p;
         timer().start("load");
         load_pbes(p, input_filename(), pbes_input_format());
         timer().finish("load");

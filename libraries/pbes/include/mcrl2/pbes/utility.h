@@ -72,14 +72,13 @@ static bool occurs_in_varL(
 /// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
 /// occurs in the pbes_specification.
 
-template <typename Container>
-inline unsigned long get_rank(const propositional_variable_instantiation current_variable_instantiation,
-                              pbes<Container> pbes_spec)
+inline unsigned long get_rank(const propositional_variable_instantiation& current_variable_instantiation,
+                              const pbes& pbes_spec)
 {
   unsigned long rank=0;
-  Container eqsys = pbes_spec.equations();
+  const std::vector<pbes_equation>& eqsys = pbes_spec.equations();
   fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
-  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  for (auto eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   {
     if (eqi->variable().name()==current_variable_instantiation.name())
     {
@@ -99,16 +98,15 @@ inline unsigned long get_rank(const propositional_variable_instantiation current
 /// \brief gives the fixed point symbol of a propositional_variable_instantiation. It is assumed that the variable
 /// occurs in the pbes_specification. Returns false if the symbol is mu, and true if the symbol in nu.
 
-template <typename Container>
 inline bool get_fixpoint_symbol(const propositional_variable_instantiation current_variable_instantiation,
-                                pbes<Container> pbes_spec)
+                                const pbes& pbes_spec)
 {
-  Container eqsys = pbes_spec.equations();
-  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  const std::vector<pbes_equation>& eqsys = pbes_spec.equations();
+  for (auto eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   {
     if (eqi->variable().name()==current_variable_instantiation.name())
     {
-      return (is_nu(eqi->symbol()));
+      return (eqi->symbol().is_nu());
     }
   }
   assert(0); // It is assumed that the variable instantiation occurs in the PBES.

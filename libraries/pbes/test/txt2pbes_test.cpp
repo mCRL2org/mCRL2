@@ -38,7 +38,7 @@ const std::string PBESSPEC2 =
 
 void test_txt2pbes()
 {
-  pbes<> p;
+  pbes p;
   p = txt2pbes(PBESSPEC1);
   BOOST_CHECK(p.is_well_typed());
   p = txt2pbes(PBESSPEC2);

@@ -32,10 +32,10 @@ void pbesstategraph(const std::string& input_filename,
                     bool use_marking_optimization
                    )
 {
-  pbes<> p;
+  pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename);
   pbes_system::algorithms::normalize(p);
-  pbes<> q;
+  pbes q;
 
   if (use_local_variant)
   {

@@ -58,7 +58,7 @@ class lts2pbes_algorithm
     /// \param formula A modal formula
     /// \param spec A linear process specification
     /// \return The result of the translation
-    pbes<> run(const state_formulas::state_formula& formula)
+    pbes run(const state_formulas::state_formula& formula)
     {
       namespace sf = state_formulas;
       namespace af = state_formulas::detail::accessors;
@@ -100,7 +100,7 @@ class lts2pbes_algorithm
       data::data_expression_list e = detail::mu_expressions(f0);
       propositional_variable_instantiation init(Xs0, e);
 
-      return pbes<>(lts0.data(), eqn, std::set<data::variable>(), init);
+      return pbes(lts0.data(), eqn, std::set<data::variable>(), init);
     }
 };
 
@@ -109,7 +109,7 @@ class lts2pbes_algorithm
 /// \param l A labelled transition system
 /// \param f A modal formula
 inline
-pbes<> lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula& f)
+pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula& f)
 {
   lts2pbes_algorithm algorithm(l);
   return algorithm.run(f);

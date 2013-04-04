@@ -56,7 +56,7 @@ void test_bes()
 
 void test_pbes()
 {
-  pbes_system::pbes<> b;
+  pbes_system::pbes b;
   std::stringstream bes_stream(bes1);
   bes_stream >> b;
 

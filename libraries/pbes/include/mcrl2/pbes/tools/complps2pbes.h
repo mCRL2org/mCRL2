@@ -63,7 +63,7 @@ void complps2pbes(const std::string& input_filename,
   state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec);
   instream.close();
 
-  pbes_system::pbes<> result = pbes_system::complps2pbes(procspec, formula);
+  pbes_system::pbes result = pbes_system::complps2pbes(procspec, formula);
 
   // save the result
   if (output_filename.empty())

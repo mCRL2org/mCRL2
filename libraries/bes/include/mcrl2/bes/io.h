@@ -434,7 +434,7 @@ void load_bes(boolean_equation_system& b,
     }
     case pbes_file_pbes:
     {
-      pbes_system::pbes<> p;
+      pbes_system::pbes p;
       p.load(infilename);
       if(!pbes_system::is_bes(p))
       {

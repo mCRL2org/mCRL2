@@ -650,7 +650,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
   public:
-    stategraph_local_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    stategraph_local_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_algorithm(p, rewrite_strategy)
     { }
 

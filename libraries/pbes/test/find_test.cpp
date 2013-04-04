@@ -99,7 +99,7 @@ void test_find_free_variables()
     "init X(true, 0);                                                       \n"
     ;
 
-  pbes<> p = txt2pbes(test1);
+  pbes p = txt2pbes(test1);
 
   std::set<data::variable> v = find_free_variables(p);
   std::cout << "variables: " << data::detail::print_set(v) << std::endl;

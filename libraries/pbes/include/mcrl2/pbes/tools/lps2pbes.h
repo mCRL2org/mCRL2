@@ -59,7 +59,7 @@ void lps2pbes(const std::string& input_filename,
   instream.close();
   //convert formula and LPS to a PBES
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
-  pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed, structured, unoptimized);
+  pbes_system::pbes result = pbes_system::lps2pbes(spec, formula, timed, structured, unoptimized);
   //save the result
   if (output_filename.empty())
   {

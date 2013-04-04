@@ -168,7 +168,7 @@ void lts_type::add_edge_label(const std::string& name,
 
 /// lts_info
 
-lts_info::lts_info(pbes<>& p, pbes_greybox_interface* pgg, bool reset = false, bool always_split = false):
+lts_info::lts_info(pbes& p, pbes_greybox_interface* pgg, bool reset = false, bool always_split = false):
     p(p),
     pgg(pgg),
     reset_option(reset),
@@ -1247,7 +1247,7 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
 }
 
 
-explorer::explorer(const pbes<>& p_, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
+explorer::explorer(const pbes& p_, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
 {
     p = p_;
     this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));

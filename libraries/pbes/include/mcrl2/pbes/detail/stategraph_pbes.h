@@ -331,7 +331,7 @@ class stategraph_pbes
 
     /// \brief Constructor
     /// \pre The pbes p must be in STATEGRAPH format
-    stategraph_pbes(const pbes<>& p)
+    stategraph_pbes(const pbes& p)
       : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
       const std::vector<pbes_equation>& equations = p.equations();

@@ -28,9 +28,9 @@ namespace pbes_system
 /// \param spec_stream A stream from which can be read
 /// \return The parsed PBES
 inline
-pbes<> txt2pbes(std::istream& spec_stream, bool normalize = true)
+pbes txt2pbes(std::istream& spec_stream, bool normalize = true)
 {
-  pbes<> result;
+  pbes result;
   spec_stream >> result;
   if (normalize)
   {
@@ -51,7 +51,7 @@ pbes<> txt2pbes(std::istream& spec_stream, bool normalize = true)
 /// \param text A string
 /// \return The parsed PBES
 inline
-pbes<> txt2pbes(const std::string& text, bool normalize = true)
+pbes txt2pbes(const std::string& text, bool normalize = true)
 {
   std::stringstream from(text);
   return txt2pbes(from, normalize);

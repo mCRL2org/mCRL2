@@ -238,8 +238,7 @@ class pbespgsolve_algorithm
       return true;
     }
 
-    template <typename Container>
-    bool run(pbes<Container>& p)
+    bool run(pbes& p)
     {
       m_timer.start("initialization");
       mCRL2log(log::verbose) << "Generating parity game..."  << std::endl;

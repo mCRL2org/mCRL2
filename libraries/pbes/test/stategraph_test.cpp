@@ -83,7 +83,7 @@ void test_significant_variables()
     ;
 
   bool normalize = false;
-  pbes<> p = txt2pbes(text, normalize);
+  pbes p = txt2pbes(text, normalize);
   const std::vector<pbes_equation>& eqn = p.equations();
   test_significant_variables(eqn[0].formula(), "{b}");
   test_significant_variables(eqn[1].formula(), "{}");
@@ -109,7 +109,7 @@ propositional_variable_instantiation find_propvar(const std::string& name, const
 void test_guard(const std::string& pbesspec, const std::string& X, const std::string& expected_result)
 {
   bool normalize = false;
-  pbes<> p = txt2pbes(pbesspec, normalize);
+  pbes p = txt2pbes(pbesspec, normalize);
   pbes_expression x1 = p.equations().front().formula();
   propositional_variable_instantiation X1 = find_propvar(X, x1);
   simplifying_rewriter<pbes_expression, data::rewriter> R(p.data());
@@ -453,7 +453,7 @@ void test_local_stategraph()
 {
   std::string text;
   bool normalize = false;
-  pbes<> p;
+  pbes p;
 
   text =
     "sort D = struct d1 | d2;\n"

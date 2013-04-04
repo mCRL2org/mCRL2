@@ -25,7 +25,7 @@ void pbesinfo(const std::string& input_filename,
               pbes_file_format file_format, bool opt_full
              )
 {
-  pbes<> p;
+  pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename, file_format);
 
   pbes_system::detail::pbes_property_map info(p);

@@ -297,7 +297,7 @@ class lts2pbes_tool : public input_output_tool
       state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(from, spec);
       from.close();
 
-      pbes_system::pbes<> result = pbes_system::lts2pbes(l, formula);
+      pbes_system::pbes result = pbes_system::lts2pbes(l, formula);
       //save the result
       if (output_filename().empty())
       {

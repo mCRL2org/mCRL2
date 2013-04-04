@@ -33,7 +33,7 @@ void pbesconstelm(const std::string& input_filename,
                  )
 {
   // load the pbes
-  pbes<> p;
+  pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename);
 
   // data rewriter

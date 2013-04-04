@@ -37,7 +37,7 @@ namespace detail {
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
     /// \param rewrite_strategy The rewrite engine to use. (Default: jitty)
-    pbes_greybox_interface(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
+    pbes_greybox_interface(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       : parity_game_generator_deprecated(p, true_false_dependencies, is_min_parity, rewrite_strategy)
     {
       initialize_generation();

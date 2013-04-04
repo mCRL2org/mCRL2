@@ -44,7 +44,7 @@ class txt2bes_tool: public input_output_tool
 
     bool run()
     {
-      pbes_system::pbes<> p;
+      pbes_system::pbes p;
       if (input_filename().empty())
       {
         p = pbes_system::txt2pbes(std::cin);

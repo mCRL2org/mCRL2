@@ -42,7 +42,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
 
     /// \brief Constructor.
     /// \param p The PBES of which the equation is part. Used to avoid name clashes when introducing new variables.
-    bqnf2ppg_rewriter(const pbes<>& p)
+    bqnf2ppg_rewriter(const pbes& p)
     {
       for (std::vector<equation_type>::const_iterator eqn = p.equations().begin(); eqn != p.equations().end(); ++eqn) {
         equation_type e = (*eqn);

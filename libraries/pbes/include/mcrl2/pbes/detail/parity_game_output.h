@@ -129,7 +129,7 @@ class parity_game_output: public parity_game_generator
     }
 
   public:
-    parity_game_output(pbes<>& p, bool min_parity_game = true)
+    parity_game_output(pbes& p, bool min_parity_game = true)
       : parity_game_generator(p, true, min_parity_game)
     {}
 

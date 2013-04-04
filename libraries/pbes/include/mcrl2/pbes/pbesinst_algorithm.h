@@ -128,7 +128,7 @@ class pbesinst_algorithm
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     /// \param p A PBES
-    void run(pbes<>& p)
+    void run(pbes& p)
     {
       pbes_system::detail::instantiate_global_variables(p);
 
@@ -174,9 +174,9 @@ class pbesinst_algorithm
 
     /// \brief Returns the computed bes in pbes format
     /// \return The computed bes in pbes format
-    pbes<> get_result()
+    pbes get_result()
     {
-      pbes<> result;
+      pbes result;
       for (std::vector<std::vector<pbes_equation> >::iterator i =  E.begin(); i != E.end(); ++i)
       {
         result.equations().insert(result.equations().end(), i->begin(), i->end());

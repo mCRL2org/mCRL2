@@ -135,12 +135,11 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     // compute functions
     //--------------------------------------------//
     /// \brief Computes the number of mu and nu equations and returns them as a pair
-    template <typename Container>
-    std::pair<size_t, size_t> compute_equation_counts(const pbes<Container>& p) const
+    std::pair<size_t, size_t> compute_equation_counts(const pbes& p) const
     {
       size_t mu_count = 0;
       size_t nu_count = 0;
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         if (i->symbol().is_mu())
         {
@@ -155,13 +154,12 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     }
 
     // number of changes from mu to nu or vice versa
-    template <typename Container>
-    size_t compute_block_nesting_depth(const pbes<Container>& p) const
+    size_t compute_block_nesting_depth(const pbes& p) const
     {
       size_t block_nesting_depth = 0;
       bool last_symbol_is_mu = false;
 
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         if (i != p.equations().begin())
         {
@@ -184,8 +182,7 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
 
     /// \brief Constructor
     /// Initializes the pbes_property_map with a linear process specification
-    template <typename Container>
-    pbes_property_map(const pbes<Container>& p)
+    pbes_property_map(const pbes& p)
     {
       std::pair<size_t, size_t>  equation_counts              = compute_equation_counts(p);
       size_t block_nesting_depth                                    = compute_block_nesting_depth(p);

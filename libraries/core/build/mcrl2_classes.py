@@ -188,7 +188,7 @@ PBES_CLASSES = r'''
 fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl | XCU | FixPoint    | A fixpoint symbol
 propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CIU | PropVarDecl | A propositional variable declaration
 pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SM  | PBEqn       | A PBES equation
-pbes<PbesEquationContainer>(const data::data_specification& data, const PbesEquationContainer& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                    | SM  | PBES        | A PBES
+pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_equation>& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                         | SM  | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
@@ -1160,8 +1160,6 @@ def print_dependencies(dependencies, message):
 def is_dependent_type(dependencies, type):
     if type in dependencies:
         return dependencies[type]
-    elif type == 'pbes_system::PbesEquationContainer':
-        return dependencies['pbes_system::pbes_equation']
     m = re.search('<(.+)>', type)
     if m != None:
         return dependencies[m.group(1)]
@@ -1238,8 +1236,6 @@ def is_modifiable_type(type, modifiability_map):
     elif type.startswith('std::vector<'):
         return True
     elif type.startswith('std::set<'):
-        return True
-    elif type.endswith('Container'): # TODO: handle containers properly
         return True
     else:
         raise Exception('is_modifiable_type(' + type + ') is unknown')

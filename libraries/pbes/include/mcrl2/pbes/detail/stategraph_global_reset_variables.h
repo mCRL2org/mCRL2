@@ -32,7 +32,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
     typedef stategraph_global_algorithm super;
 
   protected:
-    const pbes<>& m_original_pbes;
+    const pbes& m_original_pbes;
 
     // if true, the resulting PBES is simplified
     bool m_simplify;
@@ -223,7 +223,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
     }
 
     // Applies resetting of variables to the original PBES p.
-    void reset_variables_to_original(pbes<>& p)
+    void reset_variables_to_original(pbes& p)
     {
       mCRL2log(log::debug, "stategraph") << "--- resetting variables to the original PBES ---" << std::endl;
 
@@ -245,7 +245,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       }
     }
 
-    global_reset_variables_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    global_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
       : stategraph_global_algorithm(p, rewrite_strategy),
         m_original_pbes(p)
     {}
@@ -253,14 +253,14 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes<> run(bool simplify = true)
+    pbes run(bool simplify = true)
     {
       super::run();
       m_simplify = simplify;
       compute_control_flow_marking(m_control_flow_graph);
       mCRL2log(log::verbose) << "Computed control flow marking" << std::endl;
       mCRL2log(log::debug) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
-      pbes<> result = m_original_pbes;
+      pbes result = m_original_pbes;
       reset_variables_to_original(result);
       return result;
     }

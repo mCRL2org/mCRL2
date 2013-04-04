@@ -72,7 +72,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
       mCRL2log(log::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
-      pbes<> p;
+      pbes p;
       p.load(m_input_filename);
 
       // data rewriter

@@ -169,7 +169,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           try
           {
             // Try to read a pbes.
-            mcrl2::pbes_system::pbes <> p;
+            mcrl2::pbes_system::pbes p;
             p.load(input_filename());
             spec=p.data();
             context_variables = p.global_variables();

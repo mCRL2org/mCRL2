@@ -71,7 +71,7 @@ void test_bes2pbes()
   std::cout << "----------------" << std::endl;
   std::cout << bes::pp(p) << std::endl;
 
-  pbes_system::pbes<> q = bes2pbes(p);
+  pbes_system::pbes q = bes2pbes(p);
   std::cout << "----------------" << std::endl;
   std::cout << pbes_system::pp(q) << std::endl;
 

@@ -138,7 +138,7 @@ namespace detail {
   }
 
   inline
-  void print_used_function_symbols(const pbes<>& p)
+  void print_used_function_symbols(const pbes& p)
   {
     mCRL2log(log::debug, "absinthe") << "--- used function symbols ---" << std::endl;
     std::set<data::function_symbol> find_function_symbols = pbes_system::find_function_symbols(p);
@@ -433,8 +433,7 @@ struct absinthe_algorithm
       x.formula() = super::operator()(x.formula());
     }
 
-    template <typename Container>
-    void operator()(pbes_system::pbes<Container>& x)
+    void operator()(pbes_system::pbes& x)
     {
       super::operator()(x.equations());
       pbes_expression kappa = (*this)(x.initial_state());
@@ -903,7 +902,7 @@ struct absinthe_algorithm
   }
 
   // add lifted mappings and equations to the data specification
-  void lift_data_specification(const pbes<>& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
+  void lift_data_specification(const pbes& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
     sort_function sigma(sigmaH, sigmaS, sigmaF);
@@ -1000,7 +999,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
     log::mcrl2_logger::set_reporting_level(log::debug, "absinthe");
   }
 
-  void run(pbes<>& p, const std::string& abstraction_text, bool is_over_approximation)
+  void run(pbes& p, const std::string& abstraction_text, bool is_over_approximation)
   {
     // split the string abstraction_text into four different parts
     std::string function_symbol_mapping_text;

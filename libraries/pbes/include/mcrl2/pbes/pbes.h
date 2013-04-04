@@ -30,17 +30,17 @@ namespace mcrl2
 namespace pbes_system
 {
 
-template <typename Container = std::vector<pbes_equation> > class pbes;
-template <typename Container> void complete_data_specification(pbes<Container>&);
+class pbes;
+void complete_data_specification(pbes&);
 
 // template function overloads
-std::string pp(const pbes<>& x);
-void normalize_sorts(pbes<>& x, const data::data_specification& dataspec);
-void translate_user_notation(pbes_system::pbes<>& x);
-std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes<>& x);
-std::set<data::variable> find_variables(const pbes_system::pbes<>& x);
-std::set<data::variable> find_free_variables(const pbes_system::pbes<>& x);
-std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes<>& x);
+std::string pp(const pbes& x);
+void normalize_sorts(pbes& x, const data::data_specification& dataspec);
+void translate_user_notation(pbes_system::pbes& x);
+std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x);
+std::set<data::variable> find_variables(const pbes_system::pbes& x);
+std::set<data::variable> find_free_variables(const pbes_system::pbes& x);
+std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes& x);
 
 bool is_well_typed_equation(const pbes_equation& eqn,
                             const std::set<data::sort_expression>& declared_sorts,
@@ -57,13 +57,11 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
                         const data::data_specification& data_spec
                        );
 
-template <typename Container>
-atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
+atermpp::aterm_appl pbes_to_aterm(const pbes& p);
 
 /// \brief parameterized boolean equation system
 // <PBES>         ::= PBES(<DataSpec>, <GlobVarSpec>, <PBEqnSpec>, <PBInit>)
 // <PBEqnSpec>    ::= PBEqnSpec(<PBEqn>*)
-template <typename Container>
 class pbes
 {
   protected:
@@ -71,7 +69,7 @@ class pbes
     data::data_specification m_data;
 
     /// \brief The sequence of pbes equations
-    Container m_equations;
+    std::vector<pbes_equation> m_equations;
 
     /// \brief The set of global variables
     std::set<data::variable> m_global_variables;
@@ -106,7 +104,7 @@ class pbes
     std::set<propositional_variable> compute_declared_variables() const
     {
       std::set<propositional_variable> result;
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      for (auto i = equations().begin(); i != equations().end(); ++i)
       {
         result.insert(i->variable());
       }
@@ -133,9 +131,6 @@ class pbes
     }
 
   public:
-    /// \brief The container type for the equations
-    typedef Container container_type;
-
     /// \brief Constructor.
     pbes()
     {}
@@ -163,7 +158,7 @@ class pbes
     /// \param equations A sequence of pbes equations
     /// \param initial_state A propositional variable instantiation
     pbes(data::data_specification const& data,
-         const Container& equations,
+         const std::vector<pbes_equation>& equations,
          propositional_variable_instantiation initial_state)
       :
       m_data(data),
@@ -180,7 +175,7 @@ class pbes
     /// \param global_variables A sequence of free variables
     /// \param initial_state A propositional variable instantiation
     pbes(data::data_specification const& data,
-         const Container& equations,
+         const std::vector<pbes_equation>& equations,
          const std::set<data::variable>& global_variables,
          propositional_variable_instantiation initial_state)
       :
@@ -208,14 +203,14 @@ class pbes
 
     /// \brief Returns the equations.
     /// \return The equations.
-    const Container& equations() const
+    const std::vector<pbes_equation>& equations() const
     {
       return m_equations;
     }
 
     /// \brief Returns the equations.
     /// \return The equations.
-    Container& equations()
+    std::vector<pbes_equation>& equations()
     {
       return m_equations;
     }
@@ -287,7 +282,7 @@ class pbes
       // PBESs it takes too much time
       assert(no_well_typedness_check || is_well_typed());
 
-      pbes<Container> tmp(*this);
+      pbes tmp(*this);
       // tmp.data() = data::remove_all_system_defined(tmp.data());
       atermpp::aterm_appl t = pbes_to_aterm(tmp);
       core::detail::save_aterm(t, filename, binary);
@@ -301,7 +296,7 @@ class pbes
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       std::set<propositional_variable> result;
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      for (auto i = equations().begin(); i != equations().end(); ++i)
       {
         result.insert(i->variable());
       }
@@ -316,7 +311,7 @@ class pbes
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       std::set<propositional_variable_instantiation> result;
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      for (auto i = equations().begin(); i != equations().end(); ++i)
       {
         detail::occurring_variable_visitor visitor;
         visitor.visit(i->formula());
@@ -333,7 +328,7 @@ class pbes
       std::set<propositional_variable> result;
       std::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
       std::map<core::identifier_string, propositional_variable> declared_variables;
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      for (auto i = equations().begin(); i != equations().end(); ++i)
       {
         declared_variables[i->variable().name()] = i->variable();
       }
@@ -383,7 +378,7 @@ class pbes
       }
 
       // check 2), 3) and 7)
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      for (auto i = equations().begin(); i != equations().end(); ++i)
       {
         if (!is_well_typed_equation(*i, declared_sorts, declared_global_variables, data()))
         {
@@ -403,14 +398,14 @@ class pbes
 
 /// \brief Conversion to atermappl.
 /// \return The PBES converted to aterm format.
-template <typename Container>
-atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
+inline
+atermpp::aterm_appl pbes_to_aterm(const pbes& p)
 {
   atermpp::aterm_appl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
 
   atermpp::aterm_list eqn_list;
-  const Container& eqn = p.equations();
-  for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
+  const std::vector<pbes_equation>& eqn = p.equations();
+  for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = pbes_equation_to_aterm(*i);
     eqn_list.push_front(a);
@@ -430,8 +425,8 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
-template <typename Container>
-void complete_data_specification(pbes<Container>& p)
+inline
+void complete_data_specification(pbes& p)
 {
   std::set<data::sort_expression> s = pbes_system::find_sort_expressions(p);
   p.data().add_context_sorts(s);
@@ -441,8 +436,8 @@ void complete_data_specification(pbes<Container>& p)
 /// \return True if the PBESs have exactly the same internal representation. Note
 /// that this is in general not a very useful test.
 // TODO: improve the comparison
-template <typename Container1, typename Container2>
-bool operator==(const pbes<Container1>& p1, const pbes<Container2>& p2)
+inline
+bool operator==(const pbes& p1, const pbes& p2)
 {
   return pbes_to_aterm(p1) == pbes_to_aterm(p2);
 }

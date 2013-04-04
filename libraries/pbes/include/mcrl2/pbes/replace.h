@@ -59,8 +59,7 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
     update_sigma.pop(v);
   }
 
-  template <typename Container>
-  void operator()(pbes<Container>& x)
+  void operator()(pbes& x)
   {
     std::set<data::variable> v = update_sigma(x.global_variables());
     x.global_variables() = v;

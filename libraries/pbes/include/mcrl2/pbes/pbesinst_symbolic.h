@@ -79,7 +79,7 @@ class pbesinst_symbolic_algorithm
 
   protected:
     /// \brief The PBES that is being instantiated.
-    pbes<>& m_pbes;
+    pbes& m_pbes;
 
     /// \brief The rewriter.
     pbesinst_symbolic_rewriter m_rewriter;
@@ -101,7 +101,7 @@ class pbesinst_symbolic_algorithm
     std::map<core::identifier_string, std::size_t> m_equation_index;
 
   public:
-    pbesinst_symbolic_algorithm(pbes<>& p)
+    pbesinst_symbolic_algorithm(pbes& p)
       : m_pbes(p),
         m_rewriter(p.data())
     {

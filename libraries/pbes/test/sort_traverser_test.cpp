@@ -160,7 +160,7 @@ std::string t14 =
 
 void test_pbes(std::string text)
 {
-  pbes<> p = txt2pbes(text);
+  pbes p = txt2pbes(text);
   std::set<data::sort_expression> sorts;
   pbes_system::find_sort_expressions(p, std::inserter(sorts, sorts.end()));
   std::cerr << "sorts: " << data::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;

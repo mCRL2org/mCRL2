@@ -29,8 +29,8 @@ namespace detail
 /// \brief Attempts to eliminate the free variables of a PBES, by substituting
 /// a constant value for them. If no constant value is found for one of the variables,
 /// an exception is thrown.
-template <typename Container>
-void instantiate_global_variables(pbes<Container>& p)
+inline
+void instantiate_global_variables(pbes& p)
 {
   if (p.global_variables().empty())
   {

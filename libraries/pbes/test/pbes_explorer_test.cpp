@@ -38,7 +38,7 @@ private:
     size_t transition_count;
 
 public:
-    explorer(const pbes<>& p, const std::string& rewrite_strategy = "jittyc", bool reset = false, bool always_split = false) :
+    explorer(const pbes& p, const std::string& rewrite_strategy = "jittyc", bool reset = false, bool always_split = false) :
         mcrl2::pbes_system::explorer(p, rewrite_strategy, reset, always_split),
         transition_count(0)
     {}
@@ -208,7 +208,7 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer" << std::endl;
-  pbes<> p = txt2pbes(pbes_text);
+  pbes p = txt2pbes(pbes_text);
   normalize(p);
   if (!is_ppg(p))
   {

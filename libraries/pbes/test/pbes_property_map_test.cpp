@@ -51,7 +51,7 @@ const std::string INFO =
 
 int test_main(int argc, char* argv[])
 {
-  pbes<> p = txt2pbes(PBES_SPEC);
+  pbes p = txt2pbes(PBES_SPEC);
   pbes_system::detail::pbes_property_map info1(p);
   std::cerr << info1.to_string() << std::endl;
   pbes_system::detail::pbes_property_map info2(INFO);

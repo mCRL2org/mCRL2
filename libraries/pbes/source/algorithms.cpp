@@ -23,27 +23,27 @@ namespace pbes_system
 
 namespace algorithms {
 
-void remove_parameters(pbes<>& x, const std::set<data::variable>& to_be_removed)
+void remove_parameters(pbes& x, const std::set<data::variable>& to_be_removed)
 {
   pbes_system::remove_parameters(x, to_be_removed);
 }
 
-void remove_parameters(pbes<>& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
+void remove_parameters(pbes& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
   pbes_system::remove_parameters(x, to_be_removed);
 }
 
-void normalize(pbes<>& x)
+void normalize(pbes& x)
 {
   pbes_system::normalize(x);
 }
 
-bool is_normalized(const pbes<>& x)
+bool is_normalized(const pbes& x)
 {
   return pbes_system::is_normalized(x);
 }
 
-void pbesinst_finite(pbes<>& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
+void pbesinst_finite(pbes& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
 {
   pbes_system::pbesinst_finite(p, rewrite_strategy, finite_parameter_selection);
 }
@@ -53,7 +53,7 @@ std::string print_removed_equations(const std::vector<propositional_variable>& r
   return pbes_system::detail::print_removed_equations(removed);
 }
 
-std::vector<propositional_variable> remove_unreachable_variables(pbes<>& p)
+std::vector<propositional_variable> remove_unreachable_variables(pbes& p)
 {
   return pbes_system::remove_unreachable_variables(p);
 }

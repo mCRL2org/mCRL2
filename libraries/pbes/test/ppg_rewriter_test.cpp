@@ -30,7 +30,7 @@ void rewrite_ppg(std::string bqnf_text, std::string ppg_text)
   std::clog << "rewrite_ppg" << std::endl;
   std::clog << "Parsing text..." << std::endl;
   //std::clog << bqnf_text << std::endl;
-  pbes<> p = txt2pbes(bqnf_text);
+  pbes p = txt2pbes(bqnf_text);
   std::clog << "done." << std::endl;
 
   bool is_bqnf = pbes_system::detail::is_bqnf(p);
@@ -38,7 +38,7 @@ void rewrite_ppg(std::string bqnf_text, std::string ppg_text)
   bool is_ppg = pbes_system::detail::is_ppg(p);
   std::clog << "ppg_traverser says: p is " << (is_ppg ? "" : "NOT ") << "a PPG." << std::endl;
   std::clog << "Try the new rewriter:" << std::endl;
-  pbes<> q = pbes_system::detail::to_ppg(p);
+  pbes q = pbes_system::detail::to_ppg(p);
   std::clog << "The new rewriter is done." << std::endl;
   //std::clog << "result:" << std::endl << pbes_system::pp(q) << std::endl << std::endl;
   is_ppg = pbes_system::detail::is_ppg(q);
@@ -46,7 +46,7 @@ void rewrite_ppg(std::string bqnf_text, std::string ppg_text)
   p = q;
   normalize(p);
   std::clog << "Parsing text..." << std::endl;
-  pbes<> ppg = txt2pbes(ppg_text);
+  pbes ppg = txt2pbes(ppg_text);
   normalize(ppg);
   std::clog << "Checking for equality..." << std::endl;
   if (!(p==ppg))

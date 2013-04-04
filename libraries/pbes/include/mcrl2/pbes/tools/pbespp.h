@@ -27,7 +27,7 @@ void pbespp(const std::string& input_filename,
             core::print_format_type format
            )
 {
-  pbes_system::pbes<> p;
+  pbes_system::pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename, pbes_input_format);
 
   mCRL2log(log::verbose) << "printing PBES from "

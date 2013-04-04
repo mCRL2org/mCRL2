@@ -27,7 +27,7 @@ void txt2pbes(const std::string& input_filename,
               bool normalize
              )
 {
-  pbes_system::pbes<> p;
+  pbes_system::pbes p;
   if (input_filename.empty())
   {
     //parse specification from stdin

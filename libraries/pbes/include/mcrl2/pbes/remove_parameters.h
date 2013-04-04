@@ -87,8 +87,7 @@ struct remove_parameters_builder: public pbes_system::pbes_expression_builder<De
     x.formula() = static_cast<Derived&>(*this)(x.formula());
   }
 
-  template <typename Container>
-  void operator()(pbes<Container>& x)
+  void operator()(pbes& x)
   {
     static_cast<Derived&>(*this)(x.equations());
     x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
@@ -179,8 +178,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     x.formula() = static_cast<Derived&>(*this)(x.formula());
   }
 
-  template <typename Container>
-  void operator()(pbes<Container>& x)
+  void operator()(pbes& x)
   {
     static_cast<Derived&>(*this)(x.equations());
     x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
@@ -272,8 +270,7 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     x.formula() = static_cast<Derived&>(*this)(x.formula());
   }
 
-  template <typename Container>
-  void operator()(pbes<Container>& x)
+  void operator()(pbes& x)
   {
     static_cast<Derived&>(*this)(x.equations());
     x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
@@ -312,8 +309,8 @@ void remove_parameters(T& x,
 
 /// \cond INTERNAL_DOCS
 // used in pbes.h
-template <typename Container>
-void remove_pbes_parameters(pbes<Container>& x,
+inline
+void remove_pbes_parameters(pbes& x,
                             const std::set<data::variable>& to_be_removed
                            )
 {

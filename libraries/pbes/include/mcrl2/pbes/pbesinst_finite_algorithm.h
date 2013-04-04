@@ -322,7 +322,7 @@ class pbesinst_finite_algorithm
     /// \brief Runs the algorithm.
     /// \param p A PBES
     /// \param variable_map A map containing the finite parameters that should be expanded by the algorithm.
-    void run(pbes<>& p,
+    void run(pbes& p,
              const pbesinst_variable_map& variable_map
             )
     {
@@ -382,7 +382,7 @@ class pbesinst_finite_algorithm
 
     /// \brief Runs the algorithm.
     /// \param p A PBES
-    void run(pbes<>& p)
+    void run(pbes& p)
     {
       // put all finite variables in a variable map
       pbesinst_variable_map variable_map;
@@ -403,7 +403,7 @@ class pbesinst_finite_algorithm
 };
 
 inline
-void pbesinst_finite(pbes<>& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
+void pbesinst_finite(pbes& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
 {
   pbesinst_finite_algorithm algorithm(rewrite_strategy);
   pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, finite_parameter_selection);

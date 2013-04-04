@@ -339,7 +339,7 @@ class bisimulation_algorithm
     /// \param M A specification
     /// \param S A specification
     /// \return The constructed pbes
-    pbes<> build_pbes(const std::vector<pbes_equation>& equations,
+    pbes build_pbes(const std::vector<pbes_equation>& equations,
                       const specification& M,
                       const specification& S
                      )
@@ -351,7 +351,7 @@ class bisimulation_algorithm
       data_specification data = M.data();
       propositional_variable_instantiation init(X(m, s), M.initial_process().state(M.process().process_parameters()) + S.initial_process().state(S.process().process_parameters()));
 
-      pbes<> result(data, equations, init);
+      pbes result(data, equations, init);
       assert(result.is_closed());
       return result;
     }
@@ -462,7 +462,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     /// \param spec A linear process specification
     /// \return A pbes that expresses branching bisimulation between the
     /// two specifications.
-    pbes<> run(const specification& model, const specification& spec)
+    pbes run(const specification& model, const specification& spec)
     {
       namespace z = pbes_expr_optimized;
 
@@ -504,7 +504,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
 /// \param spec A linear process specification
 /// \return A pbes that expresses branching bisimulation between the two specifications.
 inline
-pbes<> branching_bisimulation(const specification& model, const specification& spec)
+pbes branching_bisimulation(const specification& model, const specification& spec)
 {
   return branching_bisimulation_algorithm().run(model, spec);
 }
@@ -563,7 +563,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     /// \param model A linear process specification
     /// \param spec A linear process specification
     /// \return A pbes that expresses strong bisimulation between stwo specifications.
-    pbes<> run(const specification& model, const specification& spec)
+    pbes run(const specification& model, const specification& spec)
     {
       namespace z = pbes_expr_optimized;
       specification spec1 = spec;
@@ -590,7 +590,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
 /// \param spec A linear process specification
 /// \return A pbes that expresses strong bisimulation between the two specifications.
 inline
-pbes<> strong_bisimulation(const specification& model, const specification& spec)
+pbes strong_bisimulation(const specification& model, const specification& spec)
 {
   return strong_bisimulation_algorithm().run(model, spec);
 }
@@ -737,7 +737,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     /// \param model A linear process specification
     /// \param spec A linear process specification
     /// \return A pbes that expresses weak bisimulation between two specifications.
-    pbes<> run(const specification& model, const specification& spec)
+    pbes run(const specification& model, const specification& spec)
     {
       namespace z = pbes_expr_optimized;
       specification spec1 = spec;
@@ -781,7 +781,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
 /// \param spec A linear process specification
 /// \return A pbes that expresses weak bisimulation between the two specifications.
 inline
-pbes<> weak_bisimulation(const specification& model, const specification& spec)
+pbes weak_bisimulation(const specification& model, const specification& spec)
 {
   return weak_bisimulation_algorithm().run(model, spec);
 }
@@ -798,7 +798,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
     /// \param model A linear process specification
     /// \param spec A linear process specification
     /// \return A pbes that expresses branching simulation equivalence between two specifications.
-    pbes<> run(const specification& model, const specification& spec)
+    pbes run(const specification& model, const specification& spec)
     {
       namespace z = pbes_expr_optimized;
       specification spec1 = spec;
@@ -839,7 +839,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
 /// \param spec A linear process specification
 /// \return A pbes that expresses branching simulation equivalence between the two specifications.
 inline
-pbes<> branching_simulation_equivalence(const specification& model, const specification& spec)
+pbes branching_simulation_equivalence(const specification& model, const specification& spec)
 {
   return branching_simulation_equivalence_algorithm().run(model, spec);
 }

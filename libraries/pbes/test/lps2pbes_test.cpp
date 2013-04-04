@@ -43,7 +43,7 @@ using mcrl2::utilities::collect_after_test_case;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-pbes<> test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool expect_success = true, const bool timed=false)
+pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool expect_success = true, const bool timed=false)
 {
   using namespace pbes_system;
 
@@ -61,7 +61,7 @@ pbes<> test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula
 
   if(expect_success)
   {
-    pbes<> p = lps2pbes(spec, formula, timed);
+    pbes p = lps2pbes(spec, formula, timed);
 
     std::cerr << "Results in the following PBES:" << std::endl
               << "---------------------------------------------------------------"
@@ -77,13 +77,13 @@ pbes<> test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula
   {
     BOOST_CHECK_THROW(lps2pbes(spec, formula, timed), mcrl2::runtime_error);
 
-    return pbes<>();
+    return pbes();
   }
 }
 
 void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf_formula, const bool expected_solution, const bool timed=false)
 {
-  pbes<> p = test_lps2pbes(lps_spec, mcf_formula, true, timed);
+  pbes p = test_lps2pbes(lps_spec, mcf_formula, true, timed);
 
   BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_solution);
 }
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_timed)
     "init P;\n"
   ;
 
-  pbes<> p = test_lps2pbes(TIMED_SPECIFICATION, TRIVIAL_FORMULA);
+  pbes p = test_lps2pbes(TIMED_SPECIFICATION, TRIVIAL_FORMULA);
 
   const std::vector<sort_expression> user_def_sorts(p.data().user_defined_sorts());
   BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
@@ -294,8 +294,8 @@ void test_directory(int argc, char** argv)
         {
           try
           {
-            pbes<> result = lps2pbes(SPEC1, formula, true);
-            pbes<> expected_result;
+            pbes result = lps2pbes(SPEC1, formula, true);
+            pbes expected_result;
             expected_result.load(timed_result_file);
             bool cmp = (result == expected_result);
             if (!cmp)
@@ -313,9 +313,9 @@ void test_directory(int argc, char** argv)
         {
           try
           {
-            pbes<> result = lps2pbes(SPEC1, formula, true, false);
+            pbes result = lps2pbes(SPEC1, formula, true, false);
             BOOST_CHECK(result.is_well_typed());
-            pbes<> expected_result;
+            pbes expected_result;
             expected_result.load(untimed_result_file);
             bool cmp = (result == expected_result);
             if (!cmp)
@@ -627,7 +627,7 @@ BOOST_AUTO_TEST_CASE(test_1090)
     ;
 
   const std::string FORMULA = "[!exists d:D . a(d)]false";
-  pbes<> p = test_lps2pbes(SPEC, FORMULA);
+  pbes p = test_lps2pbes(SPEC, FORMULA);
 
   std::set<data::variable> vars(pbes_system::find_variables(p));
   for(std::set<data::variable>::const_iterator i = vars.begin(); i != vars.end(); ++i)

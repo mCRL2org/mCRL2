@@ -38,7 +38,7 @@ class pbes_normalize_tool: public input_output_tool
       mCRL2log(log::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
-      pbes_system::pbes<> p;
+      pbes_system::pbes p;
       p.load(input_filename());
 
       // apply the algorithm

@@ -42,7 +42,7 @@ void test_separate_keyword_section()
 
 void test_absinthe(const std::string& pbes_text, const std::string& abstraction_text, bool is_over_approximation)
 {
-  pbes<> p = txt2pbes(pbes_text);
+  pbes p = txt2pbes(pbes_text);
   absinthe_algorithm algorithm;
   algorithm.run(p, abstraction_text, is_over_approximation);
 }

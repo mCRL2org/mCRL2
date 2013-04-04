@@ -81,7 +81,7 @@ class stategraph_algorithm
       return S.find(s) != S.end();
     }
 
-    propositional_variable find_propvar(const pbes<>& p, const core::identifier_string& X) const
+    propositional_variable find_propvar(const pbes& p, const core::identifier_string& X) const
     {
       const std::vector<pbes_equation>& equations = p.equations();
       for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
@@ -480,7 +480,7 @@ class stategraph_algorithm
 
   public:
 
-    stategraph_algorithm(const pbes<>& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
     {
       m_pbes = stategraph_pbes(p);
       m_datar = data::rewriter(p.data(), rewrite_strategy);

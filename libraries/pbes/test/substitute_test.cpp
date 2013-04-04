@@ -26,19 +26,19 @@ void test_substitution()
     "pbes nu X(n: Nat) = X(n + 1);\n"
     "init X(0);                   \n"    
     ;
-  pbes<> p1 = txt2pbes(text1);
+  pbes p1 = txt2pbes(text1);
 
   std::string text2 =
     "pbes nu X(n: Nat) = X(4 + 1);\n"
     "init X(0);                   \n"    
     ;
-  pbes<> p2 = txt2pbes(text2);
+  pbes p2 = txt2pbes(text2);
   
   data::mutable_map_substitution<> sigma;
   data::variable n("n", data::sort_nat::nat());
   sigma[n] = data::parse_data_expression("4");
 
-  pbes<> p = p1;
+  pbes p = p1;
   pbes_system::replace_free_variables(p, sigma);
   std::cout << pbes_system::pp(p) << std::endl;
   BOOST_CHECK(p == p1);
@@ -58,7 +58,7 @@ void test_propositional_variable_substitution()
     "nu Y(n: Nat) = X(n + 2); \n"
     "init X(0);               \n"    
     ;
-  pbes<> p1 = txt2pbes(text1);
+  pbes p1 = txt2pbes(text1);
 
   std::string text2 =
     "pbes                                     \n"
@@ -66,9 +66,9 @@ void test_propositional_variable_substitution()
     "nu Y(n: Nat) = X(n + 2 + 1) && Y(n + 2); \n"
     "init X(0);                               \n"    
     ;
-  pbes<> p2 = txt2pbes(text2);
+  pbes p2 = txt2pbes(text2);
 
-  pbes<> p = p1;
+  pbes p = p1;
   propositional_variable X = p.equations().front().variable();  
   pbes_expression phi = parse_pbes_expression("X(m + 1) && Y(m)", "datavar m: Nat; \npredvar X: Nat; Y: Nat");
   propositional_variable_substitution sigma(X, phi);

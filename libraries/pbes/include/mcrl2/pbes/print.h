@@ -127,12 +127,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
-#ifdef BOOST_MSVC
-  void operator()(const pbes_system::pbes<>& x)
-#else
-  template <typename Container>
-  void operator()(const pbes_system::pbes<Container>& x)
-#endif
+  void operator()(const pbes_system::pbes& x)
   {
     derived().enter(x);
     derived()(x.data());

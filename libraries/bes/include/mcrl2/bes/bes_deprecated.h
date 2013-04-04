@@ -433,7 +433,7 @@ class bes_expression: public atermpp::aterm
     {
       copy_term(t);
       return *this;
-    } 
+    }
 
     atermpp::aterm aterm() const
     {
@@ -2073,9 +2073,8 @@ class boolean_equation_system
     ///  atermpp::indexed_set variable_index(10000, 50);
     ///  bes_equations;
     // template < typename Container, typename PbesRewriter >
-    template < typename Container >
     boolean_equation_system(
-      const typename mcrl2::pbes_system::pbes<Container>& pbes_spec,
+      const typename mcrl2::pbes_system::pbes& pbes_spec,
       mcrl2::data::rewriter& data_rewriter,
       const transformation_strategy opt_strategy=lazy,
       const bool opt_store_as_tree=false,
@@ -2179,7 +2178,7 @@ class boolean_equation_system
       }
 
       // Needed hashtables
-      Container eqsys = pbes_spec.equations();
+      std::vector<pbes_equation> eqsys = pbes_spec.equations();
       atermpp::table pbes_equations(2*eqsys.size(), 50);   // (propvarname, pbes_equation)
 
       // Vector with the order of the variable names used for sorting the result
@@ -2194,7 +2193,7 @@ class boolean_equation_system
 
       size_t rank=1;
 
-      for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+      for (auto eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
       {
         pbes_equations.put(
           eqi->variable().name(),
@@ -2642,11 +2641,10 @@ class boolean_equation_system
 namespace bes
 {
 
-template <class Container>
 inline void save_bes_in_pbes_format(
   const std::string& outfilename,
   boolean_equation_system& bes_equations,
-  const typename mcrl2::pbes_system::pbes<Container> &p);
+  const mcrl2::pbes_system::pbes &p);
 inline void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations);
 
 //function generate_rhs_as_bes_formula

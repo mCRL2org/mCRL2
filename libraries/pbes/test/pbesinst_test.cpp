@@ -37,18 +37,18 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 inline
-pbes<> pbesinst_lazy(const pbes<>& p)
+pbes pbesinst_lazy(const pbes& p)
 {
-  pbes<> q = p;
+  pbes q = p;
   pbesinst_algorithm algorithm(q.data());
   algorithm.run(q);
   return algorithm.get_result();
 }
 
 inline
-pbes<> pbesinst_finite(const pbes<>& p)
+pbes pbesinst_finite(const pbes& p)
 {
-  pbes<> q = p;
+  pbes q = p;
   pbesinst_finite_algorithm algorithm(data::jitty);
   algorithm.run(q);
   return q;
@@ -182,7 +182,7 @@ std::string random3 =
 
 void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 {
-  pbes<> p = txt2pbes(pbes_spec);
+  pbes p = txt2pbes(pbes_spec);
   std::cout << "------------------------------\n" << pbes_system::pp(p) << std::endl;
   if (!p.is_closed())
   {
@@ -196,7 +196,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     try
     {
       using namespace pbes_system;
-      pbes<> q1 = pbesinst_finite(p);
+      pbes q1 = pbesinst_finite(p);
       std::cout << pbes_system::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)
@@ -211,7 +211,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     try
     {
       using namespace pbes_system;
-      pbes<> q1 = pbesinst_lazy(p);
+      pbes q1 = pbesinst_lazy(p);
       std::cout << pbes_system::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)
@@ -330,7 +330,7 @@ void test_cabp()
   lps::specification spec    = lps::linearise(CABP_SPECIFICATION);
   state_formulas::state_formula formula = state_formulas::parse_state_formula(INFINITELY_OFTEN_SEND, spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   pbes_system::detail::instantiate_global_variables(p);
 
   std::string expr = "(exists d_RM_00: DATA. (val(d_RM_00 == d1) && val(s31_RM == 1)) && X(2, bit0, frame(d_RM_00, b_RM), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || (((((((((((exists d_RM_00: DATA. (val(!(d_RM_00 == d1)) && val(s31_RM == 1)) && Y(2, bit0, frame(d_RM_00, b_RM), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || (exists e4_RF1_00: Bool, d4_RF1_00: DATA. val((s32_K == 3 && s33_RF1 == 1) && if(e4_RF1_00, frame(d4_RF1_00, invert(b_RF1)), frame(d4_RF1_00, b_RF1)) == f_K) && Y(s31_RM, b_RM, f_RM, 1, frame(d1, bit0), if(e4_RF1_00, 1, 2), if(e4_RF1_00, d1, d4_RF1_00), b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1))) || val(s32_K == 4 && s33_RF1 == 1) && Y(s31_RM, b_RM, f_RM, 1, frame(d1, bit0), 1, d1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s33_RF1 == 2) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, 3, d1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s35_L == 1) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 2, b_AS1, s36_AR1, b_AR1)) || (exists e5_L_00: Enum3. val(C3_fun2(e5_L_00, true, true, true) && s35_L == 2) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, C3_fun(e5_L_00, 1, 3, 4), C3_fun3(e5_L_00, bit0, b_L, bit0), s36_AR1, b_AR1))) || val(s35_L == 4 && s36_AR1 == 1) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 1, bit0, 1, b_AR1)) || (exists e7_AR1_00: Bool. val((s35_L == 3 && s36_AR1 == 1) && if(e7_AR1_00, b_AR1, invert(b_AR1)) == b_L) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 1, bit0, if(e7_AR1_00, 2, 1), b_AR1))) || val(s33_RF1 == 3) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, 1, d1, invert(b_RF1), invert(b_AS1), s35_L, b_L, s36_AR1, b_AR1)) || (exists e_K_00: Enum3. val(C3_fun2(e_K_00, true, true, true) && s32_K == 2) && Y(s31_RM, b_RM, f_RM, C3_fun(e_K_00, 1, 3, 4), C3_fun1(e_K_00, frame(d1, bit0), f_K, frame(d1, bit0)), s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1))) || val(s31_RM == 2 && s32_K == 1) && Y(2, bit0, f_RM, 2, f_RM, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s31_RM == 2 && s36_AR1 == 2) && Y(1, invert(getb(f_RM)), frame(d1, bit0), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, 1, invert(b_AR1))";
@@ -448,16 +448,16 @@ void test_balancing_plat()
   lps::specification spec = lps::linearise(BALANCE_PLAT_SPECIFICATION);
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   pbes_system::pbesinst_algorithm algorithm(p.data());
   algorithm.run(p);
-  pbes<> q = algorithm.get_result();
+  pbes q = algorithm.get_result();
 }
 
 void test_pbesinst_finite()
 {
-  pbes<> p = txt2pbes(random3);
-  pbes<> q = pbesinst_finite(p);
+  pbes p = txt2pbes(random3);
+  pbes q = pbesinst_finite(p);
   std::cerr << pbes_system::pp(q) << std::endl;
 
   std::string text =
@@ -469,7 +469,7 @@ void test_pbesinst_finite()
     "                                                                \n"
     "init X(d1);                                                     \n"
     ;
-  pbes<> p1 = txt2pbes(text);
+  pbes p1 = txt2pbes(text);
   pbesinst_finite_algorithm algorithm(data::jitty);
   pbesinst_variable_map variable_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p1, "X(*:D)");
   algorithm.run(p1, variable_map);
@@ -480,13 +480,13 @@ void test_abp_no_deadlock()
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   data::rewriter::strategy rewriter_strategy = data::jitty;
   bool print_equations = true;
   bool print_rewriter_output = true;
   pbes_system::pbesinst_algorithm algorithm(p.data(), rewriter_strategy, print_equations, print_rewriter_output);
   algorithm.run(p);
-  pbes<> q = algorithm.get_result();
+  pbes q = algorithm.get_result();
   std::cout << "--- ABP ---" << std::endl;
   std::cout << pbes_system::pp(q) << std::endl;
   BOOST_CHECK(is_bes(q));
@@ -507,7 +507,7 @@ void test_functions()
     "                                     \n"
     "init X(one, f);                      \n"
     ;
-  pbes<> p = txt2pbes(text);
+  pbes p = txt2pbes(text);
   data::rewriter::strategy rewrite_strategy = data::jitty;
   pbesinst_finite_algorithm algorithm(rewrite_strategy);
   mcrl2::pbes_system::detail::pbes_parameter_map parameter_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p, "X(*:D)");
@@ -516,7 +516,7 @@ void test_functions()
 
 void test_pbesinst_symbolic(const std::string& text)
 {
-  pbes<> p;
+  pbes p;
   p = txt2pbes(text);
   pbesinst_symbolic_algorithm algorithm(p);
   algorithm.run();

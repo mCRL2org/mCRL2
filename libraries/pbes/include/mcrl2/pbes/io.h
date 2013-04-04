@@ -34,7 +34,7 @@ namespace pbes_system
 /// \param aterm_ascii Determines, if output_format is pbes, whether the file
 ///        is written is ascii format.
 inline
-void save_pbes(const pbes<>& pbes_spec,
+void save_pbes(const pbes& pbes_spec,
                const std::string& outfilename,
                pbes_file_format output_format,
                bool aterm_ascii = false)
@@ -79,7 +79,7 @@ void save_pbes(const pbes<>& pbes_spec,
 /// \param infilename The file from which to load the PBES.
 /// \param f The format that should be assumed for the file in infilename.
 inline
-void load_pbes(pbes<>& p,
+void load_pbes(pbes& p,
               const std::string& infilename,
               const pbes_file_format f)
 {
@@ -112,7 +112,7 @@ void load_pbes(pbes<>& p,
 ///
 /// The format of the file in infilename is guessed.
 inline
-void load_pbes(pbes<>& p,
+void load_pbes(pbes& p,
               const std::string& infilename)
 {
   pbes_file_format f = guess_format(infilename);

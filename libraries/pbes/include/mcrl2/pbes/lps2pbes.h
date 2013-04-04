@@ -45,7 +45,7 @@ class lps2pbes_algorithm
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \param structured use the 'structured' approach of generating equations
     /// \return A PBES that encodes the property applied to the given specification
-    pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, data::variable T = data::variable())
+    pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, data::variable T = data::variable())
     {
       using namespace state_formulas::detail::accessors;
       using atermpp::detail::operator+;
@@ -122,7 +122,7 @@ class lps2pbes_algorithm
       }
       propositional_variable_instantiation init(Xe, e);
 
-      pbes<> result(spec.data(), eqn, spec.global_variables(), init);
+      pbes result(spec.data(), eqn, spec.global_variables(), init);
       assert(is_monotonous(result));
       pbes_system::algorithms::normalize(result);
       assert(pbes_system::algorithms::is_normalized(result));
@@ -139,7 +139,7 @@ class lps2pbes_algorithm
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen
 /// \param structured use the 'structured' approach of generating equations
 /// \return The resulting pbes
-inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false)
+inline pbes lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false)
 {
   if ((formula.has_time() || spec.process().has_time()) && !timed)
   {
@@ -170,9 +170,9 @@ inline pbes<> lps2pbes(const lps::specification& spec, const state_formulas::sta
 /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
 /// \return The result of the algorithm
 inline
-pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed = false, bool structured = false, bool unoptimized = false)
+pbes lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed = false, bool structured = false, bool unoptimized = false)
 {
-  pbes<> result;
+  pbes result;
   lps::specification spec = lps::linearise(spec_text);
   state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, spec);
   return lps2pbes(spec, f, timed, structured, unoptimized);

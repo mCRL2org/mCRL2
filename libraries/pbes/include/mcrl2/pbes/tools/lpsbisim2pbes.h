@@ -33,7 +33,7 @@ void lpsbisim2pbes(const std::string& input_filename1,
 
   M.load(input_filename1);
   S.load(input_filename2);
-  pbes<> result;
+  pbes result;
   switch (type)
   {
     case strong_bisim:

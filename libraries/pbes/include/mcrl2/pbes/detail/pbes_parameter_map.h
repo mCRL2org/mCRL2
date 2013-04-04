@@ -60,7 +60,7 @@ bool match_declaration(const std::string& text, const data::variable& d, const d
 
 /// \brief Find parameter declarations that match a given string.
 inline
-std::vector<data::variable> find_matching_parameters(const pbes<>& p, const std::string& name, const std::set<std::string>& declarations)
+std::vector<data::variable> find_matching_parameters(const pbes& p, const std::string& name, const std::set<std::string>& declarations)
 {
   std::set<data::variable> result;
   for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -88,7 +88,7 @@ std::vector<data::variable> find_matching_parameters(const pbes<>& p, const std:
 
 /// \brief Parses parameter selection for finite pbesinst algorithm
 inline
-pbes_parameter_map parse_pbes_parameter_map(const pbes<>& p, const std::string& text)
+pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& text)
 {
   using namespace boost::xpressive;
   pbes_parameter_map result;

@@ -198,7 +198,7 @@ public:
     /// \brief The variable sequence type
     typedef parity_game_generator::operation_type operation_type;
 private:
-    pbes<>& p;
+    pbes& p;
     pbes_greybox_interface* pgg;
     bool reset_option;
     bool always_split_option;
@@ -328,7 +328,7 @@ protected:
     /// \param pgg
     /// \param reset
     /// \param always_split
-    lts_info(pbes<>& p, pbes_greybox_interface* pgg, bool reset, bool always_split);
+    lts_info(pbes& p, pbes_greybox_interface* pgg, bool reset, bool always_split);
 
 public:
 
@@ -436,7 +436,7 @@ public:
     typedef parity_game_generator::operation_type operation_type;
 
 private:
-    pbes<> p;
+    pbes p;
     lts_info* info;
     std::map<std::string,int> localmap_string2int;
     std::vector<std::string> localmap_int2string;
@@ -490,7 +490,7 @@ public:
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
     ///        if not set (default) the explorer assumes the pbes to be generated with lps2pbes -p and splits accordingly.
-    explorer(const pbes<>& p, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
+    explorer(const pbes& p, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
 
     /// \brief Destructor.
     ~explorer();

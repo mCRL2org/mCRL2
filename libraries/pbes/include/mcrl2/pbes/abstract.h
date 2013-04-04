@@ -120,7 +120,7 @@ class pbes_abstract_algorithm
     /// \brief Runs the algorithm.
     /// \param p A PBES
     /// \param parameter_map A map containing the parameters that should be expanded by the algorithm.
-    void run(pbes<>& p,
+    void run(pbes& p,
              const detail::pbes_parameter_map& parameter_map,
              bool value_true
             )
