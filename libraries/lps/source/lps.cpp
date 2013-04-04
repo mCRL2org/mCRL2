@@ -77,9 +77,14 @@ std::string pp_with_summand_numbers(const specification& x)
   return out.str();
 }
 
-bool is_well_typed(const specification& spec)
+bool is_well_typed(const linear_process& x)
 {
-  return lps::detail::is_well_typed(spec);
+  return lps::detail::is_well_typed(x);
+}
+
+bool is_well_typed(const specification& x)
+{
+  return lps::detail::is_well_typed(x);
 }
 
 // TODO: These should be removed when the aterm code has been replaced.

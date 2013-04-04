@@ -29,6 +29,7 @@ namespace lps
 {
 
 class linear_process; // prototype declaration
+bool is_well_typed(const linear_process& proc);
 
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
