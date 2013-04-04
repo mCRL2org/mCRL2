@@ -15,7 +15,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/rewriter.h"
-#include "../lpsparunfoldlib.h"
+#include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
 

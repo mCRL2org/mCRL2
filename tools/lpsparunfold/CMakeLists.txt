@@ -19,7 +19,6 @@ add_custom_target(${PROJECT_NAME}_headers
 
 add_executable(${PROJECT_NAME}
   lpsparunfold.cpp
-  lpsparunfoldlib.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)

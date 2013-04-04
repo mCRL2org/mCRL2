@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
-#include "lpsparunfoldlib.h"
 #include <iostream>
 #include <string>
 #include "mcrl2/utilities/logger.h"
@@ -12,7 +11,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
-#include <mcrl2/lps/linear_process.h>
+#include "mcrl2/lps/lpsparunfoldlib.h"
+#include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/replace.h"
 
 using namespace std;

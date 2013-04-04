@@ -33,6 +33,7 @@ set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/lps.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/linearise.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/lpsparunfoldlib.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/next_state_generator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp
