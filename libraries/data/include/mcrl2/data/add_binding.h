@@ -65,16 +65,6 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
     decrease_bind_count(x.assignments());
   }
 
-  void enter(const data::assignment& x)
-  {
-    increase_bind_count(x.lhs());
-  }
-
-  void leave(const data::assignment& x)
-  {
-    decrease_bind_count(x.lhs());
-  }
-
   void enter(const data::forall& x)
   {
     increase_bind_count(x.variables());

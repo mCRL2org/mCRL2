@@ -153,10 +153,11 @@ void test_variables()
   assignment c = replace_variables(a, sigma);
   BOOST_CHECK(c == a);
 
-  // the variable d1 in the right hand side is not replaced by replace_free_variables
+  // the variable d1 in the right hand side is replaced by replace_free_variables, since
+  // we do not consider the left hand side a binding variable
   a = assignment(d1, sort_bool::and_(d1, d2));
   b = replace_free_variables(a, sigma);
-  BOOST_CHECK(b == assignment(d1, sort_bool::and_(d1, e2)));
+  BOOST_CHECK(b == assignment(d1, sort_bool::and_(e1, e2)));
 
   // the variable d1 in the right hand side is replaced by replace_free_variables
   c = replace_variables(a, sigma);
@@ -277,6 +278,25 @@ void test_replace_variables_capture_avoiding()
 	test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => (forall n2: Bool. n2 => n)");
 }
 
+void test_replace_free_variables()
+{
+  data::mutable_map_substitution<> sigma;
+  data::variable x("x", data::sort_bool::bool_());
+  data::variable y("y", data::sort_bool::bool_());
+  sigma[x] = y;
+  data::assignment a(x, x);
+  data::assignment b(x, y);
+  data::assignment c = data::replace_free_variables(a, sigma);
+  BOOST_CHECK(b == c);
+
+  data::assignment_list va;
+  va.push_front(a);
+  data::assignment_list vb;
+  vb.push_front(b);
+  data::assignment_list vc = data::replace_free_variables(va, sigma);
+  BOOST_CHECK(vb == vc);
+}
+
 int test_main(int argc, char** argv)
 {
   test_assignment_list();
@@ -284,6 +304,7 @@ int test_main(int argc, char** argv)
   test_replace_with_binders();
   test_variables();
   test_replace_variables_capture_avoiding();
+  test_replace_free_variables();
 
   return 0;
 }
