@@ -21,7 +21,6 @@
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 
 namespace mcrl2
 {
@@ -306,19 +305,7 @@ class pbes
     /// \brief Returns the set of occurring propositional variable instantiations of the pbes.
     /// This is the set of variables that occur in the right hand side of an equation.
     /// \return The occurring propositional variable instantiations of the pbes
-    std::set<propositional_variable_instantiation> occurring_variable_instantiations() const
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      std::set<propositional_variable_instantiation> result;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
-      {
-        detail::occurring_variable_visitor visitor;
-        visitor.visit(i->formula());
-        result.insert(visitor.variables.begin(), visitor.variables.end());
-      }
-      return result;
-    }
+    std::set<propositional_variable_instantiation> occurring_variable_instantiations() const;
 
     /// \brief Returns the set of occurring propositional variable declarations of the pbes, i.e.
     /// the propositional variable declarations that occur in the right hand side of an equation.

@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/translate_user_notation.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/is_well_typed.h"
+#include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 
 namespace mcrl2
 {
@@ -110,6 +111,18 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
                        )
 {
   return pbes_system::detail::is_well_typed_pbes(declared_sorts, declared_global_variables, occurring_global_variables, declared_variables, occ, init, data_spec);
+}
+
+std::set<propositional_variable_instantiation> pbes::occurring_variable_instantiations() const
+{
+  std::set<propositional_variable_instantiation> result;
+  for (auto i = equations().begin(); i != equations().end(); ++i)
+  {
+    detail::occurring_variable_visitor visitor;
+    visitor.visit(i->formula());
+    result.insert(visitor.variables.begin(), visitor.variables.end());
+  }
+  return result;
 }
 
 } // namespace pbes_system
