@@ -242,7 +242,7 @@ class pbes_parelm_algorithm
           mCRL2log(log::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
         }
         mCRL2log(log::debug) << "\ndependencies:" << std::endl;
-        typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
+        typedef boost::graph_traits<graph>::edge_iterator edge_iterator;
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
         edge_iterator last  = e.second;
