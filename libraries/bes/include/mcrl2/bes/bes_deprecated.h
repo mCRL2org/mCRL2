@@ -2074,7 +2074,7 @@ class boolean_equation_system
     ///  bes_equations;
     // template < typename Container, typename PbesRewriter >
     boolean_equation_system(
-      const typename mcrl2::pbes_system::pbes& pbes_spec,
+      const mcrl2::pbes_system::pbes& pbes_spec,
       mcrl2::data::rewriter& data_rewriter,
       const transformation_strategy opt_strategy=lazy,
       const bool opt_store_as_tree=false,

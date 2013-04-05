@@ -102,7 +102,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     std::string allowed_equivalences()
     {
       std::set<std::string> tmp;
-      for (typename std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
+      for (std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
       {
         tmp.insert(string_for_equivalence(*i));
       }
