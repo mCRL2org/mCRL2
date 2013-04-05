@@ -93,7 +93,6 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
         else if (head.name() == sort_bag::bag_enumeration_name())
         {
           // convert to finite bag
-          using namespace sort_bag;
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
           return sort_bag::bag_fbag(element_sort, sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments())));
         }

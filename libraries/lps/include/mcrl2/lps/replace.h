@@ -219,7 +219,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   using super::leave;
   using super::operator();
   using super::is_bound;
-  using super::bind_count;
+  using super::bound_variables;
   using super::increase_bind_count;
 
   Substitution sigma;
@@ -238,7 +238,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
 
   data::data_expression operator()(const data::variable& x)
   {
-    if (bind_count(x) == count)
+    if (bound_variables().count(x) == count)
     {
       return sigma(x);
     }

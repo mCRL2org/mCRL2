@@ -111,7 +111,7 @@ struct substitute_free_variables_builder: public Binder<Builder, substitute_free
   using super::leave;
   using super::operator();
   using super::is_bound;
-  using super::bind_count;
+  using super::bound_variables;
   using super::increase_bind_count;
 
   Substitution sigma;

@@ -52,7 +52,7 @@ std::set<data::variable> find_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<action_formulas::variable_traverser, action_formulas::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<action_formulas::data_expression_traverser, action_formulas::add_data_variable_binding>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -63,7 +63,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<action_formulas::variable_traverser, action_formulas::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<action_formulas::data_expression_traverser, action_formulas::add_data_variable_binding>(o, bound)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -187,7 +187,7 @@ std::set<data::variable> find_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<regular_formulas::variable_traverser, regular_formulas::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<regular_formulas::data_expression_traverser, regular_formulas::add_data_variable_binding>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -198,7 +198,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<regular_formulas::variable_traverser, regular_formulas::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<regular_formulas::data_expression_traverser, regular_formulas::add_data_variable_binding>(o, bound)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -322,7 +322,7 @@ std::set<data::variable> find_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<state_formulas::variable_traverser, state_formulas::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<state_formulas::data_expression_traverser, state_formulas::add_data_variable_binding>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -333,7 +333,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<state_formulas::variable_traverser, state_formulas::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<state_formulas::data_expression_traverser, state_formulas::add_data_variable_binding>(o, bound)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -500,7 +500,7 @@ struct find_free_state_variables_traverser: public Binder<Traverser, find_free_s
   using super::leave;
   using super::operator();
   using super::is_bound;
-  using super::bind_count;
+  using super::bound_variables;
   using super::increase_bind_count;
 
   OutputIterator out;

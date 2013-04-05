@@ -200,7 +200,7 @@ struct find_free_variables_traverser: public Binder<Traverser, find_free_variabl
   using super::leave;
   using super::operator();
   using super::is_bound;
-  using super::bind_count;
+  using super::bound_variables;
   using super::increase_bind_count;
 
   OutputIterator out;
@@ -275,7 +275,7 @@ std::set<data::variable> find_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<data::variable_traverser, data::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -286,7 +286,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<data::variable_traverser, data::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o, bound)(x);
 }
 
 /// \brief Returns all variables that occur in an object

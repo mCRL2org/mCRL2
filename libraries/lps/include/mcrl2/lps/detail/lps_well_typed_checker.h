@@ -348,21 +348,12 @@ struct lps_well_typed_checker
       return false;
     }
 
-    std::set<data::variable> declared_free_variables  = spec.global_variables();
-    std::set<data::variable> occ1 = lps::find_free_variables(spec.process());
-    std::set<data::variable> occ2 = lps::find_free_variables(spec.initial_process());
-    std::set<data::variable> occurring_free_variables = occ1;
-    occurring_free_variables.insert(occ2.begin(), occ2.end());
-    if (!(std::includes(declared_free_variables.begin(),
-                        declared_free_variables.end(),
-                        occurring_free_variables.begin(),
-                        occurring_free_variables.end()
-                       )
-         ))
+    std::set<data::variable> free_variables = lps::find_free_variables(spec);
+    if (!free_variables.empty())
     {
       mCRL2log(log::error) << "is_well_typed(specification) failed: some of the free variables were not declared\n";
-      mCRL2log(log::error) << "declared global variables: " << data::pp(declared_free_variables) << std::endl;
-      mCRL2log(log::error) << "occurring free variables: " << data::pp(occurring_free_variables) << std::endl;
+      mCRL2log(log::error) << "declared global variables: " << data::pp(spec.global_variables()) << std::endl;
+      mCRL2log(log::error) << "occurring free variables: " << data::pp(free_variables) << std::endl;
       return false;
     }
 

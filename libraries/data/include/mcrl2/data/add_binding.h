@@ -35,7 +35,7 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::bind_count;
+  using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
 
@@ -63,16 +63,6 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
   void leave(const data::where_clause& x)
   {
     decrease_bind_count(x.assignments());
-  }
-
-  void enter(const data::assignment& x)
-  {
-    increase_bind_count(x.lhs());
-  }
-
-  void leave(const data::assignment& x)
-  {
-    decrease_bind_count(x.lhs());
   }
 
   void enter(const data::forall& x)
