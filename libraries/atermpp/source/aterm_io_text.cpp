@@ -79,7 +79,7 @@ static void write_string_with_escape_symbols(const std::string &s, std::ostream&
   // surrounded by quotes, and the symbols \, ", \t, \n, \r
   // will be preceded by an escape symbol.
 
-  assert(s.size()>0);
+  // assert(s.size()>0);
   char c=s[0];
   bool contains_special_symbols= c=='-' || isdigit(c);
 

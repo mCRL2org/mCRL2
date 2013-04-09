@@ -11,10 +11,12 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_string.h"
 
 using namespace std;
 using namespace atermpp;
@@ -31,8 +33,18 @@ void test_aterm()
   BOOST_CHECK(e==atermpp::aterm());
 }
 
+void test_aterm_string()
+{
+  aterm_string empty = empty_string();
+  std::ostringstream out;
+  out << empty;
+  BOOST_CHECK(out.str() == "");
+}
+
 int test_main(int argc, char* argv[])
 {
   test_aterm();
+  test_aterm_string();
+
   return 0;
 }

@@ -59,6 +59,14 @@ class aterm_string: public aterm_appl
     }
 };
 
+/// \brief Returns the empty aterm string
+inline
+const aterm_string& empty_string()
+{
+  static atermpp::aterm_string t("");
+  return t;
+}
+
 } // namespace atermpp
 
 
@@ -69,7 +77,7 @@ namespace std
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
 ///          In order to be used in the standard containers, the declaration must
-///          be preceded by an empty template declaration. 
+///          be preceded by an empty template declaration.
 /// \param t1 The first term
 /// \param t2 The second term
 
@@ -78,6 +86,6 @@ inline void swap(atermpp::aterm_string &t1, atermpp::aterm_string &t2)
 {
   t1.swap(t2);
 }
-} // namespace std 
+} // namespace std
 
 #endif // MCRL2_ATERMPP_ATERM_STRING_H
