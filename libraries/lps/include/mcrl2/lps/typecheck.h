@@ -14,8 +14,8 @@
 
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/process/process_expression.h"
 #include "mcrl2/lps/action_rename.h"
+#include "mcrl2/lps/untyped_action.h"
 
 namespace mcrl2
 {
@@ -53,8 +53,8 @@ class action_type_checker:public data::data_type_checker
 
   protected:
     void ReadInActs(const lps::action_label_list &Acts);
-    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::parameter_identifier &ma);
-    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::parameter_identifier &ma);
+    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const lps::untyped_action &ma);
+    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const lps::untyped_action &ma);
 };
 
 
@@ -93,7 +93,7 @@ void type_check(
   const action_label_list& action_decls)
 {
   action_type_checker type_checker(data_spec,action_decls);
-  
+
   for (std::vector<multi_action>::iterator i=mult_actions.begin(); i!=mult_actions.end(); ++i)
   {
     *i=type_checker(*i); // Change the elements in the vector.

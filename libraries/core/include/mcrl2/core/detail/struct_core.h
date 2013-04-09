@@ -1872,6 +1872,20 @@ bool gsIsTau(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_Tau();
 }
 
+// UntypedAction
+inline
+const atermpp::function_symbol& function_symbol_UntypedAction()
+{
+  static atermpp::function_symbol function_symbol_UntypedAction = atermpp::function_symbol("UntypedAction", 2);
+  return function_symbol_UntypedAction;
+}
+
+inline
+bool gsIsUntypedAction(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedAction();
+}
+
 // Whr
 inline
 const atermpp::function_symbol& function_symbol_Whr()
@@ -2670,6 +2684,12 @@ inline
 aterm_appl gsMakeTau()
 {
   return term_appl<aterm>(function_symbol_Tau());
+}
+
+inline
+aterm_appl gsMakeUntypedAction(const aterm_appl& String_0, const aterm_list& DataExpr_1)
+{
+  return term_appl<aterm>(function_symbol_UntypedAction(), String_0, DataExpr_1);
 }
 
 inline

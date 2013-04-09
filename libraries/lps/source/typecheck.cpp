@@ -24,7 +24,7 @@ using namespace mcrl2::data;
 
 static action MakeAction(
                const identifier_string &Name,
-               const sort_expression_list &FormParList, 
+               const sort_expression_list &FormParList,
                const data_expression_list &FactParList)
 {
   return action(action_label(Name,FormParList),FactParList);
@@ -44,7 +44,7 @@ static std::map<identifier_string,sort_expression> list_minus(const std::map<ide
 }
 
 
-action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::parameter_identifier &act)
+action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &act)
 {
   action Result;
   core::identifier_string Name(act.name());
@@ -103,7 +103,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
   //process the arguments
 
   //possible types for the arguments of the action. (not inferred if ambiguous action).
-  sort_expression_list PosTypeList=Result.label().sorts(); 
+  sort_expression_list PosTypeList=Result.label().sorts();
 
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
@@ -115,7 +115,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
     sort_expression NewPosType;
     try
     {
-      NewPosType=TraverseVarConsTypeD(Vars,Vars,Par,PosType); 
+      NewPosType=TraverseVarConsTypeD(Vars,Vars,Par,PosType);
     }
     catch (mcrl2::runtime_error &e)
     {
@@ -144,7 +144,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
       sort_expression CastedNewPosType;
       try
-      { 
+      {
         CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par);
       }
       catch (mcrl2::runtime_error &e)
@@ -178,7 +178,7 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
 
 
-action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const process::parameter_identifier &ma)
+action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &ma)
 // last argument should have type action; but this does not allow for a ParamId.
 {
   size_t n = ma.size();
@@ -187,7 +187,7 @@ action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identif
     return ma;
   }
 
-  if (process::is_parameter_identifier(ma))
+  if (lps::is_untyped_action(ma))
   {
     return RewrAct(Vars,ma);
   }
@@ -218,7 +218,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const action_label_list &Acts)
       // the table actions contains a list of types for each
       // action name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
-    
+
       if (InTypesL(ActType, Types))
       {
         throw mcrl2::runtime_error("double declaration of action " + std::string(ActName));
@@ -234,7 +234,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const action_label_list &Acts)
 
 
 mcrl2::lps::action_type_checker::action_type_checker(
-            const data::data_specification &data_spec, 
+            const data::data_specification &data_spec,
             const action_label_list& action_decls)
   : data_type_checker(data_spec)
 {
@@ -256,17 +256,17 @@ multi_action mcrl2::lps::action_type_checker::operator()(const multi_action &ma)
   try
   {
     action_list r;
-    
+
     for (action_list::const_iterator l=ma.actions().begin(); l!=ma.actions().end(); ++l)
     {
       action o= *l;
-      assert(process::is_parameter_identifier(o));
+      assert(lps::is_untyped_action(o));
       const  std::map<core::identifier_string,sort_expression> NewDeclaredVars;
       o=TraverseAct(NewDeclaredVars,o);
       r.push_front(o);
     }
     if (ma.has_time())
-    { 
+    {
       const std::map<core::identifier_string,sort_expression> Vars;
       data_expression time=static_cast<data_type_checker>(*this)(ma.time(),Vars);
       return multi_action(reverse(r),time);
@@ -274,7 +274,7 @@ multi_action mcrl2::lps::action_type_checker::operator()(const multi_action &ma)
     return multi_action(reverse(r));
   }
   catch (mcrl2::runtime_error &e)
-  { 
+  {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of multiaction failed (" + pp(ma) + ")");
   }
 }
@@ -292,7 +292,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   std::map<core::identifier_string,term_list<sort_expression_list> > actions_from_lps;
 
   data_specification data_spec = ar_spec.data();
-  
+
   std::map<core::identifier_string,sort_expression> LPSSorts=defined_sorts; // remember the sorts from the LPS.
   sort_expression_vector sorts=data_spec.user_defined_sorts();
   for (sort_expression_vector::const_iterator i=sorts.begin(); i!=sorts.end(); ++i)
@@ -318,14 +318,14 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   ReadInConstructors(difference_sorts_set.begin(),difference_sorts_set.end());
 
   ReadInFuncs(data_spec.user_defined_constructors(),data_spec.user_defined_mappings());
-  
+
   TransformVarConsTypeData(data_spec);
-  
+
   //Save the actions from LPS only for later use.
   actions_from_lps=actions;
   const action_label_list action_labels=ar_spec.action_labels();
   ReadInActs(action_labels);
-  
+
   // Result=gstcFoldSortRefs(Result);
 
   // now the action renaming rules themselves will be typechecked.
@@ -342,16 +342,16 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     variable_list VarList=Rule.variables();
     if (!VarsUnique(VarList))
     {
-      throw mcrl2::runtime_error("the variables " + pp(VarList) + " in action rename rule " + pp(Rule.condition()) + " -> " + 
+      throw mcrl2::runtime_error("the variables " + pp(VarList) + " in action rename rule " + pp(Rule.condition()) + " -> " +
                                pp(Rule.lhs()) + " => " + (Rule.rhs().is_tau()?"tau":(Rule.rhs().is_delta()?"delta":pp(Rule.rhs().act()))) + " are not unique");
     }
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
     AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
-    
+
     DeclaredVars=NewDeclaredVars;
-    process::parameter_identifier Left=Rule.lhs();
-    
+    lps::untyped_action Left=Rule.lhs();
+
     //extra check requested by Tom: actions in the LHS can only come from the LPS
     actions.swap(actions_from_lps);
     action new_action_at_the_left=TraverseAct(DeclaredVars,Left);
@@ -362,7 +362,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
 
     action_rename_rule_rhs Right=Rule.rhs();
     if (!Right.is_delta() && !Right.is_tau())
-    { 
+    {
       Right=TraverseAct(DeclaredVars,Right.act());
     }
 
@@ -370,7 +370,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   }
 
   mCRL2log(debug) << "type checking transform VarConstTypeData phase finished" << std::endl;
-  
+
   return action_rename_specification(data_spec,action_labels,new_rules);
 }
 
@@ -380,7 +380,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
 
 
 regular_formula mcrl2::state_formulas::state_formula_type_checker::TraverseRegFrm(
-          const std::map<core::identifier_string,sort_expression> &Vars, 
+          const std::map<core::identifier_string,sort_expression> &Vars,
           const regular_formula &RegFrm)
 {
   mCRL2log(debug) << "TraverseRegFrm: " << pp(RegFrm) << "" << std::endl;
@@ -423,7 +423,7 @@ regular_formula mcrl2::state_formulas::state_formula_type_checker::TraverseRegFr
 }
 
 action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm(
-             const std::map<core::identifier_string,sort_expression> &Vars, 
+             const std::map<core::identifier_string,sort_expression> &Vars,
              const action_formula &ActFrm)
 {
   using namespace action_formulas;
@@ -466,7 +466,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     const variable_list& VarList=t.variables();
     std::map<core::identifier_string,sort_expression> NewVars;
     AddVars2Table(CopyVars,VarList,NewVars);
-    
+
     return action_formulas::forall(VarList, TraverseActFrm(NewVars,t.body()));
   }
 
@@ -478,7 +478,7 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     const variable_list& VarList=t.variables();
     std::map<core::identifier_string,sort_expression> NewVars;
     AddVars2Table(CopyVars,VarList,NewVars);
-    
+
     return action_formulas::exists(VarList, TraverseActFrm(NewVars,t.body()));
   }
 
@@ -514,9 +514,9 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     for (action_list::const_iterator l=ma.actions().begin(); l!=ma.actions().end(); ++l)
     {
       action o= *l;
-      assert(process::is_parameter_identifier(o));
+      assert(lps::is_untyped_action(o));
       o=RewrAct(Vars,o);
-      assert(!process::is_parameter_identifier(o));
+      assert(!lps::is_untyped_action(o));
       r.push_front(o);
     }
     return multi_action(reverse(r));
@@ -534,8 +534,8 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
 
 
 state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFrm(
-                const std::map<core::identifier_string,sort_expression> &Vars, 
-                const std::map<core::identifier_string,sort_expression_list> &StateVars, 
+                const std::map<core::identifier_string,sort_expression> &Vars,
+                const std::map<core::identifier_string,sort_expression_list> &StateVars,
                 const state_formula &StateFrm)
 {
   using namespace state_formulas;
@@ -669,14 +669,14 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     }
 
     data_expression_list r;
-    
+
     for (data_expression_list::const_iterator i=Pars.begin(); i!=Pars.end(); ++i, TypeList=TypeList.tail())
     {
       data_expression Par= *i;
       sort_expression ParType=TypeList.front();
       sort_expression NewParType;
-      try 
-      { 
+      try
+      {
         NewParType=TraverseVarConsTypeD(Vars,Vars,Par,ExpandNumTypesDown(ParType));
       }
       catch (mcrl2::runtime_error &e)
@@ -751,12 +751,12 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       if (!TypeMatchA(VarType,VarInitType,temp))
       {
         //upcasting
-        try 
+        try
         {
           VarInitType=UpCastNumericType(VarType,VarInitType,VarInit);
         }
         catch (mcrl2::runtime_error &e)
-        { 
+        {
           throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast " + pp(VarInit) + " to type " + pp(VarType) + " (typechecking state formula " + pp(StateFrm));
         }
       }
@@ -767,10 +767,10 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
     CopyVars.insert(FormPars.begin(),FormPars.end());
-    
+
 
     CopyStateVars[f.name()]=reverse(t);
-    
+
     try
     {
       return nu(f.name(),reverse(r),TraverseStateFrm(CopyVars,CopyStateVars,f.operand()));
@@ -827,12 +827,12 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       if (!TypeMatchA(VarType,VarInitType,temp))
       {
         //upcasting
-        try 
+        try
         {
           VarInitType=UpCastNumericType(VarType,VarInitType,VarInit);
         }
         catch (mcrl2::runtime_error &e)
-        { 
+        {
           throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast " + pp(VarInit) + " to type " + pp(VarType) + " (typechecking state formula " + pp(StateFrm));
         }
       }
@@ -843,10 +843,10 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
     std::map<core::identifier_string,sort_expression> CopyVars(Vars);
     CopyVars.insert(FormPars.begin(),FormPars.end());
-    
+
 
     CopyStateVars[f.name()]=reverse(t);
-    
+
     try
     {
       return mu(f.name(),reverse(r),TraverseStateFrm(CopyVars,CopyStateVars,f.operand()));
@@ -869,18 +869,18 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
 
 
 mcrl2::state_formulas::state_formula_type_checker::state_formula_type_checker(
-       const data::data_specification &data_spec, 
+       const data::data_specification &data_spec,
        const action_label_list& action_decls)
   :  lps::action_type_checker(data_spec,action_decls)
 {
 }
-     
+
 
 state_formula mcrl2::state_formulas::state_formula_type_checker::operator()(
-            const state_formula &formula, 
+            const state_formula &formula,
             bool check_monotonicity)
 {
-  
+
   //check correctness of the state formula in state_formula using
   //the process specification or LPS in spec as follows:
   //1) determine the types of actions according to the definitions
@@ -899,7 +899,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::operator()(
   if (check_monotonicity && !is_monotonous(result))
   {
     throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
-  } 
+  }
   return result;
 }
 

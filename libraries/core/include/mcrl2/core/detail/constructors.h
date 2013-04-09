@@ -74,6 +74,7 @@ const atermpp::aterm_appl& constructProcEqnSpec();
 const atermpp::aterm_appl& constructStateForall();
 const atermpp::aterm_appl& constructBooleanImp();
 const atermpp::aterm_appl& constructSortId();
+const atermpp::aterm_appl& constructUntypedAction();
 const atermpp::aterm_appl& constructStateNu();
 const atermpp::aterm_appl& constructRegNil();
 const atermpp::aterm_appl& constructDataSpec();
@@ -362,6 +363,14 @@ inline
 const atermpp::aterm_appl& constructSortId()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortId(), constructString()));
+  return t;
+}
+
+// UntypedAction
+inline
+const atermpp::aterm_appl& constructUntypedAction()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedAction(), constructString(), constructList()));
   return t;
 }
 
