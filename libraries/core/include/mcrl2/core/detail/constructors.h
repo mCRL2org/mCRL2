@@ -31,6 +31,13 @@ const atermpp::aterm_appl& constructString()
 }
 
 inline
+const atermpp::aterm_appl& constructStringOrEmpty()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(gsString2ATermAppl("@NoValue"));
+  return t;
+}
+
+inline
 const atermpp::aterm_list& constructList()
 {
   static atermpp::aterm_list t = atermpp::aterm_list();
@@ -181,7 +188,6 @@ const atermpp::aterm_appl& constructActSpec();
 const atermpp::aterm_appl& constructId();
 const atermpp::aterm_appl& constructSortExpr();
 const atermpp::aterm_appl& constructSortConsType();
-const atermpp::aterm_appl& constructStringOrNil();
 const atermpp::aterm_appl& constructDataExpr();
 const atermpp::aterm_appl& constructBindingOperator();
 const atermpp::aterm_appl& constructWhrDecl();
@@ -251,7 +257,7 @@ const atermpp::aterm_appl& constructForall()
 inline
 const atermpp::aterm_appl& constructCommExpr()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_CommExpr(), constructMultActName(), constructStringOrNil()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_CommExpr(), constructMultActName(), constructString()));
   return t;
 }
 
@@ -611,7 +617,7 @@ const atermpp::aterm_appl& constructRegAlt()
 inline
 const atermpp::aterm_appl& constructStructCons()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StructCons(), constructString(), constructList(), constructStringOrNil()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StructCons(), constructString(), constructList(), constructStringOrEmpty()));
   return t;
 }
 
@@ -1091,7 +1097,7 @@ const atermpp::aterm_appl& constructProcEqn()
 inline
 const atermpp::aterm_appl& constructStructProj()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StructProj(), constructStringOrNil(), constructSortExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StructProj(), constructStringOrEmpty(), constructSortExpr()));
   return t;
 }
 
@@ -1267,13 +1273,6 @@ inline
 const atermpp::aterm_appl& constructSortConsType()
 {
   return constructSortList();
-}
-
-// StringOrNil
-inline
-const atermpp::aterm_appl& constructStringOrNil()
-{
-  return constructString();
 }
 
 // DataExpr

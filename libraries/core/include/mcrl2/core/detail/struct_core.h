@@ -2079,9 +2079,9 @@ aterm_appl gsMakeComm(const aterm_list& CommExpr_0, const aterm_appl& ProcExpr_1
 }
 
 inline
-aterm_appl gsMakeCommExpr(const aterm_appl& MultActName_0, const aterm_appl& StringOrNil_1)
+aterm_appl gsMakeCommExpr(const aterm_appl& MultActName_0, const aterm_appl& String_1)
 {
-  return term_appl<aterm>(function_symbol_CommExpr(), MultActName_0, StringOrNil_1);
+  return term_appl<aterm>(function_symbol_CommExpr(), MultActName_0, String_1);
 }
 
 inline
@@ -2643,15 +2643,15 @@ aterm_appl gsMakeStateYaledTimed(const aterm_appl& DataExpr_0)
 }
 
 inline
-aterm_appl gsMakeStructCons(const aterm_appl& String_0, const aterm_list& StructProj_1, const aterm_appl& StringOrNil_2)
+aterm_appl gsMakeStructCons(const aterm_appl& String_0, const aterm_list& StructProj_1, const aterm_appl& StringOrEmpty_2)
 {
-  return term_appl<aterm>(function_symbol_StructCons(), String_0, StructProj_1, StringOrNil_2);
+  return term_appl<aterm>(function_symbol_StructCons(), String_0, StructProj_1, StringOrEmpty_2);
 }
 
 inline
-aterm_appl gsMakeStructProj(const aterm_appl& StringOrNil_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeStructProj(const aterm_appl& StringOrEmpty_0, const aterm_appl& SortExpr_1)
 {
-  return term_appl<aterm>(function_symbol_StructProj(), StringOrNil_0, SortExpr_1);
+  return term_appl<aterm>(function_symbol_StructProj(), StringOrEmpty_0, SortExpr_1);
 }
 
 inline

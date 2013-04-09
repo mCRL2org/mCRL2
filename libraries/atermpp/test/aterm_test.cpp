@@ -41,10 +41,21 @@ void test_aterm_string()
   BOOST_CHECK(out.str() == "");
 }
 
+void test_aterm_io()
+{
+  aterm_string empty = empty_string();
+  std::ostringstream out;
+  write_term_to_text_stream(empty, out);
+  std::istringstream in(out.str());
+  aterm_string empty2 = aterm_cast<aterm_string>(read_term_from_text_stream(in));
+  BOOST_CHECK(empty == empty2);
+}
+
 int test_main(int argc, char* argv[])
 {
   test_aterm();
   test_aterm_string();
+  test_aterm_io();
 
   return 0;
 }

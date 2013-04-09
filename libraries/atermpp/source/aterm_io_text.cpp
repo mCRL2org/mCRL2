@@ -356,11 +356,6 @@ static string fparse_unquoted_string(int* c, istream &is)
 
 static aterm_appl parse_arguments(const string &f, int *c, istream &is)
 {
-  if (f.empty())
-  {
-    throw atermpp::runtime_error("Parsed term has empty function symbol");
-  }
-
   /* Time to parse the arguments */
   aterm_list args;
   if (*c == '(')

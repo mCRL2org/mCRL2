@@ -80,6 +80,26 @@ bool check_rule_String(Term t)
   {
     return false;
   }
+  if (a == atermpp::empty_string())
+  {
+    return false;
+  }
+  return true;
+}
+
+template <typename Term>
+bool check_rule_StringOrEmpty(Term t)
+{
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  atermpp::aterm_appl a(term);
+  if (a.size() > 0)
+  {
+    return false;
+  }
   return true;
 }
 
@@ -105,7 +125,6 @@ template <typename Term> bool check_rule_SortId(Term t);
 template <typename Term> bool check_rule_SortConsType(Term t);
 template <typename Term> bool check_rule_StructCons(Term t);
 template <typename Term> bool check_rule_StructProj(Term t);
-template <typename Term> bool check_rule_StringOrNil(Term t);
 template <typename Term> bool check_rule_DataExpr(Term t);
 template <typename Term> bool check_rule_DataVarId(Term t);
 template <typename Term> bool check_rule_OpId(Term t);
@@ -348,17 +367,6 @@ bool check_rule_StructProj(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return check_term_StructProj(t);
-#else
-  return true;
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-}
-
-template <typename Term>
-bool check_rule_StringOrNil(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_rule_String(t)
-         || check_term_Nil(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -1223,7 +1231,7 @@ bool check_term_Forall(Term t)
   return true;
 }
 
-// CommExpr(MultActName, StringOrNil)
+// CommExpr(MultActName, String)
 template <typename Term>
 bool check_term_CommExpr(Term t)
 {
@@ -1251,9 +1259,9 @@ bool check_term_CommExpr(Term t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_MultActName" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_StringOrNil<atermpp::aterm>))
+  if (!check_term_argument(a[1], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrNil" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2860,7 +2868,7 @@ bool check_term_RegAlt(Term t)
   return true;
 }
 
-// StructCons(String, StructProj*, StringOrNil)
+// StructCons(String, StructProj*, StringOrEmpty)
 template <typename Term>
 bool check_term_StructCons(Term t)
 {
@@ -2893,9 +2901,9 @@ bool check_term_StructCons(Term t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_StructProj" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[2], check_rule_StringOrNil<atermpp::aterm>))
+  if (!check_term_argument(a[2], check_rule_StringOrEmpty<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrNil" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrEmpty" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5081,7 +5089,7 @@ bool check_term_ProcEqn(Term t)
   return true;
 }
 
-// StructProj(StringOrNil, SortExpr)
+// StructProj(StringOrEmpty, SortExpr)
 template <typename Term>
 bool check_term_StructProj(Term t)
 {
@@ -5104,9 +5112,9 @@ bool check_term_StructProj(Term t)
     return false;
   }
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_StringOrNil<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_StringOrEmpty<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrNil" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_StringOrEmpty" << std::endl;
     return false;
   }
   if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))

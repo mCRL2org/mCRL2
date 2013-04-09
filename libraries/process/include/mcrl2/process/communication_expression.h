@@ -81,57 +81,6 @@ bool is_communication_expression(const atermpp::aterm_appl& t)
 
 //--- end generated class communication_expression ---//
 
-/*
-//<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
-/// \brief Communication expression
-class communication_expression: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Constructor.
-    communication_expression()
-      : atermpp::aterm_appl(core::detail::constructCommExpr())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    communication_expression(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_CommExpr(*this));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit communication_expression(const atermpp::aterm &term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_CommExpr(*this));
-    }
-
-    /// \brief Constructor.
-    communication_expression(action_name_multiset action_name, core::identifier_string name)
-      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
-    {}
-
-    /// \brief Returns the name of the action
-    /// \return The name of the action
-    const action_name_multiset &action_name() const
-    {
-      return atermpp::aterm_cast<action_name_multiset>(atermpp::arg1(*this));
-    }
-
-    /// \brief Returns the name of the communication expression
-    /// \return The name of the communication expression
-    const core::identifier_string &name() const
-    {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg2(*this));
-    }
-};
-
-/// \brief Read-only singly linked list of communication expressions
-typedef atermpp::term_list<communication_expression> communication_expression_list;
-*/
-
 } // namespace process
 
 } // namespace mcrl2

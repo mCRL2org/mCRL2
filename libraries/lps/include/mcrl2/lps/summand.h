@@ -37,13 +37,6 @@ namespace lps
 {
 
 /// \brief Base class for LPS summands.
-// <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
-//                    <DataExprOrNil>, <Assignment>*)
-//<MultActOrDelta>
-//               ::= <MultAct>
-//                 | Delta
-// <MultAct>      ::= MultAct(<ParamId>*)                                   (- tc)
-//                  | MultAct(<Action>*)                                    (+ tc)
 class summand_base
 {
   protected:
@@ -91,7 +84,7 @@ class summand_base
     {
       return m_condition;
     }
-    
+
 };
 
 /// \brief LPS summand containing a deadlock.
@@ -197,7 +190,7 @@ class action_summand: public summand_base
     const data::assignment_list& assignments() const
     {
       return m_assignments;
-    } 
+    }
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.

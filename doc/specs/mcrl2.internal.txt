@@ -38,8 +38,8 @@
 
 //sort expression
 <SortExpr>    ::= <SortId>
-                | SortCons(<SortConsType>, <SortExpr>)                   
-                | SortStruct(<StructCons>+)                              
+                | SortCons(<SortConsType>, <SortExpr>)
+                | SortStruct(<StructCons>+)
                 | SortArrow(<SortExpr>+, <SortExpr>)
                 | SortUnknown                                            [. tc]
                 | SortsPossible(<SortExpr>+)                             [. tc]
@@ -48,22 +48,17 @@
 <SortId>       ::= SortId(<String>)
 
 //sort constructor type
-<SortConsType> ::= SortList                                             
-                 | SortSet                                             
-                 | SortBag                                            
+<SortConsType> ::= SortList
+                 | SortSet
+                 | SortBag
                  | SortFSet
                  | SortFBag
 
 //constructor declaration of a structured sort
-<StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrNil>)
+<StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrEmpty>)
 
 //projection declaration of a structured sort
-<StructProj>   ::= StructProj(<StringOrNil>, <SortExpr>)
-
-//string or nil
-<StringOrNil>  ::= <String>
-                 | Nil
-
+<StructProj>   ::= StructProj(<StringOrEmpty>, <SortExpr>)
 
 //Data expressions
 //----------------
@@ -73,8 +68,8 @@
                  | <DataVarId>                                           [+ tc]
                  | <OpId>                                                [+ tc]
                  | DataAppl(<DataExpr>, <DataExpr>+)
-                 | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>) 
-                 | Whr(<DataExpr>, <WhrDecl>+)                        
+                 | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)
+                 | Whr(<DataExpr>, <WhrDecl>+)
 
 //data variable identifier
 <DataVarId>    ::= DataVarId(<String>, <SortExpr>)
@@ -121,7 +116,7 @@
 
 //sort declaration
 <SortDecl>     ::= <SortId>
-                 | SortRef(<String>, <SortExpr>)                     
+                 | SortRef(<String>, <SortExpr>)
 
 //data equation
 <DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>,
@@ -188,7 +183,7 @@
 <RenameExpr>   ::= RenameExpr(<String>, <String>)
 
 //communication expression
-<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
+<CommExpr>     ::= CommExpr(<MultActName>, <String>)
 
 
 //Process specifications
