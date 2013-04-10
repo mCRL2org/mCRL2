@@ -119,7 +119,7 @@ struct process_actions: public lps::action_actions
   process::process_expression parse_ProcExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return atermpp::aterm_appl(id_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return atermpp::aterm_appl(untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2)))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
@@ -145,7 +145,7 @@ struct process_actions: public lps::action_actions
   process::process_expression parse_ProcExprNoIf(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return atermpp::aterm_appl(id_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return atermpp::aterm_appl(untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2)))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }

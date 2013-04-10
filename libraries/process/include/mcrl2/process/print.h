@@ -284,7 +284,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const process::id_assignment& x)
+  void operator()(const process::untyped_process_assignment& x)
   {
     derived().enter(x);
     derived()(x.name());

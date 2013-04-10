@@ -919,29 +919,29 @@ bool is_untyped_parameter_identifier(const atermpp::aterm_appl& t)
 
 
 /// \brief An id assignment (only available before type checking)
-class id_assignment: public process_expression
+class untyped_process_assignment: public process_expression
 {
   public:
     /// \brief Default constructor.
-    id_assignment()
+    untyped_process_assignment()
       : process_expression(core::detail::constructIdAssignment())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    id_assignment(const atermpp::aterm& term)
+    untyped_process_assignment(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_IdAssignment(*this));
     }
 
     /// \brief Constructor.
-    id_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)
+    untyped_process_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)
       : process_expression(core::detail::gsMakeIdAssignment(name, assignments))
     {}
 
     /// \brief Constructor.
-    id_assignment(const std::string& name, const data::identifier_assignment_list& assignments)
+    untyped_process_assignment(const std::string& name, const data::identifier_assignment_list& assignments)
       : process_expression(core::detail::gsMakeIdAssignment(core::identifier_string(name), assignments))
     {}
 
@@ -956,11 +956,11 @@ class id_assignment: public process_expression
     }
 };
 
-/// \brief Test for a id_assignment expression
+/// \brief Test for a untyped_process_assignment expression
 /// \param t A term
-/// \return True if it is a id_assignment expression
+/// \return True if it is a untyped_process_assignment expression
 inline
-bool is_id_assignment(const atermpp::aterm_appl& t)
+bool is_untyped_process_assignment(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsIdAssignment(t);
 }
@@ -1068,7 +1068,7 @@ std::string pp(const bounded_init& x);
 std::string pp(const merge& x);
 std::string pp(const left_merge& x);
 std::string pp(const choice& x);
-std::string pp(const process::id_assignment& x);
+std::string pp(const process::untyped_process_assignment& x);
 std::string pp(const process::untyped_parameter_identifier& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 

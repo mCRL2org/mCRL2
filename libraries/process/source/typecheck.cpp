@@ -428,9 +428,9 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   }
 
   //Here the code for short-hand assignments begins.
-  if (is_id_assignment(ProcTerm))
+  if (is_untyped_process_assignment(ProcTerm))
   {
-    const id_assignment& t=aterm_cast<const id_assignment>(ProcTerm);
+    const untyped_process_assignment& t=aterm_cast<const untyped_process_assignment>(ProcTerm);
     mCRL2log(debug) << "typechecking a process call with short-hand assignments " << t << "" << std::endl;
     const core::identifier_string& Name=t.name();
     const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=processes.find(Name);

@@ -182,7 +182,7 @@ merge(const process_expression& left, const process_expression& right)          
 left_merge(const process_expression& left, const process_expression& right)                                                    : public process::process_expression | EI  | LMerge            | The left merge operator
 choice(const process_expression& left, const process_expression& right)                                                        : public process::process_expression | EI  | Choice            | The choice operator
 untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)                 : public process::process_expression | EI  | ParamId           | A parameter identifier (only available before type checking)
-id_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)                        : public process::process_expression | EI  | IdAssignment      | An id assignment (only available before type checking)
+untyped_process_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)           : public process::process_expression | EI  | IdAssignment      | An id assignment (only available before type checking)
 '''
 
 PBES_CLASSES = r'''

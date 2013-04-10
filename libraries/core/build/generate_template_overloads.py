@@ -57,7 +57,7 @@ lps::multi_action
 lps::process_initializer
 lps::state
 pbes_system::fixpoint_symbol
-pbes_system::pbes<>
+pbes_system::pbes
 pbes_system::pbes_equation
 pbes_system::pbes_equation_vector
 pbes_system::pbes_expression
@@ -99,7 +99,7 @@ process::bounded_init
 process::merge
 process::left_merge
 process::choice
-process::id_assignment
+process::untyped_process_assignment
 process::untyped_parameter_identifier
 action_formulas::action_formula
 regular_formulas::regular_formula
@@ -119,7 +119,7 @@ lps::multi_action
 process::process_equation_vector
 process::process_specification
 pbes_system::pbes_equation_vector
-pbes_system::pbes<>
+pbes_system::pbes
 state_formulas::state_formula
 '''
 
@@ -128,7 +128,7 @@ data::data_expression
 data::data_equation
 lps::action
 lps::multi_action
-pbes_system::pbes<>
+pbes_system::pbes
 process::process_specification
 state_formulas::state_formula
 '''
@@ -139,7 +139,7 @@ data::data_expression
 data::sort_expression
 lps::action_label_list
 lps::specification
-pbes_system::pbes<>
+pbes_system::pbes
 process::process_equation_vector
 process::process_expression
 process::process_specification
@@ -158,7 +158,7 @@ lps::specification
 lps::deadlock
 lps::multi_action
 lps::action
-pbes_system::pbes<>
+pbes_system::pbes
 state_formulas::state_formula
 '''
 
@@ -171,7 +171,7 @@ lps::specification
 lps::deadlock
 lps::multi_action
 lps::process_initializer
-pbes_system::pbes<>
+pbes_system::pbes
 pbes_system::pbes_expression
 pbes_system::pbes_equation
 state_formulas::state_formula
@@ -180,7 +180,7 @@ state_formulas::state_formula
 FIND_FUNCTION_SYMBOLS_CLASSNAMES = '''
 data::data_equation
 lps::specification
-pbes_system::pbes<>
+pbes_system::pbes
 '''
 
 FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES = '''
@@ -205,7 +205,7 @@ pbes_system::pbes_expression
 '''
 
 def has_specification(type):
-    return type.endswith('specification') or type.endswith('pbes<>')
+    return type.endswith('specification') or type.endswith('pbes')
 
 def is_modifiable(type):
     if type in modifiability_map:
@@ -214,7 +214,7 @@ def is_modifiable(type):
         return False
     elif type.endswith('_vector'):
         return True
-    elif type.endswith('pbes<>'):
+    elif type.endswith('pbes'):
         return True
     elif type.endswith('vector<pbes_equation>'):
         return True
