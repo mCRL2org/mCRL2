@@ -141,7 +141,9 @@
 
 //Action
 <Action>       ::= Action(<ActId>, <DataExpr>*)
-                 | UntypedAction(<String>, <DataExpr>*)
+
+//untyped action
+<UntypedAction> ::= UntypedAction(<String>, <DataExpr>*)
 
 //action identifier
 <ActId>        ::= ActId(<String>, <SortExpr>*)

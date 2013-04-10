@@ -110,6 +110,12 @@ struct process_actions: public lps::action_actions
     return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 2) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "IfThen");
   }
 
+  // override
+  untyped_parameter_identifier parse_Action(const core::parse_node& node)
+  {
+    return untyped_parameter_identifier(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+  }
+
   process::process_expression parse_ProcExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }

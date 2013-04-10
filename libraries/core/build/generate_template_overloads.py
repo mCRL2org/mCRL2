@@ -100,7 +100,7 @@ process::merge
 process::left_merge
 process::choice
 process::id_assignment
-process::parameter_identifier
+process::untyped_parameter_identifier
 action_formulas::action_formula
 regular_formulas::regular_formula
 state_formulas::state_formula

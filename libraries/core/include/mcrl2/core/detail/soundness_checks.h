@@ -144,6 +144,7 @@ template <typename Term> bool check_rule_MultAct(Term t);
 template <typename Term> bool check_rule_ParamIdOrAction(Term t);
 template <typename Term> bool check_rule_ParamId(Term t);
 template <typename Term> bool check_rule_Action(Term t);
+template <typename Term> bool check_rule_UntypedAction(Term t);
 template <typename Term> bool check_rule_ActId(Term t);
 template <typename Term> bool check_rule_ProcExpr(Term t);
 template <typename Term> bool check_rule_ProcVarId(Term t);
@@ -571,8 +572,17 @@ template <typename Term>
 bool check_rule_Action(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return check_term_Action(t)
-         || check_term_UntypedAction(t);
+  return check_term_Action(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_UntypedAction(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return check_term_UntypedAction(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS

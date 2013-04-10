@@ -26,14 +26,14 @@ struct action_actions: public data::data_specification_actions
     : data::data_specification_actions(table_)
   {}
 
-  atermpp::aterm_appl parse_Action(const core::parse_node& node)
+  untyped_action parse_Action(const core::parse_node& node)
   {
-    return core::detail::gsMakeParamId(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+    return untyped_action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  atermpp::aterm_list parse_ActionList(const core::parse_node& node)
+  untyped_action_list parse_ActionList(const core::parse_node& node)
   {
-    return parse_list<atermpp::aterm_appl>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
+    return parse_list<untyped_action>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
   }
 
   bool callback_ActDecl(const core::parse_node& node, action_label_vector& result)
@@ -66,9 +66,9 @@ struct action_actions: public data::data_specification_actions
   lps::multi_action parse_MultAct(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::multi_action(); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList")) 
-    { 
-      return lps::multi_action(action_list(parse_ActionList(node.child(0)))); 
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList"))
+    {
+      return lps::multi_action(action_list(parse_ActionList(node.child(0))));
     }
     report_unexpected_node(node);
     return lps::action_list();

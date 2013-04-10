@@ -228,10 +228,10 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  process::process_expression operator()(const process::parameter_identifier& x)
+  process::process_expression operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result = process::parameter_identifier(x.name(), static_cast<Derived&>(*this)(x.arguments()));
+    process::process_expression result = process::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -324,9 +324,9 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
     }
-    else if (process::is_parameter_identifier(x))
+    else if (process::is_untyped_parameter_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_parameter_identifier>(x));
     }
     else if (process::is_id_assignment(x))
     {
@@ -531,10 +531,10 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  process::process_expression operator()(const process::parameter_identifier& x)
+  process::process_expression operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result = process::parameter_identifier(x.name(), static_cast<Derived&>(*this)(x.arguments()));
+    process::process_expression result = process::untyped_parameter_identifier(x.name(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -627,9 +627,9 @@ struct add_data_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
     }
-    else if (process::is_parameter_identifier(x))
+    else if (process::is_untyped_parameter_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_parameter_identifier>(x));
     }
     else if (process::is_id_assignment(x))
     {
@@ -834,7 +834,7 @@ struct add_process_expressions: public Builder<Derived>
     return result;
   }
 
-  process::process_expression operator()(const process::parameter_identifier& x)
+  process::process_expression operator()(const process::untyped_parameter_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
@@ -930,9 +930,9 @@ struct add_process_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::choice>(x));
     }
-    else if (process::is_parameter_identifier(x))
+    else if (process::is_untyped_parameter_identifier(x))
     {
-      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::parameter_identifier>(x));
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<process::untyped_parameter_identifier>(x));
     }
     else if (process::is_id_assignment(x))
     {

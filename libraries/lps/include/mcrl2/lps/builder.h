@@ -15,6 +15,7 @@
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/untyped_action.h"
 
 namespace mcrl2
 {
@@ -44,6 +45,14 @@ struct add_sort_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     lps::action result = lps::action(static_cast<Derived&>(*this)(x.label()), static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  lps::untyped_action operator()(const lps::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::untyped_action result = lps::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -142,6 +151,14 @@ struct add_data_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     lps::action result = lps::action(x.label(), static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  lps::untyped_action operator()(const lps::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::untyped_action result = lps::untyped_action(x.name(), static_cast<Derived&>(*this)(x.arguments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

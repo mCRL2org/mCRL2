@@ -567,9 +567,9 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
   }
   //Here the section dealing with assignments ends.
 
-  if (is_parameter_identifier(ProcTerm))
+  if (is_untyped_parameter_identifier(ProcTerm))
   {
-    const parameter_identifier& t=aterm_cast<const parameter_identifier>(ProcTerm);
+    const untyped_parameter_identifier& t=aterm_cast<const untyped_parameter_identifier>(ProcTerm);
     process_expression result= RewrActProc(Vars,t.name(), t.arguments());
     return result;
   }

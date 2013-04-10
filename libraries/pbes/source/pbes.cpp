@@ -27,7 +27,7 @@ namespace pbes_system
 
 //--- start generated pbes_system overloads ---//
 std::string pp(const pbes_system::fixpoint_symbol& x) { return pbes_system::pp< pbes_system::fixpoint_symbol >(x); }
-std::string pp(const pbes_system::pbes& x) { return pbes_system::pp< pbes_system::pbes >(x); }
+std::string pp(const pbes_system::pbes<>& x) { return pbes_system::pp< pbes_system::pbes<> >(x); }
 std::string pp(const pbes_system::pbes_equation& x) { return pbes_system::pp< pbes_system::pbes_equation >(x); }
 std::string pp(const pbes_system::pbes_equation_vector& x) { return pbes_system::pp< pbes_system::pbes_equation_vector >(x); }
 std::string pp(const pbes_system::pbes_expression& x) { return pbes_system::pp< pbes_system::pbes_expression >(x); }
@@ -40,14 +40,14 @@ std::string pp(const pbes_system::propositional_variable_instantiation& x) { ret
 std::string pp(const pbes_system::propositional_variable_instantiation_list& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_list >(x); }
 std::string pp(const pbes_system::propositional_variable_instantiation_vector& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_vector >(x); }
 void normalize_sorts(pbes_system::pbes_equation_vector& x, const data::data_specification& dataspec) { pbes_system::normalize_sorts< pbes_system::pbes_equation_vector >(x, dataspec); }
-void normalize_sorts(pbes_system::pbes& x, const data::data_specification& /* dataspec */) { pbes_system::normalize_sorts< pbes_system::pbes >(x, x.data()); }
-void translate_user_notation(pbes_system::pbes& x) { pbes_system::translate_user_notation< pbes_system::pbes >(x); }
-std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x) { return pbes_system::find_sort_expressions< pbes_system::pbes >(x); }
-std::set<data::variable> find_variables(const pbes_system::pbes& x) { return pbes_system::find_variables< pbes_system::pbes >(x); }
-std::set<data::variable> find_free_variables(const pbes_system::pbes& x) { return pbes_system::find_free_variables< pbes_system::pbes >(x); }
+void normalize_sorts(pbes_system::pbes<>& x, const data::data_specification& /* dataspec */) { pbes_system::normalize_sorts< pbes_system::pbes<> >(x, x.data()); }
+void translate_user_notation(pbes_system::pbes<>& x) { pbes_system::translate_user_notation< pbes_system::pbes<> >(x); }
+std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes<>& x) { return pbes_system::find_sort_expressions< pbes_system::pbes<> >(x); }
+std::set<data::variable> find_variables(const pbes_system::pbes<>& x) { return pbes_system::find_variables< pbes_system::pbes<> >(x); }
+std::set<data::variable> find_free_variables(const pbes_system::pbes<>& x) { return pbes_system::find_free_variables< pbes_system::pbes<> >(x); }
 std::set<data::variable> find_free_variables(const pbes_system::pbes_expression& x) { return pbes_system::find_free_variables< pbes_system::pbes_expression >(x); }
 std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x) { return pbes_system::find_free_variables< pbes_system::pbes_equation >(x); }
-std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes& x) { return pbes_system::find_function_symbols< pbes_system::pbes >(x); }
+std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes<>& x) { return pbes_system::find_function_symbols< pbes_system::pbes<> >(x); }
 std::set<pbes_system::propositional_variable_instantiation> find_propositional_variable_instantiations(const pbes_system::pbes_expression& x) { return pbes_system::find_propositional_variable_instantiations< pbes_system::pbes_expression >(x); }
 std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expression& x) { return pbes_system::find_identifiers< pbes_system::pbes_expression >(x); }
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v) { return pbes_system::search_variable< pbes_system::pbes_expression >(x, v); }

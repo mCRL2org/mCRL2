@@ -871,29 +871,29 @@ bool is_choice(const atermpp::aterm_appl& t)
 
 
 /// \brief A parameter identifier (only available before type checking)
-class parameter_identifier: public process_expression
+class untyped_parameter_identifier: public process_expression
 {
   public:
     /// \brief Default constructor.
-    parameter_identifier()
+    untyped_parameter_identifier()
       : process_expression(core::detail::constructParamId())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    parameter_identifier(const atermpp::aterm& term)
+    untyped_parameter_identifier(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_ParamId(*this));
     }
 
     /// \brief Constructor.
-    parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
+    untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
       : process_expression(core::detail::gsMakeParamId(name, arguments))
     {}
 
     /// \brief Constructor.
-    parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
+    untyped_parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
       : process_expression(core::detail::gsMakeParamId(core::identifier_string(name), arguments))
     {}
 
@@ -908,11 +908,11 @@ class parameter_identifier: public process_expression
     }
 };
 
-/// \brief Test for a parameter_identifier expression
+/// \brief Test for a untyped_parameter_identifier expression
 /// \param t A term
-/// \return True if it is a parameter_identifier expression
+/// \return True if it is a untyped_parameter_identifier expression
 inline
-bool is_parameter_identifier(const atermpp::aterm_appl& t)
+bool is_untyped_parameter_identifier(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsParamId(t);
 }
@@ -1069,7 +1069,7 @@ std::string pp(const merge& x);
 std::string pp(const left_merge& x);
 std::string pp(const choice& x);
 std::string pp(const process::id_assignment& x);
-std::string pp(const process::parameter_identifier& x);
+std::string pp(const process::untyped_parameter_identifier& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 
 // TODO: These should be removed when the aterm code has been replaced.
