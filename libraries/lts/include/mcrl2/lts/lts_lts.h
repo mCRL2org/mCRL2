@@ -229,7 +229,7 @@ inline action_label_lts parse_lts_action(
   const data::data_specification& data_spec,
   const lps::action_list& act_decls)
 {
-  lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<lps::action_label_list>(act_decls));
+  lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<lps::action_label_list>(act_decls), data_spec);
   return action_label_lts(mcrl2::core::detail::gsMakeMultAct(ma.actions()));
 }
 
