@@ -116,9 +116,9 @@ typedef std::vector<assignment>    assignment_vector;
 /// \param t A term
 /// \return True if it is a assignment expression
 inline
-bool is_assignment(const atermpp::aterm_appl& t)
+bool is_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDataVarIdInit(t);
+  return core::detail::gsIsDataVarIdInit(x);
 }
 
 
@@ -190,9 +190,9 @@ typedef std::vector<identifier_assignment>    identifier_assignment_vector;
 /// \param t A term
 /// \return True if it is a identifier_assignment expression
 inline
-bool is_identifier_assignment(const atermpp::aterm_appl& t)
+bool is_identifier_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIdInit(t);
+  return core::detail::gsIsIdInit(x);
 }
 
 //--- end generated classes ---//

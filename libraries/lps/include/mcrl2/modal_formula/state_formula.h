@@ -61,13 +61,49 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 typedef std::vector<state_formula>    state_formula_vector;
 
 
+// prototypes
+inline bool is_true(const atermpp::aterm_appl& x);
+inline bool is_false(const atermpp::aterm_appl& x);
+inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_and(const atermpp::aterm_appl& x);
+inline bool is_or(const atermpp::aterm_appl& x);
+inline bool is_imp(const atermpp::aterm_appl& x);
+inline bool is_forall(const atermpp::aterm_appl& x);
+inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_must(const atermpp::aterm_appl& x);
+inline bool is_may(const atermpp::aterm_appl& x);
+inline bool is_yaled(const atermpp::aterm_appl& x);
+inline bool is_yaled_timed(const atermpp::aterm_appl& x);
+inline bool is_delay(const atermpp::aterm_appl& x);
+inline bool is_delay_timed(const atermpp::aterm_appl& x);
+inline bool is_variable(const atermpp::aterm_appl& x);
+inline bool is_nu(const atermpp::aterm_appl& x);
+inline bool is_mu(const atermpp::aterm_appl& x);
+
 /// \brief Test for a state_formula expression
 /// \param t A term
 /// \return True if it is a state_formula expression
 inline
-bool is_state_formula(const atermpp::aterm_appl& t)
+bool is_state_formula(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateFrm(t);
+  return data::is_data_expression(x) ||
+         state_formulas::is_true(x) ||
+         state_formulas::is_false(x) ||
+         state_formulas::is_not(x) ||
+         state_formulas::is_and(x) ||
+         state_formulas::is_or(x) ||
+         state_formulas::is_imp(x) ||
+         state_formulas::is_forall(x) ||
+         state_formulas::is_exists(x) ||
+         state_formulas::is_must(x) ||
+         state_formulas::is_may(x) ||
+         state_formulas::is_yaled(x) ||
+         state_formulas::is_yaled_timed(x) ||
+         state_formulas::is_delay(x) ||
+         state_formulas::is_delay_timed(x) ||
+         state_formulas::is_variable(x) ||
+         state_formulas::is_nu(x) ||
+         state_formulas::is_mu(x);
 }
 
 
@@ -93,9 +129,9 @@ class true_: public state_formula
 /// \param t A term
 /// \return True if it is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& t)
+bool is_true(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateTrue(t);
+  return core::detail::gsIsStateTrue(x);
 }
 
 
@@ -121,9 +157,9 @@ class false_: public state_formula
 /// \param t A term
 /// \return True if it is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& t)
+bool is_false(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateFalse(t);
+  return core::detail::gsIsStateFalse(x);
 }
 
 
@@ -159,9 +195,9 @@ class not_: public state_formula
 /// \param t A term
 /// \return True if it is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& t)
+bool is_not(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateNot(t);
+  return core::detail::gsIsStateNot(x);
 }
 
 
@@ -202,9 +238,9 @@ class and_: public state_formula
 /// \param t A term
 /// \return True if it is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& t)
+bool is_and(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateAnd(t);
+  return core::detail::gsIsStateAnd(x);
 }
 
 
@@ -245,9 +281,9 @@ class or_: public state_formula
 /// \param t A term
 /// \return True if it is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& t)
+bool is_or(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateOr(t);
+  return core::detail::gsIsStateOr(x);
 }
 
 
@@ -288,9 +324,9 @@ class imp: public state_formula
 /// \param t A term
 /// \return True if it is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& t)
+bool is_imp(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateImp(t);
+  return core::detail::gsIsStateImp(x);
 }
 
 
@@ -331,9 +367,9 @@ class forall: public state_formula
 /// \param t A term
 /// \return True if it is a forall expression
 inline
-bool is_forall(const atermpp::aterm_appl& t)
+bool is_forall(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateForall(t);
+  return core::detail::gsIsStateForall(x);
 }
 
 
@@ -374,9 +410,9 @@ class exists: public state_formula
 /// \param t A term
 /// \return True if it is a exists expression
 inline
-bool is_exists(const atermpp::aterm_appl& t)
+bool is_exists(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateExists(t);
+  return core::detail::gsIsStateExists(x);
 }
 
 
@@ -417,9 +453,9 @@ class must: public state_formula
 /// \param t A term
 /// \return True if it is a must expression
 inline
-bool is_must(const atermpp::aterm_appl& t)
+bool is_must(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMust(t);
+  return core::detail::gsIsStateMust(x);
 }
 
 
@@ -460,9 +496,9 @@ class may: public state_formula
 /// \param t A term
 /// \return True if it is a may expression
 inline
-bool is_may(const atermpp::aterm_appl& t)
+bool is_may(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMay(t);
+  return core::detail::gsIsStateMay(x);
 }
 
 
@@ -488,9 +524,9 @@ class yaled: public state_formula
 /// \param t A term
 /// \return True if it is a yaled expression
 inline
-bool is_yaled(const atermpp::aterm_appl& t)
+bool is_yaled(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateYaled(t);
+  return core::detail::gsIsStateYaled(x);
 }
 
 
@@ -526,9 +562,9 @@ class yaled_timed: public state_formula
 /// \param t A term
 /// \return True if it is a yaled_timed expression
 inline
-bool is_yaled_timed(const atermpp::aterm_appl& t)
+bool is_yaled_timed(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateYaledTimed(t);
+  return core::detail::gsIsStateYaledTimed(x);
 }
 
 
@@ -554,9 +590,9 @@ class delay: public state_formula
 /// \param t A term
 /// \return True if it is a delay expression
 inline
-bool is_delay(const atermpp::aterm_appl& t)
+bool is_delay(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateDelay(t);
+  return core::detail::gsIsStateDelay(x);
 }
 
 
@@ -592,9 +628,9 @@ class delay_timed: public state_formula
 /// \param t A term
 /// \return True if it is a delay_timed expression
 inline
-bool is_delay_timed(const atermpp::aterm_appl& t)
+bool is_delay_timed(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateDelayTimed(t);
+  return core::detail::gsIsStateDelayTimed(x);
 }
 
 
@@ -640,9 +676,9 @@ class variable: public state_formula
 /// \param t A term
 /// \return True if it is a variable expression
 inline
-bool is_variable(const atermpp::aterm_appl& t)
+bool is_variable(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateVar(t);
+  return core::detail::gsIsStateVar(x);
 }
 
 
@@ -693,9 +729,9 @@ class nu: public state_formula
 /// \param t A term
 /// \return True if it is a nu expression
 inline
-bool is_nu(const atermpp::aterm_appl& t)
+bool is_nu(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateNu(t);
+  return core::detail::gsIsStateNu(x);
 }
 
 
@@ -746,9 +782,9 @@ class mu: public state_formula
 /// \param t A term
 /// \return True if it is a mu expression
 inline
-bool is_mu(const atermpp::aterm_appl& t)
+bool is_mu(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsStateMu(t);
+  return core::detail::gsIsStateMu(x);
 }
 
 //--- end generated classes ---//

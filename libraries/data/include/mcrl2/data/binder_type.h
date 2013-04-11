@@ -70,9 +70,9 @@ class set_or_bag_comprehension_binder: public binder_type
 /// \param t A term
 /// \return True if it is a set_or_bag_comprehension_binder expression
 inline
-bool is_set_or_bag_comprehension_binder(const atermpp::aterm_appl& t)
+bool is_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSetBagComp(t);
+  return core::detail::gsIsSetBagComp(x);
 }
 
 
@@ -98,9 +98,9 @@ class set_comprehension_binder: public binder_type
 /// \param t A term
 /// \return True if it is a set_comprehension_binder expression
 inline
-bool is_set_comprehension_binder(const atermpp::aterm_appl& t)
+bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSetComp(t);
+  return core::detail::gsIsSetComp(x);
 }
 
 
@@ -126,9 +126,9 @@ class bag_comprehension_binder: public binder_type
 /// \param t A term
 /// \return True if it is a bag_comprehension_binder expression
 inline
-bool is_bag_comprehension_binder(const atermpp::aterm_appl& t)
+bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBagComp(t);
+  return core::detail::gsIsBagComp(x);
 }
 
 
@@ -154,9 +154,9 @@ class forall_binder: public binder_type
 /// \param t A term
 /// \return True if it is a forall_binder expression
 inline
-bool is_forall_binder(const atermpp::aterm_appl& t)
+bool is_forall_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsForall(t);
+  return core::detail::gsIsForall(x);
 }
 
 
@@ -182,9 +182,9 @@ class exists_binder: public binder_type
 /// \param t A term
 /// \return True if it is a exists_binder expression
 inline
-bool is_exists_binder(const atermpp::aterm_appl& t)
+bool is_exists_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsExists(t);
+  return core::detail::gsIsExists(x);
 }
 
 
@@ -210,9 +210,9 @@ class lambda_binder: public binder_type
 /// \param t A term
 /// \return True if it is a lambda_binder expression
 inline
-bool is_lambda_binder(const atermpp::aterm_appl& t)
+bool is_lambda_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLambda(t);
+  return core::detail::gsIsLambda(x);
 }
 
 //--- end generated classes ---//

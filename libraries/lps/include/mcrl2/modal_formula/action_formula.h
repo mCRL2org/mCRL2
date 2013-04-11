@@ -54,13 +54,37 @@ typedef atermpp::term_list<action_formula> action_formula_list;
 typedef std::vector<action_formula>    action_formula_vector;
 
 
+// prototypes
+inline bool is_true(const atermpp::aterm_appl& x);
+inline bool is_false(const atermpp::aterm_appl& x);
+inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_and(const atermpp::aterm_appl& x);
+inline bool is_or(const atermpp::aterm_appl& x);
+inline bool is_imp(const atermpp::aterm_appl& x);
+inline bool is_forall(const atermpp::aterm_appl& x);
+inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_at(const atermpp::aterm_appl& x);
+inline bool is_multi_action(const atermpp::aterm_appl& x);
+inline bool is_untyped_multi_action(const atermpp::aterm_appl& x);
+
 /// \brief Test for a action_formula expression
 /// \param t A term
 /// \return True if it is a action_formula expression
 inline
-bool is_action_formula(const atermpp::aterm_appl& t)
+bool is_action_formula(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActFrm(t);
+  return data::is_data_expression(x) ||
+         action_formulas::is_true(x) ||
+         action_formulas::is_false(x) ||
+         action_formulas::is_not(x) ||
+         action_formulas::is_and(x) ||
+         action_formulas::is_or(x) ||
+         action_formulas::is_imp(x) ||
+         action_formulas::is_forall(x) ||
+         action_formulas::is_exists(x) ||
+         action_formulas::is_at(x) ||
+         action_formulas::is_multi_action(x) ||
+         action_formulas::is_untyped_multi_action(x);
 }
 
 
@@ -86,9 +110,9 @@ class true_: public action_formula
 /// \param t A term
 /// \return True if it is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& t)
+bool is_true(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActTrue(t);
+  return core::detail::gsIsActTrue(x);
 }
 
 
@@ -114,9 +138,9 @@ class false_: public action_formula
 /// \param t A term
 /// \return True if it is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& t)
+bool is_false(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActFalse(t);
+  return core::detail::gsIsActFalse(x);
 }
 
 
@@ -152,9 +176,9 @@ class not_: public action_formula
 /// \param t A term
 /// \return True if it is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& t)
+bool is_not(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActNot(t);
+  return core::detail::gsIsActNot(x);
 }
 
 
@@ -195,9 +219,9 @@ class and_: public action_formula
 /// \param t A term
 /// \return True if it is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& t)
+bool is_and(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActAnd(t);
+  return core::detail::gsIsActAnd(x);
 }
 
 
@@ -238,9 +262,9 @@ class or_: public action_formula
 /// \param t A term
 /// \return True if it is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& t)
+bool is_or(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActOr(t);
+  return core::detail::gsIsActOr(x);
 }
 
 
@@ -281,9 +305,9 @@ class imp: public action_formula
 /// \param t A term
 /// \return True if it is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& t)
+bool is_imp(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActImp(t);
+  return core::detail::gsIsActImp(x);
 }
 
 
@@ -324,9 +348,9 @@ class forall: public action_formula
 /// \param t A term
 /// \return True if it is a forall expression
 inline
-bool is_forall(const atermpp::aterm_appl& t)
+bool is_forall(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActForall(t);
+  return core::detail::gsIsActForall(x);
 }
 
 
@@ -367,9 +391,9 @@ class exists: public action_formula
 /// \param t A term
 /// \return True if it is a exists expression
 inline
-bool is_exists(const atermpp::aterm_appl& t)
+bool is_exists(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActExists(t);
+  return core::detail::gsIsActExists(x);
 }
 
 
@@ -410,9 +434,9 @@ class at: public action_formula
 /// \param t A term
 /// \return True if it is a at expression
 inline
-bool is_at(const atermpp::aterm_appl& t)
+bool is_at(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActAt(t);
+  return core::detail::gsIsActAt(x);
 }
 
 
@@ -448,9 +472,9 @@ class multi_action: public action_formula
 /// \param t A term
 /// \return True if it is a multi_action expression
 inline
-bool is_multi_action(const atermpp::aterm_appl& t)
+bool is_multi_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActMultAct(t);
+  return core::detail::gsIsActMultAct(x);
 }
 
 
@@ -486,9 +510,9 @@ class untyped_multi_action: public action_formula
 /// \param t A term
 /// \return True if it is a untyped_multi_action expression
 inline
-bool is_untyped_multi_action(const atermpp::aterm_appl& t)
+bool is_untyped_multi_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActUntypedMultAct(t);
+  return core::detail::gsIsActUntypedMultAct(x);
 }
 
 //--- end generated classes ---//

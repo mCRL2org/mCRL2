@@ -68,9 +68,9 @@ typedef std::vector<untyped_action>    untyped_action_vector;
 /// \param t A term
 /// \return True if it is a untyped_action expression
 inline
-bool is_untyped_action(const atermpp::aterm_appl& t)
+bool is_untyped_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedAction(t);
+  return core::detail::gsIsUntypedAction(x);
 }
 
 //--- end generated class untyped_action ---//

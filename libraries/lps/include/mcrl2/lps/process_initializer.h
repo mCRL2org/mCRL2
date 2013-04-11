@@ -79,9 +79,9 @@ typedef std::vector<process_initializer>    process_initializer_vector;
 /// \param t A term
 /// \return True if it is a process_initializer expression
 inline
-bool is_process_initializer(const atermpp::aterm_appl& t)
+bool is_process_initializer(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLinearProcessInit(t);
+  return core::detail::gsIsLinearProcessInit(x);
 }
 
 //--- end generated class process_initializer ---//

@@ -22,6 +22,7 @@
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/modal_formula/action_formula.h"
 
 namespace mcrl2
 {
@@ -55,13 +56,25 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 typedef std::vector<regular_formula>    regular_formula_vector;
 
 
+// prototypes
+inline bool is_nil(const atermpp::aterm_appl& x);
+inline bool is_seq(const atermpp::aterm_appl& x);
+inline bool is_alt(const atermpp::aterm_appl& x);
+inline bool is_trans(const atermpp::aterm_appl& x);
+inline bool is_trans_or_nil(const atermpp::aterm_appl& x);
+
 /// \brief Test for a regular_formula expression
 /// \param t A term
 /// \return True if it is a regular_formula expression
 inline
-bool is_regular_formula(const atermpp::aterm_appl& t)
+bool is_regular_formula(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegFrm(t);
+  return action_formulas::is_action_formula(x) ||
+         regular_formulas::is_nil(x) ||
+         regular_formulas::is_seq(x) ||
+         regular_formulas::is_alt(x) ||
+         regular_formulas::is_trans(x) ||
+         regular_formulas::is_trans_or_nil(x);
 }
 
 
@@ -87,9 +100,9 @@ class nil: public regular_formula
 /// \param t A term
 /// \return True if it is a nil expression
 inline
-bool is_nil(const atermpp::aterm_appl& t)
+bool is_nil(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegNil(t);
+  return core::detail::gsIsRegNil(x);
 }
 
 
@@ -130,9 +143,9 @@ class seq: public regular_formula
 /// \param t A term
 /// \return True if it is a seq expression
 inline
-bool is_seq(const atermpp::aterm_appl& t)
+bool is_seq(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegSeq(t);
+  return core::detail::gsIsRegSeq(x);
 }
 
 
@@ -173,9 +186,9 @@ class alt: public regular_formula
 /// \param t A term
 /// \return True if it is a alt expression
 inline
-bool is_alt(const atermpp::aterm_appl& t)
+bool is_alt(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegAlt(t);
+  return core::detail::gsIsRegAlt(x);
 }
 
 
@@ -211,9 +224,9 @@ class trans: public regular_formula
 /// \param t A term
 /// \return True if it is a trans expression
 inline
-bool is_trans(const atermpp::aterm_appl& t)
+bool is_trans(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegTrans(t);
+  return core::detail::gsIsRegTrans(x);
 }
 
 
@@ -249,9 +262,9 @@ class trans_or_nil: public regular_formula
 /// \param t A term
 /// \return True if it is a trans_or_nil expression
 inline
-bool is_trans_or_nil(const atermpp::aterm_appl& t)
+bool is_trans_or_nil(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRegTransOrNil(t);
+  return core::detail::gsIsRegTransOrNil(x);
 }
 
 //--- end generated classes ---//

@@ -88,9 +88,9 @@ class true_: public boolean_expression
 /// \param t A term
 /// \return True if it is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& t)
+bool is_true(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanTrue(t);
+  return core::detail::gsIsBooleanTrue(x);
 }
 
 
@@ -116,9 +116,9 @@ class false_: public boolean_expression
 /// \param t A term
 /// \return True if it is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& t)
+bool is_false(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanFalse(t);
+  return core::detail::gsIsBooleanFalse(x);
 }
 
 
@@ -154,9 +154,9 @@ class not_: public boolean_expression
 /// \param t A term
 /// \return True if it is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& t)
+bool is_not(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanNot(t);
+  return core::detail::gsIsBooleanNot(x);
 }
 
 
@@ -197,9 +197,9 @@ class and_: public boolean_expression
 /// \param t A term
 /// \return True if it is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& t)
+bool is_and(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanAnd(t);
+  return core::detail::gsIsBooleanAnd(x);
 }
 
 
@@ -240,9 +240,9 @@ class or_: public boolean_expression
 /// \param t A term
 /// \return True if it is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& t)
+bool is_or(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanOr(t);
+  return core::detail::gsIsBooleanOr(x);
 }
 
 
@@ -283,9 +283,9 @@ class imp: public boolean_expression
 /// \param t A term
 /// \return True if it is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& t)
+bool is_imp(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanImp(t);
+  return core::detail::gsIsBooleanImp(x);
 }
 
 
@@ -326,9 +326,9 @@ class boolean_variable: public boolean_expression
 /// \param t A term
 /// \return True if it is a boolean_variable expression
 inline
-bool is_boolean_variable(const atermpp::aterm_appl& t)
+bool is_boolean_variable(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBooleanVariable(t);
+  return core::detail::gsIsBooleanVariable(x);
 }
 
 //--- end generated classes ---//

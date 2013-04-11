@@ -103,71 +103,21 @@ typedef atermpp::term_list<sort_expression> sort_expression_list;
 /// \brief vector of sort_expressions
 typedef std::vector<sort_expression>    sort_expression_vector;
 
+//--- end generated class sort_expression ---//
 
 /// \brief Test for a sort_expression expression
 /// \param t A term
 /// \return True if it is a sort_expression expression
 inline
-bool is_sort_expression(const atermpp::aterm_appl& t)
+bool is_sort_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortExpr(t);
+  return core::detail::gsIsSortId(x) ||
+         core::detail::gsIsSortCons(x) ||
+         core::detail::gsIsSortStruct(x) ||
+         core::detail::gsIsSortArrow(x) ||
+         core::detail::gsIsSortUnknown(x) ||
+         core::detail::gsIsSortsPossible(x);
 }
-
-//--- end generated class sort_expression ---//
-
-/*
-/// \brief sort expression.
-///
-/// A sort expression can be any of:
-/// - basic sort
-/// - structured sort
-/// - container sort
-/// - function sort
-/// - alias
-/// In the type checker also the following expressions can be used:
-/// - unknown sort
-/// - multiple possible sorts
-class sort_expression: public atermpp::aterm_appl
-{
-  public:
-
-    /// \brief Constructor.
-    ///
-    sort_expression()
-      : atermpp::aterm_appl(core::detail::constructSortId())
-    {}
-
-    /// \brief Constructor.
-    /// \param[in] t A term.
-    /// \pre t has the internal structure of a sort expression.
-    sort_expression(const aterm& t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(is_sort_expression(*this));
-    }
-
-    /// \brief Returns the target sort of this expression.
-    /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.
-    inline
-    const sort_expression& target_sort() const
-    {
-      if (is_function_sort(*this))
-      {
-        return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
-      }
-      else
-      {
-        return atermpp::aterm_cast<const sort_expression>(*this);
-      }
-    }
-
-}; // class sort_expression
-
-/// \brief list of sorts
-typedef atermpp::term_list< sort_expression >  sort_expression_list;
-/// \brief vector of sorts
-typedef std::vector< sort_expression >     sort_expression_vector;
-*/
 
 // template function overloads
 std::string pp(const sort_expression& x);

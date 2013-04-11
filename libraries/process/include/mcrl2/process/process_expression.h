@@ -68,13 +68,57 @@ typedef atermpp::term_list<process_expression> process_expression_list;
 typedef std::vector<process_expression>    process_expression_vector;
 
 
+// prototypes
+inline bool is_process_instance(const atermpp::aterm_appl& x);
+inline bool is_process_instance_assignment(const atermpp::aterm_appl& x);
+inline bool is_delta(const atermpp::aterm_appl& x);
+inline bool is_tau(const atermpp::aterm_appl& x);
+inline bool is_sum(const atermpp::aterm_appl& x);
+inline bool is_block(const atermpp::aterm_appl& x);
+inline bool is_hide(const atermpp::aterm_appl& x);
+inline bool is_rename(const atermpp::aterm_appl& x);
+inline bool is_comm(const atermpp::aterm_appl& x);
+inline bool is_allow(const atermpp::aterm_appl& x);
+inline bool is_sync(const atermpp::aterm_appl& x);
+inline bool is_at(const atermpp::aterm_appl& x);
+inline bool is_seq(const atermpp::aterm_appl& x);
+inline bool is_if_then(const atermpp::aterm_appl& x);
+inline bool is_if_then_else(const atermpp::aterm_appl& x);
+inline bool is_bounded_init(const atermpp::aterm_appl& x);
+inline bool is_merge(const atermpp::aterm_appl& x);
+inline bool is_left_merge(const atermpp::aterm_appl& x);
+inline bool is_choice(const atermpp::aterm_appl& x);
+inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
+inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
+
 /// \brief Test for a process_expression expression
 /// \param t A term
 /// \return True if it is a process_expression expression
 inline
-bool is_process_expression(const atermpp::aterm_appl& t)
+bool is_process_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcExpr(t);
+  return process::is_process_instance(x) ||
+         process::is_process_instance_assignment(x) ||
+         process::is_delta(x) ||
+         process::is_tau(x) ||
+         process::is_sum(x) ||
+         process::is_block(x) ||
+         process::is_hide(x) ||
+         process::is_rename(x) ||
+         process::is_comm(x) ||
+         process::is_allow(x) ||
+         process::is_sync(x) ||
+         process::is_at(x) ||
+         process::is_seq(x) ||
+         process::is_if_then(x) ||
+         process::is_if_then_else(x) ||
+         process::is_bounded_init(x) ||
+         process::is_merge(x) ||
+         process::is_left_merge(x) ||
+         process::is_choice(x) ||
+         process::is_untyped_parameter_identifier(x) ||
+         process::is_untyped_process_assignment(x) ||
+         lps::is_action(x);
 }
 
 
@@ -115,9 +159,9 @@ class process_instance: public process_expression
 /// \param t A term
 /// \return True if it is a process_instance expression
 inline
-bool is_process_instance(const atermpp::aterm_appl& t)
+bool is_process_instance(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcess(t);
+  return core::detail::gsIsProcess(x);
 }
 
 
@@ -158,9 +202,9 @@ class process_instance_assignment: public process_expression
 /// \param t A term
 /// \return True if it is a process_instance_assignment expression
 inline
-bool is_process_instance_assignment(const atermpp::aterm_appl& t)
+bool is_process_instance_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcessAssignment(t);
+  return core::detail::gsIsProcessAssignment(x);
 }
 
 
@@ -186,9 +230,9 @@ class delta: public process_expression
 /// \param t A term
 /// \return True if it is a delta expression
 inline
-bool is_delta(const atermpp::aterm_appl& t)
+bool is_delta(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDelta(t);
+  return core::detail::gsIsDelta(x);
 }
 
 
@@ -214,9 +258,9 @@ class tau: public process_expression
 /// \param t A term
 /// \return True if it is a tau expression
 inline
-bool is_tau(const atermpp::aterm_appl& t)
+bool is_tau(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsTau(t);
+  return core::detail::gsIsTau(x);
 }
 
 
@@ -257,9 +301,9 @@ class sum: public process_expression
 /// \param t A term
 /// \return True if it is a sum expression
 inline
-bool is_sum(const atermpp::aterm_appl& t)
+bool is_sum(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSum(t);
+  return core::detail::gsIsSum(x);
 }
 
 
@@ -300,9 +344,9 @@ class block: public process_expression
 /// \param t A term
 /// \return True if it is a block expression
 inline
-bool is_block(const atermpp::aterm_appl& t)
+bool is_block(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBlock(t);
+  return core::detail::gsIsBlock(x);
 }
 
 
@@ -343,9 +387,9 @@ class hide: public process_expression
 /// \param t A term
 /// \return True if it is a hide expression
 inline
-bool is_hide(const atermpp::aterm_appl& t)
+bool is_hide(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsHide(t);
+  return core::detail::gsIsHide(x);
 }
 
 
@@ -386,9 +430,9 @@ class rename: public process_expression
 /// \param t A term
 /// \return True if it is a rename expression
 inline
-bool is_rename(const atermpp::aterm_appl& t)
+bool is_rename(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRename(t);
+  return core::detail::gsIsRename(x);
 }
 
 
@@ -429,9 +473,9 @@ class comm: public process_expression
 /// \param t A term
 /// \return True if it is a comm expression
 inline
-bool is_comm(const atermpp::aterm_appl& t)
+bool is_comm(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsComm(t);
+  return core::detail::gsIsComm(x);
 }
 
 
@@ -472,9 +516,9 @@ class allow: public process_expression
 /// \param t A term
 /// \return True if it is a allow expression
 inline
-bool is_allow(const atermpp::aterm_appl& t)
+bool is_allow(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAllow(t);
+  return core::detail::gsIsAllow(x);
 }
 
 
@@ -515,9 +559,9 @@ class sync: public process_expression
 /// \param t A term
 /// \return True if it is a sync expression
 inline
-bool is_sync(const atermpp::aterm_appl& t)
+bool is_sync(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSync(t);
+  return core::detail::gsIsSync(x);
 }
 
 
@@ -558,9 +602,9 @@ class at: public process_expression
 /// \param t A term
 /// \return True if it is a at expression
 inline
-bool is_at(const atermpp::aterm_appl& t)
+bool is_at(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAtTime(t);
+  return core::detail::gsIsAtTime(x);
 }
 
 
@@ -601,9 +645,9 @@ class seq: public process_expression
 /// \param t A term
 /// \return True if it is a seq expression
 inline
-bool is_seq(const atermpp::aterm_appl& t)
+bool is_seq(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSeq(t);
+  return core::detail::gsIsSeq(x);
 }
 
 
@@ -644,9 +688,9 @@ class if_then: public process_expression
 /// \param t A term
 /// \return True if it is a if_then expression
 inline
-bool is_if_then(const atermpp::aterm_appl& t)
+bool is_if_then(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThen(t);
+  return core::detail::gsIsIfThen(x);
 }
 
 
@@ -692,9 +736,9 @@ class if_then_else: public process_expression
 /// \param t A term
 /// \return True if it is a if_then_else expression
 inline
-bool is_if_then_else(const atermpp::aterm_appl& t)
+bool is_if_then_else(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThenElse(t);
+  return core::detail::gsIsIfThenElse(x);
 }
 
 
@@ -735,9 +779,9 @@ class bounded_init: public process_expression
 /// \param t A term
 /// \return True if it is a bounded_init expression
 inline
-bool is_bounded_init(const atermpp::aterm_appl& t)
+bool is_bounded_init(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBInit(t);
+  return core::detail::gsIsBInit(x);
 }
 
 
@@ -778,9 +822,9 @@ class merge: public process_expression
 /// \param t A term
 /// \return True if it is a merge expression
 inline
-bool is_merge(const atermpp::aterm_appl& t)
+bool is_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsMerge(t);
+  return core::detail::gsIsMerge(x);
 }
 
 
@@ -821,9 +865,9 @@ class left_merge: public process_expression
 /// \param t A term
 /// \return True if it is a left_merge expression
 inline
-bool is_left_merge(const atermpp::aterm_appl& t)
+bool is_left_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLMerge(t);
+  return core::detail::gsIsLMerge(x);
 }
 
 
@@ -864,9 +908,9 @@ class choice: public process_expression
 /// \param t A term
 /// \return True if it is a choice expression
 inline
-bool is_choice(const atermpp::aterm_appl& t)
+bool is_choice(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsChoice(t);
+  return core::detail::gsIsChoice(x);
 }
 
 
@@ -912,9 +956,9 @@ class untyped_parameter_identifier: public process_expression
 /// \param t A term
 /// \return True if it is a untyped_parameter_identifier expression
 inline
-bool is_untyped_parameter_identifier(const atermpp::aterm_appl& t)
+bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedParamId(t);
+  return core::detail::gsIsUntypedParamId(x);
 }
 
 
@@ -960,9 +1004,9 @@ class untyped_process_assignment: public process_expression
 /// \param t A term
 /// \return True if it is a untyped_process_assignment expression
 inline
-bool is_untyped_process_assignment(const atermpp::aterm_appl& t)
+bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsUntypedProcessAssignment(t);
+  return core::detail::gsIsUntypedProcessAssignment(x);
 }
 
 //--- end generated classes ---//

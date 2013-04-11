@@ -169,7 +169,7 @@ class data_expression: public atermpp::aterm_appl
       }
       else if (is_function_symbol(*this))
       {
-        return aterm_cast<sort_expression>((*this)[1]); 
+        return aterm_cast<sort_expression>((*this)[1]);
       }
       else if (is_abstraction(*this))
       {
@@ -189,7 +189,7 @@ class data_expression: public atermpp::aterm_appl
           }
           return function_sort(sort_expression_list(s.begin(),s.end()), aterm_cast<data_expression>((*this)[2]).sort());
         }
-        else 
+        else
         {
           assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_set_or_bag_comprehension(*this));
           const atermpp::term_list<aterm_appl> &v_variables  = atermpp::aterm_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
@@ -199,7 +199,7 @@ class data_expression: public atermpp::aterm_appl
           {
             return container_sort(bag_container(), aterm_cast<const sort_expression>(v_variables.front()[1]));
           }
-          else // If it is not known whether the term is a set or a bag, it returns the type of a set, as there is 
+          else // If it is not known whether the term is a set or a bag, it returns the type of a set, as there is
                // no setbag type. This can only occur for terms that are not propertly type checked.
           {
             return container_sort(set_container(), aterm_cast<sort_expression>(v_variables.front()[1]));
@@ -211,7 +211,7 @@ class data_expression: public atermpp::aterm_appl
         const data_expression &head = atermpp::aterm_cast<const data_expression>((*this)[0]);
         sort_expression s(head.sort());
         if (is_function_sort(s))
-        { 
+        {
           const function_sort &fs(s);
           return (fs.codomain());
         }
@@ -223,7 +223,7 @@ class data_expression: public atermpp::aterm_appl
       }
       assert(is_identifier(*this)); // All cases have been deal with here, except this one.
       return unknown_sort();
-      
+
     }
 //--- end user section data_expression ---//
 };
@@ -234,17 +234,21 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 /// \brief vector of data_expressions
 typedef std::vector<data_expression>    data_expression_vector;
 
+//--- end generated class data_expression ---//
 
 /// \brief Test for a data_expression expression
 /// \param t A term
 /// \return True if it is a data_expression expression
 inline
-bool is_data_expression(const atermpp::aterm_appl& t)
+bool is_data_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDataExpr(t);
+  return core::detail::gsIsId(x) ||
+         core::detail::gsIsDataVarId(x) ||
+         core::detail::gsIsOpId(x) ||
+         core::detail::gsIsDataAppl(x) ||
+         core::detail::gsIsBinder(x) ||
+         core::detail::gsIsWhr(x);
 }
-
-//--- end generated class data_expression ---//
 
 /// \brief Converts an container with data expressions to data_expression_list
 /// \param r A range of data expressions.

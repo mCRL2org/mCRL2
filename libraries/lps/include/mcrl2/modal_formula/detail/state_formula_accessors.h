@@ -30,10 +30,9 @@ namespace accessors
 /// \param t A modal formula
 /// \return The argument of a data expression
 inline
-data::data_expression val(const state_formula& t)
+data::data_expression val(const state_formula& x)
 {
-  assert(core::detail::gsIsDataExpr(t));
-  return data::data_expression(t);
+  return data::data_expression(x);
 }
 
 /// \brief Returns the state formula argument of an expression of type
@@ -43,18 +42,18 @@ data::data_expression val(const state_formula& t)
 inline
 state_formula arg(const state_formula& t)
 {
-  if (core::detail::gsIsStateNot(t))
+  if (state_formulas::is_not(t))
   {
     return atermpp::arg1(t);
   }
-  if (core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t))
+  if (state_formulas::is_mu(t) || state_formulas::is_nu(t))
   {
     return atermpp::arg3(t);
   }
-  assert(core::detail::gsIsStateExists(t) ||
-         core::detail::gsIsStateForall(t) ||
-         core::detail::gsIsStateMust(t)   ||
-         core::detail::gsIsStateMay(t)
+  assert(state_formulas::is_exists(t) ||
+         state_formulas::is_forall(t) ||
+         state_formulas::is_must(t)   ||
+         state_formulas::is_may(t)
         );
   return atermpp::arg2(t);
 }
@@ -65,7 +64,7 @@ state_formula arg(const state_formula& t)
 inline
 state_formula left(const state_formula& t)
 {
-  assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
+  assert(state_formulas::is_and(t) || state_formulas::is_or(t) || state_formulas::is_imp(t));
   return atermpp::arg1(t);
 }
 
@@ -75,7 +74,7 @@ state_formula left(const state_formula& t)
 inline
 state_formula right(const state_formula& t)
 {
-  assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
+  assert(state_formulas::is_and(t) || state_formulas::is_or(t) || state_formulas::is_imp(t));
   return atermpp::arg2(t);
 }
 
@@ -85,7 +84,7 @@ state_formula right(const state_formula& t)
 inline
 data::variable_list var(const state_formula& t)
 {
-  assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
+  assert(state_formulas::is_exists(t) || state_formulas::is_forall(t));
   return data::variable_list(t[0]);
   /* return data::variable_list(
            atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
@@ -98,7 +97,7 @@ data::variable_list var(const state_formula& t)
 inline
 const data::data_expression &time(const state_formula& t)
 {
-  assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
+  assert(state_formulas::is_delay_timed(t) || state_formulas::is_yaled_timed(t));
   return atermpp::aterm_cast<data::data_expression>(atermpp::arg1(t));
 }
 
@@ -108,9 +107,9 @@ const data::data_expression &time(const state_formula& t)
 inline
 const core::identifier_string &name(const state_formula& t)
 {
-  assert(core::detail::gsIsStateVar(t) ||
-         core::detail::gsIsStateMu(t)  ||
-         core::detail::gsIsStateNu(t)
+  assert(state_formulas::is_variable(t) ||
+         state_formulas::is_mu(t)  ||
+         state_formulas::is_nu(t)
         );
   return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(t));
 }
@@ -121,11 +120,8 @@ const core::identifier_string &name(const state_formula& t)
 inline
 const data::data_expression_list &param(const state_formula& t)
 {
-  assert(core::detail::gsIsStateVar(t));
+  assert(state_formulas::is_variable(t));
   return atermpp::aterm_cast<data::data_expression_list>(t[1]);
-  /* return data::data_expression_list(
-           atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
-           atermpp::term_list_iterator< data::data_expression >()); */
 }
 
 /// \brief Returns the parameters of a mu or nu expression
@@ -134,11 +130,8 @@ const data::data_expression_list &param(const state_formula& t)
 inline
 const data::assignment_list &ass(const state_formula& t)
 {
-  assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
+  assert(state_formulas::is_mu(t) || state_formulas::is_nu(t));
   return atermpp::aterm_cast<data::assignment_list>(t[1]);
-  /* return data::assignment_list(
-           atermpp::term_list_iterator< data::assignment >(atermpp::list_arg2(t)),
-           atermpp::term_list_iterator< data::assignment >()); */
 }
 
 /// \brief Returns the regular formula of a must or may expression
@@ -147,7 +140,7 @@ const data::assignment_list &ass(const state_formula& t)
 inline
 regular_formulas::regular_formula act(const state_formula& t)
 {
-  assert(core::detail::gsIsStateMust(t) || core::detail::gsIsStateMay(t));
+  assert(state_formulas::is_must(t) || state_formulas::is_may(t));
   return atermpp::arg1(t);
 }
 

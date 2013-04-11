@@ -43,13 +43,13 @@ structured_sort_constructor(const core::identifier_string& name, const structure
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-sort_expression()                                                                         : public atermpp::aterm_appl   | XIOCU  | SortExpr      | A sort expression
-basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO     | SortId        | A basic sort
-container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO     | SortCons      | A container sort
-structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU   | SortStruct    | A structured sort
-function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO     | SortArrow     | A function sort
-unknown_sort()                                                                            : public data::sort_expression | EO     | SortUnknown   | Unknown sort expression
-multiple_possible_sorts(const sort_expression_list& sorts)                                : public data::sort_expression | EO     | SortsPossible | Multiple possible sorts
+sort_expression()                                                                         : public atermpp::aterm_appl   | XOCU | SortExpr      | A sort expression
+basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO   | SortId        | A basic sort
+container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO   | SortCons      | A container sort
+structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU | SortStruct    | A structured sort
+function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO   | SortArrow     | A function sort
+unknown_sort()                                                                            : public data::sort_expression | EO   | SortUnknown   | Unknown sort expression
+multiple_possible_sorts(const sort_expression_list& sorts)                                : public data::sort_expression | EO   | SortsPossible | Multiple possible sorts
 '''
 
 BINDER_TYPES = r'''
@@ -69,13 +69,13 @@ identifier_assignment(const core::identifier_string& lhs, const data_expression&
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | XICU  | DataExpr  | A data expression
-identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO    | Id        | An identifier
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC   | DataVarId | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO    | OpId      | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU   | DataAppl  | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU   | Whr       | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO    | Binder    | An abstraction expression.
+data_expression()                                                                                             : public atermpp::aterm_appl   | XCU | DataExpr  | A data expression
+identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO  | Id        | An identifier
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId      | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU | DataAppl  | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU | Whr       | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder    | An abstraction expression.
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
@@ -765,8 +765,6 @@ inline void swap(mcrl2::<NAMESPACE>::<CLASSNAME>& t1, mcrl2::<NAMESPACE>::<CLASS
 
     def expand_text(self, text, parameters, constructors, member_functions, namespace):
         superclass = self.superclass()
-        #if self.superclass_namespace() != self.namespace():
-        #    superclass = self.superclass_namespace() + '::' + superclass
         if superclass == None:
             superclass_declaration = ': public atermpp::aterm_appl'
         else:
@@ -800,22 +798,26 @@ typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;
         return text
 
     # Returns an is_<classname> function
-    def is_function(self):
-        text = r'''/// \\brief Test for a %s expression
+    def is_function(self, all_classes):
+        text = r'''%s/// \\brief Test for a %s expression
 /// \\param t A term
 /// \\return True if it is a %s expression
 inline
-bool is_%s(const %s& t)
+bool is_%s(const %s& x)
 {
-  return %s::detail::gsIs%s(t);
+  return %s;
 }
 '''
         name = self.name()
         if name[-1] == '_':
             name = name[:-1]
-        aterm = self.aterm
-        text = text % (name, name, name, 'atermpp::aterm_appl', 'core', aterm)
-#        text = text % (name, name, name, self.superclass(), 'core', aterm)
+        if 'X' in self.modifiers():
+            prototypes = '// prototypes\n' + '\n'.join(['inline bool is_%s(const atermpp::aterm_appl& x);' % re.sub('_$', '', c.classname()) for c in self.derived_classes(all_classes) if c.namespace() == self.namespace()]) + '\n\n'
+            return_value = ' ||\n         '.join(['%s::is_%s(x)' % (c.namespace(), re.sub('_$', '', c.classname())) for c in self.derived_classes(all_classes)])
+        else:
+            prototypes = ''
+            return_value = '%s::detail::gsIs%s(x)' % ('core', self.aterm)
+        text = text % (prototypes, name, name, name, 'atermpp::aterm_appl', return_value)
         return text
 
     def is_function_name(self, include_namespace = True):
@@ -828,7 +830,7 @@ bool is_%s(const %s& t)
         return result
 
     # Returns the class definition
-    def class_inline_definition(self):
+    def class_inline_definition(self, all_classes):
         if 'S' in self.modifiers():
             return ''
 
@@ -851,12 +853,12 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = text + '\n\n' + self.container_typedefs()
 
         if 'I' in self.modifiers():
-            text = text + '\n\n' + self.is_function()
+            text = text + '\n\n' + self.is_function(all_classes)
 
         return text + '\n'
 
     # Returns the class declaration
-    def class_declaration(self, namespace = 'core'):
+    def class_declaration(self, all_classes, namespace = 'core'):
         ptext = ', '.join([p.name() for p in self.constructor.parameters()])
         ctext = '\n\n'.join([x.declaration() for x in self.constructors(namespace)])
         mtext = ''.join(['\n\n' + x.declaration() for x in self.member_functions()])
@@ -873,9 +875,15 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = text + '\n\n' + self.container_typedefs()
 
         if 'I' in self.modifiers():
-            text = text + '\n\n' + self.is_function()
+            text = text + '\n\n' + self.is_function(all_classes)
 
         return text + '\n'
+
+    def derived_classes(self, all_classes):
+        classes = [all_classes[name] for name in self.expression_classes()]
+        classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
+        classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
+        return classes
 
     # Returns the member function definitions
     def class_member_function_definitions(self, namespace = 'core'):
@@ -890,45 +898,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = re.sub('check_term', 'check_rule', text)
         return text + '\n'
 
-    def traverse_function(self, all_classes):
-        text = r'''void operator()(const QUALIFIED_NODE& x)
-{
-  static_cast<Derived&>(*this).enter(x);VISIT_FUNCTIONS
-  static_cast<Derived&>(*this).leave(x);
-}
-'''
-        if 'X' in self.modifiers():
-            qualified_node = self.classname(include_namespace = True)
-            text = re.sub('QUALIFIED_NODE', qualified_node, text)
-            classes = [all_classes[name] for name in self.expression_classes()]
-            classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
-            classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
-            visit_functions = []
-            for c in classes:
-                classname = c.classname(True)
-                is_function = c.is_function_name(True)
-                namespace = c.namespace()
-                if 'M' in c.modifiers():
-                    cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
-                else:
-                    cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
-                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s); }' % (is_function, cast))
-            vtext = '\n  ' + '\n  else '.join(visit_functions)
-            text = re.sub('VISIT_FUNCTIONS', vtext, text)
-            return text
-        else:
-            f = self.constructor
-            visit_functions = []
-            for p in f.parameters():
-                visit_functions.append('\n  static_cast<Derived&>(*this)(x.%s());' % p.name())
-            vtext = ''.join(visit_functions)
-            qualified_node = self.classname(include_namespace = True)
-            text = re.sub('QUALIFIED_NODE', qualified_node, text)
-            text = re.sub('VISIT_FUNCTIONS', vtext, text)
-            if f.is_template():
-                text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
-            return text
-
     def traverser_function(self, all_classes, dependencies):
         text = r'''void operator()(const <CLASS_NAME>& x)
 {
@@ -940,10 +909,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         visit_text = ''
         dependent = False
         if 'X' in self.modifiers():
-            classes = [all_classes[name] for name in self.expression_classes()]
-            classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
-            classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
-
+            classes = self.derived_classes(all_classes)
             updates = []
             for c in classes:
                 is_function = c.is_function_name(True)
@@ -1037,29 +1003,15 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 visit_text = '// skip'
         else:
             if 'X' in self.modifiers():
-                classes = [all_classes[name] for name in self.expression_classes()]
-                classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
-                classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
-
+                classes = self.derived_classes(all_classes)
                 updates = []
                 for c in classes:
-                    #if not is_dependent_type(dependencies, c.classname(True)):
-                    #    continue
                     is_function = c.is_function_name(True)
-                    if is_modifiable_type(c.classname(True), modifiability_map):
-                      # this one applies to action_formula <-> multi_action, for which the conversion is problematic
-                      updates.append('''if (%s(x))
-{
-  %s y = x;
-  static_cast<Derived&>(*this)(y);
-  result = y;
-}''' % (is_function, c.classname(True)))
+                    if 'M' in c.modifiers():
+                        cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
                     else:
-                        if 'M' in c.modifiers():
-                            cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
-                        else:
-                            cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
-                        updates.append('''if (%s(x))
+                        cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                    updates.append('''if (%s(x))
 {
   result = static_cast<Derived&>(*this)(%s);
 }''' % (is_function, cast))

@@ -76,9 +76,9 @@ typedef std::vector<action_label>    action_label_vector;
 /// \param t A term
 /// \return True if it is a action_label expression
 inline
-bool is_action_label(const atermpp::aterm_appl& t)
+bool is_action_label(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsActId(t);
+  return core::detail::gsIsActId(x);
 }
 
 //--- end generated class action_label ---//

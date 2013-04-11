@@ -69,9 +69,9 @@ typedef std::vector<action>    action_vector;
 /// \param t A term
 /// \return True if it is a action expression
 inline
-bool is_action(const atermpp::aterm_appl& t)
+bool is_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAction(t);
+  return core::detail::gsIsAction(x);
 }
 
 //--- end generated class action ---//
