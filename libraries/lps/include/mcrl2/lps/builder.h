@@ -16,6 +16,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/lps/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -75,6 +76,13 @@ struct add_sort_expressions: public Builder<Derived>
     {
       x.time() = static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.actions() = static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -181,6 +189,13 @@ struct add_data_expressions: public Builder<Derived>
     {
       x.time() = static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.actions() = static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 

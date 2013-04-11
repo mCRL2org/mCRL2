@@ -78,6 +78,7 @@ const atermpp::aterm_appl& constructUntypedAction();
 const atermpp::aterm_appl& constructStateNu();
 const atermpp::aterm_appl& constructRegNil();
 const atermpp::aterm_appl& constructDataSpec();
+const atermpp::aterm_appl& constructUntypedActMultAct();
 const atermpp::aterm_appl& constructTau();
 const atermpp::aterm_appl& constructStateYaledTimed();
 const atermpp::aterm_appl& constructSortCons();
@@ -106,6 +107,7 @@ const atermpp::aterm_appl& constructBagComp();
 const atermpp::aterm_appl& constructStateDelay();
 const atermpp::aterm_appl& constructIdAssignment();
 const atermpp::aterm_appl& constructRegAlt();
+const atermpp::aterm_appl& constructUntypedMultAct();
 const atermpp::aterm_appl& constructStructCons();
 const atermpp::aterm_appl& constructIdInit();
 const atermpp::aterm_appl& constructMu();
@@ -134,6 +136,7 @@ const atermpp::aterm_appl& constructActOr();
 const atermpp::aterm_appl& constructComm();
 const atermpp::aterm_appl& constructBooleanNot();
 const atermpp::aterm_appl& constructDelta();
+const atermpp::aterm_appl& constructActMultAct();
 const atermpp::aterm_appl& constructStateAnd();
 const atermpp::aterm_appl& constructLMerge();
 const atermpp::aterm_appl& constructSetComp();
@@ -194,13 +197,13 @@ const atermpp::aterm_appl& constructBindingOperator();
 const atermpp::aterm_appl& constructWhrDecl();
 const atermpp::aterm_appl& constructSortDecl();
 const atermpp::aterm_appl& constructDataExprOrNil();
-const atermpp::aterm_appl& constructParamIdOrAction();
 const atermpp::aterm_appl& constructProcExpr();
 const atermpp::aterm_appl& constructMultActOrDelta();
 const atermpp::aterm_appl& constructProcInit();
 const atermpp::aterm_appl& constructStateFrm();
 const atermpp::aterm_appl& constructRegFrm();
 const atermpp::aterm_appl& constructActFrm();
+const atermpp::aterm_appl& constructParamIdOrAction();
 const atermpp::aterm_appl& constructActionRenameRuleRHS();
 const atermpp::aterm_appl& constructFixPoint();
 const atermpp::aterm_appl& constructPBExpr();
@@ -395,6 +398,14 @@ inline
 const atermpp::aterm_appl& constructDataSpec()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_DataSpec(), constructSortSpec(), constructConsSpec(), constructMapSpec(), constructDataEqnSpec()));
+  return t;
+}
+
+// UntypedActMultAct
+inline
+const atermpp::aterm_appl& constructUntypedActMultAct()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedActMultAct(), constructList()));
   return t;
 }
 
@@ -622,6 +633,14 @@ const atermpp::aterm_appl& constructRegAlt()
   return t;
 }
 
+// UntypedMultAct
+inline
+const atermpp::aterm_appl& constructUntypedMultAct()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedMultAct(), constructList()));
+  return t;
+}
+
 // StructCons
 inline
 const atermpp::aterm_appl& constructStructCons()
@@ -843,6 +862,14 @@ inline
 const atermpp::aterm_appl& constructDelta()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Delta()));
+  return t;
+}
+
+// ActMultAct
+inline
+const atermpp::aterm_appl& constructActMultAct()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActMultAct(), constructList()));
   return t;
 }
 
@@ -1319,13 +1346,6 @@ const atermpp::aterm_appl& constructDataExprOrNil()
   return constructDataExpr();
 }
 
-// ParamIdOrAction
-inline
-const atermpp::aterm_appl& constructParamIdOrAction()
-{
-  return constructParamId();
-}
-
 // ProcExpr
 inline
 const atermpp::aterm_appl& constructProcExpr()
@@ -1365,14 +1385,21 @@ const atermpp::aterm_appl& constructRegFrm()
 inline
 const atermpp::aterm_appl& constructActFrm()
 {
-  return constructMultAct();
+  return constructDataExpr();
+}
+
+// ParamIdOrAction
+inline
+const atermpp::aterm_appl& constructParamIdOrAction()
+{
+  return constructUntypedAction();
 }
 
 // ActionRenameRuleRHS
 inline
 const atermpp::aterm_appl& constructActionRenameRuleRHS()
 {
-  return constructParamId();
+  return constructUntypedAction();
 }
 
 // FixPoint

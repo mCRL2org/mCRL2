@@ -35,7 +35,7 @@ struct action_formula_actions: public lps::action_actions
 
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node)
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return parse_MultAct(node.child(0)); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return action_formulas::untyped_multi_action(parse_ActionList(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return action_formulas::true_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return action_formulas::false_(); }

@@ -43,13 +43,6 @@ struct action_formula_traverser_base: public core::traverser<Derived>
     // skip
     static_cast<Derived&>(*this).leave(x);
   }
-
-  void operator()(const lps::multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
 };
 
 //--- start generated action_formulas::add_traverser_sort_expressions code ---//
@@ -130,6 +123,20 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -174,9 +181,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -270,6 +281,20 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -314,9 +339,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -409,6 +438,20 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -453,9 +496,13 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -551,6 +598,20 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -595,9 +656,13 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -693,6 +758,20 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -737,9 +816,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_cast<atermpp::aterm_appl>(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

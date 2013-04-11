@@ -19,6 +19,7 @@
 
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/lps/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -75,6 +76,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -180,6 +188,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const lps::deadlock_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -274,6 +289,13 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -385,6 +407,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 

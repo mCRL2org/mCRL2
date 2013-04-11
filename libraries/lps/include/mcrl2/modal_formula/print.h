@@ -37,6 +37,7 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
   using super::print_binary_operation;
   using super::print_abstraction;
   using super::print_expression;
+  using super::print_list;
 
   Derived& derived()
   {
@@ -105,6 +106,34 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
     derived()(x.operand());
     derived().print(" @ ");
     print_expression(x.time_stamp(), max_precedence);
+    derived().leave(x);
+  }
+
+  void operator()(const action_formulas::multi_action& x)
+  {
+    derived().enter(x);
+    if (x.actions().empty())
+    {
+      derived().print("tau");
+    }
+    else
+    {
+      print_list(x.actions(), "", "", "|");
+    }
+    derived().leave(x);
+  }
+
+  void operator()(const action_formulas::untyped_multi_action& x)
+  {
+    derived().enter(x);
+    if (x.arguments().empty())
+    {
+      derived().print("tau");
+    }
+    else
+    {
+      print_list(x.arguments(), "", "", "|");
+    }
     derived().leave(x);
   }
 };

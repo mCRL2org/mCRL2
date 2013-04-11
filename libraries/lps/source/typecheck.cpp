@@ -12,6 +12,7 @@
 
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
@@ -44,7 +45,7 @@ static std::map<identifier_string,sort_expression> list_minus(const std::map<ide
 }
 
 
-action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &act)
+lps::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &act)
 {
   action Result;
   core::identifier_string Name(act.name());
@@ -178,21 +179,9 @@ action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_
 
 
 
-action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &ma)
-// last argument should have type action; but this does not allow for a ParamId.
+lps::action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression> &Vars, const lps::untyped_action &ma)
 {
-  size_t n = ma.size();
-  if (n==0)
-  {
-    return ma;
-  }
-
-  if (lps::is_untyped_action(ma))
-  {
-    return RewrAct(Vars,ma);
-  }
-
-  throw mcrl2::runtime_error("Internal error. Action " + pp(ma) + " fails to match process.");
+  return RewrAct(Vars,ma);
 }
 
 
@@ -251,27 +240,26 @@ mcrl2::lps::action_type_checker::action_type_checker(
   }
 }
 
-multi_action mcrl2::lps::action_type_checker::operator()(const multi_action &ma)
+lps::multi_action mcrl2::lps::action_type_checker::operator()(const lps::untyped_multi_action &ma)
 {
   try
   {
     action_list r;
 
-    for (action_list::const_iterator l=ma.actions().begin(); l!=ma.actions().end(); ++l)
+    for (auto l=ma.actions().begin(); l!=ma.actions().end(); ++l)
     {
-      action o= *l;
-      assert(lps::is_untyped_action(o));
+      untyped_action o= *l;
       const  std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      o=TraverseAct(NewDeclaredVars,o);
-      r.push_front(o);
+      r.push_front(TraverseAct(NewDeclaredVars,o));
     }
-    if (ma.has_time())
-    {
-      const std::map<core::identifier_string,sort_expression> Vars;
-      data_expression time=static_cast<data_type_checker>(*this)(ma.time(),Vars);
-      return multi_action(reverse(r),time);
-    }
-    return multi_action(reverse(r));
+// TODO: check if this is still needed
+//    if (ma.has_time())
+//    {
+//      const std::map<core::identifier_string,sort_expression> Vars;
+//      data_expression time=static_cast<data_type_checker>(*this)(ma.time(),Vars);
+//      return multi_action(reverse(r),time);
+//    }
+    return lps::multi_action(reverse(r));
   }
   catch (mcrl2::runtime_error &e)
   {
@@ -415,16 +403,15 @@ regular_formula mcrl2::state_formulas::state_formula_type_checker::TraverseRegFr
 
   if (is_action_formula(RegFrm))
   {
-
     return TraverseActFrm(Vars, RegFrm);
   }
 
   throw mcrl2::runtime_error("Internal error. The regularformula " + pp(RegFrm) + " fails to match any known form in typechecking case analysis");
 }
 
-action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm(
+action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm(
              const std::map<core::identifier_string,sort_expression> &Vars,
-             const action_formula &ActFrm)
+             const action_formulas::action_formula &ActFrm)
 {
   using namespace action_formulas;
   mCRL2log(debug) << "TraverseActFrm: " << pp(ActFrm) << std::endl;
@@ -507,19 +494,16 @@ action_formula mcrl2::state_formulas::state_formula_type_checker::TraverseActFrm
     return action_formulas::at(NewArg1,Time);
   }
 
-  if (is_multi_action(ActFrm))
+  if (action_formulas::is_untyped_multi_action(ActFrm))
   {
-    const multi_action ma(ActFrm);
+    const action_formulas::untyped_multi_action ma(ActFrm);
     action_list r;
-    for (action_list::const_iterator l=ma.actions().begin(); l!=ma.actions().end(); ++l)
+    for (auto l=ma.arguments().begin(); l!=ma.arguments().end(); ++l)
     {
-      action o= *l;
-      assert(lps::is_untyped_action(o));
-      o=RewrAct(Vars,o);
-      assert(!lps::is_untyped_action(o));
-      r.push_front(o);
+      lps::untyped_action o= *l;
+      r.push_front(RewrAct(Vars,o));
     }
-    return multi_action(reverse(r));
+    return action_formulas::multi_action(reverse(r));
   }
 
   if (is_data_expression(ActFrm))

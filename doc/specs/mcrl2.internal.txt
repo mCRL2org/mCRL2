@@ -41,8 +41,8 @@
                 | SortCons(<SortConsType>, <SortExpr>)
                 | SortStruct(<StructCons>+)
                 | SortArrow(<SortExpr>+, <SortExpr>)
-                | SortUnknown                                            [. tc]
-                | SortsPossible(<SortExpr>+)                             [. tc]
+                | SortUnknown
+                | SortsPossible(<SortExpr>+)
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
@@ -64,9 +64,9 @@
 //----------------
 
 //data expression
-<DataExpr>     ::= Id(<String>)                                          [- tc]
-                 | <DataVarId>                                           [+ tc]
-                 | <OpId>                                                [+ tc]
+<DataExpr>     ::= Id(<String>)
+                 | <DataVarId>
+                 | <OpId>
                  | DataAppl(<DataExpr>, <DataExpr>+)
                  | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)
                  | Whr(<DataExpr>, <WhrDecl>+)
@@ -79,16 +79,16 @@
 
 //binding operator
 <BindingOperator>
-               ::= SetBagComp                                            [- tc]
-                 | SetComp                                               [+ tc]
-                 | BagComp                                               [+ tc]
+               ::= SetBagComp
+                 | SetComp
+                 | BagComp
                  | Forall
                  | Exists
                  | Lambda
 
 //where clause declaration
-<WhrDecl>      ::= <IdInit>                                              [- tc]
-                 | <DataVarIdInit>                                       [+ tc]
+<WhrDecl>      ::= <IdInit>
+                 | <DataVarIdInit>
 
 //data variable identifier and initialisation
 <DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
@@ -131,10 +131,10 @@
 //------------
 
 //multiaction
-<MultAct>      ::= MultAct(<ParamIdOrAction>*)
+<MultAct>      ::= MultAct(<Action>*)
 
-<ParamIdOrAction> ::= <ParamId>                                          [- tc]
-                    | <Action>                                           [+ tc]
+//untyped multiaction
+<UntypedMultAct> ::= UntypedMultAct(<UntypedAction>*)
 
 //parameterised id
 <ParamId>      ::= ParamId(<String>, <DataExpr>*)
@@ -153,11 +153,11 @@
 //-------------------
 
 //process expression
-<ProcExpr>     ::= <ParamId>                                             [- tc]
-                 | IdAssignment(<String>, <IdInit>*)                     [- tc]
-                 | <Action>                                              [+ tc]
-                 | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
-                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
+<ProcExpr>     ::= <ParamId>
+                 | IdAssignment(<String>, <IdInit>*)
+                 | <Action>
+                 | Process(<ProcVarId>, <DataExpr>*)
+                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)
                  | Delta
                  | Tau
                  | Sum(<DataVarId>+, <ProcExpr>)
@@ -262,15 +262,14 @@
 
 //regular formula
 <RegFrm>       ::= <ActFrm>
-                 | RegNil                                                [-rft]
-                 | RegSeq(<RegFrm>, <RegFrm>)                            [-rft]
-                 | RegAlt(<RegFrm>, <RegFrm>)                            [-rft]
-                 | RegTrans(<RegFrm>)                                    [-rft]
-                 | RegTransOrNil(<RegFrm>)                               [-rft]
+                 | RegNil
+                 | RegSeq(<RegFrm>, <RegFrm>)
+                 | RegAlt(<RegFrm>, <RegFrm>)
+                 | RegTrans(<RegFrm>)
+                 | RegTransOrNil(<RegFrm>)
 
 //action formula
-<ActFrm>       ::= <MultAct>
-                 | <DataExpr>
+<ActFrm>       ::= <DataExpr>
                  | ActTrue
                  | ActFalse
                  | ActNot(<ActFrm>)
@@ -280,10 +279,14 @@
                  | ActForall(<DataVarId>+, <ActFrm>)
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
-
+                 | ActMultAct(<Action>*)
+                 | UntypedActMultAct(<UntypedAction>*)
 
 //LPS action rename specifications
 //--------------------------------
+
+<ParamIdOrAction> ::= <UntypedAction>
+                    | <Action>
 
 //Action rename rules
 <ActionRenameRules>
@@ -296,8 +299,8 @@
 
 //Right-hand side of an action rename rule
 <ActionRenameRuleRHS>
-               ::= <ParamId>                                             [- tc]
-                 | <Action>                                              [+ tc]
+               ::= <UntypedAction>
+                 | <Action>
                  | Delta
                  | Tau
 

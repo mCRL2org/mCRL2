@@ -121,7 +121,7 @@ class state_label_lts : public atermpp::aterm_appl
       std::vector<data::data_expression> v(this->begin(),this->end());
       v[i]=e;
       *this=atermpp::aterm_appl(get_STATE_function_symbol(v.size()),v.begin(),v.end());
-    } 
+    }
 };
 
 /** \brief Pretty print a state value of this LTS.
@@ -229,12 +229,7 @@ inline action_label_lts parse_lts_action(
   const data::data_specification& data_spec,
   const lps::action_list& act_decls)
 {
-  // TODO: rewrite this cryptic code
-  atermpp::aterm_appl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(multi_action_string));
-  lps::multi_action ma=lps::action_list(atermpp::aterm_list(t[0]));
-  lps::type_check(ma,data_spec,atermpp::aterm_cast<lps::action_label_list>(act_decls));
-  lps::translate_user_notation(ma);
-  lps::normalize_sorts(ma, data_spec);
+  lps::multi_action ma = lps::parse_multi_action(multi_action_string, atermpp::aterm_cast<lps::action_label_list>(act_decls));
   return action_label_lts(mcrl2::core::detail::gsMakeMultAct(ma.actions()));
 }
 

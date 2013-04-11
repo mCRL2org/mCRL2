@@ -40,14 +40,6 @@ struct action_formula_builder_base: public core::builder<Derived>
     static_cast<Derived&>(*this).leave(x);
     return x;
   }
-
-  action_formula operator()(const lps::multi_action& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-    return x;
-  }
 };
 
 //--- start generated action_formulas::add_sort_expressions code ---//
@@ -131,6 +123,22 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
+  action_formulas::action_formula operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    action_formulas::action_formula result = action_formulas::multi_action(static_cast<Derived&>(*this)(x.actions()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  action_formulas::action_formula operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    action_formulas::action_formula result = action_formulas::untyped_multi_action(static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   action_formulas::action_formula operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -175,11 +183,13 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      lps::multi_action y = x;
-      static_cast<Derived&>(*this)(y);
-      result = y;
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -279,6 +289,22 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
+  action_formulas::action_formula operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    action_formulas::action_formula result = action_formulas::multi_action(static_cast<Derived&>(*this)(x.actions()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  action_formulas::action_formula operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    action_formulas::action_formula result = action_formulas::untyped_multi_action(static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   action_formulas::action_formula operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -323,11 +349,13 @@ struct add_data_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      lps::multi_action y = x;
-      static_cast<Derived&>(*this)(y);
-      result = y;
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;
@@ -427,6 +455,22 @@ struct add_action_formula_expressions: public Builder<Derived>
     return result;
   }
 
+  action_formulas::action_formula operator()(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+
+  action_formulas::action_formula operator()(const action_formulas::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+
   action_formulas::action_formula operator()(const action_formulas::action_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -471,11 +515,13 @@ struct add_action_formula_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::at>(x));
     }
-    else if (lps::is_multi_action(x))
+    else if (action_formulas::is_multi_action(x))
     {
-      lps::multi_action y = x;
-      static_cast<Derived&>(*this)(y);
-      result = y;
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::multi_action>(x));
+    }
+    else if (action_formulas::is_untyped_multi_action(x))
+    {
+      result = static_cast<Derived&>(*this)(atermpp::aterm_cast<action_formulas::untyped_multi_action>(x));
     }
     static_cast<Derived&>(*this).leave(x);
     return result;

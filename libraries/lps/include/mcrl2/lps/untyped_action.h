@@ -25,7 +25,7 @@ class untyped_action: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     untyped_action()
-      : atermpp::aterm_appl(core::detail::constructParamId())
+      : atermpp::aterm_appl(core::detail::constructUntypedAction())
     {}
 
     /// \brief Constructor.
@@ -33,17 +33,17 @@ class untyped_action: public atermpp::aterm_appl
     untyped_action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_ParamId(*this));
+      assert(core::detail::check_term_UntypedAction(*this));
     }
 
     /// \brief Constructor.
     untyped_action(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::gsMakeParamId(name, arguments))
+      : atermpp::aterm_appl(core::detail::gsMakeUntypedAction(name, arguments))
     {}
 
     /// \brief Constructor.
     untyped_action(const std::string& name, const data::data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::gsMakeParamId(core::identifier_string(name), arguments))
+      : atermpp::aterm_appl(core::detail::gsMakeUntypedAction(core::identifier_string(name), arguments))
     {}
 
     const core::identifier_string& name() const
@@ -70,7 +70,7 @@ typedef std::vector<untyped_action>    untyped_action_vector;
 inline
 bool is_untyped_action(const atermpp::aterm_appl& t)
 {
-  return core::detail::gsIsParamId(t);
+  return core::detail::gsIsUntypedAction(t);
 }
 
 //--- end generated class untyped_action ---//

@@ -63,36 +63,37 @@ struct action_actions: public data::data_specification_actions
     return parse_ActDeclList(node.child(1));
   }
 
-  lps::multi_action parse_MultAct(const core::parse_node& node)
+  lps::untyped_multi_action parse_MultAct(const core::parse_node& node)
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::multi_action(); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::untyped_multi_action(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList"))
     {
-      return lps::multi_action(action_list(parse_ActionList(node.child(0))));
+      return lps::untyped_multi_action(parse_ActionList(node.child(0)));
     }
     report_unexpected_node(node);
-    return lps::action_list();
+    return lps::untyped_multi_action();
   }
 };
 
 inline
-multi_action parse_multi_action_new(const std::string& text)
+lps::untyped_multi_action parse_multi_action_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("MultAct");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  multi_action result = action_actions(parser_tables_mcrl2).parse_MultAct(node);
+  lps::untyped_multi_action result = action_actions(parser_tables_mcrl2).parse_MultAct(node);
   p.destroy_parse_node(node);
   return result;
 }
 
 inline
-void complete_multi_action(multi_action& x, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+multi_action complete_multi_action(untyped_multi_action& x, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
-  lps::type_check(x, data_spec, action_decls);
-  lps::translate_user_notation(x);
-  lps::normalize_sorts(x, data_spec);
+  multi_action result = lps::type_check(x, data_spec, action_decls);
+  lps::translate_user_notation(result);
+  lps::normalize_sorts(result, data_spec);
+  return result;
 }
 
 /// \brief Parses a multi_action from an input stream
@@ -105,9 +106,8 @@ inline
 multi_action parse_multi_action(std::stringstream& in, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
   std::string text = utilities::read_text(in);
-  multi_action result = parse_multi_action_new(text);
-  complete_multi_action(result, action_decls, data_spec);
-  return result;
+  untyped_multi_action u = parse_multi_action_new(text);
+  return complete_multi_action(u, action_decls, data_spec);
 }
 
 /// \brief Parses a multi_action from a string

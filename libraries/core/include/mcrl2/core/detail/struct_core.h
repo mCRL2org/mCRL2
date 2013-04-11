@@ -136,6 +136,20 @@ bool gsIsActImp(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_ActImp();
 }
 
+// ActMultAct
+inline
+const atermpp::function_symbol& function_symbol_ActMultAct()
+{
+  static atermpp::function_symbol function_symbol_ActMultAct = atermpp::function_symbol("ActMultAct", 1);
+  return function_symbol_ActMultAct;
+}
+
+inline
+bool gsIsActMultAct(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_ActMultAct();
+}
+
 // ActNot
 inline
 const atermpp::function_symbol& function_symbol_ActNot()
@@ -1872,6 +1886,20 @@ bool gsIsTau(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_Tau();
 }
 
+// UntypedActMultAct
+inline
+const atermpp::function_symbol& function_symbol_UntypedActMultAct()
+{
+  static atermpp::function_symbol function_symbol_UntypedActMultAct = atermpp::function_symbol("UntypedActMultAct", 1);
+  return function_symbol_UntypedActMultAct;
+}
+
+inline
+bool gsIsUntypedActMultAct(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedActMultAct();
+}
+
 // UntypedAction
 inline
 const atermpp::function_symbol& function_symbol_UntypedAction()
@@ -1884,6 +1912,20 @@ inline
 bool gsIsUntypedAction(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_UntypedAction();
+}
+
+// UntypedMultAct
+inline
+const atermpp::function_symbol& function_symbol_UntypedMultAct()
+{
+  static atermpp::function_symbol function_symbol_UntypedMultAct = atermpp::function_symbol("UntypedMultAct", 1);
+  return function_symbol_UntypedMultAct;
+}
+
+inline
+bool gsIsUntypedMultAct(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedMultAct();
 }
 
 // Whr
@@ -1940,6 +1982,12 @@ inline
 aterm_appl gsMakeActImp(const aterm_appl& ActFrm_0, const aterm_appl& ActFrm_1)
 {
   return term_appl<aterm>(function_symbol_ActImp(), ActFrm_0, ActFrm_1);
+}
+
+inline
+aterm_appl gsMakeActMultAct(const aterm_list& Action_0)
+{
+  return term_appl<aterm>(function_symbol_ActMultAct(), Action_0);
 }
 
 inline
@@ -2255,9 +2303,9 @@ aterm_appl gsMakeMu()
 }
 
 inline
-aterm_appl gsMakeMultAct(const aterm_list& ParamIdOrAction_0)
+aterm_appl gsMakeMultAct(const aterm_list& Action_0)
 {
-  return term_appl<aterm>(function_symbol_MultAct(), ParamIdOrAction_0);
+  return term_appl<aterm>(function_symbol_MultAct(), Action_0);
 }
 
 inline
@@ -2687,9 +2735,21 @@ aterm_appl gsMakeTau()
 }
 
 inline
+aterm_appl gsMakeUntypedActMultAct(const aterm_list& UntypedAction_0)
+{
+  return term_appl<aterm>(function_symbol_UntypedActMultAct(), UntypedAction_0);
+}
+
+inline
 aterm_appl gsMakeUntypedAction(const aterm_appl& String_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_UntypedAction(), String_0, DataExpr_1);
+}
+
+inline
+aterm_appl gsMakeUntypedMultAct(const aterm_list& UntypedAction_0)
+{
+  return term_appl<aterm>(function_symbol_UntypedMultAct(), UntypedAction_0);
 }
 
 inline
@@ -2835,10 +2895,11 @@ inline
 bool gsIsActFrm(const aterm_appl &Term)
 {
   return
-    gsIsMultAct(Term) || gsIsDataExpr(Term) || gsIsActTrue(Term) ||
+    gsIsDataExpr(Term) || gsIsActTrue(Term) ||
     gsIsActFalse(Term) || gsIsActNot(Term) || gsIsActAnd(Term) ||
     gsIsActOr(Term) || gsIsActImp(Term) || gsIsActForall(Term) ||
-    gsIsActExists(Term) || gsIsActAt(Term);
+    gsIsActExists(Term) || gsIsActAt(Term) || gsIsActMultAct(Term) ||
+    gsIsUntypedActMultAct(Term);
 }
 
 ///\pre Term is not NULL

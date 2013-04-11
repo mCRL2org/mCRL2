@@ -575,8 +575,8 @@ class mcrl2parse_tool : public input_tool
             case multact_e  :
             {
               separate_action_specification(text, "multact", lpsspec, text);
-              lps::multi_action x = lps::parse_multi_action_new(text);
-              lps::complete_multi_action(x, lpsspec.action_labels(), lpsspec.data());
+              lps::untyped_multi_action y = lps::parse_multi_action_new(text);
+              lps::multi_action x = lps::complete_multi_action(y, lpsspec.action_labels(), lpsspec.data());
               if (aterm_format)
               {
                 std::cout << lps::detail::multi_action_to_aterm(x) << std::endl;

@@ -80,9 +80,9 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(x);
   }
 
-  void leave(const lps::multi_action& x)
+  void leave(const action_formulas::multi_action& x)
   {
-    push(lps::equal_multi_actions(a, x));
+    push(lps::equal_multi_actions(a, lps::multi_action(x.actions())));
   }
 
   void leave(const action_formulas::true_&)

@@ -125,25 +125,28 @@ trans_or_nil(const regular_formula& operand)                   : public regular_
 '''
 
 ACTION_FORMULA_CLASSES = r'''
-action_formula()                                                            : public atermpp::aterm_appl             | XICU | ActFrm    | An action formula
-true_()                                                                     : public action_formulas::action_formula | EI   | ActTrue   | The value true for action formulas
-false_()                                                                    : public action_formulas::action_formula | EI   | ActFalse  | The value false for action formulas
-not_(const action_formula& operand)                                         : public action_formulas::action_formula | EI   | ActNot    | The not operator for action formulas
-and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EI   | ActAnd    | The and operator for action formulas
-or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActOr     | The or operator for action formulas
-imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActImp    | The implication operator for action formulas
-forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActForall | The universal quantification operator for action formulas
-exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists | The existential quantification operator for action formulas
-at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt     | The at operator for action formulas
+action_formula()                                                            : public atermpp::aterm_appl             | XIC  | ActFrm            | An action formula
+true_()                                                                     : public action_formulas::action_formula | EI   | ActTrue           | The value true for action formulas
+false_()                                                                    : public action_formulas::action_formula | EI   | ActFalse          | The value false for action formulas
+not_(const action_formula& operand)                                         : public action_formulas::action_formula | EI   | ActNot            | The not operator for action formulas
+and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EI   | ActAnd            | The and operator for action formulas
+or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActOr             | The or operator for action formulas
+imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActImp            | The implication operator for action formulas
+forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActForall         | The universal quantification operator for action formulas
+exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists         | The existential quantification operator for action formulas
+at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt             | The at operator for action formulas
+multi_action(const lps::action_list& actions)                               : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
+untyped_multi_action(const lps::untyped_action_list& arguments)             : public action_formulas::action_formula | EI   | UntypedActMultAct | The multi action for action formulas (untyped)
 '''
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
 action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                                                                  : public atermpp::aterm_appl | CI   | ActId             | An action label
 action(const action_label& label, const data::data_expression_list& arguments)                                                                                                                                              : public atermpp::aterm_appl | CI   | Action            | An action
-untyped_action(const core::identifier_string& name, const data::data_expression_list& arguments)                                                                                                                            : public atermpp::aterm_appl | CI   | ParamId           | An untyped action
+untyped_action(const core::identifier_string& name, const data::data_expression_list& arguments)                                                                                                                            : public atermpp::aterm_appl | CI   | UntypedAction     | An untyped action
 deadlock(const data::data_expression& time)                                                                                                                                                                                                              | CMS  | None              | A deadlock
 multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CMS  | None              | A multi-action
+untyped_multi_action(const untyped_action_list& actions)                                                                                                                                                                                                 | CM   | UntypedMultAct    | An untyped multi-action
 deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS  | None              | A deadlock summand
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS  | None              | An action summand
 process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
@@ -223,7 +226,7 @@ boolean_variable(const core::identifier_string& name)                 : public b
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'state_formulas::state_formula'     : [ 'data::data_expression' ],
-  'action_formulas::action_formula'   : [ 'data::data_expression', 'lps::multi_action' ],
+  'action_formulas::action_formula'   : [ 'data::data_expression' ],
   'regular_formulas::regular_formula' : [ 'action_formulas::action_formula' ],
   'process::process_expression'       : [ 'lps::action' ],
   'pbes_system::pbes_expression'      : [ 'data::data_expression' ],

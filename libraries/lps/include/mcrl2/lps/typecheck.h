@@ -16,6 +16,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/lps/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -42,7 +43,7 @@ class action_type_checker:public data::data_type_checker
     *  \param[in] d A multi action that has not been type checked.
     *  \return    a multi action where all untyped identifiers have been replace by typed ones.
     **/
-    multi_action operator()(const multi_action &ma);
+    multi_action operator()(const untyped_multi_action &ma);
 
     /** \brief     Type check a action_rename_specification;
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -64,40 +65,22 @@ class action_type_checker:public data::data_type_checker
  *  \post      mult_action is type checked and sorts have been added when necessary.
  **/
 inline
-void type_check(
-  multi_action& mult_act,
+multi_action type_check(
+  untyped_multi_action& mult_act,
   const data::data_specification& data_spec,
   const action_label_list& action_decls)
 {
+  multi_action result;
   action_type_checker type_checker(data_spec,action_decls);
   try
   {
-    mult_act=type_checker(mult_act);
+   result=type_checker(mult_act);
   }
   catch (mcrl2::runtime_error &e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check multi action " + pp(mult_act));
   }
-}
-
-
-/** \brief     Type check a multi action
- *  Throws an exception if something went wrong.
- *  \param[in] mult_act A multi action that has not been type checked.
- *  \post      mult_action is type checked and sorts have been added when necessary.
- **/
-inline
-void type_check(
-  std::vector<multi_action>& mult_actions,
-  const data::data_specification& data_spec,
-  const action_label_list& action_decls)
-{
-  action_type_checker type_checker(data_spec,action_decls);
-
-  for (std::vector<multi_action>::iterator i=mult_actions.begin(); i!=mult_actions.end(); ++i)
-  {
-    *i=type_checker(*i); // Change the elements in the vector.
-  }
+  return result;
 }
 
 /// \brief Type checks an action rename specification.

@@ -48,5 +48,6 @@ if __name__ == "__main__":
     result = make_classes('../../data/include/mcrl2/data',                            DATA_EXPRESSION_CLASSES      , namespace = 'data'            ) and result
     result = make_classes('../../data/include/mcrl2/data',                            SORT_EXPRESSION_CLASSES      , namespace = 'data'            ) and result
     result = make_classes('../../data/include/mcrl2/data',                            STRUCTURED_SORT_ELEMENTS     , namespace = 'data'            ) and result
+    result = make_classes('../../data/include/mcrl2/data',                            DATA_CLASSES                 , namespace = 'data'            ) and result
     result = make_classes('../../lps/include/mcrl2/lps',                              LPS_CLASSES                  , namespace = 'lps'             ) and result
     sys.exit(not result) # 0 result indicates successful execution

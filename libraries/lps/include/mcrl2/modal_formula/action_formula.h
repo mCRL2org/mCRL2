@@ -19,7 +19,8 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/action.h"
+#include "mcrl2/lps/untyped_action.h"
 
 namespace mcrl2
 {
@@ -44,17 +45,6 @@ class action_formula: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_ActFrm(*this));
     }
-//--- start user section action_formula ---//
-    /// \brief Constructor.
-    /// \param term A term
-    // TODO: Note that this conversion loses the time of the multi action.
-    // This happens because the internal format is flawed.
-    action_formula(const lps::multi_action& m)
-      : atermpp::aterm_appl(core::detail::gsMakeMultAct(m.actions()))
-    {
-      assert(core::detail::check_rule_ActFrm(*this));
-    }
-//--- end user section action_formula ---//
 };
 
 /// \brief list of action_formulas
@@ -423,6 +413,82 @@ inline
 bool is_at(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsActAt(t);
+}
+
+
+/// \brief The multi action for action formulas
+class multi_action: public action_formula
+{
+  public:
+    /// \brief Default constructor.
+    multi_action()
+      : action_formula(core::detail::constructActMultAct())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    multi_action(const atermpp::aterm& term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActMultAct(*this));
+    }
+
+    /// \brief Constructor.
+    multi_action(const lps::action_list& actions)
+      : action_formula(core::detail::gsMakeActMultAct(actions))
+    {}
+
+    const lps::action_list& actions() const
+    {
+      return atermpp::aterm_cast<const lps::action_list>(atermpp::list_arg1(*this));
+    }
+};
+
+/// \brief Test for a multi_action expression
+/// \param t A term
+/// \return True if it is a multi_action expression
+inline
+bool is_multi_action(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsActMultAct(t);
+}
+
+
+/// \brief The multi action for action formulas (untyped)
+class untyped_multi_action: public action_formula
+{
+  public:
+    /// \brief Default constructor.
+    untyped_multi_action()
+      : action_formula(core::detail::constructUntypedActMultAct())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    untyped_multi_action(const atermpp::aterm& term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_UntypedActMultAct(*this));
+    }
+
+    /// \brief Constructor.
+    untyped_multi_action(const lps::untyped_action_list& arguments)
+      : action_formula(core::detail::gsMakeUntypedActMultAct(arguments))
+    {}
+
+    const lps::untyped_action_list& arguments() const
+    {
+      return atermpp::aterm_cast<const lps::untyped_action_list>(atermpp::list_arg1(*this));
+    }
+};
+
+/// \brief Test for a untyped_multi_action expression
+/// \param t A term
+/// \return True if it is a untyped_multi_action expression
+inline
+bool is_untyped_multi_action(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsUntypedActMultAct(t);
 }
 
 //--- end generated classes ---//
