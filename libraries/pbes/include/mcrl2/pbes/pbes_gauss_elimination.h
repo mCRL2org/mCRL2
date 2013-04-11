@@ -126,7 +126,7 @@ inline
 int gauss_elimination(pbes& p)
 {
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, data::data_enumerator> my_rewriter;
-  typedef typename core::term_traits<pbes_expression> tr;
+  typedef core::term_traits<pbes_expression> tr;
 
   data::rewriter datar(p.data());
   data::data_enumerator datae(p.data(), datar);
