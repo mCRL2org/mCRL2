@@ -281,8 +281,7 @@ class stategraph_algorithm
         }
       }
       m_pbes.compute_source_dest_copy(m_is_control_flow);
-      mCRL2log(log::debug) << print_control_flow_parameters();
-      mCRL2log(log::verbose) << "Computed control flow parameters" << std::endl;
+      mCRL2log(log::verbose) << print_control_flow_parameters();
     }
 
     void compute_local_control_flow_parameters()
