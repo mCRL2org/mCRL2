@@ -1,4 +1,4 @@
-// Author(s): Aad Mathijssen
+// Author(s): Aad Mathijssen, Wieger Wesselink
 // $Date$
 //
 // Distributed under the Boost Software License, Version 1.0.
@@ -8,24 +8,10 @@
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
-//   tc : type checking
-//   di : data implementation
-//   rft: regular formula translation
-// - [+p]/[-p] at the end of a branch means that this branch is added/removed at
-//   the end of phase p
-// - [.p] at the end of a branch means that this branch is only used in phase p
-// - <String> is an arbitrary non-empty string excluding the keywords:
-//     sort cons map var eqn act proc init
-//     struct List Set Bag
-//     lambda whr end
-//     delta tau sum allow block hide rename comm
-//     val mu nu delay yaled nil
-//   Note that this is not as restrictive as user-defined identifiers, which
-//   also excludes the following keywords:
-//     Bool Pos Nat Int Real
-//     true false div mod in forall exists
+// - <String> is an arbitrary non-empty string excluding the mCRL2 keywords
+// - <StringOrEmpty> is a <String> or the empty string
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
-// - <String> and <NumberString> are represented by a quoted ATermAppl constant
+// - <String>, <StringOrEmpty> and <NumberString> are terminals
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
@@ -136,9 +122,6 @@
 //untyped multiaction
 <UntypedMultAct> ::= UntypedMultAct(<UntypedAction>*)
 
-//parameterised id
-<ParamId>      ::= ParamId(<String>, <DataExpr>*)
-
 //Action
 <Action>       ::= Action(<ActId>, <DataExpr>*)
 
@@ -153,8 +136,8 @@
 //-------------------
 
 //process expression
-<ProcExpr>     ::= <ParamId>
-                 | IdAssignment(<String>, <IdInit>*)
+<ProcExpr>     ::= UntypedParamId(<String>, <DataExpr>*)
+                 | UntypedProcessAssignment(<String>, <IdInit>*)
                  | <Action>
                  | Process(<ProcVarId>, <DataExpr>*)
                  | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)
@@ -280,7 +263,7 @@
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
                  | ActMultAct(<Action>*)
-                 | UntypedActMultAct(<UntypedAction>*)
+                 | ActUntypedMultAct(<UntypedAction>*)
 
 //LPS action rename specifications
 //--------------------------------

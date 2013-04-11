@@ -870,13 +870,13 @@ bool is_choice(const atermpp::aterm_appl& t)
 }
 
 
-/// \brief A parameter identifier (only available before type checking)
+/// \brief An untyped parameter identifier
 class untyped_parameter_identifier: public process_expression
 {
   public:
     /// \brief Default constructor.
     untyped_parameter_identifier()
-      : process_expression(core::detail::constructParamId())
+      : process_expression(core::detail::constructUntypedParamId())
     {}
 
     /// \brief Constructor.
@@ -884,17 +884,17 @@ class untyped_parameter_identifier: public process_expression
     untyped_parameter_identifier(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_ParamId(*this));
+      assert(core::detail::check_term_UntypedParamId(*this));
     }
 
     /// \brief Constructor.
     untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : process_expression(core::detail::gsMakeParamId(name, arguments))
+      : process_expression(core::detail::gsMakeUntypedParamId(name, arguments))
     {}
 
     /// \brief Constructor.
     untyped_parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
-      : process_expression(core::detail::gsMakeParamId(core::identifier_string(name), arguments))
+      : process_expression(core::detail::gsMakeUntypedParamId(core::identifier_string(name), arguments))
     {}
 
     const core::identifier_string& name() const
@@ -914,17 +914,17 @@ class untyped_parameter_identifier: public process_expression
 inline
 bool is_untyped_parameter_identifier(const atermpp::aterm_appl& t)
 {
-  return core::detail::gsIsParamId(t);
+  return core::detail::gsIsUntypedParamId(t);
 }
 
 
-/// \brief An id assignment (only available before type checking)
+/// \brief An untyped process assginment
 class untyped_process_assignment: public process_expression
 {
   public:
     /// \brief Default constructor.
     untyped_process_assignment()
-      : process_expression(core::detail::constructIdAssignment())
+      : process_expression(core::detail::constructUntypedProcessAssignment())
     {}
 
     /// \brief Constructor.
@@ -932,17 +932,17 @@ class untyped_process_assignment: public process_expression
     untyped_process_assignment(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_IdAssignment(*this));
+      assert(core::detail::check_term_UntypedProcessAssignment(*this));
     }
 
     /// \brief Constructor.
     untyped_process_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)
-      : process_expression(core::detail::gsMakeIdAssignment(name, assignments))
+      : process_expression(core::detail::gsMakeUntypedProcessAssignment(name, assignments))
     {}
 
     /// \brief Constructor.
     untyped_process_assignment(const std::string& name, const data::identifier_assignment_list& assignments)
-      : process_expression(core::detail::gsMakeIdAssignment(core::identifier_string(name), assignments))
+      : process_expression(core::detail::gsMakeUntypedProcessAssignment(core::identifier_string(name), assignments))
     {}
 
     const core::identifier_string& name() const
@@ -962,7 +962,7 @@ class untyped_process_assignment: public process_expression
 inline
 bool is_untyped_process_assignment(const atermpp::aterm_appl& t)
 {
-  return core::detail::gsIsIdAssignment(t);
+  return core::detail::gsIsUntypedProcessAssignment(t);
 }
 
 //--- end generated classes ---//

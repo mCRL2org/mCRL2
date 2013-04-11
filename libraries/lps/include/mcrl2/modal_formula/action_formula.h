@@ -460,7 +460,7 @@ class untyped_multi_action: public action_formula
   public:
     /// \brief Default constructor.
     untyped_multi_action()
-      : action_formula(core::detail::constructUntypedActMultAct())
+      : action_formula(core::detail::constructActUntypedMultAct())
     {}
 
     /// \brief Constructor.
@@ -468,12 +468,12 @@ class untyped_multi_action: public action_formula
     untyped_multi_action(const atermpp::aterm& term)
       : action_formula(term)
     {
-      assert(core::detail::check_term_UntypedActMultAct(*this));
+      assert(core::detail::check_term_ActUntypedMultAct(*this));
     }
 
     /// \brief Constructor.
     untyped_multi_action(const lps::untyped_action_list& arguments)
-      : action_formula(core::detail::gsMakeUntypedActMultAct(arguments))
+      : action_formula(core::detail::gsMakeActUntypedMultAct(arguments))
     {}
 
     const lps::untyped_action_list& arguments() const
@@ -488,7 +488,7 @@ class untyped_multi_action: public action_formula
 inline
 bool is_untyped_multi_action(const atermpp::aterm_appl& t)
 {
-  return core::detail::gsIsUntypedActMultAct(t);
+  return core::detail::gsIsActUntypedMultAct(t);
 }
 
 //--- end generated classes ---//

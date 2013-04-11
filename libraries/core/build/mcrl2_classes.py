@@ -136,7 +136,7 @@ forall(const data::variable_list& variables, const action_formula& body)    : pu
 exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists         | The existential quantification operator for action formulas
 at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt             | The at operator for action formulas
 multi_action(const lps::action_list& actions)                               : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
-untyped_multi_action(const lps::untyped_action_list& arguments)             : public action_formulas::action_formula | EI   | UntypedActMultAct | The multi action for action formulas (untyped)
+untyped_multi_action(const lps::untyped_action_list& arguments)             : public action_formulas::action_formula | EI   | ActUntypedMultAct | The multi action for action formulas (untyped)
 '''
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
@@ -164,28 +164,28 @@ action_name_multiset(const core::identifier_string_list& names)                 
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
-process_expression()                                                                                                           : public atermpp::aterm_appl         | XIC | ProcExpr          | A process expression
-process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)                    : public process::process_expression | EI  | Process           | A process
-process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                    : public process::process_expression | EI  | ProcessAssignment | A process assignment
-delta()                                                                                                                        : public process::process_expression | EI  | Delta             | The value delta
-tau()                                                                                                                          : public process::process_expression | EI  | Tau               | The value tau
-sum(const data::variable_list& bound_variables, const process_expression& operand)                                             : public process::process_expression | EI  | Sum               | The sum operator
-block(const core::identifier_string_list& block_set, const process_expression& operand)                                        : public process::process_expression | EI  | Block             | The block operator
-hide(const core::identifier_string_list& hide_set, const process_expression& operand)                                          : public process::process_expression | EI  | Hide              | The hide operator
-rename(const rename_expression_list& rename_set, const process_expression& operand)                                            : public process::process_expression | EI  | Rename            | The rename operator
-comm(const communication_expression_list& comm_set, const process_expression& operand)                                         : public process::process_expression | EI  | Comm              | The communication operator
-allow(const action_name_multiset_list& allow_set, const process_expression& operand)                                           : public process::process_expression | EI  | Allow             | The allow operator
-sync(const process_expression& left, const process_expression& right)                                                          : public process::process_expression | EI  | Sync              | The synchronization operator
-at(const process_expression& operand, const data::data_expression& time_stamp)                                                 : public process::process_expression | EI  | AtTime            | The at operator
-seq(const process_expression& left, const process_expression& right)                                                           : public process::process_expression | EI  | Seq               | The sequential composition
-if_then(const data::data_expression& condition, const process_expression& then_case)                                           : public process::process_expression | EI  | IfThen            | The if-then operator
-if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case) : public process::process_expression | EI  | IfThenElse        | The if-then-else operator
-bounded_init(const process_expression& left, const process_expression& right)                                                  : public process::process_expression | EI  | BInit             | The bounded initialization
-merge(const process_expression& left, const process_expression& right)                                                         : public process::process_expression | EI  | Merge             | The merge operator
-left_merge(const process_expression& left, const process_expression& right)                                                    : public process::process_expression | EI  | LMerge            | The left merge operator
-choice(const process_expression& left, const process_expression& right)                                                        : public process::process_expression | EI  | Choice            | The choice operator
-untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)                 : public process::process_expression | EI  | ParamId           | A parameter identifier (only available before type checking)
-untyped_process_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)           : public process::process_expression | EI  | IdAssignment      | An id assignment (only available before type checking)
+process_expression()                                                                                                           : public atermpp::aterm_appl         | XIC | ProcExpr                 | A process expression
+process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)                    : public process::process_expression | EI  | Process                  | A process
+process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                    : public process::process_expression | EI  | ProcessAssignment        | A process assignment
+delta()                                                                                                                        : public process::process_expression | EI  | Delta                    | The value delta
+tau()                                                                                                                          : public process::process_expression | EI  | Tau                      | The value tau
+sum(const data::variable_list& bound_variables, const process_expression& operand)                                             : public process::process_expression | EI  | Sum                      | The sum operator
+block(const core::identifier_string_list& block_set, const process_expression& operand)                                        : public process::process_expression | EI  | Block                    | The block operator
+hide(const core::identifier_string_list& hide_set, const process_expression& operand)                                          : public process::process_expression | EI  | Hide                     | The hide operator
+rename(const rename_expression_list& rename_set, const process_expression& operand)                                            : public process::process_expression | EI  | Rename                   | The rename operator
+comm(const communication_expression_list& comm_set, const process_expression& operand)                                         : public process::process_expression | EI  | Comm                     | The communication operator
+allow(const action_name_multiset_list& allow_set, const process_expression& operand)                                           : public process::process_expression | EI  | Allow                    | The allow operator
+sync(const process_expression& left, const process_expression& right)                                                          : public process::process_expression | EI  | Sync                     | The synchronization operator
+at(const process_expression& operand, const data::data_expression& time_stamp)                                                 : public process::process_expression | EI  | AtTime                   | The at operator
+seq(const process_expression& left, const process_expression& right)                                                           : public process::process_expression | EI  | Seq                      | The sequential composition
+if_then(const data::data_expression& condition, const process_expression& then_case)                                           : public process::process_expression | EI  | IfThen                   | The if-then operator
+if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case) : public process::process_expression | EI  | IfThenElse               | The if-then-else operator
+bounded_init(const process_expression& left, const process_expression& right)                                                  : public process::process_expression | EI  | BInit                    | The bounded initialization
+merge(const process_expression& left, const process_expression& right)                                                         : public process::process_expression | EI  | Merge                    | The merge operator
+left_merge(const process_expression& left, const process_expression& right)                                                    : public process::process_expression | EI  | LMerge                   | The left merge operator
+choice(const process_expression& left, const process_expression& right)                                                        : public process::process_expression | EI  | Choice                   | The choice operator
+untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)                 : public process::process_expression | EI  | UntypedParamId           | An untyped parameter identifier
+untyped_process_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)           : public process::process_expression | EI  | UntypedProcessAssignment | An untyped process assginment
 '''
 
 PBES_CLASSES = r'''

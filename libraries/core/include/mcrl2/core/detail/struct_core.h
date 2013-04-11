@@ -206,6 +206,20 @@ bool gsIsActTrue(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_ActTrue();
 }
 
+// ActUntypedMultAct
+inline
+const atermpp::function_symbol& function_symbol_ActUntypedMultAct()
+{
+  static atermpp::function_symbol function_symbol_ActUntypedMultAct = atermpp::function_symbol("ActUntypedMultAct", 1);
+  return function_symbol_ActUntypedMultAct;
+}
+
+inline
+bool gsIsActUntypedMultAct(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_ActUntypedMultAct();
+}
+
 // Action
 inline
 const atermpp::function_symbol& function_symbol_Action()
@@ -696,20 +710,6 @@ bool gsIsId(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_Id();
 }
 
-// IdAssignment
-inline
-const atermpp::function_symbol& function_symbol_IdAssignment()
-{
-  static atermpp::function_symbol function_symbol_IdAssignment = atermpp::function_symbol("IdAssignment", 2);
-  return function_symbol_IdAssignment;
-}
-
-inline
-bool gsIsIdAssignment(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_IdAssignment();
-}
-
 // IdInit
 inline
 const atermpp::function_symbol& function_symbol_IdInit()
@@ -1114,20 +1114,6 @@ inline
 bool gsIsPBInit(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_PBInit();
-}
-
-// ParamId
-inline
-const atermpp::function_symbol& function_symbol_ParamId()
-{
-  static atermpp::function_symbol function_symbol_ParamId = atermpp::function_symbol("ParamId", 2);
-  return function_symbol_ParamId;
-}
-
-inline
-bool gsIsParamId(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_ParamId();
 }
 
 // ProcEqn
@@ -1886,20 +1872,6 @@ bool gsIsTau(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_Tau();
 }
 
-// UntypedActMultAct
-inline
-const atermpp::function_symbol& function_symbol_UntypedActMultAct()
-{
-  static atermpp::function_symbol function_symbol_UntypedActMultAct = atermpp::function_symbol("UntypedActMultAct", 1);
-  return function_symbol_UntypedActMultAct;
-}
-
-inline
-bool gsIsUntypedActMultAct(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_UntypedActMultAct();
-}
-
 // UntypedAction
 inline
 const atermpp::function_symbol& function_symbol_UntypedAction()
@@ -1926,6 +1898,34 @@ inline
 bool gsIsUntypedMultAct(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_UntypedMultAct();
+}
+
+// UntypedParamId
+inline
+const atermpp::function_symbol& function_symbol_UntypedParamId()
+{
+  static atermpp::function_symbol function_symbol_UntypedParamId = atermpp::function_symbol("UntypedParamId", 2);
+  return function_symbol_UntypedParamId;
+}
+
+inline
+bool gsIsUntypedParamId(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedParamId();
+}
+
+// UntypedProcessAssignment
+inline
+const atermpp::function_symbol& function_symbol_UntypedProcessAssignment()
+{
+  static atermpp::function_symbol function_symbol_UntypedProcessAssignment = atermpp::function_symbol("UntypedProcessAssignment", 2);
+  return function_symbol_UntypedProcessAssignment;
+}
+
+inline
+bool gsIsUntypedProcessAssignment(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedProcessAssignment();
 }
 
 // Whr
@@ -2012,6 +2012,12 @@ inline
 aterm_appl gsMakeActTrue()
 {
   return term_appl<aterm>(function_symbol_ActTrue());
+}
+
+inline
+aterm_appl gsMakeActUntypedMultAct(const aterm_list& UntypedAction_0)
+{
+  return term_appl<aterm>(function_symbol_ActUntypedMultAct(), UntypedAction_0);
 }
 
 inline
@@ -2225,12 +2231,6 @@ aterm_appl gsMakeId(const aterm_appl& String_0)
 }
 
 inline
-aterm_appl gsMakeIdAssignment(const aterm_appl& String_0, const aterm_list& IdInit_1)
-{
-  return term_appl<aterm>(function_symbol_IdAssignment(), String_0, IdInit_1);
-}
-
-inline
 aterm_appl gsMakeIdInit(const aterm_appl& String_0, const aterm_appl& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_IdInit(), String_0, DataExpr_1);
@@ -2402,12 +2402,6 @@ inline
 aterm_appl gsMakePBInit(const aterm_appl& PropVarInst_0)
 {
   return term_appl<aterm>(function_symbol_PBInit(), PropVarInst_0);
-}
-
-inline
-aterm_appl gsMakeParamId(const aterm_appl& String_0, const aterm_list& DataExpr_1)
-{
-  return term_appl<aterm>(function_symbol_ParamId(), String_0, DataExpr_1);
 }
 
 inline
@@ -2735,12 +2729,6 @@ aterm_appl gsMakeTau()
 }
 
 inline
-aterm_appl gsMakeUntypedActMultAct(const aterm_list& UntypedAction_0)
-{
-  return term_appl<aterm>(function_symbol_UntypedActMultAct(), UntypedAction_0);
-}
-
-inline
 aterm_appl gsMakeUntypedAction(const aterm_appl& String_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_UntypedAction(), String_0, DataExpr_1);
@@ -2750,6 +2738,18 @@ inline
 aterm_appl gsMakeUntypedMultAct(const aterm_list& UntypedAction_0)
 {
   return term_appl<aterm>(function_symbol_UntypedMultAct(), UntypedAction_0);
+}
+
+inline
+aterm_appl gsMakeUntypedParamId(const aterm_appl& String_0, const aterm_list& DataExpr_1)
+{
+  return term_appl<aterm>(function_symbol_UntypedParamId(), String_0, DataExpr_1);
+}
+
+inline
+aterm_appl gsMakeUntypedProcessAssignment(const aterm_appl& String_0, const aterm_list& IdInit_1)
+{
+  return term_appl<aterm>(function_symbol_UntypedProcessAssignment(), String_0, IdInit_1);
 }
 
 inline
@@ -2899,7 +2899,7 @@ bool gsIsActFrm(const aterm_appl &Term)
     gsIsActFalse(Term) || gsIsActNot(Term) || gsIsActAnd(Term) ||
     gsIsActOr(Term) || gsIsActImp(Term) || gsIsActForall(Term) ||
     gsIsActExists(Term) || gsIsActAt(Term) || gsIsActMultAct(Term) ||
-    gsIsUntypedActMultAct(Term);
+    gsIsActUntypedMultAct(Term);
 }
 
 ///\pre Term is not NULL
@@ -2917,8 +2917,8 @@ bool gsIsRegFrm(const aterm_appl &Term)
 inline
 bool gsIsProcExpr(const aterm_appl &Term)
 {
-  return gsIsParamId(Term)
-         || gsIsIdAssignment(Term)
+  return gsIsUntypedParamId(Term)
+         || gsIsUntypedProcessAssignment(Term)
          || gsIsAction(Term)
          || gsIsProcess(Term)
          || gsIsProcessAssignment(Term)
