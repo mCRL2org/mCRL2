@@ -79,14 +79,14 @@ class stategraph_influence_graph_algorithm
 
     void print_influence_graph() const
     {
-      mCRL2log(log::debug) << "--- influence graph ---\n";
+      mCRL2log(log::verbose) << "--- influence graph ---\n";
       for (std::vector<influence_vertex>::const_iterator i = m_influence_vertices.begin(); i != m_influence_vertices.end(); ++i)
       {
-        mCRL2log(log::debug) << i->print() << std::endl;
+        mCRL2log(log::verbose) << i->print() << std::endl;
       }
       for (std::vector<influence_edge>::const_iterator i = m_influence_edges.begin(); i != m_influence_edges.end(); ++i)
       {
-        mCRL2log(log::debug) << i->print() << std::endl;
+        mCRL2log(log::verbose) << i->print() << std::endl;
       }
     }
 
