@@ -27,8 +27,8 @@
                 | SortCons(<SortConsType>, <SortExpr>)
                 | SortStruct(<StructCons>+)
                 | SortArrow(<SortExpr>+, <SortExpr>)
-                | SortUnknown
-                | SortsPossible(<SortExpr>+)
+                | UntypedSortUnknown
+                | UntypedSortsPossible(<SortExpr>+)
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
@@ -50,12 +50,12 @@
 //----------------
 
 //data expression
-<DataExpr>     ::= Id(<String>)
-                 | <DataVarId>
+<DataExpr>     ::= <DataVarId>
                  | <OpId>
                  | DataAppl(<DataExpr>, <DataExpr>+)
                  | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)
                  | Whr(<DataExpr>, <WhrDecl>+)
+                 | UntypedIdentifier(<String>)
 
 //data variable identifier
 <DataVarId>    ::= DataVarId(<String>, <SortExpr>)
@@ -65,28 +65,27 @@
 
 //binding operator
 <BindingOperator>
-               ::= SetBagComp
+               ::= Forall
+                 | Exists
                  | SetComp
                  | BagComp
-                 | Forall
-                 | Exists
                  | Lambda
+                 | UntypedSetBagComp
 
 //where clause declaration
-<WhrDecl>      ::= <IdInit>
-                 | <DataVarIdInit>
+<WhrDecl>      ::= <DataVarIdInit>
+                 | <UntypedIdentifierAssignment>
 
 //data variable identifier and initialisation
 <DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
 
-<IdInit>       ::= IdInit(<String>, <DataExpr>)
+<UntypedIdentifierAssignment>       ::= UntypedIdentifierAssignment(<String>, <DataExpr>)
 
 //Data specifications
 //-------------------
 
 //data specification
-<DataSpec>     ::= DataSpec(<SortSpec>, <ConsSpec>,
-                     <MapSpec>, <DataEqnSpec>)
+<DataSpec>     ::= DataSpec(<SortSpec>, <ConsSpec>, <MapSpec>, <DataEqnSpec>)
 
 //sort specification
 <SortSpec>     ::= SortSpec(<SortDecl>*)
@@ -105,8 +104,7 @@
                  | SortRef(<String>, <SortExpr>)
 
 //data equation
-<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>,
-                     <DataExpr>, <DataExpr>)
+<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>, <DataExpr>, <DataExpr>)
 
 //data expression or nil
 <DataExprOrNil>::= <DataExpr>
@@ -136,9 +134,7 @@
 //-------------------
 
 //process expression
-<ProcExpr>     ::= UntypedParamId(<String>, <DataExpr>*)
-                 | UntypedProcessAssignment(<String>, <IdInit>*)
-                 | <Action>
+<ProcExpr>     ::= <Action>
                  | Process(<ProcVarId>, <DataExpr>*)
                  | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)
                  | Delta
@@ -158,6 +154,8 @@
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
                  | Choice(<ProcExpr>, <ProcExpr>)
+                 | UntypedParamId(<String>, <DataExpr>*)
+                 | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
 
 //process identifier
 <ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
@@ -263,7 +261,7 @@
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
                  | ActMultAct(<Action>*)
-                 | ActUntypedMultAct(<UntypedAction>*)
+                 | UntypedActMultAct(<UntypedAction>*)
 
 //LPS action rename specifications
 //--------------------------------
@@ -277,8 +275,7 @@
 
 //Action rename rule
 <ActionRenameRule>
-               ::= ActionRenameRule(<DataVarId>*, <DataExpr>,
-                     <ParamIdOrAction>, <ActionRenameRuleRHS>)
+               ::= ActionRenameRule(<DataVarId>*, <DataExpr>, <ParamIdOrAction>, <ActionRenameRuleRHS>)
 
 //Right-hand side of an action rename rule
 <ActionRenameRuleRHS>

@@ -13,7 +13,7 @@
 #define MCRL2_DATA_TYPECHECK_H
 
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/find.h"
 
 namespace mcrl2
@@ -248,7 +248,7 @@ void type_check(data_expression& data_expr,
     data_type_checker type_checker(data_spec);
     data_expr = type_checker(data_expr,variables);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
-    assert(!search_sort_expression(data_expr, unknown_sort()));
+    assert(!search_sort_expression(data_expr, untyped_sort()));
 #endif
   }
   catch (mcrl2::runtime_error &e) 

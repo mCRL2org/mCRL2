@@ -206,20 +206,6 @@ bool gsIsActTrue(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_ActTrue();
 }
 
-// ActUntypedMultAct
-inline
-const atermpp::function_symbol& function_symbol_ActUntypedMultAct()
-{
-  static atermpp::function_symbol function_symbol_ActUntypedMultAct = atermpp::function_symbol("ActUntypedMultAct", 1);
-  return function_symbol_ActUntypedMultAct;
-}
-
-inline
-bool gsIsActUntypedMultAct(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_ActUntypedMultAct();
-}
-
 // Action
 inline
 const atermpp::function_symbol& function_symbol_Action()
@@ -694,34 +680,6 @@ inline
 bool gsIsHide(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_Hide();
-}
-
-// Id
-inline
-const atermpp::function_symbol& function_symbol_Id()
-{
-  static atermpp::function_symbol function_symbol_Id = atermpp::function_symbol("Id", 1);
-  return function_symbol_Id;
-}
-
-inline
-bool gsIsId(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_Id();
-}
-
-// IdInit
-inline
-const atermpp::function_symbol& function_symbol_IdInit()
-{
-  static atermpp::function_symbol function_symbol_IdInit = atermpp::function_symbol("IdInit", 2);
-  return function_symbol_IdInit;
-}
-
-inline
-bool gsIsIdInit(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_IdInit();
 }
 
 // IfThen
@@ -1354,20 +1312,6 @@ bool gsIsSeq(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_Seq();
 }
 
-// SetBagComp
-inline
-const atermpp::function_symbol& function_symbol_SetBagComp()
-{
-  static atermpp::function_symbol function_symbol_SetBagComp = atermpp::function_symbol("SetBagComp", 0);
-  return function_symbol_SetBagComp;
-}
-
-inline
-bool gsIsSetBagComp(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_SetBagComp();
-}
-
 // SetComp
 inline
 const atermpp::function_symbol& function_symbol_SetComp()
@@ -1534,34 +1478,6 @@ inline
 bool gsIsSortStruct(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_SortStruct();
-}
-
-// SortUnknown
-inline
-const atermpp::function_symbol& function_symbol_SortUnknown()
-{
-  static atermpp::function_symbol function_symbol_SortUnknown = atermpp::function_symbol("SortUnknown", 0);
-  return function_symbol_SortUnknown;
-}
-
-inline
-bool gsIsSortUnknown(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_SortUnknown();
-}
-
-// SortsPossible
-inline
-const atermpp::function_symbol& function_symbol_SortsPossible()
-{
-  static atermpp::function_symbol function_symbol_SortsPossible = atermpp::function_symbol("SortsPossible", 1);
-  return function_symbol_SortsPossible;
-}
-
-inline
-bool gsIsSortsPossible(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_SortsPossible();
 }
 
 // StateAnd
@@ -1872,6 +1788,20 @@ bool gsIsTau(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_Tau();
 }
 
+// UntypedActMultAct
+inline
+const atermpp::function_symbol& function_symbol_UntypedActMultAct()
+{
+  static atermpp::function_symbol function_symbol_UntypedActMultAct = atermpp::function_symbol("UntypedActMultAct", 1);
+  return function_symbol_UntypedActMultAct;
+}
+
+inline
+bool gsIsUntypedActMultAct(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedActMultAct();
+}
+
 // UntypedAction
 inline
 const atermpp::function_symbol& function_symbol_UntypedAction()
@@ -1884,6 +1814,34 @@ inline
 bool gsIsUntypedAction(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_UntypedAction();
+}
+
+// UntypedIdentifier
+inline
+const atermpp::function_symbol& function_symbol_UntypedIdentifier()
+{
+  static atermpp::function_symbol function_symbol_UntypedIdentifier = atermpp::function_symbol("UntypedIdentifier", 1);
+  return function_symbol_UntypedIdentifier;
+}
+
+inline
+bool gsIsUntypedIdentifier(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedIdentifier();
+}
+
+// UntypedIdentifierAssignment
+inline
+const atermpp::function_symbol& function_symbol_UntypedIdentifierAssignment()
+{
+  static atermpp::function_symbol function_symbol_UntypedIdentifierAssignment = atermpp::function_symbol("UntypedIdentifierAssignment", 2);
+  return function_symbol_UntypedIdentifierAssignment;
+}
+
+inline
+bool gsIsUntypedIdentifierAssignment(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedIdentifierAssignment();
 }
 
 // UntypedMultAct
@@ -1926,6 +1884,48 @@ inline
 bool gsIsUntypedProcessAssignment(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_UntypedProcessAssignment();
+}
+
+// UntypedSetBagComp
+inline
+const atermpp::function_symbol& function_symbol_UntypedSetBagComp()
+{
+  static atermpp::function_symbol function_symbol_UntypedSetBagComp = atermpp::function_symbol("UntypedSetBagComp", 0);
+  return function_symbol_UntypedSetBagComp;
+}
+
+inline
+bool gsIsUntypedSetBagComp(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedSetBagComp();
+}
+
+// UntypedSortUnknown
+inline
+const atermpp::function_symbol& function_symbol_UntypedSortUnknown()
+{
+  static atermpp::function_symbol function_symbol_UntypedSortUnknown = atermpp::function_symbol("UntypedSortUnknown", 0);
+  return function_symbol_UntypedSortUnknown;
+}
+
+inline
+bool gsIsUntypedSortUnknown(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedSortUnknown();
+}
+
+// UntypedSortsPossible
+inline
+const atermpp::function_symbol& function_symbol_UntypedSortsPossible()
+{
+  static atermpp::function_symbol function_symbol_UntypedSortsPossible = atermpp::function_symbol("UntypedSortsPossible", 1);
+  return function_symbol_UntypedSortsPossible;
+}
+
+inline
+bool gsIsUntypedSortsPossible(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_UntypedSortsPossible();
 }
 
 // Whr
@@ -2012,12 +2012,6 @@ inline
 aterm_appl gsMakeActTrue()
 {
   return term_appl<aterm>(function_symbol_ActTrue());
-}
-
-inline
-aterm_appl gsMakeActUntypedMultAct(const aterm_list& UntypedAction_0)
-{
-  return term_appl<aterm>(function_symbol_ActUntypedMultAct(), UntypedAction_0);
 }
 
 inline
@@ -2222,18 +2216,6 @@ inline
 aterm_appl gsMakeHide(const aterm_list& String_0, const aterm_appl& ProcExpr_1)
 {
   return term_appl<aterm>(function_symbol_Hide(), String_0, ProcExpr_1);
-}
-
-inline
-aterm_appl gsMakeId(const aterm_appl& String_0)
-{
-  return term_appl<aterm>(function_symbol_Id(), String_0);
-}
-
-inline
-aterm_appl gsMakeIdInit(const aterm_appl& String_0, const aterm_appl& DataExpr_1)
-{
-  return term_appl<aterm>(function_symbol_IdInit(), String_0, DataExpr_1);
 }
 
 inline
@@ -2507,12 +2489,6 @@ aterm_appl gsMakeSeq(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
 }
 
 inline
-aterm_appl gsMakeSetBagComp()
-{
-  return term_appl<aterm>(function_symbol_SetBagComp());
-}
-
-inline
 aterm_appl gsMakeSetComp()
 {
   return term_appl<aterm>(function_symbol_SetComp());
@@ -2582,18 +2558,6 @@ inline
 aterm_appl gsMakeSortStruct(const aterm_list& StructCons_0)
 {
   return term_appl<aterm>(function_symbol_SortStruct(), StructCons_0);
-}
-
-inline
-aterm_appl gsMakeSortUnknown()
-{
-  return term_appl<aterm>(function_symbol_SortUnknown());
-}
-
-inline
-aterm_appl gsMakeSortsPossible(const aterm_list& SortExpr_0)
-{
-  return term_appl<aterm>(function_symbol_SortsPossible(), SortExpr_0);
 }
 
 inline
@@ -2729,9 +2693,27 @@ aterm_appl gsMakeTau()
 }
 
 inline
+aterm_appl gsMakeUntypedActMultAct(const aterm_list& UntypedAction_0)
+{
+  return term_appl<aterm>(function_symbol_UntypedActMultAct(), UntypedAction_0);
+}
+
+inline
 aterm_appl gsMakeUntypedAction(const aterm_appl& String_0, const aterm_list& DataExpr_1)
 {
   return term_appl<aterm>(function_symbol_UntypedAction(), String_0, DataExpr_1);
+}
+
+inline
+aterm_appl gsMakeUntypedIdentifier(const aterm_appl& String_0)
+{
+  return term_appl<aterm>(function_symbol_UntypedIdentifier(), String_0);
+}
+
+inline
+aterm_appl gsMakeUntypedIdentifierAssignment(const aterm_appl& String_0, const aterm_appl& DataExpr_1)
+{
+  return term_appl<aterm>(function_symbol_UntypedIdentifierAssignment(), String_0, DataExpr_1);
 }
 
 inline
@@ -2747,9 +2729,27 @@ aterm_appl gsMakeUntypedParamId(const aterm_appl& String_0, const aterm_list& Da
 }
 
 inline
-aterm_appl gsMakeUntypedProcessAssignment(const aterm_appl& String_0, const aterm_list& IdInit_1)
+aterm_appl gsMakeUntypedProcessAssignment(const aterm_appl& String_0, const aterm_list& UntypedIdentifierAssignment_1)
 {
-  return term_appl<aterm>(function_symbol_UntypedProcessAssignment(), String_0, IdInit_1);
+  return term_appl<aterm>(function_symbol_UntypedProcessAssignment(), String_0, UntypedIdentifierAssignment_1);
+}
+
+inline
+aterm_appl gsMakeUntypedSetBagComp()
+{
+  return term_appl<aterm>(function_symbol_UntypedSetBagComp());
+}
+
+inline
+aterm_appl gsMakeUntypedSortUnknown()
+{
+  return term_appl<aterm>(function_symbol_UntypedSortUnknown());
+}
+
+inline
+aterm_appl gsMakeUntypedSortsPossible(const aterm_list& SortExpr_0)
+{
+  return term_appl<aterm>(function_symbol_UntypedSortsPossible(), SortExpr_0);
 }
 
 inline

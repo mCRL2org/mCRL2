@@ -43,49 +43,49 @@ structured_sort_constructor(const core::identifier_string& name, const structure
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-sort_expression()                                                                         : public atermpp::aterm_appl   | XOCU | SortExpr      | A sort expression
-basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO   | SortId        | A basic sort
-container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO   | SortCons      | A container sort
-structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU | SortStruct    | A structured sort
-function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO   | SortArrow     | A function sort
-unknown_sort()                                                                            : public data::sort_expression | EO   | SortUnknown   | Unknown sort expression
-multiple_possible_sorts(const sort_expression_list& sorts)                                : public data::sort_expression | EO   | SortsPossible | Multiple possible sorts
+sort_expression()                                                                         : public atermpp::aterm_appl   | XOCU | SortExpr             | A sort expression
+basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO   | SortId               | A basic sort
+container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO   | SortCons             | A container sort
+structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU | SortStruct           | A structured sort
+function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO   | SortArrow            | A function sort
+untyped_sort()                                                                            : public data::sort_expression | EO   | UntypedSortUnknown   | Unknown sort expression
+untyped_possible_sorts(const sort_expression_list& sorts)                                 : public data::sort_expression | EO   | UntypedSortsPossible | Multiple possible sorts
 '''
 
 BINDER_TYPES = r'''
-binder_type()                     : public atermpp::aterm_appl  | XCO | BindingOperator | Binder
-set_or_bag_comprehension_binder() : public data::binder_type    | EIO | SetBagComp      | Binder for set or bag comprehension
-set_comprehension_binder()        : public data::binder_type    | EIO | SetComp         | Binder for set comprehension
-bag_comprehension_binder()        : public data::binder_type    | EIO | BagComp         | Binder for bag comprehension
-forall_binder()                   : public data::binder_type    | EIO | Forall          | Binder for universal quantification
-exists_binder()                   : public data::binder_type    | EIO | Exists          | Binder for existential quantification
-lambda_binder()                   : public data::binder_type    | EIO | Lambda          | Binder for lambda abstraction
+binder_type()                             : public atermpp::aterm_appl  | XCO | BindingOperator   | Binder
+untyped_set_or_bag_comprehension_binder() : public data::binder_type    | EIO | UntypedSetBagComp | Binder for untyped set or bag comprehension
+set_comprehension_binder()                : public data::binder_type    | EIO | SetComp           | Binder for set comprehension
+bag_comprehension_binder()                : public data::binder_type    | EIO | BagComp           | Binder for bag comprehension
+forall_binder()                           : public data::binder_type    | EIO | Forall            | Binder for universal quantification
+exists_binder()                           : public data::binder_type    | EIO | Exists            | Binder for existential quantification
+lambda_binder()                           : public data::binder_type    | EIO | Lambda            | Binder for lambda abstraction
 '''
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
-assignment_expression()                                                               : public atermpp::aterm_appl         | XOC   | WhrDecl       | Assignment expression
-assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression | EIOUC | DataVarIdInit | Assignment of a data expression to a variable
-identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | IdInit        | Assignment of a data expression to a string
+assignment_expression()                                                               : public atermpp::aterm_appl                 | XIOC  | WhrDecl                     | Assignment expression
+assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression         | EIOUC | DataVarIdInit               | Assignment of a data expression to a variable
+untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | UntypedIdentifierAssignment | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | XCU | DataExpr  | A data expression
-identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO  | Id        | An identifier
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId      | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU | DataAppl  | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU | Whr       | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder    | An abstraction expression.
+data_expression()                                                                                             : public atermpp::aterm_appl   | XCU | DataExpr          | A data expression
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId         | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId              | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU | DataAppl          | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU | Whr               | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder            | An abstraction expression
+untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO  | UntypedIdentifier | An untyped identifier
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
-abstraction()                                                                         : public data::data_expression | XES | None | Abstraction
-forall(const variable_list& variables, const data_expression& body)                   : public data::abstraction     | E   | None | Universal quantification
-exists(const variable_list& variables, const data_expression& body)                   : public data::abstraction     | E   | None | Existential quantification
-lambda(const variable_list& variables, const data_expression& body)                   : public data::abstraction     | E   | None | Lambda abstraction
-set_comprehension(const variable_list& variables, const data_expression& body)        : public data::abstraction     | E   | None | Set comprehension
-bag_comprehension(const variable_list& variables, const data_expression& body)        : public data::abstraction     | E   | None | Bag comprehension
-set_or_bag_comprehension(const variable_list& variables, const data_expression& body) : public data::abstraction     | E   | None | Set/Bag comprehension
+abstraction()                                                                                 : public data::data_expression | XES | None | Abstraction
+forall(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Universal quantification
+exists(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Existential quantification
+lambda(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Lambda abstraction
+set_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | E   | None | Set comprehension
+bag_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | E   | None | Bag comprehension
+untyped_set_or_bag_comprehension(const variable_list& variables, const data_expression& body) : public data::abstraction     | E   | None | Untyped Set/Bag comprehension
 '''
 
 DATA_CLASSES = r'''
@@ -136,7 +136,7 @@ forall(const data::variable_list& variables, const action_formula& body)    : pu
 exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists         | The existential quantification operator for action formulas
 at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt             | The at operator for action formulas
 multi_action(const lps::action_list& actions)                               : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
-untyped_multi_action(const lps::untyped_action_list& arguments)             : public action_formulas::action_formula | EI   | ActUntypedMultAct | The multi action for action formulas (untyped)
+untyped_multi_action(const lps::untyped_action_list& arguments)             : public action_formulas::action_formula | EI   | UntypedActMultAct | The multi action for action formulas (untyped)
 '''
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
@@ -185,7 +185,7 @@ merge(const process_expression& left, const process_expression& right)          
 left_merge(const process_expression& left, const process_expression& right)                                                    : public process::process_expression | EI  | LMerge                   | The left merge operator
 choice(const process_expression& left, const process_expression& right)                                                        : public process::process_expression | EI  | Choice                   | The choice operator
 untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)                 : public process::process_expression | EI  | UntypedParamId           | An untyped parameter identifier
-untyped_process_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)           : public process::process_expression | EI  | UntypedProcessAssignment | An untyped process assginment
+untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)   : public process::process_expression | EI  | UntypedProcessAssignment | An untyped process assginment
 '''
 
 PBES_CLASSES = r'''

@@ -51,15 +51,15 @@ inline bool is_structured_sort(const atermpp::aterm_appl& p)
 }
 
 /// \brief Returns true if the term t is the unknown sort
-inline bool is_unknown_sort(const atermpp::aterm_appl& p)
+inline bool is_untyped_sort(const atermpp::aterm_appl& p)
 {
-  return core::detail::gsIsSortUnknown(p);
+  return core::detail::gsIsUntypedSortUnknown(p);
 }
 
 /// \brief Returns true if the term t is an expression for multiple possible sorts
-inline bool is_multiple_possible_sorts(const atermpp::aterm_appl& p)
+inline bool is_untyped_possible_sorts(const atermpp::aterm_appl& p)
 {
-  return core::detail::gsIsSortsPossible(p);
+  return core::detail::gsIsUntypedSortsPossible(p);
 }
 
 //--- start generated class sort_expression ---//
@@ -115,8 +115,8 @@ bool is_sort_expression(const atermpp::aterm_appl& x)
          core::detail::gsIsSortCons(x) ||
          core::detail::gsIsSortStruct(x) ||
          core::detail::gsIsSortArrow(x) ||
-         core::detail::gsIsSortUnknown(x) ||
-         core::detail::gsIsSortsPossible(x);
+         core::detail::gsIsUntypedSortUnknown(x) ||
+         core::detail::gsIsUntypedSortsPossible(x);
 }
 
 // template function overloads

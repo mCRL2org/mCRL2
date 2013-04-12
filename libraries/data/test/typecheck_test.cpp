@@ -17,7 +17,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/utilities/test_utilities.h"
@@ -142,7 +142,7 @@ void test_data_expression(const std::string& de_in,
       BOOST_CHECK_EQUAL(de_in, de_out);
 #endif
       // TODO: this check should be uncommented
-      //BOOST_CHECK(!search_sort_expression(x.sort(), data::unknown_sort()));
+      //BOOST_CHECK(!search_sort_expression(x.sort(), data::untyped_sort()));
       if (expected_sort != "")
       {
         BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));

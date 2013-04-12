@@ -18,7 +18,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/identifier.h"
+#include "mcrl2/data/untyped_identifier.h"
 #include "mcrl2/data/variable.h"
 
 namespace mcrl2
@@ -51,6 +51,21 @@ typedef atermpp::term_list<assignment_expression> assignment_expression_list;
 
 /// \brief vector of assignment_expressions
 typedef std::vector<assignment_expression>    assignment_expression_vector;
+
+
+// prototypes
+inline bool is_assignment(const atermpp::aterm_appl& x);
+inline bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x);
+
+/// \brief Test for a assignment_expression expression
+/// \param t A term
+/// \return True if it is a assignment_expression expression
+inline
+bool is_assignment_expression(const atermpp::aterm_appl& x)
+{
+  return data::is_assignment(x) ||
+         data::is_untyped_identifier_assignment(x);
+}
 
 
 /// \brief Assignment of a data expression to a variable
@@ -123,30 +138,30 @@ bool is_assignment(const atermpp::aterm_appl& x)
 
 
 /// \brief Assignment of a data expression to a string
-class identifier_assignment: public assignment_expression
+class untyped_identifier_assignment: public assignment_expression
 {
   public:
     /// \brief Default constructor.
-    identifier_assignment()
-      : assignment_expression(core::detail::constructIdInit())
+    untyped_identifier_assignment()
+      : assignment_expression(core::detail::constructUntypedIdentifierAssignment())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    identifier_assignment(const atermpp::aterm& term)
+    untyped_identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
-      assert(core::detail::check_term_IdInit(*this));
+      assert(core::detail::check_term_UntypedIdentifierAssignment(*this));
     }
 
     /// \brief Constructor.
-    identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeIdInit(lhs, rhs))
+    untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
+      : assignment_expression(core::detail::gsMakeUntypedIdentifierAssignment(lhs, rhs))
     {}
 
     /// \brief Constructor.
-    identifier_assignment(const std::string& lhs, const data_expression& rhs)
-      : assignment_expression(core::detail::gsMakeIdInit(core::identifier_string(lhs), rhs))
+    untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
+      : assignment_expression(core::detail::gsMakeUntypedIdentifierAssignment(core::identifier_string(lhs), rhs))
     {}
 
     const core::identifier_string& lhs() const
@@ -158,41 +173,31 @@ class identifier_assignment: public assignment_expression
     {
       return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
     }
-//--- start user section identifier_assignment ---//
+//--- start user section untyped_identifier_assignment ---//
     /// \brief Applies the assignment to a variable
     /// \param[in] x An identifier string
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
-    data_expression operator()(const identifier& x) const
+    data_expression operator()(const untyped_identifier& x) const
     {
       return x == lhs() ? rhs() : data_expression(x);
     }
-
-    /// \brief Applies the assignment to a term
-    /// \param[in] x A term
-    /// \return The value <tt>x[lhs() := rhs()]</tt>.
-    template < typename Expression >
-    data_expression operator()(const Expression& /*x*/) const
-    {
-      throw std::runtime_error("data::identifier_assignment::operator(const Expression&) is a deprecated interface!");
-      return data_expression();
-    }
-//--- end user section identifier_assignment ---//
+//--- end user section untyped_identifier_assignment ---//
 };
 
-/// \brief list of identifier_assignments
-typedef atermpp::term_list<identifier_assignment> identifier_assignment_list;
+/// \brief list of untyped_identifier_assignments
+typedef atermpp::term_list<untyped_identifier_assignment> untyped_identifier_assignment_list;
 
-/// \brief vector of identifier_assignments
-typedef std::vector<identifier_assignment>    identifier_assignment_vector;
+/// \brief vector of untyped_identifier_assignments
+typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignment_vector;
 
 
-/// \brief Test for a identifier_assignment expression
+/// \brief Test for a untyped_identifier_assignment expression
 /// \param t A term
-/// \return True if it is a identifier_assignment expression
+/// \return True if it is a untyped_identifier_assignment expression
 inline
-bool is_identifier_assignment(const atermpp::aterm_appl& x)
+bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIdInit(x);
+  return core::detail::gsIsUntypedIdentifierAssignment(x);
 }
 
 //--- end generated classes ---//
@@ -257,19 +262,6 @@ variable_list left_hand_sides(const assignment_list& x)
   return variable_list(result.begin(), result.end());
 }
 
-/// \brief Returns true if the term x is an assignment expression
-/// \param x An expression
-/// \return True if the term t is an assignment expression
-inline
-bool is_assignment_expression(const atermpp::aterm_appl& x)
-{
-  // TODO: this code should be generated
-  return
-    core::detail::gsIsDataVarIdInit(x) ||
-    core::detail::gsIsIdInit(x)
-    ;
-}
-
 // template function overloads
 std::string pp(const assignment& x);
 std::string pp(const assignment_list& x);
@@ -294,7 +286,7 @@ inline void swap(mcrl2::data::assignment& t1, mcrl2::data::assignment& t2)
 }
 
 template <>
-inline void swap(mcrl2::data::identifier_assignment& t1, mcrl2::data::identifier_assignment& t2)
+inline void swap(mcrl2::data::untyped_identifier_assignment& t1, mcrl2::data::untyped_identifier_assignment& t2)
 {
   t1.swap(t2);
 }

@@ -368,6 +368,11 @@ def main():
     filename = '../../../doc/specs/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
 
+    if not options.soundness_checks and not options.libstruct and not options.constructors:
+        options.soundness_checks = True
+        options.libstruct = True
+        options.constructors = True
+
     if options.soundness_checks:
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
         result = generate_soundness_check_functions(rules, filename) and result
@@ -381,8 +386,6 @@ def main():
         filename = '../include/mcrl2/core/detail/constructors.h'
         result = generate_constructor_functions(rules, filename) and result
 
-    if not options.soundness_checks and not options.libstruct and not options.constructors:
-        parser.print_help()
     return result
 
 if __name__ == "__main__":

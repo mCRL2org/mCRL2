@@ -21,7 +21,7 @@
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -73,10 +73,10 @@ inline bool is_bag_comprehension(const atermpp::aterm_appl &p)
 }
 
 /// \brief Returns true if the term t is a set/bag comprehension.
-inline bool is_set_or_bag_comprehension(const atermpp::aterm_appl &p)
+inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
-         core::detail::gsIsSetBagComp(atermpp::arg1(p));
+         core::detail::gsIsUntypedSetBagComp(atermpp::arg1(p));
 }
 
 /// \brief Returns true if the term t is a function symbol
@@ -104,9 +104,9 @@ inline bool is_where_clause(const atermpp::aterm_appl &p)
 }
 
 /// \brief Returns true if the term t is an identifier
-inline bool is_identifier(const atermpp::aterm_appl &p)
+inline bool is_untyped_identifier(const atermpp::aterm_appl &p)
 {
-  return core::detail::gsIsId(p);
+  return core::detail::gsIsUntypedIdentifier(p);
 }
 
 class application; // prototype
@@ -191,7 +191,7 @@ class data_expression: public atermpp::aterm_appl
         }
         else
         {
-          assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_set_or_bag_comprehension(*this));
+          assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_untyped_set_or_bag_comprehension(*this));
           const atermpp::term_list<aterm_appl> &v_variables  = atermpp::aterm_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
           assert(v_variables.size() == 1);
 
@@ -221,8 +221,8 @@ class data_expression: public atermpp::aterm_appl
       {
         return aterm_cast<data_expression>((*this)[0]).sort();
       }
-      assert(is_identifier(*this)); // All cases have been deal with here, except this one.
-      return unknown_sort();
+      assert(is_untyped_identifier(*this)); // All cases have been deal with here, except this one.
+      return untyped_sort();
 
     }
 //--- end user section data_expression ---//
@@ -242,7 +242,7 @@ typedef std::vector<data_expression>    data_expression_vector;
 inline
 bool is_data_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsId(x) ||
+  return core::detail::gsIsUntypedIdentifier(x) ||
          core::detail::gsIsDataVarId(x) ||
          core::detail::gsIsOpId(x) ||
          core::detail::gsIsDataAppl(x) ||

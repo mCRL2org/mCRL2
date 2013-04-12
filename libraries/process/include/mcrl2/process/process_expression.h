@@ -980,12 +980,12 @@ class untyped_process_assignment: public process_expression
     }
 
     /// \brief Constructor.
-    untyped_process_assignment(const core::identifier_string& name, const data::identifier_assignment_list& assignments)
+    untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(core::detail::gsMakeUntypedProcessAssignment(name, assignments))
     {}
 
     /// \brief Constructor.
-    untyped_process_assignment(const std::string& name, const data::identifier_assignment_list& assignments)
+    untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(core::detail::gsMakeUntypedProcessAssignment(core::identifier_string(name), assignments))
     {}
 
@@ -994,9 +994,9 @@ class untyped_process_assignment: public process_expression
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    const data::identifier_assignment_list& assignments() const
+    const data::untyped_identifier_assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const data::identifier_assignment_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::untyped_identifier_assignment_list>(atermpp::list_arg2(*this));
     }
 };
 

@@ -166,7 +166,7 @@ sort_expression_list mcrl2::process::process_type_checker::GetNotInferredList(co
     }
     else
     {
-      Sort=multiple_possible_sorts(sort_expression_list(reverse(Pars[i-1])));
+      Sort=untyped_possible_sorts(sort_expression_list(reverse(Pars[i-1])));
     }
     Result.push_front(Sort);
   }
@@ -176,13 +176,13 @@ sort_expression_list mcrl2::process::process_type_checker::GetNotInferredList(co
 bool mcrl2::process::process_type_checker::IsTypeAllowedA(const sort_expression &Type, const sort_expression &PosType)
 {
   //Checks if Type is allowed by PosType
-  if (data::is_unknown_sort(data::sort_expression(PosType)))
+  if (data::is_untyped_sort(data::sort_expression(PosType)))
   {
     return true;
   }
-  if (is_multiple_possible_sorts(PosType))
+  if (is_untyped_possible_sorts(PosType))
   {
-    const multiple_possible_sorts& s=aterm_cast<multiple_possible_sorts>(PosType);
+    const untyped_possible_sorts& s=aterm_cast<untyped_possible_sorts>(PosType);
     return InTypesA(Type,s.sorts());
   }
 
@@ -443,10 +443,10 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     term_list <sort_expression_list> ParList=j->second;
     // Put the assignments into a table
     std::map <identifier_string,data_expression> As;    // variable -> expression (both untyped, still)
-    const identifier_assignment_list &al=t.assignments();
-    for (identifier_assignment_list::const_iterator l=al.begin(); l!=al.end(); ++l)
+    const untyped_identifier_assignment_list &al=t.assignments();
+    for (untyped_identifier_assignment_list::const_iterator l=al.begin(); l!=al.end(); ++l)
     {
-      const identifier_assignment& a= *l;
+      const untyped_identifier_assignment& a= *l;
       const std::map <identifier_string,data_expression>::const_iterator i=As.find(a.lhs());
       if (i!=As.end()) // An assignment of the shape x:=t already exists, this is not OK.
       {
@@ -512,7 +512,7 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         const std::map <identifier_string,data_expression> ::const_iterator i=As.find(FormalParName);
         if (i==As.end())  // Not found.
         {
-          ActualPar=identifier(FormalParName);
+          ActualPar=data::untyped_identifier(FormalParName);
         }
         else
         {
@@ -551,9 +551,9 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
     }
 
     assignment_list TypedAssignments;
-    for (identifier_assignment_list::const_iterator l=t.assignments().begin(); l!=t.assignments().end(); ++l)
+    for (untyped_identifier_assignment_list::const_iterator l=t.assignments().begin(); l!=t.assignments().end(); ++l)
     {
-      const identifier_assignment a= *l;
+      const untyped_identifier_assignment a= *l;
       const std::map <identifier_string,assignment> ::const_iterator i=As_new.find(a.lhs());
       if (i==As_new.end())
       {

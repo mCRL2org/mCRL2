@@ -26,8 +26,8 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/multiple_possible_sorts.h"
-#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/untyped_possible_sorts.h"
+#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/bool.h"
@@ -78,9 +78,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       name = function_symbol(x.head()).name();
     }
-    else if (is_identifier(x.head()))
+    else if (is_untyped_identifier(x.head()))
     {
-      name = identifier(x.head()).name();
+      name = untyped_identifier(x.head()).name();
     }
     else
     {
@@ -960,7 +960,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::identifier_assignment& x)
+  void operator()(const data::untyped_identifier_assignment& x)
   {
     derived().enter(x);
     derived()(x.lhs());
@@ -969,7 +969,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::set_or_bag_comprehension_binder& x)
+  void operator()(const data::untyped_set_or_bag_comprehension_binder& x)
   {
     derived().enter(x);
     derived().leave(x);
@@ -1106,20 +1106,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::unknown_sort& x)
+  void operator()(const data::untyped_sort& x)
   {
     derived().enter(x);
     derived().leave(x);
   }
 
-  void operator()(const data::multiple_possible_sorts& x)
+  void operator()(const data::untyped_possible_sorts& x)
   {
     derived().enter(x);
     derived()(x.sorts());
     derived().leave(x);
   }
 
-  void operator()(const data::identifier& x)
+  void operator()(const data::untyped_identifier& x)
   {
     derived().enter(x);
     derived()(x.name());
@@ -1941,7 +1941,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_setbag_comprehension(x);
     }
-    else if (data::is_set_or_bag_comprehension(x))
+    else if (data::is_untyped_set_or_bag_comprehension(x))
     {
       print_setbag_comprehension(x);
     }

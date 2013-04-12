@@ -48,31 +48,31 @@ typedef atermpp::term_list<binder_type> binder_type_list;
 typedef std::vector<binder_type>    binder_type_vector;
 
 
-/// \brief Binder for set or bag comprehension
-class set_or_bag_comprehension_binder: public binder_type
+/// \brief Binder for untyped set or bag comprehension
+class untyped_set_or_bag_comprehension_binder: public binder_type
 {
   public:
     /// \brief Default constructor.
-    set_or_bag_comprehension_binder()
-      : binder_type(core::detail::constructSetBagComp())
+    untyped_set_or_bag_comprehension_binder()
+      : binder_type(core::detail::constructUntypedSetBagComp())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    set_or_bag_comprehension_binder(const atermpp::aterm& term)
+    untyped_set_or_bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_SetBagComp(*this));
+      assert(core::detail::check_term_UntypedSetBagComp(*this));
     }
 };
 
-/// \brief Test for a set_or_bag_comprehension_binder expression
+/// \brief Test for a untyped_set_or_bag_comprehension_binder expression
 /// \param t A term
-/// \return True if it is a set_or_bag_comprehension_binder expression
+/// \return True if it is a untyped_set_or_bag_comprehension_binder expression
 inline
-bool is_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
+bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSetBagComp(x);
+  return core::detail::gsIsUntypedSetBagComp(x);
 }
 
 
@@ -230,7 +230,7 @@ inline void swap(mcrl2::data::binder_type& t1, mcrl2::data::binder_type& t2)
 }
 
 template <>
-inline void swap(mcrl2::data::set_or_bag_comprehension_binder& t1, mcrl2::data::set_or_bag_comprehension_binder& t2)
+inline void swap(mcrl2::data::untyped_set_or_bag_comprehension_binder& t1, mcrl2::data::untyped_set_or_bag_comprehension_binder& t2)
 {
   t1.swap(t2);
 }

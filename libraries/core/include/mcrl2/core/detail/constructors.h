@@ -62,13 +62,12 @@ const atermpp::aterm_appl& constructProcessAssignment();
 const atermpp::aterm_appl& constructForall();
 const atermpp::aterm_appl& constructCommExpr();
 const atermpp::aterm_appl& constructStateNot();
-const atermpp::aterm_appl& constructBooleanFalse();
+const atermpp::aterm_appl& constructUntypedSetBagComp();
 const atermpp::aterm_appl& constructSortFSet();
 const atermpp::aterm_appl& constructStateImp();
 const atermpp::aterm_appl& constructPBESExists();
 const atermpp::aterm_appl& constructPBESImp();
 const atermpp::aterm_appl& constructBinder();
-const atermpp::aterm_appl& constructSortsPossible();
 const atermpp::aterm_appl& constructSortRef();
 const atermpp::aterm_appl& constructProcEqnSpec();
 const atermpp::aterm_appl& constructStateForall();
@@ -78,6 +77,7 @@ const atermpp::aterm_appl& constructUntypedAction();
 const atermpp::aterm_appl& constructStateNu();
 const atermpp::aterm_appl& constructRegNil();
 const atermpp::aterm_appl& constructDataSpec();
+const atermpp::aterm_appl& constructUntypedActMultAct();
 const atermpp::aterm_appl& constructTau();
 const atermpp::aterm_appl& constructStateYaledTimed();
 const atermpp::aterm_appl& constructSortCons();
@@ -93,23 +93,22 @@ const atermpp::aterm_appl& constructSum();
 const atermpp::aterm_appl& constructDataVarId();
 const atermpp::aterm_appl& constructProcVarId();
 const atermpp::aterm_appl& constructProcessInit();
+const atermpp::aterm_appl& constructUntypedIdentifier();
+const atermpp::aterm_appl& constructBooleanFalse();
 const atermpp::aterm_appl& constructBES();
 const atermpp::aterm_appl& constructMapSpec();
-const atermpp::aterm_appl& constructStateYaled();
+const atermpp::aterm_appl& constructIfThen();
 const atermpp::aterm_appl& constructBooleanAnd();
 const atermpp::aterm_appl& constructLinProcSpec();
-const atermpp::aterm_appl& constructSetBagComp();
 const atermpp::aterm_appl& constructChoice();
 const atermpp::aterm_appl& constructLinearProcessInit();
 const atermpp::aterm_appl& constructMultAct();
-const atermpp::aterm_appl& constructActUntypedMultAct();
 const atermpp::aterm_appl& constructPropVarInst();
 const atermpp::aterm_appl& constructBagComp();
 const atermpp::aterm_appl& constructStateDelay();
 const atermpp::aterm_appl& constructRegAlt();
 const atermpp::aterm_appl& constructUntypedMultAct();
 const atermpp::aterm_appl& constructStructCons();
-const atermpp::aterm_appl& constructIdInit();
 const atermpp::aterm_appl& constructMu();
 const atermpp::aterm_appl& constructPBEqnSpec();
 const atermpp::aterm_appl& constructActNot();
@@ -120,12 +119,14 @@ const atermpp::aterm_appl& constructExists();
 const atermpp::aterm_appl& constructSync();
 const atermpp::aterm_appl& constructActExists();
 const atermpp::aterm_appl& constructProcSpec();
+const atermpp::aterm_appl& constructUntypedSortsPossible();
 const atermpp::aterm_appl& constructStateMu();
 const atermpp::aterm_appl& constructStateFalse();
+const atermpp::aterm_appl& constructPBESFalse();
 const atermpp::aterm_appl& constructPBESForall();
 const atermpp::aterm_appl& constructStateTrue();
 const atermpp::aterm_appl& constructBInit();
-const atermpp::aterm_appl& constructPBESFalse();
+const atermpp::aterm_appl& constructUntypedSortUnknown();
 const atermpp::aterm_appl& constructDataAppl();
 const atermpp::aterm_appl& constructRegTrans();
 const atermpp::aterm_appl& constructStateDelayTimed();
@@ -143,7 +144,7 @@ const atermpp::aterm_appl& constructSetComp();
 const atermpp::aterm_appl& constructActForall();
 const atermpp::aterm_appl& constructRenameExpr();
 const atermpp::aterm_appl& constructMerge();
-const atermpp::aterm_appl& constructIfThen();
+const atermpp::aterm_appl& constructActSpec();
 const atermpp::aterm_appl& constructBooleanVariable();
 const atermpp::aterm_appl& constructAction();
 const atermpp::aterm_appl& constructPBESAnd();
@@ -176,7 +177,7 @@ const atermpp::aterm_appl& constructOpId();
 const atermpp::aterm_appl& constructSortSet();
 const atermpp::aterm_appl& constructActFalse();
 const atermpp::aterm_appl& constructActId();
-const atermpp::aterm_appl& constructSortUnknown();
+const atermpp::aterm_appl& constructStateYaled();
 const atermpp::aterm_appl& constructPBESOr();
 const atermpp::aterm_appl& constructUntypedProcessAssignment();
 const atermpp::aterm_appl& constructSortFBag();
@@ -188,8 +189,7 @@ const atermpp::aterm_appl& constructPBInit();
 const atermpp::aterm_appl& constructActTrue();
 const atermpp::aterm_appl& constructRegTransOrNil();
 const atermpp::aterm_appl& constructGlobVarSpec();
-const atermpp::aterm_appl& constructActSpec();
-const atermpp::aterm_appl& constructId();
+const atermpp::aterm_appl& constructUntypedIdentifierAssignment();
 const atermpp::aterm_appl& constructSortExpr();
 const atermpp::aterm_appl& constructSortConsType();
 const atermpp::aterm_appl& constructDataExpr();
@@ -273,11 +273,11 @@ const atermpp::aterm_appl& constructStateNot()
   return t;
 }
 
-// BooleanFalse
+// UntypedSetBagComp
 inline
-const atermpp::aterm_appl& constructBooleanFalse()
+const atermpp::aterm_appl& constructUntypedSetBagComp()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_BooleanFalse()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedSetBagComp()));
   return t;
 }
 
@@ -318,14 +318,6 @@ inline
 const atermpp::aterm_appl& constructBinder()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Binder(), constructBindingOperator(), constructList(constructDataVarId()), constructDataExpr()));
-  return t;
-}
-
-// SortsPossible
-inline
-const atermpp::aterm_appl& constructSortsPossible()
-{
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortsPossible(), constructList(constructSortExpr())));
   return t;
 }
 
@@ -398,6 +390,14 @@ inline
 const atermpp::aterm_appl& constructDataSpec()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_DataSpec(), constructSortSpec(), constructConsSpec(), constructMapSpec(), constructDataEqnSpec()));
+  return t;
+}
+
+// UntypedActMultAct
+inline
+const atermpp::aterm_appl& constructUntypedActMultAct()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedActMultAct(), constructList()));
   return t;
 }
 
@@ -521,6 +521,22 @@ const atermpp::aterm_appl& constructProcessInit()
   return t;
 }
 
+// UntypedIdentifier
+inline
+const atermpp::aterm_appl& constructUntypedIdentifier()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedIdentifier(), constructString()));
+  return t;
+}
+
+// BooleanFalse
+inline
+const atermpp::aterm_appl& constructBooleanFalse()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_BooleanFalse()));
+  return t;
+}
+
 // BES
 inline
 const atermpp::aterm_appl& constructBES()
@@ -537,11 +553,11 @@ const atermpp::aterm_appl& constructMapSpec()
   return t;
 }
 
-// StateYaled
+// IfThen
 inline
-const atermpp::aterm_appl& constructStateYaled()
+const atermpp::aterm_appl& constructIfThen()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StateYaled()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_IfThen(), constructDataExpr(), constructProcExpr()));
   return t;
 }
 
@@ -558,14 +574,6 @@ inline
 const atermpp::aterm_appl& constructLinProcSpec()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_LinProcSpec(), constructDataSpec(), constructActSpec(), constructGlobVarSpec(), constructLinearProcess(), constructLinearProcessInit()));
-  return t;
-}
-
-// SetBagComp
-inline
-const atermpp::aterm_appl& constructSetBagComp()
-{
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SetBagComp()));
   return t;
 }
 
@@ -590,14 +598,6 @@ inline
 const atermpp::aterm_appl& constructMultAct()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_MultAct(), constructList()));
-  return t;
-}
-
-// ActUntypedMultAct
-inline
-const atermpp::aterm_appl& constructActUntypedMultAct()
-{
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActUntypedMultAct(), constructList()));
   return t;
 }
 
@@ -646,14 +646,6 @@ inline
 const atermpp::aterm_appl& constructStructCons()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StructCons(), constructString(), constructList(), constructStringOrEmpty()));
-  return t;
-}
-
-// IdInit
-inline
-const atermpp::aterm_appl& constructIdInit()
-{
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_IdInit(), constructString(), constructDataExpr()));
   return t;
 }
 
@@ -737,6 +729,14 @@ const atermpp::aterm_appl& constructProcSpec()
   return t;
 }
 
+// UntypedSortsPossible
+inline
+const atermpp::aterm_appl& constructUntypedSortsPossible()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedSortsPossible(), constructList(constructSortExpr())));
+  return t;
+}
+
 // StateMu
 inline
 const atermpp::aterm_appl& constructStateMu()
@@ -750,6 +750,14 @@ inline
 const atermpp::aterm_appl& constructStateFalse()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StateFalse()));
+  return t;
+}
+
+// PBESFalse
+inline
+const atermpp::aterm_appl& constructPBESFalse()
+{
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PBESFalse()));
   return t;
 }
 
@@ -777,11 +785,11 @@ const atermpp::aterm_appl& constructBInit()
   return t;
 }
 
-// PBESFalse
+// UntypedSortUnknown
 inline
-const atermpp::aterm_appl& constructPBESFalse()
+const atermpp::aterm_appl& constructUntypedSortUnknown()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PBESFalse()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedSortUnknown()));
   return t;
 }
 
@@ -921,11 +929,11 @@ const atermpp::aterm_appl& constructMerge()
   return t;
 }
 
-// IfThen
+// ActSpec
 inline
-const atermpp::aterm_appl& constructIfThen()
+const atermpp::aterm_appl& constructActSpec()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_IfThen(), constructDataExpr(), constructProcExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActSpec(), constructList()));
   return t;
 }
 
@@ -1185,11 +1193,11 @@ const atermpp::aterm_appl& constructActId()
   return t;
 }
 
-// SortUnknown
+// StateYaled
 inline
-const atermpp::aterm_appl& constructSortUnknown()
+const atermpp::aterm_appl& constructStateYaled()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortUnknown()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_StateYaled()));
   return t;
 }
 
@@ -1281,19 +1289,11 @@ const atermpp::aterm_appl& constructGlobVarSpec()
   return t;
 }
 
-// ActSpec
+// UntypedIdentifierAssignment
 inline
-const atermpp::aterm_appl& constructActSpec()
+const atermpp::aterm_appl& constructUntypedIdentifierAssignment()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ActSpec(), constructList()));
-  return t;
-}
-
-// Id
-inline
-const atermpp::aterm_appl& constructId()
-{
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_Id(), constructString()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedIdentifierAssignment(), constructString(), constructDataExpr()));
   return t;
 }
 
@@ -1315,21 +1315,21 @@ const atermpp::aterm_appl& constructSortConsType()
 inline
 const atermpp::aterm_appl& constructDataExpr()
 {
-  return constructId();
+  return constructDataVarId();
 }
 
 // BindingOperator
 inline
 const atermpp::aterm_appl& constructBindingOperator()
 {
-  return constructSetBagComp();
+  return constructForall();
 }
 
 // WhrDecl
 inline
 const atermpp::aterm_appl& constructWhrDecl()
 {
-  return constructIdInit();
+  return constructDataVarIdInit();
 }
 
 // SortDecl
@@ -1350,7 +1350,7 @@ const atermpp::aterm_appl& constructDataExprOrNil()
 inline
 const atermpp::aterm_appl& constructProcExpr()
 {
-  return constructUntypedParamId();
+  return constructAction();
 }
 
 // MultActOrDelta

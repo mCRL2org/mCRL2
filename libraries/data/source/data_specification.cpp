@@ -256,8 +256,8 @@ sort_expression find_normal_form(
   std::set < sort_expression > sorts_already_seen = std::set < sort_expression >())
 {
   assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
-  assert(!is_unknown_sort(e));
-  assert(!is_multiple_possible_sorts(e));
+  assert(!is_untyped_sort(e));
+  assert(!is_untyped_possible_sorts(e));
 
   if (is_function_sort(e))
   {
