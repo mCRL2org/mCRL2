@@ -636,17 +636,17 @@ inline bes_expression variable(const variable_type& n)
 
 inline bool is_false(const bes_expression& b)
 {
-  return b==false_();
+  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESFalse();
 }
 
 inline bool is_true(const bes_expression& b)
 {
-  return b==true_();
+  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESTrue();
 }
 
 inline bool is_dummy(const bes_expression& b)
 {
-  return b==dummy();
+  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESDummy();
 }
 
 inline bool is_and(const bes_expression& b)
