@@ -447,19 +447,19 @@ void use_hashtables(void)
   bes_global_variables<size_t>::opt_use_hashtables=true;
 }
 
-inline atermpp::function_symbol AFunBESAnd()
+inline const atermpp::function_symbol &AFunBESAnd()
 {
   static atermpp::function_symbol BESAnd("BESAnd", 2);
   return BESAnd;
 }
 
-inline atermpp::function_symbol AFunBESOr()
+inline const atermpp::function_symbol &AFunBESOr()
 {
   static atermpp::function_symbol BESOr("BESOr", 2);
   return BESOr;
 }
 
-inline atermpp::function_symbol AFunBESIf()
+inline const atermpp::function_symbol &AFunBESIf()
 {
   static atermpp::function_symbol BESIf("BESIf", 3);
   return BESIf;
@@ -467,9 +467,9 @@ inline atermpp::function_symbol AFunBESIf()
 
 // BESFalse
 inline
-atermpp::function_symbol gsAFunBESFalse()
+const atermpp::function_symbol &gsAFunBESFalse()
 {
-  static atermpp::function_symbol AFunBESFalse("BESFalse", 0);
+  static const atermpp::function_symbol AFunBESFalse("BESFalse", 0);
   return AFunBESFalse;
 }
 
@@ -481,9 +481,9 @@ bool gsIsBESFalse(atermpp::aterm_appl Term)
 
 // BESTrue
 inline
-atermpp::function_symbol gsAFunBESTrue()
+const atermpp::function_symbol &gsAFunBESTrue()
 {
-  static atermpp::function_symbol AFunBESTrue("BESTrue", 0);
+  static const atermpp::function_symbol AFunBESTrue("BESTrue", 0);
   return AFunBESTrue;
 }
 
@@ -495,9 +495,9 @@ bool gsIsBESTrue(atermpp::aterm_appl Term)
 
 // BESDummy
 inline
-atermpp::function_symbol gsAFunBESDummy()
+const atermpp::function_symbol &gsAFunBESDummy()
 {
-  static atermpp::function_symbol AFunBESDummy("BESDummy", 0);
+  static const atermpp::function_symbol AFunBESDummy("BESDummy", 0);
   return AFunBESDummy;
 }
 
@@ -508,47 +508,50 @@ bool gsIsBESDummy(atermpp::aterm_appl Term)
 }
 
 inline
-atermpp::aterm_appl gsMakeBESFalse()
+const atermpp::aterm_appl &gsMakeBESFalse()
 {
-  return atermpp::aterm_appl(gsAFunBESFalse());
+  static const atermpp::aterm_appl t(gsAFunBESFalse());
+  return t;
 }
 
 inline
-atermpp::aterm_appl gsMakeBESTrue()
+const atermpp::aterm_appl &gsMakeBESTrue()
 {
-  return atermpp::aterm_appl(gsAFunBESTrue());
+  static const atermpp::aterm_appl t(gsAFunBESTrue());
+  return t;
 }
 
 inline
-atermpp::aterm_appl gsMakeBESDummy()
+const atermpp::aterm_appl &gsMakeBESDummy()
 {
-  return atermpp::aterm_appl(gsAFunBESDummy());
+  static const atermpp::aterm_appl t(gsAFunBESDummy());
+  return t;
 }
 
 /// \brief Returns the expression true
 inline
-bes_expression true_()
+const bes_expression &true_()
 {
-  return bes_expression(gsMakeBESTrue());
+  return atermpp::aterm_cast<const bes_expression>(gsMakeBESTrue());
 }
 
 /// \brief Returns the expression false
 inline
-bes_expression false_()
+const bes_expression &false_()
 {
-  return bes_expression(gsMakeBESFalse());
+  return atermpp::aterm_cast<const bes_expression>(gsMakeBESFalse());
 }
 
 /// \brief Returns the expression dummy (???)
 inline
-bes_expression dummy()
+const bes_expression &dummy()
 {
-  return bes_expression(gsMakeBESDummy());
+  return atermpp::aterm_cast<const bes_expression>(gsMakeBESDummy());
 }
 
 inline bes_expression and_(const bes_expression &b1, const bes_expression &b2)
 {
-  return bes_expression(atermpp::aterm_appl(AFunBESAnd(), b1, b2));
+  return atermpp::aterm_cast<bes_expression>(atermpp::aterm_appl(AFunBESAnd(), b1, b2));
 }
 
 inline bes_expression and_optimized(const bes_expression &b1, const bes_expression &b2)
@@ -578,7 +581,7 @@ inline bes_expression and_optimized(const bes_expression &b1, const bes_expressi
 
 inline bes_expression or_(const bes_expression &b1, const bes_expression &b2)
 {
-  return bes_expression(atermpp::aterm_appl(AFunBESOr(), b1, b2));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_appl(AFunBESOr(), b1, b2));
 }
 
 inline bes_expression or_optimized(const bes_expression &b1, const bes_expression &b2)
@@ -614,7 +617,7 @@ inline bool is_variable(const bes_expression &b)
 
 inline bes_expression if_(const bes_expression &b1, const bes_expression &b2, const bes_expression &b3)
 {
-  return bes_expression(atermpp::aterm_appl(AFunBESIf(), b1, b2,b3));
+  return atermpp::aterm_cast<bes_expression>(atermpp::aterm_appl(AFunBESIf(), b1, b2,b3));
 }
 
 inline bes_expression ifAUX_(const bes_expression &b1, const bes_expression &b2, const bes_expression &b3)
@@ -628,7 +631,7 @@ inline bes_expression ifAUX_(const bes_expression &b1, const bes_expression &b2,
 
 inline bes_expression variable(const variable_type& n)
 {
-  return bes_expression(atermpp::aterm_int(n));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_int(n));
 }
 
 inline bool is_false(const bes_expression& b)
@@ -649,49 +652,49 @@ inline bool is_dummy(const bes_expression& b)
 inline bool is_and(const bes_expression& b)
 {
   using namespace atermpp;
-  return aterm_cast<aterm_appl>(b).function()==AFunBESAnd();
+  return aterm_cast<const aterm_appl>(b).function()==AFunBESAnd();
 }
 
 inline bool is_or(const bes_expression& b)
 {
   using namespace atermpp;
-  return aterm_cast<aterm_appl>(b).function()==AFunBESOr();
+  return aterm_cast<const aterm_appl>(b).function()==AFunBESOr();
 }
 
 inline bool is_if(const bes_expression& b)
 {
   using namespace atermpp;
-  return aterm_cast<aterm_appl>(b).function()==AFunBESIf();
+  return aterm_cast<const aterm_appl>(b).function()==AFunBESIf();
 }
 
 inline const bes_expression &lhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<atermpp::aterm_appl>(b)[0]);
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[0]);
 }
 
 inline const bes_expression &rhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<atermpp::aterm_appl>(b)[1]);
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[1]);
 }
 
 inline const bes_expression& condition(const bes_expression& b)
 {
   assert(is_if(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<atermpp::aterm_appl>(b)[0]);
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[0]);
 }
 
 inline const bes_expression& then_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<atermpp::aterm_appl>(b)[1]);
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[1]);
 }
 
 inline const bes_expression& else_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<atermpp::aterm_appl>(b)[2]);
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[2]);
 }
 
 inline variable_type get_variable(const bes_expression& b)
