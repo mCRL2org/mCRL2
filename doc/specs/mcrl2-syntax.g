@@ -296,7 +296,7 @@ PropVarInst: Id ( '(' DataExprList ')' )? ;
 
 PbesInit: 'init' PropVarInst ';' ;
 
-DataValExpr: 'val' '(' DataExpr ')' ;
+DataValExpr: 'val' '(' DataExpr ')';
 
 PbesExpr
   : DataValExpr
@@ -315,26 +315,26 @@ PbesExpr
 //--- Action formulas
 
 ActFrm
-  : MultAct
-  | DataValExpr
+  : MultAct                                                      $left 10
+  | '(' ActFrm ')'                                               $left 11
+  | DataValExpr                                                  $left 20
   | 'true'
   | 'false'
+  | '!' ActFrm                                                   $unary_right  6
   | 'forall' VarsDeclList '.' ActFrm                             $unary_right  0
   | 'exists' VarsDeclList '.' ActFrm                             $unary_right  0
-  | ActFrm ('=>' $binary_op_right 2) ActFrm
-  | ActFrm ('||' $binary_op_right 3) ActFrm
-  | ActFrm ('&&' $binary_op_right 4) ActFrm
   | ActFrm ('@' $binary_op_left 5) DataExpr
-  | '!' ActFrm                                                   $unary_right  6
-  | '(' ActFrm ')'
+  | ActFrm ('&&' $binary_op_right 4) ActFrm
+  | ActFrm ('||' $binary_op_right 3) ActFrm
+  | ActFrm ('=>' $binary_op_right 2) ActFrm
   ;
 
 //--- Regular formulas
 
 RegFrm
-  : ActFrm
+  : ActFrm                                                       $left 20
+  | '(' RegFrm ')'                                               $left 21
   | 'nil'
-  | '(' RegFrm ')'
   | RegFrm ('.' $binary_op_right 1) RegFrm
   | RegFrm ('+' $binary_op_left 2) RegFrm
   | RegFrm '*'                                                   $unary_right  3
@@ -344,7 +344,8 @@ RegFrm
 //--- State formulas
 
 StateFrm
-  : DataValExpr
+  : DataValExpr                                                  $left 20
+  | '(' StateFrm ')'                                             $left 20
   | 'true'
   | 'false'
   | 'mu' StateVarDecl '.' StateFrm                               $unary_right  1
@@ -360,7 +361,6 @@ StateFrm
   | Id ( '(' DataExprList ')' )?
   | 'delay' ( '@' DataExpr )?
   | 'yaled' ( '@' DataExpr )?
-  | '(' StateFrm ')'
   ;
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;
