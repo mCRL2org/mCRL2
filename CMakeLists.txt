@@ -217,6 +217,7 @@ add_subdirectory ( libraries/core )
 add_subdirectory ( libraries/data )
 add_subdirectory ( libraries/lps )
 add_subdirectory ( libraries/lts )
+add_subdirectory ( libraries/modal_formula )
 add_subdirectory ( libraries/pbes )
 add_subdirectory ( libraries/process )
 add_subdirectory ( libraries/trace )
@@ -352,13 +353,13 @@ include(MCRL2ConfigureComplingRewriters)
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
-#    libraries/aterm/include/
     libraries/atermpp/include/
+    libraries/bes/include/
     libraries/core/include/
     libraries/data/include/
     libraries/lps/include/
     libraries/lts/include/
-    libraries/bes/include/
+    libraries/modal_formula/include/
     libraries/pbes/include/
     libraries/process/include/
     libraries/trace/include/
