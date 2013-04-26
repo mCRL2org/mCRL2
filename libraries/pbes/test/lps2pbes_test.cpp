@@ -18,8 +18,7 @@
 #include <iterator>
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/utilities/test_utilities.h"
-#include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -27,7 +26,13 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
+#include "mcrl2/pbes/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/data_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
+#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
 
 using namespace std;
@@ -39,9 +44,6 @@ using namespace mcrl2::lps::detail;
 using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool expect_success = true, const bool timed=false)
 {
@@ -81,11 +83,68 @@ pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, 
   }
 }
 
-void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf_formula, const bool expected_solution, const bool timed=false)
+void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf_formula, const bool expected_solution, const bool timed = false, bool rewrite = false)
 {
   pbes p = test_lps2pbes(lps_spec, mcf_formula, true, timed);
 
+  // apply one point rule rewriter to p, otherwise some of the PBESs cannot be solved
+  if (rewrite)
+  {
+    one_point_rule_rewriter R;
+    pbes_rewrite(p, R);
+  }
+
   BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_solution);
+}
+
+void one_point_rule_rewrite(pbes& p)
+{
+  data::rewriter datar(p.data());
+
+  // first preprocess data expressions
+  data::detail::one_point_rule_preprocessor one_point_processor;
+  data_rewriter<pbes_expression, data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
+  pbes_rewrite(p, datar_onepoint);
+
+  // apply the one point rule rewriter
+  one_point_rule_rewriter pbesr;
+  pbes_rewrite(p, pbesr);
+
+  // post processing: apply the simplifying rewriter
+  simplifying_rewriter<pbes_expression, data::rewriter> simp(datar);
+  pbes_rewrite(p, simp);
+}
+
+void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, const std::string& expected_solution, bool timed = false)
+{
+  std::cerr << "=== solve_pbes === " << mcf_formula << std::endl;
+  lps::specification spec = lps::parse_linear_process_specification(lps_spec);
+  state_formulas::state_formula formula;
+  pbes p;
+
+  // test formula
+  formula = state_formulas::parse_state_formula(mcf_formula, spec);
+  p = lps2pbes(spec, formula, timed);
+  if (expected_solution != "unknown")
+  {
+    one_point_rule_rewrite(p);
+    bool expected_result = expected_solution == "true";
+    std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
+    BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
+    std::cerr << "done!" << std::endl;
+  }
+
+  // test negated formula
+  formula = state_formulas::not_(formula);
+  p = lps2pbes(spec, formula, timed);
+  if (expected_solution != "unknown")
+  {
+    one_point_rule_rewrite(p);
+    bool expected_result = expected_solution == "false";
+    std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
+    BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
+    std::cerr << "done!" << std::endl;
+  }
 }
 
 const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
@@ -346,27 +405,64 @@ BOOST_AUTO_TEST_CASE(test_formulas)
     "init P(0);                             \n"
     ;
 
-  std::vector<string> formulas;
-  formulas.push_back("delay@11");
-  formulas.push_back("exists m:Nat. <a(m)>true");
-  formulas.push_back("exists p:Nat. <a(p)>true");
-  formulas.push_back("forall m:Nat. [a(m)]false");
-  formulas.push_back("nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))");
-  formulas.push_back("mu X(n:Nat = 1). [forall m:Nat. a(m)](val(smaller(n,10) ) && X(n+2))");
-  formulas.push_back("<exists m:Nat. a(m)>true");
-  formulas.push_back("<a(2)>[a(0)]false");
-  formulas.push_back("<a(2)>true");
-  formulas.push_back("[forall m:Nat. a(m)]false");
-  formulas.push_back("[a(0)]<a(1)>true");
-  formulas.push_back("[a(1)]false");
-  formulas.push_back("!true");
-  formulas.push_back("yaled@10");
+  std::string formula;
+  std::string expected_solution;
 
-  for (std::vector<string>::iterator i = formulas.begin(); i != formulas.end(); ++i)
-  {
-    test_lps2pbes(SPEC, *i, true, false);
-    test_lps2pbes(SPEC, *i, true, true);
-  }
+  formula = "exists m:Nat. <a(m)>true";
+  expected_solution = "true";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "exists p:Nat. <a(p)>true";
+  expected_solution = "true";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "forall m:Nat. [a(m)]false";
+  expected_solution = "false";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))";
+  expected_solution = "unknown";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "mu X(n:Nat = 1). [forall m:Nat. a(m)](val(smaller(n,10) ) && X(n+2))";
+  expected_solution = "unknown";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "<exists m:Nat. a(m)>true";
+  expected_solution = "unknown";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "<a(2)>[a(0)]false";
+  expected_solution = "false";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "<a(2)>true";
+  expected_solution = "true";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "[forall m:Nat. a(m)]false";
+  expected_solution = "unknown";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "[a(0)]<a(1)>true";
+  expected_solution = "true";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "[a(1)]false";
+  expected_solution = "false";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "!true";
+  expected_solution = "false";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "delay@11";
+  expected_solution = "unknown";
+  solve_pbes(SPEC, formula, expected_solution);
+
+  formula = "yaled@10";
+  expected_solution = "unknown";
+  solve_pbes(SPEC, formula, expected_solution);
 }
 
 #ifdef MCRL2_EXTENDED_TESTS
