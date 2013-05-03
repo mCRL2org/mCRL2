@@ -1570,6 +1570,36 @@ BOOST_AUTO_TEST_CASE(test_avoidance_of_possible_types)
   );
 }
 
+/* The next example checks whether Int2Pos is properly typed. */
+BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "f(Int2Pos(-1))",
+    "map f:Pos->Bool;\n",
+    v.begin(), v.end(),
+    true,
+    "Bool"
+  );
+}
+
+/* This example checks whether explicit transformations among 
+ * numbers are properly typable.*/
+BOOST_AUTO_TEST_CASE(test_proper_use_of_int2pos1)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "fpos(Nat2Pos(0)) && fpos(Int2Pos(-1)) && fpos(Real2Pos(1 / 2)) && "
+    "fnat(Int2Nat(-1)) && fnat(Real2Nat(1 / 2)) && "
+    "fint(Real2Int(1 / 2))",
+    "map fpos:Pos->Bool;\n"
+    "    fnat:Nat->Bool;\n"
+    "    fint:Int->Bool;\n",
+    v.begin(), v.end(),
+    true,
+    "Bool"
+  );
+}
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
