@@ -186,7 +186,7 @@ class specification_basic_type:public boost::noncopyable
     process_identifier delta_process;
     std::vector < process_identifier > seq_varnames; /* Contains names of processes which represent a sequence
                                                             of process variables */
-    std::vector < std::vector < process_instance > > representedprocesses; /* contains the sequences of process
+    std::vector < std::vector < process_instance_assignment > > representedprocesses; /* contains the sequences of process
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
     bool timeIsBeingUsed;
@@ -474,6 +474,20 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
+    template <class SUBSTITUTION>
+    std::set<data::variable> sigma_variables(const SUBSTITUTION& sigma)
+    {
+      std::set<data::variable> result;
+      for (typename SUBSTITUTION::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+      {
+        std::set<data::variable> V = data::find_free_variables(i->second);
+        V.erase(i->first);
+        result.insert(V.begin(), V.end());
+      }
+      return result;
+    }
+
+
     /************ upperpowerof2 *********************************************/
 
     size_t upperpowerof2(size_t i)
@@ -500,15 +514,24 @@ class specification_basic_type:public boost::noncopyable
       return t;
     }
 
-    data_expression_list RewriteTermList(data_expression_list const& t)
+    data_expression_list RewriteTermList(const data_expression_list& t)
     {
-      if (t.empty())
+      data_expression_vector v;
+      for(data_expression_list::const_iterator i=t.begin(); i!=t.end(); ++i)
       {
-        return t;
+        v.push_back(RewriteTerm(*i));
       }
-      data_expression_list result=RewriteTermList(t.tail());
-      result.push_front(RewriteTerm(t.front()));
-      return result;
+      return data_expression_list(v.begin(),v.end());
+    }
+
+    assignment_list rewrite_assignments(const assignment_list& t)
+    {
+      assignment_vector v;
+      for(assignment_list::const_iterator i=t.begin(); i!=t.end(); ++i)
+      {
+        v.push_back(assignment(i->lhs(), RewriteTerm(i->rhs())));
+      }
+      return assignment_list(v.begin(),v.end());
     }
 
     action RewriteAction(const action& t)
@@ -516,9 +539,9 @@ class specification_basic_type:public boost::noncopyable
       return action(t.label(),RewriteTermList(t.arguments()));
     }
 
-    process_instance RewriteProcess(const process_instance& t)
+    process_instance_assignment RewriteProcess(const process_instance_assignment& t)
     {
-      return process_instance(t.identifier(),RewriteTermList(t.actual_parameters()));
+      return process_instance_assignment(t.identifier(),rewrite_assignments(t.assignments()));
     }
 
     process_expression RewriteMultAct(const process_expression& t)
@@ -581,9 +604,9 @@ class specification_basic_type:public boost::noncopyable
         return RewriteAction(t);
       }
 
-      if (is_process_instance(t))
+      if (is_process_instance_assignment(t))
       {
-        return RewriteProcess(process_instance(t));
+        return RewriteProcess(process_instance_assignment(t));
       }
 
       if (is_sync(t))
@@ -1200,6 +1223,33 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
+    bool occursintermlist(const variable& var, const assignment_list& r, const process_identifier& proc_name)
+    {
+      std::set<variable> assigned_variables;
+      for (assignment_list::const_iterator l=r.begin() ; l!=r.end() ; ++l)
+      {
+        if (occursinterm(var,l->rhs()))
+        {
+          return true;
+        }
+       assigned_variables.insert(l->lhs());
+      }
+      // Check whether x does not occur in the assignment list. Then variable x is assigned to 
+      // itself, and it occurs in the process.
+      variable_list parameters=objectdata[objectIndex(proc_name)].parameters;
+      for (variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+      {
+        if (var==*i)
+        {
+          if (assigned_variables.count(var)==0) // This variable is not assigned, so it does occur!
+          {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
     void filter_vars_by_termlist(
       const data_expression_list::const_iterator begin,
       const data_expression_list::const_iterator end,
@@ -1275,6 +1325,10 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(p))
       {
         return occursintermlist(var,process_instance(p).actual_parameters());
+      }
+      if (is_process_instance_assignment(p))
+      {
+        return occursintermlist(var,process_instance_assignment(p).assignments(),process_instance_assignment(p).identifier());
       }
       if (is_action(p))
       {
@@ -1357,7 +1411,7 @@ class specification_basic_type:public boost::noncopyable
           newsumvars.push_front(newvar);
           /* rename_vars.push_front(var);
              rename_terms.push_front(data_expression(newvar)); */
-          sigma[var]=data_expression(newvar);
+          sigma[var]=newvar;
         }
         else
         {
@@ -1416,6 +1470,7 @@ class specification_basic_type:public boost::noncopyable
 
           if (replacelhs)
           {
+            // lhs=data::replace_variables_capture_avoiding(lhs,make_map_substitution(sigma),sigma_variables(sigma));
             lhs=data::replace_free_variables(lhs,sigma);
             assert(is_variable(lhs));
           }
@@ -1562,14 +1617,18 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(p))
       {
-        return process_instance(process_instance(p).identifier(),
-                                data::replace_free_variables(process_instance(p).actual_parameters(), make_map_substitution(sigma)));
+        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(p);
+        return process_instance_assignment(u.identifier(),
+                                data::replace_free_variables(u.assignments(), make_map_substitution(sigma)));
       }
 
       if (is_process_instance_assignment(p))
       {
-        const process_instance q=transform_process_assignment_to_process(p);
-        return process_instance(q.identifier(),data::replace_free_variables(q.actual_parameters(), make_map_substitution(sigma)));
+        const process_instance_assignment q(p);
+// Let op: de substitutie replace_free_variables werkt nog niet helemaal goed. Bij x=x wordt de rechter x nog niet gesubstitueerd.
+
+        return process_instance_assignment(q.identifier(),
+                                data::replace_free_variables(q.assignments(), make_map_substitution(sigma)));
       }
 
       if (is_action(p))
@@ -1610,7 +1669,34 @@ class specification_basic_type:public boost::noncopyable
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
 
-    process_instance transform_process_assignment_to_process(const process_instance_assignment &procId)
+    process_instance_assignment transform_process_instance_to_process_instance_assignment(const process_instance &procId)
+    {
+      size_t n=objectIndex(procId.identifier());
+      const variable_list process_parameters=objectdata[n].parameters;
+      const data_expression_list rhss=procId.actual_parameters();
+
+      // Transform the assignments into a list of variables and substitutable terms;
+      // std::map < variable, data_expression > sigma;
+      /* mutable_map_substitution <> sigma;
+      for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+      {
+        sigma[i->lhs()]=i->rhs();
+      } */
+
+      assignment_vector new_assignments;
+      data_expression_list::const_iterator j=rhss.begin();
+      for(variable_list::const_iterator i=process_parameters.begin(); i!=process_parameters.end(); ++i, ++j)
+      {
+        assert(j!=rhss.end());
+        new_assignments.push_back(assignment(*i,*j));
+      }
+      assert(j==rhss.end());
+
+      process_instance_assignment p(procId.identifier(), assignment_list(new_assignments.begin(),new_assignments.end()));
+      return p;
+    }
+
+    /* process_instance transform_process_assignment_to_process(const process_instance_assignment &procId)
     {
       size_t n=objectIndex(procId.identifier());
 
@@ -1627,7 +1713,7 @@ class specification_basic_type:public boost::noncopyable
       const data_expression_list dl=make_data_expression_list(objectdata[n].parameters);
       process_instance p(procId.identifier(), data::replace_free_variables(dl,sigma));
       return p;
-    }
+    } */
 
     /********************************************************************/
     /*                                                                  */
@@ -1746,13 +1832,14 @@ class specification_basic_type:public boost::noncopyable
         /* make a new process */
         const process_identifier newproc=newprocess(freevars,body,pCRL,
                                          canterminatebody(body),containstimebody(body));
-        return at(process_instance(
+        return at(process_instance_assignment(
                     newproc,
-                    data::data_expression_list(objectdata[objectIndex(newproc)].parameters)),
+                    assignment_list()),  //data::data_expression_list(objectdata[objectIndex(newproc)].parameters)),
                   time);
       }
 
       if ((is_process_instance(body))||
+          (is_process_instance_assignment(body))||
           (is_sync(body))||
           (is_action(body))||
           (is_tau(body))||
@@ -1920,7 +2007,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        return process_instance_assignment(newproc,assignment_list()); // data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_sum(body))
@@ -1948,7 +2035,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        return process_instance_assignment(newproc,assignment_list()); // data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
       }
 
       if (is_if_then(body))
@@ -1966,7 +2053,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body2,pCRL,
                                          canterminatebody(body2),
                                          containstimebody(body2));
-        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        return process_instance_assignment(newproc,assignment_list()); // data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
 
       }
 
@@ -2011,7 +2098,7 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body3,pCRL,
                                          canterminatebody(body3),
                                          containstimebody(body3));
-        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        return process_instance_assignment(newproc,data::assignment_list());
 
       }
 
@@ -2071,7 +2158,7 @@ class specification_basic_type:public boost::noncopyable
         body1=bodytovarheadGNF(body,alt_state,freevars,first);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1),
                                          containstimebody(body));
-        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        return process_instance_assignment(newproc,data::assignment_list());
       }
 
       if (is_action(body))
@@ -2097,7 +2184,9 @@ class specification_basic_type:public boost::noncopyable
                                              GNF,1,false);
           objectdata[n].process_representing_action=tempvar;
         }
-        return process_instance(objectdata[n].process_representing_action,action(body).arguments());
+        return transform_process_instance_to_process_instance_assignment(
+                          process_instance(objectdata[n].process_representing_action,
+                          action(body).arguments()));
       }
 
       if (is_sync(body))
@@ -2129,7 +2218,10 @@ class specification_basic_type:public boost::noncopyable
                                        GNF,1,false);
           objectdata[n].process_representing_action=tempvar;
         }
-        return process_instance(process_identifier(objectdata[n].process_representing_action),getarguments(ma));
+        return transform_process_instance_to_process_instance_assignment(
+                      process_instance(
+                           process_identifier(objectdata[n].process_representing_action),
+                           getarguments(ma)));
       }
 
       if (is_at(body))
@@ -2151,17 +2243,19 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance(newproc,data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        return process_instance_assignment(newproc,data::assignment_list());
       }
 
       if (is_process_instance(body))
       {
-        return body;
+        // return body;
+        return transform_process_instance_to_process_instance_assignment(body);
       }
 
       if (is_process_instance_assignment(body))
       {
-        return transform_process_assignment_to_process(body);
+        // return transform_process_assignment_to_process(body);
+        return body;
       }
 
 
@@ -2171,7 +2265,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return tau();
         }
-        return process_instance(tau_process,data_expression_list());
+        return process_instance_assignment(tau_process,assignment_list());
       }
 
       if (is_delta(body))
@@ -2180,7 +2274,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return body;
         }
-        return process_instance(delta_process,data_expression_list());
+        return process_instance_assignment(delta_process,assignment_list());
       }
 
       throw mcrl2::runtime_error("unexpected process format in bodytovarheadGNF " + process::pp(body) +".");
@@ -2254,7 +2348,7 @@ class specification_basic_type:public boost::noncopyable
         return seq(body1,body2);
       }
 
-      if (is_process_instance(body1))
+      if (is_process_instance_assignment(body1))
       {
         return seq(body1,body2);
       }
@@ -2322,6 +2416,7 @@ class specification_basic_type:public boost::noncopyable
           (is_action(body1))||
           (is_sync(body1))||
           (is_process_instance(body1))||
+          (is_process_instance_assignment(body1))||
           (is_delta(body1))||
           (is_tau(body1)))
       {
@@ -2349,6 +2444,7 @@ class specification_basic_type:public boost::noncopyable
           is_tau(body1)||
           is_at(body1)||
           is_process_instance(body1)||
+          is_process_instance_assignment(body1)||
           isDeltaAtZero(body1))
       {
         return sum(sumvars,body1);
@@ -2372,8 +2468,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     int match_sequence(
-      const std::vector < process_instance > &s1,
-      const std::vector < process_instance > &s2,
+      const std::vector < process_instance_assignment > &s1,
+      const std::vector < process_instance_assignment > &s2,
       const bool regular2)
     {
       /* s1 and s2 are sequences of typed variables of
@@ -2382,8 +2478,8 @@ class specification_basic_type:public boost::noncopyable
          This function yields true if the names and types of
          the processes in s1 and s2 match. */
 
-      std::vector < process_instance >::const_iterator i2=s2.begin();
-      for (std::vector < process_instance >::const_iterator i1=s1.begin();
+      std::vector < process_instance_assignment >::const_iterator i2=s2.begin();
+      for (std::vector < process_instance_assignment >::const_iterator i1=s1.begin();
            i1!=s1.end(); ++i1,++i2)
       {
         if (i2==s2.end())
@@ -2413,10 +2509,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool exists_variable_for_sequence(
-      const std::vector < process_instance > &process_names,
+      const std::vector < process_instance_assignment > &process_names,
       process_identifier& result)
     {
-      std::vector < std::vector < process_instance > >::const_iterator rwalker=representedprocesses.begin();
+      std::vector < std::vector < process_instance_assignment > >::const_iterator rwalker=representedprocesses.begin();
       for (std::vector < process_identifier >::const_iterator walker=seq_varnames.begin();
            walker!=seq_varnames.end(); ++walker,++rwalker)
       {
@@ -2434,9 +2530,9 @@ class specification_basic_type:public boost::noncopyable
 
     void extract_names(
       const process_expression sequence,
-      std::vector < process_instance > &result)
+      std::vector < process_instance_assignment > &result)
     {
-      if (is_action(sequence)||is_process_instance(sequence))
+      if (is_action(sequence)||is_process_instance_assignment(sequence))
       {
         result.push_back(sequence);
         return;
@@ -2445,10 +2541,10 @@ class specification_basic_type:public boost::noncopyable
       if (is_seq(sequence))
       {
         const process_expression first=seq(sequence).left();
-        if (is_process_instance(first))
+        if (is_process_instance_assignment(first))
         {
           result.push_back(first);
-          size_t n=objectIndex(process_instance(first).identifier());
+          size_t n=objectIndex(process_instance_assignment(first).identifier());
           if (objectdata[n].canterminate)
           {
             extract_names(seq(sequence).right(),result);
@@ -2460,41 +2556,44 @@ class specification_basic_type:public boost::noncopyable
       throw mcrl2::runtime_error("Internal error. Expected sequence of process names (1) " + process::pp(sequence) + ".");
     }
 
-    variable_list parscollect(const process_expression oldbody, process_expression& newbody)
+    variable_list parscollect(const process_expression &oldbody, process_expression& newbody)
     {
       /* we expect that oldbody is a sequence of process instances */
 
-      if (is_process_instance(oldbody))
+      if (is_process_instance_assignment(oldbody))
       {
-        const process_identifier procId=process_instance(oldbody).identifier();
+        const process_identifier procId=process_instance_assignment(oldbody).identifier();
         const variable_list parameters=objectdata[objectIndex(procId)].parameters;
-        newbody=process_instance(procId,data::data_expression_list(parameters));
+        newbody=process_instance_assignment(procId,data::assignment_list());
         return parameters;
       }
 
       if (is_seq(oldbody))
       {
         const process_expression first=seq(oldbody).left();
-        if (is_process_instance(first))
+        if (is_process_instance_assignment(first))
         {
-          size_t n=objectIndex(process_instance(first).identifier());
+          size_t n=objectIndex(process_instance_assignment(first).identifier());
           if (objectdata[n].canterminate)
           {
-            const process_identifier procId=process_instance(first).identifier();
+            const process_identifier procId=process_instance_assignment(first).identifier();
             const variable_list pars=parscollect(seq(oldbody).right(),newbody);
             variable_list pars1, pars2;
 
-            construct_renaming(pars,objectdata[objectIndex(procId)].parameters,pars1,pars2,false);
+            const variable_list new_pars=construct_renaming(pars,objectdata[objectIndex(procId)].parameters,pars1,pars2,false);
+            assignment_vector new_assignment;
+            for(variable_list::const_iterator i=pars2.begin(), j=new_pars.begin(); i!=pars2.end(); ++i,++j)
+            {
+              assert(j!=new_pars.end());
+              new_assignment.push_back(assignment(*i,*j));
+            }
 
-            newbody=seq(process_instance(procId,data::data_expression_list(pars1)),newbody);
+            newbody=seq(process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())),newbody);
             return pars1+pars;
           }
           else
           {
-            const process_identifier procId=process_instance(first).identifier();
-            const variable_list parameters=objectdata[objectIndex(procId)].parameters;
-            newbody=process_instance(procId,data::data_expression_list(parameters));
-            return parameters;
+            return parscollect(first,newbody);
           }
         }
       }
@@ -2503,31 +2602,69 @@ class specification_basic_type:public boost::noncopyable
       return variable_list();
     }
 
-    data_expression_list argscollect(const process_expression t)
+    assignment_list argscollect_regular(
+                         const process_expression& t,
+                         const variable_list &vl, 
+                         const std::set<variable> &variables_bound_in_sum)
     {
-      if (is_process_instance(t))
+      assignment_vector result;
+      for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
       {
-        return process_instance(t).actual_parameters();
+        if (variables_bound_in_sum.count(*i)>0) 
+        { 
+          result.push_back(assignment(*i,*i)); // Here an identity assignment is used, as it is possible
+                                               // that the *i at the lhs is not the same variable as *i at the rhs.
+        }
+      }
+      return assignment_list(result.begin(),result.end());
+    }
+
+    assignment_list argscollect_regular2(const process_expression& t, variable_list &vl)
+    {
+      if (is_process_instance_assignment(t))
+      {
+        const process_instance_assignment p(t);
+        size_t n=objectIndex(p.identifier());
+        
+        const variable_list pars=objectdata[n].parameters; // These are the old parameters of the process.
+        assert(pars.size()<=vl.size());
+
+        std::map<variable,data_expression>sigma;
+        for(assignment_list::const_iterator i=p.assignments().begin();
+              i!=p.assignments().end(); ++i)
+        {
+          sigma[i->lhs()]=i->rhs();
+        }
+
+        assignment_list result;
+        for(variable_list::const_iterator i=pars.begin(); i!=pars.end(); ++i, vl.pop_front())
+        {
+          assert(!vl.empty());
+          const data_expression new_rhs=make_map_substitution(sigma)(*i);
+          result.push_front(assignment(vl.front(),new_rhs)); // Identity assignments are stored as lhs and rhs may
+                                                             // refer to different variables.
+        }
+        return reverse(result);
       }
 
       if (is_seq(t))
       {
-        const process_instance firstproc=seq(t).left();
+        const process_instance_assignment firstproc=seq(t).left();
         size_t n=objectIndex(firstproc.identifier());
+        const assignment_list first_assignment=argscollect_regular2(firstproc,vl);
         if (objectdata[n].canterminate)
         {
-          return firstproc.actual_parameters() + argscollect(seq(t).right());
+          return first_assignment + argscollect_regular2(seq(t).right(),vl);
         }
-        return firstproc.actual_parameters();
+        return first_assignment;
       }
 
       throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (3) " + process::pp(t) +".");
-      return data_expression_list();
     }
 
     process_expression cut_off_unreachable_tail(const process_expression t)
     {
-      if (is_process_instance(t)||is_delta(t)||is_action(t)||is_tau(t)||is_sync(t))
+      if (is_process_instance_assignment(t)||is_delta(t)||is_action(t)||is_tau(t)||is_sync(t))
       {
         return t;
       }
@@ -2535,7 +2672,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_seq(t))
       {
         const process_expression firstproc=seq(t).left();
-        size_t n=objectIndex(process_instance(firstproc).identifier());
+        size_t n=objectIndex(process_instance_assignment(firstproc).identifier());
         if (objectdata[n].canterminate)
         {
           return seq(firstproc,cut_off_unreachable_tail(seq(t).right()));
@@ -2548,26 +2685,25 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression create_regular_invocation(
-      const process_expression sequence1,
+      process_expression sequence,  
       std::vector <process_identifier> &todo,
-      const variable_list freevars)
+      const variable_list &freevars,
+      const std::set<variable> &variables_bound_in_sum)
     {
       process_identifier new_process;
-      data_expression_list args;
-      process_expression sequence(sequence1);
 
       /* Sequence consists of a sequence of process references,
          concatenated with the sequential composition operator */
       sequence=cut_off_unreachable_tail(sequence);
       sequence=pCRLrewrite(sequence);
-      std::vector < process_instance > process_names;
+      std::vector < process_instance_assignment > process_names;
       extract_names(sequence,process_names);
       assert(!process_names.empty());
 
       if (process_names.size()==1)
       {
         /* length of list equals 1 */
-        if (is_process_instance(sequence))
+        if (is_process_instance_assignment(sequence))
         {
           return sequence;
         }
@@ -2606,21 +2742,23 @@ class specification_basic_type:public boost::noncopyable
         todo.push_back(new_process);
       }
       /* now we must construct arguments */
+      variable_list parameters=objectdata[objectIndex(new_process)].parameters;
       if (options.lin_method==lmRegular2)
       {
-        args=argscollect(sequence);
+        const process_expression p=process_instance_assignment(new_process,argscollect_regular2(sequence,parameters));
+        return p;
       }
       else
       {
-        args=data::data_expression_list(objectdata[objectIndex(new_process)].parameters);
+        return process_instance_assignment(new_process,argscollect_regular(sequence,parameters,variables_bound_in_sum));
       }
-      return process_instance(new_process,args);
     }
 
     process_expression to_regular_form(
       const process_expression t,
       std::vector <process_identifier>  &todo,
-      const variable_list freevars)
+      const variable_list freevars,
+      const std::set<variable>& variables_bound_in_sum)
     /* t has the form of the sum, and condition over actions
        each followed by a sequence of variables. We replace
        this variable by a single one, putting the new variable
@@ -2628,8 +2766,8 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_choice(t))
       {
-        const process_expression t1=to_regular_form(choice(t).left(),todo,freevars);
-        const process_expression t2=to_regular_form(choice(t).right(),todo,freevars);
+        const process_expression t1=to_regular_form(choice(t).left(),todo,freevars,variables_bound_in_sum);
+        const process_expression t2=to_regular_form(choice(t).right(),todo,freevars,variables_bound_in_sum);
         return choice(t1,t2);
       }
 
@@ -2639,22 +2777,31 @@ class specification_basic_type:public boost::noncopyable
         assert(is_at(firstact)||is_tau(firstact)||is_action(firstact)||is_sync(firstact));
         /* the sequence of variables in
                    the second argument must be replaced */
-        return seq(firstact,create_regular_invocation(seq(t).right(),todo,freevars));
+        return seq(firstact,create_regular_invocation(seq(t).right(),todo,freevars,variables_bound_in_sum));
       }
 
       if (is_if_then(t))
       {
-        return if_then(if_then(t).condition(),to_regular_form(if_then(t).then_case(),todo,freevars));
+        return if_then(if_then(t).condition(),to_regular_form(if_then(t).then_case(),todo,freevars,variables_bound_in_sum));
       }
 
       if (is_sum(t))
       {
-        const variable_list sumvars=sum(t).bound_variables();
+        variable_list sumvars=sum(t).bound_variables();
+
+        std::map < variable, data_expression > sigma;
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma);
+
+        
+        std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
+        variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
         return sum(sumvars,
                    to_regular_form(
-                     sum(t).operand(),
+                     body,
                      todo,
-                     sumvars+freevars));
+                     sumvars+freevars,
+                     variables_bound_in_sum1));
       }
 
       if (is_sync(t)||is_action(t)||is_delta(t)||is_tau(t)||is_at(t))
@@ -2737,7 +2884,8 @@ class specification_basic_type:public boost::noncopyable
       std::vector <process_identifier> &todo,
       const bool regular,
       processstatustype mode,
-      const variable_list freevars)
+      const variable_list freevars,
+      const std::set <variable> &variables_bound_in_sum)
     /* This process delivers the transformation of body
        to GNF with actions as a head symbol, or it
        delivers NULL if body is not a pCRL process.
@@ -2754,7 +2902,8 @@ class specification_basic_type:public boost::noncopyable
                                    todo,
                                    regular,
                                    mode,
-                                   freevars);
+                                   freevars,
+                                   variables_bound_in_sum);
         return distributeTime(
                  body1,
                  at(body).time_stamp(),
@@ -2765,23 +2914,23 @@ class specification_basic_type:public boost::noncopyable
       if (is_choice(body))
       {
         const process_expression body1=procstorealGNFbody(choice(body).left(),first,todo,
-                                       regular,mode,freevars);
+                                       regular,mode,freevars,variables_bound_in_sum);
         const process_expression body2=procstorealGNFbody(choice(body).right(),first,todo,
-                                       regular,mode,freevars);
+                                       regular,mode,freevars,variables_bound_in_sum);
         return choice(body1,body2);
       }
 
       if (is_seq(body))
       {
         const process_expression body1=procstorealGNFbody(seq(body).left(),v,
-                                       todo,regular,mode,freevars);
+                                       todo,regular,mode,freevars,variables_bound_in_sum);
         const process_expression body2=procstorealGNFbody(seq(body).right(),later,
-                                       todo,regular,mode,freevars);
+                                       todo,regular,mode,freevars,variables_bound_in_sum);
         process_expression t3=putbehind(body1,body2);
         if ((regular) && (v==first))
         {
           /* We must transform t3 to regular form */
-          t3=to_regular_form(t3,todo,freevars);
+          t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
         }
         return t3;
       }
@@ -2790,7 +2939,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const process_expression r=distribute_condition(
                                      procstorealGNFbody(if_then(body).then_case(),first,
-                                         todo,regular,mode,freevars),
+                                         todo,regular,mode,freevars,variables_bound_in_sum),
                                      if_then(body).condition());
         return r;
       }
@@ -2798,9 +2947,11 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(body))
       {
         const variable_list sumvars=sum(body).bound_variables();
+        std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
+        variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
         return distribute_sum(sumvars,
                               procstorealGNFbody(sum(body).operand(),first,
-                                  todo,regular,mode,sumvars+freevars));
+                                  todo,regular,mode,sumvars+freevars,variables_bound_in_sum1));
       }
 
       if (is_action(body))
@@ -2825,11 +2976,11 @@ class specification_basic_type:public boost::noncopyable
           }
           todo.push_back(t);
           /* if ((!regular)||(mode=mCRL))
-              todo.push_back(t);
-                / * single = in `mode=mCRL' is important, otherwise crash
-                   I do not understand the reason for this at this moment
-                   JFG (9/5/2000) */
-          return body;
+             todo.push_back(t);
+               single = in `mode=mCRL' is important, otherwise crash
+               I do not understand the reason for this at this moment
+               JFG (9/5/2000) */
+          return transform_process_instance_to_process_instance_assignment(body); 
         }
 
         const size_t n=objectIndex(t);
@@ -2859,7 +3010,54 @@ class specification_basic_type:public boost::noncopyable
 
         if (regular)
         {
-          t3=to_regular_form(t3,todo,freevars);
+          t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
+        }
+
+        return t3;
+      }
+
+      if (is_process_instance_assignment(body))
+      {
+        process_identifier t=process_instance_assignment(body).identifier();
+
+        if (v==later)
+        {
+          if (regular)
+          {
+            mode=mCRL;
+          }
+          todo.push_back(t);
+          /* if ((!regular)||(mode=mCRL))
+              todo.push_back(t);
+                / * single = in `mode=mCRL' is important, otherwise crash
+                   I do not understand the reason for this at this moment
+                   JFG (9/5/2000) */
+          return body;
+        }
+
+        const size_t n=objectIndex(t);
+        if (objectdata[n].processstatus==mCRL)
+        {
+          todo.push_back(t);
+          return process_expression();
+        }
+        /* The variable is a pCRL process and v==first, so,
+           we must now substitute */
+        procstorealGNFrec(t,first,todo,regular);
+
+        std::map < variable, data_expression > sigma;
+
+        const assignment_list &dl= process_instance_assignment(body).assignments();
+
+        for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
+        {
+          sigma[i->lhs()]=i->rhs();
+        }
+
+        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma);
+        if (regular)
+        {
+          t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
         }
 
         return t3;
@@ -2878,39 +3076,39 @@ class specification_basic_type:public boost::noncopyable
       if (is_merge(body))
       {
         procstorealGNFbody(process::merge(body).left(),later,
-                           todo,regular,mode,freevars);
+                           todo,regular,mode,freevars,variables_bound_in_sum);
         procstorealGNFbody(process::merge(body).right(),later,
-                           todo,regular,mode,freevars);
+                           todo,regular,mode,freevars,variables_bound_in_sum);
         return process_expression();
       }
 
       if (is_hide(body))
       {
-        procstorealGNFbody(hide(body).operand(),later,todo,regular,mode,freevars);
+        procstorealGNFbody(hide(body).operand(),later,todo,regular,mode,freevars,variables_bound_in_sum);
         return process_expression();
       }
 
       if (is_rename(body))
       {
-        procstorealGNFbody(process::rename(body).operand(),later,todo,regular,mode,freevars);
+        procstorealGNFbody(process::rename(body).operand(),later,todo,regular,mode,freevars,variables_bound_in_sum);
         return process_expression();
       }
 
       if (is_allow(body))
       {
-        procstorealGNFbody(allow(body).operand(),later,todo,regular,mode,freevars);
+        procstorealGNFbody(allow(body).operand(),later,todo,regular,mode,freevars,variables_bound_in_sum);
         return process_expression();
       }
 
       if (is_block(body))
       {
-        procstorealGNFbody(block(body).operand(),later,todo,regular,mode,freevars);
+        procstorealGNFbody(block(body).operand(),later,todo,regular,mode,freevars,variables_bound_in_sum);
         return process_expression();
       }
 
       if (is_comm(body))
       {
-        procstorealGNFbody(comm(body).operand(),later,todo,regular,mode,freevars);
+        procstorealGNFbody(comm(body).operand(),later,todo,regular,mode,freevars,variables_bound_in_sum);
         return process_expression();
       }
 
@@ -2937,8 +3135,9 @@ class specification_basic_type:public boost::noncopyable
       if (objectdata[n].processstatus==pCRL)
       {
         objectdata[n].processstatus=GNFbusy;
+        std::set<variable> variables_bound_in_sum;
         const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,
-                                   todo,regular,pCRL,objectdata[n].parameters);
+                                   todo,regular,pCRL,objectdata[n].parameters,variables_bound_in_sum);
         if (objectdata[n].processstatus!=GNFbusy)
         {
           throw mcrl2::runtime_error("there is something wrong with recursion");
@@ -2952,8 +3151,9 @@ class specification_basic_type:public boost::noncopyable
       if (objectdata[n].processstatus==mCRL)
       {
         objectdata[n].processstatus=mCRLbusy;
+        std::set<variable> variables_bound_in_sum;
         procstorealGNFbody(objectdata[n].processbody,first,todo,
-                                   regular,mCRL,objectdata[n].parameters);
+                                   regular,mCRL,objectdata[n].parameters,variables_bound_in_sum);
         /* if the last result is not equal to NULL,
            the body of this process is itself a processidentifier */
 
@@ -3037,9 +3237,9 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      if (is_process_instance(t))
+      if (is_process_instance_assignment(t))
       {
-        process_identifier t1=process_instance(t).identifier(); /* get procId */
+        process_identifier t1=process_instance_assignment(t).identifier(); /* get procId */
         if (std::find(pCRLprocs.begin(),pCRLprocs.end(),t1)==pCRLprocs.end())
         {
           pCRLprocs.push_back(t1);
@@ -3355,9 +3555,59 @@ class specification_basic_type:public boost::noncopyable
       return var;
     }
 
+    assignment_list processencoding(
+      int i,
+      const assignment_list &t1,
+      const stacklisttype& stack)
+    {
+      assignment_list t(t1);
+      if (!options.newstate)
+      {
+        assignment_list result=t;
+        result.push_front(assignment(stack.stackvar,sort_pos::pos(i)));
+        return result;
+      }
+
+      i=i-1; /* below we count from 0 instead from 1 as done in the
+                first version of the prover */
+
+      if (!options.binary)
+      {
+        const size_t e=create_enumeratedtype(stack.no_of_states);
+        function_symbol_list l(enumeratedtypes[e].elementnames);
+        for (; i>0 ; i--)
+        {
+          l.pop_front();
+        }
+        assignment_list result=t;
+        result.push_front(assignment(stack.stackvar,l.front()));
+        return result;
+      }
+      /* else a sequence of boolean values needs to be generated,
+         representing the value i, when there are l->n elements */
+      {
+        size_t k=upperpowerof2(stack.no_of_states);
+        variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables;
+        for (; k>0 ; k--, ++boolean_state_variables)
+        {
+          if ((i % 2)==0)
+          {
+            t.push_front(assignment(*boolean_state_variables,sort_bool::false_()));
+            i=i/2;
+          }
+          else
+          {
+            t.push_front(assignment(*boolean_state_variables,sort_bool::true_()));
+            i=(i-1)/2;
+          }
+        }
+        return t;
+      }
+    }
+
     data_expression_list processencoding(
       int i,
-      const data_expression_list t1,
+      const data_expression_list &t1,
       const stacklisttype& stack)
     {
       data_expression_list t(t1);
@@ -3380,23 +3630,24 @@ class specification_basic_type:public boost::noncopyable
           l.pop_front();
         }
         data_expression_list result=t;
-        result.push_front(data_expression(l.front()));
+        result.push_front(l.front());
         return result;
       }
       /* else a sequence of boolean values needs to be generated,
          representing the value i, when there are l->n elements */
       {
         size_t k=upperpowerof2(stack.no_of_states);
-        for (; k>0 ; k--)
+        variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables;
+        for (; k>0 ; k--, ++boolean_state_variables)
         {
           if ((i % 2)==0)
           {
-            t.push_front(data_expression(sort_bool::false_()));
+            t.push_front(sort_bool::false_());
             i=i/2;
           }
           else
           {
-            t.push_front(data_expression(sort_bool::true_()));
+            t.push_front(sort_bool::true_());
             i=(i-1)/2;
           }
         }
@@ -3419,11 +3670,11 @@ class specification_basic_type:public boost::noncopyable
       {
         if (regular)
         {
-          return equal_to(stack.stackvar, data_expression(processencoding(i,data_expression_list(),stack).front()));
+          return equal_to(stack.stackvar, processencoding(i,assignment_list(),stack).front().rhs());
         }
         return equal_to(
                  make_application(stack.opns->getstate,stack.stackvar),
-                 processencoding(i,data_expression_list(),stack).front());
+                 processencoding(i,assignment_list(),stack).front().rhs());
       }
 
       if (!options.binary) /* Here a state encoding using enumerated types
@@ -3433,11 +3684,11 @@ class specification_basic_type:public boost::noncopyable
         if (regular)
         {
           return equal_to(stack.stackvar,
-                          processencoding(i,data_expression_list(),stack).front());
+                          processencoding(i,assignment_list(),stack).front().rhs());
         }
         return equal_to(
                  make_application(stack.opns->getstate, stack.stackvar),
-                 processencoding(i,data_expression_list(),stack).front());
+                 processencoding(i,assignment_list(),stack).front().rhs());
       }
 
       /* in this case we must encode the condition using
@@ -3595,7 +3846,7 @@ class specification_basic_type:public boost::noncopyable
     data_expression find_(
       const variable s,
       const variable_list pars,
-      const data_expression_list args,
+      const assignment_list args,
       const stacklisttype& stack,
       const variable_list vars,
       bool regular)
@@ -3608,16 +3859,16 @@ class specification_basic_type:public boost::noncopyable
            If s does not occur in pars, it must be replaced
          by a dummy value.
       */
-      data_expression_list::const_iterator j=args.begin();
-      for (variable_list::const_iterator i=pars.begin(); i!=pars.end(); ++i,++j)
+      // assignment_list::const_iterator j=args.begin();
+      for (assignment_list::const_iterator i=args.begin(); i!=args.end(); ++i)
       {
-        assert(j!=args.end());
+        // assert(j!=args.end());
         if (s==*i)
         {
-          return (regular?*j:adapt_term_to_stack(*j,stack,vars));
+          return (regular?i->rhs():adapt_term_to_stack(i->rhs(),stack,vars));
         }
       }
-      assert(j==args.end());
+      // assert(j==args.end());
       const data_expression result=representative_generator_internal(s.sort());
       return (regular?result:adapt_term_to_stack(result,stack,vars));
     }
@@ -3626,55 +3877,191 @@ class specification_basic_type:public boost::noncopyable
     data_expression_list findarguments(
       const variable_list pars,
       const variable_list parlist,
-      const data_expression_list args,
+      const assignment_list args,
       const data_expression_list t2,
       const stacklisttype& stack,
       const variable_list vars,
       bool regular)
     {
-      assert(pars.size()==args.size());
       if (parlist.empty())
       {
         return t2;
       }
       data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,regular);
-      result.push_front(find_(parlist.front(),pars,args,stack,vars,regular));
+      data_expression rhs=find_(parlist.front(),pars,args,stack,vars,regular);
+      /* if (parlist.front()!=rhs)
+      {
+        result.push_front(assignment(parlist.front(),rhs));
+      } */
+      result.push_front(rhs);
       return result;
     }
 
+    assignment_list find_dummy_arguments(
+      const variable_list pars,      // The list of parameters of one particular process.
+      const variable_list parlist,   // The list of all parameters.
+      const assignment_list args)
+    {
+      std::set<variable> parset(pars.begin(),pars.end());
+      std::map<variable,data_expression> assignment_map;
+      for(assignment_list::const_iterator k=args.begin(); k!=args.end(); ++k)
+      {
+        assignment_map[k->lhs()]=k->rhs();
+      }
 
-    data_expression_list push(
+      assignment_vector result;
+      for(variable_list::const_iterator i=parlist.begin(); i!=parlist.end(); ++i)
+      {
+        const std::set<variable>::const_iterator j=parset.find(*i);
+        if (j==parset.end())  // Not found.
+        {
+          // The variable *i must get a default value.
+          const data_expression rhs=representative_generator_internal(i->sort());
+          result.push_back(assignment(*i,rhs));
+        }
+        else 
+        {
+          const std::map<variable,data_expression>::iterator k=assignment_map.find(*i);
+          if (k!=assignment_map.end())  // There is assignment for *i. Use it.
+          {
+            result.push_back(assignment(k->first,k->second));
+            assignment_map.erase(k);
+          }
+          parset.erase(j);
+        }
+        
+      }
+      assert(parset.empty());
+      assert(assignment_map.empty());
+      return assignment_list(result.begin(), result.end());
+    }
+
+
+
+    assignment_list push_regular(
       const process_identifier procId,
-      const data_expression_list args,
+      const assignment_list args,
+      const stacklisttype& stack,
+      const std::vector < process_identifier > &pCRLprcs,
+      const variable_list vars,
+      bool singlestate)
+    {
+      assignment_list t=find_dummy_arguments(objectdata[objectIndex(procId)].parameters,stack.parameters,args);
+      if (singlestate)
+      {
+        return args;
+      }
+
+      size_t i;
+      for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
+      return processencoding(i,t,stack);
+    }
+
+    data_expression_list push_stack(
+      const process_identifier procId,
+      const assignment_list args,
       const data_expression_list t2,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pCRLprcs,
       const variable_list vars,
-      bool regular,
       bool singlestate)
     {
       data_expression_list t=findarguments(objectdata[objectIndex(procId)].parameters,
-                                           stack.parameters,args,t2,stack,vars,regular);
-
+                                           stack.parameters,args,t2,stack,vars,false);
+  
       int i;
       for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
 
-      if (regular)
-      {
-        if (singlestate)
-        {
-          return t;
-        }
-        return processencoding(i,t,stack);
-      }
-
-      return make_list(data_expression(application(
-                     stack.opns->push,
-                     processencoding(i,t,stack))));
+      return processencoding(i,t,stack);
     }
 
 
-    data_expression_list make_procargs(
+    assignment_list make_procargs_regular(
+      const process_expression &t,
+      const stacklisttype& stack,
+      const std::vector < process_identifier > &pcrlprcs,
+      const variable_list &vars,
+      const bool singlestate)
+    {
+      /* t is a sequential composition of process variables */
+
+      if (is_seq(t))
+      {
+        throw mcrl2::runtime_error("process is not regular, as it has stacking vars " + process::pp(t) +".");
+      }
+
+      if (is_process_instance_assignment(t))
+      {
+        const process_identifier procId=process_instance_assignment(t).identifier();
+        const assignment_list t1=process_instance_assignment(t).assignments();
+
+        return push_regular(procId,
+                            t1,
+                            stack,
+                            pcrlprcs,
+                            vars,
+                            singlestate);
+      }
+
+      throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
+    }
+
+    data_expression_list make_procargs_stack(
+      const process_expression &t,
+      const stacklisttype& stack,
+      const std::vector < process_identifier > &pcrlprcs,
+      const variable_list &vars,
+      const bool singlestate)
+    {
+      /* t is a sequential composition of process variables */
+
+      if (is_seq(t))
+      {
+        const process_instance_assignment process=seq(t).left();
+        const process_expression t2=seq(t).right();
+        const process_identifier procId=process.identifier();
+        const assignment_list t1=process.assignments();
+
+        if (objectdata[objectIndex(procId)].canterminate)
+        {
+          data_expression_list t3=make_procargs_stack(t2,stack,pcrlprcs,
+                                                vars,singlestate);
+          t3=push_stack(procId,t1,t3,stack,pcrlprcs,vars,singlestate);
+          return make_list(t3.front());
+        }
+
+        return push_stack(procId,t1,make_list(data_expression(stack.opns->emptystack)),
+                                           stack,pcrlprcs,vars,singlestate);
+      }
+
+      if (is_process_instance_assignment(t))
+      {
+        const process_identifier procId=process_instance_assignment(t).identifier();
+        const assignment_list t1=process_instance_assignment(t).assignments();
+
+        if (objectdata[objectIndex(procId)].canterminate)
+        {
+          return push_stack(procId,
+                            t1,
+                            make_list(data_expression(make_application(stack.opns->pop,stack.stackvar))),
+                            stack,
+                            pcrlprcs,
+                            vars,
+                            singlestate);
+        }
+        return push_stack(procId,
+                          t1,
+                          make_list(data_expression(stack.opns->emptystack)),
+                          stack,
+                          pcrlprcs,
+                          vars,
+                          singlestate);
+      }
+
+      throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
+    }
+
+    assignment_list make_procargs(
       const process_expression &t,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pcrlprcs,
@@ -3682,73 +4069,15 @@ class specification_basic_type:public boost::noncopyable
       const bool regular,
       const bool singlestate)
     {
-      /* t is a sequential composition of process variables */
-
-      if (is_seq(t))
+      if (regular)
       {
-        if (regular)
-        {
-          throw mcrl2::runtime_error("process is not regular, as it has stacking vars " + process::pp(t) +".");
-        }
-        const process_instance process=seq(t).left();
-        const process_expression t2=seq(t).right();
-        const process_identifier procId=process.identifier();
-        const data_expression_list t1=process.actual_parameters();
-
-        if (objectdata[objectIndex(procId)].canterminate)
-        {
-          data_expression_list t3=make_procargs(t2,stack,pcrlprcs,
-                                                vars,regular,singlestate);
-          t3=push(procId,t1,t3,stack,pcrlprcs,vars,regular,singlestate);
-          return make_list(t3.front());
-        }
-
-        const data_expression_list t3=push(procId,t1,data_expression_list(make_list(stack.opns->emptystack)),
-                                           stack,pcrlprcs,vars,regular,singlestate);
-        return make_list(t3.front());
+        return make_procargs_regular(t,stack,pcrlprcs,vars,singlestate);
       }
-
-      if (is_process_instance(t))
-      {
-        const process_identifier procId=process_instance(t).identifier();
-        const data_expression_list t1=process_instance(t).actual_parameters();
-
-        if (regular)
-        {
-          return push(procId,
-                      t1,
-                      data_expression_list(),
-                      stack,
-                      pcrlprcs,
-                      vars,
-                      regular,
-                      singlestate);
-        }
-        if (objectdata[objectIndex(procId)].canterminate)
-        {
-          const data_expression_list t3=push(procId,
-                                             t1,
-                                             make_list(data_expression(make_application(stack.opns->pop,stack.stackvar))),
-                                             stack,
-                                             pcrlprcs,
-                                             vars,
-                                             regular,
-                                             singlestate);
-          return make_list(t3.front());
-        }
-        const data_expression_list t3= push(procId,
-                                            t1,
-                                            data_expression_list(make_list(stack.opns->emptystack)),
-                                            stack,
-                                            pcrlprcs,
-                                            vars,
-                                            regular,
-                                            singlestate);
-        return make_list(t3.front());
-      }
-
-      throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
-      return data_expression_list();
+      /* return a stackframe */
+      data_expression_list l=make_procargs_stack(t,stack,pcrlprcs,vars,singlestate);
+      return make_list(assignment(
+                         stack.stackvar,
+                         application(stack.opns->push,l)));
     }
 
     bool occursin(const variable &name,
@@ -3766,11 +4095,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    data_expression_list pushdummyrec(
+    assignment_list pushdummyrec_regular(
       const variable_list &totalpars,
       const variable_list &pars,
-      const stacklisttype& stack,
-      const bool regular)
+      const stacklisttype& stack)
     {
       /* totalpars is the total list of parameters of the
          aggregated pCRL process. The variable pars contains
@@ -3779,35 +4107,66 @@ class specification_basic_type:public boost::noncopyable
 
       if (totalpars.empty())
       {
-        if (regular)
-        {
-          return data_expression_list();
-        }
+        return assignment_list();
+      }
+
+      const variable par=totalpars.front();
+      if (std::find(pars.begin(),pars.end(),par)!=pars.end())
+      {
+        assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack);
+        //result.push_front(data_expression(par));
+        return result;
+      }
+      /* otherwise the value of this argument is irrelevant, so
+         make it a don't care variable. */
+
+      assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack);
+      result.push_front(assignment(par,representative_generator_internal(par.sort())));
+      return result;
+    }
+
+    data_expression_list pushdummyrec_stack(
+      const variable_list &totalpars,
+      const variable_list &pars,
+      const stacklisttype& stack)
+    {
+      /* totalpars is the total list of parameters of the
+         aggregated pCRL process. The variable pars contains
+         the list of all variables occuring in the initial
+         process. */
+
+      if (totalpars.empty())
+      {
         return make_list(data_expression(stack.opns->emptystack));
       }
 
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
-        data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular);
-        result.push_front(data_expression(par));
+        data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack);
+        //result.push_front(data_expression(par));
         return result;
       }
       /* otherwise the value of this argument is irrelevant, so
          make it Nil, if a regular translation is made. If a translation
          with stacks is made, then yield a default `unique' term. */
-      data_expression_list result=pushdummyrec(totalpars.tail(),pars,stack,regular);
+      data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack);
       result.push_front(representative_generator_internal(par.sort()));
       return result;
     }
 
-    data_expression_list pushdummy(
+    assignment_list pushdummy_regular(
       const variable_list &parameters,
-      const stacklisttype& stack,
-      const bool regular)
+      const stacklisttype& stack)
     {
-      return pushdummyrec(stack.parameters,
-                          parameters,stack,regular);
+      return pushdummyrec_regular(stack.parameters,parameters,stack);
+    }
+
+    data_expression_list pushdummy_stack(
+      const variable_list &parameters,
+      const stacklisttype& stack)
+    {
+      return pushdummyrec_stack(stack.parameters,parameters,stack);
     }
 
     assignment_list make_initialstate(
@@ -3822,32 +4181,39 @@ class specification_basic_type:public boost::noncopyable
       for (i=1 ; pcrlprcs[i-1]!=initialProcId ; ++i) {};
       /* i is the index of the initial state */
 
-      data_expression_list result=
-        pushdummy(objectdata[objectIndex(initialProcId)].parameters,stack,regular);
 
       if (regular)
       {
+        assignment_list result=
+          pushdummy_regular(objectdata[objectIndex(initialProcId)].parameters,stack);
         if (!singlecontrolstate)
         {
-          result= processencoding(i,result,stack);
+          return processencoding(i,result,stack);
         }
+        return result;
       }
-      else result=make_list(data_expression(application(stack.opns->push,
+      else 
+      {
+        data_expression_list result=
+                pushdummy_stack(objectdata[objectIndex(initialProcId)].parameters,stack);
+        return make_list(assignment(stack.stackvar,application(stack.opns->push,
                                                processencoding(i,result,stack))));
-      return make_assignment_list(parameters,result);
+      }
     }
 
     /*************************  Routines for summands  **************************/
 
-    variable_list dummyparameterlist(const stacklisttype& stack,
-                                     const bool singlestate)
+    assignment_list dummyparameterlist(const stacklisttype& stack,
+                                       const bool singlestate)
     {
       if (singlestate)
       {
-        return stack.parameters;
+        // return stack.parameters;
+        return assignment_list();
       }
 
-      return variable_list(processencoding(1,data_expression_list(stack.parameters),stack)); /* Take 1 as dummy indicator */
+      // return variable_list(processencoding(1,data_expression_list(stack.parameters),stack)); /* Take 1 as dummy indicator */
+      return processencoding(1,assignment_list(),stack); /* Take 1 as dummy indicator */
     }
 
 
@@ -3859,7 +4225,7 @@ class specification_basic_type:public boost::noncopyable
       const data_expression &condition,
       const action_list &multiAction,
       const data_expression &actTime,
-      const data_expression_list &procargs,
+      const assignment_list &procargs,
       const bool has_time,
       const bool is_deadlock_summand)
     {
@@ -3882,7 +4248,7 @@ class specification_basic_type:public boost::noncopyable
         action_summands.push_back(action_summand(sumvars,
                                                  rewritten_condition,
                                                  has_time?multi_action(multiAction,actTime):multi_action(multiAction),
-                                                 make_assignment_list(parameters,procargs)));
+                                                 procargs));
       }
     }
 
@@ -3900,7 +4266,6 @@ class specification_basic_type:public boost::noncopyable
     {
       data_expression atTime;
       action_list multiAction;
-      data_expression_list procargs;
       bool is_delta_summand=false;
       bool has_time=false;
 
@@ -3975,8 +4340,7 @@ class specification_basic_type:public boost::noncopyable
           multiAction=to_action_list(t1);
         }
 
-        procargs=make_procargs(t2,stack,
-                               pCRLprocs,sumvars,regular,singlestate);
+        assignment_list procargs=make_procargs(t2,stack,pCRLprocs,sumvars,regular,singlestate);
         if (!regular)
         {
           if (!is_delta_summand)
@@ -4044,14 +4408,14 @@ class specification_basic_type:public boost::noncopyable
                        condition1,
                        multiAction,
                        atTime,
-                       aterm_cast<data_expression_list>(dummyparameterlist(stack,(bool) singlestate)),
+                       dummyparameterlist(stack,singlestate),
                        has_time,
                        is_delta_summand);
         return;
       }
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
-      procargs=make_list(data_expression(make_application(stack.opns->pop,stack.stackvar)));
+      assignment_list procargs=make_list(assignment(stack.stackvar,make_application(stack.opns->pop,stack.stackvar)));
 
       insert_summand(
                 action_summands,deadlock_summands,
@@ -6903,6 +7267,7 @@ class specification_basic_type:public boost::noncopyable
       assignment_list& init,
       const std::string hint="")
     {
+
       action_summand_vector result_action_summands;
 
       std::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
@@ -7325,24 +7690,18 @@ class specification_basic_type:public boost::noncopyable
       variable_list& pars,
       assignment_list& init)
     {
-      if (is_process_instance(t))
+      if (is_process_instance_assignment(t))
       {
-        generateLPEmCRL(action_summands,deadlock_summands,process_instance(t).identifier(),regular,pars,init);
-        size_t n=objectIndex(process_instance(t).identifier());
-        const data_expression_list args=process_instance(t).actual_parameters();
-        // init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,false,true);
+        generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init);
+        size_t n=objectIndex(process_instance_assignment(t).identifier());
+        const assignment_list ass=process_instance_assignment(t).assignments();
 
         std::map < variable, data_expression > sigma;
-        data_expression_list::const_iterator j=args.begin();
-        const variable_list vars=objectdata[n].parameters;
-        for (variable_list::const_iterator i=vars.begin();
-             i!=vars.end(); ++i, ++j)
+        for (assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
         {
           /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma.count(*i)==0)
-          {
-            sigma[*i]=*j;
-          }
+          assert(sigma.count(i->lhs())==0);
+          sigma[i->lhs()]=i->rhs();
         }
 
         init=substitute_assignmentlist(init,pars,false,true,make_map_substitution(sigma));
@@ -7388,7 +7747,7 @@ class specification_basic_type:public boost::noncopyable
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
           // by a constant, which by itself is a parameter.
 
-          const std::set <variable> variable_list = data::find_free_variables(args);
+          const std::set <variable> variable_list = data::find_free_variables(ass); /// IK DENK DAT HIER ONTERECHT DE LHS OOK WORDT MEEGENOMEN JFG TODO.
           for (std::set <variable>::const_iterator i=variable_list.begin();
                i!=variable_list.end(); ++i)
           {
@@ -7485,8 +7844,9 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==GNFalpha)||
           (objectdata[n].processstatus==multiAction))
       {
-        return generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
+        generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
                                objectdata[n].containstime,regular,pars,init);
+        return;
       }
       /* process is a mCRLdone */
       if ((objectdata[n].processstatus==mCRLdone)||
@@ -7573,12 +7933,12 @@ class specification_basic_type:public boost::noncopyable
         return result;
       }
 
-      if (is_process_instance(t))
+      if (is_process_instance_assignment(t))
       {
-        const process_identifier procId=process_instance(t).identifier();
+        const process_identifier procId=process_instance_assignment(t).identifier();
         alphaconversion(procId,parameters);
-        return process_instance(procId,
-                                data::replace_free_variables(process_instance(t).actual_parameters(), make_map_substitution(sigma)));
+        return process_instance_assignment(procId,
+                                data::replace_free_variables(process_instance_assignment(t).assignments(), make_map_substitution(sigma)));
       }
 
       if (is_action(t))
@@ -8049,7 +8409,7 @@ class specification_basic_type:public boost::noncopyable
         insertProcDeclaration(
           newProcId,
           objectdata[n].parameters,
-          seq(objectdata[n].processbody, process_instance(terminatedProcId,data_expression_list())),
+          seq(objectdata[n].processbody, process_instance_assignment(terminatedProcId,assignment_list())),
           pCRL,canterminatebody(objectdata[n].processbody),
           containstimebody(objectdata[n].processbody));
         return newProcId;
@@ -8086,16 +8446,17 @@ class specification_basic_type:public boost::noncopyable
       }
       else if (is_process_instance(t))
       {
-        result=process_instance(
-                 split_process(process_instance(t).identifier(),visited_id,visited_proc),
-                 process_instance(t).actual_parameters());
+        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(t);
+        result=process_instance_assignment(
+                 split_process(u.identifier(),visited_id,visited_proc),
+                 u.assignments());
       }
       else if (is_process_instance_assignment(t))
       {
-        const process_instance u=transform_process_assignment_to_process(t);
-        result=process_instance(
+        const process_instance_assignment u(t);
+        result=process_instance_assignment(
                  split_process(u.identifier(),visited_id,visited_proc),
-                 u.actual_parameters());
+                 u.assignments());
       }
       else if (is_hide(t))
       {
@@ -8137,17 +8498,17 @@ class specification_basic_type:public boost::noncopyable
         if (canterminatebody(t))
         {
           const process_identifier p=newprocess(parameters,
-                                                seq(t,process_instance(terminatedProcId,data_expression_list())),
+                                                seq(t,process_instance_assignment(terminatedProcId,assignment_list())),
                                                 pCRL,
                                                 0,
                                                 true);
-          result=process_instance(p,aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
+          result=process_instance_assignment(p,assignment_list()); // aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
           visited_proc[t]=result;
         }
         else
         {
           const process_identifier p=newprocess(parameters,t,pCRL,0,true);
-          result=process_instance(p,aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
+          result=process_instance_assignment(p,assignment_list()); // aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
           visited_proc[t]=result;
         }
       }

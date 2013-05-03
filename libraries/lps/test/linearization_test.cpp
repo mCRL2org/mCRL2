@@ -831,6 +831,17 @@ BOOST_AUTO_TEST_CASE(bug_1085)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(bug_978)
+{
+  const std::string spec =
+     "act rd,wr:Bool;\n"
+     "proc R(a,b : Bool) = \n"
+     "        rd(a) . R() +\n"
+     "        rd(b) . R() + \n"
+     "        sum b:Bool. wr(b) . R(a=b);\n"; 
+  run_linearisation_test_case(spec);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;
