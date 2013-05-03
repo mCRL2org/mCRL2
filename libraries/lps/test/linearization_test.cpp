@@ -838,7 +838,8 @@ BOOST_AUTO_TEST_CASE(bug_978)
      "proc R(a,b : Bool) = \n"
      "        rd(a) . R() +\n"
      "        rd(b) . R() + \n"
-     "        sum b:Bool. wr(b) . R(a=b);\n"; 
+     "        sum b:Bool. wr(b) . R(a=b);\n"
+     "init R(true,true);\n"; 
   run_linearisation_test_case(spec);
 }
 
