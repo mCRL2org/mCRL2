@@ -1372,7 +1372,7 @@ class specification_basic_type:public boost::noncopyable
            l!=sumvars.end() ; ++l)
       {
         variable var=*l;
-        if (occursinpCRLterm(var,p,1))
+        if (occursinpCRLterm(var,p,true))
         {
           variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars.push_front(newvar);
@@ -1442,7 +1442,6 @@ class specification_basic_type:public boost::noncopyable
          in the lefthandside of an assignment if replacelhs holds. If for some variable
          occuring in the parameterlist no assignment is present, whereas
          this variable occurs in vars, an assignment for it is added.
-
       */
 
       assert(replacelhs==0 || replacelhs==1);
@@ -1463,14 +1462,11 @@ class specification_basic_type:public boost::noncopyable
         if (parameter==lhs)
         {
           /* The assignment refers to parameter par. Substitute its
-             left and righthandside and check whether the left and right
-             handside have become equal, in which case no assignment
-             is necessary anymore */
+             left and righthandside */
           data_expression rhs=ass.rhs();
 
           if (replacelhs)
           {
-            // lhs=data::replace_variables_capture_avoiding(lhs,make_map_substitution(sigma),sigma_variables(sigma));
             lhs=data::replace_free_variables(lhs,sigma);
             assert(is_variable(lhs));
           }
@@ -1479,7 +1475,7 @@ class specification_basic_type:public boost::noncopyable
             rhs=data::replace_free_variables(rhs,sigma);
           }
 
-          if (lhs==rhs)
+          /* if (lhs==rhs) If they are equal, the rhs can refer to a locally bound variable.
           {
             return substitute_assignmentlist(
                      assignments.tail(),
@@ -1487,7 +1483,7 @@ class specification_basic_type:public boost::noncopyable
                      replacelhs,
                      replacerhs,
                      sigma);
-          }
+          }*/
           assignment_list result=
                    substitute_assignmentlist(
                      assignments.tail(),
@@ -1537,6 +1533,23 @@ class specification_basic_type:public boost::noncopyable
                  sigma);
       result.push_front(assignment(lhs,rhs));
       return result;
+    }
+
+    bool check_valid_process_instance_assignment(
+               const process_identifier& id,
+               const assignment_list& assignments)
+    {
+      size_t n=objectIndex(id);
+      const variable_list parameters=objectdata[n].parameters;
+      for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+      {
+        // Every assignment must occur in the parameter list
+        if (std::find(parameters.begin(),parameters.end(),i->lhs())==parameters.end())
+        {
+          return false;
+        } 
+      }
+      return true;
     }
 
     /* The function below calculates sigma(p) and replaces
@@ -1617,18 +1630,23 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(p))
       {
-        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(p);
-        return process_instance_assignment(u.identifier(),
-                                data::replace_free_variables(u.assignments(), make_map_substitution(sigma)));
+        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(p);
+
+        size_t n=objectIndex(q.identifier());
+        const variable_list parameters=objectdata[n].parameters;
+        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,make_map_substitution(sigma));
+        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
+        return process_instance_assignment(q.identifier(),new_assignments);
       }
 
       if (is_process_instance_assignment(p))
       {
         const process_instance_assignment q(p);
-// Let op: de substitutie replace_free_variables werkt nog niet helemaal goed. Bij x=x wordt de rechter x nog niet gesubstitueerd.
-
-        return process_instance_assignment(q.identifier(),
-                                data::replace_free_variables(q.assignments(), make_map_substitution(sigma)));
+        size_t n=objectIndex(q.identifier());
+        const variable_list parameters=objectdata[n].parameters;
+        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,make_map_substitution(sigma));
+        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
+        return process_instance_assignment(q.identifier(),new_assignments);
       }
 
       if (is_action(p))
@@ -1692,28 +1710,10 @@ class specification_basic_type:public boost::noncopyable
       }
       assert(j==rhss.end());
 
+      assert(check_valid_process_instance_assignment(procId.identifier(),assignment_list(new_assignments.begin(),new_assignments.end())));
       process_instance_assignment p(procId.identifier(), assignment_list(new_assignments.begin(),new_assignments.end()));
       return p;
     }
-
-    /* process_instance transform_process_assignment_to_process(const process_instance_assignment &procId)
-    {
-      size_t n=objectIndex(procId.identifier());
-
-      assignment_list assignments=procId.assignments();
-
-      // Transform the assignments into a list of variables and substitutable terms;
-      // std::map < variable, data_expression > sigma;
-      mutable_map_substitution <> sigma;
-      for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
-      {
-        sigma[i->lhs()]=i->rhs();
-      }
-
-      const data_expression_list dl=make_data_expression_list(objectdata[n].parameters);
-      process_instance p(procId.identifier(), data::replace_free_variables(dl,sigma));
-      return p;
-    } */
 
     /********************************************************************/
     /*                                                                  */
@@ -1738,7 +1738,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       variable_list parameters1=parameters_that_occur_in_body(parameters.tail(),body);
-      if (occursinpCRLterm(parameters.front(),body,0))
+      if (occursinpCRLterm(parameters.front(),body,false))
       {
 
         parameters1.push_front(parameters.front());
@@ -1832,6 +1832,7 @@ class specification_basic_type:public boost::noncopyable
         /* make a new process */
         const process_identifier newproc=newprocess(freevars,body,pCRL,
                                          canterminatebody(body),containstimebody(body));
+        assert(check_valid_process_instance_assignment(newproc,assignment_list()));
         return at(process_instance_assignment(
                     newproc,
                     assignment_list()),  //data::data_expression_list(objectdata[objectIndex(newproc)].parameters)),
@@ -1911,7 +1912,8 @@ class specification_basic_type:public boost::noncopyable
       const process_expression act, // This is a multi-action, actually.
       const data_expression condition,
       const process_expression restterm,
-      const variable_list freevars)
+      const variable_list freevars,
+      const std::set<variable>& variables_bound_in_sum)
     {
       if (is_if_then(restterm))
       {
@@ -1933,12 +1935,12 @@ class specification_basic_type:public boost::noncopyable
                                        act,
                                        lazy::and_(condition,c),
                                        if_then(restterm).then_case(),
-                                       freevars),
+                                       freevars,variables_bound_in_sum),
                                      distributeActionOverConditions(
                                        act,
                                        lazy::and_(condition,lazy::not_(c)),
                                        delta_at_zero(),
-                                       freevars));
+                                       freevars,variables_bound_in_sum));
         return r;
       }
       if (is_if_then_else(restterm))
@@ -1960,29 +1962,39 @@ class specification_basic_type:public boost::noncopyable
                                        act,
                                        lazy::and_(condition,c),
                                        if_then_else(restterm).then_case(),
-                                       freevars),
+                                       freevars,variables_bound_in_sum),
                                      distributeActionOverConditions(
                                        act,
                                        lazy::and_(condition,lazy::not_(c)),
                                        if_then_else(restterm).else_case(),
-                                       freevars));
+                                       freevars,variables_bound_in_sum));
         return r;
       }
-      const process_expression restterm1=bodytovarheadGNF(restterm,seq_state,freevars,later);
+      const process_expression restterm1=bodytovarheadGNF(restterm,seq_state,freevars,later,variables_bound_in_sum);
       return if_then(condition,seq(act,restterm1));
     }
 
 
-
-    /* the following variables give the indices of the processes that represent tau
-         and delta, respectively */
+   assignment_list parameters_to_assignment_list(const variable_list parameters, const std::set<variable>& variables_bound_in_sum)
+   {
+     assignment_vector result;
+     for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+     {
+       if (variables_bound_in_sum.count(*i)>0)
+       {
+         result.push_back(assignment(*i,*i)); // rhs is another variable than the lhs!!
+       }
+     }
+     return assignment_list(result.begin(),result.end());
+   }
 
 
     process_expression bodytovarheadGNF(
       const process_expression body, // intentionally not a reference.
       state s,
       const variable_list freevars, // intentionally not a reference.
-      variableposition v)
+      const variableposition v,
+      const std::set<variable>& variables_bound_in_sum)
     {
       /* it is assumed that we only receive processes with
          operators alt, seq, sum_state, cond, name, delta, tau, sync, AtTime in it */
@@ -1991,8 +2003,8 @@ class specification_basic_type:public boost::noncopyable
       {
         if (alt_state>=s)
         {
-          const process_expression body1=bodytovarheadGNF(choice(body).left(),alt_state,freevars,first);
-          const process_expression body2=bodytovarheadGNF(choice(body).right(),alt_state,freevars,first);
+          const process_expression body1=bodytovarheadGNF(choice(body).left(),alt_state,freevars,first,variables_bound_in_sum);
+          const process_expression body2=bodytovarheadGNF(choice(body).right(),alt_state,freevars,first,variables_bound_in_sum);
           if (isDeltaAtZero(body1))
           {
             return body2;
@@ -2003,11 +2015,12 @@ class specification_basic_type:public boost::noncopyable
           }
           return choice(body1,body2);
         }
-        const process_expression body1=bodytovarheadGNF(body,alt_state,freevars,first);
+        const process_expression body1=bodytovarheadGNF(body,alt_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance_assignment(newproc,assignment_list()); // data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
       }
 
       if (is_sum(body))
@@ -2020,7 +2033,9 @@ class specification_basic_type:public boost::noncopyable
           std::map < variable, data_expression > sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list());
           body1=substitute_pCRLproc(body1, sigma);
-          body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first);
+          std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
+          variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
+          body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first,variables_bound_in_sum1);
           /* Due to the optimisation below, suggested by Yaroslav Usenko, bodytovarheadGNF(...,sum_state,...)
              can deliver a process of the form c -> x + !c -> y. In this case, the
              sumvars must be distributed over both summands. */
@@ -2031,11 +2046,12 @@ class specification_basic_type:public boost::noncopyable
           }
           return sum(sumvars,body1);
         }
-        const process_expression body1=bodytovarheadGNF(body,alt_state,freevars,first);
+        const process_expression body1=bodytovarheadGNF(body,alt_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance_assignment(newproc,assignment_list()); // data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
       }
 
       if (is_if_then(body))
@@ -2047,13 +2063,14 @@ class specification_basic_type:public boost::noncopyable
         {
           return if_then(
                    condition,
-                   bodytovarheadGNF(body1,seq_state,freevars,first));
+                   bodytovarheadGNF(body1,seq_state,freevars,first,variables_bound_in_sum));
         }
-        const process_expression body2=bodytovarheadGNF(body,alt_state,freevars,first);
+        const process_expression body2=bodytovarheadGNF(body,alt_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body2,pCRL,
                                          canterminatebody(body2),
                                          containstimebody(body2));
-        return process_instance_assignment(newproc,assignment_list()); // data::data_expression_list(objectdata[objectIndex(newproc)].parameters));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
 
       }
 
@@ -2074,13 +2091,13 @@ class specification_basic_type:public boost::noncopyable
           {
             return if_then(
                      condition,
-                     bodytovarheadGNF(body1,seq_state,freevars,first));
+                     bodytovarheadGNF(body1,seq_state,freevars,first,variables_bound_in_sum));
           }
           /* body1=="Delta@0" */
           {
             return if_then(
                      lazy::not_(condition),
-                     bodytovarheadGNF(body2,seq_state,freevars,first));
+                     bodytovarheadGNF(body2,seq_state,freevars,first,variables_bound_in_sum));
           }
         }
         if (alt_state==s) /* body1!=Delta@0 and body2!=Delta@0 */
@@ -2089,16 +2106,17 @@ class specification_basic_type:public boost::noncopyable
             choice(
               if_then(
                 condition,
-                bodytovarheadGNF(body1,seq_state,freevars,first)),
+                bodytovarheadGNF(body1,seq_state,freevars,first,variables_bound_in_sum)),
               if_then(
                 lazy::not_(condition),
-                bodytovarheadGNF(body2,seq_state,freevars,first)));
+                bodytovarheadGNF(body2,seq_state,freevars,first,variables_bound_in_sum)));
         }
-        const process_expression body3=bodytovarheadGNF(body,alt_state,freevars,first);
+        const process_expression body3=bodytovarheadGNF(body,alt_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body3,pCRL,
                                          canterminatebody(body3),
                                          containstimebody(body3));
-        return process_instance_assignment(newproc,data::assignment_list());
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
 
       }
 
@@ -2109,7 +2127,7 @@ class specification_basic_type:public boost::noncopyable
 
         if (s<=seq_state)
         {
-          body1=bodytovarheadGNF(body1,name_state,freevars,v);
+          body1=bodytovarheadGNF(body1,name_state,freevars,v,variables_bound_in_sum);
           if ((is_if_then(body2)) && (s<=sum_state))
           {
             /* Here we check whether the process body has the form
@@ -2124,11 +2142,11 @@ class specification_basic_type:public boost::noncopyable
                with a factor up to 2. Until 1/11/2008 this code was incorrect,
                because the summand a (!c -> delta@0) was not forgotten.*/
 
-            const data_expression c=data_expression(if_then(body2).condition());
+            const data_expression c(if_then(body2).condition());
 
             const process_expression r= choice(
-                                          distributeActionOverConditions(body1,c,if_then(body2).then_case(),freevars),
-                                          distributeActionOverConditions(body1,lazy::not_(c),delta_at_zero(),freevars));
+                                          distributeActionOverConditions(body1,c,if_then(body2).then_case(),freevars,variables_bound_in_sum),
+                                          distributeActionOverConditions(body1,lazy::not_(c),delta_at_zero(),freevars,variables_bound_in_sum));
             return r;
           }
           if ((is_if_then_else(body2)) && (s<=sum_state))
@@ -2148,17 +2166,19 @@ class specification_basic_type:public boost::noncopyable
 
             const data_expression c(if_then_else(body2).condition());
             const process_expression r= choice(
-                                          distributeActionOverConditions(body1,c,if_then_else(body2).then_case(),freevars),
-                                          distributeActionOverConditions(body1,lazy::not_(c),if_then_else(body2).else_case(),freevars));
+                                          distributeActionOverConditions(body1,c,if_then_else(body2).then_case(),freevars,variables_bound_in_sum),
+                                          distributeActionOverConditions(body1,lazy::not_(c),if_then_else(body2).else_case(),freevars,variables_bound_in_sum));
             return r;
           }
-          body2=bodytovarheadGNF(body2,seq_state,freevars,later);
+          body2=bodytovarheadGNF(body2,seq_state,freevars,later,variables_bound_in_sum);
           return seq(body1,body2);
         }
-        body1=bodytovarheadGNF(body,alt_state,freevars,first);
+        body1=bodytovarheadGNF(body,alt_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1),
                                          containstimebody(body));
-        return process_instance_assignment(newproc,data::assignment_list());
+
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
       }
 
       if (is_action(body))
@@ -2195,8 +2215,8 @@ class specification_basic_type:public boost::noncopyable
         const process_expression body1=process::sync(body).left();
         const process_expression body2=process::sync(body).right();
         const action_list ma=linMergeMultiActionListProcess(
-                               bodytovarheadGNF(body1,multiaction_state,freevars,v),
-                               bodytovarheadGNF(body2,multiaction_state,freevars,v));
+                               bodytovarheadGNF(body1,multiaction_state,freevars,v,variables_bound_in_sum),
+                               bodytovarheadGNF(body2,multiaction_state,freevars,v,variables_bound_in_sum));
 
         const process_expression mp=action_list_to_process(ma);
         if ((s==multiaction_state)||(v==first))
@@ -2230,7 +2250,7 @@ class specification_basic_type:public boost::noncopyable
                                    at(body).operand(),
                                    s,
                                    freevars,
-                                   first);
+                                   first,variables_bound_in_sum);
         data_expression time=data_expression(at(body).time_stamp());
         /* put the time operator around the first action or process */
         body1=wraptime(body1,time,freevars);
@@ -2243,7 +2263,8 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        return process_instance_assignment(newproc,data::assignment_list());
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
       }
 
       if (is_process_instance(body))
@@ -2265,6 +2286,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return tau();
         }
+        assert(check_valid_process_instance_assignment(tau_process,assignment_list()));
         return process_instance_assignment(tau_process,assignment_list());
       }
 
@@ -2274,6 +2296,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return body;
         }
+        assert(check_valid_process_instance_assignment(delta_process,assignment_list()));
         return process_instance_assignment(delta_process,assignment_list());
       }
 
@@ -2292,12 +2315,14 @@ class specification_basic_type:public boost::noncopyable
         // because objectdata can be realloced as a side
         // effect of bodytovarheadGNF.
 
+        std::set<variable> variables_bound_in_sum;
         const process_expression result=
           bodytovarheadGNF(
             objectdata[n].processbody,
             alt_state,
             objectdata[n].parameters,
-            first);
+            first,
+            variables_bound_in_sum);
         objectdata[n].processbody=result;
       }
     }
@@ -2564,6 +2589,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const process_identifier procId=process_instance_assignment(oldbody).identifier();
         const variable_list parameters=objectdata[objectIndex(procId)].parameters;
+        assert(check_valid_process_instance_assignment(procId,data::assignment_list()));
         newbody=process_instance_assignment(procId,data::assignment_list());
         return parameters;
       }
@@ -2587,7 +2613,7 @@ class specification_basic_type:public boost::noncopyable
               assert(j!=new_pars.end());
               new_assignment.push_back(assignment(*i,*j));
             }
-
+            assert(check_valid_process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())));
             newbody=seq(process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())),newbody);
             return pars1+pars;
           }
@@ -2610,7 +2636,7 @@ class specification_basic_type:public boost::noncopyable
       assignment_vector result;
       for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
       {
-        if (variables_bound_in_sum.count(*i)>0) 
+        if (variables_bound_in_sum.count(*i)>0 && occursinpCRLterm(*i,t,false)) 
         { 
           result.push_back(assignment(*i,*i)); // Here an identity assignment is used, as it is possible
                                                // that the *i at the lhs is not the same variable as *i at the rhs.
@@ -2745,11 +2771,14 @@ class specification_basic_type:public boost::noncopyable
       variable_list parameters=objectdata[objectIndex(new_process)].parameters;
       if (options.lin_method==lmRegular2)
       {
-        const process_expression p=process_instance_assignment(new_process,argscollect_regular2(sequence,parameters));
+        const assignment_list args=argscollect_regular2(sequence,parameters);
+        assert(check_valid_process_instance_assignment(new_process,args));
+        const process_expression p=process_instance_assignment(new_process,args);
         return p;
       }
       else
       {
+        assert(check_valid_process_instance_assignment(new_process,argscollect_regular(sequence,parameters,variables_bound_in_sum)));
         return process_instance_assignment(new_process,argscollect_regular(sequence,parameters,variables_bound_in_sum));
       }
     }
@@ -2966,6 +2995,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(body))
       {
+        assert(0); // I do not expect this format to exist here anymore.
         process_identifier t=process_instance(body).identifier();
 
         if (v==later)
@@ -3045,10 +3075,10 @@ class specification_basic_type:public boost::noncopyable
            we must now substitute */
         procstorealGNFrec(t,first,todo,regular);
 
-        std::map < variable, data_expression > sigma;
 
         const assignment_list &dl= process_instance_assignment(body).assignments();
 
+        std::map < variable, data_expression > sigma;
         for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
         {
           sigma[i->lhs()]=i->rhs();
@@ -3119,7 +3149,7 @@ class specification_basic_type:public boost::noncopyable
 
     void procstorealGNFrec(
       const process_identifier procIdDecl,
-      variableposition v,
+      const variableposition v,
       std::vector <process_identifier> &todo,
       const bool regular)
 
@@ -4339,7 +4369,6 @@ class specification_basic_type:public boost::noncopyable
           assert(is_tau(t1)||is_action(t1)||is_sync(t1));
           multiAction=to_action_list(t1);
         }
-
         assignment_list procargs=make_procargs(t2,stack,pCRLprocs,sumvars,regular,singlestate);
         if (!regular)
         {
@@ -5018,7 +5047,7 @@ class specification_basic_type:public boost::noncopyable
       const enumtype& e,
       size_t n,
       const action_summand_vector &action_summands,
-      const variable_list &gsorts)
+      const variable_list &parameters)
     {
       /* This function gets a list of summands, with
          the same multiaction and time
@@ -5349,7 +5378,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list resultnextstate;
 
 
-      for (variable_list::const_iterator var_it=gsorts.begin(); var_it!=gsorts.end(); ++var_it)
+      for (variable_list::const_iterator var_it=parameters.begin(); var_it!=parameters.end(); ++var_it)
       {
         equalterm=data_expression();
         equaluptillnow=1;
@@ -5381,6 +5410,7 @@ class specification_basic_type:public boost::noncopyable
               sigma[*i]=*j;
             }
           }
+
 
           data_expression auxresult1=data::replace_free_variables(nextstateparameter, make_map_substitution(sigma));
           if (equalterm==data_expression()||is_global_variable(equalterm))
@@ -5435,7 +5465,7 @@ class specification_basic_type:public boost::noncopyable
       resultnextstate=reverse(resultnextstate);
       /* The list of arguments in nextstate are now in a sequential form, and
            must be transformed back to a list of assignments */
-      const assignment_list final_resultnextstate=make_assignment_list(gsorts,resultnextstate);
+      const assignment_list final_resultnextstate=make_assignment_list(parameters,resultnextstate);
       return action_summand(resultsum,
                             resultcondition,
                             some_summand_has_time?multi_action(resultmultiactionlist,resulttime):multi_action(resultmultiactionlist),
@@ -5446,7 +5476,7 @@ class specification_basic_type:public boost::noncopyable
       const enumtype& e,
       size_t n,
       const deadlock_summand_vector &deadlock_summands,
-      const variable_list & /* gsorts */)
+      const variable_list & /* parameters */)
     {
       /* This function gets a list of summands, with
          the same multiaction and time
@@ -7936,9 +7966,17 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance_assignment(t))
       {
         const process_identifier procId=process_instance_assignment(t).identifier();
-        alphaconversion(procId,parameters);
+        size_t n=objectIndex(procId);
+
+        const variable_list instance_parameters=objectdata[n].parameters;
+        alphaconversion(procId,instance_parameters);
+
+        assert(check_valid_process_instance_assignment(procId,
+                                substitute_assignmentlist(process_instance_assignment(t).assignments(),
+                                instance_parameters,false, true,make_map_substitution(sigma))));
         return process_instance_assignment(procId,
-                                data::replace_free_variables(process_instance_assignment(t).assignments(), make_map_substitution(sigma)));
+                                substitute_assignmentlist(process_instance_assignment(t).assignments(),
+                                instance_parameters,false, true,make_map_substitution(sigma)));
       }
 
       if (is_action(t))
@@ -8406,6 +8444,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (objectdata[n].canterminate)
       {
+        assert(check_valid_process_instance_assignment(terminatedProcId,assignment_list()));
         insertProcDeclaration(
           newProcId,
           objectdata[n].parameters,
@@ -8447,6 +8486,8 @@ class specification_basic_type:public boost::noncopyable
       else if (is_process_instance(t))
       {
         const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(t);
+        assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
+                 u.assignments()));
         result=process_instance_assignment(
                  split_process(u.identifier(),visited_id,visited_proc),
                  u.assignments());
@@ -8454,6 +8495,8 @@ class specification_basic_type:public boost::noncopyable
       else if (is_process_instance_assignment(t))
       {
         const process_instance_assignment u(t);
+        assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
+                 u.assignments()));
         result=process_instance_assignment(
                  split_process(u.identifier(),visited_id,visited_proc),
                  u.assignments());
@@ -8497,18 +8540,21 @@ class specification_basic_type:public boost::noncopyable
       {
         if (canterminatebody(t))
         {
+          assert(check_valid_process_instance_assignment(terminatedProcId,assignment_list()));
           const process_identifier p=newprocess(parameters,
                                                 seq(t,process_instance_assignment(terminatedProcId,assignment_list())),
                                                 pCRL,
                                                 0,
                                                 true);
-          result=process_instance_assignment(p,assignment_list()); // aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
+          assert(check_valid_process_instance_assignment(p,assignment_list()));
+          result=process_instance_assignment(p,assignment_list()); 
           visited_proc[t]=result;
         }
         else
         {
           const process_identifier p=newprocess(parameters,t,pCRL,0,true);
-          result=process_instance_assignment(p,assignment_list()); // aterm_cast<data_expression_list>(objectdata[objectIndex(p)].parameters));
+          assert(check_valid_process_instance_assignment(p,assignment_list()));
+          result=process_instance_assignment(p,assignment_list()); 
           visited_proc[t]=result;
         }
       }
