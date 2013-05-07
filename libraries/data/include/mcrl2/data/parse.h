@@ -152,7 +152,8 @@ struct data_expression_actions: public sort_expression_actions
 
   data_expression make_function_update(const data_expression& x, const data_expression& y, const data_expression& z)
   {
-    return make_application(untyped_identifier(mcrl2::data::function_update_name()), x, y, z);
+    // return make_application(untyped_identifier(mcrl2::data::function_update_name()), x, y, z);
+    return make_application(function_symbol(mcrl2::data::function_update_name(),untyped_sort()), x, y, z);
   }
 
   template <typename ExpressionContainer>
