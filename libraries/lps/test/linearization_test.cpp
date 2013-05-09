@@ -843,6 +843,16 @@ BOOST_AUTO_TEST_CASE(bug_978)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(not_properly_ordered_assignments)
+{
+  const std::string spec =
+     "proc R(a,b : Bool) = \n"
+     "        tau . R(a=true,b=false) +\n"
+     "        tau . R(b=false,a=false); \n"
+     "init R(true,true);\n"; 
+  run_linearisation_test_case(spec);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

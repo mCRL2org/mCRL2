@@ -925,6 +925,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(body))
       {
+        assert(0);
         determine_process_status(process_instance(body).identifier(),status);
         return status;
       }
@@ -1086,6 +1087,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(body))
       {
+        assert(0);
         collectPcrlProcesses(process_instance(body).identifier(),pcrlprocesses,visited);
         return;
       }
@@ -1324,6 +1326,7 @@ class specification_basic_type:public boost::noncopyable
       }
       if (is_process_instance(p))
       {
+        assert(0);
         return occursintermlist(var,process_instance(p).actual_parameters());
       }
       if (is_process_instance_assignment(p))
@@ -1534,20 +1537,50 @@ class specification_basic_type:public boost::noncopyable
       result.push_front(assignment(lhs,rhs));
       return result;
     }
+  
+    // Sort the assignments, such that they have the same order as the parameters
+    assignment_list sort_assignments(const assignment_list& ass, const variable_list parameters)
+    {
+      std::map<variable,data_expression>assignment_map;
+      for(assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
+      {
+        assignment_map[i->lhs()]=i->rhs();
+      }
+
+      assignment_vector result;
+      for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+      {
+        const std::map<variable,data_expression>::const_iterator j=assignment_map.find(*i);
+        if (j!=assignment_map.end()) // found
+        { 
+          result.push_back(assignment(j->first,j->second));
+        }
+      }
+      return assignment_list(result.begin(),result.end());
+    }
 
     bool check_valid_process_instance_assignment(
                const process_identifier& id,
                const assignment_list& assignments)
     {
       size_t n=objectIndex(id);
-      const variable_list parameters=objectdata[n].parameters;
+      variable_list parameters=objectdata[n].parameters;
       for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
       {
-        // Every assignment must occur in the parameter list
-        if (std::find(parameters.begin(),parameters.end(),i->lhs())==parameters.end())
+        // Every assignment must occur in the parameter list, in the right sequence.
+
+        variable v;
+        do
         {
-          return false;
+          if (parameters.empty())
+          { 
+            return false;
+          }
+          v=parameters.front();
+          parameters.pop_front();
         } 
+        while (v!=i->lhs());
+
       }
       return true;
     }
@@ -1630,6 +1663,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(p))
       {
+        assert(0);
         const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(p);
 
         size_t n=objectIndex(q.identifier());
@@ -1687,26 +1721,30 @@ class specification_basic_type:public boost::noncopyable
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
 
-    process_instance_assignment transform_process_instance_to_process_instance_assignment(const process_instance &procId)
+    process_instance_assignment transform_process_instance_to_process_instance_assignment(
+              const process_instance &procId,
+              const std::set<variable>& bound_variables=std::set<variable>())
     {
       size_t n=objectIndex(procId.identifier());
       const variable_list process_parameters=objectdata[n].parameters;
       const data_expression_list rhss=procId.actual_parameters();
-
-      // Transform the assignments into a list of variables and substitutable terms;
-      // std::map < variable, data_expression > sigma;
-      /* mutable_map_substitution <> sigma;
-      for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
-      {
-        sigma[i->lhs()]=i->rhs();
-      } */
 
       assignment_vector new_assignments;
       data_expression_list::const_iterator j=rhss.begin();
       for(variable_list::const_iterator i=process_parameters.begin(); i!=process_parameters.end(); ++i, ++j)
       {
         assert(j!=rhss.end());
-        new_assignments.push_back(assignment(*i,*j));
+        if (*i==*j)
+        {
+          if (bound_variables.count(*i)>0) // Now *j is a different variable than *i
+          {
+            new_assignments.push_back(assignment(*i,*j));
+          }
+        }
+        else 
+        {
+          new_assignments.push_back(assignment(*i,*j));
+        }
       }
       assert(j==rhss.end());
 
@@ -1839,7 +1877,7 @@ class specification_basic_type:public boost::noncopyable
                   time);
       }
 
-      if ((is_process_instance(body))||
+      if (// (is_process_instance(body))||
           (is_process_instance_assignment(body))||
           (is_sync(body))||
           (is_action(body))||
@@ -2269,6 +2307,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(body))
       {
+        assert(0);
         // return body;
         return transform_process_instance_to_process_instance_assignment(body);
       }
@@ -2437,13 +2476,13 @@ class specification_basic_type:public boost::noncopyable
                    condition));
       }
 
-      if ((is_at(body1))||
-          (is_action(body1))||
-          (is_sync(body1))||
-          (is_process_instance(body1))||
-          (is_process_instance_assignment(body1))||
-          (is_delta(body1))||
-          (is_tau(body1)))
+      if (is_at(body1)||
+          is_action(body1)||
+          is_sync(body1)||
+          // is_process_instance(body1)||
+          is_process_instance_assignment(body1)||
+          is_delta(body1)||
+          is_tau(body1))
       {
         return if_then(condition,body1);
       }
@@ -2468,7 +2507,7 @@ class specification_basic_type:public boost::noncopyable
           is_action(body1)||
           is_tau(body1)||
           is_at(body1)||
-          is_process_instance(body1)||
+          //is_process_instance(body1)||
           is_process_instance_assignment(body1)||
           isDeltaAtZero(body1))
       {
@@ -2922,6 +2961,7 @@ class specification_basic_type:public boost::noncopyable
        GNF where one action is always followed by a
        variable. */
     {
+// std::cerr << "ProctorealGNF body  " << pp(body) << "\n";
       if (is_at(body))
       {
         data_expression timecondition=sort_bool::true_();
@@ -3162,6 +3202,7 @@ class specification_basic_type:public boost::noncopyable
     {
       size_t n=objectIndex(procIdDecl);
 
+// std::cerr << "ProctorealGNF ----- " << pp(procIdDecl) << "   " << pp(objectdata[n].parameters) << "\n";
       if (objectdata[n].processstatus==pCRL)
       {
         objectdata[n].processstatus=GNFbusy;
@@ -5874,6 +5915,7 @@ class specification_basic_type:public boost::noncopyable
       }
       parameters=collectparameterlist(pCRLprocs);
 
+// std::cerr << "PARAMETERS " << pp(parameters) << "\n";
       alphaconversion(procId,parameters);
       /* We reverse the pCRLprocslist to give the processes that occur first the
          lowest index. In particular initial states get value 1, instead of the
@@ -5894,6 +5936,7 @@ class specification_basic_type:public boost::noncopyable
           {
             parameters=reverse(stack.booleanStateVariables) + parameters;
           }
+// std::cerr << "PARAMETERS1 " << pp(parameters) << "\n";
         }
         else  /* !binary or oldstate */
         {
@@ -5901,12 +5944,14 @@ class specification_basic_type:public boost::noncopyable
           tempparameters.push_front(stack.stackvar);
           parameters=
             ((!singlecontrolstate)?tempparameters:stack.parameters);
+// std::cerr << "PARAMETERS2 " << pp(parameters) << "\n";
         }
       }
       else /* not regular, use a stack */
       {
         parameters=make_list(stack.stackvar);
       }
+// std::cerr << "PARAMETERS3 " << pp(parameters) << "\n";
 
       init=make_initialstate(procId,stack,pCRLprocs,
                              regular,singlecontrolstate,parameters);
@@ -5933,6 +5978,7 @@ class specification_basic_type:public boost::noncopyable
            of this flag, can speed up linearisation considerably */
         deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
       }
+// std::cerr << "PARAMETERS4 " << pp(parameters) << "\n";
     }
 
 
@@ -7284,6 +7330,7 @@ class specification_basic_type:public boost::noncopyable
       for(variable_list::const_iterator i=var_list.begin(); i!=var_list.end(); ++i)
       {
         sigma[*i]=get_fresh_variable(std::string(i->name()) + ((hint.empty())?"":"_") + hint, i->sort());
+// std::cerr << "SIGMA " << pp(*i) << " := " <<  pp(sigma[*i]) << "\n";
       }
       return sigma;
     }
@@ -7301,7 +7348,9 @@ class specification_basic_type:public boost::noncopyable
       action_summand_vector result_action_summands;
 
       std::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
+// std::cerr << "SUBPARS " << pp(pars) << "\n";
       const variable_list unique_pars=data::replace_free_variables(pars,make_map_substitution(sigma));
+// std::cerr << "SUBPARS OUT " << pp(unique_pars) << "\n";
 
       init=substitute_assignmentlist(init,pars,true,false, make_map_substitution(sigma));  // Only substitute the variables at the lhs.
       for (action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
@@ -7316,8 +7365,11 @@ class specification_basic_type:public boost::noncopyable
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
+// std::cerr << "CONDITON1 " << pp(condition) << "\n";
         condition=data::replace_free_variables(condition,make_map_substitution(sigma));
+// std::cerr << "CONDITON2 " << pp(condition) << "\n";
         condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
+// std::cerr << "CONDITON3 " << pp(condition) << "\n";
 
         actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
         actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
@@ -7720,9 +7772,11 @@ class specification_basic_type:public boost::noncopyable
       variable_list& pars,
       assignment_list& init)
     {
+// std::cerr << "GENERATE " << pp(pars) << "    " << pp(t) << "\n";
       if (is_process_instance_assignment(t))
       {
         generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init);
+// std::cerr << "PARS1 " << pp(pars) << "\n";
         size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
@@ -7735,6 +7789,7 @@ class specification_basic_type:public boost::noncopyable
         }
 
         init=substitute_assignmentlist(init,pars,false,true,make_map_substitution(sigma));
+// std::cerr << "PARS2 " << pp(pars) << "\n";
 
         // Make the bound variables and parameters in this process unique.
 
@@ -7743,12 +7798,14 @@ class specification_basic_type:public boost::noncopyable
             (objectdata[n].processstatus==GNFalpha))
         {
           make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,std::string(objectdata[n].objectname));
+// std::cerr << "PARS3 " << pp(pars) << "\n";
         }
         else
         {
           if (rename_variables)
           {
             make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init);
+// std::cerr << "PARS4 " << pp(pars) << "\n";
           }
         }
 
@@ -7760,40 +7817,47 @@ class specification_basic_type:public boost::noncopyable
           // Note that this is only useful, in regular mode. This does not make sense if
           // stacks are being used.
 
+// std::cerr << "PARS5 " << pp(pars) << "\n";
           linear_process lps(pars,deadlock_summands,action_summands);
           process_initializer initializer(init);
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
-
+// std::cerr << "KKKKKKKKK " << pp(temporary_spec) << "\n";
           constelm_algorithm < rewriter > alg(temporary_spec,rewr);
           alg.run(true); // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
 
           init=temporary_spec.initial_process().assignments();
+// std::cerr << "PARS6 " << pp(pars) << " INIT: " << pp(init) << "\n";
           pars=temporary_spec.process().process_parameters();
+// std::cerr << "PARS7 " << pp(pars) << "\n";
 
           // Add all free variables in objectdata[n].parameters that are not already in the parameter list
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
           // by a constant, which by itself is a parameter.
 
-          const std::set <variable> variable_list = data::find_free_variables(ass); /// IK DENK DAT HIER ONTERECHT DE LHS OOK WORDT MEEGENOMEN JFG TODO.
+          std::set <variable> variable_list = process::find_free_variables(temporary_spec.process().action_summands()); 
+          const std::set <variable> variable_list1 = process::find_free_variables(temporary_spec.process().deadlock_summands()); 
+          variable_list.insert(variable_list1.begin(),variable_list1.end());
           for (std::set <variable>::const_iterator i=variable_list.begin();
                i!=variable_list.end(); ++i)
           {
             if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars,
-                global_variables.find(*i)==global_variables.end() && // it is neither a glabal variable
-                (lps::search_free_variable(temporary_spec.process().action_summands(),*i) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),*i))
+                global_variables.find(*i)==global_variables.end() // it is neither a global variable
+                // (lps::search_free_variable(temporary_spec.process().action_summands(),*i) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),*i))
                )          // and it occurs in the summands.
             {
               pars.push_front(*i);
             }
           }
 
+// std::cerr << "PARS8 " << pp(pars) << "\n";
           action_summands=temporary_spec.process().action_summands();
           deadlock_summands=temporary_spec.process().deadlock_summands();
         }
         // Now constelm has been applied.
+// std::cerr << "PARS9 " << pp(pars) << "\n";
         return;
       }
 
@@ -7884,6 +7948,7 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==mCRL))
       {
         objectdata[n].processstatus=mCRLlin;
+// std::cerr << "PARAMETERSmC " << pp(pars) << "\n";
         return generateLPEmCRLterm(action_summands,deadlock_summands,objectdata[n].processbody,
                                    regular,false,pars,init);
       }
@@ -8076,6 +8141,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(t))
       {
+        assert(0);
         if (allowrecursion)
         {
           return (containstime_rec(process_instance(t).identifier(),stable,visited,contains_if_then));
@@ -8259,6 +8325,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_process_instance(t))
       {
+        assert(0);
         if (allowrecursion)
         {
           return (canterminate_rec(process_instance(t).identifier(),stable,visited));
@@ -8456,6 +8523,153 @@ class specification_basic_type:public boost::noncopyable
       return procId;
     }
 
+/* Transform process_arguments 
+ *   This function replace process_instances by process_instance_assignments.
+ *   All assignments in a process_instance_assignment are ordered in the same
+ *   sequence as the parameters belonging to that assignment.
+ *   All assignments in a process_instance_assignment of the form x=x where
+ *   x is not a bound variable are removed.
+*/
+
+
+    void transform_process_arguments(
+            const process_identifier& procId,
+            std::set<process_identifier>& visited_processes)
+    {
+      if (visited_processes.count(procId)==0)
+      {
+        visited_processes.insert(procId);
+        size_t n=objectIndex(procId);
+        const std::set<variable> bound_variables;
+        objectdata[n].processbody=transform_process_arguments_body(
+                                         objectdata[n].processbody,
+                                         bound_variables,
+                                         visited_processes);
+      }
+    }
+
+    void transform_process_arguments(const process_identifier& procId)
+    {
+      std::set<process_identifier> visited_processes;
+      transform_process_arguments(procId,visited_processes);
+    }
+
+    process_expression transform_process_arguments_body(
+      const process_expression t, // intentionally not a reference.
+      const std::set<variable>& bound_variables,
+      std::set<process_identifier>& visited_processes)
+    {
+      if (is_process_instance(t))
+      {
+        transform_process_arguments(process_instance(t).identifier(),visited_processes);
+        return transform_process_instance_to_process_instance_assignment(t,bound_variables);
+      }
+      if (is_process_instance_assignment(t))
+      {
+        transform_process_arguments(process_instance_assignment(t).identifier(),visited_processes);
+        const process_instance_assignment u(t);
+        size_t n=objectIndex(u.identifier());
+        assert(check_valid_process_instance_assignment(u.identifier(),
+                 sort_assignments(u.assignments(),objectdata[n].parameters)));
+        return process_instance_assignment(
+                     u.identifier(),
+                     sort_assignments(u.assignments(),objectdata[n].parameters));
+      }
+      if (is_hide(t))
+      {
+        return hide(hide(t).hide_set(),
+                    transform_process_arguments_body(hide(t).operand(),bound_variables,visited_processes));
+      }
+      if (is_rename(t))
+      {
+        return process::rename(
+                 process::rename(t).rename_set(),
+                 transform_process_arguments_body(process::rename(t).operand(),bound_variables,visited_processes));
+      }
+      if (is_allow(t))
+      {
+        return allow(allow(t).allow_set(),
+                     transform_process_arguments_body(allow(t).operand(),bound_variables,visited_processes));
+      }
+      if (is_block(t))
+      {
+        return block(block(t).block_set(),
+                     transform_process_arguments_body(block(t).operand(),bound_variables,visited_processes));
+      }
+      if (is_comm(t))
+      {
+        return comm(comm(t).comm_set(),
+                    transform_process_arguments_body(comm(t).operand(),bound_variables,visited_processes));
+      }
+      if (is_merge(t))
+      {
+        return merge(
+                 transform_process_arguments_body(merge(t).left(),bound_variables,visited_processes),
+                 transform_process_arguments_body(merge(t).right(),bound_variables,visited_processes));
+      }
+      if (is_choice(t))
+      {
+        return choice(
+                 transform_process_arguments_body(choice(t).left(),bound_variables,visited_processes),
+                 transform_process_arguments_body(choice(t).right(),bound_variables,visited_processes));
+      }
+      if (is_seq(t))
+      {
+        return seq(
+                 transform_process_arguments_body(seq(t).left(),bound_variables,visited_processes),
+                 transform_process_arguments_body(seq(t).right(),bound_variables,visited_processes));
+      }
+      if (is_if_then_else(t))
+      {
+        return if_then_else(
+                 if_then_else(t).condition(),
+                 transform_process_arguments_body(if_then_else(t).then_case(),bound_variables,visited_processes),
+                 transform_process_arguments_body(if_then_else(t).else_case(),bound_variables,visited_processes));
+      }
+      if (is_if_then(t))
+      {
+        return if_then(
+                 if_then(t).condition(),
+                 transform_process_arguments_body(if_then(t).then_case(),bound_variables,visited_processes));
+      }
+      if (is_sum(t))
+      {
+        std::set<variable> bound_variables1=bound_variables;
+        const variable_list sum_vars=sum(t).bound_variables();
+        bound_variables1.insert(sum_vars.begin(),sum_vars.end());
+        return sum(
+                 sum_vars,
+                 transform_process_arguments_body(sum(t).operand(),bound_variables1,visited_processes));
+      }
+      if (is_action(t))
+      {
+        return t;
+      }
+      if (is_delta(t))
+      {
+        return t;
+      }
+      if (is_tau(t))
+      {
+        return t;
+      }
+      if (is_at(t))
+      {
+        return at(
+                 transform_process_arguments_body(at(t).operand(),bound_variables,visited_processes),
+                 at(t).time_stamp());
+      }
+      if (is_sync(t))
+      {
+        return process::sync(
+                 transform_process_arguments_body(process::sync(t).left(),bound_variables,visited_processes),
+                 transform_process_arguments_body(process::sync(t).right(),bound_variables,visited_processes));
+      }
+      throw mcrl2::runtime_error("unexpected process format in transform_process_arguments_body " + process::pp(t) +".");
+    }
+
+/* -----------------------------   split body  --------------------------- */
+
     process_expression split_body(
       const process_expression t, // intentionally not a reference.
       std::map < process_identifier,process_identifier > &visited_id,
@@ -8485,6 +8699,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else if (is_process_instance(t))
       {
+        assert(0);
         const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(t);
         assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
                  u.assignments()));
@@ -8495,11 +8710,12 @@ class specification_basic_type:public boost::noncopyable
       else if (is_process_instance_assignment(t))
       {
         const process_instance_assignment u(t);
+        size_t n=objectIndex(u.identifier());
         assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
-                 u.assignments()));
+                 sort_assignments(u.assignments(),objectdata[n].parameters)));
         result=process_instance_assignment(
                  split_process(u.identifier(),visited_id,visited_proc),
-                 u.assignments());
+                 sort_assignments(u.assignments(),objectdata[n].parameters));
       }
       else if (is_hide(t))
       {
@@ -8676,6 +8892,7 @@ class specification_basic_type:public boost::noncopyable
     {
       /* Then select the BPA processes, and check that the others
          are proper parallel processes */
+      transform_process_arguments(init);
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
@@ -8699,11 +8916,14 @@ class specification_basic_type:public boost::noncopyable
       procstorealGNF(init1,options.lin_method!=lmStack);
 
       generateLPEmCRL(action_summands,deadlock_summands,init1, options.lin_method!=lmStack,parameters,initial_state);
+// std::cerr << "PARAMETERS4a " << pp(parameters) << "\n";
       allowblockcomposition(action_name_multiset_list(),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
+// std::cerr << "PARAMETERS4b " << pp(parameters) << "\n";
       if (options.final_cluster)
       {
         cluster_actions(action_summands,deadlock_summands,parameters);
       }
+// std::cerr << "PARAMETERS5 " << pp(parameters) << "\n";
 
       AddTerminationActionIfNecessary(action_summands);
     }
@@ -8748,6 +8968,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 
+// std::cerr << "PARAMETERS6 " << pp(parameters) << "\n";
   linear_process lps(parameters,
                      deadlock_summands,
                      action_summands);
