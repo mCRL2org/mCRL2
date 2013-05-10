@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <sys/time.h>
+
 #include "mcrl2/lts/detail/exploration.h"
 
 #include "mcrl2/lts/lts_io.h"
@@ -262,7 +264,10 @@ bool lps2lts_algorithm::generate_lts()
   }
   else if (m_options.expl_strat == es_random || m_options.expl_strat == es_value_random_prioritized)
   {
-    srand((unsigned)time(NULL));
+    // srand((unsigned)time(NULL)); 
+    struct timeval time; 
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
     generate_lts_random(initial_state);
 
     mCRL2log(verbose) << "done with random walk of "
@@ -962,7 +967,7 @@ void lps2lts_algorithm::generate_lts_random(const generator_state_t &initial_sta
       break;
     }
 
-    size_t index = rand() % transitions.size();
+    size_t index = rand() % transitions.size(); 
     generator_state_t new_state;
 
     for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
