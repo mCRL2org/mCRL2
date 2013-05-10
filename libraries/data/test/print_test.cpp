@@ -473,6 +473,7 @@ BOOST_AUTO_TEST_CASE(test_sort_expressions)
   std::cout << "ytext    = " << ytext << std::endl;
   BOOST_CHECK(x == y);
   BOOST_CHECK(xtext == ytext);
+  BOOST_CHECK(data::pp(data::untyped_sort()) == "untyped_sort");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_print2)
