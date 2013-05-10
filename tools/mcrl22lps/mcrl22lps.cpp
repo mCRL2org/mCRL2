@@ -230,7 +230,6 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       {
         mCRL2log(verbose) << "writing LPS to file '" <<  m_linearisation_options.outfilename << "'..." << std::endl;
       }
-std::cerr << "SPEC " << pp(linear_spec) << "\n";
       linear_spec.save(m_linearisation_options.outfilename);
       return true;
     }

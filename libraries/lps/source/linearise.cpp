@@ -2961,7 +2961,6 @@ class specification_basic_type:public boost::noncopyable
        GNF where one action is always followed by a
        variable. */
     {
-// std::cerr << "ProctorealGNF body  " << pp(body) << "\n";
       if (is_at(body))
       {
         data_expression timecondition=sort_bool::true_();
@@ -3202,7 +3201,6 @@ class specification_basic_type:public boost::noncopyable
     {
       size_t n=objectIndex(procIdDecl);
 
-// std::cerr << "ProctorealGNF ----- " << pp(procIdDecl) << "   " << pp(objectdata[n].parameters) << "\n";
       if (objectdata[n].processstatus==pCRL)
       {
         objectdata[n].processstatus=GNFbusy;
@@ -5915,7 +5913,6 @@ class specification_basic_type:public boost::noncopyable
       }
       parameters=collectparameterlist(pCRLprocs);
 
-// std::cerr << "PARAMETERS " << pp(parameters) << "\n";
       alphaconversion(procId,parameters);
       /* We reverse the pCRLprocslist to give the processes that occur first the
          lowest index. In particular initial states get value 1, instead of the
@@ -5936,7 +5933,6 @@ class specification_basic_type:public boost::noncopyable
           {
             parameters=reverse(stack.booleanStateVariables) + parameters;
           }
-// std::cerr << "PARAMETERS1 " << pp(parameters) << "\n";
         }
         else  /* !binary or oldstate */
         {
@@ -5944,14 +5940,12 @@ class specification_basic_type:public boost::noncopyable
           tempparameters.push_front(stack.stackvar);
           parameters=
             ((!singlecontrolstate)?tempparameters:stack.parameters);
-// std::cerr << "PARAMETERS2 " << pp(parameters) << "\n";
         }
       }
       else /* not regular, use a stack */
       {
         parameters=make_list(stack.stackvar);
       }
-// std::cerr << "PARAMETERS3 " << pp(parameters) << "\n";
 
       init=make_initialstate(procId,stack,pCRLprocs,
                              regular,singlecontrolstate,parameters);
@@ -5978,7 +5972,6 @@ class specification_basic_type:public boost::noncopyable
            of this flag, can speed up linearisation considerably */
         deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
       }
-// std::cerr << "PARAMETERS4 " << pp(parameters) << "\n";
     }
 
 
@@ -7330,7 +7323,6 @@ class specification_basic_type:public boost::noncopyable
       for(variable_list::const_iterator i=var_list.begin(); i!=var_list.end(); ++i)
       {
         sigma[*i]=get_fresh_variable(std::string(i->name()) + ((hint.empty())?"":"_") + hint, i->sort());
-// std::cerr << "SIGMA " << pp(*i) << " := " <<  pp(sigma[*i]) << "\n";
       }
       return sigma;
     }
@@ -7348,9 +7340,7 @@ class specification_basic_type:public boost::noncopyable
       action_summand_vector result_action_summands;
 
       std::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
-// std::cerr << "SUBPARS " << pp(pars) << "\n";
       const variable_list unique_pars=data::replace_free_variables(pars,make_map_substitution(sigma));
-// std::cerr << "SUBPARS OUT " << pp(unique_pars) << "\n";
 
       init=substitute_assignmentlist(init,pars,true,false, make_map_substitution(sigma));  // Only substitute the variables at the lhs.
       for (action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
@@ -7365,11 +7355,8 @@ class specification_basic_type:public boost::noncopyable
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-// std::cerr << "CONDITON1 " << pp(condition) << "\n";
         condition=data::replace_free_variables(condition,make_map_substitution(sigma));
-// std::cerr << "CONDITON2 " << pp(condition) << "\n";
         condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
-// std::cerr << "CONDITON3 " << pp(condition) << "\n";
 
         actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
         actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
@@ -7772,11 +7759,9 @@ class specification_basic_type:public boost::noncopyable
       variable_list& pars,
       assignment_list& init)
     {
-// std::cerr << "GENERATE " << pp(pars) << "    " << pp(t) << "\n";
       if (is_process_instance_assignment(t))
       {
         generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init);
-// std::cerr << "PARS1 " << pp(pars) << "\n";
         size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
@@ -7789,7 +7774,6 @@ class specification_basic_type:public boost::noncopyable
         }
 
         init=substitute_assignmentlist(init,pars,false,true,make_map_substitution(sigma));
-// std::cerr << "PARS2 " << pp(pars) << "\n";
 
         // Make the bound variables and parameters in this process unique.
 
@@ -7798,14 +7782,12 @@ class specification_basic_type:public boost::noncopyable
             (objectdata[n].processstatus==GNFalpha))
         {
           make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,std::string(objectdata[n].objectname));
-// std::cerr << "PARS3 " << pp(pars) << "\n";
         }
         else
         {
           if (rename_variables)
           {
             make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init);
-// std::cerr << "PARS4 " << pp(pars) << "\n";
           }
         }
 
@@ -7817,21 +7799,17 @@ class specification_basic_type:public boost::noncopyable
           // Note that this is only useful, in regular mode. This does not make sense if
           // stacks are being used.
 
-// std::cerr << "PARS5 " << pp(pars) << "\n";
           linear_process lps(pars,deadlock_summands,action_summands);
           process_initializer initializer(init);
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
-// std::cerr << "KKKKKKKKK " << pp(temporary_spec) << "\n";
           constelm_algorithm < rewriter > alg(temporary_spec,rewr);
           alg.run(true); // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
 
           init=temporary_spec.initial_process().assignments();
-// std::cerr << "PARS6 " << pp(pars) << " INIT: " << pp(init) << "\n";
           pars=temporary_spec.process().process_parameters();
-// std::cerr << "PARS7 " << pp(pars) << "\n";
 
           // Add all free variables in objectdata[n].parameters that are not already in the parameter list
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
@@ -7852,12 +7830,10 @@ class specification_basic_type:public boost::noncopyable
             }
           }
 
-// std::cerr << "PARS8 " << pp(pars) << "\n";
           action_summands=temporary_spec.process().action_summands();
           deadlock_summands=temporary_spec.process().deadlock_summands();
         }
         // Now constelm has been applied.
-// std::cerr << "PARS9 " << pp(pars) << "\n";
         return;
       }
 
@@ -7948,7 +7924,6 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==mCRL))
       {
         objectdata[n].processstatus=mCRLlin;
-// std::cerr << "PARAMETERSmC " << pp(pars) << "\n";
         return generateLPEmCRLterm(action_summands,deadlock_summands,objectdata[n].processbody,
                                    regular,false,pars,init);
       }
@@ -8916,14 +8891,11 @@ class specification_basic_type:public boost::noncopyable
       procstorealGNF(init1,options.lin_method!=lmStack);
 
       generateLPEmCRL(action_summands,deadlock_summands,init1, options.lin_method!=lmStack,parameters,initial_state);
-// std::cerr << "PARAMETERS4a " << pp(parameters) << "\n";
       allowblockcomposition(action_name_multiset_list(),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
-// std::cerr << "PARAMETERS4b " << pp(parameters) << "\n";
       if (options.final_cluster)
       {
         cluster_actions(action_summands,deadlock_summands,parameters);
       }
-// std::cerr << "PARAMETERS5 " << pp(parameters) << "\n";
 
       AddTerminationActionIfNecessary(action_summands);
     }
@@ -8968,7 +8940,6 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 
-// std::cerr << "PARAMETERS6 " << pp(parameters) << "\n";
   linear_process lps(parameters,
                      deadlock_summands,
                      action_summands);
