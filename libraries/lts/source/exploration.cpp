@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <sys/time.h>
+#include <time.h>
 
 #include "mcrl2/lts/detail/exploration.h"
 
@@ -264,10 +264,14 @@ bool lps2lts_algorithm::generate_lts()
   }
   else if (m_options.expl_strat == es_random || m_options.expl_strat == es_value_random_prioritized)
   {
-    // srand((unsigned)time(NULL)); 
-    struct timeval time; 
-    gettimeofday(&time,NULL);
-    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+    // In order to guarantee that time is different from a previous run to initialise
+    // the seed of a previous run and not get the same results, we wait until time gets
+    // a fresh value. It is better to replace this by c++11 random generators, as this
+    // is an awkward solution.
+    unsigned t=time(NULL);
+    for( ; t==time(NULL) ; ); // Wait until time changes.
+    srand((unsigned)time(NULL)); 
+
     generate_lts_random(initial_state);
 
     mCRL2log(verbose) << "done with random walk of "

@@ -853,6 +853,30 @@ BOOST_AUTO_TEST_CASE(not_properly_ordered_assignments)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(the_bound_c_may_not_show_up_in_linear_process)
+{
+  const std::string spec =
+     "act \n"
+     "rcv_req; \n"
+     "snd_return : Bool; \n"
+     "internal; \n"
+     " \n"
+     "proc \n"
+     " \n"
+     "test1 = \n"
+     "( \n"
+     "    rcv_req. \n"
+     "    sum c:Bool. \n"
+     "    ( \n"
+     "        internal.snd_return(c) \n"
+     "    ). \n"
+     "    test1 \n"
+     "); \n"
+     " \n"
+     "init test1; \n";
+  run_linearisation_test_case(spec);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

@@ -1818,6 +1818,7 @@ class specification_basic_type:public boost::noncopyable
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
       const process_identifier p(fresh_identifier_generator("P"),get_sorts(parameters1));
+// std::cerr << "NEWPROCESS " << pp(p) << "   " << pp(body) << "   " << pp(parameters1) << "\n";
       insertProcDeclaration(
         p,
         parameters1,
@@ -2034,6 +2035,7 @@ class specification_basic_type:public boost::noncopyable
       const variableposition v,
       const std::set<variable>& variables_bound_in_sum)
     {
+// std::cerr << "PROCSTOVARHEADGNF " << pp(body) << "\n";
       /* it is assumed that we only receive processes with
          operators alt, seq, sum_state, cond, name, delta, tau, sync, AtTime in it */
 
@@ -2961,6 +2963,7 @@ class specification_basic_type:public boost::noncopyable
        GNF where one action is always followed by a
        variable. */
     {
+// std::cerr << "PROCSTOREALGNF " << pp(body) << "\n";
       if (is_at(body))
       {
         data_expression timecondition=sort_bool::true_();
@@ -4333,6 +4336,7 @@ class specification_basic_type:public boost::noncopyable
       const bool regular,
       const bool singlestate)
     {
+// std::cerr << "ADD SUMMNAD " << pp(summandterm) << "    " << pp(parameters) << "\n";
       data_expression atTime;
       action_list multiAction;
       bool is_delta_summand=false;
@@ -7336,7 +7340,6 @@ class specification_basic_type:public boost::noncopyable
       assignment_list& init,
       const std::string hint="")
     {
-
       action_summand_vector result_action_summands;
 
       std::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
@@ -7355,16 +7358,18 @@ class specification_basic_type:public boost::noncopyable
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-        condition=data::replace_free_variables(condition,make_map_substitution(sigma));
         condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
+        condition=data::replace_free_variables(condition,make_map_substitution(sigma));
 
-        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
         actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
-        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma));
+        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
         multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma_sumvars));
+        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma));
 
+// std::cerr << "MAKE UNIQUE IN" << pp(nextstate) << "\n";
+        nextstate=substitute_assignmentlist(nextstate,pars,false,true,make_map_substitution(sigma_sumvars));
         nextstate=substitute_assignmentlist(nextstate,pars,true,true,make_map_substitution(sigma));
-        nextstate=substitute_assignmentlist(nextstate,unique_pars,false,true,make_map_substitution(sigma_sumvars));
+// std::cerr << "MAKE UNIQUE oUT" << pp(nextstate) << "\n";
 
         result_action_summands.push_back(action_summand(unique_sumvars,
                                                         condition,
