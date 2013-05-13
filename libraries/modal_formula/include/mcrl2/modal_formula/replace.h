@@ -120,6 +120,24 @@ T replace_variables(const T& x,
 }
 
 template <typename T, typename Substitution>
+void replace_all_variables(T& x,
+                           Substitution sigma,
+                           typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                          )
+{
+  core::make_update_apply_builder<action_formulas::variable_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_all_variables(const T& x,
+                        Substitution sigma,
+                        typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                       )
+{
+  return core::make_update_apply_builder<action_formulas::variable_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
 void replace_free_variables(T& x,
                             Substitution sigma,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
@@ -279,6 +297,24 @@ T replace_variables(const T& x,
                    )
 {
   return core::make_update_apply_builder<regular_formulas::data_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_all_variables(T& x,
+                           Substitution sigma,
+                           typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                          )
+{
+  core::make_update_apply_builder<regular_formulas::variable_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_all_variables(const T& x,
+                        Substitution sigma,
+                        typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                       )
+{
+  return core::make_update_apply_builder<regular_formulas::variable_builder>(sigma)(x);
 }
 
 template <typename T, typename Substitution>
@@ -457,6 +493,24 @@ T replace_variables(const T& x,
                    )
 {
   return core::make_update_apply_builder<state_formulas::data_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_all_variables(T& x,
+                           Substitution sigma,
+                           typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                          )
+{
+  core::make_update_apply_builder<state_formulas::variable_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_all_variables(const T& x,
+                        Substitution sigma,
+                        typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                       )
+{
+  return core::make_update_apply_builder<state_formulas::variable_builder>(sigma)(x);
 }
 
 template <typename T, typename Substitution>

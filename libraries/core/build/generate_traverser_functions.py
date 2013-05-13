@@ -124,6 +124,24 @@ T replace_variables(const T& x,
 }
 
 template <typename T, typename Substitution>
+void replace_all_variables(T& x,
+                           Substitution sigma,
+                           typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                          )
+{
+  core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_all_variables(const T& x,
+                        Substitution sigma,
+                        typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                       )
+{
+  return core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
 void replace_free_variables(T& x,
                             Substitution sigma,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
@@ -327,35 +345,35 @@ def generate_code(filename, namespace, label, text):
 
 def generate_rewrite_functions():
     result = True
-    result = generate_code('../../data/include/mcrl2/data/rewrite.h'        , 'data'            , 'rewrite', REWRITE_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/lps/rewrite.h'          , 'lps'             , 'rewrite', REWRITE_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/rewrite.h', 'action_formulas' , 'rewrite', REWRITE_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/rewrite.h', 'regular_formulas', 'rewrite', REWRITE_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/rewrite.h', 'state_formulas'  , 'rewrite', REWRITE_TEXT) and result
-    result = generate_code('../../pbes/include/mcrl2/pbes/rewrite.h'        , 'pbes_system'     , 'rewrite', REWRITE_TEXT) and result
-    result = generate_code('../../process/include/mcrl2/process/rewrite.h'  , 'process'         , 'rewrite', REWRITE_TEXT) and result
+    result = generate_code('../../data/include/mcrl2/data/rewrite.h'                  , 'data'            , 'rewrite', REWRITE_TEXT) and result
+    result = generate_code('../../lps/include/mcrl2/lps/rewrite.h'                    , 'lps'             , 'rewrite', REWRITE_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/rewrite.h', 'action_formulas' , 'rewrite', REWRITE_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/rewrite.h', 'regular_formulas', 'rewrite', REWRITE_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/rewrite.h', 'state_formulas'  , 'rewrite', REWRITE_TEXT) and result
+    result = generate_code('../../pbes/include/mcrl2/pbes/rewrite.h'                  , 'pbes_system'     , 'rewrite', REWRITE_TEXT) and result
+    result = generate_code('../../process/include/mcrl2/process/rewrite.h'            , 'process'         , 'rewrite', REWRITE_TEXT) and result
     return result
 
 def generate_replace_functions():
     result = True
-    result = generate_code('../../data/include/mcrl2/data/replace.h'        , 'data'            , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/lps/replace.h'          , 'lps'             , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
-    result = generate_code('../../pbes/include/mcrl2/pbes/replace.h'        , 'pbes_system'     , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
-    result = generate_code('../../process/include/mcrl2/process/replace.h'  , 'process'         , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code('../../data/include/mcrl2/data/replace.h'                  , 'data'            , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code('../../lps/include/mcrl2/lps/replace.h'                    , 'lps'             , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code('../../pbes/include/mcrl2/pbes/replace.h'                  , 'pbes_system'     , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code('../../process/include/mcrl2/process/replace.h'            , 'process'         , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     return result
 
 def generate_find_functions():
     result = True
-    result = generate_code('../../data/include/mcrl2/data/find.h'        , 'data'            , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/lps/find.h'          , 'lps'             , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/find.h', 'action_formulas' , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/find.h', 'regular_formulas', 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
-    result = generate_code('../../lps/include/mcrl2/modal_formula/find.h', 'state_formulas'  , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
-    result = generate_code('../../pbes/include/mcrl2/pbes/find.h'        , 'pbes_system'     , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
-    result = generate_code('../../process/include/mcrl2/process/find.h'  , 'process'         , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code('../../data/include/mcrl2/data/find.h'                  , 'data'            , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code('../../lps/include/mcrl2/lps/find.h'                    , 'lps'             , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/find.h', 'action_formulas' , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/find.h', 'regular_formulas', 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/find.h', 'state_formulas'  , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code('../../pbes/include/mcrl2/pbes/find.h'                  , 'pbes_system'     , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code('../../process/include/mcrl2/process/find.h'            , 'process'         , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     return result
 
 if __name__ == "__main__":
