@@ -251,7 +251,7 @@ class specification
 std::string pp(const specification& x);
 std::string pp_with_summand_numbers(const specification& x);
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x);
-std::set<data::variable> find_variables(const lps::specification& x);
+std::set<data::variable> find_all_variables(const lps::specification& x);
 std::set<data::variable> find_free_variables(const lps::specification& x);
 std::set<data::function_symbol> find_function_symbols(const lps::specification& x);
 std::set<core::identifier_string> find_identifiers(const lps::specification& x);

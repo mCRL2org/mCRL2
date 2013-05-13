@@ -86,14 +86,14 @@ int test_main(int argc, char* argv[])
   BOOST_CHECK(!search_variable(V, n2));
 
 
-  //--- find_variables ---//
-  std::set<variable> v = find_variables(x);
+  //--- find_all_variables ---//
+  std::set<variable> v = find_all_variables(x);
   BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
   BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
   BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
 
-  std::set<variable> vS = find_variables(S);
-  std::set<variable> vV = find_variables(V);
+  std::set<variable> vS = find_all_variables(S);
+  std::set<variable> vV = find_all_variables(V);
   BOOST_CHECK(vS == vV);
 
   //--- find_free_variables ---//

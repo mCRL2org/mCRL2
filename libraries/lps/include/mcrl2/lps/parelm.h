@@ -48,20 +48,20 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       {
         std::set<data::variable> tmp;
 
-        tmp = data::find_variables(i->condition());
+        tmp = data::find_all_variables(i->condition());
         result.insert(tmp.begin(), tmp.end());
 
-        tmp = lps::find_variables(i->multi_action());
+        tmp = lps::find_all_variables(i->multi_action());
         result.insert(tmp.begin(), tmp.end());
       }
       for (deadlock_summand_vector::const_iterator i = m_spec.process().deadlock_summands().begin(); i != m_spec.process().deadlock_summands().end(); ++i)
       {
         std::set<data::variable> tmp;
 
-        tmp = data::find_variables(i->condition());
+        tmp = data::find_all_variables(i->condition());
         result.insert(tmp.begin(), tmp.end());
 
-        tmp = lps::find_variables(i->deadlock());
+        tmp = lps::find_all_variables(i->deadlock());
         result.insert(tmp.begin(), tmp.end());
       }
       return result;
@@ -114,7 +114,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
           if (j != assignments.end())
           {
             std::set<data::variable> vars;
-            data::find_variables(j->rhs(), std::inserter(vars, vars.end()));
+            data::find_all_variables(j->rhs(), std::inserter(vars, vars.end()));
             std::set<data::variable> new_variables = data::detail::set_difference(vars, significant_variables);
             todo.insert(new_variables.begin(), new_variables.end());
             significant_variables.insert(new_variables.begin(), new_variables.end());
@@ -175,7 +175,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         {
           size_t j0 = m[j->lhs()];
           std::set<data::variable> vars;
-          data::find_variables(j->rhs(), std::inserter(vars, vars.end()));
+          data::find_all_variables(j->rhs(), std::inserter(vars, vars.end()));
           for (std::set<data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
           {
             size_t k0 = m[*k];

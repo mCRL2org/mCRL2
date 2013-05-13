@@ -106,7 +106,7 @@ class group_information
       std::size_t size = specification.action_summands().size() + specification.deadlock_summands().size();
       m_group_indices.resize(size);
 
-      std::set<data::variable> parameter_set = data::find_variables(specification.process_parameters());
+      std::set<data::variable> parameter_set = data::find_all_variables(specification.process_parameters());
       std::size_t summand_index = 0;
       gather_summands(specification.action_summands(), specification.process_parameters(), parameter_set, summand_index);
       gather_summands(specification.deadlock_summands(), specification.process_parameters(), parameter_set, summand_index);

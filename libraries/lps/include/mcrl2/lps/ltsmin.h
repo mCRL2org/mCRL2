@@ -423,8 +423,8 @@ class pins
         {
           if(j->lhs() != j->rhs())
           {
-            data::find_variables(j->lhs(), std::inserter(used_write_variables, used_write_variables.end()));
-            data::find_variables(j->rhs(), std::inserter(used_read_variables, used_read_variables.end()));
+            data::find_all_variables(j->lhs(), std::inserter(used_write_variables, used_write_variables.end()));
+            data::find_all_variables(j->rhs(), std::inserter(used_read_variables, used_read_variables.end()));
           }
         }
 

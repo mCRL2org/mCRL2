@@ -80,8 +80,8 @@ std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
 std::string pp(const std::set<variable>& x);
 std::string pp(const std::set<variable>& x);
-std::set<data::variable> find_variables(const data::variable& x);
-std::set<data::variable> find_variables(const data::variable_list& x);
+std::set<data::variable> find_all_variables(const data::variable& x);
+std::set<data::variable> find_all_variables(const data::variable_list& x);
 std::set<core::identifier_string> find_identifiers(const data::variable_list& x);
 
 } // namespace data

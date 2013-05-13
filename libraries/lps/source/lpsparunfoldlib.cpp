@@ -252,8 +252,8 @@ void lpsparunfold::create_data_equations(
     {
       data_expression lhs = make_application(determine_function, *i);
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
-      set< variable > svars = find_variables(lhs);
-      set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
+      set< variable > svars = find_all_variables(lhs);
+      set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
       svars.insert(tmp_var.begin(), tmp_var.end());
       m_data_specification.add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, elements_of_new_sorts[e]));
     }
@@ -278,8 +278,8 @@ void lpsparunfold::create_data_equations(
       }
       data_expression lhs = make_application(determine_function , application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
-      set< variable > svars = find_variables(lhs);
-      set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
+      set< variable > svars = find_all_variables(lhs);
+      set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
       svars.insert(tmp_var.begin(), tmp_var.end());
       m_data_specification.add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, elements_of_new_sorts[e]));
 
@@ -290,8 +290,8 @@ void lpsparunfold::create_data_equations(
       {
         data_expression lhs = make_application(pi.front(), application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
         mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, dal[f])) << std::endl;
-        set< variable > vars = find_variables(lhs);
-        set< variable > tmp_var = find_variables(dal[f]);
+        set< variable > vars = find_all_variables(lhs);
+        set< variable > tmp_var = find_all_variables(dal[f]);
         vars.insert(tmp_var.begin(), tmp_var.end());
         m_data_specification.add_equation(data_equation(variable_list(vars.begin(), vars.end()), lhs, dal[f]));
 
@@ -327,8 +327,8 @@ void lpsparunfold::create_data_equations(
 
       data_expression lhs = make_application(determine_function , *i);
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
-      set< variable > vars = find_variables(lhs);
-      set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
+      set< variable > vars = find_all_variables(lhs);
+      set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
       vars.insert(tmp_var.begin(), tmp_var.end());
       m_data_specification.add_equation(data_equation(variable_list(vars.begin(), vars.end()), lhs, elements_of_new_sorts[e]));
 
@@ -359,8 +359,8 @@ void lpsparunfold::create_data_equations(
       }
 
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
-      set< variable > vars = find_variables(lhs);
-      set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
+      set< variable > vars = find_all_variables(lhs);
+      set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
       vars.insert(tmp_var.begin(), tmp_var.end());
       m_data_specification.add_equation(data_equation(variable_list(vars.begin(), vars.end()), lhs, elements_of_new_sorts[e]));
 
@@ -844,8 +844,8 @@ void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_ne
     sub_args[0] = data_expression(elements_of_new_sorts[i-1]);
     data_expression lhs = application(case_function , sub_args);
     mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, vars[e])) << std::endl;
-    set< variable > svars = find_variables(lhs);
-    set< variable > tmp_var = find_variables(vars[e]);
+    set< variable > svars = find_all_variables(lhs);
+    set< variable > tmp_var = find_all_variables(vars[e]);
     svars.insert(tmp_var.begin(), tmp_var.end());
     m_data_specification.add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, vars[e]));
     ++e;
@@ -859,7 +859,7 @@ void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_ne
 
     data_expression lhs = application(case_function , eq_args);
     mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, vars.back())) << std::endl;
-    set< variable > svars = find_variables(lhs);
+    set< variable > svars = find_all_variables(lhs);
     svars.insert(vars.back());
     m_data_specification.add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, vars.back()));
   }

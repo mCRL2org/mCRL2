@@ -249,7 +249,7 @@ static void split_condition(
   }
   else if (is_inequality(e) && (data::binary_left(atermpp::aterm_cast<application>(e)).sort() == sort_real::real_() || data::binary_right(atermpp::aterm_cast<application>(e)).sort() == sort_real::real_()))
   {
-    std::set < variable > vars=data::find_variables(e);
+    std::set < variable > vars=data::find_all_variables(e);
     for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
     {
       if (i->sort()!=sort_real::real_())
@@ -272,7 +272,7 @@ static void split_condition(
   else
   {
     // e is assumed to be a non_real expression.
-    std::set < variable > vars=data::find_variables(e);
+    std::set < variable > vars=data::find_all_variables(e);
     for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
     {
       if (i->sort()==sort_real::real_())
@@ -345,7 +345,7 @@ static void normalize_specification(
         // this sum operator and the condition.
 
         // mCRL2log(debug) << "REALPARS " << data::pp(i->next_state(real_parameters)) << "\n";
-        const std::set < variable> s1=data::find_variables(i->next_state(real_parameters));
+        const std::set < variable> s1=data::find_all_variables(i->next_state(real_parameters));
 
         const variable_list original_real_sum_variables=get_real_variables(i->summation_variables());
         variable_list real_sum_variables;

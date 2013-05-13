@@ -56,9 +56,9 @@ void test_find()
 {
   process_expression x = parse_process_expression("a(m).P(0)", DATA_DECL, PROC_DECL);
 
-  //--- find_variables ---//
+  //--- find_all_variables ---//
   data::variable m = nat("m");
-  std::set<data::variable> v = process::find_variables(x);
+  std::set<data::variable> v = process::find_all_variables(x);
   BOOST_CHECK(v.find(m) != v.end());
 
   //--- find_sort_expressions ---//

@@ -97,7 +97,7 @@ void next_state_generator::declare_constructors()
   // give a substantial performance penalty, due to the addition of symbols to the
   // rewriter that are not used.
 
-  std::set<variable> variables = mcrl2::lps::find_variables(m_specification);
+  std::set<variable> variables = mcrl2::lps::find_all_variables(m_specification);
   std::set<variable> free_variables = mcrl2::lps::find_free_variables(m_specification);
   std::set<variable> nonfree_variables;
   std::set_difference(free_variables.begin(), free_variables.end(), variables.begin(), variables.end(), std::inserter(nonfree_variables, nonfree_variables.begin()));

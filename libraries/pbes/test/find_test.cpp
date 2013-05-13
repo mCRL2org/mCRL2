@@ -51,10 +51,10 @@ void test_find()
 
   pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1) && Y(m)", VARSPEC);
 
-  //--- find_variables ---//
+  //--- find_all_variables ---//
   data::variable m = nat("m");
   data::variable n = nat("n");
-  std::set<data::variable> v = pbes_system::find_variables(x);
+  std::set<data::variable> v = pbes_system::find_all_variables(x);
   BOOST_CHECK(v.find(m) != v.end());
   BOOST_CHECK(v.find(n) != v.end());
 

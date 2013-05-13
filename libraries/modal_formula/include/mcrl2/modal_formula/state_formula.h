@@ -923,7 +923,7 @@ std::string pp(const state_formula& x);
 state_formula normalize_sorts(const state_formula& x, const data::data_specification& dataspec);
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x);
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x);
-std::set<data::variable> find_variables(const state_formulas::state_formula& x);
+std::set<data::variable> find_all_variables(const state_formulas::state_formula& x);
 std::set<data::variable> find_free_variables(const state_formulas::state_formula& x);
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x);
 bool find_nil(const state_formulas::state_formula& x);

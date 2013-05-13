@@ -41,8 +41,8 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   namespace s = state_formulas;
 
   state_formulas::state_formula f = formula;
-  std::set<core::identifier_string> formula_variable_names = data::detail::variable_names(state_formulas::find_variables(formula));
-  std::set<core::identifier_string> spec_variable_names = data::detail::variable_names(lps::find_variables(spec));
+  std::set<core::identifier_string> formula_variable_names = data::detail::variable_names(state_formulas::find_all_variables(formula));
+  std::set<core::identifier_string> spec_variable_names = data::detail::variable_names(lps::find_all_variables(spec));
   std::set<core::identifier_string> spec_names = lps::find_identifiers(spec);
 
   // rename data variables in f, to prevent name clashes with data variables in spec

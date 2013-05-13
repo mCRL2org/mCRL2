@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE(bug_367)
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(data::find_variables(i->condition()).empty());
-    BOOST_CHECK(lps::find_variables(i->multi_action()).empty());
+    BOOST_CHECK(data::find_all_variables(i->condition()).empty());
+    BOOST_CHECK(lps::find_all_variables(i->multi_action()).empty());
   }
 
   print_specifications(s0,s1);
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(reverse_equality)
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(data::find_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_all_variables(i->condition()).empty());
   }
 
   print_specifications(s0,s1);
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(equality)
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(data::find_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_all_variables(i->condition()).empty());
   }
 
   print_specifications(s0,s1);
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
   specification s0 = linearise(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  std::set<variable> parameters = mcrl2::data::find_variables(s1.process().process_parameters());
+  std::set<variable> parameters = mcrl2::data::find_all_variables(s1.process().process_parameters());
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
 
     // Check that the only data variables in the condition and time
     // are process parameters
-    std::set<variable> condition_vars = data::find_variables(i->condition());
+    std::set<variable> condition_vars = data::find_all_variables(i->condition());
     for (std::set<variable>::iterator j = condition_vars.begin()
                                           ; j != condition_vars.end()
          ; ++j)
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
 
     if (i->has_time())
     {
-      std::set<variable> time_vars = data::find_variables(i->multi_action().time());
+      std::set<variable> time_vars = data::find_all_variables(i->multi_action().time());
       for (std::set<variable>::iterator j = time_vars.begin()
                                             ; j != time_vars.end()
            ; ++j)
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(twice_lhs)
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
-      BOOST_CHECK(data::find_variables(i->condition()).empty());
+      BOOST_CHECK(data::find_all_variables(i->condition()).empty());
     }
   }
   BOOST_CHECK(sumvar_count == 1);

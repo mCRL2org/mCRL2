@@ -284,7 +284,7 @@ struct absinthe_algorithm
       {
         // check if it is a "ground term", i.e. it does not contain any variables
         abstraction_map::const_iterator i = sigmaH.find(x.sort());
-        if (i != sigmaH.end() && data::find_variables(x).empty())
+        if (i != sigmaH.end() && data::find_all_variables(x).empty())
         {
           data::data_expression_list args = atermpp::make_list(x);
           result = data::detail::create_finite_set(data::application(i->second, args));

@@ -162,16 +162,16 @@ make_find_data_expressions_traverser(OutputIterator out)
 }
 
 template <template <class> class Traverser, class OutputIterator>
-struct find_variables_traverser: public Traverser<find_variables_traverser<Traverser, OutputIterator> >
+struct find_all_variables_traverser: public Traverser<find_all_variables_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_variables_traverser<Traverser, OutputIterator> > super;
+  typedef Traverser<find_all_variables_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
   using super::operator();
 
   OutputIterator out;
 
-  find_variables_traverser(OutputIterator out_)
+  find_all_variables_traverser(OutputIterator out_)
     : out(out_)
   {}
 
@@ -186,10 +186,10 @@ struct find_variables_traverser: public Traverser<find_variables_traverser<Trave
 };
 
 template <template <class> class Traverser, class OutputIterator>
-find_variables_traverser<Traverser, OutputIterator>
-make_find_variables_traverser(OutputIterator out)
+find_all_variables_traverser<Traverser, OutputIterator>
+make_find_all_variables_traverser(OutputIterator out)
 {
-  return find_variables_traverser<Traverser, OutputIterator>(out);
+  return find_all_variables_traverser<Traverser, OutputIterator>(out);
 }
 
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
@@ -252,19 +252,19 @@ make_find_free_variables_traverser(OutputIterator out, const VariableContainer& 
 /// \param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \return All variables that occur in the term x
 template <typename T, typename OutputIterator>
-void find_variables(const T& x, OutputIterator o)
+void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_variables_traverser<data::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<data::variable_traverser>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
 /// \return All variables that occur in the object x
 template <typename T>
-std::set<data::variable> find_variables(const T& x)
+std::set<data::variable> find_all_variables(const T& x)
 {
   std::set<data::variable> result;
-  data::find_variables(x, std::inserter(result, result.end()));
+  data::find_all_variables(x, std::inserter(result, result.end()));
   return result;
 }
 
@@ -405,7 +405,7 @@ std::set<data::data_expression> find_data_expressions(const T& x)
 template <typename Container>
 bool search_variable(Container const& container, const variable& v)
 {
-  std::set<data::variable> variables = data::find_variables(container);
+  std::set<data::variable> variables = data::find_all_variables(container);
   return variables.find(v) != variables.end();
 }
 

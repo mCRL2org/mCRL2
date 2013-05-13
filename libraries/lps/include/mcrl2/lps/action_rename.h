@@ -357,7 +357,7 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
 {
   std::map< data::variable, data::variable > renamings;
 
-  std::set< data::variable > new_vars = data::find_variables(rleft.arguments());
+  std::set< data::variable > new_vars = data::find_all_variables(rleft.arguments());
 
   for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
   {
@@ -484,7 +484,7 @@ lps::specification action_rename(
          rule_old_argument_i++)
     {
       if (!is_variable(*rule_old_argument_i) &&
-          (!(data::find_variables(*rule_old_argument_i).empty())))
+          (!(data::find_all_variables(*rule_old_argument_i).empty())))
       {
         throw mcrl2::runtime_error("The arguments of the lhs " + lps::pp(rule_old_action) +
                                    " are not variables or closed expressions");
@@ -586,7 +586,7 @@ lps::specification action_rename(
             }
             else
             {
-              assert((data::find_variables(*rule_old_argument_i).empty())); // the argument must be closed,
+              assert((data::find_all_variables(*rule_old_argument_i).empty())); // the argument must be closed,
               // which is checked above.
               renamed_rule_condition=
                 lazy::and_(renamed_rule_condition,
@@ -603,7 +603,7 @@ lps::specification action_rename(
           }
 
           /* insert the new sum variables in all the newly generated summands */
-          std::set<variable> new_vars = find_variables(renamed_rule_old_action);
+          std::set<variable> new_vars = find_all_variables(renamed_rule_old_action);
           for (std::set<variable>::iterator sdvi = new_vars.begin();
                sdvi != new_vars.end(); sdvi++)
           {

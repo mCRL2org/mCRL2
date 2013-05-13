@@ -43,11 +43,11 @@ lps::action translate_user_notation(const lps::action& x) { return lps::translat
 void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x) { return lps::find_sort_expressions< lps::action_label_list >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x) { return lps::find_sort_expressions< lps::specification >(x); }
-std::set<data::variable> find_variables(const lps::linear_process& x) { return lps::find_variables< lps::linear_process >(x); }
-std::set<data::variable> find_variables(const lps::specification& x) { return lps::find_variables< lps::specification >(x); }
-std::set<data::variable> find_variables(const lps::deadlock& x) { return lps::find_variables< lps::deadlock >(x); }
-std::set<data::variable> find_variables(const lps::multi_action& x) { return lps::find_variables< lps::multi_action >(x); }
-std::set<data::variable> find_variables(const lps::action& x) { return lps::find_variables< lps::action >(x); }
+std::set<data::variable> find_all_variables(const lps::linear_process& x) { return lps::find_all_variables< lps::linear_process >(x); }
+std::set<data::variable> find_all_variables(const lps::specification& x) { return lps::find_all_variables< lps::specification >(x); }
+std::set<data::variable> find_all_variables(const lps::deadlock& x) { return lps::find_all_variables< lps::deadlock >(x); }
+std::set<data::variable> find_all_variables(const lps::multi_action& x) { return lps::find_all_variables< lps::multi_action >(x); }
+std::set<data::variable> find_all_variables(const lps::action& x) { return lps::find_all_variables< lps::action >(x); }
 std::set<data::variable> find_free_variables(const lps::action& x) { return lps::find_free_variables< lps::action >(x); }
 std::set<data::variable> find_free_variables(const lps::linear_process& x) { return lps::find_free_variables< lps::linear_process >(x); }
 std::set<data::variable> find_free_variables(const lps::specification& x) { return lps::find_free_variables< lps::specification >(x); }

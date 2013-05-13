@@ -235,8 +235,8 @@ class bisimulation_algorithm
       std::map<data::variable, data::variable> result;
 
       // put the names of variables appearing in p and q in an identifier generator
-      std::set<data::variable> context = lps::find_variables(p);
-      std::set<variable> vars = lps::find_variables(q);
+      std::set<data::variable> context = lps::find_all_variables(p);
+      std::set<variable> vars = lps::find_all_variables(q);
       context.insert(vars.begin(), vars.end());
       data::set_identifier_generator generator;
       for (std::set<data::variable>::iterator i = context.begin(); i != context.end(); ++i)
@@ -267,8 +267,8 @@ class bisimulation_algorithm
       std::map<data::variable, data::variable> result;
 
       // put the names of variables appearing in p and q in an identifier generator
-      std::set<data::variable> context = lps::find_variables(p);
-      std::set<variable> vars = lps::find_variables(q);
+      std::set<data::variable> context = lps::find_all_variables(p);
+      std::set<variable> vars = lps::find_all_variables(q);
       context.insert(vars.begin(), vars.end());
       data::set_identifier_generator generator;
       for (std::set<data::variable>::iterator i = context.begin(); i != context.end(); ++i)
@@ -714,8 +714,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<data::variable> used_variables = lps::find_variables(p);
-        std::set<data::variable> tmp = lps::find_variables(q);
+        std::set<data::variable> used_variables = lps::find_all_variables(p);
+        std::set<data::variable> tmp = lps::find_all_variables(q);
         used_variables.insert(tmp.begin(), tmp.end());
 
         std::set<std::string> used_names;

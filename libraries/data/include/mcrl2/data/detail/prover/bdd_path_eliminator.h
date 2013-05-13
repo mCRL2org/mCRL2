@@ -177,8 +177,8 @@ class BDD_Path_Eliminator: public BDD_Simplifier
                     const data_expression &a_expression_1, 
                     const data_expression &a_expression_2)
     {
-      std::set < variable > set1=find_variables(a_expression_1);
-      std::set < variable > set2=find_variables(a_expression_2);
+      std::set < variable > set1=find_all_variables(a_expression_1);
+      std::set < variable > set2=find_all_variables(a_expression_2);
       std::set < variable > intersection;
       std::set_intersection(set1.begin(),set1.end(),
                             set2.begin(),set2.end(),

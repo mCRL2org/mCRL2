@@ -116,7 +116,7 @@ void test_replace_process_parameters()
   data::variable b0("b0", data::sort_bool::bool_());
   sigma[b] = b0;
   lps::replace_process_parameters(spec, sigma);
-  std::set<data::variable> variables = lps::find_variables(spec);
+  std::set<data::variable> variables = lps::find_all_variables(spec);
   BOOST_CHECK(variables.find(b) == variables.end());
 }
 
@@ -134,7 +134,7 @@ void test_replace_summand_variables()
   sigma[c] = c0;
   lps::replace_summand_variables(spec, sigma);
   std::cout << lps::pp(spec) << std::endl;
-  std::set<data::variable> variables = lps::find_variables(spec);
+  std::set<data::variable> variables = lps::find_all_variables(spec);
   BOOST_CHECK(variables.find(c) == variables.end());
 }
 

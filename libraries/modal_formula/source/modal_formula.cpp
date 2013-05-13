@@ -27,7 +27,7 @@ namespace action_formulas
 
 //--- start generated action_formulas overloads ---//
 std::string pp(const action_formulas::action_formula& x) { return action_formulas::pp< action_formulas::action_formula >(x); }
-std::set<data::variable> find_variables(const action_formulas::action_formula& x) { return action_formulas::find_variables< action_formulas::action_formula >(x); }
+std::set<data::variable> find_all_variables(const action_formulas::action_formula& x) { return action_formulas::find_all_variables< action_formulas::action_formula >(x); }
 //--- end generated action_formulas overloads ---//
 
 } // namespace action_formulas
@@ -49,7 +49,7 @@ std::string pp(const state_formulas::state_formula& x) { return state_formulas::
 state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::data_specification& dataspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, dataspec); }
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x) { return state_formulas::translate_user_notation< state_formulas::state_formula >(x); }
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x) { return state_formulas::find_sort_expressions< state_formulas::state_formula >(x); }
-std::set<data::variable> find_variables(const state_formulas::state_formula& x) { return state_formulas::find_variables< state_formulas::state_formula >(x); }
+std::set<data::variable> find_all_variables(const state_formulas::state_formula& x) { return state_formulas::find_all_variables< state_formulas::state_formula >(x); }
 std::set<data::variable> find_free_variables(const state_formulas::state_formula& x) { return state_formulas::find_free_variables< state_formulas::state_formula >(x); }
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
 bool find_nil(const state_formulas::state_formula& x) { return state_formulas::find_nil< state_formulas::state_formula >(x); }

@@ -59,9 +59,9 @@ void test_find()
   lps::specification spec = lps::parse_linear_process_specification(SPEC);
   state_formula f = parse_state_formula("(mu X. X) && (forall b:Bool. true)", spec);
 
-  //--- find_variables ---//
+  //--- find_all_variables ---//
   data::variable b = bool_("b");
-  std::set<data::variable> v = state_formulas::find_variables(f);
+  std::set<data::variable> v = state_formulas::find_all_variables(f);
   BOOST_CHECK(v.find(b) != v.end());
 
   //--- find_sort_expressions ---//

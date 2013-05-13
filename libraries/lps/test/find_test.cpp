@@ -59,10 +59,10 @@ void test_find()
   action_summand s = spec.process().action_summands().front();
   action a = s.multi_action().actions().front();
 
-  //--- find_variables ---//
+  //--- find_all_variables ---//
   data::variable m = nat("m");
-  std::set<data::variable> v = lps::find_variables(a);
-  v = lps::find_variables(s);
+  std::set<data::variable> v = lps::find_all_variables(a);
+  v = lps::find_all_variables(s);
   BOOST_CHECK(v.find(m) != v.end());
 
   //--- find_sort_expressions ---//

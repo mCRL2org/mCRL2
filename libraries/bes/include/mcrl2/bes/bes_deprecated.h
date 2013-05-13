@@ -2110,7 +2110,7 @@ class boolean_equation_system
 
       // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
       // This can be removed if the jittyc compiler is not in use anymore.
-      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(pbes_spec);
+      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_all_variables(pbes_spec);
       std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(pbes_spec);
       std::set < mcrl2::data::variable > diff_set;
       std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));

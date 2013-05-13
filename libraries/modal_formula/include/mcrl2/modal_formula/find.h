@@ -29,19 +29,19 @@ namespace action_formulas
 /// \param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \return All variables that occur in the term x
 template <typename T, typename OutputIterator>
-void find_variables(const T& x, OutputIterator o)
+void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_variables_traverser<action_formulas::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<action_formulas::variable_traverser>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
 /// \return All variables that occur in the object x
 template <typename T>
-std::set<data::variable> find_variables(const T& x)
+std::set<data::variable> find_all_variables(const T& x)
 {
   std::set<data::variable> result;
-  action_formulas::find_variables(x, std::inserter(result, result.end()));
+  action_formulas::find_all_variables(x, std::inserter(result, result.end()));
   return result;
 }
 
@@ -164,19 +164,19 @@ namespace regular_formulas
 /// \param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \return All variables that occur in the term x
 template <typename T, typename OutputIterator>
-void find_variables(const T& x, OutputIterator o)
+void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_variables_traverser<regular_formulas::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<regular_formulas::variable_traverser>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
 /// \return All variables that occur in the object x
 template <typename T>
-std::set<data::variable> find_variables(const T& x)
+std::set<data::variable> find_all_variables(const T& x)
 {
   std::set<data::variable> result;
-  regular_formulas::find_variables(x, std::inserter(result, result.end()));
+  regular_formulas::find_all_variables(x, std::inserter(result, result.end()));
   return result;
 }
 
@@ -299,19 +299,19 @@ namespace state_formulas
 /// \param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \return All variables that occur in the term x
 template <typename T, typename OutputIterator>
-void find_variables(const T& x, OutputIterator o)
+void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_variables_traverser<state_formulas::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<state_formulas::variable_traverser>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
 /// \return All variables that occur in the object x
 template <typename T>
-std::set<data::variable> find_variables(const T& x)
+std::set<data::variable> find_all_variables(const T& x)
 {
   std::set<data::variable> result;
-  state_formulas::find_variables(x, std::inserter(result, result.end()));
+  state_formulas::find_all_variables(x, std::inserter(result, result.end()));
   return result;
 }
 

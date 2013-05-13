@@ -725,7 +725,7 @@ BOOST_AUTO_TEST_CASE(test_1090)
   const std::string FORMULA = "[!exists d:D . a(d)]false";
   pbes p = test_lps2pbes(SPEC, FORMULA);
 
-  std::set<data::variable> vars(pbes_system::find_variables(p));
+  std::set<data::variable> vars(pbes_system::find_all_variables(p));
   for(std::set<data::variable>::const_iterator i = vars.begin(); i != vars.end(); ++i)
   {
     BOOST_CHECK_NE(i->name(), core::identifier_string("d1"));

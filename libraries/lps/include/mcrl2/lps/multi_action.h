@@ -155,7 +155,7 @@ bool is_multi_action(const atermpp::aterm_appl& t)
 std::string pp(const multi_action& x);
 void normalize_sorts(multi_action& x, const data::data_specification& dataspec);
 void translate_user_notation(lps::multi_action& x);
-std::set<data::variable> find_variables(const lps::multi_action& x);
+std::set<data::variable> find_all_variables(const lps::multi_action& x);
 std::set<data::variable> find_free_variables(const lps::multi_action& x);
 
 /// \cond INTERNAL_DOCS

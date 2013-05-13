@@ -59,7 +59,7 @@ void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core
   if (!v.empty())
   {
     data::mutable_map_substitution<> sigma;
-    std::set<core::identifier_string> context = variable_names(lps::find_variables(summand));
+    std::set<core::identifier_string> context = variable_names(lps::find_all_variables(summand));
     data::set_identifier_generator generator;
     generator.add_identifiers(context);
     for (auto i = summation_variables.begin(); i != summation_variables.end(); ++i)

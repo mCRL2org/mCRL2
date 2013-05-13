@@ -170,7 +170,7 @@ protected:
     // This can be removed if the jittyc compilers are not in use anymore.
     void initialize_internal_rewriter()
     {
-      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(m_pbes);
+      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_all_variables(m_pbes);
       std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(m_pbes);
       std::set < mcrl2::data::variable > diff_set;
       std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));

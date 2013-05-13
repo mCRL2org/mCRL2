@@ -623,7 +623,7 @@ inline bool is_closed_real_number(const data_expression e)
     return false;
   }
 
-  std::set < variable > s=find_variables(e);
+  std::set < variable > s=find_all_variables(e);
   if (!s.empty())  // The expression e contains variables.
   {
     return false;

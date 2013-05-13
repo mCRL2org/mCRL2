@@ -37,7 +37,7 @@ std::string pp(const pbes& x);
 void normalize_sorts(pbes& x, const data::data_specification& dataspec);
 void translate_user_notation(pbes_system::pbes& x);
 std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x);
-std::set<data::variable> find_variables(const pbes_system::pbes& x);
+std::set<data::variable> find_all_variables(const pbes_system::pbes& x);
 std::set<data::variable> find_free_variables(const pbes_system::pbes& x);
 std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes& x);
 

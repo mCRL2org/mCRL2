@@ -205,7 +205,7 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 
 // template function overloads
 std::string pp(const linear_process& x);
-std::set<data::variable> find_variables(const lps::linear_process& x);
+std::set<data::variable> find_all_variables(const lps::linear_process& x);
 std::set<data::variable> find_free_variables(const lps::linear_process& x);
 
 } // namespace lps

@@ -68,19 +68,19 @@ make_find_action_labels_traverser(OutputIterator out)
 /// \param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \return All variables that occur in the term x
 template <typename T, typename OutputIterator>
-void find_variables(const T& x, OutputIterator o)
+void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_variables_traverser<lps::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<lps::variable_traverser>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
 /// \return All variables that occur in the object x
 template <typename T>
-std::set<data::variable> find_variables(const T& x)
+std::set<data::variable> find_all_variables(const T& x)
 {
   std::set<data::variable> result;
-  lps::find_variables(x, std::inserter(result, result.end()));
+  lps::find_all_variables(x, std::inserter(result, result.end()));
   return result;
 }
 

@@ -180,7 +180,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   core::identifier_string generate_identifier(const std::string& prefix, const data_expression& context) const
   {
     data::set_identifier_generator generator;
-    std::set<variable> variables = data::find_variables(context);
+    std::set<variable> variables = data::find_all_variables(context);
     for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       generator.add_identifier(i->name());

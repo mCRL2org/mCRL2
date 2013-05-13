@@ -252,7 +252,7 @@ struct term_traits<data::data_expression>
   static inline
   bool is_constant(const term_type& t)
   {
-    return data::find_variables(t).empty();
+    return data::find_all_variables(t).empty();
   }
 
   /// \brief Get the n-th argument of a data expression, provided it is an application.

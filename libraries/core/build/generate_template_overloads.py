@@ -275,7 +275,7 @@ classnames = FIND_SORT_EXPRESSIONS_CLASSNAMES.strip().split()
 generate_traverser_overloads(classnames, 'find_sort_expressions', 'std::set<data::sort_expression>', code_map)
 
 classnames = FIND_VARIABLES_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_variables', 'std::set<data::variable>', code_map)
+generate_traverser_overloads(classnames, 'find_all_variables', 'std::set<data::variable>', code_map)
 
 classnames = FIND_FREE_VARIABLES_CLASSNAMES.strip().split()
 generate_traverser_overloads(classnames, 'find_free_variables', 'std::set<data::variable>', code_map)
