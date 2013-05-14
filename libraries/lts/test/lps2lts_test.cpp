@@ -487,6 +487,25 @@ BOOST_AUTO_TEST_CASE(test_max_states)
   BOOST_CHECK_LT(result.num_states(), 10);
 }
 
+BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation1)
+{
+  std::string spec(
+    "proc B (i:Bool) = sum i:Bool.tau. B();\n"
+    "init B(true);\n"
+  );
+  check_lps2lts_specification(spec, 1, 2, 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation2)
+{
+  std::string spec(
+    "proc B (i:Bool) = sum i:Bool.tau. B(i=i);\n"
+    "init B(true);\n"
+  );
+  check_lps2lts_specification(spec, 2, 4, 1);
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
  // Initialise random seed to allow parallel running with lps2lts_test_old

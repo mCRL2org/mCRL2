@@ -8,13 +8,13 @@
 
 #include <time.h>
 
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/lps/resolve_name_clashes.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lts/detail/exploration.h"
-
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/trace/trace.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_balanced_tree.h"
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include <iomanip>
 
 using namespace mcrl2;
@@ -22,9 +22,9 @@ using namespace mcrl2::log;
 using namespace mcrl2::lps;
 using namespace mcrl2::lts;
 
-bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* options)
+bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *options)
 {
-  m_options = *options;
+  m_options=*options;
 
   assert(!(m_options.bithashing && m_options.outformat != lts_aut && m_options.outformat != lts_none));
 
@@ -45,6 +45,9 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
   m_maintain_traces = m_options.trace || m_options.save_error_trace;
   m_value_prioritize = (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized);
 
+  lps::specification specification(m_options.specification);
+  resolve_summand_variable_name_clashes(specification);
+
   if (m_options.outformat == lts_aut)
   {
     mCRL2log(verbose) << "writing state space in AUT format to '" << m_options.lts << "'." << std::endl;
@@ -63,12 +66,11 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
   {
     mCRL2log(verbose) << "writing state space in " << mcrl2::lts::detail::string_for_type(m_options.outformat)
                       << " format to '" << m_options.lts << "'." << std::endl;
-    m_output_lts.set_data(m_options.specification.data());
-    m_output_lts.set_process_parameters(m_options.specification.process().process_parameters());
-    m_output_lts.set_action_labels(m_options.specification.action_labels());
+    m_output_lts.set_data(specification.data());
+    m_output_lts.set_process_parameters(specification.process().process_parameters());
+    m_output_lts.set_action_labels(specification.action_labels());
   }
 
-  lps::specification specification(m_options.specification);
 
   if (m_options.usedummies)
   {
