@@ -68,9 +68,6 @@ class stategraph_algorithm
     // the global control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_GCFP;
 
-    // the related global control flow parameters
-    std::map<core::identifier_string, std::vector<bool> > m_is_related_GCFP;
-
     // for readability
     std::set<data::variable> FV(const data::data_expression& x) const
     {
@@ -283,7 +280,6 @@ class stategraph_algorithm
           }
         }
       }
-      m_pbes.compute_source_dest_copy(m_is_control_flow);
       mCRL2log(log::verbose) << print_control_flow_parameters();
     }
 
@@ -311,6 +307,35 @@ class stategraph_algorithm
       return out.str();
     }
 
+    // returns true if m is not a key in the map
+    template <typename Map>
+    bool is_undefined(const Map& m, const typename Map::key_type& key) const
+    {
+      return m.find(key) == m.end();
+    }
+
+    // returns true if m does not map key to value
+    template <typename Map>
+    bool is_mapped_to(const Map& m, const typename Map::key_type& key, const typename Map::mapped_type& value) const
+    {
+      auto i = m.find(key);
+      return i != m.end() && i->second == value;
+    }
+
+    // returns true if m maps a key to value
+    template <typename Map>
+    bool maps_to(const Map& m, const typename Map::mapped_type& value) const
+    {
+      for (auto i = m.begin(); i != m.end(); ++i)
+      {
+        if (i->second == value)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
     void compute_local_control_flow_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute local control flow parameters ===" << std::endl;
@@ -320,34 +345,27 @@ class stategraph_algorithm
       // initialize all control flow parameters to true
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        propositional_variable X = k->variable();
+        const core::identifier_string& X = k->variable().name();
         const std::vector<data::variable>& d_X = k->parameters();
-        m_is_LCFP[X.name()] = std::vector<bool>(d_X.size(), true);
+        m_is_LCFP[X] = std::vector<bool>(d_X.size(), true);
       }
 
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        propositional_variable X = k->variable();
+        const core::identifier_string& X = k->variable().name();
         const std::vector<data::variable>& d_X = k->parameters();
         const std::vector<predicate_variable>& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const predicate_variable& pred_X_i = *i;
-          if (pred_X_i.X.name() != X.name())
+          const predicate_variable& PVI_X_i = *i;
+          if (PVI_X_i.X.name() == X)
           {
-            continue;
-          }
-
-          for (std::size_t n = 0; n < d_X.size(); n++)
-          {
-            std::map<std::size_t, std::size_t>::const_iterator ci = pred_X_i.copy.find(n);
-            if (ci != pred_X_i.copy.end() && ci->second != n)
+            for (std::size_t n = 0; n < d_X.size(); n++)
             {
-              continue;
-            }
-            if (pred_X_i.source.find(n) == pred_X_i.source.end() || pred_X_i.dest.find(n) == pred_X_i.dest.end())
-            {
-              m_is_LCFP[X.name()][n] = false;
+              if (is_undefined(PVI_X_i.source, n) && is_undefined(PVI_X_i.dest, n) && !is_mapped_to(PVI_X_i.copy, n, n))
+              {
+                m_is_LCFP[X][n] = false;
+              }
             }
           }
         }
@@ -379,19 +397,6 @@ class stategraph_algorithm
       return out.str();
     }
 
-    // returns true if copy[m] == n for some m
-    bool is_copied(const std::map<std::size_t, std::size_t>& copy, std::size_t n) const
-    {
-      for (auto i = copy.begin(); i != copy.end(); ++i)
-      {
-        if (i->second == n)
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
     void compute_global_control_flow_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute global control flow parameters ===" << std::endl;
@@ -402,24 +407,25 @@ class stategraph_algorithm
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& d_X = k->parameters();
         const std::vector<predicate_variable>& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const predicate_variable& pred_X_i = *i;
-          const core::identifier_string& Y = pred_X_i.X.name();
-          if (Y == X)
+          const predicate_variable& PVI_X_i = *i;
+          const core::identifier_string& Y = PVI_X_i.X.name();
+          if (Y != X)
           {
-            continue;
-          }
-          const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-          const std::vector<data::variable>& d_Y = eq_Y.parameters();
-          for (std::size_t n = 0; n < d_Y.size(); n++)
-          {
-            if (pred_X_i.dest.find(n) == pred_X_i.dest.end() && !is_copied(pred_X_i.copy, n))
+            const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+            const std::vector<data::variable>& d_Y = eq_Y.parameters();
+            for (std::size_t n = 0; n < d_Y.size(); n++)
             {
-              mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(pred_X_i.X) << " in equation " << core::pp(X) << std::endl;
-              m_is_GCFP[Y][n] = false;
+              if (is_undefined(PVI_X_i.dest, n) && !maps_to(PVI_X_i.copy, n))
+              {
+                if (m_is_GCFP[Y][n])
+                {
+                  mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
+                }
+                m_is_GCFP[Y][n] = false;
+              }
             }
           }
         }
@@ -459,25 +465,15 @@ class stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << "=== compute related global control flow parameters ===" << std::endl;
 
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
-
-      // initialize all control flow parameters to false
-      for (auto k = equations.begin(); k != equations.end(); ++k)
-      {
-        propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
-        m_is_related_GCFP[X.name()] = std::vector<bool>(d_X.size(), true);
-      }
-
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& d_X = k->parameters();
         const std::vector<predicate_variable>& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const predicate_variable& pred_X_i = *i;
-          const core::identifier_string& Y = pred_X_i.X.name();
-          for (auto j = pred_X_i.copy.begin(); j != pred_X_i.copy.end(); ++j)
+          const predicate_variable& PVI_X_i = *i;
+          const core::identifier_string& Y = PVI_X_i.X.name();
+          for (auto j = PVI_X_i.copy.begin(); j != PVI_X_i.copy.end(); ++j)
           {
             std::size_t n = j->first;
             std::size_t m = j->second;
@@ -607,12 +603,14 @@ class stategraph_algorithm
     void run()
     {
       simplify(m_pbes);
+      m_pbes.compute_source_dest_copy();
+      mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
+
       compute_local_control_flow_parameters();
       compute_global_control_flow_parameters();
       compute_related_global_control_flow_parameters();
 
       compute_control_flow_parameters();
-      mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
     }
 
     const stategraph_pbes& get_pbes() const

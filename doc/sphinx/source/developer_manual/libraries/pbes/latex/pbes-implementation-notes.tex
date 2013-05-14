@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Friday, March 15, 2013 09:44:29}
+%TCIDATA{LastRevised=Tuesday, May 14, 2013 11:00:46}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -61,6 +61,7 @@
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 \input{include/tcilatex}
+\input{tcilatex}
 
 \begin{document}
 
@@ -266,9 +267,9 @@ h(\lnot \lbrack \alpha ]\varphi ) & =_{def} & \langle \alpha \rangle h(\lnot
 \varphi ) \\ 
 h(\lnot \langle \alpha \rangle \varphi ) & =_{def} & [\alpha ]h(\lnot
 \varphi ) \\ 
-h(\lnot \nabla ) & =_{def} & \Delta  \\ 
+h(\lnot \nabla ) & =_{def} & \Delta \\ 
 h(\lnot \nabla (t)) & =_{def} & \Delta (t) \\ 
-h(\lnot \Delta ) & =_{def} & \nabla  \\ 
+h(\lnot \Delta ) & =_{def} & \nabla \\ 
 h(\lnot \Delta (t)) & =_{def} & \nabla (t) \\ 
 h(\lnot X(e)) & =_{def} & undefined \\ 
 h(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \nu X(d{:}%
@@ -283,16 +284,16 @@ h(\mathsf{Q}d{{:}D}.\varphi ) & =_{def} & \mathsf{Q}d{{:}D}.h(\varphi ) \\
 h([\alpha ]\varphi ) & =_{def} & [\alpha ]h(\varphi ) \\ 
 h(\langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
 h(\varphi ) \\ 
-h(\nabla ) & =_{def} & \nabla  \\ 
+h(\nabla ) & =_{def} & \nabla \\ 
 h(\nabla (t)) & =_{def} & \nabla (t) \\ 
-h(\Delta ) & =_{def} & \Delta  \\ 
+h(\Delta ) & =_{def} & \Delta \\ 
 h(\Delta (t)) & =_{def} & \Delta (t) \\ 
 h(X(d)) & =_{def} & X(d) \\ 
 h(\sigma X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \sigma X(d{:}%
 D:=e).~h(\varphi )%
 \end{array}%
 \end{equation*}%
-\newpage 
+\newpage
 
 \subsection{The predicate formula normal form (PFNF)}
 
@@ -1848,61 +1849,66 @@ We define the function $\mathrm{changed}$ as follows:%
 
 Let $par(X)$ be the set of parameters of the equation corresponding to $X$.
 Let $pos(X,i)$ denote the $i$-th parameter of the equation corresponding to $%
-X$. Let $cf(X,i)$ be a boolean that denotes if $(X,d_{i})$ is a control flow
-parameter.
+X$.
 
-The set of control flow parameters of a PBES equation $X(d_{1}:D_{1},\cdots
-,d_{m}:D_{m})=\varphi $ is a subset of $\{(X,d_{1}),\ldots ,(X,d_{m})\}$.
-They are modeled using the function $cf$. The following algorithm computes $%
-cf$:
-
-Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots \mathcal{%
-(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeControlflowParameters(}$\mathcal{E}$\textsc{)} \\ 
-$\text{\textbf{for }}k=1,\cdots ,n\text{ \textbf{do}}$ \\ 
-$\qquad \text{\textbf{for }}i=1,\cdots ,\left\vert par(X_{k})\right\vert 
-\text{ \textbf{do}}$ \\ 
-$\qquad \qquad CFP(X_{k},i):=true$ \\ 
-$\qquad \qquad V(X_{k},i):=\bot $ \\ 
-$\text{\textbf{for }}k=1,\cdots ,n\text{ \textbf{do}}$ \\ 
-$\qquad \text{\textbf{for }}Y(e_{1},\cdots ,e_{m})\in occ(\varphi _{k})\text{
+\textsc{ComputeLocalControlflowParameters(}$\mathcal{E}$\textsc{)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert \text{ 
 \textbf{do}}$ \\ 
-$\qquad \qquad \text{\textbf{for }}i=1,\cdots ,m\text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}$is\_variable$(e_{i})\wedge
-e_{i}\in par(X_{k})$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{if}}$ $V(Y,i)=\bot \text{ \textbf{%
-then }}V(Y,i):=e_{i}$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{else }}CFP(Y,i):=(V(Y,i)=e_{i})$
-\\ 
-$todo:=\{X_{1},\cdots ,X_{n}\}$ \\ 
-\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad $\textbf{choose} $X_{k}\in todo$ \\ 
-$\qquad todo:=todo\setminus \{X_{k}\}$ \\ 
-$\qquad \text{\textbf{for }}Y(e_{1},\cdots ,e_{m})\in occ(\varphi _{k})\text{
-\textbf{do}}$ \\ 
-$\qquad \qquad \text{\textbf{for }}i=1,\cdots ,m\text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}$is\_variable$(e_{i})$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{if }}e_{i}\notin par(X_{k})$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
-\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}\qquad \qquad \qquad
-\qquad \qquad $ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{else if }}e_{i}\in
-par(X_{k})\wedge X_{k}=Y\wedge pos(X_{k},e_{i})\neq i$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
-\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{else if }}e_{i}\in
-par(X_{k})\wedge \lnot cf(X_{k},i)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
-\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{else if }}\lnot $is\_constant$(e_{i})$
-\\ 
-$\qquad \qquad \qquad \qquad \qquad \text{\textbf{if }}CFP(Y,i)\text{ 
-\textbf{then }}CFP(Y,i):=false$; $todo:=todo\cup \{Y\}$ \\ 
-$\text{\textbf{return} }CFP$%
+$\qquad \qquad LCFP(X,n):=true$ \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{if }}pred(\varphi _{X},i)=X\text{ \textbf{then}}
+$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
+par(X)\right\vert \text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}source(X,i,n)=\bot \text{ }%
+\wedge dest(X,i,n)=\bot \wedge copy(X,i,n)\neq n\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad LCFP(X,n):=false$ \\ 
+$\text{\textbf{return} }LCFP$%
 \end{tabular}%
-\end{equation*}
+\end{equation*}%
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeGlobalControlflowParameters(}$\mathcal{E},LCFP$\textsc{)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert \text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad GCFP(X,n):=LCFP(X,n)$ \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{if }}Y\neq X\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
+par(X)\right\vert \text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}dest(X,i,n)=\bot \wedge
+\forall m:copy(X,i,m)\neq n\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad GCFP(X,n):=false$ \\ 
+$\text{\textbf{return} }GCFP$%
+\end{tabular}%
+\end{equation*}%
+\newline
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeRelatedGlobalControlflowParameters(}$\mathcal{E},GCFP$\textsc{%
+)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert 
+\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}copy(X,i,n)=m\neq \bot \text{ 
+\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}GCFP(X,n)\wedge GCFP(Y,m)%
+\text{ \textbf{then }}(X,n)\sim (Y,m)$%
+\end{tabular}%
+\end{equation*}%
+\newpage 
 
 \subsection{Global control flow graph}
 

@@ -56,11 +56,8 @@ class stategraph_equation: public pbes_equation
     }
 
     // Extracts all conjuncts d[i] == e from the pbes expression x, for some i in 0 ... d.size(), and with e a constant.
-    // The conjuncts are added to the substitution sigma.
-    void find_equality_conjuncts(const pbes_expression& x, const std::vector<data::variable>& d, data::mutable_map_substitution<>& sigma) const
+    void find_equality_conjuncts(const pbes_expression& x, const std::vector<data::variable>& d, std::map<data::variable, data::data_expression>& result) const
     {
-      std::vector<data::data_expression> result;
-
       std::vector<pbes_expression> v;
       split_and(x, v);
       for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
@@ -74,11 +71,11 @@ class stategraph_equation: public pbes_equation
             data::data_expression right = data::binary_right(v_i);
             if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && is_constant(right))
             {
-              sigma[left] = right;
+              result[left] = right;
             }
             else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && is_constant(left))
             {
-              sigma[right] = left;
+              result[right] = left;
             }
           }
           // TODO: handle conjuncts b and !b, with b a variable with sort Bool
@@ -100,42 +97,38 @@ class stategraph_equation: public pbes_equation
     }
 
     // computes the source function for a pbes equation
-    void compute_source(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow)
+    void compute_source()
     {
-      const core::identifier_string& X = variable().name();
       for (std::vector<predicate_variable>::iterator i = m_predvars.begin(); i != m_predvars.end(); ++i)
       {
-        find_equality_conjuncts(i->guard, m_parameters, i->sigma);
+        std::map<data::variable, data::data_expression> sigma;
+        find_equality_conjuncts(i->guard, m_parameters, sigma);
 
         // convert sigma to source
         for (std::size_t j = 0; j < m_parameters.size(); j++)
         {
-          if (!is_cf(is_control_flow, X, j))
-          {
-            continue;
-          }
           data::variable d_j = m_parameters[j];
-          data::data_expression e = i->sigma(d_j);
-          if (e != d_j)
+          auto k = sigma.find(d_j);
+          if (k != sigma.end())
           {
+            data::data_expression e = k->second;
             i->source[j] = e;
+            i->sigma[d_j] = e;
           }
         }
       }
     }
 
-    void compute_dest(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, data::rewriter& R)
+    void compute_dest(data::rewriter& R)
     {
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        // PVI(X, I) = Y(e)
-        const core::identifier_string& Y = m_predvars[i].X.name();
         const data::data_expression_list& e = m_predvars[i].X.parameters();
         std::size_t j_index = 0;
         for (data::data_expression_list::const_iterator j = e.begin(); j != e.end(); ++j, ++j_index)
         {
           data::data_expression c = R(*j, m_predvars[i].sigma);
-          if (is_constant(c) && is_cf(is_control_flow, Y, j_index))
+          if (is_constant(c))
           {
             m_predvars[i].dest[j_index] = c;
           }
@@ -143,25 +136,17 @@ class stategraph_equation: public pbes_equation
       }
     }
 
-    void compute_copy(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow)
+    void compute_copy()
     {
-      const core::identifier_string& X = variable().name();
       for (std::size_t i = 0; i < m_predvars.size(); i++)
       {
-        // PVI(X, I) = Y(e)
-        const core::identifier_string& Y = m_predvars[i].X.name();
         const data::data_expression_list& e = m_predvars[i].X.parameters();
-
         for (std::size_t j = 0; j < m_parameters.size(); j++)
         {
-          if (!is_cf(is_control_flow, X, j))
-          {
-            continue;
-          }
           std::size_t k_index = 0;
           for (data::data_expression_list::const_iterator k = e.begin(); k != e.end(); ++k, ++k_index)
           {
-            if (m_parameters[j] == *k && is_cf(is_control_flow, Y, k_index))
+            if (m_parameters[j] == *k)
             {
               m_predvars[i].copy[j] = k_index;
             }
@@ -225,11 +210,11 @@ class stategraph_equation: public pbes_equation
       m_parameters = std::vector<data::variable>(params.begin(), params.end());
     }
 
-    void compute_source_dest_copy(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow, data::rewriter& R)
+    void compute_source_dest_copy(data::rewriter& R)
     {
-      compute_source(is_control_flow);
-      compute_dest(is_control_flow, R);
-      compute_copy(is_control_flow);
+      compute_source();
+      compute_dest(R);
+      compute_copy();
       compute_used();
       compute_changed();
     }
@@ -387,13 +372,13 @@ class stategraph_pbes
       }
     }
 
-    void compute_source_dest_copy(const std::map<core::identifier_string, std::vector<bool> >& is_control_flow)
+    void compute_source_dest_copy()
     {
       data::rewriter R(m_data);
       std::vector<stategraph_equation>& eqn = equations();
       for (std::vector<stategraph_equation>::iterator i = eqn.begin(); i != eqn.end(); ++i)
       {
-        i->compute_source_dest_copy(is_control_flow, R);
+        i->compute_source_dest_copy(R);
       }
     }
 
