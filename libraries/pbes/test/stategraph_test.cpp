@@ -485,7 +485,7 @@ int test_main(int argc, char** argv)
   test_remove_may_transitions();
   test_significant_variables();
   test_constraints();
-  test_local_stategraph();
+//  test_local_stategraph();
 
   return 0;
 }
