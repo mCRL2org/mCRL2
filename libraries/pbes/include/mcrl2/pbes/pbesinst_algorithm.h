@@ -19,10 +19,6 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
-#ifdef PBESINST_FINITE_ALGORITHM
-#include "mcrl2/pbes/detail/pbesinst_finite_builder.h"
-#endif
-
 #ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALGORITHM_H
 
