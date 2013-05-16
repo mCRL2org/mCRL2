@@ -607,7 +607,6 @@ class pbes_constelm_algorithm
             typename variable_sequence_type::iterator j = params.begin();
             for (typename data_term_sequence_type::iterator i = e.begin(); i != e.end(); ++i, ++j)
             {
-              // TODO: why not use R(t, sigma) interface here?
               data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
               if (core::term_traits<data_term_type>::is_constant(e1))
               {
@@ -839,7 +838,6 @@ class pbes_constelm_algorithm
           vertex& v = m_vertices[e.target().name()];
           mCRL2log(log::debug) << print_edge_update(e, u, v);
 
-          // TODO: why not use R(t, sigma) interface here?
           term_type value = m_pbes_rewriter(e.condition(), data::make_map_substitution(u.constraints()));
           mCRL2log(log::debug) << print_condition(e, u, value);
 

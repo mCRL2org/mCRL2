@@ -145,6 +145,8 @@ T replace_all_variables(const T& x,
   return core::make_update_apply_builder<process::variable_builder>(sigma)(x);
 }
 
+/// \brief Applies the substitution sigma to x.
+/// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 void replace_free_variables(T& x,
                             Substitution sigma,
@@ -154,6 +156,8 @@ void replace_free_variables(T& x,
   data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x);
 }
 
+/// \brief Applies the substitution sigma to x.
+/// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 T replace_free_variables(const T& x,
                          Substitution sigma,
@@ -163,6 +167,8 @@ T replace_free_variables(const T& x,
   return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x);
 }
 
+/// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
+/// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
                             Substitution sigma,

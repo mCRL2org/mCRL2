@@ -340,9 +340,9 @@ class bisimulation_algorithm
     /// \param S A specification
     /// \return The constructed pbes
     pbes build_pbes(const std::vector<pbes_equation>& equations,
-                      const specification& M,
-                      const specification& S
-                     )
+                    const specification& M,
+                    const specification& S
+                   )
     {
       const linear_process& m = M.process();
       const linear_process& s = S.process();
