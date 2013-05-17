@@ -460,6 +460,7 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
+  //assert(is_simple_substitution(sigma));
   data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
 }
 
@@ -471,6 +472,7 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
+  //assert(is_simple_substitution(sigma));
   return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
 }
 
@@ -483,9 +485,12 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
+  //assert(is_simple_substitution(sigma));
   data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
+/// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
+/// \pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
                          Substitution sigma,
@@ -493,6 +498,7 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
+  //assert(is_simple_substitution(sigma));
   return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 

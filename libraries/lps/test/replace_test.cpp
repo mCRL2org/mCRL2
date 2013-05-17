@@ -164,6 +164,11 @@ void test_action_list()
 
   l1 = lps::replace_free_variables(l1, sigma);
   BOOST_CHECK(l1 == l2);
+
+  std::set<data::variable> v;
+  l1 = lps::replace_variables(l1, sigma);
+  l1 = lps::replace_free_variables(l1, sigma);
+  l1 = lps::replace_variables_capture_avoiding(l1, sigma, v);
 }
 
 int test_main(int argc, char* argv[])

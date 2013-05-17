@@ -13,12 +13,37 @@
 #define MCRL2_DATA_SUBSTITUTIONS_H
 
 #include <functional>
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
 
 namespace data {
+
+/// \brief Returns true if the substitution sigma satisfies the property that FV(sigma(x)) is included in {x} for all variables x.
+/// N.B. The default return value is true, so a template specialization is required to enable this check for substitutions.
+template <typename Substitution>
+bool is_simple_substitution(const Substitution& sigma)
+{
+  return true;
+}
+
+/// \brief Returns true if FV(rhs) is included in {lhs}.
+inline
+bool is_simple_substitution(const data::variable& lhs, const data::data_expression& rhs)
+{
+  std::set<data::variable> v = data::find_free_variables(rhs);
+  if (v.empty())
+  {
+    return true;
+  }
+  if (v.size() == 1)
+  {
+    return *(v.begin()) == lhs;
+  }
+  return false;
+}
 
 /// \brief Substitution that maps a sort expression to a sort expression.
 struct sort_expression_assignment: public std::unary_function<sort_expression, sort_expression>
@@ -94,6 +119,20 @@ struct assignment_sequence_substitution : public std::unary_function<variable, d
   }
 };
 
+template <>
+inline
+bool is_simple_substitution(const assignment_sequence_substitution& sigma)
+{
+  for (auto i = sigma.assignments.begin(); i != sigma.assignments.end(); ++i)
+  {
+    if (!is_simple_substitution(i->lhs(), i->rhs()))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// \brief Generic substitution function. The substitution is stored as a sequence
 /// of variables and a sequence of expressions.
 template <typename VariableContainer, typename ExpressionContainer>
@@ -160,6 +199,21 @@ make_sequence_sequence_substitution(const VariableContainer& vc, const Expressio
   return sequence_sequence_substitution<VariableContainer, ExpressionContainer>(vc, ec);
 }
 
+template <typename VariableContainer, typename ExpressionContainer>
+bool is_simple_substitution(const sequence_sequence_substitution<VariableContainer, ExpressionContainer>& sigma)
+{
+  auto i = sigma.variables.begin();
+  auto j = sigma.expressions.begin();
+  for (i = sigma.variables.begin(); i != sigma.variables.end(); ++i, ++j)
+  {
+    if (!is_simple_substitution(*i, *j))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// \brief Generic substitution function. The substitution is stored as a sequence
 /// of pairs of variables and expressions.
 template <typename Container>
@@ -203,6 +257,19 @@ pair_sequence_substitution<Container>
 make_pair_sequence_substitution(const Container& c)
 {
   return pair_sequence_substitution<Container>(c);
+}
+
+template <typename Container>
+bool is_simple_substitution(const pair_sequence_substitution<Container>& sigma)
+{
+  for (auto i = sigma.container.begin(); i != sigma.container.end(); ++i)
+  {
+    if (!is_simple_substitution(i->first, i->second))
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 /// \brief Generic substitution function. The substitution is stored as a mapping
@@ -260,6 +327,19 @@ map_substitution<AssociativeContainer>
 make_map_substitution(const AssociativeContainer& m)
 {
   return map_substitution<AssociativeContainer>(m);
+}
+
+template <typename AssociativeContainer>
+bool is_simple_substitution(const map_substitution<AssociativeContainer>& sigma)
+{
+  for (auto i = sigma.m_map.begin(); i != sigma.m_map.end(); ++i)
+  {
+    if (!is_simple_substitution(i->first, i->second))
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 /// \brief Generic substitution function. The substitution is stored as a mapping
@@ -458,6 +538,19 @@ mutable_map_substitution<std::map<typename VariableContainer::value_type, typena
 make_mutable_map_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
 {
   return mutable_map_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
+}
+
+template <typename AssociativeContainer>
+bool is_simple_substitution(const mutable_map_substitution<AssociativeContainer>& sigma)
+{
+  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    if (!is_simple_substitution(i->first, i->second))
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 /// \brief Generic substitution function.
@@ -683,8 +776,6 @@ public:
   }
 
 };
-
-
 
 namespace detail
 {
