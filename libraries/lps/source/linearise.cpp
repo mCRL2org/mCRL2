@@ -190,7 +190,7 @@ class specification_basic_type:public boost::noncopyable
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
     bool timeIsBeingUsed;
-    std::deque < objectdatatype > objectdata; // This is a double ended queue to guarantee that the objects will not 
+    std::deque < objectdatatype > objectdata; // This is a double ended queue to guarantee that the objects will not
                                               // be moved to another place when the object data structure grows. This
                                               // is because objects in this datatype  are passed around by reference.
 
@@ -1236,7 +1236,7 @@ class specification_basic_type:public boost::noncopyable
         }
        assigned_variables.insert(l->lhs());
       }
-      // Check whether x does not occur in the assignment list. Then variable x is assigned to 
+      // Check whether x does not occur in the assignment list. Then variable x is assigned to
       // itself, and it occurs in the process.
       variable_list parameters=objectdata[objectIndex(proc_name)].parameters;
       for (variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
@@ -1470,7 +1470,7 @@ class specification_basic_type:public boost::noncopyable
 
           if (replacelhs)
           {
-            lhs=data::replace_free_variables(lhs,sigma);
+            lhs=data::replace_variables(lhs,sigma);
             assert(is_variable(lhs));
           }
           if (replacerhs)
@@ -1537,7 +1537,7 @@ class specification_basic_type:public boost::noncopyable
       result.push_front(assignment(lhs,rhs));
       return result;
     }
-  
+
     // Sort the assignments, such that they have the same order as the parameters
     assignment_list sort_assignments(const assignment_list& ass, const variable_list parameters)
     {
@@ -1552,7 +1552,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const std::map<variable,data_expression>::const_iterator j=assignment_map.find(*i);
         if (j!=assignment_map.end()) // found
-        { 
+        {
           result.push_back(assignment(j->first,j->second));
         }
       }
@@ -1573,12 +1573,12 @@ class specification_basic_type:public boost::noncopyable
         do
         {
           if (parameters.empty())
-          { 
+          {
             return false;
           }
           v=parameters.front();
           parameters.pop_front();
-        } 
+        }
         while (v!=i->lhs());
 
       }
@@ -1741,7 +1741,7 @@ class specification_basic_type:public boost::noncopyable
             new_assignments.push_back(assignment(*i,*j));
           }
         }
-        else 
+        else
         {
           new_assignments.push_back(assignment(*i,*j));
         }
@@ -2671,14 +2671,14 @@ class specification_basic_type:public boost::noncopyable
 
     assignment_list argscollect_regular(
                          const process_expression& t,
-                         const variable_list &vl, 
+                         const variable_list &vl,
                          const std::set<variable> &variables_bound_in_sum)
     {
       assignment_vector result;
       for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
       {
-        if (variables_bound_in_sum.count(*i)>0 && occursinpCRLterm(*i,t,false)) 
-        { 
+        if (variables_bound_in_sum.count(*i)>0 && occursinpCRLterm(*i,t,false))
+        {
           result.push_back(assignment(*i,*i)); // Here an identity assignment is used, as it is possible
                                                // that the *i at the lhs is not the same variable as *i at the rhs.
         }
@@ -2692,7 +2692,7 @@ class specification_basic_type:public boost::noncopyable
       {
         const process_instance_assignment p(t);
         size_t n=objectIndex(p.identifier());
-        
+
         const variable_list pars=objectdata[n].parameters; // These are the old parameters of the process.
         assert(pars.size()<=vl.size());
 
@@ -2752,7 +2752,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression create_regular_invocation(
-      process_expression sequence,  
+      process_expression sequence,
       std::vector <process_identifier> &todo,
       const variable_list &freevars,
       const std::set<variable> &variables_bound_in_sum)
@@ -2863,7 +2863,7 @@ class specification_basic_type:public boost::noncopyable
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
         const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma);
 
-        
+
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
         return sum(sumvars,
@@ -3052,7 +3052,7 @@ class specification_basic_type:public boost::noncopyable
                single = in `mode=mCRL' is important, otherwise crash
                I do not understand the reason for this at this moment
                JFG (9/5/2000) */
-          return transform_process_instance_to_process_instance_assignment(body); 
+          return transform_process_instance_to_process_instance_assignment(body);
         }
 
         const size_t n=objectIndex(t);
@@ -3991,7 +3991,7 @@ class specification_basic_type:public boost::noncopyable
           const data_expression rhs=representative_generator_internal(i->sort());
           result.push_back(assignment(*i,rhs));
         }
-        else 
+        else
         {
           const std::map<variable,data_expression>::iterator k=assignment_map.find(*i);
           if (k!=assignment_map.end())  // There is assignment for *i. Use it.
@@ -4001,7 +4001,7 @@ class specification_basic_type:public boost::noncopyable
           }
           parset.erase(j);
         }
-        
+
       }
       assert(parset.empty());
       assert(assignment_map.empty());
@@ -4040,7 +4040,7 @@ class specification_basic_type:public boost::noncopyable
     {
       data_expression_list t=findarguments(objectdata[objectIndex(procId)].parameters,
                                            stack.parameters,args,t2,stack,vars,false);
-  
+
       int i;
       for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
 
@@ -4264,7 +4264,7 @@ class specification_basic_type:public boost::noncopyable
         }
         return result;
       }
-      else 
+      else
       {
         data_expression_list result=
                 pushdummy_stack(objectdata[objectIndex(initialProcId)].parameters,stack);
@@ -7315,18 +7315,21 @@ class specification_basic_type:public boost::noncopyable
 
     /******** make_unique_variables **********************/
 
-    std::map < variable, data_expression > make_unique_variables(
+    data::mutable_map_substitution<> make_unique_variables(
       const variable_list &var_list,
-      const std::string& hint)
+      const std::string& hint,
+      std::set<data::variable>& rhs_variables)
     {
       /* This function generates a list of variables with the same sorts
          as in variable_list, where all names are unique */
 
-      std::map < variable, data_expression > sigma;
+      data::mutable_map_substitution<> sigma;
 
       for(variable_list::const_iterator i=var_list.begin(); i!=var_list.end(); ++i)
       {
-        sigma[*i]=get_fresh_variable(std::string(i->name()) + ((hint.empty())?"":"_") + hint, i->sort());
+        const data::variable v = get_fresh_variable(std::string(i->name()) + ((hint.empty())?"":"_") + hint, i->sort());
+        sigma[*i] = v;
+        rhs_variables.insert(v);
       }
       return sigma;
     }
@@ -7342,34 +7345,34 @@ class specification_basic_type:public boost::noncopyable
     {
       action_summand_vector result_action_summands;
 
-      std::map < variable, data_expression > sigma=make_unique_variables(pars,hint);
-      const variable_list unique_pars=data::replace_free_variables(pars,make_map_substitution(sigma));
+      std::set<data::variable> rhs_variables_sigma;
+      data::mutable_map_substitution<> sigma=make_unique_variables(pars,hint, rhs_variables_sigma);
+      const variable_list unique_pars=data::replace_variables(pars, sigma);
 
-      init=substitute_assignmentlist(init,pars,true,false, make_map_substitution(sigma));  // Only substitute the variables at the lhs.
+      init=substitute_assignmentlist(init,pars,true,false, sigma);  // Only substitute the variables at the lhs.
       for (action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
+        std::set<data::variable> rhs_variables_sumvars;
         const action_summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
-        std::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
-        const variable_list unique_sumvars=data::replace_free_variables(sumvars, make_map_substitution(sigma_sumvars));
+        data::mutable_map_substitution<> sigma_sumvars=make_unique_variables(sumvars,hint,rhs_variables_sumvars);
+        const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         data_expression condition=smmnd.condition();
         action_list multiaction=smmnd.multi_action().actions();
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-        condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
-        condition=data::replace_free_variables(condition,make_map_substitution(sigma));
+        condition=data::replace_variables_capture_avoiding(condition, sigma_sumvars, rhs_variables_sumvars);
+        condition=data::replace_variables_capture_avoiding(condition, sigma, rhs_variables_sigma);
 
-        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
-        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
-        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma_sumvars));
-        multiaction=lps::replace_free_variables(multiaction,make_map_substitution(sigma));
+        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma_sumvars, rhs_variables_sumvars);
+        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma, rhs_variables_sigma);
+        multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma_sumvars, rhs_variables_sumvars);
+        multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma, rhs_variables_sigma);
 
-// std::cerr << "MAKE UNIQUE IN" << pp(nextstate) << "\n";
-        nextstate=substitute_assignmentlist(nextstate,pars,false,true,make_map_substitution(sigma_sumvars));
-        nextstate=substitute_assignmentlist(nextstate,pars,true,true,make_map_substitution(sigma));
-// std::cerr << "MAKE UNIQUE oUT" << pp(nextstate) << "\n";
+        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars);
+        nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma);
 
         result_action_summands.push_back(action_summand(unique_sumvars,
                                                         condition,
@@ -7385,20 +7388,21 @@ class specification_basic_type:public boost::noncopyable
 
       for (deadlock_summand_vector::const_iterator s=deadlock_summands.begin(); s!=deadlock_summands.end(); ++s)
       {
+        std::set<data::variable> rhs_variables_sumvars;
         const deadlock_summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
-        std::map < variable, data_expression > sigma_sumvars=make_unique_variables(sumvars,hint);
-        const variable_list unique_sumvars=data::replace_free_variables(sumvars, make_map_substitution(sigma_sumvars));
+        data::mutable_map_substitution<> sigma_sumvars=make_unique_variables(sumvars,hint, rhs_variables_sumvars);
+        const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         assert(unique_sumvars.size()==sumvars.size());
         data_expression condition=smmnd.condition();
         data_expression actiontime=smmnd.deadlock().time();
 
-        condition=data::replace_free_variables(condition,make_map_substitution(sigma));
-        condition=data::replace_free_variables(condition,make_map_substitution(sigma_sumvars));
+        condition=data::replace_variables_capture_avoiding(condition, sigma_sumvars, rhs_variables_sumvars);
+        condition=data::replace_variables_capture_avoiding(condition, sigma, rhs_variables_sigma);
 
-        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma));
-        actiontime=data::replace_free_variables(actiontime,make_map_substitution(sigma_sumvars));
+        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma_sumvars, rhs_variables_sumvars);
+        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma, rhs_variables_sigma);
 
         result_deadlock_summands.push_back(deadlock_summand(unique_sumvars,
                                                             condition,
@@ -7820,8 +7824,8 @@ class specification_basic_type:public boost::noncopyable
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
           // by a constant, which by itself is a parameter.
 
-          std::set <variable> variable_list = process::find_free_variables(temporary_spec.process().action_summands()); 
-          const std::set <variable> variable_list1 = process::find_free_variables(temporary_spec.process().deadlock_summands()); 
+          std::set <variable> variable_list = process::find_free_variables(temporary_spec.process().action_summands());
+          const std::set <variable> variable_list1 = process::find_free_variables(temporary_spec.process().deadlock_summands());
           variable_list.insert(variable_list1.begin(),variable_list1.end());
           for (std::set <variable>::const_iterator i=variable_list.begin();
                i!=variable_list.end(); ++i)
@@ -8503,7 +8507,7 @@ class specification_basic_type:public boost::noncopyable
       return procId;
     }
 
-/* Transform process_arguments 
+/* Transform process_arguments
  *   This function replace process_instances by process_instance_assignments.
  *   All assignments in a process_instance_assignment are ordered in the same
  *   sequence as the parameters belonging to that assignment.
@@ -8743,14 +8747,14 @@ class specification_basic_type:public boost::noncopyable
                                                 0,
                                                 true);
           assert(check_valid_process_instance_assignment(p,assignment_list()));
-          result=process_instance_assignment(p,assignment_list()); 
+          result=process_instance_assignment(p,assignment_list());
           visited_proc[t]=result;
         }
         else
         {
           const process_identifier p=newprocess(parameters,t,pCRL,0,true);
           assert(check_valid_process_instance_assignment(p,assignment_list()));
-          result=process_instance_assignment(p,assignment_list()); 
+          result=process_instance_assignment(p,assignment_list());
           visited_proc[t]=result;
         }
       }
