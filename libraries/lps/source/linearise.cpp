@@ -54,6 +54,7 @@
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_equation.h"
 #include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/replace.h"
 
 // Boost utilities
 #include "boost/format.hpp"
@@ -1363,7 +1364,8 @@ class specification_basic_type:public boost::noncopyable
     void alphaconvertprocess(
       variable_list& sumvars,
       MutableSubstitution &sigma,
-      const process_expression p)
+      const process_expression p,
+      std::set < variable >& lhs_variables_in_sigma)
     {
       /* This function replaces the variables in sumvars
          by unique ones if these variables occur in occurvars
@@ -1374,12 +1376,13 @@ class specification_basic_type:public boost::noncopyable
       for (variable_list::const_iterator l=sumvars.begin() ;
            l!=sumvars.end() ; ++l)
       {
-        variable var=*l;
+        const variable var=*l;
         if (occursinpCRLterm(var,p,true))
         {
-          variable newvar=get_fresh_variable(var.name(),var.sort());
+          const variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars.push_front(newvar);
-          sigma[var]=data_expression(newvar);
+          sigma[var]=newvar;
+          lhs_variables_in_sigma.insert(newvar);
         }
         else
         {
@@ -1392,11 +1395,10 @@ class specification_basic_type:public boost::noncopyable
     template <class MutableSubstitution>
     void alphaconvert(
       variable_list& sumvars,
-      // variable_list& rename_vars,
-      // data_expression_list& rename_terms,
       MutableSubstitution &sigma,
       const variable_list &occurvars,
-      const data_expression_list &occurterms)
+      const data_expression_list &occurterms,
+      std::set<variable>& variables_occurring_in_rhs_of_sigma)
     {
       /* This function replaces the variables in sumvars
          by unique ones if these variables occur in occurvars
@@ -1415,6 +1417,7 @@ class specification_basic_type:public boost::noncopyable
           /* rename_vars.push_front(var);
              rename_terms.push_front(data_expression(newvar)); */
           sigma[var]=newvar;
+          variables_occurring_in_rhs_of_sigma.insert(newvar);
         }
         else
         {
@@ -1433,9 +1436,9 @@ class specification_basic_type:public boost::noncopyable
       const variable_list &parameters,
       const bool replacelhs,
       const bool replacerhs,
-      const Substitution &sigma)
+      Substitution &sigma,
+      const std::set<variable>& variables_in_rhs_of_sigma)
     {
-      /* TODO: This should be replaced by standard functions. */
       /* precondition: the variables in the assignment occur in
          the same sequence as in the parameters, which stands for the
          total list of parameters.
@@ -1445,6 +1448,12 @@ class specification_basic_type:public boost::noncopyable
          in the lefthandside of an assignment if replacelhs holds. If for some variable
          occuring in the parameterlist no assignment is present, whereas
          this variable occurs in vars, an assignment for it is added.
+
+         It is not possible to use standard substitution functions to replace substitute_assignmentlis
+         because they do not take the parameters of processes into account. 
+         For instance consider a process P(b:D)=... of which an instance P() exists.
+         If the substitution sigma(b)=t is applied to P() the result should be P(b=t).
+         The standard substitutions do not take this parameterlist into account, as it stands.
       */
 
       assert(replacelhs==0 || replacelhs==1);
@@ -1475,25 +1484,17 @@ class specification_basic_type:public boost::noncopyable
           }
           if (replacerhs)
           {
-            rhs=data::replace_free_variables(rhs,sigma);
+            rhs=data::replace_variables_capture_avoiding(rhs,sigma,variables_in_rhs_of_sigma);
           }
 
-          /* if (lhs==rhs) If they are equal, the rhs can refer to a locally bound variable.
-          {
-            return substitute_assignmentlist(
-                     assignments.tail(),
-                     parameters.tail(),
-                     replacelhs,
-                     replacerhs,
-                     sigma);
-          }*/
           assignment_list result=
                    substitute_assignmentlist(
                      assignments.tail(),
                      parameters.tail(),
                      replacelhs,
                      replacerhs,
-                     sigma);
+                     sigma,
+                     variables_in_rhs_of_sigma);
           result.push_front(assignment(lhs,rhs));
           return result;
         }
@@ -1515,7 +1516,7 @@ class specification_basic_type:public boost::noncopyable
       }
       if (replacerhs)
       {
-        rhs=data::replace_free_variables(rhs,sigma);
+        rhs=data::replace_variables_capture_avoiding(rhs,sigma,variables_in_rhs_of_sigma);
       }
 
       if (lhs==rhs)
@@ -1525,7 +1526,8 @@ class specification_basic_type:public boost::noncopyable
                  parameters.tail(),
                  replacelhs,
                  replacerhs,
-                 sigma);
+                 sigma,
+                 variables_in_rhs_of_sigma);
       }
       assignment_list result=
                substitute_assignmentlist(
@@ -1533,7 +1535,8 @@ class specification_basic_type:public boost::noncopyable
                  parameters.tail(),
                  replacelhs,
                  replacerhs,
-                 sigma);
+                 sigma,
+                 variables_in_rhs_of_sigma);
       result.push_front(assignment(lhs,rhs));
       return result;
     }
@@ -1591,130 +1594,11 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression substitute_pCRLproc(
       const process_expression &p,
-      const  std::map < variable, data_expression > &sigma)
+      std::map < variable, data_expression > &sigma,
+      const std::set< variable >& rhs_variables_in_sigma)
     {
-      if (is_choice(p))
-      {
-        return choice(
-                 substitute_pCRLproc(choice(p).left(),sigma),
-                 substitute_pCRLproc(choice(p).right(),sigma));
-      }
-      if (is_seq(p))
-      {
-        return seq(
-                 substitute_pCRLproc(seq(p).left(),sigma),
-                 substitute_pCRLproc(seq(p).right(),sigma));
-      }
-      if (is_sync(p))
-      {
-        return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma));
-      }
-      if (is_if_then(p))
-      {
-        data_expression condition=data::replace_free_variables(if_then(p).condition(), make_map_substitution(sigma));
-        if (condition==sort_bool::false_())
-        {
-          return delta_at_zero();
-        }
-        if (condition==sort_bool::true_())
-        {
-          return substitute_pCRLproc(if_then(p).then_case(),sigma);
-        }
-        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma));
-      }
-      if (is_if_then_else(p))
-      {
-        data_expression condition=data::replace_free_variables(if_then_else(p).condition(), make_map_substitution(sigma));
-        if (condition==sort_bool::false_())
-        {
-          return substitute_pCRLproc(if_then_else(p).else_case(),sigma);
-        }
-        if (condition==sort_bool::true_())
-        {
-          return substitute_pCRLproc(if_then_else(p).then_case(),sigma);
-        }
-        return if_then_else(
-                 condition,
-                 substitute_pCRLproc(if_then_else(p).then_case(),sigma),
-                 substitute_pCRLproc(if_then_else(p).else_case(),sigma));
-      }
-
-      if (is_sum(p))
-      {
-        variable_list sumargs=sum(p).bound_variables();
-        variable_list vars;
-        data_expression_list terms;
-
-        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-        {
-          vars=push_back(vars,i->first);
-          terms=push_back(terms,i->second);
-        }
-
-        std::map < variable, data_expression > local_sigma=sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms);
-
-        const process_expression result=sum(sumargs,
-                                            substitute_pCRLproc(sum(p).operand(),local_sigma));
-        return result;
-      }
-
-      if (is_process_instance(p))
-      {
-        assert(0);
-        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(p);
-
-        size_t n=objectIndex(q.identifier());
-        const variable_list parameters=objectdata[n].parameters;
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,make_map_substitution(sigma));
-        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
-        return process_instance_assignment(q.identifier(),new_assignments);
-      }
-
-      if (is_process_instance_assignment(p))
-      {
-        const process_instance_assignment q(p);
-        size_t n=objectIndex(q.identifier());
-        const variable_list parameters=objectdata[n].parameters;
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,make_map_substitution(sigma));
-        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
-        return process_instance_assignment(q.identifier(),new_assignments);
-      }
-
-      if (is_action(p))
-      {
-        return action(action(p).label(),
-                      data::replace_free_variables(action(p).arguments(), make_map_substitution(sigma)));
-      }
-
-      if (is_at(p))
-      {
-        return at(substitute_pCRLproc(at(p).operand(),sigma),
-                  data::replace_free_variables(at(p).time_stamp(), make_map_substitution(sigma)));
-      }
-
-      if (is_delta(p))
-      {
-        return p;
-      }
-
-      if (is_tau(p))
-      {
-        return p;
-      }
-
-      if (is_sync(p))
-      {
-        return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma));
-
-      }
-
-      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p));
-      return process_expression();
+      mutable_map_substitution<> sigma_aux(sigma); 
+      return process::replace_variables_capture_avoiding(p,sigma_aux,rhs_variables_in_sigma);
     }
 
 
@@ -1818,7 +1702,6 @@ class specification_basic_type:public boost::noncopyable
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
       const process_identifier p(fresh_identifier_generator("P"),get_sorts(parameters1));
-// std::cerr << "NEWPROCESS " << pp(p) << "   " << pp(body) << "   " << pp(parameters1) << "\n";
       insertProcDeclaration(
         p,
         parameters1,
@@ -1846,12 +1729,12 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
-        /* variable_list renamevars;
-        data_expression_list renameterms; */
         std::map < variable, data_expression > sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        body1=substitute_pCRLproc(body1, sigma);
-        const data_expression time1=data::replace_free_variables(time, make_map_substitution(sigma));
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+        body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
+        mutable_map_substitution<> sigma_aux(sigma);
+        const data_expression time1=data::replace_variables_capture_avoiding(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
         body1=wraptime(body1,time1,sumvars+freevars);
         return sum(sumvars,body1);
       }
@@ -2035,7 +1918,6 @@ class specification_basic_type:public boost::noncopyable
       const variableposition v,
       const std::set<variable>& variables_bound_in_sum)
     {
-// std::cerr << "PROCSTOVARHEADGNF " << pp(body) << "\n";
       /* it is assumed that we only receive processes with
          operators alt, seq, sum_state, cond, name, delta, tau, sync, AtTime in it */
 
@@ -2071,8 +1953,9 @@ class specification_basic_type:public boost::noncopyable
           process_expression body1=sum(body).operand();
 
           std::map < variable, data_expression > sigma;
-          alphaconvert(sumvars,sigma,freevars,data_expression_list());
-          body1=substitute_pCRLproc(body1, sigma);
+          std::set<variable> variables_occurring_in_rhs_of_sigma;
+          alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+          body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
           body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first,variables_bound_in_sum1);
@@ -2398,9 +2281,10 @@ class specification_basic_type:public boost::noncopyable
         variable_list sumvars=sum(body1).bound_variables();
 
         std::map < variable, data_expression > sigma;
-        alphaconvertprocess(sumvars,sigma,body2);
+        std::set < variable > lhs_variables_in_sigma;
+        alphaconvertprocess(sumvars,sigma,body2,lhs_variables_in_sigma);
         return sum(sumvars,
-                   putbehind(substitute_pCRLproc(sum(body1).operand(), sigma),
+                   putbehind(substitute_pCRLproc(sum(body1).operand(), sigma,lhs_variables_in_sigma),
                              body2));
       }
 
@@ -2470,11 +2354,12 @@ class specification_basic_type:public boost::noncopyable
         /* variable_list vars;
         data_expression_list terms; */
         std::map < variable, data_expression > sigma;
-        alphaconvert(sumvars,sigma,variable_list(), make_list(condition));
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+        alphaconvert(sumvars,sigma,variable_list(), make_list(condition),variables_occurring_in_rhs_of_sigma);
         return sum(
                  sumvars,
                  distribute_condition(
-                   substitute_pCRLproc(sum(body1).operand(),sigma),
+                   substitute_pCRLproc(sum(body1).operand(),sigma,variables_occurring_in_rhs_of_sigma),
                    condition));
       }
 
@@ -2860,8 +2745,9 @@ class specification_basic_type:public boost::noncopyable
         variable_list sumvars=sum(t).bound_variables();
 
         std::map < variable, data_expression > sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma);
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+        const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma, variables_occurring_in_rhs_of_sigma);
 
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
@@ -2901,9 +2787,11 @@ class specification_basic_type:public boost::noncopyable
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
         std::map < variable, data_expression > sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        body1=substitute_pCRLproc(body1, sigma);
-        const data_expression time1=data::replace_free_variables(time,make_map_substitution(sigma));
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+        body1=substitute_pCRLproc(body1, sigma, variables_occurring_in_rhs_of_sigma);
+        mutable_map_substitution<> sigma_aux(sigma);
+        const data_expression time1=data::replace_variables_capture_avoiding(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
         body1=distributeTime(body1,time1,sumvars+freevars,timecondition);
         return sum(sumvars,body1);
       }
@@ -2963,7 +2851,6 @@ class specification_basic_type:public boost::noncopyable
        GNF where one action is always followed by a
        variable. */
     {
-// std::cerr << "PROCSTOREALGNF " << pp(body) << "\n";
       if (is_at(body))
       {
         data_expression timecondition=sort_bool::true_();
@@ -3066,6 +2953,7 @@ class specification_basic_type:public boost::noncopyable
         procstorealGNFrec(t,first,todo,regular);
 
         std::map < variable, data_expression > sigma;
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
 
         const data_expression_list &dl= process_instance(body).actual_parameters();
         const variable_list &vl=objectdata[n].parameters;
@@ -3075,10 +2963,12 @@ class specification_basic_type:public boost::noncopyable
         {
           assert(j!=dl.end());
           sigma[*i]=*j;
+          const std::set<variable> varset=find_free_variables(*j);
+          variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
         }
         assert(j==dl.end());
 
-        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma);
+        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma,variables_occurring_in_rhs_of_sigma);
 
         if (regular)
         {
@@ -3121,12 +3011,16 @@ class specification_basic_type:public boost::noncopyable
         const assignment_list &dl= process_instance_assignment(body).assignments();
 
         std::map < variable, data_expression > sigma;
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
+
         for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
         {
           sigma[i->lhs()]=i->rhs();
+          const std::set<variable> varset=find_free_variables(i->rhs());
+          variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
         }
 
-        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma);
+        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma,variables_occurring_in_rhs_of_sigma);
         if (regular)
         {
           t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
@@ -3361,10 +3255,12 @@ class specification_basic_type:public boost::noncopyable
         // during the substitution. Same applies to tempvar
         // below.
         std::map < variable, data_expression > sigma;
+        std::set<variable> variables_occurring_in_rhs_of_sigma;
         sigma[var]=var2;
+        variables_occurring_in_rhs_of_sigma.insert(var2);
         data_expression_list templist=data::replace_free_variables(aterm_cast<data_expression_list>(objectdata[n].parameters), make_map_substitution(sigma));
         objectdata[n].parameters=variable_list(templist);
-        process_expression tempvar=substitute_pCRLproc(objectdata[n].processbody, sigma);
+        process_expression tempvar=substitute_pCRLproc(objectdata[n].processbody, sigma,variables_occurring_in_rhs_of_sigma);
         objectdata[n].processbody=tempvar;
         var=var2;
         return false;
@@ -4336,7 +4232,6 @@ class specification_basic_type:public boost::noncopyable
       const bool regular,
       const bool singlestate)
     {
-// std::cerr << "ADD SUMMNAD " << pp(summandterm) << "    " << pp(parameters) << "\n";
       data_expression atTime;
       action_list multiAction;
       bool is_delta_summand=false;
@@ -5147,7 +5042,8 @@ class specification_basic_type:public boost::noncopyable
         ++auxrename_list_pars;
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
-        std::map < variable, data_expression > sigma;
+        std::map<variable,data_expression> sigma;
+        std::set<variable> variables_in_rhs_of_sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
@@ -5156,10 +5052,13 @@ class specification_basic_type:public boost::noncopyable
           if (sigma.count(*i)==0)
           {
             sigma[*i]=*j;
+            const std::set<variable> varset=find_free_variables(*j);
+            variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
           }
         }
+        mutable_map_substitution<> mutable_sigma(sigma);
 
-        const data_expression auxresult1=data::replace_free_variables(condition,make_map_substitution(sigma));
+        const data_expression auxresult1=data::replace_variables_capture_avoiding(condition,mutable_sigma,variables_in_rhs_of_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -5258,7 +5157,8 @@ class specification_basic_type:public boost::noncopyable
             data_expression_list::const_iterator d1=(a1->arguments()).begin();
             for (size_t i=1; i<fcnt; ++i, ++d1) {};
             f= *d1;
-            std::map < variable, data_expression > sigma;
+            std::map<variable,data_expression> sigma;
+            std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -5267,10 +5167,13 @@ class specification_basic_type:public boost::noncopyable
               if (sigma.count(*i)==0)
               {
                 sigma[*i]=*j;
+                std::set<variable> varset=find_free_variables(*j);
+                variables_in_rhs_sigma.insert(varset.begin(),varset.end());
               }
             }
 
-            const data_expression auxresult1=data::replace_free_variables(f,make_map_substitution(sigma));
+            mutable_map_substitution<> mutable_sigma(sigma);
+            const data_expression auxresult1=data::replace_variables_capture_avoiding(f,mutable_sigma,variables_in_rhs_sigma);
 
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
@@ -5362,6 +5265,7 @@ class specification_basic_type:public boost::noncopyable
             ++auxrename_list_args;
 
             std::map < variable, data_expression > sigma;
+            std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -5370,10 +5274,13 @@ class specification_basic_type:public boost::noncopyable
               if (sigma.count(*i)==0)
               {
                 sigma[*i]=*j;
+                std::set<variable> varset=find_free_variables(*j);
+                variables_in_rhs_sigma.insert(varset.begin(),varset.end());
               }
             }
 
-            const data_expression auxresult1=data::replace_free_variables(actiontime, make_map_substitution(sigma));
+            mutable_map_substitution<> mutable_sigma(sigma);
+            const data_expression auxresult1=data::replace_variables_capture_avoiding(actiontime, mutable_sigma,variables_in_rhs_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -5443,6 +5350,7 @@ class specification_basic_type:public boost::noncopyable
           nextstateparameter=getRHSassignment(*var_it,nextstate);
 
           std::map < variable, data_expression > sigma;
+          std::set<variable> variables_in_rhs_sigma;
           data_expression_list::const_iterator j=auxargs.begin();
           for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -5451,11 +5359,13 @@ class specification_basic_type:public boost::noncopyable
             if (sigma.count(*i)==0)
             {
               sigma[*i]=*j;
+              std::set<variable> varset=find_free_variables(*j);
+              variables_in_rhs_sigma.insert(varset.begin(),varset.end());
             }
           }
 
-
-          data_expression auxresult1=data::replace_free_variables(nextstateparameter, make_map_substitution(sigma));
+          mutable_map_substitution<> mutable_sigma(sigma);
+          data_expression auxresult1=data::replace_variables_capture_avoiding(nextstateparameter, mutable_sigma,variables_in_rhs_sigma);
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
             equalterm=auxresult1;
@@ -5577,6 +5487,7 @@ class specification_basic_type:public boost::noncopyable
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
         std::map < variable, data_expression > sigma;
+        std::set<variable> variables_in_rhs_sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
@@ -5585,10 +5496,13 @@ class specification_basic_type:public boost::noncopyable
           if (sigma.count(*i)==0)
           {
             sigma[*i]=*j;
+            std::set<variable> varset=find_free_variables(*j);
+            variables_in_rhs_sigma.insert(varset.begin(),varset.end());
           }
         }
 
-        const data_expression auxresult1=data::replace_free_variables(condition, make_map_substitution(sigma));
+        mutable_map_substitution<> mutable_sigma(sigma);
+        const data_expression auxresult1=data::replace_variables_capture_avoiding(condition, mutable_sigma,variables_in_rhs_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -5694,6 +5608,7 @@ class specification_basic_type:public boost::noncopyable
             ++auxrename_list_args;
 
             std::map < variable, data_expression > sigma;
+            std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -5702,10 +5617,13 @@ class specification_basic_type:public boost::noncopyable
               if (sigma.count(*i)==0)
               {
                 sigma[*i]=*j;
+                std::set<variable> varset=find_free_variables(*j);
+                variables_in_rhs_sigma.insert(varset.begin(),varset.end());
               }
             }
 
-            const data_expression auxresult1=data::replace_free_variables(actiontime, make_map_substitution(sigma));
+            mutable_map_substitution<> mutable_sigma(sigma);
+            const data_expression auxresult1=data::replace_variables_capture_avoiding(actiontime, mutable_sigma,variables_in_rhs_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -7296,6 +7214,7 @@ class specification_basic_type:public boost::noncopyable
         const data_expression_list &auxargs=*renamings_arg;
 
         std::map < variable, data_expression > sigma;
+        std::set<variable> variables_in_rhs_sigma;
         data_expression_list::const_iterator j1=auxargs.begin();
         for (variable_list::const_iterator i1=auxpars.begin();
              i1!=auxpars.end(); ++i1, ++j1)
@@ -7304,10 +7223,14 @@ class specification_basic_type:public boost::noncopyable
           if (sigma.count(*i1)==0)
           {
             sigma[*i1]=*j1;
+            std::set<variable> varset=find_free_variables(*j);
+            variables_in_rhs_sigma.insert(varset.begin(),varset.end());
+
           }
         }
 
-        result=lazy::or_(result,data::replace_free_variables(lazy::and_(*i,*j), make_map_substitution(sigma)));
+        mutable_map_substitution<> mutable_sigma(sigma);
+        result=lazy::or_(result,data::replace_variables_capture_avoiding(lazy::and_(*i,*j), mutable_sigma, variables_in_rhs_sigma));
       }
       return result;
     }
@@ -7349,7 +7272,7 @@ class specification_basic_type:public boost::noncopyable
       data::mutable_map_substitution<> sigma=make_unique_variables(pars,hint, rhs_variables_sigma);
       const variable_list unique_pars=data::replace_variables(pars, sigma);
 
-      init=substitute_assignmentlist(init,pars,true,false, sigma);  // Only substitute the variables at the lhs.
+      init=substitute_assignmentlist(init,pars,true,false, sigma,rhs_variables_sigma);  // Only substitute the variables in the lhs.
       for (action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
         std::set<data::variable> rhs_variables_sumvars;
@@ -7371,8 +7294,8 @@ class specification_basic_type:public boost::noncopyable
         multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma_sumvars, rhs_variables_sumvars);
         multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma, rhs_variables_sigma);
 
-        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars);
-        nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma);
+        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars,rhs_variables_sumvars);
+        nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma,rhs_variables_sigma);
 
         result_action_summands.push_back(action_summand(unique_sumvars,
                                                         condition,
@@ -7470,10 +7393,11 @@ class specification_basic_type:public boost::noncopyable
         {
           /* Summand1 has time. Substitute the time expression for
              timevar in ultimatedelaycondition, and extend the condition */
-          std::map < variable, data_expression > sigma;
+          mutable_map_substitution<> sigma;
+          const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
           sigma[timevar]=actiontime1;
           const data_expression intermediateultimatedelaycondition=
-                      data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
+                      data::replace_variables_capture_avoiding(ultimatedelaycondition, sigma, variables_in_rhs_sigma);
           condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
         }
 
@@ -7512,10 +7436,11 @@ class specification_basic_type:public boost::noncopyable
           {
             /* Summand1 has time. Substitute the time expression for
                timevar in ultimatedelaycondition, and extend the condition */
-            std::map < variable, data_expression > sigma;
+            mutable_map_substitution<> sigma;
+            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
             sigma[timevar]=actiontime1;
             const data_expression intermediateultimatedelaycondition=
-                       data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
+                       data::replace_variables_capture_avoiding(ultimatedelaycondition,sigma,variables_in_rhs_sigma);
             condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
           }
 
@@ -7558,11 +7483,12 @@ class specification_basic_type:public boost::noncopyable
         {
           /* Summand2 has time. Substitute the time expression for
              timevar in ultimatedelaycondition, and extend the condition */
-          std::map < variable, data_expression > sigma;
+          mutable_map_substitution<> sigma;
+          const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime2);
           sigma[timevar]=actiontime2;
 
           const data_expression intermediateultimatedelaycondition=
-                        data::replace_free_variables(ultimatedelaycondition, make_map_substitution(sigma));
+                        data::replace_variables_capture_avoiding(ultimatedelaycondition,sigma,variables_in_rhs_sigma);
           condition2=lazy::and_(intermediateultimatedelaycondition,condition2);
         }
 
@@ -7603,11 +7529,12 @@ class specification_basic_type:public boost::noncopyable
           {
             /* Summand2 has time. Substitute the time expression for
                timevar in ultimatedelaycondition, and extend the condition */
-            std::map < variable, data_expression > sigma;
+            mutable_map_substitution<> sigma;
+            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime2);
             sigma[timevar]=actiontime2;
 
             const data_expression intermediateultimatedelaycondition=
-                                data::replace_free_variables(ultimatedelaycondition,make_map_substitution(sigma));
+                                data::replace_variables_capture_avoiding(ultimatedelaycondition,sigma,variables_in_rhs_sigma);
             condition2=lazy::and_(intermediateultimatedelaycondition,condition2);
           }
 
@@ -7774,15 +7701,17 @@ class specification_basic_type:public boost::noncopyable
         size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
+        // std::map<variable,data_expression> sigma;
+        std::set<variable> variables_occurring_in_rhs_sigma;
         for (assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
         {
-          /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          assert(sigma.count(i->lhs())==0);
           sigma[i->lhs()]=i->rhs();
+          const std::set<variable> varset=find_free_variables(i->rhs());
+          variables_occurring_in_rhs_sigma.insert(varset.begin(),varset.end());
         }
 
-        init=substitute_assignmentlist(init,pars,false,true,make_map_substitution(sigma));
+        init=substitute_assignmentlist(init,pars,false,true,sigma,variables_occurring_in_rhs_sigma);
 
         // Make the bound variables and parameters in this process unique.
 
@@ -7945,70 +7874,73 @@ class specification_basic_type:public boost::noncopyable
     process_expression alphaconversionterm(
       const process_expression &t,
       const variable_list &parameters,
-      const std::map < variable, data_expression > &sigma)
+      mutable_map_substitution<> sigma,
+      const std::set < variable >& variables_occurring_in_rhs_of_sigma)
     {
       if (is_choice(t))
       {
         return choice(
-                 alphaconversionterm(choice(t).left(),parameters,sigma),
-                 alphaconversionterm(choice(t).right(),parameters,sigma));
+                 alphaconversionterm(choice(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
+                 alphaconversionterm(choice(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_seq(t))
       {
         return seq(
-                 alphaconversionterm(seq(t).left(),parameters,sigma),
-                 alphaconversionterm(seq(t).right(),parameters,sigma));
+                 alphaconversionterm(seq(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
+                 alphaconversionterm(seq(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_sync(t))
       {
         return process::sync(
-                 alphaconversionterm(process::sync(t).left(),parameters,sigma),
-                 alphaconversionterm(process::sync(t).right(),parameters,sigma));
+                 alphaconversionterm(process::sync(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
+                 alphaconversionterm(process::sync(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_bounded_init(t))
       {
         return bounded_init(
-                 alphaconversionterm(bounded_init(t).left(),parameters,sigma),
-                 alphaconversionterm(bounded_init(t).right(),parameters,sigma));
+                 alphaconversionterm(bounded_init(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
+                 alphaconversionterm(bounded_init(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_merge(t))
       {
-        alphaconversionterm(process::merge(t).left(),parameters,sigma),
-                            alphaconversionterm(process::merge(t).right(),parameters,sigma);
-        return process_expression();
+        return process::merge(
+                 alphaconversionterm(process::merge(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
+                 alphaconversionterm(process::merge(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_left_merge(t))
       {
-        alphaconversionterm(left_merge(t).left(),parameters,sigma),
-                            alphaconversionterm(left_merge(t).right(),parameters,sigma);
-        return process_expression();
+        return left_merge(
+                 alphaconversionterm(left_merge(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
+                 alphaconversionterm(left_merge(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_at(t))
       {
-        return at(alphaconversionterm(at(t).operand(),parameters,sigma),
-                  data::replace_free_variables(data_expression(at(t).time_stamp()), make_map_substitution(sigma)));
+        return at(alphaconversionterm(at(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
+                  data::replace_variables_capture_avoiding(data_expression(at(t).time_stamp()),sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_if_then(t))
       {
         return if_then(
-                 data::replace_free_variables(data_expression(if_then(t).condition()), make_map_substitution(sigma)),
-                 alphaconversionterm(if_then(t).then_case(),parameters,sigma));
+                 data::replace_variables_capture_avoiding(data_expression(if_then(t).condition()), sigma, variables_occurring_in_rhs_of_sigma),
+                 alphaconversionterm(if_then(t).then_case(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_sum(t))
       {
         variable_list sumvars=sum(t).bound_variables();
-        std::map < variable, data_expression > local_sigma=sigma;
+        mutable_map_substitution<> local_sigma=sigma;
+        std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
 
-        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
-        const process_expression  result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,local_sigma));
+        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters),variables_occurring_in_rhs_of_local_sigma);
+        const process_expression result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,
+                                                   local_sigma,variables_occurring_in_rhs_of_local_sigma));
         return result;
       }
 
@@ -8020,17 +7952,16 @@ class specification_basic_type:public boost::noncopyable
         const variable_list instance_parameters=objectdata[n].parameters;
         alphaconversion(procId,instance_parameters);
 
-        assert(check_valid_process_instance_assignment(procId,
-                                substitute_assignmentlist(process_instance_assignment(t).assignments(),
-                                instance_parameters,false, true,make_map_substitution(sigma))));
-        return process_instance_assignment(procId,
-                                substitute_assignmentlist(process_instance_assignment(t).assignments(),
-                                instance_parameters,false, true,make_map_substitution(sigma)));
+        const process_instance_assignment result(procId,
+                                                 substitute_assignmentlist(process_instance_assignment(t).assignments(),
+                                                                           instance_parameters,false, true,sigma,variables_occurring_in_rhs_of_sigma));
+        assert(check_valid_process_instance_assignment(result.identifier(),result.assignments()));
+        return result;
       }
 
       if (is_action(t))
       {
-        return action(action(t).label(), data::replace_free_variables(action(t).arguments(), make_map_substitution(sigma)));
+        return action(action(t).label(), data::replace_variables_capture_avoiding(action(t).arguments(), sigma, variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_delta(t)||
@@ -8041,39 +7972,34 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_hide(t))
       {
-        alphaconversionterm(hide(t).operand(),parameters,sigma);
-        return process_expression();
+        return alphaconversionterm(hide(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
       }
 
       if (is_rename(t))
       {
-        alphaconversionterm(process::rename(t).operand(),parameters,sigma);
-        return process_expression();
+        return alphaconversionterm(process::rename(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
       }
 
       if (is_comm(t))
       {
-        alphaconversionterm(comm(t).operand(),parameters,sigma);
-        return process_expression();
+        return alphaconversionterm(comm(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
       }
 
       if (is_allow(t))
       {
-        alphaconversionterm(allow(t).operand(),parameters,sigma);
-        return process_expression();
+        return alphaconversionterm(allow(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
       }
 
       if (is_block(t))
       {
-        alphaconversionterm(block(t).operand(),parameters,sigma);
-        return process_expression();
+        return alphaconversionterm(block(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
       }
 
       throw mcrl2::runtime_error("unexpected process format in alphaconversionterm " + process::pp(t) +".");
       return process_expression();
     }
 
-    void alphaconversion(const process_identifier &procId, const variable_list &parameters)
+    void alphaconversion(const process_identifier& procId, const variable_list& parameters)
     {
       size_t n=objectIndex(procId);
 
@@ -8084,13 +8010,13 @@ class specification_basic_type:public boost::noncopyable
         // tempvar below is needed as objectdata may be reallocated
         // during a call to alphaconversionterm.
         std::map < variable, data_expression > sigma;
-        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters, sigma);
+        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,sigma,std::set<variable>());
         objectdata[n].processbody=tempvar;
       }
       else if (objectdata[n].processstatus==mCRLdone)
       {
         std::map < variable, data_expression > sigma;
-        alphaconversionterm(objectdata[n].processbody,parameters, sigma);
+        alphaconversionterm(objectdata[n].processbody,parameters,sigma,std::set<variable>());
 
       }
       else if (objectdata[n].processstatus==GNFalpha)
