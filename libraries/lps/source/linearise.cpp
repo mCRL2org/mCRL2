@@ -1594,11 +1594,133 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression substitute_pCRLproc(
       const process_expression &p,
-      std::map < variable, data_expression > &sigma,
+      mutable_map_substitution<> &sigma,
       const std::set< variable >& rhs_variables_in_sigma)
     {
-      mutable_map_substitution<> sigma_aux(sigma); 
-      return process::replace_variables_capture_avoiding(p,sigma_aux,rhs_variables_in_sigma);
+      // mutable_map_substitution<> sigma_aux(sigma); 
+      // return process::replace_variables_capture_avoiding(p,sigma_aux,rhs_variables_in_sigma);
+      if (is_choice(p)) 
+      { 
+        return choice( 
+                 substitute_pCRLproc(choice(p).left(),sigma,rhs_variables_in_sigma), 
+                 substitute_pCRLproc(choice(p).right(),sigma,rhs_variables_in_sigma)); 
+      } 
+      if (is_seq(p)) 
+      { 
+        return seq( 
+                 substitute_pCRLproc(seq(p).left(),sigma,rhs_variables_in_sigma), 
+                 substitute_pCRLproc(seq(p).right(),sigma,rhs_variables_in_sigma)); 
+      } 
+      if (is_sync(p)) 
+      { 
+        return process::sync( 
+                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma), 
+                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma)); 
+      } 
+      if (is_if_then(p)) 
+      { 
+        data_expression condition=data::replace_variables_capture_avoiding(if_then(p).condition(), sigma,rhs_variables_in_sigma); 
+        if (condition==sort_bool::false_()) 
+        { 
+          return delta_at_zero(); 
+        } 
+        if (condition==sort_bool::true_()) 
+        { 
+          return substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma); 
+        } 
+        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma)); 
+      } 
+      if (is_if_then_else(p)) 
+      { 
+        data_expression condition=data::replace_variables_capture_avoiding(if_then_else(p).condition(), sigma,rhs_variables_in_sigma); 
+        if (condition==sort_bool::false_()) 
+        { 
+          return substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma); 
+        } 
+        if (condition==sort_bool::true_()) 
+        { 
+          return substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma); 
+        } 
+        return if_then_else( 
+                 condition, 
+                 substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma), 
+                 substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma)); 
+      } 
+ 
+      if (is_sum(p)) 
+      { 
+        variable_list sumargs=sum(p).bound_variables(); 
+        variable_list vars; 
+        data_expression_list terms; 
+ 
+        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i) 
+        { 
+          vars=push_back(vars,i->first); 
+          terms=push_back(terms,i->second); 
+        } 
+ 
+        mutable_map_substitution<> local_sigma=sigma; 
+        std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
+        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma); 
+ 
+        const process_expression result=sum(sumargs, 
+                                            substitute_pCRLproc(sum(p).operand(),local_sigma,local_rhs_variables_in_sigma)); 
+        return result; 
+      } 
+ 
+      if (is_process_instance(p)) 
+      { 
+        assert(0); 
+        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(p); 
+ 
+        size_t n=objectIndex(q.identifier()); 
+        const variable_list parameters=objectdata[n].parameters; 
+        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma); 
+        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments)); 
+        return process_instance_assignment(q.identifier(),new_assignments); 
+      } 
+ 
+      if (is_process_instance_assignment(p)) 
+      { 
+        const process_instance_assignment q(p); 
+        size_t n=objectIndex(q.identifier()); 
+        const variable_list parameters=objectdata[n].parameters; 
+        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma); 
+        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments)); 
+        return process_instance_assignment(q.identifier(),new_assignments); 
+      } 
+ 
+      if (is_action(p)) 
+      { 
+        return action(action(p).label(), 
+                      data::replace_variables_capture_avoiding(action(p).arguments(), sigma,rhs_variables_in_sigma)); 
+      } 
+ 
+      if (is_at(p)) 
+      { 
+        return at(substitute_pCRLproc(at(p).operand(),sigma,rhs_variables_in_sigma), 
+                  data::replace_variables_capture_avoiding(at(p).time_stamp(),sigma,rhs_variables_in_sigma)); 
+      } 
+ 
+      if (is_delta(p)) 
+      { 
+        return p; 
+      } 
+ 
+      if (is_tau(p)) 
+      { 
+        return p; 
+      } 
+ 
+      if (is_sync(p)) 
+      { 
+        return process::sync( 
+                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma), 
+                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma)); 
+      } 
+ 
+      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p)); 
+      return process_expression(); 
     }
 
 
@@ -1680,7 +1802,7 @@ class specification_basic_type:public boost::noncopyable
       const bool canterminate,
       const bool containstime)
     {
-      static size_t numberOfNewProcesses=0, warningNumber=100;
+      static size_t numberOfNewProcesses=0, warningNumber=25;
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
@@ -1729,7 +1851,9 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
-        std::map < variable, data_expression > sigma;
+        
+        mutable_map_substitution<> sigma;
+        // std::map < variable, data_expression > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
@@ -1952,7 +2076,7 @@ class specification_basic_type:public boost::noncopyable
           variable_list sumvars=sum(body).bound_variables();
           process_expression body1=sum(body).operand();
 
-          std::map < variable, data_expression > sigma;
+          mutable_map_substitution<> sigma;
           std::set<variable> variables_occurring_in_rhs_of_sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
           body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
@@ -2280,7 +2404,7 @@ class specification_basic_type:public boost::noncopyable
             inadvertently bound */
         variable_list sumvars=sum(body1).bound_variables();
 
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
         std::set < variable > lhs_variables_in_sigma;
         alphaconvertprocess(sumvars,sigma,body2,lhs_variables_in_sigma);
         return sum(sumvars,
@@ -2351,9 +2475,7 @@ class specification_basic_type:public boost::noncopyable
         /* we must take care that no variables in condition are
             inadvertently bound */
         variable_list sumvars=sum(body1).bound_variables();
-        /* variable_list vars;
-        data_expression_list terms; */
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,variable_list(), make_list(condition),variables_occurring_in_rhs_of_sigma);
         return sum(
@@ -2744,11 +2866,10 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(t).bound_variables();
 
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma, variables_occurring_in_rhs_of_sigma);
-
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -2786,7 +2907,7 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         body1=substitute_pCRLproc(body1, sigma, variables_occurring_in_rhs_of_sigma);
@@ -2952,7 +3073,7 @@ class specification_basic_type:public boost::noncopyable
            we must now substitute */
         procstorealGNFrec(t,first,todo,regular);
 
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
 
         const data_expression_list &dl= process_instance(body).actual_parameters();
@@ -3010,7 +3131,7 @@ class specification_basic_type:public boost::noncopyable
 
         const assignment_list &dl= process_instance_assignment(body).assignments();
 
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
 
         for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
@@ -3019,7 +3140,6 @@ class specification_basic_type:public boost::noncopyable
           const std::set<variable> varset=find_free_variables(i->rhs());
           variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
         }
-
         process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma,variables_occurring_in_rhs_of_sigma);
         if (regular)
         {
@@ -3254,11 +3374,11 @@ class specification_basic_type:public boost::noncopyable
         // templist is needed as objectdata may be realloced
         // during the substitution. Same applies to tempvar
         // below.
-        std::map < variable, data_expression > sigma;
+        mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         sigma[var]=var2;
         variables_occurring_in_rhs_of_sigma.insert(var2);
-        data_expression_list templist=data::replace_free_variables(aterm_cast<data_expression_list>(objectdata[n].parameters), make_map_substitution(sigma));
+        data_expression_list templist=data::replace_free_variables(aterm_cast<data_expression_list>(objectdata[n].parameters), sigma);
         objectdata[n].parameters=variable_list(templist);
         process_expression tempvar=substitute_pCRLproc(objectdata[n].processbody, sigma,variables_occurring_in_rhs_of_sigma);
         objectdata[n].processbody=tempvar;
