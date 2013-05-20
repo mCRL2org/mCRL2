@@ -135,9 +135,35 @@ void test_replace_variables_capture_avoiding()
   test_replace_variables_capture_avoiding("sum n: Bool. a(n) . (sum k: Bool. a(k) . a(m))", "m: Bool := n", "sum n1: Bool. a(n1) . (sum k: Bool. a(k) . a(n))");
 }
 
+void test_process_instance_assignment()
+{
+  std::string text =
+    "proc P(b: Bool, c: Bool) = P(c = true); \n"
+    "                                        \n"
+    "init P(true, true);                     \n"
+    ;
+
+  process_specification p = parse_process_specification(text);
+  data::mutable_map_substitution<> sigma;
+  data::variable b("b", data::sort_bool::bool_());
+  data::variable c("c", data::sort_bool::bool_());
+  sigma[c] = data::sort_bool::false_();
+
+  process_expression x = p.equations().front().expression();
+  process_expression x1 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma), p.equations());
+  std::cerr << process::pp(x1) << std::endl;
+  BOOST_CHECK(process::pp(x1) == "P(c = true)");
+
+  sigma[b] = data::sort_bool::false_();
+  process_expression x2 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma), p.equations());
+  std::cerr << process::pp(x2) << std::endl;
+  BOOST_CHECK(process::pp(x2) == "P(b = false, c = true)");
+}
+
 int test_main(int argc, char** argv)
 {
   test_replace_variables_capture_avoiding();
+  test_process_instance_assignment();
 
   return EXIT_SUCCESS;
 }
