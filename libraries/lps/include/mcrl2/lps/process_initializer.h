@@ -63,7 +63,7 @@ class process_initializer: public atermpp::aterm_appl
     /// \return The initial state of the LPS.
     data::data_expression_list state(const data::variable_list& process_parameters) const
     {
-      return data::replace_free_variables(atermpp::aterm_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+      return data::replace_variables(atermpp::aterm_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
 //--- end user section process_initializer ---//
 };

@@ -15,6 +15,7 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/utilities/exception.h"
@@ -38,9 +39,9 @@ using namespace mcrl2::core::detail;
 // Auxiliary functions ----------------------------------------------------------------------------
 
 static
-std::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments)
+data::mutable_map_substitution<> get_substitutions_from_assignments(const assignment_list a_assignments)
 {
-  std::map < variable,data_expression> v_substitutions;
+  data::mutable_map_substitution<> v_substitutions;
 
   for (assignment_list::const_iterator i=a_assignments.begin(); i!=a_assignments.end(); ++i)
   {
@@ -55,8 +56,8 @@ data_expression get_subst_equation_from_assignments(
   const variable_list a_variables,
   assignment_list a_assignments_1,
   assignment_list a_assignments_2,
-  const std::map<variable,data_expression> &a_substitutions_1,
-  const std::map<variable,data_expression> &a_substitutions_2)
+  data::mutable_map_substitution<>& a_substitutions_1,
+  data::mutable_map_substitution<>& a_substitutions_2)
 {
   data_expression v_result = sort_bool::true_();
 
@@ -76,8 +77,7 @@ data_expression get_subst_equation_from_assignments(
       a_assignments_1.pop_front();
       v_variable_1 = v_assignment_1.lhs();
       v_expression_1 = v_assignment_1.rhs();
-      v_expression_1 = data::replace_free_variables(v_expression_1,
-                       data::make_map_substitution(a_substitutions_2));
+      v_expression_1 = data::replace_variables_capture_avoiding(v_expression_1, a_substitutions_2, data::substitution_variables(a_substitutions_2));
     }
     if (!a_assignments_2.empty() && v_next_2)
     {
@@ -85,8 +85,7 @@ data_expression get_subst_equation_from_assignments(
       a_assignments_2.pop_front();
       v_variable_2 = v_assignment_2.lhs();
       v_expression_2 = v_assignment_2.rhs();
-      v_expression_2 = data::replace_free_variables(v_expression_2,
-                       data::make_map_substitution(a_substitutions_1));
+      v_expression_2 = data::replace_variables_capture_avoiding(v_expression_2, a_substitutions_1, data::substitution_variables(a_substitutions_1));
     }
     while (v_variable != v_variable_1 && v_variable != v_variable_2 && i!=a_variables.end())
     {
@@ -101,16 +100,14 @@ data_expression get_subst_equation_from_assignments(
     }
     else if (v_variable == v_variable_1)
     {
-      data_expression expr = data::replace_free_variables(data_expression(v_variable_1),
-                     data::make_map_substitution(a_substitutions_1));
+      data_expression expr = data::replace_variables_capture_avoiding(data_expression(v_variable_1), a_substitutions_1, data::substitution_variables(a_substitutions_1));
       v_result = sort_bool::and_(data_expression(v_result), equal_to(v_expression_1, expr));
       v_next_1 = true;
       v_next_2 = false;
     }
     else if (v_variable == v_variable_2)
     {
-      data_expression expr = data::replace_free_variables(data_expression(v_variable_2),
-                     data::make_map_substitution(a_substitutions_2));
+      data_expression expr = data::replace_variables_capture_avoiding(data_expression(v_variable_2), a_substitutions_2, data::substitution_variables(a_substitutions_2));
       v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), expr));
       v_next_1 = false;
       v_next_2 = true;
@@ -168,7 +165,7 @@ data_expression get_equation_from_assignments(
 static
 data_expression get_subst_equation_from_actions(
   const action_list a_actions,
-  const std::map<variable,data_expression> &a_substitutions)
+  data::mutable_map_substitution<>& a_substitutions)
 {
   data_expression v_result = sort_bool::true_();
 
@@ -177,8 +174,7 @@ data_expression get_subst_equation_from_actions(
     const data_expression_list v_expressions = i->arguments();
     for (data_expression_list::const_iterator j=v_expressions.begin(); j!=v_expressions.end(); ++j)
     {
-      const data_expression v_subst_expression = data::replace_free_variables(*j,
-          data::make_map_substitution(a_substitutions));
+      const data_expression v_subst_expression = data::replace_variables_capture_avoiding(*j, a_substitutions, data::substitution_variables(a_substitutions));
       v_result = sort_bool::and_(data_expression(v_result), equal_to(*j, v_subst_expression));
     }
   }
@@ -199,16 +195,14 @@ data_expression get_confluence_condition(
   const data_expression v_condition_1 = a_summand_1.condition();
   const assignment_list v_assignments_1 = a_summand_1.assignments();
 
-  std::map < variable,data_expression> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
+  data::mutable_map_substitution<> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
   const data_expression v_condition_2 = a_summand_2.condition();
   const data_expression v_lhs = sort_bool::and_(sort_bool::and_(v_condition_1, v_condition_2), a_invariant);
   const assignment_list v_assignments_2 = a_summand_2.assignments();
 
-  std::map < variable,data_expression> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
-  const data_expression v_subst_condition_1 = data::replace_free_variables(v_condition_1,
-      data::make_map_substitution(v_substitutions_2));
-  const data_expression v_subst_condition_2 = data::replace_free_variables(v_condition_2,
-      data::make_map_substitution(v_substitutions_1));
+  data::mutable_map_substitution<> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
+  const data_expression v_subst_condition_1 = data::replace_variables_capture_avoiding(v_condition_1, v_substitutions_2, data::substitution_variables(v_substitutions_2));
+  const data_expression v_subst_condition_2 = data::replace_variables_capture_avoiding(v_condition_2, v_substitutions_1, data::substitution_variables(v_substitutions_1));
 
   const data_expression v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
 

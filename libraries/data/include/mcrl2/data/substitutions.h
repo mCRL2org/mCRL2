@@ -13,21 +13,15 @@
 #define MCRL2_DATA_SUBSTITUTIONS_H
 
 #include <functional>
+#include <iterator>
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/is_simple_substitution.h"
 
 namespace mcrl2 {
 
 namespace data {
-
-/// \brief Returns true if the substitution sigma satisfies the property that FV(sigma(x)) is included in {x} for all variables x.
-/// N.B. The default return value is true, so a template specialization is required to enable this check for substitutions.
-template <typename Substitution>
-bool is_simple_substitution(const Substitution& sigma)
-{
-  return true;
-}
 
 /// \brief Returns true if FV(rhs) is included in {lhs}.
 inline
@@ -509,8 +503,6 @@ public:
     return result.str();
   }
 
-protected:
-
   /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
   iterator find(variable_type const& v)
   {
@@ -522,7 +514,6 @@ protected:
   {
     return m_map.find(v);
   }
-
 };
 
 /// \brief Utility function for creating a mutable_map_substitution.
@@ -538,6 +529,17 @@ mutable_map_substitution<std::map<typename VariableContainer::value_type, typena
 make_mutable_map_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
 {
   return mutable_map_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
+}
+
+inline
+std::set<data::variable> substitution_variables(const mutable_map_substitution<>& sigma)
+{
+  std::set<data::variable> result;
+  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    data::find_free_variables(i->second, std::inserter(result, result.end()));
+  }
+  return result;
 }
 
 template <typename AssociativeContainer>

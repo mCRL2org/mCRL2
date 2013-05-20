@@ -230,9 +230,9 @@ class bisimulation_algorithm
     /// \detail After this substitution the following holds:
     /// \f[ ((param(p)\cup glob(p))\cap ((param(q)\cup glob(q))=\emptyset \f]
     /// where param(p) denotes p.process().process_parameters() and glob(p) denotes p.global_variables().
-    std::map<data::variable, data::variable> compute_process_parameter_name_clashes(const specification& p, const specification& q) const
+    data::mutable_map_substitution<> compute_process_parameter_name_clashes(const specification& p, const specification& q) const
     {
-      std::map<data::variable, data::variable> result;
+       data::mutable_map_substitution<> result;
 
       // put the names of variables appearing in p and q in an identifier generator
       std::set<data::variable> context = lps::find_all_variables(p);
@@ -262,9 +262,9 @@ class bisimulation_algorithm
     /// \param p A linear process specification
     /// \param q A linear process specification
     /// \return A substitution that should be applied to q to remove name clashes between p and q.
-    std::map<data::variable, data::variable> compute_summand_variable_name_clashes(const specification& p, const specification& q) const
+    data::mutable_map_substitution<> compute_summand_variable_name_clashes(const specification& p, const specification& q) const
     {
-      std::map<data::variable, data::variable> result;
+      data::mutable_map_substitution<> result;
 
       // put the names of variables appearing in p and q in an identifier generator
       std::set<data::variable> context = lps::find_all_variables(p);
@@ -306,16 +306,12 @@ class bisimulation_algorithm
     /// \brief Resolves name clashes between model and spec.
     void resolve_name_clashes(const specification& model, specification& spec, bool include_summand_variables = false)
     {
-      std::map<data::variable, data::variable> sigma = compute_process_parameter_name_clashes(model, spec);
-      if (!sigma.empty())
-      {
-        lps::replace_process_parameters(spec, data::make_map_substitution(sigma));
-      }
-
+      data::mutable_map_substitution<> sigma = compute_process_parameter_name_clashes(model, spec);
+      lps::replace_process_parameters(spec, sigma);
       if (include_summand_variables)
       {
         sigma = compute_summand_variable_name_clashes(model, spec);
-        lps::replace_summand_variables(spec, data::make_map_substitution(sigma));
+        lps::replace_summand_variables(spec, sigma);
       }
       mCRL2log(log::debug) << "bisimulation spec after resolving name clashes:\n" << lps::pp(spec) << std::endl;
     }

@@ -166,7 +166,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x);
 }
 
@@ -178,7 +180,9 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x);
 }
 
@@ -191,7 +195,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
@@ -204,12 +210,16 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+/// \param sigma A mutable substitution
+/// \param sigma_variables a container of variables
+/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_variables_capture_avoiding(T& x,
                        Substitution& sigma,
@@ -224,7 +234,9 @@ void replace_variables_capture_avoiding(T& x,
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+/// \param sigma A mutable substitution
+/// \param sigma_variables a container of variables
+/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_variables_capture_avoiding(const T& x,
                     Substitution& sigma,
@@ -333,23 +345,24 @@ void replace_process_parameters(specification& spec, Substitution sigma)
 }
 
 /// \brief Applies a substitution to the process parameters of the specification spec.
-template <typename Substitution>
-void replace_summand_variables(specification& spec, Substitution sigma)
+inline
+void replace_summand_variables(specification& spec, data::mutable_map_substitution<>& sigma)
 {
+  std::set<data::variable> sigma_variables = data::substitution_variables(sigma);
   action_summand_vector& a = spec.process().action_summands();
   for (action_summand_vector::iterator i = a.begin(); i != a.end(); ++i)
   {
     i->summation_variables() = data::replace_variables(i->summation_variables(), sigma);
-    i->condition() = data::replace_free_variables(i->condition(), sigma);
-    lps::replace_free_variables(i->multi_action(), sigma);
-    i->assignments() = lps::replace_free_variables(i->assignments(), sigma);
+    i->condition() = data::replace_variables_capture_avoiding(i->condition(), sigma, sigma_variables);
+    lps::replace_variables_capture_avoiding(i->multi_action(), sigma, sigma_variables);
+    i->assignments() = lps::replace_variables_capture_avoiding(i->assignments(), sigma, sigma_variables);
   }
   deadlock_summand_vector& d = spec.process().deadlock_summands();
   for (deadlock_summand_vector::iterator i = d.begin(); i != d.end(); ++i)
   {
     i->summation_variables() = data::replace_variables(i->summation_variables(), sigma);
-    i->condition() = data::replace_free_variables(i->condition(), sigma);
-    lps::replace_free_variables(i->deadlock(), sigma);
+    i->condition() = data::replace_variables_capture_avoiding(i->condition(), sigma, sigma_variables);
+    lps::replace_variables_capture_avoiding(i->deadlock(), sigma, sigma_variables);
   }
 }
 

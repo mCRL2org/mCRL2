@@ -42,16 +42,18 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// Adds replacement lhs := rhs to the specified map of replacements.
     /// All replacements that have lhs as a right hand side will be changed to
     /// have rhs as a right hand side.
-    void sumelm_add_replacement(std::map<data::variable, data::data_expression>& replacements,
+    void sumelm_add_replacement(data::mutable_map_substitution<>& replacements,
                                 const data::variable& lhs,
                                 const data::data_expression& rhs)
     {
       using namespace mcrl2::data;
       // First apply already present substitutions to rhs
-      data_expression new_rhs = data::replace_free_variables(rhs, data::make_map_substitution(replacements));
-      for (std::map<variable, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
+      data_expression new_rhs = data::replace_variables_capture_avoiding(rhs, replacements, substitution_variables(replacements));
+      for (data::mutable_map_substitution<>::iterator i = replacements.begin(); i != replacements.end(); ++i)
       {
-        i->second = data::replace_free_variables(i->second, assignment(lhs, new_rhs));
+        data::mutable_map_substitution<> sigma;
+        sigma[lhs] = new_rhs;
+        i->second = data::replace_variables_capture_avoiding(i->second, sigma, data::substitution_variables(sigma));
       }
       replacements[lhs] = new_rhs;
     }
@@ -71,7 +73,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     }
 
     data::data_expression compute_substitutions(const summand_base& s,
-      std::map<data::variable, data::data_expression>& substitutions)
+      data::mutable_map_substitution<>& substitutions)
     {
       using namespace data;
 
@@ -126,12 +128,12 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
             }
             else if (is_summand_variable(s, right) && substitutions.find(right) == substitutions.end())
             {
-              sumelm_add_replacement(substitutions, right, substitutions[left]);
+              sumelm_add_replacement(substitutions, right, substitutions(left));
               replacement_added = true;
             }
-            else if (is_summand_variable(s, substitutions[left]) && substitutions.find(substitutions[left]) != substitutions.end())
+            else if (is_summand_variable(s, substitutions(left)) && substitutions.find(substitutions(left)) != substitutions.end())
             {
-              sumelm_add_replacement(substitutions, substitutions[left], right);
+              sumelm_add_replacement(substitutions, substitutions(left), right);
               sumelm_add_replacement(substitutions, left, right);
               replacement_added = true;
             }
@@ -191,12 +193,12 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     {
       using namespace data;
 
-      std::map<variable, data_expression> substitutions;
+      data::mutable_map_substitution<> substitutions;
       data::data_expression new_condition = compute_substitutions(s, substitutions);
-
-      s.condition() = data::replace_free_variables(new_condition, data::make_map_substitution(substitutions));
-      lps::replace_free_variables(s.multi_action(), data::make_map_substitution(substitutions));
-      s.assignments() = data::replace_free_variables(s.assignments(), data::make_map_substitution(substitutions));
+      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
+      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
+      lps::replace_variables_capture_avoiding(s.multi_action(), substitutions, substitutions_variables);
+      s.assignments() = data::replace_variables_capture_avoiding(s.assignments(), substitutions, substitutions_variables);
 
       const size_t var_count = s.summation_variables().size();
       remove_unused_summand_variables(s);
@@ -209,13 +211,14 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     {
       using namespace data;
 
-      std::map<variable, data_expression> substitutions;
+      data::mutable_map_substitution<> substitutions;
       data::data_expression new_condition = compute_substitutions(s, substitutions);
+      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
 
-      s.condition() = data::replace_free_variables(new_condition, data::make_map_substitution(substitutions));
+      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
       if (s.deadlock().has_time())
       {
-        s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), data::make_map_substitution(substitutions));
+        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), substitutions, substitutions_variables);
       }
 
       const size_t var_count = s.summation_variables().size();

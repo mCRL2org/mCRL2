@@ -125,7 +125,8 @@ void test_replace_variables_capture_avoiding(const std::string& x_text, const st
   process_expression x = parse_expression(x_text);
   data::mutable_map_substitution<> sigma = parse_substitution(sigma_text);
   std::set<data::variable> sv = sigma_variables(sigma);
-  std::string result = process::pp(process::replace_variables_capture_avoiding(x, sigma, sv));
+  std::vector<process::process_equation> equations;
+  std::string result = process::pp(process::replace_variables_capture_avoiding(x, sigma, sv, equations));
   check_result(x_text + " sigma = " + sigma_text, result, expected_result, "replace_variables_capture_avoiding");
 }
 

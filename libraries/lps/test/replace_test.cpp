@@ -96,11 +96,12 @@ void test_lps_substituter()
 
 void test_lps_substitute()
 {
-  data::variable v("v", sort_pos::pos());
-  data::variable w("w", sort_pos::pos());
+  data::variable v("v", data::sort_bool::bool_());
+  data::data_expression w = data::sort_bool::true_();
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
-  lps::replace_free_variables(v, sigma);
+  data::data_expression e = v;
+  e = lps::replace_free_variables(e, sigma);
 }
 
 void test_replace_process_parameters()
@@ -162,12 +163,11 @@ void test_action_list()
   data::mutable_map_substitution<> sigma;
   sigma[b] = c;
 
-  l1 = lps::replace_free_variables(l1, sigma);
+  l1 = lps::replace_variables_capture_avoiding(l1, sigma, data::substitution_variables(sigma));
   BOOST_CHECK(l1 == l2);
 
   std::set<data::variable> v;
   l1 = lps::replace_variables(l1, sigma);
-  l1 = lps::replace_free_variables(l1, sigma);
   l1 = lps::replace_variables_capture_avoiding(l1, sigma, v);
 }
 

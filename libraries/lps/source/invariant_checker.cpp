@@ -15,6 +15,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/invariant_checker.h"
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/utilities/exception.h"
@@ -70,15 +71,14 @@ void Invariant_Checker::save_dot_file(size_t a_summand_number)
 
 bool Invariant_Checker::check_init(const data_expression a_invariant)
 {
-  std::map < variable, data_expression> v_substitutions;
+  data::mutable_map_substitution<> v_substitutions;
   const assignment_list l=f_init.assignments();
   for (assignment_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
     v_substitutions[i->lhs()]=i->rhs();
   }
 
-  data_expression b_invariant = data::replace_free_variables(a_invariant,
-                                data::make_map_substitution(v_substitutions));
+  data_expression b_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions, data::substitution_variables(v_substitutions));
   f_bdd_prover.set_formula(b_invariant);
   if (f_bdd_prover.is_tautology() == answer_yes)
   {
@@ -106,15 +106,14 @@ bool Invariant_Checker::check_summand(
   const data_expression v_condition = a_summand.condition();
   const assignment_list v_assignments = a_summand.assignments();
 
-  std::map < variable, data_expression> v_substitutions;
+  data::mutable_map_substitution<> v_substitutions;
 
   for (assignment_list::const_iterator i=v_assignments.begin(); i!=v_assignments.end(); ++i)
   {
     v_substitutions[i->lhs()]=i->rhs();
   }
 
-  const data_expression v_subst_invariant = data::replace_free_variables(a_invariant,
-      data::make_map_substitution(v_substitutions));
+  const data_expression v_subst_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions, data::substitution_variables(v_substitutions));
 
   const data_expression v_formula = implies(and_(a_invariant, v_condition), v_subst_invariant);
   f_bdd_prover.set_formula(v_formula);

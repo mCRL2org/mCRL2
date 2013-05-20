@@ -19,6 +19,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
@@ -355,7 +356,7 @@ namespace detail
 template <typename IdentifierGenerator>
 void rename_renamerule_variables(data::data_expression& rcond, lps::action& rleft, lps::action& rright, IdentifierGenerator& generator)
 {
-  std::map< data::variable, data::variable > renamings;
+  data::mutable_map_substitution<> renamings;
 
   std::set< data::variable > new_vars = data::find_all_variables(rleft.arguments());
 
@@ -369,9 +370,10 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
     }
   }
 
-  rcond = data::replace_free_variables(rcond, mcrl2::data::make_map_substitution(renamings));
-  rleft = lps::replace_free_variables(rleft, mcrl2::data::make_map_substitution(renamings));
-  rright = lps::replace_free_variables(rright, mcrl2::data::make_map_substitution(renamings));
+  std::set<data::variable> renamings_variables = data::substitution_variables(renamings);
+  rcond = data::replace_variables_capture_avoiding(rcond, renamings, renamings_variables);
+  rleft = lps::replace_variables_capture_avoiding(rleft, renamings, renamings_variables);
+  rright = lps::replace_variables_capture_avoiding(rright, renamings, renamings_variables);
 }
 
 inline

@@ -272,14 +272,14 @@ VariableContainer update_substitution(Substitution& sigma, const VariableContain
 }
 
 template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
-struct substitute_capture_avoiding_variables_builder: public Binder<Builder, substitute_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>
+struct replace_capture_avoiding_variables_builder: public Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>
 {
-  typedef Binder<Builder, substitute_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution> super;
+  typedef Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution> super;
   using super::enter;
   using super::leave;
   using super::operator();
 
-  substitute_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
+  replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
     : super(sigma, V)
   { }
 
@@ -289,10 +289,10 @@ struct substitute_capture_avoiding_variables_builder: public Binder<Builder, sub
 };
 
 template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
-substitute_capture_avoiding_variables_builder<Builder, Binder, Substitution>
+replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>
 apply_replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
 {
-  return substitute_capture_avoiding_variables_builder<Builder, Binder, Substitution>(sigma, V);
+  return replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>(sigma, V);
 }
 
 template <template <class> class Builder, class Derived, class Substitution>
@@ -460,7 +460,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
 }
 
@@ -472,7 +474,9 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
 }
 
@@ -485,7 +489,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
@@ -498,12 +504,16 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+/// \param sigma A mutable substitution
+/// \param sigma_variables a container of variables
+/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_variables_capture_avoiding(T& x,
                        Substitution& sigma,
@@ -518,7 +528,9 @@ void replace_variables_capture_avoiding(T& x,
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+/// \param sigma A mutable substitution
+/// \param sigma_variables a container of variables
+/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_variables_capture_avoiding(const T& x,
                     Substitution& sigma,

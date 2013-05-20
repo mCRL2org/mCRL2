@@ -36,20 +36,59 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
   using super::sigma;
   using super::update_sigma;
 
-  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V)
-    : super(sigma, V)
+  const std::vector<process_equation>& equations;
+
+  const process_equation& find_equation(const process::process_identifier& id) const
+  {
+    for (auto i = equations.begin(); i != equations.end(); ++i)
+    {
+      if (i->identifier() == id)
+      {
+        return *i;
+      }
+    }
+    throw mcrl2::runtime_error("process equation not found!");
+  }
+
+  data::assignment_list::const_iterator find_variable(const data::assignment_list& a, const data::variable& v) const
+  {
+    for (auto i = a.begin(); i != a.end(); ++i)
+    {
+      if (i->lhs() == v)
+      {
+        return i;
+      }
+    }
+    return a.end();
+  }
+
+  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V, const std::vector<process_equation>& equations_)
+    : super(sigma, V), equations(equations_)
   { }
 
-  // N.B. We cannot use the default implementation, since the left hand sides of the assignments
-  // may not be renamed. This is because they are defined outside the scope of the expression x.
   process::process_expression operator()(const process::process_instance_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
     data::assignment_list a = x.assignments();
-    std::vector<data::assignment> v(a.begin(), a.end());
-    for (std::vector<data::assignment>::iterator i = v.begin(); i != v.end(); ++i)
+    std::vector<data::assignment> v;
+
+    const process_equation& eq = find_equation(x.identifier());
+    data::variable_list variables = eq.formal_parameters();
+    for (auto j = variables.begin(); j != variables.end(); ++j)
     {
-      *i = data::assignment(i->lhs(), (*this)(i->rhs()));
+      auto k = find_variable(a, *j);
+      if (k == a.end())
+      {
+        data::data_expression e = (*this)(*j);
+        if (e != *j)
+        {
+          v.push_back(data::assignment(*j, e));
+        }
+      }
+      else
+      {
+        v.push_back(data::assignment(k->lhs(), (*this)(k->rhs())));
+      }
     }
     process::process_expression result = process::process_instance_assignment(x.identifier(), data::assignment_list(v.begin(), v.end()));
     static_cast<Derived&>(*this).leave(x);
@@ -64,6 +103,30 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
     return result;
   }
 };
+
+template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
+struct replace_capture_avoiding_variables_builder: public Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>
+{
+  typedef Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V, const std::vector<process_equation>& equations)
+    : super(sigma, V, equations)
+  { }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
+replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>
+apply_replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V, const std::vector<process_equation>& equations)
+{
+  return replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>(sigma, V, equations);
+}
 /// \endcond
 
 } // namespace detail
@@ -153,7 +216,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x);
 }
 
@@ -165,7 +230,9 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x);
 }
 
@@ -178,7 +245,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
@@ -191,38 +260,46 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  //assert(is_simple_substitution(sigma));
+#ifdef MCRL2_SIMPLE_SUBSTITUTION
+  assert(data::is_simple_substitution(sigma));
+#endif
   return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+/// \param sigma A mutable substitution
+/// \param sigma_variables a container of variables
+/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_variables_capture_avoiding(T& x,
                        Substitution& sigma,
                        const VariableContainer& sigma_variables,
+                       const std::vector<process_equation>& equations,
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                       )
 {
   std::multiset<data::variable> V;
   process::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  process::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V, equations)(x);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param sigma_variables contains the free variables appearing in the right hand side of sigma
+/// \param sigma A mutable substitution
+/// \param sigma_variables a container of variables
+/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_variables_capture_avoiding(const T& x,
                     Substitution& sigma,
                     const VariableContainer& sigma_variables,
+                    const std::vector<process_equation>& equations,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
 {
   std::multiset<data::variable> V;
   process::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  return process::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V, equations)(x);
 }
 //--- end generated process replace code ---//
 

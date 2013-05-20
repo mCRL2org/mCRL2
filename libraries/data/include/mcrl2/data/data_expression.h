@@ -23,8 +23,8 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/utilities/exception.h"
-
 namespace mcrl2
 {
 

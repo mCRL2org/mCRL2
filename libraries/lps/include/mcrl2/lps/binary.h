@@ -263,24 +263,24 @@ class binary_algorithm: public lps::detail::lps_algorithm
     }
 
     /// \brief Update an action summand with the new Boolean parameters
-    void update_action_summand(action_summand& s)
+    void update_action_summand(action_summand& s, const std::set<data::variable>& if_trees_variables)
     {
-      s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
-      s.multi_action().actions() = lps::replace_free_variables(s.multi_action().actions(), m_if_trees);
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, if_trees_variables);
+      s.multi_action().actions() = lps::replace_variables_capture_avoiding(s.multi_action().actions(), m_if_trees, data::substitution_variables(m_if_trees));
       if (s.multi_action().has_time())
       {
-        s.multi_action().time() = data::replace_free_variables(s.multi_action().time(), m_if_trees);
+        s.multi_action().time() = data::replace_variables_capture_avoiding(s.multi_action().time(), m_if_trees, if_trees_variables);
       }
       s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
     }
 
     /// \brief Update a deadlock summand with the new Boolean parameters
-    void update_deadlock_summand(deadlock_summand& s)
+    void update_deadlock_summand(deadlock_summand& s, const std::set<data::variable>& if_trees_variables)
     {
-      s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, data::substitution_variables(m_if_trees));
       if (s.deadlock().has_time())
       {
-        s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), m_if_trees);
+        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), m_if_trees, if_trees_variables);
       }
     }
 
@@ -307,14 +307,15 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
+      std::set<data::variable> if_trees_variables = data::substitution_variables(m_if_trees);
 
       std::for_each(m_spec.process().action_summands().begin(),
                     m_spec.process().action_summands().end(),
-                    boost::bind(&binary_algorithm::update_action_summand, this, _1));
+                    boost::bind(&binary_algorithm::update_action_summand, this, _1, if_trees_variables));
 
       std::for_each(m_spec.process().deadlock_summands().begin(),
                     m_spec.process().deadlock_summands().end(),
-                    boost::bind(&binary_algorithm::update_deadlock_summand, this, _1));
+                    boost::bind(&binary_algorithm::update_deadlock_summand, this, _1, if_trees_variables));
     }
 };
 
