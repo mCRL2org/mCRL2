@@ -1511,7 +1511,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (replacelhs)
       {
-        lhs=data::replace_free_variables(lhs,sigma);
+        lhs=data::replace_variables(lhs,sigma);
         assert(is_variable(lhs));
       }
       if (replacerhs)
