@@ -25,6 +25,7 @@
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
@@ -135,6 +136,7 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
   {
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "true";
+    normalize(p); // this is required for pbes2bool
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
     BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
   }
@@ -147,6 +149,7 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
   {
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "false";
+    normalize(p); // this is required for pbes2bool
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
     BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
   }
@@ -780,29 +783,29 @@ BOOST_AUTO_TEST_CASE(test_elementary_formulas)
     "a         #  <a>true                       #   true   \n"
     "a         #  [b]false                      #   true   \n"
     "b         #  [b]false                      #   false  \n"
-    "b         #  <a>true                       #   true   \n"
+    "b         #  <a>true                       #   false  \n"
     "a.(b+c)   #  <a>(<b>true && <c>true)       #   true   \n"
     "a.b+a.c   #  <a><b>true && <a><c>true      #   true   \n"
     "a.b+a.c   #  <a>(<b>true && <c>true)       #   false  \n"
     "a.(b+c)   #  [a](<b>true||<c>true)         #   true   \n"
-    "a.b+a.c   #  [a]([b]false || [c]false)     #   false  \n"
-    "a.(b+c)   #  [a]([b]false && [c]false)     #   true   \n"
+    "a.b+a.c   #  [a]([b]false || [c]false)     #   true   \n"
+    "a.(b+c)   #  [a]([b]false && [c]false)     #   false  \n"
     "a         #  mu X.X                        #   false  \n"
     "a         #  nu X.X                        #   true   \n"
     "P         #  mu X.<a>X                     #   false  \n"
     "P         #  nu X.<a>X                     #   true   \n"
     "Q         #  mu X.nu Y.[b]Y && [a]X        #   false  \n"
     "Q         #  nu X.mu Y.[b]X && [a]Y        #   true   \n"
-    "Q         #  mu X.[!a]X && <true>true      #   true   \n"
-    "Q         #  mu X.[!b]X && <true>true      #   false  \n"
+    "Q         #  mu X.[!a]X && <true>true      #   false  \n"
+    "Q         #  mu X.[!b]X && <true>true      #   true   \n"
     "a         #  [true]false                   #   false  \n"
     "a         #  [!a]false                     #   true   \n"
-    "b         #  [!a]false                     #   true   \n"
+    "b         #  [!a]false                     #   false  \n"
     "a         #  <!a>true                      #   false  \n"
     "a         #  <a && !a>true                 #   false  \n"
     "a         #  <a && a>true                  #   true   \n"
     "a         #  <a || b>true                  #   true   \n"
-    "a         #  <!(a||b)>true                 #   true   \n"
+    "a         #  <!(a||b)>true                 #   false  \n"
     "a         #  [!a]false                     #   true   \n"
     "a         #  [a && a && b]false            #   true   \n"
     "a         #  [a && a && !b]false           #   false  \n"
