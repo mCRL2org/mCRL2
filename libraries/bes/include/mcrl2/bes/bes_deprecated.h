@@ -1254,6 +1254,22 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
       }
     }
   }
+  else if (is_pbes_not(p))
+  {
+    pbes_expression l = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R,sigma,sigma_internal);
+    if (is_pbes_false(l))
+    {
+       result = pbes_expr::true_();
+    }
+    else if (is_pbes_true(l))
+    {
+       result = pbes_expr::false_();
+    }
+    else
+    {
+       result = pbes_expr::not_(l);
+    }
+  }
   else if (is_pbes_forall(p))
   {
     // p = forall(data::data_expression_list, pbes_expression)
@@ -2046,6 +2062,13 @@ class boolean_equation_system
         {
           return or_(b1,b2);
         }
+      }
+      else if (mcrl2::pbes_system::is_not(p))
+      {
+        bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                            atermpp::aterm_cast<mcrl2::pbes_system::not_>(p).operand(),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,current_variable);
+        return BDDif(b1,false_(),true_());
       }
       else if (is_true(p))
       {

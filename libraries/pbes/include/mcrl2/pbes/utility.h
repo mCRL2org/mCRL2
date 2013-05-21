@@ -337,6 +337,12 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // p is False
     result = p;
   }
+  else if (is_pbes_not(p))
+  {
+    pbes_expression l = pbes_expression_substitute_and_rewrite(arg(p),
+                              data, r,use_internal_rewrite_format,sigma,sigma_internal);
+    result = pbes_expr::not_(l);
+  }
   else if (is_pbes_forall(p))
   {
     data::variable_list data_vars = var(p);
