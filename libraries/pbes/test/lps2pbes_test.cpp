@@ -795,7 +795,6 @@ BOOST_AUTO_TEST_CASE(test_elementary_formulas)
     "Q         #  nu X.mu Y.[b]X && [a]Y        #   true   \n"
     "Q         #  mu X.[!a]X && <true>true      #   true   \n"
     "Q         #  mu X.[!b]X && <true>true      #   false  \n"
-    "          #                                #          \n"
     "a         #  [true]false                   #   false  \n"
     "a         #  [!a]false                     #   true   \n"
     "b         #  [!a]false                     #   true   \n"
