@@ -28,9 +28,9 @@ namespace detail
 
 /// \cond INTERNAL_DOCS
 template <template <class> class Builder, class Substitution>
-struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder, Substitution> >
+struct replace_sort_expressions_builder: public Builder<replace_sort_expressions_builder<Builder, Substitution> >
 {
-  typedef Builder<substitute_sort_expressions_builder<Builder, Substitution> > super;
+  typedef Builder<replace_sort_expressions_builder<Builder, Substitution> > super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -38,7 +38,7 @@ struct substitute_sort_expressions_builder: public Builder<substitute_sort_expre
   Substitution sigma;
   bool innermost;
 
-  substitute_sort_expressions_builder(Substitution sigma_, bool innermost_)
+  replace_sort_expressions_builder(Substitution sigma_, bool innermost_)
     : sigma(sigma_),
       innermost(innermost_)
   {}
@@ -59,16 +59,16 @@ struct substitute_sort_expressions_builder: public Builder<substitute_sort_expre
 };
 
 template <template <class> class Builder, class Substitution>
-substitute_sort_expressions_builder<Builder, Substitution>
+replace_sort_expressions_builder<Builder, Substitution>
 make_replace_sort_expressions_builder(Substitution sigma, bool innermost)
 {
-  return substitute_sort_expressions_builder<Builder, Substitution>(sigma, innermost);
+  return replace_sort_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
 
 template <template <class> class Builder, class Substitution>
-struct substitute_data_expressions_builder: public Builder<substitute_data_expressions_builder<Builder, Substitution> >
+struct replace_data_expressions_builder: public Builder<replace_data_expressions_builder<Builder, Substitution> >
 {
-  typedef Builder<substitute_data_expressions_builder<Builder, Substitution> > super;
+  typedef Builder<replace_data_expressions_builder<Builder, Substitution> > super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -76,7 +76,7 @@ struct substitute_data_expressions_builder: public Builder<substitute_data_expre
   Substitution sigma;
   bool innermost;
 
-  substitute_data_expressions_builder(Substitution sigma_, bool innermost_)
+  replace_data_expressions_builder(Substitution sigma_, bool innermost_)
     : sigma(sigma_),
       innermost(innermost_)
   {}
@@ -97,16 +97,16 @@ struct substitute_data_expressions_builder: public Builder<substitute_data_expre
 };
 
 template <template <class> class Builder, class Substitution>
-substitute_data_expressions_builder<Builder, Substitution>
+replace_data_expressions_builder<Builder, Substitution>
 make_replace_data_expressions_builder(Substitution sigma, bool innermost)
 {
-  return substitute_data_expressions_builder<Builder, Substitution>(sigma, innermost);
+  return replace_data_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
 
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
-struct substitute_free_variables_builder: public Binder<Builder, substitute_free_variables_builder<Builder, Binder, Substitution> >
+struct replace_free_variables_builder: public Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> >
 {
-  typedef Binder<Builder, substitute_free_variables_builder<Builder, Binder, Substitution> > super;
+  typedef Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> > super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -116,12 +116,12 @@ struct substitute_free_variables_builder: public Binder<Builder, substitute_free
 
   Substitution sigma;
 
-  substitute_free_variables_builder(Substitution sigma_)
+  replace_free_variables_builder(Substitution sigma_)
     : sigma(sigma_)
   {}
 
   template <typename VariableContainer>
-  substitute_free_variables_builder(Substitution sigma_, const VariableContainer& bound_variables)
+  replace_free_variables_builder(Substitution sigma_, const VariableContainer& bound_variables)
     : sigma(sigma_)
   {
     increase_bind_count(bound_variables);
@@ -142,17 +142,17 @@ struct substitute_free_variables_builder: public Binder<Builder, substitute_free
 };
 
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
-substitute_free_variables_builder<Builder, Binder, Substitution>
+replace_free_variables_builder<Builder, Binder, Substitution>
 make_replace_free_variables_builder(Substitution sigma)
 {
-  return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma);
+  return replace_free_variables_builder<Builder, Binder, Substitution>(sigma);
 }
 
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution, class VariableContainer>
-substitute_free_variables_builder<Builder, Binder, Substitution>
+replace_free_variables_builder<Builder, Binder, Substitution>
 make_replace_free_variables_builder(Substitution sigma, const VariableContainer& bound_variables)
 {
-  return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
+  return replace_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
 }
 
 template <typename Substitution>
