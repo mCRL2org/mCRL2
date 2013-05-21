@@ -45,7 +45,7 @@ using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
-pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool expect_success = true, const bool timed=false)
+pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool expect_success = true, const bool timed = false)
 {
   using namespace pbes_system;
 
@@ -115,10 +115,16 @@ void one_point_rule_rewrite(pbes& p)
   pbes_rewrite(p, simp);
 }
 
-void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, const std::string& expected_solution, bool timed = false)
+void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std::string expected_solution, bool linearize = false)
 {
-  std::cerr << "=== solve_pbes === " << mcf_formula << std::endl;
-  lps::specification spec = lps::parse_linear_process_specification(lps_spec);
+  bool timed = false;
+  boost::trim(expected_solution);
+  std::cerr << "=== solve_pbes === " << std::endl;
+  std::cerr << "specification = \n" << lps_spec << std::endl;
+  std::cerr << "formula = " << mcf_formula << std::endl;
+  std::cerr << "expected_solution = " << expected_solution << std::endl;
+
+  lps::specification spec = linearize ? lps::linearise(lps_spec) : lps::parse_linear_process_specification(lps_spec);
   state_formulas::state_formula formula;
   pbes p;
 
@@ -131,19 +137,18 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, con
     bool expected_result = expected_solution == "true";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
     BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
-    std::cerr << "done!" << std::endl;
   }
 
   // test negated formula
   formula = state_formulas::not_(formula);
   p = lps2pbes(spec, formula, timed);
+
   if (expected_solution != "unknown")
   {
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "false";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
     BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
-    std::cerr << "done!" << std::endl;
   }
 }
 
@@ -755,6 +760,66 @@ BOOST_AUTO_TEST_CASE(test_1150)
   test_lps2pbes_and_solve(SPEC2, "!(mu X . X)", true);
   test_lps2pbes_and_solve(SPEC2, "nu X . X",    true);
   test_lps2pbes_and_solve(SPEC2, "!(nu X . X)", false);
+}
+
+BOOST_AUTO_TEST_CASE(test_elementary_formulas)
+{
+  std::string procspec_text =
+    "act  a, b, c;         \n"
+    "                      \n"
+    "proc P = a.P;         \n"
+    "                      \n"
+    "proc Q = a.b.Q + b.Q; \n"
+    "                      \n"
+    "init <INIT>;          \n"
+    ;
+
+  std::string formulas =
+    "a         #  true                          #   true   \n"
+    "a         #  false                         #   false  \n"
+    "a         #  <a>true                       #   true   \n"
+    "a         #  [b]false                      #   true   \n"
+    "b         #  [b]false                      #   false  \n"
+    "b         #  <a>true                       #   true   \n"
+    "a.(b+c)   #  <a>(<b>true && <c>true)       #   true   \n"
+    "a.b+a.c   #  <a><b>true && <a><c>true      #   true   \n"
+    "a.b+a.c   #  <a>(<b>true && <c>true)       #   false  \n"
+    "a.(b+c)   #  [a](<b>true||<c>true)         #   true   \n"
+    "a.b+a.c   #  [a]([b]false || [c]false)     #   false  \n"
+    "a.(b+c)   #  [a]([b]false && [c]false)     #   true   \n"
+    "a         #  mu X.X                        #   false  \n"
+    "a         #  nu X.X                        #   true   \n"
+    "P         #  mu X.<a>X                     #   false  \n"
+    "P         #  nu X.<a>X                     #   true   \n"
+    "Q         #  mu X.nu Y.[b]Y && [a]X        #   false  \n"
+    "Q         #  nu X.mu Y.[b]X && [a]Y        #   true   \n"
+    "Q         #  mu X.[!a]X && <true>true      #   true   \n"
+    "Q         #  mu X.[!b]X && <true>true      #   false  \n"
+    "          #                                #          \n"
+    "a         #  [true]false                   #   false  \n"
+    "a         #  [!a]false                     #   true   \n"
+    "b         #  [!a]false                     #   true   \n"
+    "a         #  <!a>true                      #   false  \n"
+    "a         #  <a && !a>true                 #   false  \n"
+    "a         #  <a && a>true                  #   true   \n"
+    "a         #  <a || b>true                  #   true   \n"
+    "a         #  <!(a||b)>true                 #   true   \n"
+    "a         #  [!a]false                     #   true   \n"
+    "a         #  [a && a && b]false            #   true   \n"
+    "a         #  [a && a && !b]false           #   false  \n"
+    "a         #  [a || a]false                 #   false  \n"
+    ;
+
+  std::vector<std::string> lines = utilities::regex_split(formulas, "\\n");
+  for (auto i = lines.begin(); i != lines.end(); ++i)
+  {
+    std::vector<std::string> words = utilities::split(*i, "#");
+    if (words.size() != 3)
+    {
+    	continue;
+    }
+    solve_pbes(utilities::regex_replace("<INIT>", words[0], procspec_text), words[1], words[2], true);
+  }
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
