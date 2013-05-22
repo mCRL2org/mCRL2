@@ -327,6 +327,39 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
     }
   }
+  else if (is_pbes_imp(p))
+  {
+    // p = or(left, right)
+    //Rewrite left and right as far as possible
+
+    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
+                        data, r,use_internal_rewrite_format,sigma,sigma_internal);
+    if (is_pbes_false(l))
+    {
+      result = pbes_system::pbes_expr::true_();
+    }
+    else
+    {
+      pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
+                           data, r,use_internal_rewrite_format,sigma,sigma_internal);
+      if (is_pbes_true(rt))
+      {
+        result = pbes_system::pbes_expr::true_();
+      }
+      else if (is_pbes_true(l))
+      {
+        result = rt;
+      }
+      else if (is_pbes_false(rt))
+      {
+        result = mcrl2::pbes_system::pbes_expr::not_(l);
+      }
+      else
+      {
+        result = pbes_system::pbes_expr::imp(l,rt);
+      }
+    }
+  }
   else if (is_pbes_true(p))
   {
     // p is True

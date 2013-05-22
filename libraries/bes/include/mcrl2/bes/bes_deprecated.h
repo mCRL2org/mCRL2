@@ -1254,6 +1254,40 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
       }
     }
   }
+  else if (is_pbes_imp(p))
+  {
+    // p = implies(left, right)
+    //Rewrite left and right as far as possible
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R,sigma,sigma_internal);
+    if (is_pbes_false(l))
+    {
+      result = pbes_expr::true_();
+    }
+    else
+    {
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R,sigma,sigma_internal);
+      if (is_pbes_true(rt))
+      {
+        result = pbes_expr::true_();
+      }
+      else if (is_pbes_true(l))
+      {
+        result = rt;
+      }
+      else if (is_pbes_false(rt))
+      {
+        result = pbes_expr::not_(l);
+      }
+      else if (l==rt)
+      {
+        result = pbes_expr::true_();
+      }
+      else
+      {
+        result = pbes_expr::imp(l,rt);
+      }
+    }
+  }
   else if (is_pbes_not(p))
   {
     pbes_expression l = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R,sigma,sigma_internal);
@@ -2061,6 +2095,45 @@ class boolean_equation_system
         else
         {
           return or_(b1,b2);
+        }
+      }
+      else if (mcrl2::pbes_system::is_imp(p))
+      {
+        bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                            accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,current_variable);
+        if (is_false(b1))
+        {
+          return true_();
+        }
+
+        bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                            accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,current_variable);
+        if (is_true(b2))
+        {
+          return b2;
+        }
+        if (is_true(b1))
+        {
+          return b2;
+        }
+        if (is_false(b2))
+        {
+          return not_(b1);
+        }
+        if (b1==b2)
+        {
+          return true_();
+        }
+
+        if (to_bdd)
+        {
+          return BDDif(b1,b2,true_());
+        }
+        else
+        {
+          return imp(b1,b2);
         }
       }
       else if (mcrl2::pbes_system::is_not(p))
