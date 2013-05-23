@@ -25,7 +25,6 @@
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
@@ -136,7 +135,6 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
   {
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "true";
-    normalize(p); // this is required for pbes2bool
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
     BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
   }
@@ -149,7 +147,6 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
   {
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "false";
-    normalize(p); // this is required for pbes2bool
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
     BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
   }
