@@ -50,7 +50,7 @@ void test_assignment_list()
 
   data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));
-  data_expression t2 = data::replace_free_variables(t, assignment_sequence_substitution(assignment_list(l.begin(), l.end())));
+  data_expression t2 = data::replace_variables(t, assignment_sequence_substitution(assignment_list(l.begin(), l.end())));
   std::cerr << "t  == " << data::pp(t) << std::endl;
   std::cerr << "t2 == " << data::pp(t2) << std::endl;
   BOOST_CHECK(t0 == t2);
@@ -91,8 +91,8 @@ void test_variable_replace()
   l.push_back(e3);
 
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  data_expression t1 = data::replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements));
-  data_expression t2 = data::replace_free_variables(t, make_sequence_sequence_substitution(v, l));
+  data_expression t1 = data::replace_variables(t, make_sequence_sequence_substitution(variables, replacements));
+  data_expression t2 = data::replace_variables(t, make_sequence_sequence_substitution(v, l));
   std::cerr << "t  == " << data::pp(t) << std::endl;
   std::cerr << "t1 == " << data::pp(t1) << std::endl;
   std::cerr << "t2 == " << data::pp(t2) << std::endl;
@@ -103,10 +103,6 @@ void test_variable_replace()
   BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(v, l)));
   BOOST_CHECK(t1 == replace_variables(t, make_mutable_map_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(v, l)));
-  BOOST_CHECK(t1 == replace_free_variables(t, make_mutable_map_substitution(variables, replacements)));
 }
 
 void test_replace_with_binders()
@@ -135,9 +131,10 @@ void test_variables()
   variable d1 = make_bool("d1");
   variable d2 = make_bool("d2");
   variable d3 = make_bool("d3");
-  variable e1 = make_bool("e1");
-  variable e2 = make_bool("e2");
-  variable e3 = make_bool("e3");
+  variable d4 = make_bool("d4");
+  data_expression e1 = data::sort_bool::not_(d1);
+  data_expression e2 = data::sort_bool::not_(d2);
+  data_expression e3 = data::sort_bool::not_(d3);
 
   mutable_map_substitution<> sigma;
   sigma[d1] = e1;
@@ -145,7 +142,7 @@ void test_variables()
   sigma[d3] = e3;
 
   // the variable in an assignment is not replaced by replace_free_variables
-  assignment a(d1, e1);
+  assignment a(d1, d4);
   assignment b = replace_free_variables(a, sigma);
   BOOST_CHECK(b == a);
 
@@ -219,14 +216,14 @@ std::vector<data::variable> variable_context()
 inline
 data::data_expression parse_expression(const std::string& text, const std::vector<data::variable>& variables = variable_context())
 {
-	return data::parse_data_expression(text, variables.begin(), variables.end());
+  return data::parse_data_expression(text, variables.begin(), variables.end());
 }
 
 /// \brief Parses a string of the form "b: Bool := v, c: Bool := !w", and adds
 inline
 data::mutable_map_substitution<> parse_substitution(const std::string& text, const std::vector<data::variable>& variables = variable_context())
 {
-	data::mutable_map_substitution<> sigma;
+  data::mutable_map_substitution<> sigma;
   std::vector<std::string> substitutions = utilities::split(text, ";");
   for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
   {
@@ -245,19 +242,19 @@ data::mutable_map_substitution<> parse_substitution(const std::string& text, con
 // Returns the free variables in the right hand side of sigma.
 std::set<data::variable> sigma_variables(const data::mutable_map_substitution<>& sigma)
 {
-	std::set<data::variable> result;
-	for (mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
-	{
-		std::set<data::variable> V = data::find_free_variables(i->second);
-		V.erase(i->first);
-		result.insert(V.begin(), V.end());
-	}
-	return result;
+  std::set<data::variable> result;
+  for (mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    std::set<data::variable> V = data::find_free_variables(i->second);
+    V.erase(i->first);
+    result.insert(V.begin(), V.end());
+  }
+  return result;
 }
 
 void test_replace_variables_capture_avoiding(const std::string& x_text, const std::string& sigma_text, const std::string& expected_result)
 {
-	data::data_expression x = parse_expression(x_text);
+  data::data_expression x = parse_expression(x_text);
   data::mutable_map_substitution<> sigma = parse_substitution(sigma_text);
   std::set<data::variable> sv = sigma_variables(sigma);
   std::string result = data::pp(data::replace_variables_capture_avoiding(x, sigma, sv));
@@ -274,15 +271,15 @@ void test_replace_variables_capture_avoiding()
   test_replace_variables_capture_avoiding("x => x1 => y whr x = y end", "y: Bool := x", "x2 => x1 => x whr x2 = x end");
   test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => (forall k: Bool. k => n)");
   test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => (forall n2: Bool. n2 => n)");
-	test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => (forall k: Bool. k => n)");
-	test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => (forall n2: Bool. n2 => n)");
+  test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => (forall k: Bool. k => n)");
+  test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => (forall n2: Bool. n2 => n)");
 }
 
 void test_replace_free_variables()
 {
   data::mutable_map_substitution<> sigma;
   data::variable x("x", data::sort_bool::bool_());
-  data::variable y("y", data::sort_bool::bool_());
+  data::data_expression y = data::sort_bool::not_(x);
   sigma[x] = y;
   data::assignment a(x, x);
   data::assignment b(x, y);
