@@ -1470,7 +1470,7 @@ class sort_declaration():
         code += "        /// \\param %s A sort expression\n" % (escape(param))
       else:
         param = ""
-      code += "        /// \\ret The structured sort representing %s\n" % (escape(self.label))
+      code += "        /// \\return The structured sort representing %s\n" % (escape(self.label))
       code += "        inline\n"
       code += "        structured_sort %s_struct(const sort_expression& %s)\n" % (self.label, param)
       code += "        {\n"

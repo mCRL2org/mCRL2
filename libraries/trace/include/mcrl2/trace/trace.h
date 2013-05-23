@@ -78,13 +78,13 @@ enum TraceFormat
 class Trace
 {
   private:
-    // The number of states is always less then one plus the number of actions. 
+    // The number of states is always less then one plus the number of actions.
     // In case all states are there, then it is one more than the number of actions.
     // Otherwise there are less.  So, an invariant is actions.size()+1 >= states.size();
     // The states and actions are supposed to be contiguous,
     // in the sense that if a state, or action, at position n exists, then also the
     // states and actions at positions n'<n exist.
-    
+
     std::vector < mcrl2::lps::state > states;
     std::vector < mcrl2::lps::multi_action > actions;
     size_t pos; // Invariant: pos <= actions.size().
@@ -109,7 +109,7 @@ class Trace
   public:
     /// \brief Default constructor for an empty trace.
     /// \details The current position
-    /// and length of trace are set to 0. 
+    /// and length of trace are set to 0.
     Trace()
       : m_data_specification_and_act_decls_are_defined(false)
     {
@@ -118,7 +118,7 @@ class Trace
 
     /// \brief Constructor for an empty trace.
     /// \details The current position
-    /// and length of trace are set to 0. 
+    /// and length of trace are set to 0.
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
     Trace(const mcrl2::data::data_specification &spec, const mcrl2::lps::action_label_list &act_decls)
@@ -158,9 +158,9 @@ class Trace
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
     /// \exception mcrl2::runtime_error message in case of failure
-    Trace(std::istream& is, 
-          const mcrl2::data::data_specification &spec, 
-          const mcrl2::lps::action_label_list &act_decls, 
+    Trace(std::istream& is,
+          const mcrl2::data::data_specification &spec,
+          const mcrl2::lps::action_label_list &act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
         m_act_decls(act_decls),
@@ -201,10 +201,12 @@ class Trace
     /// \details A trace is read from the input file. If the format is tfUnknown it
     /// is automatically determined what the format of the trace is.
     /// \param[in] filename The name of the file from which the trace is read.
+    /// \param[in] spec A data specification.
+    /// \param[in] act_decls A list of action declarations.
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
-    Trace(std::string const& filename, 
-          const mcrl2::data::data_specification &spec, 
+    Trace(std::string const& filename,
+          const mcrl2::data::data_specification &spec,
           const mcrl2::lps::action_label_list &act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
@@ -225,7 +227,7 @@ class Trace
     bool operator <(const Trace& t) const
     {
       return ((states<t.states) ||
-              (states==t.states && actions<t.actions));  
+              (states==t.states && actions<t.actions));
     }
 
     /// \brief Set the current position back to the beginning of the trace
@@ -237,7 +239,7 @@ class Trace
     }
 
     /// \brief Increase the current position by one, except if this brings one beyond the end of the trace.
-    /// \details The initial position corresponds to pos=0. 
+    /// \details The initial position corresponds to pos=0.
     void increasePosition()
     {
       if (pos < actions.size())
@@ -245,9 +247,9 @@ class Trace
         ++pos;
       }
     }
-    
+
     /// \brief Decrease the current position in the trace by one provided the largest position is larger than 0.
-    /// \details The initial position corresponds to pos=0. 
+    /// \details The initial position corresponds to pos=0.
     void decreasePosition()
     {
       if (pos >0)
@@ -347,22 +349,22 @@ class Trace
     /// \details This routine returns the action at the current position of the
     /// trace. It is not allowed to request an action if no action is available.
     /// \return An action_list representing the action at the current position of the
-    /// trace. 
+    /// trace.
     mcrl2::lps::multi_action currentAction()
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       assert(pos < actions.size());
       return actions[pos];
     }
-    
+
     /// \brief Get the time of the current state in the trace.
     /// \details This is the time at which
     /// the last action occurred (if any).
     /// \return A data_expression representing the current time, or a default data_expression if the time is not defined.
     mcrl2::data::data_expression currentTime()
-    { 
+    {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      return actions[pos].time(); 
+      return actions[pos].time();
     }
 
     /// \brief Truncates the trace at the current position.
@@ -373,7 +375,7 @@ class Trace
     {
       actions.resize(pos);
       if (pos+1<states.size())  // Only throw states away that exist.
-      { 
+      {
         states.resize(pos+1);
       }
     }
@@ -395,8 +397,7 @@ class Trace
     /// \brief Set the state at the current position.
     /// \details It is necessary that all states at earlier positions are also set.
     /// If not an mcrl2::runtime_error exception is thrown.
-    /// \param [in] state The new state.
-
+    /// \param [in] s The new state.
     void setState(const mcrl2::lps::state &s)
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
@@ -406,12 +407,12 @@ class Trace
         ss << "Setting a state in a trace at a position " << pos << " where there are no states at earlier positions";
         throw mcrl2::runtime_error(ss.str());
       }
-      
+
       if (states.size()==pos)
       {
         states.push_back(s);
       }
-      else 
+      else
       {
         states[pos] = s;
       }
@@ -684,7 +685,7 @@ class Trace
           {
             addAction(mcrl2::lps::parse_multi_action(buf,m_act_decls,m_spec));
           }
-          else  
+          else
           {
             addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
                       mcrl2::lps::action_label(mcrl2::core::identifier_string(buf),mcrl2::data::sort_expression_list()),
@@ -735,7 +736,7 @@ class Trace
 
       // write trace
 
-      atermpp::write_term_to_binary_stream(trace,os);  
+      atermpp::write_term_to_binary_stream(trace,os);
       if (os.bad())
       {
         throw runtime_error("could not write to stream");

@@ -328,7 +328,7 @@ process_expression parse_process_expression(const std::string& text,
 
 /// \brief Parses and type checks a process expression.
 /// \param[in] text The input text containing a process expression.
-/// \param[in] procspec A process specification used as context
+/// \param[in] procspec_text A textual version of a process specification used as context
 inline
 process_expression parse_process_expression(const std::string& text, const std::string& procspec_text)
 {

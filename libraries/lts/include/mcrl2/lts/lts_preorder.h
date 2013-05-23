@@ -118,7 +118,7 @@ std::ostream& operator<<(std::ostream& os, const lts_preorder pre)
 }
 
 /** \brief Gives a description of a preorder.
- * \param[in] eq The preorder type.
+ * \param[in] pre The preorder type.
  * \return A string describing the preorder specified by \a
  * eq. */
 inline

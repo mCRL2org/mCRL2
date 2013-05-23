@@ -34,7 +34,7 @@ namespace lts
 namespace detail
 {
 /** \brief This class contains labels for states in dot format.
-   \detail A dot state label consists of two strings, the name of a state and a separate label.
+   \details A dot state label consists of two strings, the name of a state and a separate label.
 */
 class state_label_dot
 {

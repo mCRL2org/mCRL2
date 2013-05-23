@@ -36,7 +36,6 @@ struct propositional_variable_visitor: public pbes_expression_visitor<pbes_expre
     {};
 
   /// \brief Visit propositional_variable node
-  /// \param e A term
   /// \return The result of visiting the node
   bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& /* v */)
   {
@@ -105,7 +104,7 @@ class pbes_equation
     }
 
     /// \brief Constructor.
-    /// \param t A term
+    /// \param t1 A term
     explicit pbes_equation(const atermpp::aterm & t1)
     {
       atermpp::aterm_appl t(t1);

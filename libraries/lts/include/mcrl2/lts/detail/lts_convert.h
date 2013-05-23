@@ -43,7 +43,7 @@ inline void convert_core_lts(CONVERTOR& c,
                              LTS_OUT_TYPE& lts_out);
 
 /** \brief Convert LTSs to each other. The input lts is not usable afterwards.
-    \detail Converts the input lts into the output lts maintaining the nature
+    \details Converts the input lts into the output lts maintaining the nature
             of the lts as good as possible. If no translation can be provided
             because more information is required (such as data types), then
             a mcrl2::runtime error is thrown. This also happens if the particular

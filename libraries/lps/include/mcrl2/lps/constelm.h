@@ -137,11 +137,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     {}
 
     /// \brief Runs the constelm algorithm
-    /// \param p A linear process
-    /// \param e An initial value for the linear process p
-    /// \param R A data rewriter
     /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
     /// as a side effect
+    /// \param ignore_conditions If true, the algorithm is allowed to ignore the conditions in the LPS.
     void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
     {
       m_instantiate_global_variables = instantiate_global_variables;
@@ -156,7 +154,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
       linear_process& p = m_spec.process();
       const std::set<data::variable>&global_vars=m_spec.global_variables();
-      data::variable_list V(global_vars.begin(),global_vars.end()); 
+      data::variable_list V(global_vars.begin(),global_vars.end());
       const data::variable_list& d = p.process_parameters();
 
       // initialize m_index_of
@@ -209,7 +207,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                 {
                   for (data::mutable_map_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
                   {
-                    sigma[w->first] = w->second; 
+                    sigma[w->first] = w->second;
                     undo[d_j].insert(w->first);
                   }
                 }

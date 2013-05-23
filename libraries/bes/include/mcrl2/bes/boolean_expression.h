@@ -85,8 +85,8 @@ class true_: public boolean_expression
 };
 
 /// \brief Test for a true expression
-/// \param t A term
-/// \return True if it is a true expression
+/// \param x A term
+/// \return True if \a x is a true expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
@@ -113,8 +113,8 @@ class false_: public boolean_expression
 };
 
 /// \brief Test for a false expression
-/// \param t A term
-/// \return True if it is a false expression
+/// \param x A term
+/// \return True if \a x is a false expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
@@ -151,8 +151,8 @@ class not_: public boolean_expression
 };
 
 /// \brief Test for a not expression
-/// \param t A term
-/// \return True if it is a not expression
+/// \param x A term
+/// \return True if \a x is a not expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
@@ -194,8 +194,8 @@ class and_: public boolean_expression
 };
 
 /// \brief Test for a and expression
-/// \param t A term
-/// \return True if it is a and expression
+/// \param x A term
+/// \return True if \a x is a and expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
@@ -237,8 +237,8 @@ class or_: public boolean_expression
 };
 
 /// \brief Test for a or expression
-/// \param t A term
-/// \return True if it is a or expression
+/// \param x A term
+/// \return True if \a x is a or expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
@@ -280,8 +280,8 @@ class imp: public boolean_expression
 };
 
 /// \brief Test for a imp expression
-/// \param t A term
-/// \return True if it is a imp expression
+/// \param x A term
+/// \return True if \a x is a imp expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
@@ -323,8 +323,8 @@ class boolean_variable: public boolean_expression
 };
 
 /// \brief Test for a boolean_variable expression
-/// \param t A term
-/// \return True if it is a boolean_variable expression
+/// \param x A term
+/// \return True if \a x is a boolean_variable expression
 inline
 bool is_boolean_variable(const atermpp::aterm_appl& x)
 {

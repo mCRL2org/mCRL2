@@ -67,8 +67,8 @@ class list_container: public container_type
 };
 
 /// \brief Test for a list_container expression
-/// \param t A term
-/// \return True if it is a list_container expression
+/// \param x A term
+/// \return True if \a x is a list_container expression
 inline
 bool is_list_container(const atermpp::aterm_appl& x)
 {
@@ -95,8 +95,8 @@ class set_container: public container_type
 };
 
 /// \brief Test for a set_container expression
-/// \param t A term
-/// \return True if it is a set_container expression
+/// \param x A term
+/// \return True if \a x is a set_container expression
 inline
 bool is_set_container(const atermpp::aterm_appl& x)
 {
@@ -123,8 +123,8 @@ class bag_container: public container_type
 };
 
 /// \brief Test for a bag_container expression
-/// \param t A term
-/// \return True if it is a bag_container expression
+/// \param x A term
+/// \return True if \a x is a bag_container expression
 inline
 bool is_bag_container(const atermpp::aterm_appl& x)
 {
@@ -151,8 +151,8 @@ class fset_container: public container_type
 };
 
 /// \brief Test for a fset_container expression
-/// \param t A term
-/// \return True if it is a fset_container expression
+/// \param x A term
+/// \return True if \a x is a fset_container expression
 inline
 bool is_fset_container(const atermpp::aterm_appl& x)
 {
@@ -179,8 +179,8 @@ class fbag_container: public container_type
 };
 
 /// \brief Test for a fbag_container expression
-/// \param t A term
-/// \return True if it is a fbag_container expression
+/// \param x A term
+/// \return True if \a x is a fbag_container expression
 inline
 bool is_fbag_container(const atermpp::aterm_appl& x)
 {

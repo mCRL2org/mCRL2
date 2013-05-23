@@ -65,7 +65,7 @@ static data_expression negate_inequality(const data_expression &e)
 
 /// \brief Returns a list of all real variables in l
 /// \param l a list of data variables
-/// \ret The list of all v in l such that v.sort() == real()
+/// \return The list of all v in l such that v.sort() == real()
 static inline
 variable_list get_real_variables(const variable_list& l)
 {
@@ -82,7 +82,7 @@ variable_list get_real_variables(const variable_list& l)
 
 /// \brief Returns a list of all nonreal variables in l
 /// \param l a list of data variables
-/// \ret The list of all v in l such that v.sort() != real()
+/// \return The list of all v in l such that v.sort() != real()
 static inline
 variable_list get_nonreal_variables(const variable_list& l)
 {
@@ -106,7 +106,7 @@ static data::function_symbol& negate_function_symbol(const sort_expression &s)
 
 /// \brief Returns a list of all real assignments in l
 /// \param l a list of data assignments
-/// \ret The list of all x := e in l such that x.sort() == e.sort() == real()
+/// \return The list of all x := e in l such that x.sort() == e.sort() == real()
 static inline
 assignment_list get_real_assignments(const assignment_list& l)
 {
@@ -123,7 +123,7 @@ assignment_list get_real_assignments(const assignment_list& l)
 
 /// \brief Determine whether a data expression is an inequality
 /// \param e A data expression
-/// \ret true iff e is a data application of ==, <, <=, > or >= to
+/// \return true iff e is a data application of ==, <, <=, > or >= to
 ///      two arguments.
 
 static inline
@@ -138,7 +138,7 @@ bool is_inequality(const data_expression& e)
 
 /// \brief Returns a list of all nonreal assignments in l
 /// \param l a list of data assignments
-/// \ret The list of all x := e in l such that x.sort() == e.sort() != real()
+/// \return The list of all x := e in l such that x.sort() == e.sort() != real()
 static inline
 assignment_list get_nonreal_assignments(const assignment_list& l)
 {
@@ -315,7 +315,7 @@ static void normalize_specification(
   std::vector < summand_information > &summand_info)
 {
   const lps::action_summand_vector action_smds = s.process().action_summands();
-  
+
   for (lps::action_summand_vector::const_iterator i = action_smds.begin(); i != action_smds.end(); ++i)
   {
     std::vector <data_expression_list> real_conditions, non_real_conditions;
@@ -490,9 +490,9 @@ static void normalize_specification(
 
           // Construct replacements to contain the nextstate values for real variables in a map
 
-          const summand_information s(t, 
+          const summand_information s(t,
                                       true, // This is a deadlock summand.
-                                      assignment_list(), 
+                                      assignment_list(),
                                       lps::multi_action(),
                                       i->deadlock(),
                                       variable_list(), // All sum variables over reals have been eliminated.
@@ -512,7 +512,7 @@ static void normalize_specification(
 /// \param context A variable context
 /// \param variable_generator A fresh variable generator
 /// \post All inequalities in l are in the context
-/// \ret true iff a variable has been added to the context
+/// \return true iff a variable has been added to the context
 static void add_postponed_inequalities_to_context(
   const std::vector < size_t > &inequalities_to_add_lhs_size,
   const std::vector < data_expression > &inequalities_to_add_lhs,
@@ -557,7 +557,7 @@ static void add_postponed_inequalities_to_context(
 /// \param context A variable context
 /// \param variable_generator A fresh variable generator
 /// \post All inequalities in l are in the context
-/// \ret true iff a variable has been added to the context
+/// \return true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
   std::vector < size_t > &inequalities_to_add_lhs_size,
   std::vector < data_expression > &inequalities_to_add_lhs,
@@ -627,7 +627,7 @@ static void add_inequalities_to_context_postponed(
 /// \param cond A list of inequalities denoting the real part of the condition
 /// \param context A variable context
 /// \param r A rewriter
-/// \ret The summand corresponding to s with real part of condition cond, and
+/// \return The summand corresponding to s with real part of condition cond, and
 ///      nextstate determined by i.
 static void add_summand(summand_information& summand_info,
                         const data_expression& new_condition,
@@ -773,7 +773,7 @@ static void add_summand(summand_information& summand_info,
 /// \param initialization A process initialisation containing real values
 /// \param context A variable context
 /// \param r A rewriter
-/// \ret A process initialisation in which all assignments to real variables
+/// \return A process initialisation in which all assignments to real variables
 ///      have been replaced with an initialization for each variable in context.
 static
 assignment_list determine_process_initialization(

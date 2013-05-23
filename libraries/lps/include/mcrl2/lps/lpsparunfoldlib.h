@@ -47,6 +47,8 @@ class lpsparunfold
 
     /** \brief  Constructor for lpsparunfold algorithm.
       * \param[in] spec which is a valid mCRL2 process specification.
+      * \param[in,out] cache Cache to store information for reuse.
+      * \param[in] add_distribution laws If true, additional rewrite rules are introduced.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
     lpsparunfold(mcrl2::lps::specification spec,
@@ -174,8 +176,9 @@ class lpsparunfold
     mcrl2::data::function_symbol_vector new_constructors(mcrl2::data::function_symbol_vector k);
 
     /** \brief  Generates a process parameter name given an string.
-      * \param  str a string value. The value is used to generate a fresh
+      * \param str a string value. The value is used to generate a fresh
       *         process parameter name.
+      * \param process_parameter_names The context to use for generating fresh names.
       * \post   A fresh process parameter name is generated, which has an unique name
       *         with respect to the set of process parameters (process_parameter_names).
       * \return A fresh process parameter name.
@@ -183,8 +186,7 @@ class lpsparunfold
     mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names);
 
     /** \brief  Get the sort of the process parameter at given index
-      * \param  str denotes the prefered parameter_at_index name for index value.
-      * \param  parameters that are already in use
+      * \param  parameter_at_index The index of the parameter for which the sort must be obtained.
       * \return the sort of the process parameter at given index.
     **/
     mcrl2::data::sort_expression sort_at_process_parameter_index(size_t parameter_at_index);
@@ -198,8 +200,7 @@ class lpsparunfold
       mcrl2::data::function_symbol case_function);
 
     /** \brief unfolds a data expression into a vector of process parameters
-      * \param  the data expression
-      * \param  k vector of affected constructors
+      * \param  de the data expression
       * \param  determine_function the determine function
       * \param  pi the projection functions
       * \return The following vector: < det(de), pi_0(de), ... ,pi_n(de) >

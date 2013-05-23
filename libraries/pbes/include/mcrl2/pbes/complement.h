@@ -70,7 +70,7 @@ struct complement_builder: public pbes_expression_builder<Derived>
 /// \endcond
 
 /// \brief Returns the complement of a pbes expression
-/// \param p A PBES expression
+/// \param x A PBES expression
 /// \return The expression obtained by pushing the negations in the pbes
 /// expression as far as possible inwards towards a data expression.
 inline

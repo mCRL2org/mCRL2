@@ -259,7 +259,7 @@ struct term_traits<data::data_expression>
   /// \param t A term which is an application.
   /// \param n The index of the argument. The first index has number 0.
   /// \return the n-th argument of t.
-  /// \detail This function is linear in n.
+  /// \details This function is linear in n.
   static inline
   const term_type& argument(const term_type& t, const size_t n)
   {

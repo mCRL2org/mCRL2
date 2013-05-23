@@ -270,9 +270,9 @@ inline bool is_positive_constant(data_expression const& n)
 }
 
 /// \brief Return the string representation of a positive number
-/// \param n A data expression
+/// \param n_in A data expression
 /// \pre is_positive_constant(n)
-/// \ret String representation of n
+/// \return String representation of n
 /// Transforms a positive constant n into a character array containing
 /// the decimal representation of n.
 inline
@@ -336,7 +336,7 @@ inline bool is_natural_constant(data_expression const& n)
 /// \brief Return the string representation of a natural number
 /// \param n A data expression
 /// \pre is_natural_constant(n)
-/// \ret String representation of n
+/// \return String representation of n
 inline std::string natural_constant_as_string(data_expression const& n)
 {
   assert(is_natural_constant(n));
@@ -388,7 +388,7 @@ inline bool is_integer_constant(data_expression const& n)
 /// \brief Return the string representation of an integer number
 /// \param n A data expression
 /// \pre is_integer_constant(n)
-/// \ret String representation of n
+/// \return String representation of n
 inline std::string integer_constant_as_string(data_expression const& n)
 {
   assert(is_integer_constant(n));

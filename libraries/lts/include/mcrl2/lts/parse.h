@@ -100,7 +100,9 @@ class fsm_parameter
     }
 };
 
-// N.B. The source and target are 1-based!
+/// \brief Transitions in an FSM
+///
+/// \note The source and target are 1-based!
 class fsm_transition
 {
   protected:
@@ -166,6 +168,7 @@ class fsm_transition
 
 typedef std::vector<std::size_t> fsm_state;
 
+/// \brief Parse actions for FSM format
 struct fsm_actions: public core::default_parser_actions
 {
   fsm_actions(const core::parser_table& table_, lts_fsm_t& fsm_)

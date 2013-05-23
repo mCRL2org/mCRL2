@@ -153,7 +153,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// \brief Constructor.
     /// \param spec The specification to which sum elimination should be
     ///             applied.
-    /// \param verbose Control whether verbose output should be given.
+    /// \param decluster Control whether disjunctive conditions need to be split
+    ///        into multiple summands.
     sumelm_algorithm(specification& spec, bool decluster = false)
       : lps::detail::lps_algorithm(spec),
         m_removed(0),

@@ -55,9 +55,8 @@ class function_symbol
     /// \brief Constructor.
     /// \param name A string
     /// \param arity The arity of the function.
-    /// \param quoted True if the function symbol is a quoted string.
     function_symbol(const std::string &name, const size_t arity);
-    
+
     /// \brief default constructor
     /// \details This function is deprecated and should not be used
     /// \param n The number of an function_symbol
@@ -78,11 +77,11 @@ class function_symbol
     function_symbol &operator=(const function_symbol &f)
     {
       f.increase_reference_count<true>();
-      decrease_reference_count(); // Decrease the reference count after increasing it, 
+      decrease_reference_count(); // Decrease the reference count after increasing it,
                                   // as otherwise the reference count can becomes 0 for
                                   // a short moment when x=x is executed and the reference
                                   // count of x is 1. x can then prematurely be garbage collected,
-                                  // depending on the garbage collection scheme.. 
+                                  // depending on the garbage collection scheme..
       m_number=f.m_number;
       return *this;
     }
@@ -91,7 +90,7 @@ class function_symbol
     ~function_symbol()
     {
       decrease_reference_count();
-    } 
+    }
 
     /// \brief Return the name of the function_symbol.
     /// \return The name of the function symbol.
@@ -119,7 +118,7 @@ class function_symbol
 
 
     /// \brief Equality test.
-    /// \detail This operator compares the indices of the function symbols. This means
+    /// \details This operator compares the indices of the function symbols. This means
     ///         that this operation takes constant time.
     /// \returns True iff the function symbols are the same.
     bool operator ==(const function_symbol &f) const
@@ -130,7 +129,7 @@ class function_symbol
     }
 
     /// \brief Inequality test.
-    /// \detail This operator takes constant time.
+    /// \details This operator takes constant time.
     /// \returns True iff the function symbols are not equal.
     bool operator !=(const function_symbol &f) const
     {
@@ -140,7 +139,7 @@ class function_symbol
     }
 
     /// \brief Comparison operation.
-    /// \detail This operator takes constant time.
+    /// \details This operator takes constant time.
     /// \returns True iff this function has a lower index than the argument.
     bool operator <(const function_symbol &f) const
     {
@@ -150,7 +149,7 @@ class function_symbol
     }
 
     /// \brief Comparison operation.
-    /// \detail This operator takes constant time.
+    /// \details This operator takes constant time.
     /// \returns True iff this function has a higher index than the argument.
     bool operator >(const function_symbol &f) const
     {
@@ -160,7 +159,7 @@ class function_symbol
     }
 
     /// \brief Comparison operation.
-    /// \detail This operator takes constant time.
+    /// \details This operator takes constant time.
     /// \returns True iff this function has a lower or equal index than the argument.
     bool operator <=(const function_symbol &f) const
     {
@@ -170,7 +169,7 @@ class function_symbol
     }
 
     /// \brief Comparison operation.
-    /// \detail This operator takes constant time.
+    /// \details This operator takes constant time.
     /// \returns True iff this function has a larger or equal index than the argument.
     bool operator >=(const function_symbol &f) const
     {
@@ -180,8 +179,8 @@ class function_symbol
     }
 
     /// \brief Swap this function with its argument.
-    /// \detail More efficient than assigning twice.
-    /// \parameter f The function symbol with which the swap takes place.
+    /// \details More efficient than assigning twice.
+    /// \param f The function symbol with which the swap takes place.
     void swap(function_symbol &f)
     {
       std::swap(f.m_number,m_number);

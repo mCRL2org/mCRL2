@@ -130,7 +130,7 @@ class action_rename_rule
     }
 
     /// \brief Constructor.
-    /// \param t A term
+    /// \param t1 A term
     explicit action_rename_rule(const atermpp::aterm &t1)
     {
       const atermpp::aterm_appl t(t1);
@@ -143,7 +143,6 @@ class action_rename_rule
     }
 
     /// \brief Constructor.
-    /// \param t A term
     action_rename_rule(const data::variable_list&   variables,
                        const data::data_expression& condition,
                        const action&                lhs,

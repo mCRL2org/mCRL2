@@ -97,7 +97,7 @@ multi_action complete_multi_action(untyped_multi_action& x, const lps::action_la
 }
 
 /// \brief Parses a multi_action from an input stream
-/// \param ma_stream An input stream containing a multi_action
+/// \param in An input stream containing a multi_action
 /// \param[in] action_decls A list of allowed action labels that is used for type checking.
 /// \param[in] data_spec The data specification that is used for type checking.
 /// \return The parsed multi_action

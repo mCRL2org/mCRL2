@@ -33,13 +33,13 @@ class aterm
 {
   public:
     template < typename T >
-    friend class term_appl; 
+    friend class term_appl;
 
     template < typename T >
-    friend class term_list; 
-    
+    friend class term_list;
+
     friend void detail::simple_free_term(const detail::_aterm *t, const size_t arity);
-   
+
     friend void detail::free_term(const detail::_aterm* t);
 
     friend void detail::initialise_aterm_administration();
@@ -53,7 +53,7 @@ class aterm
 
     static const detail::_aterm *undefined_aterm();
     static const detail::_aterm *empty_aterm_list();
- 
+
     inline size_t decrease_reference_count() const
     {
       assert(m_term!=NULL);
@@ -78,21 +78,21 @@ class aterm
     }
 
     // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
-    // AS_INT and AS_LIST. 
+    // AS_INT and AS_LIST.
     const function_symbol &function() const
     {
       return m_term->function();
     }
-    
+
     /// \brief Constructor.
-    /// \detail The function symbol must have arity 0. This function
+    /// \details The function symbol must have arity 0. This function
     /// is for internal use only. Use term_appl(sym) in applications.
     /// \param sym A function symbol.
     aterm(const function_symbol &sym):m_term(detail::aterm0(sym))
     {
       increase_reference_count<false>();
     }
-  
+
   public: // Should be protected, but this cannot yet be done due to a problem
           // in the compiling rewriter.
     aterm (const detail::_aterm *t):m_term(t)
@@ -100,7 +100,7 @@ class aterm
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
       increase_reference_count<false>();
-    } 
+    }
 
   public:
 
@@ -131,32 +131,32 @@ class aterm
     }
 
     /// \brief Returns whether this term is a term_appl.
-    /// \detail This function has constant complexity.
+    /// \details This function has constant complexity.
     /// \return True iff term is an term_appl.
     bool type_is_appl() const
     {
-      return m_term->function()>detail::function_adm.AS_EMPTY_LIST; 
+      return m_term->function()>detail::function_adm.AS_EMPTY_LIST;
     }
 
     /// \brief Returns whether this term has the internal structure of an aterm_int.
-    /// \detail This function has constant complexity.
+    /// \details This function has constant complexity.
     /// \return True iff term is an term_int.
     bool type_is_int() const
     {
-      return m_term->function()==detail::function_adm.AS_INT; 
+      return m_term->function()==detail::function_adm.AS_INT;
     }
 
     /// \brief Returns whether this term has the structure of an term_list
-    /// \detail This function has constant complexity.
+    /// \details This function has constant complexity.
     /// \return True iff term is an term_list.
     bool type_is_list() const
     {
       const function_symbol &f=m_term->function();
-      return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST; 
+      return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST;
     }
 
     /// \brief Equality function on two aterms.
-    /// \detail Terms are stored in a maximally shared way. This
+    /// \details Terms are stored in a maximally shared way. This
     ///         means that this equality operator can be calculated
     ///         in constant time.
     /// \param t A term to which the current term is compared.
@@ -169,7 +169,7 @@ class aterm
     }
 
     /// \brief Inequality operator on two aterms.
-    /// \detail See note at the == operator. This operator requires constant time.
+    /// \details See note at the == operator. This operator requires constant time.
     /// \param t A term to which the current term is compared.
     /// \return false iff t is equal to the current term.
     bool operator !=(const aterm &t) const
@@ -180,7 +180,7 @@ class aterm
     }
 
     /// \brief Comparison operator for two aterms.
-    /// \detail This operator requires constant time. It compares
+    /// \details This operator requires constant time. It compares
     ///         the addresses where terms are stored. That means
     ///         that the outcome of this operator is only stable
     ///         as long as aterms are not garbage collected.
@@ -194,7 +194,7 @@ class aterm
     }
 
     /// \brief Comparison operator for two aterms.
-    /// \detail This operator requires constant time. See note at the operator <.
+    /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is larger than the argument.
     bool operator >(const aterm &t) const
@@ -205,7 +205,7 @@ class aterm
     }
 
     /// \brief Comparison operator for two aterms.
-    /// \detail This operator requires constant time. See note at the operator <.
+    /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is smaller or equal than the argument.
     bool operator <=(const aterm &t) const
@@ -216,7 +216,7 @@ class aterm
     }
 
     /// \brief Comparison operator for two aterms.
-    /// \detail This operator requires constant time. See note at the operator <.
+    /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is larger or equalthan the argument.
     bool operator >=(const aterm &t) const
@@ -229,9 +229,9 @@ class aterm
     /// \brief Returns true if this term is not equal to the term assigned by
     ///        the default constructor of aterms, term_appl<T>'s and aterm_int.
     /// \details The default constructor of a term_list<T> is the empty list, on which
-    ///          the operator defined yields true. This operation is more efficient 
+    ///          the operator defined yields true. This operation is more efficient
     ///          than comparing the current term with an aterm(), term_appl<T>() or an
-    ///          aterm_int(). 
+    ///          aterm_int().
     /// \return A boolean indicating whether this term equals the default constructor.
     bool defined() const
     {
@@ -243,7 +243,7 @@ class aterm
     /// \details This operation is more efficient than exchanging terms by an assignment,
     ///          as swapping does not require to change the protection of terms.
     /// \param t The term with which this term is swapped.
-    void swap(aterm &t) 
+    void swap(aterm &t)
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -260,10 +260,10 @@ class aterm
 ///          It can only be used if the input and output types inherit
 ///          from aterms, and contain no additional information than a
 ///          single aterm.
-/// \param   A term of a type inheriting from an aterm.
+/// \param   t A term of a type inheriting from an aterm.
 /// \return  A term of type ATERM_TYPE_OUT.
 template <class ATERM_TYPE_OUT>
-const ATERM_TYPE_OUT &aterm_cast(const aterm &t) 
+const ATERM_TYPE_OUT &aterm_cast(const aterm &t)
 {
   BOOST_STATIC_ASSERT((boost::is_base_of<aterm, ATERM_TYPE_OUT>::value));
   BOOST_STATIC_ASSERT((sizeof(ATERM_TYPE_OUT)==sizeof(aterm)));
@@ -299,7 +299,7 @@ inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
 {
   t1.swap(t2);
 }
-} // namespace std 
+} // namespace std
 
 
 #include "mcrl2/atermpp/detail/aterm_implementation.h"

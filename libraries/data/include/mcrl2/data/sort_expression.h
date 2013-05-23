@@ -106,7 +106,7 @@ typedef std::vector<sort_expression>    sort_expression_vector;
 //--- end generated class sort_expression ---//
 
 /// \brief Test for a sort_expression expression
-/// \param t A term
+/// \param x A term
 /// \return True if it is a sort_expression expression
 inline
 bool is_sort_expression(const atermpp::aterm_appl& x)

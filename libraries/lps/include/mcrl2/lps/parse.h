@@ -137,7 +137,7 @@ void complete_action_rename_specification(action_rename_specification& x, const 
 
 /// \brief Parses a process specification from an input stream
 /// \param in An input stream
-/// \param alpha_reduce Indicates whether alphabet reductions need to be performed
+/// \param spec A linear process specification.
 /// \return The parse result
 inline
 action_rename_specification parse_action_rename_specification(std::istream& in, const lps::specification& spec)
@@ -152,7 +152,7 @@ action_rename_specification parse_action_rename_specification(std::istream& in, 
 /// Parses an acion rename specification.
 /// If the action rename specification contains data types that are not
 /// present in the data specification of \p spec they are added to it.
-/// \param in An input stream
+/// \param spec_string A string containing an action rename specification.
 /// \param spec A linear process specification
 /// \return An action rename specification
 inline
@@ -163,7 +163,7 @@ action_rename_specification parse_action_rename_specification(const std::string&
 }
 
 /// \brief Parses a linear process specification from an input stream
-/// \param text An input stream containing a linear process specification
+/// \param spec_stream An input stream containing a linear process specification
 /// \return The parsed specification
 /// \exception non_linear_process if a non-linear sub-expression is encountered.
 /// \exception mcrl2::runtime_error in the following cases:

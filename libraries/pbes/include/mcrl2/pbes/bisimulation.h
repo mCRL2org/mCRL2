@@ -227,7 +227,7 @@ class bisimulation_algorithm
     /// \param p A linear process specification
     /// \param q A linear process specification
     /// \return A substitution that should be applied to q to remove name clashes between p and q.
-    /// \detail After this substitution the following holds:
+    /// \details After this substitution the following holds:
     /// \f[ ((param(p)\cup glob(p))\cap ((param(q)\cup glob(q))=\emptyset \f]
     /// where param(p) denotes p.process().process_parameters() and glob(p) denotes p.global_variables().
     data::mutable_map_substitution<> compute_process_parameter_name_clashes(const specification& p, const specification& q) const

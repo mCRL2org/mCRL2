@@ -73,8 +73,8 @@ typedef std::vector<action_label>    action_label_vector;
 
 
 /// \brief Test for a action_label expression
-/// \param t A term
-/// \return True if it is a action_label expression
+/// \param x A term
+/// \return True if \a x is a action_label expression
 inline
 bool is_action_label(const atermpp::aterm_appl& x)
 {

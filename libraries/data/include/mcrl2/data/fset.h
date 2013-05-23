@@ -64,7 +64,7 @@ namespace mcrl2 {
 
         /// \brief Declaration for sort fset as structured sort
         /// \param s A sort expression
-        /// \ret The structured sort representing fset
+        /// \return The structured sort representing fset
         inline
         structured_sort fset_struct(const sort_expression& s)
         {

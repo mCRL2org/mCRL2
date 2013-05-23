@@ -1109,10 +1109,9 @@ class data_specification
 /// \brief Merges two data specifications into one.
 /// \details It is assumed that the two specs can be merged. I.e.
 ///          that the second is a safe extension of the first.
-/// \param spec1[in] One of the input specifications.
-/// \param spec2[in] The second input specification.
+/// \param[in] spec1 One of the input specifications.
+/// \param[in] spec2 The second input specification.
 /// \return A specification that is merged.
-
 inline data_specification operator +(data_specification spec1, const data_specification &spec2)
 {
   const sort_expression_vector sv=spec2.user_defined_sorts();

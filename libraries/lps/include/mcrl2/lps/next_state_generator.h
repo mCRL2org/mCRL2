@@ -119,9 +119,9 @@ class next_state_generator
         size_t m_summand_index;
 
       public:
-        lps::state state() const 
-        { 
-          return m_generator->get_state(m_state); 
+        lps::state state() const
+        {
+          return m_generator->get_state(m_state);
         }
 
         internal_state_t &internal_state() { return m_state; }
@@ -204,9 +204,9 @@ class next_state_generator
   public:
     /// \brief Constructor
     /// \param specification The process specification
-    /// \param rewriter_strategy The rewriter strategy used
-    /// \param extra_function_symbols Additional function symbols the rewriter should not remove. Used by lts/exploration.
-    /// \param compute_action_labels If false, action labels for generated transitions are not computed.
+    /// \param rewriter The rewriter used
+    /// \param use_enumeration_caching Cache intermediate enumeration results
+    /// \param use_summand_pruning Preprocess summands using pruning strategy.
     next_state_generator(const specification& specification, const data::rewriter &rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
 
     ~next_state_generator();

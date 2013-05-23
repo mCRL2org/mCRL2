@@ -66,8 +66,8 @@ typedef std::vector<action>    action_vector;
 
 
 /// \brief Test for a action expression
-/// \param t A term
-/// \return True if it is a action expression
+/// \param x A term
+/// \return True if \a x is a action expression
 inline
 bool is_action(const atermpp::aterm_appl& x)
 {

@@ -92,8 +92,8 @@ inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
 inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 
 /// \brief Test for a process_expression expression
-/// \param t A term
-/// \return True if it is a process_expression expression
+/// \param x A term
+/// \return True if \a x is a process_expression expression
 inline
 bool is_process_expression(const atermpp::aterm_appl& x)
 {
@@ -156,8 +156,8 @@ class process_instance: public process_expression
 };
 
 /// \brief Test for a process_instance expression
-/// \param t A term
-/// \return True if it is a process_instance expression
+/// \param x A term
+/// \return True if \a x is a process_instance expression
 inline
 bool is_process_instance(const atermpp::aterm_appl& x)
 {
@@ -199,8 +199,8 @@ class process_instance_assignment: public process_expression
 };
 
 /// \brief Test for a process_instance_assignment expression
-/// \param t A term
-/// \return True if it is a process_instance_assignment expression
+/// \param x A term
+/// \return True if \a x is a process_instance_assignment expression
 inline
 bool is_process_instance_assignment(const atermpp::aterm_appl& x)
 {
@@ -227,8 +227,8 @@ class delta: public process_expression
 };
 
 /// \brief Test for a delta expression
-/// \param t A term
-/// \return True if it is a delta expression
+/// \param x A term
+/// \return True if \a x is a delta expression
 inline
 bool is_delta(const atermpp::aterm_appl& x)
 {
@@ -255,8 +255,8 @@ class tau: public process_expression
 };
 
 /// \brief Test for a tau expression
-/// \param t A term
-/// \return True if it is a tau expression
+/// \param x A term
+/// \return True if \a x is a tau expression
 inline
 bool is_tau(const atermpp::aterm_appl& x)
 {
@@ -298,8 +298,8 @@ class sum: public process_expression
 };
 
 /// \brief Test for a sum expression
-/// \param t A term
-/// \return True if it is a sum expression
+/// \param x A term
+/// \return True if \a x is a sum expression
 inline
 bool is_sum(const atermpp::aterm_appl& x)
 {
@@ -341,8 +341,8 @@ class block: public process_expression
 };
 
 /// \brief Test for a block expression
-/// \param t A term
-/// \return True if it is a block expression
+/// \param x A term
+/// \return True if \a x is a block expression
 inline
 bool is_block(const atermpp::aterm_appl& x)
 {
@@ -384,8 +384,8 @@ class hide: public process_expression
 };
 
 /// \brief Test for a hide expression
-/// \param t A term
-/// \return True if it is a hide expression
+/// \param x A term
+/// \return True if \a x is a hide expression
 inline
 bool is_hide(const atermpp::aterm_appl& x)
 {
@@ -427,8 +427,8 @@ class rename: public process_expression
 };
 
 /// \brief Test for a rename expression
-/// \param t A term
-/// \return True if it is a rename expression
+/// \param x A term
+/// \return True if \a x is a rename expression
 inline
 bool is_rename(const atermpp::aterm_appl& x)
 {
@@ -470,8 +470,8 @@ class comm: public process_expression
 };
 
 /// \brief Test for a comm expression
-/// \param t A term
-/// \return True if it is a comm expression
+/// \param x A term
+/// \return True if \a x is a comm expression
 inline
 bool is_comm(const atermpp::aterm_appl& x)
 {
@@ -513,8 +513,8 @@ class allow: public process_expression
 };
 
 /// \brief Test for a allow expression
-/// \param t A term
-/// \return True if it is a allow expression
+/// \param x A term
+/// \return True if \a x is a allow expression
 inline
 bool is_allow(const atermpp::aterm_appl& x)
 {
@@ -556,8 +556,8 @@ class sync: public process_expression
 };
 
 /// \brief Test for a sync expression
-/// \param t A term
-/// \return True if it is a sync expression
+/// \param x A term
+/// \return True if \a x is a sync expression
 inline
 bool is_sync(const atermpp::aterm_appl& x)
 {
@@ -599,8 +599,8 @@ class at: public process_expression
 };
 
 /// \brief Test for a at expression
-/// \param t A term
-/// \return True if it is a at expression
+/// \param x A term
+/// \return True if \a x is a at expression
 inline
 bool is_at(const atermpp::aterm_appl& x)
 {
@@ -642,8 +642,8 @@ class seq: public process_expression
 };
 
 /// \brief Test for a seq expression
-/// \param t A term
-/// \return True if it is a seq expression
+/// \param x A term
+/// \return True if \a x is a seq expression
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
@@ -685,8 +685,8 @@ class if_then: public process_expression
 };
 
 /// \brief Test for a if_then expression
-/// \param t A term
-/// \return True if it is a if_then expression
+/// \param x A term
+/// \return True if \a x is a if_then expression
 inline
 bool is_if_then(const atermpp::aterm_appl& x)
 {
@@ -733,8 +733,8 @@ class if_then_else: public process_expression
 };
 
 /// \brief Test for a if_then_else expression
-/// \param t A term
-/// \return True if it is a if_then_else expression
+/// \param x A term
+/// \return True if \a x is a if_then_else expression
 inline
 bool is_if_then_else(const atermpp::aterm_appl& x)
 {
@@ -776,8 +776,8 @@ class bounded_init: public process_expression
 };
 
 /// \brief Test for a bounded_init expression
-/// \param t A term
-/// \return True if it is a bounded_init expression
+/// \param x A term
+/// \return True if \a x is a bounded_init expression
 inline
 bool is_bounded_init(const atermpp::aterm_appl& x)
 {
@@ -819,8 +819,8 @@ class merge: public process_expression
 };
 
 /// \brief Test for a merge expression
-/// \param t A term
-/// \return True if it is a merge expression
+/// \param x A term
+/// \return True if \a x is a merge expression
 inline
 bool is_merge(const atermpp::aterm_appl& x)
 {
@@ -862,8 +862,8 @@ class left_merge: public process_expression
 };
 
 /// \brief Test for a left_merge expression
-/// \param t A term
-/// \return True if it is a left_merge expression
+/// \param x A term
+/// \return True if \a x is a left_merge expression
 inline
 bool is_left_merge(const atermpp::aterm_appl& x)
 {
@@ -905,8 +905,8 @@ class choice: public process_expression
 };
 
 /// \brief Test for a choice expression
-/// \param t A term
-/// \return True if it is a choice expression
+/// \param x A term
+/// \return True if \a x is a choice expression
 inline
 bool is_choice(const atermpp::aterm_appl& x)
 {
@@ -953,8 +953,8 @@ class untyped_parameter_identifier: public process_expression
 };
 
 /// \brief Test for a untyped_parameter_identifier expression
-/// \param t A term
-/// \return True if it is a untyped_parameter_identifier expression
+/// \param x A term
+/// \return True if \a x is a untyped_parameter_identifier expression
 inline
 bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
 {
@@ -1001,8 +1001,8 @@ class untyped_process_assignment: public process_expression
 };
 
 /// \brief Test for a untyped_process_assignment expression
-/// \param t A term
-/// \return True if it is a untyped_process_assignment expression
+/// \param x A term
+/// \return True if \a x is a untyped_process_assignment expression
 inline
 bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
 {

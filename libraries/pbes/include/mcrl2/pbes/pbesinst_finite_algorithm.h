@@ -186,6 +186,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 
   /// \brief Visit propositional_variable node
   /// \param x A term
+  /// \param v A propositional variable instantiation
+  /// \param sigma A substitution.
   /// \return The result of visiting the node
   pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
   {
@@ -313,8 +315,7 @@ class pbesinst_finite_algorithm
   public:
 
     /// \brief Constructor.
-    /// \param print_equations If true, the generated equations are printed
-    /// \param print_rewriter_output If true, invocations of the rewriter are printed
+    /// \param rewriter_strategy Strategy to be used for the data rewriter.
     pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::jitty)
       : m_rewriter_strategy(rewriter_strategy)
     {}

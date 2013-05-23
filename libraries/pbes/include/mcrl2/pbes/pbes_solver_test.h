@@ -36,7 +36,7 @@ namespace pbes_system
 {
 
 /// \brief Straightforward solver for pbesses
-/// \detail This solver gets a parameterised boolean equation system.
+/// \details This solver gets a parameterised boolean equation system.
 ///         It subsequently transforms it to a boolean equation system
 ///         where quantifiers are eliminated as much as possible (using
 ///         the quantifier-all pbes rewriter). After generating the equations

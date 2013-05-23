@@ -613,6 +613,8 @@ public:
     ///
     /// \param[in] v a variable.
     /// \param[in] c a container of expressions.
+    /// \param[in] table a table of indices
+    /// \param[in] fp a stack of free positions in \a table
     assignment(const variable_type &v, ExpressionSequence& c, std::vector <size_t> &table, std::stack<size_t> & fp) :
       m_variable(v), m_container(c), m_index_table(table), m_free_positions(fp)
     { }

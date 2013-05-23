@@ -109,7 +109,6 @@ class data_enumerator
     /// \brief Constructor.
     /// \param data_spec A data specification.
     /// \param rewriter A rewriter.
-    /// \param generator An identifier generator.
     /// \param identifier_prefix A unique prefix, used by the identifier generator.
     data_enumerator(const data_specification& data_spec,
                     const data::rewriter& rewriter,

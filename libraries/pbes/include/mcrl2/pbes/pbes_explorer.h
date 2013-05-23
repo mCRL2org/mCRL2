@@ -42,7 +42,7 @@ namespace detail
 
 /// \brief
 class lts_type {
-	int state_length;
+  int state_length;
   std::vector<std::string> state_names;
   std::vector<std::string> state_types;
   std::vector<std::string> state_type_list;
@@ -54,46 +54,46 @@ class lts_type {
   std::vector<std::string> edge_label_types;
 
 public:
-	/// \brief Contructor.
-	/// \param state_length
+  /// \brief Contructor.
+  /// \param state_length
   lts_type(int state_length);
 
-	/// \brief Destructor.
-	~lts_type();
+  /// \brief Destructor.
+  ~lts_type();
 
-	/// \brief Returns the state length.
-	int get_state_length() const;
+  /// \brief Returns the state length.
+  int get_state_length() const;
 
-	/// \brief Returns the number of state types.
-	int get_number_of_state_types() const;
+  /// \brief Returns the number of state types.
+  int get_number_of_state_types() const;
 
-	/// \brief Returns the sequence of state part names.
-	const std::vector<std::string>& get_state_names() const;
+  /// \brief Returns the sequence of state part names.
+  const std::vector<std::string>& get_state_names() const;
 
-	/// \brief Returns the sequence of state part types.
-	const std::vector<std::string>& get_state_types() const;
+  /// \brief Returns the sequence of state part types.
+  const std::vector<std::string>& get_state_types() const;
 
-	/// \brief Returns the state type index for the state part <tt>part</tt>.
-	/// \param part the state part number.
-	int get_state_type_no(int part) const;
+  /// \brief Returns the state type index for the state part <tt>part</tt>.
+  /// \param part the state part number.
+  int get_state_type_no(int part) const;
 
-	/// \brief Returns the name of the state type with number <tt>type_no</tt>.
-	/// \param type_no the state type number.
-	std::string get_state_type_name(int type_no) const;
+  /// \brief Returns the name of the state type with number <tt>type_no</tt>.
+  /// \param type_no the state type number.
+  std::string get_state_type_name(int type_no) const;
 
-	/// \brief Returns the number of state labels.
-	size_t get_number_of_state_labels() const;
+  /// \brief Returns the number of state labels.
+  size_t get_number_of_state_labels() const;
 
-	/// \brief Returns the sequence of state labels.
-	const std::vector<std::string>& get_state_labels() const;
+  /// \brief Returns the sequence of state labels.
+  const std::vector<std::string>& get_state_labels() const;
 
-	/// \brief Returns the sequence of state label types.
-	const std::vector<std::string>& get_state_label_types() const;
+  /// \brief Returns the sequence of state label types.
+  const std::vector<std::string>& get_state_label_types() const;
 
-	/// \brief Returns the number of edge labels.
-	size_t get_number_of_edge_labels() const;
+  /// \brief Returns the number of edge labels.
+  size_t get_number_of_edge_labels() const;
 
-	/// \brief Returns the sequence of edge labels.
+  /// \brief Returns the sequence of edge labels.
   const std::vector<std::string>& get_edge_labels() const;
 
   /// \brief Returns the sequence of edge label types.
@@ -102,17 +102,17 @@ public:
   /// \brief Adds a state part of type <tt>type</tt> with name <tt>name</tt>.
   /// \param name the name of the state part.
   /// \param type the type of the state part.
-	void add_state(const std::string& name, const std::string& type);
+  void add_state(const std::string& name, const std::string& type);
 
   /// \brief Adds a state label of type <tt>type</tt> with name <tt>name</tt>.
   /// \param name the name of the state label.
   /// \param type the type of the state label.
-	void add_state_label(const std::string& name, const std::string& type);
+  void add_state_label(const std::string& name, const std::string& type);
 
   /// \brief Adds an edge label of type <tt>type</tt> with name <tt>name</tt>.
   /// \param name the name of the edge label.
   /// \param type the type of the edge label.
-	void add_edge_label(const std::string& name, const std::string& type);
+  void add_edge_label(const std::string& name, const std::string& type);
 };
 
 
@@ -281,8 +281,11 @@ protected:
 
     /// \brief Computes the free variables actually used, not only passed through, in an expression.
     /// \param expr
-    /// \param L
     std::set<std::string> used(const pbes_expression& expr);
+
+    /// \brief Computes the free variables actually used, not only passed through, in an expression.
+    /// \param expr
+    /// \param L
     std::set<std::string> used(const pbes_expression& expr, const std::set<std::string>& L);
 
     /// \brief Computes the set of parameters changed in the expression.
@@ -379,7 +382,7 @@ public:
 
     /// \brief Returns the index for a parameter signature in the list of parameter signatures
     /// for the system.
-    /// \param signature the parameter signature.
+    /// \param signaturePBES_State the parameter signature.
     int get_index(const std::string& signaturePBES_State);
 
     /// \brief Determines if <tt>group</tt> is read dependent on the propositional variable.
@@ -387,7 +390,7 @@ public:
     /// to the variable.
     /// \param group the number of the transition group.
     /// \return true.
-    bool is_read_dependent_propvar(int /* group */);
+    bool is_read_dependent_propvar(int group);
 
     /// \brief Determines if <tt>group</tt> is read dependent on part <tt>part</tt> of the state vector.
     /// Returns true if the parameter represented by <tt>part</tt> is in the set of parameters of the
@@ -480,6 +483,7 @@ protected:
 public:
     /// \brief Constructor.
     /// \param filename the name of a PBES file.
+    /// \param rewrite_strategy the name of the data rewrite strategy to use.
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
     ///        if not set (default) the explorer assumes the pbes to be generated with lps2pbes -p and splits accordingly.
@@ -521,8 +525,7 @@ public:
     /// \brief Returns the index of <tt>s</tt> in the local store for string values.
     /// This store is reserved for the string representations of variable names.
     /// The value is added to the store if it is not already present.
-    /// \param type_no the number of the value type.
-    /// \param value the data value.
+    /// \param s The string for which the index needs to be retrieved.
     /// \return the index of <tt>s</tt> in the local store for string values.
     int get_string_index(const std::string& s);
 

@@ -32,7 +32,9 @@ namespace data
 
 /// \brief Generates fresh variables with names that do not appear in the given context.
 /// Caveat: the implementation is very inefficient.
-/// \param update_context If true, then generated names are added to the context
+/// \param variables a list of variables for which new names need to be generated.
+/// \param context Context of identifiers that cannot be used.
+/// \param update_context If true, the generated variables are added to \a context.
 inline
 variable_list fresh_variables(const variable_list& variables, std::set<std::string>& context, bool update_context = true)
 {
@@ -56,7 +58,7 @@ variable_list fresh_variables(const variable_list& variables, std::set<std::stri
 }
 
 /// \brief Returns a variable that doesn't appear in context
-/// \param context A term
+/// \param ids a set of identifiers to use as context.
 /// \param s A sort expression
 /// \param hint A string
 /// \return A variable that doesn't appear in context

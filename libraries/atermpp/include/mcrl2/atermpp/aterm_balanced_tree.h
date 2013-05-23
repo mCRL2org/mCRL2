@@ -131,7 +131,7 @@ class term_balanced_tree: public aterm_appl
     explicit term_balanced_tree(const aterm &tree)
        : aterm_appl(tree)
     {
-    } 
+    }
 
     /// Creates an term_balanced_tree with a copy of a range.
     /// \param first The start of a range of elements.
@@ -142,7 +142,7 @@ class term_balanced_tree: public aterm_appl
     {
     }
 
-    /// \brief Creates an term_balanced_tree with a copy of a range. 
+    /// \brief Creates an term_balanced_tree with a copy of a range.
     /// \param first The start of a range of elements.
     /// \param size The size of the range of elements.
     template < typename ForwardTraversalIterator >
@@ -152,7 +152,7 @@ class term_balanced_tree: public aterm_appl
     }
 
     /// \brief Get the left branch of the tree
-    /// \detail It is assumed that the tree is a node with a left branch.
+    /// \details It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
     const term_balanced_tree<Term>& left_branch() const
     {
@@ -161,7 +161,7 @@ class term_balanced_tree: public aterm_appl
     }
 
     /// \brief Get the left branch of the tree
-    /// \detail It is assumed that the tree is a node with a left branch.
+    /// \details It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
     const term_balanced_tree<Term>& right_branch() const
     {
@@ -171,19 +171,19 @@ class term_balanced_tree: public aterm_appl
 
     /// \brief Element indexing operator.
     /// \param position Index in the tree.
-    /// \details This operation behaves linear with respect to container size, 
+    /// \details This operation behaves linear with respect to container size,
     ///          because it must calculate the size of the container. The operator
     ///          element_at behaves logarithmically.
     const Term &operator[](size_t position) const
     {
       return element_at(position, size());
-    } 
+    }
 
-    /// \brief Get an element at the indicated position. 
-    /// \param size_t position The required position
-    /// \param size_t size The number of elements in the tree.
+    /// \brief Get an element at the indicated position.
+    /// \param position The required position
+    /// \param size The number of elements in the tree.
     ///                    This is required to make the complexity logarithmic.
-    /// \detail By providing the size this operation is logarithmic. If a wrong
+    /// \details By providing the size this operation is logarithmic. If a wrong
     ///         size is provided the outcome is not determined. See also operator [].
     /// \return The element at the indicated position.
     const Term &element_at(size_t position, size_t size) const
@@ -227,7 +227,7 @@ class term_balanced_tree: public aterm_appl
         return left_branch().size() + right_branch().size();
       }
       return (empty()) ? 0 : 1;
-    } 
+    }
 
     /// \brief Returns true if tree is empty.
     /// \return True iff the tree is empty.
@@ -242,7 +242,7 @@ class term_balanced_tree: public aterm_appl
     {
       return function()==tree_node_function();
     }
-}; 
+};
 
 template < typename Value >
 class term_balanced_tree_iterator: public boost::iterator_facade<
@@ -270,7 +270,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
     {
       return tree.empty() || (tree.size() == 1 && term_balanced_tree<Value>::is_empty(tree.top()));
     }
-    
+
     /// \brief Equality operator
     bool equal(const term_balanced_tree_iterator &other) const
     {
@@ -292,7 +292,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
           return;
         }
         m_trees.pop();
-        do 
+        do
         {
           m_trees.push(atermpp::detail::address((reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[1])));
           current=atermpp::detail::address(reinterpret_cast<const detail::_aterm_appl<aterm> *>(current)->arg[0]);
@@ -317,7 +317,7 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
   public:
 
-    term_balanced_tree_iterator() 
+    term_balanced_tree_iterator()
     { }
 
     term_balanced_tree_iterator(const aterm &tree)
@@ -356,6 +356,6 @@ inline void swap(atermpp::term_balanced_tree<T> &t1, atermpp::term_balanced_tree
 {
   t1.swap(t2);
 }
-} // namespace std 
+} // namespace std
 
 #endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

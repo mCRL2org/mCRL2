@@ -40,12 +40,12 @@ class sort_type_checker
       :  sort_type_checker(data_spec.user_defined_sorts().begin(),
                                 data_spec.user_defined_sorts().end(),
                                 data_spec.user_defined_aliases().begin(),
-                                data_spec.user_defined_aliases().end()) 
+                                data_spec.user_defined_aliases().end())
     {} */
-    
+
     /** \brief     Type check a sort expression.
     *  Throws an exception if the expression is not well typed.
-    *  \param[in] sort_expr A sort expression that has not been type checked.
+    *  \param[in] s A sort expression that has not been type checked.
     **/
     void operator ()(const sort_expression &s);
 
@@ -82,7 +82,7 @@ class data_type_checker:public sort_type_checker
   public:
     /** \brief     make a data type checker.
      *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
-     *  \param[in] d A data specification that does not need to have been type checked.
+     *  \param[in] data_spec A data specification that does not need to have been type checked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
     data_type_checker(const data_specification &data_spec);
@@ -90,13 +90,14 @@ class data_type_checker:public sort_type_checker
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] d A data expression that has not been type checked.
+     *  \param[in] Vars a mapping of variable names to their types.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
     data_expression operator()(const data_expression &d,const std::map<core::identifier_string,sort_expression> &Vars);
 
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-     *  \param[in] d A data expression that has not been type checked.
+     *  \param[in] l A list of variables that has not been type checked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
     variable_list operator()(const variable_list &l);
@@ -152,8 +153,8 @@ class data_type_checker:public sort_type_checker
                            const size_t nFactPars=std::string::npos,
                            const bool warn_upcasting=false,
                            const bool print_cast_error=true);
-    void AddVars2Table(std::map<core::identifier_string,sort_expression> &Vars, 
-                       variable_list VarDecls, 
+    void AddVars2Table(std::map<core::identifier_string,sort_expression> &Vars,
+                       variable_list VarDecls,
                        std::map<core::identifier_string,sort_expression> &result);
     bool InTypesA(sort_expression Type, sort_expression_list Types);
     bool EqTypesA(sort_expression Type1, sort_expression Type2);
@@ -161,7 +162,7 @@ class data_type_checker:public sort_type_checker
     bool EqTypesL(sort_expression_list Type1, sort_expression_list Type2);
     bool MaximumType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result);
     sort_expression ExpandNumTypesUp(sort_expression Type);
-    sort_expression ExpandNumTypesDown(sort_expression Type); 
+    sort_expression ExpandNumTypesDown(sort_expression Type);
     bool UnifyMinType(const sort_expression &Type1, const sort_expression &Type2, sort_expression &result);
     bool MatchIf(const function_sort &type, sort_expression &result);
     bool MatchEqNeqComparison(const function_sort &type, sort_expression &result);
@@ -200,6 +201,7 @@ class data_type_checker:public sort_type_checker
 /** \brief     Type check a sort expression.
  *  Throws an exception if something went wrong.
  *  \param[in] sort_expr A sort expression that has not been type checked.
+ *  \param[in] data_spec The data specification to use as context.
  *  \post      sort_expr is type checked.
  **/
 inline
@@ -244,14 +246,14 @@ void type_check(data_expression& data_expr,
   // The typechecker replaces untyped identifiers by typed identifiers (when typechecking
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
   try
-  { 
+  {
     data_type_checker type_checker(data_spec);
     data_expr = type_checker(data_expr,variables);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
     assert(!search_sort_expression(data_expr, untyped_sort()));
 #endif
   }
-  catch (mcrl2::runtime_error &e) 
+  catch (mcrl2::runtime_error &e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check data expression " + pp(t));
   }

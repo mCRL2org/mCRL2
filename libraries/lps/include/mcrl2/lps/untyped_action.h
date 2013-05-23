@@ -65,8 +65,8 @@ typedef std::vector<untyped_action>    untyped_action_vector;
 
 
 /// \brief Test for a untyped_action expression
-/// \param t A term
-/// \return True if it is a untyped_action expression
+/// \param x A term
+/// \return True if \a x is a untyped_action expression
 inline
 bool is_untyped_action(const atermpp::aterm_appl& x)
 {

@@ -907,7 +907,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 /// \param resulting_inequalities A list of inequalities to which the result is stored.
 ///                               Initially this list must be empty.
 /// \param r A rewriter
-/// \ret An indication whether the inequality referred to by i is inconsistent
+/// \return An indication whether the inequality referred to by i is inconsistent
 ///      in the context of inequalities.
 inline bool is_a_redundant_inequality(
   const std::vector < linear_inequality > &inequalities,
@@ -1034,7 +1034,7 @@ inline void remove_redundant_inequalities(
 ///          an inconsistent inequality.
 /// \param inequalities A list of inequalities
 /// \param r A rewriter
-/// \ret true if the system of inequalities can be determined to be
+/// \return true if the system of inequalities can be determined to be
 ///      inconsistent, false otherwise.
 
 /* inline bool is_inconsistent(
@@ -1176,7 +1176,7 @@ static void pivot_and_update(
 ///          CSL Technical Report SRI-CSL-06-01, 2006.
 /// \param inequalities A list of inequalities
 /// \param r A rewriter
-/// \ret true if the system of inequalities can be determined to be
+/// \return true if the system of inequalities can be determined to be
 ///      inconsistent, false otherwise.
 
 
@@ -1541,7 +1541,7 @@ inline bool is_inconsistent(
 /// \param variables_end An iterator indicating the end of the eliminatable variables.
 /// \param r A rewriter.
 /// \post variables contains the list of variables that have not been eliminated
-/// \ret The variables that could not be removed by gauss elimination.
+/// \return The variables that could not be removed by gauss elimination.
 
 template < class Variable_iterator >
 std::set < variable >  gauss_elimination(

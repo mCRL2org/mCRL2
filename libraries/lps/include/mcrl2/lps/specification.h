@@ -118,6 +118,7 @@ class specification
     /// \brief Constructor.
     /// \param data A data specification
     /// \param action_labels A sequence of action labels
+    /// \param global_variable A set of global variables
     /// \param lps A linear process
     /// \param initial_process A process initializer
     specification(const data::data_specification& data,
@@ -257,7 +258,7 @@ std::set<data::function_symbol> find_function_symbols(const lps::specification& 
 std::set<core::identifier_string> find_identifiers(const lps::specification& x);
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
-/// \param l A linear process specification
+/// \param spec A linear process specification
 inline
 void complete_data_specification(lps::specification& spec)
 {

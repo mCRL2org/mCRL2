@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import argparse
+import logging
 
 def clean(temppath, outpath):
   if os.path.exists(temppath):
@@ -39,6 +40,9 @@ def getarguments():
                       help="The version number to be used in the documentation. This "
                            "should be a release number, followed by a period, followed "
                            "by the SVN revision number.")
+  parser.add_argument("-d", "--debug", dest="debug", action="count",
+                      help="Be more verbose. Adding the option multiple times will "
+                           "increase verbosity")                     
   parser.add_argument("-p", "--path", dest="path", metavar="DIR", action="store",
                     default="")
   parser.add_argument("-t", "--temp", dest="temp", metavar="DIR", action="store",
@@ -66,7 +70,13 @@ if __name__ == '__main__':
   if args.clean:
     clean(temppath, outpath)
   
-
+  if args.debug is None:
+    logging.basicConfig()#level=logging.WARNING)
+  elif args.debug > 0:
+    logging.basicConfig(level=logging.INFO)  
+  elif args.debug > 1:
+    logging.basicConfig(level=logging.DEBUG)
+    
   sys.path = [os.path.dirname(__file__)] + sys.path
   import source
   source.generate_rst(binpath, temppath, outpath, [args.version] if args.release else args.version.rsplit('.', 1))

@@ -22,6 +22,7 @@ namespace process
 
 /// \brief Returns true if the process specification is linear.
 /// \param p A process specification
+/// \param verbose If true, verbose output is printed.
 /// \return True if the process specification is linear.
 inline
 bool is_linear(const process_specification& p, bool verbose = false)

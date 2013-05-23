@@ -179,7 +179,9 @@ class lts
     }
 
     /** \brief Sets the number of states of this LTS.
-     * \param[in] n The number of states of this LTS. */
+     * \param[in] n The number of states of this LTS.
+     * \param[in] has_state_labels If true state labels are initialised
+     */
     void set_num_states(const states_size_type n, const bool has_state_labels = true)
     {
       m_nstates = n;
@@ -284,8 +286,8 @@ class lts
     }
 
     /** \brief Sets the label of an action.
-     * \param[in] label The number of the label.
-     * \param[in] label The label that will be assigned to the label.
+     * \param[in] action The number of the action.
+     * \param[in] label The label that will be assigned to the action.
      * \param[in] is_tau Indicates whether the label is a tau action. */
     void set_action_label(labels_size_type action, ACTION_LABEL_T label, bool is_tau = false)
     {
@@ -364,16 +366,16 @@ class lts
     const std::vector<transition> &get_transitions() const
     {
       return m_transitions;
-    } 
+    }
 
     /** \brief Gets a reference to the vector of transitions of the current lts.
      *  \details As this vector can be huge, it is adviced to avoid
      *           to copy this vector.
      * \return   A reference to the vector. */
-    std::vector<transition> &get_transitions() 
+    std::vector<transition> &get_transitions()
     {
       return m_transitions;
-    } 
+    }
 
     /** \brief Add a transition to the lts.
         \details The transition can be added, even if there are not (yet) valid state and
@@ -406,7 +408,7 @@ class lts
     /** \brief Sets all actions with a string that occurs in tau_actions to tau.
      *  \details After hiding actions, it checks whether action labels are
      *           equal and merges actions with the same labels in the lts.
-     *  \param[tau_actions] Vector with strings indicating which actions must be
+     *  \param[in] tau_actions Vector with strings indicating which actions must be
      *       transformed to tau's */
     void hide_actions(const std::vector<std::string> &tau_actions)
     {

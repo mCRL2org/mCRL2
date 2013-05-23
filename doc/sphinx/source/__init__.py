@@ -51,7 +51,6 @@ def generate_rst(binpath, temppath, outpath, version):
   temp_usr = os.path.join(temppath, 'rst','user_manual')
   out_dev = os.path.join(outpath, 'developer_manual')
   out_usr = os.path.join(outpath, 'user_manual')
-  logging.basicConfig(level=logging.INFO)
   if html_dir <> outpath:
     clone_rst(html_dir, outpath)
   clone_rst(cfg_dev, temp_dev)
@@ -62,15 +61,18 @@ def generate_rst(binpath, temppath, outpath, version):
     color='#406756'
   else:
     color='#c1272d'
-  sphinx.main(['-bhtml', 
+  shared_opts = ['-bhtml',
                '-D', 'version={0}'.format('.'.join(version)), 
                '-D', 'release={0}'.format(version[0]),
-               '-D', 'html_theme_options.relbarbgcolor={0}'.format(color),
-               '-c', cfg_dev, 
+               '-D', 'html_theme_options.relbarbgcolor={0}'.format(color)]
+  if _LOG.getEffectiveLevel > logging.WARNING:
+    shared_opts += ['-Q']
+  elif _LOG.getEffectiveLevel >= logging.WARNING:
+    shared_opts += ['-q']
+  
+  sphinx.main( shared_opts +
+               ['-c', cfg_dev, 
                temp_dev, out_dev])
-  sphinx.main(['-bhtml', 
-               '-D', 'version={0}'.format('.'.join(version)), 
-               '-D', 'release={0}'.format(version[0]), 
-               '-D', 'html_theme_options.relbarbgcolor={0}'.format(color),
-               '-c', cfg_usr, 
+  sphinx.main( shared_opts +
+               ['-c', cfg_usr, 
                temp_usr, out_usr])

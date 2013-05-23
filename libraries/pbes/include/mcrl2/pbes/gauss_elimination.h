@@ -57,7 +57,7 @@ class gauss_elimination_algorithm
     /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
     /// \param first Start of a range of pbes equations
     /// \param last End of a range of pbes equations
-    /// \param solver An equation solver
+    /// \param solve An equation solver
 
     template <typename Iter, typename FixpointEquationSolver>
     void run(Iter first, Iter last, FixpointEquationSolver solve)

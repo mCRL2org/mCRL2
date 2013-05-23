@@ -60,7 +60,7 @@ class boolean_equation
     {}
 
     /// \brief Constructor.
-    /// \param t A term
+    /// \param t1 A term
     explicit boolean_equation(const atermpp::aterm &t1)
     {
       atermpp::aterm_appl t(t1);

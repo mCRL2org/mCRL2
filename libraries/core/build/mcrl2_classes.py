@@ -800,8 +800,8 @@ typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;
     # Returns an is_<classname> function
     def is_function(self, all_classes):
         text = r'''%s/// \\brief Test for a %s expression
-/// \\param t A term
-/// \\return True if it is a %s expression
+/// \\param x A term
+/// \\return True if \\a x is a %s expression
 inline
 bool is_%s(const %s& x)
 {

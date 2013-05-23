@@ -83,9 +83,9 @@ class invelm_algorithm: public lps::detail::lps_algorithm
     bool f_simplify_all;
 
     /// \brief Adds an invariant to the condition of the summand s, and optionally applies the prover to it
+    /// \param s The summand that needs to be simplified
     /// \param invariant A data expression
     /// \param apply_prover If true, the prover is applied to the condition
-    /// \param only_change_if_false If true, the condition is only updated if it becomes false
     void simplify_summand(lps::summand_base& s, const data::data_expression& invariant, bool apply_prover)
     {
       data::data_expression new_condition = data::lazy::and_(invariant, s.condition());

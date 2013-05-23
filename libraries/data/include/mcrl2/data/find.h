@@ -399,9 +399,8 @@ std::set<data::data_expression> find_data_expressions(const T& x)
 
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param[in] container an expression or container with expressions
-/// \param[in] v an expression or container with expressions
-/// \param d A variable
-/// \return True if the term has a given variable as subterm.
+/// \param[in] v a variable
+/// \return True if v occurs in any of the terms in \a container.
 template <typename Container>
 bool search_variable(Container const& container, const variable& v)
 {
@@ -411,7 +410,7 @@ bool search_variable(Container const& container, const variable& v)
 
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param[in] container an expression or container with expressions
-/// \param d A data variable
+/// \param v A data variable
 /// \return True if the term has a given variable as subterm.
 template <typename Container>
 bool search_free_variable(Container container, const variable& v)

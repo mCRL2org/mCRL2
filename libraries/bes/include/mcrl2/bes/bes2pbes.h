@@ -41,7 +41,7 @@ pbes_system::pbes_expression bes2pbes(const boolean_expression& x)
 }
 
 /// \brief Converts a boolean equation into a PBES equation
-/// \param x A boolean equation
+/// \param eq A boolean equation
 inline
 pbes_system::pbes_equation bes2pbes(const boolean_equation& eq)
 {

@@ -525,7 +525,7 @@ class pins
 
       for (std::size_t i = 0; i < m_data_types.size(); i++)
       {
-      	std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
+        std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
         assert(j != m_unique_data_types.end());
         m_unique_data_type_index.push_back(j - m_unique_data_types.begin());
       }
@@ -645,6 +645,7 @@ class pins
     /// \code
     /// void operator()(ltsmin_state_type const& next_state, int* const& edge_labels, int group=-1);
     /// \endcode
+    ///
     /// where
     /// - next_state is the target state of the transition
     /// - edge_labels is an array of edge labels
@@ -685,6 +686,7 @@ class pins
     /// \code
     /// void operator()(ltsmin_state_type const& next_state, int* const& edge_labels, int group);
     /// \endcode
+    ///
     /// where
     /// - next_state is the target state of the transition
     /// - edge_labels is an array of edge labels

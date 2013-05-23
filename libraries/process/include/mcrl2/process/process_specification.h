@@ -78,7 +78,6 @@ class process_specification
     {}
 
     /// \brief Constructor.
-    /// \param term A term
     /// \param t A term containing an aterm representation of a process specification.
     /// \param data_specification_is_type_checked A boolean that indicates whether the
     ///         data specification has been type checked. If so, the internal data specification

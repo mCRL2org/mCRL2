@@ -31,16 +31,17 @@ class action_type_checker:public data::data_type_checker
     std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
 
   public:
-    /** \brief     make a data type checker.
+    /** \brief     make an action type checker.
     *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
-    *  \param[in] d A data specification that does not need to have been type checked.
+    *  \param[in] data_spec A data specification that does not need to have been type checked.
+    *  \param[in] action_decls A list of action declarations
     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
     **/
     action_type_checker(const data::data_specification &data_spec, const action_label_list& action_decls);
 
     /** \brief     Type check a multi action.
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-    *  \param[in] d A multi action that has not been type checked.
+    *  \param[in] ma A multi action that has not been type checked.
     *  \return    a multi action where all untyped identifiers have been replace by typed ones.
     **/
     multi_action operator()(const untyped_multi_action &ma);
@@ -62,6 +63,8 @@ class action_type_checker:public data::data_type_checker
 /** \brief     Type check a multi action
  *  Throws an exception if something went wrong.
  *  \param[in] mult_act A multi action that has not been type checked.
+ *  \param[in] data_spec A data specification to use as context.
+ *  \param[in] action_decls A list of action declarations to use as context.
  *  \post      mult_action is type checked and sorts have been added when necessary.
  **/
 inline

@@ -210,6 +210,8 @@ struct pg_actions: public core::default_parser_actions
 /// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param text A string
 /// \param result A boolean equation system
+/// \param maxpg If true a max-parity game is generated in \a result, otherwise a min-parity
+///        game is obtained.
 inline
 void parse_pgsolver_string(const std::string& text, boolean_equation_system& result, bool maxpg = true)
 {
@@ -224,6 +226,8 @@ void parse_pgsolver_string(const std::string& text, boolean_equation_system& res
 /// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param from An input stream
 /// \param result A boolean equation system
+/// \param maxpg If true a max-parity game is generated in \a result, otherwise a min-parity
+///        game is obtained.
 inline
 void parse_pgsolver(std::istream& from, boolean_equation_system& result, bool maxpg = true)
 {

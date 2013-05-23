@@ -112,8 +112,6 @@ log_level_t log_level_from_string(const std::string& s)
 }
 
 
-/// \prototype
-//std::string now_time();
 std::string format_time(const time_t* timestamp);
 
 /// \brief Interface class for output policy.
@@ -138,7 +136,6 @@ class output_policy
     virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg) = 0;
 };
 
-/// \prototype
 std::set<output_policy*> initialise_output_policies();
 
 /// \brief Class for logging messages

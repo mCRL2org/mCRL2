@@ -83,6 +83,8 @@ class identifier_generator
     /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
     /// \param hint A string
+    /// \param add_to_context If true, the freshly generated identifier is added
+    /// to the context to make sure no duplicates are generated.
     /// \return A fresh identifier.
     virtual core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
     {

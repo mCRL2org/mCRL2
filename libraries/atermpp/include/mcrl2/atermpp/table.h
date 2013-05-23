@@ -16,11 +16,11 @@
 
 namespace atermpp
 {
-/// \Brief table. Has essentially the  same functionality as a std::map< term, term >;
+/// \brief table. Has essentially the  same functionality as a std::map< term, term >;
 class table:public indexed_set
 {
   protected:
-    
+
     std::vector < std::vector < aterm > > m_values;
 
   public:
@@ -58,7 +58,7 @@ class table:public indexed_set
     /// \brief Get the value belonging to a given key in a table.
     /// \param key A key value.
     /// \return The corresponding value.
-    const aterm &get(const aterm &key) const; 
+    const aterm &get(const aterm &key) const;
 
     /// \brief Remove the (key, value)-pair from table.
     /// \param key A key value.
@@ -66,7 +66,7 @@ class table:public indexed_set
 
     /// \brief Get a list of all the values in a table.
     /// This function can be useful if you need to iterate over all values in a table. It
-    /// returns an term_list containing all the values in the table. 
+    /// returns an term_list containing all the values in the table.
     /// \return A list containing the values of the table.
     aterm_list values() const;
 

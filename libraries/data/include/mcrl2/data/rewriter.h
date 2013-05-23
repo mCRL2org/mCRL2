@@ -147,7 +147,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
   public:
 
     /// \brief Constructor.
-    /// \param[in] r A rewriter
+    /// \param[in] other A rewriter
     basic_rewriter(const basic_rewriter & other) :
       basic_rewriter< atermpp::aterm >(other)
     { }
@@ -162,7 +162,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
-    /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
     template < typename EquationSelector >
     basic_rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
       basic_rewriter< atermpp::aterm >(d,selector,s)
@@ -204,7 +204,7 @@ class rewriter: public basic_rewriter<data_expression>
 
     /// \brief Constructor.
     /// \param[in] d A data specification
-    /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
     /// \param[in] s A rewriter strategy.
     template < typename EquationSelector >
     rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
@@ -213,7 +213,6 @@ class rewriter: public basic_rewriter<data_expression>
     }
 
     /// \brief Default specification used if no specification is specified at construction
-    /// \param[in] d A data specification
     static data_specification& default_specification()
     {
       static data_specification specification;
@@ -290,7 +289,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
 
     /// \brief Constructor.
     /// \param[in] d A data specification
-    /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
     /// \param[in] s A rewriter strategy.
     template < typename EquationSelector >
     rewriter_with_variables(const data_specification& d, const EquationSelector & selector, const strategy s = jitty) :

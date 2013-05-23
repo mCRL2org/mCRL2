@@ -88,8 +88,8 @@ class term_appl:public aterm
     //           is substantially less efficient.
     ///          The length of the iterator range should must match the arity of the function symbol.
     /// \param sym A function symbol.
-    /// \param first The start of a range of elements.
-    /// \param last The end of a range of elements.
+    /// \param begin The start of a range of elements.
+    /// \param end The end of a range of elements.
 
     template <class ForwardIterator>
     term_appl(const function_symbol &sym,
@@ -107,9 +107,9 @@ class term_appl:public aterm
     ///          This means that the ATermConverter is applied exactly once to each element.
     ///          The length of the iterator range must be equal to the arity of the function symbol.
     /// \param sym A function symbol.
-    /// \param first The start of a range of elements.
-    /// \param last The end of a range of elements.
-    /// \param convert_to_aterm. An optional translator that is applied to each element in the iterator range,
+    /// \param begin The start of a range of elements.
+    /// \param end The end of a range of elements.
+    /// \param convert_to_aterm An optional translator that is applied to each element in the iterator range,
     //                              and which must translate these elements to type Term.
     template <class InputIterator, class ATermConverter>
     term_appl(const function_symbol &sym,
@@ -287,7 +287,7 @@ inline void swap(atermpp::term_appl<T> &t1, atermpp::term_appl<T> &t2)
 {
   t1.swap(t2);
 }
-} // namespace std 
+} // namespace std
 
 #include "mcrl2/atermpp/detail/aterm_appl_implementation.h"
 

@@ -77,7 +77,7 @@ inline std::string pp(const state_label_fsm l)
 
 
 /** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
-    \detail The .fsm format consists of an labelled transition system where the
+    \details The .fsm format consists of an labelled transition system where the
              action labels are strings, and the state labels are vectors of integers.
              The integers at position i corresponds to a string, which are maintained
              in a separate vector for memory efficiency.

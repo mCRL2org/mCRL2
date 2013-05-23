@@ -55,7 +55,7 @@ class process_type_checker:public data::data_type_checker
     }
     void TransformActProcVarConst(void);
     process_expression TraverseActProcVarConstP(
-          const std::map<core::identifier_string,data::sort_expression> &Vars, 
+          const std::map<core::identifier_string,data::sort_expression> &Vars,
           const process_expression &ProcTerm);
     process_expression RewrActProc(
                const std::map<core::identifier_string,data::sort_expression> &Vars,
@@ -64,13 +64,13 @@ class process_type_checker:public data::data_type_checker
 
     data::sort_expression_list InsertType(const data::sort_expression_list TypeList, const data::sort_expression Type);
     std::pair<bool,data::sort_expression_list> AdjustNotInferredList(
-                                  const data::sort_expression_list &PosTypeList, 
+                                  const data::sort_expression_list &PosTypeList,
                                   const atermpp::term_list<data::sort_expression_list> &TypeListList);
     bool IsTypeAllowedA(const data::sort_expression &Type, const data::sort_expression &PosType);
     bool IsTypeAllowedL(const data::sort_expression_list &TypeList, const data::sort_expression_list PosTypeList);
     data::sort_expression_list GetNotInferredList(const atermpp::term_list<data::sort_expression_list> &TypeListList);
     atermpp::term_list<data::sort_expression_list> TypeListsIntersect(
-                                  const atermpp::term_list<data::sort_expression_list> &TypeListList1, 
+                                  const atermpp::term_list<data::sort_expression_list> &TypeListList1,
                                   const atermpp::term_list<data::sort_expression_list> &TypeListList2);
     process_equation_list WriteProcs(const process_equation_vector &oldprocs);
 
@@ -80,12 +80,13 @@ class process_type_checker:public data::data_type_checker
 /** \brief     Type check a process expression.
  *  Throws an exception if something went wrong.
  *  \param[in] proc_expr A process expression that has not been type checked.
+ *  \param[in] proc_spec A process specification used as context.
  *  \post      proc_expr is type checked.
  **/
 inline
 void type_check(process_expression& proc_expr, const process_specification& proc_spec)
 {
-  try 
+  try
   {
     process_type_checker type_checker(proc_spec);
     proc_expr=type_checker(proc_expr);

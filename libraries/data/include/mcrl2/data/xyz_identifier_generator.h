@@ -64,7 +64,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     {}
 
     /// \brief Constructor.
-    /// \param t A term.
+    /// \param ids a set of identifiers to use as context
    xyz_identifier_generator(const std::set<core::identifier_string>& ids)
       : m_index(-2), m_char('Z')
     {
@@ -73,8 +73,9 @@ class xyz_identifier_generator: public multiset_identifier_generator
 
     /// \brief Returns hint if it isn't in the context yet. Else the next available
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
-    /// The returned variable is added to the context.
     /// \param hint A string
+    /// \param add_to_context If true, the generated identifier is added to the context,
+    /// it is not added otherwise.
     /// \return A fresh identifier.
     core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
     {

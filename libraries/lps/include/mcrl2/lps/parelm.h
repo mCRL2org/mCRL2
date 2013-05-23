@@ -246,6 +246,8 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
 /// \brief Removes unused parameters from a linear process specification.
 /// \param spec A linear process specification
+/// \param variant1 If true the default variant of parelm is used, otherwise an
+///        alternative implementation is chosen.
 inline
 void parelm(specification& spec, bool variant1 = true)
 {

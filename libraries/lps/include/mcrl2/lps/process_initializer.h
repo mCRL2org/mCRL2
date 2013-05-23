@@ -76,8 +76,8 @@ typedef std::vector<process_initializer>    process_initializer_vector;
 
 
 /// \brief Test for a process_initializer expression
-/// \param t A term
-/// \return True if it is a process_initializer expression
+/// \param x A term
+/// \return True if \a x is a process_initializer expression
 inline
 bool is_process_initializer(const atermpp::aterm_appl& x)
 {

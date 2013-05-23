@@ -67,8 +67,8 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
 };
 
 /// \brief Test for a untyped_set_or_bag_comprehension_binder expression
-/// \param t A term
-/// \return True if it is a untyped_set_or_bag_comprehension_binder expression
+/// \param x A term
+/// \return True if \a x is a untyped_set_or_bag_comprehension_binder expression
 inline
 bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
@@ -95,8 +95,8 @@ class set_comprehension_binder: public binder_type
 };
 
 /// \brief Test for a set_comprehension_binder expression
-/// \param t A term
-/// \return True if it is a set_comprehension_binder expression
+/// \param x A term
+/// \return True if \a x is a set_comprehension_binder expression
 inline
 bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
 {
@@ -123,8 +123,8 @@ class bag_comprehension_binder: public binder_type
 };
 
 /// \brief Test for a bag_comprehension_binder expression
-/// \param t A term
-/// \return True if it is a bag_comprehension_binder expression
+/// \param x A term
+/// \return True if \a x is a bag_comprehension_binder expression
 inline
 bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
@@ -151,8 +151,8 @@ class forall_binder: public binder_type
 };
 
 /// \brief Test for a forall_binder expression
-/// \param t A term
-/// \return True if it is a forall_binder expression
+/// \param x A term
+/// \return True if \a x is a forall_binder expression
 inline
 bool is_forall_binder(const atermpp::aterm_appl& x)
 {
@@ -179,8 +179,8 @@ class exists_binder: public binder_type
 };
 
 /// \brief Test for a exists_binder expression
-/// \param t A term
-/// \return True if it is a exists_binder expression
+/// \param x A term
+/// \return True if \a x is a exists_binder expression
 inline
 bool is_exists_binder(const atermpp::aterm_appl& x)
 {
@@ -207,8 +207,8 @@ class lambda_binder: public binder_type
 };
 
 /// \brief Test for a lambda_binder expression
-/// \param t A term
-/// \return True if it is a lambda_binder expression
+/// \param x A term
+/// \return True if \a x is a lambda_binder expression
 inline
 bool is_lambda_binder(const atermpp::aterm_appl& x)
 {

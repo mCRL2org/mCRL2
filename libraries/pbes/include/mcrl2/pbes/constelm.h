@@ -462,8 +462,8 @@ class pbes_constelm_algorithm
         {}
 
         /// \brief Constructor
-        /// \param l A propositional variable declaration
-        /// \param r A propositional variable
+        /// \param src A propositional variable declaration
+        /// \param tgt A propositional variable
         /// \param c A term
         edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = pbes_expr::true_())
           : term_type(c), m_source(src), m_target(tgt)
@@ -514,7 +514,7 @@ class pbes_constelm_algorithm
         {}
 
         /// \brief Constructor
-        /// \param v A propositional variable declaration
+        /// \param x A propositional variable declaration
         vertex(propositional_variable_decl_type x)
           : m_variable(x)
         {}
@@ -760,9 +760,6 @@ class pbes_constelm_algorithm
 
     /// \brief Runs the constelm algorithm
     /// \param p A pbes
-    /// \param name_generator A generator for fresh identifiers
-    /// The call \p name_generator() should return an identifier that doesn't appear
-    /// in the pbes \p p
     /// \param compute_conditions If true, propagation conditions are computed. Note
     /// that the currently implementation has exponential behavior.
     void run(pbes& p, bool compute_conditions = false)

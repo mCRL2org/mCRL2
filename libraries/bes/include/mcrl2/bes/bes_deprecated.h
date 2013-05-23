@@ -2166,8 +2166,7 @@ class boolean_equation_system
     }
 
     /// \brief Calculate a BES from a given PBES
-    /// \detail
-
+    /// \details
     /// Global variables
     ///  atermpp::indexed_set variable_index(10000, 50);
     ///  bes_equations;

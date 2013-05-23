@@ -241,6 +241,7 @@ class classic_enumerator
     ///          same length as variables.
     /// \param[in] variables The variables for which a solution is sought.
     /// \param[in] condition_in_internal_format The condition in internal format.
+    /// \param[in] sigma A substitution in the internal format.
     /// \param[in] max_internal_variables The maximal number of internally generatable variables.
     ///            If zero, then there is no bound. If the bound is reached, generating
     ///            new solutions stops with or without an exception as desired.
@@ -412,6 +413,7 @@ class classic_enumerator
                         valid solutions are being generated, or whether a problem has occurred.
                         Basically, there are two possible problems, namely, there are no constructor
                         functions or the number of internally generated variables reached the limit.
+        \param[in] substitution A substitution.
 
     **/
     template < typename Container >

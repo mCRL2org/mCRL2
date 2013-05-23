@@ -479,7 +479,7 @@ bool data_specification::is_well_typed() const
 ///  - specification that includes all system defined information (legacy)
 /// The last type must eventually disappear but is unfortunately still in
 /// use in a substantial amount of source code.
-/// Note, all sorts with name prefix @legacy_ are eliminated
+/// Note, all sorts with name prefix \@legacy_ are eliminated
 void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
 {
   assert(core::detail::check_rule_DataSpec(term));

@@ -114,6 +114,8 @@ class pbes
     /// sequence of propositional variable declarations [first, last).
     /// \param first Start of a sequence of propositional variable declarations
     /// \param last End of a sequence of propositional variable declarations
+    /// \param v A propositional variable instantation
+    /// \param data_spec A data specification.
     /// \return True if the type of \p v is matched correctly
     /// \param v A propositional variable instantiation
     template <typename Iter>
@@ -270,7 +272,7 @@ class pbes
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
     /// \param filename A string
-    /// \param binary If true the file is saved in binary format
+    /// \param no_well_typedness_check If true the well typedness check is skipped.
 #ifndef NDEBUG
     void save(const std::string& filename, bool binary = true, bool no_well_typedness_check = false) const
 #else

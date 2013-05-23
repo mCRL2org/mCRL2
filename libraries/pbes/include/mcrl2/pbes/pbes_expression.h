@@ -1517,7 +1517,6 @@ struct term_traits<pbes_system::pbes_expression>
   }
 
   /// \brief Test if a term is constant
-  /// \param t A term
   /// \return True if the term is constant
   static inline
   bool is_constant(const term_type& /* t */)

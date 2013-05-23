@@ -260,8 +260,10 @@ T replace_free_variables(const T& x,
 //--- end generated process replace code ---//
 
 /// \brief Applies sigma as a capture avoiding substitution to x
+/// \param x the term to which the substitution is applied.
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
+/// \param equations The process equations that are used as context.
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_variables_capture_avoiding(T& x,
@@ -278,8 +280,10 @@ void replace_variables_capture_avoiding(T& x,
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
+/// \param x the term to which the substitution is applied.
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
+/// \param equations The process equations that are used as context.
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_variables_capture_avoiding(const T& x,

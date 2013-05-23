@@ -58,8 +58,8 @@ inline bool is_assignment(const atermpp::aterm_appl& x);
 inline bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x);
 
 /// \brief Test for a assignment_expression expression
-/// \param t A term
-/// \return True if it is a assignment_expression expression
+/// \param x A term
+/// \return True if \a x is a assignment_expression expression
 inline
 bool is_assignment_expression(const atermpp::aterm_appl& x)
 {
@@ -109,7 +109,6 @@ class assignment: public assignment_expression
     }
 
     /// \brief Applies the assignment to a term
-    /// \param[in] x A term
     /// \return The value <tt>x[lhs() := rhs()]</tt>.
     template < typename Expression >
     data_expression operator()(const Expression& /*x*/) const
@@ -128,8 +127,8 @@ typedef std::vector<assignment>    assignment_vector;
 
 
 /// \brief Test for a assignment expression
-/// \param t A term
-/// \return True if it is a assignment expression
+/// \param x A term
+/// \return True if \a x is a assignment expression
 inline
 bool is_assignment(const atermpp::aterm_appl& x)
 {
@@ -192,8 +191,8 @@ typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignm
 
 
 /// \brief Test for a untyped_identifier_assignment expression
-/// \param t A term
-/// \return True if it is a untyped_identifier_assignment expression
+/// \param x A term
+/// \return True if \a x is a untyped_identifier_assignment expression
 inline
 bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 {
@@ -221,8 +220,8 @@ struct right_hand_side : public std::unary_function< const assignment, data_expr
 };
 
 /// \brief Constructs an assignment_list by pairwise combining a variable and expression
-/// \param lhs A sequence of data variables
-/// \param rhs A sequence of data expressions
+/// \param variables A sequence of data variables
+/// \param expressions A sequence of data expressions
 /// \return The corresponding assignment list.
 template < typename VariableSequence, typename ExpressionSequence >
 assignment_vector make_assignment_vector(VariableSequence const& variables, ExpressionSequence const& expressions)
@@ -239,7 +238,9 @@ assignment_vector make_assignment_vector(VariableSequence const& variables, Expr
 }
 
 /// \brief Converts an iterator range to data_expression_list
-/// \param r A range of assignments.
+/// \param variables A sequence of variables.
+/// \param expressions A sequence of variables.
+/// \pre length(variables) == length(expressions)
 /// \note This function uses implementation details of the iterator type
 /// and hence is sometimes efficient than copying all elements of the list.
 template < typename VariableSequence, typename ExpressionSequence >

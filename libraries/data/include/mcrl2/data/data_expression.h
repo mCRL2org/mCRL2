@@ -237,7 +237,7 @@ typedef std::vector<data_expression>    data_expression_vector;
 //--- end generated class data_expression ---//
 
 /// \brief Test for a data_expression expression
-/// \param t A term
+/// \param x A term
 /// \return True if it is a data_expression expression
 inline
 bool is_data_expression(const atermpp::aterm_appl& x)

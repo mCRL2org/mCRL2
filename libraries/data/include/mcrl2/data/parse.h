@@ -554,7 +554,7 @@ void complete_data_specification(data_specification& x)
 ///     eqn  y==zero -> plus(x,y)=x;
 ///          plus(x,succ(y))=succ(plus(x,y));
 ///    \endcode
-///  \param[in] text A textual description of the data specification.
+///  \param[in] in A input stream containing the data specification.
 ///  \return the data specification corresponding to text.
 inline
 data_specification parse_data_specification(std::istream& in)
@@ -600,8 +600,8 @@ data_specification parse_data_specification(const std::string& text)
 ///         variable_list l;
 ///         parse_variables("x:Nat; y:Pos", std::front_inserter(l));
 ///      \endcode
-/// \param[in] text A textual description of the variable declarations to be parsed.
-/// \param[out] i An input interator indicating where the parsed variables must be inserted.
+/// \param[in] in An input stream containing the variable declarations to be parsed.
+/// \param[out] o An output interator indicating where the parsed variables must be inserted.
 /// \param[in]  begin The start of a variable range against which the variables are checked
 ///             for double occurrences.
 /// \param[in]  end   The end of the variable range against which the parsed variables are checked.
@@ -769,9 +769,9 @@ variable parse_variable(std::istream& text,
 ///     If a parse or type check error occurs this is reported using a mcrl2::runtime_error
 ///     exception. It is assumed that the input contains exactly one expression, and nothing
 ///     else.
-/// \param[in] text The input text containing a data expression.
-/// \param[in]  begin The start of a variables that can occur in the data expression.
-/// \param[in]  end   The end of the potentially free variables in the expression.
+/// \param[in] in The input stream containing a data expression.
+/// \param[in] first The start of a variables that can occur in the data expression.
+/// \param[in] last  The end of the potentially free variables in the expression.
 /// \param[in] data_spec The data specification that is used for type checking.
 
 template <typename Variable_iterator>
@@ -851,7 +851,7 @@ data_expression parse_data_expression(const std::string& text,
 
 /// \brief Parses and type checks a sort expression.
 /// \details See parsing a sort expression from a string for details.
-/// \param[in] text The input text containing a sort expression.
+/// \param[in] in An input stream containing a sort expression.
 /// \param[in] data_spec The data specification that is used for type checking.
 inline
 sort_expression parse_sort_expression(std::istream& in,

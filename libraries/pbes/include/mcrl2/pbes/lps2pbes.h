@@ -42,8 +42,9 @@ class lps2pbes_algorithm
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula that represents a property about the system modeled by the given specification
     /// \param spec A linear process specification
-    /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \param structured use the 'structured' approach of generating equations
+    /// \param unoptimized do not optimize the resulting PBES.
+    /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \return A PBES that encodes the property applied to the given specification
     pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, data::variable T = data::variable())
     {
@@ -83,7 +84,7 @@ class lps2pbes_algorithm
       std::vector<pbes_equation> eqn;
       if (structured)
       {
-      	data::set_identifier_generator propvar_generator;
+        data::set_identifier_generator propvar_generator;
         std::set<core::identifier_string> names = state_formulas::algorithms::find_state_variable_names(f);
         propvar_generator.add_identifiers(names);
         if (unoptimized)

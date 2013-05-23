@@ -124,7 +124,7 @@ inline function_symbol equal_to(const sort_expression& s)
 }
 
 /// \brief Recogniser for function ==
-/// \param e[in] A data expression
+/// \param[in] e A data expression
 /// \return true iff e is the function symbol matching ==
 template < typename DataExpression >
 inline bool is_equal_to_function_symbol(const DataExpression& e)

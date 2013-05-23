@@ -77,7 +77,6 @@ struct pbes_expr_builder
   { }
 
   /// \brief Visit data_expression node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_data_expression(const term_type& /* x */, const data_term_type& /* d */, Arg& /* arg */)
   {
@@ -85,7 +84,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit true node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& /* x */, Arg& /* arg */)
   {
@@ -93,7 +91,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit false node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& /* x */, Arg& /* arg */)
   {
@@ -101,7 +98,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit not node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& /* x */, const term_type& /* arg */, Arg& /* arg */)
   {
@@ -109,7 +105,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit and node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
@@ -117,7 +112,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit or node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
@@ -125,7 +119,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit imp node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
@@ -133,7 +126,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit forall node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_forall(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
@@ -141,7 +133,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit exists node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_exists(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
@@ -149,7 +140,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit propositional_variable node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& /* v */, Arg& /* arg */)
   {
@@ -339,7 +329,6 @@ struct pbes_expr_builder<Term, void>
   { }
 
   /// \brief Visit data_expression node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_data_expression(const term_type& /* x */, const data_term_type& /* d */)
   {
@@ -347,7 +336,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit true node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& /* x */)
   {
@@ -355,7 +343,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit false node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& /* x */)
   {
@@ -363,7 +350,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit not node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& /* x */, const term_type& /* arg */)
   {
@@ -371,7 +357,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit and node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */)
   {
@@ -379,7 +364,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit or node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */)
   {
@@ -387,7 +371,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit imp node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */)
   {
@@ -395,7 +378,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit forall node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_forall(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
@@ -403,7 +385,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit exists node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_exists(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
@@ -411,7 +392,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit propositional_variable node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& /* v */)
   {

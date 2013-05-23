@@ -56,7 +56,7 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
   {
     result = false;
   }
-  
+
   void enter(const propositional_variable_instantiation& x)
   {
     if (result)

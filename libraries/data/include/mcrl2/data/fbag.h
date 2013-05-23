@@ -67,7 +67,7 @@ namespace mcrl2 {
 
         /// \brief Declaration for sort fbag as structured sort
         /// \param s A sort expression
-        /// \ret The structured sort representing fbag
+        /// \return The structured sort representing fbag
         inline
         structured_sort fbag_struct(const sort_expression& s)
         {

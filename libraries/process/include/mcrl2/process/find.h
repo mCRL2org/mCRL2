@@ -262,6 +262,7 @@ std::set<core::identifier_string> find_action_names(const T& x)
 
 /// \brief Finds an equation that corresponds to a process identifier
 /// \param[in] equations a sequence of process equations
+/// \param[in] id The identifier of the equation that is searched for.
 /// \return The equation with the given process identifier. Throws an exception if no such equation was found.
 inline
 const process_equation& find_equation(const std::vector<process_equation>& equations, const process_identifier& id)

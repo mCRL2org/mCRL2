@@ -28,7 +28,7 @@ namespace lps
 {
 
 /// \brief Represents a multi action
-/// \detail Multi actions consist of a list of actions together with an optional time tag.
+/// \details Multi actions consist of a list of actions together with an optional time tag.
 class multi_action
 {
     friend class action_summand;
