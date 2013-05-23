@@ -190,8 +190,9 @@ T replace_free_variables(const T& x,
   assert(data::is_simple_substitution(sigma));
   return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
 }
+'''
 
-/// \\\\brief Applies sigma as a capture avoiding substitution to x
+REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT = '''/// \\\\brief Applies sigma as a capture avoiding substitution to x
 /// \\\\param sigma A mutable substitution
 /// \\\\param sigma_variables a container of variables
 /// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
@@ -381,6 +382,17 @@ def generate_replace_functions():
     result = generate_code('../../process/include/mcrl2/process/replace.h'            , 'process'         , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     return result
 
+def generate_replace_capture_avoiding_functions():
+    result = True
+    result = generate_code('../../data/include/mcrl2/data/replace.h'                  , 'data'            , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code('../../lps/include/mcrl2/lps/replace.h'                    , 'lps'             , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code('../../modal_formula/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code('../../pbes/include/mcrl2/pbes/replace.h'                  , 'pbes_system'     , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    #result = generate_code('../../process/include/mcrl2/process/replace.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    return result
+
 def generate_find_functions():
     result = True
     result = generate_code('../../data/include/mcrl2/data/find.h'                  , 'data'            , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
@@ -396,5 +408,6 @@ if __name__ == "__main__":
     result = True
     result = generate_rewrite_functions() and result
     result = generate_replace_functions() and result
+    result = generate_replace_capture_avoiding_functions() and result
     result = generate_find_functions() and result
     sys.exit(not result) # 0 result indicates successful execution

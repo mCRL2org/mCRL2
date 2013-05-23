@@ -240,7 +240,9 @@ T replace_free_variables(const T& x,
   assert(data::is_simple_substitution(sigma));
   return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
 }
+//--- end generated pbes_system replace code ---//
 
+//--- start generated pbes_system replace_capture_avoiding code ---//
 /// \brief Applies sigma as a capture avoiding substitution to x
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
@@ -274,7 +276,7 @@ T replace_variables_capture_avoiding(const T& x,
   V.insert(sigma_variables.begin(), sigma_variables.end());
   return data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x);
 }
-//--- end generated pbes_system replace code ---//
+//--- end generated pbes_system replace_capture_avoiding code ---//
 
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
