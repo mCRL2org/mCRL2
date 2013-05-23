@@ -149,9 +149,7 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-#ifdef MCRL2_SIMPLE_SUBSTITUTION
   assert(data::is_simple_substitution(sigma));
-#endif
   data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
 }
 
@@ -163,9 +161,7 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-#ifdef MCRL2_SIMPLE_SUBSTITUTION
   assert(data::is_simple_substitution(sigma));
-#endif
   return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
 }
 
@@ -178,9 +174,7 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-#ifdef MCRL2_SIMPLE_SUBSTITUTION
   assert(data::is_simple_substitution(sigma));
-#endif
   data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
@@ -193,9 +187,7 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-#ifdef MCRL2_SIMPLE_SUBSTITUTION
   assert(data::is_simple_substitution(sigma));
-#endif
   return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
