@@ -268,7 +268,7 @@ class pbes_eqelm_algorithm
         data::mutable_map_substitution<> sigma = compute_substitution(X);
         if (!sigma.empty())
         {
-          i->formula() = pbes_system::replace_free_variables(i->formula(), sigma);
+          i->formula() = pbes_system::replace_variables_capture_avoiding(i->formula(), sigma, data::substitution_variables(sigma));
         }
       }
 

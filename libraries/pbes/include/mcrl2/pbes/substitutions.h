@@ -57,9 +57,16 @@ class propositional_variable_substitution: public std::unary_function<propositio
       pbes_expression phi = i->second.first;
       const data::variable_list& d = i->second.second;
       const data::data_expression_list& e = v.parameters();
+      data::mutable_map_substitution<> sigma;
+      auto j = d.begin();
+      auto k = e.begin();
+      for (; j != d.end(); ++j, ++k)
+      {
+        sigma[*j] = *k;
+      }
 
       // return phi[d := e]
-      phi = pbes_system::replace_free_variables(phi, data::make_sequence_sequence_substitution(d, e));
+      phi = pbes_system::replace_variables_capture_avoiding(phi, sigma, data::substitution_variables(sigma));
       return phi;
     }
 

@@ -156,7 +156,7 @@ void update_substitution(data::mutable_map_substitution<>& sigma, const data::va
   v_e[v] = e;
   for (data::mutable_map_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
   {
-    i->second = data::replace_free_variables(i->second, v_e);
+    i->second = data::replace_variables_capture_avoiding(i->second, v_e, data::substitution_variables(v_e));
   }
   sigma[v] = e;
 }
@@ -201,7 +201,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         mCRL2log(log::debug, "one_point_rewriter") << "term = " << data::pp(v) << " == " << data::pp(e) << std::endl;
         if (variables.find(v) != variables.end()) // only consider quantifier variables
         {
-          e = data::replace_free_variables(e, sigma);
+          e = data::replace_variables_capture_avoiding(e, sigma, data::substitution_variables(sigma));
           data::data_expression f = sigma(v);
           if (f == v)
           {
@@ -237,7 +237,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         terms.erase(*i);
       }
       pbes_expression body = pbes_expr::join_and(terms.begin(), terms.end());
-      body = pbes_system::replace_free_variables(body, sigma);
+      body = pbes_system::replace_variables_capture_avoiding(body, sigma, data::substitution_variables(sigma));
       if (variables.empty())
       {
         result = body;
@@ -276,7 +276,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         mCRL2log(log::debug, "one_point_rewriter") << "term = " << data::pp(v) << " != " << data::pp(e) << std::endl;
         if (variables.find(data::variable(v)) != variables.end()) // only consider quantifier variables
         {
-          e = data::replace_free_variables(e, sigma);
+          e = data::replace_variables_capture_avoiding(e, sigma, data::substitution_variables(sigma));
           update_substitution(sigma, v, e);
           std::set<data::variable> fe = data::find_free_variables(e);
           if (fe.find(v) == fe.end())
@@ -298,7 +298,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         terms.erase(*i);
       }
       pbes_expression body = pbes_expr::join_or(terms.begin(), terms.end());
-      body = pbes_system::replace_free_variables(body, sigma);
+      body = pbes_system::replace_variables_capture_avoiding(body, sigma, data::substitution_variables(sigma));
       if (variables.empty())
       {
         result = body;

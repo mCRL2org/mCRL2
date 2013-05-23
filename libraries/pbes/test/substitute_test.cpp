@@ -39,12 +39,16 @@ void test_substitution()
   sigma[n] = data::parse_data_expression("4");
 
   pbes p = p1;
-  pbes_system::replace_free_variables(p, sigma);
-  std::cout << pbes_system::pp(p) << std::endl;
+  pbes_system::replace_free_variables(p.equations(), sigma);
   BOOST_CHECK(p == p1);
+
+  std::cout << "--- p =\n" << pbes_system::pp(p) << std::endl;
+  std::cout << "--- p1 =\n" << pbes_system::pp(p1) << std::endl;
   
   pbes_system::replace_variables(p, sigma);
-  std::cout << pbes_system::pp(p) << std::endl;
+
+  std::cout << "--- p =\n" << pbes_system::pp(p) << std::endl;
+  std::cout << "--- p2 =\n" << pbes_system::pp(p2) << std::endl;
     
   // compare textual representations, to avoid conflicts between types
   BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));

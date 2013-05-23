@@ -187,20 +187,29 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       data::variable_list yi   = i->summation_variables();
 
       pbes_expression rhs = rhs0;
-      data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
-      ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
-      lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
-      gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
+      data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variables(yi, id_generator);
+      std::set<data::variable> sigma_yi_variables = data::substitution_variables(sigma_yi);
+      ci = data::replace_variables_capture_avoiding(ci, sigma_yi, sigma_yi_variables);
+      lps::replace_variables_capture_avoiding(ai, sigma_yi, sigma_yi_variables);
+      gi = data::replace_variables_capture_avoiding(gi, sigma_yi, sigma_yi_variables);
       data::data_expression ti = ai.time();
       pbes_expression p1 = Sat(ai, alpha, id_generator, TermTraits());
       pbes_expression p2 = ci;
-      rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
+      data::mutable_map_substitution<> sigma_gi;
+      for (auto k = gi.begin(); k != gi.end(); ++k)
+      {
+        sigma_gi[k->lhs()] = k->rhs();
+      }
+      rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_gi, data::substitution_variables(sigma_gi));
       pbes_expression p = tr::and_(p1, p2);
       if (timed)
       {
-        rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
+        data::mutable_map_substitution<> sigma_ti;
+        sigma_ti[T] = ti;
+        rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
         p = tr::and_(p, data::greater(ti, T));
       }
+      data::variable_list y = data::replace_variables(yi, sigma_yi);
       p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
       v.push_back(p);
     }
@@ -468,24 +477,33 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
       data::variable_list yi   = i->summation_variables();
 
       pbes_expression rhs = rhs0;
-      data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
-      ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
-      lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
-      gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
+      data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variables(yi, id_generator);
+      std::set<data::variable> sigma_yi_variables = data::substitution_variables(sigma_yi);
+      ci = data::replace_variables_capture_avoiding(ci, sigma_yi, sigma_yi_variables);
+      lps::replace_variables_capture_avoiding(ai, sigma_yi, sigma_yi_variables);
+      gi = data::replace_variables_capture_avoiding(gi, sigma_yi, sigma_yi_variables);
       data::data_expression ti = ai.time();
       pbes_expression p1 = Sat(ai, alpha, id_generator, TermTraits());
       pbes_expression p2 = ci;
-      rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
+      data::mutable_map_substitution<> sigma_gi;
+      for (auto k = gi.begin(); k != gi.end(); ++k)
+      {
+        sigma_gi[k->lhs()] = k->rhs();
+      }
+      rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_gi, data::substitution_variables(sigma_gi));
       pbes_expression p = tr::and_(p1, p2);
       if (timed)
       {
-        rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
+        data::mutable_map_substitution<> sigma_ti;
+        sigma_ti[T] = ti;
+        rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
         p = tr::and_(p, data::greater(ti, T));
       }
+      data::variable_list y = data::replace_variables(yi, sigma_yi);
       p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
 
       // generate a new equation 'Y(d) = p', and add Y(d) to v
-    	core::identifier_string Y = propvar_generator("Y");
+      core::identifier_string Y = propvar_generator("Y");
       data::variable_list d(variables.begin(), variables.end());
       propositional_variable Yd(Y, d);
       pbes_equation eqn(sigma, Yd, p);
