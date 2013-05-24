@@ -1,3 +1,5 @@
+.. _showcase-document-feeder:
+
 Automatic Document Feeder
 =========================
 
@@ -51,13 +53,7 @@ Technical details
 Publications
 ------------
 
-.. [PS06] Bas Ploeger and Lou Somers. Analysis and Verification of an Automatic Document Feeder.
-   CS-Report 06-25, Technische Universiteit Eindhoven (2006).
-   `(PDF) <http://alexandria.tue.nl/extra1/wskrap/publichtml/200625.pdf>`_
-
-.. [PS07] Bas Ploeger and Lou Somers. Analysis and Verification of an Automatic Document Feeder.
-   In: "Proceedings of the 2007 ACM Symposium on Applied Computing (ACMSAC'07)", pages 1499-1505, Seoul, Korea. ACM, March 2007.
-   `(DOI) <http://doi.acm.org/10.1145/1244002.1244324>`_
+[PS06]_ and [PS07]_
 
 Links
 -----

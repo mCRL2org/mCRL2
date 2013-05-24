@@ -1,3 +1,5 @@
+.. _showcase-pcb:
+
 PCB Printer
 ===========
 
@@ -50,8 +52,5 @@ C# code after a rigorous abstraction method.
 Publications
 ------------
 
-.. [SR09] "Verification of safety requirements for program code using data abstraction",
-   F.P.M. Stappers and M.A.Reniers. Proc. Ninth International Workshop on Automated Verification of Critical Systems (AVoCS 2009),
-   Swansea, UK, September 23-25, 2009.
-   `(DOI) <http://eceasst.cs.tu-berlin.de/index.php/eceasst/article/view/311>`_
+[SR09]_
 

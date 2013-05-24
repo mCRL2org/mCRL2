@@ -1,5 +1,7 @@
 .. include:: toplevel.inc
 
+.. _showcases:
+
 Showcases
 =========
 

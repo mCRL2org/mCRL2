@@ -1,3 +1,5 @@
+.. _showcase-dogfooding:
+
 Dogfooding the structural operational semantics of mCRL2
 ========================================================
 
@@ -65,8 +67,4 @@ lines of mCRL2 code.
 Publications
 ------------
 
-.. [SRGW11] Stappers, F.P.M., Reniers, M.A., Groote, J.F., Weber, S.,
-   "Dogfooding the structural operational semantics of mCRL2",
-   Computer Science Report, No. 11-18, Eindhoven: Technische Universiteit Eindhoven, 87 pp, 2011
-   `(PDF) <http://alexandria.tue.nl/repository/books/724474.pdf>`_
-
+[SRGW11]_
