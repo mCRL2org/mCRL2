@@ -388,6 +388,25 @@ Classes
 </xsl:text>
 </xsl:template>
 
+<!-- itemized list -->
+<xsl:template match="itemizedlist">
+  <xsl:text>
+  
+</xsl:text>
+  <xsl:apply-templates />
+</xsl:template>
+
+<!-- list item -->
+<xsl:template match="listitem">
+  <xsl:text>  * </xsl:text><xsl:apply-templates /><xsl:text>
+</xsl:text>
+</xsl:template>
+
+<!-- code -->
+<xsl:template match="computeroutput">
+  <xsl:text>``</xsl:text><xsl:apply-templates /><xsl:text>``</xsl:text>
+</xsl:template>
+
 <xsl:template match="type">
   <xsl:call-template name="string-replace-all">
     <xsl:with-param name="text" select="."/>

@@ -19,7 +19,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \cond INTERNAL_DOCS
 /// \brief Visitor for printing the root node of a PBES.
 struct print_brief_traverser: public pbes_expression_traverser<print_brief_traverser>
 {
@@ -68,7 +67,6 @@ struct print_brief_traverser: public pbes_expression_traverser<print_brief_trave
     result = "equation " + std::string(x.variable().name());
   }
 };
-/// \endcond
 
 /// \brief Returns a string representation of the root node of a PBES.
 /// \param x a PBES object
