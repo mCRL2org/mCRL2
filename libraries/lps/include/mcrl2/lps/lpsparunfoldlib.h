@@ -48,7 +48,7 @@ class lpsparunfold
     /** \brief  Constructor for lpsparunfold algorithm.
       * \param[in] spec which is a valid mCRL2 process specification.
       * \param[in,out] cache Cache to store information for reuse.
-      * \param[in] add_distribution laws If true, additional rewrite rules are introduced.
+      * \param[in] add_distribution_laws If true, additional rewrite rules are introduced.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
     lpsparunfold(mcrl2::lps::specification spec,

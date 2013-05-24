@@ -16,10 +16,13 @@ namespace mcrl2 {
 
 namespace data {
 
-/// \brief Returns true if the substitution sigma satisfies the property that FV(sigma(x)) is included in {x} for all variables x.
-/// N.B. The default return value is true, so a template specialization is required to enable this check for substitutions.
+/// \brief Returns \c true if the substitution \a sigma satisfies the property that
+/// <tt>FV(sigma(x))</tt> is included in <tt>{x}</tt> for all variables x.
+///
+/// \note The default return value is \c true, so a template specialization is
+/// required to enable this check for substitutions.
 template <typename Substitution>
-bool is_simple_substitution(const Substitution& sigma)
+bool is_simple_substitution(const Substitution& /*sigma*/)
 {
   return true;
 }
