@@ -244,6 +244,7 @@ T replace_free_variables(const T& x,
 
 //--- start generated pbes_system replace_capture_avoiding code ---//
 /// \brief Applies sigma as a capture avoiding substitution to x
+/// \param x The expression to which the substitution is applied
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
@@ -261,6 +262,7 @@ void replace_variables_capture_avoiding(T& x,
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
+/// \param x The expression to which the substitution is applied
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }

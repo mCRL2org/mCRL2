@@ -223,9 +223,8 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
 }
 
 /// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] container an expression or container with expressions
-/// \param[in] v an expression or container with expressions
-/// \param d A variable
+/// \param[in] x an expression in which to search
+/// \param[in] v the variable to search for
 /// \return True if the term has a given variable as subterm.
 template <typename T>
 bool search_variable(const T& x, const data::variable& v)

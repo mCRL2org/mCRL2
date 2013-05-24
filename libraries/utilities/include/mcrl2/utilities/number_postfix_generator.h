@@ -59,7 +59,7 @@ class number_postfix_generator
         new_index = boost::lexical_cast<int>(num);
       }
       std::size_t old_index = m_index.find(name) == m_index.end() ? 0 : m_index[name];
-    	m_index[name] = (std::max)(old_index, new_index);
+      m_index[name] = (std::max)(old_index, new_index);
     }
 
     /// \brief Adds the strings in the range [first, last) to the context.
@@ -78,6 +78,7 @@ class number_postfix_generator
     /// \brief Constructor.
     /// \param first
     /// \param last
+    /// \param hint String hint to use as prefix for generated strings.
     /// [first, last) is a sequence of strings that is used as context.
     template <typename Iter>
     number_postfix_generator(Iter first, Iter last, std::string hint = "FRESH_VAR")

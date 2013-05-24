@@ -46,12 +46,6 @@ class pbes_expression_with_variables: public pbes_expression
       : pbes_expression(term)
     {}
 
-    /// \brief Constructor. Creates a data expression with an empty sequence of variables.
-    /// \param term A term
-    /* pbes_expression_with_variables(aterm_appl term)
-      : pbes_expression(term)
-    {} */
-
     /// \brief Constructor.
     /// \param expression A PBES expression
     /// \param variables A sequence of data variables

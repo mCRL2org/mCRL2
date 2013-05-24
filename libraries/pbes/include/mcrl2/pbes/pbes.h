@@ -412,8 +412,8 @@ atermpp::aterm_appl pbes_to_aterm(const pbes& p)
   return result;
 }
 
-/// \brief Adds all sorts that appear in the process of l to the data specification of l.
-/// \param l A linear process specification
+/// \brief Adds all sorts that appear in the PBES \a p to the data specification of \a p.
+/// \param p a PBES.
 inline
 void complete_data_specification(pbes& p)
 {

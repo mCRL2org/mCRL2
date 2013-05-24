@@ -98,6 +98,7 @@ class pbes_rewriter_tool: public Tool
     /// \param author The author(s) of the tool
     /// \param what_is One-line "what is" description of the tool
     /// \param tool_description The description of the tool
+    /// \param known_issues Known issues with the tool
     pbes_rewriter_tool(const std::string& name,
                        const std::string& author,
                        const std::string& what_is,

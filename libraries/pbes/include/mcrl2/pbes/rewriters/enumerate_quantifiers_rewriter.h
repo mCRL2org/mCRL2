@@ -50,6 +50,8 @@ class enumerate_quantifiers_rewriter
     /// \param r A data rewriter
     /// \param e A data enumerator
     /// \param enumerate_infinite_sorts Determines if quantifier variables of infinite sorts are enumerated
+    /// \param skip_data If false, data expressions are also rewritten. If true,
+    ///        only PBES expressions are rewritten, and the data expressions are not.
     enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e, bool enumerate_infinite_sorts = true, bool skip_data = false)
       : m_rewriter(r), m_enumerator(e), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
     {}
@@ -117,6 +119,8 @@ class enumerate_quantifiers_rewriter<pbes_expression, DataRewriter, DataEnumerat
     /// \param r A data rewriter
     /// \param e A data enumerator
     /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated.
+    /// \param skip_data If false, data expressions are also rewritten. If true,
+    ///        only PBES expressions are rewritten, and the data expressions are not.
     enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e, bool enumerate_infinite_sorts = true, bool skip_data = false)
       : m_rewriter(r, e, enumerate_infinite_sorts, skip_data)
     {}

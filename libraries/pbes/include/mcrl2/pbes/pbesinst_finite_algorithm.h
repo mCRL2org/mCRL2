@@ -88,6 +88,8 @@ compose<Function1, Function2> make_compose(const Function1& f1, const Function2&
 
 /// \brief Computes the subset with variables of finite sort and infinite.
 /// \param X A propositional variable instantiation
+/// \param index_map a container storing the indices of the variables that
+///        should be expanded by the finite pbesinst algorithm.
 /// \param finite A sequence of data expressions
 /// \param infinite A sequence of data expressions
 template <typename PropositionalVariable>

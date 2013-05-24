@@ -142,6 +142,10 @@ namespace pbes_expr {
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
 /// function symbol.
 /// \param expr A PBES expression
+/// \param split_simple_expressions if true, pbes disjuncts are split, even if
+///        no proposition variables occur. If false, pbes disjuncts are only split
+///        if a proposition variable occurs somewhere in \a expr.
+/// \note This never splits data disjuncts.
 /// \return A sequence of operands
 inline
 std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool split_simple_expr = false)
@@ -166,6 +170,10 @@ std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool s
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
 /// function symbol.
 /// \param expr A PBES expression
+/// \param split_simple_expressions if true, pbes conjuncts are split, even if
+///        no proposition variables occur. If false, pbes conjuncts are only split
+///        if a proposition variable occurs somewhere in \a expr.
+/// \note This never splits data conjuncts.
 /// \return A sequence of operands
 inline
 std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool split_simple_expr = false)

@@ -262,6 +262,7 @@ void type_check(data_expression& data_expr,
 /** \brief     Type check a data expression.
  *  Throws an exception if something went wrong.
  *  \param[in] data_expr A data expression that has not been type checked.
+ *  \param[in] data_spec Data specification to be used as context.
  *  \post      data_expr is type checked.
  **/
 inline

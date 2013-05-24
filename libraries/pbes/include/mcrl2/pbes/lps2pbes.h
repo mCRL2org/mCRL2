@@ -139,6 +139,8 @@ class lps2pbes_algorithm
 /// \param spec A linear process specification
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen
 /// \param structured use the 'structured' approach of generating equations
+/// \param unoptimized if true, the resulting PBES is not simplified, if false (default),
+///        the PBES is simplified.
 /// \return The resulting pbes
 inline pbes lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false)
 {

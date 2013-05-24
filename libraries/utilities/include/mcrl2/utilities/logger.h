@@ -131,6 +131,8 @@ class output_policy
     /// \brief Output message.
     /// \param[in] msg Message that is written to output.
     /// \param[in] hint Hint for the stream to which the output is written.
+    /// \param[in] timestamp Timestamp to use in the output.
+    /// \param[in] level The log level to print the message to.
     ///  \details Any implementation must assure that output is written using an atomic action, to prevent
     /// mixing of different lines into one line in the output.
     virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg) = 0;
@@ -420,9 +422,12 @@ class file_output: public output_policy
 
     /// \overload
     /// Output message to stream.
+    /// \param[in] level The log level on which to output the message
+    /// \param[in] timestamp The timestamp to use for the message
     /// \param[in] msg The message to be printed
     /// \param[in] hint The hint of the stream to which we print.
-    /// This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
+    ///
+    /// \note This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.
     virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
     {

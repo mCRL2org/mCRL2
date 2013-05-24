@@ -43,7 +43,7 @@ bes::boolean_expression pbesinstconversion(const pbes_expression& x)
 }
 
 /// \brief Converts a PBES equation into a boolean equation
-/// \param x A PBES equation
+/// \param eq A PBES equation
 inline
 bes::boolean_equation pbesinstconversion(const pbes_equation& eq)
 {

@@ -118,7 +118,7 @@ class specification
     /// \brief Constructor.
     /// \param data A data specification
     /// \param action_labels A sequence of action labels
-    /// \param global_variable A set of global variables
+    /// \param global_variables A set of global variables
     /// \param lps A linear process
     /// \param initial_process A process initializer
     specification(const data::data_specification& data,

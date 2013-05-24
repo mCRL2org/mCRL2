@@ -26,6 +26,7 @@ namespace pbes_system
 
 /// \brief Parses a PBES specification from an input stream
 /// \param spec_stream A stream from which can be read
+/// \param normalize  If true, the resulting PBES is normalized after reading.
 /// \return The parsed PBES
 inline
 pbes txt2pbes(std::istream& spec_stream, bool normalize = true)
@@ -49,6 +50,7 @@ pbes txt2pbes(std::istream& spec_stream, bool normalize = true)
 
 /// \brief Parses a PBES specification from a string
 /// \param text A string
+/// \param normalize  If true, the resulting PBES is normalized after reading.
 /// \return The parsed PBES
 inline
 pbes txt2pbes(const std::string& text, bool normalize = true)

@@ -844,6 +844,8 @@ pbes_expression join_and(FwdIt first, FwdIt last)
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
 /// function symbol.
 /// \param expr A PBES expression
+/// \param split_data_expressions if true, both data and pbes disjunctions are
+///        split, otherwise only pbes disjunctions are split.
 /// \return A sequence of operands
 inline
 std::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_expressions = false)
@@ -868,6 +870,8 @@ std::set<pbes_expression> split_or(const pbes_expression& expr, bool split_data_
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
 /// function symbol.
 /// \param expr A PBES expression
+/// \param split_data_expressions if true, both data and pbes conjunctions are
+///        split, otherwise only pbes conjunctions are split.
 /// \return A sequence of operands
 inline
 std::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data_expressions = false)

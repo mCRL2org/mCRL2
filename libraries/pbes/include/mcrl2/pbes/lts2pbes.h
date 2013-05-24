@@ -56,7 +56,6 @@ class lts2pbes_algorithm
 
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula
-    /// \param spec A linear process specification
     /// \return The result of the translation
     pbes run(const state_formulas::state_formula& formula)
     {

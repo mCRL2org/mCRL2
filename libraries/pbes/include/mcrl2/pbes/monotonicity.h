@@ -22,6 +22,7 @@ namespace pbes_system
 
 /// \brief Returns true if the pbes expression is monotonous.
 /// \param f A pbes expression
+/// \param negated_variables The set of variables that occurs under an odd number of negations.
 /// \return True if the pbes expression is monotonous.
 inline
 bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& negated_variables)

@@ -148,7 +148,7 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
 /// \endcond
 
 /// \brief Checks if a pbes expression is normalized
-/// \param t A PBES expression
+/// \param x A PBES expression
 /// \return True if the pbes expression is normalized
 template <typename T>
 bool is_normalized(const T& x)

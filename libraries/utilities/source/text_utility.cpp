@@ -154,7 +154,7 @@ std::vector<std::string> regex_split(const std::string& text, const std::string&
 }
 
 /// \brief Apply word wrapping to a text that doesn't contain newlines.
-/// \param text A string of text.
+/// \param line A string of text.
 /// \param max_line_length The maximum line length.
 /// \return The wrapped text.
 static

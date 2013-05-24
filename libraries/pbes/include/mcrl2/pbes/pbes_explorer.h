@@ -491,6 +491,7 @@ public:
 
     /// \brief Constructor.
     /// \param p a PBES.
+    /// \param rewrite_strategy String representing the rewrite strategy to use for the data rewriter.
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
     ///        if not set (default) the explorer assumes the pbes to be generated with lps2pbes -p and splits accordingly.
