@@ -147,7 +147,6 @@ void collect_terms_with_reference_count_0()
           free_term(p1);
         }
       }
-
     }
   }
 
@@ -199,7 +198,7 @@ void collect_terms_with_reference_count_0()
       b=next_block;
     }
   }
-  garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/16); 
+  garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/(sizeof(size_t)*8)); 
 }
 
 
