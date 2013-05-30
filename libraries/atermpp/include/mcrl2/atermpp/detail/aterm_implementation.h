@@ -115,7 +115,7 @@ inline const _aterm* allocate_term(const size_t size)
     assert(size<terminfo_size);
   }
 
-  if (total_nodes>=(aterm_table_size>>1))
+  if (total_nodes>=(aterm_table_size))
   {
     // The hashtable is not big enough to hold nr_of_nodes_for_the_next_garbage_collect. So, resizing
     // is wise (although not necessary, due to the structure of the hastable, which allows is to contain
