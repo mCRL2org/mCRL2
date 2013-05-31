@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Tuesday, January 15, 2013 10:21:15}
+%TCIDATA{LastRevised=Friday, May 31, 2013 11:31:51}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -465,12 +465,13 @@ $push_{\nabla }\left( A,P\left( e\right) ,W\right) $ & $=$ & $%
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-P(e) & \text{if }P\in W \\ 
-\nabla _{A}\left( push_{\nabla }\left( A,p[d:=e],W\cup \{P\}\right) \right) 
-& \text{if }P\notin W,%
+Q(e) & \text{if }((P(e),Q(e))\in W \\ 
+P^{\prime }(e) & \text{if }\forall (x,y)\in W:x\neq P(e),%
 \end{array}%
 \right.  \\ 
-\text{ where }P(d)=p\text{ is the equation of }P%
+\text{where }P(d)=p\text{ is the equation of }P\text{,} \\ 
+\text{and where }P^{\prime }(d)=push_{\nabla }\left( A,p[d:=e],W\cup
+\{(P(e),P^{\prime }(e))\}\right) \text{ is a new equation}%
 \end{array}%
 $ \\ 
 $push_{\nabla }\left( A,\delta ,W\right) $ & $=$ & $\delta $ \\ 
@@ -526,7 +527,18 @@ $ \\
 $push_{\nabla }(A,\nabla _{V}(p),W)$ & $=$ & $push_{\nabla }(A\cap
 V,p,\emptyset )$%
 \end{tabular}%
-\]%
+\]
+
+\paragraph{Example}
+
+Let $P=(a+b)\cdot P$. Then $push_{\nabla }\left( \{a\},P,\emptyset \right)
+=P^{\prime }$, with $P^{\prime }=push_{\nabla }\left( \{a\},(a+b)\cdot
+P,\{(P,P^{\prime })\}\right) =push_{\nabla }\left(
+\{a\},(a+b),\{(P,P^{\prime })\}\right) \cdot push_{\nabla }\left(
+\{a\},P,\{(P,P^{\prime })\}\right) =\cdots =a\cdot P^{\prime }$.
+
+\paragraph{Remark}
+
 Note that the logical way to handle a process instance $P(e)$ is as follows:%
 \[
 \begin{tabular}{lll}
@@ -534,10 +546,10 @@ $push_{\nabla }\left( A,P\left( e\right) ,W\right) $ & $=$ & $%
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\nabla _{A}\left( P(e)\right)  & \text{if }P\in W \\ 
-push_{\nabla }\left( A,p[d:=e],W\cup \{P\}\right)  & \text{if }P\notin W,%
+\nabla _{A}\left( P(e)\right) & \text{if }P\in W \\ 
+push_{\nabla }\left( A,p[d:=e],W\cup \{(P,P)\}\right) & \text{if }P\notin W,%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 \text{ where }P(d)=p\text{ is the equation of }P%
 \end{array}%
 $%
@@ -550,8 +562,8 @@ the case for the block operator.%
 \begin{tabular}{lll}
 $push_{\partial }(B,\overline{a},W)$ & $=$ & $\left\{ \text{ }%
 \begin{array}{lll}
-\overline{a} &  & \text{if }N(\overline{a})\cap B=\emptyset  \\ 
-\delta  &  & \text{otherwise}%
+\overline{a} &  & \text{if }N(\overline{a})\cap B=\emptyset \\ 
+\delta &  & \text{otherwise}%
 \end{array}%
 \right. $ \\ 
 $push_{\partial }(B,P(e),W)$ & $=$ & $%
@@ -560,9 +572,9 @@ $push_{\partial }(B,P(e),W)$ & $=$ & $%
 \begin{array}{ll}
 P(e) & \text{if }P\in W \\ 
 \partial _{B}\left( push_{\partial }\left( B,p[d:=e],W\cup \{P\}\right)
-\right)  & \text{if }P\notin W,%
+\right) & \text{if }P\notin W,%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 \text{ where }P(d)=p\text{ is the equation of }P%
 \end{array}%
 $ \\ 
