@@ -22,12 +22,34 @@
 
 #include <cstddef>
 #include <vector>
+#include <memory>
 
 namespace mcrl2
 {
 
 namespace utilities
 {
+
+#ifdef _MSC_VER
+
+template <class T, std::size_t N> class stack_alloc;
+
+template <std::size_t N>
+class stack_alloc<void, N>
+{
+public:
+    typedef const void*       const_pointer;
+    typedef void              value_type;
+};
+
+template <class T, std::size_t N>
+class stack_alloc: public std::allocator<T>
+{
+  public:
+    stack_alloc() throw() {}
+    stack_alloc(const stack_alloc& x) throw() : stack_alloc(x) {}
+};
+#else
 
 template <class T, std::size_t N> class stack_alloc;
 
@@ -113,6 +135,8 @@ public:
     bool operator==(stack_alloc& a) const {return &buf_ == &a.buf_;}
     bool operator!=(stack_alloc& a) const {return &buf_ != &a.buf_;}
 };
+
+#endif
 
 } // namespace utilities
 
