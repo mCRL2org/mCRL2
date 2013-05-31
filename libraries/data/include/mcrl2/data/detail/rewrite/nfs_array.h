@@ -17,8 +17,9 @@
 #include <cassert>
 
 // Maximal arity for which we generate functions for every combination of
-// arguments that are in normal form or not
-#define NF_MAX_ARITY 3  // currently this should be such that it is at most sizeof(size_t)*8
+// arguments that are in normal form or not. The value of 4 is chosen because a function
+// updat has four arguments. This may yield 2^4=16 variants of each compiled function.
+#define NF_MAX_ARITY 4  
 
 namespace mcrl2
 {

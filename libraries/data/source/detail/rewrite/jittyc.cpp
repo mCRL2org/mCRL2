@@ -2628,10 +2628,6 @@ static bool arity_is_allowed(
 inline
 void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity)
 {
-  /* If generate_code is false, only the variable aux is increased to calculate the
-     return value. TODO. This can be optimized.
-     Declare the function that gets function func_index in normal form */
-
   for (size_t a=0; a<=arity; a++)
   {
     if (arity_is_allowed(func_index,a))
@@ -2670,7 +2666,6 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
       }
     }
   }
-  // return aux;
 }
 
 void RewriterCompilingJitty::BuildRewriteSystem()
@@ -2780,6 +2775,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   fprintf(f,  "typedef atermpp::aterm_appl (*func_type)(const atermpp::aterm_appl &);\n");
   fprintf(f,  "func_type* int2func[%zu];\n", max_arity+2);
+  fprintf(f,  "func_type* int2func_head_in_nf[%zu];\n", max_arity+2);
 
   // Set this rewriter, to use its functions.
   fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
@@ -2953,13 +2949,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   /* put the functions that start the rewriting in the array int2func */
   fprintf(f,  "\n");
   fprintf(f,  "\n");
+  // Generate the entries for int2func.
   for (size_t i=0; i<=max_arity; i++)
   {
     fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,get_num_opids());
     for (size_t j=0; j < get_num_opids(); j++)
     {
       const data::function_symbol fs=get_int2term(j);
-      // const size_t arity = getArity(fs);
+      
       if (partially_rewritten_functions.count(fs)>0)
       {
         if (arity_is_allowed(j,i))
@@ -2970,12 +2967,43 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           fprintf(f,  "  int2func[%zu][%zu] = %s;\n",i+1,j,c_function_name.substr(2,c_function_name.size()-2).c_str());
         }
       }
-      else if (/* (i <= arity) && */ data_equation_selector(fs) && arity_is_allowed(j,i))
+      else if (data_equation_selector(fs) && arity_is_allowed(j,i))
       {
         fprintf(f,  "  int2func[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i+1,j,j,i);
       }
     }
   }
+  // Generate the entries for int2func_head_in_nf. Entries for constants (with arity 0) are not required.
+  for (size_t i=1; i<=max_arity; i++)
+  {
+    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,get_num_opids());
+    for (size_t j=0; j < get_num_opids(); j++)
+    {
+      const data::function_symbol fs=get_int2term(j);
+      
+      if (partially_rewritten_functions.count(fs)>0)
+      {
+        if (arity_is_allowed(j,i))
+        {
+          // We are dealing with a partially rewritten function here. 
+          // This cannot be invoked for any normal function.
+        }
+      }
+      else if (data_equation_selector(fs) && arity_is_allowed(j,i))
+      {
+        if (i<=NF_MAX_ARITY)
+        { 
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_1_term;\n",i+1,j,j,i);
+        }
+        else
+        { 
+          // If i>NF_MAX_ARITY no compiled rewrite function where the head is already in nf is available.
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i+1,j,j,i);
+        }
+      }
+    }
+  }
+  // Generate code to cleanup int2func.
   fprintf(f,  "}\n"
           "\n"
           "void rewrite_cleanup()\n"
@@ -2985,6 +3013,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   for (size_t i=0; i<=max_arity; i++)
   {
     fprintf(f,  "  free(int2func[%zu]);\n",i+1);
+    fprintf(f,  "  free(int2func_head_in_nf[%zu]);\n",i+1);
   }
   fprintf(f,  "}\n"
           "\n"
@@ -3011,25 +3040,23 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   fprintf(f,
       "atermpp::aterm_appl rewrite_appl_aux(\n"
-      "     atermpp::aterm_appl head,\n"
-      "     const atermpp::aterm_appl &t)\n"
+      "     const atermpp::aterm_appl& t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
       "  using namespace atermpp;\n"
-      "  if (mcrl2::data::is_variable(head))\n"
-      "  {\n"
-      "    head=(*(this_rewriter->global_sigma))(atermpp::aterm_cast<const mcrl2::data::variable>(head));\n"
-      "  }\n"
-      "  else if (mcrl2::data::is_where_clause(head))\n"
-      "  {\n"
-      "    head = this_rewriter->rewrite_where(head,*(this_rewriter->global_sigma));\n"
-      "  }\n"
+      "  const aterm_appl& head0=aterm_cast<const aterm_appl>(t[0]);\n"
+      "  aterm_appl head=\n"
+      "       (mcrl2::data::is_variable(head0)?\n"
+      "            (*(this_rewriter->global_sigma))(aterm_cast<const mcrl2::data::variable>(head0)):\n"
+      "       (mcrl2::data::is_where_clause(head0)?\n"
+      "            this_rewriter->rewrite_where(head0,*(this_rewriter->global_sigma)):\n"
+      "             head0));\n"
       "  \n"
       "  // Here head has the shape\n"
       "  // variable, u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,\n"
       "  if (mcrl2::data::is_abstraction(head))\n"
       "  {\n"
-      "    const atermpp::aterm_appl binder(head[0]);\n"
+      "    const aterm_appl binder(head[0]);\n"
       "    if (binder==gsMakeLambda())\n"
       "    {\n"
       "      return this_rewriter->rewrite_lambda_application(head,t,*(this_rewriter->global_sigma));\n"
@@ -3048,11 +3075,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  const size_t arity=t.size();\n"
       "  if (mcrl2::data::is_variable(head))\n"
       "  {\n"
-      "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity);\n"
-      "    new (&args[0]) atermpp::aterm(head);\n"
+      "    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,aterm, arity);\n"
+      "    new (&args[0]) aterm(head);\n"
       "    for(size_t i=1; i<arity; ++i)\n"
       "    {\n"
-      "      new (&args[i]) atermpp::aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t[i])));\n"
+      "      new (&args[i]) aterm(rewrite(aterm_cast<const aterm_appl>(t[i])));\n"
       "    }\n"
       "    const aterm_appl result=ApplyArray(arity,&args[0],&args[0]+arity);\n"
       "    for(size_t i=0; i<arity; ++i)\n"
@@ -3065,15 +3092,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  // Here head has the shape #REWR#(u0,u1,...,un).\n"
 
-      "  const atermpp::aterm_appl u=head;\n"
+      "  const aterm_appl u=head;\n"
       "  const size_t arity_t = t.size();\n"
-      "  const atermpp::aterm head1 = u[0];\n"
+      "  const aterm head1 = u[0];\n"
       "  const size_t arity_u=u.size();\n"
-      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity_u+arity_t-1));\n"
-//       "  std::vector<atermpp::aterm> args(arity_u+arity_t-1);\n"
+      "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,aterm,(arity_u+arity_t-1));\n"
+//       "  std::vector<aterm> args(arity_u+arity_t-1);\n"
       "  new (&args[0]) aterm(head1);\n"
       "  size_t function_index;\n"
-      "  if ((atermpp::aterm_cast<atermpp::aterm_appl>(head1).function().number()==%ld) && ((function_index = atermpp::aterm_int(head1).value()) < %zu) )\n"
+      "  if ((aterm_cast<aterm_appl>(head1).function().number()==%ld) && ((function_index = aterm_int(head1).value()) < %zu) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
@@ -3085,25 +3112,25 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      new (&args[k]) aterm(t[i]);\n"
       "    }\n"
       "    size_t arity = arity_u+arity_t-2;\n"
-      "    const atermpp::aterm_appl intermediate(mcrl2::data::detail::get_appl_afun_value(arity+1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
+      "    const aterm_appl intermediate(mcrl2::data::detail::get_appl_afun_value(arity+1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
       "    for(size_t i=0; i<arity_u+arity_t-1; ++i)\n"
       "    {\n"
       "      args[i].~aterm();\n"
       "    }\n"
       "    assert(arity <= %zu);\n"
-      "    assert(int2func[arity+1][function_index] != NULL);\n"
-      "    return int2func[arity+1][function_index](intermediate);\n"
+      "    assert(int2func_head_in_nf[arity+1][function_index] != NULL);\n"
+      "    return int2func_head_in_nf[arity+1][function_index](intermediate);\n"
       "  }\n"
       "  else\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
-      "      new (&args[i]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(u[i])));\n"
+      "      new (&args[i]) aterm(rewrite(aterm_cast<const aterm_appl>(u[i])));\n"
       "    }\n"
       "    size_t k = arity_u;\n"
       "    for (size_t i=1; i<arity_t; ++i,++k)\n"
       "    {\n"
-      "      new (&args[k]) aterm(rewrite(atermpp::aterm_cast<const atermpp::aterm_appl>(t[i])));\n"
+      "      new (&args[k]) aterm(rewrite(aterm_cast<const aterm_appl>(t[i])));\n"
       "    }\n"
       "    const aterm_appl result(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),&args[0],&args[0]+arity_u+arity_t-1);\n"   // YYYY+
       "    for(size_t i=0; i<arity_u+arity_t-1; ++i)\n"
@@ -3184,7 +3211,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    }\n"
       "    else\n"
       "    {\n"
-      "      return rewrite_appl_aux(atermpp::aterm_cast<const atermpp::aterm_appl>(head), t);\n"
+      "      return rewrite_appl_aux(t);\n"
       "    }\n"
       "  }\n"
       "  \n"
