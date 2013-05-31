@@ -77,9 +77,9 @@ class t_tool_options
 
       if (outtype == lts_none)
       {
-        mCRL2log(verbose) << "trying to detect output format by extension..." << std::endl;
+        mCRL2log(verbose) << "Trying to detect output format by extension..." << std::endl;
 
-        outtype = mcrl2::lts::detail::guess_format(outfilename);
+        outtype = mcrl2::lts::detail::guess_format(outfilename,true);
 
         if (outtype == lts_none)
         {
@@ -213,7 +213,7 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (tool_options.intype==lts_none)
       {
-        tool_options.intype = mcrl2::lts::detail::guess_format(tool_options.infilename);
+        tool_options.intype = mcrl2::lts::detail::guess_format(tool_options.infilename,false);
       }
       switch (tool_options.intype)
       {

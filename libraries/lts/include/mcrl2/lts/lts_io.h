@@ -49,7 +49,7 @@ namespace detail
  * \return The LTS format based on the extension of \a s.
  * If no supported format can be determined from the extension then \a
  * lts_none is returned.  */
-lts_type guess_format(std::string const& s);
+lts_type guess_format(std::string const& s, const bool be_verbose=true);
 
 /** \brief Determines the LTS format from a format specification string.
  * \details This can be any of the following strings:

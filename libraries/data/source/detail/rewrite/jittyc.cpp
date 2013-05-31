@@ -2233,7 +2233,7 @@ void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, size_
 
         used[arg] = true;
       }
-fprintf(f,"// Considering arguemnt  %ld\n",arg);
+fprintf(f,"// Considering argument  %ld\n",arg);
     }
     else
     {
