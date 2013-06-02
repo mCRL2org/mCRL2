@@ -245,6 +245,30 @@ static void check_that_all_objects_are_free()
   // in a nonderministic fashion using a placement new. So, they can be constructed
   // without properly being destroyed, increasing the reference count of the function
   // symbols in it by 1.
+#ifdef FUNCTION_SYMBOL_AS_POINTER
+  for(size_t i=0; i<function_symbol_index_table_size; ++i) 
+  {
+    for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j) 
+    {
+      if (!(function_symbol_index_table[i][j].reference_count==0 ||
+            (i==0 && function_symbol_index_table[i][j].reference_count<=2) || //AS_DEFAULT
+            (i==1 && function_symbol_index_table[i][j].reference_count<=1) || //AS_INT
+            (i==2 && function_symbol_index_table[i][j].reference_count<=1) || //AS_LIST
+            (i==3 && function_symbol_index_table[i][j].reference_count<=2)))  //AS_EMPTY_LIST
+      {
+        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has positive reference count (nr. " <<
+                    function_symbol_index_table[i][j].number << ", ref.count " << function_symbol_index_table[i][j].reference_count << ").\n";
+        result=false;
+      }
+      if (function_symbol_index_table[i][j].number!=i+j*FUNCTION_SYMBOL_BLOCK_SIZE)
+      {
+        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has incorrect index " << i << 
+                          ". This should be " << i+j*FUNCTION_SYMBOL_BLOCK_SIZE << ".\n";
+        result=false;
+      }
+    }
+  }
+#else
   for(size_t i=0; i<function_lookup_table_size; ++i) 
   {
     if (!(function_lookup_table[i].reference_count==0 ||
@@ -257,8 +281,9 @@ static void check_that_all_objects_are_free()
                  i << ", ref.count " << function_lookup_table[i].reference_count << ")\n";
       result=false;
     }
-
   }
+#endif
+
   assert(result);
 }
 #endif

@@ -51,11 +51,19 @@ void resize_aterm_hashtable();
 void allocate_block(const size_t size);
 void collect_terms_with_reference_count_0();
 
+inline size_t SHIFT(const size_t w)
+{
+#ifdef FUNCTION_SYMBOL_AS_POINTER
+  return w>>4;
+#else 
+  return w;
+#endif
+}
 
 inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
 {
-  return (hnr<<1) ^ hnr ^ w;
+  return (hnr>>1) ^ hnr ^ w;
 }
 
 inline
@@ -79,7 +87,7 @@ t
 inline HashNumber hash_number(const detail::_aterm *t)
 {
   const function_symbol &f=t->function();
-  HashNumber hnr = f.number();
+  HashNumber hnr = SHIFT(address(f));
 
   const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
   const size_t* end=begin+f.arity();
@@ -185,7 +193,7 @@ inline const _aterm* aterm0(const function_symbol &sym)
 {
   assert(sym.arity()==0);
 
-  HashNumber hnr = sym.number();
+  HashNumber hnr = SHIFT(address(sym));
 
   const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
 

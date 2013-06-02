@@ -73,6 +73,15 @@ struct constant_function_symbols
 
 extern constant_function_symbols function_adm;
 
+inline size_t address(const function_symbol &t)
+{
+#ifdef FUNCTION_SYMBOL_AS_POINTER
+  return reinterpret_cast<size_t>(t.m_function_symbol);
+#else
+  return t.m_number;
+#endif
+}
+
 } // namespace detail
 } // namespace atermpp
 

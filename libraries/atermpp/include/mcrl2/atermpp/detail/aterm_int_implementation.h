@@ -16,7 +16,7 @@ namespace detail
 
 inline const _aterm* aterm_int(size_t val)
 {
-  HashNumber hnr = COMBINE(function_adm.AS_INT.number(), val);
+  HashNumber hnr = COMBINE(SHIFT(address(function_adm.AS_INT)), val);
 
   const _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
   while (cur)
