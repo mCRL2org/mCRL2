@@ -877,6 +877,16 @@ BOOST_AUTO_TEST_CASE(the_bound_c_may_not_show_up_in_linear_process)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(process_parameters_with_different_types_can_cause_problems)
+{
+  const std::string spec =
+     "proc P(x:Nat)=tau.Q(true); \n"
+     "     Q(x:Bool)=tau.P(1); \n"
+     "init P(1);\n";
+
+  run_linearisation_test_case(spec);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;

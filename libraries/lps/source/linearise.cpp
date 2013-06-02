@@ -107,6 +107,7 @@ class objectdatatype
                                    indicate the process representing this action. */
     process_expression processbody;
     variable_list parameters;
+    variable_list old_parameters;
     processstatustype processstatus;
     objecttype object;
     bool canterminate;
@@ -1455,7 +1456,6 @@ class specification_basic_type:public boost::noncopyable
          If the substitution sigma(b)=t is applied to P() the result should be P(b=t).
          The standard substitutions do not take this parameterlist into account, as it stands.
       */
-
       assert(replacelhs==0 || replacelhs==1);
       assert(replacerhs==0 || replacerhs==1);
 
@@ -3076,8 +3076,8 @@ class specification_basic_type:public boost::noncopyable
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
 
-        const data_expression_list &dl= process_instance(body).actual_parameters();
-        const variable_list &vl=objectdata[n].parameters;
+        const data_expression_list dl= process_instance(body).actual_parameters();
+        const variable_list vl=objectdata[n].parameters;
 
         data_expression_list::const_iterator j=dl.begin();
         for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i,++j)
@@ -3370,6 +3370,7 @@ class specification_basic_type:public boost::noncopyable
          and is not present in vl. */
       if (var.name()==var1.name())
       {
+        assert(0); // Renaming of parameters is not allowed, given that assignments are being used in processes, using the names of the variables. 
         variable var2=get_fresh_variable(var.name(),var.sort());
         // templist is needed as objectdata may be realloced
         // during the substitution. Same applies to tempvar
@@ -8554,7 +8555,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
 /* Transform process_arguments
- *   This function replace process_instances by process_instance_assignments.
+ *   This function replaces process_instances by process_instance_assignments.
  *   All assignments in a process_instance_assignment are ordered in the same
  *   sequence as the parameters belonging to that assignment.
  *   All assignments in a process_instance_assignment of the form x=x where
@@ -8696,6 +8697,204 @@ class specification_basic_type:public boost::noncopyable
                  transform_process_arguments_body(process::sync(t).right(),bound_variables,visited_processes));
       }
       throw mcrl2::runtime_error("unexpected process format in transform_process_arguments_body " + process::pp(t) +".");
+    }
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+/* guarantee that all process parameters have a unique sort.
+ *   If different process parameters or sum variables occur with the same string, e.g. x:A en x:B,
+ *   then one of them is renamed, such that all variable strings have a unique
+ *   type. The names are replaced in object_data and in assignment lists.
+*/
+
+
+    void guarantee_that_parameters_have_unique_type(
+            const process_identifier& procId,
+            std::set<process_identifier>& visited_processes,
+            std::set<identifier_string>& used_variable_names,
+            mutable_map_substitution<>& parameter_mapping,
+            std::set<variable>& variables_in_lhs_of_parameter_mapping,
+            std::set<variable>& variables_in_rhs_of_parameter_mapping)
+    {
+      if (visited_processes.count(procId)==0)
+      {
+        visited_processes.insert(procId);
+        size_t n=objectIndex(procId);
+        const variable_list parameters=objectdata[n].parameters;
+        for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+        {
+          if (used_variable_names.count(i->name())==0)
+          {
+            used_variable_names.insert(i->name());
+            parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
+            variables_in_lhs_of_parameter_mapping.insert(*i);
+            variables_in_rhs_of_parameter_mapping.insert(*i);
+          }
+          else
+          {
+            // A variable already exists with this name.
+            if (variables_in_lhs_of_parameter_mapping.count(*i)==0) // The variables must be separately stored, as the parameter_mapping
+                                                                    // forgets variables mapped to itself.
+            {
+              // This parameter needs a fresh name.
+              const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
+              parameter_mapping[*i]=fresh_var;
+              variables_in_lhs_of_parameter_mapping.insert(*i);
+              variables_in_rhs_of_parameter_mapping.insert(fresh_var);
+            }
+          }
+        }
+        objectdata[n].old_parameters=objectdata[n].parameters;
+        objectdata[n].parameters=data::replace_variables(parameters,parameter_mapping);
+        objectdata[n].processbody=guarantee_that_parameters_have_unique_type_body(
+                                         objectdata[n].processbody,
+                                         visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping);
+      }
+    }
+
+    void guarantee_that_parameters_have_unique_type(const process_identifier& procId)
+    {
+      std::set<process_identifier> visited_processes;
+      std::set<identifier_string> used_variable_names;
+      mutable_map_substitution<> parameter_mapping;
+      std::set<variable> variables_in_lhs_of_parameter_mapping;
+      std::set<variable> variables_in_rhs_of_parameter_mapping;
+      guarantee_that_parameters_have_unique_type(procId,visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping);
+    }
+
+    process_expression guarantee_that_parameters_have_unique_type_body(
+      const process_expression t, // intentionally not a reference.
+      std::set<process_identifier>& visited_processes,
+      std::set<identifier_string>& used_variable_names,
+      mutable_map_substitution<>& parameter_mapping,
+      std::set<variable>& variables_in_lhs_of_parameter_mapping,
+      std::set<variable>& variables_in_rhs_of_parameter_mapping)
+    {
+      if (is_process_instance_assignment(t))
+      {
+        guarantee_that_parameters_have_unique_type(process_instance_assignment(t).identifier(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping);
+        const process_instance_assignment u(t);
+        size_t n=objectIndex(u.identifier());
+        assert(check_valid_process_instance_assignment(u.identifier(),
+                 substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping,variables_in_rhs_of_parameter_mapping)));
+        return process_instance_assignment(
+                     u.identifier(),
+                     substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_hide(t))
+      {
+        return hide(hide(t).hide_set(),
+                    guarantee_that_parameters_have_unique_type_body(hide(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_rename(t))
+      {
+        return process::rename(
+                 process::rename(t).rename_set(),
+                 guarantee_that_parameters_have_unique_type_body(process::rename(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_allow(t))
+      {
+        return allow(allow(t).allow_set(),
+                     guarantee_that_parameters_have_unique_type_body(allow(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_block(t))
+      {
+        return block(block(t).block_set(),
+                     guarantee_that_parameters_have_unique_type_body(block(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_comm(t))
+      {
+        return comm(comm(t).comm_set(),
+                    guarantee_that_parameters_have_unique_type_body(comm(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_merge(t))
+      {
+        return merge(
+                 guarantee_that_parameters_have_unique_type_body(merge(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(merge(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_choice(t))
+      {
+        return choice(
+                 guarantee_that_parameters_have_unique_type_body(choice(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(choice(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_seq(t))
+      {
+        return seq(
+                 guarantee_that_parameters_have_unique_type_body(seq(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(seq(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_if_then_else(t))
+      {
+        return if_then_else(
+                 data::replace_variables_capture_avoiding(if_then_else(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).else_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_if_then(t))
+      {
+        return if_then(
+                 data::replace_variables_capture_avoiding(if_then(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(if_then(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_sum(t))
+      {
+        // Also rename bound variables in a sum, such that there are no two variables with
+        // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
+        // x:D that require renaming are renamed to x':D.
+        const variable_list parameters=sum(t).bound_variables();
+        for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
+        {
+          if (used_variable_names.count(i->name())==0)
+          {
+            used_variable_names.insert(i->name());
+            parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
+            variables_in_lhs_of_parameter_mapping.insert(*i);
+            variables_in_rhs_of_parameter_mapping.insert(*i);
+          }
+          else
+          {
+            // A variable already exists with this name.
+            if (variables_in_lhs_of_parameter_mapping.count(*i)==0) // The variables must be separately stored, as the parameter_mapping
+                                                                    // forgets variables mapped to itself.
+            {
+              // This parameter needs a fresh name.
+              const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
+              parameter_mapping[*i]=fresh_var;
+              variables_in_lhs_of_parameter_mapping.insert(*i);
+              variables_in_rhs_of_parameter_mapping.insert(fresh_var);
+            }
+          }
+        }
+        return sum(
+                 data::replace_variables(sum(t).bound_variables(),parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(sum(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_action(t))
+      {
+        return lps::replace_variables_capture_avoiding(action(t),parameter_mapping,variables_in_rhs_of_parameter_mapping);
+      }
+      if (is_delta(t))
+      {
+        return t;
+      }
+      if (is_tau(t))
+      {
+        return t;
+      }
+      if (is_at(t))
+      {
+        return at(
+                 guarantee_that_parameters_have_unique_type_body(at(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 data::replace_variables_capture_avoiding(at(t).time_stamp(),parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      if (is_sync(t))
+      {
+        return process::sync(
+                 guarantee_that_parameters_have_unique_type_body(process::sync(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(process::sync(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+      }
+      throw mcrl2::runtime_error("unexpected process format in guarantee_that_parameters_have_unique_type_body " + process::pp(t) +".");
     }
 
 /* -----------------------------   split body  --------------------------- */
@@ -8923,6 +9122,7 @@ class specification_basic_type:public boost::noncopyable
       /* Then select the BPA processes, and check that the others
          are proper parallel processes */
       transform_process_arguments(init);
+      guarantee_that_parameters_have_unique_type(init);
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
