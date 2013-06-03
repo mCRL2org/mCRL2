@@ -14,14 +14,38 @@ namespace detail
 
 static const size_t BLOCK_SIZE = 1<<14; 
 
-typedef struct Block
+struct Block
 {
   struct Block* next_by_size;
   size_t* end;
   size_t data[];
-} Block;
 
-typedef struct TermInfo
+  protected:
+    // Copy constructor, needed by windows compiler.
+    Block(const Block& other)
+    {
+      next_by_size=other.next_by_size;
+      end=other.end;
+      for(size_t i=0; &other.data[i]!=other.end; ++i)
+      {
+        data[i]=other.data[i];
+      }
+    }
+
+    // Assignment operator, needed by windows compiler.
+    Block& operator=(const Block &other)
+    {
+      next_by_size=other.next_by_size;
+      end=other.end;
+      for(size_t i=0; &other.data[i]!=other.end; ++i)
+      {
+        data[i]=other.data[i];
+      }
+      return *this;
+    }
+};
+
+struct TermInfo
 {
   Block*       at_block;
   const _aterm*       at_freelist;
@@ -29,7 +53,7 @@ typedef struct TermInfo
   TermInfo():at_block(NULL),at_freelist(NULL)
   {}
 
-} TermInfo;
+};
 
 extern size_t aterm_table_mask;
 extern size_t aterm_table_size;

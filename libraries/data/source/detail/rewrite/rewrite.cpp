@@ -800,7 +800,7 @@ data_expression fromInner(const atermpp::aterm_appl &term)
       sort_dom.pop_front();
       ++i;
     }
-    a = application(a, data_expression_list(list.begin(),list.end()));
+    a = application(a, list.begin(),list.end());
     sort = aterm_cast<function_sort>(sort).codomain();
   }
   return a;
