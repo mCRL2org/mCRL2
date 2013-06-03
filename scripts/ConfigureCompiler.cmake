@@ -30,6 +30,9 @@ if (CMAKE_CONFIGURATION_TYPES)
   FORCE)
 endif()
 
+# Mark as debug property to ensure that MSVC links against debug QT libraries
+set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "Debug;Maintainer;RelWithDebInfo")
+
 # Perform platform-specific compiler configuration
 include(ConfigureWindows)
 include(ConfigureApple)
