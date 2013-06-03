@@ -9,7 +9,7 @@
 // function_symbols are consecutive numbers that index into a vector like piece of memory
 // which is doubled and relocated when the number of function symbols in use grow.
 
-// #define FUNCTION_SYMBOL_AS_POINTER
+#define FUNCTION_SYMBOL_AS_POINTER
 
 #ifdef FUNCTION_SYMBOL_AS_POINTER
 const size_t FUNCTION_SYMBOL_BLOCK_CLASS=14;
