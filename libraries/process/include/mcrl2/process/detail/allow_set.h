@@ -119,22 +119,27 @@ struct allow_set
     }
     return result;
   }
+
+  bool operator==(const allow_set& other) const
+  {
+    return A == other.A && A_includes_subsets == other.A_includes_subsets && I == other.I;
+  }
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const allow_set& x)
 {
-	if (!x.A.empty())
+  if (!x.A.empty())
   {
     out << lps::pp(x.A) << (x.A_includes_subsets ? "@" : "");
   }
-	if (!x.I.empty())
+  if (!x.I.empty())
   {
     out << "{" << core::pp(x.I) << "}*";
   }
   if (x.A.empty() && x.I.empty())
   {
-  	out << "{}";
+    out << "{}";
   }
   return out;
 }

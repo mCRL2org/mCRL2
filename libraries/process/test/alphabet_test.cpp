@@ -290,7 +290,8 @@ void test_push_allow(const std::string& expression, const std::string& Atext, co
   multi_action_name_set A;
   bool A_includes_subsets;
   boost::tuples::tie(A, A_includes_subsets) = parse_multi_action_name_set(Atext);
-  process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), allow_set(A, A_includes_subsets), procspec.equations());
+  data::set_identifier_generator id_generator;
+  process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), allow_set(A, A_includes_subsets), procspec.equations(), id_generator);
   std::string result = process::pp(node.m_expression);
   check_result(expression, result, expected_result, "push_allow");
 }
@@ -438,6 +439,17 @@ BOOST_AUTO_TEST_CASE(test_alphabet_parallel)
   multi_action_name_set B = detail::alphabet_intersection(procspec.init(), procspec.equations(), A);
   //BOOST_CHECK_EQUAL(lps::pp(B),"{a1, a2, a3, a4, a5, a6, a7, a8, a9, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20}");
   BOOST_CHECK_EQUAL(lps::pp(B),lps::pp(A));
+}
+
+BOOST_AUTO_TEST_CASE(test_alphabet_new)
+{
+  std::string text =
+    "act a: Bool;                             \n"
+    "proc S(d: Bool) = sum d:Bool. a(d).S(d); \n"
+    "init allow({a}, S(true)) ;               \n"
+    ;
+  process_specification procspec = parse_process_specification(text);
+  alphabet_reduce(procspec);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

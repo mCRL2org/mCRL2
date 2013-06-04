@@ -58,6 +58,20 @@ process_expression expand_rhs(const process::process_instance& x, const std::vec
   return result;
 }
 
+// Expands the assignments in x
+process_instance expand_assignments(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
+{
+  const process_equation& eqn = find_equation(equations, x.identifier());
+  const data::variable_list& v = eqn.formal_parameters();
+  data::assignment_sequence_substitution sigma(x.assignments());
+  std::vector<data::data_expression> e;
+  for (auto i = v.begin(); i != v.end(); ++i)
+  {
+    e.push_back(sigma(*i));
+  }
+  return process_instance(x.identifier(), data::data_expression_list(e.begin(), e.end()));
+}
+
 inline
 multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
 {

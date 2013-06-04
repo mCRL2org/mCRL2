@@ -89,18 +89,18 @@ struct data_expression_assignment: public std::unary_function<data_expression, d
 
 /// \brief Substitution that maps data variables to data expressions. The substitution is stored as an
 /// assignment_list.
-struct assignment_sequence_substitution : public std::unary_function<variable, data_expression>
+struct assignment_sequence_substitution: public std::unary_function<variable, data_expression>
 {
   typedef variable variable_type;
   typedef data_expression expression_type;
 
-  assignment_list assignments;
+  const assignment_list& assignments;
 
-  assignment_sequence_substitution(assignment_list assignments_)
+  assignment_sequence_substitution(const assignment_list& assignments_)
     : assignments(assignments_)
   {}
 
-  const data_expression &operator()(const variable& v) const
+  const data_expression& operator()(const variable& v) const
   {
     for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
     {

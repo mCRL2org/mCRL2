@@ -57,7 +57,7 @@ class process_equation: public atermpp::aterm_appl
     /// \param name A process identifier
     /// \param formal_parameters A sequence of data variables
     /// \param expression A process expression
-    process_equation(process_identifier name, data::variable_list formal_parameters, process_expression expression)
+    process_equation(const process_identifier& name, const data::variable_list& formal_parameters, const process_expression& expression)
       : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
                               name,
                               // atermpp::term_list<data::variable>(formal_parameters.begin(), formal_parameters.end()),

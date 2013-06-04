@@ -43,25 +43,31 @@ struct alphabet_reduce_builder: public process_expression_builder<alphabet_reduc
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #endif
 
-  const std::vector<process_equation>& equations;
+  std::vector<process_equation>& equations;
+  data::set_identifier_generator id_generator;
 
-  alphabet_reduce_builder(const std::vector<process_equation>& equations_)
+  alphabet_reduce_builder(std::vector<process_equation>& equations_)
     : equations(equations_)
-  {}
+  {
+    for (auto i = equations_.begin(); i != equations_.end(); ++i)
+    {
+      id_generator.add_identifier(i->identifier().name());
+    }
+  }
 
   process_expression operator()(const process::allow& x)
   {
-    return push_allow(x.operand(), x.allow_set(), equations);
+    return push_allow(x.operand(), x.allow_set(), equations, id_generator);
   }
 
   process_expression operator()(const process::block& x)
   {
-    return push_block(x.block_set(), x.operand(), equations);
+    return push_block(x.block_set(), x.operand(), equations, id_generator);
   }
 };
 
 inline
-process_expression alphabet_reduce(const process_expression& x, const std::vector<process_equation>& equations)
+process_expression alphabet_reduce(const process_expression& x, std::vector<process_equation>& equations)
 {
   alphabet_reduce_builder f(equations);
   return f(x);
