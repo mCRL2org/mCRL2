@@ -142,12 +142,13 @@ struct push_block_builder: public process_expression_builder<Derived>
 
     const process_equation& eqn = find_equation(equations, x.identifier());
     const process_expression& p = eqn.expression();
+    data::variable_list d = eqn.formal_parameters();
     process_expression p1 = push_block(B, p, equations, W, id_generator);
 
     // create a new equation P1(d) = p1
     core::identifier_string name = id_generator(x.identifier().name());
     process_identifier P1(name, x.identifier().sorts());
-    process_equation eqn1(P1, eqn.formal_parameters(), p1);
+    process_equation eqn1(P1, d, p1);
     equations.push_back(eqn1);
 
     // result = P1(e)
