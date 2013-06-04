@@ -100,7 +100,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   const std::set<core::identifier_string>& B;
 
   // used for generating process identifiers
-  data::set_identifier_generator id_generator;
+  data::set_identifier_generator& id_generator;
 
   push_block_builder(std::vector<process_equation>& equations_, push_block_map& W_, const std::set<core::identifier_string>& B_, data::set_identifier_generator& id_generator_)
     : equations(equations_), W(W_), B(B_), id_generator(id_generator_)

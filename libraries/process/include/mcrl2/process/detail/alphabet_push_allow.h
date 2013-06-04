@@ -116,7 +116,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   const allow_set& A;
 
   // used for generating process identifiers
-  data::set_identifier_generator id_generator;
+  data::set_identifier_generator& id_generator;
 
   std::vector<Node> node_stack;
 
