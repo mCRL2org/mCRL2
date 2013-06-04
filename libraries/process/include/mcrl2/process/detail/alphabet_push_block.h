@@ -21,7 +21,7 @@ namespace mcrl2 {
 
 namespace process {
 
-typedef std::map<process_identifier, std::vector<std::pair<std::set<core::identifier_string>, process_instance> > > push_block_map;
+typedef std::map<process_instance, std::vector<std::pair<std::set<core::identifier_string>, process_instance> > > push_block_map;
 
 namespace block_operations {
 
@@ -141,17 +141,20 @@ struct push_block_builder: public process_expression_builder<Derived>
     }
 
     const process_equation& eqn = find_equation(equations, x.identifier());
-    const process_expression& p = eqn.expression();
     data::variable_list d = eqn.formal_parameters();
+    core::identifier_string name = id_generator(x.identifier().name());
+    process_identifier P1(name, x.identifier().sorts());
+    const process_expression& p = eqn.expression();
+
+    // Add (P(e), A, P1(e)) to W
+    W[x].push_back(std::make_pair(B, process_instance(P1, x.actual_parameters())));
+
     process_expression p1 = push_block(B, p, equations, W, id_generator);
 
     // create a new equation P1(d) = p1
-    core::identifier_string name = id_generator(x.identifier().name());
-    process_identifier P1(name, x.identifier().sorts());
     process_equation eqn1(P1, d, p1);
     equations.push_back(eqn1);
 
-    // result = P1(e)
     process_instance result(P1, x.actual_parameters());
     return result;
   }
