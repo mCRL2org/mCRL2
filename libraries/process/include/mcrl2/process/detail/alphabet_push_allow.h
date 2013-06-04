@@ -215,6 +215,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     }
 
     const process_equation& eqn = find_equation(equations, x.identifier());
+    data::variable_list d = eqn.formal_parameters();
     core::identifier_string name = id_generator(x.identifier().name());
     process_identifier P1(name, x.identifier().sorts());
     const process_expression& p = eqn.expression();
@@ -227,7 +228,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push(node);
 
     // create a new equation P1(d) = p1
-    process_equation eqn1(P1, eqn.formal_parameters(), node.m_expression);
+    process_equation eqn1(P1, d, node.m_expression);
     equations.push_back(eqn1);
 
     log(x);
