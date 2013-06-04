@@ -18,29 +18,24 @@ struct Block
 {
   struct Block* next_by_size;
   size_t* end;
-  size_t data[];
+  size_t data[1000]; // This is a block of arbitrary size. The indication data[]
+                     // is not accepted by the visual C++ compiler. If a lower 
+                     // number than 1000 would be selected, the compiler may
+                     // warn that there is an index out of bound error.
 
-  protected:
-    // Copy constructor, needed by windows compiler.
+  private:
+    // The copy constructor is made private to indicate that
+    // a block is not intended to be copied.
     Block(const Block& other)
     {
-      next_by_size=other.next_by_size;
-      end=other.end;
-      for(size_t i=0; &other.data[i]!=other.end; ++i)
-      {
-        data[i]=other.data[i];
-      }
+      assert(0);
     }
 
-    // Assignment operator, needed by windows compiler.
+    // The assignment operator is made private to indicate that
+    // assigning a Block is also not allowed.
     Block& operator=(const Block &other)
     {
-      next_by_size=other.next_by_size;
-      end=other.end;
-      for(size_t i=0; &other.data[i]!=other.end; ++i)
-      {
-        data[i]=other.data[i];
-      }
+      assert(0);
       return *this;
     }
 };
