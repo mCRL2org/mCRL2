@@ -64,7 +64,7 @@ class alphabet_reduction
     bool push_comm_through_allow; //at some point is set to false to avoid infinite recursion.
 
     core::identifier_string_list untypeMA(lps::action_label_list MAct);
-    atermpp::term_list < core::identifier_string_list > untypeMAL(action_label_list_list LMAct);;
+    atermpp::term_list < core::identifier_string_list > untypeMAL(action_label_list_list LMAct);
     template <class T>
     atermpp::term_list < T > sync_mact(atermpp::term_list < T > a, atermpp::term_list < T > b);
     action_label_list_list filter_block_list(action_label_list_list l, core::identifier_string_list H);

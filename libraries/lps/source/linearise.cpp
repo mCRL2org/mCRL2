@@ -4046,14 +4046,13 @@ class specification_basic_type:public boost::noncopyable
       return processencoding(i,t,stack);
     }
 
-    data_expression_list push_stack(
+    data_expression push_stack(
       const process_identifier procId,
       const assignment_list args,
       const data_expression_list t2,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pCRLprcs,
-      const variable_list vars,
-      bool singlestate)
+      const variable_list vars)
     {
       data_expression_list t=findarguments(objectdata[objectIndex(procId)].parameters,
                                            stack.parameters,args,t2,stack,vars,false);
@@ -4061,7 +4060,9 @@ class specification_basic_type:public boost::noncopyable
       int i;
       for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
 
-      return processencoding(i,t,stack);
+      const data_expression_list l=processencoding(i,t,stack);
+      assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
+      return application(stack.opns->push,l);
     }
 
 
@@ -4095,32 +4096,29 @@ class specification_basic_type:public boost::noncopyable
       throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
     }
 
-    data_expression_list make_procargs_stack(
+    data_expression make_procargs_stack(
       const process_expression &t,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pcrlprcs,
-      const variable_list &vars,
-      const bool singlestate)
+      const variable_list &vars)
     {
       /* t is a sequential composition of process variables */
 
       if (is_seq(t))
       {
         const process_instance_assignment process=seq(t).left();
-        const process_expression t2=seq(t).right();
+        const process_expression process2=seq(t).right();
         const process_identifier procId=process.identifier();
         const assignment_list t1=process.assignments();
 
         if (objectdata[objectIndex(procId)].canterminate)
         {
-          data_expression_list t3=make_procargs_stack(t2,stack,pcrlprcs,
-                                                vars,singlestate);
-          t3=push_stack(procId,t1,t3,stack,pcrlprcs,vars,singlestate);
-          return make_list(t3.front());
+          const data_expression stackframe=make_procargs_stack(process2,stack,pcrlprcs, vars);
+          return push_stack(procId,t1,make_list<data_expression>(stackframe),stack,pcrlprcs,vars);
         }
 
-        return push_stack(procId,t1,make_list(data_expression(stack.opns->emptystack)),
-                                           stack,pcrlprcs,vars,singlestate);
+        return push_stack(procId,t1,make_list<data_expression>(stack.opns->emptystack),
+                                           stack,pcrlprcs,vars);
       }
 
       if (is_process_instance_assignment(t))
@@ -4135,16 +4133,14 @@ class specification_basic_type:public boost::noncopyable
                             make_list(data_expression(make_application(stack.opns->pop,stack.stackvar))),
                             stack,
                             pcrlprcs,
-                            vars,
-                            singlestate);
+                            vars);
         }
         return push_stack(procId,
                           t1,
                           make_list(data_expression(stack.opns->emptystack)),
                           stack,
                           pcrlprcs,
-                          vars,
-                          singlestate);
+                          vars);
       }
 
       throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
@@ -4163,10 +4159,8 @@ class specification_basic_type:public boost::noncopyable
         return make_procargs_regular(t,stack,pcrlprcs,vars,singlestate);
       }
       /* return a stackframe */
-      data_expression_list l=make_procargs_stack(t,stack,pcrlprcs,vars,singlestate);
-      return make_list(assignment(
-                         stack.stackvar,
-                         application(stack.opns->push,l)));
+      data_expression sf=make_procargs_stack(t,stack,pcrlprcs,vars);
+      return make_list(assignment(stack.stackvar,sf));
     }
 
     bool occursin(const variable &name,
@@ -4226,14 +4220,14 @@ class specification_basic_type:public boost::noncopyable
 
       if (totalpars.empty())
       {
-        return make_list(data_expression(stack.opns->emptystack));
+        return make_list<data_expression>(stack.opns->emptystack);
       }
 
       const variable par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
         data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack);
-        //result.push_front(data_expression(par));
+        result.push_front(par);
         return result;
       }
       /* otherwise the value of this argument is irrelevant, so
@@ -4285,8 +4279,9 @@ class specification_basic_type:public boost::noncopyable
       {
         data_expression_list result=
                 pushdummy_stack(objectdata[objectIndex(initialProcId)].parameters,stack);
-        return make_list(assignment(stack.stackvar,application(stack.opns->push,
-                                               processencoding(i,result,stack))));
+        const data_expression_list l=processencoding(i,result,stack);
+        assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
+        return make_list(assignment(stack.stackvar,application(stack.opns->push,l)));
       }
     }
 
