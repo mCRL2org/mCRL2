@@ -12,28 +12,28 @@ namespace atermpp
 namespace detail
 {
 
-static const size_t BLOCK_SIZE = 1<<14; 
+static const size_t BLOCK_SIZE = 1<<14;
 
 struct Block
 {
   struct Block* next_by_size;
   size_t* end;
   size_t data[1000]; // This is a block of arbitrary size. The indication data[]
-                     // is not accepted by the visual C++ compiler. If a lower 
+                     // is not accepted by the visual C++ compiler. If a lower
                      // number than 1000 would be selected, the compiler may
                      // warn that there is an index out of bound error.
 
   private:
     // The copy constructor is made private to indicate that
     // a block is not intended to be copied.
-    Block(const Block& other)
+    Block(const Block& /*other*/)
     {
       assert(0);
     }
 
     // The assignment operator is made private to indicate that
     // assigning a Block is also not allowed.
-    Block& operator=(const Block &other)
+    Block& operator=(const Block &/*other*/)
     {
       assert(0);
       return *this;
@@ -74,7 +74,7 @@ inline size_t SHIFT(const size_t w)
 {
 #ifdef FUNCTION_SYMBOL_AS_POINTER
   return w>>4;
-#else 
+#else
   return w;
 #endif
 }
@@ -93,7 +93,7 @@ size_t COMBINE(const HashNumber hnr, const aterm &w)
 
 inline
 void CHECK_TERM(const aterm &
-#ifndef NDEBUG 
+#ifndef NDEBUG
 t
 #endif
 )
@@ -113,7 +113,7 @@ inline HashNumber hash_number(const detail::_aterm *t)
   for (const size_t* i=begin; i!=end; ++i)
   {
     hnr = COMBINE(hnr, *i);
-  } 
+  }
 
   return hnr;
 }
@@ -121,7 +121,7 @@ inline HashNumber hash_number(const detail::_aterm *t)
 inline const _aterm* allocate_term(const size_t size)
 {
   assert(size>=TERM_SIZE);
-  if (size >= terminfo_size) 
+  if (size >= terminfo_size)
   {
     // Resize the size of terminfo to the minimum of twice its old size and size+1;
     const size_t old_term_info_size=terminfo_size;
@@ -153,10 +153,10 @@ inline const _aterm* allocate_term(const size_t size)
   total_nodes++;
   TermInfo &ti = terminfo[size];
   if (garbage_collect_count_down>0)
-  { 
+  {
     garbage_collect_count_down--;
   }
-  
+
   if (garbage_collect_count_down==0 && ti.at_freelist==NULL) // It is time to collect free terms, and there are
                                                              // no free terms left.
   {
@@ -168,14 +168,14 @@ inline const _aterm* allocate_term(const size_t size)
     allocate_block(size);
     assert(ti.at_block != NULL);
   }
-  
+
   const _aterm *at = ti.at_freelist;
   ti.at_freelist = ti.at_freelist->next();
   assert(at->reference_count_indicates_is_in_freelist());
   at->reset_reference_count();
   assert(ti.at_block != NULL);
   return at;
-} 
+}
 
 inline void remove_from_hashtable(const _aterm *t)
 {
@@ -239,7 +239,7 @@ inline const _aterm* aterm0(const function_symbol &sym)
 inline const _aterm* address(const aterm &t)
 {
   return t.m_term;
-} 
+}
 
 } //namespace detail
 
@@ -251,7 +251,7 @@ const detail::_aterm *aterm::undefined_aterm()
     detail::initialise_administration();
   }
   return detail::static_undefined_aterm.m_term;
-} 
+}
 
 inline
 const detail::_aterm *aterm::empty_aterm_list()
@@ -261,7 +261,7 @@ const detail::_aterm *aterm::empty_aterm_list()
     detail::initialise_administration();
   }
   return detail::static_empty_aterm_list.m_term;
-} 
+}
 
 } // namespace atermpp
 
