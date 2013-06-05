@@ -2812,27 +2812,22 @@ bool gsIsNumericString(std::string s)
   {
     s=s.substr(1);
   }
-  if (s[0] == '\0')
+  if (s.empty())
   {
     return false;
   }
   if (s[0] == '0')
   {
     s=s.substr(1);
-    if (s[0] == '\0')
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+	return s.empty();
   }
   for (std::string::const_iterator i=s.begin(); i != s.end(); ++i)
+  {
     if (!isdigit(*i))
     {
       return false;
     }
+  }
   return true;
 }
 
