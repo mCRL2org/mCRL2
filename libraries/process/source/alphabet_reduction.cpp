@@ -39,7 +39,7 @@ namespace mcrl2
         return aterm_appl(afunPair,(aterm)(aterm_list)ma1,(aterm)(aterm_appl)ma2);
       }
 
-      
+
       template < class T >
       static std::multiset <T> to_multiset(const atermpp::term_list <T> l)
       {
@@ -122,7 +122,7 @@ namespace mcrl2
         }
         return gsaATsortList(r);
       }
- 
+
       static atermpp::term_list < core::identifier_string_list > transform_list(const action_name_multiset_list l)
       {
         // Always insert empty list also.
@@ -143,7 +143,7 @@ namespace mcrl2
         {
           // An action_name_multiset_list contains the empty multi_action by default, but it cannot be part of it.
           if (!i->empty())
-          { 
+          {
             result.push_front(action_name_multiset(*i));
           }
         }
@@ -175,7 +175,7 @@ namespace mcrl2
         static atermpp::term_list<T>  list_minus(atermpp::term_list<T> l, atermpp::term_list<T> m)
         {
           if (m.empty())
-          { 
+          {
             return l;
           }
           atermpp::term_list<T> n;
@@ -183,7 +183,7 @@ namespace mcrl2
           {
             if (std::find(m.begin(),m.end(),*i) == m.end()) // Not found
             {
-              n.push_front(*i); 
+              n.push_front(*i);
             }
           }
           return reverse(n);
@@ -202,7 +202,7 @@ namespace mcrl2
         return reverse(n);
       }
 
-      static std::vector < std::multiset < identifier_string > > 
+      static std::vector < std::multiset < identifier_string > >
                  from_allow_list_to_allow_vector(const atermpp::term_list < core::identifier_string_list > V)
       {
         //returns the list of multiactions that are allowed
@@ -214,7 +214,7 @@ namespace mcrl2
         return m;
       }
 
-      static atermpp::term_list < core::identifier_string_list > 
+      static atermpp::term_list < core::identifier_string_list >
                  from_allow_vector_to_allow_list(const std::vector < std::multiset < identifier_string > > &V)
       {
         //returns the list of multiactions that are allowed
@@ -232,7 +232,7 @@ namespace mcrl2
         size_t m = 1;
         for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
         {
-          size_t c=i->size(); 
+          size_t c=i->size();
           if (c>m)
           {
             m=c;
@@ -292,7 +292,7 @@ namespace mcrl2
         communication_expression_list m;
         for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
         {
-          action_name_multiset lhs=i->action_name(); 
+          action_name_multiset lhs=i->action_name();
           lhs=action_name_multiset(gsaATsortList(lhs.names()));
           m.push_front(communication_expression(lhs,i->name()));
         }
@@ -302,8 +302,8 @@ namespace mcrl2
 
       // returns true if l1 united with l2 is a subset of m
       static bool sub_multiaction(
-                     const std::multiset < identifier_string > &l1, 
-                     const std::multiset < identifier_string > &l2, 
+                     const std::multiset < identifier_string > &l1,
+                     const std::multiset < identifier_string > &l2,
                      const std::multiset < identifier_string > &m)
       {
         std::multiset < identifier_string >::const_iterator l1_walker=l1.begin();
@@ -311,7 +311,7 @@ namespace mcrl2
         for(std::multiset < identifier_string >::const_iterator m_walker=m.begin(); m_walker!=m.end(); m_walker++)
         {
           if (l1_walker==l1.end())
-          { 
+          {
             if (l2_walker==l2.end())
             {
               return true;;
@@ -357,11 +357,11 @@ namespace mcrl2
         }
         return l1_walker==l1.end() && l2_walker==l2.end(); // l1 union l2 is exactly equal to m.
       }
-      
+
       // Return true iff the union of l1 and l2 is a subset of one of the elements of MActL.
       static bool sub_multiaction_list(
-                     const std::multiset < identifier_string > &l1, 
-                     const std::multiset < identifier_string > &l2, 
+                     const std::multiset < identifier_string > &l1,
+                     const std::multiset < identifier_string > &l2,
                      const std::vector < std::multiset < identifier_string > > &MActL)
       {
         // true if multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
@@ -375,7 +375,7 @@ namespace mcrl2
         return false;
       }
 
-      static bool disjoint_multiaction(core::identifier_string_list MAct, 
+      static bool disjoint_multiaction(core::identifier_string_list MAct,
                         atermpp::term_list < core::identifier_string_list > MActL)
       {
         // true if no part of multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
@@ -405,8 +405,8 @@ namespace mcrl2
       }
 
       static atermpp::term_list < core::identifier_string_list > extend_hide(
-                    atermpp::term_list < core::identifier_string_list > V, 
-                    core::identifier_string_list I, 
+                    atermpp::term_list < core::identifier_string_list > V,
+                    core::identifier_string_list I,
                     atermpp::term_list < core::identifier_string_list > L)
       {
         // Extend V to contain hidings of L with theta_I
@@ -415,8 +415,8 @@ namespace mcrl2
         {
           core::identifier_string_list ma=*i;
           core::identifier_string_list maH=apply_hide(I,*i);
-          if (((maH==core::identifier_string_list()) || 
-                 std::find(V.begin(),V.end(),maH)!=V.end()) 
+          if (((maH==core::identifier_string_list()) ||
+                 std::find(V.begin(),V.end(),maH)!=V.end())
                        && std::find(r.begin(),r.end(),ma)==r.end())
           {
             r.push_front(ma);
@@ -478,7 +478,7 @@ namespace mcrl2
           {
             if (i->name()==j->source())
             {
-              m.push_front(lps::action_label(j->target(),i->sorts())); 
+              m.push_front(lps::action_label(j->target(),i->sorts()));
               b=true;
               break;
             }
@@ -546,7 +546,7 @@ namespace mcrl2
 
       atermpp::term_list < core::identifier_string_list > R;
       for(std::set < core::identifier_string_list >::const_iterator j=name_set.begin(); j!=name_set.end(); ++j)
-      { 
+      {
         R.push_front(*j);
       }
       return R;
@@ -611,7 +611,7 @@ namespace mcrl2
     }
 
     alphabet_reduction::action_label_list_list alphabet_reduction::filter_allow_list(
-              action_label_list_list l, 
+              action_label_list_list l,
               atermpp::term_list < core::identifier_string_list > V)
     {
       //filters l to contain only multiactions matching the untyped multiactions from V
@@ -627,8 +627,8 @@ namespace mcrl2
     }
 
     atermpp::term_list < core::identifier_string_list > alphabet_reduction::split_allow(
-           atermpp::term_list < core::identifier_string_list > V, 
-           atermpp::term_list < core::identifier_string_list > ulp, 
+           atermpp::term_list < core::identifier_string_list > V,
+           atermpp::term_list < core::identifier_string_list > ulp,
            atermpp::term_list < core::identifier_string_list > ulq)
     {
       //splits V according to the 2 alphabets (see paper) and returns the first part.
@@ -665,7 +665,8 @@ namespace mcrl2
         for (atermpp::term_list < core::identifier_string_list >::const_iterator j=m.begin(); j!=m.end(); ++j)
         {
           std::multiset < core::identifier_string > ma;
-          std::merge(i->begin(),i->end(),j->begin(),j->end(),inserter(ma,ma.begin()));
+          ma.insert(i->begin(),i->end());
+          ma.insert(j->begin(),j->end());
           all_set.insert(detail::to_list(ma));
         }
       }
@@ -676,20 +677,20 @@ namespace mcrl2
       }
       return result;
     }
-           
-           
+
+
     alphabet_reduction::action_label_list_list alphabet_reduction::sync_list(
-           const action_label_list_list l, 
-           const action_label_list_list m, 
-           size_t length/*=0*/, 
+           const action_label_list_list l,
+           const action_label_list_list m,
+           size_t length/*=0*/,
            const std::vector < std::multiset < identifier_string > > &allowed/* std::vector < std::multiset < identifier_string > >() */)
     {
-      std::vector < std::multiset < identifier_string > > m_untyped;      
+      std::vector < std::multiset < identifier_string > > m_untyped;
       for (action_label_list_list::const_iterator j=m.begin(); j!=m.end(); ++j)
       {
         m_untyped.push_back(detail::untypeMA_set(*j));
       }
-      
+
       std::set < lps::action_label_list > all_set;
       for (action_label_list_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
@@ -702,7 +703,8 @@ namespace mcrl2
             if (allowed.empty() || detail::sub_multiaction_list(i_untyped,*j_untyped,allowed))
             {
               std::multiset < lps::action_label > ma;
-              std::merge(i->begin(),i->end(),j->begin(),j->end(),inserter(ma,ma.begin()));
+              ma.insert(i->begin(),i->end());
+              ma.insert(j->begin(),j->end());
               all_set.insert(detail::to_list(ma));
             }
           }
@@ -718,8 +720,8 @@ namespace mcrl2
 
     /* return a list with the actions of l1, l2 and all the multiactions of l1 and l2 */
     alphabet_reduction::action_label_list_list alphabet_reduction::sync_list_ht(
-                        action_label_list_list l1, 
-                        action_label_list_list l2, 
+                        action_label_list_list l1,
+                        action_label_list_list l2,
                         bool including_products_of_actions/* =true */)
     {
       std::set < lps::action_label_list > all_set;
@@ -732,11 +734,11 @@ namespace mcrl2
       {
         all_set.insert(*j);
       }
-      
+
       if (including_products_of_actions)
       {
         //put the synchronization of l1 and l2 into m (if length, then not longer than length)
-      
+
         for (action_label_list_list::const_iterator i=l1.begin(); i!=l1.end(); ++i)
         {
           for (action_label_list_list::const_iterator j=l2.begin(); j!=l2.end(); ++j)
@@ -754,7 +756,7 @@ namespace mcrl2
     }
 
     atermpp::term_list< identifier_string_list > alphabet_reduction::apply_unrename(
-                  core::identifier_string_list l, 
+                  core::identifier_string_list l,
                   rename_expression_list R)
     {
       //applies R^{-1} to a multiaction l, returns a list of multiactions.
@@ -777,9 +779,9 @@ namespace mcrl2
             temp.push_front(make_list<identifier_string>(j->source()));
           }
         }
-        temp.push_front(make_list<identifier_string>(*i));    
+        temp.push_front(make_list<identifier_string>(*i));
 
-        m = sync_list(m,temp); 
+        m = sync_list(m,temp);
       }
       return m;
     }
@@ -788,7 +790,7 @@ namespace mcrl2
     {
       // This function calculates { alpha | R(alpha) in V}.
       // E.g. for R={ d->c} and V={c}, the result is {c,d}.
-      
+
       atermpp::term_list< identifier_string_list > m;
       if (V.empty())
       {
@@ -797,7 +799,7 @@ namespace mcrl2
 
       for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
       {
-        m=detail::merge_list(m,apply_unrename(*i,R));  
+        m=detail::merge_list(m,apply_unrename(*i,R));
       }
 
       return m;
@@ -806,12 +808,12 @@ namespace mcrl2
     // Establishes the possible multi_actions that can be done if the communications
     // in C are applied to the multi_action in l. If C constains a|b->c and l
     // contains actions a,b and d, then the result is typically {<a,b,d>,<c,d>}.
-    
+
     alphabet_reduction::action_label_list_list alphabet_reduction::apply_comms(
-                    lps::action_label_list l, 
+                    lps::action_label_list l,
                     communication_expression_list C)
     {
-      
+
       //filter out actions not in the lhs of C;
       //split the rest of l to a composition of subactions of a similar type
       //to those apply a simplified procedure??
@@ -821,7 +823,7 @@ namespace mcrl2
       {
         return make_list<lps::action_label_list>(l);  //C does not apply
       }
-      
+
       l=detail::list_minus(l,ll);  //apply to the rest
 
       //Gives all possible results of application of C to a multiaction l.
@@ -834,7 +836,7 @@ namespace mcrl2
       lps::action_label_list r=l;
       while (r.size() > 0)
       {
-        lps::action_label a = r.front();  
+        lps::action_label a = r.front();
         r.pop_front();
         bool applied=false;
         for (communication_expression_list::const_iterator i=C.begin(); i!=C.end(); ++i)
@@ -885,20 +887,20 @@ namespace mcrl2
       if (!r.empty())
       {
         m=sync_list(m,make_list<lps::action_label_list>(r));
-      } 
+      }
 
       if (!ll.empty())
       {
         m=sync_list(make_list<lps::action_label_list>(ll),m);
-      } 
+      }
 
       return m;
 
     }
 
     atermpp::term_list < core::identifier_string_list > alphabet_reduction::extend_allow_comm_with_alpha(
-             atermpp::term_list < core::identifier_string_list > V, 
-             communication_expression_list C, 
+             atermpp::term_list < core::identifier_string_list > V,
+             communication_expression_list C,
              action_label_list_list l)
     {
       //Extend V to V1 so that \allow_V(\com_C(x))=\allow_V(\com_C(\allow_V1(x))) where l is the set of multiactions of x
@@ -911,7 +913,7 @@ namespace mcrl2
         nV.push_front(*i);
       }
       nV=reverse(nV);
-      
+
       nV.push_front(core::identifier_string_list()); //to include possible communications to tau
 
       atermpp::term_list < core::identifier_string_list > r;
@@ -967,7 +969,7 @@ namespace mcrl2
       for (atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
       {
         core::identifier_string_list v=*i;
-        atermpp::term_list < identifier_string_list > res=make_list<identifier_string_list >(identifier_string_list()); 
+        atermpp::term_list < identifier_string_list > res=make_list<identifier_string_list >(identifier_string_list());
         for (core::identifier_string_list::const_iterator j=v.begin(); j!=v.end(); ++j)
         {
           atermpp::term_list < core::identifier_string_list >  r;
@@ -994,7 +996,7 @@ namespace mcrl2
     }
 
     alphabet_reduction::action_label_list_list alphabet_reduction::filter_comm_list(
-              action_label_list_list l, 
+              action_label_list_list l,
               communication_expression_list C)
     {
 
@@ -1078,7 +1080,7 @@ namespace mcrl2
 
         for (core::identifier_string_list::const_iterator i=H.begin(); i!=H.end(); ++i)
         {
-          if ((std::find(lhs.begin(),lhs.end(),*i) != lhs.end()) || 
+          if ((std::find(lhs.begin(),lhs.end(),*i) != lhs.end()) ||
                  (std::find(rhs.begin(),rhs.end(),*i) != rhs.end()))
           {
             Ha.push_front(*i);
@@ -1116,7 +1118,7 @@ namespace mcrl2
         return a;
       }
       else if (is_sum(a) || is_at(a) || is_choice(a) || is_seq(a) ||
-               is_if_then(a) || is_if_then_else(a) || is_sync(a) || 
+               is_if_then(a) || is_if_then_else(a) || is_sync(a) ||
                is_merge(a) || is_left_merge(a) || is_bounded_init(a))
       {
         // Do not distribute over these operator.
@@ -1197,7 +1199,7 @@ namespace mcrl2
         return a;
       }
       else if (is_sum(a) || is_at(a) || is_choice(a) || is_seq(a) ||
-               is_if_then(a) || is_if_then_else(a) || is_sync(a) || 
+               is_if_then(a) || is_if_then_else(a) || is_sync(a) ||
                is_merge(a) || is_left_merge(a) || is_bounded_init(a))
       {
         // Distributing hide over these operators disallows the
@@ -1308,7 +1310,7 @@ namespace mcrl2
             a=process_instance(new_pn,process_instance(a).actual_parameters());
           }
           else
-          { 
+          {
             a=process_instance_assignment(new_pn,process_instance_assignment(a).assignments());
           }
           alphas[a]=l;
@@ -1317,32 +1319,32 @@ namespace mcrl2
         {
           if (non_recursive_set.count(pn)>0 && pCRL_set.count(pn)>0)
           {
-            mCRL2log(warning)  
-              << "This warning could indicate a forgotten (multi-)action in the following allow operation." << std::endl 
+            mCRL2log(warning)
+              << "This warning could indicate a forgotten (multi-)action in the following allow operation." << std::endl
               << "An allow operation allowing only the (multi-)action(s) from:"  << std::endl;
               //atermpp::term_list < core::identifier_string_list > l = detail::list_minus(untypeMAL(ll),V);
               for(atermpp::term_list < core::identifier_string_list >::const_iterator i=V.begin(); i!=V.end(); ++i)
               {
                 // An action_name_multiset_list contains the empty multi_action by default, but it cannot be part of it.
                 if (!i->empty())
-                { 
+                {
                   mCRL2log(warning) << "  "<< pp(action_name_multiset(*i)) << std::endl;
                 }
               }
               //mCRL2log(warning) << std::endl;
 
               // << "  " << pp(detail::transform_list_back(V)) << std::endl
-            mCRL2log(warning)  
-              << "is applied to sequential non-directly-recursive process:" << std::endl 
+            mCRL2log(warning)
+              << "is applied to sequential non-directly-recursive process:" << std::endl
               << "  " << pp(pn) << std::endl
-              << "The following (multi-)action(s) are disallowed in this process:" << std::endl; 
-             
+              << "The following (multi-)action(s) are disallowed in this process:" << std::endl;
+
               atermpp::term_list < core::identifier_string_list > l = detail::list_minus(untypeMAL(ll),V);
               for(atermpp::term_list < core::identifier_string_list >::const_iterator i=l.begin(); i!=l.end(); ++i)
               {
                 // An action_name_multiset_list contains the empty multi_action by default, but it cannot be part of it.
                 if (!i->empty())
-                { 
+                {
                   mCRL2log(warning) << "  "<< pp(action_name_multiset(*i)) << std::endl;
                 }
               }
@@ -1378,7 +1380,7 @@ namespace mcrl2
 
         p = PushAllow(V1,p);
 
-        assert(alphas.count(p)>0); 
+        assert(alphas.count(p)>0);
         l = alphas[p];
         a = hide(hide(a).hide_set(),p);
         alphas[a]=filter_hide_list(l,I);
@@ -1407,10 +1409,10 @@ namespace mcrl2
       }
       else if (is_comm(a))
       {
-        
+
         communication_expression_list C=comm(a).comm_set();
         C=detail::sort_multiactions_comm(C);
-         
+
 
         process_expression p=comm(a).operand();
         atermpp::term_list < core::identifier_string_list >  V1;
@@ -1676,7 +1678,7 @@ namespace mcrl2
               action_label_list_list l2=alphas[q];
               l=sync_list_ht(l,l2);
             }
-            
+
             a=merge(p,q);
             alphas[a]=l;
           }
@@ -1718,9 +1720,9 @@ namespace mcrl2
     }
 
     alphabet_reduction::action_label_list_list alphabet_reduction::gsaGetAlpha(
-                                    process_expression a, 
-                                    size_t length, 
-                                    const std::vector < std::multiset < identifier_string > > &allowed) 
+                                    process_expression a,
+                                    size_t length,
+                                    const std::vector < std::multiset < identifier_string > > &allowed)
     {
       // calculate the alphabet process expression a of a up to the length.
       // if length==0, then the length is unlimited.
@@ -1835,7 +1837,7 @@ namespace mcrl2
         communication_expression_list C = detail::sort_multiactions_comm(comm(a).comm_set());
 
         std::vector < std::multiset < identifier_string > > new_allowed;
-        
+
         if (length && !allowed.empty())
         {
           new_allowed=detail::from_allow_list_to_allow_vector(extend_allow_comm(detail::from_allow_vector_to_allow_list(allowed),C));
@@ -2015,7 +2017,7 @@ namespace mcrl2
       else if (is_choice(a))
       {
         process_expression p = gsApplyAlpha(choice(a).left());
-        process_expression q = gsApplyAlpha(choice(a).right()); 
+        process_expression q = gsApplyAlpha(choice(a).right());
         action_label_list_list l,l1,l2;
         assert(alphas.count(p)>0);
         l=l1=alphas[p];
@@ -2079,7 +2081,7 @@ namespace mcrl2
 
         l=sync_list_ht(l,l2);
 
-        a=sync(p,q); 
+        a=sync(p,q);
         alphas[a]=l;
       }
       else if (is_merge(a))
@@ -2095,7 +2097,7 @@ namespace mcrl2
 
         l=sync_list_ht(l,l2);
 
-        a=merge(p,q); 
+        a=merge(p,q);
 
         alphas[a]=l;
       }
@@ -2356,7 +2358,7 @@ namespace mcrl2
           {
             deps[pn]=old_dep;
           }
-          else 
+          else
           {
             old_dep=deps[pn];
           }
@@ -2385,7 +2387,7 @@ namespace mcrl2
       {
         process_identifier p=todo.front();
         process_identifier_list dep=deps[p];
-        bool rec=std::find(dep.begin(),dep.end(),p)!=dep.end(); //true if found 
+        bool rec=std::find(dep.begin(),dep.end(),p)!=dep.end(); //true if found
         if (rec)
         {
           recursive_set.insert(p);
@@ -2425,7 +2427,7 @@ namespace mcrl2
               mCRL_set.erase(p);
             }
             else
-            { 
+            {
               pCRL_set.erase(p);
               mCRL_set.insert(p);
             }
