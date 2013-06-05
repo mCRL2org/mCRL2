@@ -11,13 +11,13 @@ if(NOT MCRL2_GNU)
 endif()
 
 ##---------------------------------------------------
-## Set GCC compiler flags 
+## Set GCC compiler flags
 ##---------------------------------------------------
 
 message( STATUS "Loading GCC specific configuration" )
 
 ##---------------------------------------------------
-## Set C compile flags 
+## Set C compile flags
 ##---------------------------------------------------
 include(AddFlag)
 
@@ -36,8 +36,15 @@ if(NOT MCRL2_CLANG)
   try_add_c_flag(-ftest-coverage           MAINTAINER)
 endif()
 
+# The following is only implemented in clang
+if(MCRL2_CLANG)
+  # We need to add the proper flag to the linker before we try:
+  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
+  try_add_c_flag(-fsanitize=address       MAINTAINER)
+endif()
+
 ##---------------------------------------------------
-## Set C++ compile flags 
+## Set C++ compile flags
 ##---------------------------------------------------
 
 try_add_cxx_flag(-std=c++11)
@@ -66,11 +73,20 @@ try_add_cxx_flag(-Wno-system-headers     MAINTAINER)
 try_add_cxx_flag(-Woverloaded-virtual    MAINTAINER)
 try_add_cxx_flag(-Wwrite-strings         MAINTAINER)
 try_add_cxx_flag(-Wmissing-declarations  MAINTAINER)
+try_add_cxx_flag(-D_GLIBCXX_DEBUG        MAINTAINER)
 
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
   try_add_cxx_flag(-fprofile-arcs            MAINTAINER)
   try_add_cxx_flag(-ftest-coverage           MAINTAINER)
+endif()
+
+# The following is only implemented in clang
+# The following is only implemented in clang
+if(MCRL2_CLANG)
+  # We need to add the proper flag to the linker before we try:
+  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
+  try_add_cxx_flag(-fsanitize=address       MAINTAINER)
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -111,13 +127,14 @@ else()
       CACHE STRING "Flags used by the shared libraries linker during maintainer builds.")
 endif()
 
-# The following flags are not implemented in clang and therefore cause warnings.
-if(NOT MCRL2_CLANG)
-  if(CXX_ACCEPTS_FPROFILE_ARCS)
-    set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_MAINTAINER} -fprofile-arcs")
-    set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER} -fprofile-arcs")
-  endif()
-  if(CXX_ACCEPTS_FTEST_COVERAGE)
-    set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER} -ftest-coverage")
-  endif()
+if(CXX_ACCEPTS_FPROFILE_ARCS)
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_MAINTAINER} -fprofile-arcs")
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER} -fprofile-arcs")
+endif()
+if(CXX_ACCEPTS_FTEST_COVERAGE)
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER} -ftest-coverage")
+endif()
+if(CXX_ACCEPTS_FSANITIZE_ADDRESS)
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_MAINTAINER} -fsanitize=address")
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER} -fsanitize=address")
 endif()
