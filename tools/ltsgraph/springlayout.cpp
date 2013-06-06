@@ -117,7 +117,7 @@ namespace Graph
     m_nforces.resize(m_graph.nodeCount());
     m_hforces.resize(m_graph.edgeCount());
     m_lforces.resize(m_graph.edgeCount());
-    m_sforces.resize(m_graph.edgeCount());
+    m_sforces.resize(m_graph.nodeCount());
 
     for (size_t n = 0; n < m_graph.nodeCount(); ++n)
     {
