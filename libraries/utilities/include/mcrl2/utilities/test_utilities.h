@@ -74,7 +74,10 @@ char rand_alnum()
   do
   {
     c = static_cast<char>(std::rand());
-  } while(!std::isalnum(c));
+  } while(!std::isalnum(static_cast<unsigned char>(c)));
+  // The cast to unsigned char, above here, is to ensure that the value passed
+  // to isalnum is between 0 and 255, which is required by std::isalnum.
+  // MSVC checks for these bounds in debug mode.
   return c;
 
 }
