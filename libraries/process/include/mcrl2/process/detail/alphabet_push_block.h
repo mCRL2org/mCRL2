@@ -184,7 +184,6 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
-    std::cerr << "restrict b = " << core::pp(b) << " B = " << print_B(B) << " C = " << process::pp(C) << std::endl;
     for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
     {
       core::identifier_string_list gamma = i->action_name().names();
