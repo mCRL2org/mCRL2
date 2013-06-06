@@ -190,15 +190,15 @@ void lpspp(const std::string& input_filename,
   std::string text;
   if (format == core::print_internal)
   {
-  	text = to_string(specification_to_aterm(spec));
+    text = to_string(specification_to_aterm(spec));
   }
   else
   {
-  	text = print_summand_numbers ? lps::pp_with_summand_numbers(spec) : lps::pp(spec);
+    text = print_summand_numbers ? lps::pp_with_summand_numbers(spec) : lps::pp(spec);
   }
   if (output_filename.empty())
   {
-  	std::cout << text;
+    std::cout << text;
   }
   else
   {
@@ -261,6 +261,7 @@ void lpssumelm(const std::string& input_filename,
 
 void lpssuminst(const std::string& input_filename,
                 const std::string& output_filename,
+                const data::rewriter::strategy rewrite_strategy,
                 const std::string& sorts_string,
                 const bool finite_sorts_only,
                 const bool tau_summands_only)
@@ -290,7 +291,7 @@ void lpssuminst(const std::string& input_filename,
 
   mCRL2log(log::verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
 
-  mcrl2::data::rewriter r(lps_specification.data());
+  mcrl2::data::rewriter r(lps_specification.data(), rewrite_strategy);
   lps::suminst_algorithm<data::rewriter>(lps_specification, r, sorts, tau_summands_only).run();
   lps_specification.save(output_filename);
 }

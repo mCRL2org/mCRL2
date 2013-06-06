@@ -76,6 +76,7 @@ void lpssumelm(const std::string& input_filename,
 
 void lpssuminst(const std::string& input_filename,
                 const std::string& output_filename,
+                const data::rewriter::strategy rewrite_strategy,
                 const std::string& sorts_string,
                 const bool finite_sorts_only,
                 const bool tau_summands_only);

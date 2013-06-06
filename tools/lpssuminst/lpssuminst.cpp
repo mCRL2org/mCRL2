@@ -76,6 +76,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
     {
       mcrl2::lps::lpssuminst(m_input_filename,
                              m_output_filename,
+                             rewrite_strategy(),
                              m_sorts_string,
                              m_finite_sorts_only,
                              m_tau_summands_only);
