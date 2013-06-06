@@ -26,38 +26,11 @@ namespace process {
 
 namespace detail {
 
-typedef std::map<process_instance, std::vector<std::pair<allow_set, process_instance> > > push_allow_map;
-
-inline
-std::string print_W(const push_allow_map& W)
-{
-  std::ostringstream out;
-  out << "{";
-  for (auto i = W.begin(); i != W.end(); ++i)
-  {
-    if (i != W.begin())
-    {
-      out << ", ";
-    }
-    const process_instance& P = i->first;
-    const std::vector<std::pair<allow_set, process_instance> >& v = i->second;
-    out << process::pp(P) << " -> " << '(';
-    for (auto j = v.begin(); j != v.end(); ++j)
-    {
-      if (j != v.begin())
-      {
-        out << ", ";
-      }
-      out << "[A = " << j->first << ", Q = " << process::pp(j->second) << "]";
-    }
-    out << ')';
-  }
-  out << "}";
-  return out.str();
-}
-
 struct push_allow_node: public alphabet_node
 {
+  push_allow_node()
+  {}
+
   push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression = process_expression())
     : alphabet_node(alphabet), m_expression(expression)
   {}
@@ -87,6 +60,98 @@ struct push_allow_node: public alphabet_node
 
   process_expression m_expression;
 };
+
+struct wnode
+{
+  wnode(const allow_set& A_, const process_instance& Q_)
+    : A(A_), Q(Q_)
+  {}
+
+  wnode(const allow_set& A_, const process_instance& Q_, const multi_action_name_set& alphabet_)
+    : A(A_), Q(Q_), alphabet(alphabet_)
+  {}
+
+  allow_set A;
+  process_instance Q;
+  multi_action_name_set alphabet;
+};
+
+struct push_allow_map
+{
+  std::map<process_instance, std::vector<wnode> > data;
+
+  // Returns true if (x, A) is in the map. In that case result and alphabet are being set.
+  // Returns false if (x, A) is not in the map. In that case a new entry for (x, A) is created, and result and alphabet are being set.
+  bool find(const process_instance& x, const allow_set& A, push_allow_node& node) const
+  {
+    bool result = false;
+
+    auto i = data.find(x);
+    if (i != data.end())
+    {
+      const std::vector<wnode>& v = i->second;
+      for (auto j = v.begin(); j != v.end(); ++j)
+      {
+        if (A == j->A)
+        {
+          node.m_expression = j->Q;
+          node.alphabet = j->alphabet;
+          result = true;
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  void insert(const process_expression& x, const allow_set& A, const process_instance& Q)
+  {
+    data[x].push_back(wnode(A, Q));
+  }
+
+  void set_alphabet(const process_expression& x, const allow_set& A, const multi_action_name_set& alphabet)
+  {
+    auto i = data.find(x);
+    if (i != data.end())
+    {
+      std::vector<wnode>& v = i->second;
+      for (auto j = v.begin(); j != v.end(); ++j)
+      {
+        if (A == j->A)
+        {
+          j->alphabet = alphabet;
+          return;
+        }
+      }
+    }
+    throw mcrl2::runtime_error("push_allow_map: entry not found!");
+  }
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const push_allow_map& W)
+{
+  out << "W = {";
+  for (auto i = W.data.begin(); i != W.data.end(); ++i)
+  {
+    if (i != W.data.begin())
+    {
+      out << ", ";
+    }
+    const process_instance& P = i->first;
+    const std::vector<wnode>& v = i->second;
+    for (auto j = v.begin(); j != v.end(); ++j)
+    {
+      if (j != v.begin())
+      {
+        out << ", ";
+      }
+      out << "(P = " << process::pp(P) << ", " << "A = " << j->A << ", Q = " << process::pp(j->Q) << ")";
+    }
+  }
+  out << "}";
+  return out;
+}
 
 inline
 std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
@@ -162,7 +227,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     {
       text1 = text1 + " = ";
     }
-    mCRL2log(log::debug) << msg << "push(" << A << ", " << process::pp(x) << ", " << print_W(W) << ") = "
+    mCRL2log(log::debug) << msg << "push(" << A << ", " << process::pp(x) << ", " << W << ") = "
       << text1
       << process::pp(result.m_expression) << " with alphabet(" << process::pp(result.m_expression) << ") = " << lps::pp(result.alphabet) << std::endl;
   }
@@ -199,19 +264,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     // Let x = P(e)
     // The corresponding equation is P(d) = p
-    auto i = W.find(x);
-    if (i != W.end())
+    push_allow_node node;
+    if (W.find(x, A, node))
     {
-      const std::vector<std::pair<allow_set, process_instance> >& v = i->second;
-      for (auto j = v.begin(); j != v.end(); ++j)
-      {
-        if (A == j->first)
-        {
-          multi_action_name_set A1;
-          push(push_allow_node(A1, j->second));
-          return;
-        }
-      }
+      push(node);
+      return;
     }
 
     const process_equation& eqn = find_equation(equations, x.identifier());
@@ -221,15 +278,21 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     const process_expression& p = eqn.expression();
 
     // Add (P(e), A, P1(e)) to W
-    W[x].push_back(std::make_pair(A, process_instance(P1, x.actual_parameters())));
+    process_instance P1e(P1, x.actual_parameters());
+    W.insert(x, A, P1e);
 
-    push_allow_node node = push_allow(p, A, equations, W, id_generator);
-    node.apply_allow(A);
-    push(node);
+    node = push_allow(p, A, equations, W, id_generator);
 
     // create a new equation P1(d) = p1
     process_equation eqn1(P1, d, node.m_expression);
     equations.push_back(eqn1);
+
+    node.m_expression = P1e;
+    node.apply_allow(A);
+    push(node);
+
+    // put the alphabet of P1e in W
+    W.set_alphabet(x, A, node.alphabet);
 
     log(x);
   }
