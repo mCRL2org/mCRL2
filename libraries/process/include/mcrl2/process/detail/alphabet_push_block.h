@@ -146,7 +146,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     process_identifier P1(name, x.identifier().sorts());
     const process_expression& p = eqn.expression();
 
-    // Add (P(e), A, P1(e)) to W
+    // Add (P(e), B, P1(e)) to W
     W[x].push_back(std::make_pair(B, process_instance(P1, x.actual_parameters())));
 
     process_expression p1 = push_block(B, p, equations, W, id_generator);

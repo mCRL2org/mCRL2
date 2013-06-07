@@ -38,82 +38,82 @@ struct communicating_lpe_traverser: public process_expression_traverser<communic
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
 
-  void enter(const process_instance&)
+  void enter(const process::process_instance&)
   {
     result = false;
   }
 
-  void enter(const process_instance_assignment&)
+  void enter(const process::process_instance_assignment&)
   {
     result = false;
   }
 
-  void enter(const sum&)
+  void enter(const process::sum&)
   {
     result = false;
   }
 
-  void enter(const block&)
+  void enter(const process::block&)
   {
   }
 
-  void enter(const hide&)
+  void enter(const process::hide&)
   {
   }
 
-  void enter(const rename&)
+  void enter(const process::rename&)
   {
   }
 
-  void enter(const comm&)
+  void enter(const process::comm&)
   {
   }
 
-  void enter(const allow&)
+  void enter(const process::allow&)
   {
   }
 
-  void enter(const sync&)
+  void enter(const process::sync&)
   {
   }
 
-  void enter(const at&)
-  {
-    result = false;
-  }
-
-  void enter(const seq&)
+  void enter(const process::at&)
   {
     result = false;
   }
 
-  void enter(const if_then&)
+  void enter(const process::seq&)
   {
     result = false;
   }
 
-  void enter(const if_then_else&)
+  void enter(const process::if_then&)
   {
     result = false;
   }
 
-  void enter(const bounded_init&)
+  void enter(const process::if_then_else&)
   {
     result = false;
   }
 
-  void enter(const merge&)
+  void enter(const process::bounded_init&)
+  {
+    result = false;
+  }
+
+  void enter(const process::merge&)
   {
   }
 
-  void enter(const left_merge&)
+  void enter(const process::left_merge&)
   {
     result = false;
   }
 };
 
 inline
-bool is_communicating_lpe(const process_expression& x)
+bool is_communicating_lpe(const process::process_expression& x)
 {
   communicating_lpe_traverser f;
   f(x);

@@ -59,6 +59,7 @@ process_expression expand_rhs(const process::process_instance& x, const std::vec
 }
 
 // Expands the assignments in x
+inline
 process_instance expand_assignments(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
 {
   const process_equation& eqn = find_equation(equations, x.identifier());
@@ -559,7 +560,7 @@ multi_action_name_set sync(const multi_action_name_set& A1, const multi_action_n
 }
 
 inline
-multi_action_name_set comm(const communication_expression_list& C, const multi_action_name_set& A, bool A_includes_subsets = false)
+multi_action_name_set comm(const communication_expression_list& C, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result = A;
 
@@ -573,7 +574,7 @@ multi_action_name_set comm(const communication_expression_list& C, const multi_a
 }
 
 inline
-multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A, bool A_includes_subsets = false)
+multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result = A;
   for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
@@ -585,7 +586,7 @@ multi_action_name_set comm_inverse(const communication_expression_list& C, const
 }
 
 template <typename IdentifierContainer>
-multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool A_includes_subsets = false)
+multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name m(I.begin(), I.end());
   multi_action_name_set result;
@@ -603,7 +604,7 @@ multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name
 
 /// \brief Computes R(A)
 inline
-multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
+multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result;
   for (multi_action_name_set::const_iterator i = A.begin(); i != A.end(); ++i)
@@ -615,7 +616,7 @@ multi_action_name_set rename(const rename_expression_list& R, const multi_action
 
 /// \brief Computes R^[-1}(A)
 inline
-multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets = false)
+multi_action_name_set rename_inverse(const rename_expression_list& R, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
 

@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_PARSE_H
 #define MCRL2_PROCESS_PARSE_H
 
-//#define MCRL2_NEW_ALPHABET_REDUCE
+#define MCRL2_NEW_ALPHABET_REDUCE
 
 #include <iostream>
 #include <string>
