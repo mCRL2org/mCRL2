@@ -76,6 +76,7 @@ void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core
 } // namespace detail
 
 /// \brief Renames summand variables such that there are no name clashes between summand variables and process parameters
+inline
 void resolve_summand_variable_name_clashes(specification& spec)
 {
   linear_process& proc = spec.process();
