@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Friday, May 31, 2013 11:31:51}
+%TCIDATA{LastRevised=Friday, June 07, 2013 10:30:49}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -436,7 +436,9 @@ bisimulation equivalent to $\nabla _{A}(p)$, and $push_{\partial }(B,p)$ is
 bisimulation equivalent to $\partial _{B}(p)$. The goal of these mappings is
 to push allow and block expressions deeply inside process expressions. It is
 important to know that an allow set $A$ in the expression $\nabla _{A}(p)$
-implicitly contains the empty multi action $\tau $.%
+implicitly contains the empty multi action $\tau $. Let $\mathcal{E}$ $%
+=\{P_{1}(d)=p_{1},\ldots ,P_{n}(d)=p_{n}\}$ be a sequence of process
+equations.%
 \[
 \begin{tabular}{lll}
 $push(p)$ & $=$ & $p$ if $p$ is a pCRL expression \\ 
@@ -453,165 +455,169 @@ $push(\Gamma _{C}(p))$ & $=$ & $\Gamma _{C}\left( push\left( p\right)
 $push(\nabla _{V}(p))$ & $=$ & $push_{\nabla }(V,p)$%
 \end{tabular}%
 \]%
+We assume that $P_{A,e}^{\nabla }$ is a unique name for every $P\in
+\{P_{1},\ldots ,P_{n}\}$, multi action name set $A$ and sequence of data
+expressions $e$.%
 \[
-\begin{tabular}{lll}
-$push_{\nabla }\left( A,\overline{a},W\right) $ & $=$ & $\left\{ 
+\begin{tabular}[t]{lll}
+$push_{\nabla }\left( A,\overline{a}\right) $ & $=$ & $\left\{ 
 \begin{array}{ll}
 \overline{a} & \text{if }N(\overline{a})\in A \\ 
 \delta  & \text{otherwise}%
 \end{array}%
 \right. $ \\ 
-$push_{\nabla }\left( A,P\left( e\right) ,W\right) $ & $=$ & $%
+$push_{\nabla }\left( A,P\left( e\right) \right) $ & $=$ & $%
 \begin{array}{l}
-\left\{ 
-\begin{array}{ll}
-Q(e) & \text{if }((P(e),Q(e))\in W \\ 
-P^{\prime }(e) & \text{if }\forall (x,y)\in W:x\neq P(e),%
-\end{array}%
-\right.  \\ 
-\text{where }P(d)=p\text{ is the equation of }P\text{,} \\ 
-\text{and where }P^{\prime }(d)=push_{\nabla }\left( A,p[d:=e],W\cup
-\{(P(e),P^{\prime }(e))\}\right) \text{ is a new equation}%
+P_{A,e}^{\nabla }(e) \\ 
+\text{where }P(d)=p\text{ is the equation of }P\text{, and} \\ 
+\text{where }P_{A,e}^{\nabla }(d)=push_{\nabla }\left( A,p\right) \text{ is
+a new equation}%
 \end{array}%
 $ \\ 
-$push_{\nabla }\left( A,\delta ,W\right) $ & $=$ & $\delta $ \\ 
-$push_{\nabla }\left( A,\tau ,W\right) $ & $=$ & $\tau $ \\ 
-$push_{\nabla }\left( A,p+q,W\right) $ & $=$ & $push_{\nabla }\left(
-A,p,W\right) +push_{\nabla }\left( A,q,W\right) $ \\ 
-$push_{\nabla }\left( A,p\cdot q,W\right) $ & $=$ & $push_{\nabla }\left(
-A,p,W\right) \cdot push_{\nabla }\left( A,q,W\right) $ \\ 
-$push_{\nabla }\left( A,c\rightarrow p,W\right) $ & $=$ & $c\rightarrow
-push_{\nabla }\left( A,p,W\right) $ \\ 
-$push_{\nabla }\left( A,c\rightarrow p\diamond q,W\right) $ & $=$ & $%
-c\rightarrow push_{\nabla }\left( A,p,W\right) \diamond push_{\nabla }\left(
-A,q,W\right) $ \\ 
-$push_{\nabla }\left( A,\Sigma _{d:D}p,W\right) $ & $=$ & $\Sigma
-_{d:D}push_{\nabla }\left( A,p,W\right) $ \\ 
-$push_{\nabla }\left( A,p\at t,W\right) $ & $=$ & $push_{\nabla }\left(
-A,p,W\right) \at t$ \\ 
-$push_{\nabla }\left( A,p\ll q,W\right) $ & $=$ & $push_{\nabla }\left(
-A,p,W\right) \ll push_{\nabla }\left( A,q,W\right) $ \\ 
-$push_{\nabla }(A,p\parallel q,W)$ & $=$ & $\nabla _{A}(p^{\prime }\parallel
-q^{\prime })\text{ where}\left\{ \text{ }%
+$push_{\nabla }\left( A,\delta \right) $ & $=$ & $\delta $ \\ 
+$push_{\nabla }\left( A,\tau \right) $ & $=$ & $\tau $ \\ 
+$push_{\nabla }\left( A,p+q\right) $ & $=$ & $push_{\nabla }\left(
+A,p\right) +push_{\nabla }\left( A,q\right) $ \\ 
+$push_{\nabla }\left( A,p\cdot q\right) $ & $=$ & $push_{\nabla }\left(
+A,p\right) \cdot push_{\nabla }\left( A,q\right) $ \\ 
+$push_{\nabla }\left( A,c\rightarrow p\right) $ & $=$ & $c\rightarrow
+push_{\nabla }\left( A,p\right) $ \\ 
+$push_{\nabla }\left( A,c\rightarrow p\diamond q\right) $ & $=$ & $%
+c\rightarrow push_{\nabla }\left( A,p\right) \diamond push_{\nabla }\left(
+A,q\right) $ \\ 
+$push_{\nabla }\left( A,\Sigma _{d:D}p\right) $ & $=$ & $\Sigma
+_{d:D}push_{\nabla }\left( A,p\right) $ \\ 
+$push_{\nabla }\left( A,p\at t\right) $ & $=$ & $push_{\nabla }\left(
+A,p\right) \at t$ \\ 
+$push_{\nabla }\left( A,p\ll q\right) $ & $=$ & $push_{\nabla }\left(
+A,p\right) \ll push_{\nabla }\left( A,q\right) $ \\ 
+$push_{\nabla }(A,p\parallel q)$ & $=$ & $\mathsf{allow}(A,p^{\prime
+}\parallel q^{\prime })\text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(A^{\subseteq },p,\emptyset ) \\ 
-q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime
-}),q,\emptyset )%
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
+q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
 \right. $ \\ 
-$push_{\nabla }(A,p\leftmerge q,W)$ & $=$ & $\nabla _{A}(p^{\prime }%
+$push_{\nabla }(A,p\leftmerge q)$ & $=$ & $\mathsf{allow}(A,p^{\prime }%
 \leftmerge q^{\prime })\text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(A^{\subseteq },p,\emptyset ) \\ 
-q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime
-}),q,\emptyset )%
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
+q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
 \right. $ \\ 
-$push_{\nabla }(A,p\mid q,W)$ & $=$ & $\nabla _{A}(p^{\prime }\mid q^{\prime
-})$ where$\left\{ \text{ }%
+$push_{\nabla }(A,p\mid q)$ & $=$ & $\mathsf{allow}(A,p^{\prime }\mid
+q^{\prime })$ where$\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(A^{\subseteq },p,\emptyset ) \\ 
-q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime
-}),q,\emptyset )%
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
+q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
 \right. $ \\ 
-$push_{\nabla }(A,\rho _{R}(p),W)$ & $=$ & $\rho _{R}(p^{\prime })$ where $%
-p^{\prime }=$ $push_{\nabla }(R^{-1}(A),p,\emptyset )$ \\ 
-$push_{\nabla }(A,\partial _{B}(p),W)$ & $=$ & $push_{\nabla }(\partial
-_{B}(A),p,\emptyset )$ \\ 
-$push_{\nabla }(A,\tau _{I}(p),W)$ & $=$ & $\tau _{I}(p^{\prime })$ where $%
-p^{\prime }=push_{\nabla }(\tau _{I}^{-1}(A),p,\emptyset )$ \\ 
-$push_{\nabla }(A,\Gamma _{C}(p),W)$ & $=$ & $\nabla _{A}(\Gamma
-_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(C^{-1}(A),p,\emptyset )
-$ \\ 
-$push_{\nabla }(A,\nabla _{V}(p),W)$ & $=$ & $push_{\nabla }(A\cap
-V,p,\emptyset )$%
+$push_{\nabla }(A,\rho _{R}(p))$ & $=$ & $\rho _{R}(p^{\prime })$ where $%
+p^{\prime }=$ $push_{\nabla }(R^{-1}(A),p)$ \\ 
+$push_{\nabla }(A,\partial _{B}(p))$ & $=$ & $push_{\nabla }(\partial
+_{B}(A),p)$ \\ 
+$push_{\nabla }(A,\tau _{I}(p))$ & $=$ & $\tau _{I}(p^{\prime })$ where $%
+p^{\prime }=push_{\nabla }(\tau _{I}^{-1}(A),p)$ \\ 
+$push_{\nabla }(A,\Gamma _{C}(p))$ & $=$ & $\mathsf{allow}(A,\Gamma
+_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(C^{-1}(A),p)$ \\ 
+$push_{\nabla }(A,\nabla _{V}(p))$ & $=$ & $push_{\nabla }(A\cap V,p),$%
 \end{tabular}%
-\]
+\]%
+where%
+\[
+\begin{array}{lll}
+\mathsf{allow}(A,p) & = & \left\{ 
+\begin{array}{ll}
+p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
+\nabla _{A\cap \alpha (p)}(p) & \text{otherwise}%
+\end{array}%
+\right. 
+\end{array}%
+\]%
+Note that the alphabet $\alpha (p)$ is computed on the fly during the
+computation of $push_{\nabla }\left( A,p\right) $.
 
-\paragraph{Example}
+\paragraph{Example 1}
 
 Let $P=(a+b)\cdot P$. Then $push_{\nabla }\left( \{a\},P,\emptyset \right)
 =P^{\prime }$, with $P^{\prime }=push_{\nabla }\left( \{a\},(a+b)\cdot
-P,\{(P,P^{\prime })\}\right) =push_{\nabla }\left(
-\{a\},(a+b),\{(P,P^{\prime })\}\right) \cdot push_{\nabla }\left(
-\{a\},P,\{(P,P^{\prime })\}\right) =\cdots =a\cdot P^{\prime }$.
+P,\{(P,\{a\},P^{\prime })\}\right) =push_{\nabla }\left(
+\{a\},(a+b),\{(P,\{a\},P^{\prime })\}\right) \cdot push_{\nabla }\left(
+\{a\},P,\{(P,\{a\},P^{\prime })\}\right) =\cdots =a\cdot P^{\prime }$.
 
-\paragraph{Remark}
+\paragraph{Example 2}
 
-Note that the logical way to handle a process instance $P(e)$ is as follows:%
+Let $P=a\cdot \nabla _{\{a\}}(P)$. Then $push_{\nabla }\left(
+\{a\},P,\emptyset \right) =P^{\prime }$, with $P^{\prime }=push_{\nabla
+}\left( \{a\},a\cdot \nabla _{\{a\}}(P),\{(P,\{a\},P^{\prime })\}\right)
+=push_{\nabla }\left( \{a\},a,\{(P,\{a\},P^{\prime })\}\right) \cdot
+push_{\nabla }\left( \{a\},\nabla _{\{a\}}(P),\{(P,\{a\},P^{\prime
+})\}\right) =\cdots =a\cdot P^{\prime }$.
+
+We assume that $P_{A,e}^{\partial }$ is a unique name for every $P\in
+\{P_{1},\ldots ,P_{n}\}$, multi action name set $A$ and sequence of data
+expressions $e$.%
 \[
 \begin{tabular}{lll}
-$push_{\nabla }\left( A,P\left( e\right) ,W\right) $ & $=$ & $%
-\begin{array}{l}
-\left\{ 
-\begin{array}{ll}
-\nabla _{A}\left( P(e)\right) & \text{if }P\in W \\ 
-push_{\nabla }\left( A,p[d:=e],W\cup \{(P,P)\}\right) & \text{if }P\notin W,%
-\end{array}%
-\right. \\ 
-\text{ where }P(d)=p\text{ is the equation of }P%
-\end{array}%
-$%
-\end{tabular}%
-\]%
-However, the linearization algorithm in mCRL2 prohibits the occurrence of an
-allow operator within the scope of a pCRL expression. Something similar is
-the case for the block operator.%
-\[
-\begin{tabular}{lll}
-$push_{\partial }(B,\overline{a},W)$ & $=$ & $\left\{ \text{ }%
+$push_{\partial }(B,\overline{a})$ & $=$ & $\left\{ \text{ }%
 \begin{array}{lll}
 \overline{a} &  & \text{if }N(\overline{a})\cap B=\emptyset \\ 
 \delta &  & \text{otherwise}%
 \end{array}%
 \right. $ \\ 
-$push_{\partial }(B,P(e),W)$ & $=$ & $%
+$push_{\partial }(B,P(e))$ & $=$ & $%
 \begin{array}{l}
-\left\{ 
-\begin{array}{ll}
-P(e) & \text{if }P\in W \\ 
-\partial _{B}\left( push_{\partial }\left( B,p[d:=e],W\cup \{P\}\right)
-\right) & \text{if }P\notin W,%
-\end{array}%
-\right. \\ 
-\text{ where }P(d)=p\text{ is the equation of }P%
+P_{B,e}^{\partial }(e) \\ 
+\text{where }P(d)=p\text{ is the equation of }P\text{, and} \\ 
+\text{where }P_{B,e}^{\partial }(d)=push_{\partial }\left( B,p\right) \text{
+is a new equation}%
 \end{array}%
 $ \\ 
-$push_{\partial }(B,\delta ,W)$ & $=$ & $\delta $ \\ 
-$push_{\partial }(B,\tau ,W)$ & $=$ & $\tau $ \\ 
-$push_{\partial }(B,p+q,W)$ & $=$ & $push_{\partial }(B,p,W)+push_{\partial
-}(B,q,W)$ \\ 
-$push_{\partial }(B,p\cdot q,W)$ & $=$ & $push_{\partial }(B,p,W)\cdot
-push_{\partial }(B,q,W)$ \\ 
-$push_{\partial }(B,c\rightarrow p,W)$ & $=$ & $c\rightarrow push_{\partial
-}(B,p,W)$ \\ 
-$push_{\partial }(B,c\rightarrow p\diamond q,W)$ & $=$ & $c\rightarrow
-push_{\partial }(B,p,W)\diamond push_{\partial }(B,q,W)$ \\ 
-$push_{\partial }(B,\Sigma _{d:D}p,W)$ & $=$ & $\Sigma _{d:D}push_{\partial
-}(B,p,W)$ \\ 
-$push_{\partial }(B,p\at t,W)$ & $=$ & $push_{\partial }(B,p,W)\at t$ \\ 
-$push_{\partial }(B,p\ll q,W)$ & $=$ & $push_{\partial }(B,p,W)\ll
-push_{\partial }(B,q,W)$ \\ 
-$push_{\partial }(B,p\parallel q,W)$ & $=$ & $push_{\partial }\left(
-B,p,W\right) \parallel push_{\partial }\left( B,q,W\right) $ \\ 
-$push_{\partial }(B,p\leftmerge q,W)$ & $=$ & $push_{\partial }\left(
-B,p,W\right) \leftmerge push_{\partial }\left( B,q,W\right) $ \\ 
-$push_{\partial }(B,p\mid q,W)$ & $=$ & $push_{\partial }\left( B,p,W\right)
-\mid push_{\partial }\left( B,q,W\right) $ \\ 
-$push_{\partial }(B,\rho _{R}(p),W)$ & $=$ & $\rho _{R}\left( R^{-1}\left(
+$push_{\partial }(B,\delta )$ & $=$ & $\delta $ \\ 
+$push_{\partial }(B,\tau )$ & $=$ & $\tau $ \\ 
+$push_{\partial }(B,p+q)$ & $=$ & $push_{\partial }(B,p)+push_{\partial
+}(B,q)$ \\ 
+$push_{\partial }(B,p\cdot q)$ & $=$ & $push_{\partial }(B,p)\cdot
+push_{\partial }(B,q)$ \\ 
+$push_{\partial }(B,c\rightarrow p)$ & $=$ & $c\rightarrow push_{\partial
+}(B,p)$ \\ 
+$push_{\partial }(B,c\rightarrow p\diamond q)$ & $=$ & $c\rightarrow
+push_{\partial }(B,p)\diamond push_{\partial }(B,q)$ \\ 
+$push_{\partial }(B,\Sigma _{d:D}p)$ & $=$ & $\Sigma _{d:D}push_{\partial
+}(B,p)$ \\ 
+$push_{\partial }(B,p\at t)$ & $=$ & $push_{\partial }(B,p)\at t$ \\ 
+$push_{\partial }(B,p\ll q)$ & $=$ & $push_{\partial }(B,p)\ll
+push_{\partial }(B,q)$ \\ 
+$push_{\partial }(B,p\parallel q)$ & $=$ & $push_{\partial }\left(
+B,p\right) \parallel push_{\partial }\left( B,q\right) $ \\ 
+$push_{\partial }(B,p\leftmerge q)$ & $=$ & $push_{\partial }\left(
+B,p\right) \leftmerge push_{\partial }\left( B,q\right) $ \\ 
+$push_{\partial }(B,p\mid q)$ & $=$ & $push_{\partial }\left( B,p\right)
+\mid push_{\partial }\left( B,q\right) $ \\ 
+$push_{\partial }(B,\rho _{R}(p))$ & $=$ & $\rho _{R}\left( R^{-1}\left(
 B\right) ,p\right) $ \\ 
-$push_{\partial }(B,\partial _{B_{1}}(p),W)$ & $=$ & $push_{\partial }(B\cup
+$push_{\partial }(B,\partial _{B_{1}}(p))$ & $=$ & $push_{\partial }(B\cup
 B_{1},p)$ \\ 
-$push_{\partial }(B,\tau _{I}(p),W)$ & $=$ & $\tau _{I}\left( push_{\partial
+$push_{\partial }(B,\tau _{I}(p))$ & $=$ & $\tau _{I}\left( push_{\partial
 }\left( B\setminus I,p\right) \right) $ \\ 
-$push_{\partial }(B,\Gamma _{C}(p),W)$ & $=$ & $\partial _{B}\left( \Gamma
-_{C}\left( push_{\partial }\left( B^{\prime },p,W\right) \right) \right) $
-where $B^{\prime }=B\setminus \left\{ b\in B\mid \exists _{\gamma
-\rightarrow c\in C}.b\in \gamma \wedge c\notin B\right\} $ \\ 
-$push_{\partial }(B,\nabla _{V}(p),W)$ & $=$ & $push_{\nabla }(\partial
-_{B}(A),p,\emptyset )$%
+$push_{\partial }(B,\Gamma _{C}(p))$ & $=$ & $\mathsf{block}(B,\Gamma
+_{C}\left( push_{\partial }\left( B^{\prime },p\right) \right) $ where $%
+B^{\prime }=B\setminus \left\{ b\in B\mid \exists _{\gamma \rightarrow c\in
+C}.b\in \gamma \wedge c\notin B\right\} $ \\ 
+$push_{\partial }(B,\nabla _{V}(p))$ & $=$ & $push_{\nabla }(\partial
+_{B}(A),p,\emptyset ),$%
 \end{tabular}%
+\]%
+where%
+\[
+\begin{array}{lll}
+\mathsf{block}(B,p & = & \left\{ 
+\begin{array}{ll}
+p & \text{if }B=\emptyset \\ 
+\partial _{B}(p) & \text{otherwise}%
+\end{array}%
+\right.%
+\end{array}%
 \]
 
 \paragraph{Example 3}
