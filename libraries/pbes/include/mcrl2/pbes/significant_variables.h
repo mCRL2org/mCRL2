@@ -64,17 +64,17 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
     push(data::detail::set_union(left, right));
   }
 
-  void leave(const and_& x)
+  void leave(const and_& /* x */)
   {
     join();
   }
 
-  void leave(const or_& x)
+  void leave(const or_& /* x */)
   {
     join();
   }
 
-  void leave(const imp& x)
+  void leave(const imp& /* x */)
   {
     join();
   }

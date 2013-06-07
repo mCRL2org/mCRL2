@@ -123,6 +123,7 @@ boolean_expression pbes_expression2boolean_expression(const pbes_system::pbes_ex
 /// \param from An input stream
 /// \param b A boolean equation system
 /// \return The input stream
+inline
 std::istream& operator>>(std::istream& from, boolean_equation_system& b)
 {
   pbes_system::pbes p;

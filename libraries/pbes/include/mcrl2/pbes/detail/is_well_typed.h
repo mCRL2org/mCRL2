@@ -35,6 +35,7 @@ namespace detail {
 /// <li>the names of the quantifier variables in the equation are disjoint with the binding variable parameter names</li>
 /// <li>within the scope of a quantifier variable in the formula, no other quantifier variables with the same name may occur</li>
 /// </ul>
+inline
 bool is_well_typed(const pbes_equation& eqn)
 {
   // check 1)

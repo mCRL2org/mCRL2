@@ -163,19 +163,19 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     }
   }
 
-  void leave(const process::delta& /*x*/)
+  void leave(const process::delta& /* x */)
   {
     push(multi_action_name_set());
   }
 
-  void leave(const process::tau& x)
+  void leave(const process::tau& /* x */)
   {
     multi_action_name_set A;
     A.insert(multi_action_name()); // A = { tau }
     push(A);
   }
 
-  void leave(const process::sum& x)
+  void leave(const process::sum& /* x */)
   {
   }
 
@@ -204,45 +204,45 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
     top().alphabet = alphabet_operations::allow(x.allow_set(), top().alphabet);
   }
 
-  void leave(const process::sync& x)
+  void leave(const process::sync& /* x */)
   {
     join_sync();
   }
 
-  void leave(const process::at& x)
+  void leave(const process::at& /* x */)
   {
   }
 
-  void leave(const process::seq& x)
-  {
-    join();
-  }
-
-  void leave(const process::if_then& x)
-  {
-  }
-
-  void leave(const process::if_then_else& x)
+  void leave(const process::seq& /* x */)
   {
     join();
   }
 
-  void leave(const process::bounded_init& x)
+  void leave(const process::if_then& /* x */)
+  {
+  }
+
+  void leave(const process::if_then_else& /* x */)
   {
     join();
   }
 
-  void leave(const process::merge& x)
+  void leave(const process::bounded_init& /* x */)
+  {
+    join();
+  }
+
+  void leave(const process::merge& /* x */)
   {
     join_merge();
   }
 
-  void leave(const process::left_merge& x)
+  void leave(const process::left_merge& /* x */)
   {
     join_merge();
   }
 
-  void leave(const process::choice& x)
+  void leave(const process::choice& /* x */)
   {
     join();
   }

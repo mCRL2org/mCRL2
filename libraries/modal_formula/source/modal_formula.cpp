@@ -9,6 +9,7 @@
 /// \file modal_formula.cpp
 /// \brief
 
+#include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"

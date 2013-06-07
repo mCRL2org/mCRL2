@@ -27,6 +27,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
+inline
 void alphabet(const std::string& input_filename, const std::string& output_filename, bool use_new_implementation)
 {
   std::string text;

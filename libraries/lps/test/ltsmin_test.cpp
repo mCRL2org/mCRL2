@@ -204,6 +204,7 @@ std::string print_vector(const Container& c)
   return print_vector(c.begin(), c.end());
 }
 
+inline
 std::string read_groups(const lps::pins& p)
 {
   std::ostringstream out;
@@ -214,6 +215,7 @@ std::string read_groups(const lps::pins& p)
   return out.str();
 }
 
+inline
 std::string write_groups(const lps::pins& p)
 {
   std::ostringstream out;
@@ -224,6 +226,7 @@ std::string write_groups(const lps::pins& p)
   return out.str();
 }
 
+inline
 void test_dependency_matrix()
 {
   std::string ONEBIT =
@@ -251,7 +254,7 @@ void test_dependency_matrix()
   std::remove(filename.c_str());
 }
 
-int test_main(int argc, char* argv[])
+int test_main(int, char**)
 {
   test_dependency_matrix();
   test_ltsmin("jitty");
