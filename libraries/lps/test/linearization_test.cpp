@@ -887,7 +887,7 @@ BOOST_AUTO_TEST_CASE(process_parameters_with_different_types_can_cause_problems)
   run_linearisation_test_case(spec);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int, char**)
 {
   return 0;
 }

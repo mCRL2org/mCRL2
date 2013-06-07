@@ -362,7 +362,7 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
     return result;
   }
 
-  void operator()(data::data_equation& x)
+  void operator()(data::data_equation& /* x */)
   {
     throw mcrl2::runtime_error("not implemented yet");
   }

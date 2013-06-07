@@ -333,27 +333,27 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
     push(x);
   }
 
-  void leave(const pbes_system::not_& x)
+  void leave(const pbes_system::not_& /* x */)
   {
     pbes_expression operand = pop();
     push(not_(atermpp::aterm_cast<atermpp::aterm_appl>(operand)));
   }
 
-  void leave(const pbes_system::and_& x)
+  void leave(const pbes_system::and_& /* x */)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(and_(left, right));
   }
 
-  void leave(const pbes_system::or_& x)
+  void leave(const pbes_system::or_& /* x */)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
     push(or_(left, right));
   }
 
-  void leave(const pbes_system::imp& x)
+  void leave(const pbes_system::imp& /* x */)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();

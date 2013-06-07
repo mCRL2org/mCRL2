@@ -404,7 +404,7 @@ void test_remove_may_transitions(const std::string& must_text, const std::string
     const std::set<detail::dependency_vertex*>& S = u.outgoing_edges;
     for (std::set<detail::dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
     {
-      const detail::dependency_vertex& v = **j;
+      // const detail::dependency_vertex& v = **j;
     }
   }
 }
@@ -477,7 +477,7 @@ void test_local_stategraph()
   pbes_system::detail::local_reset_variables_algorithm(p).run();
 }
  
-int test_main(int argc, char** argv)
+int test_main(int, char**)
 {
   log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
   test_guard();
