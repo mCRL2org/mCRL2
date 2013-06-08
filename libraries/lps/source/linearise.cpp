@@ -3934,7 +3934,6 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression find_(
       const variable s,
-      const variable_list pars,
       const assignment_list args,
       const stacklisttype& stack,
       const variable_list vars,
@@ -3977,7 +3976,7 @@ class specification_basic_type:public boost::noncopyable
         return t2;
       }
       data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,regular);
-      data_expression rhs=find_(parlist.front(),pars,args,stack,vars,regular);
+      data_expression rhs=find_(parlist.front(),args,stack,vars,regular);
       /* if (parlist.front()!=rhs)
       {
         result.push_front(assignment(parlist.front(),rhs));
@@ -4032,7 +4031,6 @@ class specification_basic_type:public boost::noncopyable
       const assignment_list args,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pCRLprcs,
-      const variable_list vars,
       bool singlestate)
     {
       assignment_list t=find_dummy_arguments(objectdata[objectIndex(procId)].parameters,stack.parameters,args);
@@ -4070,7 +4068,6 @@ class specification_basic_type:public boost::noncopyable
       const process_expression &t,
       const stacklisttype& stack,
       const std::vector < process_identifier > &pcrlprcs,
-      const variable_list &vars,
       const bool singlestate)
     {
       /* t is a sequential composition of process variables */
@@ -4089,7 +4086,6 @@ class specification_basic_type:public boost::noncopyable
                             t1,
                             stack,
                             pcrlprcs,
-                            vars,
                             singlestate);
       }
 
@@ -4156,7 +4152,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (regular)
       {
-        return make_procargs_regular(t,stack,pcrlprcs,vars,singlestate);
+        return make_procargs_regular(t,stack,pcrlprcs,singlestate);
       }
       /* return a stackframe */
       data_expression sf=make_procargs_stack(t,stack,pcrlprcs,vars);
@@ -4257,8 +4253,7 @@ class specification_basic_type:public boost::noncopyable
       const stacklisttype& stack,
       const std::vector < process_identifier > &pcrlprcs,
       const bool regular,
-      const bool singlecontrolstate,
-      const variable_list &parameters)
+      const bool singlecontrolstate)
     {
       int i;
       for (i=1 ; pcrlprcs[i-1]!=initialProcId ; ++i) {};
@@ -4292,11 +4287,9 @@ class specification_basic_type:public boost::noncopyable
     {
       if (singlestate)
       {
-        // return stack.parameters;
         return assignment_list();
       }
 
-      // return variable_list(processencoding(1,data_expression_list(stack.parameters),stack)); /* Take 1 as dummy indicator */
       return processencoding(1,assignment_list(),stack); /* Take 1 as dummy indicator */
     }
 
@@ -4304,7 +4297,6 @@ class specification_basic_type:public boost::noncopyable
     void insert_summand(
       action_summand_vector &action_summands,
       deadlock_summand_vector &deadlock_summands,
-      const variable_list &parameters,
       const variable_list &sumvars,
       const data_expression &condition,
       const action_list &multiAction,
@@ -4343,7 +4335,6 @@ class specification_basic_type:public boost::noncopyable
       deadlock_summand_vector& deadlock_summands,
       process_expression summandterm,
       const std::vector < process_identifier> &pCRLprocs,
-      const variable_list &parameters,
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate)
@@ -4438,7 +4429,7 @@ class specification_basic_type:public boost::noncopyable
           }
         }
 
-        insert_summand(action_summands,deadlock_summands,parameters,
+        insert_summand(action_summands,deadlock_summands,
                        sumvars,condition1,multiAction,
                        atTime,procargs,has_time,is_delta_summand);
         return;
@@ -4486,7 +4477,7 @@ class specification_basic_type:public boost::noncopyable
         {
           throw mcrl2::runtime_error("terminating processes should not exist when using the regular flag");
         }
-        insert_summand(action_summands,deadlock_summands,parameters,
+        insert_summand(action_summands,deadlock_summands,
                        sumvars,
                        condition1,
                        multiAction,
@@ -4502,7 +4493,6 @@ class specification_basic_type:public boost::noncopyable
 
       insert_summand(
                 action_summands,deadlock_summands,
-                parameters,
                 sumvars,
                 condition1,
                 multiAction,
@@ -4539,7 +4529,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        add_summands(procId,action_summands,deadlock_summands,body,pCRLprocs,pars,stack,
+        add_summands(procId,action_summands,deadlock_summands,body,pCRLprocs,stack,
                      regular,singlestate);
       }
     }
@@ -5985,8 +5975,7 @@ class specification_basic_type:public boost::noncopyable
         parameters=make_list(stack.stackvar);
       }
 
-      init=make_initialstate(procId,stack,pCRLprocs,
-                             regular,singlecontrolstate,parameters);
+      init=make_initialstate(procId,stack,pCRLprocs,regular,singlecontrolstate);
 
       collectsumlist(action_summands,deadlock_summands,pCRLprocs,parameters,stack,
                      /*(canterminate&&objectdata[n].canterminate),*/regular,

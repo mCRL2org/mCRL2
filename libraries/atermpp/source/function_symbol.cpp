@@ -405,7 +405,7 @@ function_symbol::function_symbol(const std::string &name, const size_t arity_)
   const size_t free_entry = detail::first_free;
   assert(detail::function_lookup_table_size<detail::function_symbol_table_size);
 
-  if (free_entry!=detail::END_OF_LIST) // There is a free place in function_lookup_table() to store an function_symbol.
+  if (free_entry!=detail::END_OF_LIST) // There is a free place in function_lookup_table() to store a function_symbol.
   {
     assert(detail::first_free<detail::function_lookup_table_size);
     cur=detail::first_free;

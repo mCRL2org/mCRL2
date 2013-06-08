@@ -106,7 +106,7 @@ t
 inline HashNumber hash_number(const detail::_aterm *t)
 {
   const function_symbol &f=t->function();
-  HashNumber hnr = SHIFT(address(f));
+  HashNumber hnr = SHIFT(addressf(f));
 
   const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
   const size_t* end=begin+f.arity();
@@ -212,7 +212,7 @@ inline const _aterm* aterm0(const function_symbol &sym)
 {
   assert(sym.arity()==0);
 
-  HashNumber hnr = SHIFT(address(sym));
+  HashNumber hnr = SHIFT(addressf(sym));
 
   const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
 

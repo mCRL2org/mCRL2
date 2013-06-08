@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "mcrl2/atermpp/detail/function_symbol_constants.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/utilities/detail/memory_utility.h"

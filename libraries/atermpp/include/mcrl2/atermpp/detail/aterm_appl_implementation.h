@@ -36,7 +36,7 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
 {
   const size_t arity = sym.arity();
 
-  HashNumber hnr = SHIFT(address(sym));
+  HashNumber hnr = SHIFT(addressf(sym));
   
   /* The term is already partly constructed initially. If
      it turns out that the term already exists, this skeleton is freed
@@ -108,7 +108,7 @@ template <class Term, class ForwardIterator>
 const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
 {
   const size_t arity = sym.arity();
-  HashNumber hnr = SHIFT(address(sym)); 
+  HashNumber hnr = SHIFT(addressf(sym)); 
 
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
@@ -166,7 +166,7 @@ const _aterm* term_appl1(const function_symbol &sym, const Term &arg0)
   assert(sym.arity()==1);
   CHECK_TERM(arg0);
 
-  HashNumber hnr = COMBINE(SHIFT(address(sym)), arg0);
+  HashNumber hnr = COMBINE(SHIFT(addressf(sym)), arg0);
 
   const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -198,7 +198,7 @@ const _aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Ter
 
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
-  HashNumber hnr = COMBINE(COMBINE(SHIFT(address(sym)), arg0),arg1);
+  HashNumber hnr = COMBINE(COMBINE(SHIFT(addressf(sym)), arg0),arg1);
 
   const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -234,7 +234,7 @@ const _aterm* term_appl3(const function_symbol &sym, const Term &arg0, const Ter
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
   CHECK_TERM(arg2);
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(SHIFT(address(sym)), arg0),arg1),arg2);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0),arg1),arg2);
 
   const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -272,7 +272,7 @@ const _aterm *term_appl4(const function_symbol &sym, const Term &arg0, const Ter
   CHECK_TERM(arg3);
   assert(sym.arity()==4);
 
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(address(sym)), arg0), arg1), arg2), arg3);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0), arg1), arg2), arg3);
 
   const detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -317,7 +317,7 @@ const _aterm* term_appl5(const function_symbol &sym, const Term &arg0, const Ter
   CHECK_TERM(arg3);
 
 
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(address(sym)), arg0), arg1), arg2), arg3), arg4);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0), arg1), arg2), arg3), arg4);
 
   const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -364,7 +364,7 @@ const _aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Ter
   CHECK_TERM(arg4);
   CHECK_TERM(arg5);
 
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(address(sym)), arg0), arg1), arg2), arg3), arg4), arg5);
+  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0), arg1), arg2), arg3), arg4), arg5);
 
   const detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)

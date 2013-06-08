@@ -67,9 +67,8 @@ public:
     return m_array[0] & (((size_t)1 << arity) - 1);
   }
 
-  void set_value(size_t arity, size_t val)
+  void set_value(size_t val)
   {
-    assert(arity <= NF_MAX_ARITY || val == 0);
     m_array[0] = val;
   } 
 

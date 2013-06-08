@@ -24,7 +24,7 @@ class function_symbol;
 
 namespace detail
 {
-size_t address(const function_symbol &t);
+size_t addressf(const function_symbol &t);
 
 /* The type _function_symbol is used to store information about function_symbols. */
 struct _function_symbol

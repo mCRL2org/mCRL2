@@ -24,7 +24,7 @@ namespace atermpp
 class function_symbol
 {
 
-  friend size_t detail::address(const function_symbol &t);
+  friend size_t detail::addressf(const function_symbol &t);
   protected:
 #ifdef FUNCTION_SYMBOL_AS_POINTER
     const detail::_function_symbol* m_function_symbol;

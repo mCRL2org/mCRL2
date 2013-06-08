@@ -2740,8 +2740,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Print defs
   //
   fprintf(f,
-          "#define isAppl(x) (atermpp::detail::address(atermpp::aterm_cast<atermpp::aterm_appl>(x).function()) != %li)\n"
-          "\n", atermpp::detail::address(data::variable("x",data::sort_bool::bool_()).function())
+          "#define isAppl(x) (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(x).function()) != %li)\n"
+          "\n", atermpp::detail::addressf(data::variable("x",data::sort_bool::bool_()).function())
          );
 
   // Make a functional push_front to be used in the where clause.
@@ -2912,7 +2912,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             // Implement strategy
               if (0 < a)
               {
-                nfs_a.set_value(a,nfs);
+                nfs_a.set_value(nfs);
               }
               implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs);
             }
@@ -3100,7 +3100,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 //       "  std::vector<aterm> args(arity_u+arity_t-1);\n"
       "  new (&args[0]) aterm(head1);\n"
       "  size_t function_index;\n"
-      "  if ((atermpp::detail::address(aterm_cast<aterm_appl>(head1).function())==%ld) && ((function_index = aterm_int(head1).value()) < %zu) )\n"
+      "  if ((atermpp::detail::addressf(aterm_cast<aterm_appl>(head1).function())==%ld) && ((function_index = aterm_int(head1).value()) < %zu) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
@@ -3140,7 +3140,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    return result;\n"
       "  }\n"
       "}\n\n",
-      atermpp::detail::address(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity
+      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity
       );
 
   fprintf(f,
@@ -3195,7 +3195,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    // Term t has the shape #REWR#(t1,...,tn)\n"
       "    const atermpp::aterm &head = t[0];\n"
-      "    if (atermpp::detail::address(atermpp::aterm_cast<atermpp::aterm_appl>(head).function())==%ld)\n"
+      "    if (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(head).function())==%ld)\n"
       "    {\n"
       "      const size_t function_index = atermpp::aterm_cast<const atermpp::aterm_int>(head).value();\n"
       "      if (function_index < %zu )\n"
@@ -3217,7 +3217,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
-      atermpp::detail::address(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity);
+      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity);
 
 
   fclose(f);
