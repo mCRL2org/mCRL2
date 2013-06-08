@@ -60,11 +60,12 @@ static sort_expression MinType(const sort_expression_list &TypeList);
 static sort_expression replace_possible_sorts(const sort_expression &Type);
 
 // Insert an element in the list provided, it did not already occur in the list.
-inline sort_expression_list insert_sort_unique(const sort_expression_list &list, const sort_expression &el)
+template<class S>
+inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S> &list, const S &el)
 {
   if (std::find(list.begin(),list.end(), el) == list.end())
   {
-    sort_expression_list result=list;
+    atermpp::term_list<S> result=list;
     result.push_front(el);
     return result;
   }
@@ -516,101 +517,6 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
   }
 
   throw mcrl2::runtime_error("Upcasting " + pp(Type) + " to a number fails");
-}
-
-void mcrl2::data::data_type_checker::ErrorMsgCannotCast(
-                        sort_expression CandidateType,
-                        data_expression_list Arguments,
-                        sort_expression_list ArgumentTypes,
-                        std::string previous_reason)
-{
-  //prints more information about impossible cast.
-  //at this point we know that Arguments cannot be cast to CandidateType. We need to find out why and print.
-  //The code of this routine is weird. It appears to abuse term_list<sort_expression_list> and sort_expression_list,
-  //which appear to be incorrectly assigned to each other. This needs further investigation.
-  assert(Arguments.size()==ArgumentTypes.size());
-
-  /* sort_expression_list CandidateList;
-  if (is_untyped_possible_sorts(CandidateType))
-  {
-    CandidateList=aterm_cast<untyped_possible_sorts>(CandidateType).sorts();
-  }
-  else
-  {
-    CandidateList=make_list<sort_expression>(CandidateType);
-  }
-
-  sort_expression_list NewCandidateList;
-  for (sort_expression_list l=CandidateList; !l.empty(); l=l.tail())
-  {
-    sort_expression Candidate=l.front();
-    if (!is_function_sort(Candidate))
-    {
-      continue;
-    }
-    NewCandidateList.push_front(aterm_cast<sort_expression_list>(Candidate[0]));
-  }
-  CandidateList=reverse(NewCandidateList);
-
-  sort_expression_list CurrentCandidateList=CandidateList;
-  CandidateList=sort_expression_list();
-  while (true)
-  {
-    sort_expression_list NewCurrentCandidateList;
-    sort_expression_list NewList;
-    for (sort_expression_list l=CurrentCandidateList; !l.empty(); l=l.tail())
-    {
-      sort_expression List=l.front();
-      if (!List.empty())
-      {
-        NewList.push_front(List);
-        NewCurrentCandidateList=detail::insert_sort_unique(NewCurrentCandidateList,List);
-      }
-      else
-      {
-        NewCurrentCandidateList.push_front(sort_expression_list());
-      }
-    }
-    if (NewList.empty())
-    {
-      break;
-    }
-    CurrentCandidateList=reverse(NewCurrentCandidateList);
-    CandidateList.push_front(reverse(NewList));
-  }
-  CandidateList=reverse(CandidateList);
-
-  sort_expression_list m=ArgumentTypes;
-  sort_expression_list n=CandidateList;
-  for (data_expression_list l=Arguments; !(l.empty()||m.empty()||n.empty()); l=l.tail(), m=m.tail(), n=n.tail())
-  {
-    sort_expression_list PosTypes=n;
-    sort_expression NeededType=m.front();
-    bool found=true;
-    for (sort_expression_list k=PosTypes; !k.empty(); k=k.tail())
-    {
-      sort_expression temp;
-      if (TypeMatchA(k.front(),NeededType,temp))
-      {
-        found=false;
-        break;
-      }
-    }
-    if (found)
-    {
-      sort_expression Sort;
-      if (PosTypes.size()==1)
-      {
-        Sort=PosTypes.front();
-      }
-      else
-      {
-        Sort=untyped_possible_sorts(sort_expression_list(PosTypes));
-      }
-      throw mcrl2::runtime_error(previous_reason + "\nthis is, for instance, because cannot cast " + pp(l.front()) + " to type " + pp(Sort));
-    }
-  }*/
-  throw mcrl2::runtime_error(previous_reason + "\nfailed to construct additional explanation");
 }
 
 
@@ -2673,10 +2579,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       {
         was_ambiguous=false;
       }
-      else if (data::is_function_symbol(Data)||is_variable(Data))
-      {
-        ErrorMsgCannotCast(Data.sort(),Arguments,ArgumentTypes,e.what());
-      }
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " +
                             pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
     }
@@ -2764,10 +2666,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       if (was_ambiguous)
       {
         was_ambiguous=false;
-      }
-      else
-      {
-        ErrorMsgCannotCast(Data.sort(),Arguments,ArgumentTypes,e.what());
       }
       throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " +
                    pp(application(Data,aterm_cast<data_expression_list>(Arguments))) + " to type " + pp(PosType));
