@@ -52,9 +52,9 @@ inline std::istream& operator>>(std::istream& is, rewrite_strategy& s)
 {
   try
   {
-    std::string str;
-    is >> str;
-    s = parse_rewrite_strategy(str);
+    std::stringbuf buffer;
+    is >> &buffer;
+    s = parse_rewrite_strategy(buffer.str());
   }
   catch(mcrl2::runtime_error&)
   {
