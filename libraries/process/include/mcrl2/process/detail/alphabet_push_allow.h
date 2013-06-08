@@ -483,7 +483,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     log(x, log_left_merge(x, A_sub, A_arrow));
   }
 
-  std::string log_sync(const process::left_merge& x, const allow_set& A_sub, const allow_set& A_arrow)
+  std::string log_sync(const process::sync& x, const allow_set& A_sub, const allow_set& A_arrow)
   {
     std::ostringstream out;
     out << "sync(push(" << A_sub << ", " << process::pp(x.left()) << "), push(" << A_arrow << ", " << process::pp(x.right()) << "))";
