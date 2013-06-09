@@ -92,10 +92,11 @@ class group_information
         {
           if (used_parameters.find(*j) != used_parameters.end())
           {
-            m_group_indices[summand_index++].push_back(j_index);
+            m_group_indices[summand_index].push_back(j_index);
           }
           j_index++;
         }
+        summand_index++;
       }
     }
 
