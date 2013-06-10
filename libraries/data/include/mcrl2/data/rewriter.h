@@ -226,12 +226,12 @@ class rewriter: public basic_rewriter<data_expression>
     {
       substitution_type sigma;
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE: " << d;
+      mCRL2log(log::debug) << "REWRITE: " << d;
 #endif
       data_expression result(m_rewriter->rewrite(d,sigma));
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -245,7 +245,7 @@ class rewriter: public basic_rewriter<data_expression>
     data_expression operator()(const data_expression& d, const SubstitutionFunction& sigma) const
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE " << d << "\n";
+      mCRL2log(log::debug) << "REWRITE " << d << "\n";
 #endif
       substitution_type sigma_with_iterator;
       std::set < variable > free_variables=data::find_free_variables(d);
@@ -257,7 +257,7 @@ class rewriter: public basic_rewriter<data_expression>
       data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
 
 # ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -306,7 +306,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       data_expression t = m_rewriter->rewrite(d,sigma);
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE " << d << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << "REWRITE " << d << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -332,7 +332,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       data_expression t(m_rewriter->rewrite(static_cast< const data_expression& >(d),sigma_with_iterator));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE " << d << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << "REWRITE " << d << " ------------> " << result << std::endl;
 #endif
       return result;
     }
