@@ -41,6 +41,29 @@ variable bool_(std::string name)
   return variable(identifier_string(name), sort_bool::bool_());
 }
 
+void test_search_variable()
+{
+  variable b = bool_("b");
+  variable c = bool_("c");
+  data::variable_vector v;
+  v.push_back(b);
+  v.push_back(c);
+  std::set<variable> s = data::find_all_variables(v);
+  BOOST_CHECK(s.size() == 2);
+  BOOST_CHECK(s.find(b) != s.end());
+  BOOST_CHECK(s.find(c) != s.end());
+  BOOST_CHECK(data::search_variable(v, b));
+  BOOST_CHECK(data::search_variable(v, c));
+
+  data::variable_list l(v.begin(), v.end());
+  s = data::find_all_variables(l);
+  BOOST_CHECK(s.size() == 2);
+  BOOST_CHECK(s.find(b) != s.end());
+  BOOST_CHECK(s.find(c) != s.end());
+  BOOST_CHECK(data::search_variable(v, b));
+  BOOST_CHECK(data::search_variable(v, c));
+}
+
 int test_main(int argc, char* argv[])
 {
   variable n1 = nat("n1");
@@ -119,6 +142,7 @@ int test_main(int argc, char* argv[])
   find_sort_expressions(q1, std::inserter(Z, Z.end()));
   find_sort_expressions(S, std::inserter(Z, Z.end()));
 
+  test_search_variable();
 
   //--- data_specification ---//
   // TODO: discuss whether this test should fail or not
