@@ -41,13 +41,16 @@ class txt2pbes_tool: public input_output_tool
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_normalize = parser.option_argument_as<bool>("normalize");
+      m_normalize = !(0 < parser.options.count("no-normalize"));
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("normalize", make_optional_argument("NAME", "1"), "normalize the result (default true)", 'n');
+      desc.add_option("no-normalize",
+                      "normalization is not applied."
+                      "By default txt2pbes attempts to normalize the PBES, i.e. to "
+                      "remove negations and implications. ", 'n');
     }
 
   public:
