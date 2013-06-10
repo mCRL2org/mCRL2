@@ -532,12 +532,12 @@ void next_state_generator::iterator::increment()
 
       // Reduce condition as much as possible, and give a hint of the original condition in the error message.
       rewriter_expression_t reduced_condition(m_generator->m_rewriter.rewrite_internal(m_summand->condition, *m_substitution));
-      std::string printed_condition(data::pp(m_generator->m_rewriter.convert_from(m_summand->condition)).substr(0, 80));
+      std::string printed_condition(data::pp(m_generator->m_rewriter.convert_from(m_summand->condition)).substr(0, 300));
 
       throw mcrl2::runtime_error("Expression " + data::pp(m_generator->m_rewriter.convert_from(reduced_condition)) +
                                  " does not rewrite to true or false in the condition "
                                  + printed_condition
-                                 + (printed_condition.size() > 80?"...":""));
+                                 + (printed_condition.size() >= 300?"...":""));
     }
 
     m_enumeration_iterator++;
