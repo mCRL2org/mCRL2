@@ -78,7 +78,6 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
 inline
 void alphabet_reduce(process_specification& procspec)
 {
-  expand_process_instance_assignments(procspec);
   procspec.init() = detail::alphabet_reduce(procspec.init(), procspec.equations());
 }
 
