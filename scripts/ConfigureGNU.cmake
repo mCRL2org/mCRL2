@@ -36,11 +36,13 @@ if(NOT MCRL2_CLANG)
   try_add_c_flag(-ftest-coverage           MAINTAINER)
 endif()
 
-# The following is only implemented in clang
-if(MCRL2_CLANG)
-  # We need to add the proper flag to the linker before we try:
-  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
-  try_add_c_flag(-fsanitize=address       MAINTAINER)
+# The following is only implemented in clang, but not on Apple.
+if (NOT APPLE)    
+  if (MCRL2_CLANG)
+    # We need to add the proper flag to the linker before we try:
+     set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
+     try_add_c_flag(-fsanitize=address       MAINTAINER)
+  endif()
 endif()
 
 ##---------------------------------------------------
@@ -73,7 +75,10 @@ try_add_cxx_flag(-Wno-system-headers     MAINTAINER)
 try_add_cxx_flag(-Woverloaded-virtual    MAINTAINER)
 try_add_cxx_flag(-Wwrite-strings         MAINTAINER)
 try_add_cxx_flag(-Wmissing-declarations  MAINTAINER)
-try_add_cxx_flag(-D_GLIBCXX_DEBUG        MAINTAINER)
+# GLIBCXX_DEBUG has a problem with ostringstream on Apple Xcode version 4.2.
+if (NOT APPLE)  
+   try_add_cxx_flag(-D_GLIBCXX_DEBUG        MAINTAINER)
+endif()
 
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
@@ -82,11 +87,12 @@ if(NOT MCRL2_CLANG)
 endif()
 
 # The following is only implemented in clang
-# The following is only implemented in clang
-if(MCRL2_CLANG)
-  # We need to add the proper flag to the linker before we try:
-  set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
-  try_add_cxx_flag(-fsanitize=address       MAINTAINER)
+if (NOT APPLE)
+  if(MCRL2_CLANG)
+    # We need to add the proper flag to the linker before we try:
+    set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
+    try_add_cxx_flag(-fsanitize=address       MAINTAINER)
+  endif()
 endif()
 
 if(BUILD_SHARED_LIBS)
