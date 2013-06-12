@@ -77,7 +77,7 @@ D_ParseNode *d_find_in_tree(D_ParseNode *pn, int symbol);
 char *d_ws_before(D_Parser *p, D_ParseNode *pn); /* points BEFORE leading ws */
 char *d_ws_after(D_Parser *p, D_ParseNode *pn); /* points AFTER trailing ws */
 
-void d_pass(D_Parser *p, D_ParseNode *pn, uint pass_number);
+void d_pass(D_Parser *p, D_ParseNode *pn, unsigned int pass_number);
 
 int resolve_amb_greedy(D_Parser *dp, int n, D_ParseNode **v);
 

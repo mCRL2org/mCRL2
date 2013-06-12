@@ -55,7 +55,7 @@
 #endif
 #endif
 
-// enough already with the signed/unsiged char issues
+/* enough already with the signed/unsiged char issues */
 #define isspace_(_c) isspace((unsigned char)(_c))
 #define isdigit_(_c) isdigit((unsigned char)(_c))
 #define isxdigit_(_c) isxdigit((unsigned char)(_c))
@@ -65,8 +65,7 @@
 (D_MAJOR_VERSION << 24) + (D_MINOR_VERSION << 16) + \
 D_BUILD_VERSION)
                          
-/* Compilation Options 
-*/
+/* Compilation Options */
 
 #define round2(_x,_n) ((_x + ((_n)-1)) & ~((_n)-1))
 #define tohex1(_x) \
@@ -83,7 +82,7 @@ typedef long long int64;
 typedef unsigned long long uint64;
 typedef short int16;
 typedef unsigned short uint16;
-#if defined(__MINGW32__) || defined(_MSC_VER)
+#if defined(__MINGW32__) || defined(_MSC_VER) || (defined(__STDC_VERSION__) && (__STDC_VERSION__ == 199901L))
 /* already part of most systems */
 typedef unsigned long ulong;
 typedef uint32 uint; 

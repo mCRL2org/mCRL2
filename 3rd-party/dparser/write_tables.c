@@ -217,11 +217,16 @@ search_for_offset(File *fp, char *name) {
 
 static OffsetEntry *
 get_offset(File *fp, char* name, ...) {
+#ifndef NDEBUG
   int n;
+#endif
   char buf[256];
   va_list ap;
   va_start(ap, name);
-  n = vsnprintf(buf, sizeof(buf), name, ap);
+#ifndef NDEBUG
+  n = 
+#endif
+  vsnprintf(buf, sizeof(buf), name, ap);
   va_end(ap);
   assert(n < 256 && n >= 0);
   return search_for_offset(fp, buf);

@@ -68,7 +68,7 @@ xprint_paren(Parser *pp, PNode *p) {
   char *c;
   LATEST(pp, p);
   if (!p->error_recovery) {
-    printf("[%p %s]", p, pp->t->symbols[p->parse_node.symbol].name);
+    printf("[%p %s]", (void*)p, pp->t->symbols[p->parse_node.symbol].name);
     if (p->children.n) {
       printf("(");
       for (i = 0; i < p->children.n; i++)
@@ -127,12 +127,14 @@ d_find_in_tree(D_ParseNode *apn, int symbol) {
 char *
 d_ws_before(D_Parser *ap, D_ParseNode *apn) {
   PNode *pn = D_ParseNode_to_PNode(apn);
+  (void)ap;
   return pn->ws_before;
 }
 
 char *
 d_ws_after(D_Parser *ap, D_ParseNode *apn) {
   PNode *pn = D_ParseNode_to_PNode(apn);
+  (void)ap;
   return pn->ws_after;
 }
 
@@ -618,6 +620,7 @@ check_child(int ppri, AssocKind passoc, int cpri, AssocKind cassoc,
       cpri < ppri ? 1 : ( 2 + (
 	(IS_RIGHT_ASSOC(cassoc) ? 2 : 0) +
 	(IS_RIGHT_ASSOC(passoc) ? 1 : 0))));
+  (void)left; /* WHY?! */
   return child_table[p][c][r];
 }
 
@@ -906,17 +909,17 @@ static int
 greedycmp(const void *ax, const void *ay) {
   PNode *x = *(PNode**)ax;
   PNode *y = *(PNode**)ay;
-  // first by start
+  /* first by start */
   if (x->parse_node.start_loc.s < y->parse_node.start_loc.s)
     return -1;
   if (x->parse_node.start_loc.s > y->parse_node.start_loc.s)
     return 1;
-  // second by symbol
+  /* second by symbol */
   if (x->parse_node.symbol < y->parse_node.symbol)
     return -1;
   if (x->parse_node.symbol > y->parse_node.symbol)
     return 1;
-  // third by length
+  /* third by length */
   if (x->parse_node.end < y->parse_node.end)
     return -1;
   if (x->parse_node.end > y->parse_node.end)
@@ -1058,8 +1061,7 @@ make_PNode(Parser *p, uint hash, int symbol, d_loc_t *start_loc, char *e, PNode 
   } else if (r) {
     if (path)
       for (i = path->n; i > 0; ) {
-        --i;
-	PNode *latest = path->v[i]->pn;
+	PNode *latest = path->v[--i]->pn;
 	LATEST(p, latest);
    ref_pn(latest);
 	vec_add(&new_pn->children, latest);
@@ -1322,6 +1324,7 @@ parse_whitespace(D_Parser *ap, d_loc_t *loc, void **p_globals) {
       pp->accept = NULL;
     }
   }
+  (void)p_globals;
 }
 
 static void
@@ -1902,7 +1905,7 @@ error_recovery(Parser *p) {
   int head = 0, tail = 0, res = 1;
   D_ErrorRecoveryHint *best_er = NULL;
   SNode **q = 0;
-  PNode *best_pn;
+  PNode *best_pn = NULL;
 
   if (!p->snode_hash.last_all)
     return res;
@@ -2136,6 +2139,8 @@ static void
 white_space(D_Parser *p, d_loc_t *loc, void **p_user_globals) {
   int rec = 0;
   char *s = loc->s, *scol = 0;
+  (void)p_user_globals;
+  (void)p;
 
   if (*s == '#' && loc->col == 0) {
   Ldirective:
@@ -2212,7 +2217,12 @@ white_space(D_Parser *p, d_loc_t *loc, void **p_user_globals) {
   return;
 }
 
-void null_white_space(D_Parser *p, d_loc_t *loc, void **p_globals) { }
+void null_white_space(D_Parser *p, d_loc_t *loc, void **p_globals) 
+{ 
+  (void)p;
+  (void)loc;
+  (void)p_globals;
+}
 
 D_Parser *
 new_D_Parser(D_ParserTables *t, int sizeof_ParseNode_User) {
