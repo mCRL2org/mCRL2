@@ -30,7 +30,8 @@ d_dup_pathname_str(const char *s) {
 
 char *
 dup_str(const char *s, const char *e) {
-  int l = e ? e-s : strlen(s);
+  assert(!e || e > s);
+  uint l = e ? (uint)(e-s) : strlen(s);
   char *ss = (char*)MALLOC(l+1);
   memcpy(ss, s, l);
   ss[l] = 0;
