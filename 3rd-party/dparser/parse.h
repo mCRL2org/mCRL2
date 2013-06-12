@@ -79,7 +79,7 @@ typedef struct Parser {
   ShiftResult *shift_results;
   int nshift_results;
   D_Shift *code_shifts;
-  int ncode_shifts;
+  uint ncode_shifts;
   /* comments */
   struct Parser *whitespace_parser;
   /* interface support */

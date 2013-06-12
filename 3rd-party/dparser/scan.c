@@ -4,12 +4,13 @@
 
 #include "d.h"
 
-int
+uint
 scan_buffer(d_loc_t *aloc, D_State *parse_state, ShiftResult *results) {
   d_loc_t loc = *aloc, last_loc = *aloc;
   char *s = loc.s;
   int col = loc.col, line = loc.line;
-  int nresults = 0, i = 0, j;
+  uint nresults = 0;
+  int i = 0, j;
   D_Shift **shift = NULL, **shift_diff = 0;
 
   switch (parse_state->scanner_size) {
@@ -129,7 +130,7 @@ scan_buffer(d_loc_t *aloc, D_State *parse_state, ShiftResult *results) {
     if (longest) {
       /* keep only 'longest' */
       i = 0;
-      for (j = 0; j < nresults; j++) {
+      for (j = 0; j < (long int)nresults; j++) {
 	if (results[j].loc.s == end || results[j].shift->shift_kind == D_SCAN_TRAILING) {
 	  if (i != j)
 	    results[i] = results[j];

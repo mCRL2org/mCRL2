@@ -39,7 +39,7 @@ typedef struct D_Reduction {
   int 			op_priority;
   int 			rule_priority;
   int			action_index;
-  int			npass_code;
+  unsigned int		npass_code;
   D_ReductionCode	*pass_code;
 } D_Reduction;
 

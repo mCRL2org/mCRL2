@@ -13,6 +13,6 @@ typedef struct ShiftResult {
   d_loc_t	loc;
 } ShiftResult;
 
-int scan_buffer(d_loc_t *loc, D_State *st, ShiftResult *result);
+uint scan_buffer(d_loc_t *loc, D_State *st, ShiftResult *result);
 
 #endif
