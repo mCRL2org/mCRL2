@@ -14,7 +14,7 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"
-
+#include "mcrl2/utilities/toolset_version.h"
 #include "nfs_array.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
@@ -28,6 +28,8 @@ namespace data
 {
 namespace detail
 {
+
+struct rewriter_interface;
 
 class RewriterCompilingJitty: public Rewriter
 {
@@ -106,9 +108,8 @@ class RewriterCompilingJitty: public Rewriter
     std::string rewriter_source;
     uncompiled_library *rewriter_so;
 
-    void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
-    atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl &);
+    atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl&);
 
     void add_base_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
     void extend_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
@@ -127,6 +128,15 @@ class RewriterCompilingJitty: public Rewriter
     void BuildRewriteSystem();
     FILE* MakeTempFiles();
 
+};
+
+struct rewriter_interface
+{
+  std::string caller_toolset_version;
+  std::string status;
+  RewriterCompilingJitty* rewriter;
+  atermpp::aterm_appl (*rewrite_external)(const atermpp::aterm_appl &t);
+  void (*rewrite_cleanup)();
 };
 
 extern std::vector <atermpp::aterm_appl> rewr_appls;

@@ -3236,12 +3236,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   mCRL2log(verbose) << "loading rewriter..." << std::endl;
 
+  bool (*init)(rewriter_interface*);
+  rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this };
   try
   {
-    so_rewr_init = reinterpret_cast<void(*)(RewriterCompilingJitty *)>(rewriter_so->proc_address("rewrite_init"));
-    so_rewr_cleanup = reinterpret_cast<void (*)()>(rewriter_so->proc_address("rewrite_cleanup"));
-    so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl &)> (rewriter_so->proc_address("rewrite_external"));
-
+    init = reinterpret_cast<bool(*)(rewriter_interface *)>(rewriter_so->proc_address("init"));
   }
   catch(std::runtime_error &e)
   {
@@ -3260,7 +3259,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
 #endif
 
-  so_rewr_init(this);
+  if (!init(&interface))
+  {
+    throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + interface.status);
+  }
+  so_rewr_cleanup = interface.rewrite_cleanup;
+  so_rewr = interface.rewrite_external;
+
+  mCRL2log(verbose) << interface.status << std::endl;
+
   need_rebuild = false;
 }
 

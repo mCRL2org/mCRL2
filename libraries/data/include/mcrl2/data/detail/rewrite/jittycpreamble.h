@@ -5,6 +5,7 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/toolset_version_const.h"
 
 using namespace mcrl2::data::detail;
 using namespace atermpp;
@@ -15,12 +16,27 @@ using namespace atermpp;
 #define DLLEXPORT
 #endif // _MSC_VER
 
+void rewrite_init(RewriterCompilingJitty*);
+void rewrite_cleanup();
+atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl&);
+
 extern "C" {
-  DLLEXPORT void rewrite_init(RewriterCompilingJitty *r);
-  DLLEXPORT void rewrite_cleanup();
-  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl &t);
+  DLLEXPORT bool init(rewriter_interface* i);
 }
 
+bool init(rewriter_interface* i)
+{
+  if (mcrl2::utilities::MCRL2_VERSION != i->caller_toolset_version)
+  {
+    i->status = "rewriter version does not match the version of the calling application.";
+    return false;
+  }
+  i->rewrite_external = &rewrite_external;
+  i->rewrite_cleanup = &rewrite_cleanup;
+  rewrite_init(i->rewriter);
+  i->status = "rewriter loaded successfully.";
+  return true;
+}
 
 static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t);
 

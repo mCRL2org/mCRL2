@@ -20,16 +20,23 @@ set(CXX ${CMAKE_CXX_COMPILER})
 
 # Configure the default build options
 if(CMAKE_BUILD_TYPE)
-  string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-  if(CMAKE_BUILD_TYPE MATCHES "release")
+  string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_LC)
+  if(CMAKE_BUILD_TYPE_LC MATCHES "release")
     set(R_CXXFLAGS ${CMAKE_CXX_FLAGS_RELEASE})
   endif()
-  if(CMAKE_BUILD_TYPE MATCHES "debug")
+  if(CMAKE_BUILD_TYPE_LC MATCHES "debug")
     set(R_CXXFLAGS ${CMAKE_CXX_FLAGS_DEBUG})
   endif()
-  if(CMAKE_BUILD_TYPE MATCHES "relwithdebinfo")
+  if(CMAKE_BUILD_TYPE_LC MATCHES "relwithdebinfo")
     set(R_CXXFLAGS ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
   endif()
+endif()
+
+# Add build type define for version information (needed by toolset_version_const.h)
+if(CMAKE_CFG_INTDIR STREQUAL ".")
+  set(R_CXXFLAGS "${R_CXXFLAGS} -DMCRL2_BUILD_TYPE=\"\\\"${CMAKE_BUILD_TYPE}\\\"\"")
+else()
+  set(R_CXXFLAGS "${R_CXXFLAGS} -DMCRL2_BUILD_TYPE=\"\\\"${CMAKE_CFG_INTDIR}\\\"\"")
 endif()
 
 # Set appropriate C++11 flag
