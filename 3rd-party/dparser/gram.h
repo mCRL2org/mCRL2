@@ -219,7 +219,7 @@ typedef struct Grammar {
   int			save_parse_tree;
   /* grammar writing options */
   char			grammar_ident[256];
-  int			scanner_blocks;
+  uint			scanner_blocks;
   int			scanner_block_size;
   int			write_line_directives;
   int			write_header;
