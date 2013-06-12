@@ -180,7 +180,7 @@ class shared_subset
             while (node.is_node())
             {
               path_stack[path_stack_index++] = node;
-              node = (m_index & (1UL << node.bit())) ? node.true_node() : node.false_node();
+              node = (m_index & ((size_t)1 << node.bit())) ? node.true_node() : node.false_node();
             }
 
             if (node.is_true())
@@ -210,10 +210,10 @@ class shared_subset
                 bool found = false;
                 for (size_t i = start.bit() + 1; i < bit; i++)
                 {
-                  if (!(m_index & (1UL << i)))
+                  if (!(m_index & ((size_t)1 << i)))
                   {
-                    m_index |= (1UL << i);
-                    m_index &= ~((1UL << i) - 1);
+                    m_index |= ((size_t)1 << i);
+                    m_index &= ~(((size_t)1 << i) - 1);
                     found = true;
                     break;
                   }
@@ -232,10 +232,10 @@ class shared_subset
               else
               {
                 node = path_stack[--path_stack_index];
-                if (!(m_index & (1UL << bit)) && !node.true_node().is_false())
+                if (!(m_index & ((size_t)1 << bit)) && !node.true_node().is_false())
                 {
-                  m_index |= (1UL << bit);
-                  m_index &= ~((1UL << bit) - 1);
+                  m_index |= ((size_t)1 << bit);
+                  m_index &= ~(((size_t)1 << bit) - 1);
                   break;
                 }
               }
@@ -256,7 +256,7 @@ class shared_subset
         m_bdd_root(true)
     {
       m_bits = 0;
-      while (m_set->size() > (1UL << m_bits))
+      while (m_set->size() > ((size_t)1 << m_bits))
       {
         m_bits++;
       }
@@ -287,14 +287,14 @@ class shared_subset
 
           for (int bit = highest_bit(target); bit >= 0; bit--)
           {
-            if ((target & (1UL << bit)) && !(completed & (1UL << bit)))
+            if ((target & ((size_t)1 << bit)) && !(completed & ((size_t)1 << bit)))
             {
               bdd_node tree(false);
               for (int j = 0; j < bit; j++)
               {
                 bdd_node true_node;
                 bdd_node false_node;
-                if (completed & (1UL << j))
+                if (completed & ((size_t)1 << j))
                 {
                   true_node = tree;
                   false_node = trees[j];
@@ -314,14 +314,14 @@ class shared_subset
                 }
               }
               trees[bit] = tree;
-              completed |= (1UL << bit);
-              completed &= ~((1UL << bit) - 1);
+              completed |= ((size_t)1 << bit);
+              completed &= ~(((size_t)1 << bit) - 1);
             }
           }
 
           bdd_node tree(true);
           size_t bit;
-          for (bit = 0; target & (1UL << bit); bit++)
+          for (bit = 0; target & ((size_t)1 << bit); bit++)
           {
             if (tree != trees[bit])
             {
@@ -333,14 +333,14 @@ class shared_subset
         }
       }
 
-      if (completed != (1UL << m_bits))
+      if (completed != ((size_t)1 << m_bits))
       {
         bdd_node tree(false);
         for (size_t j = 0; j < m_bits; j++)
         {
           bdd_node true_node;
           bdd_node false_node;
-          if (completed & (1UL << j))
+          if (completed & ((size_t)1 << j))
           {
             true_node = tree;
             false_node = trees[j];
