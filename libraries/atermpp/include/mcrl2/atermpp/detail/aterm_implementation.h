@@ -72,11 +72,7 @@ void collect_terms_with_reference_count_0();
 
 inline size_t SHIFT(const size_t w)
 {
-#ifdef FUNCTION_SYMBOL_AS_POINTER
   return w>>4;
-#else
-  return w;
-#endif
 }
 
 inline

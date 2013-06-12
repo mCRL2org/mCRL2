@@ -971,11 +971,7 @@ static bool
 write_baf(const aterm &t, ostream &os)
 {
   size_t nr_unique_terms = 0;
-#ifdef FUNCTION_SYMBOL_AS_POINTER
   const size_t nr_symbols = detail::function_symbol_index_table_size*FUNCTION_SYMBOL_BLOCK_SIZE;
-#else
-  const size_t nr_symbols = detail::function_lookup_table_size;
-#endif
   size_t cur;
 
   /* Initialize bit buffer */
@@ -993,11 +989,7 @@ write_baf(const aterm &t, ostream &os)
 
   for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
   {
-#ifdef FUNCTION_SYMBOL_AS_POINTER
     const detail::_function_symbol &entry = detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK];
-#else
-    const detail::_function_symbol &entry = detail::function_lookup_table[lcv];
-#endif
     if (entry.reference_count>0 && count[lcv]>0)
     {
       nr_unique_terms += count[lcv];

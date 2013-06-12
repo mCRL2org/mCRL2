@@ -245,7 +245,6 @@ static void check_that_all_objects_are_free()
   // in a nonderministic fashion using a placement new. So, they can be constructed
   // without properly being destroyed, increasing the reference count of the function
   // symbols in it by 1.
-#ifdef FUNCTION_SYMBOL_AS_POINTER
   for(size_t i=0; i<function_symbol_index_table_size; ++i) 
   {
     for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j) 
@@ -268,22 +267,6 @@ static void check_that_all_objects_are_free()
       }
     }
   }
-#else
-  for(size_t i=0; i<function_lookup_table_size; ++i) 
-  {
-    if (!(function_lookup_table[i].reference_count==0 ||
-          (i==0 && function_lookup_table[i].reference_count<=2) || //AS_DEFAULT
-          (i==1 && function_lookup_table[i].reference_count<=1) || //AS_INT
-          (i==2 && function_lookup_table[i].reference_count<=1) || //AS_LIST
-          (i==3 && function_lookup_table[i].reference_count<=2)))  //AS_EMPTY_LIST
-    {
-      std::cerr << "Symbol " << function_lookup_table[i].name << " has positive reference count (nr. " <<
-                 i << ", ref.count " << function_lookup_table[i].reference_count << ")\n";
-      result=false;
-    }
-  }
-#endif
-
   assert(result);
 }
 #endif
