@@ -17,6 +17,15 @@ cmake_minimum_required(VERSION 2.6)
 FILE(GLOB_RECURSE HEADERS "include" "*.h")
 add_custom_target(${PROJECT_NAME}_headers
   SOURCES ${HEADERS})
+  
+# Generate version header file
+if(CMAKE_CFG_INTDIR STREQUAL ".")
+  add_definitions("-DMCRL2_BUILD_TYPE=\"${CMAKE_BUILD_TYPE}\"")
+else()
+  add_definitions("-DMCRL2_BUILD_TYPE=\"${CMAKE_CFG_INTDIR}\"")
+endif()
+configure_file("${CMAKE_SOURCE_DIR}/build/autoconf/toolset_version_const.h.in"
+               "${PROJECT_BINARY_DIR}/include/mcrl2/utilities/toolset_version_const.h")
 
 set(mcrl2_utilities_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
@@ -27,11 +36,8 @@ set(mcrl2_utilities_src
 
 set(mcrl2_utilities_src ${mcrl2_utilities_src}  PARENT_SCOPE)
 
-set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_version.cpp
-  PROPERTIES COMPILE_DEFINITIONS MCRL2_VERSION="${MCRL2_VERSION} \(${CMAKE_BUILD_TYPE}\)"
-)
-
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include
+                    ${PROJECT_BINARY_DIR}/include)
 
 
 add_library(${PROJECT_NAME}

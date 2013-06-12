@@ -365,6 +365,7 @@ install(
     libraries/process/include/
     libraries/trace/include/
     libraries/utilities/include/
+    ${CMAKE_BINARY_DIR}/libraries/utilities/include/
   DESTINATION ${MCRL2_INCLUDE_DIR}
   COMPONENT Headers
   PATTERN ".svn" EXCLUDE
