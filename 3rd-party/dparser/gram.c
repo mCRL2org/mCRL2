@@ -117,6 +117,11 @@ unescape_term_string(Term *t) {
   for (ss = s = t->string; *s; s++) {
     if (*s == '\\') {
       switch (s[1]) {
+        case '\\':
+    if (t->kind == TERM_STRING)
+      { *ss = '\\'; s++; break; }
+    else
+      goto Ldefault;
 	case 'b': *ss = '\b'; s++; break;
 	case 'f': *ss = '\f'; s++; break;
 	case 'n': *ss = '\n'; s++; break;
