@@ -815,6 +815,7 @@ void GLScene::renderStateLabel(size_t i)
       glPushMatrix();
 
       m_camera->billboard_cylindrical(label.pos);
+      glTranslatef(0, 0, m_size_node * m_camera->pixelsize * 1.01); // Position state label above state number
       drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
       glPopMatrix();
@@ -842,7 +843,7 @@ void GLScene::renderStateNumber(size_t i)
 
     glColor3f(node.selected, 0.0, 0.0);
     m_camera->billboard_spherical(node.pos);
-    glTranslatef(0, 0, m_size_node*m_camera->pixelsize);
+    glTranslatef(0, 0, m_size_node * m_camera->pixelsize);
     drawNumber(*m_vertexdata, *m_texturedata, i);
 
     glPopMatrix();
