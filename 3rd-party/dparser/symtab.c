@@ -91,7 +91,7 @@ new_D_SymHash() {
 
 static void
 free_D_SymHash(D_SymHash *sh) {
-  int i;
+  uint i;
   D_Sym *sym;
   for (i = 0; i < sh->syms.n; i++)
     for (; sh->syms.v[i]; sh->syms.v[i] = sym) {
@@ -267,7 +267,7 @@ commit_ll(D_Scope *st, D_SymHash *sh) {
 /* make direct links to the latest update */
 static void 
 commit_update(D_Scope *st, D_SymHash *sh) {
-  int i;
+  uint i;
   D_Sym *s;
 
   for (i = 0; i < sh->syms.n; i++)
@@ -289,7 +289,8 @@ commit_D_Scope(D_Scope *st) {
 
 D_Sym *
 new_D_Sym(D_Scope *st, char *name, char *end, int sizeof_D_Sym) {
-  int len = end ? end - name : name ? strlen(name) : 0;
+  assert(!end || end > name);
+  uint len = end ? (uint)(end - name) : name ? strlen(name) : 0;
   D_Sym *s = MALLOC(sizeof_D_Sym);
   memset(s, 0, sizeof_D_Sym);
   s->name = name;
@@ -376,7 +377,8 @@ find_D_Sym_internal(D_Scope *cur, char *name, int len, uint h) {
 
 D_Sym *
 find_D_Sym(D_Scope *st, char *name, char *end) {
-  int len = end ? end - name : strlen(name);
+  assert(!end || end > name);
+  uint len = end ? (uint)(end - name) : strlen(name);
   uint h = strhashl(name, len);
   D_Sym *s = find_D_Sym_internal(st, name, len, h);
   if (s)
@@ -387,7 +389,8 @@ find_D_Sym(D_Scope *st, char *name, char *end) {
 D_Sym *
 find_global_D_Sym(D_Scope *st, char *name, char *end) {
   D_Sym *s;
-  int len = end ? end - name : strlen(name);
+  assert(!end || end > name);
+  uint len = end ? (uint)(end - name) : strlen(name);
   uint h = strhashl(name, len);
   D_Scope *cur = st;
   while (cur->up) cur = cur->search;
@@ -399,7 +402,8 @@ find_global_D_Sym(D_Scope *st, char *name, char *end) {
 
 D_Sym *
 find_D_Sym_in_Scope(D_Scope *st, D_Scope *cur, char *name, char *end) {
-  int len = end ? end - name : strlen(name);
+  assert(!end || end > name);
+  uint len = end ? (uint)(end - name) : strlen(name);
   uint h = strhashl(name, len);
   D_Sym *s = find_D_Sym_in_Scope_internal(cur, name, len, h);
   if (s)
@@ -475,7 +479,7 @@ print_scope(D_Scope *st) {
   if (st->ll) printf("  LL\n");
   if (st->hash) printf("  HASH\n");
   if (st->hash) {
-    int i;
+    uint i;
     for (i = 0; i < st->hash->syms.n; i++)
       if (st->hash->syms.v[i])
 	print_sym(st->hash->syms.v[i]);
