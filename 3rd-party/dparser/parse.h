@@ -93,7 +93,7 @@ typedef struct Parser {
   Parse Node - the 'symbol' and the constructed parse subtrees.
 */
 typedef struct PNode {
-  uint			hash;
+  uintptr_t		hash;
   AssocKind		assoc;
   int			priority;
   AssocKind		op_assoc;

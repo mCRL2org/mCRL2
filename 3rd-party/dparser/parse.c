@@ -144,7 +144,7 @@ SNode *
 find_SNode(Parser *p, size_t state, D_Scope *sc, void *g) {
   SNodeHash *ph = &p->snode_hash;
   SNode *sn;
-  uint h = SNODE_HASH(state, sc, g);
+  uintptr_t h = SNODE_HASH(state, sc, g);
   if (ph->v)
     for (sn = ph->v[h % ph->m]; sn; sn = sn->bucket_next)
       if (sn->state - p->t->state == state &&
@@ -157,7 +157,7 @@ find_SNode(Parser *p, size_t state, D_Scope *sc, void *g) {
 void
 insert_SNode_internal(Parser *p, SNode *sn) {
   SNodeHash *ph = &p->snode_hash;
-  uint h = SNODE_HASH(sn->state - p->t->state, sn->initial_scope, sn->initial_globals), i;
+  uintptr_t h = SNODE_HASH(sn->state - p->t->state, sn->initial_scope, sn->initial_globals), i;
   SNode *t;
 
   if (ph->n + 1 > ph->m) {
@@ -308,10 +308,10 @@ free_SNode(Parser *p, struct SNode *s) {
 ((((uintptr_t)_si) << 8) + (((uintptr_t)_ei) << 16) + (((uintptr_t)_s)) + (((uintptr_t)_sc)) + (((uintptr_t)_g)))
 
 PNode *
-find_PNode(Parser *p, char *start, char *end_skip, int symbol, D_Scope *sc, void *g, uint *hash) {
+find_PNode(Parser *p, char *start, char *end_skip, int symbol, D_Scope *sc, void *g, uintptr_t *hash) {
   PNodeHash *ph = &p->pnode_hash;
   PNode *pn;
-  uint h = PNODE_HASH(start, end_skip, symbol, sc, g);
+  uintptr_t h = PNODE_HASH(start, end_skip, symbol, sc, g);
   *hash = h;
   if (ph->v)
     for (pn = ph->v[h % ph->m]; pn; pn = pn->bucket_next)
@@ -330,7 +330,7 @@ find_PNode(Parser *p, char *start, char *end_skip, int symbol, D_Scope *sc, void
 void
 insert_PNode_internal(Parser *p, PNode *pn) {
   PNodeHash *ph = &p->pnode_hash;
-  uint h = PNODE_HASH(pn->parse_node.start_loc.s, pn->parse_node.end_skip,
+  uintptr_t h = PNODE_HASH(pn->parse_node.start_loc.s, pn->parse_node.end_skip,
 		      pn->parse_node.symbol, pn->initial_scope, pn->initial_globals), i;
   PNode *t;
 
@@ -363,7 +363,8 @@ insert_PNode(Parser *p, PNode *pn) {
 
 static void
 free_old_nodes(Parser *p) {
-  uint i, h;
+  uint i;
+  uintptr_t h;
   PNode *pn = p->pnode_hash.all, *tpn, **lpn;
   SNode *sn = p->snode_hash.all, *tsn, **lsn;
   while (sn) {
@@ -1006,7 +1007,7 @@ cmp_pnodes(Parser *p, PNode *x, PNode *y) {
 }
 
 static PNode *
-make_PNode(Parser *p, uint hash, int symbol, d_loc_t *start_loc, char *e, PNode *pn,
+make_PNode(Parser *p, uintptr_t hash, int symbol, d_loc_t *start_loc, char *e, PNode *pn,
 	   D_Reduction *r, VecZNode *path, D_Shift *sh, D_Scope *scope)
 {
   uint i, l = (uint)(sizeof(PNode) - sizeof(d_voidp) + p->user.sizeof_user_parse_node);
@@ -1115,7 +1116,7 @@ add_PNode(Parser *p, int symbol, d_loc_t *start_loc, char *e, PNode *pn,
 	  D_Reduction *r, VecZNode *path, D_Shift *sh)
 {
   D_Scope *scope = equiv_D_Scope(pn->parse_node.scope);
-  uint hash;
+  uintptr_t hash;
   PNode *old_pn = find_PNode(p, start_loc->s, e, symbol, scope, pn->parse_node.globals, &hash),
     *new_pn;
   if (old_pn) {
