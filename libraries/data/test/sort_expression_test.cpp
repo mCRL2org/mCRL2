@@ -139,12 +139,12 @@ void structured_sort_test()
   BOOST_CHECK(is_structured_sort(s));
   BOOST_CHECK(!is_container_sort(s));
 
-  BOOST_CHECK(s.struct_constructors() == cs);
+  BOOST_CHECK(s.constructors() == cs);
 
   sort_expression s_e(s);
   structured_sort s_e_(s_e);
   BOOST_CHECK(s_e_ == s);
-  BOOST_CHECK(s_e_.struct_constructors() == s.struct_constructors());
+  BOOST_CHECK(s_e_.constructors() == s.constructors());
 
   structured_sort_constructor_argument_vector nv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_nat::nat()))));
   structured_sort_constructor_argument_vector bv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_bool::bool_()))));
@@ -152,8 +152,8 @@ void structured_sort_test()
   structured_sort_constructor c("C", boost::make_iterator_range(bv));
   structured_sort bc(atermpp::make_vector(b,c));
 
-  BOOST_CHECK(bc.struct_constructors() == structured_sort_constructor_list(atermpp::make_list(b,c)));
-  structured_sort_constructor_vector bc_constructors(bc.struct_constructors().begin(), bc.struct_constructors().end());
+  BOOST_CHECK(bc.constructors() == structured_sort_constructor_list(atermpp::make_list(b,c)));
+  structured_sort_constructor_vector bc_constructors(bc.constructors().begin(), bc.constructors().end());
   BOOST_CHECK(bc_constructors[0] == b);
   BOOST_CHECK(bc_constructors[1] == c);
   BOOST_CHECK(!bc_constructors[0].arguments().empty());

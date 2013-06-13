@@ -916,7 +916,7 @@ void test_bke()
         {
           std::cout << "argument: " << data::pp(*k) << " " << *k << std::endl;
           atermpp::aterm_appl name = k->name();
-          if (name != no_identifier())
+          if (name != core::empty_identifier_string())
           {
             std::cout << "name = " << name << std::endl;
           }
