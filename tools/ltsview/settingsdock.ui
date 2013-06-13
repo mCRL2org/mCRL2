@@ -187,6 +187,9 @@
    </item>
    <item row="4" column="2">
     <widget class="QSpinBox" name="stateSize">
+     <property name="minimum">
+      <number>1</number>
+     </property>
      <property name="maximum">
       <number>1000</number>
      </property>
