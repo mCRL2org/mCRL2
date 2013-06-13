@@ -2,8 +2,11 @@
   Copyright 2002-2006 John Plevyak, All Rights Reserved
 */
 #include "d.h"
-#include "strings.h"
 #include "dparse_tables.h"
+
+#ifdef __GNUC__
+#include "strings.h"
+#endif
 
 void myfprintf(FILE *f, const char *format, ...) {
   va_list ap;
