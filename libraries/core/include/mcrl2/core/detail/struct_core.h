@@ -2537,9 +2537,9 @@ aterm_appl gsMakeSortList()
 }
 
 inline
-aterm_appl gsMakeSortRef(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeSortRef(const aterm_appl& SortId_0, const aterm_appl& SortExpr_1)
 {
-  return term_appl<aterm>(function_symbol_SortRef(), String_0, SortExpr_1);
+  return term_appl<aterm>(function_symbol_SortRef(), SortId_0, SortExpr_1);
 }
 
 inline

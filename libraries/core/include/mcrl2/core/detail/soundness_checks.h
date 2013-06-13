@@ -1535,7 +1535,7 @@ bool check_term_Binder(Term t)
   return true;
 }
 
-// SortRef(String, SortExpr)
+// SortRef(SortId, SortExpr)
 template <typename Term>
 bool check_term_SortRef(Term t)
 {
@@ -1558,9 +1558,9 @@ bool check_term_SortRef(Term t)
     return false;
   }
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
+  if (!check_term_argument(a[0], check_rule_SortId<atermpp::aterm>))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortId" << std::endl;
     return false;
   }
   if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))

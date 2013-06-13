@@ -89,7 +89,7 @@ untyped_set_or_bag_comprehension(const variable_list& variables, const data_expr
 '''
 
 DATA_CLASSES = r'''
-alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | SC  | SortRef  | A sort alias
+alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | CIO  | SortRef  | A sort alias
 data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn  | A data equation
 data_specification()                                                                                                                    : public atermpp::aterm_appl | S   | DataSpec | A data specification
 '''

@@ -325,7 +325,7 @@ const atermpp::aterm_appl& constructBinder()
 inline
 const atermpp::aterm_appl& constructSortRef()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortRef(), constructString(), constructSortExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_SortRef(), constructSortId(), constructSortExpr()));
   return t;
 }
 

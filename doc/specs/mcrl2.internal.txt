@@ -101,7 +101,7 @@
 
 //sort declaration
 <SortDecl>     ::= <SortId>
-                 | SortRef(<String>, <SortExpr>)
+                 | SortRef(<SortId>, <SortExpr>)
 
 //data equation
 <DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>, <DataExpr>, <DataExpr>)
