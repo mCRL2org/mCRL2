@@ -12,6 +12,7 @@
 #ifndef MCRL2_UTILITIES_TEST_UTILITIES_H
 #define MCRL2_UTILITIES_TEST_UTILITIES_H
 
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -88,7 +89,7 @@ std::string rand_alnum_str(const std::string::size_type n)
 {
   std::string s;
   s.reserve(n);
-  generate_n(std::back_inserter(s), n, rand_alnum);
+  std::generate_n(std::back_inserter(s), n, rand_alnum);
   return s;
 }
 

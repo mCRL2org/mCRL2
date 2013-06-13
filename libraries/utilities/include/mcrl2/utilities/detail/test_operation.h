@@ -13,6 +13,7 @@
 #define MCRL2_UTILITIES_DETAIL_TEST_OPERATION_H
 
 #include <functional>
+#include <iostream>
 #include <string>
 
 namespace mcrl2
