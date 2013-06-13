@@ -2607,7 +2607,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_action(sequence)||is_process_instance_assignment(sequence))
       {
-        result.push_back(sequence);
+        result.push_back(core::down_cast<process_instance_assignment>(sequence));
         return;
       }
 
@@ -2616,8 +2616,8 @@ class specification_basic_type:public boost::noncopyable
         const process_expression first=seq(sequence).left();
         if (is_process_instance_assignment(first))
         {
-          result.push_back(first);
-          size_t n=objectIndex(process_instance_assignment(first).identifier());
+          result.push_back(core::down_cast<process_instance_assignment>(first));
+          size_t n=objectIndex(core::down_cast<process_instance_assignment>(first).identifier());
           if (objectdata[n].canterminate)
           {
             extract_names(seq(sequence).right(),result);
@@ -2723,7 +2723,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       {
-        const process_instance_assignment firstproc=seq(t).left();
+        const process_instance_assignment firstproc=core::down_cast<process_instance_assignment>(seq(t).left());
         size_t n=objectIndex(firstproc.identifier());
         const assignment_list first_assignment=argscollect_regular2(firstproc,vl);
         if (objectdata[n].canterminate)
@@ -4102,7 +4102,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       {
-        const process_instance_assignment process=seq(t).left();
+        const process_instance_assignment process=core::down_cast<process_instance_assignment>(seq(t).left());
         const process_expression process2=seq(t).right();
         const process_identifier procId=process.identifier();
         const assignment_list t1=process.assignments();
