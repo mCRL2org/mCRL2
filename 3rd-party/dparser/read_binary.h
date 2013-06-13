@@ -7,7 +7,7 @@
 typedef struct BinaryTablesHead {
   int n_relocs;
   int n_strings;
-  int d_parser_tables_loc;
+  size_t d_parser_tables_loc;
   size_t tables_size;
   size_t strings_size;
 } BinaryTablesHead;

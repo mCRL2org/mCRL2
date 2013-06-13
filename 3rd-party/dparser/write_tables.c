@@ -22,7 +22,7 @@ void myfprintf(FILE *f, const char *format, ...) {
 
 typedef struct OffsetEntry {
   char *name;
-  int len;
+  size_t len;
   int offset;
 } OffsetEntry;
 
@@ -40,7 +40,7 @@ typedef struct File {
   FILE *fp;
   unsigned char *cur_str;
   unsigned char **str;
-  unsigned int *str_len;
+  size_t *str_len;
   Buf tables;
   Buf strings;
   OffsetEntrySet entries;
@@ -50,7 +50,7 @@ typedef struct File {
   int array_length;
   int n_elems;
   int elem_size;
-  int d_parser_tables_loc;
+  size_t d_parser_tables_loc;
 } File;
 
 OffsetEntry null_entry = {"NULL", sizeof("NULL")-1, -1};
@@ -91,7 +91,7 @@ static void
 save_binary_tables(File *file) {
   uint i;
   BinaryTablesHead tables;
-  unsigned int len;
+  size_t len;
   
   tables.n_relocs = file->relocations.n;
   tables.n_strings = file->str_relocations.n;
@@ -146,7 +146,7 @@ init_buf(Buf *buf, int initial_size) {
 }
 
 static void
-file_init(File *file, int binary, FILE* fp, unsigned char **str, unsigned int *str_len) {
+file_init(File *file, int binary, FILE* fp, unsigned char **str, size_t *str_len) {
   memset(file, 0, sizeof(File));
   file->binary = binary;
   file->fp = fp;
@@ -164,9 +164,9 @@ file_init(File *file, int binary, FILE* fp, unsigned char **str, unsigned int *s
 static void
 make_room_in_buf(Buf *buf, size_t size) {
   while (buf->cur + size > buf->start + buf->len) {
-    int cur = buf->cur - buf->start;
+    uintptr_t cur = buf->cur - buf->start;
     buf->len = buf->len*2 + 1;
-    buf->start = REALLOC(buf->start, buf->len);
+    buf->start = (char*)REALLOC(buf->start, buf->len);
     buf->cur = buf->start + cur;
     memset(buf->cur, 0, buf->len - (buf->cur - buf->start));
   }
@@ -174,10 +174,10 @@ make_room_in_buf(Buf *buf, size_t size) {
 
 static void
 new_offset(File *fp, char *name) {
-  OffsetEntry *entry = MALLOC(sizeof(OffsetEntry));
+  OffsetEntry *entry = (OffsetEntry*)MALLOC(sizeof(OffsetEntry));
   memset(entry, 0, sizeof(OffsetEntry));
   entry->name = name;
-  entry->offset = fp->tables.cur - fp->tables.start;
+  entry->offset = (int)(fp->tables.cur - fp->tables.start);
   entry->len = strlen(name);
   set_add_fn(&fp->entries, entry, &offset_fns);
 }
@@ -1009,7 +1009,7 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
     for (j = 0; j < vgoto.n; j++) {
       if (vgoto.v[j] < 0 || vgoto.v[j] > 65535)
 	d_fail("goto table overflow");
-      add_array_member(fp, unsigned short, %d, vgoto.v[j], j == vgoto.n - 1);
+      add_array_member(fp, unsigned short, %d, (unsigned short)vgoto.v[j], j == vgoto.n - 1);
       if (j % 16 == 15) {
 	print(fp, "\n");
 	g->write_line += 1;
@@ -1029,7 +1029,8 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
 
 static void
 write_scanner_code(File *file, Grammar *g, char *tag) {
-  uint i, j, l;
+  uint i, j;
+  size_t l;
   Action *a;
   State *s;
   FILE *fp = file->fp;
@@ -1157,7 +1158,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
       if (*c == '#') {
 	c++;
 	if (isdigit_(*c)) {
-	  long int n = atol(c);
+	  uint n = (uint)atol(c);
 	  fprintf(fp, "(d_get_number_of_children((D_PN(_children[%d], _offset))))", n);
 	  if (n > r->elems.n-1)
 	    d_fail("$nXXXX greater than number of children at line %d", line);
@@ -1170,7 +1171,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
       } else if (*c == 'n') {
 	++c;
 	if (isdigit_(*c)) {
-	  long int n = atol(c);
+	  uint n = (uint)atol(c);
 	  fprintf(fp, "(*(D_PN(_children[%d], _offset)))", n);
 	  if (n > r->elems.n-1)
 	    d_fail("$nXXXX greater than number of children at line %d", line);
@@ -1645,7 +1646,8 @@ static int
 write_header(Grammar *g, char *base_pathname, char *tag) {
   char pathname[FILENAME_MAX];
   char ver[128];
-  uint i, tokens = 0, states = 0, col;
+  uint i, tokens = 0, states = 0;
+  size_t col;
   FILE *hfp;
 
   for (i = 0; i < g->terminals.n; i++)
@@ -1833,7 +1835,7 @@ write_parser_tables(Grammar *g, char *tag, File *file) {
 
 void
 write_parser_tables_internal(Grammar *g, char *base_pathname, char *tag, int binary, 
-			     FILE *fp, unsigned char **str, unsigned int *str_len)
+			     FILE *fp, unsigned char **str, size_t *str_len)
 {
   File file;
   if (!binary) {
@@ -1888,7 +1890,7 @@ write_binary_tables_to_file(Grammar *g, FILE *fp) {
 }
 
 int
-write_binary_tables_to_string(Grammar *g, unsigned char **str, unsigned int *str_len) {
+write_binary_tables_to_string(Grammar *g, unsigned char **str, size_t *str_len) {
   write_parser_tables_internal(g, g->pathname, 
 			       *g->grammar_ident ? g->grammar_ident : NULL, 
 			       1, 0, str, str_len);
