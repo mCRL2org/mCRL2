@@ -148,7 +148,7 @@ typedef struct D_Symbol {
 #define D_PASS_FOR_UNDEFINED	0x0010
 typedef struct D_Pass {
   char	        *name;
-  unsigned int	name_len;
+  size_t		name_len;
   unsigned int  kind;
   unsigned int	index;
 } D_Pass;

@@ -30,10 +30,10 @@ d_dup_pathname_str(const char *s) {
 
 char *
 dup_str(const char *s, const char *e) {
-  uint l;
+  size_t l;
   char* ss;
   assert(!e || e >= s);
-  l = e ? (uint)(e-s) : strlen(s);
+  l = e ? (size_t)(e-s) : strlen(s);
   ss = (char*)MALLOC(l+1);
   memcpy(ss, s, l);
   ss[l] = 0;
@@ -148,7 +148,7 @@ vec_eq(void *v, void *vv) {
 
 void *
 stack_push_internal(AbstractStack *s, void *elem) {
-  int n = s->cur - s->start;
+  size_t n = s->cur - s->start;
   if (s->start == s->initial) {
     s->cur = (void**)MALLOC(n * 2 * sizeof(void*));
     memcpy(s->cur, s->start, n * sizeof(void*));
@@ -165,9 +165,8 @@ int
 set_find(void *av, void *t) {
   AbstractVec *v = (AbstractVec*)av;
   int j, n = v->n;
-  uint i;
   if (n) {
-    uint h = ((uintptr_t)t);
+    uintptr_t i, h = ((uintptr_t)t);
     h = h % n;
     for (i = h, j = 0; 
 	 i < v->n && j < SET_MAX_SEQUENTIAL; 
@@ -186,9 +185,8 @@ int
 set_add(void *av, void *t) {
   AbstractVec *v = (AbstractVec*)av, vv;
   int j, n = v->n;
-  uint i;
   if (n) {
-    uint h = ((uintptr_t)t);
+    uintptr_t i, h = ((uintptr_t)t);
     h = h % n;
     for (i = h, j = 0; 
 	 i < v->n && j < SET_MAX_SEQUENTIAL; 

@@ -141,7 +141,7 @@ d_ws_after(D_Parser *ap, D_ParseNode *apn) {
 #define SNODE_HASH(_s, _sc, _g) ((((uintptr_t)(_s)) << 12) + (((uintptr_t)(_sc))) + ((uintptr_t)(_g)))
 
 SNode *
-find_SNode(Parser *p, uint state, D_Scope *sc, void *g) {
+find_SNode(Parser *p, size_t state, D_Scope *sc, void *g) {
   SNodeHash *ph = &p->snode_hash;
   SNode *sn;
   uint h = SNODE_HASH(state, sc, g);
@@ -192,7 +192,7 @@ static SNode *
 new_SNode(Parser *p, D_State *state, d_loc_t *loc, D_Scope *sc, void *g) {
   SNode *sn = p->free_snodes;
   if (!sn)
-    sn = MALLOC(sizeof *sn);
+    sn = (SNode*)MALLOC(sizeof *sn);
   else
     p->free_snodes = sn->all_next;
   sn->depth = 0;
@@ -225,7 +225,7 @@ static ZNode *
 new_ZNode(Parser *p, PNode *pn) {
   ZNode *z = p->free_znodes;
   if (!z)
-    z = MALLOC(sizeof *z);
+    z = (ZNode*)MALLOC(sizeof *z);
   else
     p->free_znodes = znode_next(z);
   z->pn = pn;
@@ -504,7 +504,7 @@ add_Reduction(Parser *p, ZNode *z, SNode *sn, D_Reduction *reduction) {
   {
     Reduction *r = p->free_reductions;
     if (!r)
-      r = MALLOC(sizeof *r);
+      r = (Reduction*)MALLOC(sizeof *r);
     else
       p->free_reductions = r->next;
     r->znode = z;
@@ -523,7 +523,7 @@ add_Shift(Parser *p, SNode *snode) {
   Shift *x, **l = &p->shifts_todo;
   Shift *s = p->free_shifts;
   if (!s)
-    s = MALLOC(sizeof *s);
+    s = (Shift*)MALLOC(sizeof *s);
   else
     p->free_shifts = s->next;
   s->snode = snode;
@@ -726,7 +726,7 @@ check_path_priorities_internal(VecZNode *path) {
    check_path_priorities_internal(_p))
 
 static int
-compare_priorities(int xpri[], int xn, int ypri[], int yn) {
+compare_priorities(int xpri[], size_t xn, int ypri[], size_t yn) {
   int i = 0;
 
   while (i < xn && i < yn) {
@@ -740,7 +740,7 @@ compare_priorities(int xpri[], int xn, int ypri[], int yn) {
 }
 
 static void
-intreverse(int *xp, int n) {
+intreverse(int *xp, size_t n) {
   int *a = xp, *b = xp + n -1;
   while (a < b) {
     int t = *a;
@@ -1859,7 +1859,7 @@ commit_stack(Parser *p, SNode *sn) {
 
 static const char *
 find_substr(const char *str, const char *s) {
-  int len = strlen(s);
+  size_t len = strlen(s);
   if (len == 1) {
     while (*str && *str != *s) str++;
     if (*str == *s)
@@ -2210,9 +2210,9 @@ white_space(D_Parser *p, d_loc_t *loc, void **p_user_globals) {
   }
  Ldone:
   if (scol)
-    loc->col = s - scol;
+    loc->col = (int)(s - scol);
   else
-    loc->col += s - loc->s;
+    loc->col += (int)(s - loc->s);
   loc->s = s;
   return;
 }
@@ -2333,7 +2333,7 @@ handle_top_level_ambiguities(Parser *p, SNode *sn) {
 }
 
 D_ParseNode *
-dparse(D_Parser *ap, char *buf, int buf_len) {
+dparse(D_Parser *ap, char *buf, size_t buf_len) {
   int r;
   Parser *p = (Parser *)ap;
   SNode *sn;

@@ -18,7 +18,7 @@ new_production(Grammar *g, char *name) {
     FREE(name);
     return p;
   }
-  p = MALLOC(sizeof(Production));
+  p = (Production*)MALLOC(sizeof(Production));
   memset(p, 0, sizeof(Production));
   vec_add(&g->productions, p);
   p->name = name;
@@ -231,7 +231,7 @@ new_utf8_char(Grammar *g, char *s, char *e, Rule *r) {
       utf32_code += base * (*e - 'A' + 10);
   }
   if (utf32_code < 0x80) {
-    utf8_code[0] = utf32_code;
+    utf8_code[0] = (int8)utf32_code;
     len = 1;
   } else if (utf32_code < 0x800) {
     utf8_code[0] = 0xc0 | ((utf32_code >> 6) & 0x1f);
@@ -340,7 +340,7 @@ add_declaration(Grammar *g, char *start, char *end, uint kind, uint line) {
 
 D_Pass *
 find_pass(Grammar *g, char *start, char *end) {
-  uint i, l;
+  size_t i, l;
   while (*start && isspace_(*start)) start++;
   l = end - start;
   for (i = 0; i < g->passes.n; i++)
@@ -515,7 +515,7 @@ finish_productions(Grammar *g) {
 }
 
 Production *
-lookup_production(Grammar *g, char *name, uint l) {
+lookup_production(Grammar *g, char *name, size_t l) {
   uint i;
   
   for (i = 0; i < g->productions.n; i++) {
@@ -528,7 +528,7 @@ lookup_production(Grammar *g, char *name, uint l) {
 }
 
 static Term *
-lookup_token(Grammar *g, char *name, int l) {
+lookup_token(Grammar *g, char *name, size_t l) {
   uint i;
   
   for (i = 0; i < g->terminals.n; i++) {
@@ -597,7 +597,8 @@ compute_nullable(Grammar *g) {
 */
 static void
 resolve_grammar(Grammar *g) {
-  uint i, j, k, l;
+  uint i, j, k;
+  size_t l;
   Production *p, *pp;
   Rule *r;
   Elem *e;
@@ -916,7 +917,7 @@ convert_regex_production_one(Grammar *g, Production *p) {
   Term *t;
   int circular = 0;
   char *buf = 0, *b, *s;
-  int buf_len = 0;
+  size_t buf_len = 0;
 
   if (p->regex_term) /* already done */
     return;
