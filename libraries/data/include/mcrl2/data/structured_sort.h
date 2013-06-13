@@ -17,19 +17,17 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/structured_sort_constructor.h"
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/structured_sort_constructor.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -53,48 +51,6 @@ data_equation_vector fbag_generate_equations_code(const sort_expression&);
 }
 /// \endcond
 
-namespace detail
-{
-
-//--- start generated class structured_sort ---//
-//--- end generated class structured_sort ---//
-
-/// \brief A structured sort
-class structured_sort_base: public sort_expression
-{
-  public:
-    /// \brief Default constructor.
-    structured_sort_base()
-      : sort_expression(core::detail::constructSortStruct())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    structured_sort_base(const atermpp::aterm_appl& term)
-      : sort_expression(term)
-    {
-      assert(core::detail::check_term_SortStruct(*this));
-    }
-
-    /// \brief Constructor.
-    structured_sort_base(const structured_sort_constructor_list& constructors)
-      : sort_expression(core::detail::gsMakeSortStruct(constructors))
-    {}
-
-    /// \brief Constructor.
-    template <typename Container>
-    structured_sort_base(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortStruct(atermpp::convert<structured_sort_constructor_list>(constructors)))
-    {}
-
-    structured_sort_constructor_list constructors() const
-    {
-      return structured_sort_constructor_list(atermpp::list_arg1(*this));
-    }
-};
-
-} //namespace detail
-
 /// \brief structured sort.
 ///
 /// A structured sort is a sort with the following structure:
@@ -105,8 +61,41 @@ class structured_sort_base: public sort_expression
 /// * c1, ..., cn are called constructors.
 /// * pri,j are the projection functions (or constructor arguments).
 /// * is_ci are the recognisers.
-class structured_sort: public detail::structured_sort_base
+//--- start generated class structured_sort ---//
+/// \brief A structured sort
+class structured_sort: public sort_expression
 {
+  public:
+    /// \brief Default constructor.
+    structured_sort()
+      : sort_expression(core::detail::constructSortStruct())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    structured_sort(const atermpp::aterm& term)
+      : sort_expression(term)
+    {
+      assert(core::detail::check_term_SortStruct(*this));
+    }
+
+    /// \brief Constructor.
+    structured_sort(const structured_sort_constructor_list& constructors)
+      : sort_expression(core::detail::gsMakeSortStruct(constructors))
+    {}
+
+    /// \brief Constructor.
+    template <typename Container>
+    structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
+      : sort_expression(core::detail::gsMakeSortStruct(structured_sort_constructor_list(constructors.begin(), constructors.end())))
+    {}
+
+    const structured_sort_constructor_list& constructors() const
+    {
+      return atermpp::aterm_cast<const structured_sort_constructor_list>(atermpp::list_arg1(*this));
+    }
+//--- start user section structured_sort ---//
+
     friend class data_specification;
 
   private:
@@ -124,7 +113,7 @@ class structured_sort: public detail::structured_sort_base
     function_symbol_vector constructor_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
+      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
       {
         result.push_back(i->constructor_function(s));
       }
@@ -134,7 +123,7 @@ class structured_sort: public detail::structured_sort_base
     function_symbol_vector projection_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
+      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
       {
         function_symbol_vector projections(i->projection_functions(s));
 
@@ -149,9 +138,9 @@ class structured_sort: public detail::structured_sort_base
     function_symbol_vector recogniser_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
+      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
       {
-        if (i->recogniser() != no_identifier())
+        if (i->recogniser() != core::empty_identifier_string())
         {
           result.push_back(i->recogniser_function(s));
         }
@@ -163,7 +152,7 @@ class structured_sort: public detail::structured_sort_base
     {
       data_equation_vector result;
 
-      structured_sort_constructor_vector cl(boost::copy_range< structured_sort_constructor_vector >(struct_constructors()));
+      structured_sort_constructor_vector cl(boost::copy_range< structured_sort_constructor_vector >(constructors()));
 
       for (structured_sort_constructor_vector::const_iterator i = cl.begin(); i != cl.end(); ++i)
       {
@@ -276,7 +265,7 @@ class structured_sort: public detail::structured_sort_base
     {
       data_equation_vector result;
 
-      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
+      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
       {
         if (!i->arguments().empty())
         {
@@ -296,7 +285,7 @@ class structured_sort: public detail::structured_sort_base
 
           for (structured_sort_constructor_argument_list::const_iterator j(arguments.begin()); j != arguments.end(); ++j, ++v)
           {
-            if (j->name() != no_identifier())
+            if (j->name() != core::empty_identifier_string())
             {
               application lhs(function_symbol(j->name(), make_function_sort(s, j->sort()))
                               (application(i->constructor_function(s), variables)));
@@ -314,13 +303,13 @@ class structured_sort: public detail::structured_sort_base
     {
       data_equation_vector result;
 
-      structured_sort_constructor_list cl(struct_constructors());
+      structured_sort_constructor_list cl(constructors());
 
       for (structured_sort_constructor_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
       {
         for (structured_sort_constructor_list::const_iterator j = cl.begin(); j != cl.end(); ++j)
         {
-          if (j->recogniser() != no_identifier())
+          if (j->recogniser() != core::empty_identifier_string())
           {
             data_expression right = (*i == *j) ? sort_bool::true_() : sort_bool::false_();
 
@@ -353,37 +342,7 @@ class structured_sort: public detail::structured_sort_base
       return result;
     }
 
-  public:
-
-    /// \overload
-    structured_sort()
-      : detail::structured_sort_base()
-    {}
-
-    /// \overload
-    structured_sort(atermpp::aterm_appl term)
-      : detail::structured_sort_base(term)
-    {}
-
-    /// \overload
-    structured_sort(const structured_sort_constructor_list& constructors)
-      : detail::structured_sort_base(constructors)
-    {}
-
-    /// \overload
-    template <typename Container>
-    structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
-      : detail::structured_sort_base(constructors)
-    {}
-
-    /// \brief Returns the struct constructors of this sort
-    ///
-    structured_sort_constructor_list struct_constructors() const
-    {
-      return constructors();
-    }
-
-
+public:
     /// \brief Returns the constructor functions of this sort, such that the
     ///        result can be used by the rewriter
     function_symbol_vector constructor_functions() const
@@ -427,15 +386,30 @@ class structured_sort: public detail::structured_sort_base
     {
       return recogniser_equations(*this);
     }
+//--- end user section structured_sort ---//
+};
 
-}; // class structured_sort
+/// \brief list of structured_sorts
+typedef atermpp::term_list<structured_sort> structured_sort_list;
 
-/// \brief list of structured sorts
-typedef atermpp::term_list< structured_sort > structured_sort_list;
+/// \brief vector of structured_sorts
+typedef std::vector<structured_sort>    structured_sort_vector;
+
+//--- end generated class structured_sort ---//
 
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::structured_sort& t1, mcrl2::data::structured_sort& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

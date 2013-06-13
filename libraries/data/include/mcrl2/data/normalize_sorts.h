@@ -76,11 +76,11 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     {
       // Rewrite the argument sorts to normal form.
       std::vector< structured_sort_constructor > new_constructors;
-      structured_sort_constructor_list e_constructors(structured_sort(e).struct_constructors());
+      const structured_sort_constructor_list& e_constructors(structured_sort(e).constructors());
       for (structured_sort_constructor_list::const_iterator i = e_constructors.begin(); i != e_constructors.end(); ++i)
       {
         std::vector< structured_sort_constructor_argument > new_arguments;
-        structured_sort_constructor_argument_list i_arguments(i->arguments());
+        const structured_sort_constructor_argument_list& i_arguments(i->arguments());
         for (structured_sort_constructor_argument_list::const_iterator j = i_arguments.begin(); j != i_arguments.end(); ++j)
         {
           new_arguments.push_back(structured_sort_constructor_argument(

@@ -1008,7 +1008,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::structured_sort_constructor_argument& x)
   {
     derived().enter(x);
-    if (x.name() != no_identifier())
+    if (x.name() != core::empty_identifier_string())
     {
       derived()(x.name());
       derived().print(": ");
@@ -1022,7 +1022,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().enter(x);
     derived()(x.name());
     print_list(x.arguments(), "(", ")", ", ");
-    if (x.recogniser() != data::no_identifier())
+    if (x.recogniser() != core::empty_identifier_string())
     {
       derived().print("?");
       derived()(x.recogniser());

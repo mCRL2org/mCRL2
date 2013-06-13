@@ -82,7 +82,7 @@ struct sort_expression_actions: public core::default_parser_actions
   {
     core::identifier_string name = parse_Id(node.child(0));
     data::structured_sort_constructor_argument_list arguments;
-    core::identifier_string recogniser = no_identifier();
+    core::identifier_string recogniser = atermpp::empty_string();
     if (node.child(1))
     {
       arguments = parse_ProjDeclList(node.child(1));
@@ -105,7 +105,7 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::structured_sort_constructor_argument parse_ProjDecl(const core::parse_node& node)
   {
-    core::identifier_string name = no_identifier();
+    core::identifier_string name = atermpp::empty_string();
     sort_expression sort = parse_SortExpr(node.child(1));
     if (node.child(0).child(0))
     {

@@ -34,6 +34,15 @@ bool is_identifier_string(atermpp::aterm t)
   return t.type_is_appl() && atermpp::aterm_appl(t).size() == 0;
 }
 
+/// \brief Tests if a string is empty.
+/// \param t An identifier string
+/// \return Whether t is the empty string.
+inline
+identifier_string empty_identifier_string()
+{
+  return atermpp::empty_string();
+}
+
 /// \brief Read-only singly linked list of identifier strings
 typedef atermpp::term_list<identifier_string> identifier_string_list;
 

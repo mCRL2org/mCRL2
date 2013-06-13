@@ -24,7 +24,7 @@ import string
 # X = it is an expression super class
 
 CORE_CLASSES = r'''
-identifier_string() : public atermpp::aterm_appl | SC | String | An identifier
+identifier_string() : public atermpp::aterm_string | SC | String | An identifier
 nil() : public atermpp::aterm_appl | C | Nil | The value nil
 '''
 
@@ -38,15 +38,15 @@ fbag_container() : public data::container_type | EIO | SortFBag     | Container 
 '''
 
 STRUCTURED_SORT_ELEMENTS = r'''
-structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)                                                            : public atermpp::aterm_appl | SICU | StructProj | An argument of a constructor of a structured sort
-structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) : public atermpp::aterm_appl | SICU | StructCons | A constructor for a structured sort
+structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)                                                            : public atermpp::aterm_appl | ICUO | StructProj | An argument of a constructor of a structured sort
+structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) : public atermpp::aterm_appl | ICUO | StructCons | A constructor for a structured sort
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
 sort_expression()                                                                         : public atermpp::aterm_appl   | XOCU | SortExpr             | A sort expression
 basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO   | SortId               | A basic sort
 container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO   | SortCons             | A container sort
-structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU | SortStruct           | A structured sort
+structured_sort(const structured_sort_constructor_list& constructors)              : public data::sort_expression | CEOU | SortStruct           | A structured sort
 function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO   | SortArrow            | A function sort
 untyped_sort()                                                                            : public data::sort_expression | EO   | UntypedSortUnknown   | Unknown sort expression
 untyped_possible_sorts(const sort_expression_list& sorts)                                 : public data::sort_expression | EO   | UntypedSortsPossible | Multiple possible sorts

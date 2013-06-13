@@ -313,7 +313,7 @@ void mcrl2::data::sort_type_checker::IsSortExprDeclared(const sort_expression &S
   if (is_structured_sort(SortExpr))
   {
     const structured_sort &ssort(SortExpr);
-    const structured_sort_constructor_list &constructors(ssort.struct_constructors());
+    const structured_sort_constructor_list &constructors(ssort.constructors());
     for (structured_sort_constructor_list::const_iterator i=constructors.begin(); i!=constructors.end(); ++i)
     {
       const structured_sort_constructor &Constr(*i);
@@ -3721,14 +3721,14 @@ void mcrl2::data::data_type_checker::ReadInSortStruct(const sort_expression &Sor
   if (is_structured_sort(SortExpr))
   {
     const structured_sort &struct_sort(SortExpr);
-    for (structured_sort_constructor_list::const_iterator i=struct_sort.struct_constructors().begin();
-               i!=struct_sort.struct_constructors().end(); ++i)
+    for (structured_sort_constructor_list::const_iterator i=struct_sort.constructors().begin();
+               i!=struct_sort.constructors().end(); ++i)
     {
       const structured_sort_constructor &Constr(*i);
 
       // recognizer -- if present -- a function from SortExpr to Bool
       core::identifier_string Name=Constr.recogniser();
-      if (Name!=no_identifier())
+      if (Name!=core::empty_identifier_string())
       {
         AddFunction(data::function_symbol(Name,function_sort(make_list<sort_expression>(SortExpr),sort_bool::bool_())),"recognizer");
       }
@@ -3752,7 +3752,7 @@ void mcrl2::data::data_type_checker::ReadInSortStruct(const sort_expression &Sor
         ReadInSortStruct(ProjSort);
 
         core::identifier_string ProjName=Proj.name();
-        if (ProjName!=no_identifier())
+        if (ProjName!=core::empty_identifier_string())
         {
           AddFunction(function_symbol(ProjName,function_sort(make_list(SortExpr),ProjSort)),"projection",true);
         }
