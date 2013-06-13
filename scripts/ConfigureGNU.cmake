@@ -21,6 +21,7 @@ message( STATUS "Loading GCC specific configuration" )
 ##---------------------------------------------------
 include(AddFlag)
 
+try_add_c_flag(-std=c99)
 try_add_c_flag(-Wall)
 try_add_c_flag(-Wno-inline)
 try_add_c_flag(-fno-strict-overflow)

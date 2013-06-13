@@ -289,9 +289,11 @@ commit_D_Scope(D_Scope *st) {
 
 D_Sym *
 new_D_Sym(D_Scope *st, char *name, char *end, int sizeof_D_Sym) {
-  assert(!end || end > name);
-  uint len = end ? (uint)(end - name) : name ? strlen(name) : 0;
-  D_Sym *s = MALLOC(sizeof_D_Sym);
+  uint len;
+  D_Sym *s;
+  assert(!end || end >= name);
+  len = end ? (uint)(end - name) : name ? strlen(name) : 0;
+  s = MALLOC(sizeof_D_Sym);
   memset(s, 0, sizeof_D_Sym);
   s->name = name;
   s->len = len;
@@ -377,10 +379,12 @@ find_D_Sym_internal(D_Scope *cur, char *name, int len, uint h) {
 
 D_Sym *
 find_D_Sym(D_Scope *st, char *name, char *end) {
-  assert(!end || end > name);
-  uint len = end ? (uint)(end - name) : strlen(name);
-  uint h = strhashl(name, len);
-  D_Sym *s = find_D_Sym_internal(st, name, len, h);
+  D_Sym *s;
+  uint len, h;
+  assert(!end || end >= name);
+  len = end ? (uint)(end - name) : strlen(name);
+  h = strhashl(name, len);
+  s = find_D_Sym_internal(st, name, len, h);
   if (s)
     return current_D_Sym(st, s);
   return NULL;
@@ -389,10 +393,12 @@ find_D_Sym(D_Scope *st, char *name, char *end) {
 D_Sym *
 find_global_D_Sym(D_Scope *st, char *name, char *end) {
   D_Sym *s;
-  assert(!end || end > name);
-  uint len = end ? (uint)(end - name) : strlen(name);
-  uint h = strhashl(name, len);
-  D_Scope *cur = st;
+  D_Scope *cur;
+  uint len, h;
+  assert(!end || end >= name);
+  len = end ? (uint)(end - name) : strlen(name);
+  h = strhashl(name, len);
+  cur = st;
   while (cur->up) cur = cur->search;
   s = find_D_Sym_internal(cur, name, len, h);
   if (s)
@@ -402,10 +408,12 @@ find_global_D_Sym(D_Scope *st, char *name, char *end) {
 
 D_Sym *
 find_D_Sym_in_Scope(D_Scope *st, D_Scope *cur, char *name, char *end) {
-  assert(!end || end > name);
-  uint len = end ? (uint)(end - name) : strlen(name);
-  uint h = strhashl(name, len);
-  D_Sym *s = find_D_Sym_in_Scope_internal(cur, name, len, h);
+  D_Sym *s;
+  uint len, h;
+  assert(!end || end >= name);
+  len = end ? (uint)(end - name) : strlen(name);
+  h = strhashl(name, len);
+  s = find_D_Sym_in_Scope_internal(cur, name, len, h);
   if (s)
     return current_D_Sym(st, s);
   return NULL;
