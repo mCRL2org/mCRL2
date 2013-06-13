@@ -486,7 +486,7 @@ static char tree_var_str[20];
 static aterm_appl createFreshVar(aterm_appl sort, size_t* i)
 {
   sprintf(tree_var_str,"@var_%lu",(*i)++);
-  return gsMakeDataVarId(gsString2ATermAppl(tree_var_str),sort);
+  return data::variable(tree_var_str,sort);
 }
 
 // static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &new_val, const aterm &num, const aterm_list &substs)

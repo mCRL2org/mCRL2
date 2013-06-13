@@ -26,14 +26,14 @@ namespace detail
 inline
 const atermpp::aterm_appl& constructString()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(gsString2ATermAppl("@NoValue"));
+  static atermpp::aterm_appl t = core::identifier_string("@NoValue");
   return t;
 }
 
 inline
 const atermpp::aterm_appl& constructStringOrEmpty()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(gsString2ATermAppl("@NoValue"));
+  static atermpp::aterm_appl t = core::identifier_string("@NoValue");
   return t;
 }
 

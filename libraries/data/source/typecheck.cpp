@@ -404,7 +404,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     throw mcrl2::runtime_error("cannot transform " + pp(Type) + " to a number.");
   }
 
-  if (warn_upcasting && data::is_function_symbol(Par) && gsIsNumericString(aterm_cast<function_symbol>(Par).name().function().name()))
+  if (warn_upcasting && data::is_function_symbol(Par) && utilities::is_numeric_string(aterm_cast<function_symbol>(Par).name().function().name()))
   {
     warn_upcasting=false;
   }
@@ -2755,7 +2755,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
               data::is_untyped_identifier(DataTerm)?aterm_cast<untyped_identifier>(DataTerm).name():
               is_function_symbol(DataTerm)?aterm_cast<function_symbol>(DataTerm).name():
                                            aterm_cast<variable>(DataTerm).name();
-    if (gsIsNumericString(Name.function().name()))
+    if (utilities::is_numeric_string(Name.function().name()))
     {
       sort_expression Sort=sort_int::int_();
       if (detail::IsPos(Name))
