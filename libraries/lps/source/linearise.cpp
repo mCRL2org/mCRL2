@@ -1451,7 +1451,7 @@ class specification_basic_type:public boost::noncopyable
          this variable occurs in vars, an assignment for it is added.
 
          It is not possible to use standard substitution functions to replace substitute_assignmentlis
-         because they do not take the parameters of processes into account. 
+         because they do not take the parameters of processes into account.
          For instance consider a process P(b:D)=... of which an instance P() exists.
          If the substitution sigma(b)=t is applied to P() the result should be P(b=t).
          The standard substitutions do not take this parameterlist into account, as it stands.
@@ -1597,130 +1597,130 @@ class specification_basic_type:public boost::noncopyable
       mutable_map_substitution<> &sigma,
       const std::set< variable >& rhs_variables_in_sigma)
     {
-      // mutable_map_substitution<> sigma_aux(sigma); 
+      // mutable_map_substitution<> sigma_aux(sigma);
       // return process::replace_variables_capture_avoiding(p,sigma_aux,rhs_variables_in_sigma);
-      if (is_choice(p)) 
-      { 
-        return choice( 
-                 substitute_pCRLproc(choice(p).left(),sigma,rhs_variables_in_sigma), 
-                 substitute_pCRLproc(choice(p).right(),sigma,rhs_variables_in_sigma)); 
-      } 
-      if (is_seq(p)) 
-      { 
-        return seq( 
-                 substitute_pCRLproc(seq(p).left(),sigma,rhs_variables_in_sigma), 
-                 substitute_pCRLproc(seq(p).right(),sigma,rhs_variables_in_sigma)); 
-      } 
-      if (is_sync(p)) 
-      { 
-        return process::sync( 
-                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma), 
-                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma)); 
-      } 
-      if (is_if_then(p)) 
-      { 
-        data_expression condition=data::replace_variables_capture_avoiding(if_then(p).condition(), sigma,rhs_variables_in_sigma); 
-        if (condition==sort_bool::false_()) 
-        { 
-          return delta_at_zero(); 
-        } 
-        if (condition==sort_bool::true_()) 
-        { 
-          return substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma); 
-        } 
-        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma)); 
-      } 
-      if (is_if_then_else(p)) 
-      { 
-        data_expression condition=data::replace_variables_capture_avoiding(if_then_else(p).condition(), sigma,rhs_variables_in_sigma); 
-        if (condition==sort_bool::false_()) 
-        { 
-          return substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma); 
-        } 
-        if (condition==sort_bool::true_()) 
-        { 
-          return substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma); 
-        } 
-        return if_then_else( 
-                 condition, 
-                 substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma), 
-                 substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma)); 
-      } 
- 
-      if (is_sum(p)) 
-      { 
-        variable_list sumargs=sum(p).bound_variables(); 
-        variable_list vars; 
-        data_expression_list terms; 
- 
-        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i) 
-        { 
-          vars=push_back(vars,i->first); 
-          terms=push_back(terms,i->second); 
-        } 
- 
-        mutable_map_substitution<> local_sigma=sigma; 
+      if (is_choice(p))
+      {
+        return choice(
+                 substitute_pCRLproc(choice(p).left(),sigma,rhs_variables_in_sigma),
+                 substitute_pCRLproc(choice(p).right(),sigma,rhs_variables_in_sigma));
+      }
+      if (is_seq(p))
+      {
+        return seq(
+                 substitute_pCRLproc(seq(p).left(),sigma,rhs_variables_in_sigma),
+                 substitute_pCRLproc(seq(p).right(),sigma,rhs_variables_in_sigma));
+      }
+      if (is_sync(p))
+      {
+        return process::sync(
+                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma),
+                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
+      }
+      if (is_if_then(p))
+      {
+        data_expression condition=data::replace_variables_capture_avoiding(if_then(p).condition(), sigma,rhs_variables_in_sigma);
+        if (condition==sort_bool::false_())
+        {
+          return delta_at_zero();
+        }
+        if (condition==sort_bool::true_())
+        {
+          return substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma);
+        }
+        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma));
+      }
+      if (is_if_then_else(p))
+      {
+        data_expression condition=data::replace_variables_capture_avoiding(if_then_else(p).condition(), sigma,rhs_variables_in_sigma);
+        if (condition==sort_bool::false_())
+        {
+          return substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma);
+        }
+        if (condition==sort_bool::true_())
+        {
+          return substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma);
+        }
+        return if_then_else(
+                 condition,
+                 substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma),
+                 substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma));
+      }
+
+      if (is_sum(p))
+      {
+        variable_list sumargs=sum(p).bound_variables();
+        variable_list vars;
+        data_expression_list terms;
+
+        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+        {
+          vars=push_back(vars,i->first);
+          terms=push_back(terms,i->second);
+        }
+
+        mutable_map_substitution<> local_sigma=sigma;
         std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma); 
- 
-        const process_expression result=sum(sumargs, 
-                                            substitute_pCRLproc(sum(p).operand(),local_sigma,local_rhs_variables_in_sigma)); 
-        return result; 
-      } 
- 
-      if (is_process_instance(p)) 
-      { 
-        assert(0); 
-        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(p); 
- 
-        size_t n=objectIndex(q.identifier()); 
-        const variable_list parameters=objectdata[n].parameters; 
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma); 
-        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments)); 
-        return process_instance_assignment(q.identifier(),new_assignments); 
-      } 
- 
-      if (is_process_instance_assignment(p)) 
-      { 
-        const process_instance_assignment q(p); 
-        size_t n=objectIndex(q.identifier()); 
-        const variable_list parameters=objectdata[n].parameters; 
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma); 
-        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments)); 
-        return process_instance_assignment(q.identifier(),new_assignments); 
-      } 
- 
-      if (is_action(p)) 
-      { 
-        return action(action(p).label(), 
-                      data::replace_variables_capture_avoiding(action(p).arguments(), sigma,rhs_variables_in_sigma)); 
-      } 
- 
-      if (is_at(p)) 
-      { 
-        return at(substitute_pCRLproc(at(p).operand(),sigma,rhs_variables_in_sigma), 
-                  data::replace_variables_capture_avoiding(at(p).time_stamp(),sigma,rhs_variables_in_sigma)); 
-      } 
- 
-      if (is_delta(p)) 
-      { 
-        return p; 
-      } 
- 
-      if (is_tau(p)) 
-      { 
-        return p; 
-      } 
- 
-      if (is_sync(p)) 
-      { 
-        return process::sync( 
-                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma), 
-                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma)); 
-      } 
- 
-      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p)); 
-      return process_expression(); 
+        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
+
+        const process_expression result=sum(sumargs,
+                                            substitute_pCRLproc(sum(p).operand(),local_sigma,local_rhs_variables_in_sigma));
+        return result;
+      }
+
+      if (is_process_instance(p))
+      {
+        assert(0);
+        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(p));
+
+        size_t n=objectIndex(q.identifier());
+        const variable_list parameters=objectdata[n].parameters;
+        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma);
+        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
+        return process_instance_assignment(q.identifier(),new_assignments);
+      }
+
+      if (is_process_instance_assignment(p))
+      {
+        const process_instance_assignment q(p);
+        size_t n=objectIndex(q.identifier());
+        const variable_list parameters=objectdata[n].parameters;
+        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma);
+        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
+        return process_instance_assignment(q.identifier(),new_assignments);
+      }
+
+      if (is_action(p))
+      {
+        return action(action(p).label(),
+                      data::replace_variables_capture_avoiding(action(p).arguments(), sigma,rhs_variables_in_sigma));
+      }
+
+      if (is_at(p))
+      {
+        return at(substitute_pCRLproc(at(p).operand(),sigma,rhs_variables_in_sigma),
+                  data::replace_variables_capture_avoiding(at(p).time_stamp(),sigma,rhs_variables_in_sigma));
+      }
+
+      if (is_delta(p))
+      {
+        return p;
+      }
+
+      if (is_tau(p))
+      {
+        return p;
+      }
+
+      if (is_sync(p))
+      {
+        return process::sync(
+                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma),
+                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
+      }
+
+      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p));
+      return process_expression();
     }
 
 
@@ -1851,7 +1851,7 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list sumvars=sum(body).bound_variables();
         process_expression body1=sum(body).operand();
-        
+
         mutable_map_substitution<> sigma;
         // std::map < variable, data_expression > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
@@ -2318,7 +2318,7 @@ class specification_basic_type:public boost::noncopyable
       {
         assert(0);
         // return body;
-        return transform_process_instance_to_process_instance_assignment(body);
+        return transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(body));
       }
 
       if (is_process_instance_assignment(body))
@@ -3060,7 +3060,7 @@ class specification_basic_type:public boost::noncopyable
                single = in `mode=mCRL' is important, otherwise crash
                I do not understand the reason for this at this moment
                JFG (9/5/2000) */
-          return transform_process_instance_to_process_instance_assignment(body);
+          return transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(body));
         }
 
         const size_t n=objectIndex(t);
@@ -3370,7 +3370,7 @@ class specification_basic_type:public boost::noncopyable
          and is not present in vl. */
       if (var.name()==var1.name())
       {
-        assert(0); // Renaming of parameters is not allowed, given that assignments are being used in processes, using the names of the variables. 
+        assert(0); // Renaming of parameters is not allowed, given that assignments are being used in processes, using the names of the variables.
         variable var2=get_fresh_variable(var.name(),var.sort());
         // templist is needed as objectdata may be realloced
         // during the substitution. Same applies to tempvar
@@ -8577,7 +8577,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(t))
       {
         transform_process_arguments(process_instance(t).identifier(),visited_processes);
-        return transform_process_instance_to_process_instance_assignment(t,bound_variables);
+        return transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(t),bound_variables);
       }
       if (is_process_instance_assignment(t))
       {
@@ -8593,7 +8593,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_hide(t))
       {
         return hide(hide(t).hide_set(),
-                    transform_process_arguments_body(hide(t).operand(),bound_variables,visited_processes));
+                    transform_process_arguments_body(core::down_cast<process_instance>(hide(t).operand()),bound_variables,visited_processes));
       }
       if (is_rename(t))
       {
@@ -8913,7 +8913,7 @@ class specification_basic_type:public boost::noncopyable
       else if (is_process_instance(t))
       {
         assert(0);
-        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(t);
+        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(t));
         assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
                  u.assignments()));
         result=process_instance_assignment(

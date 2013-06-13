@@ -272,7 +272,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     // Check 1) The expression right must be a process instance or a process assignment
     if (is_process_instance(x.right()))
     {
-      process_instance p = x.right();
+      const process_instance& p = core::down_cast<process_instance>(x.right());
       // Check 2) The process equation and and the process instance must match
       if (!detail::check_process_instance(m_equation, p))
       {
@@ -408,7 +408,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
 
     if (is_process_instance(p.init()))
     {
-      process_instance init = p.init();
+      const process_instance& init = core::down_cast<process_instance>(p.init());
       if (!check_process_instance(m_equation, init))
       {
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: the initial process does not match the process equation");

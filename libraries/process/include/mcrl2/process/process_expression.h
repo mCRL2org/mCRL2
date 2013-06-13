@@ -15,6 +15,7 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
@@ -133,7 +134,7 @@ class process_instance: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    process_instance(const atermpp::aterm& term)
+    explicit process_instance(const atermpp::aterm& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Process(*this));

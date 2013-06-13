@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_ALLOW_H
 
 #include <sstream>
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/allow_set.h"
@@ -106,10 +107,10 @@ struct push_allow_map
 
   void insert(const process_expression& x, const allow_set& A, const process_instance& Q)
   {
-    data[x].push_back(wnode(A, Q));
+    data[atermpp::aterm_cast<process_instance>(x)].push_back(wnode(A, Q));
   }
 
-  void set_alphabet(const process_expression& x, const allow_set& A, const multi_action_name_set& alphabet)
+  void set_alphabet(const process_instance& x, const allow_set& A, const multi_action_name_set& alphabet)
   {
     auto i = data.find(x);
     if (i != data.end())
