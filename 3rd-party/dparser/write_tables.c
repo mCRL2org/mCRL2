@@ -1123,7 +1123,6 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
     g->write_line++;
   }
   fprintf(fp, "%s{ ", fname);
-  fprintf(fp, avoid_unused_warning);
   c = code;
   while (*c) {
     if (*c != '\\') {
@@ -1243,6 +1242,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
       c++;
     }
   }
+  fprintf(fp, avoid_unused_warning);
   fprintf(fp, "  return 0;");
   fprintf(fp, "}\n\n");
   g->write_line += 2;

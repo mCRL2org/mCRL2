@@ -41,11 +41,11 @@ dup_str(const char *s, const char *e) {
 }
 
 uint
-strhashl(const char *s, int l) {
+strhashl(const char *s, size_t l) {
   uint h = 0, g;
-  int i = 0;
+  size_t i;
 
-  for (;i < l;i++,s++) {
+  for (i = 0; i < l; ++i, ++s) {
     h = (h << 4) + *s;
     if ((g = h & 0xf0000000))
       h = (h ^ (g >> 24)) ^ g;

@@ -60,7 +60,7 @@ process_arg(ArgumentState *arg_state, int i, char ***argv) {
 void
 process_args(ArgumentState *arg_state, char **argv) {
   int i = 0;
-  uint len;
+  uintptr_t len;
   char *end;
   ArgumentDescription *desc = arg_state->desc;
   /* Grab Environment Variables */

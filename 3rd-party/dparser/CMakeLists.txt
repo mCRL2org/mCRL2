@@ -23,7 +23,6 @@ add_definitions(
   -Dstrncasecmp=_strnicmp
   -Dsnprintf=_snprintf
 )
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
 endif(MSVC)
 
 # ######### General setup ##########
