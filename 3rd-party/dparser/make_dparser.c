@@ -83,6 +83,7 @@ int
 main(int argc, char *argv[]) {
   char *grammar_pathname;
   Grammar *g;
+  (void)argc;
 
   process_args(&arg_state, argv);
   if (arg_state.nfile_arguments != 1)

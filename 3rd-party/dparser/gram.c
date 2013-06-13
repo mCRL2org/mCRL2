@@ -1445,6 +1445,7 @@ compute_declaration_states(Grammar *g, Production *p, Declaration *d) {
   State *s, *base_s = NULL;
   uint j, k;
   int scanner = scanner_declaration(d);
+  (void)p;
 
   for (j = 0; j < g->states.n; j++) {
     s = g->states.v[j];

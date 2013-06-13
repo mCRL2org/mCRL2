@@ -2,6 +2,7 @@
   Copyright 2002-2006 John Plevyak, All Rights Reserved
 */
 #include "d.h"
+#include "strings.h"
 #include "dparse_tables.h"
 
 void myfprintf(FILE *f, const char *format, ...) {
@@ -601,11 +602,13 @@ trans_scanner_block_fns = {
 
 static uint32
 shift_hash_fn(Action *sa, hash_fns_t *fns) {
+  (void)fns;
   return sa->term->index + (sa->kind == ACTION_SHIFT_TRAILING ? 1000000 : 0);
 }
 
 static int
 shift_cmp_fn(Action *sa, Action *sb, hash_fns_t *fns) {
+  (void)fns;
   return (sa->term->index != sb->term->index) || (sa->kind != sb->kind);
 }
 
@@ -1099,6 +1102,8 @@ find_symbol(Grammar *g, char *s, char *e, int kind) {
   return -1;
 }
 
+static char * avoid_unused_warning = "(void)_ps; (void)_children; (void)_n_children; (void)_offset; (void)_parser; /* Avoids warnings about unused parameters in most compilers */";
+
 static void
 write_code(FILE *fp, Grammar *g, Rule *r, char *code,
 		char *fname, int line, char *pathname) 
@@ -1115,6 +1120,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
     g->write_line++;
   }
   fprintf(fp, "%s{ ", fname);
+  fprintf(fp, avoid_unused_warning);
   c = code;
   while (*c) {
     if (*c != '\\') {
@@ -1247,6 +1253,7 @@ static void
 write_global_code(FILE *fp, Grammar *g, char *tag) {
   uint i;
   char *c;
+  (void)tag;
   
   for (i = 0; i < g->ncode; i++) {
     if (g->write_line_directives) {
@@ -1454,6 +1461,7 @@ er_hint_hash_fn(State *a, hash_fns_t *fns) {
   VecHint *sa = &a->error_recovery_hints;
   uint32 hash = 0, i;
   Term *ta;
+  (void)fns;
 
   for (i = 0; i < sa->n; i++) {
     ta = sa->v[i]->rule->elems.v[sa->v[i]->rule->elems.n - 1]->e.term;
@@ -1470,6 +1478,8 @@ er_hint_cmp_fn(State *a, State *b, hash_fns_t *fns) {
   uint i;
   VecHint *sa = &a->error_recovery_hints, *sb = &b->error_recovery_hints;
   Term *ta, *tb;
+  (void)fns;
+
   if (sa->n != sb->n)
     return 1;
   for (i = 0; i < sa->n; i++) {
