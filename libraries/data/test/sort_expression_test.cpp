@@ -110,7 +110,7 @@ void structured_sort_test()
   structured_sort_constructor_argument p0("p0", s0);
   structured_sort_constructor_argument p1(s1);
   BOOST_CHECK(to_string(p0.name()) == "p0");
-  BOOST_CHECK(p1.name() == data::no_identifier());
+  BOOST_CHECK(p1.name() == core::empty_identifier_string());
   BOOST_CHECK(p0.sort() == s0);
   BOOST_CHECK(p1.sort() == s1);
 
@@ -127,7 +127,7 @@ void structured_sort_test()
   BOOST_CHECK(to_string(c1.recogniser()) == "is_c1");
   BOOST_CHECK(to_string(c2.name()) == "c2");
   BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c2.arguments()) == a2);
-  BOOST_CHECK(c2.recogniser() == data::no_identifier());
+  BOOST_CHECK(c2.recogniser() == core::empty_identifier_string());
 
   structured_sort_constructor_list cs = atermpp::make_list(c1, c2);
 
