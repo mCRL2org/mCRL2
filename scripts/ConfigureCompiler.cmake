@@ -1,11 +1,4 @@
 # Compiler configuration shared on all platforms, on all compilers
-if(CXX_COMPILER_ARCHITECTURE STREQUAL "x86")
-  add_definitions("-DAT_32BIT")
-endif()
-if(CXX_COMPILER_ARCHITECTURE STREQUAL "x86_64")
-  add_definitions("-DAT_64BIT")
-endif()
-
 set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${CMAKE_EXE_LINKER_FLAGS_MAINTAINER}"
     CACHE STRING "Flags used for linking binaries during maintainer builds.")
 set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} ${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER}"

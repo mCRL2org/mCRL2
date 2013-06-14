@@ -19,20 +19,10 @@ set(CC  ${CMAKE_C_COMPILER})
 set(CXX ${CMAKE_CXX_COMPILER})
 
 # Configure the default build options
+set(R_CXXFLAGS ${CMAKE_CXX_FLAGS})
 if(CMAKE_BUILD_TYPE)
-  string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_LC)
-  if(CMAKE_BUILD_TYPE_LC MATCHES "release")
-    set(R_CXXFLAGS ${CMAKE_CXX_FLAGS_RELEASE})
-  endif()
-  if(CMAKE_BUILD_TYPE_LC MATCHES "debug")
-    set(R_CXXFLAGS ${CMAKE_CXX_FLAGS_DEBUG})
-  endif()
-  if(CMAKE_BUILD_TYPE_LC MATCHES "relwithdebinfo")
-    set(R_CXXFLAGS ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
-  endif()
-  if(CMAKE_BUILD_TYPE_LC MATCHES "maintainer")
-    set(R_CXXFLAGS ${CMAKE_CXX_FLAGS_MAINTAINER})
-  endif()
+  string(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" R_CXXFLAGS_NAME)
+  set(R_CXXFLAGS "${R_CXXFLAGS} ${${R_CXXFLAGS_NAME}}")
 endif()
 
 # Add build type define for version information (needed by toolset_version_const.h)
@@ -41,17 +31,6 @@ if(CMAKE_CFG_INTDIR STREQUAL ".")
 else()
   set(R_CXXFLAGS "${R_CXXFLAGS} -DMCRL2_BUILD_TYPE=\"\\\"${CMAKE_CFG_INTDIR}\\\"\"")
 endif()
-
-# Set appropriate C++11 flag
-if(CXX_ACCEPTS_STD_CPP11)
-  set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++11")
-elseif(CXX_ACCEPTS_STD_CPP0X)
-  set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++0x")
-endif()
-
-# Do not use debug symbols in the rewriter, and build using the appropriate
-# flags for the aterm library
-set(R_CXXFLAGS "${R_CXXFLAGS} -DNDEBUG ${ATERM_FLAGS}")
 
 # Make sure the shared library for the rewriter is build using position
 # independent code, if we were configured as static build ourselves, otherwise
@@ -72,16 +51,13 @@ endif()
 # Set MacOS-X specific compile flags
 if( CMAKE_OSX_ARCHITECTURES )
   set(R_MCRL2_OSX_ARCH  "-arch ${CMAKE_OSX_ARCHITECTURES}" )
-endif( CMAKE_OSX_ARCHITECTURES )
-if( CMAKE_OSX_SYSROOT )
-  if (EXISTS ${R_MCRL2_OSX_ARCH})
+  if( CMAKE_OSX_SYSROOT )
     set(R_MCRL2_OSX_ARCH  "${R_MCRL2_OSX_ARCH} -isysroot ${CMAKE_OSX_SYSROOT}" )
-  endif (EXISTS ${R_MCRL2_OSX_ARCH})
-endif( CMAKE_OSX_SYSROOT )
+  endif( CMAKE_OSX_SYSROOT )
+endif( CMAKE_OSX_ARCHITECTURES )
 if( CMAKE_OSX_DEPLOYMENT_TARGET )
   set(R_MCRL2_OSX_ARCH "${R_MCRL2_OSX_ARCH} -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}" )
 endif( CMAKE_OSX_DEPLOYMENT_TARGET )
-
 set(R_CXXFLAGS "${R_CXXFLAGS} ${R_MCRL2_OSX_ARCH}")
 set(R_LDFLAGS "${R_LDFLAGS} ${R_MCRL2_OSX_ARCH}")
 
@@ -95,9 +71,8 @@ include(MCRL2MacOSXCopyBoostHeaders)
 # see jittyc.cpp. The dirname statement takes the directory of the mcrl2compilerewriter
 # script, and uses that path to search for the header files.
 if( APPLE AND MCRL2_OSX_PACKAGE )
-
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"`dirname $0`/../${MCRL2_INCLUDE_DIR}\"")
-  else()
+else()
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_INSTALL_PREFIX}/${MCRL2_INCLUDE_DIR}\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${Boost_INCLUDE_DIRS}\"")
 endif()
