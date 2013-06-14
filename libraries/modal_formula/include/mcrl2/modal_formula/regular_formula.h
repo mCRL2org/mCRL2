@@ -47,6 +47,11 @@ class regular_formula: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_RegFrm(*this));
     }
+
+    /// \brief Constructor.
+    regular_formula(const action_formulas::action_formula& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of regular_formulas
@@ -64,8 +69,8 @@ inline bool is_trans(const atermpp::aterm_appl& x);
 inline bool is_trans_or_nil(const atermpp::aterm_appl& x);
 
 /// \brief Test for a regular_formula expression
-/// \param t A term
-/// \return True if it is a regular_formula expression
+/// \param x A term
+/// \return True if \a x is a regular_formula expression
 inline
 bool is_regular_formula(const atermpp::aterm_appl& x)
 {
@@ -97,8 +102,8 @@ class nil: public regular_formula
 };
 
 /// \brief Test for a nil expression
-/// \param t A term
-/// \return True if it is a nil expression
+/// \param x A term
+/// \return True if \a x is a nil expression
 inline
 bool is_nil(const atermpp::aterm_appl& x)
 {
@@ -140,8 +145,8 @@ class seq: public regular_formula
 };
 
 /// \brief Test for a seq expression
-/// \param t A term
-/// \return True if it is a seq expression
+/// \param x A term
+/// \return True if \a x is a seq expression
 inline
 bool is_seq(const atermpp::aterm_appl& x)
 {
@@ -183,8 +188,8 @@ class alt: public regular_formula
 };
 
 /// \brief Test for a alt expression
-/// \param t A term
-/// \return True if it is a alt expression
+/// \param x A term
+/// \return True if \a x is a alt expression
 inline
 bool is_alt(const atermpp::aterm_appl& x)
 {
@@ -221,8 +226,8 @@ class trans: public regular_formula
 };
 
 /// \brief Test for a trans expression
-/// \param t A term
-/// \return True if it is a trans expression
+/// \param x A term
+/// \return True if \a x is a trans expression
 inline
 bool is_trans(const atermpp::aterm_appl& x)
 {
@@ -259,8 +264,8 @@ class trans_or_nil: public regular_formula
 };
 
 /// \brief Test for a trans_or_nil expression
-/// \param t A term
-/// \return True if it is a trans_or_nil expression
+/// \param x A term
+/// \return True if \a x is a trans_or_nil expression
 inline
 bool is_trans_or_nil(const atermpp::aterm_appl& x)
 {

@@ -45,6 +45,11 @@ class action_formula: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_ActFrm(*this));
     }
+
+    /// \brief Constructor.
+    action_formula(const data::data_expression& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of action_formulas
@@ -68,8 +73,8 @@ inline bool is_multi_action(const atermpp::aterm_appl& x);
 inline bool is_untyped_multi_action(const atermpp::aterm_appl& x);
 
 /// \brief Test for a action_formula expression
-/// \param t A term
-/// \return True if it is a action_formula expression
+/// \param x A term
+/// \return True if \a x is a action_formula expression
 inline
 bool is_action_formula(const atermpp::aterm_appl& x)
 {
@@ -107,8 +112,8 @@ class true_: public action_formula
 };
 
 /// \brief Test for a true expression
-/// \param t A term
-/// \return True if it is a true expression
+/// \param x A term
+/// \return True if \a x is a true expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
@@ -135,8 +140,8 @@ class false_: public action_formula
 };
 
 /// \brief Test for a false expression
-/// \param t A term
-/// \return True if it is a false expression
+/// \param x A term
+/// \return True if \a x is a false expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
@@ -173,8 +178,8 @@ class not_: public action_formula
 };
 
 /// \brief Test for a not expression
-/// \param t A term
-/// \return True if it is a not expression
+/// \param x A term
+/// \return True if \a x is a not expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
@@ -216,8 +221,8 @@ class and_: public action_formula
 };
 
 /// \brief Test for a and expression
-/// \param t A term
-/// \return True if it is a and expression
+/// \param x A term
+/// \return True if \a x is a and expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
@@ -259,8 +264,8 @@ class or_: public action_formula
 };
 
 /// \brief Test for a or expression
-/// \param t A term
-/// \return True if it is a or expression
+/// \param x A term
+/// \return True if \a x is a or expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
@@ -302,8 +307,8 @@ class imp: public action_formula
 };
 
 /// \brief Test for a imp expression
-/// \param t A term
-/// \return True if it is a imp expression
+/// \param x A term
+/// \return True if \a x is a imp expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
@@ -345,8 +350,8 @@ class forall: public action_formula
 };
 
 /// \brief Test for a forall expression
-/// \param t A term
-/// \return True if it is a forall expression
+/// \param x A term
+/// \return True if \a x is a forall expression
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
@@ -388,8 +393,8 @@ class exists: public action_formula
 };
 
 /// \brief Test for a exists expression
-/// \param t A term
-/// \return True if it is a exists expression
+/// \param x A term
+/// \return True if \a x is a exists expression
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
@@ -431,8 +436,8 @@ class at: public action_formula
 };
 
 /// \brief Test for a at expression
-/// \param t A term
-/// \return True if it is a at expression
+/// \param x A term
+/// \return True if \a x is a at expression
 inline
 bool is_at(const atermpp::aterm_appl& x)
 {
@@ -469,8 +474,8 @@ class multi_action: public action_formula
 };
 
 /// \brief Test for a multi_action expression
-/// \param t A term
-/// \return True if it is a multi_action expression
+/// \param x A term
+/// \return True if \a x is a multi_action expression
 inline
 bool is_multi_action(const atermpp::aterm_appl& x)
 {
@@ -507,8 +512,8 @@ class untyped_multi_action: public action_formula
 };
 
 /// \brief Test for a untyped_multi_action expression
-/// \param t A term
-/// \return True if it is a untyped_multi_action expression
+/// \param x A term
+/// \return True if \a x is a untyped_multi_action expression
 inline
 bool is_untyped_multi_action(const atermpp::aterm_appl& x)
 {

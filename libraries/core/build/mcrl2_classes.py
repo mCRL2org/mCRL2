@@ -407,7 +407,7 @@ class MemberFunction:
         self.arg  = arg
 
     def expand_text(self, text):
-        text = re.sub('<CLASSNAME>'          , self.classname          , text)
+        text = re.sub('<CLASSNAME>', self.classname, text)
         text = re.sub('<RETURN_TYPE>', self.return_type, text)
         text = re.sub('<NAME>', self.name, text)
         text = re.sub('<ARG>',  self.arg , text)
@@ -548,6 +548,43 @@ class OverloadedConstructor(Constructor):
             text = re.sub('<INLINE>', 'inline', text)
         else:
             text = re.sub('<INLINE>', '', text)
+        return self.expand_text(text)
+
+# Represents a class constructor taking an additional class as argument
+class AdditionalConstructor(Constructor):
+    def __init__(self, classname, additional_classname, superclass, additional_class):
+        self.classname            = classname
+        self.additional_classname = additional_classname
+        self.superclass           = superclass
+
+    def inline_definition(self):
+        text = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
+      : <SUPERCLASS>(x)
+    {}'''
+        return self.expand_text(text)
+
+    def declaration(self):
+        text = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x);'''
+        return self.expand_text(text)
+
+    def expand_text(self, text):
+        text = re.sub('<CLASSNAME>', self.classname, text)
+        text = re.sub('<ADDITIONAL_CLASSNAME>', self.additional_classname, text)
+        text = re.sub('<SUPERCLASS>', self.superclass, text)
+        return text
+
+    def definition(self, inline = False):
+        text = r'''    /// \\\\brief Constructor.
+    /// \\param term A term
+    <INLINE><CLASSNAME>::<CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
+      : <SUPERCLASS>(x)
+    {}'''
+        if inline:
+            text = re.sub('<INLINE>',  'inline\n    ', text)
+        else:
+            text = re.sub('<INLINE>',  '', text)
         return self.expand_text(text)
 
 # Represents a class constructor taking an aterm as argument
@@ -734,6 +771,9 @@ class Class:
             constructors.append(Constructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
         if len(self.constructor.parameters()) > 0 and (add_string_overload_constructor or add_container_overload_constructor) and (parameters != parameters1):
             constructors.append(OverloadedConstructor(classname, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
+        if self.classname(True) in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES:
+            for additional_classname in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES[self.classname(True)]:
+                constructors.append(AdditionalConstructor(classname, additional_classname, superclass, additional_classname))
         return constructors
 
     # Returns a specialization of the swap function for the std namespace

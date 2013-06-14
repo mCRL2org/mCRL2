@@ -54,6 +54,11 @@ class pbes_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_PBExpr(*this));
     }
+
+    /// \brief Constructor.
+    pbes_expression(const data::data_expression& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of pbes_expressions

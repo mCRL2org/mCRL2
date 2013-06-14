@@ -47,6 +47,11 @@ class state_formula: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_StateFrm(*this));
     }
+
+    /// \brief Constructor.
+    state_formula(const data::data_expression& x)
+      : atermpp::aterm_appl(x)
+    {}
 //--- start user section state_formula ---//
     /// \brief Returns true if the formula is timed.
     /// \return True if the formula is timed.
@@ -81,8 +86,8 @@ inline bool is_nu(const atermpp::aterm_appl& x);
 inline bool is_mu(const atermpp::aterm_appl& x);
 
 /// \brief Test for a state_formula expression
-/// \param t A term
-/// \return True if it is a state_formula expression
+/// \param x A term
+/// \return True if \a x is a state_formula expression
 inline
 bool is_state_formula(const atermpp::aterm_appl& x)
 {
@@ -126,8 +131,8 @@ class true_: public state_formula
 };
 
 /// \brief Test for a true expression
-/// \param t A term
-/// \return True if it is a true expression
+/// \param x A term
+/// \return True if \a x is a true expression
 inline
 bool is_true(const atermpp::aterm_appl& x)
 {
@@ -154,8 +159,8 @@ class false_: public state_formula
 };
 
 /// \brief Test for a false expression
-/// \param t A term
-/// \return True if it is a false expression
+/// \param x A term
+/// \return True if \a x is a false expression
 inline
 bool is_false(const atermpp::aterm_appl& x)
 {
@@ -192,8 +197,8 @@ class not_: public state_formula
 };
 
 /// \brief Test for a not expression
-/// \param t A term
-/// \return True if it is a not expression
+/// \param x A term
+/// \return True if \a x is a not expression
 inline
 bool is_not(const atermpp::aterm_appl& x)
 {
@@ -235,8 +240,8 @@ class and_: public state_formula
 };
 
 /// \brief Test for a and expression
-/// \param t A term
-/// \return True if it is a and expression
+/// \param x A term
+/// \return True if \a x is a and expression
 inline
 bool is_and(const atermpp::aterm_appl& x)
 {
@@ -278,8 +283,8 @@ class or_: public state_formula
 };
 
 /// \brief Test for a or expression
-/// \param t A term
-/// \return True if it is a or expression
+/// \param x A term
+/// \return True if \a x is a or expression
 inline
 bool is_or(const atermpp::aterm_appl& x)
 {
@@ -321,8 +326,8 @@ class imp: public state_formula
 };
 
 /// \brief Test for a imp expression
-/// \param t A term
-/// \return True if it is a imp expression
+/// \param x A term
+/// \return True if \a x is a imp expression
 inline
 bool is_imp(const atermpp::aterm_appl& x)
 {
@@ -364,8 +369,8 @@ class forall: public state_formula
 };
 
 /// \brief Test for a forall expression
-/// \param t A term
-/// \return True if it is a forall expression
+/// \param x A term
+/// \return True if \a x is a forall expression
 inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
@@ -407,8 +412,8 @@ class exists: public state_formula
 };
 
 /// \brief Test for a exists expression
-/// \param t A term
-/// \return True if it is a exists expression
+/// \param x A term
+/// \return True if \a x is a exists expression
 inline
 bool is_exists(const atermpp::aterm_appl& x)
 {
@@ -450,8 +455,8 @@ class must: public state_formula
 };
 
 /// \brief Test for a must expression
-/// \param t A term
-/// \return True if it is a must expression
+/// \param x A term
+/// \return True if \a x is a must expression
 inline
 bool is_must(const atermpp::aterm_appl& x)
 {
@@ -493,8 +498,8 @@ class may: public state_formula
 };
 
 /// \brief Test for a may expression
-/// \param t A term
-/// \return True if it is a may expression
+/// \param x A term
+/// \return True if \a x is a may expression
 inline
 bool is_may(const atermpp::aterm_appl& x)
 {
@@ -521,8 +526,8 @@ class yaled: public state_formula
 };
 
 /// \brief Test for a yaled expression
-/// \param t A term
-/// \return True if it is a yaled expression
+/// \param x A term
+/// \return True if \a x is a yaled expression
 inline
 bool is_yaled(const atermpp::aterm_appl& x)
 {
@@ -559,8 +564,8 @@ class yaled_timed: public state_formula
 };
 
 /// \brief Test for a yaled_timed expression
-/// \param t A term
-/// \return True if it is a yaled_timed expression
+/// \param x A term
+/// \return True if \a x is a yaled_timed expression
 inline
 bool is_yaled_timed(const atermpp::aterm_appl& x)
 {
@@ -587,8 +592,8 @@ class delay: public state_formula
 };
 
 /// \brief Test for a delay expression
-/// \param t A term
-/// \return True if it is a delay expression
+/// \param x A term
+/// \return True if \a x is a delay expression
 inline
 bool is_delay(const atermpp::aterm_appl& x)
 {
@@ -625,8 +630,8 @@ class delay_timed: public state_formula
 };
 
 /// \brief Test for a delay_timed expression
-/// \param t A term
-/// \return True if it is a delay_timed expression
+/// \param x A term
+/// \return True if \a x is a delay_timed expression
 inline
 bool is_delay_timed(const atermpp::aterm_appl& x)
 {
@@ -673,8 +678,8 @@ class variable: public state_formula
 };
 
 /// \brief Test for a variable expression
-/// \param t A term
-/// \return True if it is a variable expression
+/// \param x A term
+/// \return True if \a x is a variable expression
 inline
 bool is_variable(const atermpp::aterm_appl& x)
 {
@@ -726,8 +731,8 @@ class nu: public state_formula
 };
 
 /// \brief Test for a nu expression
-/// \param t A term
-/// \return True if it is a nu expression
+/// \param x A term
+/// \return True if \a x is a nu expression
 inline
 bool is_nu(const atermpp::aterm_appl& x)
 {
@@ -779,8 +784,8 @@ class mu: public state_formula
 };
 
 /// \brief Test for a mu expression
-/// \param t A term
-/// \return True if it is a mu expression
+/// \param x A term
+/// \return True if \a x is a mu expression
 inline
 bool is_mu(const atermpp::aterm_appl& x)
 {
