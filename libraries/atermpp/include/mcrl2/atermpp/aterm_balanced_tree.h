@@ -17,7 +17,6 @@
 #include <memory>
 #include <stack>
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/type_traits/is_convertible.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/function_symbol.h"
 

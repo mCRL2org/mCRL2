@@ -18,9 +18,7 @@
 #include <vector>
 #include <assert.h>
 
-#include <boost/utility/enable_if.hpp>
 #include "boost/type_traits/is_base_of.hpp"
-#include "boost/type_traits/is_convertible.hpp"
 #include "boost/static_assert.hpp"
 
 #include "mcrl2/atermpp/detail/aterm.h"
