@@ -56,8 +56,7 @@ strhashl(const char *s, size_t l) {
 int
 buf_read(const char *pathname, char **buf, int *len) {
   struct stat sb;
-  int fd;
-  size_t real_size;
+  int fd, real_size;
 
   *buf = 0;
   *len = 0;

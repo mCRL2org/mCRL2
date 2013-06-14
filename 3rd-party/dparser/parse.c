@@ -147,7 +147,7 @@ find_SNode(Parser *p, size_t state, D_Scope *sc, void *g) {
   uintptr_t h = SNODE_HASH(state, sc, g);
   if (ph->v)
     for (sn = ph->v[h % ph->m]; sn; sn = sn->bucket_next)
-      if (sn->state - p->t->state == state &&
+      if (sn->state == state + p->t->state &&
 	  sn->initial_scope == sc &&
 	  sn->initial_globals == g)
 	return sn;
@@ -728,7 +728,7 @@ check_path_priorities_internal(VecZNode *path) {
 
 static int
 compare_priorities(int xpri[], size_t xn, int ypri[], size_t yn) {
-  int i = 0;
+  size_t i = 0;
 
   while (i < xn && i < yn) {
     if (xpri[i] > ypri[i])

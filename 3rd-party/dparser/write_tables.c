@@ -1088,10 +1088,10 @@ find_symbol(Grammar *g, char *s, char *e, int kind) {
       for (i = 0; i < g->terminals.n;i++)
 	if (g->terminals.v[i]->kind == TERM_STRING &&
 	    ((g->terminals.v[i]->term_name &&
-	      (uint)strlen(g->terminals.v[i]->term_name) == e-s &&
+	      strlen(g->terminals.v[i]->term_name) == (size_t)(e-s) &&
 	      !strncmp(s, g->terminals.v[i]->term_name, e-s)) ||
 	     (!g->terminals.v[i]->term_name &&
-	      g->terminals.v[i]->string_len == (e-s) &&
+	      g->terminals.v[i]->string_len == (size_t)(e-s) &&
 	      !strncmp(s, g->terminals.v[i]->string, e-s)))) {
 	  if (found > 0) {
 	    d_fail("attempt to find symbol for non-unique string '%s'\n",
