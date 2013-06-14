@@ -82,6 +82,9 @@ BOOST_AUTO_TEST_CASE(aterm_down_cast)
   BOOST_CHECK(fxy == fxy_term);
 
   u test2(fxy_term, 3);
+
+  const atermpp::aterm& t1(fxy);
+  const atermpp::aterm_appl& t2 = mcrl2::core::static_down_cast<const atermpp::aterm_appl&>(t1);
 }
 
 // Uses the second definition of down_cast,
@@ -117,8 +120,6 @@ BOOST_AUTO_TEST_CASE(function_calls)
   t2 x2(x1);
   t3 x31(x1);
   const t1& y(t3);
-  // Now how do I call f(y)?
-  // f(mcrl2::core::down_cast<t3>(y)); This does not work.
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

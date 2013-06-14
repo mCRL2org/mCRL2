@@ -51,6 +51,12 @@ Derived down_cast(Base t,
   return Derived(t);
 }
 
+template <class Derived, class Base>
+const Derived& static_down_cast(const Base& x)
+{
+  return static_cast<const Derived&>(x);
+}
+
 } // namespace core
 
 } // namespace mcrl2

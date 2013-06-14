@@ -1671,7 +1671,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(p))
       {
         assert(0);
-        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(p));
+        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(p));
 
         size_t n=objectIndex(q.identifier());
         const variable_list parameters=objectdata[n].parameters;
@@ -2318,7 +2318,7 @@ class specification_basic_type:public boost::noncopyable
       {
         assert(0);
         // return body;
-        return transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(body));
+        return transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(body));
       }
 
       if (is_process_instance_assignment(body))
@@ -2607,7 +2607,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_action(sequence)||is_process_instance_assignment(sequence))
       {
-        result.push_back(core::down_cast<process_instance_assignment>(sequence));
+        result.push_back(core::static_down_cast<const process_instance_assignment&>(sequence));
         return;
       }
 
@@ -2616,8 +2616,8 @@ class specification_basic_type:public boost::noncopyable
         const process_expression first=seq(sequence).left();
         if (is_process_instance_assignment(first))
         {
-          result.push_back(core::down_cast<process_instance_assignment>(first));
-          size_t n=objectIndex(core::down_cast<process_instance_assignment>(first).identifier());
+          result.push_back(core::static_down_cast<const process_instance_assignment&>(first));
+          size_t n=objectIndex(core::static_down_cast<const process_instance_assignment&>(first).identifier());
           if (objectdata[n].canterminate)
           {
             extract_names(seq(sequence).right(),result);
@@ -2723,7 +2723,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       {
-        const process_instance_assignment firstproc=core::down_cast<process_instance_assignment>(seq(t).left());
+        const process_instance_assignment firstproc=core::static_down_cast<const process_instance_assignment&>(seq(t).left());
         size_t n=objectIndex(firstproc.identifier());
         const assignment_list first_assignment=argscollect_regular2(firstproc,vl);
         if (objectdata[n].canterminate)
@@ -3060,7 +3060,7 @@ class specification_basic_type:public boost::noncopyable
                single = in `mode=mCRL' is important, otherwise crash
                I do not understand the reason for this at this moment
                JFG (9/5/2000) */
-          return transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(body));
+          return transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(body));
         }
 
         const size_t n=objectIndex(t);
@@ -4102,7 +4102,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       {
-        const process_instance_assignment process=core::down_cast<process_instance_assignment>(seq(t).left());
+        const process_instance_assignment process=core::static_down_cast<const process_instance_assignment&>(seq(t).left());
         const process_expression process2=seq(t).right();
         const process_identifier procId=process.identifier();
         const assignment_list t1=process.assignments();
@@ -8577,7 +8577,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(t))
       {
         transform_process_arguments(process_instance(t).identifier(),visited_processes);
-        return transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(t),bound_variables);
+        return transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(t),bound_variables);
       }
       if (is_process_instance_assignment(t))
       {
@@ -8593,7 +8593,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_hide(t))
       {
         return hide(hide(t).hide_set(),
-                    transform_process_arguments_body(core::down_cast<process_instance>(hide(t).operand()),bound_variables,visited_processes));
+                    transform_process_arguments_body(core::static_down_cast<const process_instance&>(hide(t).operand()),bound_variables,visited_processes));
       }
       if (is_rename(t))
       {
@@ -8913,7 +8913,7 @@ class specification_basic_type:public boost::noncopyable
       else if (is_process_instance(t))
       {
         assert(0);
-        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(core::down_cast<process_instance>(t));
+        const process_instance_assignment u=transform_process_instance_to_process_instance_assignment(core::static_down_cast<const process_instance&>(t));
         assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
                  u.assignments()));
         result=process_instance_assignment(

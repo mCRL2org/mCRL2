@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_ALLOW_H
 
 #include <sstream>
-#include "mcrl2/core/down_cast.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/allow_set.h"
