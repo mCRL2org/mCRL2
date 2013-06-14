@@ -3237,7 +3237,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   mCRL2log(verbose) << "loading rewriter..." << std::endl;
 
   bool (*init)(rewriter_interface*);
-  rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this };
+  rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this, NULL, NULL };
   try
   {
     init = reinterpret_cast<bool(*)(rewriter_interface *)>(rewriter_so->proc_address("init"));
