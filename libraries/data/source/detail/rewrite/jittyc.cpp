@@ -3140,7 +3140,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    return result;\n"
       "  }\n"
       "}\n\n",
-      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity
+      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity+1
       );
 
   fprintf(f,
@@ -3217,7 +3217,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
-      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity);
+      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity+1);
 
 
   fclose(f);
