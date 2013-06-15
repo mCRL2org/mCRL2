@@ -3292,7 +3292,8 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression &term,
      substitution_type &sigma)
 {
-  internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterCompilingJitty::toRewriteFormat, this, _1));
+  // internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterCompilingJitty::toRewriteFormat, this, _1));
+  internal_substitution_type internal_sigma = apply(sigma, [this](const data_expression& t){return this->toRewriteFormat(t);});
   return fromRewriteFormat(rewrite_internal(toRewriteFormat(term),internal_sigma));
 }
 

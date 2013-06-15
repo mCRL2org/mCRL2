@@ -69,7 +69,9 @@ void test_representative_generator()
 
   // Check whether the representative of the set of reals is the empty set of reals.
   BOOST_CHECK(default_expression_generator(container_sort(set_container(),data::sort_real::real_())) ==
-              data::sort_set::empty(data::sort_real::real_()));
+              data::sort_set::constructor(data::sort_real::real_(),
+                                          data::sort_set::false_function(data::sort_real::real_()),
+                                          data::sort_fset::empty(data::sort_real::real_())));
 
 
 }

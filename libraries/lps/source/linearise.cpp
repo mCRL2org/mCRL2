@@ -5026,6 +5026,25 @@ class specification_basic_type:public boost::noncopyable
       return make_application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
     }
 
+    template <class T>
+    bool all_equal(const atermpp::term_list<T>& l)
+    {
+      if (l.empty()) 
+      {
+        return true;
+      }
+      typename atermpp::term_list<T>::const_iterator i=l.begin();
+      const T& first=*i;
+      for(++i ; i!=l.end(); ++i)
+      {
+        if (*i!=first)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     data_expression construct_binary_case_tree(
       size_t n,
       const variable_list &sums,
@@ -5192,13 +5211,20 @@ class specification_basic_type:public boost::noncopyable
       {
         if (equaluptillnow)
         {
-          data_expression_list tempconditionlist=conditionlist;
-          tempconditionlist.push_front(data_expression(e.var));
-          resultcondition=lazy::and_(
-                            application(
-                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              tempconditionlist),
-                            equalterm);
+          if (all_equal(conditionlist))
+          {
+            resultcondition=lazy::and_(conditionlist.front(), equalterm);
+          }
+          else
+          {
+            data_expression_list tempconditionlist=conditionlist;
+            tempconditionlist.push_front(data_expression(e.var));
+            resultcondition=lazy::and_(
+                              application(
+                                find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
+                                tempconditionlist),
+                              equalterm);
+          }
         }
         else
         {
@@ -5207,13 +5233,20 @@ class specification_basic_type:public boost::noncopyable
           resultcondition=application(
                             find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                             tempauxresult);
-          data_expression_list tempconditionlist=conditionlist;
-          tempconditionlist.push_front(data_expression(e.var));
-          resultcondition=lazy::and_(
+          if (all_equal(conditionlist))
+          {
+           resultcondition=lazy::and_(conditionlist.front(),resultcondition);
+          }
+          else
+          {
+           data_expression_list tempconditionlist=conditionlist;
+           tempconditionlist.push_front(data_expression(e.var));
+           resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                               tempconditionlist),
                             resultcondition);
+          }
         }
       }
 
@@ -5636,13 +5669,20 @@ class specification_basic_type:public boost::noncopyable
       {
         if (equaluptillnow)
         {
-          data_expression_list tempconditionlist=conditionlist;
-          tempconditionlist.push_front(data_expression(e.var));
-          resultcondition=lazy::and_(
+          if (all_equal(conditionlist)) 
+          {
+            resultcondition=lazy::and_(conditionlist.front(),equalterm);
+          }
+          else
+          {
+            data_expression_list tempconditionlist=conditionlist;
+            tempconditionlist.push_front(data_expression(e.var));
+            resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                               tempconditionlist),
                             equalterm);
+          }
         }
         else
         {
@@ -5651,13 +5691,20 @@ class specification_basic_type:public boost::noncopyable
           resultcondition=application(
                             find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                             tempauxresult);
-          data_expression_list tempconditionlist=conditionlist;
-          tempconditionlist.push_front(data_expression(e.var));
-          resultcondition=lazy::and_(
+          if (all_equal(conditionlist))
+          {
+            resultcondition=lazy::and_(conditionlist.front(),resultcondition);
+          }
+          else
+          {
+            data_expression_list tempconditionlist=conditionlist;
+            tempconditionlist.push_front(data_expression(e.var));
+            resultcondition=lazy::and_(
                             application(
                               find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                               tempconditionlist),
                             resultcondition);
+          }
         }
       }
 

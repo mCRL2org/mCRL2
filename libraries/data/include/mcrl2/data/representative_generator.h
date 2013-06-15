@@ -185,16 +185,11 @@ class representative_generator
           return set_representative(sort, *i);
         }
 
-        // check if there is a constant mapping for s
         const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
 
-        for (function_symbol_vector::const_iterator i =
-               std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
-             i != local_mappings.end();)
-        {
-          return set_representative(sort, *i);
-        }
-
+        // Check whether there is a representative f(t1,...,tn) for s, where f is a constructor function. 
+        // We prefer this over a constant mapping, as a constant mapping generally does not have appropriate
+        // rewrite rules.
         if (maximum_depth != 0)
         {
           // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
@@ -227,6 +222,16 @@ class representative_generator
 
           }
         }
+
+        // check if there is a constant mapping for s
+
+        for (function_symbol_vector::const_iterator i =
+               std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
+             i != local_mappings.end();)
+        {
+          return set_representative(sort, *i);
+        }
+
       }
 
       throw mcrl2::runtime_error("Cannot find a term of sort " + data::pp(sort));
