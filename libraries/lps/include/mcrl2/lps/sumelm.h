@@ -61,7 +61,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// Returns true if x is a summand variable of summand s.
     bool is_summand_variable(const summand_base& s, const data::data_expression& x)
     {
-      return data::is_variable(x) && data::search_variable(s.summation_variables(), x);
+      const data::variable_list& l=s.summation_variables();
+      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::aterm_cast<data::variable>(x))!=l.end();
     }
 
     template <typename T>
