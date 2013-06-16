@@ -297,12 +297,18 @@ class specification_basic_type:public boost::noncopyable
 
     size_t objectIndex(aterm_appl o)
     {
-      // assert(existsObjectIndex(o) >= 0);
       size_t result=objectIndexTable.index(o);
-      assert(result!=atermpp::npos); /* object index must always return the index
-                            of an existing object, because at the
-                            places where objectIndex is used, no
-                            checks take place */
+      if (result==atermpp::npos)
+      {
+        if (is_process_identifier(o))
+        {
+          throw mcrl2::runtime_error("Fail to recognize " + process::pp(process_identifier(o)) + ". Most likely due to unguarded recursion in a process equation.\n");
+        }
+        else
+        {
+          throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) + ". This is an internal error in the lineariser.\n");
+        }
+      }
       return result;
     }
 
@@ -9163,7 +9169,7 @@ class specification_basic_type:public boost::noncopyable
       collectPcrlProcesses(init1,pcrlprocesslist);
       if (pcrlprocesslist.size()==0)
       {
-        throw mcrl2::runtime_error("there are no pCRL processes to be linearized");
+        throw mcrl2::runtime_error("There are no pCRL processes to be linearized. This is most likely due to the use of unguarde recursion in process equations");
         // Note that this can occur with a specification
         // proc P(x:Int) = P(x); init P(1);
       }

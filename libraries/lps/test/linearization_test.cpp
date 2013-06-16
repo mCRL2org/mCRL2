@@ -887,6 +887,24 @@ BOOST_AUTO_TEST_CASE(process_parameters_with_different_types_can_cause_problems)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(unguarded_recursion)
+{
+  const std::string spec =
+     "proc P=P; \n"
+     "init P;\n";
+
+  run_linearisation_test_case(spec,false);
+}
+
+BOOST_AUTO_TEST_CASE(unguarded_recursion_with_parallel_operator)
+{
+  const std::string spec =
+     "proc P=P||P; \n"
+     "init P;\n";
+
+  run_linearisation_test_case(spec,false);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int, char**)
 {
   return 0;
