@@ -193,7 +193,8 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   size_t count=0;
   std::vector <variable> new_variables(vl.size());
   {
-    std::set < variable > variables_in_sigma(get_free_variables(sigma));
+    //std::set < variable > variables_in_sigma(get_free_variables(sigma));
+    std::set < variable > variables_in_sigma(sigma.variables_in_rhs());
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)

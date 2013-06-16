@@ -23,6 +23,64 @@ namespace mcrl2 {
 
 namespace data {
 
+namespace detail
+{
+// The function below gets all free variables of the term t, which has
+// the shape of an expression in internal format. The variables are added to result.
+// This routine should be removed after internal and external format have merged.
+inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &result)
+{
+  const atermpp::aterm_appl &t=atermpp::aterm_cast<const atermpp::aterm_appl>(t1);
+  if (is_variable(t))
+  {
+    result.insert(variable(t));
+  }
+  else if (is_where_clause(t))
+  {
+    std::set < variable > free_variables_in_body;
+    get_free_variables(t[0],free_variables_in_body);
+
+    variable_list bound_vars;
+    const assignment_list lv=assignment_list(t[1]);
+    for(assignment_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
+    {
+      bound_vars.push_front(it->lhs());
+      get_free_variables(it->rhs(),result);
+    }
+    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
+    {
+      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
+      {
+        result.insert(*i);
+      }
+    }
+  }
+  else if (is_abstraction(t))
+  {
+    std::set < variable > free_variables_in_body;
+    get_free_variables(t[2],free_variables_in_body);
+    const variable_list bound_vars=variable_list(t[1]);
+
+    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
+    {
+      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
+      {
+        result.insert(*i);
+      }
+    }
+  }
+  else // Term has the shape #REWR#(t1,...,tn);
+  {
+    for(size_t i=0 ; i<t.size(); ++i)
+    {
+      if (!t[i].type_is_int())
+      {
+        get_free_variables(t[i],result);
+      }
+    }
+  }
+}
+} // end namespace detail
 /// \brief Returns true if FV(rhs) is included in {lhs}.
 inline
 bool is_simple_substitution(const data::variable& lhs, const data::data_expression& rhs)
@@ -571,6 +629,8 @@ protected:
   ExpressionSequence m_container;
   std::vector <size_t> m_index_table;
   std::stack<size_t> m_free_positions;
+  bool m_variables_in_rhs_set_is_defined;
+  std::set<variable> m_variables_in_rhs;
 
 public:
 
@@ -593,12 +653,8 @@ public:
 
   /// \brief Default constructor
   mutable_indexed_substitution()
+    : m_variables_in_rhs_set_is_defined(false)
   {}
-
-  /// \brief Copy constructor
-  // mutable_indexed_substitution(const ExpressionSequence& c)
-  //   : m_container(c)
-  // {}
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment
@@ -607,6 +663,8 @@ public:
     ExpressionSequence   &m_container;
     std::vector <size_t> &m_index_table;
     std::stack<size_t> &m_free_positions;
+    bool m_variables_in_rhs_set_is_defined;
+    std::set<variable> &m_variables_in_rhs;
 
 
     /// \brief Constructor.
@@ -615,8 +673,14 @@ public:
     /// \param[in] c a container of expressions.
     /// \param[in] table a table of indices
     /// \param[in] fp a stack of free positions in \a table
-    assignment(const variable_type &v, ExpressionSequence& c, std::vector <size_t> &table, std::stack<size_t> & fp) :
-      m_variable(v), m_container(c), m_index_table(table), m_free_positions(fp)
+    assignment(const variable_type &v, ExpressionSequence& c, std::vector <size_t> &table, std::stack<size_t> & fp,
+               const bool b, std::set<variable> &vars) :
+      m_variable(v), 
+      m_container(c), 
+      m_index_table(table), 
+      m_free_positions(fp),
+      m_variables_in_rhs_set_is_defined(b),
+      m_variables_in_rhs(vars)
     { }
 
     /// \brief Actual assignment
@@ -630,6 +694,10 @@ public:
       if (e != m_variable)
       {
         // Set a new variable;
+        if (m_variables_in_rhs_set_is_defined)
+        {
+           detail::get_free_variables(e,m_variables_in_rhs);
+        }
 
         // Resize container if needed
         if (i >= m_index_table.size())
@@ -658,6 +726,7 @@ public:
         else
         {
           // The variable was already assigned. Replace the assignment.
+          // Note that we do not remove the variables in the term that is replaced.
           m_container[j]=e;
         }
       }
@@ -665,6 +734,7 @@ public:
       {
         // Indicate that the current variable is free; postpone deleting the
         // actual value assigned to the variable.
+        // Note that we do not remove variables in variables_in_rhs;
         if (i<m_index_table.size())
         {
           size_t j=m_index_table[i];
@@ -698,14 +768,17 @@ public:
   /// \brief Index operator.
   assignment operator[](variable_type const& v)
   {
-    return assignment(v, this->m_container,this->m_index_table,this->m_free_positions);
+    return assignment(v, m_container,m_index_table,m_free_positions,m_variables_in_rhs_set_is_defined,m_variables_in_rhs);
   }
 
   /// \brief Clear substitutions.
   void clear()
   {
     m_index_table.clear();
+    m_container.clear();
     m_free_positions=std::stack<size_t>();
+    m_variables_in_rhs_set_is_defined=false;
+    m_variables_in_rhs.clear();
   }
 
   /// \brief Compare substitutions
@@ -721,7 +794,25 @@ public:
     m_container=other.m_container;
     m_index_table=other.m_index_table;
     m_free_positions=other.m_free_positions;
+    m_variables_in_rhs_set_is_defined=other.m_variables_in_rhs_set_is_defined;
+    m_variables_in_rhs=other.m_variables_in_rhs;
     return *this;
+  }
+
+  std::set<variable>& variables_in_rhs()
+  {
+    if (!m_variables_in_rhs_set_is_defined)
+    {
+      for(std::vector<size_t> ::const_iterator i=m_index_table.begin(); i != m_index_table.end(); ++i)
+      {
+        if (*i != size_t(-1))
+        {
+          detail::get_free_variables(m_container[*i],m_variables_in_rhs);
+        }
+      }
+      m_variables_in_rhs_set_is_defined=true;
+    }
+    return m_variables_in_rhs;
   }
 
   /// \brief Returns true if the substitution is empty
@@ -781,69 +872,11 @@ public:
 
 };
 
-namespace detail
-{
-// The function below gets all free variables of the term t, which has
-// the shape of an expression in internal format. The variables are added to result.
-// This routine should be removed after internal and external format have merged.
-inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &result)
-{
-  const atermpp::aterm_appl &t=atermpp::aterm_cast<const atermpp::aterm_appl>(t1);
-  if (is_variable(t))
-  {
-    result.insert(variable(t));
-  }
-  else if (is_where_clause(t))
-  {
-    std::set < variable > free_variables_in_body;
-    get_free_variables(t[0],free_variables_in_body);
-
-    variable_list bound_vars;
-    const assignment_list lv=assignment_list(t[1]);
-    for(assignment_list :: const_iterator it=lv.begin() ; it!=lv.end(); ++it)
-    {
-      bound_vars.push_front(it->lhs());
-      get_free_variables(it->rhs(),result);
-    }
-    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
-    {
-      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
-      {
-        result.insert(*i);
-      }
-    }
-  }
-  else if (is_abstraction(t))
-  {
-    std::set < variable > free_variables_in_body;
-    get_free_variables(t[2],free_variables_in_body);
-    const variable_list bound_vars=variable_list(t[1]);
-
-    for(std::set < variable > :: const_iterator i=free_variables_in_body.begin(); i!=free_variables_in_body.end(); ++i)
-    {
-      if (std::find(bound_vars.begin(),bound_vars.end(),*i)==bound_vars.end()) // not found, and hence variable *i is not bound.
-      {
-        result.insert(*i);
-      }
-    }
-  }
-  else // Term has the shape #REWR#(t1,...,tn);
-  {
-    for(size_t i=0 ; i<t.size(); ++i)
-    {
-      if (!t[i].type_is_int())
-      {
-        get_free_variables(t[i],result);
-      }
-    }
-  }
-}
-} // end namespace detail
 
 /// \brief Function to get all free variables in the substitution
 ///        The rhs' have the shape of an expression in internal rewriter format.
 /// \deprecated
-template<typename VariableType, typename ExpressionSequence>
+/* template<typename VariableType, typename ExpressionSequence>
 std::set < variable > get_free_variables(const mutable_indexed_substitution<VariableType, ExpressionSequence >& sigma)
 {
   std::set < variable > result;
@@ -858,6 +891,7 @@ std::set < variable > get_free_variables(const mutable_indexed_substitution<Vari
   }
   return result;
 }
+*/
 
 /// \brief Function to get all identifiers in the substitution
 /// \deprecated
