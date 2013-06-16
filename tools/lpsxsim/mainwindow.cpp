@@ -15,10 +15,11 @@
 #include <QSettings>
 #include <climits>
 
-MainWindow::MainWindow(mcrl2::data::rewrite_strategy strategy)
+MainWindow::MainWindow(mcrl2::data::rewrite_strategy strategy,const bool do_not_use_dummies)
   : m_strategy(strategy),
     m_simulation(0),
     m_animationTimer(new QTimer(this)),
+    m_do_not_use_dummies(do_not_use_dummies),
     m_fileDialog("", this)
 {
   m_ui.setupUi(this);
@@ -273,7 +274,7 @@ void MainWindow::setTauPrioritization()
 
 void MainWindow::openSpecification(QString filename)
 {
-  Simulation *simulation = new Simulation(filename, m_strategy);
+  Simulation *simulation = new Simulation(filename, m_strategy, m_do_not_use_dummies);
   if (!simulation->initialized())
   {
     simulation->deleteLater();

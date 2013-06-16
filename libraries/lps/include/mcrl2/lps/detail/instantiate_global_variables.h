@@ -29,6 +29,7 @@ namespace detail
 inline
 void instantiate_global_variables(specification& spec)
 {
+  mCRL2log(log::verbose) << "Replacing free variables with dummy values." << std::endl;
   data::mutable_map_substitution<> sigma;
   data::representative_generator default_expression_generator(spec.data());
   std::set<data::variable> to_be_removed;
@@ -38,7 +39,7 @@ void instantiate_global_variables(specification& spec)
     data::data_expression d = default_expression_generator(i->sort());
     if (!d.defined())
     {
-      throw mcrl2::runtime_error("Error in lps::instantiate_global_variables: could not instantiate " + data::pp(*i));
+      throw mcrl2::runtime_error("Error in lps::instantiate_global_variables: could not instantiate " + data::pp(*i) + ". ");
     }
     sigma[*i] = d;
     to_be_removed.insert(*i);

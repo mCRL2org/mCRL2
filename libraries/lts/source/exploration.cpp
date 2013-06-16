@@ -74,7 +74,6 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
 
   if (m_options.usedummies)
   {
-    mCRL2log(verbose) << "replacing free variables with dummy values." << std::endl;
     lps::detail::instantiate_global_variables(specification);
   }
 

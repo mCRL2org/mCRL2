@@ -71,18 +71,18 @@ class sim_tool : public rewriter_tool< input_tool >
 
   protected:
 
-    bool m_use_dummies;
+    bool m_do_not_use_dummies;
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
+      desc.add_option("nodummy", "do not replace global variables in the LPS with dummy values", 'y');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_use_dummies = 0 < parser.options.count("dummy");
+      m_do_not_use_dummies = 0 < parser.options.count("nodummy");
     }
 
   public:
@@ -94,7 +94,7 @@ class sim_tool : public rewriter_tool< input_tool >
         "command-line simulation of an LPS",
         "Simulate the LPS in INFILE via a text-based interface."
       ),
-      m_use_dummies(false)
+      m_do_not_use_dummies(false)
     {}
 
     bool run()
@@ -103,7 +103,7 @@ class sim_tool : public rewriter_tool< input_tool >
 
       lps_specification.load(m_input_filename);
 
-      if (m_use_dummies)
+      if (!m_do_not_use_dummies)
       {
         lps::detail::instantiate_global_variables(lps_specification);
       }
