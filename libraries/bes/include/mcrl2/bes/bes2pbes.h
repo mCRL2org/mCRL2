@@ -59,7 +59,7 @@ pbes_system::pbes bes2pbes(const boolean_equation_system& x)
   {
     equations.push_back(bes2pbes(*i));
   }
-  pbes_system::propositional_variable_instantiation initial_state = bes2pbes(x.initial_state());
+  pbes_system::propositional_variable_instantiation initial_state = core::static_down_cast<const pbes_system::propositional_variable_instantiation&>(bes2pbes(x.initial_state()));
 
   return pbes_system::pbes(data_spec, equations, initial_state);
 }

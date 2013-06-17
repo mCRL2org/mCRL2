@@ -737,7 +737,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_propositional_variable_instantiation(p))
   {
     // p is a propositional variable
-    propositional_variable_instantiation propvar = p;
+    const propositional_variable_instantiation& propvar = core::static_down_cast<const propositional_variable_instantiation&>(p);
     core::identifier_string name = propvar.name();
     data::data_expression_list current_parameters(propvar.parameters());
     data::data_expression_list parameters;

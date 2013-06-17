@@ -130,7 +130,7 @@ class enumerate_quantifiers_rewriter<pbes_expression, DataRewriter, DataEnumerat
     /// \return The rewrite result.
     term_type operator()(const term_type& x) const
     {
-      return m_rewriter(pbes_expression_with_variables(x, data::variable_list()));
+      return core::static_down_cast<const pbes_expression&>(m_rewriter(pbes_expression_with_variables(x, data::variable_list())));
     }
 
     /// \brief Rewrites a pbes expression.
@@ -140,7 +140,12 @@ class enumerate_quantifiers_rewriter<pbes_expression, DataRewriter, DataEnumerat
     template <typename SubstitutionFunction>
     term_type operator()(const term_type& x, SubstitutionFunction sigma) const
     {
-      return m_rewriter(pbes_expression_with_variables(x, data::variable_list()), sigma);
+      pbes_expression_with_variables x1(x, data::variable_list());
+
+      m_rewriter(x1, sigma);
+
+      pbes_expression_with_variables result = m_rewriter(x1, sigma);
+      return result;
     }
 };
 

@@ -322,7 +322,7 @@ protected:
         // Add a BES equation for the initial state.
         data::detail::legacy_rewriter::substitution_type sigma;
         data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-        propositional_variable_instantiation phi = rewrite_and_simplify(m_pbes.initial_state(),sigma,sigma_internal);
+        propositional_variable_instantiation phi = core::static_down_cast<const propositional_variable_instantiation&>(rewrite_and_simplify(m_pbes.initial_state(),sigma,sigma_internal));
         add_bes_equation(phi, m_priorities[phi.name()]);
 
         m_initialized = true;

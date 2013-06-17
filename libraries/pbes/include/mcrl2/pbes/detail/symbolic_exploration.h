@@ -199,17 +199,17 @@ class symbolic_exploration_algorithm
       }
       else if (is_or(x))
       {
-        pbes_system::or_ y = x;
+        const pbes_system::or_& y = core::static_down_cast<const pbes_system::or_&>(x);
         result = or_(expr_or(y.left()), expr_or(y.right()));
       }
       else if (is_forall(x))
       {
-        pbes_system::forall y = x;
+        const pbes_system::forall& y = core::static_down_cast<const pbes_system::forall&>(x);
         result = forall(y.variables(), expr_or(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
-        pbes_system::exists y = x;
+        const pbes_system::exists& y = core::static_down_cast<const pbes_system::exists&>(x);
         result = exists(y.variables(), expr_or(y.body(), y.variables()));
       }
       else
@@ -235,17 +235,17 @@ class symbolic_exploration_algorithm
       }
       else if (is_and(x))
       {
-        pbes_system::and_ y = x;
+        const pbes_system::and_& y = core::static_down_cast<const pbes_system::and_&>(x);
         result = and_(expr_and(y.left()), expr_and(y.right()));
       }
       else if (is_forall(x))
       {
-        pbes_system::forall y = x;
+        const pbes_system::forall& y = core::static_down_cast<const pbes_system::forall&>(x);
         result = forall(y.variables(), expr_and(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
-        pbes_system::exists y = x;
+        const pbes_system::exists& y = core::static_down_cast<const pbes_system::exists&>(x);
         result = exists(y.variables(), expr_and(y.body(), y.variables()));
       }
       else

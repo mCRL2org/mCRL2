@@ -109,7 +109,7 @@ T remove_parameters(const T& x,
                     typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                    )
 {
-  return core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x);
+  return core::static_down_cast<const T&>(core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed)(x));
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
@@ -181,7 +181,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   void operator()(pbes& x)
   {
     static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    x.initial_state() = core::static_down_cast<const propositional_variable_instantiation&>(static_cast<Derived&>(*this)(x.initial_state()));
   }
 };
 } // namespace detail
@@ -273,7 +273,7 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   void operator()(pbes& x)
   {
     static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    x.initial_state() = core::static_down_cast<const propositional_variable_instantiation&>(static_cast<Derived&>(*this)(x.initial_state()));
     remove_parameters(x.global_variables());
   }
 };

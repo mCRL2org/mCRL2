@@ -308,7 +308,7 @@ class stategraph_pbes
     data::data_specification m_data;
     std::vector<stategraph_equation> m_equations;
     std::set<data::variable> m_global_variables;
-    pbes_expression m_initial_state;
+    propositional_variable_instantiation m_initial_state;
 
   public:
     stategraph_pbes()
@@ -346,7 +346,7 @@ class stategraph_pbes
       return m_global_variables;
     }
 
-    const pbes_expression& initial_state() const
+    const propositional_variable_instantiation& initial_state() const
     {
       return m_initial_state;
     }

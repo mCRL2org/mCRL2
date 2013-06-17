@@ -212,7 +212,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x));
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -276,7 +276,7 @@ T replace_variables_capture_avoiding(const T& x,
   std::multiset<data::variable> V;
   pbes_system::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  return core::static_down_cast<const T&>(data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma, V)(x));
 }
 //--- end generated pbes_system replace_capture_avoiding code ---//
 

@@ -237,7 +237,7 @@ void assign_variables_in_tree(
 }
 
 // static atermpp::aterm_appl store_as_tree(pbes_expression p)
-static atermpp::aterm_appl store_as_tree(mcrl2::pbes_system::propositional_variable_instantiation p)
+static atermpp::aterm_appl store_as_tree(const mcrl2::pbes_system::propositional_variable_instantiation& p)
 /* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3
  * arguments p is returned. Otherwise a term of the form B(pair(pair(...pair(x1,x2),...)))) is
  * returned, which is a balanced tree flushed to the right. For each input the resulting
@@ -1357,7 +1357,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_propositional_variable_instantiation(p))
   {
     // p is a propositional variable
-    propositional_variable_instantiation propvar = p;
+    const propositional_variable_instantiation& propvar = core::static_down_cast<const propositional_variable_instantiation&>(p);
     core::identifier_string name = propvar.name();
     data::data_expression_list parameters;
     data::data_expression_list current_parameters(propvar.parameters());
@@ -1972,8 +1972,8 @@ class boolean_equation_system
       using namespace mcrl2::pbes_system;
       if (is_propositional_variable_instantiation(p))
       {
-        std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)?
-                                  mcrl2::pbes_system::pbes_expression(store_as_tree(p)):p);
+        const propositional_variable_instantiation& p1 = mcrl2::core::static_down_cast<const propositional_variable_instantiation&>(p);
+        std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)? store_as_tree(p1) : atermpp::aterm_appl(p1));
 
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
         {
@@ -2262,7 +2262,8 @@ class boolean_equation_system
         pbes_expression_rewrite_and_simplify(
           pbes_spec.initial_state(), opt_precompile_pbes, Mucks_rewriter,sigma,sigma_internal);
 
-      variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
+      const propositional_variable_instantiation& p1 = mcrl2::core::static_down_cast<const propositional_variable_instantiation&>(p);
+      variable_index.put((internal_opt_store_as_tree)?store_as_tree(p1):atermpp::aterm_appl(p1));
 
       if (opt_strategy>=on_the_fly)
       {

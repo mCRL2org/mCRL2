@@ -72,7 +72,7 @@ struct add_sort_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
     static_cast<Derived&>(*this)(x.global_variables());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    x.initial_state() = core::down_cast<pbes_system::propositional_variable_instantiation>(static_cast<Derived&>(*this)(x.initial_state()));
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -230,7 +230,7 @@ struct add_data_expressions: public Builder<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    x.initial_state() = core::down_cast<pbes_system::propositional_variable_instantiation>(static_cast<Derived&>(*this)(x.initial_state()));
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -397,7 +397,7 @@ struct add_variables: public Builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
     static_cast<Derived&>(*this)(x.global_variables());
-    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    x.initial_state() = core::down_cast<pbes_system::propositional_variable_instantiation>(static_cast<Derived&>(*this)(x.initial_state()));
     static_cast<Derived&>(*this).leave(x);
   }
 

@@ -41,14 +41,14 @@ class pbes_expression_with_propositional_variables: public pbes_expression_with_
     {}
 
     /// \brief Constructor.
-    pbes_expression_with_propositional_variables(pbes_expression expression,
-        data::variable_list variables,
-        propositional_variable_instantiation_list propositional_variables = propositional_variable_instantiation_list())
+    pbes_expression_with_propositional_variables(const pbes_expression& expression,
+        const data::variable_list& variables,
+        const propositional_variable_instantiation_list& propositional_variables = propositional_variable_instantiation_list())
       : pbes_expression_with_variables(expression, variables), m_propositional_variables(propositional_variables)
     {}
 
     /// \brief Constructor. Creates a pbes expression with an empty sequences of propositional variables.
-    pbes_expression_with_propositional_variables(pbes_expression_with_variables expression,
+    pbes_expression_with_propositional_variables(const pbes_expression_with_variables& expression,
         propositional_variable_instantiation_list propositional_variables)
       : pbes_expression_with_variables(expression), m_propositional_variables(propositional_variables)
     {}
@@ -236,9 +236,13 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   static
   term_type prop_var(const string_type& name, Iter first, Iter last)
   {
-    pbes_system::pbes_expression_with_variables tmp = core::term_traits<pbes_system::pbes_expression_with_variables>::prop_var(name, first, last);
-    pbes_system::propositional_variable_instantiation elem = tmp;
-    return term_type(tmp, tmp.variables(), atermpp::make_list(elem));
+    propositional_variable_type X(name, data_term_sequence_type(first, last));
+    std::set<data_term_type> v;
+    for (Iter i = first; i != last; ++i)
+    {
+      v.insert(i->variables().begin(), i->variables().end());
+    }
+    return term_type(X, variable_sequence_type(v.begin(), v.end()), atermpp::make_list(X));
   }
 
   /// \brief Test for value true
@@ -436,6 +440,15 @@ struct term_traits<pbes_system::pbes_expression_with_propositional_variables>
   data_term_type term2dataterm(const term_type& t)
   {
     return tr::term2dataterm(t);
+  }
+
+  /// \brief Conversion from term to propositional variable instantiation
+  /// \param t A term
+  /// \return The converted term
+  static inline
+  const propositional_variable_type& term2propvar(const term_type& t)
+  {
+    return core::static_down_cast<const propositional_variable_type&>(static_cast<const pbes_system::pbes_expression&>(t));
   }
 
   /// \brief Returns the difference of two unordered sets of variables

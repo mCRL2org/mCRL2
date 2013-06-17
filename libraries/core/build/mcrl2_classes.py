@@ -1029,10 +1029,15 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             for p in f.parameters():
                 ptype = p.type(include_modifiers = False, include_namespace = True, remove_templates = True)
                 qtype = p.type(include_modifiers = False, include_namespace = True)
+                pclass = None
+                if ptype in all_classes:
+                    pclass = all_classes[ptype]
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
                     if is_modifiable_type(qtype, modifiability_map):
                         updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
+                    elif pclass != None and 'E' in pclass.modifiers() and not 'X' in pclass.modifiers():
+                        updates.append('x.%s() = core::down_cast<%s>(static_cast<Derived&>(*this)(x.%s()));' % (p.name(), ptype, p.name()))
                     else:
                         updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s());' % (p.name(), p.name()))
                 else:

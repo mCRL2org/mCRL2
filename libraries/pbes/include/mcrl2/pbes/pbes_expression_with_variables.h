@@ -42,20 +42,20 @@ class pbes_expression_with_variables: public pbes_expression
 
     /// \brief Constructor. Creates a data expression with an empty sequence of variables.
     /// \param term A term
-    pbes_expression_with_variables(atermpp::aterm_appl term)
+    pbes_expression_with_variables(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {}
 
     /// \brief Constructor.
     /// \param expression A PBES expression
     /// \param variables A sequence of data variables
-    pbes_expression_with_variables(pbes_expression expression, data::variable_list variables)
+    pbes_expression_with_variables(const pbes_expression& expression, const data::variable_list& variables)
       : pbes_expression(expression), m_variables(variables)
     {}
 
     /// \brief Returns the variables
     /// \return The variables
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
       return m_variables;
     }
@@ -226,7 +226,7 @@ struct term_traits<pbes_system::pbes_expression_with_variables>
     {
       v.insert(i->variables().begin(), i->variables().end());
     }
-    return term_type(tr::prop_var(name, first, last), atermpp::convert< variable_sequence_type >(v));
+    return term_type(tr::prop_var(name, first, last), variable_sequence_type(v.begin(), v.end()));
   }
 
   /// \brief Test for value true
@@ -424,6 +424,15 @@ struct term_traits<pbes_system::pbes_expression_with_variables>
   data_term_type term2dataterm(const term_type& t)
   {
     return tr::term2dataterm(t);
+  }
+
+  /// \brief Conversion from term to propositional variable instantiation
+  /// \param t A term
+  /// \return The converted term
+  static inline
+  const propositional_variable_type& term2propvar(const term_type& t)
+  {
+    return core::static_down_cast<const propositional_variable_type&>(static_cast<const pbes_system::pbes_expression&>(t));
   }
 
   /// \brief Returns the difference of two unordered sets of variables

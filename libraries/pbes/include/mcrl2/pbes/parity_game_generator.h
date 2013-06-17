@@ -173,7 +173,7 @@ class parity_game_generator
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
         substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
         mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into " << std::flush;
-        pbes_expression result(R(pbes_eqn.formula(), sigma));
+        pbes_expression result = R(pbes_eqn.formula(), sigma);
         mCRL2log(log::debug2, "parity_game_generator") << print(result) << std::endl;
         return result;
       }
@@ -324,7 +324,7 @@ class parity_game_generator
     /// \return the initial state rewritten by R
     virtual propositional_variable_instantiation get_initial_state()
     {
-      propositional_variable_instantiation phi = R(m_pbes.initial_state());
+      propositional_variable_instantiation phi = core::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       return phi;
     }
 

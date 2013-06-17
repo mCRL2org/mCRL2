@@ -17,6 +17,7 @@
 #include <iterator>
 #include <stdexcept>
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -79,7 +80,7 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    propositional_variable_instantiation(const atermpp::aterm& term)
+    explicit propositional_variable_instantiation(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PropVarInst(*this));
@@ -94,6 +95,11 @@ class propositional_variable_instantiation: public pbes_expression
     propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
       : pbes_expression(core::detail::gsMakePropVarInst(core::identifier_string(name), parameters))
     {}
+
+    void operator=(const propositional_variable_instantiation& x)
+    {
+      aterm::operator=(static_cast<const atermpp::aterm&>(x));
+    }
 
     const core::identifier_string& name() const
     {
@@ -138,7 +144,7 @@ class true_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm& term)
+    explicit true_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESTrue(*this));
@@ -156,7 +162,7 @@ class false_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm& term)
+    explicit false_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESFalse(*this));
@@ -174,7 +180,7 @@ class not_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm& term)
+    explicit not_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESNot(*this));
@@ -202,7 +208,7 @@ class and_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm& term)
+    explicit and_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESAnd(*this));
@@ -235,7 +241,7 @@ class or_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm& term)
+    explicit or_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESOr(*this));
@@ -268,7 +274,7 @@ class imp: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm& term)
+    explicit imp(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESImp(*this));
@@ -301,7 +307,7 @@ class forall: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    forall(const atermpp::aterm& term)
+    explicit forall(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESForall(*this));
@@ -334,7 +340,7 @@ class exists: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    exists(const atermpp::aterm& term)
+    explicit exists(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESExists(*this));
@@ -1513,6 +1519,15 @@ struct term_traits<pbes_system::pbes_expression>
   data_term_type term2dataterm(const term_type& t)
   {
     return data_term_type(t);
+  }
+
+  /// \brief Conversion from term to propositional variable instantiation
+  /// \param t A term
+  /// \return The converted term
+  static inline
+  const propositional_variable_type& term2propvar(const term_type& t)
+  {
+    return core::static_down_cast<const propositional_variable_type&>(t);
   }
 
   /// \brief Returns the difference of two unordered sets of variables

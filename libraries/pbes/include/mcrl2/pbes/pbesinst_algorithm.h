@@ -67,6 +67,8 @@ pbesinst_substitution_function make_pbesinst_substitution(data::variable_list v,
 /// \brief Algorithm class for the pbesinst instantiation algorithm.
 class pbesinst_algorithm
 {
+  typedef typename core::term_traits<pbes_expression> tr;
+
   protected:
     /// \brief The rewriter.
     pbesinst_rewriter R;
@@ -137,14 +139,14 @@ class pbesinst_algorithm
       }
       pbes_expression_with_propositional_variables Xinit = R(p.initial_state());
       assert(Xinit.propositional_variables().size() == 1);
-      init = Xinit;
+      init = tr::term2propvar(Xinit);
       todo.insert(Xinit.propositional_variables().front());
       while (!todo.empty())
       {
         propositional_variable_instantiation X = *todo.begin();
         todo.erase(todo.begin());
         done.insert(X);
-        propositional_variable_instantiation X_e = R.rename(X);
+        propositional_variable_instantiation X_e = tr::term2propvar(R.rename(X));
         int index = equation_index[X.name()];
         const pbes_equation& eqn = p.equations()[index];
         pbesinst_substitution_function sigma = make_pbesinst_substitution(eqn.variable().parameters(), X.parameters());

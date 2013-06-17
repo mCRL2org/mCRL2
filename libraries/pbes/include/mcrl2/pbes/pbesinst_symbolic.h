@@ -76,6 +76,7 @@ class pbesinst_symbolic_algorithm
 {
   public:
     typedef propositional_variable_instantiation state_type;
+    typedef core::term_traits<pbes_expression> tr;
 
   protected:
     /// \brief The PBES that is being instantiated.
@@ -118,7 +119,7 @@ class pbesinst_symbolic_algorithm
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     void run()
     {
-      init = m_rewriter(m_pbes.initial_state());
+      init = tr::term2propvar(m_rewriter(m_pbes.initial_state()));
       todo.insert(init);
       mCRL2log(log::debug, "symbolic") << "discovered vertex " << pbes_system::pp(init) << std::endl;
 

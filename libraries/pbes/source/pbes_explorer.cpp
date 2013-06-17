@@ -1587,7 +1587,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
         for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                 != successors.end(); ++expr) {
             if (tr::is_prop_var(*expr)) {
-                result.push_back(get_state(*expr));
+                result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
             } else if (pgg->is_true(*expr)) {
                 if (type != parity_game_generator::PGAME_AND)
                 {
@@ -1638,7 +1638,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                     != successors.end(); ++expr) {
                 //std::clog << "* Successor: " << pgg->print(*expr) << std::endl;
                 if (tr::is_prop_var(*expr)) {
-                    result.push_back(get_state(*expr));
+                    result.push_back(get_state(core::static_down_cast<const propositional_variable_instantiation&>(*expr)));
                 } else if (pgg->is_true(*expr)) {
                     if (type != parity_game_generator::PGAME_AND)
                     {

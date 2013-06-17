@@ -50,7 +50,7 @@ void split_pfnf_implication(const pbes_expression& x, pbes_expression& g, std::v
     for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
     {
       assert(is_propositional_variable_instantiation(*i));
-      Xij.push_back(*i);
+      Xij.push_back(core::static_down_cast<const propositional_variable_instantiation&>(*i));
     }
   }
 }

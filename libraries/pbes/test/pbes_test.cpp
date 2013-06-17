@@ -213,10 +213,6 @@ void test_pbes_expression()
   pbes_expression e = x1;
   data_expression x2 = mcrl2::pbes_system::accessors::val(e);
   BOOST_CHECK(x1 == x2);
-
-  pbes_expression v_expr = propositional_variable_instantiation("v:V");
-  propositional_variable_instantiation v1 = v_expr;
-  propositional_variable_instantiation v2(v_expr);
 }
 
 void test_trivial()

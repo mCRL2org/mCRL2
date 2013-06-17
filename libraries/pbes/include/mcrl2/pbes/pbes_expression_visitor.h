@@ -13,6 +13,7 @@
 #define MCRL2_PBES_PBES_EXPRESSION_VISITOR_H
 
 #include "mcrl2/core/term_traits.h"
+#include "mcrl2/core/down_cast.h"
 
 namespace mcrl2
 {
@@ -268,7 +269,7 @@ struct pbes_expression_visitor
     }
     else if (tr::is_prop_var(e))
     {
-      visit_propositional_variable(e, e, a);
+      visit_propositional_variable(e, core::static_down_cast<const propositional_variable_type&>(e), a);
       leave_propositional_variable();
     }
   }
@@ -519,7 +520,7 @@ struct pbes_expression_visitor<Term, void>
     }
     else if (tr::is_prop_var(e))
     {
-      visit_propositional_variable(e, e);
+      visit_propositional_variable(e, core::static_down_cast<const propositional_variable_type&>(e));
       leave_propositional_variable();
     }
   }

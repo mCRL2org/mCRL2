@@ -13,6 +13,7 @@
 #define MCRL2_PBES_PBES_EXPR_BUILDER_H
 
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
@@ -259,7 +260,7 @@ struct pbes_expr_builder
     }
     else if (tr::is_prop_var(e))
     {
-      result = visit_propositional_variable(e, e, arg1);
+      result = visit_propositional_variable(e, tr::term2propvar(e), arg1);
       if (!is_finished(result))
       {
         result = e;
@@ -414,7 +415,7 @@ struct pbes_expr_builder<Term, void>
   /// value is used for rebuilding the expression.
   /// \param e A term
   /// \return The visit result
-  term_type visit(term_type e)
+  term_type visit(const term_type& e)
   {
     typedef core::term_traits<term_type> tr;
 
@@ -510,7 +511,7 @@ struct pbes_expr_builder<Term, void>
     }
     else if (tr::is_prop_var(e))
     {
-      result = visit_propositional_variable(e, e);
+      result = visit_propositional_variable(e, tr::term2propvar(e));
       if (!is_finished(result))
       {
         result = e;
