@@ -905,7 +905,7 @@ BOOST_AUTO_TEST_CASE(unguarded_recursion_with_parallel_operator)
   run_linearisation_test_case(spec,false);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int, char**)
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return 0;
 }
