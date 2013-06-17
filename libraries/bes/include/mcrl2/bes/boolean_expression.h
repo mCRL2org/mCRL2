@@ -52,7 +52,7 @@ class boolean_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    boolean_expression(const atermpp::aterm& term)
+    explicit boolean_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_BooleanExpression(*this));
@@ -77,7 +77,7 @@ class true_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm& term)
+    explicit true_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanTrue(*this));
@@ -105,7 +105,7 @@ class false_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm& term)
+    explicit false_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanFalse(*this));
@@ -133,7 +133,7 @@ class not_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm& term)
+    explicit not_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanNot(*this));
@@ -171,7 +171,7 @@ class and_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm& term)
+    explicit and_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanAnd(*this));
@@ -214,7 +214,7 @@ class or_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm& term)
+    explicit or_(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanOr(*this));
@@ -257,7 +257,7 @@ class imp: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm& term)
+    explicit imp(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanImp(*this));
@@ -300,7 +300,7 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    boolean_variable(const atermpp::aterm& term)
+    explicit boolean_variable(const atermpp::aterm& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanVariable(*this));
@@ -453,7 +453,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type true_()
   {
-    return atermpp::aterm_appl(core::detail::gsMakeBooleanTrue());
+    return term_type(core::detail::gsMakeBooleanTrue());
   }
 
   /// \brief The value false
@@ -461,16 +461,16 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type false_()
   {
-    return atermpp::aterm_appl(core::detail::gsMakeBooleanFalse());
+    return term_type(core::detail::gsMakeBooleanFalse());
   }
 
   /// \brief Operator not
   /// \param p A term
   /// \return Operator not applied to p
   static inline
-  term_type not_(term_type p)
+  term_type not_(const term_type& p)
   {
-    return atermpp::aterm_appl(core::detail::gsMakeBooleanNot(p));
+    return term_type(core::detail::gsMakeBooleanNot(p));
   }
 
   /// \brief Operator and
@@ -480,7 +480,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type and_(term_type p, term_type q)
   {
-    return atermpp::aterm_appl(core::detail::gsMakeBooleanAnd(p, q));
+    return term_type(core::detail::gsMakeBooleanAnd(p, q));
   }
 
   /// \brief Operator or
@@ -490,7 +490,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type or_(term_type p, term_type q)
   {
-    return atermpp::aterm_appl(core::detail::gsMakeBooleanOr(p, q));
+    return term_type(core::detail::gsMakeBooleanOr(p, q));
   }
 
   /// \brief Implication
@@ -500,7 +500,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   term_type imp(term_type p, term_type q)
   {
-    return atermpp::aterm_appl(core::detail::gsMakeBooleanImp(p, q));
+    return term_type(core::detail::gsMakeBooleanImp(p, q));
   }
 
   /// \brief Test for value true
