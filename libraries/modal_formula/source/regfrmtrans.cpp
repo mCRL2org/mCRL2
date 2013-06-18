@@ -29,7 +29,7 @@ namespace detail
 //------------------
 
 static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_generator &xyz_generator);
-/*Pre: part represents a part of a state formula 
+/*Pre: part represents a part of a state formula
  *     after the data implementation phase
  *Ret: part in which all regular formulas are translated in terms of state and
  *     action formulas
@@ -48,7 +48,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
 {
   if (data::is_data_expression(part) ||
       lps::is_multi_action(part) ||
-      state_formulas::is_variable(part) || 
+      state_formulas::is_variable(part) ||
       data::is_assignment(part) ||
       state_formulas::is_true(part) ||
       state_formulas::is_false(part) ||
@@ -74,7 +74,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
     else if (regular_formulas::is_seq(reg_frm))
     {
       const regular_formula R1 = seq(reg_frm).left();
-      const regular_formula R2 = seq(reg_frm).right(); 
+      const regular_formula R2 = seq(reg_frm).right();
       //red([R1.R2]phi) -> red([R1][R2]phi)
       part = translate_reg_frms_appl(must(R1, must(R2, phi)),xyz_generator);
     }
@@ -163,9 +163,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
   }
   else if (state_formulas::is_not(part))
   {
-    not_ not_part=atermpp::aterm_appl(part); // This ugly trick is necessary; without adding the
-                                             // atermpp::aterm_appl cast, not_part becomes equal to not(part)
-                                             // and this is not desired.
+    const not_& not_part = core::static_down_cast<const not_&>(part);
     part = not_(translate_reg_frms_appl(not_part.operand(),xyz_generator));
   }
   else if (state_formulas::is_and(part))
@@ -195,13 +193,13 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
   }
   else if (state_formulas::is_nu(part))
   {
-    const nu nu_part=part;
+    const nu nu_part(part);
     part = nu(nu_part.name(),nu_part.assignments(),
                   translate_reg_frms_appl(nu_part.operand(),xyz_generator));
   }
   else if (state_formulas::is_mu(part))
   {
-    const mu mu_part=part;
+    const mu mu_part(part);
     part = mu(mu_part.name(),mu_part.assignments(),
                   translate_reg_frms_appl(mu_part.operand(),xyz_generator));
   }

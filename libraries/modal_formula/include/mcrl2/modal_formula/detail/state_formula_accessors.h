@@ -40,72 +40,69 @@ data::data_expression val(const state_formula& x)
 /// \param t A modal formula
 /// \return The state formula argument of an expression of type
 inline
-state_formula arg(const state_formula& t)
+const state_formula& arg(const state_formula& t)
 {
   if (state_formulas::is_not(t))
   {
-    return atermpp::arg1(t);
+    return core::static_down_cast<const state_formula&>(t[0]);
   }
   if (state_formulas::is_mu(t) || state_formulas::is_nu(t))
   {
-    return atermpp::arg3(t);
+    return core::static_down_cast<const state_formula&>(t[2]);
   }
   assert(state_formulas::is_exists(t) ||
          state_formulas::is_forall(t) ||
          state_formulas::is_must(t)   ||
          state_formulas::is_may(t)
         );
-  return atermpp::arg2(t);
+  return core::static_down_cast<const state_formula&>(t[1]);
 }
 
 /// \brief Returns the left hand side of an expression of type and/or/imp
 /// \param t A modal formula
 /// \return The left hand side of an expression of type and/or/imp
 inline
-state_formula left(const state_formula& t)
+const state_formula& left(const state_formula& t)
 {
   assert(state_formulas::is_and(t) || state_formulas::is_or(t) || state_formulas::is_imp(t));
-  return atermpp::arg1(t);
+  return core::static_down_cast<const state_formula&>(t[0]);
 }
 
 /// \brief Returns the right hand side of an expression of type and/or/imp.
 /// \param t A modal formula
 /// \return The right hand side of an expression of type and/or/imp.
 inline
-state_formula right(const state_formula& t)
+const state_formula& right(const state_formula& t)
 {
   assert(state_formulas::is_and(t) || state_formulas::is_or(t) || state_formulas::is_imp(t));
-  return atermpp::arg2(t);
+  return core::static_down_cast<const state_formula&>(t[1]);
 }
 
 /// \brief Returns the variables of a quantification expression
 /// \param t A modal formula
 /// \return The variables of a quantification expression
 inline
-data::variable_list var(const state_formula& t)
+const data::variable_list& var(const state_formula& t)
 {
   assert(state_formulas::is_exists(t) || state_formulas::is_forall(t));
-  return data::variable_list(t[0]);
-  /* return data::variable_list(
-           atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
-           atermpp::term_list_iterator< data::variable >()); */
+  return atermpp::aterm_cast<const data::variable_list>(t[0]);
 }
 
 /// \brief Returns the time of a delay or yaled expression
 /// \param t A modal formula
 /// \return The time of a delay or yaled expression
 inline
-const data::data_expression &time(const state_formula& t)
+data::data_expression time(const state_formula& t)
 {
   assert(state_formulas::is_delay_timed(t) || state_formulas::is_yaled_timed(t));
-  return atermpp::aterm_cast<data::data_expression>(atermpp::arg1(t));
+  return atermpp::aterm_cast<data::data_expression>(t[0]);
 }
 
 /// \brief Returns the name of a variable expression
 /// \param t A modal formula
 /// \return The name of a variable expression
 inline
-const core::identifier_string &name(const state_formula& t)
+const core::identifier_string& name(const state_formula& t)
 {
   assert(state_formulas::is_variable(t) ||
          state_formulas::is_mu(t)  ||
@@ -118,7 +115,7 @@ const core::identifier_string &name(const state_formula& t)
 /// \param t A modal formula
 /// \return The parameters of a variable expression
 inline
-const data::data_expression_list &param(const state_formula& t)
+const data::data_expression_list& param(const state_formula& t)
 {
   assert(state_formulas::is_variable(t));
   return atermpp::aterm_cast<data::data_expression_list>(t[1]);
@@ -128,10 +125,10 @@ const data::data_expression_list &param(const state_formula& t)
 /// \param t A modal formula
 /// \return The parameters of a mu or nu expression
 inline
-const data::assignment_list &ass(const state_formula& t)
+const data::assignment_list& ass(const state_formula& t)
 {
   assert(state_formulas::is_mu(t) || state_formulas::is_nu(t));
-  return atermpp::aterm_cast<data::assignment_list>(t[1]);
+  return atermpp::aterm_cast<const data::assignment_list>(t[1]);
 }
 
 /// \brief Returns the regular formula of a must or may expression
@@ -141,7 +138,7 @@ inline
 regular_formulas::regular_formula act(const state_formula& t)
 {
   assert(state_formulas::is_must(t) || state_formulas::is_may(t));
-  return atermpp::arg1(t);
+  return core::static_down_cast<const regular_formulas::regular_formula&>(t[0]);
 }
 
 } // namespace accessors

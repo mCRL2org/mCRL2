@@ -304,7 +304,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
     const data_expression_list Pars=v.arguments();
     if (TypeList.size()!=Pars.size())
     {
-      throw mcrl2::runtime_error("incorrect number of parameters for state variable " + pp(StateVarName) + " (typechecking state formula " + pp(StateFrm) + ")");
+      throw mcrl2::runtime_error("incorrect number of parameters for state variable " + core::pp(StateVarName) + " (typechecking state formula " + pp(StateFrm) + ")");
     }
 
     data_expression_list r;
@@ -360,7 +360,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       core::identifier_string VarName=o.lhs().name();
       if (FormPars.count(VarName)>0)
       {
-        throw mcrl2::runtime_error("non-unique formal parameter " + pp(VarName) + " (typechecking " + pp(StateFrm) + ")");
+        throw mcrl2::runtime_error("non-unique formal parameter " + core::pp(VarName) + " (typechecking " + pp(StateFrm) + ")");
       }
 
       sort_expression VarType=o.lhs().sort();
@@ -436,7 +436,7 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       core::identifier_string VarName=o.lhs().name();
       if (FormPars.count(VarName)>0)
       {
-        throw mcrl2::runtime_error("non-unique formal parameter " + pp(VarName) + " (typechecking " + pp(StateFrm) + ")");
+        throw mcrl2::runtime_error("non-unique formal parameter " + core::pp(VarName) + " (typechecking " + pp(StateFrm) + ")");
       }
 
       sort_expression VarType=o.lhs().sort();

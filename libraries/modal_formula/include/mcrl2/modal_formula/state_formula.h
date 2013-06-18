@@ -18,6 +18,7 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -42,7 +43,7 @@ class state_formula: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    state_formula(const atermpp::aterm& term)
+    explicit state_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_StateFrm(*this));
@@ -123,7 +124,7 @@ class true_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    true_(const atermpp::aterm& term)
+    explicit true_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateTrue(*this));
@@ -151,7 +152,7 @@ class false_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    false_(const atermpp::aterm& term)
+    explicit false_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateFalse(*this));
@@ -179,7 +180,7 @@ class not_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    not_(const atermpp::aterm& term)
+    explicit not_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateNot(*this));
@@ -217,7 +218,7 @@ class and_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    and_(const atermpp::aterm& term)
+    explicit and_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateAnd(*this));
@@ -260,7 +261,7 @@ class or_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    or_(const atermpp::aterm& term)
+    explicit or_(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateOr(*this));
@@ -303,7 +304,7 @@ class imp: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    imp(const atermpp::aterm& term)
+    explicit imp(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateImp(*this));
@@ -346,7 +347,7 @@ class forall: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    forall(const atermpp::aterm& term)
+    explicit forall(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateForall(*this));
@@ -389,7 +390,7 @@ class exists: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    exists(const atermpp::aterm& term)
+    explicit exists(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateExists(*this));
@@ -432,7 +433,7 @@ class must: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    must(const atermpp::aterm& term)
+    explicit must(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMust(*this));
@@ -475,7 +476,7 @@ class may: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    may(const atermpp::aterm& term)
+    explicit may(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMay(*this));
@@ -518,7 +519,7 @@ class yaled: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    yaled(const atermpp::aterm& term)
+    explicit yaled(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateYaled(*this));
@@ -546,7 +547,7 @@ class yaled_timed: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    yaled_timed(const atermpp::aterm& term)
+    explicit yaled_timed(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateYaledTimed(*this));
@@ -584,7 +585,7 @@ class delay: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    delay(const atermpp::aterm& term)
+    explicit delay(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateDelay(*this));
@@ -612,7 +613,7 @@ class delay_timed: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    delay_timed(const atermpp::aterm& term)
+    explicit delay_timed(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateDelayTimed(*this));
@@ -650,7 +651,7 @@ class variable: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    variable(const atermpp::aterm& term)
+    explicit variable(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateVar(*this));
@@ -698,7 +699,7 @@ class nu: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    nu(const atermpp::aterm& term)
+    explicit nu(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateNu(*this));
@@ -751,7 +752,7 @@ class mu: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    mu(const atermpp::aterm& term)
+    explicit mu(const atermpp::aterm& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMu(*this));
