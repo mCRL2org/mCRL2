@@ -119,7 +119,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         } else if (!qvars.empty() || !(tr::is_or(qexpr) ? tr::is_true(phi) : tr::is_false(phi))) {
           std::string fresh_varname = fresh_variable_name(var.name());
 
-          data::variable_list variable_parameters = (data::variable_list)tr::param(var) + qvars;
+          data::variable_list variable_parameters = var.parameters() + qvars;
           // Create fresh propositional variable.
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
@@ -230,7 +230,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           //std::clog << "visit_inner_and: phi /\\ psi. psi is propvar." << std::endl;
         } else if (!qvars.empty() || !tr::is_true(phi)) {
           std::string fresh_varname = fresh_variable_name(var.name());
-          data::variable_list variable_parameters = (data::variable_list)tr::param(var) + qvars;
+          data::variable_list variable_parameters = var.parameters() + qvars;
           // Create fresh propositional variable.
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);

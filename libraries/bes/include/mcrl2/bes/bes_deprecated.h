@@ -1379,7 +1379,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     if (opt_precompile_pbes)
     {
       atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
-      result = d;
+      result = core::static_down_cast<const pbes_expression&>(d);
 
       if (convert_data_to_pbes)
       {
@@ -2133,7 +2133,7 @@ class boolean_equation_system
         }
         else
         {
-          return imp(b1,b2);
+          return imp(pbes_expression(atermpp::aterm_cast<atermpp::aterm>(b1)), pbes_expression(atermpp::aterm_cast<atermpp::aterm>(b2)));
         }
       }
       else if (mcrl2::pbes_system::is_not(p))
