@@ -29,67 +29,64 @@ namespace accessors
 /// \param t An action formula
 /// \return The parameters of an action formula
 inline
-lps::action_list mult_params(action_formula t)
+const lps::action_list& mult_params(const action_formula& t)
 {
   assert(core::detail::gsIsMultAct(t));
-  return lps::action_list(atermpp::list_arg1(t));
+  return atermpp::aterm_cast<const lps::action_list>(t[0]);
 }
 
 /// \brief Returns the action formula argument of an expression of type not, at, exists or forall.
 /// \param t An action formula
 /// \return The action formula argument of an expression of type not, at, exists or forall.
 inline
-action_formula arg(action_formula t)
+const action_formula& arg(const action_formula& t)
 {
   if (core::detail::gsIsActNot(t) || core::detail::gsIsActAt(t))
   {
-    return atermpp::arg1(t);
+    return core::static_down_cast<const action_formula&>(t[0]);
   }
   assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-  return atermpp::arg2(t);
+  return core::static_down_cast<const action_formula&>(t[1]);
 }
 
 /// \brief Returns the left hand side of an expression of type and/or/imp
 /// \param t An action formula
 /// \return The left hand side of an expression of type and/or/imp
 inline
-action_formula left(action_formula t)
+const action_formula& left(const action_formula& t)
 {
   assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
-  return atermpp::arg1(t);
+  return core::static_down_cast<const action_formula&>(t[0]);
 }
 
 /// \brief Returns the right hand side of an expression of type and/or/imp.
 /// \param t An action formula
 /// \return The right hand side of an expression of type and/or/imp.
 inline
-action_formula right(action_formula t)
+const action_formula& right(const action_formula& t)
 {
   assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
-  return atermpp::arg2(t);
+  return core::static_down_cast<const action_formula&>(t[1]);
 }
 
 /// \brief Returns the variables of a quantification expression
 /// \param t An action formula
 /// \return The variables of a quantification expression
 inline
-data::variable_list var(const action_formula& t)
+const data::variable_list& var(const action_formula& t)
 {
   assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-  return data::variable_list(t[0]);
-  /* return data::variable_list(
-           atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
-           atermpp::term_list_iterator< data::variable >());  */
+  return atermpp::aterm_cast<const data::variable_list>(t[0]);
 }
 
 /// \brief Returns the time of an at expression
 /// \param t An action formula
 /// \return The time of an at expression
 inline
-data::data_expression time(action_formula t)
+const data::data_expression& time(const action_formula& t)
 {
   assert(core::detail::gsIsActAt(t));
-  return data::data_expression(atermpp::arg2(t));
+  return core::static_down_cast<const data::data_expression&>(t[1]);
 }
 
 } // namespace accessors

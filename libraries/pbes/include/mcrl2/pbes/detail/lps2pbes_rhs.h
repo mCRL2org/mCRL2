@@ -176,7 +176,8 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     bool timed = is_timed();
     std::vector<pbes_expression> v;
     pbes_expression rhs0 = RHS(phi0, x.operand(), lps, id_generator, T, TermTraits());
-    action_formulas::action_formula alpha = x.formula();
+    assert(action_formulas::is_action_formula(x.formula()));
+    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
 
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
@@ -466,7 +467,8 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
     data::variable_list vars(fv.begin(), fv.end());
 
     pbes_expression rhs0 = RHS_structured(phi0, x.operand(), lps, id_generator, propvar_generator, vars, sigma, Z, T, TermTraits());
-    action_formulas::action_formula alpha = x.formula();
+    assert(action_formulas::is_action_formula(x.formula()));
+    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
 
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)

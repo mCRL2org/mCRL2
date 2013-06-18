@@ -58,7 +58,8 @@ regular_formula mcrl2::state_formulas::state_formula_type_checker::TraverseRegFr
 
   if (is_action_formula(RegFrm))
   {
-    return TraverseActFrm(Vars, RegFrm);
+    action_formula a = TraverseActFrm(Vars, atermpp::aterm_cast<const action_formula>(RegFrm));
+    return regular_formula(a);
   }
 
   throw mcrl2::runtime_error("Internal error. The regularformula " + pp(RegFrm) + " fails to match any known form in typechecking case analysis");
@@ -78,7 +79,7 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
 
   if (action_formulas::is_not(ActFrm))
   {
-    const not_& f=aterm_cast<const not_>(ActFrm);
+    const action_formulas::not_& f = core::static_down_cast<const action_formulas::not_&>(ActFrm);
     return action_formulas::not_(TraverseActFrm(Vars,f.operand()));
   }
 
