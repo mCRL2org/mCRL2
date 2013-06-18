@@ -279,7 +279,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
   for (sort_expression_vector::const_iterator i=sorts.begin(); i!=sorts.end(); ++i)
   {
     assert(is_basic_sort(*i));
-    const basic_sort &bsort(*i);
+    const basic_sort& bsort = core::static_down_cast<const basic_sort&>(*i);
     add_basic_sort(bsort);
     basic_sorts.insert(bsort.name());
   }

@@ -228,7 +228,7 @@ mcrl2::data::sort_type_checker::sort_type_checker(
   for (sort_expression_vector::const_iterator i=sorts_begin; i!=sorts_end; ++i)
   {
     assert(is_basic_sort(*i));
-    const basic_sort &bsort(*i);
+    const basic_sort& bsort = core::static_down_cast<const basic_sort&>(*i);
     add_basic_sort(bsort);
   }
 
@@ -312,7 +312,7 @@ void mcrl2::data::sort_type_checker::IsSortExprDeclared(const sort_expression &S
 
   if (is_structured_sort(SortExpr))
   {
-    const structured_sort &ssort(SortExpr);
+    const structured_sort& ssort = core::static_down_cast<const structured_sort&>(SortExpr);
     const structured_sort_constructor_list &constructors(ssort.constructors());
     for (structured_sort_constructor_list::const_iterator i=constructors.begin(); i!=constructors.end(); ++i)
     {
@@ -1289,7 +1289,7 @@ bool mcrl2::data::data_type_checker::MatchFuncUpdate(const function_sort &type, 
   {
     return false;
   }
-  Arg1=temp_result;
+  Arg1 = core::static_down_cast<const function_sort&>(temp_result);
 
   // determine A and B from Arg1:
   sort_expression_list LA=Arg1.domain();
@@ -1861,7 +1861,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing if matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchIf(Type,NewType))
+        if (!MatchIf(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function if has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1878,7 +1878,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing ==, !=, <, <=, >= or > matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchEqNeqComparison(Type,NewType))
+        if (!MatchEqNeqComparison(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function " + pp(data_term_name) + " has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1889,7 +1889,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing |> matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchListOpCons(Type,NewType))
+        if (!MatchListOpCons(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function |> has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1900,7 +1900,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing <| matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchListOpSnoc(Type,NewType))
+        if (!MatchListOpSnoc(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function <| has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1911,7 +1911,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing ++ matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchListOpConcat(Type,NewType))
+        if (!MatchListOpConcat(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function ++ has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1922,7 +1922,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing @ matching Type " << pp(Type) << ", PosType " << pp(PosType) << ", DataTerm: " << pp(DataTerm) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchListOpEltAt(Type,NewType))
+        if (!MatchListOpEltAt(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function @ has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1935,7 +1935,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         mCRL2log(debug) << "Doing {R,L}head matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
 
         sort_expression NewType;
-        if (!MatchListOpHead(Type,NewType))
+        if (!MatchListOpHead(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function {R,L}head has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1947,7 +1947,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing {R,L}tail matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchListOpTail(Type,NewType))
+        if (!MatchListOpTail(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function {R,L}tail has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1958,7 +1958,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing Set2Bag matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchSetOpSet2Bag(Type,NewType))
+        if (!MatchSetOpSet2Bag(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function Set2Bag has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1969,7 +1969,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing {List,Set,Bag} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchListSetBagOpIn(Type,NewType))
+        if (!MatchListSetBagOpIn(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function {List,Set,Bag}In has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1982,7 +1982,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchSetBagOpUnionDiffIntersect(Type,NewType))
+        if (!MatchSetBagOpUnionDiffIntersect(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -1993,7 +1993,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing SetCompl matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchSetOpSetCompl(Type,NewType))
+        if (!MatchSetOpSetCompl(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function SetCompl has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -2004,7 +2004,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing Bag2Set matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchBagOpBag2Set(Type,NewType))
+        if (!MatchBagOpBag2Set(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function Bag2Set has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -2015,7 +2015,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing BagCount matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchBagOpBagCount(Type,NewType))
+        if (!MatchBagOpBagCount(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("the function BagCount has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -2027,7 +2027,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         mCRL2log(debug) << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         sort_expression NewType;
-        if (!MatchFuncUpdate(Type,NewType))
+        if (!MatchFuncUpdate(core::static_down_cast<const function_sort&>(Type), NewType))
         {
           throw mcrl2::runtime_error("function update has incompatible argument types " + pp(Type) + " (while typechecking " + pp(DataTerm) + ")");
         }
@@ -2979,7 +2979,7 @@ std::map < data::sort_expression, data::basic_sort > mcrl2::data::data_type_chec
     {
       // We are dealing with a sort declaration of the shape sort A=B.
       // Every occurrence of sort A is normalised to sort B.
-      normalised_aliases[first]=second;
+      normalised_aliases[core::static_down_cast<const sort_expression&>(first)] = core::static_down_cast<const basic_sort&>(second);
     }
   }
 
@@ -3016,7 +3016,7 @@ std::map < data::sort_expression, data::basic_sort > mcrl2::data::data_type_chec
       }
     }
     // So the normalised sort of i->first is result_sort.
-    i->second=result_sort;
+    i->second = core::static_down_cast<const basic_sort&>(result_sort);
   }
   return normalised_aliases;
 }
@@ -3708,7 +3708,7 @@ void mcrl2::data::data_type_checker::ReadInSortStruct(const sort_expression &Sor
 
   if (is_function_sort(SortExpr))
   {
-    const function_sort &fs(SortExpr);
+    const function_sort& fs = core::static_down_cast<const function_sort&>(SortExpr);
     ReadInSortStruct(fs.codomain());
 
     for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
@@ -3720,7 +3720,7 @@ void mcrl2::data::data_type_checker::ReadInSortStruct(const sort_expression &Sor
 
   if (is_structured_sort(SortExpr))
   {
-    const structured_sort &struct_sort(SortExpr);
+    const structured_sort& struct_sort = core::static_down_cast<const structured_sort&>(SortExpr);
     for (structured_sort_constructor_list::const_iterator i=struct_sort.constructors().begin();
                i!=struct_sort.constructors().end(); ++i)
     {

@@ -483,10 +483,10 @@ static void add_to_build_pars(build_pars* pars, aterm_list seqs, aterm_appl* r, 
 }
 
 static char tree_var_str[20];
-static aterm_appl createFreshVar(aterm_appl sort, size_t* i)
+static aterm_appl createFreshVar(const aterm_appl& sort, size_t* i)
 {
   sprintf(tree_var_str,"@var_%lu",(*i)++);
-  return data::variable(tree_var_str,sort);
+  return data::variable(tree_var_str, atermpp::aterm_cast<const sort_expression>(sort));
 }
 
 // static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &new_val, const aterm &num, const aterm_list &substs)
@@ -2386,7 +2386,7 @@ bool RewriterCompilingJitty::calc_ar(const aterm_appl &expr)
 
 void RewriterCompilingJitty::fill_always_rewrite_array()
 {
-  ar=std::vector <aterm_appl> (ar_size); 
+  ar=std::vector <aterm_appl> (ar_size);
   for(std::map <size_t,size_t> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
     size_t arity = getArity(get_int2term(it->first));
@@ -2750,7 +2750,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "  l.push_front(e);\n"
             "  return l;\n"
             "}\n");
-  
+
   // - Calculate maximum occurring arity
   // - Forward declarations of rewr_* functions
   //
@@ -2956,7 +2956,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     for (size_t j=0; j < get_num_opids(); j++)
     {
       const data::function_symbol fs=get_int2term(j);
-      
+
       if (partially_rewritten_functions.count(fs)>0)
       {
         if (arity_is_allowed(j,i))
@@ -2980,23 +2980,23 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     for (size_t j=0; j < get_num_opids(); j++)
     {
       const data::function_symbol fs=get_int2term(j);
-      
+
       if (partially_rewritten_functions.count(fs)>0)
       {
         if (arity_is_allowed(j,i))
         {
-          // We are dealing with a partially rewritten function here. 
+          // We are dealing with a partially rewritten function here.
           // This cannot be invoked for any normal function.
         }
       }
       else if (data_equation_selector(fs) && arity_is_allowed(j,i))
       {
         if (i<=NF_MAX_ARITY)
-        { 
+        {
           fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_1_term;\n",i+1,j,j,i);
         }
         else
-        { 
+        {
           // If i>NF_MAX_ARITY no compiled rewrite function where the head is already in nf is available.
           fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i+1,j,j,i);
         }

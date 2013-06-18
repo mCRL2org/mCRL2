@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -74,7 +75,7 @@ class sort_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    sort_expression(const atermpp::aterm& term)
+    explicit sort_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_SortExpr(*this));

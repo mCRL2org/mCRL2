@@ -212,7 +212,7 @@ class data_expression: public atermpp::aterm_appl
         sort_expression s(head.sort());
         if (is_function_sort(s))
         {
-          const function_sort &fs(s);
+          const function_sort& fs = core::static_down_cast<const function_sort&>(s);
           return (fs.codomain());
         }
         return s;

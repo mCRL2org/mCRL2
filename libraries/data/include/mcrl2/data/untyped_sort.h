@@ -31,7 +31,7 @@ class untyped_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    untyped_sort(const atermpp::aterm& term)
+    explicit untyped_sort(const atermpp::aterm& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_UntypedSortUnknown(*this));

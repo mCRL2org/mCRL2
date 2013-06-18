@@ -463,7 +463,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
                   if (is_function_sort(rf->sort()))
                   {
-                    data::function_sort sa=rf->sort();
+                    const data::function_sort& sa = core::static_down_cast<const data::function_sort&>(rf->sort());
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,
@@ -642,7 +642,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   data::sort_expression_list dsorts;
                   if (is_function_sort(rf->sort()))
                   {
-                    data::function_sort sa=rf->sort();
+                    data::function_sort sa = core::static_down_cast<const data::function_sort&>(rf->sort());
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,

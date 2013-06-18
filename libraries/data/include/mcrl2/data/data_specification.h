@@ -934,7 +934,7 @@ class data_specification
       }
       else if (is_structured_sort(sort))
       {
-        insert_mappings_constructors_for_structured_sort(sort);
+        insert_mappings_constructors_for_structured_sort(core::static_down_cast<const structured_sort&>(sort));
       }
       const sort_expression normalised_sort=normalize_sorts(sort,*this);
       add_standard_mappings_and_equations(normalised_sort);
