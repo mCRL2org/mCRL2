@@ -732,7 +732,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 
   if (is_where_clause(term))
   {
-    const where_clause &t=term;
+    const where_clause& t = core::static_down_cast<const where_clause&>(term);
     atermpp::term_list<atermpp::aterm> l;
     const std::vector < assignment > lv=atermpp::convert < std::vector < assignment > >(t.assignments());
     for(std::vector < assignment > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)

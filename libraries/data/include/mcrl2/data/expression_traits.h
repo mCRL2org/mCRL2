@@ -44,17 +44,17 @@ struct term_traits<data::data_expression>
   /// \brief The value true
   /// \return The value true
   static inline
-  const term_type &true_()
+  const term_type& true_()
   {
-    return data::sort_bool::true_();
+    return core::static_down_cast<const term_type&>(data::sort_bool::true_());
   }
 
   /// \brief The value false
   /// \return The value false
   static inline
-  const term_type &false_()
+  const term_type& false_()
   {
-    return data::sort_bool::false_();
+    return core::static_down_cast<const term_type&>(data::sort_bool::false_());
   }
 
   /// \brief Operator not

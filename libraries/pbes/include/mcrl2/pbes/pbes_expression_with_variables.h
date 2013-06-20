@@ -221,12 +221,12 @@ struct term_traits<pbes_system::pbes_expression_with_variables>
   static
   term_type prop_var(const string_type& name, Iter first, Iter last)
   {
-    std::set<data_term_type> v;
+    std::set<variable_type> v;
     for (Iter i = first; i != last; ++i)
     {
       v.insert(i->variables().begin(), i->variables().end());
     }
-    return term_type(tr::prop_var(name, first, last), variable_sequence_type(v.begin(), v.end()));
+    return term_type(propositional_variable_type(name, data_term_sequence_type(first, last)), variable_sequence_type(v.begin(), v.end()));
   }
 
   /// \brief Test for value true

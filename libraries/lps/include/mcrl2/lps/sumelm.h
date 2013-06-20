@@ -121,22 +121,29 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
           //    for which there is no substitution yet -> add d := e, and x := e
           if (is_summand_variable(s, left) && !search_data_expression(right, left))
           {
+            const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
+            const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+
             // Check if we already have a substition with left as left hand side
-            if (substitutions.find(left) == substitutions.end())
+            if (substitutions.find(vleft) == substitutions.end())
             {
-              sumelm_add_replacement(substitutions, left, right);
+              sumelm_add_replacement(substitutions, vleft, right);
               replacement_added = true;
             }
-            else if (is_summand_variable(s, right) && substitutions.find(right) == substitutions.end())
+            else if (is_summand_variable(s, right) && substitutions.find(vright) == substitutions.end())
             {
-              sumelm_add_replacement(substitutions, right, substitutions(left));
+              sumelm_add_replacement(substitutions, vright, substitutions(vleft));
               replacement_added = true;
             }
-            else if (is_summand_variable(s, substitutions(left)) && substitutions.find(substitutions(left)) != substitutions.end())
+            else
             {
-              sumelm_add_replacement(substitutions, substitutions(left), right);
-              sumelm_add_replacement(substitutions, left, right);
-              replacement_added = true;
+              data::variable v = core::static_down_cast<const data::variable&>(substitutions(vleft));
+              if (is_summand_variable(s, v) && substitutions.find(v) != substitutions.end())
+              {
+                sumelm_add_replacement(substitutions, v, right);
+                sumelm_add_replacement(substitutions, vleft, right);
+                replacement_added = true;
+              }
             }
           }
         }

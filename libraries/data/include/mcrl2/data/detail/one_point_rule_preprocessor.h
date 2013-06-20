@@ -28,10 +28,10 @@ one_point_rule_preprocessor
   {
     if (data::sort_bool::is_not_application(x)) // x == !y
     {
-      data::data_expression y = unary_operand(atermpp::aterm_cast<application>(x));
+      data::data_expression y = unary_operand1(x);
       if (data::sort_bool::is_not_application(y))
       {
-        return (*this)(unary_operand(atermpp::aterm_cast<application>(y)));
+        return (*this)(unary_operand1(y));
       }
       else if (data::sort_bool::is_and_application(y))
       {

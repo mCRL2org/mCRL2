@@ -377,7 +377,7 @@ class specification_basic_type:public boost::noncopyable
          can occur when linearising using regular2 */
         if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
         {
-          const variable v=*l1;
+          const variable& v = core::static_down_cast<const variable&>(*l1);
           result.push_front(v);
           occurs_set.insert(v);
         }
@@ -1185,9 +1185,10 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_variable(t))
       {
-        if (vars_set.find(variable(t))!=vars_set.end())
+        const variable& v = core::static_down_cast<const variable&>(t);
+        if (vars_set.find(v)!=vars_set.end())
         {
-          vars_result_set.insert(t);
+          vars_result_set.insert(v);
         }
         return;
       }
@@ -1476,7 +1477,7 @@ class specification_basic_type:public boost::noncopyable
       if (!assignments.empty())
       {
         assignment ass=assignments.front();
-        data_expression lhs=ass.lhs();
+        variable lhs=ass.lhs();
         if (parameter==lhs)
         {
           /* The assignment refers to parameter par. Substitute its
@@ -1485,8 +1486,7 @@ class specification_basic_type:public boost::noncopyable
 
           if (replacelhs)
           {
-            lhs=data::replace_variables(lhs,sigma);
-            assert(is_variable(lhs));
+            lhs = core::static_down_cast<const variable&>(sigma(lhs));
           }
           if (replacerhs)
           {
@@ -1512,7 +1512,7 @@ class specification_basic_type:public boost::noncopyable
          from the variable, in which case an assignment must
          be added. */
 
-      data_expression lhs=parameter;
+      variable lhs=parameter;
       data_expression rhs=parameter;
 
       if (replacelhs)
@@ -3617,9 +3617,9 @@ class specification_basic_type:public boost::noncopyable
 
     };
 
-    bool is_global_variable(const data_expression d) const
+    bool is_global_variable(const data_expression& d) const
     {
-      return is_variable(d) && global_variables.count(d)>0;
+      return is_variable(d) && global_variables.count(core::static_down_cast<const variable&>(d)) > 0;
     }
 
     data_expression getvar(const variable var,
@@ -3833,7 +3833,7 @@ class specification_basic_type:public boost::noncopyable
         }
         else
         {
-          return getvar(t,stack);
+          return getvar(core::static_down_cast<const variable&>(t), stack);
         }
       }
 
@@ -7177,7 +7177,8 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_variable(actiontime))
       {
-        if (occursintermlist(actiontime,data_expression_list(sumvars)) && !occursinterm(actiontime,condition))
+        const variable& t = core::static_down_cast<const variable&>(actiontime);
+        if (occursintermlist(t, data_expression_list(sumvars)) && !occursinterm(t, condition))
         {
           return true;
         }
@@ -7312,6 +7313,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list condition_list;
       std::vector < variable_list> renamings_pars;
       std::vector < data_expression_list> renamings_args;
+      const variable& t = core::static_down_cast<const variable&>(timevariable); // why has timevariable the wrong type?
       for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
            i!=deadlock_summands.end(); ++i)
       {
@@ -7322,7 +7324,7 @@ class specification_basic_type:public boost::noncopyable
                              freevars,
                              i->condition(),
                              i->deadlock().has_time(),
-                             timevariable,
+                             t,
                              i->deadlock().time(),
                              new_existentially_quantified_variables);
         existentially_quantified_variables=merge_var(
@@ -7344,7 +7346,7 @@ class specification_basic_type:public boost::noncopyable
                              freevars,
                              i->condition(),
                              i->multi_action().has_time(),
-                             timevariable,
+                             t,
                              i->multi_action().time(),
                              new_existentially_quantified_variables);
         existentially_quantified_variables=merge_var(

@@ -479,16 +479,12 @@ public:
     typename AssociativeContainer::const_iterator i = m_map.find(v);
     if (i == m_map.end())
     {
-      return expression_type(v);
+      return v;
     }
     else
     {
       return i->second;
     }
-    // mCRL2log(log::debug2, "substitutions") << "sigma(" << v <<") = " << result << std::endl;
-    // return result;
-    // N.B. This does not work!
-    // return i == m_map.end() ? v : i->second;
   }
 
   assignment operator[](variable_type const& v)
@@ -675,9 +671,9 @@ public:
     /// \param[in] fp a stack of free positions in \a table
     assignment(const variable_type &v, ExpressionSequence& c, std::vector <size_t> &table, std::stack<size_t> & fp,
                const bool b, std::set<variable> &vars) :
-      m_variable(v), 
-      m_container(c), 
-      m_index_table(table), 
+      m_variable(v),
+      m_container(c),
+      m_index_table(table),
       m_free_positions(fp),
       m_variables_in_rhs_set_is_defined(b),
       m_variables_in_rhs(vars)

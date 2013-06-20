@@ -802,7 +802,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
             std::string param_signature = *param;
             if (tr::is_variable(*val))
             {
-                variable value = *val;
+                const variable& value = core::static_down_cast<const variable&>(*val);
                 std::string value_signature = get_param_signature(value);
                 if (param_signature != value_signature || L.find(value_signature) != L.end())
                 {
@@ -948,7 +948,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
             std::string param_signature = get_param_signature(parameter);
             if (tr::is_variable(*val))
             {
-                variable value = *val;
+                const variable& value = core::static_down_cast<const variable&>(*val);
                 std::string value_signature = get_param_signature(value);
                 if (param_signature != value_signature || L.find(value_signature) != L.end())
                 {

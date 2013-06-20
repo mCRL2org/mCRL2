@@ -1028,10 +1028,10 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             f = self.constructor
             for p in f.parameters():
                 ptype = p.type(include_modifiers = False, include_namespace = True, remove_templates = True)
-                qtype = p.type(include_modifiers = False, include_namespace = True)
                 pclass = None
                 if ptype in all_classes:
                     pclass = all_classes[ptype]
+                qtype = p.type(include_modifiers = False, include_namespace = True)
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
                     if is_modifiable_type(qtype, modifiability_map):
@@ -1071,9 +1071,15 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 f = self.constructor
                 for p in f.parameters():
                     ptype = p.type(include_modifiers = False, include_namespace = True)
+                    pclass = None
+                    if ptype in all_classes:
+                        pclass = all_classes[ptype]
                     if is_dependent_type(dependencies, ptype):
                         dependent = True
-                        updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                        if pclass != None and 'E' in pclass.modifiers() and not 'X' in pclass.modifiers():
+                            updates.append('core::static_down_cast<const %s&>(static_cast<Derived&>(*this)(x.%s()))' % (ptype, p.name()))
+                        else:
+                            updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
                     else:
                         updates.append('x.%s()' % p.name())
                 if dependent:

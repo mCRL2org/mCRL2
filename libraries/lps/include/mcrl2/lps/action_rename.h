@@ -519,14 +519,15 @@ lps::specification action_rename(
     {
       if (is_variable(*i))
       {
-        if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
+        const variable& v = core::static_down_cast<const variable&>(*i);
+        if (variables_in_old_rule.find(v)==variables_in_old_rule.end())
         {
-          throw mcrl2::runtime_error("Variable " + data::pp(*i) + " occurs more than once in lhs " +
+          throw mcrl2::runtime_error("Variable " + data::pp(v) + " occurs more than once in lhs " +
                                      lps::pp(rule_old_action) + " of an action rename rule");
         }
         else
         {
-          variables_in_old_rule.erase(*i);
+          variables_in_old_rule.erase(v);
         }
       }
     }

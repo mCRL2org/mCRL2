@@ -46,13 +46,15 @@ bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_ex
       data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(x));
       if (data::is_variable(left))
       {
-        v = left;
+        const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
+        v = vleft;
         e = right;
         return true;
       }
       else if (data::is_variable(right))
       {
-        v = right;
+        const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+        v = vright;
         e = left;
         return true;
       }
@@ -60,7 +62,8 @@ bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_ex
     // check if the term x corresponds to v, with v a boolean variable.
     else if (data::is_variable(x))
     {
-      v = x;
+      const data::variable& vx = atermpp::aterm_cast<const data::variable>(x);
+      v = vx;
       e = data::sort_bool::true_();
       return true;
     }
@@ -70,7 +73,8 @@ bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_ex
       data::data_expression operand = data::application(x)[0];
       if (data::is_variable(operand))
       {
-        v = operand;
+        const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+        v = voperand;
         e = data::sort_bool::false_();
         return true;
       }
@@ -82,7 +86,8 @@ bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_ex
     pbes_expression operand = not_(atermpp::aterm_appl(x)).operand();
     if (data::is_variable(operand))
     {
-      v = operand;
+      const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+      v = voperand;
       e = data::sort_bool::false_();
       return true;
     }
@@ -104,13 +109,15 @@ bool is_data_inequality(const pbes_expression& x, data::variable& v, data::data_
       data::data_expression right = data::binary_right(atermpp::aterm_cast<data::application>(x));
       if (data::is_variable(left))
       {
-        v = left;
+        const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
+        v = vleft;
         e = right;
         return true;
       }
       else if (data::is_variable(right))
       {
-        v = right;
+        const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+        v = vright;
         e = left;
         return true;
       }
@@ -118,7 +125,8 @@ bool is_data_inequality(const pbes_expression& x, data::variable& v, data::data_
     // check if the term x corresponds to v, with v a boolean variable.
     else if (data::is_variable(x))
     {
-      v = x;
+      const data::variable& vx = atermpp::aterm_cast<const data::variable>(x);
+      v = vx;
       e = data::sort_bool::false_();
       return true;
     }
@@ -127,7 +135,8 @@ bool is_data_inequality(const pbes_expression& x, data::variable& v, data::data_
       data::data_expression operand = data::application(x)[0];
       if (data::is_variable(operand))
       {
-        v = operand;
+        const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+        v = voperand;
         e = data::sort_bool::true_();
         return true;
       }
@@ -138,7 +147,8 @@ bool is_data_inequality(const pbes_expression& x, data::variable& v, data::data_
     pbes_expression operand = not_(atermpp::aterm_appl(x)).operand();
     if (data::is_variable(operand))
     {
-      v = operand;
+      const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
+      v = voperand;
       e = data::sort_bool::true_();
       return true;
     }

@@ -47,8 +47,8 @@ void test_basic()
 
   using mcrl2::data::concepts::MutableSubstitution;
 
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, data_expression > > >));
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, variable > > >));
+//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, data_expression > > >));
+//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, variable > > >));
 
   mutable_map_substitution< std::map< variable, data_expression > > s;
 
@@ -91,8 +91,8 @@ void test_indexed_substitution()
 
   using mcrl2::data::concepts::MutableSubstitution;
 
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< data_expression > > >));
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< variable > > >));
+//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< data_expression > > >));
+//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< variable > > >));
 
   mutable_indexed_substitution< variable, std::vector< data_expression > > s;
 

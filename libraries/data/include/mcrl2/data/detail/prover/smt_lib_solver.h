@@ -609,7 +609,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_add_c(const data_expression &a_clause)
     {
-      const application& v_clause(a_clause);
+      const application& v_clause = core::static_down_cast<const application&>(a_clause);
       application::const_iterator arg = v_clause.begin();
       const data_expression v_clause_1 = *arg++;
       const data_expression v_clause_2 = *arg++;

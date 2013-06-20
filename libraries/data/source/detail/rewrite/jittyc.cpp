@@ -2456,7 +2456,7 @@ static aterm toInner_list_odd(const data_expression &t)
   }
   else if (is_where_clause(t))
   {
-    const where_clause w=t;
+    const where_clause& w = core::static_down_cast<const where_clause&>(t);
     assignment_list assignments=w.assignments();
     atermpp::term_list <atermpp::aterm_appl > translated_assignments;
     for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)

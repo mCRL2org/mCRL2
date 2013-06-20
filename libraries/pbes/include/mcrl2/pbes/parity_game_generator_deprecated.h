@@ -89,10 +89,12 @@ public:
       else if(tr::is_forall(e))
       {
         tr::variable_sequence_type params = tr::var(e);
-        data::data_expression_vector pretty_args;
-        for(tr::variable_sequence_type::const_iterator i = params.begin(); i != params.end(); ++i)
+        data::variable_vector pretty_args;
+        for(auto i = params.begin(); i != params.end(); ++i)
         {
-          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+          data::data_expression d = datar_internal.convert_from((atermpp::aterm_appl)*i);
+          const data::variable& vd = core::static_down_cast<const data::variable&>(d);
+          pretty_args.push_back(vd);
         }
         pbes_expression arg = from_rewrite_format(tr::arg(e));
         result = tr::forall(tr::variable_sequence_type(pretty_args.begin(), pretty_args.end()), arg);
@@ -100,10 +102,12 @@ public:
       else if(tr::is_exists(e))
       {
         tr::variable_sequence_type params = tr::var(e);
-        data::data_expression_vector pretty_args;
-        for(tr::variable_sequence_type::const_iterator i = params.begin(); i != params.end(); ++i)
+        data::variable_vector pretty_args;
+        for(auto i = params.begin(); i != params.end(); ++i)
         {
-          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+          data::data_expression d = datar_internal.convert_from((atermpp::aterm_appl)*i);
+          const data::variable& vd = core::static_down_cast<const data::variable&>(d);
+          pretty_args.push_back(vd);
         }
         pbes_expression arg = from_rewrite_format(tr::arg(e));
         result = tr::exists(tr::variable_sequence_type(pretty_args.begin(), pretty_args.end()), arg);

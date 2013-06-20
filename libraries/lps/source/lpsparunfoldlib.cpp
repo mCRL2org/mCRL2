@@ -269,7 +269,7 @@ void lpsparunfold::create_data_equations(
         if (sort_vars[*j].size() == sort_index[ *j])
         {
           istr = generator(dstr);
-          data_expression v = variable(istr, *j);
+          variable v(istr, *j);
           sort_vars[*j].push_back(v);
         }
         variable y = sort_vars[*j].at(sort_index[*j]);
@@ -342,7 +342,7 @@ void lpsparunfold::create_data_equations(
       if (sort_vars[element_sort].size() == sort_index[ element_sort ])
       {
         istr = generator(dstr);
-        data_expression v = variable(istr, element_sort);
+        variable v(istr, element_sort);
         sort_vars[ element_sort ].push_back(v);
       }
       //variable y = sort_vars[ element_sort ].at(sort_index[ element_sort ]);
@@ -402,7 +402,7 @@ void lpsparunfold::unfold_summands(mcrl2::lps::action_summand_vector& summands, 
   {
     mcrl2::data::assignment_list ass = j->assignments();
     //Create new left-hand assignment_list & right-hand assignment_list
-    mcrl2::data::data_expression_vector new_ass_left;
+    mcrl2::data::variable_vector new_ass_left;
     mcrl2::data::data_expression_vector new_ass_right;
     for (mcrl2::data::assignment_list::iterator k = ass.begin(); k != ass.end(); ++k)
     {
@@ -532,7 +532,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   mCRL2log(debug) << "- New LPS process parameters: " <<  mcrl2::data::pp(new_process_parameters) << std::endl;
 
   //Prepare parameter substitution
-  std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
+  std::map<mcrl2::data::variable, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
 
   // TODO: avoid unnecessary copies of the LPS
   mcrl2::lps::linear_process new_lps;
@@ -544,7 +544,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
 
   new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
 
-  for (std::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
+  for (auto i = parsub.begin()
        ; i != parsub.end()
        ; ++i)
   {
@@ -569,7 +569,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
 
   data::assignment_list ass = m_init_process.assignments();
   //Create new left-hand assignment_list
-  mcrl2::data::data_expression_vector new_ass_left;
+  mcrl2::data::variable_vector new_ass_left;
   for (mcrl2::data::assignment_list::iterator k = ass.begin()
        ; k != ass.end()
        ; ++k)
@@ -627,9 +627,9 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   return new_init;
 }
 
-std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol case_function)
+std::map<mcrl2::data::variable, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol case_function)
 {
-  std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
+  std::map<mcrl2::data::variable, mcrl2::data::data_expression> result;
   data_expression_vector dev;
 
   set<mcrl2::data::variable_vector::iterator> used_iters;
@@ -690,7 +690,7 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfol
     }
 
     mCRL2log(verbose) << "Parameter substitution:\t" << data::pp(i->first) << "\t->\t" <<  data::pp(mcrl2::data::application(case_function, dev)) << std::endl;
-    result.insert(std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application(case_function, dev)));
+    result.insert(std::pair<mcrl2::data::variable, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application(case_function, dev)));
   }
   return result ;
 }

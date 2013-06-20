@@ -39,7 +39,7 @@ class variable: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    variable(const atermpp::aterm& term)
+    explicit variable(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataVarId(*this));

@@ -16,6 +16,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -82,7 +83,7 @@ struct builder
                )
   {
     msg("aterm update copy");
-    return static_cast<Derived&>(*this)(x);
+    return core::static_down_cast<const T&>(static_cast<Derived&>(*this)(x));
   }
 
   // non-aterm update copy
@@ -149,7 +150,7 @@ struct builder
     std::vector<T> result;
     for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
     {
-      result.push_back(static_cast<Derived&>(*this)(*i));
+      result.push_back(core::static_down_cast<const T&>(static_cast<Derived&>(*this)(*i)));
     }
     return atermpp::term_list<T>(result.begin(),result.end());
   }

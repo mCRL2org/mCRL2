@@ -194,7 +194,7 @@ class lpsparunfold
     /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
       * \return substitute function for replacing process parameters with unfolded process parameters functions.
     **/
-    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameter_substitution(
+    std::map<mcrl2::data::variable, mcrl2::data::data_expression> parameter_substitution(
       std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i,
       mcrl2::data::function_symbol_vector AffectedConstructors,
       mcrl2::data::function_symbol case_function);

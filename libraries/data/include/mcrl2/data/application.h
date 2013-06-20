@@ -39,7 +39,7 @@ class application: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    application(const atermpp::aterm& term)
+    explicit application(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataAppl(*this));
@@ -199,6 +199,27 @@ inline
 const data_expression& binary_right(const application& x)
 {
   return *(++x.begin());
+}
+
+inline
+const data_expression& unary_operand1(const data_expression& x)
+{
+  const application& y = core::static_down_cast<const application&>(x);
+  return *y.begin();
+}
+
+inline
+const data_expression& binary_left1(const data_expression& x)
+{
+  const application& y = core::static_down_cast<const application&>(x);
+  return *y.begin();
+}
+
+inline
+const data_expression& binary_right1(const data_expression & x)
+{
+  const application& y = core::static_down_cast<const application&>(x);
+  return *(++y.begin());
 }
 
 } // namespace data

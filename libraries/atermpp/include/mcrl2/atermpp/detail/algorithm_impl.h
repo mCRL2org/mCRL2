@@ -154,7 +154,7 @@ void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBeg
     if (op(a))
     {
       value_type v(a);
-      *destBegin++ = a;
+      *destBegin++ = aterm_cast<value_type>(a);
     }
     for (aterm_appl::iterator i = a.begin(); i != a.end(); ++i)
     {

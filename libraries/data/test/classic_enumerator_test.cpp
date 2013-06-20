@@ -211,8 +211,8 @@ void check_concepts()
 {
   using namespace mcrl2::data::concepts;
 
-  BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_map_substitution< > >));
-  BOOST_CONCEPT_ASSERT((classic_enumerator< >::iterator ));
+//  BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_map_substitution< > >));
+//  BOOST_CONCEPT_ASSERT((classic_enumerator< >::iterator ));
 }
 
 inline

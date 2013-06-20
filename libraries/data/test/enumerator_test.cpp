@@ -139,7 +139,7 @@ void test3()
   rewriter rewr(data_spec);
   data_enumerator e(data_spec, rewr, "x_");
 
-  variable   n = parse_data_expression("n", "n: Pos;\n");
+  variable n = atermpp::aterm_cast<variable>(parse_data_expression("n", "n: Pos;\n"));
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
   data_expression_with_variables x(c, atermpp::make_vector(n));
 }
@@ -149,7 +149,7 @@ void test4()
   data_specification data_spec(parse_data_specification("sort N = Nat;")); // import Nat
   rewriter datar(data_spec);
   data_enumerator datae(data_spec, datar, "x_");
-  variable y = parse_data_expression("n", "n: Nat;\n");
+  variable y = atermpp::aterm_cast<variable>(parse_data_expression("n", "n: Nat;\n"));
   std::vector<data_expression_with_variables> z = datae.enumerate(y);
   BOOST_CHECK(z.size() > 0);
 }

@@ -29,7 +29,7 @@ namespace detail
 /// \param lhs Function for getting the left subtree of a node.
 /// \param rhs Function for getting the right subtree of a node.
 template <typename T, typename OutputIterator, typename MatchFunction, typename AccessorFunction>
-void split(T t, OutputIterator i, MatchFunction match, AccessorFunction lhs, AccessorFunction rhs)
+void split(const T& t, OutputIterator i, MatchFunction match, AccessorFunction lhs, AccessorFunction rhs)
 {
   if (match(t))
   {

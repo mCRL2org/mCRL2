@@ -67,15 +67,17 @@ class stategraph_equation: public pbes_equation
           data::data_expression v_i = *i;
           if (data::is_equal_to_application(v_i))
           {
-            data::data_expression left = data::binary_left(v_i);
-            data::data_expression right = data::binary_right(v_i);
+            data::data_expression left = data::binary_left1(v_i);
+            data::data_expression right = data::binary_right1(v_i);
             if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && is_constant(right))
             {
-              result[left] = right;
+              const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
+              result[vleft] = right;
             }
             else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && is_constant(left))
             {
-              result[right] = left;
+              const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+              result[vright] = left;
             }
           }
           // TODO: handle conjuncts b and !b, with b a variable with sort Bool

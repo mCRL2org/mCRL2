@@ -431,7 +431,7 @@ T replace_variables(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
 {
-  return core::make_update_apply_builder<data::data_expression_builder>(sigma)(x);
+  return core::static_down_cast<const T&>(core::make_update_apply_builder<data::data_expression_builder>(sigma)(x));
 }
 
 template <typename T, typename Substitution>
@@ -473,7 +473,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x));
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.

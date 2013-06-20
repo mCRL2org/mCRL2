@@ -185,17 +185,18 @@ class stategraph_algorithm
           {
             if (data::is_variable(*q))
             {
-              std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), *q);
+              const data::variable& vq = core::static_down_cast<const data::variable&>(*q);
+              std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), vq);
               if (found != d_X.end())
               {
                 if (V[Y.name()][index] == data::variable())
                 {
-                  V[Y.name()][index] = *q;
+                  V[Y.name()][index] = vq;
                   mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(true, index, X, Y, "pass 1");
                 }
                 else
                 {
-                  bool is_same_value = (V[Y.name()][index] == *q);
+                  bool is_same_value = (V[Y.name()][index] == vq);
                   m_is_control_flow[Y.name()][index] = is_same_value;
                   mCRL2log(log::debug, "stategraph") << print_stategraph_assignment(is_same_value, index, X, Y, "pass 1", V[Y.name()][index]);
                 }
@@ -233,7 +234,8 @@ class stategraph_algorithm
             }
             else if (data::is_variable(*q))
             {
-              std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), *q);
+              const data::variable& vq = core::static_down_cast<const data::variable&>(*q);
+              std::vector<data::variable>::const_iterator found = std::find(d_X.begin(), d_X.end(), vq);
               if (found == d_X.end())
               {
                 if (m_is_control_flow[Y.name()][index] != false)

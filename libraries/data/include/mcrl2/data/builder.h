@@ -98,7 +98,7 @@ struct add_sort_expressions: public Builder<Derived>
   data::assignment_expression operator()(const data::assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+    data::assignment_expression result = data::assignment(core::static_down_cast<const data::variable&>(static_cast<Derived&>(*this)(x.lhs())), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -631,7 +631,7 @@ struct add_variables: public Builder<Derived>
   data::assignment_expression operator()(const data::assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_expression result = data::assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+    data::assignment_expression result = data::assignment(core::static_down_cast<const data::variable&>(static_cast<Derived&>(*this)(x.lhs())), static_cast<Derived&>(*this)(x.rhs()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

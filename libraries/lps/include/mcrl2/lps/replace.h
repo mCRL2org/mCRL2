@@ -284,7 +284,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
 
   data::assignment_expression operator()(const data::assignment& x)
   {
-    data::variable lhs = (*this)(x.lhs());
+    data::variable lhs = core::static_down_cast<const data::variable&>((*this)(x.lhs()));
     data::data_expression rhs = (*this)(x.rhs());
     return data::assignment(lhs, rhs);
   }
