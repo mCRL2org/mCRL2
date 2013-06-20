@@ -9,14 +9,14 @@ all_classes = parse_class_map(class_map)
 modifiability_map = make_modifiability_map(all_classes)
 
 file_map = {
-  'action_formulas' : '../../lps/source/lps.cpp',
+  'action_formulas' : '../../modal_formula/source/modal_formula.cpp',
   'core' : '../../core/source/core.cpp',
   'data' : '../../data/source/data.cpp',
   'lps' : '../../lps/source/lps.cpp',
   'pbes_system' : '../../pbes/source/pbes.cpp',
   'process' : '../../process/source/process.cpp',
-  'regular_formulas' : '../../lps/source/lps.cpp',
-  'state_formulas' : '../../lps/source/lps.cpp',
+  'regular_formulas' : '../../modal_formula/source/modal_formula.cpp',
+  'state_formulas' : '../../modal_formula/source/modal_formula.cpp',
 }
 
 PP_CLASSNAMES = '''
