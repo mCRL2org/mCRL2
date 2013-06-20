@@ -212,15 +212,16 @@ class linear_inequality
       {
         if (e.sort() == sort_real::real_())
         {
-          if (m_lhs.find(e) == m_lhs.end())
+          const variable &v=static_cast<const variable &>(e);
+          if (m_lhs.find(v) == m_lhs.end())
           {
-            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real::negate(factor),r)
+            set_factor_for_a_variable(v,(negate?rewrite_with_memory(sort_real::negate(factor),r)
                                          :rewrite_with_memory(factor,r)));
           }
           else
           {
-            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real::minus(m_lhs[e],factor),r)
-                                         :rewrite_with_memory(sort_real::plus(m_lhs[e],factor),r)));
+            set_factor_for_a_variable(v,(negate?rewrite_with_memory(sort_real::minus(m_lhs[v],factor),r)
+                                         :rewrite_with_memory(sort_real::plus(m_lhs[v],factor),r)));
           }
         }
         else
