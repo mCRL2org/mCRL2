@@ -56,6 +56,14 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::identifier_string(name), sort))
     {}
 
+	/// \brief Constructor.
+	///
+	/// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
+	template < size_t S >
+    structured_sort_constructor_argument(const char(&name)[S], const sort_expression& sort)
+      : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::identifier_string(name), sort))
+    {}
+
     const core::identifier_string& name() const
     {
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
