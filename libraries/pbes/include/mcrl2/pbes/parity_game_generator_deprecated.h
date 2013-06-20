@@ -189,7 +189,7 @@ protected:
         const mcrl2::data::function_symbol_vector constructors(m_pbes.data().constructors(*i));
         for (mcrl2::data::function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
         {
-          datar_internal.convert_to(*i);
+          datar_internal.convert_to(*j);
         }
       }
     }

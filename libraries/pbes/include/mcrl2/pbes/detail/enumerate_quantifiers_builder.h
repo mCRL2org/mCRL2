@@ -340,7 +340,7 @@ class quantifier_enumerator
                        )
     {
       // Undo substitutions to quantifier variables
-      std::map<variable_type, term_type> undo;
+      std::map<variable_type, data_term_type> undo;
       for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
       {
         term_type sigma_i = sigma(*i);

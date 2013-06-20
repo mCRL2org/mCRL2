@@ -165,10 +165,9 @@ class Formula_Checker
     {
       int v_formula_number = 1;
 
-      for(data_expression_list::const_iterator i=a_formulas.begin();
-                i!=a_formulas.end(); ++i)
+      for(data_expression_list::const_iterator i = a_formulas.begin(); i != a_formulas.end(); ++i)
       {
-        atermpp::aterm_appl v_formula = *i;
+        const data_expression& v_formula = *i;
         mCRL2log(log::info) << "'" << data::pp(v_formula) << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();

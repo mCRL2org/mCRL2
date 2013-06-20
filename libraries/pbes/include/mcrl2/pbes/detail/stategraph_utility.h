@@ -131,7 +131,7 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
     term_type result = x;
     if (tr::is_not(x))
     {
-      term_type t = tr::not_arg(x);
+      const term_type& t = tr::not_arg(x);
       if (tr::is_or(t)) // x = !(y && z)
       {
         term_type y = utilities::optimized_not(tr::left(t));
@@ -152,7 +152,8 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
       }
       else if (is_data_not(t)) // x = !val(!y)
       {
-        term_type y = not_arg(t);
+        const data::data_expression& z = atermpp::aterm_cast<const data::data_expression>(t);
+        data::data_expression y = not_arg(z);
         result = y;
       }
     }
@@ -171,16 +172,17 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
     typedef core::term_traits<data::data_expression> tt;
     if (is_data_not(x))
     {
-      return tr::not_(not_arg(x));
+      const data::data_expression& y = atermpp::aterm_cast<const data::data_expression>(x);
+      return tr::not_(not_arg(y));
     }
     else if (is_data_and(x))
     {
-      data::data_expression y = x;
+      const data::data_expression& y = atermpp::aterm_cast<const data::data_expression>(x);
       return tr::and_(tt::left(y), tt::right(y));
     }
     else if (is_data_or(x))
     {
-      data::data_expression y = x;
+      const data::data_expression& y = atermpp::aterm_cast<const data::data_expression>(x);
       return tr::or_(tt::left(y), tt::right(y));
     }
     return x;
@@ -197,7 +199,7 @@ struct stategraph_simplify_quantifier_builder: public pbes_system::detail::simpl
     }
     typedef core::term_traits<data::data_expression> tt;
     term_type result = super::visit_data_expression(x, d, sigma);
-    data::data_expression t = result;
+    const data::data_expression& t = atermpp::aterm_cast<const data::data_expression>(result);
     if (data::is_not_equal_to_application(t)) // result = y != z
     {
       data::data_expression y = tt::left(t);

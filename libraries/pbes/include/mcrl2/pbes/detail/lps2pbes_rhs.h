@@ -241,18 +241,18 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
     {
-      pbes_expression       ci = i->condition();
-      data::data_expression ti = i->multi_action().time();
-      data::variable_list   yi = i->summation_variables();
+      const data::data_expression& ci = i->condition();
+      const data::data_expression& ti = i->multi_action().time();
+      const data::variable_list&   yi = i->summation_variables();
       pbes_expression p = tr::forall(yi, tr::or_(data::sort_bool::not_(ci), data::greater(t, ti)));
       v.push_back(p);
     }
     const lps::deadlock_summand_vector& dsv = lps.deadlock_summands();
     for (lps::deadlock_summand_vector::const_iterator j = dsv.begin(); j != dsv.end(); ++j)
     {
-      data::data_expression cj = j->condition();
-      data::data_expression tj = j->deadlock().time();
-      data::variable_list   yj = j->summation_variables();
+      const data::data_expression& cj = j->condition();
+      const data::data_expression& tj = j->deadlock().time();
+      const data::variable_list&   yj = j->summation_variables();
       pbes_expression p = tr::forall(yj, tr::or_(data::sort_bool::not_(cj), data::greater(t, tj)));
       v.push_back(p);
     }

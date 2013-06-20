@@ -779,7 +779,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     }
     else
     {
-      data::data_expression d(r(p,sigma));
+      const data::data_expression& dp = atermpp::aterm_cast<const data::data_expression>(p);
+      data::data_expression d(r(dp, sigma));
       if (d == data::sort_bool::true_())
       {
         result = pbes_expr::true_();

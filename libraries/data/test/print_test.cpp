@@ -61,7 +61,7 @@ void test_term(const std::string& s)
   }
   else
   {
-    data_expression x = atermpp::aterm_appl((atermpp::aterm_appl) a);
+    data_expression x = atermpp::aterm_cast<data_expression>(a);
     test_term(s, x);
   }
 }

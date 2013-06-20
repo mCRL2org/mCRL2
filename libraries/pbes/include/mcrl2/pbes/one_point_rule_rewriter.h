@@ -70,7 +70,7 @@ bool is_data_equality(const pbes_expression& x, data::variable& v, data::data_ex
     // check if the term x corresponds to !v, with v a boolean variable.
     else if (data::sort_bool::is_not_application(x))
     {
-      data::data_expression operand = data::application(x)[0];
+      const data::data_expression& operand = core::static_down_cast<const data::data_expression&>(data::application(x)[0]);
       if (data::is_variable(operand))
       {
         const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);
@@ -132,7 +132,7 @@ bool is_data_inequality(const pbes_expression& x, data::variable& v, data::data_
     }
     else if (data::sort_bool::is_not_application(x))
     {
-      data::data_expression operand = data::application(x)[0];
+      data::data_expression operand(x[0]);
       if (data::is_variable(operand))
       {
         const data::variable& voperand = atermpp::aterm_cast<const data::variable>(operand);

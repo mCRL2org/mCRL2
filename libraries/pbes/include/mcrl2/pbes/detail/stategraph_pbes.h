@@ -64,7 +64,7 @@ class stategraph_equation: public pbes_equation
       {
         if (data::is_data_expression(*i))
         {
-          data::data_expression v_i = *i;
+          const data::data_expression& v_i = atermpp::aterm_cast<const data::data_expression>(*i);
           if (data::is_equal_to_application(v_i))
           {
             data::data_expression left = data::binary_left1(v_i);

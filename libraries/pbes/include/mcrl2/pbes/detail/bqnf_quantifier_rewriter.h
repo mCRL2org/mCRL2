@@ -167,10 +167,13 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       term_type e_1 = filter(g, d_minus_free_phi_i);
       if (!d_intersects_free_g_minus_free_phi_i.empty())
       {
-        e_1 = data::exists(
+        e_1 =
+// data::exists(    // N.B. Removing this, since it does not make sense to convert a pbes_system::exists to a data::exists (Wieger).
             tr::exists(
             data::variable_list(d_intersects_free_g_minus_free_phi_i.begin(), d_intersects_free_g_minus_free_phi_i.end()),
-            e_1));
+            e_1)
+// )
+           ;
       }
       term_type e_2 = filter(g, d_intersects_free_phi_i);
       term_type empty;

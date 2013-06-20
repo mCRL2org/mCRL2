@@ -1375,10 +1375,11 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   else
   {
     // p is a data::data_expression
+    const data::data_expression& dp = atermpp::aterm_cast<const data::data_expression>(p);
 
     if (opt_precompile_pbes)
     {
-      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
+      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(dp),sigma_internal);
       result = core::static_down_cast<const pbes_expression&>(d);
 
       if (convert_data_to_pbes)
@@ -1395,7 +1396,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     }
     else
     {
-      data::data_expression d(R(p,sigma));
+      data::data_expression d(R(dp,sigma));
       result = d;
 
       if (convert_data_to_pbes)
