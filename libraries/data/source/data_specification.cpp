@@ -500,7 +500,7 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   {
     if (data::is_alias(*i)) // Compatibility with legacy code
     {
-      add_alias(*i);
+      add_alias(atermpp::aterm_cast<data::alias>(*i));
     }
     else
     {

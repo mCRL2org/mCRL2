@@ -40,7 +40,7 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    structured_sort_constructor_argument(const atermpp::aterm& term)
+    explicit structured_sort_constructor_argument(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_StructProj(*this));

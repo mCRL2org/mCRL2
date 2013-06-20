@@ -42,7 +42,7 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    process_initializer(const atermpp::aterm& term)
+    explicit process_initializer(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));

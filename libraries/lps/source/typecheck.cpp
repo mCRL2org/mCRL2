@@ -331,7 +331,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     AddVars2Table(DeclaredVars,VarList,NewDeclaredVars);
 
     DeclaredVars=NewDeclaredVars;
-    lps::untyped_action Left=Rule.lhs();
+    lps::untyped_action Left(atermpp::aterm_cast<atermpp::aterm>(Rule.lhs()));
 
     //extra check requested by Tom: actions in the LHS can only come from the LPS
     actions.swap(actions_from_lps);
@@ -344,7 +344,7 @@ action_rename_specification mcrl2::lps::action_type_checker::operator()(const ac
     action_rename_rule_rhs Right=Rule.rhs();
     if (!Right.is_delta() && !Right.is_tau())
     {
-      Right=TraverseAct(DeclaredVars,Right.act());
+      Right = TraverseAct(DeclaredVars, atermpp::aterm_cast<lps::untyped_action>(Right.act()));
     }
 
     new_rules.push_back(action_rename_rule(VarList,Cond,new_action_at_the_left,Right));

@@ -609,7 +609,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_action(t))
       {
-        return RewriteAction(t);
+        return RewriteAction(atermpp::aterm_cast<lps::action>(t));
       }
 
       if (is_process_instance_assignment(t))

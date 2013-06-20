@@ -96,15 +96,9 @@ class propositional_variable_instantiation: public pbes_expression
       : pbes_expression(core::detail::gsMakePropVarInst(core::identifier_string(name), parameters))
     {}
 
-    void operator=(const propositional_variable_instantiation& x)
-    {
-      aterm::operator=(static_cast<const atermpp::aterm&>(x));
-    }
-
     const core::identifier_string& name() const
     {
-//      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
     const data::data_expression_list& parameters() const
@@ -194,8 +188,7 @@ class not_: public pbes_expression
 
     const pbes_expression& operand() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 };
 
@@ -223,14 +216,12 @@ class and_: public pbes_expression
 
     const pbes_expression& left() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 
     const pbes_expression& right() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -258,14 +249,12 @@ class or_: public pbes_expression
 
     const pbes_expression& left() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 
     const pbes_expression& right() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -293,14 +282,12 @@ class imp: public pbes_expression
 
     const pbes_expression& left() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 
     const pbes_expression& right() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -333,8 +320,7 @@ class forall: public pbes_expression
 
     const pbes_expression& body() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -367,8 +353,7 @@ class exists: public pbes_expression
 
     const pbes_expression& body() const
     {
-//      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
-      return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
+      return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated classes ---//

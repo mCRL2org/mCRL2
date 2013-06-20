@@ -33,7 +33,7 @@ class nil: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    nil(const atermpp::aterm& term)
+    explicit nil(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_Nil(*this));

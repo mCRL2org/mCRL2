@@ -38,7 +38,7 @@ class action_label: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    action_label(const atermpp::aterm& term)
+    explicit action_label(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_ActId(*this));

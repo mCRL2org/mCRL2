@@ -30,7 +30,7 @@ class untyped_multi_action: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    untyped_multi_action(const atermpp::aterm& term)
+    explicit untyped_multi_action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_UntypedMultAct(*this));
