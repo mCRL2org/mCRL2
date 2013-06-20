@@ -57,17 +57,6 @@ class structured_sort_constructor: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser)))
     {}
 
-	/// \brief Constructor 
-    /// 
-    /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string 
-    template < typename Container, size_t S, size_t S0 > 
-    structured_sort_constructor(const char(&name)[S], 
-                                const Container& arguments, 
-                                const char(&recogniser)[S0], 
-                                typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0) 
-      : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser)))
-    {} 
-
     const core::identifier_string& name() const
     {
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
@@ -141,6 +130,17 @@ class structured_sort_constructor: public atermpp::aterm_appl
     structured_sort_constructor(const std::string& name)
       : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), structured_sort_constructor_argument_list(), core::empty_identifier_string()))
     {}
+
+    /// \brief Constructor 
+    /// 
+    /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string 
+    template < typename Container, size_t S, size_t S0 > 
+    structured_sort_constructor(const char(&name)[S], 
+                                const Container& arguments, 
+                                const char(&recogniser)[S0], 
+                                typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0) 
+      : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser)))
+    {} 
 
     /// \brief Returns the constructor function for this constructor,
     ///        assuming it is internally represented with sort s.
