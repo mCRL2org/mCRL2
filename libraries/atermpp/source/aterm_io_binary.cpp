@@ -971,7 +971,7 @@ static bool
 write_baf(const aterm &t, ostream &os)
 {
   size_t nr_unique_terms = 0;
-  const size_t nr_symbols = detail::function_symbol_index_table_size*FUNCTION_SYMBOL_BLOCK_SIZE;
+  const size_t nr_symbols = detail::function_symbol_index_table_number_of_elements*FUNCTION_SYMBOL_BLOCK_SIZE;
   size_t cur;
 
   /* Initialize bit buffer */

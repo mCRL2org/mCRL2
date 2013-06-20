@@ -245,7 +245,7 @@ static void check_that_all_objects_are_free()
   // in a nonderministic fashion using a placement new. So, they can be constructed
   // without properly being destroyed, increasing the reference count of the function
   // symbols in it by 1.
-  for(size_t i=0; i<function_symbol_index_table_size; ++i) 
+  for(size_t i=0; i<function_symbol_index_table_number_of_elements; ++i) 
   {
     for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j) 
     {

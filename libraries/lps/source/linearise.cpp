@@ -1829,7 +1829,9 @@ class specification_basic_type:public boost::noncopyable
         warningNumber=warningNumber*5;
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
-      const process_identifier p(fresh_identifier_generator("P"),get_sorts(parameters1));
+      const core::identifier_string s=fresh_identifier_generator("P");
+      const process_identifier p(s,get_sorts(parameters1));
+      assert(std::string(p.name()).size()>0); 
       insertProcDeclaration(
         p,
         parameters1,

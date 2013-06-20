@@ -35,7 +35,8 @@ namespace detail
 
 
   // The function_lookup_table is not a vector to prevent it from being destroyed prematurely.
-  size_t function_symbol_index_table_size=0;
+  static size_t function_symbol_index_table_size=0;
+  size_t function_symbol_index_table_number_of_elements=0;
   static _function_symbol* function_symbol_free_list=END_OF_LIST;
   constant_function_symbols function_adm;
   
@@ -43,26 +44,51 @@ namespace detail
   
   static void create_new_function_symbol_block()
   {
-    function_symbol_index_table[function_symbol_index_table_size]=
+    if (function_symbol_index_table_number_of_elements==function_symbol_index_table_size)
+    {
+      // There is no place in the function_symbol_index_table. Double it.
+      function_symbol_index_table=reinterpret_cast<_function_symbol**>(realloc(function_symbol_index_table,2*function_symbol_index_table_size*sizeof(_function_symbol*)));
+      if (function_symbol_index_table==NULL)
+      {
+        throw std::runtime_error("Out of memory. Cannot extend function symbol index table.");
+      }
+      function_symbol_index_table_size=function_symbol_index_table_size*2;
+    }
+  
+    assert(function_symbol_index_table_number_of_elements<function_symbol_index_table_size);
+    function_symbol_index_table[function_symbol_index_table_number_of_elements]=
              reinterpret_cast<_function_symbol*>(
                         malloc(FUNCTION_SYMBOL_BLOCK_SIZE*sizeof(_function_symbol)));
-    if (function_symbol_index_table[function_symbol_index_table_size]==NULL)
+    if (function_symbol_index_table[function_symbol_index_table_number_of_elements]==NULL)
     {
       throw std::runtime_error("Out of memory. Fail to resize function_lookup_table.");
     }
     for(size_t i=FUNCTION_SYMBOL_BLOCK_SIZE; i>0; )
     {
       --i;
-      function_symbol_index_table[function_symbol_index_table_size][i].arity=0;
-      new (&function_symbol_index_table[function_symbol_index_table_size][i].name) std::string(); // Placement new
-      function_symbol_index_table[function_symbol_index_table_size][i].reference_count=0;
-      function_symbol_index_table[function_symbol_index_table_size][i].next=function_symbol_free_list;
-      function_symbol_free_list=&function_symbol_index_table[function_symbol_index_table_size][i];
-      function_symbol_index_table[function_symbol_index_table_size][i].number=i+FUNCTION_SYMBOL_BLOCK_SIZE*function_symbol_index_table_size;
+      function_symbol_index_table[function_symbol_index_table_number_of_elements][i].arity=0;
+      new (&function_symbol_index_table[function_symbol_index_table_number_of_elements][i].name) std::string(); // Placement new
+      function_symbol_index_table[function_symbol_index_table_number_of_elements][i].reference_count=0;
+      function_symbol_index_table[function_symbol_index_table_number_of_elements][i].next=function_symbol_free_list;
+      function_symbol_free_list=&function_symbol_index_table[function_symbol_index_table_number_of_elements][i];
+      function_symbol_index_table[function_symbol_index_table_number_of_elements][i].number=i+FUNCTION_SYMBOL_BLOCK_SIZE*function_symbol_index_table_number_of_elements;
 
     }
-    function_symbol_index_table_size++;
+    function_symbol_index_table_number_of_elements++;
     assert(function_symbol_free_list!=END_OF_LIST);
+  }
+
+
+  bool check_that_the_function_symbol_points_to_memory_containing_a_function(const detail::_function_symbol* f)
+  {
+    for (size_t i=0; i<function_symbol_index_table_number_of_elements; ++i)
+    {
+      if (function_symbol_index_table[i]<=f && f<(function_symbol_index_table[i])+FUNCTION_SYMBOL_BLOCK_SIZE)
+      { 
+        return true;
+      }
+    }
+    return false;
   }
 
   void initialise_administration()
@@ -94,7 +120,7 @@ namespace detail
       {
         throw std::runtime_error("Out of memory. Cannot create function symbol index table.");
       }
-      function_symbol_index_table_size=0;
+      function_symbol_index_table_number_of_elements=0;
       create_new_function_symbol_block(); // This guarantees that function_symbol_index_table[0][0] exists;
 
       function_adm.initialise_function_symbols();
@@ -127,7 +153,7 @@ namespace detail
       function_symbol_hashtable[i]=END_OF_LIST;
     }
   
-    for (size_t i=0; i<function_symbol_index_table_size; i++)
+    for (size_t i=0; i<function_symbol_index_table_number_of_elements; i++)
     {
       for (size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; j++)
       {
@@ -174,7 +200,7 @@ function_symbol::function_symbol(const std::string &name, const size_t arity_)
   {
     detail::initialise_administration();
   }
-  if (detail::function_symbol_index_table_size<<(FUNCTION_SYMBOL_BLOCK_CLASS+1) > detail::function_symbol_table_size)
+  if (detail::function_symbol_index_table_number_of_elements<<(FUNCTION_SYMBOL_BLOCK_CLASS+1) > detail::function_symbol_table_size)
   {
     detail::resize_function_symbol_hashtable();
   }

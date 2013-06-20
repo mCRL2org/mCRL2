@@ -27,12 +27,14 @@ struct _function_symbol
 }; 
 
 extern detail::_function_symbol** function_symbol_index_table;
-extern size_t function_symbol_index_table_size;
+extern size_t function_symbol_index_table_number_of_elements;
+
+bool check_that_the_function_symbol_points_to_memory_containing_a_function(const detail::_function_symbol* f);
 
 inline
 bool is_valid_function_symbol(const detail::_function_symbol* f)
 {
-  return f->reference_count>0;
+  return (f->reference_count>0) && check_that_the_function_symbol_points_to_memory_containing_a_function(f);
 }
 
 } // namespace detail
