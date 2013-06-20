@@ -215,7 +215,9 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s)
 {
-  boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
+  // The static below prevents the regular expression recognizer to be compiled
+  // each time a string is matched, which is far too time consuming.
+  static boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
   return boost::xpressive::regex_match(s, re);
 }
 
