@@ -393,7 +393,7 @@ T replace_sort_expressions(const T& x,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x));
 }
 
 template <typename T, typename Substitution>
@@ -413,7 +413,7 @@ T replace_data_expressions(const T& x,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x));
 }
 
 template <typename T, typename Substitution>
@@ -431,7 +431,7 @@ T replace_variables(const T& x,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                    )
 {
-  return core::static_down_cast<const T&>(core::make_update_apply_builder<data::data_expression_builder>(sigma)(x));
+  return core::make_update_apply_builder<data::data_expression_builder>(sigma)(x);
 }
 
 template <typename T, typename Substitution>
@@ -499,13 +499,12 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
+  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables));
 }
 //--- end generated data replace code ---//
 
 //--- start generated data replace_capture_avoiding code ---//
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param x The term to which the substitution is applied
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
@@ -523,7 +522,6 @@ void replace_variables_capture_avoiding(T& x,
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param x The term to which the substitution is applied
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
@@ -537,7 +535,7 @@ T replace_variables_capture_avoiding(const T& x,
   std::multiset<data::variable> V;
   data::find_free_variables(x, std::inserter(V, V.end()));
   V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma, V)(x);
+  return core::static_down_cast<const T&>(data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma, V)(x));
 }
 //--- end generated data replace_capture_avoiding code ---//
 

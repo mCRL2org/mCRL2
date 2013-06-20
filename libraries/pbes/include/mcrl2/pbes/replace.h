@@ -132,7 +132,7 @@ T replace_sort_expressions(const T& x,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<pbes_system::sort_expression_builder>(sigma, innermost)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_sort_expressions_builder<pbes_system::sort_expression_builder>(sigma, innermost)(x));
 }
 
 template <typename T, typename Substitution>
@@ -152,7 +152,7 @@ T replace_data_expressions(const T& x,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<pbes_system::data_expression_builder>(sigma, innermost)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_data_expressions_builder<pbes_system::data_expression_builder>(sigma, innermost)(x));
 }
 
 template <typename T, typename Substitution>
@@ -238,13 +238,12 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
+  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables));
 }
 //--- end generated pbes_system replace code ---//
 
 //--- start generated pbes_system replace_capture_avoiding code ---//
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param x The expression to which the substitution is applied
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
@@ -262,7 +261,6 @@ void replace_variables_capture_avoiding(T& x,
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x
-/// \param x The expression to which the substitution is applied
 /// \param sigma A mutable substitution
 /// \param sigma_variables a container of variables
 /// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }

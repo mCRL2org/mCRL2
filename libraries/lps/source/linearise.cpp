@@ -1517,8 +1517,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (replacelhs)
       {
-        lhs=data::replace_variables(lhs,sigma);
-        assert(is_variable(lhs));
+        lhs = core::static_down_cast<const data::variable&>(sigma(lhs));
       }
       if (replacerhs)
       {

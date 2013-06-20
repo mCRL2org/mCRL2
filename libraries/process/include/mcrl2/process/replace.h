@@ -149,7 +149,7 @@ T replace_sort_expressions(const T& x,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
-  return data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_sort_expressions_builder<process::sort_expression_builder>(sigma, innermost)(x));
 }
 
 template <typename T, typename Substitution>
@@ -169,7 +169,7 @@ T replace_data_expressions(const T& x,
                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                           )
 {
-  return data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_data_expressions_builder<process::data_expression_builder>(sigma, innermost)(x));
 }
 
 template <typename T, typename Substitution>
@@ -229,7 +229,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x);
+  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x));
 }
 
 /// \brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -255,7 +255,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x, bound_variables);
+  return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_binding>(sigma)(x, bound_variables));
 }
 //--- end generated process replace code ---//
 
