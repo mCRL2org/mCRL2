@@ -129,13 +129,14 @@ class aterm
     }
 
     /// \brief Returns whether this term is a term_appl.
-    /// \details This function has constant complexity.
+    /// \details This function has constant complexity. 
+    ///          It is defined as !type_is_int() && !type_is_list().
     /// \return True iff term is an term_appl.
     bool type_is_appl() const
     {
-      return m_term->function()>detail::function_adm.AS_EMPTY_LIST;
+      return !type_is_int() && !type_is_list();
     }
-
+    
     /// \brief Returns whether this term has the internal structure of an aterm_int.
     /// \details This function has constant complexity.
     /// \return True iff term is an term_int.

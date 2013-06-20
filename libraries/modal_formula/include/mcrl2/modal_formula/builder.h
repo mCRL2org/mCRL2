@@ -725,7 +725,7 @@ struct regular_formula_builder_base: public core::builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
+    return atermpp::aterm_cast<regular_formula>(x);
   }
 };
 
