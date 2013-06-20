@@ -67,7 +67,7 @@ pbesinst_substitution_function make_pbesinst_substitution(data::variable_list v,
 /// \brief Algorithm class for the pbesinst instantiation algorithm.
 class pbesinst_algorithm
 {
-  typedef typename core::term_traits<pbes_expression> tr;
+  typedef core::term_traits<pbes_expression> tr;
 
   protected:
     /// \brief The rewriter.
