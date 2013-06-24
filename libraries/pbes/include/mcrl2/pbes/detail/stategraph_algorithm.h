@@ -23,6 +23,45 @@ namespace pbes_system {
 
 namespace detail {
 
+class dependency_graph_vertex
+{
+  protected:
+    core::identifier_string name_;
+    std::size_t index_;
+    std::set<dependency_graph_vertex*> neighbors_;
+
+  public:
+    dependency_graph_vertex(const core::identifier_string& name, std::size_t index)
+      : name_(name), index_(index)
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return name_;
+    }
+
+    std::size_t index() const
+    {
+      return index_;
+    }
+
+    const std::set<dependency_graph_vertex*>& neighbors() const
+    {
+      return neighbors_;
+    }
+
+    std::set<dependency_graph_vertex*>& neighbors()
+    {
+      return neighbors_;
+    }
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const dependency_graph_vertex& u)
+{
+  return out << '(' << u.name() << ", " << u.index() << ')';
+}
+
 /// \brief Algorithm class for the computation of the stategraph graph
 class stategraph_algorithm
 {
@@ -67,6 +106,8 @@ class stategraph_algorithm
 
     // the global control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_GCFP;
+
+    std::vector<dependency_graph_vertex> m_dependency_graph_vertices;
 
     // for readability
     std::set<data::variable> FV(const data::data_expression& x) const
@@ -462,11 +503,60 @@ class stategraph_algorithm
       return cf[i];
     }
 
+    std::vector<dependency_graph_vertex>::iterator find_vertex(const core::identifier_string& X, std::size_t n)
+    {
+      for (auto i = m_dependency_graph_vertices.begin(); i != m_dependency_graph_vertices.end(); ++i)
+      {
+        if (i->name() == X && i->index() == n)
+        {
+          return i;
+        }
+      }
+      throw mcrl2::runtime_error("vertex not found in dependency graph");
+      return m_dependency_graph_vertices.end();
+    }
+
+    // relate (X, n) and (Y, m) in the dependency graph
+    // \pre: the equation of X has a lower rank than the equation of Y
+    void relate_dependency_graph_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
+    {
+      mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related" << std::endl;
+      dependency_graph_vertex& u = *find_vertex(X, n);
+      dependency_graph_vertex& v = *find_vertex(Y, m);
+      u.neighbors().insert(&v);
+      v.neighbors().insert(&u);
+    }
+
+//    void print_related_global_control_flow_parameters() const
+//    {
+//      std::set<std::vector<dependency_graph_vertex>::iterator> done;
+//      for (auto i = m_dependency_graph_vertices.begin(); i != m_dependency_graph_vertices.end(); ++i)
+//      {
+//        if (done.find(i) != done.end())
+//        {
+//          continue;
+//        }
+//        std::ostringstream out;
+//        out <<
+//      }
+//    }
+
     void compute_related_global_control_flow_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute related global control flow parameters ===" << std::endl;
-
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
+
+      // step 1: create vertices for the dependency graph
+      for (auto k = equations.begin(); k != equations.end(); ++k)
+      {
+        const core::identifier_string& X = k->variable().name();
+        for (std::size_t n = 0; n < k->variable().parameters().size(); n++)
+        {
+          m_dependency_graph_vertices.push_back(dependency_graph_vertex(X, n));
+        }
+      }
+
+      // step 2: find related vertices
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
@@ -481,10 +571,72 @@ class stategraph_algorithm
             std::size_t m = j->second;
             if (is_global_control_flow_parameter(X, n) && is_global_control_flow_parameter(Y, m))
             {
-              mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related" << std::endl;
+              relate_dependency_graph_vertices(X, n, Y, m);
             }
           }
         }
+      }
+    }
+
+    std::string print_connected_component(const std::set<std::size_t>& component) const
+    {
+      std::ostringstream out;
+      out << "component {";
+      for (auto i = component.begin(); i != component.end(); ++i)
+      {
+        if (i != component.begin())
+        {
+          out << ", ";
+        }
+        out << m_dependency_graph_vertices[*i];
+      }
+      out << "}";
+      return out.str();
+    }
+
+    // compute the connected component belonging to the vertex m_dependency_graph_vertices[i]
+    std::set<std::size_t> compute_connected_component(std::size_t i, std::vector<bool>& done) const
+    {
+      std::set<std::size_t> todo;
+      std::set<std::size_t> component;
+
+      todo.insert(i);
+      while (!todo.empty())
+      {
+        auto j = todo.begin();
+        std::size_t u_index = *j;
+        todo.erase(j);
+        const dependency_graph_vertex& u = m_dependency_graph_vertices[u_index];
+        done[u_index] = true;
+        component.insert(u_index);
+
+        for (auto k = u.neighbors().begin(); k != u.neighbors().end(); ++k)
+        {
+          const dependency_graph_vertex* w = *k;
+          std::size_t w_index = w - &(m_dependency_graph_vertices.front());
+          if (!done[w_index])
+          {
+            todo.insert(w_index);
+          }
+        }
+      }
+      return component;
+    }
+
+    void compute_connected_components() const
+    {
+      mCRL2log(log::debug, "stategraph") << "=== compute connected components ===" << std::endl;
+      // done[i] means that m_dependency_graph_vertices[i] has been processed
+      std::vector<bool> done(m_dependency_graph_vertices.size(), false);
+
+      for (std::size_t i = 0; i < done.size(); i++)
+      {
+        if (done[i])
+        {
+          continue;
+        }
+        std::set<std::size_t> component = compute_connected_component(i, done);
+        mCRL2log(log::debug, "stategraph") << print_connected_component(component) << std::endl;
       }
     }
 
@@ -611,6 +763,7 @@ class stategraph_algorithm
       compute_local_control_flow_parameters();
       compute_global_control_flow_parameters();
       compute_related_global_control_flow_parameters();
+      compute_connected_components();
 
       compute_control_flow_parameters();
     }
