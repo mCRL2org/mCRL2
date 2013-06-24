@@ -53,7 +53,7 @@ Technical details
 Publications
 ------------
 
-[PS06]_ and [PS07]_
+[PS07]_
 
 Links
 -----

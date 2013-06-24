@@ -60,5 +60,5 @@ layers were modeled in an abstract way.
 Publications
 ------------
 
-[EHSU07a]_ and [EHSU07b]_
+[EHSU07]_
 

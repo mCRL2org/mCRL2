@@ -64,5 +64,5 @@ Technical details
 Publications
 ------------
 
-[MP05]_ and [MP07]_
+[MP07]_
 

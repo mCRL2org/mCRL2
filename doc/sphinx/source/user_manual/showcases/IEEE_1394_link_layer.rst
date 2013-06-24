@@ -37,5 +37,5 @@ the documentation.
 Publications
 ------------
 
-[Lut97]_ and [Lut97a]_
+[Lut97]_
 

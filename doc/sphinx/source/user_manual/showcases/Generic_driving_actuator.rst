@@ -53,5 +53,5 @@ The requirements on the software of the Generic Driving Actuator were checked.
 Publications
 ------------
 
-[MDC07a]_ and [MDC07b]_
+[MDC07]_
 
