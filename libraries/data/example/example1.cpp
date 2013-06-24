@@ -1,6 +1,6 @@
 #include <cassert>
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 
 using namespace mcrl2::data;
 
