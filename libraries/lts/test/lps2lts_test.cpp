@@ -265,6 +265,7 @@ BOOST_AUTO_TEST_CASE(test_abp)
     "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);\n"
   );
   check_lps2lts_specification(abp, 74, 92, 19);
+  check_lps2lts_specification(abp, 74, 92, 19, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_confluence)
