@@ -26,6 +26,7 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 

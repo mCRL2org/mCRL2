@@ -13,7 +13,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -24,6 +24,7 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
@@ -3058,6 +3059,7 @@ void mcrl2::data::data_type_checker::check_for_empty_constructor_domains(functio
         }
       }
 
+      // Why is this code duplicated? Beats me... (JK)
       if (is_structured_sort(*i))
       {
         const function_symbol_vector r=structured_sort(*i).constructor_functions();

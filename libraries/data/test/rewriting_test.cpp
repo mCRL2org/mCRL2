@@ -531,7 +531,8 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
   using namespace sort_bool;
   using namespace sort_nat;
 
-  data_specification specification;
+
+  //data_specification specification;
 
   std::vector< structured_sort_constructor_argument > arguments;
 
@@ -559,10 +560,12 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
   constructors.push_back(structured_sort_constructor("c",
                          boost::make_iterator_range(arguments.begin() + 2, arguments.end()), "is_c"));
 
-  data::structured_sort ls(boost::make_iterator_range(constructors));
+  data::structured_sort ls(constructors);
 
-  specification.add_alias(alias(basic_sort("D"), ls));
+//  specification.add_alias(alias(basic_sort("D"), ls));
   // specification.normalize_sorts();
+
+  data_specification specification = data::parse_data_specification("sort D = struct c0 | c1?is_one | a(a0: Bool) | b(Bool)?is_b | c(n0: Nat, n1: Nat)?is_c; ");
 
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
@@ -577,6 +580,28 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
     data_expression n0(nat("0"));
     data_expression n1(nat("1"));
     data_expression c(constructors[4].constructor_function(ls)(n0, n1));
+    data_expression c_(constructors[4].constructor_function(ls)(n1, n0));
+
+    // equality, less, less_equal test
+    data_rewrite_test(R, normalize_sorts(equal_to(c0, c0),specification), true_());
+    data_rewrite_test(R, normalize_sorts(equal_to(c0, c1),specification), false_());
+    data_rewrite_test(R, normalize_sorts(equal_to(c0, c),specification), false_());
+    data_rewrite_test(R, normalize_sorts(equal_to(c, c),specification), true_());
+    data_rewrite_test(R, normalize_sorts(equal_to(c, c_),specification), false_());
+    data_rewrite_test(R, normalize_sorts(less(c0, c0),specification), false_());
+    data_rewrite_test(R, normalize_sorts(less(c0, c1),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less(c1, c0),specification), false_());
+    data_rewrite_test(R, normalize_sorts(less(c0, c),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less(c, c),specification), false_());
+    data_rewrite_test(R, normalize_sorts(less(c, c_),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less(c_, c),specification), false_());
+    data_rewrite_test(R, normalize_sorts(less_equal(c0, c0),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less_equal(c0, c1),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less_equal(c1, c0),specification), false_());
+    data_rewrite_test(R, normalize_sorts(less_equal(c0, c),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less_equal(c, c),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less_equal(c, c_),specification), true_());
+    data_rewrite_test(R, normalize_sorts(less_equal(c_, c),specification), false_());
 
     // recogniser tests
     data_rewrite_test(R, normalize_sorts(make_application(constructors[1].recogniser_function(ls), c0),specification), false_());
@@ -681,6 +706,36 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test)
     data::rewriter R(specification, *strat);
 
     data::data_expression x = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
+    x = normalize_sorts(x,specification);
+    data_rewrite_test(R, x, false_());
+  }
+}
+
+BOOST_AUTO_TEST_CASE(finite_set_equals_test)
+{
+  using namespace mcrl2::data::sort_set;
+  using namespace mcrl2::data::sort_fset;
+  using namespace mcrl2::data::sort_nat;
+  using namespace mcrl2::data::sort_bool;
+  std::cerr << "finite_set_equals_test\n";
+  data_specification specification = parse_data_specification(
+        "sort R = struct r2 | r1 ;\n"
+        "map All: Set(R);\n"
+        "eqn All = {  r: R | true };\n");
+
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy14a: " << data::pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression x = data::parse_data_expression("{r1, r2} == All", specification);
+    x = normalize_sorts(x,specification);
+    data_rewrite_test(R, x, true_());
+    x = data::parse_data_expression("r1 == r1", specification);
+    x = normalize_sorts(x,specification);
+    data_rewrite_test(R, x, true_());
+    x = data::parse_data_expression("r1 == r2", specification);
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }
@@ -1125,5 +1180,6 @@ BOOST_AUTO_TEST_CASE(rewrite_using_the_where_construct)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
+  //mcrl2::log::logger::set_reporting_level(log::debug);
   return 0;
 }

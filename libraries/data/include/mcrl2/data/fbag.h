@@ -728,6 +728,8 @@ namespace mcrl2 {
         result.push_back(difference(s));
         result.push_back(fbag2fset(s));
         result.push_back(fset2fbag(s));
+        function_symbol_vector fbag_mappings = detail::fbag_struct(s).comparison_functions(fbag(s));
+        result.insert(result.end(), fbag_mappings.begin(), fbag_mappings.end());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -832,6 +834,8 @@ namespace mcrl2 {
 
         data_equation_vector result;
         data_equation_vector fbag_equations = detail::fbag_struct(s).constructor_equations(fbag(s));
+        result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
+        fbag_equations = detail::fbag_struct(s).comparison_equations(fbag(s));
         result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
         result.push_back(data_equation(atermpp::make_vector(vd, vp), insert(s, vd, vp, empty(s)), cons_(s, vd, vp, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, vp, vq), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, sort_nat::plus(vp, vq), vb)));

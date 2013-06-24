@@ -1369,6 +1369,22 @@ class sort_declaration():
       result = "        function_symbol_vector %s_constructors = detail::%s_struct(%s).constructor_functions(%s);\n" % (self.label, self.label, param, sort)
       return result + "        result.insert(result.end(), %s_constructors.begin(), %s_constructors.end());\n" % (self.label, self.label)
 
+  def structured_sort_mapping_code(self):
+    if self.alias == None:
+      return ""
+    else:
+      param = ""
+      if isinstance(self.sort_expression, sort_container):
+        param = str(self.sort_expression.element_sort).lower()
+      sort = "%s(%s)" % (self.label, param)
+      result = "        function_symbol_vector %s_mappings = detail::%s_struct(%s).comparison_functions(%s);\n" % (self.label, self.label, param, sort)
+      result += "        result.insert(result.end(), %s_mappings.begin(), %s_mappings.end());\n" % (self.label, self.label)
+#      result += "        %s_mappings = detail::%s_struct(%s).projection_functions(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_mappings.begin(), %s_mappings.end());\n" % (self.label, self.label)
+#      result += "        %s_mappings = detail::%s_struct(%s).recogniser_functions(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_mappings.begin(), %s_mappings.end());\n" % (self.label, self.label)
+      return result
+
   def structured_sort_equation_code(self):
     if self.alias == None:
       return ""
@@ -1378,7 +1394,14 @@ class sort_declaration():
         param = str(self.sort_expression.element_sort).lower()
       sort = "%s(%s)" % (self.label, param)
       result = "        data_equation_vector %s_equations = detail::%s_struct(%s).constructor_equations(%s);\n" % (self.label, self.label, param, sort)
-      return result + "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+      result += "        %s_equations = detail::%s_struct(%s).comparison_equations(%s);\n" % (self.label, self.label, param, sort)
+      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+#      result += "        %s_equations = detail::%s_struct(%s).projection_equations(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+#      result += "        %s_equations = detail::%s_struct(%s).recogniser_equations(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+      return result
 
   def sort_name(self, id, label):
     code = ""
@@ -1527,6 +1550,13 @@ class sort_declaration_list():
         code += "%s" % (e.structured_sort_constructor_code())
     return code
 
+  def structured_sort_mapping_code(self):
+    code = ""
+    for e in self.elements:
+      if e.namespace == self.namespace:
+        code += "%s" % (e.structured_sort_mapping_code())
+    return code
+
   def structured_sort_equation_code(self):
     code = ""
     for e in self.elements:
@@ -1623,7 +1653,7 @@ class mapping_specification():
       code += "      function_symbol_vector %s_generate_functions_code(%s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
       code += "        function_symbol_vector result;\n"
-      code += self.declarations.generator_code(spec)
+      code += self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_mapping_code())
       code += "        return result;\n"
       code += "      }\n"
       return code
@@ -1773,6 +1803,9 @@ class sort_specification():
 
   def structured_sort_constructor_code(self):
     return self.declarations.structured_sort_constructor_code()
+
+  def structured_sort_mapping_code(self):
+    return self.declarations.structured_sort_mapping_code()
 
   def structured_sort_equation_code(self):
     return self.declarations.structured_sort_equation_code()

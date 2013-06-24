@@ -21,11 +21,14 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/pos.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/data/structured_sort_constructor.h"
 #include "mcrl2/data/variable.h"
 
@@ -40,6 +43,7 @@ namespace data
 namespace sort_fset
 {
 function_symbol_vector fset_generate_constructors_code(const sort_expression&);
+function_symbol_vector fset_generate_functions_code(const sort_expression&);
 data_equation_vector fset_generate_equations_code(const sort_expression&);
 }
 
@@ -47,6 +51,7 @@ data_equation_vector fset_generate_equations_code(const sort_expression&);
 namespace sort_fbag
 {
 function_symbol_vector fbag_generate_constructors_code(const sort_expression&);
+function_symbol_vector fbag_generate_functions_code(const sort_expression&);
 data_equation_vector fbag_generate_equations_code(const sort_expression&);
 }
 /// \endcond
@@ -101,14 +106,42 @@ class structured_sort: public sort_expression
   private:
 
     friend function_symbol_vector sort_fset::fset_generate_constructors_code(const sort_expression&);
+    friend function_symbol_vector sort_fset::fset_generate_functions_code(const sort_expression&);
     friend data_equation_vector sort_fset::fset_generate_equations_code(const sort_expression&);
     friend function_symbol_vector sort_fbag::fbag_generate_constructors_code(const sort_expression&);
+    friend function_symbol_vector sort_fbag::fbag_generate_functions_code(const sort_expression&);
     friend data_equation_vector sort_fbag::fbag_generate_equations_code(const sort_expression&);
 
     static bool has_recogniser(structured_sort_constructor const& s)
     {
       return !s.recogniser().empty();
     }
+
+#ifdef MCRL2_ORDERED_STRUCT_FUNCTIONS
+    function_symbol to_pos_function(const sort_expression& s) const
+    {
+      function_symbol to_pos_function_("@to_pos", make_function_sort(s, sort_pos::pos()));
+      return to_pos_function_;
+    }
+
+    function_symbol equal_arguments_function(const sort_expression& s) const
+    {
+      function_symbol equal_arguments_function_("@equal_arguments", make_function_sort(s, s, sort_bool::bool_()));
+      return equal_arguments_function_;
+    }
+
+    function_symbol smaller_arguments_function(const sort_expression& s) const
+    {
+      function_symbol smaller_arguments_function_("@less_arguments", make_function_sort(s, s, sort_bool::bool_()));
+      return smaller_arguments_function_;
+    }
+
+    function_symbol smaller_equal_arguments_function(const sort_expression& s) const
+    {
+      function_symbol smaller_equal_arguments_function_("@less_equal_arguments", make_function_sort(s, s, sort_bool::bool_()));
+      return smaller_equal_arguments_function_;
+    }
+#endif
 
     function_symbol_vector constructor_functions(const sort_expression& s) const
     {
@@ -117,6 +150,18 @@ class structured_sort: public sort_expression
       {
         result.push_back(i->constructor_function(s));
       }
+      return result;
+    }
+
+    function_symbol_vector comparison_functions(const sort_expression& s) const
+    {
+      function_symbol_vector result;
+#ifdef MCRL2_ORDERED_STRUCT_FUNCTIONS
+      result.push_back(to_pos_function(s));
+      result.push_back(equal_arguments_function(s));
+      result.push_back(smaller_arguments_function(s));
+      result.push_back(smaller_equal_arguments_function(s));
+#endif
       return result;
     }
 
@@ -148,11 +193,118 @@ class structured_sort: public sort_expression
       return result;
     }
 
+
+    data_equation_vector comparison_equations(const sort_expression& s) const
+    {
+      data_equation_vector result;
+
+      // give every constructor an index.
+      size_t index = 1;
+      for(structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i, ++index)
+      {
+        // constructor does not take arguments
+        if (i->arguments().empty())
+        {
+          result.push_back(data_equation(to_pos_function(s)(i->constructor_function(s)), sort_pos::pos(index)));
+          result.push_back(data_equation(equal_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::true_()));
+          result.push_back(data_equation(smaller_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::false_()));
+          result.push_back(data_equation(smaller_equal_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::true_()));
+        }
+        else
+        {
+          set_identifier_generator generator;
+
+          std::vector< variable > variables1;
+          std::vector< variable > variables2;
+          for (structured_sort_constructor_argument_list::const_iterator k = i->arguments().begin(); k != i->arguments().end(); ++k)
+          {
+            variables1.push_back(variable(generator("v"), k->sort()));
+            variables2.push_back(variable(generator("w"), k->sort()));
+          }
+          application instance1(i->constructor_function(s), variables1);
+          application instance2(i->constructor_function(s), variables2);
+
+          result.push_back(data_equation(variables1, sort_bool::true_(), to_pos_function(s)(instance1), sort_pos::pos(index)));
+
+          // constructors are the same, generate right hand sides of equal_arguments_function, etc.
+          variable_vector::const_reverse_iterator end(variables1.rend());
+          variable_vector::const_reverse_iterator k(variables1.rbegin());
+          variable_vector::const_reverse_iterator l(variables2.rbegin());
+
+          data_expression right_equal         = equal_to(*k, *l);
+          data_expression right_smaller       = less(*k, *l);
+          data_expression right_smaller_equal = less_equal(*k, *l);
+
+          for (++l, ++k; k != end; ++l, ++k)
+          {
+            // Constructors have one or more arguments:
+            // - rhs for c(x0,...,xn) == c(y0,..,yn):
+            //     x0 == y0 && ... && xn == yn
+            right_equal         = sort_bool::and_(equal_to(*k, *l), right_equal);
+            // - rhs for c(x0,...,xn) < c(y0,..,yn):
+            //     x0 < y0                                                     , when n = 0
+            //     x0 < y0 || (x0 == y0 && x1 < y1)                            , when n = 1
+            //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 < y2))) , when n = 2
+            //     etcetera
+            right_smaller       = sort_bool::or_(less(*k, *l),
+                                                 sort_bool::and_(equal_to(*k, *l), right_smaller));
+            // - rhs for c(x0,...,xn) <= c(y0,..,yn):
+            //     x0 <= y0                                                    , when n = 0
+            //     x0 < y0 || (x0 == y0 && x1 <= y1)                           , when n = 1
+            //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 <= y2))), when n = 2
+            //     etcetera
+            right_smaller_equal = sort_bool::or_(less(*k, *l),
+                                                 sort_bool::and_(equal_to(*k, *l), right_smaller_equal));
+          }
+
+          application left_equal = make_application(equal_arguments_function(s), instance1, instance2);
+          application left_smaller = make_application(smaller_arguments_function(s), instance1, instance2);
+          application left_smaller_equal = make_application(smaller_equal_arguments_function(s), instance1, instance2);
+          variables1.insert(variables1.end(),variables2.begin(),variables2.end());
+          result.push_back(data_equation(variables1, sort_bool::true_(),left_equal, right_equal));
+          result.push_back(data_equation(variables1, sort_bool::true_(),left_smaller, right_smaller));
+          result.push_back(data_equation(variables1, sort_bool::true_(),left_smaller_equal, right_smaller_equal));
+        }
+      }
+      return result;
+    }
+
+#ifdef MCRL2_ORDERED_STRUCT_FUNCTIONS
     data_equation_vector constructor_equations(const sort_expression& s) const
     {
       data_equation_vector result;
 
-      structured_sort_constructor_vector cl(boost::copy_range< structured_sort_constructor_vector >(constructors()));
+      variable x("x", s);
+      variable y("y", s);
+      variable_list xy = make_list(x,y);
+      application to_pos_x = make_application(to_pos_function(s), x);
+      application to_pos_y = make_application(to_pos_function(s), y);
+      application equal_arguments_xy         = make_application(equal_arguments_function(s), x, y);
+      application smaller_arguments_xy       = make_application(smaller_arguments_function(s), x, y);
+      application smaller_equal_arguments_xy = make_application(smaller_equal_arguments_function(s), x, y);
+      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     equal_to(x,y), equal_arguments_xy));
+      result.push_back(data_equation(xy, not_equal_to(to_pos_x, to_pos_y), equal_to(x,y), sort_bool::false_()));
+      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less(x,y), sort_bool::true_()));
+      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     less(x,y), smaller_arguments_xy));
+      result.push_back(data_equation(xy, greater(to_pos_x, to_pos_y),      less(x,y), sort_bool::false_()));
+      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less_equal(x,y), sort_bool::true_()));
+      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     less_equal(x,y), smaller_equal_arguments_xy));
+      result.push_back(data_equation(xy, greater(to_pos_x, to_pos_y),      less_equal(x,y), sort_bool::false_()));
+      // (JK) The following encoding of the equations would be more desirable; however,
+      // rewriting fails if we use this.
+/*
+      result.push_back(data_equation(xy, sort_bool::true_(), equal_to(x,y), sort_bool::and_(equal_to(to_pos_x, to_pos_y), equal_arguments_xy)));
+      result.push_back(data_equation(xy, sort_bool::true_(), less(x,y), sort_bool::or_(less(to_pos_x, to_pos_y), sort_bool::and_(equal_to(to_pos_x, to_pos_y), smaller_arguments_xy))));
+      result.push_back(data_equation(xy, sort_bool::true_(), less_equal(x,y), sort_bool::or_(less(to_pos_x, to_pos_y), sort_bool::and_(equal_to(to_pos_x, to_pos_y), smaller_equal_arguments_xy))));
+*/
+      return result;
+    }
+#else
+    data_equation_vector constructor_equations(const sort_expression& s) const
+    {
+      data_equation_vector result;
+
+      structured_sort_constructor_vector cl(constructors().begin(),constructors().end());
 
       for (structured_sort_constructor_vector::const_iterator i = cl.begin(); i != cl.end(); ++i)
       {
@@ -260,6 +412,7 @@ class structured_sort: public sort_expression
 
       return result;
     }
+#endif
 
     data_equation_vector projection_equations(const sort_expression& s) const
     {
@@ -350,6 +503,13 @@ public:
       return constructor_functions(*this);
     }
 
+    /// \brief Returns the additional functions of this sort, used to implement
+    ///        its comparison operators
+    function_symbol_vector comparison_functions() const
+    {
+      return comparison_functions(*this);
+    }
+
     /// \brief Returns the projection functions of this sort, such that the
     ///        result can be used by the rewriter
     function_symbol_vector projection_functions() const
@@ -366,12 +526,20 @@ public:
     }
 
     /// \brief Returns the equations for ==, < and <= for this sort, such that the
-    ///        result can be used by the rewriter
-    //         internally
+    ///        result can be used by the rewriter internally
     data_equation_vector constructor_equations() const
     {
       return constructor_equations(*this);
     }
+
+    /// \brief Returns the equations for the functions used to implement comparison
+    ///        operators on this sort.
+    ///        Needed to do proper rewriting
+    data_equation_vector comparison_equations() const
+    {
+      return comparison_equations(*this);
+    }
+
     /// \brief Generate equations for the projection functions of this sort
     /// \return A vector of equations for the projection functions of this sort.
     data_equation_vector projection_equations() const

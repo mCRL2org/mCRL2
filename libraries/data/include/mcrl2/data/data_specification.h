@@ -326,12 +326,16 @@ class data_specification
       std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
       f = s_sort.recogniser_functions(sort);
       std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+      f = s_sort.comparison_functions(sort);
+      std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
 
       data_equation_vector e(s_sort.constructor_equations(sort));
       std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       e = s_sort.projection_equations(sort);
       std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       e = s_sort.recogniser_equations(sort);
+      std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+      e = s_sort.comparison_equations(sort);
       std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
     }
 
@@ -355,7 +359,7 @@ class data_specification
   public:
 
     ///\brief Default constructor. Generate a data specification that contains
-    ///       only booleans.
+    ///       only booleans and positive numbers.
     data_specification()
       : m_data_specification_is_type_checked(true),
         m_normalised_data_is_up_to_date(false)

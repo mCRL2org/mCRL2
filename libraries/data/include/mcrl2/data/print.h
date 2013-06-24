@@ -24,6 +24,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/precedence.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/untyped_possible_sorts.h"

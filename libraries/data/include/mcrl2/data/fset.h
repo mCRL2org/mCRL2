@@ -545,6 +545,8 @@ namespace mcrl2 {
         result.push_back(union_(s));
         result.push_back(intersection(s));
         result.push_back(difference(s));
+        function_symbol_vector fset_mappings = detail::fset_struct(s).comparison_functions(fset(s));
+        result.insert(result.end(), fset_mappings.begin(), fset_mappings.end());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -634,6 +636,8 @@ namespace mcrl2 {
 
         data_equation_vector result;
         data_equation_vector fset_equations = detail::fset_struct(s).constructor_equations(fset(s));
+        result.insert(result.end(), fset_equations.begin(), fset_equations.end());
+        fset_equations = detail::fset_struct(s).comparison_equations(fset(s));
         result.insert(result.end(), fset_equations.begin(), fset_equations.end());
         result.push_back(data_equation(atermpp::make_vector(vd), insert(s, vd, empty(s)), cons_(s, vd, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), insert(s, vd, cons_(s, vd, vs)), cons_(s, vd, vs)));
