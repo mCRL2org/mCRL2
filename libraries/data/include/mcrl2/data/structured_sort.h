@@ -117,7 +117,6 @@ class structured_sort: public sort_expression
       return !s.recogniser().empty();
     }
 
-#ifdef MCRL2_ORDERED_STRUCT_FUNCTIONS
     function_symbol to_pos_function(const sort_expression& s) const
     {
       function_symbol to_pos_function_("@to_pos", make_function_sort(s, sort_pos::pos()));
@@ -141,7 +140,6 @@ class structured_sort: public sort_expression
       function_symbol smaller_equal_arguments_function_("@less_equal_arguments", make_function_sort(s, s, sort_bool::bool_()));
       return smaller_equal_arguments_function_;
     }
-#endif
 
     function_symbol_vector constructor_functions(const sort_expression& s) const
     {
@@ -156,12 +154,10 @@ class structured_sort: public sort_expression
     function_symbol_vector comparison_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-#ifdef MCRL2_ORDERED_STRUCT_FUNCTIONS
       result.push_back(to_pos_function(s));
       result.push_back(equal_arguments_function(s));
       result.push_back(smaller_arguments_function(s));
       result.push_back(smaller_equal_arguments_function(s));
-#endif
       return result;
     }
 
@@ -269,7 +265,6 @@ class structured_sort: public sort_expression
       return result;
     }
 
-#ifdef MCRL2_ORDERED_STRUCT_FUNCTIONS
     data_equation_vector constructor_equations(const sort_expression& s) const
     {
       data_equation_vector result;
@@ -299,120 +294,6 @@ class structured_sort: public sort_expression
 */
       return result;
     }
-#else
-    data_equation_vector constructor_equations(const sort_expression& s) const
-    {
-      data_equation_vector result;
-
-      structured_sort_constructor_vector cl(constructors().begin(),constructors().end());
-
-      for (structured_sort_constructor_vector::const_iterator i = cl.begin(); i != cl.end(); ++i)
-      {
-        for (structured_sort_constructor_vector::const_iterator j = cl.begin(); j != cl.end(); ++j)
-        {
-          data_expression right_equal         = (i == j) ? sort_bool::true_() : sort_bool::false_();
-          data_expression right_smaller       = (i < j)  ? sort_bool::true_() : sort_bool::false_();
-          data_expression right_smaller_equal = (i <= j) ? sort_bool::true_() : sort_bool::false_();
-
-          if (i->arguments().empty() && j->arguments().empty())
-          {
-            data_expression operand_left  = i->constructor_function(s);
-            data_expression operand_right = j->constructor_function(s);
-
-            result.push_back(data_equation(equal_to(operand_left, operand_right), right_equal));
-            result.push_back(data_equation(less(operand_left, operand_right), right_smaller));
-            result.push_back(data_equation(less_equal(operand_left, operand_right), right_smaller_equal));
-          }
-          else   // at least one constructor takes arguments
-          {
-            data_expression operand_left;
-            data_expression operand_right;
-
-            set_identifier_generator generator;
-
-            // Create variables for equation
-            std::vector< variable > variables;
-
-            if (i->arguments().empty())
-            {
-              operand_left = i->constructor_function(s);
-            }
-            else
-            {
-              structured_sort_constructor_argument_list i_arguments = i->arguments();
-              for (structured_sort_constructor_argument_list::const_iterator k = i_arguments.begin(); k != i_arguments.end(); ++k)
-              {
-                variables.push_back(variable(generator("v"), k->sort()));
-              }
-
-              // create first operand of ==, < or <=
-              operand_left = application(i->constructor_function(s), variables);
-            }
-
-            if (j->arguments().empty())
-            {
-              operand_right = j->constructor_function(s);
-            }
-            else
-            {
-              structured_sort_constructor_argument_list j_arguments = j->arguments();
-              for (structured_sort_constructor_argument_list::const_iterator k = j_arguments.begin(); k != j_arguments.end(); ++k)
-              {
-                variables.push_back(variable(generator("v"), k->sort()));
-              }
-
-              // create second operand of ==, < or <=
-              operand_right = application(j->constructor_function(s),
-                                          boost::make_iterator_range(boost::next(variables.begin(), boost::distance(i->arguments())), variables.end()));
-            }
-
-            if (i == j)
-            {
-              // constructors are the same
-              variable_vector::const_reverse_iterator k(variables.rbegin() + boost::distance(i->arguments()));
-              variable_vector::const_reverse_iterator l(variables.rbegin());
-              variable_vector::const_reverse_iterator end(variables.rend());
-
-              right_equal         = equal_to(*k, *l);
-              right_smaller       = less(*k, *l);
-              right_smaller_equal = less_equal(*k, *l);
-
-              for (++l, ++k; k != end; ++l, ++k)
-              {
-                // Constructors have one or more arguments:
-                // - rhs for c(x0,...,xn) == c(y0,..,yn):
-                //     x0 == y0 && ... && xn == yn
-                right_equal         = sort_bool::and_(equal_to(*k, *l), right_equal);
-                // - rhs for c(x0,...,xn) < c(y0,..,yn):
-                //     x0 < y0                                                     , when n = 0
-                //     x0 < y0 || (x0 == y0 && x1 < y1)                            , when n = 1
-                //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 < y2))) , when n = 2
-                //     etcetera
-                right_smaller       = sort_bool::or_(less(*k, *l),
-                                                     sort_bool::and_(equal_to(*k, *l), right_smaller));
-                // - rhs for c(x0,...,xn) <= c(y0,..,yn):
-                //     x0 <= y0                                                    , when n = 0
-                //     x0 < y0 || (x0 == y0 && x1 <= y1)                           , when n = 1
-                //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 <= y2))), when n = 2
-                //     etcetera
-                right_smaller_equal = sort_bool::or_(less(*k, *l),
-                                                     sort_bool::and_(equal_to(*k, *l), right_smaller_equal));
-              }
-            }
-
-            result.push_back(data_equation(variables,
-                                           equal_to(operand_left, operand_right), right_equal));
-            result.push_back(data_equation(variables,
-                                           less(operand_left, operand_right), right_smaller));
-            result.push_back(data_equation(variables,
-                                           less_equal(operand_left, operand_right), right_smaller_equal));
-          }
-        }
-      }
-
-      return result;
-    }
-#endif
 
     data_equation_vector projection_equations(const sort_expression& s) const
     {
