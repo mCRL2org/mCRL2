@@ -365,13 +365,11 @@ class stategraph_algorithm
       return i != m.end() && i->second == value;
     }
 
-    // returns true if m maps a key to value
-    template <typename Map>
-    bool maps_to(const Map& m, const typename Map::mapped_type& value) const
+    bool maps_to_and_is_GFCP(const std::map<std::size_t, std::size_t>& m, std::size_t value, const core::identifier_string& X)
     {
       for (auto i = m.begin(); i != m.end(); ++i)
       {
-        if (i->second == value)
+        if (i->second == value && m_is_GCFP[X][i->first])
         {
           return true;
         }
@@ -447,32 +445,41 @@ class stategraph_algorithm
       m_is_GCFP = m_is_LCFP;
 
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
-      for (auto k = equations.begin(); k != equations.end(); ++k)
+
+      bool changed;
+      do
       {
-        const core::identifier_string& X = k->variable().name();
-        const std::vector<predicate_variable>& predvars = k->predicate_variables();
-        for (auto i = predvars.begin(); i != predvars.end(); ++i)
+        changed = false;
+        for (auto k = equations.begin(); k != equations.end(); ++k)
         {
-          const predicate_variable& PVI_X_i = *i;
-          const core::identifier_string& Y = PVI_X_i.X.name();
-          if (Y != X)
+          const core::identifier_string& X = k->variable().name();
+          const std::vector<predicate_variable>& predvars = k->predicate_variables();
+          for (auto i = predvars.begin(); i != predvars.end(); ++i)
           {
-            const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-            const std::vector<data::variable>& d_Y = eq_Y.parameters();
-            for (std::size_t n = 0; n < d_Y.size(); n++)
+            const predicate_variable& PVI_X_i = *i;
+            const core::identifier_string& Y = PVI_X_i.X.name();
+            if (Y != X)
             {
-              if (is_undefined(PVI_X_i.dest, n) && !maps_to(PVI_X_i.copy, n))
+              const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+              const std::vector<data::variable>& d_Y = eq_Y.parameters();
+              for (std::size_t n = 0; n < d_Y.size(); n++)
               {
-                if (m_is_GCFP[Y][n])
+                if (is_undefined(PVI_X_i.dest, n) && (!maps_to_and_is_GFCP(PVI_X_i.copy, n, X)))
                 {
-                  mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
+                  if (m_is_GCFP[Y][n])
+                  {
+                    m_is_GCFP[Y][n] = false;
+                    changed = true;
+                    mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
+                  }
                 }
-                m_is_GCFP[Y][n] = false;
               }
             }
           }
         }
       }
+      while (changed);
+
       mCRL2log(log::verbose) << print_global_control_flow_parameters();
     }
 
