@@ -176,7 +176,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
 
   m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
 
-  if (!prioritised_summands.empty())
+  if (m_use_confluence_reduction)
   {
     m_nonprioritized_subset = next_state_generator::summand_subset_t(m_generator, nonprioritised_summands, m_options.use_summand_pruning);
     m_prioritized_subset = next_state_generator::summand_subset_t(m_generator, prioritised_summands, m_options.use_summand_pruning);
