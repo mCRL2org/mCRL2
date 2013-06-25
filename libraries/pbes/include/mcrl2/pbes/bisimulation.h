@@ -124,6 +124,19 @@ class bisimulation_algorithm
       }
     }
 
+    // creates the substitution v[i] := e[i]
+    // pre: v.size() == e.size()
+    void make_substitution(const data::variable_list& v, const data::data_expression_list& e, data::mutable_map_substitution<>& result) const
+    {
+      assert(v.size() == e.size());
+      auto vi = v.begin();
+      auto ei = e.begin();
+      for (; vi != v.end(); ++vi, ++ei)
+      {
+        result[*vi] = *ei;
+      }
+    }
+
   public:
     /// \brief Creates a name for the propositional variable Xpq
     /// \param p A linear process
@@ -684,9 +697,14 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     /// \param d A sequence of data expressions
     /// \param d1 A sequence of data expressions
     /// \return The function result
-    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i, data_expression_list const& d, data_expression_list const& d1) const
+    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i, const data_expression_list& d, const data_expression_list& d1) const
     {
       namespace z = pbes_expr_optimized;
+      const variable_list& parameters = q.process_parameters();
+
+      data::mutable_map_substitution<> sigma; // q.process_parameters() := d1
+      make_substitution(parameters, d1, sigma);
+      std::set<data::variable> sigma_variables = data::find_free_variables(d1);
 
       std::vector<pbes_expression> v;
       for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
@@ -700,13 +718,12 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         data_expression      cj  = j->condition();                        // cj == cj(d',e')
         data_expression_list gj  = j->next_state(q.process_parameters()); // gj == gj(d',e')
         variable_list        e1  = j->summation_variables();              // e1 == e'
-        const variable_list& parameters = q.process_parameters();
 
         // replace d' by d1 (if needed)
         if (d1 != data_expression_list(parameters.begin(), parameters.end()))
         {
-          cj = data::replace_free_variables(cj, mcrl2::data::make_sequence_sequence_substitution(q.process_parameters(), d1));
-          gj = data::replace_free_variables(gj, mcrl2::data::make_sequence_sequence_substitution(q.process_parameters(), d1));
+          cj = data::replace_variables_capture_avoiding(cj, sigma, sigma_variables);
+          gj = data::replace_variables_capture_avoiding(gj, sigma, sigma_variables);
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
@@ -720,8 +737,11 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           used_names.insert(std::string(k->name()));
         }
         variable_list e1_new = fresh_variables(e1, used_names);
-        data_expression    cj_new   = data::replace_free_variables(cj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
-        data_expression_list gj_new = data::replace_free_variables(gj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
+        data::mutable_map_substitution<> sigma1;
+        make_substitution(e1, atermpp::aterm_cast<data::data_expression_list>(e1_new), sigma1);
+        std::set<data::variable> sigma1_variables(e1_new.begin(), e1_new.end());
+        data_expression      cj_new = data::replace_variables_capture_avoiding(cj, sigma1, sigma1_variables);
+        data_expression_list gj_new = data::replace_variables_capture_avoiding(gj, sigma1, sigma1_variables);
 
         pbes_expression expr = pbes_expr::exists(e1_new, z::and_(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);
