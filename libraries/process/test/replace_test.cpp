@@ -160,10 +160,30 @@ void test_process_instance_assignment()
   BOOST_CHECK(process::pp(x2) == "P(b = false, c = true)");
 }
 
+void test_replace_process_identifiers()
+{
+  std::string text =
+    "proc P(b: Bool, c: Bool) = P(c = true) . P(false, false); \n"
+    "proc Q(b: Bool, c: Bool) = P(c = true);                   \n"
+    "proc R(b: Bool, c: Bool) = Q(c = true) . Q(false, false); \n"
+    "                                                          \n"
+    "init P(true, true);                                       \n"
+    ;
+
+  process_specification p = parse_process_specification(text);
+  process_equation eqP = p.equations()[0];
+  process_equation eqQ = p.equations()[1];
+  process_equation eqR = p.equations()[2];
+
+  process_expression rhs = replace_process_identifiers(eqP.expression(), process_identifier_assignment(eqP.identifier(), eqQ.identifier()));
+  BOOST_CHECK(rhs == eqR.expression());
+}
+
 int test_main(int argc, char** argv)
 {
   test_replace_variables_capture_avoiding();
   test_process_instance_assignment();
+  test_replace_process_identifiers();
 
   return EXIT_SUCCESS;
 }

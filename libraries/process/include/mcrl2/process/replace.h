@@ -299,6 +299,46 @@ T replace_variables_capture_avoiding(const T& x,
   return process::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V, equations)(x);
 }
 
+struct process_identifier_assignment
+{
+  const process_identifier& lhs;
+  const process_identifier& rhs;
+
+  typedef process_identifier result_type;
+  typedef process_identifier argument_type;
+
+  process_identifier_assignment(const process_identifier& lhs_, const process_identifier& rhs_)
+    : lhs(lhs_), rhs(rhs_)
+  {}
+
+  process_identifier operator()(const process_identifier& x)
+  {
+    if (x == lhs)
+    {
+      return rhs;
+    }
+    return x;
+  }
+};
+
+template <typename T, typename Substitution>
+void replace_process_identifiers(T& x,
+                       Substitution sigma,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                      )
+{
+  core::make_update_apply_builder<process::process_identifier_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_process_identifiers(const T& x,
+                    Substitution sigma,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
+                   )
+{
+  return core::make_update_apply_builder<process::process_identifier_builder>(sigma)(x);
+}
+
 } // namespace process
 
 } // namespace mcrl2

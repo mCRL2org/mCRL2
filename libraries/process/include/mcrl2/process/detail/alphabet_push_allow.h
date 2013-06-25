@@ -26,6 +26,17 @@ namespace process {
 
 namespace detail {
 
+inline
+bool matching_equations(const process_equation& eq1, const process_equation& eq2)
+{
+  if (eq1.formal_parameters() != eq2.formal_parameters())
+  {
+    return false;
+  }
+  process_expression rhs = replace_process_identifiers(eq2.expression(), process_identifier_assignment(eq2.identifier(), eq1.identifier()));
+  return eq1.expression() == rhs;
+}
+
 struct push_allow_node: public alphabet_node
 {
   push_allow_node()
