@@ -121,11 +121,13 @@ class shared_subset
         size_t m_index;
 
       public:
+
         iterator()
-          : m_index(-1)
+          : m_subset(nullptr),
+            m_index(-1)
         {
         }
-
+        
         iterator(const shared_subset &subset)
           : m_subset(&subset),
             m_index(0)
@@ -171,12 +173,13 @@ class shared_subset
 
           while (true)
           {
+            assert(m_subset->m_set != nullptr);
             if (m_index >= m_subset->m_set->size())
             {
               m_index = -1;
               return;
             }
-
+            
             while (node.is_node())
             {
               path_stack[path_stack_index++] = node;
@@ -245,10 +248,10 @@ class shared_subset
     };
 
     shared_subset()
-      : m_bits(0),
+      : m_set(nullptr),
+        m_bits(0),
         m_bdd_root(false)
-    {
-    }
+    {}
 
     /// \brief Constructor.
     shared_subset(std::vector<T> &set)
