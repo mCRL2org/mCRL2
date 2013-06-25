@@ -140,7 +140,9 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           // TODO: this information is not readily available, resulting in very ugly code...
           std::map<core::identifier_string, std::map<std::size_t, std::size_t> >::const_iterator ci = m_control_flow_index.find(X);
           assert(ci != m_control_flow_index.end());
+#ifndef NDEBUG
           bool found = false;
+#endif          
           std::size_t m = (std::numeric_limits<std::size_t>::max)();
           const std::map<std::size_t, std::size_t>& M = ci->second;
           for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
@@ -148,7 +150,9 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
             if (mi->second == k)
             {
               assert(!found);
+#ifndef NDEBUG              
               found = true;
+#endif              
               m = mi->first;
             }
           }

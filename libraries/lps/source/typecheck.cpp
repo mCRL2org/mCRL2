@@ -44,14 +44,11 @@ lps::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identi
   core::identifier_string Name(act.name());
   term_list<sort_expression_list> ParList;
 
-  bool action=false;
-
   const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=actions.find(Name);
 
   if (j!=actions.end())
   {
     ParList=j->second;
-    action=true;
   }
   else
   {
