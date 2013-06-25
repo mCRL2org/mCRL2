@@ -567,6 +567,22 @@ class stategraph_algorithm
       }
     }
 
+    // a connected component is valid if it does not contain two nodes (X, n) and (Y, m) with X == Y
+    bool is_valid_connected_component(const std::set<std::size_t>& component) const
+    {
+      std::set<core::identifier_string> V;
+      for (auto i = component.begin(); i != component.end(); ++i)
+      {
+        const core::identifier_string& X = m_dependency_graph_vertices[*i].name();
+        if (V.find(X) != V.end())
+        {
+          return false;
+        }
+        V.insert(X);
+      }
+      return true;
+    }
+
     std::string print_connected_component(const std::set<std::size_t>& component) const
     {
       std::ostringstream out;
@@ -580,6 +596,10 @@ class stategraph_algorithm
         out << m_dependency_graph_vertices[*i];
       }
       out << "}";
+      if (!is_valid_connected_component(component))
+      {
+        out << " invalid";
+      }
       return out.str();
     }
 
