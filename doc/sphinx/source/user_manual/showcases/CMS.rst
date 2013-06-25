@@ -102,5 +102,5 @@ Technical details
 Publications
 ------------
 
-[HKW11]_ and [HKW11a]_
+[HKV+13]_
 
