@@ -1435,6 +1435,141 @@ class specification_basic_type:public boost::noncopyable
       sumvars=reverse(newsumvars);
     }
 
+    /******************* find_free_variables_process *****************************************/
+
+
+    /* We define our own variant of the standard function find_free_variables, because
+       find_free_variables is not correctly defined on processes, due to process_instance_assignments,
+       where variables can occur by not being mentioned. It is necessary to know the parameters of
+       a process to retrieve these. Concrete example in P() defined by P(x:Nat)= ..., the variable x
+       appears as a free variable, although it is not explicitly mentioned. 
+       If the standard function find_free_variable on processes is repaired, this function can 
+       be removed */
+    void find_free_variables_process(const process_expression &p, std::set< variable >& free_variables_in_p)
+    {
+      if (is_choice(p))
+      {
+         find_free_variables_process(choice(p).left(),free_variables_in_p);
+         find_free_variables_process(choice(p).right(),free_variables_in_p);
+         return;
+      }
+      if (is_seq(p))
+      {
+        find_free_variables_process(seq(p).left(),free_variables_in_p);
+        find_free_variables_process(seq(p).right(),free_variables_in_p);
+        return;
+      }
+      if (is_sync(p))
+      {
+        find_free_variables_process(process::sync(p).left(),free_variables_in_p);
+        find_free_variables_process(process::sync(p).right(),free_variables_in_p);
+        return;
+      }
+      if (is_if_then(p))
+      {
+        std::set<variable> s=find_free_variables(if_then(p).condition());
+        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        {
+          free_variables_in_p.insert(*i);
+        }
+        find_free_variables_process(if_then(p).then_case(),free_variables_in_p);
+        return;
+      }
+      if (is_if_then_else(p))
+      {
+        std::set<variable> s=find_free_variables(if_then(p).condition());
+        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        {
+          free_variables_in_p.insert(*i);
+        }
+        find_free_variables_process(if_then_else(p).then_case(),free_variables_in_p);
+        find_free_variables_process(if_then_else(p).else_case(),free_variables_in_p);
+        return;
+      }
+
+      if (is_sum(p))
+      {
+        find_free_variables_process(sum(p).operand(),free_variables_in_p);
+        const variable_list& sumargs=sum(p).bound_variables();
+
+        for(variable_list::const_iterator i=sumargs.begin(); i!=sumargs.end(); ++i)
+        {
+          free_variables_in_p.erase(*i);
+        }
+        return;
+      }
+
+      if (is_process_instance_assignment(p))
+      {
+        const process_instance_assignment q(p);
+        size_t n=objectIndex(q.identifier());
+        const variable_list parameters=objectdata[n].parameters;
+        std::set<variable> parameter_set(parameters.begin(),parameters.end());
+        const assignment_list& assignments=q.assignments();
+        for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+        {
+          std::set<variable> s=find_free_variables(i->rhs());
+          for(std::set<variable>::const_iterator j=s.begin(); j!=s.end(); ++j)
+          {
+            free_variables_in_p.insert(*j);
+          }
+          parameter_set.erase(i->lhs());
+        }
+        // Add all remaining variables in the parameter_set, as they have an identity assignment.
+        for(std::set<variable>::const_iterator i=parameter_set.begin(); i!=parameter_set.end(); ++i)
+        {
+          free_variables_in_p.insert(*i);
+        }
+        return;
+      }
+
+      if (is_action(p))
+      {
+        std::set<variable> s=process::find_free_variables(p);
+        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        {
+          free_variables_in_p.insert(*i);
+        }
+        return;
+      }
+
+      if (is_at(p))
+      {
+        std::set<variable> s=data::find_free_variables(at(p).time_stamp());
+        for(std::set<variable>::const_iterator i=s.begin(); i!=s.end(); ++i)
+        {
+          free_variables_in_p.insert(*i);
+        }
+        find_free_variables_process(at(p).operand(),free_variables_in_p);
+        return;
+      }
+
+      if (is_delta(p))
+      {
+        return;
+      }
+
+      if (is_tau(p))
+      {
+        return;
+      }
+
+      if (is_sync(p))
+      {
+        find_free_variables_process(process::sync(p).left(),free_variables_in_p);
+        find_free_variables_process(process::sync(p).right(),free_variables_in_p);
+        return;
+      }
+
+      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p));
+    }
+
+    std::set< variable > find_free_variables_process(const process_expression &p)
+    {
+      std::set<variable> free_variables_in_p;
+      find_free_variables_process(p,free_variables_in_p);
+      return free_variables_in_p;
+    }
     /******************* substitute *****************************************/
 
 
@@ -3992,11 +4127,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     assignment_list find_dummy_arguments(
-      const variable_list pars,      // The list of parameters of one particular process.
       const variable_list parlist,   // The list of all parameters.
-      const assignment_list args)
+      const assignment_list args,
+      const std::set<variable>& free_variables_in_body)
     {
-      std::set<variable> parset(pars.begin(),pars.end());
       std::map<variable,data_expression> assignment_map;
       for(assignment_list::const_iterator k=args.begin(); k!=args.end(); ++k)
       {
@@ -4006,8 +4140,7 @@ class specification_basic_type:public boost::noncopyable
       assignment_vector result;
       for(variable_list::const_iterator i=parlist.begin(); i!=parlist.end(); ++i)
       {
-        const std::set<variable>::const_iterator j=parset.find(*i);
-        if (j==parset.end())  // Not found.
+        if (free_variables_in_body.find(*i)==free_variables_in_body.end())
         {
           // The variable *i must get a default value.
           const data_expression rhs=representative_generator_internal(i->sort());
@@ -4021,12 +4154,9 @@ class specification_basic_type:public boost::noncopyable
             result.push_back(assignment(k->first,k->second));
             assignment_map.erase(k);
           }
-          parset.erase(j);
         }
 
       }
-      assert(parset.empty());
-      assert(assignment_map.empty());
       return assignment_list(result.begin(), result.end());
     }
 
@@ -4039,7 +4169,8 @@ class specification_basic_type:public boost::noncopyable
       const std::vector < process_identifier > &pCRLprcs,
       bool singlestate)
     {
-      assignment_list t=find_dummy_arguments(objectdata[objectIndex(procId)].parameters,stack.parameters,args);
+      const size_t n=objectIndex(procId);
+      assignment_list t=find_dummy_arguments(stack.parameters,args,find_free_variables_process(objectdata[n].processbody));
       if (singlestate)
       {
         return args;
@@ -4060,7 +4191,7 @@ class specification_basic_type:public boost::noncopyable
     {
       const size_t n=objectIndex(procId);
       data_expression_list t=findarguments(objectdata[n].parameters,
-                                           stack.parameters,args,t2,stack,vars,process::find_free_variables(objectdata[n].processbody));
+                                           stack.parameters,args,t2,stack,vars,find_free_variables_process(objectdata[n].processbody));
 
       int i;
       for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
