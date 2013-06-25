@@ -473,7 +473,7 @@ class stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug) << print_global_control_flow_parameters();
+      mCRL2log(log::verbose) << print_global_control_flow_parameters();
     }
 
     bool is_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
@@ -527,20 +527,6 @@ class stategraph_algorithm
       v.neighbors().insert(&u);
     }
 
-//    void print_related_global_control_flow_parameters() const
-//    {
-//      std::set<std::vector<dependency_graph_vertex>::iterator> done;
-//      for (auto i = m_dependency_graph_vertices.begin(); i != m_dependency_graph_vertices.end(); ++i)
-//      {
-//        if (done.find(i) != done.end())
-//        {
-//          continue;
-//        }
-//        std::ostringstream out;
-//        out <<
-//      }
-//    }
-
     void compute_related_global_control_flow_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute related global control flow parameters ===" << std::endl;
@@ -552,7 +538,10 @@ class stategraph_algorithm
         const core::identifier_string& X = k->variable().name();
         for (std::size_t n = 0; n < k->variable().parameters().size(); n++)
         {
-          m_dependency_graph_vertices.push_back(dependency_graph_vertex(X, n));
+          if (is_global_control_flow_parameter(X, n))
+          {
+            m_dependency_graph_vertices.push_back(dependency_graph_vertex(X, n));
+          }
         }
       }
 
