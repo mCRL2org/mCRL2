@@ -3944,7 +3944,7 @@ class specification_basic_type:public boost::noncopyable
       const assignment_list args,
       const stacklisttype& stack,
       const variable_list vars,
-      bool regular)
+      const std::set<variable>& free_variables_in_body)
     {
       /* We generate the value for variable s in the list of
          the parameters of the process. If s is equal to some
@@ -3954,18 +3954,20 @@ class specification_basic_type:public boost::noncopyable
            If s does not occur in pars, it must be replaced
          by a dummy value.
       */
-      // assignment_list::const_iterator j=args.begin();
       for (assignment_list::const_iterator i=args.begin(); i!=args.end(); ++i)
       {
-        // assert(j!=args.end());
-        if (s==*i)
+        if (s==i->lhs())
         {
-          return (regular?i->rhs():adapt_term_to_stack(i->rhs(),stack,vars));
+          return adapt_term_to_stack(i->rhs(),stack,vars);
         }
       }
-      // assert(j==args.end());
-      const data_expression result=representative_generator_internal(s.sort());
-      return (regular?result:adapt_term_to_stack(result,stack,vars));
+      
+      if (free_variables_in_body.find(s)==free_variables_in_body.end())
+      {
+        const data_expression result=representative_generator_internal(s.sort());
+        return adapt_term_to_stack(result,stack,vars);
+      }
+      return adapt_term_to_stack(s,stack,vars);
     }
 
 
@@ -3976,18 +3978,15 @@ class specification_basic_type:public boost::noncopyable
       const data_expression_list t2,
       const stacklisttype& stack,
       const variable_list vars,
-      bool regular)
+      const std::set<variable>& free_variables_in_body)
     {
       if (parlist.empty())
       {
         return t2;
       }
-      data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,regular);
-      data_expression rhs=find_(parlist.front(),args,stack,vars,regular);
-      /* if (parlist.front()!=rhs)
-      {
-        result.push_front(assignment(parlist.front(),rhs));
-      } */
+      data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,free_variables_in_body);
+      data_expression rhs=find_(parlist.front(),args,stack,vars,free_variables_in_body);
+
       result.push_front(rhs);
       return result;
     }
@@ -4059,8 +4058,9 @@ class specification_basic_type:public boost::noncopyable
       const std::vector < process_identifier > &pCRLprcs,
       const variable_list vars)
     {
-      data_expression_list t=findarguments(objectdata[objectIndex(procId)].parameters,
-                                           stack.parameters,args,t2,stack,vars,false);
+      const size_t n=objectIndex(procId);
+      data_expression_list t=findarguments(objectdata[n].parameters,
+                                           stack.parameters,args,t2,stack,vars,process::find_free_variables(objectdata[n].processbody));
 
       int i;
       for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
