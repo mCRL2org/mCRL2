@@ -85,6 +85,25 @@ void eliminate_duplicate_equations(process_specification& procspec, std::size_t 
   }
 }
 
+// Eliminates duplicate equations in procspec with index >= N
+inline
+void eliminate_duplicate_equations_repeatedly(process_specification& procspec, std::size_t N)
+{
+  std::size_t size = procspec.equations().size();
+  for (;;)
+  {
+    eliminate_duplicate_equations(procspec, N);
+    if (size == procspec.equations().size())
+    {
+      break;
+    }
+    else
+    {
+      size = procspec.equations().size();
+    }
+  }
+}
+
 struct push_allow_node: public alphabet_node
 {
   push_allow_node()
