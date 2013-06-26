@@ -187,7 +187,7 @@ if __name__ == "__main__":
     result = make_builder('../../process/include/mcrl2/process/builder.h', 'process_expression_builder', 'add_process_expressions', 'process::process_expression_builder_base', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map) and result
 
     # process_identifier_builder
-    result = make_builder('../../process/include/mcrl2/process/builder.h', 'process_identifier_builder', 'add_process_identifiers', 'core::builder', class_map, all_classes, 'process', 'process::process_expression', process_identifier_dependencies, modifiability_map) and result
+    result = make_builder('../../process/include/mcrl2/process/builder.h', 'process_identifier_builder', 'add_process_identifiers', 'process::process_expression_builder_base', class_map, all_classes, 'process', 'process::process_expression', process_identifier_dependencies, modifiability_map) and result
 
     # state_formula_builder
     result = make_builder('../../modal_formula/include/mcrl2/modal_formula/builder.h', 'state_formula_builder', 'add_state_formula_expressions', 'state_formulas::state_formula_builder_base', class_map, all_classes, 'state_formulas', 'state_formulas::state_formula', state_formula_dependencies, modifiability_map) and result

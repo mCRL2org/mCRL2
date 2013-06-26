@@ -301,8 +301,8 @@ T replace_variables_capture_avoiding(const T& x,
 
 struct process_identifier_assignment
 {
-  const process_identifier& lhs;
-  const process_identifier& rhs;
+  process_identifier lhs;
+  process_identifier rhs;
 
   typedef process_identifier result_type;
   typedef process_identifier argument_type;

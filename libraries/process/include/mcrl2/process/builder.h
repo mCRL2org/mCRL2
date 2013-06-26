@@ -1563,9 +1563,9 @@ struct add_process_identifiers: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct process_identifier_builder: public add_process_identifiers<core::builder, Derived>
+struct process_identifier_builder: public add_process_identifiers<process::process_expression_builder_base, Derived>
 {
-  typedef add_process_identifiers<core::builder, Derived> super;
+  typedef add_process_identifiers<process::process_expression_builder_base, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();

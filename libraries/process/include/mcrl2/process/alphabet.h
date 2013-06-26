@@ -78,7 +78,9 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
 inline
 void alphabet_reduce(process_specification& procspec)
 {
+  std::size_t N = procspec.equations().size();
   procspec.init() = detail::alphabet_reduce(procspec.init(), procspec.equations());
+  process::detail::eliminate_duplicate_equations(procspec, N);
 }
 
 } // namespace process

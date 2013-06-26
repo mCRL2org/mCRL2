@@ -37,6 +37,50 @@ bool matching_equations(const process_equation& eq1, const process_equation& eq2
   return eq1.expression() == rhs;
 }
 
+template <typename EquationIterator>
+EquationIterator find_matching_equation(EquationIterator first, EquationIterator last, const process_equation& eqn)
+{
+  for (EquationIterator i = first; i != last; ++i)
+  {
+    if (matching_equations(*i, eqn))
+    {
+      return i;
+    }
+  }
+  return last;
+}
+
+// Eliminates duplicate equations in procspec with index >= N
+inline
+void eliminate_duplicate_equations(process_specification& procspec, std::size_t N)
+{
+  std::vector<process_equation>& equations = procspec.equations();
+  std::vector<process_equation> E(equations.begin() + N, equations.end());
+  equations.erase(equations.begin() + N, equations.end());
+
+  for (auto i = E.begin(); i != E.end(); ++i)
+  {
+    auto j = find_matching_equation(equations.begin(), equations.end(), *i);
+    if (j == equations.end())
+    {
+      equations.push_back(*i);
+    }
+    else
+    {
+      process_identifier_assignment a(i->identifier(), j->identifier());
+      for (auto k = equations.begin(); k != equations.end(); ++k)
+      {
+        *k = process_equation(k->identifier(), k->formal_parameters(), replace_process_identifiers(k->expression(), a));
+      }
+      for (auto k = boost::next(i); k != E.end(); ++k)
+      {
+        *k = process_equation(k->identifier(), k->formal_parameters(), replace_process_identifiers(k->expression(), a));
+      }
+      procspec.init() = replace_process_identifiers(procspec.init(), a);
+    }
+  }
+}
+
 struct push_allow_node: public alphabet_node
 {
   push_allow_node()
