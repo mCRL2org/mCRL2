@@ -19,31 +19,6 @@
 namespace atermpp
 {
 
-static int write_byte(const int byte, std::ostream &os)
-{
-  os.put(byte);
-  return byte;
-}
-
-static size_t write_bytes(const char* buf, const size_t count, std::ostream &os)
-{
-  os.write(buf,count);
-  return count;
-}
-
-static int read_byte(std::istream &is)
-{
-  int c = is.get();
-  return c;
-}
-
-static size_t read_bytes(char* buf, size_t count, std::istream &is)
-{
-  is.read(buf, count);
-  return count;
-}
-
-
 /**
  * Calculate the number of unique symbols.
  */
@@ -56,8 +31,6 @@ static size_t calcUniqueAFuns(
                   std::vector<size_t> &count)
 {
   size_t nr_unique = 0;
-  size_t  i, arity;
-  aterm_list list;
 
   if (visited.count(t)>0)
   {
@@ -71,20 +44,9 @@ static size_t calcUniqueAFuns(
       nr_unique = 1;
     }
   }
-  else if (t.type_is_appl())
-  {
-    function_symbol sym = aterm_cast<aterm_appl>(t).function(); 
-    nr_unique = count[sym.number()]>0 ? 0 : 1;
-    count[sym.number()]++;
-    arity = sym.arity();
-    for (i = 0; i < arity; i++)
-    {
-      nr_unique += calcUniqueAFuns(aterm_cast<const aterm_appl>(t)[i],visited,count);
-    }
-  }
   else if (t.type_is_list())
   {
-    list = aterm_cast<const aterm_list>(t);
+    aterm_list list = aterm_cast<const aterm_list>(t);
     while (list!=aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
@@ -102,6 +64,18 @@ static size_t calcUniqueAFuns(
       {
         nr_unique++;
       }
+    }
+  }
+  else 
+  {
+    assert(t.type_is_appl());
+    function_symbol sym = aterm_cast<aterm_appl>(t).function(); 
+    nr_unique = count[sym.number()]>0 ? 0 : 1;
+    count[sym.number()]++;
+    size_t arity = sym.arity();
+    for (size_t i = 0; i < arity; i++)
+    {
+      nr_unique += calcUniqueAFuns(aterm_cast<const aterm_appl>(t)[i],visited,count);
     }
   }
 
@@ -224,8 +198,6 @@ class sym_read_entry
 
 };
 
-char bafio_id[] = "$Id$";
-
 static size_t nr_unique_symbols = 0;
 static std::vector<sym_read_entry> read_symbols;
 static std::vector<sym_entry> sym_entries;
@@ -287,33 +259,22 @@ writeIntToBuf(const size_t val, unsigned char* buf)
 }
 
 
-static int writeBits(size_t val, const size_t nr_bits, ostream &os)
+static void writeBits(size_t val, const size_t nr_bits, ostream &os)
 {
-  size_t cur_bit;
-
-  for (cur_bit=0; cur_bit<nr_bits; cur_bit++)
+  for (size_t cur_bit=0; cur_bit<nr_bits; cur_bit++)
   {
     bit_buffer <<= 1;
     bit_buffer |= (val & 0x01);
     val >>= 1;
     if (++bits_in_buffer == 8)
     {
-      if (write_byte((int)bit_buffer, os) == -1)
-      {
-        return -1;
-      }
+      os.put((int)bit_buffer);
       bits_in_buffer = 0;
       bit_buffer = '\0';
     }
   }
 
-  if (val)
-  {
-    return -1;
-  }
-
-  /* Ok */
-  return 0;
+  assert(val==0);
 }
 
 
@@ -324,7 +285,8 @@ static int flushBitsToWriter(ostream &os)
   {
     size_t left = 8-bits_in_buffer;
     bit_buffer <<= left;
-    result = (write_byte((int)bit_buffer, os) == EOF) ? -1 : 0;
+    os.put((int)bit_buffer);
+    result = ((int)bit_buffer == EOF) ? -1 : 0;
     bits_in_buffer = 0;
     bit_buffer = '\0';
   }
@@ -344,7 +306,7 @@ readBits(size_t* val, const size_t nr_bits, istream &is)
   {
     if (bits_in_buffer == 0)
     {
-      int val = read_byte(is);
+      int val = is.get();
       if (val == EOF)
       {
         return -1;
@@ -363,19 +325,11 @@ readBits(size_t* val, const size_t nr_bits, istream &is)
 }
 
 
-static bool writeInt(const size_t val, ostream &os)
+static void writeInt(const size_t val, ostream &os)
 {
-  size_t nr_items;
   unsigned char buf[8];
-
-  nr_items = writeIntToBuf(val, buf);
-  if (write_bytes((char*)buf, nr_items, os) != nr_items)
-  {
-    return false;
-  }
-
-  /* Ok */
-  return true;
+  size_t nr_items = writeIntToBuf(val, buf);
+  os.write((char*)buf, nr_items);
 }
 
 
@@ -384,7 +338,7 @@ static int readInt(size_t* val, istream &is)
   int buf[8];
 
   /* Try to read 1st character */
-  if ((buf[0] = read_byte(is)) == EOF)
+  if ((buf[0] = is.get()) == EOF)
   {
     return EOF;
   }
@@ -397,7 +351,7 @@ static int readInt(size_t* val, istream &is)
   }
 
   /* Try to read 2nd character */
-  if ((buf[1] = read_byte(is)) == EOF)
+  if ((buf[1] = is.get()) == EOF)
   {
     return EOF;
   }
@@ -410,7 +364,7 @@ static int readInt(size_t* val, istream &is)
   }
 
   /* Try to read 3rd character */
-  if ((buf[2] = read_byte(is)) == EOF)
+  if ((buf[2] = is.get()) == EOF)
   {
     return EOF;
   }
@@ -423,7 +377,7 @@ static int readInt(size_t* val, istream &is)
   }
 
   /* Try to read 4th character */
-  if ((buf[3] = read_byte(is)) == EOF)
+  if ((buf[3] = is.get()) == EOF)
   {
     return EOF;
   }
@@ -437,7 +391,7 @@ static int readInt(size_t* val, istream &is)
   }
 
   /* Try to read 5th character */
-  if ((buf[4] = read_byte(is)) == EOF)
+  if ((buf[4] = is.get()) == EOF)
   {
     return EOF;
   }
@@ -448,22 +402,13 @@ static int readInt(size_t* val, istream &is)
 }
 
 
-static bool writeString(const char* str, const size_t len, ostream &os)
+static void writeString(const char* str, const size_t len, ostream &os)
 {
   /* Write length. */
-  if (!writeInt(len, os))
-  {
-    return false;
-  }
+  writeInt(len, os);
 
   /* Write actual string. */
-  if (write_bytes(str, len, os) != len)
-  {
-    return false;
-  }
-
-  /* Ok */
-  return true;
+  os.write(str, len);
 }
 
 
@@ -489,10 +434,7 @@ static size_t readString(istream &is)
   }
 
   /* Read the actual string */
-  if (read_bytes(text_buffer, len, is) != len)
-  {
-    return atermpp::npos;
-  }
+  is.read(text_buffer, len);
 
   /* Ok, return length of string */
   return len;
@@ -502,25 +444,12 @@ static size_t readString(istream &is)
  * Write a symbol to file.
  */
 
-static bool write_symbol(const function_symbol sym, ostream &os)
+static void write_symbol(const function_symbol sym, ostream &os)
 {
   const char* name = sym.name().c_str();
-  if (!writeString(name, strlen(name), os))
-  {
-    return false;
-  }
-
-  if (!writeInt(sym.arity(), os))
-  {
-    return false;
-  }
-
-  if (!writeInt(true, os))
-  {
-    return false;
-  }
-
-  return true;
+  writeString(name, strlen(name), os);
+  writeInt(sym.arity(), os);
+  writeInt(true, os);
 }
 
 /**
@@ -719,8 +648,9 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
         collect_terms((aterm)(list.tail()),visited,index);
       }
     }
-    else if (t.type_is_appl())
+    else 
     {
+      assert(t.type_is_appl());
       aterm_appl appl(t);
 
       sym = appl.function();
@@ -729,10 +659,6 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
       {
         collect_terms(appl[cur_arg],visited,index);
       }
-    }
-    else
-    {
-      throw std::runtime_error("collect_terms: illegal term");
     }
     entry = &sym_entries[index[sym.number()]];
 
@@ -748,41 +674,25 @@ static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::v
  * Write all symbols in a term to file.
  */
 
-static bool write_symbols(ostream &os)
+static void write_symbols(ostream &os)
 {
-  size_t sym_idx, arg_idx, top_idx;
-
-  for (sym_idx=0; sym_idx<nr_unique_symbols; sym_idx++)
+  for (size_t sym_idx=0; sym_idx<nr_unique_symbols; sym_idx++)
   {
     sym_entry* cur_sym = &sym_entries[sym_idx];
-    if (!write_symbol(cur_sym->id, os))
-    {
-      return false;
-    }
-    if (!writeInt(cur_sym->nr_terms, os))
-    {
-      return false;
-    }
+    write_symbol(cur_sym->id, os);
+    writeInt(cur_sym->nr_terms, os);
 
-    for (arg_idx=0; arg_idx<cur_sym->arity; arg_idx++)
+    for (size_t arg_idx=0; arg_idx<cur_sym->arity; arg_idx++)
     {
       size_t nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
-      if (!writeInt(nr_symbols, os))
-      {
-        return false;
-      }
-      for (top_idx=0; top_idx<nr_symbols; top_idx++)
+      writeInt(nr_symbols, os);
+      for (size_t top_idx=0; top_idx<nr_symbols; top_idx++)
       {
         top_symbol* ts = &cur_sym->top_symbols[arg_idx].symbols[top_idx];
-        if (!writeInt(ts->index, os))
-        {
-          return false;
-        }
+        writeInt(ts->index, os);
       }
     }
   }
-
-  return true;
 }
 
 
@@ -835,29 +745,14 @@ static bool write_term(const aterm, const std::vector<size_t> &index, ostream &o
 static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
                       const std::vector<size_t> &index, ostream &os)
 {
-  top_symbol* ts;
-  sym_entry* arg_sym;
-  size_t arg_trm_idx;
-  function_symbol sym;
+  function_symbol sym = get_top_symbol(arg,index)->id;
+  top_symbol* ts = find_top_symbol(&trm_sym->top_symbols[arg_idx], sym);
+  writeBits(ts->code, ts->code_width, os);
+  sym_entry* arg_sym = &sym_entries[ts->index];
+  size_t arg_trm_idx = find_term(arg_sym, arg);
+  writeBits(arg_trm_idx, arg_sym->term_width, os);
 
-  sym = get_top_symbol(arg,index)->id;
-  ts = find_top_symbol(&trm_sym->top_symbols[arg_idx], sym);
-
-  if (writeBits(ts->code, ts->code_width, os)<0)
-  {
-    return false;
-  }
-
-  arg_sym = &sym_entries[ts->index];
-
-  arg_trm_idx = find_term(arg_sym, arg);
-  if (writeBits(arg_trm_idx, arg_sym->term_width, os)<0)
-  {
-    return false;
-  }
-
-  if (arg_trm_idx >= arg_sym->cur_index &&
-      !write_term(arg, index, os))
+  if (arg_trm_idx >= arg_sym->cur_index && !write_term(arg, index, os))
   {
     return false;
   }
@@ -872,16 +767,12 @@ static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
 
 static bool write_term(const aterm t, const std::vector<size_t> &index, ostream &os)
 {
-  size_t arg_idx;
   sym_entry* trm_sym = NULL;
   {
     if (t.type_is_int())
     {
       /* If aterm integers are > 32 bits, then this can fail. */
-      if (writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os) < 0)
-      {
-        return false;
-      }
+      writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os);
       trm_sym = &sym_entries[index[detail::function_adm.AS_INT.number()]];
     }
     else if (t.type_is_list())
@@ -898,20 +789,20 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
         {
           return false;
         }
-        if (!write_arg(trm_sym, (aterm)(list.tail()), 1, index, os))
+        if (!write_arg(trm_sym, list.tail(), 1, index, os))
         {
           return false;
         }
       }
     }
-    else if (t.type_is_appl())
+    else 
     {
-      size_t arity;
+      assert(t.type_is_appl());
       function_symbol sym = aterm_cast<aterm_appl>(t).function();
       trm_sym = &sym_entries[index[sym.number()]];
       assert(sym == trm_sym->id);
-      arity = sym.arity();
-      for (arg_idx=0; arg_idx<arity; arg_idx++)
+      size_t arity = sym.arity();
+      for (size_t arg_idx=0; arg_idx<arity; arg_idx++)
       {
         aterm cur_arg = aterm_cast<const aterm_appl>(t)[arg_idx];
         if (!write_arg(trm_sym, cur_arg, arg_idx, index, os))
@@ -919,10 +810,6 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
           return false;
         }
       }
-    }
-    else
-    {
-      throw std::runtime_error("write_term: illegal term");
     }
   }
   if (trm_sym->terms[trm_sym->cur_index].t != t)
@@ -941,16 +828,14 @@ static bool write_term(const aterm t, const std::vector<size_t> &index, ostream 
 
 static void free_write_space()
 {
-  size_t i, j;
-
-  for (i=0; i<nr_unique_symbols; i++)
+  for (size_t i=0; i<nr_unique_symbols; i++)
   {
     sym_entry* entry = &sym_entries[i];
 
     free(entry->termtable);
     entry->termtable = NULL;
 
-    for (j=0; j<entry->arity; j++)
+    for (size_t j=0; j<entry->arity; j++)
     {
       top_symbols_t* topsyms = &entry->top_symbols[j];
       topsyms->symbols=std::vector<top_symbol>();
@@ -972,7 +857,6 @@ write_baf(const aterm &t, ostream &os)
 {
   size_t nr_unique_terms = 0;
   const size_t nr_symbols = detail::function_symbol_index_table_number_of_elements*FUNCTION_SYMBOL_BLOCK_SIZE;
-  size_t cur;
 
   /* Initialize bit buffer */
   bit_buffer     = '\0';
@@ -987,6 +871,7 @@ write_baf(const aterm &t, ostream &os)
 
   /* Collect all unique symbols in the input term */
 
+  size_t cur;
   for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
   {
     const detail::_function_symbol &entry = detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK];
@@ -1031,41 +916,15 @@ write_baf(const aterm &t, ostream &os)
 
   /* write header */
 
-  if (!writeInt(0, os))
-  {
-    return false;
-  }
-
-  if (!writeInt(BAF_MAGIC, os))
-  {
-    return false;
-  }
-
-  if (!writeInt(BAF_VERSION, os))
-  {
-    return false;
-  }
-
-  if (!writeInt(nr_unique_symbols, os))
-  {
-    return false;
-  }
-
-  if (!writeInt(nr_unique_terms, os))
-  {
-    return false;
-  }
-
-  if (!write_symbols(os))
-  {
-    return false;
-  }
+  writeInt(0, os);
+  writeInt(BAF_MAGIC, os);
+  writeInt(BAF_VERSION, os);
+  writeInt(nr_unique_symbols, os);
+  writeInt(nr_unique_terms, os);
+  write_symbols(os);
 
   /* Write the top symbol */
-  if (!writeInt(get_top_symbol(t,index)-&sym_entries[0], os))
-  {
-    return false;
-  }
+  writeInt(get_top_symbol(t,index)-&sym_entries[0], os);
 
   if (!write_term(t, index, os))
   {
