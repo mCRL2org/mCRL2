@@ -123,7 +123,7 @@ class shared_subset
       public:
 
         iterator()
-          : m_subset(nullptr),
+          : m_subset(NULL),
             m_index(-1)
         {
         }
@@ -173,7 +173,7 @@ class shared_subset
 
           while (true)
           {
-            assert(m_subset->m_set != nullptr);
+            assert(m_subset->m_set != NULL);
             if (m_index >= m_subset->m_set->size())
             {
               m_index = -1;
@@ -248,7 +248,7 @@ class shared_subset
     };
 
     shared_subset()
-      : m_set(nullptr),
+      : m_set(NULL),
         m_bits(0),
         m_bdd_root(false)
     {}
