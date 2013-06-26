@@ -4566,7 +4566,6 @@ class specification_basic_type:public boost::noncopyable
                      atTime,stack,sumvars);
           }
         }
-
         insert_summand(action_summands,deadlock_summands,
                        sumvars,condition1,multiAction,
                        atTime,procargs,has_time,is_delta_summand);
@@ -5643,7 +5642,10 @@ class specification_basic_type:public boost::noncopyable
 
           mutable_map_substitution<> mutable_sigma(sigma);
           data_expression auxresult1=data::replace_variables_capture_avoiding(nextstateparameter, mutable_sigma,variables_in_rhs_sigma);
-          if (equalterm==data_expression()||is_global_variable(equalterm))
+          if (equalterm==data_expression()) // ||is_global_variable(equalterm)) Adding this last part leads to smaller case functions,
+                                            // but bigger and less structured state spaces, as parameters are less often put to default
+                                            // values. Constant elimination can less often be applied as constant eliminiation does not
+                                            // have subtle knowledge of case functions.
           {
             equalterm=auxresult1;
           }
