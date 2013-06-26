@@ -33,6 +33,10 @@ bool matching_equations(const process_equation& eq1, const process_equation& eq2
   {
     return false;
   }
+  if (eq1.expression() == eq2.expression())
+  {
+    return true;
+  }
   process_expression rhs = replace_process_identifiers(eq2.expression(), process_identifier_assignment(eq2.identifier(), eq1.identifier()));
   return eq1.expression() == rhs;
 }
