@@ -142,7 +142,7 @@ struct duplicate_equation_removal
         continue;
       }
 
-      group::const_iterator j = std::min_element(i->begin(), i->end(), [](const iterator& x, const iterator& y) { return x < y; });
+      group::const_iterator j = std::min_element(i->begin(), i->end());
       new_equations.push_back(**j);
       for (group::const_iterator k = i->begin(); k != i->end(); ++k)
       {
