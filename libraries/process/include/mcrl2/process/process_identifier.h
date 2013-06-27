@@ -37,7 +37,7 @@ class process_identifier: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    process_identifier(const atermpp::aterm& term)
+    explicit process_identifier(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_ProcVarId(*this));
@@ -72,78 +72,15 @@ typedef std::vector<process_identifier>    process_identifier_vector;
 
 
 /// \brief Test for a process_identifier expression
-/// \param t A term
-/// \return True if it is a process_identifier expression
+/// \param x A term
+/// \return True if \a x is a process_identifier expression
 inline
-bool is_process_identifier(const atermpp::aterm_appl& t)
+bool is_process_identifier(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcVarId(t);
+  return core::detail::gsIsProcVarId(x);
 }
 
 //--- end generated class process_identifier ---//
-
-/*
-/// \brief Process identifier
-//<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
-class process_identifier: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Constructor.
-    process_identifier()
-      : atermpp::aterm_appl(core::detail::constructProcVarId())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    process_identifier(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_ProcVarId(*this));
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit process_identifier(const atermpp::aterm &term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_term_ProcVarId(*this));
-    }
-
-    /// \brief Constructor.
-    process_identifier(core::identifier_string name, data::sort_expression_list sorts)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list<data::sort_expression>(sorts.begin(), sorts.end())))
-    {}
-
-    /// \brief Returns the name of the process identifier
-    /// \return The name of the process identifier
-    const core::identifier_string &name() const
-    {
-      return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(*this));
-    }
-
-    /// \brief Returns the sorts of the process identifier
-    /// \return The sorts of the process identifier
-    const data::sort_expression_list &sorts() const
-    {
-      return atermpp::aterm_cast<data::sort_expression_list>((*this)[1]);
-    }
-};
-
-/// \brief list of process identifierss
-typedef atermpp::term_list<process_identifier> process_identifier_list;
-
-/// \brief vector of process_identifiers
-typedef std::vector<process_identifier>    process_identifier_vector;
-
-/// \brief Test for a process_identifier expression
-/// \param t A term
-/// \return True if it is a process_identifier expression
-inline
-bool is_process_identifier(const atermpp::aterm_appl& t)
-{
-  return core::detail::gsIsProcVarId(t);
-}
-*/
 
 // template function overloads
 std::string pp(const process_identifier& x);

@@ -37,7 +37,7 @@ class rename_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    rename_expression(const atermpp::aterm& term)
+    explicit rename_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_RenameExpr(*this));
@@ -72,12 +72,12 @@ typedef std::vector<rename_expression>    rename_expression_vector;
 
 
 /// \brief Test for a rename_expression expression
-/// \param t A term
-/// \return True if it is a rename_expression expression
+/// \param x A term
+/// \return True if \a x is a rename_expression expression
 inline
-bool is_rename_expression(const atermpp::aterm_appl& t)
+bool is_rename_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRenameExpr(t);
+  return core::detail::gsIsRenameExpr(x);
 }
 
 //--- end generated class rename_expression ---//

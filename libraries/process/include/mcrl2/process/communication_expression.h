@@ -36,7 +36,7 @@ class communication_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    communication_expression(const atermpp::aterm& term)
+    explicit communication_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_CommExpr(*this));
@@ -71,12 +71,12 @@ typedef std::vector<communication_expression>    communication_expression_vector
 
 
 /// \brief Test for a communication_expression expression
-/// \param t A term
-/// \return True if it is a communication_expression expression
+/// \param x A term
+/// \return True if \a x is a communication_expression expression
 inline
-bool is_communication_expression(const atermpp::aterm_appl& t)
+bool is_communication_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsCommExpr(t);
+  return core::detail::gsIsCommExpr(x);
 }
 
 //--- end generated class communication_expression ---//

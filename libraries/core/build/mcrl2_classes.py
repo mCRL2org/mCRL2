@@ -46,7 +46,7 @@ SORT_EXPRESSION_CLASSES = r'''
 sort_expression()                                                                         : public atermpp::aterm_appl   | XOCU | SortExpr             | A sort expression
 basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO   | SortId               | A basic sort
 container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO   | SortCons             | A container sort
-structured_sort(const structured_sort_constructor_list& constructors)              : public data::sort_expression | CEOU | SortStruct           | A structured sort
+structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | CEOU | SortStruct           | A structured sort
 function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO   | SortArrow            | A function sort
 untyped_sort()                                                                            : public data::sort_expression | EO   | UntypedSortUnknown   | Unknown sort expression
 untyped_possible_sorts(const sort_expression_list& sorts)                                 : public data::sort_expression | EO   | UntypedSortsPossible | Multiple possible sorts
@@ -156,8 +156,9 @@ specification(const data::data_specification& data, const action_label_list& act
 
 PROCESS_CLASSES = r'''
 process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SM | ProcSpec    | A process specification
+%process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
 process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | SCI | ProcEqn     | A process equation
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI  | ProcEqn     | A process equation
 rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI  | RenameExpr  | A rename expression
 communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI  | CommExpr    | A communication expression
 action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI  | MultActName | A multiset of action names

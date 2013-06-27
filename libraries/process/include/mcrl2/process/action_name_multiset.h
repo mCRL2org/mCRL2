@@ -38,7 +38,7 @@ class action_name_multiset: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    action_name_multiset(const atermpp::aterm& term)
+    explicit action_name_multiset(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_MultActName(*this));
@@ -63,12 +63,12 @@ typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 
 
 /// \brief Test for a action_name_multiset expression
-/// \param t A term
-/// \return True if it is a action_name_multiset expression
+/// \param x A term
+/// \return True if \a x is a action_name_multiset expression
 inline
-bool is_action_name_multiset(const atermpp::aterm_appl& t)
+bool is_action_name_multiset(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsMultActName(t);
+  return core::detail::gsIsMultActName(x);
 }
 
 //--- end generated class action_name_multiset ---//
