@@ -450,6 +450,8 @@ class stategraph_algorithm
       do
       {
         changed = false;
+
+        // Detect conflicts for parameters of Y in equations of the form X(d) = ... Y(e)
         for (auto k = equations.begin(); k != equations.end(); ++k)
         {
           const core::identifier_string& X = k->variable().name();
@@ -472,6 +474,40 @@ class stategraph_algorithm
                     changed = true;
                     mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
                   }
+                }
+              }
+            }
+          }
+        }
+
+        // Detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)
+        for (auto k = equations.begin(); k != equations.end(); ++k)
+        {
+          const core::identifier_string& X = k->variable().name();
+          const std::vector<predicate_variable>& predvars = k->predicate_variables();
+          const std::vector<data::variable>& d_X = k->parameters();
+          std::size_t M = d_X.size();
+
+          for (auto i = predvars.begin(); i != predvars.end(); ++i)
+          {
+            const predicate_variable& PVI_X_i = *i;
+            const core::identifier_string& Y = PVI_X_i.X.name();
+            if (Y == X)
+            {
+              continue;
+            }
+            const data::data_expression_list& e = PVI_X_i.X.parameters();
+            std::size_t n = 0;
+            for (auto ei = e.begin(); ei != e.end(); ++ei, ++n)
+            {
+              std::set<data::variable> V = data::find_free_variables(*ei);
+              for (std::size_t m = 0; m < M; m++)
+              {
+                if (m_is_GCFP[X][m] && !m_is_GCFP[Y][n] && (V.find(d_X[m]) != V.end()))
+                {
+                  m_is_GCFP[X][m] = false;
+                  changed = true;
+                  mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
                 }
               }
             }
