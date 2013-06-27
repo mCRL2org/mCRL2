@@ -16,12 +16,11 @@
 #include <iterator>
 #include <iostream>
 #include <sstream>
-#include "mcrl2/data/substitutions.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/alphabet_traverser.h"
-#include "mcrl2/process/detail/expand_process_instance_assignments.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
 #include "mcrl2/utilities/logger.h"
@@ -78,9 +77,8 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
 inline
 void alphabet_reduce(process_specification& procspec)
 {
-  std::size_t N = procspec.equations().size();
   procspec.init() = detail::alphabet_reduce(procspec.init(), procspec.equations());
-  process::detail::eliminate_duplicate_equations_repeatedly(procspec, N);
+  remove_duplicate_equations(procspec);
 }
 
 } // namespace process
