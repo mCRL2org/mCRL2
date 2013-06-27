@@ -15,6 +15,7 @@
 #include <functional>
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/standard_container_utility.h"
 
 namespace mcrl2
 {
