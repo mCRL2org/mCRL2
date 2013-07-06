@@ -176,7 +176,6 @@ inline const _aterm* allocate_term(const size_t size)
 inline void remove_from_hashtable(const _aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
-  assert(t->reference_count_indicates_is_in_freelist());
   const _aterm *prev=NULL;
   const HashNumber hnr = hash_number(t) & aterm_table_mask;
   const _aterm *cur = aterm_hashtable[hnr];

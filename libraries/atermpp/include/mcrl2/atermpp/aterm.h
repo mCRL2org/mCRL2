@@ -38,7 +38,8 @@ class aterm
 
     friend void detail::simple_free_term(const detail::_aterm *t, const size_t arity);
 
-    friend void detail::free_term(const detail::_aterm* t);
+    // friend void detail::free_term(const detail::_aterm* t);
+    friend void detail::free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed);
 
     friend void detail::initialise_aterm_administration();
 

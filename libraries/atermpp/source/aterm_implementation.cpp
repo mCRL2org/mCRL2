@@ -47,9 +47,8 @@ TermInfo *terminfo;
 
 size_t total_nodes = 0;
 
-void free_term(const detail::_aterm* t) 
+void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed) 
 {
-  // const detail::_aterm* t=this->m_term;
   assert(t->reference_count()==0);
 
   const function_symbol &f=t->function();
@@ -59,7 +58,6 @@ void free_term(const detail::_aterm* t)
 
   detail::TermInfo &ti = detail::terminfo[size];
   t->set_reference_count_indicates_in_freelist();
-  remove_from_hashtable(t);  // Remove from hash_table
   t->set_next(ti.at_freelist);
   ti.at_freelist = t;
 
@@ -70,12 +68,31 @@ void free_term(const detail::_aterm* t)
       const aterm& a= reinterpret_cast<const detail::_aterm_appl<aterm> *>(t)->arg[i];
       if  (0==a.decrease_reference_count())
       {
-        free_term(a.m_term);
+        remove_from_hashtable(a.m_term);
+        a.m_term->set_next(terms_to_be_removed);
+        terms_to_be_removed=a.m_term; 
       } 
     }
   } 
 
   f.~function_symbol();
+}
+
+/* Remove terms, but do not use the stack, because
+ * the stack is not always sufficiently large, esp. if limit stacksize
+ * is not set. On OSX the stack can only be 65Mbyte big, which is not enough
+ * to remove a large aterm list. */
+void free_term(const detail::_aterm* t)
+{
+  const detail::_aterm* terms_to_be_removed=t;
+  remove_from_hashtable(t);
+  t->set_next(NULL);
+  while (terms_to_be_removed!=NULL)
+  {
+    const detail::_aterm* u=terms_to_be_removed;
+    terms_to_be_removed=terms_to_be_removed->next();
+    free_term_aux(u,terms_to_be_removed);
+  }
 }
 
 

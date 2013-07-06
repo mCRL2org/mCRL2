@@ -30,7 +30,7 @@ namespace detail
 // This routine should be removed after internal and external format have merged.
 inline void get_free_variables(const atermpp::aterm &t1, std::set < variable > &result)
 {
-  const atermpp::aterm_appl &t=atermpp::aterm_cast<const atermpp::aterm_appl>(t1);
+  const atermpp::aterm_appl &t=static_cast<const atermpp::aterm_appl&>(t1);
   if (is_variable(t))
   {
     result.insert(variable(t));
