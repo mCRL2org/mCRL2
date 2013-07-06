@@ -106,6 +106,8 @@ class objectdatatype
     process_identifier process_representing_action; /* for actions target sort is used to
                                    indicate the process representing this action. */
     process_expression processbody;
+    std::set <variable> free_variables;
+    bool free_variables_defined;
     variable_list parameters;
     variable_list old_parameters;
     processstatustype processstatus;
@@ -130,6 +132,8 @@ class objectdatatype
       representedprocess=o.representedprocess;
       process_representing_action=o.process_representing_action;
       processbody=o.processbody;
+      free_variables=o.free_variables;
+      free_variables_defined=o.free_variables_defined;
       parameters=o.parameters;
       processstatus=o.processstatus;
       object=o.object;
@@ -145,6 +149,8 @@ class objectdatatype
       representedprocess=o.representedprocess;
       process_representing_action=o.process_representing_action;
       processbody=o.processbody;
+      free_variables=o.free_variables;
+      free_variables_defined=o.free_variables_defined;
       parameters=o.parameters;
       processstatus=o.processstatus;
       object=o.object;
@@ -454,8 +460,20 @@ class specification_basic_type:public boost::noncopyable
         // multiaction.
         const action_list tempvar=makemultiaction(actionnames, data_expression_list(objectdata[n].parameters));
         objectdata[n].processbody=action_list_to_process(tempvar);
+        objectdata[n].free_variables=std::set<variable>(objectdata[n].parameters.begin(), objectdata[n].parameters.end());
+        objectdata[n].free_variables_defined=true;
       }
       return n;
+    }
+
+    const std::set<variable>& get_free_variables(const size_t n)
+    {
+      if (!objectdata[n].free_variables_defined)
+      {
+        objectdata[n].free_variables=find_free_variables_process(objectdata[n].processbody);
+        objectdata[n].free_variables_defined=true;
+      }
+      return objectdata[n].free_variables;
     }
 
     void insertvariable(const variable &var, const bool mustbenew)
@@ -679,6 +697,7 @@ class specification_basic_type:public boost::noncopyable
       objectdata[n].objectname=procId.name();
       objectdata[n].object=proc;
       objectdata[n].processbody=body;
+      objectdata[n].free_variables_defined=false;
       objectdata[n].canterminate=canterminate;
       objectdata[n].containstime=containstime;
       objectdata[n].processstatus=s;
@@ -1499,6 +1518,16 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
+      if (is_process_instance(p))
+      {
+        const process_instance q(p);
+        std::set<variable> free_variables=find_free_variables(q.actual_parameters());
+        for(std::set<variable> ::const_iterator i=free_variables.begin(); i!=free_variables.end(); ++i)
+        {
+          free_variables_in_p.insert(*i);
+        }
+        return;
+      }
       if (is_process_instance_assignment(p))
       {
         const process_instance_assignment q(p);
@@ -1558,6 +1587,50 @@ class specification_basic_type:public boost::noncopyable
       {
         find_free_variables_process(process::sync(p).left(),free_variables_in_p);
         find_free_variables_process(process::sync(p).right(),free_variables_in_p);
+        return;
+      }
+
+      if (is_left_merge(p))
+      {
+        find_free_variables_process(process::left_merge(p).left(),free_variables_in_p);
+        find_free_variables_process(process::left_merge(p).right(),free_variables_in_p);
+        return;
+      }
+
+      if (is_merge(p))
+      {
+        find_free_variables_process(process::merge(p).left(),free_variables_in_p);
+        find_free_variables_process(process::merge(p).right(),free_variables_in_p);
+        return;
+      }
+
+      if (is_allow(p))
+      {
+        find_free_variables_process(process::allow(p).operand(),free_variables_in_p);
+        return;
+      }
+
+      if (is_comm(p))
+      {
+        find_free_variables_process(process::comm(p).operand(),free_variables_in_p);
+        return;
+      }
+
+      if (is_block(p))
+      {
+        find_free_variables_process(process::block(p).operand(),free_variables_in_p);
+        return;
+      }
+
+      if (is_hide(p))
+      {
+        find_free_variables_process(process::hide(p).operand(),free_variables_in_p);
+        return;
+      }
+
+      if (is_rename(p))
+      {
+        find_free_variables_process(process::rename(p).operand(),free_variables_in_p);
         return;
       }
 
@@ -4170,7 +4243,7 @@ class specification_basic_type:public boost::noncopyable
       bool singlestate)
     {
       const size_t n=objectIndex(procId);
-      assignment_list t=find_dummy_arguments(stack.parameters,args,find_free_variables_process(objectdata[n].processbody));
+      assignment_list t=find_dummy_arguments(stack.parameters,args,get_free_variables(n));
       if (singlestate)
       {
         return args;
@@ -4191,7 +4264,7 @@ class specification_basic_type:public boost::noncopyable
     {
       const size_t n=objectIndex(procId);
       data_expression_list t=findarguments(objectdata[n].parameters,
-                                           stack.parameters,args,t2,stack,vars,find_free_variables_process(objectdata[n].processbody));
+                                           stack.parameters,args,t2,stack,vars,get_free_variables(n));
 
       int i;
       for (i=1 ; pCRLprcs[i-1]!=procId ; ++i) {}
