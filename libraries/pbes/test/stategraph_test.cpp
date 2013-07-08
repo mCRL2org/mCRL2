@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
+#include "mcrl2/utilities/detail/split.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -476,16 +477,457 @@ void test_local_stategraph()
   p = txt2pbes(text, normalize);
   pbes_system::detail::local_reset_variables_algorithm(p).run();
 }
- 
+
+inline
+std::string print_connected_component(const std::set<std::size_t>& component, const pbes_system::detail::stategraph_algorithm& algorithm)
+{
+  const std::vector<pbes_system::detail::control_flow_graph_vertex>& V = algorithm.control_flow_graph_vertices();
+  std::ostringstream out;
+  out << "{";
+  for (auto i = component.begin(); i != component.end(); ++i)
+  {
+    if (!algorithm.is_valid_connected_component(component))
+    {
+      continue;
+    }
+    if (i != component.begin())
+    {
+      out << ", ";
+    }
+    out << algorithm.print(V[*i]);
+  }
+  out << "}";
+  return out.str();
+}
+
+inline
+std::set<std::string> print_connected_components(const std::set<std::set<std::size_t> >& components, const pbes_system::detail::stategraph_algorithm& algorithm)
+{
+  std::set<std::string> result;
+  for (auto i = components.begin(); i != components.end(); ++i)
+  {
+    result.insert(print_connected_component(*i, algorithm));
+  }
+  return result;
+}
+
+// Test cases provided by Tim Willemse, 28-06-2013
+void test_cfp()
+{
+  std::string text =
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(0,j+1,n+1,m+1)) &&                                                  \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i)}                                                                              \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => Y(0,j,n+1,m+1)) &&                                                    \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(0,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Y(1,n,j,m) );                                                         \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i)}, {(Y, i)}                                                                    \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => Y(0,j,n+1,m+1)) &&                                                    \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(0,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Y(1,j,n,m) );                                                         \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i), (Y, i)}                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => Y(i,j,n+1,m+1)) &&                                                    \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(0,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Y(1,j,n,m) );                                                         \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i), (Y, i)}                                                                      \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => Y(i,j,n+1,m+1)) &&                                                    \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(0,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Y(1,j,n,m) ) &&                                                       \n"
+    "(val(i == 1) => Y(0,j,n,m) );                                                         \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i), (Y, i)}                                                                      \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => Y(i,j,n+1,m+1)) &&                                                    \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(0,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Y(1,j,n,m) ) &&                                                       \n"
+    "(val(i == 1) => Y(0,j,n,m) );                                                         \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i), (Y, i)}                                                                      \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => Y(i,j,n+1,m+1)) &&                                                    \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(j,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => X(i,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Y(1,j,n,m) ) &&                                                       \n"
+    "(val(i == 1) => Y(0,j,n,m) );                                                         \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{}                                                                                    \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => Y(i,j,n+1,m+1)) &&                                                    \n"
+    "(val(i == 0) => X(i+1,j+1,n+1,m+1));                                                  \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i == 1) => X(j,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Z(i,j,n,m) ) &&                                                       \n"
+    "(val(i == 0) => Y(1,j,n,m) ) &&                                                       \n"
+    "(val(i == 1) => Y(0,j,n,m) );                                                         \n"
+    "                                                                                      \n"
+    "nu Z(i,j,n,m:Nat) =                                                                   \n"
+    "(val(i== 0) => X(i,j,n,m)) &&                                                         \n"
+    "(val(i== 1) => Z(i,j,n,m));                                                           \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0,0);                                                                           \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{}                                                                                    \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => Y(i,j,n+1)) &&                                                        \n"
+    "(val(i == 0) => X(i+1,j+1,n+1));                                                      \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => X(j,j,n) )                                                            \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0);                                                                             \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(Y, i)}                                                                              \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => Y(i,j,n+1)) &&                                                        \n"
+    "(val(i == 0) => X(i+1,j+1,n+1));                                                      \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => X(i,j,n) ) &&                                                         \n"
+    "(val(i == 1) => Z(i,j,n) )                                                            \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "nu Z(i,j,n:Nat) =                                                                     \n"
+    "(val(j == 1) => X(i,j,n)) &&                                                          \n"
+    "(val(i == 1) => Z(0,j,n))                                                             \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0);                                                                             \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i), (Y, i), (Z, i)}                                                              \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => Y(i,j,n+1)) &&                                                        \n"
+    "(val(i == 0) => X(i+1,j+1,n+1));                                                      \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => X(i,j,n) ) &&                                                         \n"
+    "(val(i == 1) => Z(i,j,n) )                                                            \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "nu Z(i,j,n:Nat) =                                                                     \n"
+    "(val(j == 1) => X(j,i,n)) &&                                                          \n"
+    "(val(i == 1) => Z(0,j,n))                                                             \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0);                                                                             \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => Y(i,j,n+1)) &&                                                        \n"
+    "(val(i == 0) => X(i+1,i+1,n+1));                                                      \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => X(i,j,n) ) &&                                                         \n"
+    "(val(i == 1) => Z(i,j,n) )                                                            \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "nu Z(i,j,n:Nat) =                                                                     \n"
+    "(val(j == 1) => X(i,j,n)) &&                                                          \n"
+    "(val(i == 1) => Z(0,j,n))                                                             \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0);                                                                             \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 0) => Y(i,j,n+1));                                                          \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n:Nat) =                                                                     \n"
+    "(val(i==0) => Z(i,j,n+1));                                                            \n"
+    "                                                                                      \n"
+    "nu Z(i,j,n:Nat) =                                                                     \n"
+    "(val(i==0) => Z(1,j,n)) &&                                                            \n"
+    "(val(i==1) => (X(i,j,n) || Y(i,j,n)));                                                \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0);                                                                             \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,n:Nat) =                                                                       \n"
+    "(val(i == 0) => Y(i,n+1));                                                            \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) =                                                                       \n"
+    "(val(i==0) => Z(i,n+1));                                                              \n"
+    "                                                                                      \n"
+    "nu Z(i,n:Nat) =                                                                       \n"
+    "(val(i==0) => X(i,n));                                                                \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(n:Nat) = Y(n+1);                                                                 \n"
+    "nu Y(n:Nat) = Z(n+1);                                                                 \n"
+    "nu Z(n:Nat) =  X(n);                                                                  \n"
+    "                                                                                      \n"
+    "init X(0);                                                                            \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,n:Nat) =                                                                       \n"
+    "(val(i == 0) => Y(i,n+1));                                                            \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) =                                                                       \n"
+    "(val(i==0) => Z(i,0,n+1)) &&                                                          \n"
+    "(val(i==0) => X(i,n+1));                                                              \n"
+    "                                                                                      \n"
+    "nu Z(i,j,n:Nat) =                                                                     \n"
+    "(val(i==0 && n == 1) => Z(1,j,n)) &&                                                  \n"
+    "(val(i==1) => X(n,j));                                                                \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                      \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,n:Nat) =                                                                       \n"
+    "(val(i == 0) => Y(i,n));                                                              \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) =                                                                       \n"
+    "(val(i==0) => Z(i,0)) &&                                                              \n"
+    "(val(i==0) => X(i,2));                                                                \n"
+    "                                                                                      \n"
+    "nu Z(i,n:Nat) =                                                                       \n"
+    "(val(i==0 && n == 1) => Z(1,n)) &&                                                    \n"
+    "(val(i==1) => X(n,i));                                                                \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,n:Nat) =                                                                       \n"
+    "(val(i == 0) => Y(i,n));                                                              \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) =                                                                       \n"
+    "(val(i==0) => X(i,0)) &&                                                              \n"
+    "(val(i==1) => X(n,2));                                                                \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,n:Nat) =                                                                       \n"
+    "(val(i == 0) => Y(i,n+1));                                                            \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) =                                                                       \n"
+    "(val(i==0) => X(i,0)) &&                                                              \n"
+    "(val(i==1) => X(n,2));                                                                \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(n,i:Nat) = Y(n+1,0);                                                             \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) = X(0,n);                                                               \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,n:Nat) = forall j:Nat.(val(i == 0) => Y(i,n+j));                               \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) = (val(i==1) => X(n,2));                                                \n"
+    "                                                                                      \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "%                                                                                     \n"
+    "% The below PBES should only have (Y,i) as a control flow parameter                   \n"
+    "%                                                                                     \n"
+    "                                                                                      \n"
+    "pbes                                                                                  \n"
+    "nu X(n:Nat) = forall j:Nat. Y(0,n+j);                                                 \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) = (val(i==1) => X(2));                                                  \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0);                                                                                 \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(Y, i)}                                                                              \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(n:Nat) = forall j:Nat. Y(0,j);                                                   \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) = (val(i==1) => X(2));                                                  \n"
+    "                                                                                      \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0);                                                                                 \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, n), (Y, i)}                                                                      \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "                                                                                      \n"
+    "nu X(i,j:Nat) = (val(i==0) => X(0,i)) && (val(j==1) => X(j,1));                       \n"
+    "                                                                                      \n"
+    "init X(0,0);                                                                          \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,n:Nat) =                                                                       \n"
+    "(val(i == 0) => Y(i,n));                                                              \n"
+    "                                                                                      \n"
+    "nu Y(i,n:Nat) =                                                                       \n"
+    "(val(i==0) => X(i,0)) &&                                                              \n"
+    "(val(i==1) => X(n+1,2));                                                              \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0);                                                                               \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    ;
+
+  std::vector<std::string> test_cases = utilities::detail::split_text(text, "----------");
+  for (auto i = test_cases.begin(); i != test_cases.end(); ++i)
+  {
+    std::vector<std::string> keywords;
+    keywords.push_back("pbes");
+    keywords.push_back("expected_result");
+    std::map<std::string, std::string> test_case = utilities::detail::split_text_using_keywords(*i, keywords);
+    pbes p = txt2pbes(test_case["pbes"], false);
+    std::string expected_result = boost::trim_copy(test_case["expected_result"]);
+    if (!expected_result.empty())
+    {
+      expected_result = boost::trim_copy(expected_result.substr(15));
+    }
+    std::vector<std::string> lines = utilities::detail::nonempty_lines(expected_result);
+    std::set<std::string> lineset(lines.begin(), lines.end());
+    std::string expected = utilities::string_join(lineset, ", ");
+    pbes_system::detail::stategraph_algorithm algorithm(p);
+    algorithm.run();
+    std::string result = utilities::string_join(print_connected_components(algorithm.connected_components(), algorithm), ", ");
+    if (result != expected)
+    {
+      BOOST_CHECK(result == expected);
+      std::cout << "--- Control flow test failed ---" << std::endl;
+      std::cout << test_case["pbes"] << std::endl;
+      std::cout << "result          = " << result   << std::endl;
+      std::cout << "expected result = " << expected << std::endl;
+    }
+  }
+}
+
 int test_main(int, char**)
 {
-  log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
+  // log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
   test_guard();
 //  test_parse();
 //  test_remove_may_transitions();
   test_significant_variables();
 //  test_constraints();
 //  test_local_stategraph();
+//  test_cfp();
 
   return 0;
 }

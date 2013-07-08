@@ -23,15 +23,15 @@ namespace pbes_system {
 
 namespace detail {
 
-class dependency_graph_vertex
+class control_flow_graph_vertex
 {
   protected:
     core::identifier_string name_;
     std::size_t index_;
-    std::set<dependency_graph_vertex*> neighbors_;
+    std::set<control_flow_graph_vertex*> neighbors_;
 
   public:
-    dependency_graph_vertex(const core::identifier_string& name, std::size_t index)
+    control_flow_graph_vertex(const core::identifier_string& name, std::size_t index)
       : name_(name), index_(index)
     {}
 
@@ -45,19 +45,19 @@ class dependency_graph_vertex
       return index_;
     }
 
-    const std::set<dependency_graph_vertex*>& neighbors() const
+    const std::set<control_flow_graph_vertex*>& neighbors() const
     {
       return neighbors_;
     }
 
-    std::set<dependency_graph_vertex*>& neighbors()
+    std::set<control_flow_graph_vertex*>& neighbors()
     {
       return neighbors_;
     }
 };
 
 inline
-std::ostream& operator<<(std::ostream& out, const dependency_graph_vertex& u)
+std::ostream& operator<<(std::ostream& out, const control_flow_graph_vertex& u)
 {
   return out << '(' << u.name() << ", " << u.index() << ')';
 }
@@ -107,7 +107,11 @@ class stategraph_algorithm
     // the global control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_GCFP;
 
-    std::vector<dependency_graph_vertex> m_dependency_graph_vertices;
+    // the vertices of the control flow graph
+    std::vector<control_flow_graph_vertex> m_control_flow_graph_vertices;
+
+    // the connected components in the control flow graph
+    std::set<std::set<std::size_t> > m_connected_components;
 
     // for readability
     std::set<data::variable> FV(const data::data_expression& x) const
@@ -546,9 +550,9 @@ class stategraph_algorithm
       return cf[i];
     }
 
-    std::vector<dependency_graph_vertex>::iterator find_vertex(const core::identifier_string& X, std::size_t n)
+    std::vector<control_flow_graph_vertex>::iterator find_vertex(const core::identifier_string& X, std::size_t n)
     {
-      for (auto i = m_dependency_graph_vertices.begin(); i != m_dependency_graph_vertices.end(); ++i)
+      for (auto i = m_control_flow_graph_vertices.begin(); i != m_control_flow_graph_vertices.end(); ++i)
       {
         if (i->name() == X && i->index() == n)
         {
@@ -556,16 +560,16 @@ class stategraph_algorithm
         }
       }
       throw mcrl2::runtime_error("vertex not found in dependency graph");
-      return m_dependency_graph_vertices.end();
+      return m_control_flow_graph_vertices.end();
     }
 
     // relate (X, n) and (Y, m) in the dependency graph
     // \pre: the equation of X has a lower rank than the equation of Y
-    void relate_dependency_graph_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
+    void relate_control_flow_graph_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
     {
       mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related" << std::endl;
-      dependency_graph_vertex& u = *find_vertex(X, n);
-      dependency_graph_vertex& v = *find_vertex(Y, m);
+      control_flow_graph_vertex& u = *find_vertex(X, n);
+      control_flow_graph_vertex& v = *find_vertex(Y, m);
       u.neighbors().insert(&v);
       v.neighbors().insert(&u);
     }
@@ -583,7 +587,7 @@ class stategraph_algorithm
         {
           if (is_global_control_flow_parameter(X, n))
           {
-            m_dependency_graph_vertices.push_back(dependency_graph_vertex(X, n));
+            m_control_flow_graph_vertices.push_back(control_flow_graph_vertex(X, n));
           }
         }
       }
@@ -603,27 +607,11 @@ class stategraph_algorithm
             std::size_t m = j->second;
             if (is_global_control_flow_parameter(X, n) && is_global_control_flow_parameter(Y, m))
             {
-              relate_dependency_graph_vertices(X, n, Y, m);
+              relate_control_flow_graph_vertices(X, n, Y, m);
             }
           }
         }
       }
-    }
-
-    // a connected component is valid if it does not contain two nodes (X, n) and (Y, m) with X == Y
-    bool is_valid_connected_component(const std::set<std::size_t>& component) const
-    {
-      std::set<core::identifier_string> V;
-      for (auto i = component.begin(); i != component.end(); ++i)
-      {
-        const core::identifier_string& X = m_dependency_graph_vertices[*i].name();
-        if (V.find(X) != V.end())
-        {
-          return false;
-        }
-        V.insert(X);
-      }
-      return true;
     }
 
     std::string print_connected_component(const std::set<std::size_t>& component) const
@@ -636,7 +624,7 @@ class stategraph_algorithm
         {
           out << ", ";
         }
-        out << m_dependency_graph_vertices[*i];
+        out << m_control_flow_graph_vertices[*i];
       }
       out << "}";
       if (!is_valid_connected_component(component))
@@ -646,7 +634,7 @@ class stategraph_algorithm
       return out.str();
     }
 
-    // compute the connected component belonging to the vertex m_dependency_graph_vertices[i]
+    // compute the connected component belonging to the vertex m_control_flow_graph_vertices[i]
     std::set<std::size_t> compute_connected_component(std::size_t i, std::vector<bool>& done) const
     {
       std::set<std::size_t> todo;
@@ -658,14 +646,14 @@ class stategraph_algorithm
         auto j = todo.begin();
         std::size_t u_index = *j;
         todo.erase(j);
-        const dependency_graph_vertex& u = m_dependency_graph_vertices[u_index];
+        const control_flow_graph_vertex& u = m_control_flow_graph_vertices[u_index];
         done[u_index] = true;
         component.insert(u_index);
 
         for (auto k = u.neighbors().begin(); k != u.neighbors().end(); ++k)
         {
-          const dependency_graph_vertex* w = *k;
-          std::size_t w_index = w - &(m_dependency_graph_vertices.front());
+          const control_flow_graph_vertex* w = *k;
+          std::size_t w_index = w - &(m_control_flow_graph_vertices.front());
           if (!done[w_index])
           {
             todo.insert(w_index);
@@ -675,11 +663,12 @@ class stategraph_algorithm
       return component;
     }
 
-    void compute_connected_components() const
+    void compute_connected_components()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute connected components ===" << std::endl;
-      // done[i] means that m_dependency_graph_vertices[i] has been processed
-      std::vector<bool> done(m_dependency_graph_vertices.size(), false);
+
+      // done[i] means that m_control_flow_graph_vertices[i] has been processed
+      std::vector<bool> done(m_control_flow_graph_vertices.size(), false);
 
       for (std::size_t i = 0; i < done.size(); i++)
       {
@@ -688,6 +677,7 @@ class stategraph_algorithm
           continue;
         }
         std::set<std::size_t> component = compute_connected_component(i, done);
+        m_connected_components.insert(component);
         mCRL2log(log::debug, "stategraph") << print_connected_component(component) << std::endl;
       }
     }
@@ -803,6 +793,39 @@ class stategraph_algorithm
     {
       m_pbes = stategraph_pbes(p);
       m_datar = data::rewriter(p.data(), rewrite_strategy);
+    }
+
+    const std::vector<control_flow_graph_vertex>& control_flow_graph_vertices() const
+    {
+      return m_control_flow_graph_vertices;
+    }
+
+    const std::set<std::set<std::size_t> >& connected_components() const
+    {
+      return m_connected_components;
+    }
+
+    // a connected component is valid if it does not contain two nodes (X, n) and (Y, m) with X == Y
+    bool is_valid_connected_component(const std::set<std::size_t>& component) const
+    {
+      std::set<core::identifier_string> V;
+      for (auto i = component.begin(); i != component.end(); ++i)
+      {
+        const core::identifier_string& X = m_control_flow_graph_vertices[*i].name();
+        if (V.find(X) != V.end())
+        {
+          return false;
+        }
+        V.insert(X);
+      }
+      return true;
+    }
+
+    std::string print(const control_flow_graph_vertex& u) const
+    {
+      std::ostringstream out;
+      out << '(' << u.name() << ", " << find_equation(m_pbes, u.name())->parameters()[u.index()].name() << ')';
+      return out.str();
     }
 
     /// \brief Computes the control flow graph
