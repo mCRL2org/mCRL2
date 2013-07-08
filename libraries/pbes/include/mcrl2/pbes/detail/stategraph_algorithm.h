@@ -381,6 +381,9 @@ class stategraph_algorithm
       return false;
     }
 
+    // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
+    // 1. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
+    // 2. copy(X,i,n) is defined en source(X,i,n) en dest(X,i,n) zijn beide undefined.
     void compute_local_control_flow_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute local control flow parameters ===" << std::endl;
@@ -407,9 +410,26 @@ class stategraph_algorithm
           {
             for (std::size_t n = 0; n < d_X.size(); n++)
             {
-              if (is_undefined(PVI_X_i.source, n) && is_undefined(PVI_X_i.dest, n) && !is_mapped_to(PVI_X_i.copy, n, n))
+              // if (is_undefined(PVI_X_i.source, n) && is_undefined(PVI_X_i.dest, n) && !is_mapped_to(PVI_X_i.copy, n, n))
+              // {
+              //   m_is_LCFP[X][n] = false;
+              // }
+
+              if (PVI_X_i.copy.find(n) == PVI_X_i.copy.end())
               {
-                m_is_LCFP[X][n] = false;
+                // copy(X,i,n) is undefined
+                if (is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n))
+                {
+                  m_is_LCFP[X][n] = false;
+                }
+              }
+              else
+              {
+                // copy(X,i,n) is defined
+                if (!is_undefined(PVI_X_i.source, n) || !is_undefined(PVI_X_i.dest, n))
+                {
+                  m_is_LCFP[X][n] = false;
+                }
               }
             }
           }
