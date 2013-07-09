@@ -114,6 +114,52 @@ variable, $d$ is a data variable of sort $D$ and $a$ is an action label.
 where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, $\mathsf{Q}\in \{\forall
 ,\exists \}$, $\sigma \in \{\mu ,\nu \}$, $b$ is a data term of sort $%
 \mathsf{B}$, $X$ is a predicate variable, $d$ is a data variable of sort $D$
-and $e$ is a vector of data terms and $\alpha $ is an action
-formula.\newpage 
+and $e$ is a vector of data terms and $\alpha $ is an action formula.
 \end{definition}
+
+\subsection{Well typedness constraints}
+
+\subsubsection{well typedness constraints for PBES equations}
+
+\begin{itemize}
+\item the binding variable parameters have unique names
+
+\item the names of the quantifier variables in the equation are disjoint
+with the binding variable parameter names
+
+\item within the scope of a quantifier variable in the formula, no other
+quantifier variables with the same name may occur
+\end{itemize}
+
+\subsubsection{well typedness constraints for PBESs}
+
+\begin{itemize}
+\item the sorts occurring in the global variables of the equations are
+declared in the data specification
+
+\item the sorts occurring in the binding variable parameters are declared in
+the data specification
+
+\item the sorts occurring in the quantifier variables of the equations are
+declared in the data specification
+
+\item the binding variables of the equations have unique names (well
+formedness)
+
+\item the global variables occurring in the equations are declared in the
+global variable specification
+
+\item the global variables occurring in the equations with the same name are
+identical
+
+\item the declared global variables and the quantifier variables occurring
+in the equations have different names
+
+\item the predicate variable instantiations occurring in the equations match
+with their declarations
+
+\item the predicate variable instantiation occurring in the initial state
+matches with the declaration
+
+\item the data specification is well typed
+\end{itemize}
