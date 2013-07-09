@@ -650,8 +650,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
   public:
-    stategraph_local_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
-      : stategraph_algorithm(p, rewrite_strategy)
+    stategraph_local_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty, bool use_alternative_cfp_criterion = false)
+      : stategraph_algorithm(p, rewrite_strategy, use_alternative_cfp_criterion)
     { }
 
     /// \brief Computes the control flow graph

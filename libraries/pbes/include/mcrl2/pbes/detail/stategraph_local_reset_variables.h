@@ -142,7 +142,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
           assert(ci != m_control_flow_index.end());
 #ifndef NDEBUG
           bool found = false;
-#endif          
+#endif
           std::size_t m = (std::numeric_limits<std::size_t>::max)();
           const std::map<std::size_t, std::size_t>& M = ci->second;
           for (std::map<std::size_t, std::size_t>::const_iterator mi = M.begin(); mi != M.end(); ++mi)
@@ -150,9 +150,9 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
             if (mi->second == k)
             {
               assert(!found);
-#ifndef NDEBUG              
+#ifndef NDEBUG
               found = true;
-#endif              
+#endif
               m = mi->first;
             }
           }
@@ -320,8 +320,8 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
     }
 
-    local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
-      : stategraph_local_algorithm(p, rewrite_strategy),
+    local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty, bool use_alternative_cfp_criterion = false)
+      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_cfp_criterion),
         m_original_pbes(p)
     {}
 

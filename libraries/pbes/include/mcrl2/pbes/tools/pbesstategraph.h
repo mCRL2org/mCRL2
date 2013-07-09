@@ -40,8 +40,8 @@ void pbesstategraph(const std::string& input_filename,
 
   if (use_local_variant)
   {
-    pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy);
-    q = algorithm.run(simplify, use_marking_optimization, use_alternative_cfp_criterion);
+    pbes_system::detail::local_reset_variables_algorithm algorithm(p, rewrite_strategy, use_alternative_cfp_criterion);
+    q = algorithm.run(simplify, use_marking_optimization);
     if (print_influence_graph)
     {
       pbes_system::detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
