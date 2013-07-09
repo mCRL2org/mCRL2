@@ -1,0 +1,88 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{PBES instantiation}
+
+In this section we describe two instantiation algorithms for PBESs.
+
+\subsection{Lazy algorithm}
+
+In this section we describe an implementation of the lazy instantiation
+algorithm \textsc{Pbes2besLazy} that uses instantiation to compute a BES. It
+takes two extra parameters, an injective function $\rho $ that renames
+proposition variables to predicate variables, and a rewriter $R$ that
+eliminates quantifiers from predicate formulae. Let $\mathcal{E=(\sigma }%
+_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\ldots \mathcal{(\sigma }%
+_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES, and $X_{init}(e_{init})$ an
+initial state.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Pbes2besLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
+\text{, }\rho \text{\textsc{)}} \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}_{i}:=\epsilon
+\\ 
+todo:=\{R(X_{init}(e_{init}))\} \\ 
+done:=\emptyset \\ 
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
+\qquad done:=done\cup \{X_{k}(e)\} \\ 
+\qquad X^{e}:=\rho (X_{k}(e)) \\ 
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad \mathcal{E}_{k}:=\mathcal{E}_{k}(\mathcal{\sigma }_{k}X^{e}=\rho
+(\psi ^{e})) \\ 
+\qquad todo:=todo\cup \{Y(f)\in \mathsf{occ}(\psi ^{e})\ |\ Y(f)\notin done\}
+\\ 
+\text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+where $\rho $ is extended from predicate variables to quantifier free
+predicate formulae using%
+\begin{equation*}
+\begin{array}{cc}
+\rho (b)=_{def}b & \quad \rho (\varphi \oplus \psi )=_{def}\rho (\varphi
+)\oplus \rho (\psi )%
+\end{array}%
+\end{equation*}%
+\pagebreak
+
+\subsection{Finite algorithm}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi
+_{1})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{n}:D_{n},e_{n}:E_{n})=\varphi
+_{n})$ be a PBES. We assume that all data sorts $D_{i}$ are finite and all
+data sorts $E_{i}$ are infinite. Let $r$ be a data rewriter, and let $\rho $
+be an injective function that creates a unique predicate variable from a
+predicate variable name and a data value according to $\rho
+(X(d:D,e:E),d_{0})\rightarrow Y(e:E)$, where $D$ is finite and $E$ is
+infinite and $d_{0}\in D$. Note that $D$ and $D_{i}$ may be
+multi-dimensional sorts.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Pbes2besFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
+\textsc{)}} \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do}} \\ 
+\qquad \mathcal{E}_{i}:=\{\mathcal{\sigma }_{i}\rho (X_{i},d)=R(\varphi
+_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\ 
+\text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+with $R$ a rewriter on pbes expressions that is defined as follows:%
+\begin{eqnarray*}
+R(b) &=&b \\
+R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
+R(\varphi \oplus \psi ) &=&R(\varphi )\oplus (\psi ) \\
+R(X_{i}(d,e)) &=&\left\{ 
+\begin{array}{cc}
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\ 
+\dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
+\text{if }FV(d)\neq \emptyset%
+\end{array}%
+\right. \\
+R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
+R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
+\end{eqnarray*}%
+where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
+$\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
+variables appearing in $d$.\newpage

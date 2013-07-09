@@ -1,0 +1,261 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{PBES rewriters}
+
+In this section we describe two PBES rewriters. We assume that a data
+rewriter $r$ is given that rewrites data terms.
+
+\subsection{Simplifying rewriter}
+
+We define a simplifying PBES rewriter $R$ recursively as follows. We assume
+that $D$ is a non-empty data type, and we denote the free variables
+appearing in $\varphi $ as $\mathsf{free}(\varphi )$. We assume that a data
+rewriter $r$ is given that rewrites data terms.%
+\begin{equation*}
+\begin{array}{lcl}
+b & \rightarrow & r(b) \\ 
+\lnot \lnot \varphi & \rightarrow & \varphi \\ 
+\varphi \wedge true & \rightarrow & \varphi \\ 
+true\wedge \varphi & \rightarrow & \varphi \\ 
+\varphi \wedge false & \rightarrow & false \\ 
+false\wedge \varphi & \rightarrow & false \\ 
+\varphi \wedge \varphi & \rightarrow & \varphi \\ 
+\varphi \vee true & \rightarrow & true \\ 
+true\vee \varphi & \rightarrow & true \\ 
+\varphi \vee false & \rightarrow & \varphi \\ 
+false\vee \varphi & \rightarrow & \varphi \\ 
+\varphi \vee \varphi & \rightarrow & \varphi \\ 
+\varphi \Rightarrow \psi & \rightarrow & \lnot \varphi \vee \psi \\ 
+\forall _{d:D}.\varphi & \rightarrow & \varphi \text{ if }d\notin \mathsf{%
+free}(\varphi ) \\ 
+\forall _{d:D}.\lnot \varphi & \rightarrow & \lnot \exists _{d:D}.\varphi \\ 
+\forall _{d:D}.\varphi \wedge \psi & \rightarrow & \forall _{d:D}.\varphi
+\wedge \forall _{d:D}.\psi \\ 
+\forall _{d:D}.\varphi \vee \psi & \rightarrow & (\forall _{d:D}.\varphi
+)\vee \psi \text{ if }d\notin \mathsf{free}(\psi ) \\ 
+\forall _{d:D}.\varphi \vee \psi & \rightarrow & \varphi \vee (\forall
+_{d:D}.\psi )\text{ if }d\notin \mathsf{free}(\varphi ) \\ 
+\exists _{d:D}.\varphi & \rightarrow & \varphi \text{ if }d\notin \mathsf{%
+free}(\varphi ) \\ 
+\exists _{d:D}.\lnot \varphi & \rightarrow & \lnot \forall _{d:D}.\varphi \\ 
+\exists _{d:D}.\varphi \vee \psi & \rightarrow & \exists _{d:D}.\varphi \vee
+\exists _{d:D}.\psi \\ 
+\exists _{d:D}.\varphi \wedge \psi & \rightarrow & (\exists _{d:D}.\varphi
+)\wedge \psi \text{ if }d\notin \mathsf{free}(\psi ) \\ 
+\exists _{d:D}.\varphi \wedge \psi & \rightarrow & \varphi \wedge (\exists
+_{d:D}.\psi )\text{ if }d\notin \mathsf{free}(\varphi ) \\ 
+X(e) & \rightarrow & X(r(e))%
+\end{array}%
+\end{equation*}%
+where $\varphi $ and $\psi $ are arbitrary pbes expressions, $b$ is a data
+term of data sort $\mathbb{B}$, $true$ and $false$ are elements of data sort 
+$\mathbb{B}$, $X$ is a predicate variable, $e$ consists of zero or more data
+sorts and $d$ is a data variable of sort $D$.
+
+\paragraph{\newpage Simplify}
+
+The pbes expression rewrite system \textsc{Simplify} [Luc Engelen, 2007]
+consists of the following rules\footnote{%
+Todo: reformulate this rewrite system.}:%
+\begin{eqnarray*}
+false\wedge x &\rightarrow &false \\
+x\wedge false &\rightarrow &false \\
+true\wedge x &\rightarrow &x \\
+x\wedge true &\rightarrow &x \\
+\lnot true &\rightarrow &false \\
+\lnot false &\rightarrow &true \\
+ITE(true,x,y) &\rightarrow &x \\
+ITE(false,x,y) &\rightarrow &y \\
+x &=&x\rightarrow true \\
+y &=&x\rightarrow x=y,\text{ provided }y\succ x
+\end{eqnarray*}
+
+\subsection{Quantifier Elimination Rewriter}
+
+This section describes a rewriter on predicate formulae that eliminates
+quantifiers. It is based on the following property%
+\begin{equation*}
+\begin{array}{cc}
+\forall _{x:X}.\varphi \equiv \dbigwedge\limits_{y:X}\varphi \lbrack
+x:=y]\quad & \exists _{x:X}.\varphi \equiv \dbigvee\limits_{y:X}\varphi
+\lbrack x:=y],%
+\end{array}%
+\end{equation*}
+
+where the conjunction and disjunction on the right hand sides may be
+infinite. Because of this, the rewriter we describe here is not guaranteed
+to terminate. However, in many practical cases the rewriter can compute a
+finite expression even if the quantifier variables are of infinite sort. An
+example of this is the formula $\forall _{n:\mathbb{N}}.(n>2)\vee X(n)$ that
+can be rewritten into $X(0)\wedge X(1)\wedge X(2)$.
+
+We assume that the sorts of quantifier variables can be enumerated. By this
+we mean the existence of a function $enum$ that maps an arbitrary term $d:D$
+to a finite set of terms $\{d_{1},\cdots ,d_{k}\}$, such that $%
+range(d)=\dbigcup\limits_{i=1\cdots k}range(d_{i})$, where $range(d)$ is the
+set of closed terms obtained from $d$ by substituting values for the free
+variables of $d$. For example, if natural numbers are represented by $%
+S^{n}(0)$, with $S$ a function that expresses the successor of a number,
+then possible enumerations of the term $n$ are $\{0,S(n^{\prime })\}$ and $%
+\{0,S(0),S(S(n^{\prime \prime }))\}$. Let $id$ be the identity function and
+let $\sigma \lbrack d_{1}:=e_{1},\cdots ,d_{n}:=e_{n}]$ be the function $%
+\sigma ^{\prime }$ with $\sigma ^{\prime }(x)=e_{i}$ if $x=d_{i}$ and $%
+\sigma ^{\prime }(x)=\sigma (x)$ otherwise.
+
+A parameter of the \textsc{EliminateQuantifiers }algorithm is a rewriter $R$
+on quantifier free predicate formulae, that is expected to have the
+following properties:%
+\begin{eqnarray*}
+R(\bot ) &=&\bot \\
+(R(t) &=&R(t^{\prime }))\Rightarrow t\simeq t^{\prime }\text{,}
+\end{eqnarray*}%
+where $t\simeq t^{\prime }$ indicates that $t$ and $t^{\prime }$ are
+equivalent. 
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{EliminateQuantifiers(}$Q_{d_{1}:D_{1},\ldots ,d_{n}:D_{n}}.\varphi
+,R $\textsc{)} \\ 
+$\text{\textbf{if }}freevars(R(\varphi ))\cap \{d_{1},\cdots
+,d_{n}\}=\emptyset $ $\text{\textbf{then return }}R(\varphi )$ \\ 
+$V:=\emptyset $ \\ 
+$\text{\textbf{for }}i\in \{1,\ldots ,n\}\text{ \textbf{do }}%
+E_{i}:=\{d_{i}\} $ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \text{\textbf{choose }}e_{k}\in E_{k}$, such that $\mathsf{dvar}%
+(e_{k})\neq \emptyset $ \\ 
+$\qquad E_{k}:=E_{k}\backslash \{e_{k}\}$ \\ 
+$\qquad \text{\textbf{for }}e\in enum(e_{k}):$ \\ 
+$\qquad \qquad W:=\emptyset $ \\ 
+$\qquad \qquad \text{\textbf{for }}\sigma \in \{id[d_{1}:=f_{1},\cdots
+,d_{k-1}:=f_{k-1},d_{k}:=e,d_{k+1}:=f_{k+1},\cdots ,d_{n}:=f_{n}]$ \\ 
+$\qquad \qquad \qquad \wedge f_{i}\in E_{i}\quad (i=1,\cdots ,n)\}:$ \\ 
+$\qquad \qquad \qquad W:=W\cup \{R(\sigma (\varphi )\}$ \\ 
+$\qquad \qquad \text{\textbf{if }}stop_{Q}\in W\text{ \textbf{then return }}%
+stop_{Q}$ \\ 
+$\qquad \qquad V:=V\cup \{w\in W\ |\ \mathsf{dvar}(w)\subset \mathsf{dvar}%
+(\varphi )\}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\{w\in W\ |\ \mathsf{dvar}(w)\varsubsetneq 
+\mathsf{dvar}(\varphi )\}\neq \emptyset $ $\text{\textbf{then }}%
+E_{k}:=E_{k}\cup \{e\}$ \\ 
+$\qquad $\textbf{rof} \\ 
+$\text{\textbf{while }}\forall _{i\in \{1,\ldots ,n\}}.E_{i}\neq \emptyset $
+\\ 
+$\text{\textbf{return} }\dbigoplus\limits_{v\in V}v,$%
+\end{tabular}%
+\end{equation*}%
+where $stop_{Q}=\bot $ and $\dbigoplus =\dbigwedge $ in case $Q=\forall $,
+and where $stop_{Q}=\top $ and $\dbigoplus =\dbigvee $ in case $Q=\exists $
+
+\subsection{OnePointRule Quantifier Elimination}
+
+The OnePointRule Quantifier Elimination rewriter rewrites certain patterns
+of PBES quantifier expressions as follows:%
+\begin{equation*}
+\begin{array}{lll}
+\exists _{x:X}.(x=e)\wedge \varphi & \rightarrow & \varphi \lbrack x:=e] \\ 
+\exists _{x:\mathbb{B}}.x\wedge \varphi & \rightarrow & \varphi \lbrack
+x:=true] \\ 
+\exists _{x:\mathbb{B}}.\lnot x\wedge \varphi & \rightarrow & \varphi
+\lbrack x:=false] \\ 
+\forall _{x:X}.(x\neq e)\vee \varphi & \rightarrow & \varphi \lbrack x:=e]
+\\ 
+\forall _{x:\mathbb{B}}.x\vee \varphi & \rightarrow & \varphi \lbrack
+x:=false] \\ 
+\forall _{x:\mathbb{B}}.\lnot x\vee \varphi & \rightarrow & \varphi \lbrack
+x:=true]%
+\end{array}%
+\end{equation*}%
+Note that it is straightforward to generalize these patterns to quantifier
+expressions as they occur in the mCRL2 toolset ($\exists
+_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $ and $\forall
+_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $).
+
+\subsubsection{Preprocessing}
+
+It turns out that the data rewriters in the mCRL2 toolset do not rewrite $%
+\lnot (\varphi =\psi )$ into $\varphi \neq \psi $. Therefore it is useful to
+apply the following as a preprocessing step to data expressions:%
+\begin{equation*}
+\begin{array}{lll}
+\lnot (\varphi _{1}\wedge \cdots \wedge \varphi _{n}) & \rightarrow  & \lnot
+\varphi _{1}\vee \cdots \vee \lnot \varphi _{n} \\ 
+\lnot (\varphi _{1}\vee \cdots \vee \varphi _{n}) & \rightarrow  & \lnot
+\varphi _{1}\wedge \cdots \wedge \lnot \varphi _{n} \\ 
+\lnot (\varphi =\psi ) & \rightarrow  & \varphi \neq \psi  \\ 
+\lnot (\varphi \neq \psi ) & \rightarrow  & \varphi =\psi  \\ 
+\lnot \lnot \varphi  & \rightarrow  & \varphi 
+\end{array}%
+\end{equation*}
+
+\subsection{The predicate formula normal form (PFNF)}
+
+\begin{definition}
+A predicate formula is said to be in \emph{Predicate Formula Normal Form}
+(PFNF) if it has the following form: 
+\begin{equation*}
+\mathsf{Q}_{1}v_{1}{:}V_{1}.\cdots \mathsf{Q}_{n}v_{n}{:}V_{n}.~h\wedge
+\bigwedge\limits_{i\in I}\left( g_{i}\implies \bigvee\limits_{j\in
+J_{i}}~X^{j}(e^{j})\right)
+\end{equation*}%
+where $X^{j}\in \chi $ ($\chi $ is a countable of sorted predicate
+variables), $\mathsf{Q}_{i}\in \{\forall ,\exists \}$, $I$ is a (possibly
+empty) finite index set, each $J_{i}$ is a non-empty finite index set, and $%
+h $ and every $g_{i}$ are simple formulae.
+\end{definition}
+
+Note that here $J_{i}$ is used to index a set of occurrences of not
+necessarily different variables. For instance, $(n>0\implies X(3)\vee
+X(5)\vee Y(6))$ is a formula complying to the definition of PFNF. So long as
+it does not lead to confusion, we stick to the convention to drop the typing
+of the quantified variables $v_{i}$. An algorithm to compute a PFNF is:
+
+\begin{equation*}
+\begin{array}{lll}
+p(c) & =_{def} & c \\ 
+p(X(d)) & =_{def} & X(d) \\ 
+p(\forall {x{:}D}.\varphi ) & =_{def} & \forall {x{:}D}.p(\varphi ) \\ 
+p(\exists {x{:}D}.\varphi ) & =_{def} & \exists {x{:}D}.p(\varphi ) \\ 
+&  &  \\ 
+p(\varphi \wedge \psi ) & =_{def} & 
+\begin{array}{l}
+\mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi }}^{\varphi }\mathsf{Q%
+}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi }.~~\left( h^{\varphi
+}\wedge h^{\psi }\right) \\ 
+\wedge \bigwedge\limits_{i\in I^{\varphi }\cup I^{\psi }}\left(
+g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)%
+\end{array}
+\\ 
+&  &  \\ 
+p(\varphi \vee \psi ) & =_{def} & 
+\begin{array}{l}
+\mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi }}^{\varphi }\mathsf{Q%
+}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi }.\left( h^{\varphi }\vee
+h^{\psi }\right) \\ 
+\wedge \bigwedge\limits_{i\in I^{\varphi }}\left( \left( \lnot h^{\psi
+}\wedge g_{i}\right) \implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)
+\\ 
+\wedge \bigwedge\limits_{i\in I^{\psi }}\left( \left( \lnot h^{\varphi
+}\wedge g_{i}\right) \implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)
+\\ 
+\wedge \bigwedge\limits_{i\in I^{\varphi },k\in I^{\psi }}\left( \left(
+g_{i}\wedge g_{k}\right) \implies \bigvee\limits_{j\in J_{i},m\in
+J_{k}}~X^{j}(e^{j})\vee X^{m}(e^{m})\right)%
+\end{array}%
+\end{array}%
+\end{equation*}%
+where
+
+\begin{equation*}
+\begin{array}{lll}
+p(\varphi ) & = & \mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi
+}}^{\varphi }.~h^{\varphi }\wedge \bigwedge\limits_{i\in I^{\varphi }}\left(
+g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)  \\ 
+p(\psi ) & = & \mathsf{Q}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi
+}.~h^{\psi }\wedge \bigwedge\limits_{i\in I^{\psi }}\left( g_{i}\implies
+\bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right) ,%
+\end{array}%
+\end{equation*}%
+under the assumption that $I^{\varphi }$ and $I^{\psi }$ are disjoint, and $%
+v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\newpage 

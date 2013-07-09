@@ -1,0 +1,109 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\subsection{Monotonicity}
+
+\begin{definition}
+A state formula is called \emph{monotonous} if it can be rewritten such that
+propositional variables are not inside the scope of a negation or an
+implication. More formally, a state formula $\varphi $ is monotonous if $%
+m(\varphi )=true$, where $m$ is defined as follows. This definition applies
+to predicate formulae as well.
+\end{definition}
+
+\begin{equation*}
+\begin{array}{lll}
+m(\lnot b) & =_{def} & \mathsf{true} \\ 
+m(\lnot \lnot \varphi ) & =_{def} & m(\varphi ) \\ 
+m(\lnot (\varphi \wedge \psi )) & =_{def} & m(\lnot \varphi )\wedge m(\lnot
+\psi ) \\ 
+m(\lnot (\varphi \vee \psi )) & =_{def} & m(\lnot \varphi )\wedge m(\lnot
+\psi ) \\ 
+m(\lnot (\varphi \Rightarrow \psi )) & =_{def} & m(\varphi )\wedge m(\lnot
+\psi ) \\ 
+m(\lnot \forall d{{:}D}.\varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \exists d{{:}D}.\varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \lbrack \alpha ]\varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \langle \alpha \rangle \varphi ) & =_{def} & m(\lnot \varphi ) \\ 
+m(\lnot \nabla ) & =_{def} & \mathsf{true} \\ 
+m(\lnot \nabla (t)) & =_{def} & \mathsf{true} \\ 
+m(\lnot \Delta ) & =_{def} & \mathsf{true} \\ 
+m(\lnot \Delta (t)) & =_{def} & \mathsf{true} \\ 
+m(\lnot X(e)) & =_{def} & \mathsf{false} \\ 
+m(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\lnot \varphi \lbrack
+X:=\lnot X]) \\ 
+m(\lnot \nu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\lnot \varphi \lbrack
+X:=\lnot X]) \\ 
+m(b) & =_{def} & \mathsf{true} \\ 
+m(\varphi \wedge \psi ) & =_{def} & m(\varphi )\wedge m(\psi ) \\ 
+m(\varphi \vee \psi ) & =_{def} & m(\varphi )\wedge m(\psi ) \\ 
+m(\varphi \Rightarrow \psi ) & =_{def} & m(\lnot \varphi )\wedge m(\psi ) \\ 
+m(\forall d{{:}D}.\varphi ) & =_{def} & m(\varphi ) \\ 
+m(\exists d{{:}D}.\varphi ) & =_{def} & m(\varphi ) \\ 
+m([\alpha ]\varphi ) & =_{def} & m(\varphi ) \\ 
+m(\langle \alpha \rangle \varphi ) & =_{def} & m(\varphi ) \\ 
+m(\nabla ) & =_{def} & \mathsf{true} \\ 
+m(\nabla (t)) & =_{def} & \mathsf{true} \\ 
+m(\Delta ) & =_{def} & \mathsf{true} \\ 
+m(\Delta (t)) & =_{def} & \mathsf{true} \\ 
+m(X(e)) & =_{def} & \mathsf{true} \\ 
+m(\mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\varphi ) \\ 
+m(\nu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & m(\varphi )%
+\end{array}%
+\end{equation*}
+
+\newpage
+
+\subsection{Normalization}
+
+The normalization function $h$ is a function that eliminates implications
+from a state formula $\varphi $, and that 'pushes' negations inwards to the
+level of data expressions. A precondition of $h$ is that $\varphi $ is
+monotonous. If this is not the case, during the computation a term $\lnot
+X(e)$ will be encountered.%
+\begin{equation*}
+\begin{array}{lll}
+h(\lnot b) & =_{def} & \lnot b \\ 
+h(\lnot \lnot \varphi ) & =_{def} & h(\varphi ) \\ 
+h(\lnot (\varphi \wedge \psi )) & =_{def} & h(\lnot \varphi )\vee h(\lnot
+\psi ) \\ 
+h(\lnot (\varphi \vee \psi )) & =_{def} & h(\lnot \varphi )\wedge h(\lnot
+\psi ) \\ 
+h(\lnot (\varphi \Rightarrow \psi )) & =_{def} & h(\varphi )\wedge h(\lnot
+\psi ) \\ 
+h(\lnot \forall d{{:}D}.\varphi ) & =_{def} & \exists d{{:}D}.h(\lnot
+\varphi ) \\ 
+h(\lnot \exists d{{:}D}.\varphi ) & =_{def} & \forall d{{:}D}.h(\lnot
+\varphi ) \\ 
+h(\lnot \lbrack \alpha ]\varphi ) & =_{def} & \langle \alpha \rangle h(\lnot
+\varphi ) \\ 
+h(\lnot \langle \alpha \rangle \varphi ) & =_{def} & [\alpha ]h(\lnot
+\varphi ) \\ 
+h(\lnot \nabla ) & =_{def} & \Delta  \\ 
+h(\lnot \nabla (t)) & =_{def} & \Delta (t) \\ 
+h(\lnot \Delta ) & =_{def} & \nabla  \\ 
+h(\lnot \Delta (t)) & =_{def} & \nabla (t) \\ 
+h(\lnot X(e)) & =_{def} & undefined \\ 
+h(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \nu X(d{:}%
+D:=e).~h(\lnot \varphi \lbrack X:=\lnot X]) \\ 
+h(\lnot \nu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \mu X(d{:}%
+D:=e).~h(\lnot \varphi \lbrack X:=\lnot X]) \\ 
+h(b) & =_{def} & b \\ 
+h(\varphi \wedge \psi ) & =_{def} & h(\varphi )\wedge h(\psi ) \\ 
+h(\varphi \vee \psi ) & =_{def} & h(\varphi )\vee h(\psi ) \\ 
+h(\varphi \Rightarrow \psi ) & =_{def} & h(\lnot \varphi )\vee h(\psi ) \\ 
+h(\mathsf{Q}d{{:}D}.\varphi ) & =_{def} & \mathsf{Q}d{{:}D}.h(\varphi ) \\ 
+h([\alpha ]\varphi ) & =_{def} & [\alpha ]h(\varphi ) \\ 
+h(\langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
+h(\varphi ) \\ 
+h(\nabla ) & =_{def} & \nabla  \\ 
+h(\nabla (t)) & =_{def} & \nabla (t) \\ 
+h(\Delta ) & =_{def} & \Delta  \\ 
+h(\Delta (t)) & =_{def} & \Delta (t) \\ 
+h(X(d)) & =_{def} & X(d) \\ 
+h(\sigma X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \sigma X(d{:}%
+D:=e).~h(\varphi )%
+\end{array}%
+\end{equation*}%
+\newpage 

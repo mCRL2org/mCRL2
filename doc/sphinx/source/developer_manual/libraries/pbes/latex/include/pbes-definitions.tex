@@ -1,0 +1,119 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{Definitions}
+
+Parameterised Boolean Equation Systems (PBESs) are empty (denoted $\epsilon $%
+) or finite sequences of fixed point equations, where each equation is of
+the form $(\mu X(d{:}D)=\phi $ or $(\nu X(d{:}D)=\phi $. The left-hand side
+of each equation consists of a \emph{fixed point symbol}, where $\mu $
+indicates a least and $\nu $ a greatest fixed point, and a sorted predicate
+variable $X$ of sort $D\rightarrow B$, taken from some countable domain of
+sorted predicate variables $\mathcal{X}$. The right-hand side of each
+equation is a predicate formula as defined below.
+
+\begin{definition}
+\emph{Predicate formulae} $\phi $ are defined by the following grammar: 
+\begin{equation*}
+\phi ::=b~|~X(e)~|~\lnot \phi ~|~\phi \oplus \phi ~|~\mathsf{Q}d:D.~\phi
+\end{equation*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, $\mathsf{Q}\in \{\forall
+,\exists \}$, $b$ is a data term of sort $\mathsf{B}$, $X$ is a predicate
+variable, $d$ is a data variable of sort $D$ and $e$ is a vector of data
+terms.
+\end{definition}
+
+The set of predicate variables that occur in a predicate formula $\phi $,
+denoted by $\mathsf{occ}$, is defined recursively as follows, for any
+formulae $\phi _{1},\phi _{2}$: 
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{occ(}{b)} & =_{def}\emptyset & \mathsf{occ(}{X(e))} & =_{def}\{X\}
+\\ 
+\mathsf{occ(}{\phi _{1}\oplus \phi _{2})} & =_{def}\mathsf{occ(}{\phi _{1})}%
+\cup \mathsf{occ(}{\phi _{2})}\qquad & \mathsf{occ}(\mathsf{Q}d:D{.~\phi
+_{1})} & =_{def}\mathsf{occ(}{\phi _{1})}.%
+\end{array}%
+\end{equation*}%
+Extended to equation systems, $\mathsf{occ}{(}\mathcal{E}{)}$ is the union
+of all variables occurring at the right-hand side of equations in $\mathcal{E%
+}$. Likewise, the set of predicate variable instantiations that occur in a
+predicate formula $\phi $ is denoted by $\mathsf{iocc}$, and is defined
+recursively as follows%
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{iocc(}{b)} & =_{def}\emptyset & \mathsf{iocc(}{X(e))} & 
+=_{def}\{X(e)\} \\ 
+\mathsf{iocc(}{\phi _{1}\oplus \phi _{2})} & =_{def}\mathsf{iocc(}{\phi _{1})%
+}\cup \mathsf{iocc(}{\phi _{2})}\qquad & \mathsf{iocc}(\mathsf{Q}d:D{.~\phi
+_{1})} & =_{def}\mathsf{iocc(}{\phi _{1})}.%
+\end{array}%
+\end{equation*}
+
+For any equation system $\mathcal{E}$, the set of \emph{binding predicate
+variables}, $\mathsf{bnd(}\mathcal{E})$, is the set of variables occurring
+at the left-hand side of some equation in $\mathcal{E}$. Formally, we
+define: 
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{bnd(}{\epsilon )} & =_{def}\emptyset \qquad & \mathsf{bnd(}{(\sigma
+X(d{:}D)=\phi )~\mathcal{E)}} & =_{def}\mathsf{bnd(}{\mathcal{E)}}\cup \{X\}
+\\ 
+\mathsf{occ(}{\epsilon )} & =_{def}\emptyset \qquad & \mathsf{occ(}{(\sigma
+X(d{:}D)=\phi )~\mathcal{E)}} & =_{def}\mathsf{occ(}{\mathcal{E)}}\cup 
+\mathsf{occ(}{\phi )}.%
+\end{array}%
+\end{equation*}%
+Let $\mathsf{dvar}(d)$ be the set of \emph{free data variables} occurring in
+a data term $d$. The function $\mathsf{dvar}$ is extended to predicate
+formulae using%
+\begin{equation*}
+\begin{array}{llll}
+\mathsf{dvar(}{X(e))} & =_{def}\mathsf{dvar}(e) & \mathsf{dvar}(\mathsf{Q}d:D%
+{.~\phi _{1})} & =_{def}\mathsf{dvar(}{\phi _{1})}\setminus \mathsf{dvar(}d{)%
+}. \\ 
+\mathsf{dvar(}{\phi _{1}\oplus \phi _{2})} & =_{def}\mathsf{dvar(}{\phi _{1})%
+}\cup \mathsf{iocc(}{\phi _{2}).}\qquad &  & 
+\end{array}%
+\end{equation*}
+
+The set of freely occurring predicate variables in $\mathcal{E}$, denoted $%
+\mathsf{pvar}(\mathcal{E})$ is defined as $\mathsf{occ(}{\mathcal{E)}}%
+\setminus \mathsf{bnd(}{\mathcal{E)}}$. An equation system $\mathcal{E}$ is
+said to be \emph{well-formed} iff every binding predicate variable occurs at
+the left-hand side of precisely one equation of $\mathcal{E}$. We only
+consider well-formed equation systems in this paper.
+
+An equation system $\mathcal{E}$ is called \emph{closed} if $\mathsf{pvar}(%
+\mathcal{E})=\emptyset $ and \emph{open} otherwise. An equation $(\sigma
+X(d:D)=\phi )$, where $\sigma $ denotes either the fixed point sign $\mu $
+or $\nu $, is called \emph{data-closed} if the set of data variables that
+occur freely in $\phi $ is contained in the set of variables induced by the
+vector of variables $d$. An equation system is called \emph{data-closed} iff
+each of its equations is data-closed.\newline
+
+\begin{definition}
+\emph{Action formulae} $\alpha $ are defined by the following grammar:%
+\begin{equation*}
+\alpha ::=b~|~\lnot \alpha ~|~\alpha \oplus \alpha ~|~\mathsf{Q}d:D.\alpha
+~|~a(d)~|~\alpha \mbox{\aap ,}t
+\end{equation*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, $\mathsf{Q}\in \{\forall
+,\exists \}$, $b$ is a data term of sort $\mathsf{B}$, $X$ is a predicate
+variable, $d$ is a data variable of sort $D$ and $a$ is an action label.
+\end{definition}
+
+\begin{definition}
+\emph{State formulae} $\phi $ are defined by the following grammar:%
+\begin{equation*}
+\phi ::=b~|~X(e)~|~\lnot \phi ~|~\phi \oplus \phi ~|~\mathsf{Q}d:D.~\phi
+~|~\langle \alpha \rangle \phi ~|~[\alpha ]\phi ~|~\Delta ~|~\Delta
+(t)~|~\nabla ~|~\nabla (t)~|~\sigma X(d{:}D:=e)
+\end{equation*}%
+where $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, $\mathsf{Q}\in \{\forall
+,\exists \}$, $\sigma \in \{\mu ,\nu \}$, $b$ is a data term of sort $%
+\mathsf{B}$, $X$ is a predicate variable, $d$ is a data variable of sort $D$
+and $e$ is a vector of data terms and $\alpha $ is an action
+formula.\newpage 
+\end{definition}
