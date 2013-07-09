@@ -124,7 +124,7 @@ std::string lts_extensions_as_string(const std::set<lts_type> &supported);
 
 
 /** \brief Read a labelled transition system and return it in fsm format.
- *  \details The file can refer to any file in lts, aut, fsm, bcg, or dot 
+ *  \details The file can refer to any file in lts, aut, fsm, bcg, or dot
  *           format. After reading it is is attempted to translate it into
  *           fsm format.
  *  \param[in] path A string with the name of the file.
@@ -167,7 +167,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
     case lts_dot:
     {
       lts_dot_t l1;
-      l1.load(path);
+      l1.loadnew(path);
       detail::lts_convert(l1,l);
       return;
     }

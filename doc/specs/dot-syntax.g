@@ -21,7 +21,7 @@ strict: "[sS][tT][rR][iI][cC][tT]" ;
 
 graph: "[gG][rR][aA][pP][hH]" ;
 
-subgraph: "[sS][uU][bB][gG][rR][aA][pP][hH]" ;
+subgraph_literal: "[sS][uU][bB][gG][rR][aA][pP][hH]" ;
 
 digraph: "[dD][iI][gG][rR][aA][pP][hH]" ;
 
@@ -29,7 +29,8 @@ node: "[nN][oO][dD][eE]" ;
 
 edge: "[eE][dD][gG][eE]" ;
 
-stmt_list : (stmt ';'? stmt_list?)? ;
+// stmt_list : (stmt ';'? stmt_list?)? ;
+stmt_list : (stmt (';' stmt)*)? ;
 
 stmt
   : node_stmt
@@ -58,7 +59,7 @@ port
   | ':' compass_pt
   ;
 
-subgraph : (subgraph ID?)? '{' stmt_list '}' ;
+subgraph : (subgraph_literal ID?)? '{' stmt_list '}' ;
 
 compass_pt : 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw' | 'c' | '_' ;
 
