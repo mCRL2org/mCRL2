@@ -555,7 +555,7 @@ void test_cfp()
     "X(0,0,0,0);                                                                           \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
-    "{(X, i), (Y, i)}                                                                       \n"
+    "{(X, i), (Y, i)}                                                                      \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,j,n,m:Nat) =                                                                   \n"
@@ -773,7 +773,7 @@ void test_cfp()
     "init                                                                                  \n"
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
-    "expected_result                                                                      \n"
+    "expected_result                                                                       \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) =                                                                       \n"
@@ -927,7 +927,7 @@ int test_main(int, char**)
   test_significant_variables();
 //  test_constraints();
 //  test_local_stategraph();
-//  test_cfp();
+  test_cfp();
 
   return 0;
 }

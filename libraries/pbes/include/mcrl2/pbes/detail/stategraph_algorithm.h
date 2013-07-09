@@ -98,6 +98,9 @@ class stategraph_algorithm
     // a data rewriter
     data::rewriter m_datar;
 
+    // determines how control flow parameters are computed
+    bool m_use_alternative_cfp_criterion;
+
     // the control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_control_flow;
 
@@ -381,9 +384,12 @@ class stategraph_algorithm
       return false;
     }
 
-    // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    // 1. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
-    // 2. copy(X,i,n) is defined en source(X,i,n) en dest(X,i,n) zijn beide undefined.
+    // Option 1
+    // --------
+    //
+    // Option 2
+    // --------
+    // ...
     void compute_local_control_flow_parameters()
     {
       mCRL2log(log::debug, "stategraph") << "=== compute local control flow parameters ===" << std::endl;
@@ -410,23 +416,31 @@ class stategraph_algorithm
           {
             for (std::size_t n = 0; n < d_X.size(); n++)
             {
-              // if (is_undefined(PVI_X_i.source, n) && is_undefined(PVI_X_i.dest, n) && !is_mapped_to(PVI_X_i.copy, n, n))
-              // {
-              //   m_is_LCFP[X][n] = false;
-              // }
-
-              if (PVI_X_i.copy.find(n) == PVI_X_i.copy.end())
+              if (m_use_alternative_cfp_criterion)
               {
-                // copy(X,i,n) is undefined
-                if (is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n))
+                // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
+                // 1. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
+                // 2. copy(X,i,n) is defined en source(X,i,n) en dest(X,i,n) zijn beide undefined.
+                if (PVI_X_i.copy.find(n) == PVI_X_i.copy.end())
                 {
-                  m_is_LCFP[X][n] = false;
+                  // copy(X,i,n) is undefined
+                  if (is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n))
+                  {
+                    m_is_LCFP[X][n] = false;
+                  }
+                }
+                else
+                {
+                  // copy(X,i,n) is defined
+                  if (!is_undefined(PVI_X_i.source, n) || !is_undefined(PVI_X_i.dest, n))
+                  {
+                    m_is_LCFP[X][n] = false;
+                  }
                 }
               }
               else
               {
-                // copy(X,i,n) is defined
-                if (!is_undefined(PVI_X_i.source, n) || !is_undefined(PVI_X_i.dest, n))
+                if (is_undefined(PVI_X_i.source, n) && is_undefined(PVI_X_i.dest, n) && !is_mapped_to(PVI_X_i.copy, n, n))
                 {
                   m_is_LCFP[X][n] = false;
                 }
@@ -627,7 +641,20 @@ class stategraph_algorithm
             std::size_t m = j->second;
             if (is_global_control_flow_parameter(X, n) && is_global_control_flow_parameter(Y, m))
             {
-              relate_control_flow_graph_vertices(X, n, Y, m);
+              if (m_use_alternative_cfp_criterion)
+              {
+                relate_control_flow_graph_vertices(X, n, Y, m);
+              }
+              else
+              {
+                // Twee parameters zijn alleen gerelateerd als er een copy is van de een naar de ander,
+                // EN dat de dest in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
+                // voor de parameter op dat punt).
+                if (is_undefined(PVI_X_i.dest, n))
+                {
+                  relate_control_flow_graph_vertices(X, n, Y, m);
+                }
+              }
             }
           }
         }
@@ -809,10 +836,11 @@ class stategraph_algorithm
 
   public:
 
-    stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty, bool use_alternative_cfp_criterion = false)
+      : m_datar(p.data(), rewrite_strategy),
+        m_use_alternative_cfp_criterion(use_alternative_cfp_criterion)
     {
       m_pbes = stategraph_pbes(p);
-      m_datar = data::rewriter(p.data(), rewrite_strategy);
     }
 
     const std::vector<control_flow_graph_vertex>& control_flow_graph_vertices() const
