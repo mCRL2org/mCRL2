@@ -51,7 +51,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
       desc.add_option("print-influence-graph", make_optional_argument("NAME", "0"), "print the influence graph", 'i');
       desc.add_option("use-marking-optimization", make_optional_argument("NAME", "0"), "apply an optimization during marking", 'm');
-      desc.add_option("use-alternative-cfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for control flow parameter computation", 'm');
+      desc.add_option("use-alternative-cfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for control flow parameter computation", 'x');
     }
 
   public:
