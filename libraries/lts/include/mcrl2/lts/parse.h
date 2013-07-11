@@ -462,7 +462,7 @@ struct dot_actions: public core::default_parser_actions
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "edge_stmt")) { parse_edge_stmt(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "attr_stmt")) { } // ignore !?!?
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ID") && (symbol_name(node.child(1)) == "=") && (symbol_name(node.child(2)) == "ID")) { } // ignore !?!?
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "subgraph_literal")) { } // ignore !?!?
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "subgraph")) { } // ignore !?!?
     else
     {
       report_unexpected_node(node);

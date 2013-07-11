@@ -29,8 +29,9 @@ node: "[nN][oO][dD][eE]" ;
 
 edge: "[eE][dD][gG][eE]" ;
 
+// The official grammar is ambiguous, so we use an alternative formulation.
 // stmt_list : (stmt ';'? stmt_list?)? ;
-stmt_list : (stmt (';' stmt)*)? ;
+stmt_list : (stmt (';' stmt)*)? ';'? ;
 
 stmt
   : node_stmt
