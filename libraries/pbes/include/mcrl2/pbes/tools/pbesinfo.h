@@ -10,7 +10,7 @@
 /// \brief add your file description here.
 
 #ifndef MCRL2_PBES_TOOLS_PBESINFO_H
-#define MCRL2_PBES_TOOLS_PBESINFO_
+#define MCRL2_PBES_TOOLS_PBESINFO_H
 
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
