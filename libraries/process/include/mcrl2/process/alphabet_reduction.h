@@ -28,10 +28,14 @@ class alphabet_reduction
   protected:
 
     typedef atermpp::term_list < lps::action_label_list > action_label_list_list;
-    
+
     static inline process_identifier INIT_KEY(void)
     {
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       return process_identifier(core::identifier_string("init"),mcrl2::data::sort_expression_list());
+#else
+      return process_identifier(core::identifier_string("init"),mcrl2::data::variable_list());
+#endif
     }
 
     std::map < process_expression, action_label_list_list > alphas;
@@ -40,10 +44,10 @@ class alphabet_reduction
     std::map < atermpp::aterm_appl, process_identifier > subs_alpha;
     std::map < process_identifier, process_identifier > subs_alpha_rev;
     std::map < process_identifier, mcrl2::data::variable_list > form_pars;
- 
+
     std::map < process_identifier, process_expression > procs;
     bool all_stable;
- 
+
     std::map < lps::action_label_list, core::identifier_string_list > untypes;
 
     //Classify the *reachable from init* process equations in 3 parts:
@@ -71,16 +75,16 @@ class alphabet_reduction
     action_label_list_list filter_hide_list(action_label_list_list l, core::identifier_string_list I);
     action_label_list_list filter_allow_list(action_label_list_list l, atermpp::term_list < core::identifier_string_list > V);
     atermpp::term_list < core::identifier_string_list > split_allow(
-            atermpp::term_list < core::identifier_string_list > V, 
-            atermpp::term_list < core::identifier_string_list > ulp, 
+            atermpp::term_list < core::identifier_string_list > V,
+            atermpp::term_list < core::identifier_string_list > ulp,
             atermpp::term_list < core::identifier_string_list > ulq);
     atermpp::term_list < core::identifier_string_list > sync_list(
            const atermpp::term_list < core::identifier_string_list > l,
            const atermpp::term_list < core::identifier_string_list > m);
     action_label_list_list sync_list(
-            const action_label_list_list l,                       
-            const action_label_list_list m,     
-            size_t length=0, 
+            const action_label_list_list l,
+            const action_label_list_list m,
+            size_t length=0,
             const std::vector < std::multiset < core::identifier_string > > &allowed=std::vector < std::multiset < core::identifier_string > >());
     action_label_list_list sync_list_ht(action_label_list_list l1, action_label_list_list l2, bool including_products_of_actions=true);
     atermpp::term_list< core::identifier_string_list > apply_unrename(core::identifier_string_list l, rename_expression_list R);
@@ -89,7 +93,7 @@ class alphabet_reduction
     alphabet_reduction::action_label_list_list  apply_comms(lps::action_label_list l, communication_expression_list C);
     atermpp::term_list < core::identifier_string_list > extend_allow_comm_with_alpha(
             atermpp::term_list < core::identifier_string_list > V,
-            communication_expression_list  C, 
+            communication_expression_list  C,
             action_label_list_list l);
     atermpp::term_list < core::identifier_string_list > extend_allow_comm(atermpp::term_list < core::identifier_string_list > V, communication_expression_list C);
     action_label_list_list filter_comm_list(action_label_list_list l, communication_expression_list C);
@@ -98,12 +102,12 @@ class alphabet_reduction
     process_expression PushAllow(atermpp::term_list < core::identifier_string_list > V, process_expression a);
     process_expression PushComm(communication_expression_list C, process_expression a);
     action_label_list_list gsaGetAlpha(
-            process_expression a, 
-            size_t length=0, 
+            process_expression a,
+            size_t length=0,
             const std::vector < std::multiset < core::identifier_string > > &allowed=std::vector < std::multiset < core::identifier_string > >());
     action_label_list_list gsaGetSyncAlpha(
-            process_expression a, 
-            size_t length, 
+            process_expression a,
+            size_t length,
             const std::vector < std::multiset < core::identifier_string > > &allowed,
             bool &success);
     process_expression gsApplyAlpha(process_expression a);
@@ -112,7 +116,7 @@ class alphabet_reduction
     bool gsaGetProp(const process_expression a, process_identifier context);
     void gsAlpha(process_equation_list& equations, process_expression& init);
 
- 
+
   public:
     /// \brief     Applies alphabet reduction to a process specification.
     /// \param[in,out] p An mCRL2 process specificiation that has been
@@ -127,7 +131,7 @@ class alphabet_reduction
       all_stable(false),
       push_comm_through_allow(true)
     {}
-  
+
 };
 
 } // namespace process

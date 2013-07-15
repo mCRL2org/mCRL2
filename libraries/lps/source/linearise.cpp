@@ -245,7 +245,11 @@ class specification_basic_type:public boost::noncopyable
       // The terminationAction and the terminatedProcId must be defined after initialisation of
       // data as otherwise fresh name does not work properly.
       terminationAction=action(action_label(fresh_identifier_generator("Terminate"),sort_expression_list()),data_expression_list());
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"),sort_expression_list());
+#else
+      terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"), variable_list());
+#endif
 // /* Changed delta() to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
       insertProcDeclaration(
         terminatedProcId,
@@ -682,7 +686,11 @@ class specification_basic_type:public boost::noncopyable
       const bool canterminate,
       const bool containstime)
     {
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       assert(procId.sorts().size()==parameters.size());
+#else
+      assert(procId.variables().size()==parameters.size());
+#endif
       const std::string str=procId.name();
       addString(str);
 
@@ -727,7 +735,11 @@ class specification_basic_type:public boost::noncopyable
       /* init is used as the name of the initial process,
          because it cannot occur as a string in the input */
 
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       process_identifier initprocess(std::string("init"),sort_expression_list());
+#else
+      process_identifier initprocess(std::string("init"), variable_list());
+#endif
       insertProcDeclaration(initprocess,variable_list(),init,unknown,0,false);
       return initprocess;
     }
@@ -1461,8 +1473,8 @@ class specification_basic_type:public boost::noncopyable
        find_free_variables is not correctly defined on processes, due to process_instance_assignments,
        where variables can occur by not being mentioned. It is necessary to know the parameters of
        a process to retrieve these. Concrete example in P() defined by P(x:Nat)= ..., the variable x
-       appears as a free variable, although it is not explicitly mentioned. 
-       If the standard function find_free_variable on processes is repaired, this function can 
+       appears as a free variable, although it is not explicitly mentioned.
+       If the standard function find_free_variable on processes is repaired, this function can
        be removed */
     void find_free_variables_process(const process_expression &p, std::set< variable >& free_variables_in_p)
     {
@@ -2037,8 +2049,12 @@ class specification_basic_type:public boost::noncopyable
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
       const core::identifier_string s=fresh_identifier_generator("P");
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       const process_identifier p(s,get_sorts(parameters1));
-      assert(std::string(p.name()).size()>0); 
+#else
+      const process_identifier p(s, parameters1);
+#endif
+      assert(std::string(p.name()).size()>0);
       insertProcDeclaration(
         p,
         parameters1,
@@ -4169,7 +4185,7 @@ class specification_basic_type:public boost::noncopyable
           return adapt_term_to_stack(i->rhs(),stack,vars);
         }
       }
-      
+
       if (free_variables_in_body.find(s)==free_variables_in_body.end())
       {
         const data_expression result=representative_generator_internal(s.sort());
@@ -5239,7 +5255,7 @@ class specification_basic_type:public boost::noncopyable
     template <class T>
     bool all_equal(const atermpp::term_list<T>& l)
     {
-      if (l.empty()) 
+      if (l.empty())
       {
         return true;
       }
@@ -5882,7 +5898,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (equaluptillnow)
         {
-          if (all_equal(conditionlist)) 
+          if (all_equal(conditionlist))
           {
             resultcondition=lazy::and_(conditionlist.front(),equalterm);
           }
@@ -8768,10 +8784,14 @@ class specification_basic_type:public boost::noncopyable
         return procId;
       }
 
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       const process_identifier newProcId(
         fresh_identifier_generator(procId.name()),
         procId.sorts());
-
+#else
+// TODO
+      const process_identifier newProcId;
+#endif
       visited_id[procId]=newProcId;
 
       if (objectdata[n].processstatus==mCRL)

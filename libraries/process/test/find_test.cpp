@@ -74,7 +74,11 @@ void test_free_variables()
 
   data::variable b = bool_("b");
   data::data_expression_list d = atermpp::aterm_cast<data::data_expression_list>(make_list(b));
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
   process_identifier P(core::identifier_string("P"), atermpp::aterm_cast<data::sort_expression_list>(make_list(data::sort_bool::bool_())));
+#else
+  process_identifier P(core::identifier_string("P"), atermpp::aterm_cast<data::variable_list>(make_list(b)));
+#endif
   process_instance pi(P, d);
 
   std::set<data::variable> free_variables = process::find_free_variables(pi);

@@ -50,7 +50,11 @@ class process_type_checker:public data::data_type_checker
     void ReadInProcsAndInit(const std::vector<process_equation>& Procs, const process_expression &Init);
     const process_identifier initial_process(void)
     {
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       static process_identifier init_process(core::identifier_string("init"),data::sort_expression_list());
+#else
+      static process_identifier init_process(core::identifier_string("init"),data::variable_list());
+#endif
       return init_process;
     }
     void TransformActProcVarConst(void);

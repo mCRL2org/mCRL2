@@ -92,7 +92,12 @@ static process_expression MakeActionOrProc(
   }
   else
   {
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
     return process_instance(process_identifier(Name,FormParList),FactParList);
+#else
+// TODO
+    return process_expression();
+#endif
   }
 }
 
@@ -340,9 +345,13 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
   //process the arguments
 
   //possible types for the arguments of the action. (not inferred if ambiguous action).
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
   sort_expression_list PosTypeList=is_action(Result)?  aterm_cast<const process::action>(Result).label().sorts():
                                                        aterm_cast<const process_instance>(Result).identifier().sorts();
-
+#else
+// TODO
+  sort_expression_list PosTypeList;
+#endif
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
   for (data_expression_list Pars=pars; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
@@ -371,8 +380,12 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
 
   if (!p.first)
   {
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
     PosTypeList=is_action(Result)?  aterm_cast<const process::action>(Result).label().sorts():
                                     aterm_cast<const process_instance>(Result).identifier().sorts();
+#else
+// TODO
+#endif
     data_expression_list Pars=NewPars;
     NewPars=data_expression_list();
     sort_expression_list CastedPosTypeList;
@@ -466,7 +479,12 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         sort_expression_list Par=ParList.front();
 
         // get the formal parameter names
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
         variable_list FormalPars=proc_pars[process_identifier(Name,Par)];
+#else
+// TODO
+        variable_list FormalPars;
+#endif
         // we only need the names of the parameters, not the types
         identifier_string_list FormalParNames;
         for (variable_list::const_iterator i=FormalPars.begin(); i!=FormalPars.end(); ++i)
@@ -503,7 +521,13 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
     // get the formal parameter names
     data_expression_list ActualPars;
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
     const variable_list& FormalPars=proc_pars[process_identifier(Name,ParList.front())];
+#else
+// TODO
+    variable_list dummy;
+    const variable_list& FormalPars = dummy;
+#endif
     {
       // we only need the names of the parameters, not the types
       for (variable_list::const_iterator l=FormalPars.begin(); l!=FormalPars.end(); ++l)
@@ -949,7 +973,13 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
       throw mcrl2::runtime_error("declaration of both process and action " + pp(ProcName));
     }
 
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
     const sort_expression_list &ProcType=Proc.identifier().sorts();
+#else
+// TODO
+    sort_expression_list dummy;
+    const sort_expression_list &ProcType = dummy;
+#endif
 
     IsSortExprListDeclared(ProcType);
 

@@ -15,6 +15,7 @@
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/replace.h"
 
 namespace mcrl2 {
 
@@ -59,6 +60,7 @@ struct duplicate_equation_removal
     }
   }
 
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
   data::sort_expression_list get_sorts(const data::variable_list& v)
   {
     data::sort_expression_vector s;
@@ -68,6 +70,7 @@ struct duplicate_equation_removal
     }
     return data::sort_expression_list(s.begin(), s.end());
   }
+#endif
 
   // assigns a unique process identifier to each process identifier within a group
   substitution make_substitution()
@@ -77,7 +80,11 @@ struct duplicate_equation_removal
     {
       const group& g = *i;
       const process_equation& first_equation = **g.begin();
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
       process_identifier id(generator("X"), get_sorts(first_equation.formal_parameters()));
+#else
+      process_identifier id(generator("X"), first_equation.formal_parameters());
+#endif
       for (auto j = i->begin(); j != i->end(); ++j)
       {
         const process_equation& eq = **j;

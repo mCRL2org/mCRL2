@@ -156,8 +156,8 @@ specification(const data::data_specification& data, const action_label_list& act
 
 PROCESS_CLASSES = r'''
 process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SM | ProcSpec    | A process specification
-%process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
-process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
+%process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI  | ProcEqn     | A process equation
 rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI  | RenameExpr  | A rename expression
 communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI  | CommExpr    | A communication expression

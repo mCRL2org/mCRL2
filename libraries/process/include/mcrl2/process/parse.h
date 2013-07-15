@@ -171,7 +171,11 @@ struct process_actions: public lps::action_actions
   {
     core::identifier_string name = parse_Id(node.child(0));
     data::variable_list variables = parse_VarsDeclList(node.child(1));
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
     process_identifier id(name, get_sorts(variables));
+#else
+    process_identifier id(name, variables);
+#endif
     return process::process_equation(id, variables, parse_ProcExpr(node.child(3)));
   }
 
