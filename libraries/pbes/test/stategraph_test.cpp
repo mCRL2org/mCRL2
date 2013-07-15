@@ -266,190 +266,6 @@ void test_guard()
   test_guard(text, "X7", "s == 7");
 }
 
-void test_parse()
-{
-  std::string text =
-    "X 0 ; Y 1 ; Y 2 ; Z 0 \n"
-    "X 0 ; Y 1             \n"
-    "X 0 ; Y 2             \n"
-    "Z 0 ; Y 2             \n"
-  ;
-
-  detail::dependency_graph G = detail::parse_dependency_graph(text);
-  std::cout << "G =\n" << G.print() << std::endl;
-  BOOST_CHECK(G.vertices().size() == 4);
-}
-
-void test_constraints(const std::string& text, bool expected_result)
-{
-  detail::dependency_graph G = detail::parse_dependency_graph(text);
-  bool result = G.check_constraints();
-  if (!result == expected_result)
-  {
-    std::cout << "--- failure in dependency_graph::check_constraints ---" << std::endl;
-    std::cout << text << std::endl;
-    std::cout << "result          = " << std::boolalpha << result << std::endl;
-    std::cout << "expected result = " << std::boolalpha << expected_result << std::endl;
-  }
-  BOOST_CHECK(result == expected_result);
-}
-
-void test_constraints()
-{
-  std::string text;
-  bool expected_result;
-
-  text =
-    "X 0 ; Y 0 ; Y 1       \n"
-    "X 0 ; Y 0             \n"
-    "X 0 ; Y 1             \n"
-  ;
-  expected_result = false;
-  test_constraints(text, expected_result);
-
-  text =
-    "X 0 ; Y 0 ; X 1       \n"
-    "X 0 ; Y 0             \n"
-    "Y 0 ; X 1             \n"
-  ;
-  expected_result = false;
-  test_constraints(text, expected_result);
-
-  text =
-    "X 0 ; Y 0 ; Z 0       \n"
-    "X 0 ; Y 0             \n"
-    "Y 0 ; Z 0             \n"
-    "Z 0 ; X 0             \n"
-    "Y 0 ; X 0             \n"
-  ;
-  expected_result = true;
-  test_constraints(text, expected_result);
-
-  text =
-    "X 1 ; Y 0 ; Z 0 ; X 0 \n"
-    "X 0 ; Y 0             \n"
-    "Y 0 ; Z 0             \n"
-    "Z 0 ; X 1             \n"
-    "Y 0 ; X 0             \n"
-  ;
-  expected_result = false;
-  test_constraints(text, expected_result);
-
-  text =
-    "X 0 ; X 1 ; Y 0 ; Y 1 \n"
-    "X 0 ; Y 0             \n"
-    "X 1 ; Y 0             \n"
-  ;
-  expected_result = false;
-  test_constraints(text, expected_result);
-
-  text =
-    "X 0 ; X 1 ; Y 0 ; Y 1 \n"
-    "X 0 ; Y 0             \n"
-    "X 1 ; Y 1             \n"
-  ;
-  expected_result = true;
-  test_constraints(text, expected_result);
-
-  text =
-    "X 0 ; X 1 ; Y 0 ; Z 0 \n"
-    "X 0 ; Y 0             \n"
-    "X 1 ; Z 0             \n"
-    "Y 0 ; Z 0             \n"
-  ;
-  expected_result = false;
-  test_constraints(text, expected_result);
-
-  text =
-    "X 0 ; X 1 ; X 2 ; Y 1 \n"
-    "X 0 ; X 0             \n"
-    "X 0 ; Y 1             \n"
-    "X 1 ; X 1             \n"
-    "X 1 ; Y 1             \n"
-    "X 2 ; X 2             \n"
-    "X 2 ; Y 1             \n"
-  ;
-  expected_result = false;
-  test_constraints(text, expected_result);
-}
-
-struct dependency_vertex_compare
-{
-  const detail::dependency_vertex* source;
-
-  dependency_vertex_compare()
-    : source(0)
-  {}
-
-  bool operator()(const detail::dependency_vertex* u, const detail::dependency_vertex* v) const
-  {
-    return (source->X == u->X) > (source->X == v->X);
-  }
-};
-
-void test_remove_may_transitions(const std::string& must_text, const std::string& may_text)
-{
-  detail::dependency_graph must_graph = detail::parse_dependency_graph(must_text);
-  detail::dependency_graph may_graph = detail::parse_dependency_graph(may_text);
-  bool result = detail::remove_may_transitions(must_graph, may_graph, dependency_vertex_compare());
-  if (result)
-  {
-    BOOST_CHECK(must_graph.check_constraints());
-  }
-
-  // check if the source and target of each edge has the same parameter p (which is implied by the test cases)
-  std::vector<detail::dependency_vertex>& V = must_graph.vertices();
-  for (std::vector<detail::dependency_vertex>::iterator i = V.begin(); i != V.end(); ++i)
-  {
-    const detail::dependency_vertex& u = *i;
-    const std::set<detail::dependency_vertex*>& S = u.outgoing_edges;
-    for (std::set<detail::dependency_vertex*>::const_iterator j = S.begin(); j != S.end(); ++j)
-    {
-      // const detail::dependency_vertex& v = **j;
-    }
-  }
-}
-
-void test_remove_may_transitions()
-{
-  std::string must_text;
-  std::string may_text;
-
-  must_text =
-    "X 0 ; Y 0 ; X 1 ; Y 1 ; Z 1 \n"
-  ;
-  may_text =
-    "X 0 ; Y 0 ; X 1 ; Y 1 ; Z 1 \n"
-    "Y 0 ; X 0                   \n"
-    "Z 1 ; Y 0                   \n"
-    "Z 1 ; Y 1                   \n"
-    "Y 1 ; Z 1                   \n"
-    "X 1 ; Y 0                   \n"
-    "X 1 ; Y 1                   \n"
-  ;
-  test_remove_may_transitions(must_text, may_text);
-
-  must_text =
-    "X 0 ; Y 0 ; Z 0 ; U 0 ; U 1 ; V 1 ; W 1 \n"
-  ;
-  may_text =
-    "X 0 ; Y 0 ; Z 0 ; U 0 ; U 1 ; V 1 ; W 1 \n"
-    "X 0 ; Y 0                               \n"
-    "X 0 ; V 1                               \n"
-    "Y 0 ; Z 0                               \n"
-    "Y 0 ; V 1                               \n"
-    "Z 0 ; X 0                               \n"
-    "Z 0 ; U 0                               \n"
-    "Z 0 ; V 1                               \n"
-    "Z 0 ; W 1                               \n"
-    "U 0 ; X 0                               \n"
-    "V 1 ; U 1                               \n"
-    "V 1 ; W 1                               \n"
-    "W 1 ; U 1                               \n"
-  ;
-  test_remove_may_transitions(must_text, may_text);
-}
-
 void test_local_stategraph()
 {
   std::string text;
@@ -501,7 +317,7 @@ std::string print_connected_component(const std::set<std::size_t>& component, co
 }
 
 inline
-std::set<std::string> print_connected_components(const std::set<std::set<std::size_t> >& components, const pbes_system::detail::stategraph_algorithm& algorithm)
+std::set<std::string> print_connected_components(const std::vector<std::set<std::size_t> >& components, const pbes_system::detail::stategraph_algorithm& algorithm)
 {
   std::set<std::string> result;
   for (auto i = components.begin(); i != components.end(); ++i)
@@ -904,7 +720,7 @@ void test_cfp()
     std::vector<std::string> lines = utilities::detail::nonempty_lines(expected_result);
     std::set<std::string> lineset(lines.begin(), lines.end());
     std::string expected = utilities::string_join(lineset, ", ");
-    pbes_system::detail::stategraph_algorithm algorithm(p);
+    pbes_system::detail::stategraph_algorithm algorithm(p, data::jitty, true);
     algorithm.run();
     std::string result = utilities::string_join(print_connected_components(algorithm.connected_components(), algorithm), ", ");
     if (result != expected)
