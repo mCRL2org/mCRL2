@@ -136,19 +136,23 @@ We define the function $\mathrm{changed}$ as follows:%
 \mathrm{data}(\varphi _{X},i)[j]
 \end{equation*}
 
-\newpage
+Let $par(X)$ be the set of parameters of the equation corresponding to $X$.
+Let $pos(X,i)$ denote the $i$-th parameter of the equation corresponding to $%
+X$.\newpage
 
 \subsection{Control flow parameters}
 
-\subsubsection{Notations}
+Control flow parameters are computed in phases. First the function $LCFP$ is
+computed, then the function $GCFP$, and finally they are related using $\sim 
+$.
 
-Let $par(X)$ be the set of parameters of the equation corresponding to $X$.
-Let $pos(X,i)$ denote the $i$-th parameter of the equation corresponding to $%
-X$.
+\subsubsection{LCFP computation}
+
+There are two versions of the computation of LCFP.
 
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeLocalControlflowParameters(}$\mathcal{E}$\textsc{)} \\ 
+\textsc{ComputeLocalControlflowParametersDefault(}$\mathcal{E}$\textsc{)} \\ 
 $\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
 $\qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert \text{ 
 \textbf{do}}$ \\ 
@@ -165,7 +169,35 @@ $\qquad \qquad \qquad \qquad \text{\textbf{if }}source(X,i,n)=\bot \text{ }%
 $\qquad \qquad \qquad \qquad \qquad LCFP(X,n):=false$ \\ 
 $\text{\textbf{return} }LCFP$%
 \end{tabular}%
-\end{equation*}%
+\end{equation*}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeLocalControlflowParametersAlternative(}$\mathcal{E}$\textsc{)}
+\\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert \text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad LCFP(X,n):=true$ \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{if }}pred(\varphi _{X},i)=X\text{ \textbf{then}}
+$ \\ 
+$\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
+par(X)\right\vert \text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}(source(X,i,n)=\bot \text{ }%
+\wedge dest(X,i,n)=\bot \wedge copy(X,i,n)\neq \bot )$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{or} $(source(X,i,n)\neq \bot \text{ }%
+\wedge dest(X,i,n)\neq \bot \wedge copy(X,i,n)=\bot )$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad LCFP(X,n):=false$ \\ 
+$\text{\textbf{return} }LCFP$%
+\end{tabular}%
+\end{equation*}
+
+\subsubsection{GCFP computation}
+
 \begin{equation*}
 \begin{tabular}{l}
 \textsc{ComputeGlobalControlflowParameters(}$\mathcal{E},LCFP$\textsc{)} \\ 
@@ -187,10 +219,15 @@ $\text{\textbf{return} }GCFP$%
 \end{tabular}%
 \end{equation*}%
 \newline
+
+\subsubsection{Related control flow parameters}
+
+GCFP parameters can be related using the relation $\sim $. There are two
+versions of the computation of $\sim $.%
 \begin{equation*}
 \begin{tabular}{l}
-\textsc{ComputeRelatedGlobalControlflowParameters(}$\mathcal{E},GCFP$\textsc{%
-)} \\ 
+\textsc{ComputeRelatedGlobalControlflowParametersDefault(}$\mathcal{E},GCFP$%
+\textsc{)} \\ 
 $\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
 $\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
 }$ \\ 
@@ -203,7 +240,31 @@ $\qquad \qquad \qquad \qquad \text{\textbf{if }}GCFP(X,n)\wedge GCFP(Y,m)%
 \text{ \textbf{then }}(X,n)\sim (Y,m)$%
 \end{tabular}%
 \end{equation*}%
-\newpage
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeRelatedGlobalControlflowParametersAlternative(}$\mathcal{E}%
+,GCFP$\textsc{)} \\ 
+$\text{\textbf{for }}X\in bnd(\mathcal{E})\text{ \textbf{do}}$ \\ 
+$\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
+}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert 
+\text{ \textbf{do}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}copy(X,i,n)=m\neq \bot \text{ 
+\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}GCFP(X,n)\wedge GCFP(Y,m)%
+\text{ }\wedge dest(X,i,n)=\bot \text{ \textbf{then }}(X,n)\sim (Y,m)$%
+\end{tabular}%
+\end{equation*}
+
+\subsubsection{Control flow graphs}
+
+The relation $\sim $ defines a graph on the set of vertices $V=\{(X,i)\mid
+X\in bnd(\mathcal{E})\wedge 1\leq i\leq \left\vert d_{X}\right\vert \}$.
+This graph is called the global control flow graph. The connected components
+in this graph are the local control flow graphs. A local control flow graph
+is called \emph{invalid} if it contains two vertices $(X,i)$ and $(X,j)$
+with $i\neq j$. \newpage
 
 \subsection{Global control flow graph}
 
@@ -389,55 +450,6 @@ r:=r\vartriangleleft e[j]$ \textbf{else} $r:=r\vartriangleleft
 default\_value(e[j])$ \\ 
 $\qquad \varphi :=\varphi \wedge (c\Rightarrow Y(r))$ \\ 
 \textbf{return} $\varphi $%
-\end{tabular}%
-\end{equation*}
-
-\newpage
-
-\subsection{Local control flow graphs}
-
-Let index $p$ correspond to a control flow parameter in the equation of $%
-X_{init}$. Then we define the following algorithm for computing a local
-control flow graph:%
-\begin{equation*}
-\begin{tabular}{l}
-\textsc{ComputeLocalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$, $%
-p $, $\longrightarrow _{must}$\textsc{)} \\ 
-$u_{0}:=X_{init}(e_{init}[p])$ \\ 
-$y_{0}:=(X_{init},p)$ \\ 
-$V:=\{u_{0}\}$ \\ 
-$sig(u_{0}):=sig(R(\varphi _{X},[d_{X}[p]:=e_{init}[p]])$ \\ 
-$E:=\emptyset $ \\ 
-$todo:=\{(u_{0},y_{0})\}$ \\ 
-\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad $\textbf{choose} $(u,y)=(X(e),(X,p))\in todo$ \\ 
-$\qquad todo:=todo\setminus \{(u,y)\}$ \\ 
-$\qquad \text{\textbf{if }}y\nrightarrow _{must}$\textbf{\ then continue} \\ 
-$\qquad $\textbf{for} $(X,p)\longrightarrow _{must}(Y,q)\text{ \textbf{do}}$
-\\ 
-$\qquad \qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ 
-\textbf{do}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{X},i)\neq Y$%
-\textbf{\ then continue} \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{source}(X,i,p)=e\wedge 
-\mathrm{dest}(X,i,q)\neq \bot $ \\ 
-$\qquad \qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,q))$ \\ 
-$\qquad \qquad \qquad \text{\textbf{else if }}\mathrm{source}(X,i,p)=\bot
-\wedge \mathrm{dest}(X,i,q)\neq \bot \wedge X\neq Y$ \\ 
-$\qquad \qquad \qquad \qquad v:=Y(\mathrm{dest}(X,i,q))$ \\ 
-$\qquad \qquad \qquad \text{\textbf{else if }}\mathrm{source}(X,i,p)=\bot
-\wedge \mathrm{copy}(X,i,p)=q\wedge X\neq Y$ \\ 
-$\qquad \qquad \qquad \qquad v:=Y(e)$ \\ 
-$\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{continue}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
-$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
-$\qquad \qquad \qquad \qquad todo:=todo\cup \{(v,(Y,q)\}$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $v=Y(f)$ \\ 
-$\qquad \qquad \qquad \qquad sig(v):=sig(R(\varphi _{Y},[d_{Y}[q]:=f])$ \\ 
-$\qquad \qquad \qquad E:=E\cup \{(u,v)\}$ \\ 
-$\qquad \qquad \qquad label(u,v):=i$ \\ 
-$\text{\textbf{return} }(V,E)$%
 \end{tabular}%
 \end{equation*}
 
