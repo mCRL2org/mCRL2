@@ -739,7 +739,7 @@ class stategraph_algorithm
         const std::set<std::size_t>& component = *i;
         for (auto j = component.begin(); j != component.end(); ++j)
         {
-          const control_flow_graph_vertex& u = m_control_flow_graph_vertices[*j];
+          // const control_flow_graph_vertex& u = m_control_flow_graph_vertices[*j];
           // TODO: The current control flow graph has a different representation.
           // G.insert_vertex(u.name(), u.index());
         }
