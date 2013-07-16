@@ -158,7 +158,7 @@
                  | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
 
 //process identifier
-<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
+<ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*)
 
 //multiaction name
 <MultActName>  ::= MultActName(<String>+)
