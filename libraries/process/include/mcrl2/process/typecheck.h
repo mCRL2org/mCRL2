@@ -30,8 +30,13 @@ class process_type_checker:public data::data_type_checker
     std::map<core::identifier_string,data::sort_expression> glob_vars;                  //name -> Type: global variables (for proc, pbes and init)
 
     process_equation_list equations;
+#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
     std::map <process_identifier,data::variable_list> proc_pars; // process_identifier -> variable_list
     std::map <process_identifier,process_expression> proc_bodies;  // process_identifier -> rhs
+#else
+    std::map <std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list> proc_pars; // process_identifier -> variable_list
+    std::map <std::pair<core::identifier_string,data::sort_expression_list>,process_expression> proc_bodies;  // process_identifier -> rhs
+#endif
     process_specification type_checked_process_spec;
 
   public:
@@ -77,6 +82,10 @@ class process_type_checker:public data::data_type_checker
                                   const atermpp::term_list<data::sort_expression_list> &TypeListList1,
                                   const atermpp::term_list<data::sort_expression_list> &TypeListList2);
     process_equation_list WriteProcs(const process_equation_vector &oldprocs);
+    process_expression MakeActionOrProc(bool is_action,
+                                        const core::identifier_string &Name,
+                                        const data::sort_expression_list &FormParList,
+                                        const data::data_expression_list FactParList);
 
 };
 

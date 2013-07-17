@@ -8789,8 +8789,9 @@ class specification_basic_type:public boost::noncopyable
         fresh_identifier_generator(procId.name()),
         procId.sorts());
 #else
-// TODO
-      const process_identifier newProcId;
+      const process_identifier newProcId(
+                   fresh_identifier_generator(procId.name()),
+                   objectdata[n].parameters);
 #endif
       visited_id[procId]=newProcId;
 

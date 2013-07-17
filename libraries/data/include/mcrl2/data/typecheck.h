@@ -118,11 +118,23 @@ class data_type_checker:public sort_type_checker
     void AddFunction(const data::function_symbol &f, const std::string msg, bool allow_double_decls=false);
     void AddConstant(const data::function_symbol &OpId, const std::string msg);
     void initialise_system_defined_functions(void);
-    void AddSystemConstant(const data::function_symbol &f);
-    void AddSystemFunction(const data::function_symbol &f);
-    bool TypeMatchA(const sort_expression &Type_in, const sort_expression &PosType_in, sort_expression &result);
-    bool TypeMatchL(const sort_expression_list &TypeList, const sort_expression_list &PosTypeList, sort_expression_list &result);
-    sort_expression UnwindType(const sort_expression &Type);
+    void AddSystemConstant(const data::function_symbol& f);
+    void AddSystemFunction(const data::function_symbol& f);
+    bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result);
+    bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list &PosTypeList, sort_expression_list& result);
+    sort_expression UnwindType(const sort_expression& Type);
+    variable UnwindType(const variable& Type);
+    template <class T> 
+    atermpp::term_list<T> UnwindType(const atermpp::term_list<T>& l)
+    {
+      std::vector<T> result;
+      for(typename atermpp::term_list<T>::const_iterator i=l.begin(); i!=l.end(); ++i)
+      {
+        result.push_back(UnwindType(*i));
+      }
+      return atermpp::term_list<T>(result.begin(),result.end());
+    }
+
     void check_for_empty_constructor_domains(function_symbol_list constructor_list);
     std::map < data::sort_expression, data::basic_sort > construct_normalised_aliases();
     sort_expression TraverseVarConsTypeD(

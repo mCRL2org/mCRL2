@@ -1281,7 +1281,7 @@ namespace mcrl2
 #ifndef MCRL2_NEW_PROCESS_IDENTIFIER
               new_pn =process_identifier(identifier_string(name.str()),pn.sorts());
 #else
-// TODO
+              new_pn =process_identifier(identifier_string(name.str()),pn.variables());
 #endif
               i++;
             }

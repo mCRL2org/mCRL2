@@ -3303,6 +3303,11 @@ sort_expression mcrl2::data::data_type_checker::UnwindType(const sort_expression
   return Type;
 }
 
+variable mcrl2::data::data_type_checker::UnwindType(const variable& v)
+{
+  return variable(v.name(),UnwindType(v.sort()));
+}
+
 bool mcrl2::data::data_type_checker::TypeMatchA(
                  const sort_expression &Type_in,
                  const sort_expression &PosType_in,
