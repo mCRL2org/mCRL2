@@ -14,7 +14,6 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/stack_alloc.h"
-#include "mcrl2/utilities/stack_container.h"
 
 using namespace mcrl2::utilities;
 
@@ -59,29 +58,6 @@ BOOST_AUTO_TEST_CASE(test_stack_alloc)
     v.push_back(1);
   }
   BOOST_CHECK(v.size() == 2 * N);
-}
-
-// Test case for the StackVector of Google Chrome
-BOOST_AUTO_TEST_CASE(test_stack_vector)
-{
-  const unsigned N = 200;
-  stack_vector<int, N> v;
-
-  for (std::size_t i = 0; i < N; i++)
-  {
-    v->push_back(10 * i);
-  }
-
-  for (std::size_t i = 0; i < N; ++i)
-  {
-    BOOST_CHECK(v[i] == 10*i);
-  }
-
-  for (std::size_t i = 0; i < N; i++)
-  {
-    v->push_back(1);
-  }
-  BOOST_CHECK(v->size() == 2 * N);
 }
 
 /* The following case is disabled. It was added to show that
