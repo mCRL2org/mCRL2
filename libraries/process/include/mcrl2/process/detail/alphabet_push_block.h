@@ -143,11 +143,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     const process_equation& eqn = find_equation(equations, x.identifier());
     data::variable_list d = eqn.formal_parameters();
     core::identifier_string name = id_generator(x.identifier().name());
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    process_identifier P1(name, x.identifier().sorts());
-#else
     process_identifier P1(name, x.identifier().variables());
-#endif
     const process_expression& p = eqn.expression();
 
     // Add (P(e), B, P1(e)) to W

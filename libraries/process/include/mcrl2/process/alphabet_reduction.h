@@ -31,11 +31,7 @@ class alphabet_reduction
 
     static inline process_identifier INIT_KEY(void)
     {
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-      return process_identifier(core::identifier_string("init"),mcrl2::data::sort_expression_list());
-#else
       return process_identifier(core::identifier_string("init"),mcrl2::data::variable_list());
-#endif
     }
 
     std::map < process_expression, action_label_list_list > alphas;

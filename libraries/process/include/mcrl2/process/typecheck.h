@@ -30,13 +30,8 @@ class process_type_checker:public data::data_type_checker
     std::map<core::identifier_string,data::sort_expression> glob_vars;                  //name -> Type: global variables (for proc, pbes and init)
 
     process_equation_list equations;
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    std::map <process_identifier,data::variable_list> proc_pars; // process_identifier -> variable_list
-    std::map <process_identifier,process_expression> proc_bodies;  // process_identifier -> rhs
-#else
     std::map <std::pair<core::identifier_string,data::sort_expression_list>,data::variable_list> proc_pars; // process_identifier -> variable_list
     std::map <std::pair<core::identifier_string,data::sort_expression_list>,process_expression> proc_bodies;  // process_identifier -> rhs
-#endif
     process_specification type_checked_process_spec;
 
   public:
@@ -55,11 +50,7 @@ class process_type_checker:public data::data_type_checker
     void ReadInProcsAndInit(const std::vector<process_equation>& Procs, const process_expression &Init);
     const process_identifier initial_process(void)
     {
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-      static process_identifier init_process(core::identifier_string("init"),data::sort_expression_list());
-#else
       static process_identifier init_process(core::identifier_string("init"),data::variable_list());
-#endif
       return init_process;
     }
     void TransformActProcVarConst(void);

@@ -2391,7 +2391,7 @@ bool check_term_DataVarId(Term t)
   return true;
 }
 
-// ProcVarId(String, SortExpr*)
+// ProcVarId(String, DataVarId*)
 template <typename Term>
 bool check_term_ProcVarId(Term t)
 {
@@ -2419,9 +2419,9 @@ bool check_term_ProcVarId(Term t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
     return false;
   }
-  if (!check_list_argument(a[1], check_rule_SortExpr<atermpp::aterm>, 0))
+  if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

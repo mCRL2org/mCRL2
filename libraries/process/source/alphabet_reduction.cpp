@@ -1278,11 +1278,7 @@ namespace mcrl2
             {
               std::stringstream name;
               name << core::pp(pn.name()) << "_allow_" << i;
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-              new_pn =process_identifier(identifier_string(name.str()),pn.sorts());
-#else
               new_pn =process_identifier(identifier_string(name.str()),pn.variables());
-#endif
               i++;
             }
             while (procs.count(new_pn)>0);

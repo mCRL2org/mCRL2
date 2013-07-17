@@ -103,13 +103,9 @@ process_expression process_type_checker::MakeActionOrProc(
   }
   else
   {
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    return process_instance(process_identifier(Name,FormParList),FactParList);
-#else
     assert(proc_pars.count(std::pair<identifier_string,sort_expression_list>(Name,UnwindType(FormParList)))>0);
     const variable_list& FormalVars=proc_pars[std::pair<identifier_string,sort_expression_list>(Name,UnwindType(FormParList))];
     return process_instance(process_identifier(Name,FormalVars),FactParList);
-#endif
   }
 }
 
@@ -123,11 +119,7 @@ process_equation_list mcrl2::process::process_type_checker::WriteProcs(const pro
     {
       continue;
     }
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    Result.push_front(process_equation(ProcVar, proc_pars[ProcVar],proc_bodies[ProcVar]));
-#else
     Result.push_front(process_equation(ProcVar, ProcVar.variables(),proc_bodies[std::pair<core::identifier_string,sort_expression_list>(ProcVar.name(),UnwindType(get_sorts(ProcVar.variables())))]));
-#endif
   }
   return Result;
 }
@@ -361,14 +353,9 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
   //process the arguments
 
   //possible types for the arguments of the action. (not inferred if ambiguous action).
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-  sort_expression_list PosTypeList=is_action(Result)?  aterm_cast<const process::action>(Result).label().sorts():
-                                                       aterm_cast<const process_instance>(Result).identifier().sorts();
-#else
-  sort_expression_list PosTypeList=is_action(Result)?  
+  sort_expression_list PosTypeList=is_action(Result)?
                 aterm_cast<const process::action>(Result).label().sorts():
                 get_sorts(aterm_cast<const process_instance>(Result).identifier().variables());
-#endif
   data_expression_list NewPars;
   sort_expression_list NewPosTypeList;
   for (data_expression_list Pars=pars; !Pars.empty(); Pars=Pars.tail(),PosTypeList=PosTypeList.tail())
@@ -397,14 +384,9 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
 
   if (!p.first)
   {
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    PosTypeList=is_action(Result)?  aterm_cast<const process::action>(Result).label().sorts():
-                                    aterm_cast<const process_instance>(Result).identifier().sorts();
-#else
-    PosTypeList=is_action(Result)?  
+    PosTypeList=is_action(Result)?
                      aterm_cast<const process::action>(Result).label().sorts():
                      get_sorts(aterm_cast<const process_instance>(Result).identifier().variables());
-#endif
     data_expression_list Pars=NewPars;
     NewPars=data_expression_list();
     sort_expression_list CastedPosTypeList;
@@ -498,12 +480,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
         sort_expression_list Par=ParList.front();
 
         // get the formal parameter names
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-        variable_list FormalPars=proc_pars[process_identifier(Name,Par)];
-#else
         assert(proc_pars.count(std::pair<core::identifier_string,sort_expression_list>(Name,UnwindType(Par)))>0);
         variable_list FormalPars=proc_pars[std::pair<core::identifier_string,sort_expression_list>(Name,UnwindType(Par))];
-#endif
         // we only need the names of the parameters, not the types
         identifier_string_list FormalParNames;
         for (variable_list::const_iterator i=FormalPars.begin(); i!=FormalPars.end(); ++i)
@@ -540,12 +518,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
 
     // get the formal parameter names
     data_expression_list ActualPars;
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    const variable_list& FormalPars=proc_pars[process_identifier(Name,ParList.front())];
-#else
     assert(proc_pars.count(std::pair<identifier_string,sort_expression_list>(Name,UnwindType(ParList.front())))>0);
     const variable_list& FormalPars=proc_pars[std::pair<identifier_string,sort_expression_list>(Name,UnwindType(ParList.front()))];
-#endif
     {
       // we only need the names of the parameters, not the types
       for (variable_list::const_iterator l=FormalPars.begin(); l!=FormalPars.end(); ++l)
@@ -963,11 +937,7 @@ void mcrl2::process::process_type_checker::TransformActProcVarConst(void)
 
   //process and data terms in processes and init
   assert(proc_pars.size()==proc_bodies.size());
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-  for (std::map <process_identifier,variable_list>::const_iterator i=proc_pars.begin(); i!=proc_pars.end(); ++i)
-#else
   for (std::map <std::pair<core::identifier_string,sort_expression_list>,variable_list>::const_iterator i=proc_pars.begin(); i!=proc_pars.end(); ++i)
-#endif
   {
     Vars=glob_vars;
 
@@ -975,14 +945,9 @@ void mcrl2::process::process_type_checker::TransformActProcVarConst(void)
     AddVars2Table(Vars,i->second,NewVars);
     Vars=NewVars;
 
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,proc_bodies[i->first]);
-    proc_bodies[i->first]=NewProcTerm;
-#else
     assert(proc_bodies.count(i->first)>0);
     const process_expression NewProcTerm=TraverseActProcVarConstP(Vars,proc_bodies[i->first]);
     proc_bodies[i->first]=NewProcTerm;
-#endif
   }
 }
 
@@ -1000,12 +965,7 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
       throw mcrl2::runtime_error("declaration of both process and action " + pp(ProcName));
     }
 
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    const sort_expression_list &ProcType=Proc.identifier().sorts();
-#else
     const sort_expression_list &ProcType=get_sorts(Proc.identifier().variables());
-#endif
-
     IsSortExprListDeclared(ProcType);
 
     const std::map<core::identifier_string,term_list<sort_expression_list> >::const_iterator j=processes.find(ProcName);
@@ -1038,24 +998,14 @@ void mcrl2::process::process_type_checker::ReadInProcsAndInit(const std::vector<
       throw mcrl2::runtime_error("the formal variables in process " + pp(Proc) + " are not unique");
     }
 
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-    proc_pars[Proc.identifier()]=Proc.formal_parameters();
-    proc_bodies[Proc.identifier()]=Proc.expression();
-#else
     std::pair<identifier_string,sort_expression_list> p(Proc.identifier().name(),UnwindType(get_sorts(Proc.identifier().variables())));
     proc_pars[p]=UnwindType(Proc.formal_parameters());
     proc_bodies[p]=Proc.expression();
-#endif
   }
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-  proc_pars[initial_process()]=variable_list();
-  proc_bodies[initial_process()]=Init;
-#else
   std::pair<identifier_string,sort_expression_list> p(initial_process().name(),
                                                       UnwindType(get_sorts(initial_process().variables())));
   proc_pars[p]=variable_list();
   proc_bodies[p]=Init;
-#endif
 
 }
 
@@ -1130,12 +1080,8 @@ mcrl2::process::process_type_checker::process_type_checker(const process_specifi
                                       proc_spec.action_labels(),
                                       variable_list(proc_spec.global_variables().begin(),proc_spec.global_variables().end()),
                                       type_checked_process_equations,
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-                                      proc_bodies[initial_process()]
-#else
                                       proc_bodies[std::pair<identifier_string,sort_expression_list>(initial_process().name(),
                                                       get_sorts(initial_process().variables()))]
-#endif
                                      );
 
   normalize_sorts(type_checked_process_spec,type_checked_process_spec.data());

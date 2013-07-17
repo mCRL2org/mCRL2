@@ -63,7 +63,7 @@ struct add_sort_expressions: public Builder<Derived>
   process::process_identifier operator()(const process::process_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_identifier result = process::process_identifier(x.name(), static_cast<Derived&>(*this)(x.sorts()));
+    process::process_identifier result = process::process_identifier(x.name(), static_cast<Derived&>(*this)(x.variables()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -674,10 +674,18 @@ struct add_variables: public Builder<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  process::process_identifier operator()(const process::process_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    process::process_identifier result = process::process_identifier(x.name(), static_cast<Derived&>(*this)(x.variables()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
   process::process_equation operator()(const process::process_equation& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_equation result = process::process_equation(x.identifier(), static_cast<Derived&>(*this)(x.formal_parameters()), static_cast<Derived&>(*this)(x.expression()));
+    process::process_equation result = process::process_equation(static_cast<Derived&>(*this)(x.identifier()), static_cast<Derived&>(*this)(x.formal_parameters()), static_cast<Derived&>(*this)(x.expression()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -685,7 +693,7 @@ struct add_variables: public Builder<Derived>
   process::process_expression operator()(const process::process_instance& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result = process::process_instance(x.identifier(), static_cast<Derived&>(*this)(x.actual_parameters()));
+    process::process_expression result = process::process_instance(static_cast<Derived&>(*this)(x.identifier()), static_cast<Derived&>(*this)(x.actual_parameters()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -693,7 +701,7 @@ struct add_variables: public Builder<Derived>
   process::process_expression operator()(const process::process_instance_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    process::process_expression result = process::process_instance_assignment(x.identifier(), static_cast<Derived&>(*this)(x.assignments()));
+    process::process_expression result = process::process_instance_assignment(static_cast<Derived&>(*this)(x.identifier()), static_cast<Derived&>(*this)(x.assignments()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

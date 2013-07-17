@@ -66,7 +66,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   void operator()(const process::process_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.sorts());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -940,9 +940,17 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const process::process_identifier& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.variables());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const process::process_equation& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.identifier());
     static_cast<Derived&>(*this)(x.formal_parameters());
     static_cast<Derived&>(*this)(x.expression());
     static_cast<Derived&>(*this).leave(x);
@@ -951,6 +959,7 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const process::process_instance& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.identifier());
     static_cast<Derived&>(*this)(x.actual_parameters());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -958,6 +967,7 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const process::process_instance_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.identifier());
     static_cast<Derived&>(*this)(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
@@ -1237,7 +1247,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.name());
-    static_cast<Derived&>(*this)(x.sorts());
+    static_cast<Derived&>(*this)(x.variables());
     static_cast<Derived&>(*this).leave(x);
   }
 

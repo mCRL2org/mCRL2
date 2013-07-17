@@ -14,6 +14,7 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/stack_alloc.h"
+#include "mcrl2/utilities/stack_container.h"
 
 using namespace mcrl2::utilities;
 
@@ -37,8 +38,8 @@ BOOST_AUTO_TEST_CASE(test_alloca)
   }
 }
 
-// Test case for the stack allocator of Howard Hinnant. N.B. This requires C++11.
-BOOST_AUTO_TEST_CASE(test_short_alloc)
+// Test case for the stack allocator of Howard Hinnant.
+BOOST_AUTO_TEST_CASE(test_stack_alloc)
 {
   const unsigned N = 200;
   std::vector<std::size_t, stack_alloc<int, N> > v;
@@ -58,6 +59,29 @@ BOOST_AUTO_TEST_CASE(test_short_alloc)
     v.push_back(1);
   }
   BOOST_CHECK(v.size() == 2 * N);
+}
+
+// Test case for the StackVector of Google Chrome
+BOOST_AUTO_TEST_CASE(test_stack_vector)
+{
+  const unsigned N = 200;
+  stack_vector<int, N> v;
+
+  for (std::size_t i = 0; i < N; i++)
+  {
+    v->push_back(10 * i);
+  }
+
+  for (std::size_t i = 0; i < N; ++i)
+  {
+    BOOST_CHECK(v[i] == 10*i);
+  }
+
+  for (std::size_t i = 0; i < N; i++)
+  {
+    v->push_back(1);
+  }
+  BOOST_CHECK(v->size() == 2 * N);
 }
 
 /* The following case is disabled. It was added to show that

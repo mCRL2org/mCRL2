@@ -245,11 +245,7 @@ class specification_basic_type:public boost::noncopyable
       // The terminationAction and the terminatedProcId must be defined after initialisation of
       // data as otherwise fresh name does not work properly.
       terminationAction=action(action_label(fresh_identifier_generator("Terminate"),sort_expression_list()),data_expression_list());
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-      terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"),sort_expression_list());
-#else
       terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"), variable_list());
-#endif
 // /* Changed delta() to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
       insertProcDeclaration(
         terminatedProcId,
@@ -686,11 +682,7 @@ class specification_basic_type:public boost::noncopyable
       const bool canterminate,
       const bool containstime)
     {
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-      assert(procId.sorts().size()==parameters.size());
-#else
       assert(procId.variables().size()==parameters.size());
-#endif
       const std::string str=procId.name();
       addString(str);
 
@@ -735,11 +727,7 @@ class specification_basic_type:public boost::noncopyable
       /* init is used as the name of the initial process,
          because it cannot occur as a string in the input */
 
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-      process_identifier initprocess(std::string("init"),sort_expression_list());
-#else
       process_identifier initprocess(std::string("init"), variable_list());
-#endif
       insertProcDeclaration(initprocess,variable_list(),init,unknown,0,false);
       return initprocess;
     }
@@ -2049,11 +2037,7 @@ class specification_basic_type:public boost::noncopyable
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
       const core::identifier_string s=fresh_identifier_generator("P");
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-      const process_identifier p(s,get_sorts(parameters1));
-#else
       const process_identifier p(s, parameters1);
-#endif
       assert(std::string(p.name()).size()>0);
       insertProcDeclaration(
         p,
@@ -8784,15 +8768,9 @@ class specification_basic_type:public boost::noncopyable
         return procId;
       }
 
-#ifndef MCRL2_NEW_PROCESS_IDENTIFIER
-      const process_identifier newProcId(
-        fresh_identifier_generator(procId.name()),
-        procId.sorts());
-#else
       const process_identifier newProcId(
                    fresh_identifier_generator(procId.name()),
                    objectdata[n].parameters);
-#endif
       visited_id[procId]=newProcId;
 
       if (objectdata[n].processstatus==mCRL)

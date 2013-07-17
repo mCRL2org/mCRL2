@@ -44,13 +44,13 @@ class process_identifier: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, sorts))
+    process_identifier(const core::identifier_string& name, const data::variable_list& variables)
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, variables))
     {}
 
     /// \brief Constructor.
-    process_identifier(const std::string& name, const data::sort_expression_list& sorts)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(core::identifier_string(name), sorts))
+    process_identifier(const std::string& name, const data::variable_list& variables)
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(core::identifier_string(name), variables))
     {}
 
     const core::identifier_string& name() const
@@ -58,9 +58,9 @@ class process_identifier: public atermpp::aterm_appl
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    const data::sort_expression_list& sorts() const
+    const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::sort_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
     }
 };
 

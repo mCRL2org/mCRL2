@@ -2405,9 +2405,9 @@ aterm_appl gsMakeProcSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpe
 }
 
 inline
-aterm_appl gsMakeProcVarId(const aterm_appl& String_0, const aterm_list& SortExpr_1)
+aterm_appl gsMakeProcVarId(const aterm_appl& String_0, const aterm_list& DataVarId_1)
 {
-  return term_appl<aterm>(function_symbol_ProcVarId(), String_0, SortExpr_1);
+  return term_appl<aterm>(function_symbol_ProcVarId(), String_0, DataVarId_1);
 }
 
 inline
