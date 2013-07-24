@@ -324,6 +324,10 @@ std::set<std::string> print_connected_components(const std::vector<std::set<std:
   {
     result.insert(print_connected_component(*i, algorithm));
   }
+  if (result.empty()) // Special handling of empty result to distinguish undefined/empty results
+  {
+      result.insert("{}");
+  }
   return result;
 }
 
@@ -371,7 +375,7 @@ void test_cfp()
     "X(0,0,0,0);                                                                           \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
-    "{(X, i), (Y, i)}                                                                      \n"
+    "{(X, i)}, {(Y, i)}                                                                    \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,j,n,m:Nat) =                                                                   \n"
@@ -513,6 +517,7 @@ void test_cfp()
     "X(0,0,0);                                                                             \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{}                                                                                    \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,j,n:Nat) =                                                                     \n"
@@ -533,6 +538,28 @@ void test_cfp()
     "X(0,0,0);                                                                             \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{(X, i), (Y, i), (Z, i)}                                                              \n"
+    "----------                                                                            \n"
+    "pbes                                                                                  \n"
+    "nu X(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => Y(i,j,n+1)) &&                                                        \n"
+    "(val(i == 0) => X(1,1,n+1));                                                          \n"
+    "                                                                                      \n"
+    "nu Y(i,j,n:Nat) =                                                                     \n"
+    "(val(i == 1) => X(i,j,n) ) &&                                                         \n"
+    "(val(i == 1) => Z(i,j,n) )                                                            \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "nu Z(i,j,n:Nat) =                                                                     \n"
+    "(val(j == 1) => X(i,j,n)) &&                                                          \n"
+    "(val(i == 1) => Z(0,j,n))                                                             \n"
+    ";                                                                                     \n"
+    "                                                                                      \n"
+    "init                                                                                  \n"
+    "X(0,0,0);                                                                             \n"
+    "                                                                                      \n"
+    "expected_result                                                                       \n"
+    "{(X, i), (Y, i), (Z, i)}                                                              \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,j,n:Nat) =                                                                     \n"
@@ -549,6 +576,7 @@ void test_cfp()
     "X(0,0,0);                                                                             \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{(X, i), (Y, i), (Z, i)}, {(X, j), (Y, j), (Z, j)}                                    \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) =                                                                       \n"
@@ -564,6 +592,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{(X, i), (Y, i), (Z, i)}                                                              \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(n:Nat) = Y(n+1);                                                                 \n"
@@ -573,6 +602,7 @@ void test_cfp()
     "init X(0);                                                                            \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{}                                                                                    \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) =                                                                       \n"
@@ -590,6 +620,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{(Z, i)}                                                                              \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) =                                                                       \n"
@@ -607,6 +638,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{(X, n), (Y, n), (Z, i)}                                                              \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) =                                                                       \n"
@@ -620,6 +652,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{}                                                                                    \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) =                                                                       \n"
@@ -633,6 +666,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{}                                                                                    \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(n,i:Nat) = Y(n+1,0);                                                             \n"
@@ -643,6 +677,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{(X, i), (Y, n)}                                                                      \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) = forall j:Nat.(val(i == 0) => Y(i,n+j));                               \n"
@@ -654,6 +689,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{(Y, i)}                                                                              \n"
     "----------                                                                            \n"
     "%                                                                                     \n"
     "% The below PBES should only have (Y,i) as a control flow parameter                   \n"
@@ -680,16 +716,22 @@ void test_cfp()
     "X(0);                                                                                 \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
-    "{(X, n), (Y, i)}                                                                      \n"
+    "{(X, n)}, {(Y, i)}                                                                    \n"
     "----------                                                                            \n"
     "pbes                                                                                  \n"
     "                                                                                      \n"
-    "nu X(i,j:Nat) = (val(i==0) => X(0,i)) && (val(j==1) => X(j,1));                       \n"
+    "nu X(i,j:Nat) =                                                                       \n"
+    "(val(i==0) => X(0,i)) &&                                                              \n"
+    "(val(j==1) => X(j,1));                                                                \n"
     "                                                                                      \n"
     "init X(0,0);                                                                          \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{}                                                                                    \n"
     "----------                                                                            \n"
+    "%This solution assumes strict separation between CFPs and DPs, if this assumption is  \n"
+    "%dropped, the following is the expected solution                                      \n"
+    "%{(X, n), (Y, n)}                                                                     \n"
     "pbes                                                                                  \n"
     "nu X(i,n:Nat) =                                                                       \n"
     "(val(i == 0) => Y(i,n));                                                              \n"
@@ -702,6 +744,7 @@ void test_cfp()
     "X(0,0);                                                                               \n"
     "                                                                                      \n"
     "expected_result                                                                       \n"
+    "{}                                                                                    \n"
     ;
 
   std::vector<std::string> test_cases = utilities::detail::split_text(text, "----------");
@@ -723,20 +766,21 @@ void test_cfp()
     pbes_system::detail::stategraph_algorithm algorithm(p, data::jitty, true);
     algorithm.run();
     std::string result = utilities::string_join(print_connected_components(algorithm.connected_components(), algorithm), ", ");
+
     if (result != expected)
     {
       BOOST_CHECK(result == expected);
       std::cout << "--- Control flow test failed ---" << std::endl;
       std::cout << test_case["pbes"] << std::endl;
-      std::cout << "result          = " << result   << std::endl;
-      std::cout << "expected result = " << expected << std::endl;
+      std::cout << "result               = " << result   << std::endl;
+      std::cout << "expected result      = " << expected << std::endl;
     }
   }
 }
 
 int test_main(int, char**)
 {
-  // log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
+//  log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
   test_guard();
 //  test_parse();
 //  test_remove_may_transitions();
