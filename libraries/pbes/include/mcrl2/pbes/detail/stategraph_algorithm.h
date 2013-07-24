@@ -684,6 +684,7 @@ class stategraph_algorithm
       std::vector<data::data_expression> d;
       for (data::data_expression_list::iterator i = d_X.begin(); i != d_X.end(); ++i, index++)
       {
+        assert(index < b.size());
         if (b[index])
         {
           d.push_back(*i);
