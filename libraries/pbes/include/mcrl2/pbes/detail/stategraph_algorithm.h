@@ -212,7 +212,7 @@ class stategraph_algorithm
       compute_global_control_flow_parameters();
       compute_related_global_control_flow_parameters();
       compute_connected_components();
-      mCRL2log(log::verbose) << print_control_flow_parameters();
+      mCRL2log(log::verbose, "stategraph") << print_control_flow_parameters();
     }
 
     std::string print_local_control_flow_parameters()
@@ -302,6 +302,7 @@ class stategraph_algorithm
                   // copy(X,i,n) is undefined
                   if (is_undefined(PVI_X_i.source, n) || is_undefined(PVI_X_i.dest, n))
                   {
+                    mCRL2log(log::debug, "stategraph") << "(" << X << ", " << n << ") is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << "in equation " << X << " (copy and source/dest undefined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
@@ -310,6 +311,7 @@ class stategraph_algorithm
                   // copy(X,i,n) is defined
                   if (!is_undefined(PVI_X_i.source, n) || !is_undefined(PVI_X_i.dest, n))
                   {
+                    mCRL2log(log::debug, "stategraph") << "(" << X << ", " << n << ") is not an LCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << "in equation " << X << " (copy defined and source/dest defined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
@@ -318,6 +320,7 @@ class stategraph_algorithm
               {
                 if (is_undefined(PVI_X_i.source, n) && is_undefined(PVI_X_i.dest, n) && !is_mapped_to(PVI_X_i.copy, n, n))
                 {
+                  mCRL2log(log::debug, "stategraph") << "parameter (" << X << ", " << n << ") is not an LCFP due to " << pbes_system::pp(PVI_X_i.X) << "(source and dest undefined, and no copy to self)" << std::endl;
                   m_is_LCFP[X][n] = false;
                 }
               }
@@ -325,7 +328,7 @@ class stategraph_algorithm
           }
         }
       }
-      mCRL2log(log::debug) << print_local_control_flow_parameters();
+      mCRL2log(log::debug, "stategraph") << print_local_control_flow_parameters();
     }
 
     std::string print_global_control_flow_parameters()
@@ -386,7 +389,7 @@ class stategraph_algorithm
                   {
                     m_is_GCFP[Y][n] = false;
                     changed = true;
-                    mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
                   }
                 }
               }
@@ -421,7 +424,7 @@ class stategraph_algorithm
                 {
                   m_is_GCFP[X][m] = false;
                   changed = true;
-                  mCRL2log(log::debug) << "(" << core::pp(Y) << ", " << n << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
+                  mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << m << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
                 }
               }
             }
@@ -430,7 +433,7 @@ class stategraph_algorithm
       }
       while (changed);
 
-      mCRL2log(log::verbose) << print_global_control_flow_parameters();
+      mCRL2log(log::verbose, "stategraph") << print_global_control_flow_parameters();
     }
 
     bool is_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
@@ -477,7 +480,6 @@ class stategraph_algorithm
     // \pre: the equation of X has a lower rank than the equation of Y
     void relate_control_flow_graph_vertices(const core::identifier_string& X, std::size_t n, const core::identifier_string& Y, std::size_t m)
     {
-      mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related" << std::endl;
       control_flow_graph_vertex& u = *find_vertex(X, n);
       control_flow_graph_vertex& v = *find_vertex(Y, m);
       u.neighbors().insert(&v);
@@ -519,6 +521,8 @@ class stategraph_algorithm
             {
               if (m_use_alternative_cfp_criterion)
               {
+                mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related "
+                                                   << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << std::endl;
                 relate_control_flow_graph_vertices(X, n, Y, m);
               }
               else
@@ -528,6 +532,8 @@ class stategraph_algorithm
                 // voor de parameter op dat punt).
                 if (is_undefined(PVI_X_i.dest, n))
                 {
+                  mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related "
+                                                       << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << " (dest is undefined)" << std::endl;
                   relate_control_flow_graph_vertices(X, n, Y, m);
                 }
               }
