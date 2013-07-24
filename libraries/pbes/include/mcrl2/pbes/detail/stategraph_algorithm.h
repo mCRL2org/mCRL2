@@ -530,7 +530,7 @@ class stategraph_algorithm
                 // Twee parameters zijn alleen gerelateerd als er een copy is van de een naar de ander,
                 // EN dat de dest in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
                 // voor de parameter op dat punt).
-                if (is_undefined(PVI_X_i.dest, n))
+                if (is_undefined(PVI_X_i.dest, m))
                 {
                   mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related "
                                                        << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << " (dest is undefined)" << std::endl;
