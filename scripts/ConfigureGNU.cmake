@@ -77,9 +77,10 @@ try_add_cxx_flag(-Woverloaded-virtual    MAINTAINER)
 try_add_cxx_flag(-Wwrite-strings         MAINTAINER)
 try_add_cxx_flag(-Wmissing-declarations  MAINTAINER)
 # GLIBCXX_DEBUG has a problem with ostringstream on Apple Xcode version 4.2.
-if (NOT APPLE)  
-   try_add_cxx_flag(-D_GLIBCXX_DEBUG        MAINTAINER)
-endif()
+# And with high memory usage on Linux
+#if (NOT APPLE)
+#   try_add_cxx_flag(-D_GLIBCXX_DEBUG        MAINTAINER)
+#endif()
 
 # The following flags are not implemented in clang and therefore cause warnings.
 if(NOT MCRL2_CLANG)
