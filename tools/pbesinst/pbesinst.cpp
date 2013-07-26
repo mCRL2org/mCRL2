@@ -9,8 +9,6 @@
 /// \file pbesinst.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG

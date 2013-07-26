@@ -8,8 +8,6 @@
 //
 /// \file tbf2lps.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "tbf2lps"
 #define AUTHOR "Muck van Weerdenburg"
 

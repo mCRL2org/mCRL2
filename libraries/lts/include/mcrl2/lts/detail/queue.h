@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #ifndef MCRL2_LTS_DETAIL_QUEUE_H
 #define MCRL2_LTS_DETAIL_QUEUE_H
 

@@ -9,8 +9,6 @@
 /// \file lpsinvelm.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 #include <string>
 #include <fstream>
 

@@ -8,8 +8,6 @@
 //
 /// \file pbespp.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "pbespp"
 #define AUTHOR "Aad Mathijssen and Jeroen Keiren"
 

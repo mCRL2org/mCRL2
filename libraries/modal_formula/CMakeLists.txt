@@ -27,8 +27,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-
 set(mcrl2_modal_formula_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/modal_formula.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp

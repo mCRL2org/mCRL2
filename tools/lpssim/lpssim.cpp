@@ -8,8 +8,6 @@
 //
 /// \file sim.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "lpssim"
 #define AUTHOR "Muck van Weerdenburg"
 

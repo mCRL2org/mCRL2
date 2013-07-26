@@ -21,7 +21,6 @@ if(UNIX)
   LINK_LIBRARIES(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
   set(COMP_REWRITERS
    ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jittyc.cpp
-#   ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/innerc.cpp
   )
 endif(UNIX)
 
@@ -33,7 +32,6 @@ set(mcrl2_data_src
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp
 
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/with_prover.cpp
- # ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/inner.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jitty.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/rewrite.cpp
  ${COMP_REWRITERS}
@@ -47,10 +45,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 add_library(${PROJECT_NAME}
   ${mcrl2_data_src}

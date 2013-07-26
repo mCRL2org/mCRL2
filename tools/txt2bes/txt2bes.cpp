@@ -9,8 +9,6 @@
 /// \file txt2pbes.cpp
 /// \brief Parse a textual description of a BES.
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "txt2bes"
 #define AUTHOR "Wieger Wesselink"
 

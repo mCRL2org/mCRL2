@@ -8,8 +8,6 @@
 /// \file pbes2bool.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 // ======================================================================
 //
 // file          : pbes2bool

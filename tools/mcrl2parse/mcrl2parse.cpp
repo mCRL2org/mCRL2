@@ -9,8 +9,6 @@
 /// \file mcrl2parse.cpp
 /// \brief tool for testing the new parser
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "mcrl2parse"
 #define AUTHOR "Wieger Wesselink"
 

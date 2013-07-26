@@ -8,8 +8,6 @@
 //
 /// \file mcrl2/lts/bithashtable.h
 
-#include "boost.hpp" // for precompiled headers
-
 #ifndef MCRL2_LTS_DETAIL_BITHASHTABLE_H
 #define MCRL2_LTS_DETAIL_BITHASHTABLE_H
 

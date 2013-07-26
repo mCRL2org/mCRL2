@@ -10,8 +10,6 @@
 /// \brief This tool linearises mcrl2 specifications into linear
 ///         form.
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "mcrl22lps"
 #define AUTHOR "Jan Friso Groote"
 

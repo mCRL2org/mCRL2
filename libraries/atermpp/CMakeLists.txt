@@ -25,10 +25,6 @@ add_library(${PROJECT_NAME}
   source/aterm_io_binary.cpp
   source/table.cpp
   source/indexed_set.cpp
-#  source/byteio.cpp
-#  source/byteencoding.cpp
-#  source/safio.cpp
-#  source/idmappings.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)

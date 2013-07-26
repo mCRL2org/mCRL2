@@ -8,8 +8,6 @@
 //
 /// \file pbesstategraph.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"

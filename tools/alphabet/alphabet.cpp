@@ -10,8 +10,6 @@
 /// \brief This tool reads a process specification,
 /// and applies alphabet reduction to it.
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "alphabet"
 #define AUTHOR "Wieger Wesselink"
 

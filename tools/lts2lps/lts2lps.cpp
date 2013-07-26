@@ -10,8 +10,6 @@
 /// \brief This tool reads a mcrl2 specification of a linear process,
 /// and translates it directly into LPS format.
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "lts2lps"
 #define AUTHOR "Frank Stappers"
 

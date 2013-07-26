@@ -8,8 +8,6 @@
 //
 /// \file bessolve.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "bessolve"
 #define AUTHOR "Jeroen Keiren"
 

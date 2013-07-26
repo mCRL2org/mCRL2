@@ -8,8 +8,6 @@
 //
 /// \file lps2lts_lts.cpp
 
-#include "boost.hpp" // precompiled headers
-
 // NAME is defined in lps2lts.h
 #define AUTHOR "Muck van Weerdenburg"
 

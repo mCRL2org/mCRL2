@@ -9,8 +9,6 @@
 /// \file ./txt2pbes.cpp
 /// \brief Parse a textual description of a PBES.
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "txt2pbes"
 #define AUTHOR "Aad Mathijssen, Wieger Wesselink"
 

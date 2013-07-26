@@ -9,8 +9,6 @@
 /// \file mcrl2i.cpp
 
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "mcrl2i"
 #define AUTHORS "Muck van Weerdenburg; Jan Friso Groote"
 

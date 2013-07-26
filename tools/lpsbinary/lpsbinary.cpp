@@ -9,8 +9,6 @@
 /// \file lpsbinary.cpp
 /// \brief The binary tool, this runs the binary algorithm.
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"

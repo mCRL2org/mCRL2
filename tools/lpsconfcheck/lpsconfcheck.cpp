@@ -8,8 +8,6 @@
 //
 /// \file lpsconfcheck.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <string>
 #include <fstream>
 

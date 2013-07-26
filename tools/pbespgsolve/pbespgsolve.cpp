@@ -11,8 +11,6 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include "boost.hpp" // precompiled headers
-
 #include <fstream>
 #include <iostream>
 #include <string>

@@ -9,8 +9,6 @@
 /// \file pbes2bes.cpp
 /// \brief Transform a pbes into a bes
 
-#include "boost.hpp" // precompiled headers
-
 // ======================================================================
 //
 // file          : pbes2bes

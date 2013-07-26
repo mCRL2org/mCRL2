@@ -8,8 +8,6 @@
 //
 /// \file symbolic_exploration.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/pbes/detail/symbolic_exploration.h"
 #include "mcrl2/utilities/input_output_tool.h"
 

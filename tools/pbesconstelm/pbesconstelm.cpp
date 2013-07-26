@@ -8,8 +8,6 @@
 //
 /// \file pbesconstelm.cpp
 
-#include "boost.hpp" // precompiled headers
-
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 

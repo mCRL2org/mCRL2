@@ -20,8 +20,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/tools/lpsparunfold/test)
 

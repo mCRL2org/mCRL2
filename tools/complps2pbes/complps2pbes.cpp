@@ -9,8 +9,6 @@
 /// \file complps2pbes.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"

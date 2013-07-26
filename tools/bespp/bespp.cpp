@@ -8,8 +8,6 @@
 //
 /// \file bespp.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "bespp"
 #define AUTHOR "Jeroen Keiren"
 

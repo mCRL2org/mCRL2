@@ -8,8 +8,6 @@
 //
 /// \file pbesrewr.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <iostream>
 #include <string>
 #include "mcrl2/pbes/tools.h"

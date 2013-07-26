@@ -8,8 +8,6 @@
 //
 /// \file pbesnormalize.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/normalize.h"

@@ -8,8 +8,6 @@
 //
 /// \file bestranslate.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <string>
 #include <iostream>
 #include <fstream>

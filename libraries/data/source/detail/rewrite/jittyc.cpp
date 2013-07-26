@@ -8,8 +8,6 @@
 //
 /// \file jittyc.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/data/detail/rewrite.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE

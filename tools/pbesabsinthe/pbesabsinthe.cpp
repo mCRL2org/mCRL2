@@ -8,8 +8,6 @@
 //
 /// \file pbesabsint.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <iostream>
 #include <string>
 #include "mcrl2/pbes/absinthe_strategy.h"

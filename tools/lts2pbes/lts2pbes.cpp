@@ -9,8 +9,6 @@
 /// \file lts2pbes.cpp
 /// \brief This tool reads an LTS and translates it into a PBES.
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "lts2pbes"
 #define AUTHOR "Wieger Wesselink"
 

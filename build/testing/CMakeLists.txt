@@ -14,7 +14,6 @@ project(mcrl2_headertest_targets)
 cmake_minimum_required(VERSION 2.6)
 
 set(MRCL2_HEADERTESTS_INCLUDE_DIRECTORIES
-#  ${CMAKE_SOURCE_DIR}/libraries/aterm/include/
   ${CMAKE_SOURCE_DIR}/libraries/lps/include
   ${CMAKE_SOURCE_DIR}/libraries/bes/include
   ${CMAKE_SOURCE_DIR}/libraries/pbes/include
@@ -24,7 +23,6 @@ set(MRCL2_HEADERTESTS_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/libraries/process/include/
   ${CMAKE_SOURCE_DIR}/libraries/atermpp/include
   ${CMAKE_SOURCE_DIR}/build/workarounds/
-  ${CMAKE_SOURCE_DIR}/build/precompile
   ${CMAKE_SOURCE_DIR}/libraries/lts/include
   ${CMAKE_SOURCE_DIR}/libraries/fdr/include
   ${CMAKE_SOURCE_DIR}/libraries/trace/include

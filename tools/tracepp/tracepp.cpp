@@ -8,8 +8,6 @@
 //
 /// \file tracepp.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "tracepp"
 #define AUTHOR "Muck van Weerdenburg"
 

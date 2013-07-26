@@ -8,8 +8,6 @@
 //
 /// \file jitty.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/data/detail/rewrite/jitty.h"
 
 #define NAME std::string("rewr_jitty")

@@ -8,8 +8,6 @@
 //
 /// \file ./lpsconstelm.cpp
 
-#include "boost.hpp" // precompiled headers
-
 //mCRL2
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
