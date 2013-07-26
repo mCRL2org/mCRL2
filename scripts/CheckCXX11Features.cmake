@@ -47,7 +47,7 @@ cmake_minimum_required(VERSION 2.8.3)
 function(cxx11_check_feature FEATURE_NAME RESULT_VAR REQUIRED)
     set(_LOG_NAME "\"${FEATURE_NAME}\"")
     if (NOT DEFINED ${RESULT_VAR})
-        set(_bindir "${CMAKE_CURRENT_BINARY_DIR}/cxx11_${FEATURE_NAME}")
+        set(_bindir "${CMAKE_CURRENT_BINARY_DIR}/CheckCXX11Features/cxx11_${FEATURE_NAME}")
 
         set(_SRCFILE_BASE ${CMAKE_CURRENT_LIST_DIR}/CheckCXX11Features/cxx11-test-${FEATURE_NAME})
         message(STATUS "Checking C++11 support for ${_LOG_NAME}")
