@@ -34,7 +34,7 @@ add_library(${PROJECT_NAME}
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
-target_link_libraries( mcrl2_atermpp
+target_link_libraries( ${PROJECT_NAME}
   mcrl2_utilities
 )
 
