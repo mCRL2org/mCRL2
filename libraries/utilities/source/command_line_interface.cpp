@@ -20,10 +20,6 @@
 #include <string>
 #include <iterator>
 
-#if !defined(MCRL2_DISABLE_BOOST_REGEX)
-#include <boost/regex.hpp>
-#endif
-
 #include <fstream>
 #include <iostream>
 
