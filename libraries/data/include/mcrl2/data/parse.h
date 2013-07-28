@@ -136,19 +136,22 @@ struct data_expression_actions: public sort_expression_actions
   data_expression make_list_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    return application(untyped_identifier(sort_list::list_enumeration_name()), x);
+    // return application(untyped_identifier(sort_list::list_enumeration_name()), x); 
+    return sort_list::list_enumeration(untyped_sort(),x);
   }
 
   data_expression make_set_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    return application(untyped_identifier(sort_set::set_enumeration_name()), x);
+    // return application(untyped_identifier(sort_set::set_enumeration_name()), x); 
+    return sort_set::set_enumeration(untyped_sort(),x);
   }
 
   data_expression make_bag_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    return application(untyped_identifier(sort_bag::bag_enumeration_name()), x);
+    // return application(untyped_identifier(sort_bag::bag_enumeration_name()), x); 
+    return sort_bag::bag_enumeration(untyped_sort(),x);
   }
 
   data_expression make_function_update(const data_expression& x, const data_expression& y, const data_expression& z)
