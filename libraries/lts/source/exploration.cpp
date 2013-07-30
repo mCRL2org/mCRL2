@@ -747,11 +747,6 @@ bool lps2lts_algorithm::add_transition(const lps2lts_algorithm::generator_state_
     }
   }
 
-  if (m_options.detect_action && m_detected_action_summands[transition.summand_index()])
-  {
-    save_actions(state, transition);
-  }
-
   return destination_state_number.second;
 }
 
