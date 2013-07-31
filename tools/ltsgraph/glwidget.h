@@ -210,6 +210,7 @@ class GLWidget : public QGLWidget
     float fogDistance() { return m_scene->fogDistance(); }
   signals:
     void widgetResized(const Graph::Coord3D& newsize);
+    void initialized();
   public slots:
 
     /**

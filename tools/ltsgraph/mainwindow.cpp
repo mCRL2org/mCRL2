@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
+  connect(m_glwidget, SIGNAL(initialized()), this, SLOT(onOpenGLInitialized()));
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
@@ -90,12 +91,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::showEvent(QShowEvent *event)
+void MainWindow::onOpenGLInitialized()
 {
-  QMainWindow::showEvent(event);
   if (!m_delayedOpen.isEmpty())
   {
-    m_glwidget->updateGL();
     openFile(m_delayedOpen);
     m_delayedOpen = QString();
   }
