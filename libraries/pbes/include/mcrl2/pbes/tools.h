@@ -121,7 +121,9 @@ void pbesstategraph(const std::string& input_filename,
                     bool use_local_variant,
                     bool print_influence_graph,
                     bool use_marking_optimization,
-                    bool use_alternative_cfp_criterion
+                    bool use_alternative_lcfp_criterion,
+                    bool use_alternative_gcfp_relation,
+                    bool use_alternative_gcfp_consistency
                    );
 
 } // namespace pbes_system

@@ -28,7 +28,9 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
     bool m_use_local_variant;
     bool m_print_influence_graph;
     bool m_use_marking_optimization;
-    bool m_use_alternative_cfp_criterion;
+    bool m_use_alternative_lcfp_criterion;
+    bool m_use_alternative_gcfp_relation;
+    bool m_use_alternative_gcfp_consistency;
 
     void parse_options(const command_line_parser& parser)
     {
@@ -38,7 +40,9 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       m_use_local_variant = parser.option_argument_as<bool>("use-local-variant");
       m_print_influence_graph = parser.option_argument_as<bool>("print-influence-graph");
       m_use_marking_optimization = parser.option_argument_as<bool>("use-marking-optimization");
-      m_use_alternative_cfp_criterion = parser.option_argument_as<bool>("use-alternative-cfp-criterion");
+      m_use_alternative_lcfp_criterion = parser.option_argument_as<bool>("use-alternative-cfp-criterion");
+      m_use_alternative_gcfp_relation = parser.option_argument_as<bool>("use-alternative-gcfp-relation");
+      m_use_alternative_gcfp_consistency = parser.option_argument_as<bool>("use-alternative-gcfp-consistency");
     }
 
     void add_options(interface_description& desc)
@@ -49,7 +53,9 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       desc.add_option("use-local-variant", make_optional_argument("NAME", "0"), "use the local variant of the algorithm", 'l');
       desc.add_option("print-influence-graph", make_optional_argument("NAME", "0"), "print the influence graph", 'i');
       desc.add_option("use-marking-optimization", make_optional_argument("NAME", "0"), "apply an optimization during marking", 'm');
-      desc.add_option("use-alternative-cfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for control flow parameter computation", 'x');
+      desc.add_option("use-alternative-lcfp-criterion", make_optional_argument("NAME", "0"), "use an alternative criterion for local control flow parameter computation", 'x');
+      desc.add_option("use-alternative-gcfp-relation", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter relation", 'y');
+      desc.add_option("use-alternative-gcfp-consistency", make_optional_argument("NAME", "0"), "use an alternative global control flow parameter consistency", 'z');
     }
 
   public:
@@ -66,14 +72,16 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
     bool run()
     {
       mCRL2log(verbose) << "pbesstategraph parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:                    " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:                   " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  simplify:                      " << std::boolalpha << m_simplify << std::endl;
-      mCRL2log(verbose) << "  apply to original:             " << std::boolalpha << m_apply_to_original << std::endl;
-      mCRL2log(verbose) << "  use local variant:             " << std::boolalpha << m_use_local_variant << std::endl;
-      mCRL2log(verbose) << "  print influence graph:         " << std::boolalpha << m_print_influence_graph << std::endl;
-      mCRL2log(verbose) << "  use marking optimization:      " << std::boolalpha << m_use_marking_optimization << std::endl;
-      mCRL2log(verbose) << "  use alternative cfp criterion: " << std::boolalpha << m_use_alternative_cfp_criterion << std::endl;
+      mCRL2log(verbose) << "  input file:                       " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:                      " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  simplify:                         " << std::boolalpha << m_simplify << std::endl;
+      mCRL2log(verbose) << "  apply to original:                " << std::boolalpha << m_apply_to_original << std::endl;
+      mCRL2log(verbose) << "  use local variant:                " << std::boolalpha << m_use_local_variant << std::endl;
+      mCRL2log(verbose) << "  print influence graph:            " << std::boolalpha << m_print_influence_graph << std::endl;
+      mCRL2log(verbose) << "  use marking optimization:         " << std::boolalpha << m_use_marking_optimization << std::endl;
+      mCRL2log(verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << m_use_alternative_lcfp_criterion << std::endl;
+      mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << m_use_alternative_gcfp_relation << std::endl;
+      mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << m_use_alternative_gcfp_consistency << std::endl;
 
       pbesstategraph(input_filename(),
                      output_filename(),
@@ -83,7 +91,9 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
                      m_use_local_variant,
                      m_print_influence_graph,
                      m_use_marking_optimization,
-                     m_use_alternative_cfp_criterion
+                     m_use_alternative_lcfp_criterion,
+                     m_use_alternative_gcfp_relation,
+                     m_use_alternative_gcfp_consistency
                     );
       return true;
     }

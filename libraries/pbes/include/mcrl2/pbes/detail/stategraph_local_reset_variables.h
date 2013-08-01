@@ -320,8 +320,12 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
     }
 
-    local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty, bool use_alternative_cfp_criterion = false)
-      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_cfp_criterion),
+    local_reset_variables_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
+                                    bool use_alternative_lcfp_criterion = false,
+                                    bool use_alternative_gcfp_relation = false,
+                                    bool use_alternative_gcfp_consistency = false
+                                   )
+      : stategraph_local_algorithm(p, rewrite_strategy, use_alternative_lcfp_criterion, use_alternative_gcfp_relation, use_alternative_gcfp_consistency),
         m_original_pbes(p)
     {}
 

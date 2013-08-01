@@ -763,7 +763,7 @@ void test_cfp()
     std::vector<std::string> lines = utilities::detail::nonempty_lines(expected_result);
     std::set<std::string> lineset(lines.begin(), lines.end());
     std::string expected = utilities::string_join(lineset, ", ");
-    pbes_system::detail::stategraph_algorithm algorithm(p, data::jitty, true);
+    pbes_system::detail::stategraph_algorithm algorithm(p, data::jitty, true, true, true);
     algorithm.run();
     std::string result = utilities::string_join(print_connected_components(algorithm.connected_components(), algorithm), ", ");
 

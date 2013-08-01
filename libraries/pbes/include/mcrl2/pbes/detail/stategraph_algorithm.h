@@ -98,8 +98,43 @@ class stategraph_algorithm
     // a data rewriter
     data::rewriter m_datar;
 
-    // determines how control flow parameters are computed
-    bool m_use_alternative_cfp_criterion;
+    // determines how local control flow parameters are computed
+    //
+    // Keuze uit twee alternatieven voor de berekening van lokale CFPs.
+    //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
+    //          a. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
+    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en dest(X,i,n) zijn beide undefined.
+    //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
+    //          a. source(X,i,n) and dest(X,i,n) zijn beide defined, of
+    //          b. copy(X,i,n) is defined en gelijk aan n.
+    //
+    // De eerste definieert in feite een exclusive or, terwijl de tweede een standaard or is.
+    bool m_use_alternative_lcfp_criterion;
+
+    // determines how global control flow parameters are related
+    //
+    // Keuze uit twee alternatieven voor het relateren van CFPs.
+    //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
+    //         a. er is een i z.d.d. copy(X, i, n) = m, of
+    //         b. er is een i z.d.d. copy(Y, i, m) = n
+    //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
+    //         a. er is een i z.d.d. copy(X, i, n) = m, en dest(X, i, m) is ongedefinieerd, of
+    //         b. er is een i z.d.d. copy(Y, i, m) = n en dest(Y, i, n) is ongedefinieerd.
+    // Hier zit het verschil er dus in dat we, in het tweede geval, parameters alleen relateren als er een copy is
+    // van de een naar de ander EN de dest in dat geval ongedefinieerd is.
+    bool m_use_alternative_gcfp_relation;
+
+    // determines how global control flow parameters are selected
+    //
+    // Keuze voor de selectie van globale CFPs (of globale consistentie eisen).
+    //  * Een set van CFPs is consistent als voor elke d^X[n], en voor alle Y in bnd(E)\{X} (dus in alle andere vergelijkingen), voor alle i waarvoor geldt pred(phi_Y, i) = X, danwel:
+    //         a. dest(Y, i, n) is gedefinieerd, of
+    //         b. copy(Y, i, m) = n voor een of andere globale CFP d^Y[m]
+    // Deze eis is in principe voldoende om globale CFPs te identificeren. Als we echter een strikte scheiding tussen control flow parameters en data parameters willen bewerkstelligen, dan moet hier optioneel de volgende eis aan toegevoegd worden:
+    //  * Een set van CFPs is consistent als de voorgaande eisen gelden, en bovendien voor elke d^X[n] geldt dat voor alle i waarvoor pred(phi_X, i) = Y != X, als d^X[n] affects data(phi_X, i)[m], dan is d^Y[m] een globale control flow parameter.
+    // Waar de eerste gemarkeerd is als "detect conflicts for parameters of Y in equations of the form X(d) = ... Y(e)"
+    // en de tweede als "detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)".
+    bool m_use_alternative_gcfp_consistency;
 
     // the control flow parameters
     std::map<core::identifier_string, std::vector<bool> > m_is_control_flow;
@@ -292,7 +327,7 @@ class stategraph_algorithm
           {
             for (std::size_t n = 0; n < d_X.size(); n++)
             {
-              if (m_use_alternative_cfp_criterion)
+              if (m_use_alternative_lcfp_criterion)
               {
                 // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
                 // 1. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
@@ -398,33 +433,36 @@ class stategraph_algorithm
         }
 
         // Detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)
-        for (auto k = equations.begin(); k != equations.end(); ++k)
+        if (m_use_alternative_gcfp_consistency)
         {
-          const core::identifier_string& X = k->variable().name();
-          const std::vector<predicate_variable>& predvars = k->predicate_variables();
-          const std::vector<data::variable>& d_X = k->parameters();
-          std::size_t M = d_X.size();
-
-          for (auto i = predvars.begin(); i != predvars.end(); ++i)
+          for (auto k = equations.begin(); k != equations.end(); ++k)
           {
-            const predicate_variable& PVI_X_i = *i;
-            const core::identifier_string& Y = PVI_X_i.X.name();
-            if (Y == X)
+            const core::identifier_string& X = k->variable().name();
+            const std::vector<predicate_variable>& predvars = k->predicate_variables();
+            const std::vector<data::variable>& d_X = k->parameters();
+            std::size_t M = d_X.size();
+
+            for (auto i = predvars.begin(); i != predvars.end(); ++i)
             {
-              continue;
-            }
-            const data::data_expression_list& e = PVI_X_i.X.parameters();
-            std::size_t n = 0;
-            for (auto ei = e.begin(); ei != e.end(); ++ei, ++n)
-            {
-              std::set<data::variable> V = data::find_free_variables(*ei);
-              for (std::size_t m = 0; m < M; m++)
+              const predicate_variable& PVI_X_i = *i;
+              const core::identifier_string& Y = PVI_X_i.X.name();
+              if (Y == X)
               {
-                if (m_is_GCFP[X][m] && !m_is_GCFP[Y][n] && (V.find(d_X[m]) != V.end()))
+                continue;
+              }
+              const data::data_expression_list& e = PVI_X_i.X.parameters();
+              std::size_t n = 0;
+              for (auto ei = e.begin(); ei != e.end(); ++ei, ++n)
+              {
+                std::set<data::variable> V = data::find_free_variables(*ei);
+                for (std::size_t m = 0; m < M; m++)
                 {
-                  m_is_GCFP[X][m] = false;
-                  changed = true;
-                  mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << m << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
+                  if (m_is_GCFP[X][m] && !m_is_GCFP[Y][n] && (V.find(d_X[m]) != V.end()))
+                  {
+                    m_is_GCFP[X][m] = false;
+                    changed = true;
+                    mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << m << ") is not a GCFP because of predicate variable " << pbes_system::pp(PVI_X_i.X) << " in equation " << core::pp(X) << std::endl;
+                  }
                 }
               }
             }
@@ -519,7 +557,7 @@ class stategraph_algorithm
             std::size_t m = j->second;
             if (is_global_control_flow_parameter(X, n) && is_global_control_flow_parameter(Y, m))
             {
-              if (m_use_alternative_cfp_criterion)
+              if (m_use_alternative_gcfp_relation)
               {
                 mCRL2log(log::debug, "stategraph") << "(" << core::pp(X) << ", " << n << ") and (" << core::pp(Y) << ", " << m << ") are related "
                                                    << "because of recursion " << pp(PVI_X_i.X) << " in the equation for " << core::pp(X) << std::endl;
@@ -759,9 +797,15 @@ class stategraph_algorithm
 
   public:
 
-    stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty, bool use_alternative_cfp_criterion = false)
+    stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
+                         bool use_alternative_lcfp_criterion = false,
+                         bool use_alternative_gcfp_relation = false,
+                         bool use_alternative_gcfp_consistency = false
+                        )
       : m_datar(p.data(), rewrite_strategy),
-        m_use_alternative_cfp_criterion(use_alternative_cfp_criterion)
+        m_use_alternative_lcfp_criterion(use_alternative_lcfp_criterion),
+        m_use_alternative_gcfp_relation(use_alternative_gcfp_relation),
+        m_use_alternative_gcfp_consistency(use_alternative_gcfp_consistency)
     {
       m_pbes = stategraph_pbes(p);
     }
