@@ -12,7 +12,7 @@
 
 #include <algorithm>
 #include <set>
-#include "mcrl2/utilities/stack_alloc.h"
+#include <boost/signals2/detail/auto_buffer.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -261,6 +261,12 @@ struct parameter_score
 {
   size_t parameter_id;
   float score;
+
+  parameter_score() {}
+
+  parameter_score(size_t id, float score_)
+    : parameter_id(id), score(score_)
+  {}
 };
 
 static bool parameter_score_compare(const parameter_score &left, const parameter_score &right)
@@ -270,14 +276,12 @@ static bool parameter_score_compare(const parameter_score &left, const parameter
 
 void next_state_generator::summand_subset_t::build_pruning_parameters(const action_summand_vector &summands)
 {
-  typedef std::vector<parameter_score, mcrl2::utilities::stack_alloc< parameter_score, 64 > > vector_t;
-  vector_t parameters(m_generator->m_process_parameters.size());
+  typedef boost::signals2::detail::auto_buffer<parameter_score, boost::signals2::detail::store_n_objects<64> > vector_t;
+  vector_t parameters;
 
   for (size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
   {
-    parameters[i].parameter_id = i;
-    parameters[i].score = 0;
-
+    parameters.push_back(parameter_score(i, 0));
     for (action_summand_vector::const_iterator j = summands.begin(); j != summands.end(); j++)
     {
       parameters[i].score += condition_selectivity(j->condition(), m_generator->m_process_parameters[i]);
@@ -394,7 +398,7 @@ struct action_argument_converter
         m_rewriter(rewriter),
         m_substitution(substitution)
   {}
-  
+
   data_expression operator()(const atermpp::aterm_appl &t) const
   {
     return atermpp::aterm_cast<data_expression>(m_rewriter.convert_from(m_rewriter.rewrite_internal(t, *m_substitution)));
@@ -410,7 +414,7 @@ struct state_argument_rewriter
         m_rewriter(rewriter),
         m_substitution(substitution)
   {}
-  
+
   next_state_generator::internal_state_argument_t operator()(const atermpp::aterm &t) const
   {
     return atermpp::aterm_cast<next_state_generator::internal_state_argument_t>(
@@ -577,7 +581,7 @@ void next_state_generator::iterator::increment()
     }
     actions[i] = action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }
-  m_transition.m_action = multi_action(action_list(actions.begin(), actions.end())); 
+  m_transition.m_action = multi_action(action_list(actions.begin(), actions.end()));
 
   m_transition.m_summand_index = (m_summand - &m_generator->m_summands[0]);
 

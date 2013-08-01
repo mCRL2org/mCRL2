@@ -12,7 +12,7 @@
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
-#include "mcrl2/utilities/stack_alloc.h"
+#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/data/detail/prover/info.h"
 
 namespace mcrl2
@@ -207,12 +207,12 @@ class InternalFormatManipulator
       const atermpp::aterm &v_function = a_term[0];
       size_t v_arity = v_symbol.arity();
 
-      typedef std::vector < atermpp::aterm,mcrl2::utilities::stack_alloc < atermpp::aterm,64> > vector_t;
-      vector_t v_parts(v_arity);
-      v_parts[0] = v_function;
+      typedef boost::signals2::detail::auto_buffer<atermpp::aterm, boost::signals2::detail::store_n_objects<64> > vector_t;
+      vector_t v_parts;
+      v_parts.push_back(v_function);
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = orient(atermpp::aterm_appl(a_term[i]));
+        v_parts.push_back(orient(atermpp::aterm_appl(a_term[i])));
       }
       atermpp::aterm_appl v_result = atermpp::aterm_appl(v_symbol, v_parts.begin(),v_parts.end());
 

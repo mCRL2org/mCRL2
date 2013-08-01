@@ -19,10 +19,10 @@
 #include <stdexcept>
 #include <iostream>
 #include "boost/config.hpp"
+#include <boost/signals2/detail/auto_buffer.hpp>
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct_core.h"
 
@@ -709,7 +709,7 @@ aterm_appl RewriterJitty::rewrite_aux_function_symbol(
   if (strat.defined())
   {
     typedef std::pair<variable, aterm> variable_aterm_pair;
-    std::vector<variable_aterm_pair,utilities::stack_alloc < variable_aterm_pair , 16> > subst;
+    boost::signals2::detail::auto_buffer<variable_aterm_pair, boost::signals2::detail::store_n_objects<16> > subst;
     subst.reserve(16);
     for (aterm_list::const_iterator strategy_it=strat.begin(); strategy_it!=strat.end(); ++strategy_it)
     {

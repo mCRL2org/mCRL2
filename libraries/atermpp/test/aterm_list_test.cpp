@@ -55,11 +55,15 @@ void test_aterm_list()
   aterm_list q (read_term_from_string("[1,2,3,4]"));
 
   aterm_list r = reverse(q); // r == [4,3,2,1]
+
   BOOST_CHECK(r == read_term_from_string("[4,3,2,1]"));
 
   aterm_list r1 = q;
+
+/*
   r1=push_back<aterm>(r1,aterm_int(5));
   BOOST_CHECK(r1 == read_term_from_string("[1,2,3,4,5]"));
+*/
 
   atermpp::aterm f = q.front(); // f == 1
   BOOST_CHECK(f == aterm_int(1));
@@ -82,7 +86,7 @@ void test_aterm_list()
   BOOST_CHECK(w.tail() == v);
   w.pop_front();
   BOOST_CHECK(w == v);
- 
+
   // test concatenation
   {
     aterm_list a (read_term_from_string("[1,2,3]"));
@@ -90,7 +94,7 @@ void test_aterm_list()
     // BOOST_CHECK(x + a == read_term_from_string("[0,1,2,3]"));
     BOOST_CHECK(a + a == read_term_from_string("[1,2,3,1,2,3]"));
     // BOOST_CHECK(a + x == read_term_from_string("[1,2,3,0]"));
-  }
+  }  
 }
 
 void test_set_operations()

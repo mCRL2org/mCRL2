@@ -1,8 +1,8 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 
+#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -22,14 +22,16 @@ template <typename Term>
 inline
 term_list<Term> push_back(const term_list<Term> &l, const Term &el)
 {
-  typedef std::vector <typename term_list<Term>::const_iterator, mcrl2::utilities::stack_alloc<typename term_list<Term>::const_iterator,64> > vector_t;
+  typedef typename term_list<Term>::const_iterator const_iterator;
+  
+  typedef boost::signals2::detail::auto_buffer<const_iterator, boost::signals2::detail::store_n_objects<64> > vector_t;
   vector_t buffer;
   const size_t len = l.size();
   buffer.reserve(len);
 
   /* Collect all elements of list in buffer */
   
-  for (typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
+  for (const_iterator i = l.begin(); i != l.end(); ++i)
   {
     buffer.push_back(i);  
   }
@@ -38,12 +40,13 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el)
   result.push_front(el);
 
   /* Insert elements at the front of the list */
-  for (typename vector_t::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+  for (auto i = buffer.rbegin(); i != buffer.rend(); ++i)
   {
     result.push_front(**i);
   }
   return result;
 }
+
 
 template <typename Term>
 inline
@@ -62,8 +65,10 @@ template <typename Term>
 inline
 term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
 {
+  typedef typename term_list<Term>::const_iterator const_iterator;
+  
   size_t len=0;
-  typename term_list<Term>::const_iterator i=list.begin();
+  const_iterator i = list.begin();
   for( ; i!=list.end(); ++i, ++len)
   {
     if (*i==t)
@@ -78,12 +83,12 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
     return list;
   }
 
-  typedef std::vector <typename term_list<Term>::const_iterator, mcrl2::utilities::stack_alloc<typename term_list<Term>::const_iterator,64> > vector_t;
+  typedef boost::signals2::detail::auto_buffer<const_iterator, boost::signals2::detail::store_n_objects<64> > vector_t;
   vector_t buffer;
   buffer.reserve(len);
 
   term_list<Term> result = list; 
-  for(typename term_list<Term>::const_iterator j=list.begin();  j!=i; ++j)
+  for(const_iterator j = list.begin(); j != i; ++j)
   {
     buffer.push_back(j);
     result.pop_front();
@@ -92,7 +97,7 @@ term_list<Term> remove_one_element(const term_list<Term> &list, const Term &t)
   assert(result.front()==t);
   result.pop_front(); // skip the element.
 
-  for (typename vector_t::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+  for (auto i = buffer.rbegin(); i != buffer.rend(); ++i)
   {
     result.push_front(**i);
   }
@@ -104,6 +109,7 @@ template <typename Term>
 inline
 term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
 {
+  typedef typename term_list<Term>::const_iterator const_iterator;
 
   if (m.empty())
   {
@@ -118,25 +124,25 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m)
   }
 
   term_list<Term> result = m;
-  typedef std::vector <typename term_list<Term>::const_iterator, mcrl2::utilities::stack_alloc<typename term_list<Term>::const_iterator,64> > vector_t;
+
+  typedef boost::signals2::detail::auto_buffer<const_iterator, boost::signals2::detail::store_n_objects<64> > vector_t;
   vector_t buffer;
+
   buffer.reserve(len);
 
-  for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
+  for (const_iterator i = l.begin(); i != l.end(); ++i)
   {
     buffer.push_back(i); 
   }
 
-  /* Insert elements at the front of the list */
-  for (typename vector_t::const_reverse_iterator j=buffer.rbegin(); j!=buffer.rend(); ++j)
+  // Insert elements at the front of the list
+  for (auto j = buffer.rbegin(); j != buffer.rend(); ++j)
   {
     result.push_front(**j);
   }
 
   return result;
 }
-
-
 
 
 
@@ -150,18 +156,18 @@ namespace detail
     const _aterm* result=aterm::empty_aterm_list();
     while (first != last)
     {
-      const typename Iter::value_type &t=*(--last);
-      result=term_appl2<aterm>(detail::function_adm.AS_LIST,convert_to_aterm(t),aterm_cast<term_list<Term> >(aterm(result)));
+      result=term_appl2<aterm>(detail::function_adm.AS_LIST,convert_to_aterm(*(--last)),aterm_cast<term_list<Term> >(aterm(result)));
     }
     return result;
   }
+
 
   template <class Term, class Iter, class ATermConverter>
   inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm)
   {
     BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
     BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(aterm));
-    typedef std::vector<Term,mcrl2::utilities::stack_alloc < Term, 64> > vector_type;
+    typedef boost::signals2::detail::auto_buffer<Term, boost::signals2::detail::store_n_objects<64> > vector_type;
     vector_type temporary_store;  
     temporary_store.reserve(64);
     for(; first != last; ++first)
@@ -169,10 +175,11 @@ namespace detail
       temporary_store.push_back(convert_to_aterm(*first));
     }
 
-    return make_list_backward<Term,typename vector_type::const_iterator,do_not_convert_term<Term> >
-               (temporary_store.begin(),temporary_store.end(),do_not_convert_term<Term>());
+    return make_list_backward<Term>(temporary_store.begin(), temporary_store.end(), do_not_convert_term<Term>());
   }
+
 }
+
 
 } // namespace atermpp
 

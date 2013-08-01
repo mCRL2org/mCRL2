@@ -10,7 +10,7 @@
 
 #include <cstdlib>
 #include <vector>
-#include "mcrl2/utilities/stack_alloc.h"
+#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/utilities/exception.h"
@@ -147,7 +147,7 @@ ptrdiff_t tree_set_store::create_set(vector<ptrdiff_t> &elems)
     return EMPTY_SET;
   }
 
-  typedef std::vector <ptrdiff_t, mcrl2::utilities::stack_alloc< ptrdiff_t, 128> > vector_t;
+  typedef boost::signals2::detail::auto_buffer<ptrdiff_t, boost::signals2::detail::store_n_objects<128> > vector_t;
   vector_t nodes;
   nodes.reserve(elems.size());
   size_t node_size = 0;

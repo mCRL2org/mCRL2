@@ -8,6 +8,7 @@
 
 #include <cstdlib>
 #include <sstream>
+#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
@@ -346,7 +347,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
       }
     }
 
-    typedef std::vector < atermpp::aterm, mcrl2::utilities::stack_alloc<atermpp::aterm,64> > args_vector_t;
+    typedef boost::signals2::detail::auto_buffer<atermpp::aterm, boost::signals2::detail::store_n_objects<64> > args_vector_t;
     args_vector_t args;
     args.reserve(arity+extra_arity);
     
@@ -407,7 +408,7 @@ bool EnumeratorSolutionsStandard::next(
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
-  typedef vector < atermpp::aterm, mcrl2::utilities::stack_alloc<aterm, 32> > vector_t;
+  typedef boost::signals2::detail::auto_buffer<atermpp::aterm, boost::signals2::detail::store_n_objects<64> > vector_t;
   vector_t var_array;
   var_array.reserve(32);
 

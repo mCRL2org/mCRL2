@@ -12,8 +12,10 @@
 #ifndef MCRL2_ATERMPP_SHARED_SUBSET_H
 #define MCRL2_ATERMPP_SHARED_SUBSET_H
 
+#include <algorithm>
+#include <iterator>
 #include <vector>
-#include "mcrl2/utilities/stack_alloc.h"
+#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
@@ -127,7 +129,7 @@ class shared_subset
             m_index(-1)
         {
         }
-        
+
         iterator(const shared_subset &subset)
           : m_subset(&subset),
             m_index(0)
@@ -166,9 +168,8 @@ class shared_subset
 
         void find_next_index()
         {
-          typedef std::vector < bdd_node, mcrl2::utilities::stack_alloc < bdd_node, 64> > vector_t;
-          vector_t path_stack(m_subset->m_bits);
-          size_t path_stack_index = 0;
+          typedef boost::signals2::detail::auto_buffer<bdd_node, boost::signals2::detail::store_n_objects<64> > vector_t;
+          vector_t path_stack;
           bdd_node node = m_subset->m_bdd_root;
 
           while (true)
@@ -179,10 +180,10 @@ class shared_subset
               m_index = -1;
               return;
             }
-            
+
             while (node.is_node())
             {
-              path_stack[path_stack_index++] = node;
+              path_stack.push_back(node);
               node = (m_index & ((size_t)1 << node.bit())) ? node.true_node() : node.false_node();
             }
 
@@ -196,7 +197,7 @@ class shared_subset
               bdd_node start;
               size_t bit;
 
-              if (path_stack_index == 0)
+              if (path_stack.empty())
               {
                 start = m_subset->m_bdd_root;
                 bit = m_subset->m_bits;
@@ -204,7 +205,7 @@ class shared_subset
               else
               {
                 start = node;
-                bit = path_stack[path_stack_index - 1].bit();
+                bit = path_stack.back().bit();
               }
 
               if (!start.is_false())
@@ -227,14 +228,15 @@ class shared_subset
                 }
               }
 
-              if (path_stack_index == 0)
+              if (path_stack.empty())
               {
                 m_index = -1;
                 return;
               }
               else
               {
-                node = path_stack[--path_stack_index];
+                node = path_stack.back();
+                path_stack.pop_back();
                 if (!(m_index & ((size_t)1 << bit)) && !node.true_node().is_false())
                 {
                   m_index |= ((size_t)1 << bit);
@@ -279,8 +281,9 @@ class shared_subset
       : m_set(set.m_set),
         m_bits(set.m_bits)
     {
-      typedef std::vector < bdd_node, mcrl2::utilities::stack_alloc < bdd_node, 64> > vector_t;
-      vector_t trees(m_bits + 1);
+      typedef boost::signals2::detail::auto_buffer<bdd_node, boost::signals2::detail::store_n_objects<64> > vector_t;
+      vector_t trees;
+      std::fill_n(std::back_inserter(trees), m_bits + 1, bdd_node());
       size_t completed = 0;
       for (iterator i = set.begin(); i != set.end(); i++)
       {

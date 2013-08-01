@@ -13,8 +13,8 @@
 #include <cstring>
 #include <limits>
 #include <algorithm>
+#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/stack_alloc.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
@@ -697,7 +697,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 
   if (is_application(term))
   {
-    std::vector<atermpp::aterm,utilities::stack_alloc < atermpp::aterm, 16> > result;
+    boost::signals2::detail::auto_buffer<atermpp::aterm, boost::signals2::detail::store_n_objects<16> > result;
     result.reserve(16);
     
     const application& appl=aterm_cast<application>(term); 

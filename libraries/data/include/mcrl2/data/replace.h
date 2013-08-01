@@ -460,7 +460,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  assert(data::is_simple_substitution(sigma));
+  if (!data::is_simple_substitution(sigma)) {
+    throw mcrl2::runtime_error("error!");
+  }
   data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
 }
 
@@ -472,7 +474,9 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  assert(data::is_simple_substitution(sigma));
+  if (!data::is_simple_substitution(sigma)) {
+    throw mcrl2::runtime_error("error!");
+  }
   return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x));
 }
 
@@ -485,7 +489,9 @@ void replace_free_variables(T& x,
                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                            )
 {
-  assert(data::is_simple_substitution(sigma));
+  if (!data::is_simple_substitution(sigma)) {
+    throw mcrl2::runtime_error("error!");
+  }
   data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
@@ -498,7 +504,9 @@ T replace_free_variables(const T& x,
                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0
                         )
 {
-  assert(data::is_simple_substitution(sigma));
+  if (!data::is_simple_substitution(sigma)) {
+    throw mcrl2::runtime_error("error!");
+  }
   return core::static_down_cast<const T&>(data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables));
 }
 //--- end generated data replace code ---//
