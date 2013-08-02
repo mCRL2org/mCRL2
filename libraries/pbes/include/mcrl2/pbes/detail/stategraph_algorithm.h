@@ -495,7 +495,7 @@ class stategraph_algorithm
     bool is_global_control_flow_parameter(const core::identifier_string& X, std::size_t i) const
     {
       std::map<core::identifier_string, std::vector<bool> >::const_iterator j = m_is_GCFP.find(X);
-      assert(j != m_is_LCFP.end());
+      assert(j != m_is_GCFP.end());
       const std::vector<bool>& cf = j->second;
       assert(i < cf.size());
       return cf[i];
