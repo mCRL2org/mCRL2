@@ -47,7 +47,7 @@ cmake_minimum_required(VERSION 2.8.3)
 function(cxx11_check_feature FEATURE_NAME RESULT_VAR REQUIRED)
     set(_LOG_NAME "\"${FEATURE_NAME}\"")
     if (NOT DEFINED ${RESULT_VAR})
-        set(_bindir "${CMAKE_CURRENT_BINARY_DIR}/CheckCXX11Features/cxx11_${FEATURE_NAME}")
+        set(_bindir "${CMAKE_CURRENT_BINARY_DIR}")
 
         set(_SRCFILE_BASE ${CMAKE_CURRENT_LIST_DIR}/CheckCXX11Features/cxx11-test-${FEATURE_NAME})
         message(STATUS "Checking C++11 support for ${_LOG_NAME}")
@@ -60,7 +60,7 @@ function(cxx11_check_feature FEATURE_NAME RESULT_VAR REQUIRED)
             try_compile(${RESULT_VAR} "${_bindir}" "${_SRCFILE}"
                         COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}")
             if (${RESULT_VAR} AND EXISTS ${_SRCFILE_FAIL})
-                try_compile(${RESULT_VAR} "${_bindir}_fail" "${_SRCFILE_FAIL}"
+                try_compile(${RESULT_VAR} "${_bindir}" "${_SRCFILE_FAIL}"
                             COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}")
             endif (${RESULT_VAR} AND EXISTS ${_SRCFILE_FAIL})
         else (CROSS_COMPILING)
@@ -74,7 +74,7 @@ function(cxx11_check_feature FEATURE_NAME RESULT_VAR REQUIRED)
             endif (_COMPILE_RESULT_VAR AND NOT _RUN_RESULT_VAR)
             if (${RESULT_VAR} AND EXISTS ${_SRCFILE_FAIL})
                 try_run(_RUN_RESULT_VAR _COMPILE_RESULT_VAR
-                        "${_bindir}_fail" "${_SRCFILE_FAIL}"
+                        "${_bindir}" "${_SRCFILE_FAIL}"
                          COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}")
                 if (_COMPILE_RESULT_VAR AND _RUN_RESULT_VAR)
                     set(${RESULT_VAR} TRUE)
@@ -84,7 +84,7 @@ function(cxx11_check_feature FEATURE_NAME RESULT_VAR REQUIRED)
             endif (${RESULT_VAR} AND EXISTS ${_SRCFILE_FAIL})
         endif (CROSS_COMPILING)
         if (${RESULT_VAR} AND EXISTS ${_SRCFILE_FAIL_COMPILE})
-            try_compile(_TMP_RESULT "${_bindir}_fail_compile" "${_SRCFILE_FAIL_COMPILE}"
+            try_compile(_TMP_RESULT "${_bindir}" "${_SRCFILE_FAIL_COMPILE}"
                         COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}")
             if (_TMP_RESULT)
                 set(${RESULT_VAR} FALSE)
