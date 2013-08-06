@@ -53,19 +53,6 @@ add_library(${PROJECT_NAME}
 
 # ##### Start generate parser tables ######
 
-# Silence warnings while compiling generated C code (fsm_syntax.c is the only
-# C code in this library)
-if(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w") # Disable all warnings
-else(MSVC)
-  if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w") # Disable all warnings
-  else (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    # Assuming GCC: disable only the missing-field-initializer warning.
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-field-initializers")
-  endif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-endif(MSVC)
-
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/libraries/lts/source)
 
 add_custom_command(

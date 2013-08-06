@@ -16,19 +16,6 @@ add_custom_target(${PROJECT_NAME}_headers SOURCES ${HEADERS})
 
 # ##### Generate parser tables ######
 
-# Silence warnings while compiling generated C code (mcrl2_syntax.c is the only
-# C code in this library)
-if(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w") # Disable all warnings
-else(MSVC)
-  if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w") # Disable all warnings
-  else (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    # Assuming GCC: disable only the missing-field-initializer warning.
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-field-initializers")
-  endif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-endif(MSVC)
-
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/libraries/core/source)
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/libraries/core/source/mcrl2_syntax.c
