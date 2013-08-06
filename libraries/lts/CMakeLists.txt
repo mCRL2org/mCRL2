@@ -26,7 +26,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 
 set(mcrl2_lts_src
@@ -96,7 +95,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_syntax
   dot_syntax
   fsm_syntax
-  dparser
 )
 
 if( USE_BCG STREQUAL "" )

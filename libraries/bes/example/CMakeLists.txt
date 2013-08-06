@@ -25,7 +25,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 ##---------------------------------------------------
 ## Example *.cpp 

@@ -25,14 +25,12 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_lts
   mcrl2_utilities
   mcrl2_syntax
-  dparser
 )
 
 # install target:

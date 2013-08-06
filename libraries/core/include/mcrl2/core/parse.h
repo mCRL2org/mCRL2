@@ -24,6 +24,8 @@
 #include "mcrl2/core/dparser.h"
 #include "mcrl2/core/detail/dparser_functions.h"
 
+struct D_ParserTables; // prototype
+
 extern "C"
 {
   extern D_ParserTables parser_tables_mcrl2;

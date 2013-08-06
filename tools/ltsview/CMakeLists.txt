@@ -100,7 +100,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities
   mcrl2_utilities_qt
   mcrl2_syntax
-  dparser
   tr
 )
 
@@ -130,7 +129,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 if(GL2PS_FOUND)
   include_directories(${GL2PS_INCLUDE_DIRS})
 else(GL2PS_FOUND)

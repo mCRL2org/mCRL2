@@ -58,7 +58,7 @@ endif(COMMAND cmake_policy)
 # ######### General setup ##########
 
 set(mcrl2_core_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/parse.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/dparser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/core.cpp
 )
 

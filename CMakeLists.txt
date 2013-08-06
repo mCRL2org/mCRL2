@@ -370,13 +370,13 @@ install(
   COMPONENT Headers
   PATTERN ".svn" EXCLUDE
 )
-FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
-install(
-  FILES
-    ${dparser_headers}
-  DESTINATION ${MCRL2_INCLUDE_DIR}/dparser
-  COMPONENT Headers
-)
+#FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
+#install(
+#  FILES
+#    ${dparser_headers}
+#  DESTINATION ${MCRL2_INCLUDE_DIR}/dparser
+#  COMPONENT Headers
+#)
 endif( MCRL2_INSTALL_HEADERS )
 
 ##---------------------------------------------------

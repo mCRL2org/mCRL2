@@ -29,7 +29,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/libraries/pbes/include
   ${CMAKE_SOURCE_DIR}/libraries/process/include
   ${CMAKE_SOURCE_DIR}/libraries/utilities/include
-  ${CMAKE_SOURCE_DIR}/3rd-party/dparser
   ${CMAKE_SOURCE_DIR}/build/workarounds
 )
 
@@ -40,7 +39,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_process
   mcrl2_utilities
   mcrl2_syntax
-  dparser
 )
 
 # install target:

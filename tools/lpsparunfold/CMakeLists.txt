@@ -28,15 +28,11 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-# include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_process
   mcrl2_utilities
-  dparser
 )
 
 # install target:
