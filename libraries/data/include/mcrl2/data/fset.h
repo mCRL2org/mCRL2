@@ -150,7 +150,7 @@ namespace mcrl2 {
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return cons_(s)(arg0, arg1);
+        return sort_fset::cons_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_cons
@@ -220,7 +220,7 @@ namespace mcrl2 {
       inline
       application insert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return insert(s)(arg0, arg1);
+        return sort_fset::insert(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_insert
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return cinsert(s)(arg0, arg1, arg2);
+        return sort_fset::cinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_cinsert
@@ -337,7 +337,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_fset::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_in
@@ -397,7 +397,7 @@ namespace mcrl2 {
       inline
       application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return union_(s)(arg0, arg1, arg2, arg3);
+        return sort_fset::union_(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_union
@@ -457,7 +457,7 @@ namespace mcrl2 {
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return intersection(s)(arg0, arg1, arg2, arg3);
+        return sort_fset::intersection(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_inter
@@ -515,7 +515,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return difference(s)(arg0, arg1);
+        return sort_fset::difference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_diff
@@ -539,12 +539,12 @@ namespace mcrl2 {
       function_symbol_vector fset_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(insert(s));
-        result.push_back(cinsert(s));
-        result.push_back(in(s));
-        result.push_back(union_(s));
-        result.push_back(intersection(s));
-        result.push_back(difference(s));
+        result.push_back(sort_fset::insert(s));
+        result.push_back(sort_fset::cinsert(s));
+        result.push_back(sort_fset::in(s));
+        result.push_back(sort_fset::union_(s));
+        result.push_back(sort_fset::intersection(s));
+        result.push_back(sort_fset::difference(s));
         function_symbol_vector fset_mappings = detail::fset_struct(s).comparison_functions(fset(s));
         result.insert(result.end(), fset_mappings.begin(), fset_mappings.end());
         return result;

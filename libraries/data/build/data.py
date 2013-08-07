@@ -6,6 +6,18 @@ import string
 import copy
 import re
 
+# The following lists identifiers that must be
+# escaped by a namespace when the corresponding function
+# is called, to work around a bug in GCC 4.4
+IDS_WITH_NAMESPACE = ['set_comprehension', 'bag_comprehension']
+
+def add_namespace(function_symbol_name, function_symbol_namespace, other_namespace = "undefined"):
+  global IDS_WITH_NAMESPACE
+  if (function_symbol_namespace == other_namespace or is_standard_function(function_symbol_name) or function_symbol_namespace == "undefined") and not (str(function_symbol_name) in IDS_WITH_NAMESPACE):
+    return function_symbol_name
+  else:
+    return "sort_%s::%s" % (function_symbol_namespace, function_symbol_name)
+
 # Remove trailing _ from a string
 def remove_underscore(s):
   if s.endswith("_"):
@@ -183,7 +195,7 @@ class function_declaration():
       except:
         pass # in case sort_expression has no domain
     
-    return "        result.push_back({0}({1}));\n".format(self.label, ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
     
 
 class function_declaration_list():
@@ -452,7 +464,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      application %s(%s%s%s)\n" % (name, formsortparams, comma, formparams)
         code += "      {\n"
-        code += "        return %s(%s)(%s);\n" % (name, actsortparams, actparams)
+        code += "        return %s(%s)(%s);\n" % (add_namespace(name, self.namespace), actsortparams, actparams)
         code += "      }\n"
         return code
 
@@ -883,11 +895,7 @@ class function_symbol(data_expression):
   def code(self, spec, function_spec, variable_spec, argumentcount = -1):
     f = function_spec.find_function(self, argumentcount)
     sort_parameters_code = [s.code(spec) for s in f.sort_parameters(spec)]
-
-    if f.namespace == function_spec.namespace or is_standard_function(f.label) or f.namespace == "undefined":
-      return "%s(%s)" % (f.label, string.join(sort_parameters_code, ", "))
-    else:
-      return "sort_%s::%s(%s)" % (f.namespace, f.label, string.join(sort_parameters_code, ", "))
+    return "%s(%s)" % (add_namespace(f.label, f.namespace, function_spec.namespace), string.join(sort_parameters_code, ", "))
 
 class lambda_abstraction(data_expression):
   def __init__(self, var_declaration, expression):

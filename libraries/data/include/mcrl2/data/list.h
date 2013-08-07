@@ -135,7 +135,7 @@ namespace mcrl2 {
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return cons_(s)(arg0, arg1);
+        return sort_list::cons_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of |>
@@ -159,8 +159,8 @@ namespace mcrl2 {
       function_symbol_vector list_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(empty(s));
-        result.push_back(cons_(s));
+        result.push_back(sort_list::empty(s));
+        result.push_back(sort_list::cons_(s));
 
         return result;
       }
@@ -205,7 +205,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_list::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
-        return count(s)(arg0);
+        return sort_list::count(s)(arg0);
       }
 
       /// \brief Recogniser for application of #
@@ -320,7 +320,7 @@ namespace mcrl2 {
       inline
       application snoc(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return snoc(s)(arg0, arg1);
+        return sort_list::snoc(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of <|
@@ -378,7 +378,7 @@ namespace mcrl2 {
       inline
       application concat(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return concat(s)(arg0, arg1);
+        return sort_list::concat(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of ++
@@ -436,7 +436,7 @@ namespace mcrl2 {
       inline
       application element_at(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return element_at(s)(arg0, arg1);
+        return sort_list::element_at(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of .
@@ -493,7 +493,7 @@ namespace mcrl2 {
       inline
       application head(const sort_expression& s, const data_expression& arg0)
       {
-        return head(s)(arg0);
+        return sort_list::head(s)(arg0);
       }
 
       /// \brief Recogniser for application of head
@@ -550,7 +550,7 @@ namespace mcrl2 {
       inline
       application tail(const sort_expression& s, const data_expression& arg0)
       {
-        return tail(s)(arg0);
+        return sort_list::tail(s)(arg0);
       }
 
       /// \brief Recogniser for application of tail
@@ -607,7 +607,7 @@ namespace mcrl2 {
       inline
       application rhead(const sort_expression& s, const data_expression& arg0)
       {
-        return rhead(s)(arg0);
+        return sort_list::rhead(s)(arg0);
       }
 
       /// \brief Recogniser for application of rhead
@@ -664,7 +664,7 @@ namespace mcrl2 {
       inline
       application rtail(const sort_expression& s, const data_expression& arg0)
       {
-        return rtail(s)(arg0);
+        return sort_list::rtail(s)(arg0);
       }
 
       /// \brief Recogniser for application of rtail
@@ -688,15 +688,15 @@ namespace mcrl2 {
       function_symbol_vector list_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(in(s));
-        result.push_back(count(s));
-        result.push_back(snoc(s));
-        result.push_back(concat(s));
-        result.push_back(element_at(s));
-        result.push_back(head(s));
-        result.push_back(tail(s));
-        result.push_back(rhead(s));
-        result.push_back(rtail(s));
+        result.push_back(sort_list::in(s));
+        result.push_back(sort_list::count(s));
+        result.push_back(sort_list::snoc(s));
+        result.push_back(sort_list::concat(s));
+        result.push_back(sort_list::element_at(s));
+        result.push_back(sort_list::head(s));
+        result.push_back(sort_list::tail(s));
+        result.push_back(sort_list::rhead(s));
+        result.push_back(sort_list::rtail(s));
         return result;
       }
       ///\brief Function for projecting out argument

@@ -103,7 +103,7 @@ namespace mcrl2 {
       inline
       application cint(const data_expression& arg0)
       {
-        return cint()(arg0);
+        return sort_int::cint()(arg0);
       }
 
       /// \brief Recogniser for application of \@cInt
@@ -158,7 +158,7 @@ namespace mcrl2 {
       inline
       application cneg(const data_expression& arg0)
       {
-        return cneg()(arg0);
+        return sort_int::cneg()(arg0);
       }
 
       /// \brief Recogniser for application of \@cNeg
@@ -181,8 +181,8 @@ namespace mcrl2 {
       function_symbol_vector int_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(cint());
-        result.push_back(cneg());
+        result.push_back(sort_int::cint());
+        result.push_back(sort_int::cneg());
 
         return result;
       }
@@ -224,7 +224,7 @@ namespace mcrl2 {
       inline
       application nat2int(const data_expression& arg0)
       {
-        return nat2int()(arg0);
+        return sort_int::nat2int()(arg0);
       }
 
       /// \brief Recogniser for application of Nat2Int
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       application int2nat(const data_expression& arg0)
       {
-        return int2nat()(arg0);
+        return sort_int::int2nat()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Nat
@@ -334,7 +334,7 @@ namespace mcrl2 {
       inline
       application pos2int(const data_expression& arg0)
       {
-        return pos2int()(arg0);
+        return sort_int::pos2int()(arg0);
       }
 
       /// \brief Recogniser for application of Pos2Int
@@ -389,7 +389,7 @@ namespace mcrl2 {
       inline
       application int2pos(const data_expression& arg0)
       {
-        return int2pos()(arg0);
+        return sort_int::int2pos()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Pos
@@ -489,7 +489,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return maximum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -565,7 +565,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return minimum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -620,7 +620,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        return abs()(arg0);
+        return sort_int::abs()(arg0);
       }
 
       /// \brief Recogniser for application of abs
@@ -678,7 +678,7 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        return negate(arg0.sort())(arg0);
+        return sort_int::negate(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of -
@@ -752,7 +752,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return succ(arg0.sort())(arg0);
+        return sort_int::succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -826,7 +826,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        return pred(arg0.sort())(arg0);
+        return sort_int::pred(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of pred
@@ -898,7 +898,7 @@ namespace mcrl2 {
       inline
       application dub(const data_expression& arg0, const data_expression& arg1)
       {
-        return dub(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::dub(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@dub
@@ -982,7 +982,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return plus(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -1042,7 +1042,7 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        return minus(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -1118,7 +1118,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return times(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -1190,7 +1190,7 @@ namespace mcrl2 {
       inline
       application div(const data_expression& arg0, const data_expression& arg1)
       {
-        return div(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::div(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of div
@@ -1250,7 +1250,7 @@ namespace mcrl2 {
       inline
       application mod(const data_expression& arg0, const data_expression& arg1)
       {
-        return mod(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::mod(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of mod
@@ -1326,7 +1326,7 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        return exp(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of exp
@@ -1349,32 +1349,32 @@ namespace mcrl2 {
       function_symbol_vector int_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(nat2int());
-        result.push_back(int2nat());
-        result.push_back(pos2int());
-        result.push_back(int2pos());
-        result.push_back(maximum(sort_pos::pos(), int_()));
-        result.push_back(maximum(int_(), sort_pos::pos()));
-        result.push_back(maximum(sort_nat::nat(), int_()));
-        result.push_back(maximum(int_(), sort_nat::nat()));
-        result.push_back(maximum(int_(), int_()));
-        result.push_back(minimum(int_(), int_()));
-        result.push_back(abs());
-        result.push_back(negate(sort_pos::pos()));
-        result.push_back(negate(sort_nat::nat()));
-        result.push_back(negate(int_()));
-        result.push_back(succ(int_()));
-        result.push_back(pred(sort_nat::nat()));
-        result.push_back(pred(int_()));
-        result.push_back(dub(sort_bool::bool_(), int_()));
-        result.push_back(plus(int_(), int_()));
-        result.push_back(minus(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(minus(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(minus(int_(), int_()));
-        result.push_back(times(int_(), int_()));
-        result.push_back(div(int_(), sort_pos::pos()));
-        result.push_back(mod(int_(), sort_pos::pos()));
-        result.push_back(exp(int_(), sort_nat::nat()));
+        result.push_back(sort_int::nat2int());
+        result.push_back(sort_int::int2nat());
+        result.push_back(sort_int::pos2int());
+        result.push_back(sort_int::int2pos());
+        result.push_back(sort_int::maximum(sort_pos::pos(), int_()));
+        result.push_back(sort_int::maximum(int_(), sort_pos::pos()));
+        result.push_back(sort_int::maximum(sort_nat::nat(), int_()));
+        result.push_back(sort_int::maximum(int_(), sort_nat::nat()));
+        result.push_back(sort_int::maximum(int_(), int_()));
+        result.push_back(sort_int::minimum(int_(), int_()));
+        result.push_back(sort_int::abs());
+        result.push_back(sort_int::negate(sort_pos::pos()));
+        result.push_back(sort_int::negate(sort_nat::nat()));
+        result.push_back(sort_int::negate(int_()));
+        result.push_back(sort_int::succ(int_()));
+        result.push_back(sort_int::pred(sort_nat::nat()));
+        result.push_back(sort_int::pred(int_()));
+        result.push_back(sort_int::dub(sort_bool::bool_(), int_()));
+        result.push_back(sort_int::plus(int_(), int_()));
+        result.push_back(sort_int::minus(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(sort_int::minus(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(sort_int::minus(int_(), int_()));
+        result.push_back(sort_int::times(int_(), int_()));
+        result.push_back(sort_int::div(int_(), sort_pos::pos()));
+        result.push_back(sort_int::mod(int_(), sort_pos::pos()));
+        result.push_back(sort_int::exp(int_(), sort_nat::nat()));
         return result;
       }
       ///\brief Function for projecting out argument

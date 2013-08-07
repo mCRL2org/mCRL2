@@ -134,7 +134,7 @@ namespace mcrl2 {
       inline
       application cdub(const data_expression& arg0, const data_expression& arg1)
       {
-        return cdub()(arg0, arg1);
+        return sort_pos::cdub()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@cDub
@@ -157,8 +157,8 @@ namespace mcrl2 {
       function_symbol_vector pos_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(c1());
-        result.push_back(cdub());
+        result.push_back(sort_pos::c1());
+        result.push_back(sort_pos::cdub());
 
         return result;
       }
@@ -201,7 +201,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return maximum()(arg0, arg1);
+        return sort_pos::maximum()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -257,7 +257,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return minimum()(arg0, arg1);
+        return sort_pos::minimum()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -312,7 +312,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return succ()(arg0);
+        return sort_pos::succ()(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -367,7 +367,7 @@ namespace mcrl2 {
       inline
       application pos_predecessor(const data_expression& arg0)
       {
-        return pos_predecessor()(arg0);
+        return sort_pos::pos_predecessor()(arg0);
       }
 
       /// \brief Recogniser for application of \@pospred
@@ -423,7 +423,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return plus()(arg0, arg1);
+        return sort_pos::plus()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -480,7 +480,7 @@ namespace mcrl2 {
       inline
       application add_with_carry(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return add_with_carry()(arg0, arg1, arg2);
+        return sort_pos::add_with_carry()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@addc
@@ -536,7 +536,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return times()(arg0, arg1);
+        return sort_pos::times()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -559,13 +559,13 @@ namespace mcrl2 {
       function_symbol_vector pos_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(maximum());
-        result.push_back(minimum());
-        result.push_back(succ());
-        result.push_back(pos_predecessor());
-        result.push_back(plus());
-        result.push_back(add_with_carry());
-        result.push_back(times());
+        result.push_back(sort_pos::maximum());
+        result.push_back(sort_pos::minimum());
+        result.push_back(sort_pos::succ());
+        result.push_back(sort_pos::pos_predecessor());
+        result.push_back(sort_pos::plus());
+        result.push_back(sort_pos::add_with_carry());
+        result.push_back(sort_pos::times());
         return result;
       }
       ///\brief Function for projecting out argument

@@ -154,7 +154,7 @@ namespace mcrl2 {
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return cons_(s)(arg0, arg1, arg2);
+        return sort_fbag::cons_(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_cons
@@ -225,7 +225,7 @@ namespace mcrl2 {
       inline
       application insert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return insert(s)(arg0, arg1, arg2);
+        return sort_fbag::insert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_insert
@@ -284,7 +284,7 @@ namespace mcrl2 {
       inline
       application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return cinsert(s)(arg0, arg1, arg2);
+        return sort_fbag::cinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_cinsert
@@ -342,7 +342,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return count(s)(arg0, arg1);
+        return sort_fbag::count(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag_count
@@ -400,7 +400,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_fbag::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag_in
@@ -460,7 +460,7 @@ namespace mcrl2 {
       inline
       application join(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return join(s)(arg0, arg1, arg2, arg3);
+        return sort_fbag::join(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_join
@@ -520,7 +520,7 @@ namespace mcrl2 {
       inline
       application intersect(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return intersect(s)(arg0, arg1, arg2, arg3);
+        return sort_fbag::intersect(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_inter
@@ -580,7 +580,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return difference(s)(arg0, arg1, arg2, arg3);
+        return sort_fbag::difference(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_diff
@@ -638,7 +638,7 @@ namespace mcrl2 {
       inline
       application fbag2fset(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return fbag2fset(s)(arg0, arg1);
+        return sort_fbag::fbag2fset(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag2fset
@@ -695,7 +695,7 @@ namespace mcrl2 {
       inline
       application fset2fbag(const sort_expression& s, const data_expression& arg0)
       {
-        return fset2fbag(s)(arg0);
+        return sort_fbag::fset2fbag(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@fset2fbag
@@ -719,15 +719,15 @@ namespace mcrl2 {
       function_symbol_vector fbag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(insert(s));
-        result.push_back(cinsert(s));
-        result.push_back(count(s));
-        result.push_back(in(s));
-        result.push_back(join(s));
-        result.push_back(intersect(s));
-        result.push_back(difference(s));
-        result.push_back(fbag2fset(s));
-        result.push_back(fset2fbag(s));
+        result.push_back(sort_fbag::insert(s));
+        result.push_back(sort_fbag::cinsert(s));
+        result.push_back(sort_fbag::count(s));
+        result.push_back(sort_fbag::in(s));
+        result.push_back(sort_fbag::join(s));
+        result.push_back(sort_fbag::intersect(s));
+        result.push_back(sort_fbag::difference(s));
+        result.push_back(sort_fbag::fbag2fset(s));
+        result.push_back(sort_fbag::fset2fbag(s));
         function_symbol_vector fbag_mappings = detail::fbag_struct(s).comparison_functions(fbag(s));
         result.insert(result.end(), fbag_mappings.begin(), fbag_mappings.end());
         return result;

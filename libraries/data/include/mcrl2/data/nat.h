@@ -163,7 +163,7 @@ namespace mcrl2 {
       inline
       application cnat(const data_expression& arg0)
       {
-        return cnat()(arg0);
+        return sort_nat::cnat()(arg0);
       }
 
       /// \brief Recogniser for application of \@cNat
@@ -219,7 +219,7 @@ namespace mcrl2 {
       inline
       application cpair(const data_expression& arg0, const data_expression& arg1)
       {
-        return cpair()(arg0, arg1);
+        return sort_nat::cpair()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@cPair
@@ -242,9 +242,9 @@ namespace mcrl2 {
       function_symbol_vector nat_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(c0());
-        result.push_back(cnat());
-        result.push_back(cpair());
+        result.push_back(sort_nat::c0());
+        result.push_back(sort_nat::cnat());
+        result.push_back(sort_nat::cpair());
 
         return result;
       }
@@ -286,7 +286,7 @@ namespace mcrl2 {
       inline
       application pos2nat(const data_expression& arg0)
       {
-        return pos2nat()(arg0);
+        return sort_nat::pos2nat()(arg0);
       }
 
       /// \brief Recogniser for application of Pos2Nat
@@ -341,7 +341,7 @@ namespace mcrl2 {
       inline
       application nat2pos(const data_expression& arg0)
       {
-        return nat2pos()(arg0);
+        return sort_nat::nat2pos()(arg0);
       }
 
       /// \brief Recogniser for application of Nat2Pos
@@ -421,7 +421,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return maximum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_nat::maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -493,7 +493,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return minimum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_nat::minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -551,7 +551,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return succ(arg0.sort())(arg0);
+        return sort_nat::succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -606,7 +606,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        return pred()(arg0);
+        return sort_nat::pred()(arg0);
       }
 
       /// \brief Recogniser for application of pred
@@ -662,7 +662,7 @@ namespace mcrl2 {
       inline
       application dub(const data_expression& arg0, const data_expression& arg1)
       {
-        return dub()(arg0, arg1);
+        return sort_nat::dub()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@dub
@@ -742,7 +742,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return plus(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_nat::plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -799,7 +799,7 @@ namespace mcrl2 {
       inline
       application gte_subtract_with_borrow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return gte_subtract_with_borrow()(arg0, arg1, arg2);
+        return sort_nat::gte_subtract_with_borrow()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@gtesubtb
@@ -871,7 +871,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return times(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_nat::times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -927,7 +927,7 @@ namespace mcrl2 {
       inline
       application div(const data_expression& arg0, const data_expression& arg1)
       {
-        return div()(arg0, arg1);
+        return sort_nat::div()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of div
@@ -983,7 +983,7 @@ namespace mcrl2 {
       inline
       application mod(const data_expression& arg0, const data_expression& arg1)
       {
-        return mod()(arg0, arg1);
+        return sort_nat::mod()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of mod
@@ -1055,7 +1055,7 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        return exp(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_nat::exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of exp
@@ -1110,7 +1110,7 @@ namespace mcrl2 {
       inline
       application even(const data_expression& arg0)
       {
-        return even()(arg0);
+        return sort_nat::even()(arg0);
       }
 
       /// \brief Recogniser for application of \@even
@@ -1166,7 +1166,7 @@ namespace mcrl2 {
       inline
       application monus(const data_expression& arg0, const data_expression& arg1)
       {
-        return monus()(arg0, arg1);
+        return sort_nat::monus()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@monus
@@ -1222,7 +1222,7 @@ namespace mcrl2 {
       inline
       application swap_zero(const data_expression& arg0, const data_expression& arg1)
       {
-        return swap_zero()(arg0, arg1);
+        return sort_nat::swap_zero()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@swap_zero
@@ -1280,7 +1280,7 @@ namespace mcrl2 {
       inline
       application swap_zero_add(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return swap_zero_add()(arg0, arg1, arg2, arg3);
+        return sort_nat::swap_zero_add()(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@swap_zero_add
@@ -1338,7 +1338,7 @@ namespace mcrl2 {
       inline
       application swap_zero_min(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return swap_zero_min()(arg0, arg1, arg2, arg3);
+        return sort_nat::swap_zero_min()(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@swap_zero_min
@@ -1396,7 +1396,7 @@ namespace mcrl2 {
       inline
       application swap_zero_monus(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return swap_zero_monus()(arg0, arg1, arg2, arg3);
+        return sort_nat::swap_zero_monus()(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@swap_zero_monus
@@ -1451,7 +1451,7 @@ namespace mcrl2 {
       inline
       application first(const data_expression& arg0)
       {
-        return first()(arg0);
+        return sort_nat::first()(arg0);
       }
 
       /// \brief Recogniser for application of \@first
@@ -1506,7 +1506,7 @@ namespace mcrl2 {
       inline
       application last(const data_expression& arg0)
       {
-        return last()(arg0);
+        return sort_nat::last()(arg0);
       }
 
       /// \brief Recogniser for application of \@last
@@ -1562,7 +1562,7 @@ namespace mcrl2 {
       inline
       application divmod(const data_expression& arg0, const data_expression& arg1)
       {
-        return divmod()(arg0, arg1);
+        return sort_nat::divmod()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@divmod
@@ -1619,7 +1619,7 @@ namespace mcrl2 {
       inline
       application generalised_divmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return generalised_divmod()(arg0, arg1, arg2);
+        return sort_nat::generalised_divmod()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@gdivmod
@@ -1676,7 +1676,7 @@ namespace mcrl2 {
       inline
       application doubly_generalised_divmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return doubly_generalised_divmod()(arg0, arg1, arg2);
+        return sort_nat::doubly_generalised_divmod()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@ggdivmod
@@ -1699,35 +1699,35 @@ namespace mcrl2 {
       function_symbol_vector nat_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(pos2nat());
-        result.push_back(nat2pos());
-        result.push_back(maximum(sort_pos::pos(), nat()));
-        result.push_back(maximum(nat(), sort_pos::pos()));
-        result.push_back(maximum(nat(), nat()));
-        result.push_back(minimum(nat(), nat()));
-        result.push_back(succ(nat()));
-        result.push_back(pred());
-        result.push_back(dub());
-        result.push_back(plus(sort_pos::pos(), nat()));
-        result.push_back(plus(nat(), sort_pos::pos()));
-        result.push_back(plus(nat(), nat()));
-        result.push_back(gte_subtract_with_borrow());
-        result.push_back(times(nat(), nat()));
-        result.push_back(div());
-        result.push_back(mod());
-        result.push_back(exp(sort_pos::pos(), nat()));
-        result.push_back(exp(nat(), nat()));
-        result.push_back(even());
-        result.push_back(monus());
-        result.push_back(swap_zero());
-        result.push_back(swap_zero_add());
-        result.push_back(swap_zero_min());
-        result.push_back(swap_zero_monus());
-        result.push_back(first());
-        result.push_back(last());
-        result.push_back(divmod());
-        result.push_back(generalised_divmod());
-        result.push_back(doubly_generalised_divmod());
+        result.push_back(sort_nat::pos2nat());
+        result.push_back(sort_nat::nat2pos());
+        result.push_back(sort_nat::maximum(sort_pos::pos(), nat()));
+        result.push_back(sort_nat::maximum(nat(), sort_pos::pos()));
+        result.push_back(sort_nat::maximum(nat(), nat()));
+        result.push_back(sort_nat::minimum(nat(), nat()));
+        result.push_back(sort_nat::succ(nat()));
+        result.push_back(sort_nat::pred());
+        result.push_back(sort_nat::dub());
+        result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
+        result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
+        result.push_back(sort_nat::plus(nat(), nat()));
+        result.push_back(sort_nat::gte_subtract_with_borrow());
+        result.push_back(sort_nat::times(nat(), nat()));
+        result.push_back(sort_nat::div());
+        result.push_back(sort_nat::mod());
+        result.push_back(sort_nat::exp(sort_pos::pos(), nat()));
+        result.push_back(sort_nat::exp(nat(), nat()));
+        result.push_back(sort_nat::even());
+        result.push_back(sort_nat::monus());
+        result.push_back(sort_nat::swap_zero());
+        result.push_back(sort_nat::swap_zero_add());
+        result.push_back(sort_nat::swap_zero_min());
+        result.push_back(sort_nat::swap_zero_monus());
+        result.push_back(sort_nat::first());
+        result.push_back(sort_nat::last());
+        result.push_back(sort_nat::divmod());
+        result.push_back(sort_nat::generalised_divmod());
+        result.push_back(sort_nat::doubly_generalised_divmod());
         return result;
       }
       ///\brief Function for projecting out argument

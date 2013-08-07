@@ -132,8 +132,8 @@ namespace mcrl2 {
       function_symbol_vector bool_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(true_());
-        result.push_back(false_());
+        result.push_back(sort_bool::true_());
+        result.push_back(sort_bool::false_());
 
         return result;
       }
@@ -175,7 +175,7 @@ namespace mcrl2 {
       inline
       application not_(const data_expression& arg0)
       {
-        return not_()(arg0);
+        return sort_bool::not_()(arg0);
       }
 
       /// \brief Recogniser for application of !
@@ -231,7 +231,7 @@ namespace mcrl2 {
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
-        return and_()(arg0, arg1);
+        return sort_bool::and_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of &&
@@ -287,7 +287,7 @@ namespace mcrl2 {
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
-        return or_()(arg0, arg1);
+        return sort_bool::or_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of ||
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
-        return implies()(arg0, arg1);
+        return sort_bool::implies()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of =>
@@ -366,10 +366,10 @@ namespace mcrl2 {
       function_symbol_vector bool_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(not_());
-        result.push_back(and_());
-        result.push_back(or_());
-        result.push_back(implies());
+        result.push_back(sort_bool::not_());
+        result.push_back(sort_bool::and_());
+        result.push_back(sort_bool::or_());
+        result.push_back(sort_bool::implies());
         return result;
       }
       ///\brief Function for projecting out argument

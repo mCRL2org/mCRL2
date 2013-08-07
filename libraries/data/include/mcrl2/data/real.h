@@ -113,7 +113,7 @@ namespace mcrl2 {
       inline
       application creal(const data_expression& arg0, const data_expression& arg1)
       {
-        return creal()(arg0, arg1);
+        return sort_real::creal()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@cReal
@@ -168,7 +168,7 @@ namespace mcrl2 {
       inline
       application pos2real(const data_expression& arg0)
       {
-        return pos2real()(arg0);
+        return sort_real::pos2real()(arg0);
       }
 
       /// \brief Recogniser for application of Pos2Real
@@ -223,7 +223,7 @@ namespace mcrl2 {
       inline
       application nat2real(const data_expression& arg0)
       {
-        return nat2real()(arg0);
+        return sort_real::nat2real()(arg0);
       }
 
       /// \brief Recogniser for application of Nat2Real
@@ -278,7 +278,7 @@ namespace mcrl2 {
       inline
       application int2real(const data_expression& arg0)
       {
-        return int2real()(arg0);
+        return sort_real::int2real()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Real
@@ -333,7 +333,7 @@ namespace mcrl2 {
       inline
       application real2pos(const data_expression& arg0)
       {
-        return real2pos()(arg0);
+        return sort_real::real2pos()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Pos
@@ -388,7 +388,7 @@ namespace mcrl2 {
       inline
       application real2nat(const data_expression& arg0)
       {
-        return real2nat()(arg0);
+        return sort_real::real2nat()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Nat
@@ -443,7 +443,7 @@ namespace mcrl2 {
       inline
       application real2int(const data_expression& arg0)
       {
-        return real2int()(arg0);
+        return sort_real::real2int()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Int
@@ -547,7 +547,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return maximum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_real::maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -627,7 +627,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return minimum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_real::minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -697,7 +697,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        return abs(arg0.sort())(arg0);
+        return sort_real::abs(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of abs
@@ -775,7 +775,7 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        return negate(arg0.sort())(arg0);
+        return sort_real::negate(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of -
@@ -853,7 +853,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return succ(arg0.sort())(arg0);
+        return sort_real::succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -931,7 +931,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        return pred(arg0.sort())(arg0);
+        return sort_real::pred(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of pred
@@ -1019,7 +1019,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return plus(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_real::plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -1099,7 +1099,7 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        return minus(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_real::minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -1179,7 +1179,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return times(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_real::times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -1259,7 +1259,7 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        return exp(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_real::exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of exp
@@ -1319,7 +1319,7 @@ namespace mcrl2 {
       inline
       application divides(const data_expression& arg0, const data_expression& arg1)
       {
-        return divides(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_real::divides(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of /
@@ -1374,7 +1374,7 @@ namespace mcrl2 {
       inline
       application floor(const data_expression& arg0)
       {
-        return floor()(arg0);
+        return sort_real::floor()(arg0);
       }
 
       /// \brief Recogniser for application of floor
@@ -1429,7 +1429,7 @@ namespace mcrl2 {
       inline
       application ceil(const data_expression& arg0)
       {
-        return ceil()(arg0);
+        return sort_real::ceil()(arg0);
       }
 
       /// \brief Recogniser for application of ceil
@@ -1484,7 +1484,7 @@ namespace mcrl2 {
       inline
       application round(const data_expression& arg0)
       {
-        return round()(arg0);
+        return sort_real::round()(arg0);
       }
 
       /// \brief Recogniser for application of round
@@ -1540,7 +1540,7 @@ namespace mcrl2 {
       inline
       application reduce_fraction(const data_expression& arg0, const data_expression& arg1)
       {
-        return reduce_fraction()(arg0, arg1);
+        return sort_real::reduce_fraction()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrac
@@ -1597,7 +1597,7 @@ namespace mcrl2 {
       inline
       application reduce_fraction_where(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return reduce_fraction_where()(arg0, arg1, arg2);
+        return sort_real::reduce_fraction_where()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@redfracwhr
@@ -1653,7 +1653,7 @@ namespace mcrl2 {
       inline
       application reduce_fraction_helper(const data_expression& arg0, const data_expression& arg1)
       {
-        return reduce_fraction_helper()(arg0, arg1);
+        return sort_real::reduce_fraction_helper()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrachlp
@@ -1676,33 +1676,33 @@ namespace mcrl2 {
       function_symbol_vector real_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(creal());
-        result.push_back(pos2real());
-        result.push_back(nat2real());
-        result.push_back(int2real());
-        result.push_back(real2pos());
-        result.push_back(real2nat());
-        result.push_back(real2int());
-        result.push_back(maximum(real_(), real_()));
-        result.push_back(minimum(real_(), real_()));
-        result.push_back(abs(real_()));
-        result.push_back(negate(real_()));
-        result.push_back(succ(real_()));
-        result.push_back(pred(real_()));
-        result.push_back(plus(real_(), real_()));
-        result.push_back(minus(real_(), real_()));
-        result.push_back(times(real_(), real_()));
-        result.push_back(exp(real_(), sort_int::int_()));
-        result.push_back(divides(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(divides(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(divides(sort_int::int_(), sort_int::int_()));
-        result.push_back(divides(real_(), real_()));
-        result.push_back(floor());
-        result.push_back(ceil());
-        result.push_back(round());
-        result.push_back(reduce_fraction());
-        result.push_back(reduce_fraction_where());
-        result.push_back(reduce_fraction_helper());
+        result.push_back(sort_real::creal());
+        result.push_back(sort_real::pos2real());
+        result.push_back(sort_real::nat2real());
+        result.push_back(sort_real::int2real());
+        result.push_back(sort_real::real2pos());
+        result.push_back(sort_real::real2nat());
+        result.push_back(sort_real::real2int());
+        result.push_back(sort_real::maximum(real_(), real_()));
+        result.push_back(sort_real::minimum(real_(), real_()));
+        result.push_back(sort_real::abs(real_()));
+        result.push_back(sort_real::negate(real_()));
+        result.push_back(sort_real::succ(real_()));
+        result.push_back(sort_real::pred(real_()));
+        result.push_back(sort_real::plus(real_(), real_()));
+        result.push_back(sort_real::minus(real_(), real_()));
+        result.push_back(sort_real::times(real_(), real_()));
+        result.push_back(sort_real::exp(real_(), sort_int::int_()));
+        result.push_back(sort_real::divides(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(sort_real::divides(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(sort_real::divides(sort_int::int_(), sort_int::int_()));
+        result.push_back(sort_real::divides(real_(), real_()));
+        result.push_back(sort_real::floor());
+        result.push_back(sort_real::ceil());
+        result.push_back(sort_real::round());
+        result.push_back(sort_real::reduce_fraction());
+        result.push_back(sort_real::reduce_fraction_where());
+        result.push_back(sort_real::reduce_fraction_helper());
         return result;
       }
       ///\brief Function for projecting out argument
