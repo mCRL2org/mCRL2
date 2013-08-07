@@ -1066,7 +1066,9 @@ static aterm read_term(sym_read_entry* sym, istream &is)
           current.callresult = &arg_sym->terms[value];
           if (!current.callresult->defined())
           {
-            item = { arg_sym, 0, std::vector<aterm>(arg_sym->arity), &(*current.callresult), NULL };
+            item.sym = arg_sym;
+            item.args = std::vector<aterm>(arg_sym->arity);
+            item.result = &(*current.callresult);
             stack.push(item);
           }
           continue;
