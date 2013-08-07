@@ -294,34 +294,37 @@ static int flushBitsToWriter(ostream &os)
   return result;
 }
 
-
+/**
+ * @brief readBits Reads an n-bit integer from the input stream.
+ * @param val      Variable to store integer in.
+ * @param nr_bits  Number of bits to read from the input stream.
+ * @param is       The input stream.
+ * @return true on success, false on failure (EOF).
+ */
 static
-int
-readBits(size_t* val, const size_t nr_bits, istream &is)
+bool readBits(size_t& val, const size_t nr_bits, istream &is)
 {
   size_t cur_bit, mask = 1;
 
-  *val = 0;
+  val = 0;
   for (cur_bit=0; cur_bit<nr_bits; cur_bit++)
   {
     if (bits_in_buffer == 0)
     {
-      int val = is.get();
-      if (val == EOF)
+      int byte = is.get();
+      if (byte == EOF)
       {
-        return -1;
+        return false;
       }
-      bit_buffer = (char) val;
+      bit_buffer = (unsigned char)byte;
       bits_in_buffer = 8;
     }
-    *val |= (bit_buffer & 0x80 ? mask : 0);
+    val |= (bit_buffer & 0x80 ? mask : 0);
     mask <<= 1;
     bit_buffer <<= 1;
     bits_in_buffer--;
   }
-
-  /* Ok */
-  return 0;
+  return true;
 }
 
 
@@ -333,7 +336,7 @@ static void writeInt(const size_t val, ostream &os)
 }
 
 
-static int readInt(size_t* val, istream &is)
+static int readInt(size_t& val, istream &is)
 {
   int buf[8];
 
@@ -346,7 +349,7 @@ static int readInt(size_t* val, istream &is)
   /* Check if 1st character is enough */
   if ((buf[0] & 0x80) == 0)
   {
-    *val = buf[0];
+    val = buf[0];
     return 1;
   }
 
@@ -359,7 +362,7 @@ static int readInt(size_t* val, istream &is)
   /* Check if 2nd character is enough */
   if ((buf[0] & 0x40) == 0)
   {
-    *val = buf[1] + ((buf[0] & ~0xc0) << 8);
+    val = buf[1] + ((buf[0] & ~0xc0) << 8);
     return 2;
   }
 
@@ -372,7 +375,7 @@ static int readInt(size_t* val, istream &is)
   /* Check if 3rd character is enough */
   if ((buf[0] & 0x20) == 0)
   {
-    *val = buf[2] + (buf[1] << 8) + ((buf[0] & ~0xe0) << 16);
+    val = buf[2] + (buf[1] << 8) + ((buf[0] & ~0xe0) << 16);
     return 3;
   }
 
@@ -385,7 +388,7 @@ static int readInt(size_t* val, istream &is)
   /* Check if 4th character is enough */
   if ((buf[0] & 0x10) == 0)
   {
-    *val = buf[3] + (buf[2] << 8) + (buf[1] << 16) +
+    val = buf[3] + (buf[2] << 8) + (buf[1] << 16) +
            ((buf[0] & ~0xf0) << 24);
     return 4;
   }
@@ -397,7 +400,7 @@ static int readInt(size_t* val, istream &is)
   }
 
   /* Now 5th character should be enough */
-  *val = buf[4] + (buf[3] << 8) + (buf[2] << 16) + (buf[1] << 24);
+  val = buf[4] + (buf[3] << 8) + (buf[2] << 16) + (buf[1] << 24);
   return 5;
 }
 
@@ -417,7 +420,7 @@ static size_t readString(istream &is)
   size_t len;
 
   /* Get length of string */
-  if (readInt(&len, is) < 0)
+  if (readInt(len, is) < 0)
   {
     return atermpp::npos;
   }
@@ -623,52 +626,51 @@ static void add_term(sym_entry* entry, const aterm &t)
  * Collect all terms in the appropriate symbol table.
  */
 
-static void collect_terms(const aterm &t, std::set<aterm> &visited, const std::vector<size_t> &index)
+const aterm& subterm(const aterm& t, size_t i)
 {
-  function_symbol sym;
-  sym_entry* entry;
-
-  if (visited.count(t)==0)
+  if (t.type_is_appl())
   {
-    if (t.type_is_int())
-    {
-      sym = detail::function_adm.AS_INT;
-    }
-    else if (t.type_is_list())
-    {
-      aterm_list list(t);
-      if (list==aterm_list())
-      {
-        sym = detail::function_adm.AS_EMPTY_LIST;
-      }
-      else
-      {
-        sym = detail::function_adm.AS_LIST;
-        collect_terms(list.front(),visited,index);
-        collect_terms((aterm)(list.tail()),visited,index);
-      }
-    }
-    else 
-    {
-      assert(t.type_is_appl());
-      aterm_appl appl(t);
-
-      sym = appl.function();
-      const size_t cur_arity = sym.arity();
-      for (size_t cur_arg=0; cur_arg<cur_arity; cur_arg++)
-      {
-        collect_terms(appl[cur_arg],visited,index);
-      }
-    }
-    entry = &sym_entries[index[sym.number()]];
-
-    assert(entry->id == sym);
-    add_term(entry, t);
-
-    visited.insert(t);
+    assert(i < aterm_cast<const aterm_appl>(t).function().arity());
+    return atermpp::aterm_cast<const aterm_appl>(t)[i];
+  }
+  else
+  {
+    assert(t.type_is_list() && t != aterm_list());
+    assert(i < 2);
+    return i == 0 ? atermpp::aterm_cast<const aterm_list>(t).front()
+                  : atermpp::aterm_cast<const aterm_list>(t).tail();
   }
 }
 
+static void collect_terms(const aterm& t, const std::vector<size_t> &index)
+{
+  typedef struct { aterm term; sym_entry* entry; size_t arg; } todo;
+  std::stack<todo> stack;
+  std::set<aterm> visited;
+  todo item = { t, get_top_symbol(t, index), 0 };
+  stack.push(item);
+
+  do
+  {
+    todo& current = stack.top();
+    if (current.arg < current.entry->arity)
+    {
+      item.term = subterm(current.term, current.arg++);
+      if (visited.count(item.term) == 0)
+      {
+        item.entry = get_top_symbol(item.term, index);
+        stack.push(item);
+      }
+    }
+    else
+    {
+      add_term(current.entry, current.term);
+      visited.insert(current.term);
+      stack.pop();
+    }
+  }
+  while (!stack.empty());
+}
 
 /**
  * Write all symbols in a term to file.
@@ -734,91 +736,54 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sy
   return cur;
 }
 
-
-/**
- * Write an argument.
- */
-
-/* forward declaration */
-static bool write_term(const aterm, const std::vector<size_t> &index, ostream &os);
-
-static bool write_arg(sym_entry* trm_sym, const aterm arg, const size_t arg_idx,
-                      const std::vector<size_t> &index, ostream &os)
-{
-  function_symbol sym = get_top_symbol(arg,index)->id;
-  top_symbol* ts = find_top_symbol(&trm_sym->top_symbols[arg_idx], sym);
-  writeBits(ts->code, ts->code_width, os);
-  sym_entry* arg_sym = &sym_entries[ts->index];
-  size_t arg_trm_idx = find_term(arg_sym, arg);
-  writeBits(arg_trm_idx, arg_sym->term_width, os);
-
-  if (arg_trm_idx >= arg_sym->cur_index && !write_term(arg, index, os))
-  {
-    return false;
-  }
-
-  return true;
-}
-
-
 /**
  * Write a term using a writer.
  */
 
 static bool write_term(const aterm t, const std::vector<size_t> &index, ostream &os)
 {
-  sym_entry* trm_sym = NULL;
-  {
-    if (t.type_is_int())
-    {
-      /* If aterm integers are > 32 bits, then this can fail. */
-      writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os);
-      trm_sym = &sym_entries[index[detail::function_adm.AS_INT.number()]];
-    }
-    else if (t.type_is_list())
-    {
-      aterm_list list (t);
-      if (list==aterm_list())
-      {
-        trm_sym = &sym_entries[index[detail::function_adm.AS_EMPTY_LIST.number()]];
-      }
-      else
-      {
-        trm_sym = &sym_entries[index[detail::function_adm.AS_LIST.number()]];
-        if (!write_arg(trm_sym, list.front(), 0, index, os))
-        {
-          return false;
-        }
-        if (!write_arg(trm_sym, list.tail(), 1, index, os))
-        {
-          return false;
-        }
-      }
-    }
-    else 
-    {
-      assert(t.type_is_appl());
-      function_symbol sym = aterm_cast<aterm_appl>(t).function();
-      trm_sym = &sym_entries[index[sym.number()]];
-      assert(sym == trm_sym->id);
-      size_t arity = sym.arity();
-      for (size_t arg_idx=0; arg_idx<arity; arg_idx++)
-      {
-        aterm cur_arg = aterm_cast<const aterm_appl>(t)[arg_idx];
-        if (!write_arg(trm_sym, cur_arg, arg_idx, index, os))
-        {
-          return false;
-        }
-      }
-    }
-  }
-  if (trm_sym->terms[trm_sym->cur_index].t != t)
-  {
-    throw std::runtime_error("terms out of sync at pos " + to_string(trm_sym->cur_index) + " of sym " + trm_sym->id.name() +
-                             ", term in table was " + to_string(trm_sym->terms[trm_sym->cur_index].t) + ", expected " + to_string(t));
-  }
-  trm_sym->cur_index++;
+  typedef struct { aterm term; sym_entry* entry; size_t arg; } todo;
+  std::stack<todo> stack;
 
+  todo item = { t, get_top_symbol(t, index), 0 };
+  stack.push(item);
+
+  do
+  {
+    todo& current = stack.top();
+
+    if (current.term.type_is_int())
+    {
+      /* WARNING: the following comment was taken from the original source code.
+       *          I have no idea what it means. [scranen] */
+      // If aterm integers are > 32 bits, then this can fail.
+      writeBits(aterm_int(t).value(), INT_SIZE_IN_BAF, os);
+    }
+    else
+    if (current.arg < current.entry->arity)
+    {
+      item.term = subterm(current.term, current.arg);
+      item.entry = get_top_symbol(item.term, index);
+
+      top_symbol* ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
+      writeBits(ts->code, ts->code_width, os);
+      sym_entry* arg_sym = &sym_entries[ts->index];
+      size_t arg_trm_idx = find_term(arg_sym, item.term);
+      writeBits(arg_trm_idx, arg_sym->term_width, os);
+
+      ++current.arg;
+
+      if (arg_trm_idx >= arg_sym->cur_index)
+      {
+        stack.push(item);
+      }
+      continue;
+    }
+
+    ++current.entry->cur_index;
+    stack.pop();
+  }
+  while (!stack.empty());
   return true;
 }
 
@@ -903,8 +868,7 @@ write_baf(const aterm &t, ostream &os)
   assert(cur == nr_unique_symbols);
 
 
-  std::set<aterm> visited;
-  collect_terms(t,visited,index);
+  collect_terms(t, index);
 
   /* reset cur_index */
   for (size_t lcv=0; lcv < nr_unique_symbols; lcv++)
@@ -966,12 +930,12 @@ static function_symbol read_symbol(istream &is)
 
   text_buffer[len] = '\0';
 
-  if (readInt(&arity, is) < 0)
+  if (readInt(arity, is) < 0)
   {
     return function_symbol(atermpp::npos);
   }
 
-  if (readInt(&quoted, is) < 0)
+  if (readInt(quoted, is) < 0)
   {
     return function_symbol(atermpp::npos);
   }
@@ -999,7 +963,7 @@ static bool read_all_symbols(istream &is)
 
     /* Read term count and allocate space */
 
-    if (readInt(&val, is) < 0 || val == 0)
+    if (readInt(val, is) < 0 || val == 0)
     {
       return false;
     }
@@ -1042,7 +1006,7 @@ static bool read_all_symbols(istream &is)
 
     for (j=0; j<read_symbols[i].arity; j++)
     {
-      if (readInt(&val, is) < 0)
+      if (readInt(val, is) < 0)
       {
         return false;
       }
@@ -1057,7 +1021,7 @@ static bool read_all_symbols(istream &is)
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
       {
-        if (readInt(&val, is) < 0)
+        if (readInt(val, is) < 0)
         {
           return false;
         }
@@ -1072,72 +1036,69 @@ static bool read_all_symbols(istream &is)
 
 static aterm read_term(sym_read_entry* sym, istream &is)
 {
-  size_t val;
-  size_t i, arity = sym->arity;
-  sym_read_entry* arg_sym;
-  std::vector<aterm> args(arity);
+  typedef struct { sym_read_entry* sym; size_t arg; std::vector<aterm> args; aterm* result; aterm* callresult; } todo;
   aterm result;
+  size_t value;
+  std::stack<todo> stack;
 
-  for (i=0; i<arity; i++)
+  todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, NULL };
+  stack.push(item);
+
+  do
   {
-    if (readBits(&val, sym->sym_width[i], is) < 0)
-    {
-      return aterm();
-    }
-    if (val >= sym->nr_topsyms[i])
-    {
-      return aterm();
-    }
-    arg_sym = &read_symbols[sym->topsyms[i][val]];
+    sym_read_entry* arg_sym;
+    todo& current = stack.top();
 
-    if (readBits(&val, arg_sym->term_width, is) < 0)
+    if (current.callresult != NULL)
     {
-      return aterm();
+      current.args[current.arg++] = *current.callresult;
+      current.callresult = NULL;
     }
-
-    if (val >= arg_sym->nr_terms)
+    if (current.arg < current.sym->arity)
     {
-      return aterm();
-    }
-    if (!arg_sym->terms[val].defined())
-    {
-      arg_sym->terms[val] = read_term(arg_sym, is);
-      if (!arg_sym->terms[val].defined())
+      if (readBits(value, current.sym->sym_width[current.arg], is) &&
+          value < current.sym->nr_topsyms[current.arg])
       {
-        return aterm();
+        arg_sym = &read_symbols[current.sym->topsyms[current.arg][value]];
+        if (readBits(value, arg_sym->term_width, is) &&
+            value < arg_sym->nr_terms)
+        {
+          current.callresult = &arg_sym->terms[value];
+          if (!current.callresult->defined())
+          {
+            item = { arg_sym, 0, std::vector<aterm>(arg_sym->arity), &(*current.callresult), NULL };
+            stack.push(item);
+          }
+          continue;
+        }
+      }
+      throw mcrl2::runtime_error("Could not read valid aterm from stream.");
+    }
+
+    if (current.sym->sym == detail::function_adm.AS_INT)
+    {
+      if (readBits(value, INT_SIZE_IN_BAF, is))
+      {
+        *current.result = aterm_int(value);
       }
     }
-
-    args[i] = arg_sym->terms[val];
-  }
-
-  if (sym->sym==detail::function_adm.AS_INT)
-  {
-    /* Read an integer */
-
-    if (readBits(&val, INT_SIZE_IN_BAF, is) < 0)
+    else if (current.sym->sym==detail::function_adm.AS_EMPTY_LIST)
     {
-      return aterm();
+      *current.result = aterm_list();
     }
-
-    result = aterm_int(val);
-
+    else if (current.sym->sym == detail::function_adm.AS_LIST)
+    {
+      aterm_list result = atermpp::aterm_cast<aterm_list>(current.args[1]);
+      result.push_front(current.args[0]);
+      *current.result = result;
+    }
+    else // sym is a function application
+    {
+      *current.result = aterm_appl(current.sym->sym, current.args.begin(), current.args.end());
+    }
+    stack.pop();
   }
-  else if (sym->sym==detail::function_adm.AS_LIST)
-  {
-      aterm_list temp=(aterm_list)args[1];
-      temp.push_front(args[0]);
-      result=temp;
-  }
-  else if (sym->sym==detail::function_adm.AS_EMPTY_LIST)
-  {
-    result = aterm_list();
-  }
-  else
-  {
-    /* Must be a function application */
-    result = aterm_appl(sym->sym, args.begin(),args.end());
-  }
+  while (!stack.empty());
 
   return result;
 }
@@ -1195,14 +1156,14 @@ aterm read_baf(istream &is)
 
   /* Read header */
 
-  if (readInt(&val, is) < 0)
+  if (readInt(val, is) < 0)
   {
     return aterm();
   }
 
   if (val == 0)
   {
-    if (readInt(&val, is) < 0)
+    if (readInt(val, is) < 0)
     {
       return aterm();
     }
@@ -1214,7 +1175,7 @@ aterm read_baf(istream &is)
     return aterm();
   }
 
-  if (readInt(&val, is) < 0)
+  if (readInt(val, is) < 0)
   {
     return aterm();
   }
@@ -1225,13 +1186,13 @@ aterm read_baf(istream &is)
     return aterm();
   }
 
-  if (readInt(&val, is) < 0)
+  if (readInt(val, is) < 0)
   {
     return aterm();
   }
   nr_unique_symbols = val;
 
-  if (readInt(&nr_unique_terms, is) < 0)
+  if (readInt(nr_unique_terms, is) < 0)
   {
     return aterm();
   }
@@ -1245,7 +1206,7 @@ aterm read_baf(istream &is)
     return aterm();
   }
 
-  if (readInt(&val, is) < 0)
+  if (readInt(val, is) < 0)
   {
     return aterm();
   }
