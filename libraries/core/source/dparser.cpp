@@ -9,10 +9,11 @@
 /// \file mcrl2/core/dparser.cpp
 /// \brief add your file description here.
 
-#include <stdexcept>
 #include <iostream>
 #include <iomanip>
+#include <locale>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <sstream>
 #include <vector>
