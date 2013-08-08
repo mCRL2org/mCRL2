@@ -143,7 +143,7 @@ void MainWindow::openFile(QString fileName)
   {
     try
     {
-      m_layout->ui()->setActive(false);
+      m_ui.actLayout->setChecked(false);
       m_glwidget->resetViewpoint(0);
       m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
       m_glwidget->rebuild();
