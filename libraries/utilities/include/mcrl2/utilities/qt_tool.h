@@ -24,8 +24,9 @@
 #include "toolset_version.h"
 
 #if defined(_WIN32)
-#include <Windows.h>
-#endif
+#include <iostream>
+#include <fstream>
+#endif // defined(_WIN32)
 
 namespace mcrl2
 {
@@ -46,6 +47,19 @@ class QtToolBase : public QObject
     QMainWindow *m_window;
 
   protected:
+
+#if defined(_WIN32) 
+	std::streambuf	*_cinbuf;
+	std::streambuf	*_coutbuf;
+	std::streambuf	*_cerrbuf;
+	std::ifstream	_console_cin;
+	std::ofstream	_console_cout;
+	std::ofstream	_console_cerr;
+    
+    void attachConsole();
+    void releaseConsole();
+#endif // _WIN32
+
     bool show_main_window(QMainWindow *window)
     {
       m_window = window;
@@ -95,21 +109,14 @@ class QtToolBase : public QObject
       m_author(author),
       m_description(description),
       m_manualUrl(manualUrl)
-    {}
+    {
+    }
 };
 
 template <typename Tool>
 class qt_tool: public Tool, public QtToolBase
 {
   private:
-#if defined(_WIN32) 
-	std::streambuf	*_cinbuf;
-	std::streambuf	*_coutbuf;
-	std::streambuf	*_cerrbuf;
-	std::ifstream	_console_cin;
-	std::ofstream	_console_cout;
-	std::ofstream	_console_cerr;
-#endif // _WIN32
     int m_argc;
     char** m_argv;
   protected:
@@ -128,32 +135,14 @@ class qt_tool: public Tool, public QtToolBase
         m_application(NULL)
     {
 #if defined(_WIN32)
-       BOOL success = AttachConsole(ATTACH_PARENT_PROCESS);
-       if (success)
-       {
-	     _cinbuf = std::cin.rdbuf();
-	     _console_cin.open("CONIN$");
-	     std::cin.rdbuf(_console_cin.rdbuf());
-	     _coutbuf = std::cout.rdbuf();
-	     _console_cout.open("CONOUT$");
-	     std::cout.rdbuf(_console_cout.rdbuf());
-	     _cerrbuf = std::cerr.rdbuf();
-	     _console_cerr.open("CONOUT$");
-	     std::cerr.rdbuf(_console_cerr.rdbuf());
-       }
+      attachConsole();
 #endif
     }
 
     virtual bool pre_run()
     {
 #if defined(_WIN32)
-	  _console_cout.close();
-	  std::cout.rdbuf(_coutbuf);
-	  _console_cin.close();
-	  std::cin.rdbuf(_cinbuf);
-	  _console_cerr.close();
-	  std::cerr.rdbuf(_cerrbuf);
-	  FreeConsole();
+      releaseConsole();
 #endif
       m_application = new QApplication(m_argc, m_argv);
       qsrand(QDateTime::currentDateTime().toTime_t());
