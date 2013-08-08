@@ -642,17 +642,18 @@ const aterm& subterm(const aterm& t, size_t i)
   }
 }
 
+typedef struct { aterm term; sym_entry* entry; size_t arg; } write_todo;
+
 static void collect_terms(const aterm& t, const std::vector<size_t> &index)
 {
-  typedef struct { aterm term; sym_entry* entry; size_t arg; } todo;
-  std::stack<todo> stack;
+  std::stack<write_todo> stack;
   std::set<aterm> visited;
-  todo item = { t, get_top_symbol(t, index), 0 };
+  write_todo item = { t, get_top_symbol(t, index), 0 };
   stack.push(item);
 
   do
   {
-    todo& current = stack.top();
+    write_todo& current = stack.top();
     if (current.arg < current.entry->arity)
     {
       item.term = subterm(current.term, current.arg++);
@@ -742,15 +743,14 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sy
 
 static bool write_term(const aterm t, const std::vector<size_t> &index, ostream &os)
 {
-  typedef struct { aterm term; sym_entry* entry; size_t arg; } todo;
-  std::stack<todo> stack;
+  std::stack<write_todo> stack;
 
-  todo item = { t, get_top_symbol(t, index), 0 };
+  write_todo item = { t, get_top_symbol(t, index), 0 };
   stack.push(item);
 
   do
   {
-    todo& current = stack.top();
+    write_todo& current = stack.top();
 
     if (current.term.type_is_int())
     {
@@ -1034,20 +1034,21 @@ static bool read_all_symbols(istream &is)
   return true;
 }
 
+typedef struct { sym_read_entry* sym; size_t arg; std::vector<aterm> args; aterm* result; aterm* callresult; } read_todo;
+
 static aterm read_term(sym_read_entry* sym, istream &is)
 {
-  typedef struct { sym_read_entry* sym; size_t arg; std::vector<aterm> args; aterm* result; aterm* callresult; } todo;
   aterm result;
   size_t value;
-  std::stack<todo> stack;
+  std::stack<read_todo> stack;
 
-  todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, NULL };
+  read_todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, NULL };
   stack.push(item);
 
   do
   {
     sym_read_entry* arg_sym;
-    todo& current = stack.top();
+    read_todo& current = stack.top();
 
     if (current.callresult != NULL)
     {
