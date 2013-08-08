@@ -23,6 +23,10 @@
 #include <string>
 #include "toolset_version.h"
 
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
+
 namespace mcrl2
 {
 namespace utilities
@@ -98,6 +102,14 @@ template <typename Tool>
 class qt_tool: public Tool, public QtToolBase
 {
   private:
+#if defined(_WIN32) 
+	std::streambuf	*_cinbuf;
+	std::streambuf	*_coutbuf;
+	std::streambuf	*_cerrbuf;
+	std::ifstream	_console_cin;
+	std::ofstream	_console_cout;
+	std::ofstream	_console_cerr;
+#endif // _WIN32
     int m_argc;
     char** m_argv;
   protected:
@@ -114,10 +126,35 @@ class qt_tool: public Tool, public QtToolBase
       : Tool(name, author, what_is, tool_description, known_issues),
         QtToolBase(QString::fromStdString(name), QString::fromStdString(author), QString::fromStdString(about_description), QString::fromStdString(manual_url)),
         m_application(NULL)
-    {}
+    {
+#if defined(_WIN32)
+       BOOL success = AttachConsole(ATTACH_PARENT_PROCESS);
+       if (success)
+       {
+	     _cinbuf = std::cin.rdbuf();
+	     _console_cin.open("CONIN$");
+	     std::cin.rdbuf(_console_cin.rdbuf());
+	     _coutbuf = std::cout.rdbuf();
+	     _console_cout.open("CONOUT$");
+	     std::cout.rdbuf(_console_cout.rdbuf());
+	     _cerrbuf = std::cerr.rdbuf();
+	     _console_cerr.open("CONOUT$");
+	     std::cerr.rdbuf(_console_cerr.rdbuf());
+       }
+#endif
+    }
 
     virtual bool pre_run()
     {
+#if defined(_WIN32)
+	  _console_cout.close();
+	  std::cout.rdbuf(_coutbuf);
+	  _console_cin.close();
+	  std::cin.rdbuf(_cinbuf);
+	  _console_cerr.close();
+	  std::cerr.rdbuf(_cerrbuf);
+	  FreeConsole();
+#endif
       m_application = new QApplication(m_argc, m_argv);
       qsrand(QDateTime::currentDateTime().toTime_t());
       return true;
