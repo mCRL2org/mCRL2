@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow
     void truncateTrace(int state);
     void selectTransition(int transition);
     void animationStep();
+    void undoLast();
 
     /**
      * @brief Updates the statusbar with the latest log output

@@ -39,8 +39,8 @@ MainWindow::MainWindow(mcrl2::data::rewrite_strategy strategy,const bool do_not_
   connect(m_ui.actionOutput, SIGNAL(toggled(bool)), m_ui.dockWidget, SLOT(setVisible(bool)));
 
   connect(m_ui.traceTable, SIGNAL(itemSelectionChanged()), this, SLOT(stateSelected()));
-  connect(m_ui.traceTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(truncateTrace(int)));
-  connect(m_ui.transitionTable, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(selectTransition(int)));
+  connect(m_ui.traceTable, SIGNAL(cellActivated(int, int)), this, SLOT(truncateTrace(int)));
+  connect(m_ui.transitionTable, SIGNAL(cellActivated(int, int)), this, SLOT(selectTransition(int)));
 
   connect(m_ui.dockWidget->widget(), SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
 
@@ -56,6 +56,12 @@ MainWindow::MainWindow(mcrl2::data::rewrite_strategy strategy,const bool do_not_
   restoreState(settings.value("windowState").toByteArray());
 
   m_ui.actionOutput->setChecked(!m_ui.dockWidget->isHidden());
+}
+
+void MainWindow::undoLast()
+{
+  selectState(m_selectedState - 1);
+  m_ui.actionUndo_last->setEnabled(m_selectedState > 0);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -221,11 +227,7 @@ void MainWindow::updateSimulation()
       m_ui.traceTable->item(i, 2)->setText(renderStateChange(m_trace[i - 1].state, m_trace[i].state));
     }
   }
-  m_ui.traceTable->setRangeSelected(QTableWidgetSelectionRange(0, 0, m_trace.size() - 1, 2), false);
-  if (selectedState == m_selectedState)
-  {
-    m_ui.traceTable->setRangeSelected(QTableWidgetSelectionRange(selectedState, 0, selectedState, 2), true);
-  }
+  m_ui.traceTable->setCurrentCell(selectedState, 0);
 
   m_ui.transitionTable->setRowCount(0);
   m_ui.transitionTable->setRowCount(m_trace[selectedState].transitions.size());
@@ -236,6 +238,10 @@ void MainWindow::updateSimulation()
 
     m_ui.transitionTable->item(i, 0)->setText(m_trace[selectedState].transitions[i].action);
     m_ui.transitionTable->item(i, 1)->setText(renderStateChange(m_trace[selectedState].state, m_trace[selectedState].transitions[i].destination));
+  }
+  if (m_trace[selectedState].transitions.size() > 0)
+  {
+    m_ui.transitionTable->setCurrentCell(0, 0);
   }
 
   assert(m_trace[selectedState].state.size() == m_ui.stateTable->rowCount());
@@ -350,6 +356,7 @@ void MainWindow::selectTransition(int transition)
   m_selectedState++;
   select(transition);
   m_ui.traceTable->scrollToItem(m_ui.traceTable->item(m_selectedState, 1));
+  m_ui.actionUndo_last->setEnabled(true);
 }
 
 void MainWindow::animationStep()
