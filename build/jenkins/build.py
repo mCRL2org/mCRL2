@@ -49,7 +49,7 @@ if package == "official-release":
   packageflags += ['-DMCRL2_PACKAGE_RELEASE=ON']
 
 if label.startswith('windows'):
-  packageflags += ['-DMSVC10_REDIST_DIR:PATH="C:\Program Files\Common Files\VC\Redist"']
+  packageflags += ['-DMSVC10_REDIST_DIR:PATH=C:\Program Files\Common Files\VC\Redist']
 
 #
 # Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
