@@ -31,7 +31,7 @@ edge: "[eE][dD][gG][eE]" ;
 
 // The official grammar is ambiguous, so we use an alternative formulation.
 // stmt_list : (stmt ';'? stmt_list?)? ;
-stmt_list : (stmt (';' stmt)*)? ';'? ;
+stmt_list : (stmt ';'?)* ;
 
 stmt
   : node_stmt
@@ -77,7 +77,7 @@ ID
   | number
   ;
 
-quoted : "\"[^\"]*\"" ;
+quoted : "\"([^\"]|\\\")*\"" ;
 
 name : "[A-Za-z_][A-Za-z_0-9]*" ;
 

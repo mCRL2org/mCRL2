@@ -155,6 +155,30 @@ void test_fsm()
   BOOST_CHECK(text1 == text2);
 }
 
+void test_dot()
+{
+  lts::lts_dot_t dot1;
+  lts::lts_dot_t dot2;
+  std::string text1;
+  std::string text2;
+
+  // This string is parsed successfully by dotty.
+  std::string DOT = "digraph G { a -> b b -> c }";
+
+  lts::parse_dot_specification(DOT, dot1);
+  parse_dot(DOT, dot2);
+  text1 = print_dot(dot1);
+  text2 = print_dot(dot2);
+  if (text1 != text2)
+  {
+    std::cout << "--- text1 ---" << std::endl;
+    std::cout << text1 << std::endl;
+    std::cout << "--- text2 ---" << std::endl;
+    std::cout << text2 << std::endl;
+  }
+  BOOST_CHECK(text1 == text2);
+}
+
 void test_dot_abp()
 {
   lts::lts_dot_t dot1;
@@ -354,6 +378,7 @@ void test_dot_abp()
 int test_main(int argc, char** argv)
 {
   test_fsm();
+  test_dot();
   test_dot_abp();
 
   return 0;
