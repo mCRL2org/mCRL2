@@ -32,6 +32,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/typecheck.h"
+#include "mcrl2/lts/parse.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/pbes/parse.h"
@@ -357,7 +358,9 @@ class mcrl2parse_tool : public input_tool
     bool aterm_format;
     bool warn;
 
-
+    bool dot_old;
+    bool dot_new;
+    std::string dot_file;
 
     void add_options(interface_description& desc)
     {
@@ -389,6 +392,12 @@ class mcrl2parse_tool : public input_tool
       desc.add_option("check-printer", "compare the results of the old and new pretty printer", 'P');
       desc.add_option("aterm-format", "compare the results in aterm format", 'a');
       desc.add_option("warn", "generate warnings", 'w');
+
+      desc.add_option("dot-old", "load a dot file using the existing parser");
+      desc.add_option("dot-new", "load a dot file using the new parser");
+      desc.add_option("dot-file",
+                      make_optional_argument("NAME", ""),
+                      "the location of the dot file");
     }
 
     void parse_options(const command_line_parser& parser)
@@ -402,6 +411,10 @@ class mcrl2parse_tool : public input_tool
       aterm_format   = 0 < parser.options.count("aterm-format");
       warn           = 0 < parser.options.count("warn");
       text = parser.option_argument("expression");
+
+      dot_old = parser.options.count("dot-old") > 0;
+      dot_new = parser.options.count("dot-new") > 0;
+      dot_file = parser.option_argument("dot-file");
     }
 
     std::string read_text(std::istream& from)
@@ -413,6 +426,26 @@ class mcrl2parse_tool : public input_tool
         out << s << std::endl;
       }
       return out.str();
+    }
+
+    bool load_dot_file()
+    {
+      if ((dot_old || dot_new) && !dot_file.empty())
+      {
+        lts::lts_dot_t dot;
+        if (dot_new)
+        {
+          dot.loadnew(dot_file);
+          dot.save(dot_file + ".new.dot");
+        }
+        else
+        {
+          dot.load(dot_file);
+          dot.save(dot_file + ".old.dot");
+        }
+        return true;
+      }
+      return false;
     }
 
   public:
@@ -427,6 +460,11 @@ class mcrl2parse_tool : public input_tool
 
     bool run()
     {
+      if (load_dot_file())
+      {
+        return true;
+      }
+
       if (text.empty())
       {
         if (input_filename().empty())
