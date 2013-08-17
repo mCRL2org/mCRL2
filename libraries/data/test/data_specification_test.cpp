@@ -237,14 +237,13 @@ void test_constructors()
 
   function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
   BOOST_CHECK(spec.constructors(s) == fgl);
-std::cerr << "#constructors " << constructors.size() << "\n";
   BOOST_CHECK(constructors.size() == 7); // f,g,h, true, false.
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
-  BOOST_CHECK(spec.constructors() == spec1.constructors());
+  BOOST_CHECK(spec.constructors() != spec1.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
   BOOST_CHECK(spec.constructors(s0) == hl);
   BOOST_CHECK(spec1.constructors(s) == fgl);

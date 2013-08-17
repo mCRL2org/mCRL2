@@ -193,6 +193,7 @@ bool mcrl2::data::sort_type_checker::check_for_sort_alias_loop_through_function_
 
 void mcrl2::data::sort_type_checker::add_basic_sort(const basic_sort &sort)
 {
+std::cerr << "Add basic sort " << sort << "\n";
   if (sort_bool::is_bool(sort))
   {
     throw mcrl2::runtime_error("attempt to redeclare sort Bool");

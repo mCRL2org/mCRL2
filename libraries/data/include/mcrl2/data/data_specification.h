@@ -80,16 +80,6 @@ void insert(Container& container, Sequence sequence)
 
 template < typename Container, typename T >
 inline
-void insert_unique(Container& container, const T& t)
-{
-  if(std::find(container.begin(), container.end(), t) == container.end())
-  {
-    container.push_back(t);
-  }
-}
-
-template < typename Container, typename T >
-inline
 void remove(Container& container, const T& t)
 {
   typename Container::iterator i = std::find(container.begin(), container.end(), t);
@@ -283,7 +273,7 @@ class data_specification
     void add_system_defined_constructor(const function_symbol& f) const
     {
       function_symbol g(normalize_sorts(f, *this));
-      detail::insert_unique(m_normalised_constructors, g);
+      m_normalised_constructors.push_back(g);
     }
 
     /// \brief Adds a mapping to this specification, and marks it as system
@@ -296,7 +286,7 @@ class data_specification
     void add_system_defined_mapping(const function_symbol& f) const
     {
       function_symbol g(normalize_sorts(f, *this));
-      detail::insert_unique(m_normalised_mappings, g);
+      m_normalised_mappings.push_back(g);
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -345,7 +335,7 @@ class data_specification
 
       for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
       {
-        detail::insert_unique(m_normalised_mappings,*i);
+        m_normalised_mappings.push_back(*i);
       }
 
       data_equation_vector equations(standard_generate_equations_code(sort));
@@ -548,11 +538,8 @@ class data_specification
     void add_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
-      if (std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end())
-      {
-        m_sorts.push_back(s);
-        data_is_not_necessarily_normalised_anymore();
-      }
+      m_sorts.push_back(s);
+      data_is_not_necessarily_normalised_anymore();
     }
 
     /// \brief Adds an alias (new name for a sort) to this specification
@@ -564,7 +551,7 @@ class data_specification
     void add_alias(alias const& a)
     {
       assert(m_data_specification_is_type_checked);
-      detail::insert_unique(m_aliases, a);
+      m_aliases.push_back(a);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -576,7 +563,7 @@ class data_specification
     void add_constructor(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      detail::insert_unique(m_constructors, f);
+      m_constructors.push_back(f);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -588,7 +575,7 @@ class data_specification
     void add_mapping(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      detail::insert_unique(m_mappings, f);
+      m_mappings.push_back(f);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -716,7 +703,7 @@ class data_specification
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
         function_symbol normalised_constructor(normalize_sorts(*i, *this));
 
-        detail::insert_unique(m_normalised_constructors, normalised_constructor);
+        m_normalised_constructors.push_back(normalised_constructor);
         add_system_defined_sort(normalised_sort);
       }
 
@@ -727,7 +714,7 @@ class data_specification
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
         function_symbol normalised_mapping(normalize_sorts(*i, *this));
 
-        detail::insert_unique(m_normalised_mappings, normalised_mapping);
+        m_normalised_mappings.push_back(normalised_mapping);
 
         add_system_defined_sort(normalised_sort);
       }
