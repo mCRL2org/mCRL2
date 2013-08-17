@@ -29,6 +29,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/libraries/pbes/include
   ${CMAKE_SOURCE_DIR}/libraries/process/include
   ${CMAKE_SOURCE_DIR}/libraries/utilities/include
+  ${CMAKE_SOURCE_DIR}/libraries/lts/include
   ${CMAKE_SOURCE_DIR}/build/workarounds
 )
 
@@ -39,6 +40,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_process
   mcrl2_utilities
   mcrl2_syntax
+  mcrl2_lts
 )
 
 # install target:
