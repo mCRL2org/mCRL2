@@ -39,10 +39,14 @@ def parse_alternative(text):
     text, annotation = parse_annotation('(\$binary_right\s*\d+)', '', text, annotation)
     text, annotation = parse_annotation('(\$left\s*\d+)', '', text, annotation)
     text, annotation = parse_annotation('(\$right\s*\d+)', '', text, annotation)
-    text, annotation = parse_annotation(r"\(('[^']+')\s*(\$unary_op_left\s*\d+\))", r'\1', text, annotation)
-    text, annotation = parse_annotation(r"\(('[^']+')\s*(\$unary_op_right\s*\d+\))", r'\1', text, annotation)
-    text, annotation = parse_annotation(r"\(('[^']+')\s*(\$binary_op_left\s*\d+\))", r'\1', text, annotation)
-    text, annotation = parse_annotation(r"\(('[^']+')\s*(\$binary_op_right\s*\d+\))", r'\1', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)\s*(\$unary_op_left\s*\d+)\)", r'\1', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)\s*(\$unary_op_right\s*\d+)\)", r'\1', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)\s*(\$binary_op_left\s*\d+)\)", r'\1', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)\s*(\$binary_op_right\s*\d+)\)", r'\1', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)('[^']+')\s*(\$unary_op_left\s*\d+)\)", r'\1\2', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)('[^']+')\s*(\$unary_op_right\s*\d+)\)", r'\1\2', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)('[^']+')\s*(\$binary_op_left\s*\d+)\)", r'\1\2', text, annotation)
+    text, annotation = parse_annotation(r"\(([\w\s]*)('[^']+')\s*(\$binary_op_right\s*\d+)\)", r'\1\2', text, annotation)
 
     return (text.strip(), comment, annotation)
 
