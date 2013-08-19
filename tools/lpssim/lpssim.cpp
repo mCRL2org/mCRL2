@@ -167,7 +167,8 @@ class sim_tool : public rewriter_tool< input_tool >
           else if (isdigit(s[0]))
           {
             size_t index;
-            sscanf(s.c_str(), "%zu", &index);
+            std::stringstream ss(s);
+            ss >> index;
             if (index < current_state.transitions.size())
             {
               simulation.truncate(state_index);

@@ -3941,7 +3941,6 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification &data
         was_ambiguous(false)
 
 {
-  mCRL2log(verbose) << "type checking data expression..." << std::endl;
   initialise_system_defined_functions();
 
   //XXX read-in from spec (not finished)
@@ -3954,7 +3953,6 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification &data
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
   }
-  mCRL2log(debug) << "type checking of data expression read-in phase finished" << std::endl;
 
   type_checked_data_spec=data_spec;
   type_checked_data_spec.declare_data_specification_to_be_type_checked();
