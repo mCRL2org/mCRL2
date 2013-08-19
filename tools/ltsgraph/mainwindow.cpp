@@ -144,14 +144,18 @@ void MainWindow::openFile(QString fileName)
     try
     {
       m_ui.actLayout->setChecked(false);
+	  m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
       m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
       m_glwidget->rebuild();
+      m_glwidget->resume();
       m_information->update();
+	  setWindowTitle(QString("LTSGraph - ") + fileName);
     }
     catch (mcrl2::runtime_error e)
     {
       QMessageBox::critical(this, "Error opening file", e.what());
+	  setWindowTitle(QString("LTSGraph"));
     }
   }
 }

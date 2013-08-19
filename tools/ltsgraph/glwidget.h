@@ -61,10 +61,11 @@ class GLWidget : public QGLWidget
     QPoint m_dragstart;         ///< The coordinate at which the dragging started.
     QColor m_paintcolor;        ///< The color of the paint operation.
     bool m_painting;            ///< Boolean indicating if painting is enabled.
+	bool m_paused;
     GLScene* m_scene;           ///< The GLScene which is used to render the contents.
     std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
 
-
+	
     /**
      * @brief Renders a single edge.
      * @param i The index of the edge to render.
@@ -122,6 +123,17 @@ class GLWidget : public QGLWidget
      * @brief Paints the OpenGL context.
      */
     virtual void paintGL();
+
+	/**
+	 * @brief Pauses painting and clears the selection. Used to make the
+	 *        GLWidget wait while a new graph is loaded.
+	 */
+    void pause();
+
+	/**
+	 * @brief Resumes painting after a call to pause().
+	 */
+    void resume();
 
     /**
      * @brief Resize the OpenGL viewport.

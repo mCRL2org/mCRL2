@@ -128,7 +128,7 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget *parent)
-  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false)
+  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false), m_paused(false)
 {
   m_scene = new GLScene(m_graph);
   QGLFormat fmt = format();
@@ -140,6 +140,19 @@ GLWidget::~GLWidget()
 {
   delete m_scene;
   delete m_ui;
+}
+
+void GLWidget::pause()
+{
+  m_paused = true;
+  m_selections.clear();
+  m_dragmode = dm_none;
+  m_dragnode = NULL;
+}
+
+void GLWidget::resume()
+{
+  m_paused = false;
 }
 
 inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
@@ -214,8 +227,15 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
-  updateSelection();
-  m_scene->render();
+  if (m_paused)
+  {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
+  else
+  {
+    updateSelection();
+    m_scene->render();
+  }
   if (m_scene->resizing())
     emit widgetResized(m_scene->size());
 }
