@@ -6,6 +6,15 @@ import re
 import string
 from path import *
 
+def parse_annotation(pattern, replacement, text, annotation):
+    if annotation != '':
+        return text, annotation
+    m = re.search(pattern, text)
+    if m != None:
+        annotation = m.groups()[-1]
+    text = re.sub(pattern, replacement, text)
+    return text, annotation
+
 #---------------------------------------------------------------#
 #                          parse_alternative
 #---------------------------------------------------------------#
@@ -22,15 +31,18 @@ def parse_alternative(text):
         text = words[0]
         comment = words[1]
 
-    # extract the optional annotation
+    # extract the optional precedence annotation
     annotation = ''
-    text = re.sub('(\$unary_)|(\$binary_)(op_)?', '$$', text)
-    words = map(string.strip, text.split('$$'))
-    if len(words) == 2:
-        text = words[0]
-        annotation = words[1]
+    text, annotation = parse_annotation('(\$unary_left\s*\d+)', '', text, annotation)
+    text, annotation = parse_annotation('(\$unary_right\s*\d+)', '', text, annotation)
+    text, annotation = parse_annotation('(\$binary_left\s*\d+)', '', text, annotation)
+    text, annotation = parse_annotation('(\$binary_right\s*\d+)', '', text, annotation)
+    text, annotation = parse_annotation('(\$left\s*\d+)', '', text, annotation)
+    text, annotation = parse_annotation('(\$right\s*\d+)', '', text, annotation)
+    text, annotation = parse_annotation(r"\(('[^']+')\s*(\$binary_op_left\s*\d+\))", r'\1', text, annotation)
+    text, annotation = parse_annotation(r"\(('[^']+')\s*(\$binary_op_right\s*\d+\))", r'\1', text, annotation)
 
-    return (text, comment, annotation)
+    return (text.strip(), comment, annotation)
 
 def split_lines(text):
     result = []
