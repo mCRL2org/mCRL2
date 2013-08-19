@@ -18,6 +18,7 @@
 #include <GL/glu.h> // Needed for compilation on Ubuntu 12.04
 #endif
 #include "mcrl2/utilities/workarounds.h"
+#include "mcrl2/utilities/logger.h"
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
@@ -1130,7 +1131,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
 {
   FILE* outfile = fopen(filename, "wb+");
   GLint viewport[4];
-  GLint buffersize = 0, state = GL2PS_OVERFLOW;
+  GLint buffersize = 1024*1024, state = GL2PS_OVERFLOW;
 
   while( state == GL2PS_OVERFLOW ){
     buffersize += 1024*1024;
@@ -1141,6 +1142,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
                    GL2PS_BSP_SORT,
                    GL2PS_SILENT |
                    GL2PS_USE_CURRENT_VIEWPORT |
+				   GL2PS_OCCLUSION_CULL |
                    GL2PS_BEST_ROOT |
                    GL2PS_COMPRESS,
                    GL_RGBA,
@@ -1154,7 +1156,14 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
     render();
     state = gl2psEndPage();
   }
-  fclose(outfile);
+  if (state != GL2PS_SUCCESS)
+  {
+	mCRL2log(mcrl2::log::error) << "Could not save file (gl2ps error)." << std::endl;
+  }
+  if (outfile)
+  {
+    fclose(outfile);
+  }
 }
 
 void GLScene::renderLatexGraphics(QString filename, float aspectRatio)

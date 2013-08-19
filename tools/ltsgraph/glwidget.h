@@ -180,13 +180,24 @@ class GLWidget : public QGLWidget
     void rebuild();
 
     /**
-     * @brief Renders the current visualisation to a file.
-     * @param filename The filename for the output.
-     * @param filter The filter that was used for this operation.
+     * @brief Renders the current visualisation to a bitmap file.
+     * @param filename The filename for the output (extension determines file type).
      * @param w The desired width of the image.
      * @param h The desired height of the image.
      */
-    void renderToFile(const QString& filename, const QString& filter, const int w = 1024, const int h = 768);
+    void savePixmap(const QString &filename, const int w = 1024, const int h = 768);
+
+    /**
+	 * @brief Renders the current visualisation to a vector graphics file using gl2ps.
+	 * @param filename The filename for the output (extension determines file type).
+	 */
+	void saveVector(const QString &filename);
+
+    /**
+	 * @brief Renders the current visualisation to a LaTeX Tikz image.
+	 * @param filename The filename for the output.
+	 */
+	void saveTikz(const QString &filename, float aspectRatio);
 
     /**
      * @brief Sets the paint color.

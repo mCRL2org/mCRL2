@@ -172,14 +172,10 @@ void MainWindow::onOpenFile()
 void MainWindow::onExportImage()
 {
   QString bitmap = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
-  QString pdf = tr("Portable Document Format (*.pdf)");
-  QString ps = tr("PostScript (*.ps)");
-  QString eps = tr("Encapsulated PostScript (*.eps)");
-  QString svg = tr("Scalable Vector Graphics (*.svg)");
+  QString vector = tr("Vector format (*.pdf *.ps *.eps *.svg *.pgf)");
   QString tikz = tr("LaTeX TikZ Image (*.tex)");
-  QString pgf = tr("PGF (*.pgf)");
-
-  QString filter = bitmap + ";;" + pdf + ";;" + ps + ";;" + eps + ";;" + svg + ";;" + tikz + ";;" + pgf;
+  
+  QString filter = bitmap + ";;" + vector + ";;" + tikz;
   QString selectedFilter = bitmap;
   QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
                                                 filter,
@@ -192,13 +188,18 @@ void MainWindow::onExportImage()
       DimensionsDialog dDialog(this);
       if (dDialog.exec())
       {
-        m_glwidget->renderToFile(fileName, selectedFilter, dDialog.resultWidth(), dDialog.resultHeight());
+        m_glwidget->savePixmap(fileName, dDialog.resultWidth(), dDialog.resultHeight());
       }
     }
     else
+	if (selectedFilter == vector)
     {
-      m_glwidget->renderToFile(fileName, selectedFilter);
+      m_glwidget->saveVector(fileName);
     }
+	else
+	{
+      m_glwidget->saveTikz(fileName, m_glwidget->width() / m_glwidget->height());
+	}
   }
 
 }
