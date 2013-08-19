@@ -140,7 +140,7 @@ class classic_enumerator
         /// \brief Destructor.
         ~iterator_internal()
         {
-          if (m_generator!=NULL)
+          if (m_generator!=nullptr)
           {
             m_generator.reset();
           }
@@ -154,12 +154,13 @@ class classic_enumerator
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
+          /* Code below appears to be without effect.
           if (m_generator==NULL && other.m_generator!=NULL)
           {
           }
           if (m_generator!=NULL && other.m_generator==NULL)
           {
-          }
+          } */
           m_generator=other.m_generator;
           return *this;
         }
@@ -172,12 +173,14 @@ class classic_enumerator
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
+          /* Code below appears to be without effect.
           if (m_generator==NULL && other.m_generator!=NULL)
           {
           }
           if (m_generator!=NULL && other.m_generator==NULL)
           {
           }
+          */
           m_generator=other.m_generator;
         }
 
@@ -207,7 +210,7 @@ class classic_enumerator
 
         void increment()
         {
-          if (m_generator==NULL)
+          if (m_generator==nullptr)
           {
             m_enumerator_iterator_valid=false; // There was only one solution.
           }
