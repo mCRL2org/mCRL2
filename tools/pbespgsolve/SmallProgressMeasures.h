@@ -212,7 +212,7 @@ protected:
     LiftingStatistics   *stats_;    //!< statistics object to record lifts
     const verti         *vmap_;     //!< active vertex map (if any)
     verti               vmap_size_; //!< size of vertex map
-    int                 len_;       //!< length of SPM vectors
+    size_t              len_;       //!< length of SPM vectors
     verti               *M_;        //!< bounds on the SPM vector components
     verti               *spm_;      //!< array storing the SPM vector data
 };

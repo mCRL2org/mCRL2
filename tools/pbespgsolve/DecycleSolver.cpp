@@ -33,7 +33,7 @@ struct CycleFinder
     size_t memory_use();
 
 private:
-    int                         prio_;          //!< selected priority
+    size_t                      prio_;          //!< selected priority
     const std::vector<verti>    &mapping_;      //!< priority induced vertex set
     ParityGame                  subgame_;       //!< priority induced subgame
     DenseSet<verti>             winning_set_;   //!< winning set of the subgame
@@ -139,7 +139,7 @@ ParityGame::Strategy DecycleSolver::solve()
                             solved_set.memory_use() + sizeof(*this);
 
     // Find owner-controlled cycles for every priority value:
-    for (int prio = 0; prio < game_.d(); ++prio)
+    for (size_t prio = 0; prio < game_.d(); ++prio)
     {
         verti old_size = solved_set.size();
 

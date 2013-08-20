@@ -181,7 +181,7 @@ public:
     size_t memory_use() const;
 
     /*! Return the priority limit d; all priorities must be in range [0:d) */
-    int d() const { return d_; }
+    size_t d() const { return d_; }
 
     /*! Return the game graph */
     const StaticGraph &graph() const { return graph_; }
@@ -194,7 +194,7 @@ public:
 
     /*! Return the number of vertices with priority `p`.
         `p` must be between 0 and `d` (exclusive). */
-    verti cardinality(int p) const { return cardinality_[p]; }
+    verti cardinality(size_t p) const { return cardinality_[p]; }
 
     /*! Return the winner for vertex v according to strategy s. */
     template<class StrategyT>
@@ -239,7 +239,7 @@ private:
     ParityGame &operator=(const ParityGame &game);
 
 private:
-    int d_;                 /*!< priority limit (max. priority + 1) */
+    size_t d_;                 /*!< priority limit (max. priority + 1) */
     StaticGraph graph_;     /*!< game graph */
 
     /*! Assignment of players and priorities to vertices (size graph_.V()) */

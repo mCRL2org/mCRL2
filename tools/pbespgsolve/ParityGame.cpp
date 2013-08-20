@@ -141,7 +141,7 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
 
     // Find out how to map old priorities to new priorities
     std::vector<int> prio_map(d_, -1);
-    int first_prio = 0, last_prio = 0;
+    size_t first_prio = 0, last_prio = 0;
     if (!preserve_parity)
     {
         // Find lowest priority in use:
@@ -150,7 +150,7 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
     }
     bool swap_players = first_prio%2 != 0;
     prio_map[first_prio] = last_prio;
-    for (int p = first_prio + 1; p < d_; ++p)
+    for (size_t p = first_prio + 1; p < d_; ++p)
     {
         if (cardinality[p] == 0) continue;  // remove priority p
         bool last_prio_odd = last_prio%2 != 1;
@@ -160,10 +160,10 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
     }
 
     // Update priority limit and cardinality counts
-    int new_d = last_prio + 1;
+    size_t new_d = last_prio + 1;
     verti *new_cardinality = new verti[new_d];
     std::fill(new_cardinality, new_cardinality + new_d, 0);
-    for (int p = 0; p < d_; ++p)
+    for (size_t p = 0; p < d_; ++p)
     {
         if (prio_map[p] >= 0)
         {
