@@ -74,7 +74,7 @@ class shared_subset
           : atermpp::aterm_appl(value ? get_true() : get_false())
         {}
 
-        bdd_node(int bit, const bdd_node &true_node, const bdd_node &false_node)
+        bdd_node(size_t bit, const bdd_node &true_node, const bdd_node &false_node)
           : atermpp::aterm_appl(get_node(), atermpp::aterm_int(bit), true_node, false_node)
         {}
 
@@ -93,7 +93,7 @@ class shared_subset
           return function() == get_node();
         }
 
-        int bit()
+        size_t bit()
         {
           return atermpp::aterm_int((*this)[0]).value();
         }
