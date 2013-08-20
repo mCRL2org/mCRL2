@@ -3860,10 +3860,11 @@ class specification_basic_type:public boost::noncopyable
     }
 
     assignment_list processencoding(
-      int i,
+      size_t i,
       const assignment_list &t1,
       const stacklisttype& stack)
     {
+      assert(i>0);
       assignment_list t(t1);
       if (!options.newstate)
       {
