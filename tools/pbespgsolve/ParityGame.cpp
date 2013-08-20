@@ -153,7 +153,9 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
     for (int p = first_prio + 1; p < d_; ++p)
     {
         if (cardinality[p] == 0) continue;  // remove priority p
-        if ((last_prio%2 ^ p%2) != swap_players) ++last_prio;
+        bool last_prio_odd = last_prio%2 != 1;
+        bool p_odd = p%2 != 1;
+        if ((last_prio_odd != p_odd) != swap_players) ++last_prio;
         prio_map[p] = last_prio;
     }
 
@@ -183,14 +185,14 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
     return swap_players ? PLAYER_ODD : PLAYER_EVEN;
 }
 
-int ParityGame::propagate_priority( verti v, StaticGraph::const_iterator it,
+size_t ParityGame::propagate_priority( verti v, StaticGraph::const_iterator it,
                                              StaticGraph::const_iterator end )
 {
-    int p = priority(v), q = 0;
+    size_t p = priority(v), q = 0;
     for ( ; it != end; ++it)
     {
         verti w = *it;
-        int r = priority(w);
+        size_t r = priority(w);
         if (r >= p) return 0;
         if (r > q) q = r;
     }
@@ -205,9 +207,9 @@ int ParityGame::propagate_priority( verti v, StaticGraph::const_iterator it,
     algorithm starts with a first pass looking for vertices which can be
     updated, rather than putting them all in the initial queue, which would be
     simpler but require more memory up-front. */
-long long ParityGame::propagate_priorities()
+size_t ParityGame::propagate_priorities()
 {
-    long long res = 0;
+    size_t res = 0;
     std::deque<verti> todo;
 
     // Make an initial pass to look for updatable vertices:
@@ -215,7 +217,7 @@ long long ParityGame::propagate_priorities()
     {
         if (priority(v) > 0)
         {
-            int change = propagate_priority(v, graph_.succ_begin(v),
+            size_t change = propagate_priority(v, graph_.succ_begin(v),
                                                graph_.succ_end(v) )
                        + propagate_priority(v, graph_.pred_begin(v),
                                                graph_.pred_end(v) );
@@ -230,7 +232,7 @@ long long ParityGame::propagate_priorities()
     while (!todo.empty())
     {
         verti w = todo.front();
-        int p = priority(w);
+        size_t p = priority(w);
         todo.pop_front();
 
         // Perform backwards propagation on predecessors:
@@ -240,7 +242,7 @@ long long ParityGame::propagate_priorities()
             verti v = *it;
             if (priority(v) > p)
             {
-                int change = propagate_priority(v, graph_.succ_begin(v),
+                size_t change = propagate_priority(v, graph_.succ_begin(v),
                                                    graph_.succ_end(v) );
                 if (change > 0) {
                     res += change;
@@ -256,7 +258,7 @@ long long ParityGame::propagate_priorities()
             verti v = *it;
             if (priority(v) > p)
             {
-                int change = propagate_priority(v, graph_.pred_begin(v),
+                size_t change = propagate_priority(v, graph_.pred_begin(v),
                                                    graph_.pred_end(v) );
                 if (change > 0) {
                     res += change;

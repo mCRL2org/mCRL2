@@ -156,7 +156,7 @@ public:
 
     /*! Return the number of odd priorities less than or equal to the
         priority of v. This is the length of the SPM vector for `v`. */
-    int len(verti v) const { return (game_.priority(v) + 1 + p_)/2; }
+    size_t len(verti v) const { return (game_.priority(v) + 1 + p_)/2; }
 
     /*! Return whether the given SPM vector has top value. */
     bool is_top(const verti vec[]) const { return vec[0] == NO_VERTEX; }

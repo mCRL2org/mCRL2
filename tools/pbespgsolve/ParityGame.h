@@ -149,7 +149,7 @@ public:
         Returns the sum of differences between old and new priority values
         for all vertices.
     */
-    long long propagate_priorities();
+    size_t propagate_priorities();
 
     /*! Read a game description in PGSolver format. */
     void read_pgsolver( std::istream &is,
@@ -231,7 +231,7 @@ protected:
     /*! Helper function for ParityGame::propagate_priorities() that decreases
         the priority for `v' to the maximum of those in range [begin:end), if
         this is less than its current value, and returns the absolute change. */
-    int propagate_priority( verti v, StaticGraph::const_iterator begin,
+    size_t propagate_priority( verti v, StaticGraph::const_iterator begin,
                                      StaticGraph::const_iterator end );
 
 private:
