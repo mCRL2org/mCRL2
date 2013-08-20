@@ -18,6 +18,7 @@ void ParityGame::make_subgame( const ParityGame &game,
                                ForwardIterator vertices_end )
 {
     assert(this != &game);
+	assert(vertices_end >= vertices_begin);
 
     const verti num_vertices = std::distance(vertices_begin, vertices_end);
     ForwardIterator it;

@@ -33,7 +33,7 @@
 struct ParityGameVertex
 {
     unsigned char   player;
-    compat_uint16_t priority;
+    size_t priority;
 };
 
 inline bool operator== (const ParityGameVertex &a, const ParityGameVertex &b)
@@ -187,7 +187,7 @@ public:
     const StaticGraph &graph() const { return graph_; }
 
     /*! Return the priority associated with vertex v */
-    int priority(verti v) const { return vertex_[v].priority; }
+    size_t priority(verti v) const { return vertex_[v].priority; }
 
     /*! Return the player associated with vertex v */
     Player player(verti v) const { return (Player)vertex_[v].player; }

@@ -112,7 +112,7 @@ private:
                 {
                     /* Push my lower link index to parent vertex `u`, if it
                        is lower than the parent's current lower link index. */
-                    int u = stack.back().first;
+                    verti u = stack.back().first;
                     info[u].second = (std::min)(info[u].second, info[v].second);
                 }
 

@@ -61,7 +61,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
         // Conservatively estimate vertices won by player.
         std::vector<char> marked(V, 0);
         std::vector<char> queued(V, 0);
-        std::deque<int> dirty;
+        std::deque<verti> dirty;
         for (verti v = 0; v < V; ++v)
         {
             if (is_top(v))
