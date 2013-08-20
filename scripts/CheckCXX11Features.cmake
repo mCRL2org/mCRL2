@@ -122,3 +122,7 @@ cxx11_check_feature("rvalue-references" HAS_CXX11_RVALUE_REFERENCES False)
 cxx11_check_feature("sizeof_member" HAS_CXX11_SIZEOF_MEMBER False)
 cxx11_check_feature("static_assert" HAS_CXX11_STATIC_ASSERT False)
 cxx11_check_feature("variadic_templates" HAS_CXX11_VARIADIC_TEMPLATES False)
+
+if(HAS_CXX11_NULLPTR)
+  add_definitions(-DMCRL2_HAVE_NULLPTR)
+endif()

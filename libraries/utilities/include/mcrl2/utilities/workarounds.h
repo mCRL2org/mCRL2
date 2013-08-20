@@ -87,8 +87,24 @@ inline double round(double d)
 #undef nil
 #endif
 
-// Code used for all platforms
+/*
+Workaround for compilers that do not support C++11 nullptr. Especially,
+GCC 4.4 and older do not yet have this keyword. File is included by passing
+the -include flag on the command line.
+*/
+#ifndef MCRL2_HAVE_NULLPTR
+#ifndef __cplusplus
+#define nullptr ((void*)0)
+#elif defined(__GNUC__)
+#define nullptr __null
+#elif defined(_WIN64)
+#define nullptr 0LL
+#else
+#define nullptr 0L
+#endif
+#endif // defined(HAVE_NULLPTR)
 
+// Code used for all platforms
 #include <limits.h>
 
 // Part of C99 but not C++98
