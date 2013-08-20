@@ -165,10 +165,10 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
     std::fill(new_cardinality, new_cardinality + new_d, 0);
     for (size_t p = 0; p < d_; ++p)
     {
-        if (prio_map[p] >= 0)
-        {
-            new_cardinality[prio_map[p]] += cardinality_[p];
-        }
+      if (prio_map[p] != std::numeric_limits<size_t>::max())
+      {
+        new_cardinality[prio_map[p]] += cardinality_[p];
+      }
     }
     delete[] cardinality_;
     cardinality_ = new_cardinality;

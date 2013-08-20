@@ -174,8 +174,9 @@ bool SmallProgressMeasures::lift(verti v)
     if (d >= carry) return false;
 
     /* Assign successor */
-    for (size_t n = len(v) - 1; n >= 0; --n)
+    for (size_t m = len(v); m > 0; --m)
     {
+        size_t n = m - 1;
         vec(v)[n] = vec(w)[n] + carry;
         carry = (vec(v)[n] >= M_[n]);
         if (carry) vec(v)[n] = 0;
