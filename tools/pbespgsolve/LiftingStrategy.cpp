@@ -38,7 +38,7 @@ std::string tolower(std::string s)
 static inline
 bool nonempty(std::string s)
 {
-  s.erase(std::remove_if(s.begin(), s.end(), std::isspace), s.end());
+  s.erase(std::remove_if(s.begin(), s.end(), (int(*)(int)) isspace), s.end());
   return !s.empty();
 }
 
