@@ -134,7 +134,7 @@ LiftingStrategy *FocusListLiftingStrategyFactory::create(
     /* Ratio is absolute value if >1, or a fraction of the size of the game's
        vertex set if <= 1. */
     verti V = game.graph().V();
-    verti max_size  = (size_ratio_ > 1) ? size_ratio_ : size_ratio_*V;
+    verti max_size  = (size_ratio_ > 1) ? static_cast<verti>(size_ratio_) : static_cast<verti>(size_ratio_*V); // XXX Ugly casting here
     if (max_size == 0) max_size = 1;
     if (max_size >  V) max_size = V;
     verti max_lifts = (verti)(lift_ratio_ * max_size);
