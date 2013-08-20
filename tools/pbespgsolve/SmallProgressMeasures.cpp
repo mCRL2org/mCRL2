@@ -170,7 +170,7 @@ bool SmallProgressMeasures::lift(verti v)
 
     /* Check if lifting is required */
     int d = vector_cmp(v, w, len(v));
-    bool carry = game_.priority(v)%2 != p_;
+    int carry = game_.priority(v)%2 != p_; // really a Boolean, but hey...
     if (d >= carry) return false;
 
     /* Assign successor */
@@ -272,7 +272,7 @@ bool SmallProgressMeasures::verify_solution()
               it != graph.succ_end(v); ++it )
         {
             bool ok = is_top(v) ||
-                vector_cmp(v, *it, len(v)) >= (game_.priority(v)%2 != p_);
+                vector_cmp(v, *it, len(v)) >= static_cast<int>(game_.priority(v)%2 != p_);
             one_ok = one_ok || ok;
             all_ok = all_ok && ok;
         }
