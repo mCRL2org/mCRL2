@@ -174,7 +174,7 @@ bool SmallProgressMeasures::lift(verti v)
     if (d >= carry) return false;
 
     /* Assign successor */
-    for (int n = len(v) - 1; n >= 0; --n)
+    for (size_t n = len(v) - 1; n >= 0; --n)
     {
         vec(v)[n] = vec(w)[n] + carry;
         carry = (vec(v)[n] >= M_[n]);
@@ -188,7 +188,7 @@ bool SmallProgressMeasures::lift(verti v)
 bool SmallProgressMeasures::lift_to(verti v, const verti vec2[])
 {
     verti *vec1 = vec(v);
-    int l = len(v);
+    size_t l = len(v);
     if (vector_cmp(vec1, vec2, l) >= 0) return false;
     if (is_top(vec2))
     {
@@ -196,7 +196,7 @@ bool SmallProgressMeasures::lift_to(verti v, const verti vec2[])
     }
     else
     {
-        for (int i = 0; i < l; ++i) vec1[i] = vec2[i];
+        for (size_t i = 0; i < l; ++i) vec1[i] = vec2[i];
     }
     ls_->lifted(v);
     return true;

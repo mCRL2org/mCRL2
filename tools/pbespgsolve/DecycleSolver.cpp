@@ -18,7 +18,7 @@ struct CycleFinder
 {
     /*! Construct an instance for the subgame of `game' induced by `mapping',
         looking for cycles of dominant priority `prio'. */
-    CycleFinder( const ParityGame &game, int prio,
+    CycleFinder( const ParityGame &game, size_t prio,
                  const std::vector<verti> &mapping );
 
     /*! Search for minimum-priority cycles and vertices in their attractor sets,
@@ -42,7 +42,7 @@ private:
 };
 
 CycleFinder::CycleFinder( const ParityGame &game,
-                          int prio, const std::vector<verti> &mapping )
+                          size_t prio, const std::vector<verti> &mapping )
     : prio_(prio), mapping_(mapping), winning_set_(0, (verti)mapping.size()),
       winning_queue_(), substrat_(mapping.size(), NO_VERTEX)
 {

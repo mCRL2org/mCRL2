@@ -83,9 +83,9 @@ int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
     {
         // Compress vertex priorities
         {
-            int old_d = subgame.d();
+            size_t old_d = subgame.d();
             subgame.compress_priorities();
-            int new_d = subgame.d();
+            size_t new_d = subgame.d();
             if (old_d != new_d)
             {
               mCRL2log(mcrl2::log::verbose, "ComponentSolver") << "Priority compression removed " << old_d - new_d << " of " << old_d << " priorities" << std::endl;

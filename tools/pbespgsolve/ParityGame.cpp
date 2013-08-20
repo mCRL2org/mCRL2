@@ -47,7 +47,7 @@ void ParityGame::assign(const ParityGame &game)
     recalculate_cardinalities(V);
 }
 
-void ParityGame::reset(verti V, int d)
+void ParityGame::reset(verti V, size_t d)
 {
     delete[] vertex_;
     delete[] cardinality_;
@@ -140,7 +140,7 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
     }
 
     // Find out how to map old priorities to new priorities
-    std::vector<int> prio_map(d_, -1);
+    std::vector<size_t> prio_map(d_, std::numeric_limits<size_t>::max());
     size_t first_prio = 0, last_prio = 0;
     if (!preserve_parity)
     {

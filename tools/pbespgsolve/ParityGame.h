@@ -222,7 +222,7 @@ public:
 protected:
     /*! Re-allocate memory to store information on V vertices with priorities
         between 0 and `d` (exclusive). */
-    void reset(verti V, int d);
+    void reset(verti V, size_t d);
 
     /*! Recalculate cardinalities (priority frequencies) from the first
         `num_vertices` elements of `vertex_`. */

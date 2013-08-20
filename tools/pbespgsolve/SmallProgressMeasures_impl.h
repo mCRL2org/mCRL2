@@ -12,18 +12,18 @@
 #include <vector>
 #include <deque>
 
-inline int SmallProgressMeasures::vector_cmp(verti v, verti w, int N) const
+inline int SmallProgressMeasures::vector_cmp(verti v, verti w, size_t N) const
 {
     return vector_cmp(vec(v), vec(w), N);
 }
 
 inline int SmallProgressMeasures::vector_cmp( const verti vec1[],
-                                              const verti vec2[], int N ) const
+                                              const verti vec2[], size_t N ) const
 {
     if (is_top(vec1)) return is_top(vec2) ? 0 : +1;  // v is top
     if (is_top(vec2)) return -1;                     // w is top, but v isn't
 
-    for (int n = 0; n < N; ++n)
+    for (size_t n = 0; n < N; ++n)
     {
         if (vec1[n] < vec2[n]) return -1;
         if (vec1[n] > vec2[n]) return +1;
@@ -39,7 +39,7 @@ inline verti SmallProgressMeasures::get_ext_succ(verti v, bool take_max) const
 
     assert(it != end);  /* assume we have at least one successor */
 
-    int N = len(v);
+    size_t N = len(v);
     verti res = *it++;
     for ( ; it != end; ++it)
     {

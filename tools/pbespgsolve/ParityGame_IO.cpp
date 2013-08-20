@@ -146,7 +146,7 @@ void ParityGame::read_pgsolver( std::istream &is,
 void ParityGame::write_pgsolver(std::ostream &os) const
 {
     // Get max priority and make it even so max_prio - p preserves parity:
-    int max_prio = d();
+    size_t max_prio = d();
     if (max_prio%2 == 1) --max_prio;
 
     // Write out graph

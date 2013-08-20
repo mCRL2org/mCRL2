@@ -136,7 +136,7 @@ public:
     ParityGame::Player player() const { return (ParityGame::Player)p_; }
 
     /*! Return the length of the SPM vectors (a positive integer). */
-    int len() const { return len_; }
+    size_t len() const { return len_; }
 
     /*! Returns the SPM vector space; an array of len() integers. */
     const verti *M() const { return M_; }
@@ -146,7 +146,7 @@ public:
     void set_M(const verti *new_M) { std::copy(new_M, new_M + len_, M_); }
 
     /*! Decrements the i'th element of M. */
-    void decr_M(int i) { assert(M_[i] > 0); --M_[i]; }
+    void decr_M(size_t i) { assert(M_[i] > 0); --M_[i]; }
 
     /*! Return the SPM vector for vertex `v`.
         This array contains only the components with odd (for Even) or even
@@ -185,10 +185,10 @@ private:
     /*! Compares the first `N` elements of the given SPM vectors and returns
         -1, 0 or 1 to indicate that v is smaller than, equal to, or larger than
         w (respectively). */
-    inline int vector_cmp(const verti vec1[], const verti vec2[], int N) const;
+    inline int vector_cmp(const verti vec1[], const verti vec2[], size_t N) const;
 
     /*! Compares `N' elements of the SPM vectors for the given vertices. */
-    inline int vector_cmp(verti v, verti w, int N) const;
+    inline int vector_cmp(verti v, verti w, size_t N) const;
 
     /*! Returns the minimum or maximum successor for vertex `v`,
         depending on whether take_max is false or true (respectively). */
