@@ -393,7 +393,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       {
         r=UpCastNumericType(*i,Type,Par,warn_upcasting);
       }
-      catch (mcrl2::runtime_error &e)
+      catch (mcrl2::runtime_error&)
       {
         found_solution=false;
       }
@@ -2339,7 +2339,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,false);
           }
-          catch (mcrl2::runtime_error &e)
+          catch (mcrl2::runtime_error&)
           {
             // Try again, but now without Type as the suggestion.
             // If this does not work, it will be caught in the second pass below.
@@ -2619,7 +2619,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             Type=UpCastNumericType(NeededType,Type,Arg,warn_upcasting);
           }
-          catch (mcrl2::runtime_error &e)
+          catch (mcrl2::runtime_error&)
           {
           }
         }
@@ -2695,7 +2695,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             Type=UpCastNumericType(NeededType,Type,Arg,warn_upcasting);
           }
-          catch (mcrl2::runtime_error &e)
+          catch (mcrl2::runtime_error&)
           {
           }
         }
