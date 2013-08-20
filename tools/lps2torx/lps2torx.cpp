@@ -187,25 +187,28 @@ class torx_tool : public rewriter_tool< input_tool >
               std::cout << "EB" << std::endl;
               current = states[index];
 
-              for (next_state_generator::iterator i = generator.begin(current, &substitution); i != generator.end(); i++)
+              for(size_t summand_index = 0; summand_index < lps_specification.process().action_summands().size(); ++summand_index)
               {
-                /* Rebuild transition string in Torx format*/
-                std::cout << "Ee " << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";
-
-                state next = i->state();
-
-                /* Print optional first-encounted visited state */
-                if(state_numbers.count(next) == 0)
+                for (next_state_generator::iterator i = generator.begin(current, &substitution, summand_index); i != generator.end(); i++)
                 {
-                  state_numbers[next] = states.size();
-                }
-                else
-                {
-                  std::cout << state_numbers[next];
-                }
-                std::cout << std::endl;
+                  /* Rebuild transition string in Torx format*/
+                  std::cout << "Ee " << "_e" << summand_index << "." << states.size() << "\t" << (i->action().actions().empty() ? 0 : 1) << "\t" << 1 << "\t" << print_torx_action(i->action()) << "\t\t\t";
 
-                states.push_back(next);
+                  state next = i->state();
+
+                  /* Print optional first-encounted visited state */
+                  if(state_numbers.find(next) == state_numbers.end())
+                  {
+                    state_numbers[next] = states.size();
+                  }
+                  else
+                  {
+                    std::cout << state_numbers[next];
+                  }
+                  std::cout << std::endl;
+
+                  states.push_back(next);
+                }
               }
               std::cout << "EE" << std::endl;
 
