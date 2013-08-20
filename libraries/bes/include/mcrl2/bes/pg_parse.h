@@ -179,7 +179,7 @@ struct pg_actions: public core::default_parser_actions
     return parse_Number(node.child(0));
   }
 
-  identifier_t parse_Priority(const core::parse_node& node)
+  priority_t parse_Priority(const core::parse_node& node)
   {
     return parse_Number(node.child(0));
   }
