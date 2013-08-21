@@ -72,6 +72,7 @@ include(MCRL2MacOSXCopyBoostHeaders)
 # script, and uses that path to search for the header files.
 if( APPLE AND MCRL2_OSX_PACKAGE )
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"`dirname $0`/../${MCRL2_INCLUDE_DIR}\"")
+  set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${Boost_INCLUDE_DIRS}\"")
 else()
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${CMAKE_INSTALL_PREFIX}/${MCRL2_INCLUDE_DIR}\"")
   set(R_CXXFLAGS "${R_CXXFLAGS} -I\"${Boost_INCLUDE_DIRS}\"")
