@@ -195,7 +195,7 @@ endif(EXISTS /etc/debian_version )
 if(APPLE)
   set(CPACK_STRIP_FILES FALSE)
  
-  set(CPACK_SET_DESTDIR TRUE)
+  #set(CPACK_SET_DESTDIR TRUE)
   set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
 
   configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
