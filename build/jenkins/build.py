@@ -50,6 +50,9 @@ if package == "official-release":
 
 if label.startswith('windows'):
   packageflags += ['-DMSVC10_REDIST_DIR:PATH=C:\Program Files\Common Files\VC\Redist']
+  
+if label.startswith('macosx') and package in ['nightly', 'official-release']:
+  packageflags += ['-DMCRL2_OSX_PACKAGE=ON'] # Needed for packaging relevant Boost headers (for compiling rewriter)
 
 #
 # Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
