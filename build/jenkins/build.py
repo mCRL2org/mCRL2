@@ -110,8 +110,6 @@ if call('CMake --build', make_command):
 # Test
 #
 
-newenv = {'MCRL2_COMPILEREWRITER': '{0}/stage/bin/mcrl2compilerewriter'.format(builddir)}
-newenv.update(os.environ)
 ctest_command = ['ctest', \
                  '-T', 'Test', \
                  '--output-on-failure', \

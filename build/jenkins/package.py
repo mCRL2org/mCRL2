@@ -27,6 +27,8 @@ elif label in ["windows-x86", "windows-amd64"]:
   # As a workaround, we generate the package to C:\Temp\pkg.
   cpack_temp_path = "C:\Temp\pkg"
   cpack_options = ["-G", "NSIS", "-B", cpack_temp_path]
+elif label in ["macosx-x86", "macosx-amd64"]:
+  cpack_options = ["-G", "PackageMaker"] 
 
 cpack_command = ['cpack'] + cpack_options
 cpack_result = call('CPack', cpack_command)
