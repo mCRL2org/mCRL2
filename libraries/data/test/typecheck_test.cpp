@@ -321,22 +321,22 @@ BOOST_AUTO_TEST_CASE(test_list_is_list_nat)
 
 BOOST_AUTO_TEST_CASE(test_emptyset)
 {
-  test_data_expression("{}", false);
+  test_data_expression("{}", true);
 }
 
 BOOST_AUTO_TEST_CASE(test_emptyset_complement)
 {
-  test_data_expression("!{}", false);
+  test_data_expression("!{}", true);
 }
 
 BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset)
 {
-  test_data_expression("!{} <= {}", false);
+  test_data_expression("!{} <= {}", true);
 }
 
 BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset_reverse)
 {
-  test_data_expression("{} <= !{}", false);
+  test_data_expression("{} <= !{}", true);
 }
 
 BOOST_AUTO_TEST_CASE(test_set_true_false)
@@ -354,6 +354,15 @@ BOOST_AUTO_TEST_CASE(test_set_comprehension)
   test_data_expression("{ x: Nat | x mod 2 == 0 }", true, "Set(Nat)");
 }
 
+BOOST_AUTO_TEST_CASE(test_emptybag)
+{
+  test_data_expression("{:}", true);
+}
+
+BOOST_AUTO_TEST_CASE(test_emptybag_complement)
+{
+  test_data_expression("!{:}", false);
+}
 BOOST_AUTO_TEST_CASE(test_bag_true_false)
 {
   test_data_expression("{true: 1, false: 2}", true, "Bag(Bool)");

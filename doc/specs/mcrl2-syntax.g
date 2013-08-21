@@ -83,7 +83,8 @@ DataExpr
   | 'true'                                                       // True
   | 'false'                                                      // False
   | '[' ']'                                                      // Empty list
-  | '{' '}'                                                      // Empty set/bag
+  | '{' '}'                                                      // Empty set
+  | '{'':''}'                                                    // Empty bag
   | '[' DataExprList ']'                                         // List enumeration
   | '{' BagEnumEltList '}'                                       // Bag enumeration
   | '{' VarDecl '|' DataExpr '}'                                 // Set/bag comprehension

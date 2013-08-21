@@ -138,7 +138,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::identifier_string("{}");
+        static core::identifier_string empty_name = core::identifier_string("{:}");
         return empty_name;
       }
 

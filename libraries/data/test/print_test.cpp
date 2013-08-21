@@ -344,10 +344,10 @@ BOOST_AUTO_TEST_CASE(test_bag_print)
   data_expression bag_true = sort_bag::bag_fbag(bool_(), sort_fbag::cons_(bool_(), true_(), number(sort_pos::pos(), "1"), fbag_empty_));
 
   // Using all operations
-  BOOST_CHECK(print_check(bag_empty, "{}"));
-  BOOST_CHECK(print_check(sort_bag::bag_fbag(bool_(), sort_fbag::empty(bool_())), "{}"));
-  BOOST_CHECK(print_check(sort_bag::constructor(bool_(), sort_bag::zero_function(bool_()), fbag_empty_), "{}"));
-  BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_empty), "false in {}"));
+  BOOST_CHECK(print_check(bag_empty, "{:}"));
+  BOOST_CHECK(print_check(sort_bag::bag_fbag(bool_(), sort_fbag::empty(bool_())), "{:}"));
+  BOOST_CHECK(print_check(sort_bag::constructor(bool_(), sort_bag::zero_function(bool_()), fbag_empty_), "{:}"));
+  BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_empty), "false in {:}"));
   BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_false), "false in {false: 1}"));
   BOOST_CHECK(print_check(sort_bag::count(bool_(), false_(), bag_true), "count(false, {true: 1})"));
   BOOST_CHECK(print_check(sort_bag::join(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));

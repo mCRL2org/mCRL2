@@ -627,7 +627,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     data_expression y = sort_bag::right(x);
     if (sort_fbag::is_empty_function_symbol(y))
     {
-      derived().print("{}");
+      derived().print("{:}");
     }
     else if (data::is_variable(y))
     {
@@ -1148,7 +1148,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_fbag::is_empty_function_symbol(x))
     {
-      derived().print("{}");
+      derived().print("{:}");
     }
     else if (sort_fset::is_empty_function_symbol(x))
     {
@@ -1635,7 +1635,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         data_expression y = sort_bag::arg(x);
         if (sort_fbag::is_empty_function_symbol(y))
         {
-          derived().print("{}");
+          derived().print("{:}");
         }
         else if (data::is_variable(y))
         {

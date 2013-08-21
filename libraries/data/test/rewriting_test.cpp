@@ -1024,7 +1024,7 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
   "    a: Bool;"
   "eqn "
   "    F1( cal, b, [] ,  m ) = [];"
-  "    F1( cal, b, a |> bs, m ) = if( m <= {}, ELM( cal, b, a |> bs ) , [] );"
+  "    F1( cal, b, a |> bs, m ) = if( m <= {:}, ELM( cal, b, a |> bs ) , [] );"
   "    ELM( [] , b, bs ) =  F1( [] , b, bs, { false:1 } );"
   "    ELM( ca |> cal, b, bs ) = ELM( cal, b , bs );"
   );

@@ -181,10 +181,10 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   "     a, b: A;"
   " eqn PART( [] , func ) = func;"
   "     PART( a |> as , func ) = PART( as, func[ args(a) -> func(args(a)) + {first(a):1}]  );"
-  "     MAC( [] ) = {};"
+  "     MAC( [] ) = {:};"
   "     MAC( ca |> cal ) = {ca:1} + MAC(cal);"
   " "
-  "     COMM( cal, al, lsa ) = COMM( cal, al, lsa,  PART( lsa, lambda x: List(Bool). {} ), MAC(cal) );"
+  "     COMM( cal, al, lsa ) = COMM( cal, al, lsa,  PART( lsa, lambda x: List(Bool). {:} ), MAC(cal) );"
   "     COMM( cal, al, [] , func, m ) = [];"
   "     COMM( cal, al, a |> lsa, func, m ) = if( m <= func(args(a)), "
   "                                                      ELM( cal, al, a |> lsa, args(a) , cal ) , "
@@ -199,7 +199,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
 
   /* Test 17. */
   r = rewriter(spec_1, s);
-  data_expression t17d1 = parse_data_expression("exists x_0: List(A). x_0 == [ac( false, []), ac(true, []), ac(false, [])] && [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) ", spec_1);
+  data_expression t17d1 = parse_data_expression("exists x_0: List(A). x_0 == [ac( false, []), ac(true, []), ac(false, [])] && [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {:}), {false: 2}) ", spec_1);
   data_expression t17d2 = parse_data_expression("true");
   BOOST_CHECK(r(t17d1) == r(t17d2));
 
@@ -208,7 +208,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   */
   data_expression t18d1 = parse_data_expression(
        "exists x_0: List(A). [ac(true, []), ac(true, [])] == "
-       "        COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) &&  "
+       "        COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {:}), {false: 2}) &&  "
        "        x_0 == [ac( false, []), ac(true, []), ac(false, [])]", spec_1);
   data_expression t18d2 = parse_data_expression("true");
   BOOST_CHECK(r(t18d1) == r(t18d2));
