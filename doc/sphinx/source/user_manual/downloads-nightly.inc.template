@@ -13,6 +13,9 @@
 .. |bin_fedora64n| replace:: Fedora RPM (64-bit)
 .. _bin_fedora64n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_x86_64.rpm
 
+.. |bin_osx64n| replace:: Mac OS X (64-bit)
+.. _bin_osx64n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_x86_64.dmg
+
 .. |src_tgzn| replace:: GZipped Tarball
 .. _src_tgzn: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@.tar.gz
 
