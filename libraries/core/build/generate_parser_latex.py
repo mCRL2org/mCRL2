@@ -24,7 +24,8 @@ def print_alternative(text, comment, annotation):
 # #  --> \#.
     text = re.sub(r'#', r'\\#', text)
 # {}  --> \{\}.
-    text = re.sub(r'{}', r'\\{\\}', text)
+    text = re.sub(r'{{}', r'{\\{}', text)
+    text = re.sub(r'{}}', r'{\\}}', text)
 # Replace $unary_left by ; Left in an annotation.
     annotation = re.sub(r'\$unary_left',r'; Left',annotation)
     annotation = re.sub(r'\$unary_right',r'; Right',annotation)
