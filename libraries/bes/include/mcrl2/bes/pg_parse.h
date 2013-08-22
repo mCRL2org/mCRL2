@@ -206,7 +206,6 @@ struct pg_actions: public core::default_parser_actions
   }
 };
 
-#ifndef MCRL2_USE_OLD_PARSE_PGSOLVER
 /// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param text A string
 /// \param result A boolean equation system
@@ -234,125 +233,6 @@ void parse_pgsolver(std::istream& from, boolean_equation_system& result, bool ma
   std::string text = utilities::read_text(from);
   parse_pgsolver_string(text, result, maxpg);
 }
-
-#else
-/// \brief Reads a parity game from an input stream, and stores it as a BES.
-/// \param from An input stream
-/// \param b A boolean equation system
-/// \return The input stream
-// EBNF:
-// <parity_game> ::= [parity <identifier> ;] <node_spec>+
-// <node_spec> ::= <identifier> <priority> <owner> <successors> [name] ;
-// <identifier> ::= N
-// <priority> ::= N
-// <owner> ::= 0 | 1
-// <successors> ::= <identifier> (, <identifier>)*
-// <name> ::= " ( any ASCII string not containing `"') "
-// In this N means a natural number.
-// There must be whitespace characters between the following pairs of tokens:
-// <identifier> and <priority>, <priority> and <owner>, <owner> and <identifier>
-inline
-void parse_pgsolver(std::istream& from, boolean_equation_system& b, bool maxpg = true)
-{
-  while (!isalnum(from.peek()))
-  {
-    from.ignore();
-  }
-
-  // We ignore parity line
-  if (from.peek() == 'p')
-  {
-    from.ignore(1024, '\n');
-  }
-
-  // Parse node specifications (store in map)
-  std::map<identifier_t, node_t> game;
-  bool init = false;
-  identifier_t initial_node = 0;
-
-  while (isalnum(from.peek()))
-  {
-    while (!isalnum(from.peek()))
-    {
-      from.ignore();
-    }
-    node_t node;
-    from >> node.id;
-    from >> node.prio;
-    from >> node.owner;
-
-    if (!init)
-    {
-      initial_node = node.id;
-      init = true;
-    }
-
-    std::string successors;
-    std::getline(from, successors);
-    // Rest of line. First remove comments
-    size_t index = successors.find('"');
-    if (index != std::string::npos)
-    {
-      successors = successors.substr(0, index);
-    }
-
-    successors = utilities::remove_whitespace(successors);
-    std::vector<std::string> v(utilities::split(successors,","));
-    for (std::vector<std::string>::const_iterator i = v.begin(); i != v.end(); ++i)
-    {
-      identifier_t id;
-      std::stringstream tmp;
-      tmp << *i;
-      tmp >> id;
-      node.successors.insert(id);
-    }
-
-    game[node.id] = node;
-  }
-
-  // Build Boolean equation system. First we group equations by block
-  std::map<priority_t, std::set<boolean_equation> > blocks;
-  // Translation scheme:
-  // prefix every id with X. Owner 0 means ||, owner 1 means &&
-
-  for (std::map<identifier_t, node_t>::const_iterator i = game.begin(); i != game.end(); ++i)
-  {
-    std::stringstream id;
-    id << "X" << i->second.id;
-
-    fixpoint_symbol fp(fixpoint_symbol::mu());
-    if (i->second.prio % 2 == 0)
-    {
-      fp = fixpoint_symbol::nu();
-    }
-
-    boolean_equation eqn(fp, boolean_variable(id.str()), formula(i->second.successors, i->second.owner));
-
-    blocks[i->second.prio].insert(eqn);
-  }
-
-  std::vector<boolean_equation> eqns;
-  if(maxpg)
-  {
-    for (std::map<priority_t, std::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
-    {
-      eqns.insert(eqns.end(), i->second.begin(), i->second.end());
-    }
-  }
-  else
-  {
-    for (std::map<priority_t, std::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
-    {
-      eqns.insert(eqns.end(), i->second.begin(), i->second.end());
-    }
-  }
-
-  b.equations() = eqns;
-  std::stringstream init_id;
-  init_id << initial_node;
-  b.initial_state() = boolean_variable("X" + init_id.str());
-}
-#endif // MCRL2_USE_OLD_PARSE_PGSOLVER
 
 /// \brief Parse parity game in PGSolver format from filename, and store the
 ///        resulting BES in b.
