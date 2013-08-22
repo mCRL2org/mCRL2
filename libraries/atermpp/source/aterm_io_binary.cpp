@@ -268,7 +268,7 @@ static void writeBits(size_t val, const size_t nr_bits, ostream &os)
     val >>= 1;
     if (++bits_in_buffer == 8)
     {
-      os.put((int)bit_buffer);
+      os.put(bit_buffer);
       bits_in_buffer = 0;
       bit_buffer = '\0';
     }
@@ -285,8 +285,8 @@ static int flushBitsToWriter(ostream &os)
   {
     size_t left = 8-bits_in_buffer;
     bit_buffer <<= left;
-    os.put((int)bit_buffer);
-    result = ((int)bit_buffer == EOF) ? -1 : 0;
+    os.put(bit_buffer);
+    result = os.fail() ? -1 : 0;
     bits_in_buffer = 0;
     bit_buffer = '\0';
   }
@@ -312,7 +312,7 @@ bool readBits(size_t& val, const size_t nr_bits, istream &is)
     if (bits_in_buffer == 0)
     {
       int byte = is.get();
-      if (byte == EOF)
+      if (is.fail())
       {
         return false;
       }
