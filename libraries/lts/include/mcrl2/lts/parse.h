@@ -378,19 +378,31 @@ void parse_fsm_specification(std::istream& in, lts_fsm_t& result)
   parse_fsm_specification(text, result);
 }
 
+struct dot_attrs
+{
+  dot_attrs() : has_label(false) {}
+  bool has_label;
+  std::string label;
+};
+
 struct dot_actions: public core::default_parser_actions
 {
   dot_actions(const core::parser_table& table_, lts_dot_t& dot_)
     : core::default_parser_actions(table_),
       dot(dot_)
-  {}
+  {
+    default_node_label.push("");
+    default_edge_label.push("");
+  }
 
   lts_dot_t& dot;
   std::map<std::string, std::size_t> labelTable;
   std::map<std::string, std::size_t> stateTable;
   std::vector<std::string> state_sequence;
+  std::stack<std::string> default_node_label;
+  std::stack<std::string> default_edge_label;
 
-  std::size_t dot_state(const std::string& id, const std::string& label)
+  std::size_t dot_state(const std::string& id, const std::string* label=NULL)
   {
     using namespace mcrl2::lts::detail;
     std::size_t idx;
@@ -398,15 +410,22 @@ struct dot_actions: public core::default_parser_actions
     std::map<std::string, std::size_t>::const_iterator state_index = stateTable.find(id);
     if (state_index == stateTable.end())
     {
-      idx = dot.add_state(state_label_dot(id,label));
+      if (label)
+      {
+        idx = dot.add_state(state_label_dot(id,*label));
+      }
+      else
+      {
+        idx = dot.add_state(state_label_dot(id,default_node_label.top()));
+      }
       stateTable[id] = idx;
     }
     else
     {
       idx = state_index->second;
-      if (label != "")
+      if (label)
       {
-        dot.set_state_label(idx, state_label_dot(id,label));
+        dot.set_state_label(idx, state_label_dot(id,*label));
       }
     }
     return idx;
@@ -435,7 +454,7 @@ struct dot_actions: public core::default_parser_actions
     for (++i; i!=state_sequence.end(); ++i)
     {
       const std::string to_string = *i;
-      add_transition(dot_state(from_string, ""), label, dot_state(to_string, ""));
+      add_transition(dot_state(from_string), label, dot_state(to_string));
       from_string = to_string;
     }
   }
@@ -456,13 +475,22 @@ struct dot_actions: public core::default_parser_actions
     parse_stmt_list(node.child(4));
   }
 
+  void parse_subgraph(const core::parse_node& node)
+  {
+    default_edge_label.push(default_edge_label.top());
+    default_node_label.push(default_node_label.top());
+    parse_stmt_list(node.child(2));
+    default_edge_label.pop();
+    default_node_label.pop();
+  }
+
   void parse_stmt(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "node_stmt")) { parse_node_stmt(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "edge_stmt")) { parse_edge_stmt(node.child(0)); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "attr_stmt")) { } // ignore !?!?
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ID") && (symbol_name(node.child(1)) == "=") && (symbol_name(node.child(2)) == "ID")) { } // ignore !?!?
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "subgraph")) { } // ignore !?!?
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "attr_stmt")) { parse_attr_stmt(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "attribute")) { /* Ignore, we currently have no (sub)graph attributes. */ }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "subgraph")) { parse_subgraph(node.child(0)); }
     else
     {
       report_unexpected_node(node);
@@ -474,67 +502,77 @@ struct dot_actions: public core::default_parser_actions
     traverse(node, make_visitor(table, "stmt", boost::bind(&dot_actions::parse_stmt, this, _1)));
   }
 
-  std::string parse_attr_list(const core::parse_node& node)
+  void parse_attribute(const core::parse_node& node, dot_attrs& attrs)
   {
-    std::string s1;
-    if (node.child(1))
+    std::string name = parse_ID(node.child(0));
+    std::string value = parse_ID(node.child(2));
+    if (name == "label")
     {
-      s1 = parse_a_list(node.child(1).child(0));
+      attrs.has_label = true;
+      attrs.label = value;
     }
-    std::string s3;
-    if (node.child(3).child(0))
-    {
-      s3 = parse_attr_list(node.child(3).child(0));
-    }
-    return s1.empty() ? s3 : s1;
   }
 
-  // TODO: check if this is the correct way of handling an a_list
-  std::string parse_a_list(const core::parse_node& node)
+  void parse_attr_list(const core::parse_node& node, dot_attrs& attrs)
   {
-    std::string s0 = parse_ID(node.child(0));
-    std::string s1;
-    if (node.child(1).child(0))
+    if (node.child(1))
     {
-      s1 = parse_ID(node.child(1).child(0).child(1));
+      parse_a_list(node.child(1).child(0), attrs);
     }
-    std::string s3;
     if (node.child(3).child(0))
     {
-      s3 = parse_a_list(node.child(3).child(0));
+      parse_attr_list(node.child(3).child(0), attrs);
     }
-    if (s0 == "label")
+  }
+
+  void parse_a_list(const core::parse_node& node, dot_attrs& attrs)
+  {
+    parse_attribute(node.child(0), attrs);
+    if (node.child(2).child(0))
     {
-      return s1;
+      parse_a_list(node.child(2).child(0), attrs);
+    }
+  }
+
+  void parse_attr_stmt(const core::parse_node& node)
+  {
+    dot_attrs attrs;
+    parse_attr_list(node.child(1), attrs);
+    if (symbol_name(node.child(0).child(0)) == "node" && attrs.has_label)
+    {
+      default_node_label.top() = attrs.label;
     }
     else
+    if (symbol_name(node.child(0).child(0)) == "edge" && attrs.has_label)
     {
-      return s0;
+      default_edge_label.top() = attrs.label;
     }
   }
 
   // Collect all node_id's, and use the optional attr_list as label.
   void parse_edge_stmt(const core::parse_node& node)
   {
+    dot_attrs attrs;
     state_sequence.clear();
     traverse(node, make_visitor(table, "node_id", boost::bind(&dot_actions::parse_node_id, this, _1)));
-    std::string label;
     if (node.child(2).child(0))
     {
-      label = parse_attr_list(node.child(2).child(0));
+      parse_attr_list(node.child(2).child(0), attrs);
     }
+    std::string label = attrs.has_label ? attrs.label : default_edge_label.top();
     add_transitions(state_sequence, label);
   }
 
   void parse_node_stmt(const core::parse_node& node)
   {
+    dot_attrs attrs;
     parse_node_id(node.child(0));
-    std::string label;
     if (node.child(1).child(0))
     {
-      label = parse_attr_list(node.child(1).child(0));
+      parse_attr_list(node.child(1).child(0), attrs);
     }
-    dot_state(state_sequence.back(), label);
+    std::string label = attrs.has_label ? attrs.label : default_node_label.top();
+    dot_state(state_sequence.back(), &label);
   }
 
   void parse_node_id(const core::parse_node& node)

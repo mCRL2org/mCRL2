@@ -358,9 +358,7 @@ class mcrl2parse_tool : public input_tool
     bool aterm_format;
     bool warn;
 
-    bool dot_old;
-    bool dot_new;
-    std::string dot_file;
+    bool dot;
 
     void add_options(interface_description& desc)
     {
@@ -393,11 +391,7 @@ class mcrl2parse_tool : public input_tool
       desc.add_option("aterm-format", "compare the results in aterm format", 'a');
       desc.add_option("warn", "generate warnings", 'w');
 
-      desc.add_option("dot-old", "load a dot file using the existing parser");
-      desc.add_option("dot-new", "load a dot file using the new parser");
-      desc.add_option("dot-file",
-                      make_optional_argument("NAME", ""),
-                      "the location of the dot file");
+      desc.add_option("dot", "load a dot file using the old and the new parser and check the result");
     }
 
     void parse_options(const command_line_parser& parser)
@@ -412,9 +406,7 @@ class mcrl2parse_tool : public input_tool
       warn           = 0 < parser.options.count("warn");
       text = parser.option_argument("expression");
 
-      dot_old = parser.options.count("dot-old") > 0;
-      dot_new = parser.options.count("dot-new") > 0;
-      dot_file = parser.option_argument("dot-file");
+      dot = parser.options.count("dot") > 0;
     }
 
     std::string read_text(std::istream& from)
@@ -430,18 +422,92 @@ class mcrl2parse_tool : public input_tool
 
     bool load_dot_file()
     {
-      if ((dot_old || dot_new) && !dot_file.empty())
+      if (dot && !input_filename().empty())
       {
-        lts::lts_dot_t dot;
-        if (dot_new)
+        bool fail = false;
+        lts::lts_dot_t dot1;
+        lts::lts_dot_t dot2;
+        mCRL2log(log::info) << "Start parsing." << std::endl;
+        timer().start("old");
+        try
         {
-          dot.loadnew(dot_file);
-          dot.save(dot_file + ".new.dot");
+          dot1.load(input_filename());
+          mCRL2log(log::info) << "Parsed using old parser." << std::endl;
         }
-        else
+        catch(...)
         {
-          dot.load(dot_file);
-          dot.save(dot_file + ".old.dot");
+          fail = !fail;
+        }
+        timer().finish("old");
+        timer().start("new");
+        try
+        {
+          dot2.loadnew(input_filename());
+          mCRL2log(log::info) << "Parsed using new parser." << std::endl;
+        }
+        catch(...)
+        {
+          fail = !fail;
+        }
+        timer().finish("new");
+        if (fail)
+        {
+          throw mcrl2::runtime_error("One parser failed (but not both).");
+        }
+
+        if (log::mcrl2_logger().get_reporting_level() == log::verbose)
+        {
+          dot1.save(std::cout);
+          dot2.save(std::cout);
+        }
+
+        mCRL2log(log::info) << "Checking equality of parsed structures." << std::endl;
+        if (dot1.num_states() != dot2.num_states())
+        {
+          mCRL2log(log::verbose) << "old: " << dot1.num_states() << std::endl;
+          mCRL2log(log::verbose) << "new: " << dot2.num_states() << std::endl;
+          throw mcrl2::runtime_error("Not the same amount of states.");
+        }
+        if (dot1.num_state_labels() != dot2.num_state_labels())
+        {
+          mCRL2log(log::verbose) << "old: " << dot1.num_state_labels() << std::endl;
+          mCRL2log(log::verbose) << "new: " << dot2.num_state_labels() << std::endl;
+          throw mcrl2::runtime_error("Not the same amount of state labels.");
+        }
+        if (dot1.initial_state() != dot2.initial_state())
+        {
+          mCRL2log(log::verbose) << "old: " << dot1.initial_state() << std::endl;
+          mCRL2log(log::verbose) << "new: " << dot2.initial_state() << std::endl;
+          throw mcrl2::runtime_error("Not the same initial state.");
+        }
+        for (auto it1 = dot1.get_transitions().begin(), it2 = dot2.get_transitions().begin();
+             it1 != dot1.get_transitions().end(); ++it1, ++it2)
+        {
+          if (it1->from() != it2->from() || it1->to() != it2->to() || it1->label() != it2->label())
+          {
+            throw mcrl2::runtime_error("Transition lists not identical.");
+          }
+        }
+        for (size_t i = 0; i < dot1.num_action_labels(); ++i)
+        {
+          if (dot1.action_label(i) != dot2.action_label(i))
+          {
+            throw mcrl2::runtime_error("Action label lists not identical.");
+          }
+        }
+        for (size_t i = 0; i < dot1.num_state_labels(); ++i)
+        {
+          if (dot1.state_label(i) != dot2.state_label(i)) 
+          {
+            throw mcrl2::runtime_error("State label lists not identical.");
+          }
+        }
+        for (size_t i = 0; i < dot1.get_transitions().size(); ++i)
+        {
+          if (dot1.is_tau(i) != dot2.is_tau(i))
+          {
+            throw mcrl2::runtime_error("Tau lists not identical.");
+          }
         }
         return true;
       }
