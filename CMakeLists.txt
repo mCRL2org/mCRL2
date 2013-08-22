@@ -33,6 +33,8 @@ option(MCRL2_ENABLE_CADP_SUPPORT
        "Enable/disable support for CADP"               OFF)
 option(MCRL2_ENABLE_EXPERIMENTAL
        "Enable/disable creation of experimental tools" OFF)
+option(MCRL2_ENABLE_DEVELOPER
+       "Enable/disable creation of developer tools"    OFF)
 option(MCRL2_ENABLE_DEPRECATED
        "Enable/disable creation of deprecated tools"   OFF)
 option(MCRL2_INSTALL_HEADERS
@@ -210,7 +212,6 @@ add_subdirectory ( 3rd-party/dparser )
 ## mCRL2 libraries
 ##---------------------------------------------------
 
-# add_subdirectory ( libraries/aterm )
 add_subdirectory ( libraries/atermpp )
 add_subdirectory ( libraries/bes )
 add_subdirectory ( libraries/core )
@@ -227,10 +228,8 @@ add_subdirectory ( libraries/utilities )
 ## Command-line tools
 ##---------------------------------------------------
 
-add_subdirectory ( tools/alphabet )
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
-add_subdirectory ( tools/formulacheck )
 add_subdirectory ( tools/lps2lts )
 add_subdirectory ( tools/lps2pbes )
 add_subdirectory ( tools/lps2torx )
@@ -249,14 +248,12 @@ add_subdirectory ( tools/lpssuminst )
 add_subdirectory ( tools/lpsuntime )
 add_subdirectory ( tools/lpssim )
 add_subdirectory ( tools/lts2lps )
-# add_subdirectory ( tools/lts2mathematica )
 add_subdirectory ( tools/lts2pbes )
 add_subdirectory ( tools/ltsconvert )
 add_subdirectory ( tools/ltscompare )
 add_subdirectory ( tools/ltsinfo )
 add_subdirectory ( tools/mcrl22lps )
 add_subdirectory ( tools/mcrl2i )
-add_subdirectory ( tools/mcrl2parse )
 add_subdirectory ( tools/pbes2bool )
 add_subdirectory ( tools/pbes2bes )
 add_subdirectory ( tools/pbesconstelm )
@@ -268,6 +265,15 @@ add_subdirectory ( tools/pbesrewr )
 add_subdirectory ( tools/tracepp )
 add_subdirectory ( tools/txt2pbes )
 add_subdirectory ( tools/txt2lps )
+
+##---------------------------------------------------
+## Developer tools (not part of the distribution, but
+## used by mCRL2 developers).
+##---------------------------------------------------
+if(MCRL2_ENABLE_DEVELOPER)
+  add_subdirectory ( tools/alphabet )
+  add_subdirectory ( tools/mcrl2parse )
+endif()
 
 ##---------------------------------------------------
 ## Graphical tools
@@ -305,6 +311,7 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 ##---------------------------------------------------
 
 if(MCRL2_ENABLE_DEPRECATED)
+  add_subdirectory ( tools/formulacheck )
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
