@@ -1,4 +1,64 @@
 ===============================================================================
+Changes between toolset releases 201210.1 and 201309.0:
+===============================================================================
+
+60 tickets were fixed for this release. We summarise the most important changes
+below.
+
+It is important to note that LPS and PBES files generated using earlier
+versions of mCRL2 cannot be loaded in this version.
+
+Libraries:
+  - ATerm library was cleaned up and ported to C++, the directory
+    3rd-party/aterm has been removed, and relevant code has been merged
+    into libraries/atermpp, and the library is compiled as mcrl2_atermpp.
+  - WARNING: The file aterm_init.h and the MCRL2_ATERMPP_INIT macro are
+    still available, but will be removed in the next release (r11743).
+  - Code for modal mu-calculus formulae was moved to a separate library,
+    which is compiled as mcrl2_modal_formula.
+  - Type checking was lifted to a higher level of abstraction, and now
+    operates on classes representing conceptual objects, instead of ATerms.
+  - Specified and reimplemented the alphabet reductions, leading to
+    improved performance.
+  - Added absorption rules for set and bag union and intersection (#1089).
+  - Implemented capture avoiding substitutions, such that variables do not
+    need to be renamed a-priori.
+  - Improved one-point rule elimination in rewriters.
+  - Extend parser of PGSolver format to accept games produced by MLSolver (r11637).
+  - Typechecker now rejects redeclaration of built-in functions (r11689).
+  - Fix normalisation of modal mu-calculus formulae (r11696).
+  - Fix compiler warnings in the included DParser library.
+  - The jittyc compiler now checks that the version of the header files
+    with which it is compiled matches the version of the tool that is
+    loading the rewriter (#951).
+  - For compiling the rewriter, we do not depend on the DParser headers
+    anymore (#1176).
+
+Build:
+  - Require C++11 support of the C++ compiler. We tested using
+    GCC 4.4, 4.5, 4.6, 4.7 and Clang 3.2 on Linux, MSVC 2010 on Windows,
+    and Clang 3.2 on Mac OS X.
+
+
+Tool changes:
+  - Fix handling of command line arguments with spaces for all tools (r11388).
+  - Fix opening and creation of files and folders in mcrl2-gui on OSX (#1123).
+  - Properly handle tools with multiple input file-types in mcrl2-gui (#1124).
+  - Fix name-clash resolution in lpsbisim2pbes (#1144).
+  - Use optimisations in lps2pbes, which leads to smaller right hand sides
+    in PBESes (#1155).
+
+New experimental tools:
+  - complps2pbes
+  - pbesstategraph
+
+The following tools have been removed:
+  - tbf2lps
+
+The following tool has become deprecated as of this release:
+  - formulacheck
+
+===============================================================================
 Changes between toolset releases 201210.0 and 201210.1:
 ===============================================================================
 
