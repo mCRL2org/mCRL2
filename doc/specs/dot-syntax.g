@@ -54,7 +54,7 @@ attr_stmt	:	(graph | node | edge) attr_list ;
 
 attr_list :	'[' a_list? ']' attr_list? ;
 
-a_list : ID ('=' ID)? ','? a_list? ;
+a_list : ID '=' ID ','? a_list? ;
 
 edge_stmt	:	(node_id | subgraph) edgeRHS attr_list? ;
 
