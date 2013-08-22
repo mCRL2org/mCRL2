@@ -25,6 +25,4 @@ This page lists all file formats supported by the mCRL2 toolset.
   trace        .trc        binary   trace for simulation
   DOT          .dot        textual  `DOT file format <http://www.graphviz.org/doc/info/lang.html>`_ (subgraphs as nodes are not supported)
   μCRL         .mcrl       textual  `μCRL specification <http://homepages.cwi.nl/~mcrl/>`_
-  TBF          .tbf        binary   `μCRL linear process equation <http://homepages.cwi.nl/~mcrl/manpages/rn01re01.html#lpe>`_
-  Chi          .chi        textual  Chi specification in the `Chi file format <http://se.wtb.tue.nl/sewiki/chi/>`_
   ===========  =========   =======  ===========

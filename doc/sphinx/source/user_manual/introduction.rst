@@ -210,8 +210,22 @@ Statistical information can be obtained using :ref:`tool-pbesinfo` and the PBES 
 be simplified using :ref:`tool-pbesrewr`. Furthermore some tools for simplifying the
 PBES are available, such as :ref:`tool-pbesparelm` and :ref:`tool-pbesconstelm`.
 
-Import and export
-^^^^^^^^^^^^^^^^^
-The mCRL2 toolset also provides tools for converting system specifications in
-other languages to mCRL2. A μCRL
-linear process can be converted to an mCRL2 LPS using :ref:`tool-tbf2lps`. An interface with the TorX tool is provided by :ref:`tool-lps2torx`.
+Integration with other tools
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The mCRL2 toolset also integrates with other tool sets.
+An interface with the TorX tool is provided by :ref:`tool-lps2torx`.
+Furthermore, mCRL2 can be used as a language front-end for the
+`LTSmin toolset <http://fmt.cs.utwente.nl/tools/ltsmin/>`_. It can
+also be built against `CADP <http://cadp.inria.fr/>`_ to enable support
+for the BCG file format for labelled transition systems. Furthermore,
+a number of textual file formats are available, that facilitate easy
+integration with other tools. Examples are the :ref:`language-aut-lts` for labelled
+transition systems, that is, e.g., supported by `μCRL <http://homepages.cwi.nl/~mcrl/>`_
+and `CADP <http://cadp.inria.fr/>`_. The CWI
+format for Boolean equation systems, and finally, the GM file format,
+which is supported by the `PGSolver <https://github.com/oliverfriedmann/pgsolver>`_
+tools.
+
+Finally, some tools may profit from the use of an external SMT solver.
+For this purpose, mCRL2 can use the `CVC3 <http://www.cs.nyu.edu/acsys/cvc3/>`_
+automatic theorem prover for SMT problems.
