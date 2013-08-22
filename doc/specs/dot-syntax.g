@@ -31,7 +31,16 @@ edge: "[eE][dD][gG][eE]" ;
 
 // The official grammar is ambiguous, so we use an alternative formulation.
 // stmt_list : (stmt ';'? stmt_list?)? ;
-stmt_list : (stmt ';'?)* ;
+//
+// The performance of the rule below is poor, so we use yet another formulation.
+// stmt_list : (stmt ';'?)* ;
+
+stmt_list
+  : stmt_list2?;
+
+stmt_list2
+  : (stmt ';'?)
+  | stmt_list2 (stmt ';'?);
 
 stmt
   : node_stmt
