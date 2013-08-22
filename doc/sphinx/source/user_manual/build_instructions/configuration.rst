@@ -1,34 +1,63 @@
+.. _build-configuration:
+
 Configuration
 =============
 
-To configure CMake to build in ``<mcrl2>/build``, make sure this directory 
+To configure CMake to build in ``<mcrl2>/build``, and assuming that
+the sources are in ``<mcrl2>/src``, make sure ``<mcrl2>/build``
 exists before continuing with the following steps. There are three ways to
 configure CMake:
 
 *Graphically*
   A graphical user interface is available on all platforms, either as
   ``CMakeSetup.exe`` in Windows (should be in the start menu), or as 
-  ``cmake-gui`` in Linux (you may have to install it separately, it is currently
-  in the ``cmake-qt-gui`` package in PPA).
+  ``cmake-gui`` in Linux (you may have to install it separately, it is, e.g., currently
+  in the ``cmake-qt-gui`` package in the PPA for Ubuntu installations).
+  Use of this user interface is mostly self-explanatory.
 
 *CCMake*
   A user-friendly command-line interface is provided by the ``ccmake`` 
-  executable.
+  executable. Example usage is as follows (from the directory
+  ``<mcrl2>/build``)::
+  
+    ccmake <mcrl2>/src
+    
+  From the interface you are presented with, you can choose the options
+  explained below.  
 
 *Command-line*
   CMake can also be run directly from the command line. This is recommended only
   for experienced users who need to configure the build from a script. To set
   a configuration variable, use the ``-D<FLAG=option>`` command-line option.
+  
+  Example usage is as follows (from the directory
+  ``<mcrl2>/build``)::
+  
+    cmake <mcrl2>/src -DFLAG=option
+    
+  To install mCRL2 to <installdir>, with all default settings, you can
+  issue the command::
+  
+    cmake <mcrl2>/src -DCMAKE_INSTALL_PREFIX=<installdir>
 
 All three methods allow you to change the value of CMake configuration 
 variables. Below, we describe the meaning of these variables. Note that in the
 graphical user interfaces, some advanced settings are initially hidden.
 
+.. note::
+
+   For a typical installation of mCRL2, the default settings are
+   acceptable for all the options listed below. The only common change
+   is in the path to which mCRL2 must be installed, which can be set
+   using ``CMAKE_INSTALL_PREFIX``. If you are not interested in the
+   meaning of detailed configuration settings, you can safely skip to
+   :ref:`build-compilation`.
+
 .. note:: 
 
    Values of the flags are cached and are case insensitive. This implies that
    when changing a single value, all other flags remain the same. 
-
+   
 ``BOOST_ROOT``
   *Default*:: Automatically detected
 
@@ -138,16 +167,6 @@ graphical user interfaces, some advanced settings are initially hidden.
   ``OFF`` Disable generation of manual pages.
   ======= ======================================================================
 
-``MCRL2_MONO_LIB``
-  *Default*: ``OFF``
-
-  ======= ======================================================================
-  ``ON``  Combine all libraries into one monolithic library. This excludes third
-          party libraries.
-  ------- ----------------------------------------------------------------------
-  ``OFF`` Compile libraries into separate binaries.
-  ======= ======================================================================
-
 ``MCRL2_ENABLE_GUI_TOOLS``
   *Default*: ``ON``
 
@@ -176,11 +195,6 @@ graphical user interfaces, some advanced settings are initially hidden.
   This variable specifies the location where Ctags can be found. Ctags is a 
   program that generates an index (or tag) file of names found in source and
   header files of various programming languages.
-
-``DART_TESTING_TIMEOUT``
-  *Default*: ``1500``
-
-  This variable controls the timeout for running tests.
 
 ``SVNVERSION``
   *Default*: ``/PATH/WITH/FILE/svnversion``

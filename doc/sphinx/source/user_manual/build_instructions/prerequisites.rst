@@ -1,3 +1,5 @@
+.. _build-prerequisites:
+
 Prerequisites
 =============
 
@@ -17,6 +19,9 @@ To build the documentation, the following is needed:
 
 .. |cmake| replace:: *CMake 2.8*
 .. _cmake: http://www.cmake.org/cmake/resources/software.html
+
+.. |cmakeosx| replace:: *CMake 2.8.7*
+.. _cmakeosx: http://www.cmake.org/cmake/resources/software.html
 
 .. |doxygen| replace:: *Doxygen 1.7.4*
 .. _doxygen: http://www.doxygen.org
@@ -70,17 +75,18 @@ setup:
      +-----------------+-----------------+
 
 
-   - |cmake|_ or higher.
+   - |cmakeosx|_ or higher.
      
 .. admonition:: Linux
    :class: platform-specific linux
 
-   - *g++* version 4.0.0 or higher.
+   - *g++* version 4.4.0 or higher.
    - *make* version 3.80 or higher.
    - |cmake|_ or higher.
 
-   We recommend installing these by installing the ``build-essential`` PPA
-   package (if available for your distribution).
+   We recommend installing these by using the package manager of your
+   distribution. On, e.g., Ubuntu, these can be installed by installing
+   the ``build-essential`` PPA package.
 
 Boost
 -----
@@ -89,29 +95,22 @@ Boost
 .. _boost: http://www.boost.org
 
 The mCRL2 sources use libraries from the |boost|_ collection (or a more recent
-version). The following libraries are required:
-
-- *filesystem*
-- *serialization*
-- *signals*
-- *regex*
-- *system*
+version). The build only depends on the Boost header files, and does not
+link to any boost libraries.
 
 .. admonition:: Windows
    :class: platform-specific win
 
    .. warning:: 
  
-      Only a 32-bit version is freely available at the time of writing. For
+      Only a 32-bit binary version is freely available at the time of writing. For
       64-bit versions, :doc:`compile the Boost libraries yourself <boost>`.
 
-   To install *Boost*, follow the steps below.
+   To install a binary version of *Boost*, follow the steps below.
 
    - Download *BoostPro* from http://www.boostpro.com/download/
    - Install file after downloading.
-   - Install all static runtime libraries (Debug/Release, Multi/Single thread)
-     for the compiler you are using.
-   - Select the required *Boost* packages.   
+   - Install all header files.
 
 .. _osx-boost:
 
@@ -142,17 +141,18 @@ version). The following libraries are required:
 .. admonition:: Linux
    :class: platform-specific linux
 
-   The easiest way to install the required libraries is to use the package 
+   The easiest way to install Boost using the package 
    manager in your distribution. For instance, the libraries can be installed
-   by installing the ``libboost-*-dev`` PPA packages.
+   by installing the ``libboost-*-dev`` PPA packages when you are using
+   Ubuntu.
 
-   You can also :doc:`compile the required Boost libraries yourself <boost>`.
+   You can also :doc:`compile the Boost libraries yourself <boost>`.
 
 QT
 --
 
 .. |qt| replace:: *QT 4*
-.. _qt: http://qt.nokia.com
+.. _qt: http://qt-project.org
 
 The mCRL2 toolset requires |qt|_ for compilation of the graphical tools 
 (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
@@ -166,13 +166,13 @@ The mCRL2 toolset requires |qt|_ for compilation of the graphical tools
    
    For a 32-bit version, binaries are available:
    
-     - Download the Qt libraries for Windows for your compiler version from http://qt.nokia.com/downloads.
+     - Download the Qt libraries for Windows for your compiler version from http://qt-project.org/downloads.
        For the Windows 7.1 SDK you need to select the Qt libraries for Windows (VS 2010).
      - Follow the installation instructions.
      
    For a 64-bit version, perform the following steps (taken from http://qt-project.org/doc/qt-4.8/install-win.html):
    
-     - Download the Qt libraries source package (.zip) from http://qt.nokia.com/downloads.
+     - Download the Qt libraries source package (.zip) from http://qt-project.org//downloads.
      - Extract the files, e.g. to ``C:\Qt\4.8.2``
      - Add ``C:\Qt\4.8.2\bin`` to your ``PATH`` environment variable.
      - Open a *Visual Studio* command prompt, and type the following (to support
@@ -197,13 +197,32 @@ The mCRL2 toolset requires |qt|_ for compilation of the graphical tools
    your ``PATH``, CMake should be able to automatically find your 
    installation.
    
+.. admonition:: Mac OS X
+   :class: platform-specific mac
+
+   QT can be installed using MacPorts by doing the following:
+
+   - First go to http://www.macports.org/.
+   - In the left menu bar select "Available Downloads" and download the 
+     appropriate version.
+   - Install the downloaded image.
+   - After installing open a terminal and execute the following to test and 
+     update MacPort::
+
+       sudo port selfupdate
+  
+     Note that ``port`` is usually installed in ``/opt/local/bin``. 
+   - To install *QT*, execute::
+
+       sudo port install qt4-mac 
+   
 .. admonition:: Linux
    :class: platform-specific linux
    
    Binary development versions are available in the package manager in most 
-   distributions (for instance the ``libqt4-dev`` PPA package).
+   distributions (for instance the ``libqt4-dev`` PPA package in Ubuntu).
 
-   On linux it is also required to install OpenGL related development packages.
+   On Linux it is also required to install OpenGL related development packages.
    The exact package to be installed depends on your distribution. For Ubuntu
    these are e.g. ``libgl1-mesa-dev`` and ``libglu1-mesa-dev``.
 
