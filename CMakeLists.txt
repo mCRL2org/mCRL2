@@ -305,7 +305,6 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 ##---------------------------------------------------
 
 if(MCRL2_ENABLE_DEPRECATED)
-  add_subdirectory ( tools/tbf2lps )
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
