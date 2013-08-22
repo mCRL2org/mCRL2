@@ -115,7 +115,7 @@ ctest_command = ['ctest', \
                  '--output-on-failure', \
                  '--no-compress-output', \
                  '-j{0}'.format(buildthreads)]
-ctest_result = call('CTest', ctest_command, env=newenv)
+ctest_result = call('CTest', ctest_command)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))
 
