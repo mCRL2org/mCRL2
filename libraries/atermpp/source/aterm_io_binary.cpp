@@ -626,7 +626,7 @@ static void add_term(sym_entry* entry, const aterm &t)
  * Collect all terms in the appropriate symbol table.
  */
 
-const aterm& subterm(const aterm& t, size_t i)
+static const aterm& subterm(const aterm& t, size_t i)
 {
   if (t.type_is_appl())
   {

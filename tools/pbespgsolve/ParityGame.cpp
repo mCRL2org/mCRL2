@@ -177,7 +177,7 @@ ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
     // Remap priorities and players of all vertices
     for (verti v = 0; v < graph_.V(); ++v)
     {
-        assert(prio_map[vertex_[v].priority] >= 0);
+        assert(prio_map[vertex_[v].priority] != std::numeric_limits<size_t>::max());
         vertex_[v].priority = prio_map[vertex_[v].priority];
         if (swap_players) vertex_[v].player = Player(1 - vertex_[v].player);
     }

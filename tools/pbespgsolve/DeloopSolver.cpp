@@ -38,7 +38,7 @@ ParityGame::Strategy DeloopSolver::solve()
         std::deque<verti> winning;
         for (verti v = 0; v < V; ++v)
         {
-            if ( game_.priority(v)%2 == player &&
+            if ( static_cast<int>(game_.priority(v)%2) == player &&
                  game_.graph().outdegree(v) == 1 &&
                  *game_.graph().succ_begin(v) == v )
             {

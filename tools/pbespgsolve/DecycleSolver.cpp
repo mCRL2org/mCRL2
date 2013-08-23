@@ -99,7 +99,7 @@ int CycleFinder::operator()(const verti *scc, size_t scc_size)
                 verti w = scc[j];
                 if (subgame_.graph().has_succ(v, w))
                 {
-                    if (subgame_.player(v) == prio_%2)
+                    if (subgame_.player(v) == static_cast<int>(prio_%2))
                     {
                         substrat_[v] = w;
                     }
@@ -149,7 +149,7 @@ ParityGame::Strategy DecycleSolver::solve()
         {
             if ( solved_set.count(v) == 0 &&
                  game_.priority(v) >= prio &&
-                 ( game_.player(v) == prio%2 ||
+                 ( game_.player(v) == static_cast<int>(prio%2) ||
                    game_.graph().outdegree(v) == 1 ) )
             {
                 mapping.push_back(v);

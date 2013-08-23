@@ -67,7 +67,7 @@ SmallProgressMeasures::SmallProgressMeasures(
     verti cnt = 0;
     for (verti v = 0; v < game_.graph().V(); ++v)
     {
-        if ( game_.priority(v)%2 == 1 - p_ &&
+        if ( static_cast<int>(game_.priority(v)%2) == 1 - p_ &&
              game_.graph().outdegree(v) == 1 &&
              *game_.graph().succ_begin(v) == v )
         {
@@ -170,7 +170,7 @@ bool SmallProgressMeasures::lift(verti v)
 
     /* Check if lifting is required */
     int d = vector_cmp(v, w, len(v));
-    int carry = game_.priority(v)%2 != p_; // really a Boolean, but hey...
+    int carry = static_cast<int>(game_.priority(v)%2) != p_; // really a Boolean, but hey...
     if (d >= carry) return false;
 
     /* Assign successor */
@@ -208,7 +208,7 @@ void SmallProgressMeasures::debug_print(bool verify)
     mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << "M =";
     for (size_t p = 0; p < game_.d(); ++p)
     {
-      mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << " " << ((p%2 == p_) ? 0 : M_[p/2]);
+      mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << " " << ((static_cast<int>(p%2) == p_) ? 0 : M_[p/2]);
     }
     mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << std::endl;
 
@@ -225,7 +225,7 @@ void SmallProgressMeasures::debug_print(bool verify)
         {
             for (size_t p = 0; p < game_.d(); ++p)
             {
-              mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << " " << ((p%2 == p_) ? 0 : vec(v)[p/2]);
+              mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << " " << ((static_cast<int>(p%2) == p_) ? 0 : vec(v)[p/2]);
             }
         }
         mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << std::endl;
@@ -248,7 +248,7 @@ bool SmallProgressMeasures::verify_solution()
         {
             for (size_t p = 0; p < game_.d(); ++p)
             {
-                if (p%2 == p_) continue; /* this component is not stored */
+                if (static_cast<int>(p%2) == p_) continue; /* this component is not stored */
 
                 /* Ensure vector values satisfy bounds */
                 if (vec(v)[p/2] >= M_[p/2])
@@ -272,7 +272,7 @@ bool SmallProgressMeasures::verify_solution()
               it != graph.succ_end(v); ++it )
         {
             bool ok = is_top(v) ||
-                vector_cmp(v, *it, len(v)) >= static_cast<int>(game_.priority(v)%2 != p_);
+                vector_cmp(v, *it, len(v)) >= static_cast<int>(static_cast<int>(game_.priority(v)%2) != p_);
             one_ok = one_ok || ok;
             all_ok = all_ok && ok;
         }

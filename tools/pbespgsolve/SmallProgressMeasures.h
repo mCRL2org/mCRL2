@@ -207,7 +207,7 @@ private:
 
 protected:
     const ParityGame    &game_;     //!< the game being solved
-    const int           p_;         //!< the player to solve for
+    int                 p_;         //!< the player to solve for
     LiftingStrategy     *ls_;       //!< lifting strategy used
     LiftingStatistics   *stats_;    //!< statistics object to record lifts
     const verti         *vmap_;     //!< active vertex map (if any)

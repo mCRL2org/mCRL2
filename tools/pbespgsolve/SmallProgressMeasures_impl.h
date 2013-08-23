@@ -89,7 +89,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                       it != graph.succ_end(v); ++it )
                 {
                     if ( !marked[*it] && vector_cmp(v, *it, len(v))
-                            >= static_cast<int>(game_.priority(v)%2 != p_) )
+                            >= static_cast<int>(static_cast<int>(game_.priority(v)%2) != p_) )
                     {
                         mark = false;
                         break;
@@ -107,7 +107,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                 {
                     const verti w = *it;
                     if ( marked[*it] || vector_cmp(v, w, len(v))
-                            < static_cast<int>(game_.priority(v)%2 != p_) )
+                            < static_cast<int>(static_cast<int>(game_.priority(v)%2) != p_) )
                     {
                         marked[v] = true;
                         break;
@@ -157,5 +157,5 @@ void SmallProgressMeasures::set_top(verti v)
     assert(!is_top(v));
     vec(v)[0] = NO_VERTEX;
     size_t prio = game_.priority(v);
-    if (prio%2 != p_) decr_M(prio/2);
+    if (static_cast<int>(prio%2) != p_) decr_M(prio/2);
 }

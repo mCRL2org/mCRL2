@@ -92,7 +92,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
         StaticGraph::edge_list edges;
         for (verti v = 0; v < graph_.V(); ++v)
         {
-            if (priority(v) >= prio && (int)winner(s, v) == (1 - prio%2))
+            if (priority(v) >= prio && (winner(s, v) == 1 - static_cast<int>(prio%2)))
             {
                 if (s[v] != NO_VERTEX)
                 {

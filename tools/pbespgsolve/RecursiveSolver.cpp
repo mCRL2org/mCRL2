@@ -133,7 +133,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
     {
         if (game.priority(v) < prio)
         {
-            if (game.player(v) == game.priority(v)%2)
+            if (game.player(v) == static_cast<int>(game.priority(v)%2))
             {
                 strat[v] = *graph.succ_begin(v);
             }
