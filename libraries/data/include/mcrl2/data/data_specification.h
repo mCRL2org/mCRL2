@@ -366,6 +366,8 @@ class data_specification
       m_normalised_data_is_up_to_date(false)
     {
       m_non_typed_checked_data_spec=t;
+      add_context_sort(sort_bool::bool_());
+      add_context_sort(sort_pos::pos());
     }
 
     /// \brief Indicates that the data specification is type checked.
