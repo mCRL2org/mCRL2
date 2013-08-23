@@ -9,6 +9,7 @@
 # This script generates toolset documentation
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-nightly.inc.template" "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-nightly.inc" @ONLY )
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-release.inc.template" "${CMAKE_CURRENT_SOURCE_DIR}/source/user_manual/downloads-release.inc" @ONLY )
 
 set( MCRL2_GENERATE_DOC_RELEASE_FLAG "" )
 if(MCRL2_PACKAGE_RELEASE)
