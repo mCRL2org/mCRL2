@@ -75,7 +75,9 @@ void Solver::solve(QString specification, QString dataExpression)
         throw mcrl2::runtime_error("Expression is not of sort Bool.");
       }
 
+      m_data_spec.add_context_sort(mcrl2::data::sort_real::real_());
       mcrl2::data::rewriter rewr(m_data_spec,m_rewrite_strategy);
+
       term=rewr(term);
 
       typedef mcrl2::data::classic_enumerator< mcrl2::data::rewriter > enumerator_type;
