@@ -20,6 +20,7 @@
 #  HAS_CXX11_SIZEOF_MEMBER      - sizeof() non-static members
 #  HAS_CXX11_STATIC_ASSERT      - static_assert()
 #  HAS_CXX11_VARIADIC_TEMPLATES - variadic templates
+#  HAS_CXX11_UNIQUE_PTR         - std::unique_ptr
 
 #=============================================================================
 # Copyright 2011,2012 Rolf Eike Beer <eike@sf-mail.de>
@@ -122,6 +123,7 @@ cxx11_check_feature("rvalue-references" HAS_CXX11_RVALUE_REFERENCES False)
 cxx11_check_feature("sizeof_member" HAS_CXX11_SIZEOF_MEMBER False)
 cxx11_check_feature("static_assert" HAS_CXX11_STATIC_ASSERT False)
 cxx11_check_feature("variadic_templates" HAS_CXX11_VARIADIC_TEMPLATES False)
+cxx11_check_feature("unique_ptr" HAS_CXX11_UNIQUE_PTR False)
 
 if(HAS_CXX11_NULLPTR)
   add_definitions(-DMCRL2_HAVE_NULLPTR)
