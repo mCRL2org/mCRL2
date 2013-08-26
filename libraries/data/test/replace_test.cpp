@@ -296,6 +296,22 @@ void test_replace_free_variables()
   BOOST_CHECK(vb == vc);
 }
 
+void test_ticket_1209()
+{
+  std::string text = "n whr n = m, m = 3 end whr m = 255 end";
+  std::string expected_result = "n whr n = m2, m3 = 3 end whr m2 = 255 end";
+  data::data_expression x = data::parse_data_expression(text);
+  data::mutable_map_substitution<> sigma;
+  data::variable m("m", data::sort_pos::pos());
+  data::variable m1("m1", data::sort_pos::pos());
+  sigma[m] = m1;
+  std::set<data::variable> v;
+  v.insert(m1);
+  data::data_expression x1 = data::replace_variables_capture_avoiding(x, sigma, v);
+  std::string result = data::pp(x1);
+  BOOST_CHECK(result == expected_result);
+}
+
 int test_main(int argc, char** argv)
 {
   test_assignment_list();
@@ -304,6 +320,7 @@ int test_main(int argc, char** argv)
   test_variables();
   test_replace_variables_capture_avoiding();
   test_replace_free_variables();
+  test_ticket_1209();
 
   return 0;
 }

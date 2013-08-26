@@ -327,14 +327,18 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
     }
     std::vector<data::variable> v = update_sigma.push(tmp);
 
+    // The updated substitution should be applied to the body.
+    const data::data_expression new_body = (*this)(x.body());
+    update_sigma.pop(v);
+
+    // The original substitution should be applied to the right hand sides of the assignments.
     std::vector<data::assignment> a;
     std::vector<data::variable>::const_iterator j = v.begin();
     for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i, ++j)
     {
       a.push_back(data::assignment(*j, (*this)(i->rhs())));
     }
-    data_expression result = data::where_clause((*this)(x.body()), assignment_list(a.begin(), a.end()));
-    update_sigma.pop(v);
+    data_expression result = data::where_clause(new_body, assignment_list(a.begin(), a.end()));
     return result;
   }
 
