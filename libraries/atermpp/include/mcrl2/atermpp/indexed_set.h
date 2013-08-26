@@ -83,6 +83,7 @@ class indexed_set
         {
           throw mcrl2::runtime_error("failed to add element to indexed set");
         }
+        result = p.first;
       }
       return result;
     }
