@@ -75,7 +75,7 @@ class Solver : public QObject
   private:
     mcrl2::data::rewrite_strategy m_rewrite_strategy;   ///< The currently used rewriter
     mcrl2::data::data_specification m_data_spec;        ///< The specification that was used last time
-    std::set <mcrl2::data::variable > m_vars;           ///< The variables used in the last rewrite process
+    std::set <mcrl2::data::variable > m_global_vars;    ///< The global variables of the last parsed specification
     bool m_parsed;                                      ///< Boolean indicating if the last specification was successfully parsed (used to cache the parsing step)
     QString m_parseError;                               ///< The last parse error message
     QString m_specification;                            ///< String containing the last specification that was parsed

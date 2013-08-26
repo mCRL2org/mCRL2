@@ -37,7 +37,7 @@ void Solver::solve(QString specification, QString dataExpression)
     m_specification = specification;
     try
     {
-      mcrl2xi_qt::parseMcrl2Specification(m_specification.toStdString(), m_data_spec, m_vars);
+      mcrl2xi_qt::parseMcrl2Specification(m_specification.toStdString(), m_data_spec, m_global_vars);
       m_parsed = true;
     }
     catch (mcrl2::runtime_error e)
@@ -57,9 +57,10 @@ void Solver::solve(QString specification, QString dataExpression)
       int dotpos =  stdDataExpression.find('.');
       if (dotpos  == -1)
       {
-        throw mcrl2::runtime_error("Expected a '.' in the input.");
+        throw mcrl2::runtime_error("Expected input of the shape 'x1:Type1,...,xn:Typen.b' where b is a boolean expression.");
       }
 
+      std::set <mcrl2::data::variable > m_vars=m_global_vars;
       parse_variables(std::string(stdDataExpression.substr(0, dotpos)
                                   ) + ";",std::inserter(m_vars,m_vars.begin()),m_data_spec);
 
@@ -75,7 +76,9 @@ void Solver::solve(QString specification, QString dataExpression)
         throw mcrl2::runtime_error("Expression is not of sort Bool.");
       }
 
-      m_data_spec.add_context_sort(mcrl2::data::sort_real::real_());
+      std::set<mcrl2::data::sort_expression> all_sorts=find_sort_expressions(term);
+      m_data_spec.add_context_sorts(all_sorts);
+
       mcrl2::data::rewriter rewr(m_data_spec,m_rewrite_strategy);
 
       term=rewr(term);

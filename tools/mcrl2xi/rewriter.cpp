@@ -58,7 +58,8 @@ void Rewriter::rewrite(QString specification, QString dataExpression)
 
       mCRL2log(info) << "Rewriting data expression: \"" << stdDataExpression << "\"" << std::endl;
 
-      m_data_spec.add_context_sort(mcrl2::data::sort_real::real_());
+      std::set<mcrl2::data::sort_expression> all_sorts=find_sort_expressions(term);
+      m_data_spec.add_context_sorts(all_sorts);
       mcrl2::data::rewriter rewr(m_data_spec, m_rewrite_strategy);
       mcrl2::data::mutable_map_substitution < std::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
 

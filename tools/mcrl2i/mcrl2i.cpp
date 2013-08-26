@@ -112,6 +112,24 @@ static bool match_and_remove(string& s, const string& match)
   return false;
 }
 
+static bool add_context_sorts(const std::set<sort_expression> &new_sorts,
+                                    std::set<sort_expression> &context_sorts,
+                                    data_specification &spec)
+{
+  // Check whether new rewrite rules are required, and if so, reinitialise the rewriter with them.
+  bool reinitialise_rewriter=false;
+  for(auto i=new_sorts.begin(); i!=new_sorts.end(); ++i)
+  {
+     if (context_sorts.insert(*i).second)
+     {
+       // The sort was not yet present in the context sorts
+       reinitialise_rewriter=true;
+       spec.add_context_sort(*i);
+     }
+  }
+  return reinitialise_rewriter;
+}
+
 static const std::string help_text=
   "The following commands are available to manipulate mcrl2 data expressions. "
   "Essentially, there are commands to rewrite and type expressions, as well as generating "
@@ -151,6 +169,9 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     bool run()
     {
       std::set < variable > context_variables;
+      std::set < sort_expression > context_sorts;
+      bool need_to_rebuild_rewriter=true;
+
       data_specification spec;
       if (!input_filename().empty())
       {
@@ -182,13 +203,10 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         }
       }
 
-      // Import all standard data types should be available even if they are
-      // not port of the loaded lps or pbes.
-      spec.add_context_sort(sort_real::real_());
 
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
-      rewriter rewr(spec,m_rewrite_strategy);
+      rewriter rewr; 
 
       mutable_map_substitution < std::map < variable, data_expression > > assignments;
 
@@ -230,7 +248,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             if (new_strategy!=m_rewrite_strategy)
             {
               m_rewrite_strategy=new_strategy;
-              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=true;
             }
           }
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
@@ -245,6 +263,13 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
           {
             data_expression term = parse_term(s,spec,context_variables);
+            std::set<sort_expression> all_sorts=find_sort_expressions(term);
+            need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+            if (need_to_rebuild_rewriter)
+            {
+              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=false;
+            }
             cout << data::pp(rewr(term,assignments)) << "\n";
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
@@ -256,10 +281,19 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
               throw mcrl2::runtime_error("Expect a `.' in the input.");
             }
             parse_variables(s.substr(0,dotpos)+";",std::inserter(vars,vars.begin()),spec);
+            std::set<sort_expression> all_sorts=find_sort_expressions(vars);
             data_expression term = parse_term(s.substr(dotpos+1),spec,context_variables,vars);
             if (term.sort()!=sort_bool::bool_())
             {
               throw mcrl2::runtime_error("expression is not of sort Bool.");
+            }
+            find_sort_expressions(term,std::inserter(all_sorts,all_sorts.end()));
+
+            need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+            if (need_to_rebuild_rewriter)
+            {
+              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=false;
             }
 
             term=rewr(term);
@@ -298,6 +332,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             s = s.substr(assign_pos+1);
             data_expression term = parse_term(s,spec,context_variables);
             variable var(varname,term.sort());
+
+            std::set<sort_expression> all_sorts=find_sort_expressions(term);
+            need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+            if (need_to_rebuild_rewriter)
+            {
+              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=false;
+            }
             term = rewr(term,assignments);
             cout << data::pp(term) << "\n";
             assignments[var]=term;
