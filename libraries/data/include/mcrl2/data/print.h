@@ -965,7 +965,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.lhs());
-    derived().print(":=");
+    derived().print("=");
     derived()(x.rhs());
     derived().leave(x);
   }
