@@ -4,20 +4,26 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdexcept>
+#include <iomanip>
 
 #ifdef WIN32
 #include <fcntl.h>
 #include <io.h>
 #endif
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/detail/aterm_io_implementation.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace atermpp
 {
+
+using detail::readInt;
+using detail::writeInt;
 
 /**
  * Calculate the number of unique symbols.
@@ -26,8 +32,8 @@ namespace atermpp
 using namespace std;
 
 static size_t calcUniqueAFuns(
-                  const aterm &t, 
-                  std::set<aterm> &visited, 
+                  const aterm &t,
+                  std::set<aterm> &visited,
                   std::vector<size_t> &count)
 {
   size_t nr_unique = 0;
@@ -66,10 +72,10 @@ static size_t calcUniqueAFuns(
       }
     }
   }
-  else 
+  else
   {
     assert(t.type_is_appl());
-    function_symbol sym = aterm_cast<aterm_appl>(t).function(); 
+    function_symbol sym = aterm_cast<aterm_appl>(t).function();
     nr_unique = count[sym.number()]>0 ? 0 : 1;
     count[sym.number()]++;
     size_t arity = sym.arity();
@@ -94,7 +100,18 @@ static size_t AT_calcUniqueAFuns(const aterm &t, std::vector<size_t> &count)
 
 
 static const size_t BAF_MAGIC = 0xbaf;
-static const size_t BAF_VERSION = 0x0300;      /* version 3.0 */
+
+// The BAF_VERSION constant is the version number of the ATerms written in BAF
+// format. As of 29 August 2013 this version number is used by the mCRL2
+// toolset. Whenever the file format of mCRL2 files is changed, the BAF_VERSION
+// has to be increased.
+//
+// History:
+//
+// before 2013    : version 0x0300
+// 29 August 2013 : version changed to 0x0301
+
+static const size_t BAF_VERSION = 0x0301;
 
 static const size_t BAF_DEFAULT_TABLE_SIZE = 1024;
 
@@ -209,56 +226,6 @@ static size_t text_buffer_size = 0;
 static unsigned char bit_buffer = '\0';
 static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-
-
-static
-size_t
-writeIntToBuf(const size_t val, unsigned char* buf)
-{
-  if (val < (1 << 7))
-  {
-    buf[0] = (unsigned char) val;
-    return 1;
-  }
-
-  if (val < (1 << 14))
-  {
-    buf[0] = (unsigned char)((val >>  8) | 0x80);
-    buf[1] = (unsigned char)((val >>  0) & 0xff);
-    return 2;
-  }
-
-  if (val < (1 << 21))
-  {
-    buf[0] = (unsigned char)((val >> 16) | 0xc0);
-    buf[1] = (unsigned char)((val >>  8) & 0xff);
-    buf[2] = (unsigned char)((val >>  0) & 0xff);
-    return 3;
-  }
-
-  if (val < (1 << 28))
-  {
-    buf[0] = (unsigned char)((val >> 24) | 0xe0);
-    buf[1] = (unsigned char)((val >> 16) & 0xff);
-    buf[2] = (unsigned char)((val >>  8) & 0xff);
-    buf[3] = (unsigned char)((val >>  0) & 0xff);
-    return 4;
-  }
-
-  if (sizeof(size_t)>4 && val>((size_t)1<<4*sizeof(size_t)))
-  {
-    mCRL2log(mcrl2::log::warning) << "losing precision of integers when writing to .baf file" << std::endl;
-  }
-
-  buf[0] = 0xf0;
-  buf[1] = (unsigned char)((val >> 24) & 0xff);
-  buf[2] = (unsigned char)((val >> 16) & 0xff);
-  buf[3] = (unsigned char)((val >>  8) & 0xff);
-  buf[4] = (unsigned char)((val >>  0) & 0xff);
-  return 5;
-}
-
-
 static void writeBits(size_t val, const size_t nr_bits, ostream &os)
 {
   for (size_t cur_bit=0; cur_bit<nr_bits; cur_bit++)
@@ -327,84 +294,6 @@ bool readBits(size_t& val, const size_t nr_bits, istream &is)
   return true;
 }
 
-
-static void writeInt(const size_t val, ostream &os)
-{
-  unsigned char buf[8];
-  size_t nr_items = writeIntToBuf(val, buf);
-  os.write((char*)buf, nr_items);
-}
-
-
-static int readInt(size_t& val, istream &is)
-{
-  int buf[8];
-
-  /* Try to read 1st character */
-  if ((buf[0] = is.get()) == EOF)
-  {
-    return EOF;
-  }
-
-  /* Check if 1st character is enough */
-  if ((buf[0] & 0x80) == 0)
-  {
-    val = buf[0];
-    return 1;
-  }
-
-  /* Try to read 2nd character */
-  if ((buf[1] = is.get()) == EOF)
-  {
-    return EOF;
-  }
-
-  /* Check if 2nd character is enough */
-  if ((buf[0] & 0x40) == 0)
-  {
-    val = buf[1] + ((buf[0] & ~0xc0) << 8);
-    return 2;
-  }
-
-  /* Try to read 3rd character */
-  if ((buf[2] = is.get()) == EOF)
-  {
-    return EOF;
-  }
-
-  /* Check if 3rd character is enough */
-  if ((buf[0] & 0x20) == 0)
-  {
-    val = buf[2] + (buf[1] << 8) + ((buf[0] & ~0xe0) << 16);
-    return 3;
-  }
-
-  /* Try to read 4th character */
-  if ((buf[3] = is.get()) == EOF)
-  {
-    return EOF;
-  }
-
-  /* Check if 4th character is enough */
-  if ((buf[0] & 0x10) == 0)
-  {
-    val = buf[3] + (buf[2] << 8) + (buf[1] << 16) +
-           ((buf[0] & ~0xf0) << 24);
-    return 4;
-  }
-
-  /* Try to read 5th character */
-  if ((buf[4] = is.get()) == EOF)
-  {
-    return EOF;
-  }
-
-  /* Now 5th character should be enough */
-  val = buf[4] + (buf[3] << 8) + (buf[2] << 16) + (buf[1] << 24);
-  return 5;
-}
-
-
 static void writeString(const char* str, const size_t len, ostream &os)
 {
   /* Write length. */
@@ -420,10 +309,7 @@ static size_t readString(istream &is)
   size_t len;
 
   /* Get length of string */
-  if (readInt(len, is) < 0)
-  {
-    return atermpp::npos;
-  }
+  len = readInt(is);
 
   /* Assure buffer can hold the string */
   if (text_buffer_size < (len+1))
@@ -591,7 +477,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
         {
           arg = aterm_cast<const aterm_appl>(term)[cur_arg];
         }
-        else 
+        else
         {
           throw std::runtime_error("build_arg_tables: illegal term");
         }
@@ -920,9 +806,7 @@ void write_term_to_binary_stream(const aterm &t, std::ostream &os)
 
 static function_symbol read_symbol(istream &is)
 {
-  size_t arity, quoted;
-  size_t len;
-
+  std::size_t len;
   if ((len = readString(is)) == atermpp::npos)
   {
     return function_symbol(atermpp::npos);
@@ -930,15 +814,8 @@ static function_symbol read_symbol(istream &is)
 
   text_buffer[len] = '\0';
 
-  if (readInt(arity, is) < 0)
-  {
-    return function_symbol(atermpp::npos);
-  }
-
-  if (readInt(quoted, is) < 0)
-  {
-    return function_symbol(atermpp::npos);
-  }
+  std::size_t arity = readInt(is);
+  /* std::size_t quoted = */ readInt(is);
 
   return function_symbol(text_buffer, arity);
 }
@@ -962,8 +839,8 @@ static bool read_all_symbols(istream &is)
     read_symbols[i].arity = arity;
 
     /* Read term count and allocate space */
-
-    if (readInt(val, is) < 0 || val == 0)
+    val = readInt(is);
+    if (val == 0)
     {
       return false;
     }
@@ -1006,11 +883,7 @@ static bool read_all_symbols(istream &is)
 
     for (j=0; j<read_symbols[i].arity; j++)
     {
-      if (readInt(val, is) < 0)
-      {
-        return false;
-      }
-
+      val = readInt(is);
       read_symbols[i].nr_topsyms[j] = val;
       read_symbols[i].sym_width[j] = bit_width(val);
       read_symbols[i].topsyms[j] = (size_t*)calloc(val, sizeof(size_t));
@@ -1021,10 +894,7 @@ static bool read_all_symbols(istream &is)
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
       {
-        if (readInt(val, is) < 0)
-        {
-          return false;
-        }
+        val = readInt(is);
         read_symbols[i].topsyms[j][k] = val;
       }
     }
@@ -1137,7 +1007,7 @@ static void free_read_space()
     }
 
   }
-  read_symbols=std::vector<sym_read_entry>(); // Release memory, and prevent read symbols to be 
+  read_symbols=std::vector<sym_read_entry>(); // Release memory, and prevent read symbols to be
                                               // destructed after the destruction of function_symbols, which leads
                                               // to decreasing reference counters, after function_lookup_table has
                                               // been destroyed (i.e. core dump).
@@ -1150,70 +1020,47 @@ static void free_read_space()
 static
 aterm read_baf(istream &is)
 {
-  size_t val, nr_unique_terms;
+  size_t val;
   aterm result;
 
-  /* Initialize bit buffer */
+  // Initialize bit buffer
   bit_buffer     = '\0';
-  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
+  bits_in_buffer = 0; // how many bits in bit_buffer are used
 
-  /* Read header */
-
-  if (readInt(val, is) < 0)
-  {
-    return aterm();
-  }
-
+  // Read header
+  val = readInt(is);
   if (val == 0)
   {
-    if (readInt(val, is) < 0)
-    {
-      return aterm();
-    }
+    val = readInt(is);
   }
-
   if (val != BAF_MAGIC)
   {
-    mCRL2log(mcrl2::log::error) << "read_baf: input is not in BAF!" << std::endl;
-    return aterm();
+    throw std::runtime_error("read_baf: error reading BAF_MAGIC!");
   }
 
-  if (readInt(val, is) < 0)
+  std::size_t version = readInt(is);
+  if (version != BAF_VERSION)
   {
-    return aterm();
+    std::ostringstream ss;
+    ss << std::showbase // show the 0x prefix
+       << std::internal // fill between the prefix and the number
+       << std::setfill('0'); // fill with 0s
+    ss << std::hex << std::setw(4) << version;
+    throw mcrl2::runtime_error("wrong version number " + ss.str());
   }
 
-  if (val != BAF_VERSION)
-  {
-    mCRL2log(mcrl2::log::error) << "read_baf: wrong BAF version, giving up!" << std::endl;
-    return aterm();
-  }
+  nr_unique_symbols = readInt(is);
+  /* std::size_t nr_unique_terms = */ readInt(is);
 
-  if (readInt(val, is) < 0)
-  {
-    return aterm();
-  }
-  nr_unique_symbols = val;
-
-  if (readInt(nr_unique_terms, is) < 0)
-  {
-    return aterm();
-  }
-
-  /* Allocate symbol space */
+  // Allocate symbol space
   read_symbols = std::vector<sym_read_entry>(nr_unique_symbols);
-
 
   if (!read_all_symbols(is))
   {
-    return aterm();
+    throw std::runtime_error("read_baf: failed to read all symbols!");
   }
 
-  if (readInt(val, is) < 0)
-  {
-    return aterm();
-  }
-
+  val = readInt(is);
   result = read_term(&read_symbols[val], is);
   free_read_space();
   return result;

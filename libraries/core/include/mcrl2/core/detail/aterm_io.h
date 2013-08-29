@@ -39,45 +39,50 @@ using namespace atermpp;
 inline
 aterm load_aterm(const std::string& filename)
 {
-  //open filename for reading as stream
   aterm result;
-
-  if (filename.empty())
+  try
   {
-    if(atermpp::is_binary_aterm_file(filename))
+    //open filename for reading as stream
+    if (filename.empty())
     {
-      result=read_term_from_binary_stream(std::cin);
+      if(atermpp::is_binary_aterm_file(filename))
+      {
+        result=read_term_from_binary_stream(std::cin);
+      }
+      else
+      {
+        result=read_term_from_text_stream(std::cin);
+      }
     }
     else
     {
-      result=read_term_from_text_stream(std::cin);
+      std::ifstream is;
+      if(atermpp::is_binary_aterm_file(filename))
+      {
+        is.open(filename.c_str(), std::ios::binary);
+        if (is.fail())
+        {
+          throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
+        }
+        result=read_term_from_binary_stream(is);
+      }
+      else
+      {
+        is.open(filename.c_str());
+        if (is.fail())
+        {
+          throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
+        }
+        result=read_term_from_text_stream(is);
+      }
+      is.close();
     }
   }
-  else
+  catch (mcrl2::runtime_error& e)
   {
-    std::ifstream is;
-    if(atermpp::is_binary_aterm_file(filename))
-    {
-      is.open(filename.c_str(), std::ios::binary);
-      if (is.fail())
-      {
-        throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
-      }
-      result=read_term_from_binary_stream(is);
-    }
-    else
-    {
-      is.open(filename.c_str());
-      if (is.fail())
-      {
-        throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading.");
-      }
-      result=read_term_from_text_stream(is);
-    }
-    is.close();
+    throw mcrl2::runtime_error("could not read a valid aterm from " + ((filename.empty())?"stdin":("'" + filename + "'"))  + " (" + e.what() + ")");
   }
-
-  if (result == aterm())
+  catch (std::runtime_error&)
   {
     throw mcrl2::runtime_error("could not read a valid aterm from " + ((filename.empty())?"stdin":("'" + filename + "'")));
   }
@@ -94,14 +99,14 @@ inline
 void save_aterm(aterm term, const std::string& filename, bool binary = true)
 {
   using namespace std;
-  
+
   if (filename.empty())
   {
     if (binary)
     {
       write_term_to_binary_stream(term, cout);
     }
-    else 
+    else
     {
       write_term_to_text_stream(term, cout);
     }
@@ -118,7 +123,7 @@ void save_aterm(aterm term, const std::string& filename, bool binary = true)
       os.open(filename.c_str(), std::ios::binary);
       write_term_to_binary_stream(term, os);
     }
-    else 
+    else
     {
       os.open(filename.c_str());
       write_term_to_text_stream(term, os);

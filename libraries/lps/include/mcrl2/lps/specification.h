@@ -143,7 +143,7 @@ class specification
     {
       using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (!t.defined() || !t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
+      if (!t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
       }
