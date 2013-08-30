@@ -14,9 +14,10 @@
 
 #include <cstdio>
 #include <cerrno>
-#include <string>
 #include <cstring>
 #include <fstream>
+#include <iomanip>
+#include <string>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_io.h"
@@ -78,9 +79,17 @@ aterm load_aterm(const std::string& filename)
       is.close();
     }
   }
-  catch (mcrl2::runtime_error& e)
+  catch (baf_version_error& e)
   {
-    throw mcrl2::runtime_error("could not read a valid aterm from " + ((filename.empty())?"stdin":("'" + filename + "'"))  + " (" + e.what() + ")");
+    std::ostringstream ss;
+    ss << std::showbase // show the 0x prefix
+       << std::internal // fill between the prefix and the number
+       << std::setfill('0')  // fill with 0s
+       << "could not read a valid aterm from " + ((filename.empty())?"stdin":("'" + filename + "'"))
+       << ", it was created with an older version of mCRL2 (file format version number "
+       << std::hex << std::setw(4) << e.version
+       << ", expected " << std::setw(4) << e.expected_version << ".";
+    throw mcrl2::runtime_error(ss.str());
   }
   catch (std::runtime_error&)
   {

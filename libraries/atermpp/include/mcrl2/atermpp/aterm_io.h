@@ -14,6 +14,7 @@
 
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace atermpp
 {
@@ -49,6 +50,34 @@ aterm read_term_from_text_stream(std::istream &is);
 /// \return The term corresponding to the string.
 aterm read_term_from_string(const std::string& s);
 
+///
+/// \brief Exception class for reporting an I/O error in the ATerm Library.
+///
+struct aterm_io_error : public mcrl2::runtime_error
+{
+  /// \brief Constructor
+  /// \param[in] message the exception message
+  aterm_io_error(const std::string& message)
+    : mcrl2::runtime_error(message)
+  { }
+};
+
+///
+/// \brief Exception class for reporting a version error in the BAF file format.
+///
+struct baf_version_error : public aterm_io_error
+{
+  std::size_t version;
+  std::size_t expected_version;
+
+  /// \brief Constructor
+  /// \param[in] message the exception message
+  baf_version_error(const std::string& message, std::size_t version_, std::size_t expected_version_)
+    : aterm_io_error(message),
+      version(version_),
+      expected_version(expected_version_)
+  { }
+};
 
 } // namespace atermpp
 
