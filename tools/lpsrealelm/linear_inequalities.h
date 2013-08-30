@@ -18,7 +18,6 @@
 
 #include <algorithm>
 
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_symbol.h"
@@ -56,7 +55,7 @@ class linear_inequality
   public:
     enum comparison_t { equal, less, less_eq };
 
-    class lhs_t:public atermpp::map < variable, data_expression >
+    class lhs_t:public std::map < variable, data_expression >
     {
       private:
         // TODO: the meta operations below insert variables with constant 0, which should
@@ -180,8 +179,8 @@ class linear_inequality
     {
       if (sort_real::is_minus_application(e) && application(e).arguments().size()==2)
       {
-        parse_and_store_expression(application(e).left(),r,negate,factor);
-        parse_and_store_expression(application(e).right(),r,!negate,factor);
+        parse_and_store_expression(data::binary_left(application(e)),r,negate,factor);
+        parse_and_store_expression(data::binary_right(application(e)),r,!negate,factor);
       }
       else if (sort_real::is_negate_application(e) && application(e).arguments().size()==1)
       {
@@ -189,13 +188,13 @@ class linear_inequality
       }
       else if (sort_real::is_plus_application(e))
       {
-        parse_and_store_expression(application(e).left(),r,negate,factor);
-        parse_and_store_expression(application(e).right(),r,negate,factor);
+        parse_and_store_expression(data::binary_left(application(e)),r,negate,factor);
+        parse_and_store_expression(data::binary_right(application(e)),r,negate,factor);
       }
       else if (sort_real::is_times_application(e))
       {
-        data_expression lhs=rewrite_with_memory(application(e).left(),r);
-        data_expression rhs=rewrite_with_memory(application(e).right(),r);
+        data_expression lhs=rewrite_with_memory(data::binary_left(application(e)),r);
+        data_expression rhs=rewrite_with_memory(data::binary_right(application(e)),r);
         if (is_closed_real_number(lhs))
         {
           parse_and_store_expression(rhs,r,negate,sort_real::times(lhs,factor));
@@ -213,15 +212,16 @@ class linear_inequality
       {
         if (e.sort() == sort_real::real_())
         {
-          if (m_lhs.find(e) == m_lhs.end())
+          const variable &v=static_cast<const variable &>(e);
+          if (m_lhs.find(v) == m_lhs.end())
           {
-            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real::negate(factor),r)
+            set_factor_for_a_variable(v,(negate?rewrite_with_memory(sort_real::negate(factor),r)
                                          :rewrite_with_memory(factor,r)));
           }
           else
           {
-            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real::minus(m_lhs[e],factor),r)
-                                         :rewrite_with_memory(sort_real::plus(m_lhs[e],factor),r)));
+            set_factor_for_a_variable(v,(negate?rewrite_with_memory(sort_real::minus(m_lhs[v],factor),r)
+                                         :rewrite_with_memory(sort_real::plus(m_lhs[v],factor),r)));
           }
         }
         else
@@ -252,13 +252,11 @@ class linear_inequality
     /// \brief Constructor yielding an inconsistent inequality.
     linear_inequality():m_lhs(),m_comparison(less)
     {
-      m_rhs.protect();
       m_rhs=real_zero();
     }
 
     linear_inequality(const linear_inequality& l)
     {
-      m_rhs.protect();
       m_rhs=l.m_rhs;
       m_lhs=l.m_lhs;
       m_comparison=l.m_comparison;
@@ -266,7 +264,6 @@ class linear_inequality
 
     ~linear_inequality()
     {
-      m_rhs.unprotect();
     }
 
     linear_inequality& operator=(const linear_inequality& l)
@@ -288,7 +285,6 @@ class linear_inequality
                       const rewriter& r)
       :m_lhs(),m_comparison(less)
     {
-      m_rhs.protect();
       m_rhs=real_zero();
 
 
@@ -320,8 +316,8 @@ class linear_inequality
         throw mcrl2::runtime_error("Unexpected equality or inequality: " + pp(e) + "\n") ;
       }
 
-      data_expression lhs=application(e).left();
-      data_expression rhs=application(e).right();
+      data_expression lhs=data::binary_left(application(e));
+      data_expression rhs=data::binary_right(application(e));
 
       parse_and_store_expression(lhs,r,negate);
       parse_and_store_expression(rhs,r,!negate);
@@ -332,7 +328,6 @@ class linear_inequality
                       const comparison_t cmp,
                       const rewriter& r):m_lhs(),m_comparison(cmp)
     {
-      m_rhs.protect();
       m_rhs=real_zero();
 
       parse_and_store_expression(lhs,r);
@@ -576,42 +571,21 @@ std::string string(const linear_inequality& l)
 // Real zero and real one are an ad hoc solution. They should be provided by
 // the data type library.
 
-static data_expression init_real_zero(data_expression& real_zero)
-{
-  real_zero=sort_real::real_("0");
-  real_zero.protect();
-  return real_zero;
-}
-
-static data_expression init_real_one(data_expression& real_one)
-{
-  real_one=sort_real::real_("1");
-  real_one.protect();
-  return real_one;
-}
-
-static data_expression init_real_minus_one(data_expression& real_minus_one)
-{
-  real_minus_one=sort_real::real_("-1");
-  real_minus_one.protect();
-  return real_minus_one;
-}
-
 inline data_expression real_zero()
 {
-  static data_expression real_zero=init_real_zero(real_zero);
+  static data_expression real_zero=sort_real::real_("0");
   return real_zero;
 }
 
 inline data_expression real_one()
 {
-  static data_expression real_one=init_real_one(real_one);
+  static data_expression real_one=sort_real::real_("1");
   return real_one;
 }
 
 inline data_expression real_minus_one()
 {
-  static data_expression real_minus_one=init_real_minus_one(real_minus_one);
+  static data_expression real_minus_one=sort_real::real_("-1");
   return real_minus_one;
 }
 
@@ -650,7 +624,7 @@ inline bool is_closed_real_number(const data_expression e)
     return false;
   }
 
-  std::set < variable > s=find_variables(e);
+  std::set < variable > s=find_all_variables(e);
   if (!s.empty())  // The expression e contains variables.
   {
     return false;
@@ -737,7 +711,7 @@ void count_occurrences(
 }
 
 template < class Variable_iterator >
-atermpp::set < variable >  gauss_elimination(
+std::set < variable >  gauss_elimination(
   const std::vector < linear_inequality > &inequalities,
   std::vector < linear_inequality > &resulting_equalities,
   std::vector < linear_inequality > &resulting_inequalities,
@@ -780,7 +754,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 
   std::vector < linear_inequality > inequalities;
   std::vector < linear_inequality > equalities;
-  atermpp::set < variable > vars=
+  std::set < variable > vars=
     gauss_elimination(inequalities_in,
                       equalities,      // Store all resulting equalities here.
                       inequalities,    // Store all resulting non equalities here.
@@ -793,7 +767,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   // At this stage, the variables that should be eliminated only occur in
   // inequalities. Group the inequalities into positive, 0, and negative
   // occurrences of each variable, and create a new system.
-  for (atermpp::set < variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
+  for (std::set < variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
   {
     std::map < variable, size_t> nr_positive_occurrences;
     std::map < variable, size_t> nr_negative_occurrences;
@@ -802,7 +776,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
     bool found=false;
     size_t best_choice=0;
     variable best_variable;
-    for (atermpp::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
+    for (std::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
     {
       const size_t p=nr_positive_occurrences[*k];
       const size_t n=nr_negative_occurrences[*k];
@@ -934,7 +908,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 /// \param resulting_inequalities A list of inequalities to which the result is stored.
 ///                               Initially this list must be empty.
 /// \param r A rewriter
-/// \ret An indication whether the inequality referred to by i is inconsistent
+/// \return An indication whether the inequality referred to by i is inconsistent
 ///      in the context of inequalities.
 inline bool is_a_redundant_inequality(
   const std::vector < linear_inequality > &inequalities,
@@ -1061,7 +1035,7 @@ inline void remove_redundant_inequalities(
 ///          an inconsistent inequality.
 /// \param inequalities A list of inequalities
 /// \param r A rewriter
-/// \ret true if the system of inequalities can be determined to be
+/// \return true if the system of inequalities can be determined to be
 ///      inconsistent, false otherwise.
 
 /* inline bool is_inconsistent(
@@ -1076,7 +1050,7 @@ inline void remove_redundant_inequalities(
     }
   }
 
-  atermpp::set<variable> dvs;
+  std::set<variable> dvs;
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
                 i!=inequalities.end(); ++i)
   { i->add_variables(dvs);
@@ -1112,9 +1086,9 @@ static void pivot_and_update(
   const variable xj,  // a non basic variable
   const data_expression v,
   const data_expression v_delta_correction,
-  atermpp::map < variable,data_expression > &beta,
-  atermpp::map < variable,data_expression > &beta_delta_correction,
-  atermpp::set < variable > &basic_variables,
+  std::map < variable,data_expression > &beta,
+  std::map < variable,data_expression > &beta_delta_correction,
+  std::set < variable > &basic_variables,
   std::map < variable, linear_inequality::lhs_t > &working_equalities,
   const rewriter& r)
 {
@@ -1128,7 +1102,7 @@ static void pivot_and_update(
   beta_delta_correction[xj]=rewrite_with_memory(sort_real::plus(beta_delta_correction[xj],theta_delta_correction),r);
 
   // mCRL2log(debug) << "Pivoting phase 0\n";
-  for (atermpp::set < variable >::const_iterator k=basic_variables.begin();
+  for (std::set < variable >::const_iterator k=basic_variables.begin();
        k!=basic_variables.end(); ++k)
   {
     if ((*k!=xi) && (working_equalities[*k].count(xj)>0))
@@ -1178,7 +1152,7 @@ static void pivot_and_update(
   // mCRL2log(debug) << "End pivoting " << pp(xj) << "\n";
   if (mCRL2logEnabled(log::debug))
   {
-    for (atermpp::map < variable,data_expression >::const_iterator i=beta.begin();
+    for (std::map < variable,data_expression >::const_iterator i=beta.begin();
          i!=beta.end(); ++i)
     {
       // mCRL2log(debug) << "beta[" << pp(i->first) << "]= " << pp(beta[i->first]) << "+ delta* " <<
@@ -1203,7 +1177,7 @@ static void pivot_and_update(
 ///          CSL Technical Report SRI-CSL-06-01, 2006.
 /// \param inequalities A list of inequalities
 /// \param r A rewriter
-/// \ret true if the system of inequalities can be determined to be
+/// \return true if the system of inequalities can be determined to be
 ///      inconsistent, false otherwise.
 
 
@@ -1222,14 +1196,14 @@ inline bool is_inconsistent(
   mCRL2log(log::debug) << "Starting an inconsistency check on " + pp_vector(inequalities_in) << "\n";
 
   // The required data structures
-  atermpp::map < variable,data_expression > lowerbounds;
-  atermpp::map < variable,data_expression > upperbounds;
-  atermpp::map < variable,data_expression > beta;
-  atermpp::map < variable,data_expression > lowerbounds_delta_correction;
-  atermpp::map < variable,data_expression > upperbounds_delta_correction;
-  atermpp::map < variable,data_expression > beta_delta_correction;
-  atermpp::set < variable > non_basic_variables;
-  atermpp::set < variable > basic_variables;
+  std::map < variable,data_expression > lowerbounds;
+  std::map < variable,data_expression > upperbounds;
+  std::map < variable,data_expression > beta;
+  std::map < variable,data_expression > lowerbounds_delta_correction;
+  std::map < variable,data_expression > upperbounds_delta_correction;
+  std::map < variable,data_expression > beta_delta_correction;
+  std::set < variable > non_basic_variables;
+  std::set < variable > basic_variables;
   std::map < variable, linear_inequality::lhs_t > working_equalities;
 
   set_identifier_generator fresh_variable_name;
@@ -1351,7 +1325,7 @@ inline bool is_inconsistent(
   // Now set the values for beta:
   // The beta values for the non basic variables must satisfy the lower and
   // upperbounds.
-  for (atermpp::set < variable >::const_iterator i=non_basic_variables.begin();
+  for (std::set < variable >::const_iterator i=non_basic_variables.begin();
        i!=non_basic_variables.end(); ++i)
   {
     if (lowerbounds.count(*i)>0)
@@ -1382,7 +1356,7 @@ inline bool is_inconsistent(
   }
 
   // Subsequently set the values for the basic variables
-  for (atermpp::set < variable >::const_iterator i=basic_variables.begin();
+  for (std::set < variable >::const_iterator i=basic_variables.begin();
        i!=basic_variables.end(); ++i)
   {
     beta[*i]=working_equalities[*i].evaluate(beta,r);
@@ -1403,7 +1377,7 @@ inline bool is_inconsistent(
     bool found=false;
     bool lowerbound_violation = false;
     variable xi;
-    for (atermpp::set < variable > :: const_iterator i=basic_variables.begin() ;
+    for (std::set < variable > :: const_iterator i=basic_variables.begin() ;
          i!=basic_variables.end() ; ++i)
     {
       // mCRL2log(debug) << "Evaluate start\n";
@@ -1444,7 +1418,7 @@ inline bool is_inconsistent(
       if (mCRL2logEnabled(log::debug))
       {
         mCRL2log(log::debug) << "Consistent while pivoting\n";
-        /* for(atermpp::map < variable,data_expression >::const_iterator i=lowerbounds.begin();
+        /* for(std::map < variable,data_expression >::const_iterator i=lowerbounds.begin();
                       i!=lowerbounds.end(); ++i)
         { variable v=i->first;
           if (lowerbounds.count(v)>0)
@@ -1568,10 +1542,10 @@ inline bool is_inconsistent(
 /// \param variables_end An iterator indicating the end of the eliminatable variables.
 /// \param r A rewriter.
 /// \post variables contains the list of variables that have not been eliminated
-/// \ret The variables that could not be removed by gauss elimination.
+/// \return The variables that could not be removed by gauss elimination.
 
 template < class Variable_iterator >
-atermpp::set < variable >  gauss_elimination(
+std::set < variable >  gauss_elimination(
   const std::vector < linear_inequality > &inequalities,
   std::vector < linear_inequality > &resulting_equalities,
   std::vector < linear_inequality > &resulting_inequalities,
@@ -1579,7 +1553,7 @@ atermpp::set < variable >  gauss_elimination(
   Variable_iterator variables_end,
   const rewriter& r)
 {
-  atermpp::set < variable >  remaining_variables;
+  std::set < variable >  remaining_variables;
 
   // First copy equalities to the resulting_equalities and the inequalites to resulting_inequalities.
   for (std::vector < linear_inequality > ::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
@@ -1743,8 +1717,8 @@ atermpp::set < variable >  gauss_elimination(
 inline data_expression rewrite_with_memory(
   const data_expression t,const rewriter& r)
 {
-  static atermpp::map < data_expression, data_expression > rewrite_hash_table;
-  atermpp::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
+  static std::map < data_expression, data_expression > rewrite_hash_table;
+  std::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
   if (i==rewrite_hash_table.end())
   {
     data_expression t1=r(t);

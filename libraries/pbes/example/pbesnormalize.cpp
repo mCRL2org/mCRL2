@@ -8,12 +8,9 @@
 //
 /// \file pbesnormalize.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -39,7 +36,7 @@ class pbes_normalize_tool: public input_output_tool
       mCRL2log(log::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
-      pbes_system::pbes<> p;
+      pbes_system::pbes p;
       p.load(input_filename());
 
       // apply the algorithm
@@ -54,8 +51,6 @@ class pbes_normalize_tool: public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   pbes_normalize_tool tool;
   return tool.execute(argc, argv);
 }

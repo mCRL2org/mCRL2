@@ -13,8 +13,8 @@
 #define MCRL2_UTILITIES_DETAIL_TEST_OPERATION_H
 
 #include <functional>
+#include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
 
 namespace mcrl2
 {
@@ -33,7 +33,7 @@ T identity(T t)
 
 /// \brief Generic function that applies two operations to two objects, and compares the results.
 template <typename Parser, typename Printer, typename Operation1, typename Operation2, typename Compare>
-void test_operation(
+bool test_operation(
   const std::string& expr1,
   const std::string& expr2,
   Parser parse,
@@ -51,7 +51,6 @@ void test_operation(
   T f1 = op1(x1);
   T f2 = op2(x2);
   bool success = comp(f1, f2);
-  BOOST_CHECK(success);
   if (success)
   {
     std::cout << "--- TEST SUCCEEDED --- " << std::endl;
@@ -70,12 +69,13 @@ void test_operation(
   {
     std::cout << (opname2 + "(y)") << " = " << print(f2) << std::endl;
   }
+  return success;
 }
 
 /// \brief Generic function that applies an operation to an object, and compares it
 /// with another object.
 template <typename Parser, typename Printer, typename Operation, typename Compare>
-void test_operation(
+bool test_operation(
   const std::string& expr1,
   const std::string& expr2,
   Parser parse,

@@ -26,14 +26,6 @@
 #include "graph.h"
 #include "utils.h"
 
-template <class T>
-inline std::string to_string(const T& t)
-{
-  std::stringstream ss;
-  ss << t;
-  return ss.str();
-}
-
 class Parser : public QObject
 {
   Q_OBJECT

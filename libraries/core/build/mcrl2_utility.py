@@ -1,4 +1,6 @@
-#~ Copyright 2009, 2010 Wieger Wesselink.
+#!/usr/bin/env python
+
+# Copyright 2009, 2010 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
@@ -52,13 +54,16 @@ def insert_text_in_file(filename, text, label, handle_user_sections = False):
         if old_text == new_text:
             if re.search(src, old_text, re.S) == None:
                 print "Error: label '//--- start %s ---//' not found in file %s" % (label, filename)
+                return False
             else:
                 print 'Warning: nothing has changed in file %s' % filename
         else:
             path(filename).write_text(new_text)
             print 'Updated file %s' % filename
+        return True
     except IOError, e:
         print 'Error: unable to open file ' + filename + ' ', e
+        return False
 
 def indent_text(text, indent):
     lines = []

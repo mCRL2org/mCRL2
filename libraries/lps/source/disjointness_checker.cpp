@@ -26,10 +26,10 @@ using namespace mcrl2::data;
 // Auxiliary functions ----------------------------------------------------------------------------
 
 static bool disjoint_sets(
-  atermpp::set<variable> &a_set_1,
-  atermpp::set<variable> &a_set_2)
+  std::set<variable> &a_set_1,
+  std::set<variable> &a_set_2)
 {
-  for (atermpp::set<variable>::const_iterator i = a_set_1.begin(); i!=a_set_1.end(); ++i)
+  for (std::set<variable>::const_iterator i = a_set_1.begin(); i!=a_set_1.end(); ++i)
   {
     if (a_set_2.count(*i)>0)
     {
@@ -53,8 +53,8 @@ void Disjointness_Checker::process_data_expression(const size_t a_summand_number
   {
     const where_clause t(a_expression);
     process_data_expression(a_summand_number,t.body());
-    const assignment_expression_list decls=t.declarations();
-    for (assignment_expression_list::const_iterator i=decls.begin(); i!=decls.end(); ++i)
+    const assignment_list assignments=t.assignments();
+    for (assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
     {
       process_data_expression(a_summand_number,i->rhs());
     }
@@ -65,10 +65,9 @@ void Disjointness_Checker::process_data_expression(const size_t a_summand_number
   }
   else if (is_application(a_expression))
   {
-    const application t(a_expression);
+    const application &t=atermpp::aterm_cast<application>(a_expression);
     process_data_expression(a_summand_number,t.head());
-    const data_expression_list l=t.arguments();
-    for (data_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    for (data_expression_list::const_iterator i=t.begin(); i!=t.end(); ++i)
     {
       process_data_expression(a_summand_number,*i);
     }
@@ -135,9 +134,9 @@ Disjointness_Checker::Disjointness_Checker(const linear_process& a_process_equat
 
   f_number_of_summands = v_summands.size();
   f_used_parameters_per_summand =
-    std::vector< atermpp::set < variable > >(f_number_of_summands + 1,atermpp::set < variable >());
+    std::vector< std::set < variable > >(f_number_of_summands + 1,std::set < variable >());
   f_changed_parameters_per_summand =
-    std::vector< atermpp::set < variable > >(f_number_of_summands + 1,atermpp::set < variable >());
+    std::vector< std::set < variable > >(f_number_of_summands + 1,std::set < variable >());
 
   for (action_summand_vector::const_iterator i=v_summands.begin(); i!=v_summands.end(); ++i)
   {

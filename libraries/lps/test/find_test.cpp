@@ -14,11 +14,9 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/detail/print_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -61,10 +59,10 @@ void test_find()
   action_summand s = spec.process().action_summands().front();
   action a = s.multi_action().actions().front();
 
-  //--- find_variables ---//
+  //--- find_all_variables ---//
   data::variable m = nat("m");
-  std::set<data::variable> v = lps::find_variables(a);
-  v = lps::find_variables(s);
+  std::set<data::variable> v = lps::find_all_variables(a);
+  v = lps::find_all_variables(s);
   BOOST_CHECK(v.find(m) != v.end());
 
   //--- find_sort_expressions ---//
@@ -76,13 +74,15 @@ void test_find()
 
 void test_free_variables()
 {
+  std::set<data::variable> free_variables;
+
   lps::specification specification(parse_linear_process_specification(
                                      "act a : Bool;\n"
                                      "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
                                      "init X;\n"
                                    ));
 
-  std::set<data::variable> free_variables = find_free_variables(specification.process());
+  free_variables = find_free_variables(specification.process());
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
@@ -91,15 +91,17 @@ void test_free_variables()
                     "proc X(z : Bool) = (z && (forall x : Nat. exists y : Nat. x < y)) -> a.X(!z);\n"
                     "init X(true);\n"
                   );
-  free_variables = find_free_variables(specification.process());
-  std::cerr << "--- lps ---\n" << lps::pp(specification) << std::endl;
-  std::cerr << core::detail::print_set(free_variables, data::stream_printer(), "free variables") << std::endl;
+  free_variables = find_free_variables(specification);
+  BOOST_CHECK(free_variables.empty());
 
-  BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
-  BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
+  free_variables = find_free_variables(specification.process());
+  BOOST_CHECK(free_variables.empty());
+
+  free_variables = find_free_variables(specification.process().action_summands().front());
+  BOOST_CHECK(free_variables.size() == 1);
+  BOOST_CHECK(free_variables.find(data::variable("z", data::sort_bool::bool_())) != free_variables.end());
 
   BOOST_CHECK(is_well_typed(specification));
-  core::garbage_collect();
 }
 
 void test_search()
@@ -127,8 +129,6 @@ void test_search_sort_expression()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_find();
   test_free_variables();
   test_search();

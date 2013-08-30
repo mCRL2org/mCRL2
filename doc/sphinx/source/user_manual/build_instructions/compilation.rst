@@ -1,3 +1,5 @@
+.. _build-compilation:
+
 Compilation
 ===========
 
@@ -44,6 +46,8 @@ system can be generated and used to build the binaries.
      make mcrl22lps/fast
 
    This disables dependency checking, speeding up compilation dramatically.
+
+.. _build-installation:
 
 Installation
 ============

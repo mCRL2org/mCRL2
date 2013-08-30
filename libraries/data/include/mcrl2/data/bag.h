@@ -69,7 +69,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& constructor_name()
       {
-        static core::identifier_string constructor_name = core::detail::initialise_static_expression(constructor_name, core::identifier_string("@bag"));
+        static core::identifier_string constructor_name = core::identifier_string("@bag");
         return constructor_name;
       }
 
@@ -105,7 +105,7 @@ namespace mcrl2 {
       inline
       application constructor(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return constructor(s)(arg0, arg1);
+        return sort_bag::constructor(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@bag
@@ -129,7 +129,7 @@ namespace mcrl2 {
       function_symbol_vector bag_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(constructor(s));
+        result.push_back(sort_bag::constructor(s));
 
         return result;
       }
@@ -138,7 +138,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("{}"));
+        static core::identifier_string empty_name = core::identifier_string("{:}");
         return empty_name;
       }
 
@@ -171,7 +171,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bag_fbag_name()
       {
-        static core::identifier_string bag_fbag_name = core::detail::initialise_static_expression(bag_fbag_name, core::identifier_string("@bagfbag"));
+        static core::identifier_string bag_fbag_name = core::identifier_string("@bagfbag");
         return bag_fbag_name;
       }
 
@@ -206,7 +206,7 @@ namespace mcrl2 {
       inline
       application bag_fbag(const sort_expression& s, const data_expression& arg0)
       {
-        return bag_fbag(s)(arg0);
+        return sort_bag::bag_fbag(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@bagfbag
@@ -228,7 +228,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bag_comprehension_name()
       {
-        static core::identifier_string bag_comprehension_name = core::detail::initialise_static_expression(bag_comprehension_name, core::identifier_string("@bagcomp"));
+        static core::identifier_string bag_comprehension_name = core::identifier_string("@bagcomp");
         return bag_comprehension_name;
       }
 
@@ -263,7 +263,7 @@ namespace mcrl2 {
       inline
       application bag_comprehension(const sort_expression& s, const data_expression& arg0)
       {
-        return bag_comprehension(s)(arg0);
+        return sort_bag::bag_comprehension(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@bagcomp
@@ -285,7 +285,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& count_name()
       {
-        static core::identifier_string count_name = core::detail::initialise_static_expression(count_name, core::identifier_string("count"));
+        static core::identifier_string count_name = core::identifier_string("count");
         return count_name;
       }
 
@@ -321,7 +321,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return count(s)(arg0, arg1);
+        return sort_bag::count(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of count
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("in"));
+        static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
       }
 
@@ -379,7 +379,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_bag::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -401,7 +401,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& join_name()
       {
-        static core::identifier_string join_name = core::detail::initialise_static_expression(join_name, core::identifier_string("+"));
+        static core::identifier_string join_name = core::identifier_string("+");
         return join_name;
       }
 
@@ -437,7 +437,7 @@ namespace mcrl2 {
       inline
       application join(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return join(s)(arg0, arg1);
+        return sort_bag::join(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -459,7 +459,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& intersection_name()
       {
-        static core::identifier_string intersection_name = core::detail::initialise_static_expression(intersection_name, core::identifier_string("*"));
+        static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
       }
 
@@ -495,7 +495,7 @@ namespace mcrl2 {
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return intersection(s)(arg0, arg1);
+        return sort_bag::intersection(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -517,7 +517,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& difference_name()
       {
-        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("-"));
+        static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
       }
 
@@ -553,7 +553,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return difference(s)(arg0, arg1);
+        return sort_bag::difference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -575,7 +575,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bag2set_name()
       {
-        static core::identifier_string bag2set_name = core::detail::initialise_static_expression(bag2set_name, core::identifier_string("Bag2Set"));
+        static core::identifier_string bag2set_name = core::identifier_string("Bag2Set");
         return bag2set_name;
       }
 
@@ -610,7 +610,7 @@ namespace mcrl2 {
       inline
       application bag2set(const sort_expression& s, const data_expression& arg0)
       {
-        return bag2set(s)(arg0);
+        return sort_bag::bag2set(s)(arg0);
       }
 
       /// \brief Recogniser for application of Bag2Set
@@ -632,7 +632,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set2bag_name()
       {
-        static core::identifier_string set2bag_name = core::detail::initialise_static_expression(set2bag_name, core::identifier_string("Set2Bag"));
+        static core::identifier_string set2bag_name = core::identifier_string("Set2Bag");
         return set2bag_name;
       }
 
@@ -667,7 +667,7 @@ namespace mcrl2 {
       inline
       application set2bag(const sort_expression& s, const data_expression& arg0)
       {
-        return set2bag(s)(arg0);
+        return sort_bag::set2bag(s)(arg0);
       }
 
       /// \brief Recogniser for application of Set2Bag
@@ -689,7 +689,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& zero_function_name()
       {
-        static core::identifier_string zero_function_name = core::detail::initialise_static_expression(zero_function_name, core::identifier_string("@zero_"));
+        static core::identifier_string zero_function_name = core::identifier_string("@zero_");
         return zero_function_name;
       }
 
@@ -724,7 +724,7 @@ namespace mcrl2 {
       inline
       application zero_function(const sort_expression& s, const data_expression& arg0)
       {
-        return zero_function(s)(arg0);
+        return sort_bag::zero_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@zero_
@@ -746,7 +746,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& one_function_name()
       {
-        static core::identifier_string one_function_name = core::detail::initialise_static_expression(one_function_name, core::identifier_string("@one_"));
+        static core::identifier_string one_function_name = core::identifier_string("@one_");
         return one_function_name;
       }
 
@@ -781,7 +781,7 @@ namespace mcrl2 {
       inline
       application one_function(const sort_expression& s, const data_expression& arg0)
       {
-        return one_function(s)(arg0);
+        return sort_bag::one_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@one_
@@ -803,7 +803,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& add_function_name()
       {
-        static core::identifier_string add_function_name = core::detail::initialise_static_expression(add_function_name, core::identifier_string("@add_"));
+        static core::identifier_string add_function_name = core::identifier_string("@add_");
         return add_function_name;
       }
 
@@ -839,7 +839,7 @@ namespace mcrl2 {
       inline
       application add_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return add_function(s)(arg0, arg1);
+        return sort_bag::add_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@add_
@@ -861,7 +861,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& min_function_name()
       {
-        static core::identifier_string min_function_name = core::detail::initialise_static_expression(min_function_name, core::identifier_string("@min_"));
+        static core::identifier_string min_function_name = core::identifier_string("@min_");
         return min_function_name;
       }
 
@@ -897,7 +897,7 @@ namespace mcrl2 {
       inline
       application min_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return min_function(s)(arg0, arg1);
+        return sort_bag::min_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@min_
@@ -919,7 +919,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& monus_function_name()
       {
-        static core::identifier_string monus_function_name = core::detail::initialise_static_expression(monus_function_name, core::identifier_string("@monus_"));
+        static core::identifier_string monus_function_name = core::identifier_string("@monus_");
         return monus_function_name;
       }
 
@@ -955,7 +955,7 @@ namespace mcrl2 {
       inline
       application monus_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return monus_function(s)(arg0, arg1);
+        return sort_bag::monus_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@monus_
@@ -977,7 +977,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& nat2bool_function_name()
       {
-        static core::identifier_string nat2bool_function_name = core::detail::initialise_static_expression(nat2bool_function_name, core::identifier_string("@Nat2Bool_"));
+        static core::identifier_string nat2bool_function_name = core::identifier_string("@Nat2Bool_");
         return nat2bool_function_name;
       }
 
@@ -1012,7 +1012,7 @@ namespace mcrl2 {
       inline
       application nat2bool_function(const sort_expression& s, const data_expression& arg0)
       {
-        return nat2bool_function(s)(arg0);
+        return sort_bag::nat2bool_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@Nat2Bool_
@@ -1034,7 +1034,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bool2nat_function_name()
       {
-        static core::identifier_string bool2nat_function_name = core::detail::initialise_static_expression(bool2nat_function_name, core::identifier_string("@Bool2Nat_"));
+        static core::identifier_string bool2nat_function_name = core::identifier_string("@Bool2Nat_");
         return bool2nat_function_name;
       }
 
@@ -1069,7 +1069,7 @@ namespace mcrl2 {
       inline
       application bool2nat_function(const sort_expression& s, const data_expression& arg0)
       {
-        return bool2nat_function(s)(arg0);
+        return sort_bag::bool2nat_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@Bool2Nat_
@@ -1093,23 +1093,23 @@ namespace mcrl2 {
       function_symbol_vector bag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(empty(s));
-        result.push_back(bag_fbag(s));
-        result.push_back(bag_comprehension(s));
-        result.push_back(count(s));
-        result.push_back(in(s));
-        result.push_back(join(s));
-        result.push_back(intersection(s));
-        result.push_back(difference(s));
-        result.push_back(bag2set(s));
-        result.push_back(set2bag(s));
-        result.push_back(zero_function(s));
-        result.push_back(one_function(s));
-        result.push_back(add_function(s));
-        result.push_back(min_function(s));
-        result.push_back(monus_function(s));
-        result.push_back(nat2bool_function(s));
-        result.push_back(bool2nat_function(s));
+        result.push_back(sort_bag::empty(s));
+        result.push_back(sort_bag::bag_fbag(s));
+        result.push_back(sort_bag::bag_comprehension(s));
+        result.push_back(sort_bag::count(s));
+        result.push_back(sort_bag::in(s));
+        result.push_back(sort_bag::join(s));
+        result.push_back(sort_bag::intersection(s));
+        result.push_back(sort_bag::difference(s));
+        result.push_back(sort_bag::bag2set(s));
+        result.push_back(sort_bag::set2bag(s));
+        result.push_back(sort_bag::zero_function(s));
+        result.push_back(sort_bag::one_function(s));
+        result.push_back(sort_bag::add_function(s));
+        result.push_back(sort_bag::min_function(s));
+        result.push_back(sort_bag::monus_function(s));
+        result.push_back(sort_bag::nat2bool_function(s));
+        result.push_back(sort_bag::bool2nat_function(s));
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1121,7 +1121,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_join_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1133,7 +1133,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_bag_fbag_application(e) || is_bag_comprehension_application(e) || is_bag2set_application(e) || is_set2bag_application(e) || is_zero_function_application(e) || is_one_function_application(e) || is_nat2bool_function_application(e) || is_bool2nat_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1145,7 +1145,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_join_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for bag
@@ -1168,13 +1168,23 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), empty(s), constructor(s, zero_function(s), sort_fbag::empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vb), bag_fbag(s, vb), constructor(s, zero_function(s), vb)));
-        result.push_back(data_equation(atermpp::make_vector(vf), bag_comprehension(s, vf), constructor(s, vf, sort_fbag::empty(s))));
+        result.push_back(data_equation(atermpp::make_vector(vf), sort_bag::bag_comprehension(s, vf), constructor(s, vf, sort_fbag::empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vb, ve, vf), count(s, ve, constructor(s, vf, vb)), sort_nat::swap_zero(vf(ve), sort_fbag::count(s, ve, vb))));
         result.push_back(data_equation(atermpp::make_vector(ve, vx), in(s, ve, vx), greater(count(s, ve, vx), sort_nat::c0())));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), equal_to(constructor(s, vf, vb), constructor(s, vg, vc)), if_(equal_to(vf, vg), equal_to(vb, vc), forall(atermpp::make_vector(vd), equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc)))))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx), join(s, vx, vx), vx));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, vx, join(s, vx, vy)), join(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, vx, join(s, vy, vx)), join(s, vy, vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, join(s, vx, vy), vx), join(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), join(s, join(s, vy, vx), vx), join(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), join(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), sort_fbag::join(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vx), intersection(s, vx, vx), vx));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), sort_fbag::intersect(s, vf, vg, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), sort_fbag::difference(s, vf, vg, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vf), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));

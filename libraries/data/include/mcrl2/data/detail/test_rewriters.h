@@ -15,7 +15,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/detail/accessors.h"
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
@@ -40,10 +40,10 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
   /// function symbol.
   /// \param expr A data expression
   /// \return A sequence of operands
-  atermpp::multiset<data_expression> split_or(const data_expression& expr)
+  std::multiset<data_expression> split_or(const data_expression& expr)
   {
-    atermpp::multiset<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<data_expression> >(result, result.begin()), sort_bool::is_or_application, data_accessors::left, data_accessors::right);
+    std::multiset<data_expression> result;
+    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_or_application, data::binary_left1, data::binary_right1);
     return result;
   }
 
@@ -53,10 +53,10 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
   /// function symbol.
   /// \param expr A data expression
   /// \return A sequence of operands
-  atermpp::multiset<data_expression> split_and(const data_expression& expr)
+  std::multiset<data_expression> split_and(const data_expression& expr)
   {
-    atermpp::multiset<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<data_expression> >(result, result.begin()), sort_bool::is_and_application, data_accessors::left, data_accessors::right);
+    std::multiset<data_expression> result;
+    utilities::detail::split(expr, std::insert_iterator<std::multiset<data_expression> >(result, result.begin()), sort_bool::is_and_application, data::binary_left1, data::binary_right1);
     return result;
   }
 
@@ -65,12 +65,12 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
     data_expression y = super::operator()(x);
     if (sort_bool::is_and_application(y))
     {
-      atermpp::multiset<data_expression> s = split_and(y);
+      std::multiset<data_expression> s = split_and(y);
       return data::join_and(s.begin(), s.end());
     }
     else if (sort_bool::is_or_application(y))
     {
-      atermpp::multiset<data_expression> s = split_or(y);
+      std::multiset<data_expression> s = split_or(y);
       return data::join_or(s.begin(), s.end());
     }
     return y;
@@ -79,7 +79,7 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
 
 template <typename T>
 T normalize_and_or(const T& x,
-                   typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                   typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                   )
 {
   return core::make_apply_builder<normalize_and_or_builder>()(x);
@@ -87,7 +87,7 @@ T normalize_and_or(const T& x,
 
 template <typename T>
 void normalize_and_or(T& x,
-                      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                      typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                      )
 {
   core::make_apply_builder<normalize_and_or_builder>()(x);
@@ -107,8 +107,8 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
     data_expression y = super::operator()(x);
     if (data::is_equal_to_application(y))
     {
-      data_expression left = application(y).left();
-      data_expression right = application(y).right();
+      data_expression left = data::binary_left1(y);
+      data_expression right = data::binary_right1(y);
       if (left < right)
       {
         return data::equal_to(left, right);
@@ -120,8 +120,8 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
     }
     else if (data::is_not_equal_to_application(y))
     {
-      data_expression left = application(y).left();
-      data_expression right = application(y).right();
+      data_expression left = data::binary_left1(y);
+      data_expression right = data::binary_right1(y);
       if (left < right)
       {
         return data::not_equal_to(left, right);
@@ -137,7 +137,7 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
 
 template <typename T>
 T normalize_equality(const T& x,
-                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                     typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                     )
 {
   return core::make_apply_builder<normalize_equality_builder>()(x);
@@ -145,7 +145,7 @@ T normalize_equality(const T& x,
 
 template <typename T>
 void normalize_equality(T& x,
-                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                        )
 {
   core::make_apply_builder<normalize_equality_builder>()(x);
@@ -172,14 +172,6 @@ template <typename Function>
 normalizer<Function> N(const Function& f)
 {
   return normalizer<Function>(f);
-}
-
-template <typename Term>
-std::string data_printer(const Term& x)
-{
-  std::ostringstream out;
-  out << data::pp(x);
-  return out.str();
 }
 
 inline
@@ -229,7 +221,7 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
     expr1,
     expr2,
     parser(var_decl, data_spec),
-    data_printer<data_expression>,
+    data::detail::data_printer(),
     std::equal_to<data_expression>(),
     R1,
     "R1",

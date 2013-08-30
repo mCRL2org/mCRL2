@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_PROCESS_SPECIFICATION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/action_label.h"
@@ -50,27 +49,27 @@ class process_specification
     lps::action_label_list m_action_labels;
 
     /// \brief The set of global variables
-    atermpp::set<data::variable> m_global_variables;
+    std::set<data::variable> m_global_variables;
 
     /// \brief The equations of the specification
-    atermpp::vector<process_equation> m_equations;
+    std::vector<process_equation> m_equations;
 
     /// \brief The initial state of the specification
     process_expression m_initial_process;
 
-    /// \brief Initializes the specification with an ATerm.
+    /// \brief Initializes the specification with an aterm.
     /// \param t A term
-    void construct_from_aterm(atermpp::aterm_appl t)
+    void construct_from_aterm(const atermpp::aterm_appl& t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      m_data            = atermpp::aterm_appl(*i++);
-      m_action_labels   = atermpp::aterm_appl(*i++)(0);
-      data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
-      process_equation_list l = atermpp::aterm_appl(*i++)(0);
+      m_data            = data::data_specification(atermpp::aterm_appl(*i++));
+      m_action_labels   = static_cast<lps::action_label_list>(atermpp::aterm_appl(*i++)[0]);
+      data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
+      m_global_variables = atermpp::convert<std::set<data::variable> >(global_variables);
+      process_equation_list l = static_cast<process_equation_list>(atermpp::aterm_appl(*i++)[0]);
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
-      m_initial_process = atermpp::aterm_appl(init(0));
-      m_equations       = atermpp::vector<process_equation>(l.begin(), l.end());
+      m_initial_process = process_expression(atermpp::aterm_appl(init[0]));
+      m_equations       = std::vector<process_equation>(l.begin(), l.end());
     }
 
   public:
@@ -79,7 +78,6 @@ class process_specification
     {}
 
     /// \brief Constructor.
-    /// \param term A term
     /// \param t A term containing an aterm representation of a process specification.
     /// \param data_specification_is_type_checked A boolean that indicates whether the
     ///         data specification has been type checked. If so, the internal data specification
@@ -149,28 +147,28 @@ class process_specification
 
     /// \brief Returns the declared free variables of the process specification.
     /// \return The declared free variables of the process specification.
-    const atermpp::set<data::variable>& global_variables() const
+    const std::set<data::variable>& global_variables() const
     {
       return m_global_variables;
     }
 
     /// \brief Returns the declared free variables of the process specification.
     /// \return The declared free variables of the process specification.
-    atermpp::set<data::variable>& global_variables()
+    std::set<data::variable>& global_variables()
     {
       return m_global_variables;
     }
 
     /// \brief Returns the equations of the process specification
     /// \return The equations of the process specification
-    const atermpp::vector<process_equation>& equations() const
+    const std::vector<process_equation>& equations() const
     {
       return m_equations;
     }
 
     /// \brief Returns the equations of the process specification
     /// \return The equations of the process specification
-    atermpp::vector<process_equation>& equations()
+    std::vector<process_equation>& equations()
     {
       return m_equations;
     }
@@ -200,8 +198,8 @@ void complete_data_specification(process_specification& spec)
   spec.data().add_context_sorts(s);
 }
 
-/// \brief Conversion to ATermAppl.
-/// \return The specification converted to ATerm format.
+/// \brief Conversion to aterm_appl.
+/// \return The specification converted to aterm format.
 /// \param spec A process specification
 inline
 atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec)

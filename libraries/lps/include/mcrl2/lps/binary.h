@@ -16,7 +16,6 @@
 #include <iterator>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/replace.h"
@@ -73,10 +72,10 @@ class binary_algorithm: public lps::detail::lps_algorithm
     DataRewriter m_rewriter;
 
     /// Mapping of finite variables to boolean vectors
-    atermpp::map<data::variable, atermpp::vector<data::variable> > m_new_parameters;
+    std::map<data::variable, std::vector<data::variable> > m_new_parameters;
 
     /// Mapping of variables to all values they can be assigned
-    atermpp::map<data::variable, atermpp::vector<data::data_expression> > m_enumerated_elements;
+    std::map<data::variable, std::vector<data::data_expression> > m_enumerated_elements;
 
     /// Mapping of variables to corresponding if-tree
     data::mutable_map_substitution<> m_if_trees;
@@ -155,7 +154,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
           // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
           for (enumerator_type::iterator j=enumerator.begin(
-                           push_front(data::variable_list(),par),
+                           atermpp::make_list<data::variable>(par),
                            data::data_expression(data::sort_bool::true_()));
                 j != enumerator.end() ; ++j)
           {
@@ -199,7 +198,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       mCRL2log(log::debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
-      m_spec.process().process_parameters() = atermpp::convert<data::variable_list>(new_parameters);
+      m_spec.process().process_parameters() = data::variable_list(new_parameters.begin(),new_parameters.end());
     }
 
     /// \brief Replace assignments in v that are of a finite sort with a
@@ -260,28 +259,28 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       mCRL2log(log::debug) << "Replaced assignment(s) " << data::pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
 
-      return atermpp::convert<data::assignment_list>(result);
+      return data::assignment_list(result.begin(),result.end());
     }
 
     /// \brief Update an action summand with the new Boolean parameters
-    void update_action_summand(action_summand& s)
+    void update_action_summand(action_summand& s, const std::set<data::variable>& if_trees_variables)
     {
-      s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
-      s.multi_action().actions() = lps::replace_free_variables(s.multi_action().actions(), m_if_trees);
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, if_trees_variables);
+      s.multi_action().actions() = lps::replace_variables_capture_avoiding(s.multi_action().actions(), m_if_trees, data::substitution_variables(m_if_trees));
       if (s.multi_action().has_time())
       {
-        s.multi_action().time() = data::replace_free_variables(s.multi_action().time(), m_if_trees);
+        s.multi_action().time() = data::replace_variables_capture_avoiding(s.multi_action().time(), m_if_trees, if_trees_variables);
       }
       s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
     }
 
     /// \brief Update a deadlock summand with the new Boolean parameters
-    void update_deadlock_summand(deadlock_summand& s)
+    void update_deadlock_summand(deadlock_summand& s, const std::set<data::variable>& if_trees_variables)
     {
-      s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, data::substitution_variables(m_if_trees));
       if (s.deadlock().has_time())
       {
-        s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), m_if_trees);
+        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), m_if_trees, if_trees_variables);
       }
     }
 
@@ -308,14 +307,15 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
+      std::set<data::variable> if_trees_variables = data::substitution_variables(m_if_trees);
 
       std::for_each(m_spec.process().action_summands().begin(),
                     m_spec.process().action_summands().end(),
-                    boost::bind(&binary_algorithm::update_action_summand, this, _1));
+                    boost::bind(&binary_algorithm::update_action_summand, this, _1, if_trees_variables));
 
       std::for_each(m_spec.process().deadlock_summands().begin(),
                     m_spec.process().deadlock_summands().end(),
-                    boost::bind(&binary_algorithm::update_deadlock_summand, this, _1));
+                    boost::bind(&binary_algorithm::update_deadlock_summand, this, _1, if_trees_variables));
     }
 };
 

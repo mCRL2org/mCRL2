@@ -13,7 +13,6 @@
 #define MCRL2_DATA_CONTAINER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -35,10 +34,10 @@ class container_type: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    container_type(const atermpp::aterm_appl& term)
+    explicit container_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_SortConsType(m_term));
+      assert(core::detail::check_rule_SortConsType(*this));
     }
 };
 
@@ -46,7 +45,7 @@ class container_type: public atermpp::aterm_appl
 typedef atermpp::term_list<container_type> container_type_list;
 
 /// \brief vector of container_types
-typedef atermpp::vector<container_type>    container_type_vector;
+typedef std::vector<container_type>    container_type_vector;
 
 
 /// \brief Container type for lists
@@ -60,20 +59,20 @@ class list_container: public container_type
 
     /// \brief Constructor.
     /// \param term A term
-    list_container(const atermpp::aterm_appl& term)
+    explicit list_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortList(m_term));
+      assert(core::detail::check_term_SortList(*this));
     }
 };
 
 /// \brief Test for a list_container expression
-/// \param t A term
-/// \return True if it is a list_container expression
+/// \param x A term
+/// \return True if \a x is a list_container expression
 inline
-bool is_list_container(const container_type& t)
+bool is_list_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortList(t);
+  return core::detail::gsIsSortList(x);
 }
 
 
@@ -88,20 +87,20 @@ class set_container: public container_type
 
     /// \brief Constructor.
     /// \param term A term
-    set_container(const atermpp::aterm_appl& term)
+    explicit set_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortSet(m_term));
+      assert(core::detail::check_term_SortSet(*this));
     }
 };
 
 /// \brief Test for a set_container expression
-/// \param t A term
-/// \return True if it is a set_container expression
+/// \param x A term
+/// \return True if \a x is a set_container expression
 inline
-bool is_set_container(const container_type& t)
+bool is_set_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortSet(t);
+  return core::detail::gsIsSortSet(x);
 }
 
 
@@ -116,20 +115,20 @@ class bag_container: public container_type
 
     /// \brief Constructor.
     /// \param term A term
-    bag_container(const atermpp::aterm_appl& term)
+    explicit bag_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortBag(m_term));
+      assert(core::detail::check_term_SortBag(*this));
     }
 };
 
 /// \brief Test for a bag_container expression
-/// \param t A term
-/// \return True if it is a bag_container expression
+/// \param x A term
+/// \return True if \a x is a bag_container expression
 inline
-bool is_bag_container(const container_type& t)
+bool is_bag_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortBag(t);
+  return core::detail::gsIsSortBag(x);
 }
 
 
@@ -144,20 +143,20 @@ class fset_container: public container_type
 
     /// \brief Constructor.
     /// \param term A term
-    fset_container(const atermpp::aterm_appl& term)
+    explicit fset_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortFSet(m_term));
+      assert(core::detail::check_term_SortFSet(*this));
     }
 };
 
 /// \brief Test for a fset_container expression
-/// \param t A term
-/// \return True if it is a fset_container expression
+/// \param x A term
+/// \return True if \a x is a fset_container expression
 inline
-bool is_fset_container(const container_type& t)
+bool is_fset_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortFSet(t);
+  return core::detail::gsIsSortFSet(x);
 }
 
 
@@ -172,20 +171,20 @@ class fbag_container: public container_type
 
     /// \brief Constructor.
     /// \param term A term
-    fbag_container(const atermpp::aterm_appl& term)
+    explicit fbag_container(const atermpp::aterm& term)
       : container_type(term)
     {
-      assert(core::detail::check_term_SortFBag(m_term));
+      assert(core::detail::check_term_SortFBag(*this));
     }
 };
 
 /// \brief Test for a fbag_container expression
-/// \param t A term
-/// \return True if it is a fbag_container expression
+/// \param x A term
+/// \return True if \a x is a fbag_container expression
 inline
-bool is_fbag_container(const container_type& t)
+bool is_fbag_container(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSortFBag(t);
+  return core::detail::gsIsSortFBag(x);
 }
 
 //--- end generated classes ---//
@@ -193,4 +192,45 @@ bool is_fbag_container(const container_type& t)
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::container_type& t1, mcrl2::data::container_type& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::list_container& t1, mcrl2::data::list_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::set_container& t1, mcrl2::data::set_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::bag_container& t1, mcrl2::data::bag_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::fset_container& t1, mcrl2::data::fset_container& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::fbag_container& t1, mcrl2::data::fbag_container& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_CONTAINER_TYPE_H

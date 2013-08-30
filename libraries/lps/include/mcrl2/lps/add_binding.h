@@ -33,7 +33,7 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::bind_count;
+  using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
 
@@ -74,7 +74,7 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
 
   void leave(const specification& x)
   {
-    increase_bind_count(x.global_variables());
+    decrease_bind_count(x.global_variables());
   }
 };
 

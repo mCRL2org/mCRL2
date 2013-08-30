@@ -105,7 +105,7 @@ class representative_generator
     data_specification const&                        m_specification;
 
     /// \brief Serves as a cache for later find operations
-    atermpp::map< sort_expression, data_expression > m_representatives;
+    std::map< sort_expression, data_expression > m_representatives;
 
   protected:
 
@@ -136,7 +136,7 @@ class representative_generator
       {
         data_expression representative = find_representative(*i, maximum_depth - 1);
 
-        if (representative == data_expression())
+        if (!representative.defined())
         {
           return data_expression();
         }
@@ -185,16 +185,11 @@ class representative_generator
           return set_representative(sort, *i);
         }
 
-        // check if there is a constant mapping for s
         const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
 
-        for (function_symbol_vector::const_iterator i =
-               std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
-             i != local_mappings.end();)
-        {
-          return set_representative(sort, *i);
-        }
-
+        // Check whether there is a representative f(t1,...,tn) for s, where f is a constructor function. 
+        // We prefer this over a constant mapping, as a constant mapping generally does not have appropriate
+        // rewrite rules.
         if (maximum_depth != 0)
         {
           // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
@@ -227,6 +222,16 @@ class representative_generator
 
           }
         }
+
+        // check if there is a constant mapping for s
+
+        for (function_symbol_vector::const_iterator i =
+               std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
+             i != local_mappings.end();)
+        {
+          return set_representative(sort, *i);
+        }
+
       }
 
       throw mcrl2::runtime_error("Cannot find a term of sort " + data::pp(sort));
@@ -244,7 +249,7 @@ class representative_generator
     /// \param[in] maximum_depth unfold generate terms recursively up to this depth
     data_expression operator()(sort_expression const& sort, const unsigned int maximum_depth = 3)
     {
-      for (atermpp::map< sort_expression, data_expression >::iterator i = m_representatives.find(sort); i != m_representatives.end();)
+      for (std::map< sort_expression, data_expression >::iterator i = m_representatives.find(sort); i != m_representatives.end();)
       {
         return i->second;
       }

@@ -13,9 +13,6 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
@@ -104,8 +101,8 @@ void test2()
 
   std::string var_decl = "m, n: Pos;\n";
   mutable_map_substitution<> sigma;
-  sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
-  sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
+  sigma[atermpp::aterm_cast<variable>(parse_data_expression("m", var_decl))] = r(parse_data_expression("3"));
+  sigma[atermpp::aterm_cast<variable>(parse_data_expression("n", var_decl))] = r(parse_data_expression("4"));
 
   // Rewrite two data expressions, and check if they are the same
   d1 = parse_data_expression("m+n", var_decl);
@@ -115,7 +112,7 @@ void test2()
 
 void test3()
 {
-  typedef mutable_map_substitution< atermpp::map< variable, data_expression_with_variables > > substitution_function;
+  typedef mutable_map_substitution< std::map< variable, data_expression_with_variables > > substitution_function;
 
   data_specification data_spec = parse_data_specification(
                                    "map dummy1:Pos;  \n"
@@ -128,7 +125,7 @@ void test3()
                                  );
   rewriter_with_variables r(data_spec);
   data_expression x = parse_data_expression("b == b", "b: Bool;\n");
-  std::set<variable> v = find_variables(x);
+  std::set<variable> v = find_all_variables(x);
   BOOST_CHECK(v.size() == 1);
 
   data_expression_with_variables y(x, variable_list(v.begin(), v.end()));
@@ -158,7 +155,7 @@ void test3()
 template <typename Rewriter>
 void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitutions)
 {
-  mutable_map_substitution< atermpp::map< variable, data_expression > > sigma;
+  mutable_map_substitution< std::map< variable, data_expression > > sigma;
   data::detail::parse_substitutions(substitutions, data_spec, sigma);
   data_expression d1 = parse_data_expression(expr1, declarations, data_spec);
   data_expression d2 = parse_data_expression(expr2, declarations, data_spec);
@@ -194,11 +191,9 @@ void allocation_test()
   data::rewriter                  R_stack(data_spec);
 
   R_stack(parse_data_expression("1 == 2"));
-  core::garbage_collect();
   R_stack(parse_data_expression("1 == 2"));
 
   (*R_heap)(parse_data_expression("1 == 2"));
-  core::garbage_collect();
   (*R_heap)(parse_data_expression("1 == 2"));
 }
 
@@ -228,7 +223,6 @@ void simplify_rewriter_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   test1();
   test2();
   test3();

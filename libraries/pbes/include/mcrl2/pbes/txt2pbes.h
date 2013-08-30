@@ -13,7 +13,7 @@
 #define MCRL2_PBES_TXT2PBES_H
 
 #include <sstream>
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/utilities/logger.h"
@@ -26,18 +26,19 @@ namespace pbes_system
 
 /// \brief Parses a PBES specification from an input stream
 /// \param spec_stream A stream from which can be read
+/// \param normalize  If true, the resulting PBES is normalized after reading.
 /// \return The parsed PBES
 inline
-pbes<> txt2pbes(std::istream& spec_stream, bool normalize = true)
+pbes txt2pbes(std::istream& spec_stream, bool normalize = true)
 {
-  pbes<> result;
+  pbes result;
   spec_stream >> result;
   if (normalize)
   {
     try
     {
       mCRL2log(log::verbose) << "checking monotonicity..." << std::endl;
-      pbes_system::normalize(result);
+      pbes_system::algorithms::normalize(result);
     }
     catch (std::exception& /* e */)
     {
@@ -49,9 +50,10 @@ pbes<> txt2pbes(std::istream& spec_stream, bool normalize = true)
 
 /// \brief Parses a PBES specification from a string
 /// \param text A string
+/// \param normalize  If true, the resulting PBES is normalized after reading.
 /// \return The parsed PBES
 inline
-pbes<> txt2pbes(const std::string& text, bool normalize = true)
+pbes txt2pbes(const std::string& text, bool normalize = true)
 {
   std::stringstream from(text);
   return txt2pbes(from, normalize);

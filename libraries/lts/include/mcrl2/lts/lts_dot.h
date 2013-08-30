@@ -34,7 +34,7 @@ namespace lts
 namespace detail
 {
 /** \brief This class contains labels for states in dot format.
-   \detail A dot state label consists of two strings, the name of a state and a separate label.
+   \details A dot state label consists of two strings, the name of a state and a separate label.
 */
 class state_label_dot
 {
@@ -129,10 +129,15 @@ class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_stri
     void load(const std::string& filename);
     void loadnew(const std::string& filename);
     
-    /** \brief Save the labelled transition system to file.
-     *  \details If the filename is empty, the result is written to stdout.
-     *  \param[in] filename Name of the file to which this lts is written.
+    /** \brief Save the labelled transition system to a stream.
+     *  \param[in] stream Stream which to write the lts to.
      */   
+    void save(std::ostream& os) const;
+
+    /** \brief Save the labelled transition system to a file.
+     *  \details Throws an error when the file cannot be opened.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
     void save(const std::string& filename) const;
 };
 

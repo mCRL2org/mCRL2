@@ -4,6 +4,10 @@
 #include "d.h"
 #include "dparse_tables.h"
 
+#ifdef __GNUC__
+#include "strings.h"
+#endif
+
 void myfprintf(FILE *f, const char *format, ...) {
   va_list ap;
   va_start(ap, format);
@@ -18,7 +22,7 @@ void myfprintf(FILE *f, const char *format, ...) {
 
 typedef struct OffsetEntry {
   char *name;
-  int len;
+  size_t len;
   int offset;
 } OffsetEntry;
 
@@ -36,7 +40,7 @@ typedef struct File {
   FILE *fp;
   unsigned char *cur_str;
   unsigned char **str;
-  unsigned int *str_len;
+  size_t *str_len;
   Buf tables;
   Buf strings;
   OffsetEntrySet entries;
@@ -46,7 +50,7 @@ typedef struct File {
   int array_length;
   int n_elems;
   int elem_size;
-  int d_parser_tables_loc;
+  size_t d_parser_tables_loc;
 } File;
 
 OffsetEntry null_entry = {"NULL", sizeof("NULL")-1, -1};
@@ -55,13 +59,13 @@ OffsetEntry final_code_entry = {"#final_code", sizeof("#final_code")-1, -3};
 
 uint32 
 offset_hash_fn(OffsetEntry *entry, struct hash_fns_t* fn) {
-  fn = fn;
+  (void)fn;
   return strhashl(entry->name, entry->len);
 }
 
 int 
 offset_cmp_fn(OffsetEntry *a, OffsetEntry *b, struct hash_fns_t* fn) {
-  fn = fn;
+  (void)fn;
   return strcmp(a->name, b->name);
 }
 
@@ -85,9 +89,9 @@ write_chk(const void* ptr, size_t size, size_t nmemb, File *file) {
 
 static void
 save_binary_tables(File *file) {
-  int i;
+  uint i;
   BinaryTablesHead tables;
-  unsigned int len;
+  size_t len;
   
   tables.n_relocs = file->relocations.n;
   tables.n_strings = file->str_relocations.n;
@@ -116,7 +120,7 @@ save_binary_tables(File *file) {
 
 static void
 free_tables(File *f) {
-  int i;
+  uint i;
   if (f->tables.start)
     FREE(f->tables.start);
   if (f->strings.start)
@@ -142,7 +146,7 @@ init_buf(Buf *buf, int initial_size) {
 }
 
 static void
-file_init(File *file, int binary, FILE* fp, unsigned char **str, unsigned int *str_len) {
+file_init(File *file, int binary, FILE* fp, unsigned char **str, size_t *str_len) {
   memset(file, 0, sizeof(File));
   file->binary = binary;
   file->fp = fp;
@@ -160,9 +164,9 @@ file_init(File *file, int binary, FILE* fp, unsigned char **str, unsigned int *s
 static void
 make_room_in_buf(Buf *buf, size_t size) {
   while (buf->cur + size > buf->start + buf->len) {
-    int cur = buf->cur - buf->start;
+    uintptr_t cur = buf->cur - buf->start;
     buf->len = buf->len*2 + 1;
-    buf->start = REALLOC(buf->start, buf->len);
+    buf->start = (char*)REALLOC(buf->start, buf->len);
     buf->cur = buf->start + cur;
     memset(buf->cur, 0, buf->len - (buf->cur - buf->start));
   }
@@ -170,10 +174,10 @@ make_room_in_buf(Buf *buf, size_t size) {
 
 static void
 new_offset(File *fp, char *name) {
-  OffsetEntry *entry = MALLOC(sizeof(OffsetEntry));
+  OffsetEntry *entry = (OffsetEntry*)MALLOC(sizeof(OffsetEntry));
   memset(entry, 0, sizeof(OffsetEntry));
   entry->name = name;
-  entry->offset = fp->tables.cur - fp->tables.start;
+  entry->offset = (int)(fp->tables.cur - fp->tables.start);
   entry->len = strlen(name);
   set_add_fn(&fp->entries, entry, &offset_fns);
 }
@@ -194,7 +198,7 @@ static OffsetEntry *
 search_for_offset(File *fp, char *name) {
   uint32 tt = strhashl(name, strlen(name));
   OffsetEntrySet *v = &fp->entries;
-  int j, n = v->n;
+  uint j, n = v->n;
   uint i;
   if (n) {
     uint h = tt % n;
@@ -217,11 +221,16 @@ search_for_offset(File *fp, char *name) {
 
 static OffsetEntry *
 get_offset(File *fp, char* name, ...) {
+#ifndef NDEBUG
   int n;
+#endif
   char buf[256];
   va_list ap;
   va_start(ap, name);
-  n = vsnprintf(buf, sizeof(buf), name, ap);
+#ifndef NDEBUG
+  n = 
+#endif
+  vsnprintf(buf, sizeof(buf), name, ap);
   va_end(ap);
   assert(n < 256 && n >= 0);
   return search_for_offset(fp, buf);
@@ -596,11 +605,13 @@ trans_scanner_block_fns = {
 
 static uint32
 shift_hash_fn(Action *sa, hash_fns_t *fns) {
+  (void)fns;
   return sa->term->index + (sa->kind == ACTION_SHIFT_TRAILING ? 1000000 : 0);
 }
 
 static int
 shift_cmp_fn(Action *sa, Action *sb, hash_fns_t *fns) {
+  (void)fns;
   return (sa->term->index != sb->term->index) || (sa->kind != sb->kind);
 }
 
@@ -618,7 +629,8 @@ write_scanner_data(File *fp, Grammar *g, char *tag) {
   VecScannerBlock scanner_block_hash[4], *pscanner_block_hash;
   VecScannerBlock trans_scanner_block_hash[4], *ptrans_scanner_block_hash;
   VecAction shift_hash;
-  int nvsblocks, ivsblock, i, j, k, x, xx;
+  int nvsblocks, ivsblock, x, xx;
+  uint i, j, k;
   VecScanState *ss;
   char speculative_code[256];
   Term *t;
@@ -903,7 +915,8 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
   Vec(intptr_t) vgoto;
   State *s;
   uint8 *goto_valid = NULL;
-  int i, j, x, again, nvalid_bytes, sym, lowest_sym;
+  uint i, j, x, nvalid_bytes;
+  int again, sym, lowest_sym;
 
   nvalid_bytes = ((g->productions.n + g->terminals.n) + 7) / 8;
   goto_valid = MALLOC(nvalid_bytes);
@@ -934,7 +947,7 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
 	  x = elem_symbol(g, s->gotos.v[j]->elem);
 	  x -= lowest_sym;
 	  while (vgoto.n <= x) {
-            int qq = 0;
+            uint qq = 0;
 	    vec_add(&vgoto, 0);
             for (qq = 0; qq < vgoto.n; qq++)
               if (vgoto.v[qq] == 239847234)
@@ -943,8 +956,8 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
 	  if (vgoto.v[x]) {
 	    again = 1;
 	    /* undo the damage */
-	    for (--j;j >= 0;j--) {
-	      x = elem_symbol(g, s->gotos.v[j]->elem);
+	    while (j > 0) {
+	      x = elem_symbol(g, s->gotos.v[--j]->elem);
 	      x -= lowest_sym;
 	      vgoto.v[x] = 0;
 	    }
@@ -996,7 +1009,7 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
     for (j = 0; j < vgoto.n; j++) {
       if (vgoto.v[j] < 0 || vgoto.v[j] > 65535)
 	d_fail("goto table overflow");
-      add_array_member(fp, unsigned short, %d, vgoto.v[j], j == vgoto.n - 1);
+      add_array_member(fp, unsigned short, %d, (unsigned short)vgoto.v[j], j == vgoto.n - 1);
       if (j % 16 == 15) {
 	print(fp, "\n");
 	g->write_line += 1;
@@ -1016,7 +1029,8 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
 
 static void
 write_scanner_code(File *file, Grammar *g, char *tag) {
-  int i, j, l;
+  uint i, j;
+  size_t l;
   Action *a;
   State *s;
   FILE *fp = file->fp;
@@ -1069,15 +1083,15 @@ find_symbol(Grammar *g, char *s, char *e, int kind) {
       if ((p = lookup_production(g, s, e-s)))
 	return p->index;
     } else if (kind == D_SYMBOL_STRING) {
-      int i;
+      uint i;
       int found = -1;
       for (i = 0; i < g->terminals.n;i++)
 	if (g->terminals.v[i]->kind == TERM_STRING &&
 	    ((g->terminals.v[i]->term_name &&
-	      strlen(g->terminals.v[i]->term_name) == e-s &&
+	      strlen(g->terminals.v[i]->term_name) == (size_t)(e-s) &&
 	      !strncmp(s, g->terminals.v[i]->term_name, e-s)) ||
 	     (!g->terminals.v[i]->term_name &&
-	      g->terminals.v[i]->string_len == (e-s) &&
+	      g->terminals.v[i]->string_len == (size_t)(e-s) &&
 	      !strncmp(s, g->terminals.v[i]->string, e-s)))) {
 	  if (found > 0) {
 	    d_fail("attempt to find symbol for non-unique string '%s'\n",
@@ -1091,6 +1105,8 @@ find_symbol(Grammar *g, char *s, char *e, int kind) {
   }
   return -1;
 }
+
+static char * avoid_unused_warning = "(void)_ps; (void)_children; (void)_n_children; (void)_offset; (void)_parser; /* Avoids warnings about unused parameters in most compilers */";
 
 static void
 write_code(FILE *fp, Grammar *g, Rule *r, char *code,
@@ -1142,7 +1158,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
       if (*c == '#') {
 	c++;
 	if (isdigit_(*c)) {
-	  int n = atoi(c);
+	  uint n = (uint)atol(c);
 	  fprintf(fp, "(d_get_number_of_children((D_PN(_children[%d], _offset))))", n);
 	  if (n > r->elems.n-1)
 	    d_fail("$nXXXX greater than number of children at line %d", line);
@@ -1155,7 +1171,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
       } else if (*c == 'n') {
 	++c;
 	if (isdigit_(*c)) {
-	  int n = atoi(c);
+	  uint n = (uint)atol(c);
 	  fprintf(fp, "(*(D_PN(_children[%d], _offset)))", n);
 	  if (n > r->elems.n-1)
 	    d_fail("$nXXXX greater than number of children at line %d", line);
@@ -1227,6 +1243,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
       c++;
     }
   }
+  fprintf(fp, avoid_unused_warning);
   fprintf(fp, "  return 0;");
   fprintf(fp, "}\n\n");
   g->write_line += 2;
@@ -1238,8 +1255,9 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
 
 static void
 write_global_code(FILE *fp, Grammar *g, char *tag) {
-  int i;
+  uint i;
   char *c;
+  (void)tag;
   
   for (i = 0; i < g->ncode; i++) {
     if (g->write_line_directives) {
@@ -1291,7 +1309,7 @@ static char * reduction_args = "(void *_ps, void **_children, int _n_children, i
 
 static void
 write_reductions(File *file, Grammar *g, char *tag) {
-  int i, j, k, l, pmax;
+  uint i, j, k, l, pmax;
   Production *p, *pdefault;
   Rule *r, *rdefault = NULL;
   char final_code[256], speculative_code[256], pass_code[256];
@@ -1317,8 +1335,8 @@ write_reductions(File *file, Grammar *g, char *tag) {
   }
   for (i = 0; i < g->productions.n; i++) {
     p = g->productions.v[i];
-    for (j = p->rules.n - 1; j >= 0; j--) {
-      r = p->rules.v[j];
+    for (j = p->rules.n; j > 0; ) {
+      r = p->rules.v[--j];
       for (k = 0; k < j; k++)
 	if (r->elems.n == p->rules.v[k]->elems.n &&
 	    r->speculative_code.code == p->rules.v[k]->speculative_code.code &&
@@ -1447,6 +1465,7 @@ er_hint_hash_fn(State *a, hash_fns_t *fns) {
   VecHint *sa = &a->error_recovery_hints;
   uint32 hash = 0, i;
   Term *ta;
+  (void)fns;
 
   for (i = 0; i < sa->n; i++) {
     ta = sa->v[i]->rule->elems.v[sa->v[i]->rule->elems.n - 1]->e.term;
@@ -1460,9 +1479,11 @@ er_hint_hash_fn(State *a, hash_fns_t *fns) {
 
 static int
 er_hint_cmp_fn(State *a, State *b, hash_fns_t *fns) {
-  int i;
+  uint i;
   VecHint *sa = &a->error_recovery_hints, *sb = &b->error_recovery_hints;
   Term *ta, *tb;
+  (void)fns;
+
   if (sa->n != sb->n)
     return 1;
   for (i = 0; i < sa->n; i++) {
@@ -1485,7 +1506,7 @@ er_hint_hash_fns = {
 
 static void
 write_error_data(File *fp, Grammar *g, VecState *er_hash, char *tag) {
-  int i, j;
+  uint i, j;
   State *s;
   Term *t;
   State *h;
@@ -1523,7 +1544,7 @@ static char *scan_kind_strings[] = {"D_SCAN_ALL", "D_SCAN_LONGEST", "D_SCAN_MIXE
 
 static void
 write_state_data(File *fp, Grammar *g, VecState *er_hash, char *tag) {
-  int i;
+  uint i;
   State *s, *h, *shifts;
   
   print(fp, "\n");
@@ -1625,7 +1646,8 @@ static int
 write_header(Grammar *g, char *base_pathname, char *tag) {
   char pathname[FILENAME_MAX];
   char ver[128];
-  int i, tokens = 0, states = 0, col;
+  uint i, tokens = 0, states = 0;
+  size_t col;
   FILE *hfp;
 
   for (i = 0; i < g->terminals.n; i++)
@@ -1693,7 +1715,7 @@ static int d_symbol_values[] = {
   D_SYMBOL_STRING, D_SYMBOL_REGEX, D_SYMBOL_CODE, D_SYMBOL_TOKEN };
 static void
 write_symbol_data(File *fp, Grammar *g, char *tag) {
-  int i;
+  uint i;
   start_array(fp, D_Symbol, make_name("d_symbols_%s", tag), "", 0, "\n");
   g->write_line += 1;
   for (i = 0; i < g->productions.n; i++) {
@@ -1718,6 +1740,7 @@ write_symbol_data(File *fp, Grammar *g, char *tag) {
     add_struct_const_member(fp, D_Symbol, d_symbol[symbol_index], d_symbol_values[symbol_index], kind);
     add_struct_str_member(fp, D_Symbol, name, name);
     add_struct_member(fp, D_Symbol, %d, (int) strlen(name), name_len);  /*BS strlen doesn't always works here, length can change when quoted string is compiled*/
+    add_struct_member(fp, D_Symbol, %d, 0, start_symbol);
     end_struct_in_array(fp, ",\n");
     g->write_line += 1;
     FREE(s);
@@ -1729,7 +1752,7 @@ write_symbol_data(File *fp, Grammar *g, char *tag) {
 
 static void
 write_passes(File *fp, Grammar *g, char *tag) {
-  int i;
+  uint i;
   if (g->passes.n) {
     start_array(fp, D_Pass, make_name("d_passes_%s", tag), "", 0, "");
     g->write_line += 1;
@@ -1812,7 +1835,7 @@ write_parser_tables(Grammar *g, char *tag, File *file) {
 
 void
 write_parser_tables_internal(Grammar *g, char *base_pathname, char *tag, int binary, 
-			     FILE *fp, unsigned char **str, unsigned int *str_len)
+			     FILE *fp, unsigned char **str, size_t *str_len)
 {
   File file;
   if (!binary) {
@@ -1867,7 +1890,7 @@ write_binary_tables_to_file(Grammar *g, FILE *fp) {
 }
 
 int
-write_binary_tables_to_string(Grammar *g, unsigned char **str, unsigned int *str_len) {
+write_binary_tables_to_string(Grammar *g, unsigned char **str, size_t *str_len) {
   write_parser_tables_internal(g, g->pathname, 
 			       *g->grammar_ident ? g->grammar_ident : NULL, 
 			       1, 0, str, str_len);

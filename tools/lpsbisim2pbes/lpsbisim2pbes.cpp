@@ -8,11 +8,8 @@
 //
 /// \file lpsbisim2pbes.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/bisimulation_type.h"
 #include "mcrl2/utilities/tool.h"
@@ -95,7 +92,6 @@ class lpsbisim2pbes_tool: public super
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   lpsbisim2pbes_tool tool;
   return tool.execute(argc, argv);
 }

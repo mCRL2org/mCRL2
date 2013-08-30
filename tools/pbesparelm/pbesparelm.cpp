@@ -8,15 +8,11 @@
 //
 /// \file pbesparelm.cpp
 
-#include "boost.hpp" // precompiled headers
-
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -55,18 +51,9 @@ class pbes_parelm_tool: public input_output_tool
     }
 };
 
-class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool>
-{
-  public:
-    pbes_parelm_gui_tool() {}
-};
-
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  pbes_parelm_gui_tool tool;
-  return tool.execute(argc, argv); /*< The function `execute` first parses the command line
+  return pbes_parelm_tool().execute(argc, argv); /*< The function `execute` first parses the command line
                                        arguments, and then calls the function `run`. >*/
 }
 //]

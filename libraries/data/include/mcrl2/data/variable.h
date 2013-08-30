@@ -16,8 +16,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
@@ -41,10 +39,10 @@ class variable: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    variable(const atermpp::aterm_appl& term)
+    explicit variable(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_DataVarId(m_term));
+      assert(core::detail::check_term_DataVarId(*this));
     }
 
     /// \brief Constructor.
@@ -57,14 +55,14 @@ class variable: public data_expression
       : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    sort_expression sort() const
+    const sort_expression& sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
 
@@ -72,7 +70,7 @@ class variable: public data_expression
 typedef atermpp::term_list<variable> variable_list;
 
 /// \brief vector of variables
-typedef atermpp::vector<variable>    variable_vector;
+typedef std::vector<variable>    variable_vector;
 
 //--- end generated class variable ---//
 
@@ -81,24 +79,24 @@ std::string pp(const variable& x);
 std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
 std::string pp(const std::set<variable>& x);
-std::string pp(const atermpp::set<variable>& x);
-std::set<data::variable> find_variables(const data::variable& x);
-std::set<data::variable> find_variables(const data::variable_list& x);
+std::string pp(const std::set<variable>& x);
+std::set<data::variable> find_all_variables(const data::variable& x);
+std::set<data::variable> find_all_variables(const data::variable_list& x);
 std::set<core::identifier_string> find_identifiers(const data::variable_list& x);
-
-/// \brief Converts an container with variables to a variable_list
-/// \param r A range of variables.
-/// \note This function uses implementation details of the iterator type
-/// and hence is sometimes efficient than copying all elements of the list.
-template < typename Container >
-inline variable_list make_variable_list(Container const& r, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-{
-  return atermpp::convert< variable_list >(r);
-}
 
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::variable& t1, mcrl2::data::variable& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_VARIABLE_H
 

@@ -52,6 +52,8 @@ std::string pp(const process::bounded_init& x) { return process::pp< process::bo
 std::string pp(const process::merge& x) { return process::pp< process::merge >(x); }
 std::string pp(const process::left_merge& x) { return process::pp< process::left_merge >(x); }
 std::string pp(const process::choice& x) { return process::pp< process::choice >(x); }
+std::string pp(const process::untyped_process_assignment& x) { return process::pp< process::untyped_process_assignment >(x); }
+std::string pp(const process::untyped_parameter_identifier& x) { return process::pp< process::untyped_parameter_identifier >(x); }
 void normalize_sorts(process::process_equation_vector& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_equation_vector >(x, dataspec); }
 void normalize_sorts(process::process_specification& x, const data::data_specification& /* dataspec */) { process::normalize_sorts< process::process_specification >(x, x.data()); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }
@@ -61,9 +63,9 @@ std::set<data::sort_expression> find_sort_expressions(const process::process_spe
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
 
-// TODO: These should be removed when the ATerm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return x.to_string(); }
-std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
+// TODO: These should be removed when the aterm code has been replaced.
+std::string pp(const atermpp::aterm& x) { return to_string(x); }
+std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
 } // namespace process
 

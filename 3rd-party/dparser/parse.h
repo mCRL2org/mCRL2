@@ -79,7 +79,7 @@ typedef struct Parser {
   ShiftResult *shift_results;
   int nshift_results;
   D_Shift *code_shifts;
-  int ncode_shifts;
+  uint ncode_shifts;
   /* comments */
   struct Parser *whitespace_parser;
   /* interface support */
@@ -93,7 +93,7 @@ typedef struct Parser {
   Parse Node - the 'symbol' and the constructed parse subtrees.
 */
 typedef struct PNode {
-  uint			hash;
+  uintptr_t		hash;
   AssocKind		assoc;
   int			priority;
   AssocKind		op_assoc;

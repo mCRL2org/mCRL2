@@ -22,9 +22,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/parse.h"
 
 using namespace mcrl2;
@@ -38,11 +36,11 @@ void test_representative_generator()
                                     "    h__:Set(Real);\n"
                                    );
 
-  atermpp::vector< data::structured_sort_constructor_argument > arguments;
+  std::vector< data::structured_sort_constructor_argument > arguments;
   arguments.push_back(structured_sort_constructor_argument("s", basic_sort("E")));
   arguments.push_back(structured_sort_constructor_argument("n", sort_nat::nat()));
 
-  atermpp::vector< structured_sort_constructor > constructors;
+  std::vector< structured_sort_constructor > constructors;
   constructors.push_back(structured_sort_constructor("d", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   constructors.push_back(structured_sort_constructor("e", boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
 
@@ -71,17 +69,16 @@ void test_representative_generator()
 
   // Check whether the representative of the set of reals is the empty set of reals.
   BOOST_CHECK(default_expression_generator(container_sort(set_container(),data::sort_real::real_())) ==
-              data::sort_set::empty(data::sort_real::real_()));
+              data::sort_set::constructor(data::sort_real::real_(),
+                                          data::sort_set::false_function(data::sort_real::real_()),
+                                          data::sort_fset::empty(data::sort_real::real_())));
 
 
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_representative_generator();
-  core::garbage_collect();
 
   return 0;
 }

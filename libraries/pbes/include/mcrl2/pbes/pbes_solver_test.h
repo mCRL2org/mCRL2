@@ -16,12 +16,9 @@
 #include "mcrl2/core/detail/print_utility.h"
 
 //Rewriters
-// #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/data/rewriter.h"
-// #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/pbes/rewriter.h"
-// #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/algorithms.h"
 
 //Data framework
 #include "mcrl2/data/enumerator.h"
@@ -39,7 +36,7 @@ namespace pbes_system
 {
 
 /// \brief Straightforward solver for pbesses
-/// \detail This solver gets a parameterised boolean equation system.
+/// \details This solver gets a parameterised boolean equation system.
 ///         It subsequently transforms it to a boolean equation system
 ///         where quantifiers are eliminated as much as possible (using
 ///         the quantifier-all pbes rewriter). After generating the equations
@@ -47,10 +44,10 @@ namespace pbes_system
 ///         these. This method uses the same code as pbes2bool (except that
 ///         pbes2bool uses more advanced features).
 
-template < typename Container >
-bool pbes2_bool_test(pbes< Container > &pbes_spec, data::rewriter::strategy rewrite_strategy = data::jitty)
+inline
+bool pbes2_bool_test(pbes &pbes_spec, data::rewriter::strategy rewrite_strategy = data::jitty)
 {
-  pbes_system::detail::instantiate_global_variables(pbes_spec);
+  pbes_system::algorithms::instantiate_global_variables(pbes_spec);
 
   // Generate an enumerator, a data rewriter and a pbes rewriter.
   data::rewriter datar(pbes_spec.data(),
@@ -65,11 +62,10 @@ std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spe
 #endif
 
   // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
-  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter_with_variables datarv(datar);
-  data::data_enumerator<> datae(pbes_spec.data(), datar, generator);
+  data::data_enumerator datae(pbes_spec.data(), datar);
   const bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,data::data_enumerator<> >
+  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator>
   pbesr(datarv, datae, enumerate_infinite_sorts);
   // The use of a pbesrewriter is switched off, because the pbesrewriter is too slow for the time being.
   // ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr);

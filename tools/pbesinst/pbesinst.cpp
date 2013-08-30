@@ -9,8 +9,6 @@
 /// \file pbesinst.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
@@ -21,7 +19,6 @@
 #include <string>
 #include <utility>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -143,7 +140,5 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return pbesinst_tool().execute(argc, argv);
 }

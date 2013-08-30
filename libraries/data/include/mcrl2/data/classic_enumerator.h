@@ -22,6 +22,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/detail/enum/standard.h"
+#include "mcrl2/utilities/workarounds.h" // for nullptr on older compilers
 
 namespace mcrl2
 {
@@ -125,7 +126,6 @@ class classic_enumerator
                                                               not_equal_to_false,
                                                               &(m_enclosing_enumerator->m_enumerator),
                                                               max_internal_variables));
-            m_assignments.protect();
             increment();
           }
         }
@@ -141,9 +141,8 @@ class classic_enumerator
         /// \brief Destructor.
         ~iterator_internal()
         {
-          if (m_generator!=NULL)
+          if (m_generator!=nullptr)
           {
-            m_assignments.unprotect();
             m_generator.reset();
           }
         }
@@ -156,14 +155,13 @@ class classic_enumerator
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
+          /* Code below appears to be without effect.
           if (m_generator==NULL && other.m_generator!=NULL)
           {
-            m_assignments.protect();
           }
           if (m_generator!=NULL && other.m_generator==NULL)
           {
-            m_assignments.unprotect();
-          }
+          } */
           m_generator=other.m_generator;
           return *this;
         }
@@ -176,14 +174,14 @@ class classic_enumerator
           m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
           m_solution_is_exact=other.m_solution_is_exact;
           m_solution_possible=other.m_solution_possible;
+          /* Code below appears to be without effect.
           if (m_generator==NULL && other.m_generator!=NULL)
           {
-            m_assignments.protect();
           }
           if (m_generator!=NULL && other.m_generator==NULL)
           {
-            m_assignments.unprotect();
           }
+          */
           m_generator=other.m_generator;
         }
 
@@ -213,7 +211,7 @@ class classic_enumerator
 
         void increment()
         {
-          if (m_generator==NULL)
+          if (m_generator==nullptr)
           {
             m_enumerator_iterator_valid=false; // There was only one solution.
           }
@@ -247,6 +245,7 @@ class classic_enumerator
     ///          same length as variables.
     /// \param[in] variables The variables for which a solution is sought.
     /// \param[in] condition_in_internal_format The condition in internal format.
+    /// \param[in] sigma A substitution in the internal format.
     /// \param[in] max_internal_variables The maximal number of internally generatable variables.
     ///            If zero, then there is no bound. If the bound is reached, generating
     ///            new solutions stops with or without an exception as desired.
@@ -320,10 +319,6 @@ class classic_enumerator
                       &(m_enclosing_enumerator->m_enumerator),
                       max_internal_variables)
         {
-          /* for (substitution_type::const_iterator i=substitution.begin(); i!=substitution.end(); ++i)
-          {
-            m_enclosing_enumerator->m_evaluator.set_internally_associated_value(i->first,i->second);
-          } */
           increment();
         }
 
@@ -373,8 +368,8 @@ class classic_enumerator
             }
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
-            for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
-                 i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i,++j)
+            for (atermpp::term_list_iterator< atermpp::aterm_appl > i=assignment_list.begin();
+                 i != assignment_list.end(); ++i,++j)
             {
               assert(static_cast< variable_type >(*j).sort() ==
                               m_enclosing_enumerator->m_evaluator.convert_from(*i).sort());
@@ -422,6 +417,7 @@ class classic_enumerator
                         valid solutions are being generated, or whether a problem has occurred.
                         Basically, there are two possible problems, namely, there are no constructor
                         functions or the number of internally generated variables reached the limit.
+        \param[in] substitution A substitution.
 
     **/
     template < typename Container >

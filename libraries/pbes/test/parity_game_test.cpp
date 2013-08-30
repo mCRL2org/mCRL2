@@ -27,8 +27,6 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 #ifdef MCRL2_PGSOLVER_ENABLED
 #include <cstdlib>
@@ -125,7 +123,7 @@ std::string PBES3 =
 
 void test_pbes(std::string pbes_spec)
 {
-  pbes_system::pbes<> p = pbes_system::txt2pbes(pbes_spec);
+  pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::detail::parity_game_output pgg(p);
   pgg.run();
 
@@ -158,13 +156,12 @@ void test_pbes(std::string pbes_spec)
   BOOST_CHECK(player == 0);
   BOOST_CHECK(expected_result = (winner == 0));
 #endif
-  core::garbage_collect();
 }
 
 // mimick the way parity_game_generator is used in parity game solver from Twente
 void test_pbespgsolve(std::string pbes_spec)
 {
-  pbes_system::pbes<> p = pbes_system::txt2pbes(pbes_spec);
+  pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::parity_game_generator pgg(p, true, true);
   size_t begin = 0;
   size_t end = 3;
@@ -201,15 +198,13 @@ void test_lps(const std::string& lps_spec, const std::string& formula = lps::det
 {
   using namespace pbes_system;
   bool timed = false;
-  pbes<> p = lps2pbes(lps_spec, formula, timed);
+  pbes p = lps2pbes(lps_spec, formula, timed);
   std::string text = pbes_system::pp(p);
   test_pbes(text);
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_pbes(BES1);
   test_pbes(BES2);
   test_pbes(BES3);

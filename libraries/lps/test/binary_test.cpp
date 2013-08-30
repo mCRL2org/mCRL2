@@ -19,7 +19,6 @@
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -277,13 +276,10 @@ BOOST_AUTO_TEST_CASE(abp)
   binary_algorithm<rewriter>(spec, r).run();
   std::clog << "--- after ---\n" << lps::pp(spec) << std::endl;
   BOOST_CHECK(is_well_typed(spec));
-  core::garbage_collect();
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }
 

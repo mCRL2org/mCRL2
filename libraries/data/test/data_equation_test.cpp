@@ -14,13 +14,11 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -28,8 +26,8 @@ using namespace mcrl2::data;
 void data_equation_test()
 {
   basic_sort s("S");
-  function_symbol c("c", s);
-  function_symbol f("f", s);
+  data::function_symbol c("c", s);
+  data::function_symbol f("f", s);
   variable x("x", s);
   variable_list xl(atermpp::make_list(x));
 
@@ -42,10 +40,7 @@ void data_equation_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   data_equation_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

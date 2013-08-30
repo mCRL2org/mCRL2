@@ -17,13 +17,11 @@
 
 //MCRL2-specific
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/bes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -78,7 +76,7 @@ class besinfo_tool: public bes_input_tool<input_tool>
     /// - Give error
     bool run()
     {
-      boolean_equation_system<> b;
+      boolean_equation_system b;
       load_bes(b,input_filename(), bes_input_format());
 
       bes::detail::bes_property_map info(b);
@@ -105,7 +103,7 @@ class besinfo_tool: public bes_input_tool<input_tool>
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
-        for (atermpp::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+        for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
         {
           std::cout << core::pp(i->symbol()) << "." << bes::pp(i->variable()) << std::endl;
         }
@@ -115,17 +113,7 @@ class besinfo_tool: public bes_input_tool<input_tool>
 
 };
 
-class besinfo_gui_tool: public mcrl2_gui_tool<besinfo_tool>
-{
-  public:
-    besinfo_gui_tool()
-    {
-      m_gui_options["full"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-  return besinfo_gui_tool().execute(argc, argv);
+  return besinfo_tool().execute(argc, argv);
 }

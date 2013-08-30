@@ -21,13 +21,13 @@ namespace core
 namespace detail
 {
 
-// ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts);
+// aterm_appl gsDataSpecEltsToSpec(aterm_list SpecElts);
 // //Pre: SpecElts contains zero or more occurrences of sort, constructor,
 // //     operation and data equation specifications.
 // //Ret: data specification containing one sort, constructor, operation,
 // //     and data equation specification, in that order.
 //
-// ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts);
+// aterm_appl gsProcSpecEltsToSpec(aterm_list SpecElts);
 // //Pre: SpecElts contains one process initialisation and zero or more
 // //     occurrences of sort, constructor, operation, data equation, action and
 // //     process equation specifications.
@@ -35,14 +35,14 @@ namespace detail
 // //     data equation, action and process equation specification, and one
 // //     process initialisation, in that order.
 //
-// ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
+// aterm_appl gsActionRenameEltsToActionRename(aterm_list SpecElts);
 // //Pre: ActionRenameElts contains zero or more occurrences of
 // //     sort, constructor, operation, equation, action and action rename
 // //     rules.
 // //Ret: specification containing one sort, constructor, operation, equation,
 // //     action and action rename rules in that order.
 //
-// ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
+// aterm_appl gsPBESSpecEltsToSpec(aterm_list SpecElts);
 // //Pre: SpecElts contains one parameterised boolean initialisation and zero or
 // //     more occurrences of sort, constructor, operation, data equation, action
 // //     and parameterised boolean equation specifications.
@@ -51,18 +51,18 @@ namespace detail
 // //     and one parameterised boolean initialisation, in that order.
 
 inline
-ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts)
+aterm_appl gsDataSpecEltsToSpec(aterm_list SpecElts)
 {
-  ATermAppl Result = NULL;
-  ATermList SortDecls = ATmakeList0();
-  ATermList ConsDecls = ATmakeList0();
-  ATermList MapDecls = ATmakeList0();
-  ATermList DataEqnDecls = ATmakeList0();
+  aterm_appl Result = NULL;
+  aterm_list SortDecls = ATmakeList0();
+  aterm_list ConsDecls = ATmakeList0();
+  aterm_list MapDecls = ATmakeList0();
+  aterm_list DataEqnDecls = ATmakeList0();
   size_t n = ATgetLength(SpecElts);
   for (size_t i = 0; i < n; i++)
   {
-    ATermAppl SpecElt = ATAelementAt(SpecElts, i);
-    ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
+    aterm_appl SpecElt = ATAelementAt(SpecElts, i);
+    aterm_list SpecEltArg0 = ATLgetArgument(SpecElt, 0);
     if (gsIsSortSpec(SpecElt))
     {
       SortDecls = ATconcat(SortDecls, SpecEltArg0);
@@ -95,21 +95,21 @@ ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts)
 }
 
 inline
-ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
+aterm_appl gsProcSpecEltsToSpec(aterm_list SpecElts)
 {
-  ATermAppl Result = NULL;
-  ATermList SortDecls = ATmakeList0();
-  ATermList ConsDecls = ATmakeList0();
-  ATermList MapDecls = ATmakeList0();
-  ATermList DataEqnDecls = ATmakeList0();
-  ATermList GlobVars = ATmakeList0();
-  ATermList ActDecls = ATmakeList0();
-  ATermList ProcEqnDecls = ATmakeList0();
-  ATermAppl ProcInit = NULL;
+  aterm_appl Result = NULL;
+  aterm_list SortDecls = ATmakeList0();
+  aterm_list ConsDecls = ATmakeList0();
+  aterm_list MapDecls = ATmakeList0();
+  aterm_list DataEqnDecls = ATmakeList0();
+  aterm_list GlobVars = ATmakeList0();
+  aterm_list ActDecls = ATmakeList0();
+  aterm_list ProcEqnDecls = ATmakeList0();
+  aterm_appl ProcInit = NULL;
   size_t n = ATgetLength(SpecElts);
   for (size_t i = 0; i < n; i++)
   {
-    ATermAppl SpecElt = ATAelementAt(SpecElts, i);
+    aterm_appl SpecElt = ATAelementAt(SpecElts, i);
     if (gsIsProcessInit(SpecElt))
     {
       if (ProcInit == NULL)
@@ -125,7 +125,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
     }
     else
     {
-      ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
+      aterm_list SpecEltArg0 = ATLgetArgument(SpecElt, 0);
       if (gsIsGlobVarSpec(SpecElt))
       {
         GlobVars = ATconcat(GlobVars, SpecEltArg0);
@@ -183,20 +183,20 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
 }
 
 inline
-ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
+aterm_appl gsPBESSpecEltsToSpec(aterm_list SpecElts)
 {
-  ATermAppl Result = NULL;
-  ATermList SortDecls = ATmakeList0();
-  ATermList ConsDecls = ATmakeList0();
-  ATermList MapDecls = ATmakeList0();
-  ATermList DataEqnDecls = ATmakeList0();
-  ATermList GlobVars = ATmakeList0();
-  ATermAppl PBEqnSpec = NULL;
-  ATermAppl PBInit = NULL;
+  aterm_appl Result = NULL;
+  aterm_list SortDecls = ATmakeList0();
+  aterm_list ConsDecls = ATmakeList0();
+  aterm_list MapDecls = ATmakeList0();
+  aterm_list DataEqnDecls = ATmakeList0();
+  aterm_list GlobVars = ATmakeList0();
+  aterm_appl PBEqnSpec = NULL;
+  aterm_appl PBInit = NULL;
   size_t n = ATgetLength(SpecElts);
   for (size_t i = 0; i < n; i++)
   {
-    ATermAppl SpecElt = ATAelementAt(SpecElts, i);
+    aterm_appl SpecElt = ATAelementAt(SpecElts, i);
     if (gsIsPBEqnSpec(SpecElt))
     {
       if (PBEqnSpec == NULL)
@@ -225,7 +225,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
     }
     else
     {
-      ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
+      aterm_list SpecEltArg0 = ATLgetArgument(SpecElt, 0);
       if (gsIsGlobVarSpec(SpecElt))
       {
         GlobVars = ATconcat(GlobVars, SpecEltArg0);
@@ -275,20 +275,20 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
 }
 
 inline
-ATermAppl gsActionRenameEltsToActionRename(ATermList ActionRenameElts)
+aterm_appl gsActionRenameEltsToActionRename(aterm_list ActionRenameElts)
 {
-  ATermAppl Result = NULL;
-  ATermList SortDecls = ATmakeList0();
-  ATermList ConsDecls = ATmakeList0();
-  ATermList MapDecls = ATmakeList0();
-  ATermList DataEqnDecls = ATmakeList0();
-  ATermList ActDecls = ATmakeList0();
-  ATermList ActionRenameRules = ATmakeList0();
+  aterm_appl Result = NULL;
+  aterm_list SortDecls = ATmakeList0();
+  aterm_list ConsDecls = ATmakeList0();
+  aterm_list MapDecls = ATmakeList0();
+  aterm_list DataEqnDecls = ATmakeList0();
+  aterm_list ActDecls = ATmakeList0();
+  aterm_list ActionRenameRules = ATmakeList0();
   size_t n = ATgetLength(ActionRenameElts);
   for (size_t i = 0; i < n; i++)
   {
-    ATermAppl ActionRenameElt = ATAelementAt(ActionRenameElts, i);
-    ATermList ActionRenameEltArg0 = ATLgetArgument(ActionRenameElt, 0);
+    aterm_appl ActionRenameElt = ATAelementAt(ActionRenameElts, i);
+    aterm_list ActionRenameEltArg0 = ATLgetArgument(ActionRenameElt, 0);
     if (gsIsSortSpec(ActionRenameElt))
     {
       SortDecls = ATconcat(SortDecls, ActionRenameEltArg0);

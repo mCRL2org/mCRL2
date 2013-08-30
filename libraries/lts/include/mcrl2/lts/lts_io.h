@@ -28,9 +28,6 @@
 
 #include "boost/iterator/transform_iterator.hpp"
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 #include "mcrl2/lts/transition.h"
@@ -52,7 +49,7 @@ namespace detail
  * \return The LTS format based on the extension of \a s.
  * If no supported format can be determined from the extension then \a
  * lts_none is returned.  */
-lts_type guess_format(std::string const& s);
+lts_type guess_format(std::string const& s, const bool be_verbose=true);
 
 /** \brief Determines the LTS format from a format specification string.
  * \details This can be any of the following strings:
@@ -127,7 +124,7 @@ std::string lts_extensions_as_string(const std::set<lts_type> &supported);
 
 
 /** \brief Read a labelled transition system and return it in fsm format.
- *  \details The file can refer to any file in lts, aut, fsm, bcg, or dot 
+ *  \details The file can refer to any file in lts, aut, fsm, bcg, or dot
  *           format. After reading it is is attempted to translate it into
  *           fsm format.
  *  \param[in] path A string with the name of the file.
@@ -170,7 +167,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
     case lts_dot:
     {
       lts_dot_t l1;
-      l1.load(path);
+      l1.loadnew(path);
       detail::lts_convert(l1,l);
       return;
     }

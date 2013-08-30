@@ -1,0 +1,132 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{Bisimulation algorithms}
+
+Let%
+\begin{eqnarray*}
+M(d) &=&\sum\limits_{i\in I_{M}}\sum_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(d,e)\cdot M(g_{i}(d,e)) \\
+S(d) &=&\sum\limits_{i\in I_{S}}\sum_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(d,e)\cdot M(g_{i}(d,e))
+\end{eqnarray*}%
+be two linear processes, such that $I_{M}\cap I_{S}=\emptyset $. $M$ is
+called the model and $S$ the specification. The expression $a_{i}(d,e)$ can
+be a multi-action, or have the special value $\tau $. We assume that there
+are no $\delta $ summands. We define four pbes equation systems that express
+some kind of bisimulation equivalence between $M$ and $S$.
+
+\paragraph{Branching Bisimulation}
+
+\emph{brbsim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{1} & := & \{Y_{i}^{M,S}(d,d^{\prime },e)=close_{i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{i}^{S,M}(d^{\prime },d,e)=close_{i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}\}%
+\end{array}%
+\end{equation*}%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{i}^{p,q}(d,d^{\prime },e)) \\
+close_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau
+\}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+Y_{i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime }),e)) \\
+&&\vee (X^{p,q}(d,d^{\prime })\wedge step_{i}^{p,q}(d,d^{\prime },e)) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{ 
+\begin{array}{cl}
+a_{i}=\tau : & X^{p,q}(g_{i}(d,e),d^{\prime })\vee \bigvee\limits_{\{j\in
+I_{q}|a_{j}=\tau \}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime
+},e^{\prime })\wedge X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime })) \\ 
+a_{i}\neq \tau : & \bigvee\limits_{\{j\in I_{q}|a_{j}=a_{i}\}}\exists
+_{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+(a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime }))\wedge
+X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))%
+\end{array}%
+\right.
+\end{eqnarray*}
+
+\paragraph{Strong Bisimulation}
+
+\emph{sbisim}$(M,S)=\nu E$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\}%
+\end{array}%
+\end{equation*}%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow step_{i}^{p,q}(d,d^{\prime },e)) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{j\in I_{q}}\exists
+_{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+(a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime }))\wedge
+X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))
+\end{eqnarray*}
+
+\paragraph{Weak Bisimulation}
+
+\emph{wbisim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E_{3} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{2} & := & \{Y_{1,i}^{M,S}(d,d^{\prime },e)=close_{1,i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{2,i}^{M,S}(d,d^{\prime })=close_{2,i}^{M,S}(d,d^{\prime })|i\in
+I_{M}, \\ 
+&  & Y_{1,i}^{S,M}(d^{\prime },d,e)=close_{1,i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}, \\ 
+&  & Y_{2,i}^{S,M}(d^{\prime },d)=close_{2,i}^{S,M}(d^{\prime },d)|i\in
+I_{S}\}%
+\end{array}%
+\end{equation*}%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{1,i}^{p,q}(d,d^{\prime },e)) \\
+close_{1,i}^{p,q}(d,d^{\prime },e) &=&\left( \bigvee\limits_{\{j\in
+I_{q}|a_{j}=\tau \}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime
+},e^{\prime })\wedge Y_{1,i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime
+}),e))\right) \vee step_{i}^{p,q}(d,d^{\prime },e) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{ 
+\begin{array}{cl}
+a_{i}=\tau : & close_{2,i}^{p,q}(g_{i}(d,e),d^{\prime }) \\ 
+a_{i}\neq \tau : & \bigvee\limits_{j\in I_{q}}\exists _{e^{\prime
+}:E_{j}}.\left( c_{j}(d^{\prime },e^{\prime })\wedge
+a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime })\wedge
+close_{2,i}^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))\right)%
+\end{array}%
+\right. \\
+close_{2,i}^{p,q}(d,d^{\prime }) &=&X^{p,q}(d,d^{\prime })\vee
+\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau \}}\left( \exists _{e^{\prime
+}:E_{j}}c_{j}(d^{\prime },e^{\prime })\wedge Y_{2,i}^{p,q}(d,g_{j}(d^{\prime
+},e^{\prime }))\right)
+\end{eqnarray*}
+
+\paragraph{Branching Simulation Equivalence}
+
+\emph{brbsim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\begin{equation*}
+\begin{array}{ccl}
+E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{M,S}(d,d^{\prime })=X^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{1} & := & \{Y_{i}^{M,S}(d,d^{\prime },e)=close_{i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{i}^{S,M}(d^{\prime },d,e)=close_{i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}\}%
+\end{array}%
+\end{equation*}%
+with $match$, $close$, and $step$ defined exactly the same as in branching
+bisimulation.\newpage

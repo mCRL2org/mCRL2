@@ -13,7 +13,6 @@
 #define BDD_SIMPLIFIER_H
 
 #include <ctime>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2
@@ -22,9 +21,6 @@ namespace data
 {
 namespace detail
 {
-
-// XXX remove
-using namespace aterm;
 
 /** \brief A base class for simplifying binary decision diagrams.
  *

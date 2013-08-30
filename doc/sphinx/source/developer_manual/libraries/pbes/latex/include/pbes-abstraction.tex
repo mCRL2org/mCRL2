@@ -1,0 +1,48 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{PBES abstraction}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\varphi
+_{X_{1}})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\varphi
+_{X_{n}})$ be a PBES, and let $V_{i}$ be a subset of the parameters in $%
+d_{X_{i}}$ for $i=1\cdots n$. Let $e\in \{true,false\}$ be a data
+expression. Then we define the algorithm $\mathsf{abstract}$ as follows:%
+\begin{equation*}
+\begin{array}{lll}
+\mathsf{abstract}(d,V,e) & = & \left\{ 
+\begin{array}{ll}
+d & \text{\textsf{if}\ }\mathsf{freevar}(d)\cap V=\emptyset \\ 
+e & \text{\textsf{otherwise}}%
+\end{array}%
+\right. \\ 
+\mathsf{abstract}(\varphi \oplus \psi ,V,e) & = & \mathsf{abstract}(\varphi
+,V,e)\oplus \mathsf{abstract}(\varphi ,V,e) \\ 
+\mathsf{abstract}(\mathsf{Q}_{d_{_{1}}:D_{1},\cdots ,d_{m}:D_{m}}.\varphi
+,V,e) & = & \mathsf{Q}_{d_{_{1}}:D_{1},\cdots ,d_{m}:D_{m}}.\mathsf{abstract}%
+(\varphi ,V\setminus \{d_{_{1}}:D_{1},\cdots ,d_{m}:D_{m}\},e) \\ 
+\mathsf{abstract}(\mathcal{\sigma }X(d_{_{1}}:D_{1},\cdots
+,d_{m}:D_{m})=\varphi ,V,e) & = & \mathcal{\sigma }X(d_{_{1}}:D_{1},\cdots
+,d_{m}:D_{m})=\mathsf{abstract}(\varphi ,V,e) \\ 
+\mathsf{abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],e) & = & 
+\begin{array}{c}
+\mathcal{(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\mathsf{abstract(}\varphi
+_{X_{1}},V_{1},e)) \\ 
+\cdots \\ 
+\mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\mathsf{abstract(}\varphi
+_{X_{n}},V_{n},e)%
+\end{array}%
+\end{array}%
+\end{equation*}%
+with $d$ a data expression, $\oplus \in \{\wedge ,\vee ,\Rightarrow \}$, and 
+$\mathsf{Q\in \{\forall ,\exists \}}$ and $V\subset \{d_{_{1}}:D_{1},\cdots
+,d_{m}:D_{m}\}$.
+
+\subsection{Motivation}
+
+The motivation for this algorithm is that if the solution of $\mathsf{%
+abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],false)$ is $true$, this implies
+that the solution of $\mathcal{E}$ is $true$ as well, and if the solution of 
+$\mathsf{abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],true)$ is $false$, this
+implies that the solution of $\mathcal{E}$ is $false$.\newpage 

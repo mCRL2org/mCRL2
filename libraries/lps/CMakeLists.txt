@@ -24,22 +24,18 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/lps.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/linearise.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/lpsparunfoldlib.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/next_state_generator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/simulation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
 )
 set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
 
@@ -50,6 +46,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_process
+  mcrl2_core
 )
 
 # add install target:

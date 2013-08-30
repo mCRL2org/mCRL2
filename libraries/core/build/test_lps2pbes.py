@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #~ Copyright 2011 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
@@ -12,16 +14,19 @@ def test_lps2pbes(p, filename):
     lpsfile = filename + '.lps'
     ltsfile = filename + '.lts'
     mcffile = 'nodeadlock.mcf'
-    pbesfile = filename + '.pbes'
+    pbesfile1 = filename + '1.pbes'
+    pbesfile2 = filename + '2.pbes'
     path(mcffile).write_text('[true*]<true>true')
     add_temporary_files(mcffile)
     run_mcrl22lps(mcrl2file, lpsfile, '--no-alpha')
     text = run_lps2lts(lpsfile, ltsfile, '-D')
     answer1 = text.find('deadlock-detect: deadlock found') != -1
-    run_lpspbes(lpsfile, mcffile, pbesfile)
-    answer2 = not run_pbes2bool(pbesfile)
-    print answer1, answer2
-    return answer1 == answer2
+    run_lpspbes(lpsfile, mcffile, pbesfile1)
+    answer2 = not run_pbes2bool(pbesfile1)
+    run_lpspbes(lpsfile, mcffile, pbesfile2, '--structured')
+    answer3 = not run_pbes2bool(pbesfile2)
+    print answer1, answer2, answer3
+    return answer1 == answer2 == answer3
 
 def main():
     options = parse_command_line()

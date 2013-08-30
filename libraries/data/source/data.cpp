@@ -55,11 +55,11 @@ data::data_equation translate_user_notation(const data::data_equation& x) { retu
 std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x) { return data::find_sort_expressions< data::data_equation >(x); }
 std::set<data::sort_expression> find_sort_expressions(const data::data_expression& x) { return data::find_sort_expressions< data::data_expression >(x); }
 std::set<data::sort_expression> find_sort_expressions(const data::sort_expression& x) { return data::find_sort_expressions< data::sort_expression >(x); }
-std::set<data::variable> find_variables(const data::data_expression& x) { return data::find_variables< data::data_expression >(x); }
-std::set<data::variable> find_variables(const data::data_expression_list& x) { return data::find_variables< data::data_expression_list >(x); }
-std::set<data::variable> find_variables(const data::function_symbol& x) { return data::find_variables< data::function_symbol >(x); }
-std::set<data::variable> find_variables(const data::variable& x) { return data::find_variables< data::variable >(x); }
-std::set<data::variable> find_variables(const data::variable_list& x) { return data::find_variables< data::variable_list >(x); }
+std::set<data::variable> find_all_variables(const data::data_expression& x) { return data::find_all_variables< data::data_expression >(x); }
+std::set<data::variable> find_all_variables(const data::data_expression_list& x) { return data::find_all_variables< data::data_expression_list >(x); }
+std::set<data::variable> find_all_variables(const data::function_symbol& x) { return data::find_all_variables< data::function_symbol >(x); }
+std::set<data::variable> find_all_variables(const data::variable& x) { return data::find_all_variables< data::variable >(x); }
+std::set<data::variable> find_all_variables(const data::variable_list& x) { return data::find_all_variables< data::variable_list >(x); }
 std::set<data::variable> find_free_variables(const data::data_expression& x) { return data::find_free_variables< data::data_expression >(x); }
 std::set<data::variable> find_free_variables(const data::data_expression_list& x) { return data::find_free_variables< data::data_expression_list >(x); }
 std::set<data::function_symbol> find_function_symbols(const data::data_equation& x) { return data::find_function_symbols< data::data_equation >(x); }
@@ -68,11 +68,10 @@ bool search_variable(const data::data_expression& x, const data::variable& v) { 
 //--- end generated data overloads ---//
 
 std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable> >(x); }
-std::string pp(const atermpp::set<variable>& x) { return data::pp< atermpp::set<variable> >(x); }
 
-// TODO: These should be removed when the ATerm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return x.to_string(); }
-std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
+// TODO: These should be removed when the aterm code has been replaced.
+std::string pp(const atermpp::aterm& x) { return to_string(x); }
+std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
 } // namespace data
 

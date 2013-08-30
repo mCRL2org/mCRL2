@@ -43,7 +43,7 @@ free_state(State *s) {
 
 static State *
 maybe_add_state(Grammar *g, State *s) {
-  int i, j;
+  uint i, j;
 
   for (i = 0; i < g->states.n; i++) {
     if (s->hash == g->states.v[i]->hash && 
@@ -71,7 +71,7 @@ next_elem(Item *i) {
 
 static State *
 build_closure(Grammar *g, State *s) {
-  int j, k;
+  uint j, k;
 
   for (j = 0; j < s->items.n; j++) {
     Item *i = s->items.v[j];
@@ -107,7 +107,7 @@ add_goto(State *s, State *ss, Elem *e) {
 
 static void
 build_state_for(Grammar *g, State *s, Elem *e) {
-  int j;
+  uint j;
   Item *i;
   State *ss = NULL;
 
@@ -126,7 +126,7 @@ build_state_for(Grammar *g, State *s, Elem *e) {
 
 static void
 build_new_states(Grammar *g) {
-  int i, j;
+  uint i, j;
   State *s;
   Elem e;
 
@@ -147,7 +147,7 @@ build_new_states(Grammar *g) {
 
 static void
 build_states_for_each_production(Grammar *g) {
-  int i;
+  uint i;
   for (i = 0; i < g->productions.n; i++)
     if (!g->productions.v[i]->internal && g->productions.v[i]->elem) {
       State *s = new_state();
@@ -167,13 +167,13 @@ elem_symbol(Grammar *g, Elem *e) {
 static int 
 gotocmp(const void *aa, const void *bb) {
   Goto *a = *(Goto **)aa, *b = *(Goto **)bb;
-  int i = a->state->index, j = b->state->index;
+  uint i = a->state->index, j = b->state->index;
   return ((i > j) ? 1 : ((i < j) ? -1 : 0));
 }
 
 static void
 sort_Gotos(Grammar *g) {
-  int i;
+  uint i;
 
   for (i = 0; i < g->states.n; i++) {
     VecGoto *vg = &g->states.v[i]->gotos;
@@ -212,10 +212,10 @@ free_Action(Action *a) {
 }
 
 static void
-add_action(Grammar *g, State *s, int akind, Term *aterm, 
+add_action(Grammar *g, State *s, uint akind, Term *aterm, 
 	   Rule *arule, State *astate) 
 {
-  int i;
+  uint i;
   Action *a;
   
   if (akind == ACTION_REDUCE) {
@@ -268,7 +268,7 @@ sort_VecAction(VecAction *v) {
 
 static void
 build_actions(Grammar *g) {
-  int x, y, z;
+  uint x, y, z;
   State *s;
   Elem *e;
  
@@ -296,7 +296,7 @@ build_actions(Grammar *g) {
 
 State *
 goto_State(State *s, Elem *e) {
-  int i;
+  uint i;
   for (i = 0; i < s->gotos.n; i++)
     if (s->gotos.v[i]->elem->e.term_or_nterm == e->e.term_or_nterm)
       return s->gotos.v[i]->state;
@@ -325,7 +325,7 @@ hintcmp(const void *ai, const void *aj) {
 
 static void
 build_right_epsilon_hints(Grammar *g) {
-  int x, y, z;
+  uint x, y, z;
   State *s, *ss;
   Elem *e;
   Rule *r;
@@ -347,7 +347,7 @@ build_right_epsilon_hints(Grammar *g) {
 	if (ss && r->elems.n)
 	  vec_add(&s->right_epsilon_hints, 
 		  new_Hint(r->elems.n - e->index - 1, ss, r));
-	else /* ignore for states_for_each_productions */;
+	else {/* ignore for states_for_each_productions */}
       }
       Lnext:;
     }
@@ -359,7 +359,7 @@ build_right_epsilon_hints(Grammar *g) {
 
 static void
 build_error_recovery(Grammar *g) {
-  int i, j, k, depth;
+  uint i, j, k, depth;
   State *s;
   Rule *r, *rr;
   Elem *e, *ee;

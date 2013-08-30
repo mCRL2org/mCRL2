@@ -19,16 +19,13 @@
 #include <sstream>
 #include <utility>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
@@ -52,44 +49,41 @@ class parity_game_generator
     typedef core::term_traits<pbes_expression> tr;
 
     /// \brief Substitution function type used by the PBES rewriter.
-    typedef data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > substitution_function;
+    typedef data::mutable_map_substitution< std::map< data::variable, data::data_expression_with_variables > > substitution_function;
 
     /// \brief Mark whether initialization has been initialized.
     /// Needed to properly cope with virtual inheritance!
     bool m_initialized;
 
     /// \brief The PBES that is being solved.
-    pbes<>& m_pbes;
-
-    /// \brief Identifier generator for the enumerator. (TODO: this needs to be improved!)
-    utilities::number_postfix_generator generator;
+    pbes& m_pbes;
 
     /// \brief Data rewriter.
     data::rewriter datar;
 
     /// \brief Data enumerator.
-    data::data_enumerator<> datae;
+    data::data_enumerator datae;
 
     /// \brief Data rewriter that operates on data expressions with variables.
     data::rewriter_with_variables datarv;
 
     /// \brief PBES rewriter.
-    pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R;
+    pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> R;
 
     /// \brief Maps propositional variables to corresponding PBES equations.
-    std::map<core::identifier_string, atermpp::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
+    std::map<core::identifier_string, std::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
 
     /// \brief Maps propositional variables to corresponding priorities.
     std::map<core::identifier_string, size_t> m_priorities;
 
     /// \brief Maps PBES closed expressions to corresponding BES variables.
-    atermpp::map<pbes_expression, size_t> m_pbes_expression_index;
+    std::map<pbes_expression, size_t> m_pbes_expression_index;
 
     /// \brief Contains intermediate results of the BES that is being generated.
     /// m_bes[i] represents a BES equation corresponding to BES variable i.
     /// m_bes[i].first is the right hand side of the BES equation
     /// m_bes[i].second is the block nesting depth of the corresponding PBES variable
-    atermpp::vector<std::pair<pbes_expression, size_t> > m_bes;
+    std::vector<std::pair<pbes_expression, size_t> > m_bes;
 
     /// \brief Determines what kind of BES equations are generated for true and false.
     bool m_true_false_dependencies;
@@ -130,7 +124,7 @@ class parity_game_generator
       mCRL2log(log::debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
-      atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(t);
+      std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(t);
       if (i != m_pbes_expression_index.end())
       {
         result = i->second;
@@ -179,7 +173,7 @@ class parity_game_generator
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
         substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
         mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into " << std::flush;
-        pbes_expression result(R(pbes_eqn.formula(), sigma));
+        pbes_expression result = R(pbes_eqn.formula(), sigma);
         mCRL2log(log::debug2, "parity_game_generator") << print(result) << std::endl;
         return result;
       }
@@ -191,7 +185,7 @@ class parity_game_generator
     void compute_equation_index_map()
     {
 
-      for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
       {
         m_pbes_equation_index[i->variable().name()] = i;
       }
@@ -288,7 +282,7 @@ class parity_game_generator
         }
 
         // Normalize the pbes, since the parity game generator currently doesn't handle negation and implication.
-        pbes_system::normalize(m_pbes);
+        pbes_system::algorithms::normalize(m_pbes);
 
         compute_equation_index_map();
         compute_priorities(m_pbes.equations());
@@ -309,19 +303,19 @@ class parity_game_generator
     /// \param p A PBES
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-    parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
+    /// \param rewrite_strategy Strategy to use for the data rewriter
+    parity_game_generator(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       :
       m_initialized(false),
       m_pbes(p),
-      generator("UNIQUE_PREFIX"),
       datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
-      datae(p.data(), datar, generator),
+      datae(p.data(), datar),
       datarv(datar),
       R(datarv, datae),
       m_true_false_dependencies(true_false_dependencies),
       m_is_min_parity(is_min_parity)
     {
-      detail::instantiate_global_variables(p);
+      pbes_system::algorithms::instantiate_global_variables(p);
     }
 
     virtual ~parity_game_generator() {}
@@ -330,7 +324,7 @@ class parity_game_generator
     /// \return the initial state rewritten by R
     virtual propositional_variable_instantiation get_initial_state()
     {
-      propositional_variable_instantiation phi = R(m_pbes.initial_state());
+      propositional_variable_instantiation phi = core::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       return phi;
     }
 
@@ -452,16 +446,16 @@ class parity_game_generator
       }
       else if (tr::is_and(psi))
       {
-        atermpp::set<pbes_expression> terms = pbes_expr::split_and(psi);
-        for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = pbes_expr::split_and(psi);
+        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(add_bes_equation(*i, priority));
         }
       }
       else if (tr::is_or(psi))
       {
-        atermpp::set<pbes_expression> terms = pbes_expr::split_or(psi);
-        for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = pbes_expr::split_or(psi);
+        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(add_bes_equation(*i, priority));
         }
@@ -470,7 +464,7 @@ class parity_game_generator
       {
         if (m_true_false_dependencies)
         {
-          atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::true_());
+          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::true_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }
@@ -479,14 +473,14 @@ class parity_game_generator
       {
         if (m_true_false_dependencies)
         {
-          atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::false_());
+          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::false_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }
       }
       else
       {
-        throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + print(psi) + "\n" + psi.to_string()));
+        throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + print(psi) + "\n" + to_string(psi)));
       }
       mCRL2log(log::debug, "parity_game_generator") << print_bes_equation(index, result);
       return result;
@@ -496,20 +490,20 @@ class parity_game_generator
     virtual
     void print_variable_mapping()
     {
-      std::cerr << "--- variable mapping ---" << std::endl;
+      mCRL2log(log::info) << "--- variable mapping ---" << std::endl;
       std::map<size_t, pbes_expression> m;
-      for (atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
+      for (std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
       {
         m[i->second] = i->first;
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        std::cerr << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
+        mCRL2log(log::info) << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
       }
-      std::cerr << "--- priorities ---" << std::endl;
+      mCRL2log(log::info) << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
       {
-        std::cerr << core::pp(i->first) << " " << i->second << std::endl;
+        mCRL2log(log::info) << core::pp(i->first) << " " << i->second << std::endl;
       }
     }
 };

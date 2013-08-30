@@ -24,17 +24,12 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_pbes
   mcrl2_utilities
   mcrl2_syntax
-  dparser
 )
 
 # install target:

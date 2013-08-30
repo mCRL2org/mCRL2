@@ -6,14 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #ifndef MCRL2_LTS_DETAIL_QUEUE_H
 #define MCRL2_LTS_DETAIL_QUEUE_H
 
 #include <limits.h>
 #include <cassert>
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -25,8 +22,8 @@ template <class T>
 class queue
 {
   private:
-    atermpp::deque <T> queue_get;
-    atermpp::deque <T> queue_put;
+    std::deque <T> queue_get;
+    std::deque <T> queue_put;
     size_t queue_size_max;        // This is the maximal allowed size of a queue
     size_t queue_put_count_extra; // This represents the number of elements that
     // did not fit in the queue.

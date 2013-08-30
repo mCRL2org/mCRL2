@@ -10,8 +10,6 @@
 /// \brief This tool reads a mcrl2 specification of a linear process,
 /// and translates it directly into LPS format.
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "txt2lps"
 #define AUTHOR "Wieger Wesselink"
 
@@ -20,8 +18,6 @@
 #include <string>
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -44,23 +40,15 @@ class txt2lps_tool : public input_output_tool
 
     bool run()
     {
-      lps::txtlps(input_filename(),
-                  output_filename()
-                 );
+      lps::txt2lps(input_filename(),
+                   output_filename()
+                  );
       return true;
     }
 
 };
 
-class txt2lps_gui_tool: public mcrl2_gui_tool<txt2lps_tool>
-{
-  public:
-    txt2lps_gui_tool() {}
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return txt2lps_gui_tool().execute(argc, argv);
+  return txt2lps_tool().execute(argc, argv);
 }

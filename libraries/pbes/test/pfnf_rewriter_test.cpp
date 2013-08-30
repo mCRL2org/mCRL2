@@ -10,10 +10,10 @@
 /// \brief Tests for pfnf rewriter.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplifying_rewriter.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
@@ -84,7 +84,6 @@ std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
     std::cout << "R(t1) " << pbes_system::pp(R(t1)) << std::endl;
     std::cout << "R(t2) " << pbes_system::pp(R(t2)) << std::endl;
   }
-  core::garbage_collect();
 }
 
 void test_pfnf_visitor()
@@ -93,13 +92,12 @@ void test_pfnf_visitor()
   test_pfnf_expression("X && (Y(3) || X)");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
   //test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
-  core::garbage_collect();
 }
 
 void test_pfnf(const std::string& pbes_spec)
 {
   std::cerr << "--- test_pfnf ---" << std::endl;
-  pbes<> p = txt2pbes(pbes_spec);
+  pbes p = txt2pbes(pbes_spec);
   std::cerr << "- before:" << std::endl;
   std::cerr << pbes_system::pp(p) << std::endl;
   pfnf_rewriter R;
@@ -108,7 +106,6 @@ void test_pfnf(const std::string& pbes_spec)
   std::cerr << pbes_system::pp(p) << std::endl;
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
   std::cerr << "-----------------" << std::endl;
-  core::garbage_collect();
 }
 
 void test_pfnf_rewriter()
@@ -135,12 +132,11 @@ void test_pfnf_rewriter()
   pfnf_rewriter R;
   pbes_expression x = parse_pbes_expression("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)", VARIABLE_SPECIFICATION);
   pbes_expression y = R(x);
-  core::garbage_collect();
 }
 
 void test_pfnf_rewriter2(const std::string& text)
 {
-  pbes<> p = txt2pbes(text);
+  pbes p = txt2pbes(text);
   std::cout << "\ntest_pfnf_rewriter2\n" << std::endl;
   std::cout << "--- before ---\n";
   std::cout << pbes_system::pp(p) << std::endl;
@@ -163,7 +159,6 @@ void test_pfnf_rewriter2(const std::string& text)
   bool result2 = pbes2_bool_test(p);
 #endif
   BOOST_CHECK(result1 == result2);
-  core::garbage_collect();
 }
 
 void test_pfnf_rewriter2()
@@ -185,7 +180,6 @@ void test_pfnf_rewriter2()
     "init X;                                                                                \n"
     ;
   test_pfnf_rewriter2(text);
-  core::garbage_collect();
 
   // problematic case found by random tests 15-1-2011
   text =
@@ -218,7 +212,7 @@ void test_is_pfnf()
     "     nu X11(b: Bool) = val(b) && (X11(b) || X11(!b)) && (X11(b) || X11(!!b)); \n"
     "init X(0);                                  \n"
     ;
-  pbes<> p = txt2pbes(text, false);
+  pbes p = txt2pbes(text, false);
   pbes_expression x;
 
   x = p.equations()[0].formula();
@@ -316,7 +310,7 @@ void test_pfnf_print()
     "     nu Y(n: Nat) = forall c:Bool. forall b:Bool. (X(0) || X(1) && X(0)) && (val(n > 0) => (X(2) || X(3))); \n"
     "init X(0);                                  \n"
     ;
-  pbes<> p = txt2pbes(text);
+  pbes p = txt2pbes(text);
   pfnf_rewriter R;
   pbes_rewrite(p, R);
   std::cout << "--- pfnf print ---" << std::endl;
@@ -326,13 +320,52 @@ void test_pfnf_print()
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 }
 
+void test_pfnf_rewriter3()
+{
+  std::string text =
+    "sort D = struct d1 | d2 | d3;                                                \n"
+    "                                                                             \n"
+    "map match: Pos # D -> Bool;                                                  \n"
+    "                                                                             \n"
+    "pbes                                                                         \n"
+    "                                                                             \n"
+    "nu Y(s1: Pos, e1: D, s2: Pos, e2: D) =                                       \n"
+    "    forall d: D.                                                             \n"
+    "    (                                                                        \n"
+    "        (val(s1 == 1 && match(1, d1))                  => X(2, d1, s2, e2))  \n"
+    "     && (val(s1 == 1 && !match(1, d1))                 => X(1, d1, s2, e2))  \n"
+    "     && (val(s1 == 2 && s2 == 1 && match(2, e1))       => Y(1, d1, 2, e1))   \n"
+    "     && (val(s1 == 2 && s2 == 1 && !match(2, e1))      => Y(1, d1, 1, d1))   \n"
+    "     && (val(s2 == 2)                                  => Y(s1, e1, 1, d1))  \n"
+    "     && (val(s1 == 1 && match(1, d))                   => Y(2, d, s2, e2))   \n"
+    "     && (val(s1 == 1 && !match(1, d))                  => Y(1, d1, s2, e2))  \n"
+    "    );                                                                       \n"
+    "                                                                             \n"
+    "mu X(s1: Pos, e1: D, s2: Pos, e2: D) =                                       \n"
+    "    forall d: D.                                                             \n"
+    "    (                                                                        \n"
+    "        (val(s1 == 2 && s2 == 1 && match(2, e1))       => X(1, d1, 2, e1))   \n"
+    "     && (val(s1 == 2 && s2 == 1 && !match(2, e1))      => X(1, d1, 1, d1))   \n"
+    "     && (val(e2 != d1 && s2 == 2)                      => X(s1, e1, 1, d1))  \n"
+    "     && (val(s1 == 1 && match(1, d))                   => X(2, d, s2, e2))   \n"
+    "     && (val(s1 == 1 && !match(1, d))                  => X(1, d1, s2, e2))  \n"
+    "    );                                                                       \n"
+    "                                                                             \n"
+    "init Y(1, d1, 1, d1);                                                        \n"
+    ;
+  pbes p = txt2pbes(text, true);
+  BOOST_CHECK(!pbes_system::detail::is_pfnf(p));
+  pfnf_rewriter R;
+  pbes_system::pbes_rewrite(p, R);
+  BOOST_CHECK(pbes_system::detail::is_pfnf(p));
+}
+
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_pfnf_visitor();
   test_pfnf_rewriter();
   test_pfnf_rewriter2();
+  test_pfnf_rewriter3();
   test_is_pfnf();
   test_pfnf_print();
 

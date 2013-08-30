@@ -18,15 +18,13 @@
 #include <vector>
 #include <set>
 #include <sstream>
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -36,10 +34,10 @@ namespace pbes_system
 {
 
 /// \brief Data structure for storing the indices of the variables that should be expanded by the finite pbesinst algorithm.
-typedef atermpp::map<core::identifier_string, std::vector<size_t> > pbesinst_index_map;
+typedef std::map<core::identifier_string, std::vector<size_t> > pbesinst_index_map;
 
 /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
-typedef atermpp::map<core::identifier_string, std::vector<data::variable> > pbesinst_variable_map;
+typedef std::map<core::identifier_string, std::vector<data::variable> > pbesinst_variable_map;
 
 /// \brief Function object for renaming a propositional variable instantiation
 struct pbesinst_finite_rename
@@ -90,6 +88,8 @@ compose<Function1, Function2> make_compose(const Function1& f1, const Function2&
 
 /// \brief Computes the subset with variables of finite sort and infinite.
 /// \param X A propositional variable instantiation
+/// \param index_map a container storing the indices of the variables that
+///        should be expanded by the finite pbesinst algorithm.
 /// \param finite A sequence of data expressions
 /// \param infinite A sequence of data expressions
 template <typename PropositionalVariable>
@@ -188,12 +188,14 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 
   /// \brief Visit propositional_variable node
   /// \param x A term
+  /// \param v A propositional variable instantiation
+  /// \param sigma A substitution.
   /// \return The result of visiting the node
   pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
   {
     mCRL2log(log::debug1) << "visit " << data::pp(x) << "\n";
 
-    // TODO: this code contains too much conversion between vectors and ATerm lists
+    // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
     split_parameters(v, m_index_map, finite_parameters, infinite_parameters);
@@ -210,7 +212,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
       di = vi->second;
     }
 
-    atermpp::set<pbes_expression> result;
+    std::set<pbes_expression> result;
     data::classic_enumerator<> enumerator(m_data_spec, super::m_data_rewriter);
     for (data::classic_enumerator<>::iterator i=enumerator.begin(di, data::sort_bool::true_());
               i != enumerator.end(); ++i)
@@ -315,8 +317,7 @@ class pbesinst_finite_algorithm
   public:
 
     /// \brief Constructor.
-    /// \param print_equations If true, the generated equations are printed
-    /// \param print_rewriter_output If true, invocations of the rewriter are printed
+    /// \param rewriter_strategy Strategy to be used for the data rewriter.
     pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::jitty)
       : m_rewriter_strategy(rewriter_strategy)
     {}
@@ -324,11 +325,11 @@ class pbesinst_finite_algorithm
     /// \brief Runs the algorithm.
     /// \param p A PBES
     /// \param variable_map A map containing the finite parameters that should be expanded by the algorithm.
-    void run(pbes<>& p,
+    void run(pbes& p,
              const pbesinst_variable_map& variable_map
             )
     {
-      pbes_system::detail::instantiate_global_variables(p);
+      pbes_system::algorithms::instantiate_global_variables(p);
       m_equation_count = 0;
 
       // compute index map corresponding to the variable map
@@ -341,8 +342,8 @@ class pbesinst_finite_algorithm
       detail::pbesinst_finite_builder<data::rewriter, pbesinst_finite_rename, substitution_type> visitor(rewr, pbesinst_finite_rename(), p.data(), index_map, variable_map);
 
       // compute new equations
-      atermpp::vector<pbes_equation> equations;
-      for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      std::vector<pbes_equation> equations;
+      for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         std::vector<data::variable> finite_parameters;
         std::vector<data::variable> infinite_parameters;
@@ -384,11 +385,11 @@ class pbesinst_finite_algorithm
 
     /// \brief Runs the algorithm.
     /// \param p A PBES
-    void run(pbes<>& p)
+    void run(pbes& p)
     {
       // put all finite variables in a variable map
       pbesinst_variable_map variable_map;
-      for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         data::variable_list v = i->variable().parameters();
         for (data::variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
@@ -403,6 +404,14 @@ class pbesinst_finite_algorithm
       run(p, variable_map);
     }
 };
+
+inline
+void pbesinst_finite(pbes& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
+{
+  pbesinst_finite_algorithm algorithm(rewrite_strategy);
+  pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, finite_parameter_selection);
+  algorithm.run(p, parameter_map);
+}
 
 } // namespace pbes_system
 

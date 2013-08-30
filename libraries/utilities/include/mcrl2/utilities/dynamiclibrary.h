@@ -32,19 +32,19 @@
   inline
   std::string get_last_error()
   {
-	  std::string result;
-	  char *buffer = 0;
-	  DWORD last = GetLastError();
-	  DWORD x = FormatMessage(
-	    FORMAT_MESSAGE_ALLOCATE_BUFFER | // Let Windows allocate string
-	    FORMAT_MESSAGE_FROM_SYSTEM,      // Retrieve a system error message
-			  NULL,					     // No source needed
-			  last,					     // Requested error message
-			  0,						 // Default language
-			  reinterpret_cast<LPSTR>(&buffer), // Output buffer
-			  0,						 // Minimum allocation size
-			  NULL						 // No arguments here
-			);
+    std::string result;
+    char *buffer = 0;
+    DWORD last = GetLastError();
+    DWORD x = FormatMessage(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | // Let Windows allocate string
+      FORMAT_MESSAGE_FROM_SYSTEM,      // Retrieve a system error message
+        NULL,               // No source needed
+        last,               // Requested error message
+        0,             // Default language
+        reinterpret_cast<LPSTR>(&buffer), // Output buffer
+        0,             // Minimum allocation size
+        NULL             // No arguments here
+      );
     if (x)
     {
       result = buffer;
@@ -53,8 +53,8 @@
     {
       result = "Unknown error.";
     }
-	  LocalFree(buffer);
-	  return result;
+    LocalFree(buffer);
+    return result;
   }
 #else
   #include <dlfcn.h>
@@ -82,33 +82,33 @@
   inline
   std::string get_last_error()
   {
-	  return std::string(dlerror());
+    return std::string(dlerror());
   }
 #endif
 
 class dynamic_library {
 private:
-	library_handle m_library;
-	void load() throw(std::runtime_error)
-	{
-		if (m_library == NULL)
-		{
-			m_library = get_module_handle(m_filename.c_str());
-			if (m_library == NULL)
-			{
-				std::stringstream s;
-				s << "Could not load library (" << m_filename << "): " << get_last_error();
-				throw std::runtime_error(s.str());
-			}
-		}
-	}
+  library_handle m_library;
+  void load() throw(std::runtime_error)
+  {
+    if (m_library == NULL)
+    {
+      m_library = get_module_handle(m_filename.c_str());
+      if (m_library == NULL)
+      {
+        std::stringstream s;
+        s << "Could not load library (" << m_filename << "): " << get_last_error();
+        throw std::runtime_error(s.str());
+      }
+    }
+  }
 protected:
-	std::string m_filename;
+  std::string m_filename;
   void unload() throw(std::runtime_error)
   {
     if (m_library)
     {
-		  if (!close_module_handle(m_library))
+      if (!close_module_handle(m_library))
       {
         std::stringstream s;
         s << "Could not close library (" << m_filename << "): " << get_last_error();
@@ -118,9 +118,9 @@ protected:
     }
   }
 public:
-	dynamic_library(const std::string &filename = std::string()) : m_library(0), m_filename(filename) {}
-	virtual ~dynamic_library() 
-	{
+  dynamic_library(const std::string &filename = std::string()) : m_library(0), m_filename(filename) {}
+  virtual ~dynamic_library() 
+  {
     try
     {
       unload();
@@ -129,22 +129,22 @@ public:
     {
       mCRL2log(mcrl2::log::error) << "Error while unloading dynamic library: " << error.what() << std::endl;
     }
-	}
-	library_proc proc_address(const std::string &name) throw(std::runtime_error)
-	{
-		if (m_library == 0)
-		{
-			load();
-		}
-		library_proc result = get_proc_address(m_library, name.c_str());
-		if (result == 0)
-		{
-			std::stringstream s;
-			s << "Could not find proc address (" << m_filename << ":" << name << "): " << get_last_error();
-			throw std::runtime_error(s.str());
-		}
-		return result;
-	}
+  }
+  library_proc proc_address(const std::string &name) throw(std::runtime_error)
+  {
+    if (m_library == 0)
+    {
+      load();
+    }
+    library_proc result = get_proc_address(m_library, name.c_str());
+    if (result == 0)
+    {
+      std::stringstream s;
+      s << "Could not find proc address (" << m_filename << ":" << name << "): " << get_last_error();
+      throw std::runtime_error(s.str());
+    }
+    return result;
+  }
 };
 
 #endif // __DYNAMIC_LIBRARY_H

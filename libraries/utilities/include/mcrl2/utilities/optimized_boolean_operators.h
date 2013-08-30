@@ -158,6 +158,10 @@ typename TermTraits::term_type optimized_imp(const typename TermTraits::term_typ
 /// \brief Make a universal quantification
 /// \param v A sequence of variables
 /// \param arg A term
+////// \param remove_variables If true, remove bound variables that do not occur in \a arg.
+/// \param empty_domain_allowed If true, and there are no variables in \a v, treat
+///        as empty domain, hence yielding <tt>true</tt>, otherwise <tt>arg</tt> arg
+///        is returned in this case.
 /// \return The universal quantification <tt>forall v.arg</tt>
 template <typename TermTraits>
 inline
@@ -208,6 +212,10 @@ typename TermTraits::term_type optimized_forall(const typename TermTraits::varia
 /// \brief Make an existential quantification
 /// \param v A sequence of variables
 /// \param arg A term
+/// \param remove_variables If true, remove bound variables that do not occur in \a arg.
+/// \param empty_domain_allowed If true, and there are no variables in \a v, treat
+///        as empty domain, hence yielding <tt>false</tt>, otherwise <tt>arg</tt> arg
+///        is returned in this case.
 /// \return The existential quantification <tt>exists v.arg</tt>
 template <typename TermTraits>
 inline

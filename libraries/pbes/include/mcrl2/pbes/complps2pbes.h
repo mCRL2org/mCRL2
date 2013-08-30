@@ -24,16 +24,11 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-void complps2pbes(const std::string& input_filename,
-                  const std::string& output_filename,
-                  const std::string& formfilename
-                 );
-
 inline
-pbes_system::pbes<> complps2pbes(const process::process_specification& procspec, const state_formulas::state_formula& /* formula */)
+pbes_system::pbes complps2pbes(const process::process_specification& procspec, const state_formulas::state_formula& /* formula */)
 {
-  const atermpp::vector<process::process_equation>& equations = procspec.equations();
-  for (atermpp::vector<process::process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  const std::vector<process::process_equation>& equations = procspec.equations();
+  for (std::vector<process::process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
   {
     if (!process::is_linear(*i))
     {
@@ -46,7 +41,7 @@ pbes_system::pbes<> complps2pbes(const process::process_specification& procspec,
     throw mcrl2::runtime_error("the initial state " + process::pp(procspec.init()) + " is not in communicating LPE format!");
   }
 
-  return pbes_system::pbes<>();
+  return pbes_system::pbes();
 }
 
 } // namespace pbes_system

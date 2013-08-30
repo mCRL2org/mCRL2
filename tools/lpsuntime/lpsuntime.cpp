@@ -8,13 +8,9 @@
 //
 /// \file lpsuntime.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -45,17 +41,7 @@ class untime_tool: public input_output_tool
 
 };
 
-class untime_gui_tool: public mcrl2_gui_tool<untime_tool>
-{
-  public:
-    untime_gui_tool()
-    {
-    }
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return untime_gui_tool().execute(argc, argv);
+  return untime_tool().execute(argc, argv);
 }

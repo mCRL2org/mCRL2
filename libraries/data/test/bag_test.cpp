@@ -17,8 +17,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -38,7 +36,7 @@ void test_data_expression(const std::string& s, variable_vector v, Predicate p, 
 /* Test case for various bag sort expressions, based
    on the following specification:
 
-proc P(b: Bag(Nat)) = (1 in b) -> tau . P(({} + b) - {20:1} * {40:5})
+proc P(b: Bag(Nat)) = (1 in b) -> tau . P(({:} + b) - {20:1} * {40:5})
                     + ({10:count(20, b)} < b) -> tau . P(b)
                     + (b <= {20:2} + Set2Bag({20,30,40})) -> tau . P(b);
 
@@ -61,8 +59,8 @@ void bag_expression_test()
 
   test_data_expression("{x : Nat | x}", v, sort_bag::is_constructor_application, sort_bag::is_in_application);
   test_data_expression("1 in b", v, sort_bag::is_in_application, sort_bag::is_join_application);
-  test_data_expression("{} + b", v, sort_bag::is_join_application, sort_bag::is_intersection_application);
-  test_data_expression("(({} + b) - {20:1}) * {40:5}", v, sort_bag::is_intersection_application, is_less_application<data_expression>);
+  test_data_expression("{:} + b", v, sort_bag::is_join_application, sort_bag::is_intersection_application);
+  test_data_expression("(({:} + b) - {20:1}) * {40:5}", v, sort_bag::is_intersection_application, is_less_application<data_expression>);
   test_data_expression("{10:count(20,b)} < b", v, is_less_application<data_expression>, sort_bag::is_bag_comprehension_application);
   test_data_expression("b <= {20:2}", v, is_less_equal_application<data_expression>, sort_bag::is_set2bag_application);
   test_data_expression("Set2Bag({20,30,40})", v, sort_bag::is_set2bag_application, sort_bag::is_join_application);
@@ -81,10 +79,7 @@ void bag_expression_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   bag_expression_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

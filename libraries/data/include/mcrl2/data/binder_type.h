@@ -13,7 +13,6 @@
 #define MCRL2_DATA_BINDER_TYPE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -35,10 +34,10 @@ class binder_type: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    binder_type(const atermpp::aterm_appl& term)
+    explicit binder_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_BindingOperator(m_term));
+      assert(core::detail::check_rule_BindingOperator(*this));
     }
 };
 
@@ -46,34 +45,34 @@ class binder_type: public atermpp::aterm_appl
 typedef atermpp::term_list<binder_type> binder_type_list;
 
 /// \brief vector of binder_types
-typedef atermpp::vector<binder_type>    binder_type_vector;
+typedef std::vector<binder_type>    binder_type_vector;
 
 
-/// \brief Binder for set or bag comprehension
-class set_or_bag_comprehension_binder: public binder_type
+/// \brief Binder for untyped set or bag comprehension
+class untyped_set_or_bag_comprehension_binder: public binder_type
 {
   public:
     /// \brief Default constructor.
-    set_or_bag_comprehension_binder()
-      : binder_type(core::detail::constructSetBagComp())
+    untyped_set_or_bag_comprehension_binder()
+      : binder_type(core::detail::constructUntypedSetBagComp())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    set_or_bag_comprehension_binder(const atermpp::aterm_appl& term)
+    explicit untyped_set_or_bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_SetBagComp(m_term));
+      assert(core::detail::check_term_UntypedSetBagComp(*this));
     }
 };
 
-/// \brief Test for a set_or_bag_comprehension_binder expression
-/// \param t A term
-/// \return True if it is a set_or_bag_comprehension_binder expression
+/// \brief Test for a untyped_set_or_bag_comprehension_binder expression
+/// \param x A term
+/// \return True if \a x is a untyped_set_or_bag_comprehension_binder expression
 inline
-bool is_set_or_bag_comprehension_binder(const binder_type& t)
+bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSetBagComp(t);
+  return core::detail::gsIsUntypedSetBagComp(x);
 }
 
 
@@ -88,20 +87,20 @@ class set_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    set_comprehension_binder(const atermpp::aterm_appl& term)
+    explicit set_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_SetComp(m_term));
+      assert(core::detail::check_term_SetComp(*this));
     }
 };
 
 /// \brief Test for a set_comprehension_binder expression
-/// \param t A term
-/// \return True if it is a set_comprehension_binder expression
+/// \param x A term
+/// \return True if \a x is a set_comprehension_binder expression
 inline
-bool is_set_comprehension_binder(const binder_type& t)
+bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSetComp(t);
+  return core::detail::gsIsSetComp(x);
 }
 
 
@@ -116,20 +115,20 @@ class bag_comprehension_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    bag_comprehension_binder(const atermpp::aterm_appl& term)
+    explicit bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_BagComp(m_term));
+      assert(core::detail::check_term_BagComp(*this));
     }
 };
 
 /// \brief Test for a bag_comprehension_binder expression
-/// \param t A term
-/// \return True if it is a bag_comprehension_binder expression
+/// \param x A term
+/// \return True if \a x is a bag_comprehension_binder expression
 inline
-bool is_bag_comprehension_binder(const binder_type& t)
+bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBagComp(t);
+  return core::detail::gsIsBagComp(x);
 }
 
 
@@ -144,20 +143,20 @@ class forall_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    forall_binder(const atermpp::aterm_appl& term)
+    explicit forall_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Forall(m_term));
+      assert(core::detail::check_term_Forall(*this));
     }
 };
 
 /// \brief Test for a forall_binder expression
-/// \param t A term
-/// \return True if it is a forall_binder expression
+/// \param x A term
+/// \return True if \a x is a forall_binder expression
 inline
-bool is_forall_binder(const binder_type& t)
+bool is_forall_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsForall(t);
+  return core::detail::gsIsForall(x);
 }
 
 
@@ -172,20 +171,20 @@ class exists_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    exists_binder(const atermpp::aterm_appl& term)
+    explicit exists_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Exists(m_term));
+      assert(core::detail::check_term_Exists(*this));
     }
 };
 
 /// \brief Test for a exists_binder expression
-/// \param t A term
-/// \return True if it is a exists_binder expression
+/// \param x A term
+/// \return True if \a x is a exists_binder expression
 inline
-bool is_exists_binder(const binder_type& t)
+bool is_exists_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsExists(t);
+  return core::detail::gsIsExists(x);
 }
 
 
@@ -200,20 +199,20 @@ class lambda_binder: public binder_type
 
     /// \brief Constructor.
     /// \param term A term
-    lambda_binder(const atermpp::aterm_appl& term)
+    explicit lambda_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
-      assert(core::detail::check_term_Lambda(m_term));
+      assert(core::detail::check_term_Lambda(*this));
     }
 };
 
 /// \brief Test for a lambda_binder expression
-/// \param t A term
-/// \return True if it is a lambda_binder expression
+/// \param x A term
+/// \return True if \a x is a lambda_binder expression
 inline
-bool is_lambda_binder(const binder_type& t)
+bool is_lambda_binder(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLambda(t);
+  return core::detail::gsIsLambda(x);
 }
 
 //--- end generated classes ---//
@@ -221,4 +220,51 @@ bool is_lambda_binder(const binder_type& t)
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::binder_type& t1, mcrl2::data::binder_type& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::untyped_set_or_bag_comprehension_binder& t1, mcrl2::data::untyped_set_or_bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::set_comprehension_binder& t1, mcrl2::data::set_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::bag_comprehension_binder& t1, mcrl2::data::bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::forall_binder& t1, mcrl2::data::forall_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::exists_binder& t1, mcrl2::data::exists_binder& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::data::lambda_binder& t1, mcrl2::data::lambda_binder& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
+
 #endif // MCRL2_DATA_BINDER_TYPE_H

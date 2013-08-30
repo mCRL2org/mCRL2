@@ -16,25 +16,16 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
-#include "mcrl2/atermpp/convert.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
 {
 
 namespace data
 {
-
-/// \brief Returns true if the term t is a sort_expression
-/// \param t A term
-/// \return True if the term is a sort expression.
-inline
-bool is_sort_expression(const atermpp::aterm_appl& t)
-{
-  return core::detail::gsIsSortExpr(t);
-}
 
 /// \brief Returns true if the term t is a basic sort
 inline bool is_basic_sort(const atermpp::aterm_appl& p)
@@ -61,68 +52,73 @@ inline bool is_structured_sort(const atermpp::aterm_appl& p)
 }
 
 /// \brief Returns true if the term t is the unknown sort
-inline bool is_unknown_sort(const atermpp::aterm_appl& p)
+inline bool is_untyped_sort(const atermpp::aterm_appl& p)
 {
-  return core::detail::gsIsSortUnknown(p);
+  return core::detail::gsIsUntypedSortUnknown(p);
 }
 
 /// \brief Returns true if the term t is an expression for multiple possible sorts
-inline bool is_multiple_possible_sorts(const atermpp::aterm_appl& p)
+inline bool is_untyped_possible_sorts(const atermpp::aterm_appl& p)
 {
-  return core::detail::gsIsSortsPossible(p);
+  return core::detail::gsIsUntypedSortsPossible(p);
 }
 
-/// \brief sort expression.
-///
-/// A sort expression can be any of:
-/// - basic sort
-/// - structured sort
-/// - container sort
-/// - function sort
-/// - alias
-/// In the type checker also the following expressions can be used:
-/// - unknown sort
-/// - multiple possible sorts
+//--- start generated class sort_expression ---//
+/// \brief A sort expression
 class sort_expression: public atermpp::aterm_appl
 {
   public:
-
-    /// \brief Constructor.
-    ///
+    /// \brief Default constructor.
     sort_expression()
-      : atermpp::aterm_appl(core::detail::constructSortId())
+      : atermpp::aterm_appl(core::detail::constructSortExpr())
     {}
 
     /// \brief Constructor.
-    /// \param[in] t A term.
-    /// \pre t has the internal structure of a sort expression.
-    sort_expression(const atermpp::aterm_appl& t)
-      : atermpp::aterm_appl(t)
+    /// \param term A term
+    explicit sort_expression(const atermpp::aterm& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(is_sort_expression(t));
+      assert(core::detail::check_rule_SortExpr(*this));
     }
-
+//--- start user section sort_expression ---//
     /// \brief Returns the target sort of this expression.
     /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.
     inline
-    sort_expression target_sort() const
+    const sort_expression& target_sort() const
     {
       if (is_function_sort(*this))
       {
-        return atermpp::arg2(*this);
+        return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
       }
       else
       {
-        return *this;
+        return atermpp::aterm_cast<const sort_expression>(*this);
       }
     }
+//--- end user section sort_expression ---//
+};
 
-}; // class sort_expression
+/// \brief list of sort_expressions
+typedef atermpp::term_list<sort_expression> sort_expression_list;
 
-/// \brief list of sorts
-typedef atermpp::term_list< sort_expression >  sort_expression_list;
-/// \brief vector of sorts
-typedef atermpp::vector< sort_expression >     sort_expression_vector;
+/// \brief vector of sort_expressions
+typedef std::vector<sort_expression>    sort_expression_vector;
+
+//--- end generated class sort_expression ---//
+
+/// \brief Test for a sort_expression expression
+/// \param x A term
+/// \return True if it is a sort_expression expression
+inline
+bool is_sort_expression(const atermpp::aterm_appl& x)
+{
+  return core::detail::gsIsSortId(x) ||
+         core::detail::gsIsSortCons(x) ||
+         core::detail::gsIsSortStruct(x) ||
+         core::detail::gsIsSortArrow(x) ||
+         core::detail::gsIsUntypedSortUnknown(x) ||
+         core::detail::gsIsUntypedSortsPossible(x);
+}
 
 // template function overloads
 std::string pp(const sort_expression& x);
@@ -133,6 +129,16 @@ std::set<data::sort_expression> find_sort_expressions(const data::sort_expressio
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::sort_expression& t1, mcrl2::data::sort_expression& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

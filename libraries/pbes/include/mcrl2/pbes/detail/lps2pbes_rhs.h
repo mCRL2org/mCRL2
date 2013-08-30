@@ -55,7 +55,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   const lps::linear_process& lps;
   data::set_identifier_generator& id_generator;
   const data::variable& T;
-  atermpp::vector<pbes_expression> result_stack;
+  std::vector<pbes_expression> result_stack;
 
   rhs_traverser(const state_formulas::state_formula& phi0_,
                 const lps::linear_process& lps_,
@@ -174,9 +174,10 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void handle_must_may(const Expr& x, bool is_must)
   {
     bool timed = is_timed();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     pbes_expression rhs0 = RHS(phi0, x.operand(), lps, id_generator, T, TermTraits());
-    action_formulas::action_formula alpha = x.formula();
+    assert(action_formulas::is_action_formula(x.formula()));
+    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
 
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
@@ -187,25 +188,34 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       data::variable_list yi   = i->summation_variables();
 
       pbes_expression rhs = rhs0;
-      data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
-      ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
-      lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
-      gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
+      data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variables(yi, id_generator);
+      std::set<data::variable> sigma_yi_variables = data::substitution_variables(sigma_yi);
+      ci = data::replace_variables_capture_avoiding(ci, sigma_yi, sigma_yi_variables);
+      lps::replace_variables_capture_avoiding(ai, sigma_yi, sigma_yi_variables);
+      gi = data::replace_variables_capture_avoiding(gi, sigma_yi, sigma_yi_variables);
       data::data_expression ti = ai.time();
-      pbes_expression p1 = Sat(ai, alpha, id_generator);
+      pbes_expression p1 = Sat(ai, alpha, id_generator, TermTraits());
       pbes_expression p2 = ci;
-      rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
+      data::mutable_map_substitution<> sigma_gi;
+      for (auto k = gi.begin(); k != gi.end(); ++k)
+      {
+        sigma_gi[k->lhs()] = k->rhs();
+      }
+      rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_gi, data::substitution_variables(sigma_gi));
       pbes_expression p = tr::and_(p1, p2);
       if (timed)
       {
-        rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
+        data::mutable_map_substitution<> sigma_ti;
+        sigma_ti[T] = ti;
+        rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
         p = tr::and_(p, data::greater(ti, T));
       }
+      data::variable_list y = data::replace_variables(yi, sigma_yi);
       p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
       v.push_back(p);
     }
 
-    pbes_expression result = is_must ? pbes_expr::join_and(v.begin(), v.end()) : pbes_expr::join_or(v.begin(), v.end());
+    pbes_expression result = is_must ? tr::join_and(v.begin(), v.end()) : tr::join_or(v.begin(), v.end());
     push(result);
   }
 
@@ -227,26 +237,26 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void leave(const state_formulas::yaled_timed& x)
   {
     data::data_expression t = x.time_stamp();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
     {
-      pbes_expression       ci = i->condition();
-      data::data_expression ti = i->multi_action().time();
-      data::variable_list   yi = i->summation_variables();
+      const data::data_expression& ci = i->condition();
+      const data::data_expression& ti = i->multi_action().time();
+      const data::variable_list&   yi = i->summation_variables();
       pbes_expression p = tr::forall(yi, tr::or_(data::sort_bool::not_(ci), data::greater(t, ti)));
       v.push_back(p);
     }
     const lps::deadlock_summand_vector& dsv = lps.deadlock_summands();
     for (lps::deadlock_summand_vector::const_iterator j = dsv.begin(); j != dsv.end(); ++j)
     {
-      data::data_expression cj = j->condition();
-      data::data_expression tj = j->deadlock().time();
-      data::variable_list   yj = j->summation_variables();
+      const data::data_expression& cj = j->condition();
+      const data::data_expression& tj = j->deadlock().time();
+      const data::variable_list&   yj = j->summation_variables();
       pbes_expression p = tr::forall(yj, tr::or_(data::sort_bool::not_(cj), data::greater(t, tj)));
       v.push_back(p);
     }
-    push(tr::and_(pbes_expr::join_or(v.begin(), v.end()), data::greater(t, T)));
+    push(tr::and_(tr::join_or(v.begin(), v.end()), data::greater(t, T)));
   }
 
   void leave(const state_formulas::delay&)
@@ -257,7 +267,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void leave(const state_formulas::delay_timed& x)
   {
     data::data_expression t = x.time_stamp();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
     {
@@ -276,7 +286,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       pbes_expression p = tr::exists(yj, tr::and_(cj, data::less_equal(t, tj)));
       v.push_back(p);
     }
-    push(tr::or_(pbes_expr::join_or(v.begin(), v.end()), data::less_equal(t, T)));
+    push(tr::or_(tr::join_or(v.begin(), v.end()), data::less_equal(t, T)));
   }
 
   void leave(const state_formulas::variable& x)
@@ -368,7 +378,7 @@ pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                data::set_identifier_generator& propvar_generator,
                                data::variable_list& variables,
                                const fixpoint_symbol& sigma,
-                               atermpp::vector<pbes_equation>& Z,
+                               std::vector<pbes_equation>& Z,
                                const data::variable& T,
                                TermTraits tr
                     );
@@ -398,7 +408,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
   std::multiset<data::variable> variables;
   const fixpoint_symbol& sigma;
   data::set_identifier_generator& propvar_generator;
-  atermpp::vector<pbes_equation>& Z; // new equations that are generated on the fly
+  std::vector<pbes_equation>& Z; // new equations that are generated on the fly
 
   rhs_structured_traverser(const state_formulas::state_formula& phi0,
                            const lps::linear_process& lps,
@@ -406,7 +416,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
                            data::set_identifier_generator& propvar_generator_,
                            data::variable_list& variables_,
                            const fixpoint_symbol& sigma_,
-                           atermpp::vector<pbes_equation>& Z_,
+                           std::vector<pbes_equation>& Z_,
                            const data::variable& T,
                            TermTraits tr
                )
@@ -449,7 +459,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
   void handle_must_may(const Expr& x, bool is_must)
   {
     bool timed = is_timed();
-    atermpp::vector<pbes_expression> v;
+    std::vector<pbes_expression> v;
 
     // TODO: can this call to find_free_variables be eliminated?
     std::set<data::variable> fv = state_formulas::find_free_variables(x.operand());
@@ -457,7 +467,8 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
     data::variable_list vars(fv.begin(), fv.end());
 
     pbes_expression rhs0 = RHS_structured(phi0, x.operand(), lps, id_generator, propvar_generator, vars, sigma, Z, T, TermTraits());
-    action_formulas::action_formula alpha = x.formula();
+    assert(action_formulas::is_action_formula(x.formula()));
+    const action_formulas::action_formula& alpha = atermpp::aterm_cast<const action_formulas::action_formula>(x.formula());
 
     const lps::action_summand_vector& asv = lps.action_summands();
     for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
@@ -468,24 +479,33 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
       data::variable_list yi   = i->summation_variables();
 
       pbes_expression rhs = rhs0;
-      data::variable_list y = pbes_system::detail::make_fresh_variables(yi, id_generator);
-      ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
-      lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
-      gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
+      data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variables(yi, id_generator);
+      std::set<data::variable> sigma_yi_variables = data::substitution_variables(sigma_yi);
+      ci = data::replace_variables_capture_avoiding(ci, sigma_yi, sigma_yi_variables);
+      lps::replace_variables_capture_avoiding(ai, sigma_yi, sigma_yi_variables);
+      gi = data::replace_variables_capture_avoiding(gi, sigma_yi, sigma_yi_variables);
       data::data_expression ti = ai.time();
-      pbes_expression p1 = Sat(ai, alpha, id_generator);
+      pbes_expression p1 = Sat(ai, alpha, id_generator, TermTraits());
       pbes_expression p2 = ci;
-      rhs = pbes_system::replace_free_variables(rhs, data::assignment_sequence_substitution(gi));
+      data::mutable_map_substitution<> sigma_gi;
+      for (auto k = gi.begin(); k != gi.end(); ++k)
+      {
+        sigma_gi[k->lhs()] = k->rhs();
+      }
+      rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_gi, data::substitution_variables(sigma_gi));
       pbes_expression p = tr::and_(p1, p2);
       if (timed)
       {
-        rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
+        data::mutable_map_substitution<> sigma_ti;
+        sigma_ti[T] = ti;
+        rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
         p = tr::and_(p, data::greater(ti, T));
       }
+      data::variable_list y = data::replace_variables(yi, sigma_yi);
       p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
 
       // generate a new equation 'Y(d) = p', and add Y(d) to v
-    	core::identifier_string Y = propvar_generator("Y");
+      core::identifier_string Y = propvar_generator("Y");
       data::variable_list d(variables.begin(), variables.end());
       propositional_variable Yd(Y, d);
       pbes_equation eqn(sigma, Yd, p);
@@ -493,7 +513,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits>
       v.push_back(propositional_variable_instantiation(Y, data::make_data_expression_list(d)));
     }
 
-    pbes_expression result = is_must ? pbes_expr::join_and(v.begin(), v.end()) : pbes_expr::join_or(v.begin(), v.end());
+    pbes_expression result = is_must ? tr::join_and(v.begin(), v.end()) : tr::join_or(v.begin(), v.end());
     push(result);
   }
 
@@ -522,7 +542,7 @@ struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_tra
                                  data::set_identifier_generator& propvar_generator,
                                  data::variable_list& variables,
                                  const fixpoint_symbol& sigma,
-                                 atermpp::vector<pbes_equation>& Z,
+                                 std::vector<pbes_equation>& Z,
                                  const data::variable& T,
                                  TermTraits tr
                                 )
@@ -543,7 +563,7 @@ pbes_expression RHS_structured(const state_formulas::state_formula& x0,
                                data::set_identifier_generator& propvar_generator,
                                data::variable_list& variables,
                                const fixpoint_symbol& sigma,
-                               atermpp::vector<pbes_equation>& Z,
+                               std::vector<pbes_equation>& Z,
                                const data::variable& T,
                                TermTraits tr
                     )

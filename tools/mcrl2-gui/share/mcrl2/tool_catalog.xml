@@ -1,44 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
-<tool name="diagraphica" 	input_format="lts" 				gui="true"  category="Analysis" />
-<tool name="lps2lts" 		input_format="lps" output_format ="lts"     category="Transformation"/>
-<tool name="lps2pbes" 		input_format="lps" output_format ="pbes"    category="Transformation" />
-<tool name="lpsactionrename" 	input_format="lps" output_format ="lps" category="Transformation"/>
-<tool name="lpsbinary" 		input_format="lps" output_format ="lps"     category="Transformation"/> 
-<tool name="lpsconstelm" 	input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpsconfcheck" 	input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpsinfo" 		input_format="lps"                          category="Analysis"/>
-<tool name="lpsinvelm" 		input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpsparelm" 		input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpsparunfold" 	input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpspp" 		    input_format="lps" output_format ="txt"     category="Analysis"/>
-<tool name="lpsrewr" 		input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpssumelm" 		input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpssuminst" 	input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="lpsuntime" 		input_format="lps" output_format ="lps"     category="Transformation"/>
-<tool name="ltsconvert" 	input_format="lts" output_format ="lts"     category="Transformation"/>
-<tool name="lts2lps" 		input_format="lts" output_format ="lps"     category="Transformation"/>
-<tool name="ltscompare" 	input_format="lts" input_format1="lts"    category="Analysis"/>
-<tool name="ltsgraph" 		input_format="lts" 				gui="true"  category="Analysis"/>
-<tool name="ltsinfo" 		input_format="lts"                          category="Analysis"/>
-<tool name="ltsview" 		input_format="lts" 				gui="true"  category="Analysis"/>
-<tool name="mcrl22lps" 		input_format="mcrl2" output_format ="lps"   category="Transformation"/> 
-<tool name="pbes2bool" 		input_format="pbes"                         category="Analysis"/>
-<tool name="pbes2bool" 		input_format="bes"                         category="Analysis"/>
-<tool name="pbesconstelm" 	input_format="pbes" output_format ="pbes"   category="Transformation"/> 
-<tool name="pbesinfo" 		input_format="pbes"                         category="Analysis"/>
-<tool name="pbesparelm" 	input_format="pbes" output_format ="pbes"   category="Transformation"/>
-<tool name="pbespp" 		input_format="pbes" output_format ="txt"    category="Analysis"/>
-<tool name="pbesrewr" 		input_format="pbes" output_format ="pbes"   category="Transformation"/>
-<tool name="tbf2lps" 		input_format="tbf"  output_format ="lps"    category="Transformation"/>
-<tool name="tracepp" 		input_format="trc"  output_format ="txt"    category="Analysis"/>
-<tool name="txt2lps" 		input_format="txt"  output_format ="lps"    category="Transformation"/>
-<tool name="txt2pbes" 		input_format="txt"  output_format ="pbes"   category="Transformation"/>
-<tool name="lpsxsim" 		input_format="lps" 				gui="true"  category="Analysis"/>
-<tool name="mcrl2xi" 		input_format="mcrl2" 				gui="true" category="Editing"/>
-<tool name="pbes2bes" 	input_format="pbes" 	output_format ="bes"	category="Transformation"/>
-<tool name="pbespgsolve" 		input_format="pbes"                         category="Analysis"/>
-<tool name="pbespgsolve" 		input_format="bes"                         category="Analysis"/>
-<tool name="besinfo" 		input_format="bes"                         category="Analysis"/>
-<tool name="bespp" 		input_format="bes" output_format ="txt" category="Analysis"/>
+<tool name="besconvert"         input_format="bes"   output_format="bes"  category="Transformation"/> 
+<tool name="besinfo"            input_format="bes"                        category="Analysis"/>
+<tool name="bespp"              input_format="bes"   output_format="txt"  category="Analysis"/>
+<tool name="bessolve"           input_format="bes"                        category="Analysis"/>
+
+<tool name="diagraphica"        input_format="lts"                        category="Analysis"       gui="true" />
+
+<tool name="lps2lts"            input_format="lps"   output_format="lts"  category="Transformation"/>
+<tool name="lps2pbes"           input_format="lps"   output_format="pbes" category="Transformation" />
+<tool name="lpsactionrename"    input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpsbinary"          input_format="lps"   output_format="lps"  category="Transformation"/> 
+<tool name="lpsconfcheck"       input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpsconstelm"        input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpsinfo"            input_format="lps"                        category="Analysis"/>
+<tool name="lpsinvelm"          input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpsparelm"          input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpsparunfold"       input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpspp"              input_format="lps"   output_format="txt"  category="Analysis"/>
+<tool name="lpsrewr"            input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpssumelm"          input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpssuminst"         input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpsuntime"          input_format="lps"   output_format="lps"  category="Transformation"/>
+<tool name="lpsxsim" 		input_format="lps"                        category="Analysis" gui="true"/>
+<tool name="lts2lps" 		input_format="lts"   output_format="lps"  category="Transformation"/>
+<tool name="lts2pbes" 		input_format="lts"   output_format="pbes" category="Transformation"/>
+<tool name="ltsconvert" 	input_format="lts"   output_format="lts"  category="Transformation"/>
+<tool name="ltscompare" 	input_format="lts"   input_format1="lts"  category="Analysis"/>
+<tool name="ltsgraph" 		input_format="lts"                        category="Analysis" gui="true" />
+<tool name="ltsinfo" 		input_format="lts"                        category="Analysis"/>
+<tool name="ltsview" 		input_format="lts"                        category="Analysis" gui="true" />
+
+<tool name="mcrl22lps" 		input_format="mcrl2" output_format ="lps" category="Transformation"/> 
+<tool name="mcrl2xi" 		input_format="mcrl2"                      category="Editing" gui="true"/>
+
+<tool name="pbes2bool" 		input_format="pbes;bes"                   category="Analysis"/>
+<tool name="pbes2bes" 		input_format="pbes" output_format="bes"   category="Transformation"/>
+<tool name="pbesconstelm" 	input_format="pbes" output_format="pbes"  category="Transformation"/> 
+<tool name="pbesinfo" 		input_format="pbes"                       category="Analysis"/>
+<tool name="pbesparelm" 	input_format="pbes" output_format="pbes"  category="Transformation"/>
+<tool name="pbespgsolve" 	input_format="pbes;bes"                   category="Analysis"/>
+<tool name="pbespp" 		input_format="pbes" output_format="txt"   category="Analysis"/>
+<tool name="pbesrewr" 		input_format="pbes" output_format="pbes"  category="Transformation"/>
+
+<tool name="tracepp" 		input_format="trc"  output_format="txt"   category="Analysis"/>
+<tool name="txt2lps" 		input_format="txt"  output_format="lps"   category="Transformation"/>
+<tool name="txt2pbes" 		input_format="txt"  output_format="pbes"  category="Transformation"/>
 </tool-catalog>

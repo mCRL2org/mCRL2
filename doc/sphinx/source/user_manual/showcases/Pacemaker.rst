@@ -1,3 +1,5 @@
+.. _showcase-pacemaker:
+
 Pacemaker
 =========
 
@@ -103,7 +105,5 @@ Technical details
 Publications
 ------------
 
-.. [Wig07] J.E. Wiggelinkhuizen. Feasibility of formal model checking in the Vitatron environment.
-   Master Thesis. Eindhoven University of Technology, 2007
-   `(PDF) <http://alexandria.tue.nl/extra2/afstversl/wsk-i/wiggelinkhuizen2007.pdf>`_
+[Wig07]_
 

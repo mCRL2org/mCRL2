@@ -15,9 +15,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -59,12 +57,12 @@ BOOST_AUTO_TEST_CASE(bug_367)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(data::find_variables(i->condition()).empty());
-    BOOST_CHECK(lps::find_variables(i->actions()).empty());
+    BOOST_CHECK(data::find_all_variables(i->condition()).empty());
+    BOOST_CHECK(lps::find_all_variables(i->multi_action()).empty());
   }
 
   print_specifications(s0,s1);
@@ -84,8 +82,8 @@ BOOST_AUTO_TEST_CASE(no_occurrence_of_variable)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -111,11 +109,11 @@ BOOST_AUTO_TEST_CASE(reverse_equality)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(data::find_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_all_variables(i->condition()).empty());
   }
 
   print_specifications(s0,s1);
@@ -136,11 +134,11 @@ BOOST_AUTO_TEST_CASE(equality)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(data::find_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_all_variables(i->condition()).empty());
   }
 
   print_specifications(s0,s1);
@@ -163,15 +161,15 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
   specification s0 = linearise(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  std::set<variable> parameters = mcrl2::data::find_variables(s1.process().process_parameters());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  std::set<variable> parameters = mcrl2::data::find_all_variables(s1.process().process_parameters());
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
 
     // Check that the only data variables in the condition and time
     // are process parameters
-    std::set<variable> condition_vars = data::find_variables(i->condition());
+    std::set<variable> condition_vars = data::find_all_variables(i->condition());
     for (std::set<variable>::iterator j = condition_vars.begin()
                                           ; j != condition_vars.end()
          ; ++j)
@@ -181,7 +179,7 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
 
     if (i->has_time())
     {
-      std::set<variable> time_vars = data::find_variables(i->time());
+      std::set<variable> time_vars = data::find_all_variables(i->multi_action().time());
       for (std::set<variable>::iterator j = time_vars.begin()
                                             ; j != time_vars.end()
            ; ++j)
@@ -210,9 +208,9 @@ BOOST_AUTO_TEST_CASE(both_sides_of_equality)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -254,9 +252,9 @@ BOOST_AUTO_TEST_CASE(three_sums_remove_two)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -287,14 +285,14 @@ BOOST_AUTO_TEST_CASE(twice_lhs)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
-      BOOST_CHECK(data::find_variables(i->condition()).empty());
+      BOOST_CHECK(data::find_all_variables(i->condition()).empty());
     }
   }
   BOOST_CHECK(sumvar_count == 1);
@@ -317,9 +315,9 @@ BOOST_AUTO_TEST_CASE(no_unconditional_sum_removal_from_delta)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const deadlock_summand_vector& summands1 = s1.process().deadlock_summands();
+  for (deadlock_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -344,9 +342,9 @@ BOOST_AUTO_TEST_CASE(bug_380)
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->condition() != sort_bool::true_());
     if (!i->summation_variables().empty())
@@ -384,8 +382,6 @@ BOOST_AUTO_TEST_CASE(test_boolean_variables)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }
 

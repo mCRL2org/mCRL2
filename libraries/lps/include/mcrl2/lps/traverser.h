@@ -18,6 +18,8 @@
 #define MCRL2_LPS_TRAVERSER_H
 
 #include "mcrl2/data/traverser.h"
+#include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/lps/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -49,6 +51,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const lps::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -67,6 +76,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -109,6 +125,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
@@ -143,6 +160,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const lps::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -161,6 +185,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -233,6 +264,13 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const lps::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -251,6 +289,13 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -292,6 +337,7 @@ struct add_traverser_variables: public Traverser<Derived>
   void operator()(const lps::specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
@@ -335,6 +381,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void operator()(const lps::untyped_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.name());
+    static_cast<Derived&>(*this)(x.arguments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void operator()(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -353,6 +407,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this)(x.time());
     }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -395,6 +456,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
     static_cast<Derived&>(*this)(x.process());
     static_cast<Derived&>(*this)(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
@@ -412,6 +474,71 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<data
   using super::operator();
 };
 //--- end generated add_traverser_identifier_strings code ---//
+
+//--- start generated add_traverser_action_labels code ---//
+template <template <class> class Traverser, class Derived>
+struct add_traverser_action_labels: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  void operator()(const lps::action_label& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.label());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.multi_action());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(const lps::specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Traverser class
+template <typename Derived>
+struct action_label_traverser: public add_traverser_action_labels<core::traverser, Derived>
+{
+  typedef add_traverser_action_labels<core::traverser, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
+//--- end generated add_traverser_action_labels code ---//
 
 } // namespace lps
 

@@ -10,11 +10,9 @@
 /// \brief Some tests for BES.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/print.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -52,7 +50,6 @@ void test_join()
   std::cout << "x = " << bes::pp(x) << std::endl;
 #endif
 
-  core::garbage_collect();
 }
 
 void test_expressions()
@@ -125,7 +122,7 @@ void test_boolean_equation()
   BOOST_CHECK(e.formula() == tr::and_(Y,Z));
 
   // Check for finding variables in the right hand side
-  atermpp::set<boolean_variable> expected;
+  std::set<boolean_variable> expected;
   expected.insert(Y);
   expected.insert(Z);
 
@@ -141,7 +138,6 @@ void test_boolean_equation()
   found.clear();
   find_boolean_variables(e.formula(), std::inserter(found, found.end()));
   BOOST_CHECK(found == expected);
-  core::garbage_collect();
 }
 
 void test_bes()
@@ -153,25 +149,22 @@ void test_bes()
   boolean_equation eqX(fixpoint_symbol::nu(), X, tr::and_(X, tr::and_(Y,Z)));
   boolean_equation eqY(fixpoint_symbol::nu(), Y, tr::and_(X, Y));
   boolean_equation eqZ(fixpoint_symbol::mu(), Z, tr::or_(Z, X));
-  atermpp::vector<boolean_equation> eqns;
+  std::vector<boolean_equation> eqns;
   eqns.push_back(eqX);
   eqns.push_back(eqY);
   eqns.push_back(eqZ);
 
-  boolean_equation_system<> bes(eqns, X);
+  boolean_equation_system bes(eqns, X);
   BOOST_CHECK(bes.is_closed());
 
   bes::pp(bes);
 
   std::set<boolean_variable> occurring_variables = bes.occurring_variables();
   BOOST_CHECK(occurring_variables.size() == 3);
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_expressions();
   test_boolean_equation();
   test_join();

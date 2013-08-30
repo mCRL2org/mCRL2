@@ -16,9 +16,6 @@ Release 201210.0
 .. |bin_w64_201210.0| replace:: Windows Installer (64-bit)
 .. _bin_w64_201210.0: http://www.mcrl2.org/download/release/mcrl2-201210.0_x86_64.exe
 
-.. |bin_osx_201210.0| replace:: Darwin package
-.. _bin_osx_201210.0: http://www.mcrl2.org/download/release/mcrl2-201210.0-Darwin.dmg
-
 .. |bin_ppa_201210.0| replace:: PPA release
 .. _bin_ppa_201210.0: https://launchpad.net/~mcrl2/+archive/release-ppa
 
@@ -33,8 +30,6 @@ Release 201210.0
   |                        ||bin_w64_201210.0|_                       |
   +------------------------+------------------------------------------+
   |Linux                   ||ubuntu|_                                 |
-  +------------------------+------------------------------------------+
-  |Mac OS X (Darwin)       ||bin_osx_201210.0|_                       |
   +------------------------+------------------------------------------+
   |Source                  ||src_tgz_201210.0|_                       |
   +------------------------+------------------------------------------+
@@ -78,9 +73,6 @@ Release July 2011.1
 .. |bin_w32_201107.1| replace:: Windows Installer (32-bit)
 .. _bin_w32_201107.1: http://www.mcrl2.org/download/release/mcrl2-201107-2-win32.exe
 
-.. |bin_w64_201107.1| replace:: Windows Installer (64-bit)
-.. _bin_w64_201107.1: http://www.mcrl2.org/download/release/mcrl2-201107-2-win64.exe
-
 .. |bin_osx_201107.1| replace:: Darwin package
 .. _bin_osx_201107.1: http://www.mcrl2.org/download/release/mcrl2-201107-2-Darwin.dmg
 
@@ -94,8 +86,6 @@ Release July 2011.1
   |Operating system        |Release (201007.1)                        |
   +========================+==========================================+
   |Windows                 ||bin_w32_201107.1|_                       |
-  |                        +------------------------------------------+
-  |                        ||bin_w64_201107.1|_                       |
   +------------------------+------------------------------------------+
   |Linux                   ||ubuntu|_                                 |
   +------------------------+------------------------------------------+
@@ -110,11 +100,8 @@ Release July 2011 (revision 9551)
 .. |bin_w32_201107| replace:: Windows Installer (32-bit)
 .. _bin_w32_201107: http://www.mcrl2.org/download/release/mcrl2-201107-1-win32.exe
 
-.. |bin_w64_201107| replace:: Windows Installer (64-bit)
-.. _bin_w64_201107: http://www.mcrl2.org/download/release/mcrl2-201107-1-win64.exe
-
 .. |ubuntu| replace:: Ubuntu Launchpad PPA
-.. _ubuntu: https://launchpad.net/~mcrl2/+archive/ppa
+.. _ubuntu: https://launchpad.net/~mcrl2/+archive/release-ppa
 
 .. |suse_11.3_32_201107| replace:: OpenSUSE 11.3 package (32-bit)
 .. _suse_11.3_32_201107: http://www.mcrl2.org/download/release/mcrl2-201107-1.openSUSE_11.3.i586.rpm
@@ -150,8 +137,6 @@ Release July 2011 (revision 9551)
   |Operating system        |Release (201007)                          |
   +========================+==========================================+
   |Windows                 ||bin_w32_201107|_                         |
-  |                        +------------------------------------------+
-  |                        ||bin_w64_201107|_                         |
   +------------------------+------------------------------------------+
   |Linux                   ||ubuntu|_                                 |
   |                        +------------------------------------------+
@@ -275,10 +260,10 @@ Release September 2010 (SVN revision 8071 + bugfixes)
 .. _ubuntu_32_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_9.10_(i686).deb
 
 .. |ubuntu_64_201009| replace:: Ubuntu 10.4.1 package (64-bit)
-.. _ubuntu_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_10.04.1_LTS_(x86_64).deb
+.. _ubuntu_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_10.04.1_LTS(x86_64).deb
 
 .. |suse_64_201009| replace:: OpenSUSE 11.3 package (64-bit)
-.. _suse_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-openSuSE_11.3_(x86_64).rpm
+.. _suse_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-openSUSE_11.3_(x86_64).rpm
 
 .. |bin_osx_201009| replace:: Darwin package (32-bit)
 .. _bin_osx_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Darwin.dmg

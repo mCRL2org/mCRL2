@@ -10,6 +10,7 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
@@ -24,7 +25,6 @@
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -43,25 +43,25 @@ void test_term(const std::string& s, const T& x)
 
 void test_term(const std::string& s)
 {
-  ATerm a = atermpp::make_term(s);
+  atermpp::aterm a = atermpp::read_term_from_string(s);
   if (s.find("DataEqn") == 0)
   {
-    data_equation x = atermpp::aterm_appl((ATermAppl) a);
+    data_equation x (a);
     test_term(s, x);
   }
   else if (s.find("SortCons") == 0)
   {
-    sort_expression x = atermpp::aterm_appl((ATermAppl) a);
+    sort_expression x (a);
     test_term(s, x);
   }
   else if (s.find("OpId") == 0)
   {
-    function_symbol x = atermpp::aterm_appl((ATermAppl) a);
+    data::function_symbol x (a);
     test_term(s, x);
   }
   else
   {
-    data_expression x = atermpp::aterm_appl((ATermAppl) a);
+    data_expression x = atermpp::aterm_cast<data_expression>(a);
     test_term(s, x);
   }
 }
@@ -206,15 +206,15 @@ bool print_container_check(Container const& c)
 
 BOOST_AUTO_TEST_CASE(test_function_symbol_print)
 {
-  function_symbol f("f", sort_bool::bool_());
+  data::function_symbol f("f", sort_bool::bool_());
 
   PRINT_CHECK(f, "f");
 }
 
 BOOST_AUTO_TEST_CASE(test_application_print)
 {
-  function_symbol f("f", make_function_sort(bool_(), bool_()));
-  function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
+  data::function_symbol f("f", make_function_sort(bool_(), bool_()));
+  data::function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
 
   PRINT_CHECK(f(true_()), "f(true)");
   PRINT_CHECK(g(false_(), sort_nat::nat(10)), "g(false, 10)");
@@ -344,10 +344,10 @@ BOOST_AUTO_TEST_CASE(test_bag_print)
   data_expression bag_true = sort_bag::bag_fbag(bool_(), sort_fbag::cons_(bool_(), true_(), number(sort_pos::pos(), "1"), fbag_empty_));
 
   // Using all operations
-  BOOST_CHECK(print_check(bag_empty, "{}"));
-  BOOST_CHECK(print_check(sort_bag::bag_fbag(bool_(), sort_fbag::empty(bool_())), "{}"));
-  BOOST_CHECK(print_check(sort_bag::constructor(bool_(), sort_bag::zero_function(bool_()), fbag_empty_), "{}"));
-  BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_empty), "false in {}"));
+  BOOST_CHECK(print_check(bag_empty, "{:}"));
+  BOOST_CHECK(print_check(sort_bag::bag_fbag(bool_(), sort_fbag::empty(bool_())), "{:}"));
+  BOOST_CHECK(print_check(sort_bag::constructor(bool_(), sort_bag::zero_function(bool_()), fbag_empty_), "{:}"));
+  BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_empty), "false in {:}"));
   BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_false), "false in {false: 1}"));
   BOOST_CHECK(print_check(sort_bag::count(bool_(), false_(), bag_true), "count(false, {true: 1})"));
   BOOST_CHECK(print_check(sort_bag::join(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));
@@ -433,11 +433,11 @@ BOOST_AUTO_TEST_CASE(test_mod)
   data::data_expression x = parse_data_expression("(1 + 2) mod 3");
   BOOST_CHECK(sort_nat::is_mod_application(x));
 
-  application left = sort_nat::left(x);
+  application left = atermpp::aterm_cast<application>(sort_nat::left(x));
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left));
 
-  data_expression left1 = remove_numeric_casts(left);
+  application left1 = atermpp::aterm_cast<application>(detail::remove_numeric_casts(left));
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_plus(left1));
 
@@ -445,7 +445,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   std::cout << "x = " << x << " " << data::pp(x) << std::endl;
 
   x = parse_data_expression("(2 - 1) mod 3");
-  left = sort_int::left(x);
+  left = atermpp::aterm_cast<application>(sort_int::left(x));
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left));
   std::cout << "precedence(left) = " << precedence(left) << std::endl;
@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   BOOST_CHECK(data::sort_nat::is_nat(x.sort()));
   BOOST_CHECK(data::sort_int::is_mod_application(x));
 
-  left1 = remove_numeric_casts(left);
+  left1 = atermpp::aterm_cast<application>(detail::remove_numeric_casts(left));
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left1));
   std::cout << "precedence(left1) = " << precedence(left1) << std::endl;
@@ -473,6 +473,7 @@ BOOST_AUTO_TEST_CASE(test_sort_expressions)
   std::cout << "ytext    = " << ytext << std::endl;
   BOOST_CHECK(x == y);
   BOOST_CHECK(xtext == ytext);
+  BOOST_CHECK(data::pp(data::untyped_sort()) == "untyped_sort");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_print2)
@@ -530,9 +531,14 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{ x: Pos | !g(x) && x in {1, 2} } * { x: Pos | !f(x) && x in {3} }");
 }
 
+BOOST_AUTO_TEST_CASE(test_precedence)
+{
+  data::data_expression x = parse_data_expression("exists b:Bool. true");
+  BOOST_CHECK(is_exists(x));
+  BOOST_CHECK(precedence(x) == 1);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

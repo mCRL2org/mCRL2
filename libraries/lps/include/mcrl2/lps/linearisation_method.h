@@ -80,9 +80,9 @@ inline
 std::istream& operator>>(std::istream& is, t_lin_method& l)
 {
   try {
-    std::string s;
-    is >> s;
-    l = parse_lin_method(s);
+    std::stringbuf buffer;
+    is >> &buffer;
+    l = parse_lin_method(buffer.str());
   }
   catch (mcrl2::runtime_error&)
   {

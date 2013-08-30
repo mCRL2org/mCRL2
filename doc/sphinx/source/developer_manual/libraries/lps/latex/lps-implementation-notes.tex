@@ -8,7 +8,7 @@
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Friday, August 21, 2009 13:26:27}
+%TCIDATA{LastRevised=Tuesday, July 09, 2013 10:53:16}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -97,16 +97,16 @@ e:E_{i}\wedge c_{i}(d,e)\}$
 For $R\subset S$ we define $next\_states(R)$ as $\{s\in S|\exists r\in
 R:r\rightarrow s\}$.
 
-\subsection{Don't care variables}
+\subsection{Global variables}
 
-\bigskip In the mCRL2 tool set a linear process is parameterized with a
-finite set $DC$ of so called \emph{don't care} variables (also called free
-variables). This means that the expressions $c_{i}(d,e)$, $f_{i}(d,e)$, $%
-g_{i}(d,e)$, and $t_{i}(d,e)$ may contain unbound variables from the set $DC$%
-. Don't care variables have the special property that any two processes
-obtained by assigning values to them are strongly bisimulation equivalent.
-In many algorithms we will simply ignore don't care variables. In some
-cases, algorithms may assign values to some of the don't care variables.
+In the mCRL2 tool set a linear process is parameterized with a finite set $DC
+$ of so called \emph{global} variables. This means that the expressions $%
+c_{i}(d,e)$, $f_{i}(d,e)$, $g_{i}(d,e)$, and $t_{i}(d,e)$ may contain
+unbound variables from the set $DC$. Global variables have the implicit
+property that any two processes obtained by assigning values to them are
+strongly bisimulation equivalent. In many algorithms we will simply ignore
+global variables. In some cases, algorithms may assign values to some of the
+global variables.
 
 \subsection{Notations}
 
@@ -124,104 +124,8 @@ such that for any two initial states that differ only at the value of $d_{i}$%
 \item Let $p$ be a linear process, $x$ a data variable and $y$ a data
 expression. Then $p[x:=y]$ is the linear process obtained from $p$ by
 applying the substitution $x:=y$ to all terms $c_{i}(d,e)$, $f_{i}(d,e)$, $%
-g_{i}(d,e)$, and $t_{i}(d,e)$ that appear in the definition of $p$.\newpage
+g_{i}(d,e)$, and $t_{i}(d,e)$ that appear in the definition of $p$.
 \end{itemize}
-
-\subsection{Processes}
-
-Process expressions in mCRL2 are expressions built according to the
-following syntax:%
-\[
-\begin{array}{ccc}
-\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
-a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\ 
-P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\ 
-P(d:=e) & \text{process\_assignment(}P\text{,}d:=e\text{)} & \text{%
-ProcessAssignment} \\ 
-\delta & \text{delta()} & \text{Delta} \\ 
-\tau & \text{tau()} & \text{Tau} \\ 
-\dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\ 
-\partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\ 
-\tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\ 
-\rho _{R}(x) & \text{rename(}R\text{,}x\text{)} & \text{Rename} \\ 
-\Gamma _{C}(x) & \text{comm(}C\text{,}x\text{)} & \text{Comm} \\ 
-\bigtriangledown _{V}(x) & \text{allow(}V\text{,}x\text{)} & \text{Allow} \\ 
-x\ |\ y & \text{sync(}x\text{,}y\text{)} & \text{Sync} \\ 
-x\mbox{\aap ,}t & \text{at\_time(}x\text{,}t\text{)} & \text{AtTime} \\ 
-x\cdot y & \text{seq(}x\text{,}y\text{)} & \text{Seq} \\ 
-c\rightarrow x & \text{if\_then(}c\text{,}x\text{)} & \text{IfThen} \\ 
-c\rightarrow x\diamond y & \text{if\_then\_else(}c\text{,}x\text{,}y\text{)}
-& \text{IfThenElse} \\ 
-x<<y & \text{binit(}x\text{,}y\text{)} & \text{BInit} \\ 
-x\ ||\ y & \text{merge(}x\text{,}y\text{)} & \text{Merge} \\ 
-x\ ||\_\ y & \text{lmerge(}x\text{,}y\text{)} & \text{LMerge} \\ 
-x+y & \text{choice(}x\text{,}y\text{)} & \text{Choice}%
-\end{array}%
-\]
-
-where the types of the symbols are as follows:%
-\[
-\begin{array}{cl}
-a,b & \text{strings (action names)} \\ 
-P & \text{a process identifier} \\ 
-e & \text{a sequence of data expressions} \\ 
-d & \text{a sequence of data variables} \\ 
-B & \text{a set of strings (action names) } \\ 
-R & \text{a sequence of rename expressions} \\ 
-C & \text{a sequence of communication expressions} \\ 
-V & \text{a sequence of multi actions} \\ 
-t & \text{a data expression of type real} \\ 
-x,y & \text{process expressions} \\ 
-c & \text{ a data expression of type bool}%
-\end{array}%
-\]%
-A rename expression is of the form $a\rightarrow b$, with $a$ and $b$ action
-names. A multi action is of the form $a_{1}\ |\ \cdots \ |\ a_{n}$, with $%
-a_{i}$ actions. A communication expression is of the form $b_{1}\ |\ \cdots
-\ |\ b_{n}\rightarrow b$, with $b$ and $b_{i}$ action names.
-
-\subsubsection{Restrictions}
-
-A multi action is a multi set of actions. The left hand sides of the
-communication expressions in $C$ must be unique. Also the left hand sides of
-the rename expressions in $R$ must be unique.\pagebreak
-
-\subsubsection{Linear process expressions}
-
-Linear process expressions are a subset of process expresions satisfying the
-following grammar:
-\begin{verbatim}
-<linear process expression> ::= choice(<linear process expression>, <linear process expression>)
-                              | <summand>
- 
-<summand>                   ::= sum(<variables>, <alternative>)
-                              | <conditional action prefix>
-                              | <conditional deadlock>
- 
-<conditional action prefix> ::= if_then(<condition>, <action prefix>)
-                              | <action prefix>
- 
-<action prefix>             ::= seq(<timed multiaction>, <process reference>)
-                              | <timed multiaction>
- 
-<timed multiaction>         ::= at_time(<multiaction>, <time stamp>)
-                              | <multiaction>
- 
-<multiaction>               ::= tau()
-                              | <action>
-                              | sync(<multiaction>, <multiaction>)
- 
-<conditional deadlock>      ::= if_then(<condition>, <timed deadlock>)
-                              | <timed deadlock>
- 
-<timed deadlock>            ::= delta()
-                              | at_time(delta(), <time stamp>)
- 
-<process reference>         ::= process(<process identifier>, <data expressions>)
-                              | process_assignment(<process identifier>, <data assignments>)
-\end{verbatim}
-
-\pagebreak
 
 \subsection{Linear processes}
 
@@ -264,54 +168,102 @@ t & \text{a data expression of type real} \\
 s & \text{a sequence of summands} \\ 
 c & \text{ a data expression of type bool}%
 \end{array}%
-\]
+\]%
+A grammar for linear processes can be found in the Process implementation
+notes document.
 
-\subsubsection{Conversion to linear process}
+\subsection{Well typedness constraints}
 
-The function $lin$ converts a process expression to linear process format,
-if it is linear.
+Not all linear processes that adhere to the grammar for linear processes are
+considered valid. A number of restrictions apply to make them valid input
+for the mCRL2 toolset. These restrictions are called \emph{well typedness
+constraints}.
 
-\begin{eqnarray*}
-lin(\text{if\_then}(c,\delta )) &=&\text{summand}([],c,\delta ) \\
-lin(\text{if\_then}(c,\text{seq}(x,P(g))) &=&\text{summand}([],c,lin(x),g) \\
-\text{add\_summand\_variables}(\text{summand}(v,c,\overrightarrow{a},g),w)
-&=&\text{summand}(v+w,c,\overrightarrow{a},g) \\
-\text{add\_summand\_variables}(\text{summand}(v,c,\delta ),w) &=&\text{%
-summand}(v+w,c,\delta ) \\
-lin(\text{sum}(v,x) &=&\text{add\_summand\_variables}(lin(x),w) \\
-lin(\text{seq}(x,P)) &=&lin(x) \\
-\text{set\_multi\_action\_time}(\text{multi\_action}([a_{1},\cdots
-,a_{n}]),t) &=&\text{multi\_action}([a_{1},\cdots ,a_{n}],t) \\
-lin(\text{at\_time}(x,t)) &=&\text{set\_multi\_action\_time}(lin(x),t) \\
-\text{multi\_action}([a_{1},\cdots ,a_{m}])+\text{multi\_action}%
-([a_{m+1},\cdots ,a_{n}]) &=&\text{multi\_action}([a_{1},\cdots ,a_{n}]) \\
-lin(\text{sync}(x,y)) &=&lin(x)+lin(y) \\
-lin(a) &=&\text{multi\_action}([a]) \\
-lin(\tau ) &=&\text{multi\_action}([]) \\
-lin(\text{choice}(\text{choice}(x,y),z)) &=&lin(\text{choice}(x,y))+[lin(z)]
-\\
-lin(\text{choice}(x,\text{choice}(y,z))) &=&[lin(x)]+lin(\text{choice}(y,z))
-\\
-lin(\text{choice}(x,y)) &=&[lin(x),lin(y)]
-\end{eqnarray*}
+\subsubsection{well typedness constraints for data specifications}
 
-\pagebreak
+\begin{itemize}
+\item the domain and range sorts of constructors are declared in the data
+specification
 
-\subsection{Operations on linear processes}
+\item the domain and range sorts of mappings are declared in the data
+specification
+\end{itemize}
+
+\subsubsection{well typedness constraints for a linear process}
+
+\begin{itemize}
+\item the process parameters have unique names
+
+\item process parameters and summation variables have different names
+
+\item the left hand sides of the assignments of summands are contained in
+the process parameters
+
+\item the summands are well typed
+\end{itemize}
+
+\subsubsection{well typedness constraints for linear process specifications}
+
+\begin{itemize}
+\item the sorts occurring in the summation variables are declared in the
+data specification
+
+\item the sorts occurring in the process parameters are declared in the data
+specification
+
+\item the sorts occurring in the global variables are declared in the data
+specification
+
+\item the sorts occurring in the action labels are declared in the data
+specification
+
+\item the action labels occurring in the linear process are declared in the
+action specification
+
+\item the data specification is well typed
+
+\item the linear process is well typed
+
+\item the process initializer is well typed
+
+\item the global variables occurring in the linear process are declared in
+the global variable specification
+
+\item the global variables occurring in the initial process are declared in
+the global variable specification
+
+\item the global variables have unique names
+\end{itemize}
+
+\subsubsection{well typedness constraints for other types}
+
+\begin{itemize}
+\item the sorts of the left and right hand side of an assignment are the same
+
+\item the time of a summand has type Real
+
+\item the condition of a summand has type Bool
+
+\item the set of left hand sides of assignments in an action summand or
+process initializer does not contain duplicates
+\end{itemize}
+
+\newpage
+
+\section{Algorithms}
 
 We now define two operations on linear processes: removing (insignificant)
-parameters and removing constant parameters.
-
-Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
-{eq:lps_timed} and let $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of
-insignificant parameters of $X$. Then we define \textsc{RemoveParameters(}$%
-p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{)} as a linear process obtained
-from $X(d:D)$ by removing $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the process
-parameters of $X$, and by replacing each term $c_{i}(d,e)$, $f_{i}(d,e)$, $%
-g_{i}(d,e)$, or $t_{i}(d,e)$ that appears in the definition of $X$, and that
-has one of the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm by a
-term $c_{i}^{\prime }(d,e)$, $f_{i}^{\prime }(d,e)$, $g_{i}^{\prime }(d,e)$,
-or $t_{i}^{\prime }(d,e)$ that does not have one of the variables $%
+parameters and removing constant parameters. Let $X(d:D)$ be an linear
+process as defined in \ref{eq:lps_untimed}, or \ref{eq:lps_timed} and let $%
+\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of insignificant parameters of $X$%
+. Then we define \textsc{RemoveParameters(}$p,\{d_{j_{1}},\cdots
+,d_{j_{m}}\} $\textsc{)} as a linear process obtained from $X(d:D)$ by
+removing $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the process parameters of $X$%
+, and by replacing each term $c_{i}(d,e)$, $f_{i}(d,e)$, $g_{i}(d,e)$, or $%
+t_{i}(d,e)$ that appears in the definition of $X$, and that has one of the
+variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm by a term $%
+c_{i}^{\prime }(d,e)$, $f_{i}^{\prime }(d,e)$, $g_{i}^{\prime }(d,e)$, or $%
+t_{i}^{\prime }(d,e)$ that does not have one of the variables $%
 d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm, and such that the remaining
 process is strongly bisimulation equivalent to $X(d:D)$\footnote{%
 A more formal definition of this is welcome.}.
@@ -331,7 +283,7 @@ equivalent to $X(d:D)$\footnote{%
 Or should this be restricted to the result of substituting all the constant
 values, and possibly applying the rewriter to it?}.
 
-\section{Parelm}
+\subsection{Parelm}
 
 Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
 {eq:lps_timed}. A \emph{parelm} algorithm is an algorithm that returns 
@@ -359,8 +311,8 @@ $\text{\textbf{return} \textsc{RemoveParameters(}}p,\{d_{j_{1}},\cdots
 ,d_{j_{m}}\}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
 \]%
-where $\{j_{1},\cdots ,j_{m}\}=G$.\bigskip\ Note that $g_{i}(d,e)_{l}$ is
-the $l$-th component of the vector of terms $g_{i}(d,e)$.%
+where $\{j_{1},\cdots ,j_{m}\}=G$. Note that $g_{i}(d,e)_{l}$ is the $l$-th
+component of the vector of terms $g_{i}(d,e)$.%
 \[
 \begin{tabular}{|l|}
 \hline
@@ -375,9 +327,10 @@ for some $w\in W\}$ \\
 $\text{\textbf{return} \textsc{RemoveParameters(}}p,R\text{\textsc{)}},$ \\ 
 \hline
 \end{tabular}%
-\]
+\]%
+\newpage
 
-\section{Constelm}
+\subsection{Constelm}
 
 Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
 {eq:lps_timed}, and let $\overline{d}:D$ be its initial value. A \emph{%
@@ -483,6 +436,35 @@ $\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
 p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
 \]%
-where $\{j_{1},\cdots ,j_{m}\}=G$.
+where $\{j_{1},\cdots ,j_{m}\}=G$.\newpage
+
+\subsection{Conversion to linear process}
+
+The function $lin$ converts a process expression to linear process format,
+if it is linear.
+
+\begin{eqnarray*}
+lin(\text{if\_then}(c,\delta )) &=&\text{summand}([],c,\delta ) \\
+lin(\text{if\_then}(c,\text{seq}(x,P(g))) &=&\text{summand}([],c,lin(x),g) \\
+\text{add\_summand\_variables}(\text{summand}(v,c,\overrightarrow{a},g),w)
+&=&\text{summand}(v+w,c,\overrightarrow{a},g) \\
+\text{add\_summand\_variables}(\text{summand}(v,c,\delta ),w) &=&\text{%
+summand}(v+w,c,\delta ) \\
+lin(\text{sum}(v,x) &=&\text{add\_summand\_variables}(lin(x),w) \\
+lin(\text{seq}(x,P)) &=&lin(x) \\
+\text{set\_multi\_action\_time}(\text{multi\_action}([a_{1},\cdots
+,a_{n}]),t) &=&\text{multi\_action}([a_{1},\cdots ,a_{n}],t) \\
+lin(\text{at\_time}(x,t)) &=&\text{set\_multi\_action\_time}(lin(x),t) \\
+\text{multi\_action}([a_{1},\cdots ,a_{m}])+\text{multi\_action}%
+([a_{m+1},\cdots ,a_{n}]) &=&\text{multi\_action}([a_{1},\cdots ,a_{n}]) \\
+lin(\text{sync}(x,y)) &=&lin(x)+lin(y) \\
+lin(a) &=&\text{multi\_action}([a]) \\
+lin(\tau ) &=&\text{multi\_action}([]) \\
+lin(\text{choice}(\text{choice}(x,y),z)) &=&lin(\text{choice}(x,y))+[lin(z)]
+\\
+lin(\text{choice}(x,\text{choice}(y,z))) &=&[lin(x)]+lin(\text{choice}(y,z))
+\\
+lin(\text{choice}(x,y)) &=&[lin(x),lin(y)]
+\end{eqnarray*}
 
 \end{document}

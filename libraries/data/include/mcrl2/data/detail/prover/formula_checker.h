@@ -12,8 +12,6 @@
 #ifndef FORMULA_CHECKER_H
 #define FORMULA_CHECKER_H
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
@@ -89,7 +87,7 @@ class Formula_Checker
       if (f_witness)
       {
         const data_expression v_witness = f_bdd_prover.get_witness();
-        if (v_witness == 0)
+        if (!v_witness.defined())
         {
           throw mcrl2::runtime_error(
             "Cannot print witness. This is probably caused by an abrupt stop of the\n"
@@ -109,7 +107,7 @@ class Formula_Checker
       if (f_counter_example)
       {
         const data_expression v_counter_example = f_bdd_prover.get_counter_example();
-        if (v_counter_example == 0)
+        if (!v_counter_example.defined())
         {
           throw mcrl2::runtime_error(
             "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
@@ -163,14 +161,13 @@ class Formula_Checker
 
     /// \brief Checks the formulas in the list a_formulas.
     /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
-    void check_formulas(const data_expression_list a_formulas)
+    void check_formulas(const data_expression_list &a_formulas)
     {
       int v_formula_number = 1;
 
-      for(data_expression_list::const_iterator i=a_formulas.begin();
-                i!=a_formulas.end(); ++i)
+      for(data_expression_list::const_iterator i = a_formulas.begin(); i != a_formulas.end(); ++i)
       {
-        atermpp::aterm_appl v_formula = *i;
+        const data_expression& v_formula = *i;
         mCRL2log(log::info) << "'" << data::pp(v_formula) << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();

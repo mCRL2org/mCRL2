@@ -1,9 +1,12 @@
+#!/usr/bin/env python
+
 #~ Copyright 2011 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import os
 import random
+import re
 from optparse import OptionParser
 from path import *
 
@@ -69,7 +72,7 @@ def timeout_command(program, options, timeout = -1):
     if mcrl2_tool_options.verbose:
         print 'executing', command
 
-    cmd = command.split(" ")
+    cmd = re.split('\s+', command)
     start = datetime.datetime.now()
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -116,9 +119,9 @@ def run_pbespgsolve(filename, timeout = 3):
         return None
     return last_word(text) == 'true'
 
-def run_txt2pbes(txtfile, pbesfile):
+def run_txt2pbes(txtfile, pbesfile, options = ''):
     add_temporary_files(txtfile, pbesfile)
-    run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
+    run_program('txt2pbes', '%s %s %s' % (options, txtfile, pbesfile))
 
 def run_txt2bes(txtfile, besfile):
     add_temporary_files(txtfile, besfile)
@@ -191,18 +194,37 @@ def run_pbesrewr(pbesfile1, pbesfile2, pbes_rewriter = 'simplify', timeout = 10)
     timeout_command('pbesrewr',  '--pbes-rewriter=%s %s %s' % (pbes_rewriter, pbesfile1, pbesfile2), timeout)
 
 def run_mcrl22lps(mcrl2file, lpsfile, options = '', timeout = 10):
+    add_temporary_files(mcrl2file, lpsfile)
     args = '%s %s %s' % (options, mcrl2file, lpsfile)
     timeout_command('mcrl22lps',  args.strip(), timeout)
 
 def run_lps2lts(lpsfile, destfile, options = '', timeout = 10):
+    add_temporary_files(lpsfile)
     args = '%s %s %s' % (options, lpsfile, destfile)
     dummy, text = timeout_command('lps2lts', args.strip(), timeout)
     return text
 
+def run_ltsinfo(ltsfile, timeout = 10):
+    add_temporary_files(ltsfile)
+    text, dummy = timeout_command('lps2lts', ltsfile, timeout)
+    return (dummy + text).find('error') != -1
+
+# returns the output of ltscompare (for example: 'LTSs are branching bisimilar')
 def run_ltscompare(ltsfile1, ltsfile2, options = '', timeout = 10):
+    add_temporary_files(ltsfile1, ltsfile2)
     dummy, text = timeout_command('ltscompare',  '%s %s %s' % (options, ltsfile1, ltsfile2), timeout)
-    return text.find('LTSs are strongly bisimilar') != -1
+    return text
 
 def run_lpspbes(lpsfile, mcffile, pbesfile, options = '', timeout = 10):
+    add_temporary_files(lpsfile, mcffile, pbesfile)
     args = '%s -f%s %s %s' % (lpsfile, mcffile, options, pbesfile)
     timeout_command('lps2pbes',  args.strip(), timeout)
+
+def run_pbesstategraph(pbesfile1, pbesfile2, options = '', timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('pbesstategraph',  '%s %s %s' % (options, pbesfile1, pbesfile2), timeout)
+
+def run_symbolic_exploration(pbesfile1, pbesfile2, options = '', timeout = 10):
+    add_temporary_files(pbesfile1, pbesfile2)
+    timeout_command('symbolic_exploration',  '%s %s %s' % (options, pbesfile1, pbesfile2), timeout)
+

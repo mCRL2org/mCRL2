@@ -42,16 +42,18 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// Adds replacement lhs := rhs to the specified map of replacements.
     /// All replacements that have lhs as a right hand side will be changed to
     /// have rhs as a right hand side.
-    void sumelm_add_replacement(std::map<data::variable, data::data_expression>& replacements,
+    void sumelm_add_replacement(data::mutable_map_substitution<>& replacements,
                                 const data::variable& lhs,
                                 const data::data_expression& rhs)
     {
       using namespace mcrl2::data;
       // First apply already present substitutions to rhs
-      data_expression new_rhs = data::replace_free_variables(rhs, data::make_map_substitution(replacements));
-      for (std::map<variable, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
+      data_expression new_rhs = data::replace_variables_capture_avoiding(rhs, replacements, substitution_variables(replacements));
+      for (data::mutable_map_substitution<>::iterator i = replacements.begin(); i != replacements.end(); ++i)
       {
-        i->second = data::replace_free_variables(i->second, assignment(lhs, new_rhs));
+        data::mutable_map_substitution<> sigma;
+        sigma[lhs] = new_rhs;
+        i->second = data::replace_variables_capture_avoiding(i->second, sigma, data::substitution_variables(sigma));
       }
       replacements[lhs] = new_rhs;
     }
@@ -59,7 +61,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// Returns true if x is a summand variable of summand s.
     bool is_summand_variable(const summand_base& s, const data::data_expression& x)
     {
-      return data::is_variable(x) && data::search_variable(s.summation_variables(), x);
+      const data::variable_list& l=s.summation_variables();
+      return data::is_variable(x) && std::find(l.begin(),l.end(),atermpp::aterm_cast<data::variable>(x))!=l.end();
     }
 
     template <typename T>
@@ -71,14 +74,14 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     }
 
     data::data_expression compute_substitutions(const summand_base& s,
-      std::map<data::variable, data::data_expression>& substitutions)
+      data::mutable_map_substitution<>& substitutions)
     {
       using namespace data;
 
-      atermpp::set<data_expression> conjuncts = data::split_and(s.condition());
-      atermpp::set<data_expression> new_conjuncts;
+      std::set<data_expression> conjuncts = data::split_and(s.condition());
+      std::set<data_expression> new_conjuncts;
 
-      for(atermpp::set<data_expression>::const_iterator i = conjuncts.begin(); i != conjuncts.end(); ++i)
+      for(std::set<data_expression>::const_iterator i = conjuncts.begin(); i != conjuncts.end(); ++i)
       {
         bool replacement_added(false);
         data_expression left;
@@ -86,8 +89,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
 
         if (is_equal_to_application(*i)) // v == e
         {
-          left = application(*i).left();
-          right = application(*i).right();
+          left = data::binary_left(application(*i));
+          right = data::binary_right(application(*i));
         }
         else if (is_variable(*i) && sort_bool::is_bool(i->sort())) // v equal to v == true
         {
@@ -118,22 +121,29 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
           //    for which there is no substitution yet -> add d := e, and x := e
           if (is_summand_variable(s, left) && !search_data_expression(right, left))
           {
+            const data::variable& vleft = core::static_down_cast<const data::variable&>(left);
+            const data::variable& vright = core::static_down_cast<const data::variable&>(right);
+
             // Check if we already have a substition with left as left hand side
-            if (substitutions.find(left) == substitutions.end())
+            if (substitutions.find(vleft) == substitutions.end())
             {
-              sumelm_add_replacement(substitutions, left, right);
+              sumelm_add_replacement(substitutions, vleft, right);
               replacement_added = true;
             }
-            else if (is_summand_variable(s, right) && substitutions.find(right) == substitutions.end())
+            else if (is_summand_variable(s, right) && substitutions.find(vright) == substitutions.end())
             {
-              sumelm_add_replacement(substitutions, right, substitutions[left]);
+              sumelm_add_replacement(substitutions, vright, substitutions(vleft));
               replacement_added = true;
             }
-            else if (is_summand_variable(s, substitutions[left]) && substitutions.find(substitutions[left]) != substitutions.end())
+            else
             {
-              sumelm_add_replacement(substitutions, substitutions[left], right);
-              sumelm_add_replacement(substitutions, left, right);
-              replacement_added = true;
+              data::variable v = core::static_down_cast<const data::variable&>(substitutions(vleft));
+              if (is_summand_variable(s, v) && substitutions.find(v) != substitutions.end())
+              {
+                sumelm_add_replacement(substitutions, v, right);
+                sumelm_add_replacement(substitutions, vleft, right);
+                replacement_added = true;
+              }
             }
           }
         }
@@ -151,7 +161,8 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// \brief Constructor.
     /// \param spec The specification to which sum elimination should be
     ///             applied.
-    /// \param verbose Control whether verbose output should be given.
+    /// \param decluster Control whether disjunctive conditions need to be split
+    ///        into multiple summands.
     sumelm_algorithm(specification& spec, bool decluster = false)
       : lps::detail::lps_algorithm(spec),
         m_removed(0),
@@ -191,12 +202,12 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     {
       using namespace data;
 
-      atermpp::map<variable, data_expression> substitutions;
+      data::mutable_map_substitution<> substitutions;
       data::data_expression new_condition = compute_substitutions(s, substitutions);
-
-      s.condition() = data::replace_free_variables(new_condition, data::make_map_substitution(substitutions));
-      lps::replace_free_variables(s.multi_action(), data::make_map_substitution(substitutions));
-      s.assignments() = data::replace_free_variables(s.assignments(), data::make_map_substitution(substitutions));
+      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
+      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
+      lps::replace_variables_capture_avoiding(s.multi_action(), substitutions, substitutions_variables);
+      s.assignments() = data::replace_variables_capture_avoiding(s.assignments(), substitutions, substitutions_variables);
 
       const size_t var_count = s.summation_variables().size();
       remove_unused_summand_variables(s);
@@ -209,13 +220,14 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     {
       using namespace data;
 
-      std::map<variable, data_expression> substitutions;
+      data::mutable_map_substitution<> substitutions;
       data::data_expression new_condition = compute_substitutions(s, substitutions);
+      std::set<data::variable> substitutions_variables = data::substitution_variables(substitutions);
 
-      s.condition() = data::replace_free_variables(new_condition, data::make_map_substitution(substitutions));
+      s.condition() = data::replace_variables_capture_avoiding(new_condition, substitutions, substitutions_variables);
       if (s.deadlock().has_time())
       {
-        s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), data::make_map_substitution(substitutions));
+        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), substitutions, substitutions_variables);
       }
 
       const size_t var_count = s.summation_variables().size();

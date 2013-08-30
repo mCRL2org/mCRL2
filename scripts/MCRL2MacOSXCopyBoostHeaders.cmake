@@ -18,6 +18,7 @@ endif()
 
 # Following configuration holds for Boost 1.51.0
 set( R_MCRL2_BOOST_HEADER_FILES
+  boost/aligned_storage.hpp
   boost/assert.hpp
   boost/array.hpp
   boost/bind.hpp
@@ -40,6 +41,7 @@ set( R_MCRL2_BOOST_HEADER_FILES
   boost/noncopyable.hpp
   boost/ref.hpp
   boost/shared_ptr.hpp
+  boost/signals2.hpp
   boost/smart_ptr.hpp
   boost/static_assert.hpp
   boost/swap.hpp
@@ -60,9 +62,11 @@ set ( R_MCRL2_BOOST_HEADER_DIRS
   boost/iterator
   boost/mpl
   boost/math
+  boost/multi_index
   boost/numeric
   boost/preprocessor
   boost/range
+  boost/signals2
   boost/smart_ptr
   boost/type_traits
   boost/utility

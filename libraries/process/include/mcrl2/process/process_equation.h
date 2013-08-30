@@ -27,64 +27,62 @@ namespace mcrl2
 namespace process
 {
 
-/// \brief Process equation
-// <ProcEqn> ::= ProcEqn(<ProcVarId>, <DataVarId>*, <ProcExpr>)
+//--- start generated class process_equation ---//
+/// \brief A process equation
 class process_equation: public atermpp::aterm_appl
 {
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     process_equation()
       : atermpp::aterm_appl(core::detail::constructProcEqn())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    process_equation(atermpp::aterm_appl term)
+    explicit process_equation(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_ProcEqn(m_term));
+      assert(core::detail::check_term_ProcEqn(*this));
     }
 
     /// \brief Constructor.
-    /// \param name A process identifier
-    /// \param formal_parameters A sequence of data variables
-    /// \param expression A process expression
-    process_equation(process_identifier name, data::variable_list formal_parameters, process_expression expression)
-      : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
-                              name,
-                              atermpp::term_list<data::variable>(formal_parameters.begin(), formal_parameters.end()),
-                              expression))
+    process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)
+      : atermpp::aterm_appl(core::detail::gsMakeProcEqn(identifier, formal_parameters, expression))
     {}
 
-    /// \brief Returns the name of the process equation
-    /// \return The name of the process equation
-    process_identifier identifier() const
+    const process_identifier& identifier() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_identifier>(atermpp::arg1(*this));
     }
 
-    /// \brief Returns the formal parameters of the equation
-    /// \return The formal parameters of the equation
-    data::variable_list formal_parameters() const
+    const data::variable_list& formal_parameters() const
     {
-      return data::variable_list(
-               atermpp::term_list_iterator<data::variable>(atermpp::list_arg2(*this)),
-               atermpp::term_list_iterator<data::variable>());
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
     }
 
-    /// \brief Returns the expression of the process equation
-    /// \return The expression of the process equation
-    process_expression expression() const
+    const process_expression& expression() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg3(*this));
     }
 };
 
-/// \brief Read-only singly linked list of process equations
+/// \brief list of process_equations
 typedef atermpp::term_list<process_equation> process_equation_list;
 
-/// \brief vector of process equations
-typedef atermpp::vector<process_equation> process_equation_vector;
+/// \brief vector of process_equations
+typedef std::vector<process_equation>    process_equation_vector;
+
+
+/// \brief Test for a process_equation expression
+/// \param x A term
+/// \return True if \a x is a process_equation expression
+inline
+bool is_process_equation(const atermpp::aterm_appl& x)
+{
+  return core::detail::gsIsProcEqn(x);
+}
+
+//--- end generated class process_equation ---//
 
 // template function overloads
 std::string pp(const process_equation& x);

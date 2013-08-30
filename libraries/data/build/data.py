@@ -6,6 +6,18 @@ import string
 import copy
 import re
 
+# The following lists identifiers that must be
+# escaped by a namespace when the corresponding function
+# is called, to work around a bug in GCC 4.4
+IDS_WITH_NAMESPACE = ['set_comprehension', 'bag_comprehension']
+
+def add_namespace(function_symbol_name, function_symbol_namespace, other_namespace = "undefined"):
+  global IDS_WITH_NAMESPACE
+  if (function_symbol_namespace == other_namespace or is_standard_function(function_symbol_name) or function_symbol_namespace == "undefined") and not (str(function_symbol_name) in IDS_WITH_NAMESPACE):
+    return function_symbol_name
+  else:
+    return "sort_%s::%s" % (function_symbol_namespace, function_symbol_name)
+
 # Remove trailing _ from a string
 def remove_underscore(s):
   if s.endswith("_"):
@@ -183,7 +195,7 @@ class function_declaration():
       except:
         pass # in case sort_expression has no domain
     
-    return "        result.push_back({0}({1}));\n".format(self.label, ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
     
 
 class function_declaration_list():
@@ -285,11 +297,12 @@ class function_declaration_list():
       projection = []
              
       if len(index_table) == 1:
-        projection.append("return *boost::next(static_cast< application >(e).arguments().begin(), {0});".format(index_table.keys()[0]))
+#        projection.append("return *boost::next(static_cast< application >(e).arguments().begin(), {0});".format(index_table.keys()[0]))
+        projection.append("return *boost::next(atermpp::aterm_cast<const application >(e).begin(), {0});".format(index_table.keys()[0]))
       else:
         projection_case = '''        if ({0})
         {
-          return *boost::next(static_cast< application >(e).arguments().begin(), %s);\n" % (i)
+          return *boost::next(atermpp::aterm_cast<const application >(e).begin(), %s);\n" % (i)
         }'''.format(" || ".join(["is_{0}_application(e)".format(c[1] for c in index_table[i])]), i)
         projection.append(projection_case)
 
@@ -338,7 +351,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      core::identifier_string const& %s_name()\n" % (name)
         code += "      {\n"
-        code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (name, name, fullname)
+        code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (name, fullname)
         code += "        return %s_name;\n" % (name)
         code += "      }\n\n"
         return code
@@ -360,7 +373,7 @@ class function_declaration_list():
         else:
           code += "      function_symbol const& %s(%s)\n" % (name, sortparams)
           code += "      {\n"
-          code += "        static function_symbol %s = core::detail::initialise_static_expression(%s, function_symbol(%s_name(), %s));\n" % (name, name, name, sort)
+          code += "        static function_symbol %s = function_symbol(%s_name(), %s);\n" % (name, name, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n\n"
         return code
@@ -451,7 +464,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      application %s(%s%s%s)\n" % (name, formsortparams, comma, formparams)
         code += "      {\n"
-        code += "        return %s(%s)(%s);\n" % (name, actsortparams, actparams)
+        code += "        return %s(%s)(%s);\n" % (add_namespace(name, self.namespace), actsortparams, actparams)
         code += "      }\n"
         return code
 
@@ -537,7 +550,7 @@ class function_declaration_list():
               target_sort += "        }\n"
             target_sort += "        else\n"
             target_sort += "        {\n"
-            target_sort += "          throw mcrl2::runtime_error(\"cannot compute target sort for %s with domain sorts \" + %s);\n" % (self.label, string.join([("%s.to_string()" % new_domain_sorts[j].code(spec)) for j in range(len(sort.domain.elements))], " + \", \" + "))
+            target_sort += "          throw mcrl2::runtime_error(\"cannot compute target sort for %s with domain sorts \" + %s);\n" % (self.label, string.join([("to_string(%s)" % new_domain_sorts[j].code(spec)) for j in range(len(sort.domain.elements))], " + \", \" + "))
             target_sort += "        }\n"
           target_sort_id = sort_identifier(identifier("target_sort"))
           new_sort = sort_arrow(domain(False, new_domain_sorts), target_sort_id)
@@ -882,11 +895,7 @@ class function_symbol(data_expression):
   def code(self, spec, function_spec, variable_spec, argumentcount = -1):
     f = function_spec.find_function(self, argumentcount)
     sort_parameters_code = [s.code(spec) for s in f.sort_parameters(spec)]
-
-    if f.namespace == function_spec.namespace or is_standard_function(f.label) or f.namespace == "undefined":
-      return "%s(%s)" % (f.label, string.join(sort_parameters_code, ", "))
-    else:
-      return "sort_%s::%s(%s)" % (f.namespace, f.label, string.join(sort_parameters_code, ", "))
+    return "%s(%s)" % (add_namespace(f.label, f.namespace, function_spec.namespace), string.join(sort_parameters_code, ", "))
 
 class lambda_abstraction(data_expression):
   def __init__(self, var_declaration, expression):
@@ -1368,6 +1377,22 @@ class sort_declaration():
       result = "        function_symbol_vector %s_constructors = detail::%s_struct(%s).constructor_functions(%s);\n" % (self.label, self.label, param, sort)
       return result + "        result.insert(result.end(), %s_constructors.begin(), %s_constructors.end());\n" % (self.label, self.label)
 
+  def structured_sort_mapping_code(self):
+    if self.alias == None:
+      return ""
+    else:
+      param = ""
+      if isinstance(self.sort_expression, sort_container):
+        param = str(self.sort_expression.element_sort).lower()
+      sort = "%s(%s)" % (self.label, param)
+      result = "        function_symbol_vector %s_mappings = detail::%s_struct(%s).comparison_functions(%s);\n" % (self.label, self.label, param, sort)
+      result += "        result.insert(result.end(), %s_mappings.begin(), %s_mappings.end());\n" % (self.label, self.label)
+#      result += "        %s_mappings = detail::%s_struct(%s).projection_functions(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_mappings.begin(), %s_mappings.end());\n" % (self.label, self.label)
+#      result += "        %s_mappings = detail::%s_struct(%s).recogniser_functions(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_mappings.begin(), %s_mappings.end());\n" % (self.label, self.label)
+      return result
+
   def structured_sort_equation_code(self):
     if self.alias == None:
       return ""
@@ -1377,14 +1402,21 @@ class sort_declaration():
         param = str(self.sort_expression.element_sort).lower()
       sort = "%s(%s)" % (self.label, param)
       result = "        data_equation_vector %s_equations = detail::%s_struct(%s).constructor_equations(%s);\n" % (self.label, self.label, param, sort)
-      return result + "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+      result += "        %s_equations = detail::%s_struct(%s).comparison_equations(%s);\n" % (self.label, self.label, param, sort)
+      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+#      result += "        %s_equations = detail::%s_struct(%s).projection_equations(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+#      result += "        %s_equations = detail::%s_struct(%s).recogniser_equations(%s);\n" % (self.label, self.label, param, sort)
+#      result += "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label, self.label)
+      return result
 
   def sort_name(self, id, label):
     code = ""
     code += "      inline\n"
     code += "      core::identifier_string const& %s_name()\n" % (label)
     code += "      {\n"
-    code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label, label, id)
+    code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, id)
     code += "        return %s_name;\n" % (label)
     code += "      }\n\n"
     return code
@@ -1394,7 +1426,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      core::identifier_string const& %s_name()\n" % (label)
     code += "      {\n"
-    code += "        static core::identifier_string %s_name = core::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label, label, label)
+    code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, label)
     code += "        return %s_name;\n" % (label)
     code += "      }\n\n"
     return code
@@ -1407,7 +1439,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      basic_sort const& %s()\n" % (label)
     code += "      {\n"
-    code += "        static basic_sort %s = core::detail::initialise_static_expression(%s, basic_sort(%s_name()));\n" % (label, label, label)
+    code += "        static basic_sort %s = basic_sort(%s_name());\n" % (label, label)
     code += "        return %s;\n" % (label)
     code += "      }\n\n"
 
@@ -1469,7 +1501,7 @@ class sort_declaration():
         code += "        /// \\param %s A sort expression\n" % (escape(param))
       else:
         param = ""
-      code += "        /// \\ret The structured sort representing %s\n" % (escape(self.label))
+      code += "        /// \\return The structured sort representing %s\n" % (escape(self.label))
       code += "        inline\n"
       code += "        structured_sort %s_struct(const sort_expression& %s)\n" % (self.label, param)
       code += "        {\n"
@@ -1524,6 +1556,13 @@ class sort_declaration_list():
     for e in self.elements:
       if e.namespace == self.namespace:
         code += "%s" % (e.structured_sort_constructor_code())
+    return code
+
+  def structured_sort_mapping_code(self):
+    code = ""
+    for e in self.elements:
+      if e.namespace == self.namespace:
+        code += "%s" % (e.structured_sort_mapping_code())
     return code
 
   def structured_sort_equation_code(self):
@@ -1622,7 +1661,7 @@ class mapping_specification():
       code += "      function_symbol_vector %s_generate_functions_code(%s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
       code += "        function_symbol_vector result;\n"
-      code += self.declarations.generator_code(spec)
+      code += self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_mapping_code())
       code += "        return result;\n"
       code += "      }\n"
       return code
@@ -1772,6 +1811,9 @@ class sort_specification():
 
   def structured_sort_constructor_code(self):
     return self.declarations.structured_sort_constructor_code()
+
+  def structured_sort_mapping_code(self):
+    return self.declarations.structured_sort_mapping_code()
 
   def structured_sort_equation_code(self):
     return self.declarations.structured_sort_equation_code()

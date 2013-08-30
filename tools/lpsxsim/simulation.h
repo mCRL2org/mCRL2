@@ -39,7 +39,7 @@ class Simulation : public QObject
     typedef QList<TracePosition> Trace;
 
   public:
-    Simulation(QString filename, mcrl2::data::rewrite_strategy strategy);
+    Simulation(QString filename, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies);
     ~Simulation() { delete m_simulation; }
     bool initialized() const { return m_initialized; }
     const QStringList &parameters() const { return m_parameters; }
@@ -66,6 +66,7 @@ class Simulation : public QObject
     QString m_filename;
     mcrl2::data::rewrite_strategy m_strategy;
     bool m_initialized;
+    bool m_do_not_use_dummies;
 
     mcrl2::lps::simulation *m_simulation;
     QStringList m_parameters;

@@ -14,11 +14,10 @@
 #include <cassert>
 #include <vector>
 
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm_io.h"
 
 using namespace std;
 using namespace atermpp;
@@ -28,7 +27,7 @@ struct is_f
 {
   bool operator()(atermpp::aterm t) const
   {
-    return (t.type() == AT_APPL) && aterm_appl(t).function().name() == "f";
+    return (t.type_is_appl()) && aterm_appl(t).function().name() == "f";
   }
 };
 
@@ -37,35 +36,33 @@ struct is_a_or_b
 {
   bool operator()(atermpp::aterm t) const
   {
-    return (t.type() == AT_APPL) &&
+    return (t.type_is_appl()) &&
            (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");
   }
 };
 
 void test_find()
 {
-  aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
+  aterm_appl a(read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
-  assert(t == make_term("f(y)"));
+  assert(t == read_term_from_string("f(y)"));
 
   vector<atermpp::aterm> v;
   find_all_if(a, is_f(), back_inserter(v));
-  assert(v.front() == make_term("f(y)"));
-  assert(v.back() == make_term("f(z)"));
+  assert(v.front() == read_term_from_string("f(y)"));
+  assert(v.back() == read_term_from_string("f(z)"));
 }
 
 void test_replace()
 {
-  aterm_appl a = make_term("f(f(x))");
-  aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
-  assert(b == make_term("f(x)"));
+  aterm_appl a (read_term_from_string("f(f(x))"));
+  aterm_appl b = replace(a, aterm_appl(read_term_from_string("f(x)")), aterm_appl(read_term_from_string("x")));
+  assert(b == read_term_from_string("f(x)"));
 }
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_find();
   test_replace();
 

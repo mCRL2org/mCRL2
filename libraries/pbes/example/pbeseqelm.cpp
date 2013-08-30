@@ -8,8 +8,6 @@
 //
 /// \file pbeseqelm.cpp
 
-#include "boost.hpp" // precompiled headers
-
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
@@ -23,7 +21,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
@@ -73,7 +70,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
       mCRL2log(log::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
-      pbes<> p;
+      pbes p;
       p.load(m_input_filename);
 
       // data rewriter
@@ -93,10 +90,9 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
         case quantifier_all:
         case quantifier_finite:
         {
-          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
+          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator> my_pbes_rewriter;
           bool enumerate_infinite_sorts = (rewriter_type() == quantifier_all);
-          utilities::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, name_generator);
+          data::data_enumerator datae(p.data(), datar);
           data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
           pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
@@ -116,7 +112,6 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   pbes_eqelm_tool tool;
   return tool.execute(argc, argv);
 }

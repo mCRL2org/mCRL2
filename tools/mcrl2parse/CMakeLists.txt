@@ -20,27 +20,27 @@ add_executable(${PROJECT_NAME}
 )
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/libraries/utilities/include
+  ${CMAKE_SOURCE_DIR}/libraries/atermpp/include
+  ${CMAKE_SOURCE_DIR}/libraries/bes/include
   ${CMAKE_SOURCE_DIR}/libraries/core/include
   ${CMAKE_SOURCE_DIR}/libraries/data/include
-  ${CMAKE_SOURCE_DIR}/libraries/process/include
   ${CMAKE_SOURCE_DIR}/libraries/lps/include
-  ${CMAKE_SOURCE_DIR}/libraries/bes/include
+  ${CMAKE_SOURCE_DIR}/libraries/modal_formula/include
   ${CMAKE_SOURCE_DIR}/libraries/pbes/include
-  ${CMAKE_SOURCE_DIR}/libraries/atermpp/include
-  ${CMAKE_SOURCE_DIR}/libraries/aterm/include
-  ${CMAKE_SOURCE_DIR}/3rd-party/dparser
-  ${CMAKE_SOURCE_DIR}/build/precompile
+  ${CMAKE_SOURCE_DIR}/libraries/process/include
+  ${CMAKE_SOURCE_DIR}/libraries/utilities/include
+  ${CMAKE_SOURCE_DIR}/libraries/lts/include
   ${CMAKE_SOURCE_DIR}/build/workarounds
 )
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
+  mcrl2_modal_formula
   mcrl2_pbes
   mcrl2_process
   mcrl2_utilities
   mcrl2_syntax
-  dparser
+  mcrl2_lts
 )
 
 # install target:

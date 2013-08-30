@@ -485,7 +485,7 @@ using std::cout;
 
 using namespace mcrl2::lts;
 
-//Global precondition: the ATerm library has been initialised
+//Global precondition: the aterm library has been initialised
 
 //external declarations
 int fsmyyparse(void);          /* declared in fsmparser.cpp */

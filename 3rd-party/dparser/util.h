@@ -112,7 +112,7 @@ char *sbuf_read(const char *pathname);
 void d_fail(const char *str, ...);
 void d_warn(const char *str, ...);
 char *dup_str(const char *str, const char *end);
-uint strhashl(const char *s, int len);
+uint strhashl(const char *s, size_t len);
 void d_free(void *);
 
 void int_list_diff(int *a, int *b, int *c);

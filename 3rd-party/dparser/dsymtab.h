@@ -13,7 +13,7 @@ struct D_Scope;
 
 typedef struct D_Sym {
   char		 *name;
-  int		 len;
+  size_t	 len;
   unsigned int	 hash;
   struct D_Scope *scope;
   struct D_Sym	 *update_of;

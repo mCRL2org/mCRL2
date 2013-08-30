@@ -147,7 +147,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
   public:
 
     /// \brief Constructor.
-    /// \param[in] r A rewriter
+    /// \param[in] other A rewriter
     basic_rewriter(const basic_rewriter & other) :
       basic_rewriter< atermpp::aterm >(other)
     { }
@@ -162,7 +162,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
-    /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
     template < typename EquationSelector >
     basic_rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
       basic_rewriter< atermpp::aterm >(d,selector,s)
@@ -204,7 +204,7 @@ class rewriter: public basic_rewriter<data_expression>
 
     /// \brief Constructor.
     /// \param[in] d A data specification
-    /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
     /// \param[in] s A rewriter strategy.
     template < typename EquationSelector >
     rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
@@ -213,7 +213,6 @@ class rewriter: public basic_rewriter<data_expression>
     }
 
     /// \brief Default specification used if no specification is specified at construction
-    /// \param[in] d A data specification
     static data_specification& default_specification()
     {
       static data_specification specification;
@@ -227,12 +226,12 @@ class rewriter: public basic_rewriter<data_expression>
     {
       substitution_type sigma;
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE: " << d;
+      mCRL2log(log::debug) << "REWRITE: " << d;
 #endif
       data_expression result(m_rewriter->rewrite(d,sigma));
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -246,12 +245,8 @@ class rewriter: public basic_rewriter<data_expression>
     data_expression operator()(const data_expression& d, const SubstitutionFunction& sigma) const
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE " << d << "\n";
+      mCRL2log(log::debug) << "REWRITE " << d << "\n";
 #endif
-      // Old code by Wieger, which is very inefficient, as sigma is first substituted and rewritten, where we know
-      // it is already mapping terms to normal form, and we should not rewrite these again.
-      // data_expression result(reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma)),empty_sigma)));
-
       substitution_type sigma_with_iterator;
       std::set < variable > free_variables=data::find_free_variables(d);
       for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
@@ -262,7 +257,7 @@ class rewriter: public basic_rewriter<data_expression>
       data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
 
 # ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -294,7 +289,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
 
     /// \brief Constructor.
     /// \param[in] d A data specification
-    /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
     /// \param[in] s A rewriter strategy.
     template < typename EquationSelector >
     rewriter_with_variables(const data_specification& d, const EquationSelector & selector, const strategy s = jitty) :
@@ -311,7 +306,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       data_expression t = m_rewriter->rewrite(d,sigma);
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE " << d << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << "REWRITE " << d << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -337,7 +332,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       data_expression t(m_rewriter->rewrite(static_cast< const data_expression& >(d),sigma_with_iterator));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(debug) << "REWRITE " << d << " ------------> " << result << std::endl;
+      mCRL2log(log::debug) << "REWRITE " << d << " ------------> " << result << std::endl;
 #endif
       return result;
     }

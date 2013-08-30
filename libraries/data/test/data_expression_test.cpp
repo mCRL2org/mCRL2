@@ -13,8 +13,8 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -32,7 +32,6 @@
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -41,16 +40,16 @@ void variable_test()
 {
   basic_sort s("S");
   variable x("x", s);
-  BOOST_CHECK(x.name() == "x");
+  BOOST_CHECK(to_string(x.name()) == "x");
   BOOST_CHECK(x.sort() == s);
 
   core::identifier_string y_name("y");
   variable y(y_name, s);
-  BOOST_CHECK(y.name() == "y");
+  BOOST_CHECK(to_string(y.name()) == "y");
   BOOST_CHECK(y.sort() == s);
 
   variable y_("y", s);
-  BOOST_CHECK(y_.name() == "y");
+  BOOST_CHECK(to_string(y_.name()) == "y");
   BOOST_CHECK(y.sort() == s);
 
   BOOST_CHECK(x != y);
@@ -76,17 +75,17 @@ void function_symbol_test()
   function_sort fs(s01, s);
 
 
-  function_symbol f("f", fs);
-  BOOST_CHECK(f.name() == "f");
+  data::function_symbol f("f", fs);
+  BOOST_CHECK(to_string(f.name()) == "f");
   BOOST_CHECK(f.sort() == fs);
 
-  function_symbol g("g", s0);
-  BOOST_CHECK(g.name() == "g");
+  data::function_symbol g("g", s0);
+  BOOST_CHECK(to_string(g.name()) == "g");
   BOOST_CHECK(g.sort() == s0);
 
   core::identifier_string g_name("g");
-  function_symbol g_(g_name, s0);
-  BOOST_CHECK(g_.name() == "g");
+  data::function_symbol g_(g_name, s0);
+  BOOST_CHECK(to_string(g_.name()) == "g");
   BOOST_CHECK(g_.sort() == s0);
 
   BOOST_CHECK(f != g);
@@ -94,7 +93,7 @@ void function_symbol_test()
   BOOST_CHECK(g == g_);
 
   data_expression f_e(f);
-  function_symbol f_e_(f_e);
+  data::function_symbol f_e_(f_e);
   BOOST_CHECK(f_e == f);
   BOOST_CHECK(f_e_.name() == f.name());
   BOOST_CHECK(f_e_.sort() == f.sort());
@@ -110,7 +109,7 @@ void application_test()
   s01.push_back(sort_expression(s1));
   function_sort s01s(s01, s);
 
-  function_symbol f("f", s01s);
+  data::function_symbol f("f", s01s);
   data_expression x(variable("x", s0));
   data_expression y(variable("y", s1));
   data_expression_list xy = atermpp::make_list(x,y);
@@ -118,6 +117,8 @@ void application_test()
   BOOST_CHECK(fxy.sort() == s);
   BOOST_CHECK(fxy.head() == f);
   BOOST_CHECK(fxy.arguments() == xy);
+  BOOST_CHECK(*(fxy.begin()) == x);
+  BOOST_CHECK(*(++fxy.begin()) == y);
 
   data_expression fxy_e(fxy);
   application fxy_e_(fxy_e);
@@ -241,7 +242,7 @@ void set_comprehension_test()
 {
   basic_sort s("S");
   variable x("x", s);
-  function_symbol f("f", make_function_sort(s, sort_bool::bool_()));
+  data::function_symbol f("f", make_function_sort(s, sort_bool::bool_()));
   data_expression e(sort_set::set_comprehension(s, x));
   BOOST_CHECK(e.sort() == sort_set::set_(s));
 }
@@ -250,7 +251,7 @@ void bag_comprehension_test()
 {
   basic_sort s("S");
   variable x("x", s);
-  function_symbol f("f", make_function_sort(s, sort_nat::nat()));
+  data::function_symbol f("f", make_function_sort(s, sort_nat::nat()));
   data_expression e(sort_bag::bag_comprehension(s, f(x)));
   BOOST_CHECK(e.sort() == sort_bag::bag(s));
 }
@@ -293,40 +294,27 @@ void system_defined_check()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   variable_test();
-  core::garbage_collect();
 
   function_symbol_test();
-  core::garbage_collect();
 
   application_test();
-  core::garbage_collect();
 
   abstraction_test();
-  core::garbage_collect();
 
   lambda_test();
-  core::garbage_collect();
 
   forall_test();
-  core::garbage_collect();
 
   exists_test();
-  core::garbage_collect();
 
   set_comprehension_test();
-  core::garbage_collect();
 
   bag_comprehension_test();
-  core::garbage_collect();
 
   where_declaration_test();
-  core::garbage_collect();
 
   assignment_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

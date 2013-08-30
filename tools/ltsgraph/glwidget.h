@@ -61,10 +61,11 @@ class GLWidget : public QGLWidget
     QPoint m_dragstart;         ///< The coordinate at which the dragging started.
     QColor m_paintcolor;        ///< The color of the paint operation.
     bool m_painting;            ///< Boolean indicating if painting is enabled.
+	bool m_paused;
     GLScene* m_scene;           ///< The GLScene which is used to render the contents.
     std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
 
-
+	
     /**
      * @brief Renders a single edge.
      * @param i The index of the edge to render.
@@ -123,6 +124,17 @@ class GLWidget : public QGLWidget
      */
     virtual void paintGL();
 
+	/**
+	 * @brief Pauses painting and clears the selection. Used to make the
+	 *        GLWidget wait while a new graph is loaded.
+	 */
+    void pause();
+
+	/**
+	 * @brief Resumes painting after a call to pause().
+	 */
+    void resume();
+
     /**
      * @brief Resize the OpenGL viewport.
      * @param width The new width for the viewport.
@@ -168,13 +180,24 @@ class GLWidget : public QGLWidget
     void rebuild();
 
     /**
-     * @brief Renders the current visualisation to a file.
-     * @param filename The filename for the output.
-     * @param filter The filter that was used for this operation.
+     * @brief Renders the current visualisation to a bitmap file.
+     * @param filename The filename for the output (extension determines file type).
      * @param w The desired width of the image.
      * @param h The desired height of the image.
      */
-    void renderToFile(const QString& filename, const QString& filter, const int w = 1024, const int h = 768);
+    void savePixmap(const QString &filename, const int w = 1024, const int h = 768);
+
+    /**
+	 * @brief Renders the current visualisation to a vector graphics file using gl2ps.
+	 * @param filename The filename for the output (extension determines file type).
+	 */
+	void saveVector(const QString &filename);
+
+    /**
+	 * @brief Renders the current visualisation to a LaTeX Tikz image.
+	 * @param filename The filename for the output.
+	 */
+	void saveTikz(const QString &filename, float aspectRatio);
 
     /**
      * @brief Sets the paint color.
@@ -210,6 +233,7 @@ class GLWidget : public QGLWidget
     float fogDistance() { return m_scene->fogDistance(); }
   signals:
     void widgetResized(const Graph::Coord3D& newsize);
+    void initialized();
   public slots:
 
     /**
@@ -222,6 +246,7 @@ class GLWidget : public QGLWidget
     void toggleTransitionLabels(bool show) { m_scene->setDrawTransitionLabels(show); }
     void toggleStateLabels(bool show) { m_scene->setDrawStateLabels(show); }
     void toggleStateNumbers(bool show) { m_scene->setDrawStateNumbers(show); }
+    void toggleSelfLoops(bool show) { m_scene->setDrawSelfLoops(show); }
     void toggleInitialMarking(bool show) { m_scene->setDrawInitialMarking(show); }
     void toggleFog(bool show) { m_scene->setDrawFog(show); }
     void setNodeSize(int size) { m_scene->setNodeSize(size); m_scene->updateShapes(); }

@@ -12,8 +12,6 @@
 #ifndef MCRL2_BES_DETAIL_BES_ALGORITHM_H
 #define MCRL2_BES_DETAIL_BES_ALGORITHM_H
 
-#include "mcrl2/atermpp/deque.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 
@@ -27,16 +25,15 @@ namespace detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
-template <typename Container = atermpp::vector<boolean_equation> >
 class bes_algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
-    boolean_equation_system<Container>& m_bes;
+    boolean_equation_system& m_bes;
 
   public:
     /// \brief Constructor
-    bes_algorithm(boolean_equation_system<Container>& bes)
+    bes_algorithm(boolean_equation_system& bes)
       : m_bes(bes)
     {}
 
@@ -50,12 +47,12 @@ class bes_algorithm
     /// those that are unreachable.
     bool remove_unreachable_equations()
     {
-      atermpp::deque<boolean_variable> todo;
-      atermpp::set<boolean_variable> reachable;
+      std::deque<boolean_variable> todo;
+      std::set<boolean_variable> reachable;
 
       // For efficiency reasons, store equation X = phi as mapping X -> X = phi
-      atermpp::map<boolean_variable, boolean_equation> equations;
-      for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      std::map<boolean_variable, boolean_equation> equations;
+      for(auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         equations[i->variable()] = *i;
       }
@@ -68,7 +65,7 @@ class bes_algorithm
         boolean_equation eqn = equations[todo.front()];
         todo.pop_front();
         std::set<boolean_variable> occ = find_boolean_variables(eqn.formula());
-        for(atermpp::set<boolean_variable>::const_iterator i = occ.begin(); i != occ.end(); ++i)
+        for(std::set<boolean_variable>::const_iterator i = occ.begin(); i != occ.end(); ++i)
         {
           bool fresh = reachable.insert(*i).second;
           if(fresh)
@@ -83,9 +80,9 @@ class bes_algorithm
         return true;
       }
 
-      Container reachable_equations;
-      atermpp::set<boolean_variable> unreachable_equations;
-      for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      std::vector<boolean_equation> reachable_equations;
+      std::set<boolean_variable> unreachable_equations;
+      for(auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         if(reachable.find(i->variable()) != reachable.end())
         {

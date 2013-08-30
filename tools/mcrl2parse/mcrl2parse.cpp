@@ -9,8 +9,6 @@
 /// \file mcrl2parse.cpp
 /// \brief tool for testing the new parser
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "mcrl2parse"
 #define AUTHOR "Wieger Wesselink"
 
@@ -22,13 +20,11 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/detail/dparser_functions.h"
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
@@ -36,6 +32,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/typecheck.h"
+#include "mcrl2/lts/parse.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/pbes/parse.h"
@@ -47,7 +44,6 @@
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -216,12 +212,12 @@ void separate_process_specification(const std::string& text, const std::string& 
 }
 
 inline
-void separate_pbes_specification(const std::string& text, const std::string& keyword, pbes_system::pbes<>& pbesspec, std::string& keyword_text)
+void separate_pbes_specification(const std::string& text, const std::string& keyword, pbes_system::pbes& pbesspec, std::string& keyword_text)
 {
   if (!has_keyword(text, keyword))
   {
     keyword_text = text;
-    pbesspec = pbes_system::pbes<>();
+    pbesspec = pbes_system::pbes();
   }
   else
   {
@@ -362,7 +358,7 @@ class mcrl2parse_tool : public input_tool
     bool aterm_format;
     bool warn;
 
-
+    bool dot;
 
     void add_options(interface_description& desc)
     {
@@ -394,6 +390,8 @@ class mcrl2parse_tool : public input_tool
       desc.add_option("check-printer", "compare the results of the old and new pretty printer", 'P');
       desc.add_option("aterm-format", "compare the results in aterm format", 'a');
       desc.add_option("warn", "generate warnings", 'w');
+
+      desc.add_option("dot", "load a dot file using the old and the new parser and check the result");
     }
 
     void parse_options(const command_line_parser& parser)
@@ -407,6 +405,8 @@ class mcrl2parse_tool : public input_tool
       aterm_format   = 0 < parser.options.count("aterm-format");
       warn           = 0 < parser.options.count("warn");
       text = parser.option_argument("expression");
+
+      dot = parser.options.count("dot") > 0;
     }
 
     std::string read_text(std::istream& from)
@@ -418,6 +418,100 @@ class mcrl2parse_tool : public input_tool
         out << s << std::endl;
       }
       return out.str();
+    }
+
+    bool load_dot_file()
+    {
+      if (dot && !input_filename().empty())
+      {
+        bool fail = false;
+        lts::lts_dot_t dot1;
+        lts::lts_dot_t dot2;
+        mCRL2log(log::info) << "Start parsing." << std::endl;
+        timer().start("old");
+        try
+        {
+          dot1.load(input_filename());
+          mCRL2log(log::info) << "Parsed using old parser." << std::endl;
+        }
+        catch(...)
+        {
+          fail = !fail;
+        }
+        timer().finish("old");
+        timer().start("new");
+        try
+        {
+          dot2.loadnew(input_filename());
+          mCRL2log(log::info) << "Parsed using new parser." << std::endl;
+        }
+        catch(...)
+        {
+          fail = !fail;
+        }
+        timer().finish("new");
+        if (fail)
+        {
+          throw mcrl2::runtime_error("One parser failed (but not both).");
+        }
+
+        if (log::mcrl2_logger().get_reporting_level() == log::verbose)
+        {
+          dot1.save(std::cout);
+          dot2.save(std::cout);
+        }
+
+        mCRL2log(log::info) << "Checking equality of parsed structures." << std::endl;
+        if (dot1.num_states() != dot2.num_states())
+        {
+          mCRL2log(log::verbose) << "old: " << dot1.num_states() << std::endl;
+          mCRL2log(log::verbose) << "new: " << dot2.num_states() << std::endl;
+          throw mcrl2::runtime_error("Not the same amount of states.");
+        }
+        if (dot1.num_state_labels() != dot2.num_state_labels())
+        {
+          mCRL2log(log::verbose) << "old: " << dot1.num_state_labels() << std::endl;
+          mCRL2log(log::verbose) << "new: " << dot2.num_state_labels() << std::endl;
+          throw mcrl2::runtime_error("Not the same amount of state labels.");
+        }
+        if (dot1.initial_state() != dot2.initial_state())
+        {
+          mCRL2log(log::verbose) << "old: " << dot1.initial_state() << std::endl;
+          mCRL2log(log::verbose) << "new: " << dot2.initial_state() << std::endl;
+          throw mcrl2::runtime_error("Not the same initial state.");
+        }
+        for (auto it1 = dot1.get_transitions().begin(), it2 = dot2.get_transitions().begin();
+             it1 != dot1.get_transitions().end(); ++it1, ++it2)
+        {
+          if (it1->from() != it2->from() || it1->to() != it2->to() || it1->label() != it2->label())
+          {
+            throw mcrl2::runtime_error("Transition lists not identical.");
+          }
+        }
+        for (size_t i = 0; i < dot1.num_action_labels(); ++i)
+        {
+          if (dot1.action_label(i) != dot2.action_label(i))
+          {
+            throw mcrl2::runtime_error("Action label lists not identical.");
+          }
+        }
+        for (size_t i = 0; i < dot1.num_state_labels(); ++i)
+        {
+          if (dot1.state_label(i) != dot2.state_label(i)) 
+          {
+            throw mcrl2::runtime_error("State label lists not identical.");
+          }
+        }
+        for (size_t i = 0; i < dot1.get_transitions().size(); ++i)
+        {
+          if (dot1.is_tau(i) != dot2.is_tau(i))
+          {
+            throw mcrl2::runtime_error("Tau lists not identical.");
+          }
+        }
+        return true;
+      }
+      return false;
     }
 
   public:
@@ -432,6 +526,11 @@ class mcrl2parse_tool : public input_tool
 
     bool run()
     {
+      if (load_dot_file())
+      {
+        return true;
+      }
+
       if (text.empty())
       {
         if (input_filename().empty())
@@ -448,7 +547,7 @@ class mcrl2parse_tool : public input_tool
       data::data_specification dataspec;
       lps::specification lpsspec;
       process::process_specification procspec;
-      pbes_system::pbes<> pbesspec;
+      pbes_system::pbes pbesspec;
 
       core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
       unsigned int start_symbol_index = 0;
@@ -519,7 +618,7 @@ class mcrl2parse_tool : public input_tool
             }
             case besspec_e  :
             {
-              bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
+              bes::boolean_equation_system x = bes::parse_boolean_equation_system_new(text);
               atermpp::aterm_appl a = bes::boolean_equation_system_to_aterm(x);
               if (aterm_format)
               {
@@ -578,8 +677,8 @@ class mcrl2parse_tool : public input_tool
             case multact_e  :
             {
               separate_action_specification(text, "multact", lpsspec, text);
-              lps::multi_action x = lps::parse_multi_action_new(text);
-              lps::complete_multi_action(x, lpsspec.action_labels(), lpsspec.data());
+              lps::untyped_multi_action y = lps::parse_multi_action_new(text);
+              lps::multi_action x = lps::complete_multi_action(y, lpsspec.action_labels(), lpsspec.data());
               if (aterm_format)
               {
                 std::cout << lps::detail::multi_action_to_aterm(x) << std::endl;
@@ -606,7 +705,7 @@ class mcrl2parse_tool : public input_tool
             }
             case pbesspec_e :
             {
-              pbes_system::pbes<> x = pbes_system::parse_pbes_new(text);
+              pbes_system::pbes x = pbes_system::parse_pbes_new(text);
               pbes_system::complete_pbes(x);
               if (aterm_format)
               {
@@ -698,7 +797,7 @@ class mcrl2parse_tool : public input_tool
             }
             case besspec_e  :
             {
-              bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
+              bes::boolean_equation_system x = bes::parse_boolean_equation_system_new(text);
               std::cout << bes::pp(x) << std::endl;
               break;
             }
@@ -740,7 +839,7 @@ class mcrl2parse_tool : public input_tool
             }
             case pbesspec_e :
             {
-              pbes_system::pbes<> x = pbes_system::parse_pbes(text);
+              pbes_system::pbes x = pbes_system::parse_pbes(text);
               std::cout << pbes_system::pp(x) << std::endl;
               break;
             }
@@ -785,15 +884,7 @@ class mcrl2parse_tool : public input_tool
 
 };
 
-class mcrl2parse_gui_tool: public mcrl2_gui_tool<mcrl2parse_tool>
-{
-  public:
-    mcrl2parse_gui_tool() {}
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return mcrl2parse_gui_tool().execute(argc, argv);
+  return mcrl2parse_tool().execute(argc, argv);
 }

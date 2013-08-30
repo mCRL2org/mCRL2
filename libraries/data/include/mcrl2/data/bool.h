@@ -36,7 +36,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bool_name()
       {
-        static core::identifier_string bool_name = core::detail::initialise_static_expression(bool_name, core::identifier_string("Bool"));
+        static core::identifier_string bool_name = core::identifier_string("Bool");
         return bool_name;
       }
 
@@ -45,7 +45,7 @@ namespace mcrl2 {
       inline
       basic_sort const& bool_()
       {
-        static basic_sort bool_ = core::detail::initialise_static_expression(bool_, basic_sort(bool_name()));
+        static basic_sort bool_ = basic_sort(bool_name());
         return bool_;
       }
 
@@ -67,7 +67,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& true_name()
       {
-        static core::identifier_string true_name = core::detail::initialise_static_expression(true_name, core::identifier_string("true"));
+        static core::identifier_string true_name = core::identifier_string("true");
         return true_name;
       }
 
@@ -76,7 +76,7 @@ namespace mcrl2 {
       inline
       function_symbol const& true_()
       {
-        static function_symbol true_ = core::detail::initialise_static_expression(true_, function_symbol(true_name(), bool_()));
+        static function_symbol true_ = function_symbol(true_name(), bool_());
         return true_;
       }
 
@@ -99,7 +99,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& false_name()
       {
-        static core::identifier_string false_name = core::detail::initialise_static_expression(false_name, core::identifier_string("false"));
+        static core::identifier_string false_name = core::identifier_string("false");
         return false_name;
       }
 
@@ -108,7 +108,7 @@ namespace mcrl2 {
       inline
       function_symbol const& false_()
       {
-        static function_symbol false_ = core::detail::initialise_static_expression(false_, function_symbol(false_name(), bool_()));
+        static function_symbol false_ = function_symbol(false_name(), bool_());
         return false_;
       }
 
@@ -132,8 +132,8 @@ namespace mcrl2 {
       function_symbol_vector bool_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(true_());
-        result.push_back(false_());
+        result.push_back(sort_bool::true_());
+        result.push_back(sort_bool::false_());
 
         return result;
       }
@@ -142,7 +142,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& not_name()
       {
-        static core::identifier_string not_name = core::detail::initialise_static_expression(not_name, core::identifier_string("!"));
+        static core::identifier_string not_name = core::identifier_string("!");
         return not_name;
       }
 
@@ -151,7 +151,7 @@ namespace mcrl2 {
       inline
       function_symbol const& not_()
       {
-        static function_symbol not_ = core::detail::initialise_static_expression(not_, function_symbol(not_name(), make_function_sort(bool_(), bool_())));
+        static function_symbol not_ = function_symbol(not_name(), make_function_sort(bool_(), bool_()));
         return not_;
       }
 
@@ -175,7 +175,7 @@ namespace mcrl2 {
       inline
       application not_(const data_expression& arg0)
       {
-        return not_()(arg0);
+        return sort_bool::not_()(arg0);
       }
 
       /// \brief Recogniser for application of !
@@ -197,7 +197,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& and_name()
       {
-        static core::identifier_string and_name = core::detail::initialise_static_expression(and_name, core::identifier_string("&&"));
+        static core::identifier_string and_name = core::identifier_string("&&");
         return and_name;
       }
 
@@ -206,7 +206,7 @@ namespace mcrl2 {
       inline
       function_symbol const& and_()
       {
-        static function_symbol and_ = core::detail::initialise_static_expression(and_, function_symbol(and_name(), make_function_sort(bool_(), bool_(), bool_())));
+        static function_symbol and_ = function_symbol(and_name(), make_function_sort(bool_(), bool_(), bool_()));
         return and_;
       }
 
@@ -231,7 +231,7 @@ namespace mcrl2 {
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
-        return and_()(arg0, arg1);
+        return sort_bool::and_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of &&
@@ -253,7 +253,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& or_name()
       {
-        static core::identifier_string or_name = core::detail::initialise_static_expression(or_name, core::identifier_string("||"));
+        static core::identifier_string or_name = core::identifier_string("||");
         return or_name;
       }
 
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       function_symbol const& or_()
       {
-        static function_symbol or_ = core::detail::initialise_static_expression(or_, function_symbol(or_name(), make_function_sort(bool_(), bool_(), bool_())));
+        static function_symbol or_ = function_symbol(or_name(), make_function_sort(bool_(), bool_(), bool_()));
         return or_;
       }
 
@@ -287,7 +287,7 @@ namespace mcrl2 {
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
-        return or_()(arg0, arg1);
+        return sort_bool::or_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of ||
@@ -309,7 +309,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& implies_name()
       {
-        static core::identifier_string implies_name = core::detail::initialise_static_expression(implies_name, core::identifier_string("=>"));
+        static core::identifier_string implies_name = core::identifier_string("=>");
         return implies_name;
       }
 
@@ -318,7 +318,7 @@ namespace mcrl2 {
       inline
       function_symbol const& implies()
       {
-        static function_symbol implies = core::detail::initialise_static_expression(implies, function_symbol(implies_name(), make_function_sort(bool_(), bool_(), bool_())));
+        static function_symbol implies = function_symbol(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
         return implies;
       }
 
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
-        return implies()(arg0, arg1);
+        return sort_bool::implies()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of =>
@@ -366,10 +366,10 @@ namespace mcrl2 {
       function_symbol_vector bool_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(not_());
-        result.push_back(and_());
-        result.push_back(or_());
-        result.push_back(implies());
+        result.push_back(sort_bool::not_());
+        result.push_back(sort_bool::and_());
+        result.push_back(sort_bool::or_());
+        result.push_back(sort_bool::implies());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -381,7 +381,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -393,7 +393,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -405,7 +405,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_not_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for bool_

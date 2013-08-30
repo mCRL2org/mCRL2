@@ -13,11 +13,9 @@
 #include <stdio.h>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/test_utilities.h"
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 
@@ -40,7 +38,7 @@ private:
     size_t transition_count;
 
 public:
-    explorer(const pbes<>& p, const std::string& rewrite_strategy = "jittyc", bool reset = false, bool always_split = false) :
+    explorer(const pbes& p, const std::string& rewrite_strategy = "jittyc", bool reset = false, bool always_split = false) :
         mcrl2::pbes_system::explorer(p, rewrite_strategy, reset, always_split),
         transition_count(0)
     {}
@@ -174,7 +172,7 @@ void explorer::bfs()
         for(std::vector<std::vector<int> >::iterator succ = successors.begin(); succ != successors.end(); ++succ)
         {
           std::vector<int> s = *succ;
-          std::pair<atermpp::set<std::vector<int> >::iterator,bool> ret;
+          std::pair<std::set<std::vector<int> >::iterator,bool> ret;
           ret = visited.insert(s);
           if (ret.second)
           {
@@ -210,7 +208,7 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer" << std::endl;
-  pbes<> p = txt2pbes(pbes_text);
+  pbes p = txt2pbes(pbes_text);
   normalize(p);
   if (!is_ppg(p))
   {
@@ -239,6 +237,7 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
   //BOOST_CHECK(num_states==(int)pbes_explorer->get_state_count());
   //BOOST_CHECK(num_transitions==(int)pbes_explorer->get_transition_count());
   delete pbes_explorer;
+
 }
 
 void run_pbes_explorer_file(std::string filename, int num_parts, int num_groups, int num_states, int num_transitions,
@@ -325,7 +324,5 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

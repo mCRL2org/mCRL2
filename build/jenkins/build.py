@@ -28,6 +28,9 @@ compilerflags = []
 if compiler == 'clang':
   cc = which('clang')
   cpp = which('clang++')
+elif compiler == 'gcc-oldest':
+  cc = which('gcc-4.4')
+  cpp = which('g++-4.4')
 elif compiler == 'gcc-latest':
   cc = which('gcc-4.7')
   cpp = which('g++-4.7')
@@ -43,7 +46,13 @@ if compiler != 'default':
 #
 packageflags = []
 if package == "official-release":
-  packageflags = ['-DMCRL2_PACKAGE_RELEASE=ON']
+  packageflags += ['-DMCRL2_PACKAGE_RELEASE=ON']
+
+if label.startswith('windows'):
+  packageflags += ['-DMSVC10_REDIST_DIR:PATH=C:\Program Files\Common Files\VC\Redist']
+  
+if label.startswith('macosx') and package in ['nightly', 'official-release']:
+  packageflags += ['-DMCRL2_OSX_PACKAGE=ON'] # Needed for packaging relevant Boost headers (for compiling rewriter)
 
 #
 # Do not run long tests, unless we're doing the ubuntu-amd64 maintainer build
@@ -101,14 +110,12 @@ if call('CMake --build', make_command):
 # Test
 #
 
-newenv = {'MCRL2_COMPILEREWRITER': '{0}/stage/bin/mcrl2compilerewriter'.format(builddir)}
-newenv.update(os.environ)
 ctest_command = ['ctest', \
                  '-T', 'Test', \
                  '--output-on-failure', \
                  '--no-compress-output', \
                  '-j{0}'.format(buildthreads)]
-ctest_result = call('CTest', ctest_command, env=newenv)
+ctest_result = call('CTest', ctest_command)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))
 

@@ -67,7 +67,7 @@ typedef struct D_ParseNode {
 
 D_Parser *new_D_Parser(struct D_ParserTables *t, int sizeof_ParseNode_User);
 void free_D_Parser(D_Parser *p); 
-D_ParseNode *dparse(D_Parser *p, char *buf, int buf_len);
+D_ParseNode *dparse(D_Parser *p, char *buf, size_t buf_len);
 void free_D_ParseNode(D_Parser *p, D_ParseNode *pn);
 void free_D_ParseTreeBelow(D_Parser *p, D_ParseNode *pn);
 
@@ -77,7 +77,7 @@ D_ParseNode *d_find_in_tree(D_ParseNode *pn, int symbol);
 char *d_ws_before(D_Parser *p, D_ParseNode *pn); /* points BEFORE leading ws */
 char *d_ws_after(D_Parser *p, D_ParseNode *pn); /* points AFTER trailing ws */
 
-void d_pass(D_Parser *p, D_ParseNode *pn, int pass_number);
+void d_pass(D_Parser *p, D_ParseNode *pn, unsigned int pass_number);
 
 int resolve_amb_greedy(D_Parser *dp, int n, D_ParseNode **v);
 

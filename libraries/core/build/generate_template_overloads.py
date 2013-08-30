@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+import sys
 from mcrl2_classes import *
 from mcrl2_utility import *
 
@@ -6,18 +9,19 @@ all_classes = parse_class_map(class_map)
 modifiability_map = make_modifiability_map(all_classes)
 
 file_map = {
-  'action_formulas' : '../../lps/source/lps.cpp',
+  'action_formulas' : '../../modal_formula/source/modal_formula.cpp',
   'core' : '../../core/source/core.cpp',
   'data' : '../../data/source/data.cpp',
   'lps' : '../../lps/source/lps.cpp',
   'pbes_system' : '../../pbes/source/pbes.cpp',
   'process' : '../../process/source/process.cpp',
-  'regular_formulas' : '../../lps/source/lps.cpp',
-  'state_formulas' : '../../lps/source/lps.cpp',
+  'regular_formulas' : '../../modal_formula/source/modal_formula.cpp',
+  'state_formulas' : '../../modal_formula/source/modal_formula.cpp',
 }
 
 PP_CLASSNAMES = '''
 core::identifier_string
+core::nil
 data::sort_expression
 data::sort_expression_list
 data::sort_expression_vector
@@ -48,11 +52,12 @@ lps::action_vector
 lps::action_label
 lps::action_label_list
 lps::action_label_vector
+lps::deadlock
 lps::multi_action
 lps::process_initializer
 lps::state
 pbes_system::fixpoint_symbol
-pbes_system::pbes<>
+pbes_system::pbes
 pbes_system::pbes_equation
 pbes_system::pbes_equation_vector
 pbes_system::pbes_expression
@@ -94,6 +99,8 @@ process::bounded_init
 process::merge
 process::left_merge
 process::choice
+process::untyped_process_assignment
+process::untyped_parameter_identifier
 action_formulas::action_formula
 regular_formulas::regular_formula
 state_formulas::state_formula
@@ -112,7 +119,7 @@ lps::multi_action
 process::process_equation_vector
 process::process_specification
 pbes_system::pbes_equation_vector
-pbes_system::pbes<>
+pbes_system::pbes
 state_formulas::state_formula
 '''
 
@@ -121,7 +128,7 @@ data::data_expression
 data::data_equation
 lps::action
 lps::multi_action
-pbes_system::pbes<>
+pbes_system::pbes
 process::process_specification
 state_formulas::state_formula
 '''
@@ -132,7 +139,7 @@ data::data_expression
 data::sort_expression
 lps::action_label_list
 lps::specification
-pbes_system::pbes<>
+pbes_system::pbes
 process::process_equation_vector
 process::process_expression
 process::process_specification
@@ -150,7 +157,8 @@ lps::linear_process
 lps::specification
 lps::deadlock
 lps::multi_action
-pbes_system::pbes<>
+lps::action
+pbes_system::pbes
 state_formulas::state_formula
 '''
 
@@ -163,7 +171,8 @@ lps::specification
 lps::deadlock
 lps::multi_action
 lps::process_initializer
-pbes_system::pbes<>
+pbes_system::pbes
+pbes_system::pbes_expression
 pbes_system::pbes_equation
 state_formulas::state_formula
 '''
@@ -171,7 +180,7 @@ state_formulas::state_formula
 FIND_FUNCTION_SYMBOLS_CLASSNAMES = '''
 data::data_equation
 lps::specification
-pbes_system::pbes<>
+pbes_system::pbes
 '''
 
 FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES = '''
@@ -196,7 +205,7 @@ pbes_system::pbes_expression
 '''
 
 def has_specification(type):
-    return type.endswith('specification') or type.endswith('pbes<>')
+    return type.endswith('specification') or type.endswith('pbes')
 
 def is_modifiable(type):
     if type in modifiability_map:
@@ -205,7 +214,7 @@ def is_modifiable(type):
         return False
     elif type.endswith('_vector'):
         return True
-    elif type.endswith('pbes<>'):
+    elif type.endswith('pbes'):
         return True
     elif type.endswith('vector<pbes_equation>'):
         return True
@@ -214,30 +223,30 @@ def is_modifiable(type):
 def extract_namespace(classname):
     return re.sub('::.*', '', classname)
 
-def generate_traverser_overloads(classnames, function, return_type, result):
+def generate_traverser_overloads(classnames, function, return_type, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         text = re.sub('>>', '> >', '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (return_type, function, classname, namespace, function, classname))
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
-def generate_builder_overloads(classnames, function, result):
+def generate_builder_overloads(classnames, function, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         if is_modifiable(classname):
             text = 'void %s(%s& x) { %s::%s< %s >(x); }\n' % (function, classname, namespace, function, classname)
         else:
             text = '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (classname, function, classname, namespace, function, classname)
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
 # special because of additional variable argument
-def generate_search_variable_overloads(classnames, function, return_type, result):
+def generate_search_variable_overloads(classnames, function, return_type, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         text = re.sub('>>', '> >', '%s %s(const %s& x, const data::variable& v) { return %s::%s< %s >(x, v); }\n' % (return_type, function, classname, namespace, function, classname))
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
 # special because of additional data_specification argument
-def generate_normalize_sorts_overloads(classnames, result):
+def generate_normalize_sorts_overloads(classnames, code_map):
     for classname in classnames:
         namespace = extract_namespace(classname)
         if is_modifiable(classname):
@@ -247,50 +256,49 @@ def generate_normalize_sorts_overloads(classnames, result):
         if has_specification(classname):
             text = re.sub('x, dataspec', 'x, x.data()', text)
             text = re.sub('& dataspec', '& /* dataspec */', text)
-        result[namespace].append(text)
+        code_map[namespace].append(text)
 
-result = {}
+code_map = {}
 for namespace in file_map:
-    result[namespace] = []
+    code_map[namespace] = []
 
 classnames = PP_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'pp', 'std::string', result)
+generate_traverser_overloads(classnames, 'pp', 'std::string', code_map)
 
 classnames = NORMALIZE_SORTS_CLASSNAMES.strip().split()
-generate_normalize_sorts_overloads(classnames, result)
+generate_normalize_sorts_overloads(classnames, code_map)
 
 classnames = TRANSLATE_USER_NOTATION_CLASSNAMES.strip().split()
-generate_builder_overloads(classnames, 'translate_user_notation', result)
+generate_builder_overloads(classnames, 'translate_user_notation', code_map)
 
 classnames = FIND_SORT_EXPRESSIONS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_sort_expressions', 'std::set<data::sort_expression>', result)
+generate_traverser_overloads(classnames, 'find_sort_expressions', 'std::set<data::sort_expression>', code_map)
 
 classnames = FIND_VARIABLES_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_variables', 'std::set<data::variable>', result)
+generate_traverser_overloads(classnames, 'find_all_variables', 'std::set<data::variable>', code_map)
 
 classnames = FIND_FREE_VARIABLES_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_free_variables', 'std::set<data::variable>', result)
+generate_traverser_overloads(classnames, 'find_free_variables', 'std::set<data::variable>', code_map)
 
 classnames = FIND_FUNCTION_SYMBOLS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_function_symbols', 'std::set<data::function_symbol>', result)
+generate_traverser_overloads(classnames, 'find_function_symbols', 'std::set<data::function_symbol>', code_map)
 
 classnames = FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_propositional_variable_instantiations', 'std::set<pbes_system::propositional_variable_instantiation>', result)
+generate_traverser_overloads(classnames, 'find_propositional_variable_instantiations', 'std::set<pbes_system::propositional_variable_instantiation>', code_map)
 
 classnames = FIND_IDENTIFIERS_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', result)
+generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', code_map)
 
 classnames = FIND_NIL_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'find_nil', 'bool', result)
+generate_traverser_overloads(classnames, 'find_nil', 'bool', code_map)
 
 classnames = SEARCH_VARIABLE_CLASSNAMES.strip().split()
-generate_search_variable_overloads(classnames, 'search_variable', 'bool', result)
+generate_search_variable_overloads(classnames, 'search_variable', 'bool', code_map)
 
-for namespace in result:
+result = True
+for namespace in code_map:
     filename = file_map[namespace]
-    text = ''.join(result[namespace])
+    text = ''.join(code_map[namespace])
     label = 'generated %s overloads' % namespace
-    insert_text_in_file(filename, text, label)
-
-    print '--- %s ---' % namespace
-    print re.sub(' \{.*\}', ';', text)
+    result = insert_text_in_file(filename, text, label) and result
+sys.exit(not result) # 0 result indicates successful execution

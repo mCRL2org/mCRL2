@@ -67,7 +67,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& constructor_name()
       {
-        static core::identifier_string constructor_name = core::detail::initialise_static_expression(constructor_name, core::identifier_string("@set"));
+        static core::identifier_string constructor_name = core::identifier_string("@set");
         return constructor_name;
       }
 
@@ -103,7 +103,7 @@ namespace mcrl2 {
       inline
       application constructor(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return constructor(s)(arg0, arg1);
+        return sort_set::constructor(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@set
@@ -127,7 +127,7 @@ namespace mcrl2 {
       function_symbol_vector set_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(constructor(s));
+        result.push_back(sort_set::constructor(s));
 
         return result;
       }
@@ -136,7 +136,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("{}"));
+        static core::identifier_string empty_name = core::identifier_string("{}");
         return empty_name;
       }
 
@@ -169,7 +169,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set_fset_name()
       {
-        static core::identifier_string set_fset_name = core::detail::initialise_static_expression(set_fset_name, core::identifier_string("@setfset"));
+        static core::identifier_string set_fset_name = core::identifier_string("@setfset");
         return set_fset_name;
       }
 
@@ -204,7 +204,7 @@ namespace mcrl2 {
       inline
       application set_fset(const sort_expression& s, const data_expression& arg0)
       {
-        return set_fset(s)(arg0);
+        return sort_set::set_fset(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@setfset
@@ -226,7 +226,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set_comprehension_name()
       {
-        static core::identifier_string set_comprehension_name = core::detail::initialise_static_expression(set_comprehension_name, core::identifier_string("@setcomp"));
+        static core::identifier_string set_comprehension_name = core::identifier_string("@setcomp");
         return set_comprehension_name;
       }
 
@@ -261,7 +261,7 @@ namespace mcrl2 {
       inline
       application set_comprehension(const sort_expression& s, const data_expression& arg0)
       {
-        return set_comprehension(s)(arg0);
+        return sort_set::set_comprehension(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@setcomp
@@ -283,7 +283,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("in"));
+        static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
       }
 
@@ -319,7 +319,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_set::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -341,7 +341,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& complement_name()
       {
-        static core::identifier_string complement_name = core::detail::initialise_static_expression(complement_name, core::identifier_string("!"));
+        static core::identifier_string complement_name = core::identifier_string("!");
         return complement_name;
       }
 
@@ -376,7 +376,7 @@ namespace mcrl2 {
       inline
       application complement(const sort_expression& s, const data_expression& arg0)
       {
-        return complement(s)(arg0);
+        return sort_set::complement(s)(arg0);
       }
 
       /// \brief Recogniser for application of !
@@ -398,7 +398,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& union_name()
       {
-        static core::identifier_string union_name = core::detail::initialise_static_expression(union_name, core::identifier_string("+"));
+        static core::identifier_string union_name = core::identifier_string("+");
         return union_name;
       }
 
@@ -434,7 +434,7 @@ namespace mcrl2 {
       inline
       application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return union_(s)(arg0, arg1);
+        return sort_set::union_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -456,7 +456,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& intersection_name()
       {
-        static core::identifier_string intersection_name = core::detail::initialise_static_expression(intersection_name, core::identifier_string("*"));
+        static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
       }
 
@@ -492,7 +492,7 @@ namespace mcrl2 {
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return intersection(s)(arg0, arg1);
+        return sort_set::intersection(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -514,7 +514,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& difference_name()
       {
-        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("-"));
+        static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
       }
 
@@ -550,7 +550,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return difference(s)(arg0, arg1);
+        return sort_set::difference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -572,7 +572,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& false_function_name()
       {
-        static core::identifier_string false_function_name = core::detail::initialise_static_expression(false_function_name, core::identifier_string("@false_"));
+        static core::identifier_string false_function_name = core::identifier_string("@false_");
         return false_function_name;
       }
 
@@ -607,7 +607,7 @@ namespace mcrl2 {
       inline
       application false_function(const sort_expression& s, const data_expression& arg0)
       {
-        return false_function(s)(arg0);
+        return sort_set::false_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@false_
@@ -629,7 +629,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& true_function_name()
       {
-        static core::identifier_string true_function_name = core::detail::initialise_static_expression(true_function_name, core::identifier_string("@true_"));
+        static core::identifier_string true_function_name = core::identifier_string("@true_");
         return true_function_name;
       }
 
@@ -664,7 +664,7 @@ namespace mcrl2 {
       inline
       application true_function(const sort_expression& s, const data_expression& arg0)
       {
-        return true_function(s)(arg0);
+        return sort_set::true_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@true_
@@ -686,7 +686,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& not_function_name()
       {
-        static core::identifier_string not_function_name = core::detail::initialise_static_expression(not_function_name, core::identifier_string("@not_"));
+        static core::identifier_string not_function_name = core::identifier_string("@not_");
         return not_function_name;
       }
 
@@ -721,7 +721,7 @@ namespace mcrl2 {
       inline
       application not_function(const sort_expression& s, const data_expression& arg0)
       {
-        return not_function(s)(arg0);
+        return sort_set::not_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@not_
@@ -743,7 +743,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& and_function_name()
       {
-        static core::identifier_string and_function_name = core::detail::initialise_static_expression(and_function_name, core::identifier_string("@and_"));
+        static core::identifier_string and_function_name = core::identifier_string("@and_");
         return and_function_name;
       }
 
@@ -779,7 +779,7 @@ namespace mcrl2 {
       inline
       application and_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return and_function(s)(arg0, arg1);
+        return sort_set::and_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@and_
@@ -801,7 +801,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& or_function_name()
       {
-        static core::identifier_string or_function_name = core::detail::initialise_static_expression(or_function_name, core::identifier_string("@or_"));
+        static core::identifier_string or_function_name = core::identifier_string("@or_");
         return or_function_name;
       }
 
@@ -837,7 +837,7 @@ namespace mcrl2 {
       inline
       application or_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return or_function(s)(arg0, arg1);
+        return sort_set::or_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@or_
@@ -861,19 +861,19 @@ namespace mcrl2 {
       function_symbol_vector set_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(empty(s));
-        result.push_back(set_fset(s));
-        result.push_back(set_comprehension(s));
-        result.push_back(in(s));
-        result.push_back(complement(s));
-        result.push_back(union_(s));
-        result.push_back(intersection(s));
-        result.push_back(difference(s));
-        result.push_back(false_function(s));
-        result.push_back(true_function(s));
-        result.push_back(not_function(s));
-        result.push_back(and_function(s));
-        result.push_back(or_function(s));
+        result.push_back(sort_set::empty(s));
+        result.push_back(sort_set::set_fset(s));
+        result.push_back(sort_set::set_comprehension(s));
+        result.push_back(sort_set::in(s));
+        result.push_back(sort_set::complement(s));
+        result.push_back(sort_set::union_(s));
+        result.push_back(sort_set::intersection(s));
+        result.push_back(sort_set::difference(s));
+        result.push_back(sort_set::false_function(s));
+        result.push_back(sort_set::true_function(s));
+        result.push_back(sort_set::not_function(s));
+        result.push_back(sort_set::and_function(s));
+        result.push_back(sort_set::or_function(s));
         return result;
       }
       ///\brief Function for projecting out argument
@@ -885,7 +885,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -897,7 +897,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_set_fset_application(e) || is_set_comprehension_application(e) || is_complement_application(e) || is_false_function_application(e) || is_true_function_application(e) || is_not_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -909,7 +909,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_and_function_application(e) || is_or_function_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for set_
@@ -930,13 +930,23 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), empty(s), constructor(s, false_function(s), sort_fset::empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vs), set_fset(s, vs), constructor(s, false_function(s), vs)));
-        result.push_back(data_equation(atermpp::make_vector(vf), set_comprehension(s, vf), constructor(s, vf, sort_fset::empty(s))));
+        result.push_back(data_equation(atermpp::make_vector(vf), sort_set::set_comprehension(s, vf), constructor(s, vf, sort_fset::empty(s))));
         result.push_back(data_equation(atermpp::make_vector(ve, vf, vs), in(s, ve, constructor(s, vf, vs)), not_equal_to(vf(ve), sort_fset::in(s, ve, vs))));
         result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(constructor(s, vf, vs), constructor(s, vg, vt)), forall(atermpp::make_vector(vc), not_equal_to(equal_to(vf(vc), vg(vc)), sort_fset::in(s, vc, sort_fset::difference(s, vs, vt))))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
         result.push_back(data_equation(atermpp::make_vector(vf, vs), complement(s, constructor(s, vf, vs)), constructor(s, not_function(s, vf), vs)));
+        result.push_back(data_equation(atermpp::make_vector(vx), union_(s, vx, vx), vx));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, vx, union_(s, vx, vy)), union_(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, vx, union_(s, vy, vx)), union_(s, vy, vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vx, vy), vx), union_(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vy, vx), vx), union_(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), union_(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, or_function(s, vf, vg), sort_fset::union_(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vx), intersection(s, vx, vx), vx));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), intersection(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, and_function(s, vf, vg), sort_fset::intersection(s, vf, vg, vs, vt))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), difference(s, vx, vy), intersection(s, vx, complement(s, vy))));
         result.push_back(data_equation(atermpp::make_vector(ve), false_function(s, ve), sort_bool::false_()));
@@ -952,12 +962,12 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, false_function(s), vf), false_function(s)));
         result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, vf, true_function(s)), vf));
         result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, true_function(s), vf), vf));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve))));
         result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, vf, vf), vf));
         result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, vf, false_function(s)), vf));
         result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, false_function(s), vf), vf));
         result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, vf, true_function(s)), true_function(s)));
         result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, true_function(s), vf), true_function(s)));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve))));
         return result;
       }
 

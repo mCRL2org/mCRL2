@@ -1,3 +1,5 @@
+.. _showcase-CMS:
+
 Control Software of the CMS Experiment at CERN's Large Hadron Collider
 ======================================================================
 
@@ -100,13 +102,5 @@ Technical details
 Publications
 ------------
 
-.. [HKW11] Y.L. Hwong, V.J.J. Kusters and T.A.C. Willemse,
-   ''Analysing the Control Software of the Compact Muon Solenoid Experiment at the Large Hadron Collider.''
-   In ''Proc. of FSEN 2011'', Lecture Notes in Computer Science, Springer, vol. 7141, pp 174-190, 2011.
-   An extended version is available as [HKW11a]_
-   
-.. [HKW11a] Y.L. Hwong, V.J.J. Kusters and T.A.C. Willemse,
-   ''Analysing the Control Software of the Compact Muon Solenoid Experiment at the Large Hadron Collider.''
-   CoRR abs/1101.5324.
-   `(DOI) <http://arxiv.org/abs/1101.5324>`_.
+[HKV+13]_
 

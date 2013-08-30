@@ -42,26 +42,20 @@ class pbes_expression_with_variables: public pbes_expression
 
     /// \brief Constructor. Creates a data expression with an empty sequence of variables.
     /// \param term A term
-    pbes_expression_with_variables(atermpp::aterm_appl term)
-      : pbes_expression(term)
-    {}
-
-    /// \brief Constructor. Creates a data expression with an empty sequence of variables.
-    /// \param term A term
-    pbes_expression_with_variables(ATermAppl term)
+    pbes_expression_with_variables(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {}
 
     /// \brief Constructor.
     /// \param expression A PBES expression
     /// \param variables A sequence of data variables
-    pbes_expression_with_variables(pbes_expression expression, data::variable_list variables)
+    pbes_expression_with_variables(const pbes_expression& expression, const data::variable_list& variables)
       : pbes_expression(expression), m_variables(variables)
     {}
 
     /// \brief Returns the variables
     /// \return The variables
-    data::variable_list variables() const
+    const data::variable_list& variables() const
     {
       return m_variables;
     }
@@ -84,35 +78,6 @@ class pbes_expression_with_variables: public pbes_expression
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_variables >
-{
-  static void protect(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    t.protect();
-    t.variables().protect();
-  }
-  static void unprotect(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    t.unprotect();
-    t.variables().unprotect();
-  }
-  static void mark(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    t.mark();
-    t.variables().mark();
-  }
-  static ATerm term(const mcrl2::pbes_system::pbes_expression_with_variables& t)
-  {
-    return t.term();
-  }
-};
-}
-/// \endcond
 
 namespace mcrl2
 {
@@ -256,12 +221,12 @@ struct term_traits<pbes_system::pbes_expression_with_variables>
   static
   term_type prop_var(const string_type& name, Iter first, Iter last)
   {
-    std::set<data_term_type> v;
+    std::set<variable_type> v;
     for (Iter i = first; i != last; ++i)
     {
       v.insert(i->variables().begin(), i->variables().end());
     }
-    return term_type(tr::prop_var(name, first, last), atermpp::convert< variable_sequence_type >(v));
+    return term_type(propositional_variable_type(name, data_term_sequence_type(first, last)), variable_sequence_type(v.begin(), v.end()));
   }
 
   /// \brief Test for value true
@@ -459,6 +424,15 @@ struct term_traits<pbes_system::pbes_expression_with_variables>
   data_term_type term2dataterm(const term_type& t)
   {
     return tr::term2dataterm(t);
+  }
+
+  /// \brief Conversion from term to propositional variable instantiation
+  /// \param t A term
+  /// \return The converted term
+  static inline
+  const propositional_variable_type& term2propvar(const term_type& t)
+  {
+    return core::static_down_cast<const propositional_variable_type&>(static_cast<const pbes_system::pbes_expression&>(t));
   }
 
   /// \brief Returns the difference of two unordered sets of variables

@@ -14,7 +14,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/test_utilities.h"
 
@@ -33,7 +32,7 @@ BOOST_AUTO_TEST_CASE(pbes_with_reals)
     "init X(0);\n"
   );
 
-  pbes<> p;
+  pbes p;
   p = txt2pbes(input);
 
   std::string output;
@@ -50,7 +49,7 @@ BOOST_AUTO_TEST_CASE(pbes_print)
     "init X;           \n"
    ;
 
-  pbes<> p;
+  pbes p;
   p = txt2pbes(PBES);
   pbes_system::pp(p);
 }
@@ -69,7 +68,7 @@ BOOST_AUTO_TEST_CASE(pbes_val)
     "init X(1);\n"
     ;
 
-  pbes<> p;
+  pbes p;
   p = txt2pbes(PBES);
   std::string result = pbes_system::pp(p);
   BOOST_CHECK(result == expected_result);
@@ -77,7 +76,5 @@ BOOST_AUTO_TEST_CASE(pbes_val)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H
 
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"
@@ -27,9 +28,9 @@ namespace pbes_system {
 /// \param q A sequence of PBES equations
 /// \return The concatenation result
 inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
+std::vector<pbes_equation> operator+(const std::vector<pbes_equation>& p, const std::vector<pbes_equation>& q)
 {
-  atermpp::vector<pbes_equation> result(p);
+  std::vector<pbes_equation> result(p);
   result.insert(result.end(), q.begin(), q.end());
   return result;
 }
@@ -42,9 +43,9 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
 /// \param e A PBES equation
 /// \return The append result
 inline
-atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const pbes_equation& e)
+std::vector<pbes_equation> operator+(const std::vector<pbes_equation>& p, const pbes_equation& e)
 {
-  atermpp::vector<pbes_equation> result(p);
+  std::vector<pbes_equation> result(p);
   result.push_back(e);
   return result;
 }
@@ -63,7 +64,7 @@ data::variable_list mu_variables(state_formulas::state_formula f)
   data::variable_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = atermpp::push_front(result, i->lhs());
+    result.push_front(i->lhs());
   }
   return atermpp::reverse(result);
 }
@@ -79,17 +80,17 @@ data::data_expression_list mu_expressions(state_formulas::state_formula f)
   data::data_expression_list result;
   for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = atermpp::push_front(result, i->rhs());
+    result.push_front(i->rhs());
   }
   return atermpp::reverse(result);
 }
 
 inline
-std::string myprint(const atermpp::vector<pbes_equation>& v)
+std::string myprint(const std::vector<pbes_equation>& v)
 {
   std::ostringstream out;
   out << "[";
-  for (atermpp::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (std::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     out << "\n  " << pbes_system::pp(i->symbol()) << " " << pbes_system::pp(i->variable()) << " = " << pbes_system::pp(i->formula());
   }
@@ -97,23 +98,24 @@ std::string myprint(const atermpp::vector<pbes_equation>& v)
   return out.str();
 }
 
-/// \brief Generates fresh variables with names that do not appear in the given context.
+/// \brief Generates a substitution that assigns fresh variables to the given sequence of variables.
+/// The identifier generator is used to assign names to the fresh variables.
 /// Caveat: the implementation is very inefficient.
 /// \param update_context If true, then generated names are added to the context
 inline
-data::variable_list make_fresh_variables(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
+data::mutable_map_substitution<> make_fresh_variables(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
 {
-  data::variable_vector result;
+  data::mutable_map_substitution<> result;
   for (data::variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     core::identifier_string name =  id_generator(std::string(i->name()));
-    result.push_back(data::variable(name, i->sort()));
+    result[*i] = data::variable(name, i->sort());
     if (!add_to_context)
     {
       id_generator.remove_identifier(name);
     }
   }
-  return atermpp::convert<data::variable_list>(result);
+  return result;
 }
 
 } // namespace detail

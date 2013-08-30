@@ -11,9 +11,6 @@
 
 #include <queue>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/deque.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/parse.h"
@@ -37,7 +34,6 @@ void test_initial_state_successors(const specification& lps_spec)
   {
     std::cout << lps::pp(it->state()) << std::endl;
   }
-  core::garbage_collect();
 }
 
 void test_next_state_generator(const specification& lps_spec, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool enumeration_caching, bool summand_pruning, bool per_summand)
@@ -48,12 +44,12 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
 
   state initial_state = generator.initial_state();
 
-  atermpp::set<state> visited;
-  atermpp::set<state> seen;
-  atermpp::set<multi_action> transition_labels;
+  std::set<state> visited;
+  std::set<state> seen;
+  std::set<multi_action> transition_labels;
   size_t transitions = 0;
 
-  std::queue<state, atermpp::deque<state> > q;
+  std::queue<state, std::deque<state> > q;
   q.push(initial_state);
   seen.insert(initial_state);
 
@@ -112,7 +108,6 @@ BOOST_AUTO_TEST_CASE(single_state_test)
   );
 
   specification spec = parse_linear_process_specification(text);
-
   test_initial_state_successors(spec);
   // Test all 2**3 possible feature flags
   for (size_t i = 0; i < 8; i++)
@@ -157,7 +152,5 @@ BOOST_AUTO_TEST_CASE(test_non_true_condition)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

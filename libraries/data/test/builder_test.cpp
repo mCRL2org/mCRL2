@@ -13,8 +13,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/parse.h"
@@ -79,6 +77,9 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
     }
     return sigma(v);
   }
+  #if BOOST_MSVC
+  #include "mcrl2/core/detail/builder_msvc.inc.h"
+  #endif
 };
 
 struct subst: public std::unary_function<data::variable, data::data_expression>
@@ -133,8 +134,6 @@ void test_binding()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_binding();
 
   return EXIT_SUCCESS;

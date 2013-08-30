@@ -105,7 +105,7 @@ static std::vector<verti> get_complement( verti V, ForwardIterator begin,
 /*! Returns the first inversion of parity, i.e. the least priority `p' such that
     some vertices exist with priorities p and q, where q < p and q%2 != p%2.
     If there are no inversions, game.d() is returned instead. */
-int first_inversion(const ParityGame &game);
+size_t first_inversion(const ParityGame &game);
 
 
 /*! Parity game solver implementing Zielonka's recursive algorithm. */

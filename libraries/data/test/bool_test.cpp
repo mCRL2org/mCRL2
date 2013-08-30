@@ -13,10 +13,9 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/bool.h"
 
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -26,15 +25,12 @@ void bool_sort_test()
 {
   basic_sort b(bool_());
   BOOST_CHECK(b == bool_());
-  BOOST_CHECK(b.name() == "Bool");
+  BOOST_CHECK(to_string(b.name()) == "Bool");
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   bool_sort_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

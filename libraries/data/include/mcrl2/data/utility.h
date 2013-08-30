@@ -18,9 +18,6 @@
 #include <set>
 #include <string>
 #include <utility>
-#include <vector>
-
-#include "boost/iterator/transform_iterator.hpp"
 
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -33,38 +30,11 @@ namespace mcrl2
 namespace data
 {
 
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-template < typename Container >
-struct sort_range
-{
-  typedef boost::iterator_range< boost::transform_iterator<
-  detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > > type;
-};
-
-} // namespace detail
-/// \endcond
-
-/// \brief Gives a sequence of sorts for a given sequence of expressions
-///
-/// A sequence is a container (as per the STL Container concept) or
-/// iterator range type. The template class / is_container governs what is
-/// recognised as a container.
-//
-/// \param[in] r range of iterators that refer expression objects
-/// \return s1, s2, ..., s3 such that sn = t.front().sort() where t = r.advance_begin(n)
-/// \note Behaviour is lazy, no intermediate containers are constructed
-template < typename Container >
-typename detail::sort_range< Container >::type
-make_sort_range(Container const& container, typename boost::enable_if< typename atermpp::detail::is_container< Container >::type >::type* = 0)
-{
-  return typename detail::sort_range< Container >::type(container);
-}
-
 /// \brief Generates fresh variables with names that do not appear in the given context.
 /// Caveat: the implementation is very inefficient.
-/// \param update_context If true, then generated names are added to the context
+/// \param variables a list of variables for which new names need to be generated.
+/// \param context Context of identifiers that cannot be used.
+/// \param update_context If true, the generated variables are added to \a context.
 inline
 variable_list fresh_variables(const variable_list& variables, std::set<std::string>& context, bool update_context = true)
 {
@@ -84,11 +54,11 @@ variable_list fresh_variables(const variable_list& variables, std::set<std::stri
     }
     result.push_back(variable(name, i->sort()));
   }
-  return atermpp::convert<variable_list>(result);
+  return variable_list(result.begin(),result.end());
 }
 
 /// \brief Returns a variable that doesn't appear in context
-/// \param context A term
+/// \param ids a set of identifiers to use as context.
 /// \param s A sort expression
 /// \param hint A string
 /// \return A variable that doesn't appear in context

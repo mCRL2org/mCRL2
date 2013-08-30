@@ -47,9 +47,9 @@ namespace detail {
   inline
   data_expression remove_numeric_casts(data_expression x)
   {
-  	while (is_numeric_cast(x))
+    while (is_numeric_cast(x))
     {
-    	x = static_cast<application>(x).arguments().front();
+    	x = *atermpp::aterm_cast<application>(x).begin();
     }
     return x;
   }
@@ -252,7 +252,6 @@ int precedence(const application& x)
   {
     return precedence(sort_real::left(x));
   }
-
   else if (detail::is_implies(x))
   {
     return 2;
@@ -327,9 +326,8 @@ int infix_precedence_left(const application& x)
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return infix_precedence_left(sort_real::arg(x));
+    return infix_precedence_left(atermpp::aterm_cast<application>(sort_real::arg(x)));
   }
-
   else if (detail::is_implies(x))
   {
     return 3;
@@ -403,9 +401,8 @@ int infix_precedence_right(const application& x)
   // TODO: this is unexpected, what to do???
   if (sort_real::is_creal_application(x))
   {
-    return infix_precedence_right(sort_real::arg(x));
+    return infix_precedence_right(atermpp::aterm_cast<application>(sort_real::arg(x)));
   }
-
   else if (detail::is_implies(x))
   {
     return 2;
@@ -480,6 +477,10 @@ int precedence(const data_expression& x)
   {
     return precedence(application(x));
   }
+  else if (is_abstraction(x))
+  {
+    return 1;
+  }
   return max_precedence;
 }
 
@@ -490,6 +491,10 @@ int infix_precedence_left(const data_expression& x)
   {
     return infix_precedence_left(application(x));
   }
+  else if (is_abstraction(x))
+  {
+    return 2;
+  } 
   return max_precedence;
 }
 
@@ -499,6 +504,10 @@ int infix_precedence_right(const data_expression& x)
   if (is_application(x))
   {
     return infix_precedence_right(application(x));
+  }
+  else if (is_abstraction(x))
+  {
+    return 1;
   }
   return max_precedence;
 }

@@ -13,10 +13,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/data/standard_utility.h"
-
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -35,10 +32,7 @@ void recogniser_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   recogniser_test();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

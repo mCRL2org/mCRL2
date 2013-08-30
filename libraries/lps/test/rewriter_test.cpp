@@ -19,9 +19,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -178,7 +176,6 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
     std::cerr << lps::pp(dest) << std::endl;
   }
   BOOST_CHECK(src == dest);
-  core::garbage_collect();
 }
 
 void test_lps_rewriter()
@@ -198,8 +195,6 @@ void test_lps_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test1();
   test2();
   test3();

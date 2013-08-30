@@ -8,8 +8,6 @@
 /// \file pbes2bool.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 // ======================================================================
 //
 // file          : pbes2bool
@@ -37,7 +35,6 @@
 #include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
 //Data Framework
@@ -55,7 +52,6 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2::utilities;
@@ -181,7 +177,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
-      mcrl2::pbes_system::pbes<> p;
+      mcrl2::pbes_system::pbes p;
       load_pbes(p, input_filename(), pbes_input_format());
 
       pbes_system::normalize(p);
@@ -193,9 +189,9 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
       {
         // Create a rewriter with only the necessary data equations.
         using namespace mcrl2::data;
-        std::set < function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
-        std::set < function_symbol > init_symbol_set=pbes_system::find_function_symbols(p.initial_state());
-        std::set < function_symbol > function_symbol_set;
+        std::set < data::function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
+        std::set < data::function_symbol > init_symbol_set=pbes_system::find_function_symbols(p.initial_state());
+        std::set < data::function_symbol > function_symbol_set;
         set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
                   init_symbol_set.begin(),init_symbol_set.end(),
                   inserter(function_symbol_set,function_symbol_set.begin()));
@@ -316,41 +312,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<in
 
 };
 
-class pbes2bool_gui_tool: public mcrl2_gui_tool<pbes2bool_tool>
-{
-  public:
-    pbes2bool_gui_tool()
-    {
-
-      std::vector<std::string> values;
-
-      m_gui_options["counter"] = create_checkbox_widget();
-      m_gui_options["hashtables"] = create_checkbox_widget();
-
-      values.clear();
-      values.push_back("simplify");
-      values.push_back("quantifier-all");
-      values.push_back("quantifier-finite");
-      values.push_back("pfnf");
-      m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
-
-      add_rewriter_widget();
-
-      values.clear();
-      values.push_back("0");
-      values.push_back("1");
-      values.push_back("2");
-      values.push_back("3");
-      m_gui_options["strategy"] = create_radiobox_widget(values);
-
-      m_gui_options["tree"] = create_checkbox_widget();
-      m_gui_options["unused_data"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return pbes2bool_gui_tool().execute(argc, argv);
+  return pbes2bool_tool().execute(argc, argv);
 }

@@ -20,7 +20,6 @@
 //mCRL2
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 
 //LPS framework
@@ -31,11 +30,10 @@
 #include "mcrl2/data/parse.h"
 
 //LPSPARUNFOLDLIB
-#include "lpsparunfoldlib.h"
+#include "mcrl2/lps/lpsparunfoldlib.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::data;
@@ -44,7 +42,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 
-class parunfold_tool: public  rewriter_tool<input_output_tool>
+class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 {
   protected:
 
@@ -134,7 +132,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
   public:
 
-    parunfold_tool()
+    lpsparunfold_tool()
       : super(
         "lpsparunfold",
         "Frank Stappers",
@@ -162,7 +160,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
       lps_specification.load(m_input_filename);
 
       /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */
-      atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
+      std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
 
       for (size_t i =0; i != m_repeat_unfold; ++i)
       {
@@ -221,25 +219,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
 };
 
-class lps_parunfold_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<parunfold_tool>
-{
-  public:
-    lps_parunfold_gui_tool()
-    {
-      m_gui_options["index"] = create_textctrl_widget();
-      m_gui_options["laws"] = create_checkbox_widget();
-      m_gui_options["repeat"] = create_textctrl_widget();
-
-      add_rewriter_widget();
-      m_gui_options["sort"] = create_textctrl_widget();
-
-    }
-};
-
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return lps_parunfold_gui_tool().execute(argc, argv);
+  return lpsparunfold_tool().execute(argc, argv);
 }

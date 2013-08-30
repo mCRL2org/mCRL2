@@ -82,8 +82,7 @@ std::set<boolean_variable> find_boolean_variables(Container const& container)
 
 /// \brief Returns true if the term has a given boolean variable as subterm.
 /// \param[in] container an expression or container with expressions
-/// \param[in] v an expression or container with expressions
-/// \param d A boolean variable
+/// \param[in] v a boolean variable
 /// \return True if the term has a given boolean variable as subterm.
 template <typename Container>
 bool search_boolean_variable(Container const& container, const boolean_variable& v)

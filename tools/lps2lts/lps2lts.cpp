@@ -8,25 +8,19 @@
 //
 /// \file lps2lts_lts.cpp
 
-#include "boost.hpp" // precompiled headers
-
 // NAME is defined in lps2lts.h
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
 #include <cassert>
 #include <signal.h>
-#include "mcrl2/aterm/aterm2.h"
 
 #include "boost/lexical_cast.hpp"
-
-#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/action_parse.h"
@@ -45,6 +39,7 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
+static
 std::list<std::string> split_actions(const std::string& s)
 {
   size_t pcount = 0;
@@ -239,7 +234,7 @@ class lps2lts_tool : public lps2lts_base
                  "for visualisation purposes, for instance, but can cause the OUTFILE "
                  "to grow considerably. Note that this option is implicit when writing "
                  "in the AUT format.").
-      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions"
+      add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions. "
                  "For large state spaces the number of progress messages can be quite "
                  "horrendous. This feature helps to suppress those. Other verbose messages, "
                  "such as the total number of states explored, just remain visible.").
@@ -370,48 +365,6 @@ class lps2lts_tool : public lps2lts_base
 
 };
 
-class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
-{
-  public:
-    lps2lts_gui_tool()
-    {
-      std::vector<std::string> values;
-      m_gui_options["action"] = create_textctrl_widget();
-      m_gui_options["bit-hash"] = create_textctrl_widget();
-      m_gui_options["confluence"] = create_textctrl_widget();
-      m_gui_options["deadlock"] = create_checkbox_widget();
-      m_gui_options["error-trace"] = create_checkbox_widget();
-
-
-      values.clear();
-      values.push_back("tree");
-      values.push_back("vector");
-
-      m_gui_options["state-format"] = create_radiobox_widget(values);
-      m_gui_options["divergence"] = create_checkbox_widget();
-      m_gui_options["init-tsize"] = create_textctrl_widget();
-      m_gui_options["max"] = create_textctrl_widget();
-      m_gui_options["no-info"] = create_checkbox_widget();
-
-      add_rewriter_widget();
-
-      values.clear();
-      values.push_back("breadth");
-      values.push_back("depth");
-      values.push_back("prioritized");
-      values.push_back("rprioritized");
-      values.push_back("random");
-      m_gui_options["strategy"] = create_radiobox_widget(values);
-      m_gui_options["suppress"] = create_checkbox_widget();
-      m_gui_options["trace"] = create_textctrl_widget();
-      m_gui_options["todo-max"] = create_textctrl_widget();
-
-      m_gui_options["unused-data"] = create_checkbox_widget();
-      m_gui_options["dummy"] = create_textctrl_widget();
-
-    }
-};
-
 lps2lts_tool *tool_instance;
 
 static
@@ -427,8 +380,7 @@ void premature_termination_handler(int)
 int main(int argc, char** argv)
 {
   int result;
-  MCRL2_ATERMPP_INIT(argc, argv)
-  tool_instance = new lps2lts_gui_tool();
+  tool_instance = new lps2lts_tool();
 
   signal(SIGABRT,premature_termination_handler);
   signal(SIGINT,premature_termination_handler);

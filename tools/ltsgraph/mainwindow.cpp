@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
+  connect(m_glwidget, SIGNAL(initialized()), this, SLOT(onOpenGLInitialized()));
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
@@ -90,12 +91,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::showEvent(QShowEvent *event)
+void MainWindow::onOpenGLInitialized()
 {
-  QMainWindow::showEvent(event);
   if (!m_delayedOpen.isEmpty())
   {
-    m_glwidget->updateGL();
     openFile(m_delayedOpen);
     m_delayedOpen = QString();
   }
@@ -144,15 +143,19 @@ void MainWindow::openFile(QString fileName)
   {
     try
     {
-      m_layout->ui()->setActive(false);
+      m_ui.actLayout->setChecked(false);
+	  m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
       m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
       m_glwidget->rebuild();
+      m_glwidget->resume();
       m_information->update();
+	  setWindowTitle(QString("LTSGraph - ") + fileName);
     }
     catch (mcrl2::runtime_error e)
     {
       QMessageBox::critical(this, "Error opening file", e.what());
+	  setWindowTitle(QString("LTSGraph"));
     }
   }
 }
@@ -169,14 +172,10 @@ void MainWindow::onOpenFile()
 void MainWindow::onExportImage()
 {
   QString bitmap = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
-  QString pdf = tr("Portable Document Format (*.pdf)");
-  QString ps = tr("PostScript (*.ps)");
-  QString eps = tr("Encapsulated PostScript (*.eps)");
-  QString svg = tr("Scalable Vector Graphics (*.svg)");
+  QString vector = tr("Vector format (*.pdf *.ps *.eps *.svg *.pgf)");
   QString tikz = tr("LaTeX TikZ Image (*.tex)");
-  QString pgf = tr("PGF (*.pgf)");
-
-  QString filter = bitmap + ";;" + pdf + ";;" + ps + ";;" + eps + ";;" + svg + ";;" + tikz + ";;" + pgf;
+  
+  QString filter = bitmap + ";;" + vector + ";;" + tikz;
   QString selectedFilter = bitmap;
   QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
                                                 filter,
@@ -189,13 +188,18 @@ void MainWindow::onExportImage()
       DimensionsDialog dDialog(this);
       if (dDialog.exec())
       {
-        m_glwidget->renderToFile(fileName, selectedFilter, dDialog.resultWidth(), dDialog.resultHeight());
+        m_glwidget->savePixmap(fileName, dDialog.resultWidth(), dDialog.resultHeight());
       }
     }
     else
+	if (selectedFilter == vector)
     {
-      m_glwidget->renderToFile(fileName, selectedFilter);
+      m_glwidget->saveVector(fileName);
     }
+	else
+	{
+      m_glwidget->saveTikz(fileName, m_glwidget->width() / m_glwidget->height());
+	}
   }
 
 }

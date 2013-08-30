@@ -34,9 +34,19 @@ struct add_data_variable_binding: public lps::add_data_variable_binding<Builder,
   using super::enter;
   using super::leave;
   using super::operator();
-  using super::bind_count;
+  using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
+
+  void enter(const process::sum& x)
+  {
+    increase_bind_count(x.bound_variables());
+  }
+
+  void leave(const process::sum& x)
+  {
+    decrease_bind_count(x.bound_variables());
+  }
 };
 
 } // namespace process

@@ -14,6 +14,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <string.h>
+#include <cassert>
 #include "mathutils.h"
 
 using namespace MathUtils;
@@ -37,6 +38,7 @@ void P_Sphere::draw()
 
 void P_Sphere::reshape(int N,float* coss,float* sins)
 {
+  assert(N>0);
   int i,j,k,l;
   GLfloat* vertices = (GLfloat*)malloc(3*((N-1)*N+2)*sizeof(GLfloat));
   GLfloat* texCoords = (GLfloat*)malloc(((N-1)*N+2)*sizeof(GLfloat));
@@ -226,6 +228,7 @@ void P_Hemisphere::draw()
 
 void P_Hemisphere::reshape(int N,float* coss,float* sins)
 {
+  assert(N>0);
   int Ndiv2 = N / 2;
   int i,j,k,l;
   GLfloat* vertices = (GLfloat*)malloc(3 * (N * Ndiv2 + 1) * sizeof(GLfloat));
@@ -319,6 +322,7 @@ void P_Disc::draw()
 
 void P_Disc::reshape(int N,float* coss,float* sins)
 {
+  assert(N>0);
   GLfloat* vertices = (GLfloat*)malloc(3*N*sizeof(GLfloat));
   GLfloat* texCoords = (GLfloat*)malloc(N*sizeof(GLfloat));
   int i,j, k;
@@ -374,6 +378,7 @@ void P_Ring::draw()
 
 void P_Ring::reshape(int N,float* coss,float* sins)
 {
+  assert(N>0);
   int N3 = 3*N;
   int i,j,k,l,m;
   GLfloat* vertices = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
@@ -521,6 +526,7 @@ void P_ObliqueCone::reshape(int /*N*/,float* /*coss*/,float* /*sins*/)
 
 void P_ObliqueCone::reshape(int N,float* coss,float* sins,float obt)
 {
+  assert(N>0);
   float a = 0.5f*static_cast<float>(PI) - alpha - sign*obt;
   float sin_a = -sign*sin(a);
   float cos_a = cos(a);

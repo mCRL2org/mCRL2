@@ -14,8 +14,7 @@
 #include <boost/test/minimal.hpp>
 
 #include <map>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/indexed_set.h"
 
 using namespace std;
@@ -26,11 +25,11 @@ void test_indexed_set()
   indexed_set t(100, 75);
 
   std::pair<long, bool> p;
-  p = t.put(make_term("a"));
-  BOOST_CHECK(t.elements().size() == 1);
+  p = t.put(read_term_from_string("a"));
+  BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
-  p = t.put(make_term("b"));
-  BOOST_CHECK(t.elements().size() == 2);
+  p = t.put(read_term_from_string("b"));
+  BOOST_CHECK(t.keys().size() == 2);
   BOOST_CHECK(t.size() == 2);
 
   {
@@ -38,29 +37,29 @@ void test_indexed_set()
   }
   indexed_set t2 = t;
 
-  BOOST_CHECK(t.index(make_term("a")) == 0);
-  BOOST_CHECK(t.index(make_term("b")) == 1);
+  BOOST_CHECK(t.index(read_term_from_string("a")) == 0);
+  BOOST_CHECK(t.index(read_term_from_string("b")) == 1);
 
   atermpp::aterm a = t.get(0);
-  BOOST_CHECK(a == make_term("a"));
+  BOOST_CHECK(a == read_term_from_string("a"));
 
   atermpp::aterm b = t.get(1);
-  BOOST_CHECK(b == make_term("b"));
+  BOOST_CHECK(b == read_term_from_string("b"));
 
-  t.remove(a);
-  BOOST_CHECK(t.elements().size() == 1);
+  t.erase(a);
+  BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
 
-  t.remove(make_term("x"));
-  BOOST_CHECK(t.elements().size() == 1);
+  t.erase(read_term_from_string("x"));
+  BOOST_CHECK(t.keys().size() == 1);
   BOOST_CHECK(t.size() == 1);
 
-  p = t.put(make_term("c"));
-  BOOST_CHECK(t.elements().size() == 2);
+  p = t.put(read_term_from_string("c"));
+  BOOST_CHECK(t.keys().size() == 2);
   BOOST_CHECK(p.first == 0);
 
-  t.reset();
-  BOOST_CHECK(t.elements().size() == 0);
+  t.clear();
+  BOOST_CHECK(t.keys().size() == 0);
   BOOST_CHECK(t.size() == 0);
 
   std::map<int, indexed_set> x;
@@ -69,7 +68,6 @@ void test_indexed_set()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   test_indexed_set();
   return 0;
 }

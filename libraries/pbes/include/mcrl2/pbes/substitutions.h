@@ -29,7 +29,7 @@ class propositional_variable_substitution: public std::unary_function<propositio
 {
   public:
     // maps X to (phi, d), where X(d) is the propositional variable corresponding to X
-    typedef atermpp::map<core::identifier_string, std::pair<pbes_expression, data::variable_list> > map_type;
+    typedef std::map<core::identifier_string, std::pair<pbes_expression, data::variable_list> > map_type;
 
     typedef map_type::iterator iterator;
     typedef map_type::const_iterator const_iterator;
@@ -57,9 +57,16 @@ class propositional_variable_substitution: public std::unary_function<propositio
       pbes_expression phi = i->second.first;
       const data::variable_list& d = i->second.second;
       const data::data_expression_list& e = v.parameters();
+      data::mutable_map_substitution<> sigma;
+      auto j = d.begin();
+      auto k = e.begin();
+      for (; j != d.end(); ++j, ++k)
+      {
+        sigma[*j] = *k;
+      }
 
       // return phi[d := e]
-      phi = pbes_system::replace_free_variables(phi, data::make_sequence_sequence_substitution(d, e));
+      phi = pbes_system::replace_variables_capture_avoiding(phi, sigma, data::substitution_variables(sigma));
       return phi;
     }
 
@@ -161,21 +168,21 @@ class propositional_variable_substitution: public std::unary_function<propositio
     }
 
     /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
-    iterator find(variable_type const& v)
+    iterator find(const variable_type &v)
     {
-      return this->m_map.find(v);
+      return this->m_map.find(atermpp::aterm_cast<core::identifier_string>(v));
     }
 
     /// \brief Removes the substitution to the propositional variable v.
     map_type::size_type erase(const propositional_variable& v)
     {
-      return m_map.erase(v);
+      return m_map.erase(atermpp::aterm_cast<core::identifier_string>(v));
     }
 
     /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
     const_iterator find(variable_type const& v) const
     {
-      return m_map.find(v);
+      return m_map.find(atermpp::aterm_cast<core::identifier_string>(v));
     }
 
     /// \brief Returns true if the sequence of assignments is empty

@@ -14,8 +14,6 @@
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/suminst.h>
 #include <mcrl2/lps/linearise.h>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -37,8 +35,8 @@ void test_case_1()
   suminst_algorithm<rewriter>(s1,r).run();
   std::clog << lps::pp(s0) << std::endl;
   std::clog << lps::pp(s1) << std::endl;
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -61,11 +59,9 @@ void test_case_2()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  std::cerr << "SUMMANDS " << summands1 << "\n";
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-    std::cerr << "LEEG " << i->summation_variables() << "\n";
     BOOST_CHECK(i->summation_variables().empty());
   }
 
@@ -87,9 +83,9 @@ void test_case_3()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool sum_occurs = false;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_occurs = sum_occurs || !i->summation_variables().empty();
   }
@@ -114,10 +110,10 @@ void test_case_4()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, finite_sorts(s1.data()), true).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (i->is_tau())
     {
@@ -152,10 +148,10 @@ void test_case_5()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (i->is_tau())
     {
@@ -180,9 +176,9 @@ void test_case_6()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  suminst_algorithm<rewriter>(s1, r, atermpp::convert<std::set<data::sort_expression> >(s1.data().sorts())).run();
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -200,10 +196,10 @@ void test_case_7()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
-  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  suminst_algorithm<rewriter>(s1, r, atermpp::convert<std::set<data::sort_expression> >(s1.data().sorts())).run();
   int sum_count = 0;
-  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  const action_summand_vector& summands1 = s1.process().action_summands();
+  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_count += i->summation_variables().size();
   }
@@ -212,26 +208,18 @@ void test_case_7()
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERMPP_INIT(ac, av)
-
   std::clog << "test case 1" << std::endl;
   test_case_1();
-  core::garbage_collect();
   std::clog << "test case 2" << std::endl;
   test_case_2();
-  core::garbage_collect();
   std::clog << "test case 3" << std::endl;
   test_case_3();
-  core::garbage_collect();
   std::clog << "test case 4" << std::endl;
   test_case_4();
-  core::garbage_collect();
   std::clog << "test case 5" << std::endl;
   test_case_5();
-  core::garbage_collect();
   std::clog << "test case 6" << std::endl;
   test_case_6();
-  core::garbage_collect();
 
   return 0;
 }

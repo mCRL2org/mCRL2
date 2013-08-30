@@ -8,8 +8,6 @@
 //
 /// \file bessolve.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "bessolve"
 #define AUTHOR "Jeroen Keiren"
 
@@ -18,11 +16,9 @@
 #include <fstream>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/gauss_elimination.h"
@@ -124,7 +120,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
 
     bool run()
     {
-      bes::boolean_equation_system<> bes;
+      bes::boolean_equation_system bes;
       load_bes(bes,input_filename(),bes_input_format());
 
       mCRL2log(verbose) << "solving BES in " <<
@@ -172,24 +168,8 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
     }
 };
 
-class bessolve_gui_tool: public mcrl2_gui_tool<bessolve_tool>
-{
-  public:
-    bessolve_gui_tool()
-    {
-
-      std::vector<std::string> values;
-
-      values.clear();
-      values.push_back("spm");
-      values.push_back("gauss");
-      m_gui_options["strategy"] = create_radiobox_widget(values);
-    }
-};
-
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-  return bessolve_gui_tool().execute(argc, argv);
+  return bessolve_tool().execute(argc, argv);
 }
 

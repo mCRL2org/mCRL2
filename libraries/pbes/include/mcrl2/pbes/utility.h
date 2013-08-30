@@ -61,7 +61,7 @@ static bool occurs_in_varL(
   // expressions in internal format. So, it will not search the whole expression.
   if (use_internal_rewrite_format)
   {
-    return find_if(l, compare_variableL(v)) != atermpp::aterm();
+    return find_if(l, compare_variableL(v)) != atermpp::aterm_appl();
   }
   else
   {
@@ -72,14 +72,13 @@ static bool occurs_in_varL(
 /// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
 /// occurs in the pbes_specification.
 
-template <typename Container>
-inline unsigned long get_rank(const propositional_variable_instantiation current_variable_instantiation,
-                              pbes<Container> pbes_spec)
+inline unsigned long get_rank(const propositional_variable_instantiation& current_variable_instantiation,
+                              const pbes& pbes_spec)
 {
   unsigned long rank=0;
-  Container eqsys = pbes_spec.equations();
+  const std::vector<pbes_equation>& eqsys = pbes_spec.equations();
   fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
-  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  for (auto eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   {
     if (eqi->variable().name()==current_variable_instantiation.name())
     {
@@ -99,16 +98,15 @@ inline unsigned long get_rank(const propositional_variable_instantiation current
 /// \brief gives the fixed point symbol of a propositional_variable_instantiation. It is assumed that the variable
 /// occurs in the pbes_specification. Returns false if the symbol is mu, and true if the symbol in nu.
 
-template <typename Container>
 inline bool get_fixpoint_symbol(const propositional_variable_instantiation current_variable_instantiation,
-                                pbes<Container> pbes_spec)
+                                const pbes& pbes_spec)
 {
-  Container eqsys = pbes_spec.equations();
-  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  const std::vector<pbes_equation>& eqsys = pbes_spec.equations();
+  for (auto eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   {
     if (eqi->variable().name()==current_variable_instantiation.name())
     {
-      return (is_nu(eqi->symbol()));
+      return (eqi->symbol().is_nu());
     }
   }
   assert(0); // It is assumed that the variable instantiation occurs in the PBES.
@@ -121,7 +119,7 @@ inline bool get_fixpoint_symbol(const propositional_variable_instantiation curre
 // set of the form { p1,p2, ..., pn}, assuming that pi does not have a && as main
 // function symbol.
 
-static void distribute_and(const pbes_expression& expr,atermpp::set < pbes_expression> &conjunction_set)
+static void distribute_and(const pbes_expression& expr,std::set < pbes_expression> &conjunction_set)
 {
   /* distribute the conjuncts of expr over the conjunction_set */
   if (is_pbes_and(expr))
@@ -138,11 +136,11 @@ static void distribute_and(const pbes_expression& expr,atermpp::set < pbes_expre
 // given a set { p1, p2, ... , pn}, the function below yields an expression
 // of the form p1 && ... && pn.
 
-static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &conjunction_set)
+static pbes_expression make_conjunction(const std::set < pbes_expression> &conjunction_set)
 {
   pbes_expression t=pbes_expr::true_();
 
-  for (atermpp::set < pbes_expression>::const_iterator i=conjunction_set.begin();
+  for (std::set < pbes_expression>::const_iterator i=conjunction_set.begin();
        i!=conjunction_set.end() ; i++)
   {
     if (is_pbes_true(t))
@@ -159,7 +157,7 @@ static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &c
 
 // see distribute_and.
 
-static void distribute_or(const pbes_expression& expr,atermpp::set < pbes_expression> &disjunction_set)
+static void distribute_or(const pbes_expression& expr,std::set < pbes_expression> &disjunction_set)
 {
   /* distribute the conjuncts of expr over the conjunction_set */
   if (is_pbes_or(expr))
@@ -175,11 +173,11 @@ static void distribute_or(const pbes_expression& expr,atermpp::set < pbes_expres
 
 // see make_conjunction.
 
-static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &disjunction_set)
+static pbes_expression make_disjunction(const std::set < pbes_expression> &disjunction_set)
 {
   pbes_expression t=pbes_expr::false_();
 
-  for (atermpp::set < pbes_expression>::const_iterator i=disjunction_set.begin();
+  for (std::set < pbes_expression>::const_iterator i=disjunction_set.begin();
        i!=disjunction_set.end() ; i++)
   {
     if (is_pbes_false(t))
@@ -195,13 +193,13 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 }
 
 // The function below restores a saved substitution.
-static void restore_saved_substitution(const atermpp::map<data::variable,atermpp::aterm_appl> &saved_substitutions,
+static void restore_saved_substitution(const std::map<data::variable,atermpp::aterm_appl> &saved_substitutions,
                                        data::detail::legacy_rewriter& /* r */,
                                        const bool use_internal_rewrite_format,
                                        data::detail::legacy_rewriter::substitution_type &sigma,
                                        data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
-  for (atermpp::map<data::variable,atermpp::aterm_appl>::const_iterator i=saved_substitutions.begin();
+  for (std::map<data::variable,atermpp::aterm_appl>::const_iterator i=saved_substitutions.begin();
        i!=saved_substitutions.end(); ++i)
   {
     if (use_internal_rewrite_format)
@@ -329,6 +327,39 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
     }
   }
+  else if (is_pbes_imp(p))
+  {
+    // p = or(left, right)
+    //Rewrite left and right as far as possible
+
+    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
+                        data, r,use_internal_rewrite_format,sigma,sigma_internal);
+    if (is_pbes_false(l))
+    {
+      result = pbes_system::pbes_expr::true_();
+    }
+    else
+    {
+      pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
+                           data, r,use_internal_rewrite_format,sigma,sigma_internal);
+      if (is_pbes_true(rt))
+      {
+        result = pbes_system::pbes_expr::true_();
+      }
+      else if (is_pbes_true(l))
+      {
+        result = rt;
+      }
+      else if (is_pbes_false(rt))
+      {
+        result = mcrl2::pbes_system::pbes_expr::not_(l);
+      }
+      else
+      {
+        result = pbes_system::pbes_expr::imp(l,rt);
+      }
+    }
+  }
   else if (is_pbes_true(p))
   {
     // p is True
@@ -338,6 +369,12 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   {
     // p is False
     result = p;
+  }
+  else if (is_pbes_not(p))
+  {
+    pbes_expression l = pbes_expression_substitute_and_rewrite(arg(p),
+                              data, r,use_internal_rewrite_format,sigma,sigma_internal);
+    result = pbes_expr::not_(l);
   }
   else if (is_pbes_forall(p))
   {
@@ -358,13 +395,13 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          First the substitutions for existing variables that are also bound in the
          quantifier are saved and reset to the variable. At the end they must be reset. */
 
-      atermpp::map < data::variable, atermpp::aterm_appl > saved_substitutions;
+      std::map < data::variable, atermpp::aterm_appl > saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
         atermpp::aterm_appl d;
         if (use_internal_rewrite_format)
         {
-          d=r.rewrite_internal((atermpp::aterm)*i,sigma_internal);
+          d=r.rewrite_internal(*i,sigma_internal);
         }
         else
         {
@@ -393,7 +430,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
-      atermpp::set < pbes_expression > conjunction_set;
+      std::set < pbes_expression > conjunction_set;
       distribute_and(expr,conjunction_set);
       bool constructor_sorts_found=true;
       for (; constructor_sorts_found ;)
@@ -405,12 +442,12 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           if (!data.is_constructor_sort(i->sort()))
           {
             /* The sort of variable i is not a constructor sort.  */
-            new_data_vars = atermpp::push_front(new_data_vars, *i);
+            new_data_vars.push_front(*i);
           }
           else
           {
-            atermpp::set <pbes_expression> new_conjunction_set;
-            for (atermpp::set <pbes_expression >::iterator t=conjunction_set.begin() ;
+            std::set <pbes_expression> new_conjunction_set;
+            for (std::set <pbes_expression >::iterator t=conjunction_set.begin() ;
                  t!=conjunction_set.end() ; t++)
             {
               if (!occurs_in_varL(*t,*i,use_internal_rewrite_format))
@@ -426,7 +463,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
                   if (is_function_sort(rf->sort()))
                   {
-                    data::function_sort sa=rf->sort();
+                    const data::function_sort& sa = core::static_down_cast<const data::function_sort&>(rf->sort());
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,
@@ -450,14 +487,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {
-                      std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
+                      mCRL2log(log::verbose) << "Used " << no_variables << " variables when eliminating universal quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
+                        mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
-                    function_arguments = atermpp::push_front(function_arguments, new_variable);
+                    new_data_vars.push_front(new_variable);
+                    function_arguments.push_front(new_variable);
                   }
 
                   const data::data_expression d((!function_arguments.empty())?
@@ -539,13 +576,13 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          quantifier are saved and reset to the variable. At the end they must be reset.
       */
 
-      atermpp::map < data::variable,  atermpp::aterm_appl> saved_substitutions;
+      std::map < data::variable,  atermpp::aterm_appl> saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
         atermpp::aterm_appl d;
         if (use_internal_rewrite_format)
         {
-          d=r.rewrite_internal((atermpp::aterm)*i,sigma_internal);
+          d=r.rewrite_internal(*i,sigma_internal);
         }
         else
         {
@@ -573,10 +610,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       variable_name_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
-      atermpp::set < pbes_expression > disjunction_set;
+      std::set < pbes_expression > disjunction_set;
       distribute_or(expr,disjunction_set);
       bool constructor_sorts_found=true;
-      for (; constructor_sorts_found ;)
+      while (constructor_sorts_found)
       {
         constructor_sorts_found=false;
         for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -584,12 +621,12 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           if (!data.is_constructor_sort(i->sort()))
           {
             /* The sort of variable i is not a constructor sort.  */
-            new_data_vars = atermpp::push_front(new_data_vars, *i);
+            new_data_vars.push_front(*i);
           }
           else
           {
-            atermpp::set <pbes_expression> new_disjunction_set;
-            for (atermpp::set <pbes_expression >::iterator t=disjunction_set.begin() ;
+            std::set <pbes_expression> new_disjunction_set;
+            for (std::set <pbes_expression >::iterator t=disjunction_set.begin() ;
                  t!=disjunction_set.end() ; t++)
             {
               if (!occurs_in_varL(*t,*i,use_internal_rewrite_format))
@@ -605,7 +642,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   data::sort_expression_list dsorts;
                   if (is_function_sort(rf->sort()))
                   {
-                    data::function_sort sa=rf->sort();
+                    data::function_sort sa = core::static_down_cast<const data::function_sort&>(rf->sort());
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,
@@ -628,14 +665,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     {
-                      std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
+                      mCRL2log(log::verbose) << "Used " << no_variables << " variables when eliminating existential quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
+                        mCRL2log(log::verbose) << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
-                    function_arguments = atermpp::push_front(function_arguments, new_variable);
+                    new_data_vars.push_front(new_variable);
+                    function_arguments.push_front(new_variable);
                   }
                   const data::data_expression d((!function_arguments.empty())?
                                     static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
@@ -700,7 +737,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_propositional_variable_instantiation(p))
   {
     // p is a propositional variable
-    propositional_variable_instantiation propvar = p;
+    const propositional_variable_instantiation& propvar = core::static_down_cast<const propositional_variable_instantiation&>(p);
     core::identifier_string name = propvar.name();
     data::data_expression_list current_parameters(propvar.parameters());
     data::data_expression_list parameters;
@@ -715,7 +752,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for (data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
-        parameters = atermpp::push_front(parameters, (data::data_expression)r(*l,sigma));
+        parameters.push_front(atermpp::aterm_cast<data::data_expression>(r(*l,sigma)));
       }
       parameters = atermpp::reverse(parameters);
     }
@@ -726,7 +763,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // p is a data::data_expression
     if (use_internal_rewrite_format)
     {
-      data::data_expression d = (data::data_expression)r.rewrite_internal((atermpp::aterm)p,sigma_internal);
+      data::data_expression d = (data::data_expression)r.rewrite_internal(p,sigma_internal);
       if (d==r.get_rewriter().internal_true)
       {
         result = pbes_expr::true_();
@@ -742,7 +779,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     }
     else
     {
-      data::data_expression d(r(p,sigma));
+      const data::data_expression& dp = atermpp::aterm_cast<const data::data_expression>(p);
+      data::data_expression d(r(dp, sigma));
       if (d == data::sort_bool::true_())
       {
         result = pbes_expr::true_();

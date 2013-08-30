@@ -52,7 +52,7 @@ class data_expression_with_variables: public data_expression
 
 //      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
 //      /// \param term A term
-//      data_expression_with_variables(ATermAppl term)
+//      data_expression_with_variables(aterm_appl term)
 //        : data_expression(term)
 //      {}
 
@@ -89,38 +89,5 @@ class data_expression_with_variables: public data_expression
 } // namespace data
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::data::data_expression_with_variables>
-{
-  static void protect(const mcrl2::data::data_expression_with_variables& t)
-  {
-    t.protect();
-    t.variables().protect();
-  }
-  static void unprotect(const mcrl2::data::data_expression_with_variables& t)
-  {
-    t.unprotect();
-    t.variables().unprotect();
-  }
-  static void mark(const mcrl2::data::data_expression_with_variables& t)
-  {
-    t.mark();
-    t.variables().mark();
-  }
-  static ATerm term(mcrl2::data::data_expression_with_variables& t)
-  {
-    return t.term();
-  }
-  static ATerm* ptr(mcrl2::data::data_expression_with_variables& t)
-  {
-    return &t.term();
-  }
-};
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H

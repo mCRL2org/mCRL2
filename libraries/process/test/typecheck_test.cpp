@@ -14,7 +14,6 @@
 #include <mcrl2/lps/parse.h>
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/specification.h>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -81,8 +80,8 @@ BOOST_AUTO_TEST_CASE(test_bug_528a)
 {
   test_typechecker_case(
     "sort S = struct c;                  \n"
-    "map succ: S -> S;                   \n"
-    "eqn succ(c) = c;                    \n"
+    "map succ_: S -> S;                   \n"
+    "eqn succ_(c) = c;                    \n"
     "init delta;                         \n",
     true
   );
@@ -92,10 +91,10 @@ BOOST_AUTO_TEST_CASE(test_bug_528b)
 {
   test_typechecker_case(
     "sort S,T;                           \n"
-    "map  count: S # T -> Nat;           \n"
+    "map  count_: S # T -> Nat;           \n"
     "var  x:S;                           \n"
     "     y:T;                           \n"
-    "eqn  count(x, y) = 0;               \n"
+    "eqn  count_(x, y) = 0;               \n"
     "init delta;                         \n",
     true
   );
@@ -105,9 +104,9 @@ BOOST_AUTO_TEST_CASE(test_bug_528c)
 {
   test_typechecker_case(
     "sort S;                             \n"
-    "map  count: S -> Nat;               \n"
+    "map  count_: S -> Nat;               \n"
     "var  x:S;                           \n"
-    "eqn  count(x) = 0;                  \n"
+    "eqn  count_(x) = 0;                  \n"
     "init delta;                         \n",
     true
   );
@@ -348,7 +347,5 @@ BOOST_AUTO_TEST_CASE(test_double_variable_assignment_in_process)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

@@ -14,13 +14,13 @@
 #include <memory>
 
 #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/nextstate/nextstate_options.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
 #include "mcrl2/lts/detail/lts_generation_options.h"
-#include "mcrl2/atermpp/list.h"
 #include "mcrl2/lts/detail/exploration_strategy.h"
 
 #include "mcrl2/utilities/workarounds.h"
@@ -62,7 +62,7 @@ class lps2lts_algorithm
 
     std::vector<bool> m_detected_action_summands;
 
-    atermpp::map<storage_state_t, storage_state_t> m_backpointers;
+    std::map<storage_state_t, storage_state_t> m_backpointers;
     size_t m_traces_saved;
 
     size_t m_num_states;
@@ -100,23 +100,24 @@ class lps2lts_algorithm
     }
 
   private:
-    generator_state_t generator_state(const storage_state_t storage_state);
-    storage_state_t storage_state(const generator_state_t generator_state);
+    generator_state_t generator_state(const storage_state_t &storage_state);
+    storage_state_t storage_state(const generator_state_t &generator_state);
     generator_state_t get_prioritised_representative(generator_state_t state);
-    void value_prioritize(atermpp::list<next_state_generator::transition_t> &transitions);
-    bool save_trace(generator_state_t state, std::string filename);
-    bool search_divergence(generator_state_t state, std::set<generator_state_t> &current_path, atermpp::set<generator_state_t> &visited);
-    void check_divergence(generator_state_t state);
-    void save_actions(generator_state_t state, const next_state_generator::transition_t &transition);
-    void save_deadlock(generator_state_t state);
-    void save_error(generator_state_t state);
-    bool add_transition(generator_state_t state, const next_state_generator::transition_t &transition);
-    atermpp::list<next_state_generator::transition_t> get_transitions(generator_state_t state);
+    void value_prioritize(std::list<next_state_generator::transition_t> &transitions);
+    bool save_trace(const generator_state_t& state, const std::string& filename);
+    bool search_divergence(const generator_state_t& state, std::set<generator_state_t> &current_path, std::set<generator_state_t> &visited);
+    void check_divergence(const generator_state_t& state);
+    void save_actions(const generator_state_t& state, const next_state_generator::transition_t &transition);
+    void save_deadlock(const generator_state_t& state);
+    void save_error(const generator_state_t& state);
+    bool add_transition(const generator_state_t& state, next_state_generator::transition_t &transition);
+    void get_transitions(const generator_state_t &state,
+                         std::list<lps2lts_algorithm::next_state_generator::transition_t> &transitions);
 
     void generate_lts_breadth();
-    void generate_lts_breadth_bithashing(generator_state_t initial_state);
-    void generate_lts_depth(generator_state_t initial_state);
-    void generate_lts_random(generator_state_t initial_state);
+    void generate_lts_breadth_bithashing(const generator_state_t &initial_state);
+    void generate_lts_depth(const generator_state_t &initial_state);
+    void generate_lts_random(const generator_state_t &initial_state);
 };
 
 } // namespace lps

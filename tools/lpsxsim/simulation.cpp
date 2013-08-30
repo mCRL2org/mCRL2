@@ -10,11 +10,14 @@
 #include <QMetaObject>
 #include "mcrl2/utilities/atermthread.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 
-Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy)
+Simulation::Simulation(QString filename, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies)
   : m_filename(filename),
     m_strategy(strategy),
-    m_initialized(false)
+    m_initialized(false),
+    m_do_not_use_dummies(do_not_use_dummies),
+    m_simulation(NULL)
 {
   moveToThread(mcrl2::utilities::qt::get_aterm_thread());
   QMetaObject::invokeMethod(this, "init", Qt::BlockingQueuedConnection);
@@ -37,6 +40,11 @@ void Simulation::init()
   {
     mCRL2log(mcrl2::log::error) << "Error loading LPS: unknown error" << std::endl;
     return;
+  }
+
+  if (!m_do_not_use_dummies)
+  {
+    mcrl2::lps::detail::instantiate_global_variables(specification);
   }
 
   for (mcrl2::data::variable_list::const_iterator i = specification.process().process_parameters().begin(); i != specification.process().process_parameters().end(); i++)

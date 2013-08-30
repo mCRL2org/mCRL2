@@ -23,20 +23,21 @@
 #ifndef __HASH_TABLE_H
 #define __HASH_TABLE_H
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "ptable.h"
 
   typedef struct
   {
-    aterm::ATermIndexedSet terms;
+    atermpp::indexed_set terms;
     PTable pointers;
   } HTable;
 
   int HTinit(HTable*);
   void HTfree(HTable*);
-  unsigned int HTinsert(HTable*, aterm::ATerm, void*);
-  int HTmember(HTable*, aterm::ATerm, long*);
-  aterm::ATerm HTgetTerm(HTable*, long);
+  unsigned int HTinsert(HTable*, atermpp::aterm, void*);
+  int HTmember(HTable*, atermpp::aterm, long*);
+  atermpp::aterm HTgetTerm(HTable*, long);
   void* HTgetPtr(HTable*, long);
   void HTsetPtr(HTable*, long, void*);
 

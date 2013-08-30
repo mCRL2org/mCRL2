@@ -8,14 +8,10 @@
 //
 /// \file lpssuminst.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/lps/tools.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -78,6 +74,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
     {
       mcrl2::lps::lpssuminst(m_input_filename,
                              m_output_filename,
+                             rewrite_strategy(),
                              m_sorts_string,
                              m_finite_sorts_only,
                              m_tau_summands_only);
@@ -85,21 +82,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
     }
 };
 
-class suminst_gui_tool: public mcrl2_gui_tool<suminst_tool>
-{
-  public:
-    suminst_gui_tool()
-    {
-
-      m_gui_options["finite"] = create_checkbox_widget();
-      add_rewriter_widget();
-      m_gui_options["tau"] = create_checkbox_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return suminst_gui_tool().execute(argc, argv);
+  return suminst_tool().execute(argc, argv);
 }

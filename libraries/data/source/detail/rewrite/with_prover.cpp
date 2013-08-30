@@ -6,15 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "rewr_prover"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
 #include <memory.h>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/bdd_prover.h"
@@ -43,18 +40,18 @@ RewriterProver::~RewriterProver()
   delete prover_obj;
 }
 
-bool RewriterProver::addRewriteRule(const data_equation Rule)
+bool RewriterProver::addRewriteRule(const data_equation &Rule)
 {
   return rewr_obj->addRewriteRule(Rule);
 }
 
-bool RewriterProver::removeRewriteRule(const data_equation Rule)
+bool RewriterProver::removeRewriteRule(const data_equation &Rule)
 {
   return rewr_obj->removeRewriteRule(Rule);
 }
 
 data_expression RewriterProver::rewrite(
-            const data_expression Term,
+            const data_expression &Term,
             substitution_type &sigma)
 {
   if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
@@ -70,7 +67,7 @@ data_expression RewriterProver::rewrite(
 }
 
 atermpp::aterm_appl RewriterProver::rewrite_internal(
-            const atermpp::aterm_appl Term,
+            const atermpp::aterm_appl &Term,
             internal_substitution_type &sigma)
 {
   // Code below is not very efficient, due to the translation to and from internal
@@ -88,7 +85,7 @@ atermpp::aterm_appl RewriterProver::rewrite_internal(
   }
 }
 
-atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression Term)
+atermpp::aterm_appl RewriterProver::toRewriteFormat(const data_expression &Term)
 {
   return rewr_obj->toRewriteFormat(Term);
 }

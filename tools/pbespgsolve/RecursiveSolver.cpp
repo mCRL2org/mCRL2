@@ -13,12 +13,12 @@
 #include <set>
 #include <assert.h>
 
-int first_inversion(const ParityGame &game)
+size_t first_inversion(const ParityGame &game)
 {
-    int d = game.d();
-    int q = 0;
+    size_t d = game.d();
+    size_t q = 0;
     while (q < d && game.cardinality(q) == 0) ++q;
-    int p = q + 1;
+    size_t p = q + 1;
     while (p < d && game.cardinality(p) == 0) p += 2;
     if (p > d) p = d;
     return p;
@@ -59,7 +59,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
 {
     if (aborted()) return false;
 
-    int prio;
+    size_t prio;
     while ((prio = first_inversion(game)) < game.d())
     {
         mCRL2log(mcrl2::log::debug) << "prio=" << prio << std::endl;
@@ -133,7 +133,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
     {
         if (game.priority(v) < prio)
         {
-            if (game.player(v) == game.priority(v)%2)
+            if (game.player(v) == static_cast<int>(game.priority(v)%2))
             {
                 strat[v] = *graph.succ_begin(v);
             }

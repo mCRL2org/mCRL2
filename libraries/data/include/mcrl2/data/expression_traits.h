@@ -44,24 +44,24 @@ struct term_traits<data::data_expression>
   /// \brief The value true
   /// \return The value true
   static inline
-  term_type true_()
+  const term_type& true_()
   {
-    return data::sort_bool::true_();
+    return core::static_down_cast<const term_type&>(data::sort_bool::true_());
   }
 
   /// \brief The value false
   /// \return The value false
   static inline
-  term_type false_()
+  const term_type& false_()
   {
-    return data::sort_bool::false_();
+    return core::static_down_cast<const term_type&>(data::sort_bool::false_());
   }
 
   /// \brief Operator not
   /// \param p A term
   /// \return Operator not applied to p
   static inline
-  term_type not_(term_type p)
+  term_type not_(const term_type &p)
   {
     return data::sort_bool::not_(p);
   }
@@ -71,7 +71,7 @@ struct term_traits<data::data_expression>
   /// \param q A term
   /// \return Operator and applied to p and q
   static inline
-  term_type and_(term_type p, term_type q)
+  term_type and_(const term_type& p, const term_type& q)
   {
     return data::sort_bool::and_(p, q);
   }
@@ -81,7 +81,7 @@ struct term_traits<data::data_expression>
   /// \param q A term
   /// \return Operator or applied to p and q
   static inline
-  term_type or_(term_type p, term_type q)
+  term_type or_(const term_type& p, const term_type& q)
   {
     return data::sort_bool::or_(p, q);
   }
@@ -91,7 +91,7 @@ struct term_traits<data::data_expression>
   /// \param q A term
   /// \return Operator or applied to p and q
   static inline
-  term_type imp(term_type p, term_type q)
+  term_type imp(const term_type& p, const term_type& q)
   {
     return data::sort_bool::implies(p, q);
   }
@@ -101,7 +101,7 @@ struct term_traits<data::data_expression>
   /// \param p A term
   /// \return Operator forall applied to d and p
   static inline
-  term_type forall(variable_sequence_type d, term_type p)
+  term_type forall(const variable_sequence_type &d, const term_type& p)
   {
     return data::forall(d, p);
   }
@@ -111,7 +111,7 @@ struct term_traits<data::data_expression>
   /// \param p A term
   /// \return Operator exists applied to d and p
   static inline
-  term_type exists(variable_sequence_type d, term_type p)
+  term_type exists(const variable_sequence_type &d, const term_type& p)
   {
     return data::exists(d, p);
   }
@@ -120,7 +120,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term has the value true
   static inline
-  bool is_true(term_type t)
+  bool is_true(const term_type& t)
   {
     return t == data::sort_bool::true_();
   }
@@ -129,7 +129,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term has the value false
   static inline
-  bool is_false(term_type t)
+  bool is_false(const term_type& t)
   {
     return t == data::sort_bool::false_();
   }
@@ -138,7 +138,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is of type not
   static inline
-  bool is_not(term_type t)
+  bool is_not(const term_type& t)
   {
     return data::sort_bool::is_not_application(t);
   }
@@ -147,7 +147,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is of type and
   static inline
-  bool is_and(term_type t)
+  bool is_and(const term_type& t)
   {
     return data::sort_bool::is_and_application(t);
   }
@@ -156,7 +156,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is of type or
   static inline
-  bool is_or(term_type t)
+  bool is_or(const term_type& t)
   {
     return data::sort_bool::is_or_application(t);
   }
@@ -165,7 +165,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is an implication
   static inline
-  bool is_imp(term_type t)
+  bool is_imp(const term_type& t)
   {
     return data::sort_bool::is_implies_application(t);
   }
@@ -174,7 +174,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is an universal quantification
   static inline
-  bool is_forall(term_type t)
+  bool is_forall(const term_type& t)
   {
     return data::is_forall(t);
   }
@@ -183,7 +183,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is an existential quantification
   static inline
-  bool is_exists(term_type t)
+  bool is_exists(const term_type& t)
   {
     return data::is_exists(t);
   }
@@ -192,7 +192,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is a lambda expression
   static inline
-  bool is_lambda(term_type t)
+  bool is_lambda(const term_type& t)
   {
     return data::is_lambda(t);
   }
@@ -201,7 +201,7 @@ struct term_traits<data::data_expression>
   /// \param v A variable
   /// \return The converted variable
   static inline
-  term_type variable2term(variable_type v)
+  const term_type& variable2term(const variable_type& v)
   {
     return v;
   }
@@ -210,7 +210,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return True if the term is a variable
   static inline
-  bool is_variable(term_type t)
+  bool is_variable(const term_type& t)
   {
     return data::is_variable(t);
   }
@@ -219,7 +219,7 @@ struct term_traits<data::data_expression>
   /// \param t A term
   /// \return The free variables of a term
   static inline
-  variable_sequence_type free_variables(term_type t)
+  variable_sequence_type free_variables(const term_type& t)
   {
     std::set<variable_type> v = data::find_free_variables(data::data_expression(t));
     return variable_sequence_type(v.begin(), v.end());
@@ -250,35 +250,64 @@ struct term_traits<data::data_expression>
   /// \return True if the term is constant. N.B. It is unknown if the current implementation
   /// works for quantifier expressions.
   static inline
-  bool is_constant(term_type t)
+  bool is_constant(const term_type& t)
   {
-    return data::find_variables(t).empty();
+    return data::find_all_variables(t).empty();
+  }
+
+  /// \brief Get the n-th argument of a data expression, provided it is an application.
+  /// \param t A term which is an application.
+  /// \param n The index of the argument. The first index has number 0.
+  /// \return the n-th argument of t.
+  /// \details This function is linear in n.
+  static inline
+  const term_type& argument(const term_type& t, const size_t n)
+  {
+    assert(data::is_application(t));
+    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    assert(a.size()>n);
+    data::application::const_iterator i=a.begin();
+    for(size_t j=0; j<n; ++j, ++i)
+    {
+      assert(i!=a.end());
+    }
+    assert(i!=a.end());
+    return *i;
   }
 
   static inline
-  term_type left(term_type t)
+  const term_type& left(const term_type& t)
   {
-    return data::application(t).left();
+    assert(data::is_application(t));
+    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    assert(a.size() == 2);
+    return *(a.begin());
   }
 
   static inline
-  term_type right(term_type t)
+  const term_type& right(const term_type& t)
   {
-    return data::application(t).right();
+    assert(data::is_application(t));
+    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    assert(a.size() == 2);
+    return *(++(a.begin()));
   }
 
   static inline
-  term_type not_arg(term_type t)
+  const term_type& not_arg(const term_type& t)
   {
     assert(is_not(t));
-    return data::application(t).arguments().front();
+    assert(data::is_application(t));
+    const data::application &a=atermpp::aterm_cast<data::application>(t);
+    assert(a.size() == 1);
+    return *(a.begin());
   }
 
   /// \brief Pretty print function
   /// \param t A term
   /// \return A pretty print representation of the term
   static inline
-  std::string pp(term_type t)
+  std::string pp(const term_type& t)
   {
     return data::pp(t);
   }
@@ -295,73 +324,74 @@ struct expression_traits : public core::term_traits< Expression >
   // Type of expression that represents variables
   typedef mcrl2::data::variable variable_type;
 
-  static bool is_true(data_expression const& e)
+  static bool is_true(const data_expression& e)
   {
     return sort_bool::is_true_function_symbol(e);
   }
 
-  static bool is_false(data_expression const& e)
+  static bool is_false(const data_expression& e)
   {
     return sort_bool::is_false_function_symbol(e);
   }
 
-  static bool is_application(data_expression const& e)
+  static bool is_application(const data_expression& e)
   {
     return data::is_application(e);
   }
 
-  static bool is_abstraction(data_expression const& e)
+  static bool is_abstraction(const data_expression& e)
   {
     return data::is_abstraction(e);
   }
 
-  static data_expression head(data_expression const& e)
+  static const data_expression& head(const data_expression& e)
   {
-    return application(e).head();
+    return atermpp::aterm_cast<application>(e).head();
   }
 
-  static data_expression_list arguments(data_expression const& e)
+  /* static const data_expression_list& arguments(const data_expression& e)
   {
-    return application(e).arguments();
+    return atermpp::aterm_cast<data::data_expression_list>(atermpp::list_arg2(e));
+  } */
+
+  static const data_expression_list &variables(const data_expression& a)
+  {
+    return atermpp::aterm_cast<data_expression_list>(atermpp::aterm_cast<abstraction>(a).variables());
   }
 
-  static data_expression_list variables(data_expression const& a)
+  static const data_expression& body(const data_expression& a)
   {
-    return abstraction(a).variables();
+    return atermpp::aterm_cast<const abstraction>(a).body();
   }
 
-  static data_expression body(data_expression const& a)
+  static data_expression replace_body(const data_expression& variable_binder, const data_expression& new_body)
   {
-    return abstraction(a).body();
-  }
-
-  static data_expression replace_body(data_expression const& variable_binder, data_expression const& new_body)
-  {
-    return abstraction(abstraction(variable_binder).binding_operator(), abstraction(variable_binder).variables(), new_body);
+    const abstraction &a=atermpp::aterm_cast<const abstraction>(variable_binder);
+    return abstraction(a.binding_operator(), a.variables(), new_body);
   }
 
   template < typename Container >
-  static application make_application(data_expression const& e, Container const& arguments)
+  static application make_application(const data_expression& e, const Container& arguments)
   {
     return application(e, arguments);
   }
 
-  static data_expression false_()
+  static const data_expression& false_()
   {
     return sort_bool::false_();
   }
 
-  static data_expression true_()
+  static const data_expression& true_()
   {
     return sort_bool::true_();
   }
 
-  static data_expression and_(data_expression const& e1, data_expression const& e2)
+  static data_expression and_(const data_expression& e1, const data_expression& e2)
   {
     return sort_bool::and_(e1, e2);
   }
 
-  static data_expression or_(data_expression const& e1, data_expression const& e2)
+  static data_expression or_(const data_expression& e1, const data_expression& e2)
   {
     return sort_bool::or_(e1, e2);
   }

@@ -19,8 +19,8 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 file(GLOB TERM_OBJS "*.cpp")
 

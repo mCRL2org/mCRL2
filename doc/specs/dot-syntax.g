@@ -21,7 +21,7 @@ strict: "[sS][tT][rR][iI][cC][tT]" ;
 
 graph: "[gG][rR][aA][pP][hH]" ;
 
-subgraph: "[sS][uU][bB][gG][rR][aA][pP][hH]" ;
+subgraph_literal: "[sS][uU][bB][gG][rR][aA][pP][hH]" ;
 
 digraph: "[dD][iI][gG][rR][aA][pP][hH]" ;
 
@@ -29,13 +29,24 @@ node: "[nN][oO][dD][eE]" ;
 
 edge: "[eE][dD][gG][eE]" ;
 
-stmt_list : (stmt ';'? stmt_list?)? ;
+// The official grammar is ambiguous, so we use an alternative formulation.
+// stmt_list : (stmt ';'? stmt_list?)? ;
+//
+// The performance of the rule below is poor, so we use yet another formulation.
+// stmt_list : (stmt ';'?)* ;
+
+stmt_list
+  : stmt_list2?;
+
+stmt_list2
+  : (stmt ';'?)
+  | stmt_list2 (stmt ';'?);
 
 stmt
   : node_stmt
 	| edge_stmt
 	| attr_stmt
-	| ID '=' ID
+	| attribute
 	| subgraph
 	;
 
@@ -43,7 +54,9 @@ attr_stmt	:	(graph | node | edge) attr_list ;
 
 attr_list :	'[' a_list? ']' attr_list? ;
 
-a_list : ID ('=' ID)? ','? a_list? ;
+a_list : attribute ','? a_list? ;
+
+attribute : ID '=' ID ;
 
 edge_stmt	:	(node_id | subgraph) edgeRHS attr_list? ;
 
@@ -58,7 +71,7 @@ port
   | ':' compass_pt
   ;
 
-subgraph : (subgraph ID?)? '{' stmt_list '}' ;
+subgraph : (subgraph_literal ID?)? '{' stmt_list '}' ;
 
 compass_pt : 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw' | 'c' | '_' ;
 
@@ -75,9 +88,9 @@ ID
   | number
   ;
 
-quoted : "\"[^\"]*\"" ;
+quoted : "\"([^\"]|\\\")*\"" ;
 
-name : "[A-Za-z_][A-Za-z_0-9]*" ;
+name : "[A-Za-z_][A-Za-z_0-9]*" $term -1;
 
 number : "[-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?))" ;
 

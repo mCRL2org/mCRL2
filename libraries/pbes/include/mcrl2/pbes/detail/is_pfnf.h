@@ -80,9 +80,7 @@ bool is_pfnf_or_expression(const pbes_expression& x)
 inline
 bool is_pfnf_or(const pbes_expression& x)
 {
-  bool result = is_true(x) || is_pfnf_or_expression(x);
-  return result;
-  //return is_true(x) || is_pfnf_or_expression(x);
+  return is_true(x) || is_pfnf_or_expression(x);
 }
 
 // Determines if an expression has the format g_i => x with is_pfnf_or(x)
@@ -110,8 +108,8 @@ inline
 bool is_pfnf_inner_and(const pbes_expression& x)
 {
   bool result = true;
-  atermpp::set<pbes_expression> terms = pbes_expr::split_and(x);
-  for (atermpp::set<pbes_expression>::const_iterator i = terms.begin(); i != terms.end(); ++i)
+  std::set<pbes_expression> terms = pbes_expr::split_and(x);
+  for (std::set<pbes_expression>::const_iterator i = terms.begin(); i != terms.end(); ++i)
   {
     if (!is_pfnf_imp(*i))
     {

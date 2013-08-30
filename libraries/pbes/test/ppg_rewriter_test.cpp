@@ -11,10 +11,8 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
 #include "mcrl2/pbes/detail/bqnf2ppg_rewriter.h"
@@ -32,23 +30,23 @@ void rewrite_ppg(std::string bqnf_text, std::string ppg_text)
   std::clog << "rewrite_ppg" << std::endl;
   std::clog << "Parsing text..." << std::endl;
   //std::clog << bqnf_text << std::endl;
-  pbes<> p = txt2pbes(bqnf_text);
+  pbes p = txt2pbes(bqnf_text);
   std::clog << "done." << std::endl;
 
-  bool is_bqnf = detail::is_bqnf(p);
+  bool is_bqnf = pbes_system::detail::is_bqnf(p);
   std::clog << "bqnf_traverser says: p is " << (is_bqnf ? "" : "NOT ") << "in BQNF." << std::endl;
-  bool is_ppg = detail::is_ppg(p);
+  bool is_ppg = pbes_system::detail::is_ppg(p);
   std::clog << "ppg_traverser says: p is " << (is_ppg ? "" : "NOT ") << "a PPG." << std::endl;
   std::clog << "Try the new rewriter:" << std::endl;
-  pbes<> q = detail::to_ppg(p);
+  pbes q = pbes_system::detail::to_ppg(p);
   std::clog << "The new rewriter is done." << std::endl;
   //std::clog << "result:" << std::endl << pbes_system::pp(q) << std::endl << std::endl;
-  is_ppg = detail::is_ppg(q);
+  is_ppg = pbes_system::detail::is_ppg(q);
   std::clog << "ppg_traverser says: result is " << (is_ppg ? "" : "NOT ") << "a PPG." << std::endl;
   p = q;
   normalize(p);
   std::clog << "Parsing text..." << std::endl;
-  pbes<> ppg = txt2pbes(ppg_text);
+  pbes ppg = txt2pbes(ppg_text);
   normalize(ppg);
   std::clog << "Checking for equality..." << std::endl;
   if (!(p==ppg))
@@ -90,11 +88,6 @@ void test_ppg_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
-  //log::log_level_t log_level = log::debug2;
-  //log::mcrl2_logger::set_reporting_level(log_level);
-
   test_ppg_rewriter();
 
   return 0;

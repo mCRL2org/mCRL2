@@ -17,43 +17,34 @@ ToolCatalog::ToolCatalog()
 
 void ToolCatalog::generateFileTypes()
 {
-//  m_filetypes.insert("mcrl2", "mcrl2");
-
-//  m_filetypes.insert("lps",   "lps");
-
-//  m_filetypes.insert("lts",   "lts");
-  m_filetypes.insert("fsm",   "lts");
-  m_filetypes.insert("aut",   "lts");
-  m_filetypes.insert("dot",   "lts");
-  m_filetypes.insert("svc",   "lts");
+  // Only add those file types for which we cannot use
+  // the identity
+  m_filetypes.insert("fsm", "lts");
+  m_filetypes.insert("aut", "lts");
+  m_filetypes.insert("dot", "lts");
+  m_filetypes.insert("svc", "lts");
 #ifdef USE_BCG
-  m_filetypes.insert("bcg",   "lts");
+  m_filetypes.insert("bcg", "lts");
 #endif
-//  m_filetypes.insert("bes",   "bes");
-  m_filetypes.insert("gm",    "bes");
-  m_filetypes.insert("cwi",   "bes");
-  m_filetypes.insert("pbes",  "bes");
-
-//  m_filetypes.insert("pbes",  "pbes");
-
-//  m_filetypes.insert("tbf",   "tbf");
-
-//  m_filetypes.insert("gra",   "gra");
-
-//  m_filetypes.insert("mcf",   "mcf");
-
-//  m_filetypes.insert("trc",   "trc");
-
-//  m_filetypes.insert("txt",   "txt");
+  m_filetypes.insert("bes", "bes");
+  m_filetypes.insert("gm",  "bes");
+  m_filetypes.insert("cwi", "bes");
+  m_filetypes.insert("bes", "pbes");
+  m_filetypes.insert("gm",  "pbes");
+  m_filetypes.insert("cwi", "pbes");
 }
 
-QString ToolCatalog::fileType(QString extension)
+QStringList ToolCatalog::fileTypes(QString extension)
 {
-  return m_filetypes.value(extension, extension);
+  QStringList result = m_filetypes.values(extension);
+  result.push_front(extension);
+  return result;
 }
 
 void ToolCatalog::load()
 {
+  typedef QMap<QString, QList<ToolInformation> > categorymap;
+
   QDir toolsetDir = QDir(QCoreApplication::applicationDirPath());
   if (toolsetDir.dirName().toLower() == "bin")
     toolsetDir.cdUp();
@@ -88,14 +79,13 @@ void ToolCatalog::load()
 
     if (e.tagName() == "tool") {
       QString cat = e.attribute("category", "Miscellaneous");
-      if (!m_categories.contains(cat))
-        m_categories.insert(cat, QMap<QString, ToolInformation>());
+      categorymap::iterator icat = m_categories.find(cat);
+      if (icat == m_categories.end())
+        icat = m_categories.insert(cat, QList<ToolInformation>());
 
-      QMap<QString, ToolInformation> tools = m_categories.value(cat);
       ToolInformation toolinfo(e.attribute("name"), e.attribute("input_format"), e.attribute("input_format1"), e.attribute("output_format", ""), e.attribute("gui", "").toLower() == "true");
       toolinfo.load();
-      tools.insert(e.attribute("name"), toolinfo);
-      m_categories.insert(cat, tools);
+      icat.value().append(toolinfo);
     }
 
     node = node.nextSibling();
@@ -109,19 +99,22 @@ QStringList ToolCatalog::categories()
 
 QList<ToolInformation> ToolCatalog::tools(QString category)
 {
-  return m_categories.value(category).values();
+  return m_categories.value(category);
 }
 
 QList<ToolInformation> ToolCatalog::tools(QString category, QString extension)
 {
-  QString inputType = fileType(extension);
+  QStringList inputTypes = fileTypes(extension);
   QList<ToolInformation> all = tools(category);
   QList<ToolInformation> ret;
-  for (int i = 0; i < all.count(); i++)
+  for (QList<ToolInformation>::iterator tool = all.begin(); tool != all.end(); ++tool)
   {
-    ToolInformation tool = all.at(i);
-    if (tool.input == inputType) {
-      ret.append(tool);
+    for (QStringList::const_iterator it = inputTypes.begin(); it != inputTypes.end(); ++it)
+    {
+      if (tool->input.contains(*it)) {
+        ret.append(*tool);
+        break;
+      }
     }
   }
   return ret;

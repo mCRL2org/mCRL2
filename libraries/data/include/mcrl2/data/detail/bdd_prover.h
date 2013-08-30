@@ -12,7 +12,7 @@
 #ifndef BDD_PROVER_H
 #define BDD_PROVER_H
 
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
@@ -102,15 +102,15 @@ class BDD_Prover: public Prover
     bool f_apply_induction;
 
     /// \brief A data specification.
-    const data_specification& f_data_spec;
+    // const data_specification& f_data_spec;
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
-    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_formula_to_bdd;
+    std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_formula_to_bdd;
 
     /// \brief A hashtable that maps formulas to the smallest guard occuring in those formulas.
     /// \brief If the smallest guard of a formula is unknown, it maps this formula to 0.
-    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_smallest;
+    std::map < atermpp::aterm_appl, atermpp::aterm_appl > f_smallest;
 
     /// \brief Class that provides information about the structure of BDDs.
     BDD_Info f_bdd_info;
@@ -163,6 +163,7 @@ class BDD_Prover: public Prover
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
     atermpp::aterm_appl bdd_down(atermpp::aterm_appl a_formula, std::string& a_indent)
     {
+      using namespace atermpp;
       a_indent.append("  ");
 
       if (f_time_limit != 0 && (f_deadline - time(0)) <= 0)
@@ -180,14 +181,14 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      const atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
+      const std::map < aterm_appl, aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
       if (i!=f_formula_to_bdd.end()) // found
       {
         return i->second;
       }
 
-      atermpp::aterm_appl v_guard = smallest(a_formula);
-      if (!v_guard)
+      aterm_appl v_guard = smallest(a_formula);
+      if (!v_guard.defined())
       {
         return a_formula;
       }
@@ -196,7 +197,7 @@ class BDD_Prover: public Prover
         mCRL2log(log::debug) << a_indent << "Smallest guard: " << data::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
       }
 
-      atermpp::aterm_appl v_term1, v_term2;
+      aterm_appl v_term1, v_term2;
 
       v_term1 = f_manipulator.set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewrite_internal(v_term1,bdd_sigma);
@@ -206,13 +207,13 @@ class BDD_Prover: public Prover
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
 
       v_term2 = f_manipulator.set_false(a_formula, v_guard);
-      v_term2 = m_rewriter->rewrite_internal(atermpp::aterm_appl(v_term2),bdd_sigma);
+      v_term2 = m_rewriter->rewrite_internal(aterm_appl(v_term2),bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
 
-      atermpp::aterm_appl v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
+      aterm_appl v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
 
       a_indent.erase(a_indent.size() - 2);
@@ -250,7 +251,7 @@ class BDD_Prover: public Prover
           while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
           {
             mCRL2log(log::debug) << "Applying induction." << std::endl;
-            f_formula = f_induction.apply_induction();
+            f_formula = data_expression(f_induction.apply_induction());
             build_bdd();
             eliminate_paths();
           }
@@ -267,7 +268,7 @@ class BDD_Prover: public Prover
             while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
             {
               mCRL2log(log::debug) << "Applying induction on the negated formula." << std::endl;
-              f_formula = f_induction.apply_induction();
+              f_formula = data_expression(f_induction.apply_induction());
               build_bdd();
               eliminate_paths();
             }
@@ -326,7 +327,7 @@ class BDD_Prover: public Prover
         return atermpp::aterm_appl();
       }
 
-      const atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_smallest.find(a_formula);
+      const std::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_smallest.find(a_formula);
       if (i!=f_smallest.end()) //found
       {
         return i->second;
@@ -341,7 +342,7 @@ class BDD_Prover: public Prover
       for (s = 0; s < v_length; s++)
       {
         v_small = smallest(f_info.get_argument(a_formula, s));
-        if (v_small)
+        if (v_small!=atermpp::aterm_appl())
         {
           if (v_result!=atermpp::aterm_appl())
           {
@@ -356,7 +357,7 @@ class BDD_Prover: public Prover
           }
         }
       }
-      if (!v_result && f_info.has_type_bool(a_formula))
+      if (v_result==atermpp::aterm_appl() && f_info.has_type_bool(a_formula))
       {
         v_result = a_formula;
       }
@@ -379,10 +380,10 @@ class BDD_Prover: public Prover
         data_expression v_true_branch = f_bdd_info.get_true_branch(a_bdd);
         data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         data_expression v_branch = get_branch(v_true_branch, a_polarity);
-        if (v_branch == data_expression())
+        if (!v_branch.defined())
         {
           v_branch = get_branch(v_false_branch, a_polarity);
-          if (v_branch == data_expression())
+          if (!v_branch.defined())
           {
             v_result = data_expression();
           }
@@ -444,7 +445,7 @@ class BDD_Prover: public Prover
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
       : Prover(data_spec, equations_selector, a_rewrite_strategy, a_time_limit),
-        f_data_spec(data_spec),
+//        f_data_spec(data_spec),
         f_induction(data_spec)
     {
       f_reverse = true;
@@ -523,7 +524,7 @@ class BDD_Prover: public Prover
       {
         mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression t=get_branch(f_bdd, true);
-        if (t==data_expression())
+        if (!t.defined())
         { throw mcrl2::runtime_error(
             "Cannot provide witness. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
@@ -550,7 +551,7 @@ class BDD_Prover: public Prover
       {
         mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression t=get_branch(f_bdd, false);
-        if (t==data_expression())
+        if (!t.defined())
         { throw mcrl2::runtime_error(
             "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");

@@ -19,8 +19,6 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
@@ -63,10 +61,7 @@ void test_boolean_operators()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_boolean_operators();
-  core::garbage_collect();
 
   return 0;
 }

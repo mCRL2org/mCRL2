@@ -13,7 +13,6 @@
 #define MCRL2_LPS_PARSE_H
 
 #include <sstream>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/action_parse.h"
@@ -55,16 +54,16 @@ struct action_rename_actions: public lps::action_actions
     return action_rename_rule(core::detail::gsMakeActionRenameRule(data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
   }
 
-  atermpp::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
   {
     return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", boost::bind(&action_rename_actions::parse_ActionRenameRule, this, _1));
   }
 
-  atermpp::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node)
   {
     data::variable_list variables = parse_VarSpec(node.child(0));
-    atermpp::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
-    for (atermpp::vector<lps::action_rename_rule>::iterator i = rules.begin(); i != rules.end(); ++i)
+    std::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
+    for (std::vector<lps::action_rename_rule>::iterator i = rules.begin(); i != rules.end(); ++i)
     {
       i->variables() = variables;
     }
@@ -96,7 +95,7 @@ struct action_rename_actions: public lps::action_actions
     }
     else if (symbol_name(node) == "ActionRenameRuleSpec")
     {
-      atermpp::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleSpec(node);
+      std::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleSpec(node);
       result.rules().insert(result.rules().end(), rules.begin(), rules.end());
       return true;
     }
@@ -127,10 +126,10 @@ inline
 void complete_action_rename_specification(action_rename_specification& x, const lps::specification& spec)
 {
   using namespace mcrl2::data;
-  atermpp::aterm_appl result = lps::action_rename_specification_to_aterm(x);
-  atermpp::aterm_appl lps_spec = lps::specification_to_aterm(spec);
-  result = lps::detail::type_check_action_rename_specification(result, lps_spec);
-  x = action_rename_specification(result);
+  // atermpp::aterm_appl result = lps::action_rename_specification_to_aterm(x);
+  // atermpp::aterm_appl lps_spec = lps::specification_to_aterm(spec);
+  x = lps::type_check_action_rename_specification(x, spec);
+  // x = action_rename_specification(result);
   x.data().declare_data_specification_to_be_type_checked();
   x = action_rename_specification(x.data()+spec.data(),x.action_labels(),x.rules());
   x = detail::translate_user_notation_and_normalise_sorts_action_rename_spec(x);
@@ -138,7 +137,7 @@ void complete_action_rename_specification(action_rename_specification& x, const 
 
 /// \brief Parses a process specification from an input stream
 /// \param in An input stream
-/// \param alpha_reduce Indicates whether alphabet reductions need to be performed
+/// \param spec A linear process specification.
 /// \return The parse result
 inline
 action_rename_specification parse_action_rename_specification(std::istream& in, const lps::specification& spec)
@@ -153,7 +152,7 @@ action_rename_specification parse_action_rename_specification(std::istream& in, 
 /// Parses an acion rename specification.
 /// If the action rename specification contains data types that are not
 /// present in the data specification of \p spec they are added to it.
-/// \param in An input stream
+/// \param spec_string A string containing an action rename specification.
 /// \param spec A linear process specification
 /// \return An action rename specification
 inline
@@ -164,7 +163,7 @@ action_rename_specification parse_action_rename_specification(const std::string&
 }
 
 /// \brief Parses a linear process specification from an input stream
-/// \param text An input stream containing a linear process specification
+/// \param spec_stream An input stream containing a linear process specification
 /// \return The parsed specification
 /// \exception non_linear_process if a non-linear sub-expression is encountered.
 /// \exception mcrl2::runtime_error in the following cases:

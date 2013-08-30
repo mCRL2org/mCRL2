@@ -7,6 +7,10 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 if( APPLE )
+  # Graphical tools depend on the CMake Module DeployQt4. This module is used 
+  # for the deployment (installation and packaging) of Qt. This module is 
+  # available as of version 2.8.7. To include Qt libraries in a package we require
+  # version 2.8.10.  
   cmake_minimum_required (VERSION 2.8.7)
 else()
   cmake_minimum_required (VERSION 2.8)
@@ -29,6 +33,8 @@ option(MCRL2_ENABLE_CADP_SUPPORT
        "Enable/disable support for CADP"               OFF)
 option(MCRL2_ENABLE_EXPERIMENTAL
        "Enable/disable creation of experimental tools" OFF)
+option(MCRL2_ENABLE_DEVELOPER
+       "Enable/disable creation of developer tools"    OFF)
 option(MCRL2_ENABLE_DEPRECATED
        "Enable/disable creation of deprecated tools"   OFF)
 option(MCRL2_INSTALL_HEADERS
@@ -206,13 +212,13 @@ add_subdirectory ( 3rd-party/dparser )
 ## mCRL2 libraries
 ##---------------------------------------------------
 
-add_subdirectory ( libraries/aterm )
 add_subdirectory ( libraries/atermpp )
 add_subdirectory ( libraries/bes )
 add_subdirectory ( libraries/core )
 add_subdirectory ( libraries/data )
 add_subdirectory ( libraries/lps )
 add_subdirectory ( libraries/lts )
+add_subdirectory ( libraries/modal_formula )
 add_subdirectory ( libraries/pbes )
 add_subdirectory ( libraries/process )
 add_subdirectory ( libraries/trace )
@@ -224,8 +230,6 @@ add_subdirectory ( libraries/utilities )
 
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
-add_subdirectory ( tools/complps2pbes )
-add_subdirectory ( tools/formulacheck )
 add_subdirectory ( tools/lps2lts )
 add_subdirectory ( tools/lps2pbes )
 add_subdirectory ( tools/lps2torx )
@@ -250,7 +254,6 @@ add_subdirectory ( tools/ltscompare )
 add_subdirectory ( tools/ltsinfo )
 add_subdirectory ( tools/mcrl22lps )
 add_subdirectory ( tools/mcrl2i )
-add_subdirectory ( tools/mcrl2parse )
 add_subdirectory ( tools/pbes2bool )
 add_subdirectory ( tools/pbes2bes )
 add_subdirectory ( tools/pbesconstelm )
@@ -259,11 +262,18 @@ add_subdirectory ( tools/pbesparelm )
 add_subdirectory ( tools/pbespgsolve )
 add_subdirectory ( tools/pbespp )
 add_subdirectory ( tools/pbesrewr )
-add_subdirectory ( tools/symbolic_exploration )
-add_subdirectory ( tools/tbf2lps )
 add_subdirectory ( tools/tracepp )
 add_subdirectory ( tools/txt2pbes )
 add_subdirectory ( tools/txt2lps )
+
+##---------------------------------------------------
+## Developer tools (not part of the distribution, but
+## used by mCRL2 developers).
+##---------------------------------------------------
+if(MCRL2_ENABLE_DEVELOPER)
+  add_subdirectory ( tools/alphabet )
+  add_subdirectory ( tools/mcrl2parse )
+endif()
 
 ##---------------------------------------------------
 ## Graphical tools
@@ -284,12 +294,15 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
 if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/besconvert )
   add_subdirectory ( tools/bessolve )
+  add_subdirectory ( tools/complps2pbes )
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/lpsrealelm )
   add_subdirectory ( tools/pbesabstract )
   add_subdirectory ( tools/pbesabsinthe )
   add_subdirectory ( tools/pbesinst )
   add_subdirectory ( tools/pbespareqelm )
+  add_subdirectory ( tools/pbesstategraph )
+  add_subdirectory ( tools/symbolic_exploration )
   add_subdirectory ( tools/txt2bes )
 endif(MCRL2_ENABLE_EXPERIMENTAL)
 
@@ -298,7 +311,7 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 ##---------------------------------------------------
 
 if(MCRL2_ENABLE_DEPRECATED)
-
+  add_subdirectory ( tools/formulacheck )
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
@@ -347,28 +360,29 @@ include(MCRL2ConfigureComplingRewriters)
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
-    libraries/aterm/include/
     libraries/atermpp/include/
+    libraries/bes/include/
     libraries/core/include/
     libraries/data/include/
     libraries/lps/include/
     libraries/lts/include/
-    libraries/bes/include/
+    libraries/modal_formula/include/
     libraries/pbes/include/
     libraries/process/include/
     libraries/trace/include/
     libraries/utilities/include/
+    ${CMAKE_BINARY_DIR}/libraries/utilities/include/
   DESTINATION ${MCRL2_INCLUDE_DIR}
   COMPONENT Headers
   PATTERN ".svn" EXCLUDE
 )
-FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
-install(
-  FILES
-    ${dparser_headers}
-  DESTINATION ${MCRL2_INCLUDE_DIR}/dparser
-  COMPONENT Headers
-)
+#FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
+#install(
+#  FILES
+#    ${dparser_headers}
+#  DESTINATION ${MCRL2_INCLUDE_DIR}/dparser
+#  COMPONENT Headers
+#)
 endif( MCRL2_INSTALL_HEADERS )
 
 ##---------------------------------------------------

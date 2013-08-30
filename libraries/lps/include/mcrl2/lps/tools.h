@@ -43,7 +43,6 @@ void lpsinvelm(const std::string& input_filename,
                const std::string& dot_file_name,
                data::rewriter::strategy rewrite_strategy,
                data::detail::smt_solver_type solver_type,
-               const size_t summand_number,
                const bool no_check,
                const bool no_elimination,
                const bool simplify_all,
@@ -77,6 +76,7 @@ void lpssumelm(const std::string& input_filename,
 
 void lpssuminst(const std::string& input_filename,
                 const std::string& output_filename,
+                const data::rewriter::strategy rewrite_strategy,
                 const std::string& sorts_string,
                 const bool finite_sorts_only,
                 const bool tau_summands_only);
@@ -84,9 +84,9 @@ void lpssuminst(const std::string& input_filename,
 void lpsuntime(const std::string& input_filename,
                const std::string& output_filename);
 
-void txtlps(const std::string& input_filename,
-            const std::string& output_filename
-           );
+void txt2lps(const std::string& input_filename,
+             const std::string& output_filename
+            );
 
 } // namespace lps
 

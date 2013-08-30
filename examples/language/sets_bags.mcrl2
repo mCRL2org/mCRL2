@@ -48,7 +48,7 @@ act  insert_b: E;
      tb6_bag_diff_bc: Bag(E);
      tb7_bag2set_bc: Set(E) # Set(E);
 
-proc Test_bags(bags_only: Bool, max_count: Nat) = Test_bags({}, {}, bags_only, max_count);
+proc Test_bags(bags_only: Bool, max_count: Nat) = Test_bags({:}, {:}, bags_only, max_count);
      Test_bags(b: Bag(E), c: Bag(E), bags_only: Bool, max_count: Nat) =
        sum e: E. (count(e, b) < max_count) -> insert_b(e) . Test_bags({e:1} + b, c, bags_only, max_count) <> delta
      + sum e: E. (count(e, c) < max_count) -> insert_c(e) . Test_bags(b, {e:1} + c, bags_only, max_count) <> delta

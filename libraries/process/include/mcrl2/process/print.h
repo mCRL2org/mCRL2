@@ -50,6 +50,12 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().print(";\n");
   }
 
+  void print_if_then_condition(const data::data_expression& condition, const std::string& arrow = "  ->  ", int precedence = max_precedence)
+  {
+    print_expression(condition, precedence);
+    derived().print(arrow);
+  }
+
   void operator()(const process::process_specification& x)
   {
     derived().enter(x);
@@ -59,7 +65,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
 
     // N.B. We have to normalize the sorts of the equations. Otherwise predicates like
     // is_list(x) may return the wrong result.
-    atermpp::vector<process_equation> normalized_equations = x.equations();
+    std::vector<process_equation> normalized_equations = x.equations();
     process::normalize_sorts(normalized_equations, x.data());
     print_list(normalized_equations, "proc ", "\n\n", "\n     ");
 
@@ -131,7 +137,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived().print("block(");
-    print_list(x.block_set(), "{", "}, ", ", ");
+    print_list(x.block_set(), "{", "}, ", ", ", true);
     derived()(x.operand());
     derived().print(")");
     derived().leave(x);
@@ -232,8 +238,8 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", max_precedence);
-    print_expression(x.then_case(), 5);
+    print_if_then_condition(x.condition(), " -> ", max_precedence);
+    print_expression(x.then_case());
     derived().leave(x);
   }
 
@@ -241,12 +247,12 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then_else& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", max_precedence);
-    print_expression(x.then_case(), 5);
-    derived().print(" <> ");
-    // N.B. the else case is printed with a lower precedence, since we want the expression a -> b -> c <> d <> e
+    print_if_then_condition(x.condition(), " -> ", max_precedence);
+    // N.B. the then case is printed with a higher precedence, since we want the expression a -> b -> c <> d <> e
     // to be printed as a -> (b -> c <> d) <> e
-    print_expression(x.else_case(), 5);
+    print_expression(x.then_case(), precedence(x) + 1);
+    derived().print(" <> ");
+    print_expression(x.else_case());
     derived().leave(x);
   }
 
@@ -278,6 +284,21 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().leave(x);
   }
 
+  void operator()(const process::untyped_process_assignment& x)
+  {
+    derived().enter(x);
+    derived()(x.name());
+    print_assignments(x.assignments(), false);
+    derived().leave(x);
+  }
+
+  void operator()(const process::untyped_parameter_identifier& x)
+  {
+    derived().enter(x);
+    derived()(x.name());
+    print_list(x.arguments(), "(", ")", ", ");
+    derived().leave(x);
+  }
 };
 
 } // namespace detail

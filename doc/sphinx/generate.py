@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import argparse
+import logging
 
 def clean(temppath, outpath):
   if os.path.exists(temppath):
@@ -34,11 +35,16 @@ def getarguments():
                     help="Force rebuild of selected targets. Choose from %(choices)s. "
                          "Use this flag more than once to force rebuilding multiple "
                          "targets.")
+  parser.add_argument("-j", "--local-mathjax", dest="localmathjax", action="store_true",
+                      help="Install a local copy of the MathJax library, instead of using CDN.")
   parser.add_argument("-v", "--version", dest="version", metavar="REL.SVN", action="store",
                       default="unknown.unknown", 
                       help="The version number to be used in the documentation. This "
                            "should be a release number, followed by a period, followed "
                            "by the SVN revision number.")
+  parser.add_argument("-d", "--debug", dest="debug", action="count",
+                      help="Be more verbose. Adding the option multiple times will "
+                           "increase verbosity")                     
   parser.add_argument("-p", "--path", dest="path", metavar="DIR", action="store",
                     default="")
   parser.add_argument("-t", "--temp", dest="temp", metavar="DIR", action="store",
@@ -53,6 +59,7 @@ def getarguments():
 # Main program
 #
 if __name__ == '__main__':
+  sphinxdir = os.path.dirname(__file__)
 
   args = getarguments()
   temppath = os.path.abspath(args.temp)
@@ -66,7 +73,25 @@ if __name__ == '__main__':
   if args.clean:
     clean(temppath, outpath)
   
-
+  if args.debug is None:
+    logging.basicConfig()#level=logging.WARNING)
+  elif args.debug > 0:
+    logging.basicConfig(level=logging.INFO)  
+  elif args.debug > 1:
+    logging.basicConfig(level=logging.DEBUG)
+    
+  mathjaxdir = os.path.join(sphinxdir, 'html', 'mathjax')
+  if os.path.exists(mathjaxdir):
+    shutil.rmtree(mathjaxdir)
+  os.makedirs(mathjaxdir)
+  if args.localmathjax:
+    import zipfile
+    archive = zipfile.ZipFile(os.path.join(sphinxdir, 'source', 'mathjax-2.2.zip'))
+    archive.extractall(mathjaxdir)
+  else:
+    shutil.copyfile(os.path.join(sphinxdir, 'source', 'mathjax-cdn.js'),
+                    os.path.join(mathjaxdir, 'MathJax.js'))
+    
   sys.path = [os.path.dirname(__file__)] + sys.path
   import source
   source.generate_rst(binpath, temppath, outpath, [args.version] if args.release else args.version.rsplit('.', 1))

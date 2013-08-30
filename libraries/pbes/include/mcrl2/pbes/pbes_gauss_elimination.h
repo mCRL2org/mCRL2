@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
@@ -122,16 +122,14 @@ pbes_equation_solver<Rewriter> make_pbes_equation_solver(const Rewriter& rewrite
 /// \pre The pbes \p p is a bes.
 /// \param p A pbes
 /// \return 0 if the solution is false, 1 if the solution is true, 2 if the solution is unknown
-template <typename Container>
-int gauss_elimination(pbes<Container>& p)
+inline
+int gauss_elimination(pbes& p)
 {
-  typedef data::data_enumerator<utilities::number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
-  typedef typename core::term_traits<pbes_expression> tr;
+  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, data::data_enumerator> my_rewriter;
+  typedef core::term_traits<pbes_expression> tr;
 
   data::rewriter datar(p.data());
-  utilities::number_postfix_generator name_generator("x");
-  my_enumerator datae(p.data(), datar, name_generator);
+  data::data_enumerator datae(p.data(), datar);
   my_rewriter pbesr(datar, datae);
 
   gauss_elimination_algorithm<pbes_traits> algorithm;

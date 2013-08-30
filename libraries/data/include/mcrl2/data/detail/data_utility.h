@@ -15,9 +15,7 @@
 #include <algorithm>
 #include <iterator>
 #include <set>
-#include <string>
 #include <utility>
-#include <vector>
 #include "boost/bind.hpp"
 #include "boost/range/iterator_range.hpp"
 

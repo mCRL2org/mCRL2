@@ -13,7 +13,6 @@
 #define MCRL2_DATA_DETAIL_REWRITE_CONTAINER_H
 
 #include <vector>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
@@ -48,7 +47,7 @@ void rewrite_container(data::data_expression_list& v, const Rewriter& rewr)
 {
   std::vector<data_expression> tmp(v.begin(), v.end());
   rewrite_container(tmp, rewr);
-  v = atermpp::convert<data::data_expression_list>(tmp);
+  v = data::data_expression_list(tmp.begin(),tmp.end());
 }
 
 template <typename Rewriter, typename Substitution>
@@ -56,7 +55,7 @@ void rewrite_container(data::data_expression_list& v, const Rewriter& rewr, cons
 {
   std::vector<data_expression> tmp(v.begin(), v.end());
   rewrite_container(tmp, rewr, sigma);
-  v = atermpp::convert<data::data_expression_list>(tmp);
+  v = data::data_expression_list(tmp.begin(),tmp.end());
 }
 
 } // namespace detail

@@ -74,6 +74,12 @@ class add_binding : public Traverser<Derived>
       return m_bound_variables.find(v) != m_bound_variables.end();
     }
 
+    /// \brief Returns the bound variables.
+    const std::multiset<variable_type>& bound_variables() const
+    {
+      return m_bound_variables;
+    }
+
     /// \brief Returns the bind count of the variable v.
     typename std::multiset<variable_type>::size_type bind_count(const variable_type& v)
     {

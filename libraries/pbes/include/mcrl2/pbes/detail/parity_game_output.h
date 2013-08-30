@@ -120,16 +120,16 @@ class parity_game_output: public parity_game_generator
     /// \param todo A todo list
     void print_set(std::string name, const std::set<size_t>& todo) const
     {
-      std::cerr << name << " = {";
+      mCRL2log(log::verbose) << name << " = {";
       for (std::set<size_t>::const_iterator i = todo.begin(); i != todo.end(); ++i)
       {
-        std::cerr << (i == todo.begin() ? "" : ", ") << *i;
+        mCRL2log(log::verbose) << (i == todo.begin() ? "" : ", ") << *i;
       }
-      std::cerr << "}" << std::endl;
+      mCRL2log(log::verbose) << "}" << std::endl;
     }
 
   public:
-    parity_game_output(pbes<>& p, bool min_parity_game = true)
+    parity_game_output(pbes& p, bool min_parity_game = true)
       : parity_game_generator(p, true, min_parity_game)
     {}
 

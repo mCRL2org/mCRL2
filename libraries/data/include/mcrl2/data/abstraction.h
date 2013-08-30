@@ -37,10 +37,10 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    abstraction(const atermpp::aterm_appl& term)
+    abstraction(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_Binder(m_term));
+      assert(core::detail::check_term_Binder(*this));
     }
 
     /// \brief Constructor.
@@ -51,22 +51,22 @@ class abstraction: public data_expression
     /// \brief Constructor.
     template <typename Container>
     abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
-      : data_expression(core::detail::gsMakeBinder(binding_operator, atermpp::convert<variable_list>(variables), body))
+      : data_expression(core::detail::gsMakeBinder(binding_operator, variable_list(variables.begin(), variables.end()), body))
     {}
 
-    binder_type binding_operator() const
+    const binder_type& binding_operator() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const binder_type>(atermpp::arg1(*this));
     }
 
-    variable_list variables() const
+    const variable_list& variables() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const variable_list>(atermpp::list_arg2(*this));
     }
 
-    data_expression body() const
+    const data_expression& body() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<const data_expression>(atermpp::arg3(*this));
     }
 };
 //--- end generated class abstraction ---//
@@ -74,6 +74,16 @@ class abstraction: public data_expression
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::abstraction& t1, mcrl2::data::abstraction& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_ABSTRACTION_H
 

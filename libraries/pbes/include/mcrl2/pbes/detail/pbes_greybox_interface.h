@@ -37,7 +37,7 @@ namespace detail {
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
     /// \param rewrite_strategy The rewrite engine to use. (Default: jitty)
-    pbes_greybox_interface(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
+    pbes_greybox_interface(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       : parity_game_generator_deprecated(p, true_false_dependencies, is_min_parity, rewrite_strategy)
     {
       initialize_generation();
@@ -50,7 +50,7 @@ namespace detail {
     propositional_variable_instantiation get_initial_state()
     {
       //std::clog << "get_initial_state()" << std::endl;
-      propositional_variable_instantiation phi = rewrite_and_simplify_expression(m_pbes.initial_state());
+      propositional_variable_instantiation phi = core::static_down_cast<const propositional_variable_instantiation&>(rewrite_and_simplify_expression(m_pbes.initial_state()));
       //std::clog << "  phi = " << print(phi) << std::endl;
       return phi;
     }
@@ -82,12 +82,12 @@ namespace detail {
     /// \param phi An instantiated propositional variable
     /// \return The set of variable instantiations (successor states) that appear in the rewritten
     /// right hand side expression.
-    atermpp::set<pbes_expression> get_successors(const pbes_expression& phi)
+    std::set<pbes_expression> get_successors(const pbes_expression& phi)
     {
       //std::clog << "get_successors(psi)" << std::endl;
       initialize_generation();
 
-      atermpp::set<pbes_expression> result;
+      std::set<pbes_expression> result;
       mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression " << print(phi) << std::endl;
 
       // expand the right hand side if needed
@@ -100,16 +100,16 @@ namespace detail {
       }
       else if (tr::is_and(psi))
       {
-        atermpp::set<pbes_expression> terms = pbes_expr::split_and(psi);
-        for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = pbes_expr::split_and(psi);
+        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(*i);
         }
       }
       else if (tr::is_or(psi))
       {
-        atermpp::set<pbes_expression> terms = pbes_expr::split_or(psi);
-        for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = pbes_expr::split_or(psi);
+        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(*i);
         }
@@ -130,7 +130,7 @@ namespace detail {
       }
       else
       {
-        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + print(psi) + "\n" + psi.to_string()));
+        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + print(psi) + "\n" + to_string(psi)));
       }
       mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);
       return result;
@@ -190,11 +190,11 @@ namespace detail {
     /// \param expr The expression associated with the transition group.
     /// \return The set of variable instantiations (successor states) that appear in the rewritten
     /// expression.
-    atermpp::set<pbes_expression> get_successors(const pbes_expression& phi, const std::string& var, const pbes_expression& expr)
+    std::set<pbes_expression> get_successors(const pbes_expression& phi, const std::string& var, const pbes_expression& expr)
     {
       initialize_generation();
 
-      atermpp::set<pbes_expression> result;
+      std::set<pbes_expression> result;
       mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression "  << print(phi) << " (var = " << var
                                                                                                << ", expr = " << print(expr) << ")" <<std::endl;
 
@@ -213,16 +213,16 @@ namespace detail {
         }
         else if (tr::is_and(psi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_and(psi);
-          for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          std::set<pbes_expression> terms = pbes_expr::split_and(psi);
+          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(*i);
           }
         }
         else if (tr::is_or(psi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_or(psi);
-          for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          std::set<pbes_expression> terms = pbes_expr::split_or(psi);
+          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(*i);
           }

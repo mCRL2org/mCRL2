@@ -32,7 +32,7 @@ struct substitution
   /// \brief Constructor.
   /// \param src A value.
   /// \param dest A replacement.
-  substitution(aterm src, aterm dest)
+  substitution(const aterm &src, const aterm &dest)
     : m_src(src), m_dest(dest)
   {}
 
@@ -44,17 +44,6 @@ struct substitution
     return atermpp::replace(t, m_src, m_dest);
   }
 };
-
-/// \brief Convenience function for creating a substitution.
-/// \param src A term
-/// \param dest A term
-/// \return A substitution
-template <typename Src, typename Dest>
-inline
-substitution make_substitution(Src src, Dest dest)
-{
-  return substitution(aterm_traits<Src>::term(src), aterm_traits<Dest>::term(dest));
-}
 
 /// Utility class for applying a substitution to a term.
 template <typename Src, typename Dest>

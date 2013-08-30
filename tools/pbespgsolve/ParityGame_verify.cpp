@@ -15,7 +15,7 @@ struct VerifySCC  // used by ParityGame::verify
 {
     const ParityGame    &game;
     const StaticGraph   &graph;
-    const int           prio;
+    const size_t           prio;
     verti * const       error;
 
     int operator() (const verti *scc, size_t scc_size)
@@ -84,7 +84,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
     }
 
     // Verify absence of cycles owned by opponent in winning sets
-    for (int prio = 0; prio < d_; ++prio)
+    for (size_t prio = 0; prio < d_; ++prio)
     {
         /* Create set of edges incident with vertices in the winning set of
            player (1 - prio%2) consistent with strategy s and incident with
@@ -92,7 +92,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
         StaticGraph::edge_list edges;
         for (verti v = 0; v < graph_.V(); ++v)
         {
-            if (priority(v) >= prio && (int)winner(s, v) == (1 - prio%2))
+            if (priority(v) >= prio && (winner(s, v) == 1 - static_cast<int>(prio%2)))
             {
                 if (s[v] != NO_VERTEX)
                 {

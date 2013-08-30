@@ -25,7 +25,7 @@ namespace bes
 /// \param eqn A boolean equation system
 /// \param recursive_form Determines whether or not the result will be in standard recursive normal form
 inline
-void make_standard_form(boolean_equation_system<>& eqn, bool recursive_form = false)
+void make_standard_form(boolean_equation_system& eqn, bool recursive_form = false)
 {
   detail::standard_form_traverser t(recursive_form);
   t(eqn);

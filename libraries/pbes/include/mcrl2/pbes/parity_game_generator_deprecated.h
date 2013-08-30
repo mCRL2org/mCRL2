@@ -19,15 +19,12 @@
 #include <set>
 #include <utility>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 
@@ -55,10 +52,10 @@ class parity_game_generator_deprecated: public parity_game_generator
     data::detail::legacy_rewriter datar_internal;
 
     /// \brief Maps propositional variables to corresponding PBES equations.
-    std::map<core::identifier_string, atermpp::vector<internal_equation_t>::const_iterator > m_pbes_equation_index;
+    std::map<core::identifier_string, std::vector<internal_equation_t>::const_iterator > m_pbes_equation_index;
 
     /// \brief Stores an internal representation of equations
-    atermpp::vector<internal_equation_t> m_internal_equations;
+    std::vector<internal_equation_t> m_internal_equations;
 public:
     pbes_expression from_rewrite_format(const pbes_expression& e)
     {
@@ -92,10 +89,12 @@ public:
       else if(tr::is_forall(e))
       {
         tr::variable_sequence_type params = tr::var(e);
-        data::data_expression_vector pretty_args;
-        for(tr::variable_sequence_type::const_iterator i = params.begin(); i != params.end(); ++i)
+        data::variable_vector pretty_args;
+        for(auto i = params.begin(); i != params.end(); ++i)
         {
-          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+          data::data_expression d = datar_internal.convert_from((atermpp::aterm_appl)*i);
+          const data::variable& vd = core::static_down_cast<const data::variable&>(d);
+          pretty_args.push_back(vd);
         }
         pbes_expression arg = from_rewrite_format(tr::arg(e));
         result = tr::forall(tr::variable_sequence_type(pretty_args.begin(), pretty_args.end()), arg);
@@ -103,10 +102,12 @@ public:
       else if(tr::is_exists(e))
       {
         tr::variable_sequence_type params = tr::var(e);
-        data::data_expression_vector pretty_args;
-        for(tr::variable_sequence_type::const_iterator i = params.begin(); i != params.end(); ++i)
+        data::variable_vector pretty_args;
+        for(auto i = params.begin(); i != params.end(); ++i)
         {
-          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+          data::data_expression d = datar_internal.convert_from((atermpp::aterm_appl)*i);
+          const data::variable& vd = core::static_down_cast<const data::variable&>(d);
+          pretty_args.push_back(vd);
         }
         pbes_expression arg = from_rewrite_format(tr::arg(e));
         result = tr::exists(tr::variable_sequence_type(pretty_args.begin(), pretty_args.end()), arg);
@@ -123,7 +124,7 @@ public:
     {
       if (m_precompile_pbes)
       {
-        return e.to_string() + " (" + data::pp(from_rewrite_format(e)) + ")";
+        return to_string(e) + " (" + data::pp(from_rewrite_format(e)) + ")";
       }
       else
       {
@@ -173,7 +174,7 @@ protected:
     // This can be removed if the jittyc compilers are not in use anymore.
     void initialize_internal_rewriter()
     {
-      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(m_pbes);
+      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_all_variables(m_pbes);
       std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(m_pbes);
       std::set < mcrl2::data::variable > diff_set;
       std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
@@ -188,7 +189,7 @@ protected:
         const mcrl2::data::function_symbol_vector constructors(m_pbes.data().constructors(*i));
         for (mcrl2::data::function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
         {
-          datar_internal.convert_to(*i);
+          datar_internal.convert_to(*j);
         }
       }
     }
@@ -199,7 +200,7 @@ protected:
     {
       data::detail::legacy_rewriter::substitution_type sigma;
       data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-      for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
+      for (std::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
       {
         m_internal_equations.push_back(
           pbes_equation_to_aterm(
@@ -245,7 +246,7 @@ protected:
     virtual
     void compute_equation_index_map()
     {
-      for (atermpp::vector<internal_equation_t>::const_iterator i = m_internal_equations.begin(); i != m_internal_equations.end(); ++i)
+      for (std::vector<internal_equation_t>::const_iterator i = m_internal_equations.begin(); i != m_internal_equations.end(); ++i)
       {
         m_pbes_equation_index[pbes_equation(*i).variable().name()] = i;
       }
@@ -265,7 +266,7 @@ protected:
         if (m_precompile_pbes)
         {
           // datar_internal.set_internally_associated_value(*i,(atermpp::aterm)(*j));
-          sigma_internal[*i]=atermpp::aterm(*j);
+          sigma_internal[*i]=*j;
         }
         else
         {
@@ -316,7 +317,7 @@ protected:
 
         // Normalize the pbes, since the parity game generator currently doesn't handle negation and implication.
 
-        pbes_system::normalize(m_pbes);
+        pbes_system::algorithms::normalize(m_pbes);
         initialize_internal_rewriter();
         populate_internal_equations();
         compute_equation_index_map();
@@ -325,7 +326,7 @@ protected:
         // Add a BES equation for the initial state.
         data::detail::legacy_rewriter::substitution_type sigma;
         data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
-        propositional_variable_instantiation phi = rewrite_and_simplify(m_pbes.initial_state(),sigma,sigma_internal);
+        propositional_variable_instantiation phi = core::static_down_cast<const propositional_variable_instantiation&>(rewrite_and_simplify(m_pbes.initial_state(),sigma,sigma_internal));
         add_bes_equation(phi, m_priorities[phi.name()]);
 
         m_initialized = true;
@@ -340,7 +341,8 @@ protected:
     /// \param p A PBES
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-    parity_game_generator_deprecated(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
+    /// \param rewrite_strategy Strategy to use for the data rewriter
+    parity_game_generator_deprecated(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       :
       parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
       datar_internal(datar)

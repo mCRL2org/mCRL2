@@ -13,10 +13,7 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/typecheck.h"
 #include "mcrl2/pbes/parse.h"
 
@@ -24,7 +21,7 @@ using namespace mcrl2;
 
 void test_pbes_specification(const std::string& pbes_in, bool test_type_checker = true)
 {
-  pbes_system::pbes<> p = pbes_system::parse_pbes_new(pbes_in);
+  pbes_system::pbes p = pbes_system::parse_pbes_new(pbes_in);
   if (test_type_checker)
   {
     pbes_system::type_check(p);
@@ -38,7 +35,6 @@ void test_pbes_specification(const std::string& pbes_in, bool test_type_checker 
     }
     BOOST_CHECK(pbes_in == pbes_out);
   }
-  core::garbage_collect();
 }
 
 void test_pbes_specification1()
@@ -68,9 +64,7 @@ void test_pbes_specification2()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_pbes_specification1();
+ test_pbes_specification1();
   test_pbes_specification2();
 
   return 0;

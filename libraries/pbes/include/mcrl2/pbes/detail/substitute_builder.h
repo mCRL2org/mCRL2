@@ -55,7 +55,7 @@ struct substitute_builder: public pbes_expr_builder<pbes_expression>
   {
     // TODO: how to make this function efficient?
     typedef typename TermList::value_type value_type;
-    atermpp::vector<value_type> v(l.begin(), l.end());
+    std::vector<value_type> v(l.begin(), l.end());
     for (typename std::vector<value_type>::iterator i = v.begin(); i != v.end(); ++i)
     {
       substitute(*i);

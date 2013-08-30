@@ -41,7 +41,7 @@ pbes_system::pbes_expression bes2pbes(const boolean_expression& x)
 }
 
 /// \brief Converts a boolean equation into a PBES equation
-/// \param x A boolean equation
+/// \param eq A boolean equation
 inline
 pbes_system::pbes_equation bes2pbes(const boolean_equation& eq)
 {
@@ -51,17 +51,17 @@ pbes_system::pbes_equation bes2pbes(const boolean_equation& eq)
 /// \brief Converts a BES into a PBES
 /// \param x A boolean expression
 inline
-pbes_system::pbes<> bes2pbes(const boolean_equation_system<>& x)
+pbes_system::pbes bes2pbes(const boolean_equation_system& x)
 {
   data::data_specification data_spec;
-  atermpp::vector<pbes_system::pbes_equation> equations;
-  for (atermpp::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
+  std::vector<pbes_system::pbes_equation> equations;
+  for (std::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
   {
     equations.push_back(bes2pbes(*i));
   }
-  pbes_system::propositional_variable_instantiation initial_state = bes2pbes(x.initial_state());
+  pbes_system::propositional_variable_instantiation initial_state = core::static_down_cast<const pbes_system::propositional_variable_instantiation&>(bes2pbes(x.initial_state()));
 
-  return pbes_system::pbes<>(data_spec, equations, initial_state);
+  return pbes_system::pbes(data_spec, equations, initial_state);
 }
 
 } // namespace bes

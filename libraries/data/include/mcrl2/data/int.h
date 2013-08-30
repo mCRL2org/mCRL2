@@ -39,7 +39,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& int_name()
       {
-        static core::identifier_string int_name = core::detail::initialise_static_expression(int_name, core::identifier_string("Int"));
+        static core::identifier_string int_name = core::identifier_string("Int");
         return int_name;
       }
 
@@ -48,7 +48,7 @@ namespace mcrl2 {
       inline
       basic_sort const& int_()
       {
-        static basic_sort int_ = core::detail::initialise_static_expression(int_, basic_sort(int_name()));
+        static basic_sort int_ = basic_sort(int_name());
         return int_;
       }
 
@@ -70,7 +70,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cint_name()
       {
-        static core::identifier_string cint_name = core::detail::initialise_static_expression(cint_name, core::identifier_string("@cInt"));
+        static core::identifier_string cint_name = core::identifier_string("@cInt");
         return cint_name;
       }
 
@@ -79,7 +79,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cint()
       {
-        static function_symbol cint = core::detail::initialise_static_expression(cint, function_symbol(cint_name(), make_function_sort(sort_nat::nat(), int_())));
+        static function_symbol cint = function_symbol(cint_name(), make_function_sort(sort_nat::nat(), int_()));
         return cint;
       }
 
@@ -103,7 +103,7 @@ namespace mcrl2 {
       inline
       application cint(const data_expression& arg0)
       {
-        return cint()(arg0);
+        return sort_int::cint()(arg0);
       }
 
       /// \brief Recogniser for application of \@cInt
@@ -125,7 +125,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cneg_name()
       {
-        static core::identifier_string cneg_name = core::detail::initialise_static_expression(cneg_name, core::identifier_string("@cNeg"));
+        static core::identifier_string cneg_name = core::identifier_string("@cNeg");
         return cneg_name;
       }
 
@@ -134,7 +134,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cneg()
       {
-        static function_symbol cneg = core::detail::initialise_static_expression(cneg, function_symbol(cneg_name(), make_function_sort(sort_pos::pos(), int_())));
+        static function_symbol cneg = function_symbol(cneg_name(), make_function_sort(sort_pos::pos(), int_()));
         return cneg;
       }
 
@@ -158,7 +158,7 @@ namespace mcrl2 {
       inline
       application cneg(const data_expression& arg0)
       {
-        return cneg()(arg0);
+        return sort_int::cneg()(arg0);
       }
 
       /// \brief Recogniser for application of \@cNeg
@@ -181,8 +181,8 @@ namespace mcrl2 {
       function_symbol_vector int_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(cint());
-        result.push_back(cneg());
+        result.push_back(sort_int::cint());
+        result.push_back(sort_int::cneg());
 
         return result;
       }
@@ -191,7 +191,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& nat2int_name()
       {
-        static core::identifier_string nat2int_name = core::detail::initialise_static_expression(nat2int_name, core::identifier_string("Nat2Int"));
+        static core::identifier_string nat2int_name = core::identifier_string("Nat2Int");
         return nat2int_name;
       }
 
@@ -200,7 +200,7 @@ namespace mcrl2 {
       inline
       function_symbol const& nat2int()
       {
-        static function_symbol nat2int = core::detail::initialise_static_expression(nat2int, function_symbol(nat2int_name(), make_function_sort(sort_nat::nat(), int_())));
+        static function_symbol nat2int = function_symbol(nat2int_name(), make_function_sort(sort_nat::nat(), int_()));
         return nat2int;
       }
 
@@ -224,7 +224,7 @@ namespace mcrl2 {
       inline
       application nat2int(const data_expression& arg0)
       {
-        return nat2int()(arg0);
+        return sort_int::nat2int()(arg0);
       }
 
       /// \brief Recogniser for application of Nat2Int
@@ -246,7 +246,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& int2nat_name()
       {
-        static core::identifier_string int2nat_name = core::detail::initialise_static_expression(int2nat_name, core::identifier_string("Int2Nat"));
+        static core::identifier_string int2nat_name = core::identifier_string("Int2Nat");
         return int2nat_name;
       }
 
@@ -255,7 +255,7 @@ namespace mcrl2 {
       inline
       function_symbol const& int2nat()
       {
-        static function_symbol int2nat = core::detail::initialise_static_expression(int2nat, function_symbol(int2nat_name(), make_function_sort(int_(), sort_nat::nat())));
+        static function_symbol int2nat = function_symbol(int2nat_name(), make_function_sort(int_(), sort_nat::nat()));
         return int2nat;
       }
 
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       application int2nat(const data_expression& arg0)
       {
-        return int2nat()(arg0);
+        return sort_int::int2nat()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Nat
@@ -301,7 +301,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& pos2int_name()
       {
-        static core::identifier_string pos2int_name = core::detail::initialise_static_expression(pos2int_name, core::identifier_string("Pos2Int"));
+        static core::identifier_string pos2int_name = core::identifier_string("Pos2Int");
         return pos2int_name;
       }
 
@@ -310,7 +310,7 @@ namespace mcrl2 {
       inline
       function_symbol const& pos2int()
       {
-        static function_symbol pos2int = core::detail::initialise_static_expression(pos2int, function_symbol(pos2int_name(), make_function_sort(sort_pos::pos(), int_())));
+        static function_symbol pos2int = function_symbol(pos2int_name(), make_function_sort(sort_pos::pos(), int_()));
         return pos2int;
       }
 
@@ -334,7 +334,7 @@ namespace mcrl2 {
       inline
       application pos2int(const data_expression& arg0)
       {
-        return pos2int()(arg0);
+        return sort_int::pos2int()(arg0);
       }
 
       /// \brief Recogniser for application of Pos2Int
@@ -356,7 +356,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& int2pos_name()
       {
-        static core::identifier_string int2pos_name = core::detail::initialise_static_expression(int2pos_name, core::identifier_string("Int2Pos"));
+        static core::identifier_string int2pos_name = core::identifier_string("Int2Pos");
         return int2pos_name;
       }
 
@@ -365,7 +365,7 @@ namespace mcrl2 {
       inline
       function_symbol const& int2pos()
       {
-        static function_symbol int2pos = core::detail::initialise_static_expression(int2pos, function_symbol(int2pos_name(), make_function_sort(int_(), sort_pos::pos())));
+        static function_symbol int2pos = function_symbol(int2pos_name(), make_function_sort(int_(), sort_pos::pos()));
         return int2pos;
       }
 
@@ -389,7 +389,7 @@ namespace mcrl2 {
       inline
       application int2pos(const data_expression& arg0)
       {
-        return int2pos()(arg0);
+        return sort_int::int2pos()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Pos
@@ -411,7 +411,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& maximum_name()
       {
-        static core::identifier_string maximum_name = core::detail::initialise_static_expression(maximum_name, core::identifier_string("max"));
+        static core::identifier_string maximum_name = core::identifier_string("max");
         return maximum_name;
       }
 
@@ -461,7 +461,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + to_string(s0) + ", " + to_string(s1));
         }
 
         function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
@@ -489,7 +489,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return maximum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -511,7 +511,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& minimum_name()
       {
-        static core::identifier_string minimum_name = core::detail::initialise_static_expression(minimum_name, core::identifier_string("min"));
+        static core::identifier_string minimum_name = core::identifier_string("min");
         return minimum_name;
       }
 
@@ -537,7 +537,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + to_string(s0) + ", " + to_string(s1));
         }
 
         function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
@@ -565,7 +565,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return minimum(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -587,7 +587,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& abs_name()
       {
-        static core::identifier_string abs_name = core::detail::initialise_static_expression(abs_name, core::identifier_string("abs"));
+        static core::identifier_string abs_name = core::identifier_string("abs");
         return abs_name;
       }
 
@@ -596,7 +596,7 @@ namespace mcrl2 {
       inline
       function_symbol const& abs()
       {
-        static function_symbol abs = core::detail::initialise_static_expression(abs, function_symbol(abs_name(), make_function_sort(int_(), sort_nat::nat())));
+        static function_symbol abs = function_symbol(abs_name(), make_function_sort(int_(), sort_nat::nat()));
         return abs;
       }
 
@@ -620,7 +620,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        return abs()(arg0);
+        return sort_int::abs()(arg0);
       }
 
       /// \brief Recogniser for application of abs
@@ -642,7 +642,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& negate_name()
       {
-        static core::identifier_string negate_name = core::detail::initialise_static_expression(negate_name, core::identifier_string("-"));
+        static core::identifier_string negate_name = core::identifier_string("-");
         return negate_name;
       }
 
@@ -678,7 +678,7 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        return negate(arg0.sort())(arg0);
+        return sort_int::negate(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of -
@@ -700,7 +700,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& succ_name()
       {
-        static core::identifier_string succ_name = core::detail::initialise_static_expression(succ_name, core::identifier_string("succ"));
+        static core::identifier_string succ_name = core::identifier_string("succ");
         return succ_name;
       }
 
@@ -725,7 +725,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + to_string(s0));
         }
 
         function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
@@ -752,7 +752,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return succ(arg0.sort())(arg0);
+        return sort_int::succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -774,7 +774,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& pred_name()
       {
-        static core::identifier_string pred_name = core::detail::initialise_static_expression(pred_name, core::identifier_string("pred"));
+        static core::identifier_string pred_name = core::identifier_string("pred");
         return pred_name;
       }
 
@@ -799,7 +799,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + to_string(s0));
         }
 
         function_symbol pred(pred_name(), make_function_sort(s0, target_sort));
@@ -826,7 +826,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        return pred(arg0.sort())(arg0);
+        return sort_int::pred(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of pred
@@ -848,7 +848,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& dub_name()
       {
-        static core::identifier_string dub_name = core::detail::initialise_static_expression(dub_name, core::identifier_string("@dub"));
+        static core::identifier_string dub_name = core::identifier_string("@dub");
         return dub_name;
       }
 
@@ -870,7 +870,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for dub with domain sorts " + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for dub with domain sorts " + to_string(s0) + ", " + to_string(s1));
         }
 
         function_symbol dub(dub_name(), make_function_sort(s0, s1, target_sort));
@@ -898,7 +898,7 @@ namespace mcrl2 {
       inline
       application dub(const data_expression& arg0, const data_expression& arg1)
       {
-        return dub(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::dub(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@dub
@@ -920,7 +920,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& plus_name()
       {
-        static core::identifier_string plus_name = core::detail::initialise_static_expression(plus_name, core::identifier_string("+"));
+        static core::identifier_string plus_name = core::identifier_string("+");
         return plus_name;
       }
 
@@ -954,7 +954,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + to_string(s0) + ", " + to_string(s1));
         }
 
         function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
@@ -982,7 +982,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return plus(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -1004,7 +1004,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& minus_name()
       {
-        static core::identifier_string minus_name = core::detail::initialise_static_expression(minus_name, core::identifier_string("-"));
+        static core::identifier_string minus_name = core::identifier_string("-");
         return minus_name;
       }
 
@@ -1042,7 +1042,7 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        return minus(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -1064,7 +1064,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& times_name()
       {
-        static core::identifier_string times_name = core::detail::initialise_static_expression(times_name, core::identifier_string("*"));
+        static core::identifier_string times_name = core::identifier_string("*");
         return times_name;
       }
 
@@ -1090,7 +1090,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + to_string(s0) + ", " + to_string(s1));
         }
 
         function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
@@ -1118,7 +1118,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return times(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -1140,7 +1140,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& div_name()
       {
-        static core::identifier_string div_name = core::detail::initialise_static_expression(div_name, core::identifier_string("div"));
+        static core::identifier_string div_name = core::identifier_string("div");
         return div_name;
       }
 
@@ -1162,7 +1162,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts " + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts " + to_string(s0) + ", " + to_string(s1));
         }
 
         function_symbol div(div_name(), make_function_sort(s0, s1, target_sort));
@@ -1190,7 +1190,7 @@ namespace mcrl2 {
       inline
       application div(const data_expression& arg0, const data_expression& arg1)
       {
-        return div(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::div(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of div
@@ -1212,7 +1212,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& mod_name()
       {
-        static core::identifier_string mod_name = core::detail::initialise_static_expression(mod_name, core::identifier_string("mod"));
+        static core::identifier_string mod_name = core::identifier_string("mod");
         return mod_name;
       }
 
@@ -1250,7 +1250,7 @@ namespace mcrl2 {
       inline
       application mod(const data_expression& arg0, const data_expression& arg1)
       {
-        return mod(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::mod(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of mod
@@ -1272,7 +1272,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& exp_name()
       {
-        static core::identifier_string exp_name = core::detail::initialise_static_expression(exp_name, core::identifier_string("exp"));
+        static core::identifier_string exp_name = core::identifier_string("exp");
         return exp_name;
       }
 
@@ -1298,7 +1298,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + to_string(s0) + ", " + to_string(s1));
         }
 
         function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
@@ -1326,7 +1326,7 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        return exp(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_int::exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of exp
@@ -1349,32 +1349,32 @@ namespace mcrl2 {
       function_symbol_vector int_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(nat2int());
-        result.push_back(int2nat());
-        result.push_back(pos2int());
-        result.push_back(int2pos());
-        result.push_back(maximum(sort_pos::pos(), int_()));
-        result.push_back(maximum(int_(), sort_pos::pos()));
-        result.push_back(maximum(sort_nat::nat(), int_()));
-        result.push_back(maximum(int_(), sort_nat::nat()));
-        result.push_back(maximum(int_(), int_()));
-        result.push_back(minimum(int_(), int_()));
-        result.push_back(abs());
-        result.push_back(negate(sort_pos::pos()));
-        result.push_back(negate(sort_nat::nat()));
-        result.push_back(negate(int_()));
-        result.push_back(succ(int_()));
-        result.push_back(pred(sort_nat::nat()));
-        result.push_back(pred(int_()));
-        result.push_back(dub(sort_bool::bool_(), int_()));
-        result.push_back(plus(int_(), int_()));
-        result.push_back(minus(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(minus(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(minus(int_(), int_()));
-        result.push_back(times(int_(), int_()));
-        result.push_back(div(int_(), sort_pos::pos()));
-        result.push_back(mod(int_(), sort_pos::pos()));
-        result.push_back(exp(int_(), sort_nat::nat()));
+        result.push_back(sort_int::nat2int());
+        result.push_back(sort_int::int2nat());
+        result.push_back(sort_int::pos2int());
+        result.push_back(sort_int::int2pos());
+        result.push_back(sort_int::maximum(sort_pos::pos(), int_()));
+        result.push_back(sort_int::maximum(int_(), sort_pos::pos()));
+        result.push_back(sort_int::maximum(sort_nat::nat(), int_()));
+        result.push_back(sort_int::maximum(int_(), sort_nat::nat()));
+        result.push_back(sort_int::maximum(int_(), int_()));
+        result.push_back(sort_int::minimum(int_(), int_()));
+        result.push_back(sort_int::abs());
+        result.push_back(sort_int::negate(sort_pos::pos()));
+        result.push_back(sort_int::negate(sort_nat::nat()));
+        result.push_back(sort_int::negate(int_()));
+        result.push_back(sort_int::succ(int_()));
+        result.push_back(sort_int::pred(sort_nat::nat()));
+        result.push_back(sort_int::pred(int_()));
+        result.push_back(sort_int::dub(sort_bool::bool_(), int_()));
+        result.push_back(sort_int::plus(int_(), int_()));
+        result.push_back(sort_int::minus(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(sort_int::minus(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(sort_int::minus(int_(), int_()));
+        result.push_back(sort_int::times(int_(), int_()));
+        result.push_back(sort_int::div(int_(), sort_pos::pos()));
+        result.push_back(sort_int::mod(int_(), sort_pos::pos()));
+        result.push_back(sort_int::exp(int_(), sort_nat::nat()));
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1386,7 +1386,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1398,7 +1398,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1410,7 +1410,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_cint_application(e) || is_cneg_application(e) || is_nat2int_application(e) || is_int2nat_application(e) || is_pos2int_application(e) || is_int2pos_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for int_

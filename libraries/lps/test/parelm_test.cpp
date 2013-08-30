@@ -20,8 +20,6 @@
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/specification.h>
 #include "mcrl2/lps/detail/specification_property_map.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -121,7 +119,6 @@ void test_parelm(const std::string& message, const std::string& spec_text, const
   lps::detail::specification_property_map info2(spec2);
   BOOST_CHECK(data::detail::compare_property_maps(message + "a", info1, expected_result));
   BOOST_CHECK(data::detail::compare_property_maps(message + "b", info2, expected_result));
-  core::garbage_collect();
 }
 
 void test_parelm()
@@ -137,8 +134,6 @@ void test_parelm()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_parelm();
 
   return 0;

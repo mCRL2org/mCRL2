@@ -23,7 +23,6 @@
 
 
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -175,29 +174,23 @@ std::string description(const transformation_strategy s)
 
 
 /* Declare a protected PAIR symbol */
-inline AFun initAFunPair(AFun& f)
+inline atermpp::function_symbol PAIR()
 {
-  f = ATmakeAFun("PAIR", 2, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline AFun PAIR()
-{
-  static AFun PAIR = initAFunPair(PAIR);
+  static atermpp::function_symbol PAIR("PAIR", 2);
   return PAIR;
 }
 
 static
-inline ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
+inline atermpp::aterm_appl apply_pair_symbol(const atermpp::aterm &t1, const atermpp::aterm &t2)
 {
-  return ATmakeAppl2(PAIR(),(ATerm)t1,(ATerm)t2);
+  return atermpp::aterm_appl(PAIR(),t1,t2);
 }
 
 static
-inline bool is_pair(ATerm t)
+inline bool is_pair(const atermpp::aterm &t)
 {
-  return ATgetAFun(t)==PAIR();
+  using namespace atermpp;
+  return aterm_cast<aterm_appl>(t).function()==PAIR();
 }
 
 static size_t largest_power_of_2_smaller_than(size_t i)
@@ -214,17 +207,18 @@ static size_t largest_power_of_2_smaller_than(size_t i)
 
 inline
 void assign_variables_in_tree(
-     ATerm t,
+     atermpp::aterm t,
      mcrl2::data::variable_list::iterator& var_iter,
      mcrl2::data::detail::legacy_rewriter& rewriter,
      const bool opt_precompile_pbes,
      mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
      mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
+  using namespace atermpp;
   if (is_pair(t))
   {
-    assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
-    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(aterm_cast<atermpp::aterm_appl>(t)[0],var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(aterm_cast<atermpp::aterm_appl>(t)[1],var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
   }
   else
   {
@@ -242,8 +236,8 @@ void assign_variables_in_tree(
   }
 }
 
-// static ATermAppl store_as_tree(pbes_expression p)
-static ATermAppl store_as_tree(mcrl2::pbes_system::propositional_variable_instantiation p)
+// static atermpp::aterm_appl store_as_tree(pbes_expression p)
+static atermpp::aterm_appl store_as_tree(const mcrl2::pbes_system::propositional_variable_instantiation& p)
 /* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3
  * arguments p is returned. Otherwise a term of the form B(pair(pair(...pair(x1,x2),...)))) is
  * returned, which is a balanced tree flushed to the right. For each input the resulting
@@ -259,7 +253,7 @@ static ATermAppl store_as_tree(mcrl2::pbes_system::propositional_variable_instan
 
   size_t n=largest_power_of_2_smaller_than(args.size());
 
-  atermpp::vector<ATermAppl> tree_store(n);
+  std::vector<atermpp::aterm_appl> tree_store(n);
 
   /* put the arguments in the intermediate tree_store. The last elements are stored as
    * pairs, such that the args.size() elements are stored in n positions. */
@@ -273,9 +267,9 @@ static ATermAppl store_as_tree(mcrl2::pbes_system::propositional_variable_instan
     }
     else
     {
-      ATermAppl t1(*t);
+      atermpp::aterm_appl t1(*t);
       t++;
-      ATermAppl t2(*t);
+      atermpp::aterm_appl t2(*t);
       tree_store[i]= apply_pair_symbol(t1,t2);
       i++;
     }
@@ -289,7 +283,7 @@ static ATermAppl store_as_tree(mcrl2::pbes_system::propositional_variable_instan
       tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
     }
   }
-  return apply_pair_symbol(p.name(),(ATermAppl)tree_store[0]);
+  return apply_pair_symbol(p.name(),(atermpp::aterm_appl)tree_store[0]);
 }
 
 /* class pbes2bool_rewriter: public mcrl2::data::rewriter
@@ -426,7 +420,7 @@ class bes_expression: public atermpp::aterm
       : atermpp::aterm()
     {}
 
-    bes_expression(atermpp::aterm_appl term)
+    bes_expression(const atermpp::aterm &term)
       : atermpp::aterm(term)
     {}
 
@@ -435,9 +429,9 @@ class bes_expression: public atermpp::aterm
     // {}
 
     // allow assignment from aterms
-    bes_expression& operator=(const atermpp::aterm& t)
+    bes_expression& operator=(const bes_expression& t)
     {
-      m_term = t;
+      copy_term(t);
       return *this;
     }
 
@@ -453,159 +447,114 @@ void use_hashtables(void)
   bes_global_variables<size_t>::opt_use_hashtables=true;
 }
 
-inline AFun initAFunBESAnd(AFun& f)
+inline const atermpp::function_symbol &AFunBESAnd()
 {
-  f = ATmakeAFun("BESAnd", 2, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline AFun AFunBESAnd()
-{
-  static AFun BESAnd = initAFunBESAnd(BESAnd);
+  static atermpp::function_symbol BESAnd("BESAnd", 2);
   return BESAnd;
 }
 
-inline AFun initAFunBESOr(AFun& f)
+inline const atermpp::function_symbol &AFunBESOr()
 {
-  f = ATmakeAFun("BESOr", 2, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline AFun AFunBESOr()
-{
-  static AFun BESOr = initAFunBESOr(BESOr);
+  static atermpp::function_symbol BESOr("BESOr", 2);
   return BESOr;
 }
 
-inline AFun initAFunBESIf(AFun& f)
+inline const atermpp::function_symbol &AFunBESIf()
 {
-  f = ATmakeAFun("BESIf", 3, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline AFun AFunBESIf()
-{
-  static AFun BESIf = initAFunBESIf(BESIf);
+  static atermpp::function_symbol BESIf("BESIf", 3);
   return BESIf;
 }
 
 // BESFalse
 inline
-AFun initAFunBESFalse(AFun& f)
+const atermpp::function_symbol &gsAFunBESFalse()
 {
-  f = ATmakeAFun("BESFalse", 0, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunBESFalse()
-{
-  static AFun AFunBESFalse = initAFunBESFalse(AFunBESFalse);
+  static const atermpp::function_symbol AFunBESFalse("BESFalse", 0);
   return AFunBESFalse;
 }
 
 inline
-bool gsIsBESFalse(ATermAppl Term)
+bool gsIsBESFalse(atermpp::aterm_appl Term)
 {
-  return ATgetAFun(Term) == gsAFunBESFalse();
+  return Term.function() == gsAFunBESFalse();
 }
 
 // BESTrue
 inline
-AFun initAFunBESTrue(AFun& f)
+const atermpp::function_symbol &gsAFunBESTrue()
 {
-  f = ATmakeAFun("BESTrue", 0, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunBESTrue()
-{
-  static AFun AFunBESTrue = initAFunBESTrue(AFunBESTrue);
+  static const atermpp::function_symbol AFunBESTrue("BESTrue", 0);
   return AFunBESTrue;
 }
 
 inline
-bool gsIsBESTrue(ATermAppl Term)
+bool gsIsBESTrue(atermpp::aterm_appl Term)
 {
-  return ATgetAFun(Term) == gsAFunBESTrue();
+  return Term.function() == gsAFunBESTrue();
 }
 
 // BESDummy
 inline
-AFun initAFunBESDummy(AFun& f)
+const atermpp::function_symbol &gsAFunBESDummy()
 {
-  f = ATmakeAFun("BESDummy", 0, false);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunBESDummy()
-{
-  static AFun AFunBESDummy = initAFunBESDummy(AFunBESDummy);
+  static const atermpp::function_symbol AFunBESDummy("BESDummy", 0);
   return AFunBESDummy;
 }
 
 inline
-bool gsIsBESDummy(ATermAppl Term)
+bool gsIsBESDummy(atermpp::aterm_appl Term)
 {
-  return ATgetAFun(Term) == gsAFunBESDummy();
+  return Term.function() == gsAFunBESDummy();
 }
 
 inline
-ATermAppl gsMakeBESFalse()
+const atermpp::aterm_appl &gsMakeBESFalse()
 {
-  return ATmakeAppl0(gsAFunBESFalse());
+  static const atermpp::aterm_appl t(gsAFunBESFalse());
+  return t;
 }
 
 inline
-ATermAppl gsMakeBESTrue()
+const atermpp::aterm_appl &gsMakeBESTrue()
 {
-  return ATmakeAppl0(gsAFunBESTrue());
+  static const atermpp::aterm_appl t(gsAFunBESTrue());
+  return t;
 }
 
 inline
-ATermAppl gsMakeBESDummy()
+const atermpp::aterm_appl &gsMakeBESDummy()
 {
-  return ATmakeAppl0(gsAFunBESDummy());
+  static const atermpp::aterm_appl t(gsAFunBESDummy());
+  return t;
 }
 
 /// \brief Returns the expression true
 inline
-bes_expression true_()
+const bes_expression &true_()
 {
-  return bes_expression(gsMakeBESTrue());
+  return atermpp::aterm_cast<const bes_expression>(gsMakeBESTrue());
 }
 
 /// \brief Returns the expression false
 inline
-bes_expression false_()
+const bes_expression &false_()
 {
-  return bes_expression(gsMakeBESFalse());
+  return atermpp::aterm_cast<const bes_expression>(gsMakeBESFalse());
 }
 
 /// \brief Returns the expression dummy (???)
 inline
-bes_expression dummy()
+const bes_expression &dummy()
 {
-  return bes_expression(gsMakeBESDummy());
+  return atermpp::aterm_cast<const bes_expression>(gsMakeBESDummy());
 }
 
-inline bes_expression and_(bes_expression b1,bes_expression b2)
+inline bes_expression and_(const bes_expression &b1, const bes_expression &b2)
 {
-  return bes_expression(
-           ATmakeAppl2(AFunBESAnd(),
-                       (atermpp::aterm)(b1),
-                       (atermpp::aterm)(b2)));
+  return atermpp::aterm_cast<bes_expression>(atermpp::aterm_appl(AFunBESAnd(), b1, b2));
 }
 
-inline bes_expression and_optimized(bes_expression b1,bes_expression b2)
+inline bes_expression and_optimized(const bes_expression &b1, const bes_expression &b2)
 {
   if (b1==true_())
   {
@@ -630,15 +579,12 @@ inline bes_expression and_optimized(bes_expression b1,bes_expression b2)
   return and_(b1,b2);
 }
 
-inline bes_expression or_(bes_expression b1,bes_expression b2)
+inline bes_expression or_(const bes_expression &b1, const bes_expression &b2)
 {
-  return bes_expression(
-           ATmakeAppl2(AFunBESOr(),
-                       (atermpp::aterm)(b1),
-                       (atermpp::aterm)(b2)));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_appl(AFunBESOr(), b1, b2));
 }
 
-inline bes_expression or_optimized(bes_expression b1,bes_expression b2)
+inline bes_expression or_optimized(const bes_expression &b1, const bes_expression &b2)
 {
   if (b1==true_())
   {
@@ -664,21 +610,17 @@ inline bes_expression or_optimized(bes_expression b1,bes_expression b2)
 }
 
 
-inline bool is_variable(bes_expression b)
+inline bool is_variable(const bes_expression &b)
 {
-  return b.type()==AT_INT;
+  return b.type_is_int();
 }
 
-inline bes_expression if_(bes_expression b1,bes_expression b2,bes_expression b3)
+inline bes_expression if_(const bes_expression &b1, const bes_expression &b2, const bes_expression &b3)
 {
-  return bes_expression(
-           ATmakeAppl3(AFunBESIf(),
-                       (atermpp::aterm)(b1),
-                       (atermpp::aterm)(b2),
-                       (atermpp::aterm)(b3)));
+  return atermpp::aterm_cast<bes_expression>(atermpp::aterm_appl(AFunBESIf(), b1, b2,b3));
 }
 
-inline bes_expression ifAUX_(bes_expression b1,bes_expression b2,bes_expression b3)
+inline bes_expression ifAUX_(const bes_expression &b1, const bes_expression &b2, const bes_expression &b3)
 {
   if (b2==b3)
   {
@@ -689,67 +631,70 @@ inline bes_expression ifAUX_(bes_expression b1,bes_expression b2,bes_expression 
 
 inline bes_expression variable(const variable_type& n)
 {
-  return bes_expression((atermpp::aterm)atermpp::aterm_int(static_cast<int>(n)));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_int(n));
 }
 
 inline bool is_false(const bes_expression& b)
 {
-  return b==false_();
+  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESFalse();
 }
 
 inline bool is_true(const bes_expression& b)
 {
-  return b==true_();
+  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESTrue();
 }
 
 inline bool is_dummy(const bes_expression& b)
 {
-  return b==dummy();
+  return atermpp::aterm_cast<const atermpp::aterm_appl>(b).function()==gsAFunBESDummy();
 }
 
 inline bool is_and(const bes_expression& b)
 {
-  return ATgetAFun((_ATerm*)b)==AFunBESAnd();
+  using namespace atermpp;
+  return aterm_cast<const aterm_appl>(b).function()==AFunBESAnd();
 }
 
 inline bool is_or(const bes_expression& b)
 {
-  return ATgetAFun((_ATerm*)b)==AFunBESOr();
+  using namespace atermpp;
+  return aterm_cast<const aterm_appl>(b).function()==AFunBESOr();
 }
 
 inline bool is_if(const bes_expression& b)
 {
-  return ATgetAFun((_ATerm*)b)==AFunBESIf();
+  using namespace atermpp;
+  return aterm_cast<const aterm_appl>(b).function()==AFunBESIf();
 }
 
-inline bes_expression lhs(const bes_expression& b)
+inline const bes_expression &lhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(0));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[0]);
 }
 
-inline bes_expression rhs(const bes_expression& b)
+inline const bes_expression &rhs(const bes_expression& b)
 {
   assert(is_and(b) || is_or(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(1));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[1]);
 }
 
-inline bes_expression condition(const bes_expression& b)
+inline const bes_expression& condition(const bes_expression& b)
 {
   assert(is_if(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(0));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[0]);
 }
 
-inline bes_expression then_branch(const bes_expression& b)
+inline const bes_expression& then_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(1));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[1]);
 }
 
-inline bes_expression else_branch(const bes_expression& b)
+inline const bes_expression& else_branch(const bes_expression& b)
 {
   assert(is_if(b));
-  return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(2));
+  return atermpp::aterm_cast<const bes_expression>(atermpp::aterm_cast<const atermpp::aterm_appl>(b)[2]);
 }
 
 inline variable_type get_variable(const bes_expression& b)
@@ -759,7 +704,7 @@ inline variable_type get_variable(const bes_expression& b)
 }
 
 inline bes_expression substitute_true_false_rec(
-  bes_expression b,
+  const bes_expression &b,
   const variable_type v,
   const bes_expression b_subst,
   atermpp::table& hashtable,
@@ -777,7 +722,7 @@ inline bes_expression substitute_true_false_rec(
   if (bes_global_variables<size_t>::opt_use_hashtables)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result==bes_expression())
     {
       return result;
     }
@@ -912,7 +857,7 @@ inline bes_expression substitute_true_false_rec(
 
 inline
 bes_expression substitute_true_false(
-  bes_expression b,
+  const bes_expression &b,
   const variable_type v,
   const bes_expression b_subst,
   std::deque < counter_example > &counter_example_queue=bes_global_variables<size_t>::COUNTER_EXAMPLE_NULL_QUEUE)
@@ -930,20 +875,20 @@ bes_expression substitute_true_false(
 
   if (bes_global_variables<size_t>::opt_use_hashtables)
   {
-    hashtable1.reset();
+    hashtable1.clear();
   }
   return result;
 }
 
 inline
 bes_expression BDDif_rec(
-  bes_expression b1,
-  bes_expression b2,
-  bes_expression b3,
+  const bes_expression &b1,
+  const bes_expression &b2,
+  const bes_expression &b3,
   atermpp::table& hashtable);
 
 
-inline bes_expression BDDif(bes_expression b1, bes_expression b2, bes_expression b3)
+inline bes_expression BDDif(const bes_expression &b1, const bes_expression &b2, const bes_expression &b3)
 {
 
   static atermpp::table hashtable(100,75);
@@ -953,13 +898,13 @@ inline bes_expression BDDif(bes_expression b1, bes_expression b2, bes_expression
   hashtable_reset_counter++;
   if (hashtable_reset_counter==1000) // resetting of the hashtable is quite expensive.
   {
-    hashtable.reset();
+    hashtable.clear();
     hashtable_reset_counter=0;
   }
   return b;
 }
 
-inline bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expression b3,atermpp::table& hashtable)
+inline bes_expression BDDif_rec(const bes_expression &b1, const bes_expression &b2, const bes_expression &b3,atermpp::table& hashtable)
 {
   /* Assume that b1, b2 and b3 are ordered BDDs. Return an
      ordered BDD */
@@ -994,7 +939,7 @@ inline bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expres
     {
       b1b2b3=if_(b1,b2,b3);
       bes_expression b(hashtable.get(b1b2b3));
-      if (b!=NULL)
+      if (b!=bes_expression())
       {
         return b;
       }
@@ -1025,7 +970,7 @@ inline bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expres
     /* hence not is_false(b3) */
     b1b2b3=if_(b1,b2,b3);
     bes_expression b(hashtable.get(b1b2b3));
-    if (b!=NULL)
+    if (b!=bes_expression())
     {
       return b;
     }
@@ -1147,7 +1092,7 @@ inline bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expres
   return result;
 }
 
-static bes_expression toBDD_rec(bes_expression b1,atermpp::table& hashtable)
+static bes_expression toBDD_rec(const bes_expression &b1,atermpp::table& hashtable)
 {
   if ((b1==true_()) || (b1==false_()))
   {
@@ -1156,7 +1101,7 @@ static bes_expression toBDD_rec(bes_expression b1,atermpp::table& hashtable)
 
   bes_expression result;
   bes_expression b(hashtable.get(b1));
-  if (b!=NULL)
+  if (b!=bes_expression())
   {
     return b;
   }
@@ -1191,7 +1136,7 @@ static bes_expression toBDD_rec(bes_expression b1,atermpp::table& hashtable)
 }
 
 
-inline bes_expression toBDD(bes_expression b)
+inline bes_expression toBDD(const bes_expression &b)
 {
   static atermpp::table hashtable(100,75);
   return toBDD_rec(b,hashtable);
@@ -1215,7 +1160,7 @@ inline bes_expression toBDD(bes_expression b)
 /// in the tool pbes2bool (or pbesinst) where pbes expressions must iteratively be rewritten.
 
 inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
-     mcrl2::pbes_system::pbes_expression p,
+     const mcrl2::pbes_system::pbes_expression &p,
      bool opt_precompile_pbes,
      mcrl2::data::detail::legacy_rewriter& R,
      mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
@@ -1309,6 +1254,56 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
       }
     }
   }
+  else if (is_pbes_imp(p))
+  {
+    // p = implies(left, right)
+    //Rewrite left and right as far as possible
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R,sigma,sigma_internal);
+    if (is_pbes_false(l))
+    {
+      result = pbes_expr::true_();
+    }
+    else
+    {
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R,sigma,sigma_internal);
+      if (is_pbes_true(rt))
+      {
+        result = pbes_expr::true_();
+      }
+      else if (is_pbes_true(l))
+      {
+        result = rt;
+      }
+      else if (is_pbes_false(rt))
+      {
+        result = pbes_expr::not_(l);
+      }
+      else if (l==rt)
+      {
+        result = pbes_expr::true_();
+      }
+      else
+      {
+        result = pbes_expr::imp(l,rt);
+      }
+    }
+  }
+  else if (is_pbes_not(p))
+  {
+    pbes_expression l = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R,sigma,sigma_internal);
+    if (is_pbes_false(l))
+    {
+       result = pbes_expr::true_();
+    }
+    else if (is_pbes_true(l))
+    {
+       result = pbes_expr::false_();
+    }
+    else
+    {
+       result = pbes_expr::not_(l);
+    }
+  }
   else if (is_pbes_forall(p))
   {
     // p = forall(data::data_expression_list, pbes_expression)
@@ -1320,7 +1315,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     {
       if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
-        occurred_data_vars = push_front(occurred_data_vars, *i);
+        occurred_data_vars.push_front(*i);
       }
     }
 
@@ -1345,7 +1340,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     {
       if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
-        occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
+        occurred_data_vars.push_front(*i);
       }
     }
 
@@ -1362,14 +1357,14 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_propositional_variable_instantiation(p))
   {
     // p is a propositional variable
-    propositional_variable_instantiation propvar = p;
+    const propositional_variable_instantiation& propvar = core::static_down_cast<const propositional_variable_instantiation&>(p);
     core::identifier_string name = propvar.name();
     data::data_expression_list parameters;
     data::data_expression_list current_parameters(propvar.parameters());
     for (data::data_expression_list::const_iterator l=current_parameters.begin();
          l != current_parameters.end(); ++l)
     {
-      parameters = atermpp::push_front(parameters,
+      parameters.push_front(
                 ((opt_precompile_pbes?
                        data::data_expression(R.rewrite_internal(R.convert_to(*l),sigma_internal)):
                        R(*l,sigma))));
@@ -1380,11 +1375,12 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   else
   {
     // p is a data::data_expression
+    const data::data_expression& dp = atermpp::aterm_cast<const data::data_expression>(p);
 
     if (opt_precompile_pbes)
     {
-      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
-      result = d;
+      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(dp),sigma_internal);
+      result = core::static_down_cast<const pbes_expression&>(d);
 
       if (convert_data_to_pbes)
       {
@@ -1400,7 +1396,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     }
     else
     {
-      data::data_expression d(R(p,sigma));
+      data::data_expression d(R(dp,sigma));
       result = d;
 
       if (convert_data_to_pbes)
@@ -1437,7 +1433,7 @@ class boolean_equation_system
     // The value 0 for control_info indicates a wrong value.
 
     std::vector<size_t> control_info;
-    atermpp::vector<bes_expression> right_hand_sides;
+    std::vector<bes_expression> right_hand_sides;
     bool variable_occurrences_are_stored;
     std::vector< std::set <variable_type> > variable_occurrence_sets;
     atermpp::indexed_set variable_relevance_indexed_set;
@@ -1499,7 +1495,7 @@ class boolean_equation_system
     void add_equation(variable_type v,
                       mcrl2::pbes_system::fixpoint_symbol sigma,
                       size_t rank,
-                      bes_expression rhs,
+                      const bes_expression &rhs,
                       std::deque <variable_type> &todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
       assert(rank>0);  // rank must be positive.
@@ -1528,7 +1524,7 @@ class boolean_equation_system
     }
 
     inline void set_rhs(variable_type v,
-                        bes_expression b,
+                        const bes_expression &b,
                         variable_type v_except=0,
                         std::deque <variable_type> &todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
@@ -1592,7 +1588,7 @@ class boolean_equation_system
 
     void add_variables_to_occurrence_sets(
       variable_type v,
-      bes_expression b)
+      const bes_expression &b)
     {
       assert(v>0);
       assert(variable_occurrences_are_stored);
@@ -1634,7 +1630,7 @@ class boolean_equation_system
 
     void remove_variables_from_occurrence_sets(
       const variable_type v,
-      bes_expression b,
+      const bes_expression &b,
       const variable_type v_except)
     {
       assert(v>0);
@@ -1709,7 +1705,7 @@ class boolean_equation_system
 
 
     void set_variable_relevance_rec(
-      bes_expression b,
+      const bes_expression &b,
       std::deque <variable_type> &todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
     {
       assert(count_variable_relevance);
@@ -1777,7 +1773,7 @@ class boolean_equation_system
         reset_variable_relevance();
         if (bes_global_variables<size_t>::opt_use_hashtables)
         {
-          variable_relevance_indexed_set.reset();
+          variable_relevance_indexed_set.clear();
         }
         if (&todo!=&bes_global_variables<size_t>::TODO_NULL_QUEUE)
         {
@@ -1859,7 +1855,7 @@ class boolean_equation_system
 
     // The following function indicates whether there is a mu/nu loop.
     bool find_mu_nu_loop_rec(
-      bes_expression b,
+      const bes_expression &b,
       variable_type v,
       size_t rankv, // rank of v may not have been stored yet.
       std::map < variable_type,bool > &visited_variables,
@@ -1942,7 +1938,7 @@ class boolean_equation_system
 
     /* delivers true if a loop from variables in b to v is detected. */
     bool find_mu_loop(
-      bes_expression b,
+      const bes_expression &b,
       variable_type v,
       size_t rankv)
     {
@@ -1952,7 +1948,7 @@ class boolean_equation_system
     }
 
     bool find_nu_loop(
-      bes_expression b,
+      const bes_expression &b,
       variable_type v,
       size_t rankv)
     {
@@ -1966,7 +1962,7 @@ class boolean_equation_system
     //function add_propositional_variable_instantiations_to_indexed_set
     //and translate to pbes expression to a bes_expression in BDD format.
     bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
-      const mcrl2::pbes_system::pbes_expression p,
+      const mcrl2::pbes_system::pbes_expression &p,
       atermpp::indexed_set& variable_index,
       size_t& nr_of_generated_variables,
       const bool to_bdd,
@@ -1977,8 +1973,8 @@ class boolean_equation_system
       using namespace mcrl2::pbes_system;
       if (is_propositional_variable_instantiation(p))
       {
-        std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)?
-                                  mcrl2::pbes_system::pbes_expression(store_as_tree(p)):p);
+        const propositional_variable_instantiation& p1 = mcrl2::core::static_down_cast<const propositional_variable_instantiation&>(p);
+        std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)? store_as_tree(p1) : atermpp::aterm_appl(p1));
 
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
         {
@@ -2102,6 +2098,52 @@ class boolean_equation_system
           return or_(b1,b2);
         }
       }
+      else if (mcrl2::pbes_system::is_imp(p))
+      {
+        bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                            accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,current_variable);
+        if (is_false(b1))
+        {
+          return true_();
+        }
+
+        bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                            accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,current_variable);
+        if (is_true(b2))
+        {
+          return b2;
+        }
+        if (is_true(b1))
+        {
+          return b2;
+        }
+        if (is_false(b2))
+        {
+          return not_(b1);
+        }
+        if (b1==b2)
+        {
+          return true_();
+        }
+
+        if (to_bdd)
+        {
+          return BDDif(b1,b2,true_());
+        }
+        else
+        {
+          return imp(pbes_expression(atermpp::aterm_cast<atermpp::aterm>(b1)), pbes_expression(atermpp::aterm_cast<atermpp::aterm>(b2)));
+        }
+      }
+      else if (mcrl2::pbes_system::is_not(p))
+      {
+        bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                            atermpp::aterm_cast<mcrl2::pbes_system::not_>(p).operand(),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,current_variable);
+        return BDDif(b1,false_(),true_());
+      }
       else if (is_true(p))
       {
         return true_();
@@ -2125,15 +2167,13 @@ class boolean_equation_system
     }
 
     /// \brief Calculate a BES from a given PBES
-    /// \detail
-
+    /// \details
     /// Global variables
     ///  atermpp::indexed_set variable_index(10000, 50);
     ///  bes_equations;
     // template < typename Container, typename PbesRewriter >
-    template < typename Container >
     boolean_equation_system(
-      const typename mcrl2::pbes_system::pbes<Container>& pbes_spec,
+      const mcrl2::pbes_system::pbes& pbes_spec,
       mcrl2::data::rewriter& data_rewriter,
       const transformation_strategy opt_strategy=lazy,
       const bool opt_store_as_tree=false,
@@ -2166,7 +2206,7 @@ class boolean_equation_system
 
       // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
       // This can be removed if the jittyc compiler is not in use anymore.
-      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(pbes_spec);
+      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_all_variables(pbes_spec);
       std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(pbes_spec);
       std::set < mcrl2::data::variable > diff_set;
       std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
@@ -2223,7 +2263,8 @@ class boolean_equation_system
         pbes_expression_rewrite_and_simplify(
           pbes_spec.initial_state(), opt_precompile_pbes, Mucks_rewriter,sigma,sigma_internal);
 
-      variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
+      const propositional_variable_instantiation& p1 = mcrl2::core::static_down_cast<const propositional_variable_instantiation&>(p);
+      variable_index.put((internal_opt_store_as_tree)?store_as_tree(p1):atermpp::aterm_appl(p1));
 
       if (opt_strategy>=on_the_fly)
       {
@@ -2237,12 +2278,12 @@ class boolean_equation_system
       }
 
       // Needed hashtables
-      Container eqsys = pbes_spec.equations();
-      atermpp::table pbes_equations(2*static_cast<int>(eqsys.size()), 50);   // (propvarname, pbes_equation)
+      std::vector<pbes_equation> eqsys = pbes_spec.equations();
+      atermpp::table pbes_equations(2*eqsys.size(), 50);   // (propvarname, pbes_equation)
 
       // Vector with the order of the variable names used for sorting the result
 
-      atermpp::table variable_rank(2*static_cast<int>(eqsys.size()),50);
+      atermpp::table variable_rank(2*eqsys.size(),50);
 
       // Fill the pbes_equations table
       mCRL2log(mcrl2::log::verbose) << "Retrieving pbes_equations from equation system..." << std::endl;
@@ -2252,7 +2293,7 @@ class boolean_equation_system
 
       size_t rank=1;
 
-      for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+      for (auto eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
       {
         pbes_equations.put(
           eqi->variable().name(),
@@ -2272,7 +2313,7 @@ class boolean_equation_system
           current_fixpoint_symbol=eqi->symbol();
           rank=rank+1;
         }
-        variable_rank.put(eqi->variable().name(),atermpp::aterm_int(static_cast<int>(rank)));
+        variable_rank.put(eqi->variable().name(),atermpp::aterm_int(rank));
       }
 
       size_t relevance_counter=0;
@@ -2313,13 +2354,12 @@ class boolean_equation_system
         {
 
           pbes_equation current_pbeq;
-          // atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression_with_variables > sigma;
 
           // Add the required substitutions
           if (internal_opt_store_as_tree)
           {
             // The current variable instantiation is stored as a tree, and this tree must be unfolded.
-            ATerm t=variable_index.get(variable_to_be_processed);
+            atermpp::aterm t=variable_index.get(variable_to_be_processed);
             if (!is_pair(t))
             {
               // Then t is the name of the current_variable_instantiation, and it has
@@ -2331,10 +2371,10 @@ class boolean_equation_system
             else
             {
               // t is a pair, with a name as its left hand side.
-              current_pbeq = pbes_equation(pbes_equations.get(ATgetArgument(t,0)));
+              current_pbeq = pbes_equation(pbes_equations.get(atermpp::aterm_cast<atermpp::aterm_appl>(t)[0]));
               // the right hand side of t are the parameters, in a tree structure.
 
-              t=ATgetArgument(t,1);
+              t=atermpp::aterm_cast<atermpp::aterm_appl>(t)[1];
               variable_list::iterator iter=current_pbeq.variable().parameters().begin();
               assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes,sigma,sigma_internal);
             }
@@ -2409,7 +2449,7 @@ class boolean_equation_system
               data_expression_list resulting_pars;
               for(data_expression_list::const_iterator it=pars.begin(); it!=pars.end(); ++it)
               {
-                resulting_pars=push_front(resulting_pars,Mucks_rewriter.convert_from(*it));
+                resulting_pars.push_front(Mucks_rewriter.convert_from(*it));
               }
               prop_var=propositional_variable_instantiation(prop_var.name(),reverse(resulting_pars));
             }
@@ -2572,20 +2612,20 @@ class boolean_equation_system
   private:
 
     void print_tree_rec(const char c,
-                        ATerm t,
+                        const atermpp::aterm &t,
                         std::ostream& f)
     {
       using namespace mcrl2::data;
       if (is_pair(t))
       {
-        print_tree_rec(c,ATgetArgument(t,0),f);
-        print_tree_rec(',',ATgetArgument(t,1),f);
+        print_tree_rec(c,atermpp::aterm_cast<atermpp::aterm_appl>(t)[0],f);
+        print_tree_rec(',',atermpp::aterm_cast<atermpp::aterm_appl>(t)[1],f);
       }
       else
       {
         if (opt_precompile_pbes)
         {
-          data_expression t1(Mucks_rewriter.convert_from((ATerm)t));
+          data_expression t1(Mucks_rewriter.convert_from(atermpp::aterm_appl(t)));
           f << c << mcrl2::data::pp(t1);
         }
         else
@@ -2604,17 +2644,18 @@ class boolean_equation_system
     {
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
+      using namespace atermpp;
       if (internal_opt_store_as_tree)
       {
-        ATerm t=variable_index.get(current_var);
+        atermpp::aterm t=variable_index.get(current_var);
         if (!is_pair(t))
         {
-          f << ATgetName(ATgetAFun(t));
+          f << aterm_cast<aterm_appl>(t).function().name();
         }
         else
         {
-          f << ATgetName(ATgetAFun(ATgetArgument(t,0)));
-          print_tree_rec('(',ATgetArgument(t,1),f);
+          f << aterm_cast<aterm_appl>(aterm_cast<atermpp::aterm_appl>(t)[0]).function().name();
+          print_tree_rec('(',aterm_cast<atermpp::aterm_appl>(t)[1],f);
           f << ")";
         }
       }
@@ -2625,8 +2666,8 @@ class boolean_equation_system
         data_expression_list tl=X.parameters();
         std::string s=X.name();
         f << s;
-        data_expression_list::iterator t;
-        for (t=tl.begin(); t!=tl.end(); ++t)
+        data_expression_list::iterator t=tl.begin();
+        for (     ; t!=tl.end(); ++t)
         {
           f << ((t==tl.begin())?"(":",");
           if (opt_precompile_pbes)
@@ -2696,45 +2737,19 @@ class boolean_equation_system
 
 } // namespace bes.
 
-namespace atermpp
-{
-template<>
-struct aterm_traits<bes::bes_expression>
-{
-  static void protect(const bes::bes_expression& t)
-  {
-    t.aterm().protect();  // protect the term against garbage collection
-  }
-  static void unprotect(const bes::bes_expression& t)
-  {
-    t.aterm().unprotect();  // undo the protection against garbage collection
-  }
-  static void mark(const bes::bes_expression& t)
-  {
-    t.aterm().mark();  // mark the term for not being garbage collected
-  }
-  // when it is inside a protected container
-  static ATerm term(const bes::bes_expression& t)
-  {
-    return t.term();  // return the ATerm corresponding to t
-  }
-};
-} // namespace atermpp
-
 
 namespace bes
 {
 
-template <class Container>
 inline void save_bes_in_pbes_format(
   const std::string& outfilename,
   boolean_equation_system& bes_equations,
-  const typename mcrl2::pbes_system::pbes<Container> &p);
+  const mcrl2::pbes_system::pbes &p);
 inline void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations);
 
 //function generate_rhs_as_bes_formula
 //---------------------------
-static mcrl2::bes::boolean_expression generate_rhs_as_bes_formula(bes_expression b)
+static mcrl2::bes::boolean_expression generate_rhs_as_bes_formula(const bes_expression &b)
 {
   using namespace mcrl2::pbes_system;
   if (is_true(b))
@@ -2775,14 +2790,14 @@ static mcrl2::bes::boolean_expression generate_rhs_as_bes_formula(bes_expression
 }
 
 inline
-mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& bes_equations)
+mcrl2::bes::boolean_equation_system convert_to_bes(boolean_equation_system& bes_equations)
 {
   using namespace mcrl2::pbes_system;
   using namespace mcrl2::bes;
   mCRL2log(mcrl2::log::verbose) << "Converting result to BES-format..." << std::endl;
   // Use an indexed set to keep track of the variables and their bes-representations
 
-  atermpp::vector < boolean_equation > eqns;
+  std::vector < boolean_equation > eqns;
   for (size_t r=1 ; r<=bes_equations.max_rank ; ++r)
   {
     for (size_t i=1; i<=bes_equations.nr_of_variables() ; ++i)
@@ -2801,7 +2816,7 @@ mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& be
     }
   }
 
-  mcrl2::bes::boolean_equation_system<> result(eqns,
+  mcrl2::bes::boolean_equation_system result(eqns,
       boolean_variable("X1"));
 
   return result;
@@ -2811,9 +2826,9 @@ mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& be
 
 /* substitute boolean equation expression */
 static bes_expression substitute_rank(
-  bes_expression b,
+  const bes_expression &b,
   const size_t current_rank,
-  const atermpp::vector<bes_expression> &approximation,
+  const std::vector<bes_expression> &approximation,
   bes::boolean_equation_system& bes_equations,
   const bool use_hashtable,
   atermpp::table& hashtable,
@@ -2832,7 +2847,7 @@ static bes_expression substitute_rank(
   if (use_hashtable)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result!=bes_expression())
     {
       return result;
     }
@@ -3001,8 +3016,8 @@ static bes_expression substitute_rank(
 /* substitute boolean equation expression */
 
 static bes_expression evaluate_bex(
-  bes_expression b,
-  const atermpp::vector<bes_expression> &approximation,
+  const bes_expression &b,
+  const std::vector<bes_expression> &approximation,
   const size_t rank,
   bes::boolean_equation_system& bes_equations,
   const bool use_hashtable,
@@ -3023,7 +3038,7 @@ static bes_expression evaluate_bex(
   if (use_hashtable)
   {
     result=hashtable.get(b);
-    if (result!=NULL)
+    if (result!=bes_expression())
     {
       return result;
     }
@@ -3174,7 +3189,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   mCRL2log(mcrl2::log::verbose) << "Solving a BES with " << bes_equations.nr_of_variables() <<
               " equations." << std::endl;
 
-  atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
+  std::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
   atermpp::table bex_hashtable(10,5);
 
@@ -3232,14 +3247,14 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
         {
           if (opt_use_hashtables)
           {
-            bex_hashtable.reset();  /* we change the approximation, so the
+            bex_hashtable.clear();  /* we change the approximation, so the
                                        hashtable becomes invalid */
           }
           if (opt_construct_counter_example)
           {
             if (opt_use_hashtables)
             {
-              bex_hashtable.reset();  /* We want to construct a counter example, which is
+              bex_hashtable.clear();  /* We want to construct a counter example, which is
                                          not traceable when results in the hashtable are used */
             }
             approximation[v]=evaluate_bex(
@@ -3288,14 +3303,14 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
           {
             if (opt_use_hashtables)
             {
-              bex_hashtable.reset();  /* we change approximation, so the
+              bex_hashtable.clear();  /* we change approximation, so the
                                          hashtable becomes invalid */
             }
             if (opt_construct_counter_example)
             {
               if (opt_use_hashtables)
               {
-                bex_hashtable.reset();  /* We want to construct a counter example, which is
+                bex_hashtable.clear();  /* We want to construct a counter example, which is
                                            not traceable when results in the hashtable are used */
               }
               approximation[*u]=evaluate_bex(
@@ -3324,7 +3339,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
 
     if (opt_use_hashtables)
     {
-      bex_hashtable.reset();
+      bex_hashtable.clear();
     }
 
     for (bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
@@ -3368,7 +3383,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
     }
     if (opt_use_hashtables)
     {
-      bex_hashtable.reset();
+      bex_hashtable.clear();
     }
 
   }

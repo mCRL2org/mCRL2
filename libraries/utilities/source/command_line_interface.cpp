@@ -20,10 +20,6 @@
 #include <string>
 #include <iterator>
 
-#if !defined(MCRL2_DISABLE_BOOST_REGEX)
-#include <boost/regex.hpp>
-#endif
-
 #include <fstream>
 #include <iostream>
 
@@ -860,7 +856,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
         }
         catch (std::runtime_error&)   // parse error
         {
-          if (argument.substr(1, 3) == "at-")   // does not match option pattern for ATerm library
+          if (argument.substr(1, 3) == "at-")   // does not match option pattern for aterm library
           {
             continue;
           }

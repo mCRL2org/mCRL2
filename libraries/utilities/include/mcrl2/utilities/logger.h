@@ -112,8 +112,6 @@ log_level_t log_level_from_string(const std::string& s)
 }
 
 
-/// \prototype
-//std::string now_time();
 std::string format_time(const time_t* timestamp);
 
 /// \brief Interface class for output policy.
@@ -133,12 +131,13 @@ class output_policy
     /// \brief Output message.
     /// \param[in] msg Message that is written to output.
     /// \param[in] hint Hint for the stream to which the output is written.
+    /// \param[in] timestamp Timestamp to use in the output.
+    /// \param[in] level The log level to print the message to.
     ///  \details Any implementation must assure that output is written using an atomic action, to prevent
     /// mixing of different lines into one line in the output.
     virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg) = 0;
 };
 
-/// \prototype
 std::set<output_policy*> initialise_output_policies();
 
 /// \brief Class for logging messages
@@ -423,9 +422,12 @@ class file_output: public output_policy
 
     /// \overload
     /// Output message to stream.
+    /// \param[in] level The log level on which to output the message
+    /// \param[in] timestamp The timestamp to use for the message
     /// \param[in] msg The message to be printed
     /// \param[in] hint The hint of the stream to which we print.
-    /// This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
+    ///
+    /// \note This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.
     virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
     {
@@ -438,74 +440,6 @@ class file_output: public output_policy
       fprintf(p_stream, "%s", formatter::format(level, hint, timestamp, msg).c_str());
       fflush(p_stream);
     }
-};
-
-/// \brief Output policy that wraps a function pointer to do the actual output
-///
-/// \deprecated Instead of using this output policy, use a custom class
-/// inheriting from output_policy.
-template<typename Formatter>
-class function_pointer_output: public output_policy
-{
-
-public:
-  /// \brief Type for message distinction (by purpose).
-  /// Should only be used for custom message handlers.
-  enum message_t
-  {
-    msg_notice,
-    msg_warning,
-    msg_error
-  };
-
-  /// \brief Type for function pointer for a custom message printing routine
-  /// \deprecated
-  /// provided for backward compatibility with gs*Msg
-  typedef void (*custom_message_handler_t)(message_t, const char*);
-
-  /// \brief Pointer that contains a custom message handler.
-  custom_message_handler_t m_handler;
-
-  /// \brief Formatting
-  formatter_interface m_formatter;
-
-protected:
-  /// \brief Conversion of log level to message type
-  message_t to_message_type(const log_level_t level) const
-  {
-    if (level <= error)
-    {
-      return msg_error;
-    }
-    else if (level <= warning)
-    {
-      return msg_warning;
-    }
-    else
-    {
-      return msg_notice;
-    }
-  }
-
-public:
-
-  function_pointer_output()
-    : m_handler(NULL)
-  {}
-
-  function_pointer_output(custom_message_handler_t handler)
-    : m_handler(handler)
-  {}
-
-  void set_custom_message_handler(custom_message_handler_t handler)
-  {
-    m_handler = handler;
-  }
-
-  virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
-  {
-    m_handler(to_message_type(level), Formatter::format(level, hint, timestamp, msg).c_str());
-  }
 };
 
 /// \brief The default output policy used by the logger

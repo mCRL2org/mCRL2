@@ -23,18 +23,13 @@ add_definitions(
   -Dstrncasecmp=_strnicmp
   -Dsnprintf=_snprintf
 )
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
-else(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-   # The following is more accurate, but currently does not do the job
-  #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-sign-compare -Wno-unused-parameter -Wno-long-long -Wno-format")
 endif(MSVC)
 
 # ######### General setup ##########
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 # actual target:
-add_library(dparser
+add_library(dparser STATIC
   arg.c
   parse.c
   scan.c
@@ -59,4 +54,6 @@ target_link_libraries(make_dparser
   dparser
 )
 
-install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
+# No need to install; library is statically linked into the libraries
+# that need it...
+#install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

@@ -12,12 +12,12 @@
 #ifndef MCRL2_UTILITIES_TEST_UTILITIES_H
 #define MCRL2_UTILITIES_TEST_UTILITIES_H
 
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <vector>
 #include <cctype>
 #include <fstream>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewrite_strategy.h"
 
 namespace mcrl2
@@ -32,7 +32,7 @@ struct collect_after_test_case
 {
   ~collect_after_test_case()
   {
-    core::garbage_collect();
+    // core::garbage_collect();
   }
 };
 
@@ -75,7 +75,10 @@ char rand_alnum()
   do
   {
     c = static_cast<char>(std::rand());
-  } while(!std::isalnum(c));
+  } while(!std::isalnum(static_cast<unsigned char>(c)));
+  // The cast to unsigned char, above here, is to ensure that the value passed
+  // to isalnum is between 0 and 255, which is required by std::isalnum.
+  // MSVC checks for these bounds in debug mode.
   return c;
 
 }
@@ -86,10 +89,11 @@ std::string rand_alnum_str(const std::string::size_type n)
 {
   std::string s;
   s.reserve(n);
-  generate_n(std::back_inserter(s), n, rand_alnum);
+  std::generate_n(std::back_inserter(s), n, rand_alnum);
   return s;
 }
 
+inline
 bool file_exists(const char *filename)
 {
   std::ifstream ifile(filename);
@@ -98,6 +102,7 @@ bool file_exists(const char *filename)
 
 /// \brief Get filename with random suffix
 /// \warning is prone to race conditions
+inline
 std::string temporary_filename(std::string const& prefix = "")
 {
   std::string basename(prefix + "_" + rand_alnum_str(8));

@@ -15,6 +15,7 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
@@ -34,6 +35,7 @@ namespace process
 
 // Make some LPS types visible. These should become part of the process library.
 using lps::action;
+using lps::action_name_set;
 using lps::multi_action;
 using lps::multi_action_name;
 using lps::multi_action_name_set;
@@ -53,27 +55,76 @@ class process_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    process_expression(const atermpp::aterm_appl& term)
+    explicit process_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_ProcExpr(m_term));
+      assert(core::detail::check_rule_ProcExpr(*this));
     }
+
+    /// \brief Constructor.
+    process_expression(const lps::action& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of process_expressions
 typedef atermpp::term_list<process_expression> process_expression_list;
 
 /// \brief vector of process_expressions
-typedef atermpp::vector<process_expression>    process_expression_vector;
+typedef std::vector<process_expression>    process_expression_vector;
 
+
+// prototypes
+inline bool is_process_instance(const atermpp::aterm_appl& x);
+inline bool is_process_instance_assignment(const atermpp::aterm_appl& x);
+inline bool is_delta(const atermpp::aterm_appl& x);
+inline bool is_tau(const atermpp::aterm_appl& x);
+inline bool is_sum(const atermpp::aterm_appl& x);
+inline bool is_block(const atermpp::aterm_appl& x);
+inline bool is_hide(const atermpp::aterm_appl& x);
+inline bool is_rename(const atermpp::aterm_appl& x);
+inline bool is_comm(const atermpp::aterm_appl& x);
+inline bool is_allow(const atermpp::aterm_appl& x);
+inline bool is_sync(const atermpp::aterm_appl& x);
+inline bool is_at(const atermpp::aterm_appl& x);
+inline bool is_seq(const atermpp::aterm_appl& x);
+inline bool is_if_then(const atermpp::aterm_appl& x);
+inline bool is_if_then_else(const atermpp::aterm_appl& x);
+inline bool is_bounded_init(const atermpp::aterm_appl& x);
+inline bool is_merge(const atermpp::aterm_appl& x);
+inline bool is_left_merge(const atermpp::aterm_appl& x);
+inline bool is_choice(const atermpp::aterm_appl& x);
+inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
+inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 
 /// \brief Test for a process_expression expression
-/// \param t A term
-/// \return True if it is a process_expression expression
+/// \param x A term
+/// \return True if \a x is a process_expression expression
 inline
-bool is_process_expression(const atermpp::aterm_appl& t)
+bool is_process_expression(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcExpr(t);
+  return process::is_process_instance(x) ||
+         process::is_process_instance_assignment(x) ||
+         process::is_delta(x) ||
+         process::is_tau(x) ||
+         process::is_sum(x) ||
+         process::is_block(x) ||
+         process::is_hide(x) ||
+         process::is_rename(x) ||
+         process::is_comm(x) ||
+         process::is_allow(x) ||
+         process::is_sync(x) ||
+         process::is_at(x) ||
+         process::is_seq(x) ||
+         process::is_if_then(x) ||
+         process::is_if_then_else(x) ||
+         process::is_bounded_init(x) ||
+         process::is_merge(x) ||
+         process::is_left_merge(x) ||
+         process::is_choice(x) ||
+         process::is_untyped_parameter_identifier(x) ||
+         process::is_untyped_process_assignment(x) ||
+         lps::is_action(x);
 }
 
 
@@ -88,10 +139,10 @@ class process_instance: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    process_instance(const atermpp::aterm_appl& term)
+    explicit process_instance(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Process(m_term));
+      assert(core::detail::check_term_Process(*this));
     }
 
     /// \brief Constructor.
@@ -99,24 +150,24 @@ class process_instance: public process_expression
       : process_expression(core::detail::gsMakeProcess(identifier, actual_parameters))
     {}
 
-    process_identifier identifier() const
+    const process_identifier& identifier() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_identifier>(atermpp::arg1(*this));
     }
 
-    data::data_expression_list actual_parameters() const
+    const data::data_expression_list& actual_parameters() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
     }
 };
 
 /// \brief Test for a process_instance expression
-/// \param t A term
-/// \return True if it is a process_instance expression
+/// \param x A term
+/// \return True if \a x is a process_instance expression
 inline
-bool is_process_instance(const process_expression& t)
+bool is_process_instance(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcess(t);
+  return core::detail::gsIsProcess(x);
 }
 
 
@@ -131,10 +182,10 @@ class process_instance_assignment: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    process_instance_assignment(const atermpp::aterm_appl& term)
+    explicit process_instance_assignment(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_ProcessAssignment(m_term));
+      assert(core::detail::check_term_ProcessAssignment(*this));
     }
 
     /// \brief Constructor.
@@ -142,24 +193,24 @@ class process_instance_assignment: public process_expression
       : process_expression(core::detail::gsMakeProcessAssignment(identifier, assignments))
     {}
 
-    process_identifier identifier() const
+    const process_identifier& identifier() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_identifier>(atermpp::arg1(*this));
     }
 
-    data::assignment_list assignments() const
+    const data::assignment_list& assignments() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const data::assignment_list>(atermpp::list_arg2(*this));
     }
 };
 
 /// \brief Test for a process_instance_assignment expression
-/// \param t A term
-/// \return True if it is a process_instance_assignment expression
+/// \param x A term
+/// \return True if \a x is a process_instance_assignment expression
 inline
-bool is_process_instance_assignment(const process_expression& t)
+bool is_process_instance_assignment(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcessAssignment(t);
+  return core::detail::gsIsProcessAssignment(x);
 }
 
 
@@ -174,20 +225,20 @@ class delta: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    delta(const atermpp::aterm_appl& term)
+    explicit delta(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Delta(m_term));
+      assert(core::detail::check_term_Delta(*this));
     }
 };
 
 /// \brief Test for a delta expression
-/// \param t A term
-/// \return True if it is a delta expression
+/// \param x A term
+/// \return True if \a x is a delta expression
 inline
-bool is_delta(const process_expression& t)
+bool is_delta(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsDelta(t);
+  return core::detail::gsIsDelta(x);
 }
 
 
@@ -202,20 +253,20 @@ class tau: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    tau(const atermpp::aterm_appl& term)
+    explicit tau(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Tau(m_term));
+      assert(core::detail::check_term_Tau(*this));
     }
 };
 
 /// \brief Test for a tau expression
-/// \param t A term
-/// \return True if it is a tau expression
+/// \param x A term
+/// \return True if \a x is a tau expression
 inline
-bool is_tau(const process_expression& t)
+bool is_tau(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsTau(t);
+  return core::detail::gsIsTau(x);
 }
 
 
@@ -230,10 +281,10 @@ class sum: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    sum(const atermpp::aterm_appl& term)
+    explicit sum(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Sum(m_term));
+      assert(core::detail::check_term_Sum(*this));
     }
 
     /// \brief Constructor.
@@ -241,24 +292,24 @@ class sum: public process_expression
       : process_expression(core::detail::gsMakeSum(bound_variables, operand))
     {}
 
-    data::variable_list bound_variables() const
+    const data::variable_list& bound_variables() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
     }
 
-    process_expression operand() const
+    const process_expression& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a sum expression
-/// \param t A term
-/// \return True if it is a sum expression
+/// \param x A term
+/// \return True if \a x is a sum expression
 inline
-bool is_sum(const process_expression& t)
+bool is_sum(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSum(t);
+  return core::detail::gsIsSum(x);
 }
 
 
@@ -273,10 +324,10 @@ class block: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    block(const atermpp::aterm_appl& term)
+    explicit block(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Block(m_term));
+      assert(core::detail::check_term_Block(*this));
     }
 
     /// \brief Constructor.
@@ -284,24 +335,24 @@ class block: public process_expression
       : process_expression(core::detail::gsMakeBlock(block_set, operand))
     {}
 
-    core::identifier_string_list block_set() const
+    const core::identifier_string_list& block_set() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string_list>(atermpp::list_arg1(*this));
     }
 
-    process_expression operand() const
+    const process_expression& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a block expression
-/// \param t A term
-/// \return True if it is a block expression
+/// \param x A term
+/// \return True if \a x is a block expression
 inline
-bool is_block(const process_expression& t)
+bool is_block(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBlock(t);
+  return core::detail::gsIsBlock(x);
 }
 
 
@@ -316,10 +367,10 @@ class hide: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    hide(const atermpp::aterm_appl& term)
+    explicit hide(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Hide(m_term));
+      assert(core::detail::check_term_Hide(*this));
     }
 
     /// \brief Constructor.
@@ -327,24 +378,24 @@ class hide: public process_expression
       : process_expression(core::detail::gsMakeHide(hide_set, operand))
     {}
 
-    core::identifier_string_list hide_set() const
+    const core::identifier_string_list& hide_set() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string_list>(atermpp::list_arg1(*this));
     }
 
-    process_expression operand() const
+    const process_expression& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a hide expression
-/// \param t A term
-/// \return True if it is a hide expression
+/// \param x A term
+/// \return True if \a x is a hide expression
 inline
-bool is_hide(const process_expression& t)
+bool is_hide(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsHide(t);
+  return core::detail::gsIsHide(x);
 }
 
 
@@ -359,10 +410,10 @@ class rename: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    rename(const atermpp::aterm_appl& term)
+    explicit rename(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Rename(m_term));
+      assert(core::detail::check_term_Rename(*this));
     }
 
     /// \brief Constructor.
@@ -370,24 +421,24 @@ class rename: public process_expression
       : process_expression(core::detail::gsMakeRename(rename_set, operand))
     {}
 
-    rename_expression_list rename_set() const
+    const rename_expression_list& rename_set() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const rename_expression_list>(atermpp::list_arg1(*this));
     }
 
-    process_expression operand() const
+    const process_expression& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a rename expression
-/// \param t A term
-/// \return True if it is a rename expression
+/// \param x A term
+/// \return True if \a x is a rename expression
 inline
-bool is_rename(const process_expression& t)
+bool is_rename(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsRename(t);
+  return core::detail::gsIsRename(x);
 }
 
 
@@ -402,10 +453,10 @@ class comm: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    comm(const atermpp::aterm_appl& term)
+    explicit comm(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Comm(m_term));
+      assert(core::detail::check_term_Comm(*this));
     }
 
     /// \brief Constructor.
@@ -413,24 +464,24 @@ class comm: public process_expression
       : process_expression(core::detail::gsMakeComm(comm_set, operand))
     {}
 
-    communication_expression_list comm_set() const
+    const communication_expression_list& comm_set() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const communication_expression_list>(atermpp::list_arg1(*this));
     }
 
-    process_expression operand() const
+    const process_expression& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a comm expression
-/// \param t A term
-/// \return True if it is a comm expression
+/// \param x A term
+/// \return True if \a x is a comm expression
 inline
-bool is_comm(const process_expression& t)
+bool is_comm(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsComm(t);
+  return core::detail::gsIsComm(x);
 }
 
 
@@ -445,10 +496,10 @@ class allow: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    allow(const atermpp::aterm_appl& term)
+    explicit allow(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Allow(m_term));
+      assert(core::detail::check_term_Allow(*this));
     }
 
     /// \brief Constructor.
@@ -456,24 +507,24 @@ class allow: public process_expression
       : process_expression(core::detail::gsMakeAllow(allow_set, operand))
     {}
 
-    action_name_multiset_list allow_set() const
+    const action_name_multiset_list& allow_set() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::aterm_cast<const action_name_multiset_list>(atermpp::list_arg1(*this));
     }
 
-    process_expression operand() const
+    const process_expression& operand() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a allow expression
-/// \param t A term
-/// \return True if it is a allow expression
+/// \param x A term
+/// \return True if \a x is a allow expression
 inline
-bool is_allow(const process_expression& t)
+bool is_allow(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAllow(t);
+  return core::detail::gsIsAllow(x);
 }
 
 
@@ -488,10 +539,10 @@ class sync: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    sync(const atermpp::aterm_appl& term)
+    explicit sync(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Sync(m_term));
+      assert(core::detail::check_term_Sync(*this));
     }
 
     /// \brief Constructor.
@@ -499,24 +550,24 @@ class sync: public process_expression
       : process_expression(core::detail::gsMakeSync(left, right))
     {}
 
-    process_expression left() const
+    const process_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
     }
 
-    process_expression right() const
+    const process_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a sync expression
-/// \param t A term
-/// \return True if it is a sync expression
+/// \param x A term
+/// \return True if \a x is a sync expression
 inline
-bool is_sync(const process_expression& t)
+bool is_sync(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSync(t);
+  return core::detail::gsIsSync(x);
 }
 
 
@@ -531,10 +582,10 @@ class at: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    at(const atermpp::aterm_appl& term)
+    explicit at(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_AtTime(m_term));
+      assert(core::detail::check_term_AtTime(*this));
     }
 
     /// \brief Constructor.
@@ -542,24 +593,24 @@ class at: public process_expression
       : process_expression(core::detail::gsMakeAtTime(operand, time_stamp))
     {}
 
-    process_expression operand() const
+    const process_expression& operand() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
     }
 
-    data::data_expression time_stamp() const
+    const data::data_expression& time_stamp() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a at expression
-/// \param t A term
-/// \return True if it is a at expression
+/// \param x A term
+/// \return True if \a x is a at expression
 inline
-bool is_at(const process_expression& t)
+bool is_at(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAtTime(t);
+  return core::detail::gsIsAtTime(x);
 }
 
 
@@ -574,10 +625,10 @@ class seq: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    seq(const atermpp::aterm_appl& term)
+    explicit seq(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Seq(m_term));
+      assert(core::detail::check_term_Seq(*this));
     }
 
     /// \brief Constructor.
@@ -585,24 +636,24 @@ class seq: public process_expression
       : process_expression(core::detail::gsMakeSeq(left, right))
     {}
 
-    process_expression left() const
+    const process_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
     }
 
-    process_expression right() const
+    const process_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a seq expression
-/// \param t A term
-/// \return True if it is a seq expression
+/// \param x A term
+/// \return True if \a x is a seq expression
 inline
-bool is_seq(const process_expression& t)
+bool is_seq(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsSeq(t);
+  return core::detail::gsIsSeq(x);
 }
 
 
@@ -617,10 +668,10 @@ class if_then: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    if_then(const atermpp::aterm_appl& term)
+    explicit if_then(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_IfThen(m_term));
+      assert(core::detail::check_term_IfThen(*this));
     }
 
     /// \brief Constructor.
@@ -628,24 +679,24 @@ class if_then: public process_expression
       : process_expression(core::detail::gsMakeIfThen(condition, then_case))
     {}
 
-    data::data_expression condition() const
+    const data::data_expression& condition() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
     }
 
-    process_expression then_case() const
+    const process_expression& then_case() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a if_then expression
-/// \param t A term
-/// \return True if it is a if_then expression
+/// \param x A term
+/// \return True if \a x is a if_then expression
 inline
-bool is_if_then(const process_expression& t)
+bool is_if_then(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThen(t);
+  return core::detail::gsIsIfThen(x);
 }
 
 
@@ -660,10 +711,10 @@ class if_then_else: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    if_then_else(const atermpp::aterm_appl& term)
+    explicit if_then_else(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_IfThenElse(m_term));
+      assert(core::detail::check_term_IfThenElse(*this));
     }
 
     /// \brief Constructor.
@@ -671,29 +722,29 @@ class if_then_else: public process_expression
       : process_expression(core::detail::gsMakeIfThenElse(condition, then_case, else_case))
     {}
 
-    data::data_expression condition() const
+    const data::data_expression& condition() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg1(*this));
     }
 
-    process_expression then_case() const
+    const process_expression& then_case() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 
-    process_expression else_case() const
+    const process_expression& else_case() const
     {
-      return atermpp::arg3(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg3(*this));
     }
 };
 
 /// \brief Test for a if_then_else expression
-/// \param t A term
-/// \return True if it is a if_then_else expression
+/// \param x A term
+/// \return True if \a x is a if_then_else expression
 inline
-bool is_if_then_else(const process_expression& t)
+bool is_if_then_else(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsIfThenElse(t);
+  return core::detail::gsIsIfThenElse(x);
 }
 
 
@@ -708,10 +759,10 @@ class bounded_init: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    bounded_init(const atermpp::aterm_appl& term)
+    explicit bounded_init(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_BInit(m_term));
+      assert(core::detail::check_term_BInit(*this));
     }
 
     /// \brief Constructor.
@@ -719,24 +770,24 @@ class bounded_init: public process_expression
       : process_expression(core::detail::gsMakeBInit(left, right))
     {}
 
-    process_expression left() const
+    const process_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
     }
 
-    process_expression right() const
+    const process_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a bounded_init expression
-/// \param t A term
-/// \return True if it is a bounded_init expression
+/// \param x A term
+/// \return True if \a x is a bounded_init expression
 inline
-bool is_bounded_init(const process_expression& t)
+bool is_bounded_init(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsBInit(t);
+  return core::detail::gsIsBInit(x);
 }
 
 
@@ -751,10 +802,10 @@ class merge: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    merge(const atermpp::aterm_appl& term)
+    explicit merge(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Merge(m_term));
+      assert(core::detail::check_term_Merge(*this));
     }
 
     /// \brief Constructor.
@@ -762,24 +813,24 @@ class merge: public process_expression
       : process_expression(core::detail::gsMakeMerge(left, right))
     {}
 
-    process_expression left() const
+    const process_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
     }
 
-    process_expression right() const
+    const process_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a merge expression
-/// \param t A term
-/// \return True if it is a merge expression
+/// \param x A term
+/// \return True if \a x is a merge expression
 inline
-bool is_merge(const process_expression& t)
+bool is_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsMerge(t);
+  return core::detail::gsIsMerge(x);
 }
 
 
@@ -794,10 +845,10 @@ class left_merge: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    left_merge(const atermpp::aterm_appl& term)
+    explicit left_merge(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_LMerge(m_term));
+      assert(core::detail::check_term_LMerge(*this));
     }
 
     /// \brief Constructor.
@@ -805,24 +856,24 @@ class left_merge: public process_expression
       : process_expression(core::detail::gsMakeLMerge(left, right))
     {}
 
-    process_expression left() const
+    const process_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
     }
 
-    process_expression right() const
+    const process_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a left_merge expression
-/// \param t A term
-/// \return True if it is a left_merge expression
+/// \param x A term
+/// \return True if \a x is a left_merge expression
 inline
-bool is_left_merge(const process_expression& t)
+bool is_left_merge(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsLMerge(t);
+  return core::detail::gsIsLMerge(x);
 }
 
 
@@ -837,10 +888,10 @@ class choice: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    choice(const atermpp::aterm_appl& term)
+    explicit choice(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_Choice(m_term));
+      assert(core::detail::check_term_Choice(*this));
     }
 
     /// \brief Constructor.
@@ -848,24 +899,120 @@ class choice: public process_expression
       : process_expression(core::detail::gsMakeChoice(left, right))
     {}
 
-    process_expression left() const
+    const process_expression& left() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg1(*this));
     }
 
-    process_expression right() const
+    const process_expression& right() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const process_expression>(atermpp::arg2(*this));
     }
 };
 
 /// \brief Test for a choice expression
-/// \param t A term
-/// \return True if it is a choice expression
+/// \param x A term
+/// \return True if \a x is a choice expression
 inline
-bool is_choice(const process_expression& t)
+bool is_choice(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsChoice(t);
+  return core::detail::gsIsChoice(x);
+}
+
+
+/// \brief An untyped parameter identifier
+class untyped_parameter_identifier: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    untyped_parameter_identifier()
+      : process_expression(core::detail::constructUntypedParamId())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit untyped_parameter_identifier(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_UntypedParamId(*this));
+    }
+
+    /// \brief Constructor.
+    untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
+      : process_expression(core::detail::gsMakeUntypedParamId(name, arguments))
+    {}
+
+    /// \brief Constructor.
+    untyped_parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
+      : process_expression(core::detail::gsMakeUntypedParamId(core::identifier_string(name), arguments))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+    }
+
+    const data::data_expression_list& arguments() const
+    {
+      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
+    }
+};
+
+/// \brief Test for a untyped_parameter_identifier expression
+/// \param x A term
+/// \return True if \a x is a untyped_parameter_identifier expression
+inline
+bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
+{
+  return core::detail::gsIsUntypedParamId(x);
+}
+
+
+/// \brief An untyped process assginment
+class untyped_process_assignment: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    untyped_process_assignment()
+      : process_expression(core::detail::constructUntypedProcessAssignment())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit untyped_process_assignment(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_UntypedProcessAssignment(*this));
+    }
+
+    /// \brief Constructor.
+    untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
+      : process_expression(core::detail::gsMakeUntypedProcessAssignment(name, assignments))
+    {}
+
+    /// \brief Constructor.
+    untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
+      : process_expression(core::detail::gsMakeUntypedProcessAssignment(core::identifier_string(name), assignments))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+    }
+
+    const data::untyped_identifier_assignment_list& assignments() const
+    {
+      return atermpp::aterm_cast<const data::untyped_identifier_assignment_list>(atermpp::list_arg2(*this));
+    }
+};
+
+/// \brief Test for a untyped_process_assignment expression
+/// \param x A term
+/// \return True if \a x is a untyped_process_assignment expression
+inline
+bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
+{
+  return core::detail::gsIsUntypedProcessAssignment(x);
 }
 
 //--- end generated classes ---//
@@ -927,6 +1074,27 @@ inline int precedence(const seq& x)          { return precedence(static_cast<con
 inline int precedence(const at& x)           { return precedence(static_cast<const process_expression&>(x)); }
 inline int precedence(const sync& x)         { return precedence(static_cast<const process_expression&>(x)); }
 
+inline const process_expression& unary_operand(const sum& x)         { return x.operand(); }
+inline const process_expression& unary_operand(const block& x)       { return x.operand(); }
+inline const process_expression& unary_operand(const hide& x)        { return x.operand(); }
+inline const process_expression& unary_operand(const rename& x)      { return x.operand(); }
+inline const process_expression& unary_operand(const comm& x)        { return x.operand(); }
+inline const process_expression& unary_operand(const allow& x)       { return x.operand(); }
+inline const process_expression& unary_operand(const at& x)          { return x.operand(); }
+
+inline const process_expression& binary_left(const sync& x)          { return x.left(); }
+inline const process_expression& binary_right(const sync& x)         { return x.right(); }
+inline const process_expression& binary_left(const seq& x)           { return x.left(); }
+inline const process_expression& binary_right(const seq& x)          { return x.right(); }
+inline const process_expression& binary_left(const bounded_init& x)  { return x.left(); }
+inline const process_expression& binary_right(const bounded_init& x) { return x.right(); }
+inline const process_expression& binary_left(const choice& x)        { return x.left(); }
+inline const process_expression& binary_right(const choice& x)       { return x.right(); }
+inline const process_expression& binary_left(const merge& x)         { return x.left(); }
+inline const process_expression& binary_right(const merge& x)        { return x.right(); }
+inline const process_expression& binary_left(const left_merge& x)    { return x.left(); }
+inline const process_expression& binary_right(const left_merge& x)   { return x.right(); }
+
 // template function overloads
 std::string pp(const process_expression& x);
 std::string pp(const process_expression_list& x);
@@ -950,14 +1118,140 @@ std::string pp(const bounded_init& x);
 std::string pp(const merge& x);
 std::string pp(const left_merge& x);
 std::string pp(const choice& x);
+std::string pp(const process::untyped_process_assignment& x);
+std::string pp(const process::untyped_parameter_identifier& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 
-// TODO: These should be removed when the ATerm code has been replaced.
+// TODO: These should be removed when the aterm code has been replaced.
 std::string pp(const atermpp::aterm& x);
 std::string pp(const atermpp::aterm_appl& x);
 
 } // namespace process
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::process::process_expression& t1, mcrl2::process::process_expression& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::process_instance& t1, mcrl2::process::process_instance& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::process_instance_assignment& t1, mcrl2::process::process_instance_assignment& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::delta& t1, mcrl2::process::delta& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::tau& t1, mcrl2::process::tau& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::sum& t1, mcrl2::process::sum& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::block& t1, mcrl2::process::block& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::hide& t1, mcrl2::process::hide& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::rename& t1, mcrl2::process::rename& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::comm& t1, mcrl2::process::comm& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::allow& t1, mcrl2::process::allow& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::sync& t1, mcrl2::process::sync& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::at& t1, mcrl2::process::at& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::seq& t1, mcrl2::process::seq& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::if_then& t1, mcrl2::process::if_then& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::if_then_else& t1, mcrl2::process::if_then_else& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::bounded_init& t1, mcrl2::process::bounded_init& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::merge& t1, mcrl2::process::merge& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::left_merge& t1, mcrl2::process::left_merge& t2)
+{
+  t1.swap(t2);
+}
+
+template <>
+inline void swap(mcrl2::process::choice& t1, mcrl2::process::choice& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H

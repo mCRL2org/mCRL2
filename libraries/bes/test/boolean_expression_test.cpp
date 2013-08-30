@@ -13,8 +13,6 @@
 #include <string>
 #include <stdio.h>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
@@ -34,7 +32,7 @@ void test_boolean_expressions()
   std::cout << bes::pp(e1) << std::endl;
   std::cout << bes::pp(e2) << std::endl;
 
-  boolean_equation_system<> p;
+  boolean_equation_system p;
   p.equations().push_back(e1);
   p.equations().push_back(e2);
   p.initial_state() = X1;
@@ -43,11 +41,10 @@ void test_boolean_expressions()
 
   std::string filename = "boolean_expression_test.out";
   p.save(filename);
-  boolean_equation_system<> q;
+  boolean_equation_system q;
   q.load(filename);
   BOOST_CHECK(p == q);
   remove(filename.c_str());
-  core::garbage_collect();
 }
 
 void test_bes2pbes()
@@ -66,7 +63,7 @@ void test_bes2pbes()
   std::cout << bes::pp(e2) << std::endl;
   std::cout << bes::pp(e3) << std::endl;
 
-  boolean_equation_system<> p;
+  boolean_equation_system p;
   p.equations().push_back(e1);
   p.equations().push_back(e2);
   p.equations().push_back(e3);
@@ -74,11 +71,10 @@ void test_bes2pbes()
   std::cout << "----------------" << std::endl;
   std::cout << bes::pp(p) << std::endl;
 
-  pbes_system::pbes<> q = bes2pbes(p);
+  pbes_system::pbes q = bes2pbes(p);
   std::cout << "----------------" << std::endl;
   std::cout << pbes_system::pp(q) << std::endl;
 
-  core::garbage_collect();
 }
 
 void test_precedence()
@@ -97,8 +93,6 @@ void test_precedence()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_boolean_expressions();
   test_bes2pbes();
   test_precedence();

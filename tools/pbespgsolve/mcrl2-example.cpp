@@ -18,8 +18,6 @@
 
 int main(int argc, char *argv[])
 {
-    MCRL2_ATERMPP_INIT(argc, argv);
-
     // you get these values from where-ever:
     bool use_spm = true;    // use SPM solver?
     bool use_rec = false;   // use recursive solver?

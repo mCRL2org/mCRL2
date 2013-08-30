@@ -9,8 +9,6 @@
 /// \file ./txt2pbes.cpp
 /// \brief Parse a textual description of a PBES.
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "txt2pbes"
 #define AUTHOR "Aad Mathijssen, Wieger Wesselink"
 
@@ -20,12 +18,10 @@
 #include <string>
 
 //mCRL2 specific
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -36,6 +32,22 @@ using namespace mcrl2::utilities::tools;
 class txt2pbes_tool: public input_output_tool
 {
   typedef input_output_tool super;
+
+  protected:
+    bool m_normalize;
+
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      m_normalize = 0 < parser.options.count("normalize");
+    }
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("normalize",
+                      "normalization is applied, i.e. negations and implications are eliminated. ", 'n');
+    }
 
   public:
     txt2pbes_tool()
@@ -49,21 +61,14 @@ class txt2pbes_tool: public input_output_tool
     bool run()
     {
       txt2pbes(input_filename(),
-               output_filename()
+               output_filename(),
+               m_normalize
               );
       return true;
     }
 };
 
-class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool>
-{
-  public:
-    txt2pbes_gui_tool() {}
-};
-
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-  return txt2pbes_gui_tool().execute(argc, argv);
+  return txt2pbes_tool().execute(argc, argv);
 }

@@ -23,17 +23,18 @@
 #include <assert.h>
 #include <limits.h>
 #include <svc/huffman.h>
+#include "mcrl2/atermpp/aterm_int.h"
 
-using namespace aterm;
+using namespace atermpp;
 
-static ATerm ESCAPE_SEQUENCE;
-static ATerm NO_ATERM;
+static aterm ESCAPE_SEQUENCE;
+static aterm NO_ATERM;
 
-static struct HFnode* HFadd(HFtree*, ATerm);
+static struct HFnode* HFadd(HFtree*, aterm);
 static void          HFwriteCode(BitStream*, struct HFnode*);
 static void          HFfreeLoop(struct HFnode*);
 
-void HFdump(struct HFnode*, int);
+// void HFdump(struct HFnode*, int);
 void HFstats(struct HFnode*, int, long*);
 
 void HFdumpCode(FILE*, struct HFnode*);
@@ -46,12 +47,12 @@ int HFinit(HFtree* tree, HTable* terms)
 {
   /* Protect and assign constants */
 
-  ESCAPE_SEQUENCE=NULL;
-  NO_ATERM=NULL;
-  ATprotect(&ESCAPE_SEQUENCE);
-  ATprotect(&NO_ATERM);
-  ESCAPE_SEQUENCE=(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,true),(ATerm)ATmakeAppl0(ATmakeAFun("NEW",0,false)));
-  NO_ATERM       =(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,true),(ATerm)ATmakeAppl0(ATmakeAFun("NIL",0,false)));
+  ESCAPE_SEQUENCE=aterm();
+  NO_ATERM=aterm();
+  // ATprotect(&ESCAPE_SEQUENCE);
+  // ATprotect(&NO_ATERM);
+  ESCAPE_SEQUENCE=aterm_appl(function_symbol("ESC",1),aterm_appl(function_symbol("NEW",0)));
+  NO_ATERM       =aterm_appl(function_symbol("ESC",1),aterm_appl(function_symbol("NIL",0)));
 
   /* Init LZ buffer */
 
@@ -63,22 +64,24 @@ int HFinit(HFtree* tree, HTable* terms)
 
   /* Create the root node */
 
-  tree->codes=(struct HFnode*)malloc(sizeof(struct HFnode));
+  // tree->codes=(struct HFnode*)malloc(sizeof(struct HFnode));
+  tree->codes=new struct HFnode;
   tree->codes->high=NULL;
   tree->codes->parent=NULL;
   tree->codes->frequency=0L;
-  tree->codes->term=NULL;
-  ATprotect(&tree->codes->term);
+  tree->codes->term=aterm();
+  // ATprotect(&tree->codes->term);
 
   /* Create the leaf for the escape code */
 
-  tree->codes->low=(struct HFnode*)malloc(sizeof(struct HFnode));
+  // tree->codes->low=(struct HFnode*)malloc(sizeof(struct HFnode));
+  tree->codes->low=new struct HFnode;
   tree->codes->low->high=NULL;
   tree->codes->low->low=NULL;
   tree->codes->low->parent=tree->codes;
   tree->codes->low->frequency=0L;
   tree->codes->low->term=ESCAPE_SEQUENCE;
-  ATprotect(&tree->codes->low->term);
+  // ATprotect(&tree->codes->low->term);
   /* Store the escape sequence term */
 
   tree->top=tree->codes->low;
@@ -111,8 +114,8 @@ void HFfreeLoop(struct HFnode* node)
   {
     HFfreeLoop(node->low);
     HFfreeLoop(node->high);
-    ATunprotect(&node->term);
-    free(node);
+    // ATunprotect(&node->term);
+    delete node;
   }
 }
 
@@ -140,7 +143,7 @@ void HFstats(struct HFnode* tree, int level, long* sum)
 
 /* Write 'tree' to stderr */
 
-void HFdump(struct HFnode* tree, int d)
+/* void HFdump(struct HFnode* tree, int d)
 {
   int i;
 
@@ -148,13 +151,13 @@ void HFdump(struct HFnode* tree, int d)
   {
     if (tree->low==NULL && tree->high==NULL)
     {
-      if (tree->term==NULL)
+      if (&*(tree->term)==NULL)
       {
-        ATfprintf(stderr," (%d) Term NULL\n", tree->frequency);
+        fprintf(stderr," (%ld) Term NULL\n", tree->frequency);
       }
       else
       {
-        ATfprintf(stderr," (%d) Term %t\n", tree->frequency, tree->term);
+        ATfprintf(stderr," (%d) Term %t\n", tree->frequency, &*tree->term);
       }
     }
     else
@@ -175,7 +178,7 @@ void HFdump(struct HFnode* tree, int d)
     }
   }
 
-}
+} */
 
 /* Return the first node of 'current' in 'tree' in the left-to-right and bottom
    to top ordering  */
@@ -317,7 +320,7 @@ static void HFupdate(HFtree* tree, struct HFnode* current)
 
 
 
-int HFdecodeATerm(BitStream* fp, HFtree* tree, ATerm* term)
+int HFdecodeATerm(BitStream* fp, HFtree* tree, aterm* term)
 {
   Bit bit;
   struct HFnode* current;
@@ -351,7 +354,7 @@ int HFdecodeATerm(BitStream* fp, HFtree* tree, ATerm* term)
 
       if (*term==NO_ATERM)
       {
-        *term=NULL;
+        *term=aterm();
         return 0;
       }
       else
@@ -388,7 +391,7 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
 {
   Bit bit;
   struct HFnode* current;
-  ATerm term;
+  aterm term;
 
 
   current=tree->codes;
@@ -405,7 +408,7 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
         */
         if (LZreadInt(fp,&tree->buffer,index))
         {
-          term=(ATerm)ATmakeInt(*index);
+          term=aterm_int(*index);
           current=HFadd(tree,term);
           HFupdate(tree,current);
           return *index!=NO_INT;
@@ -418,7 +421,7 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
       else
       {
         HFupdate(tree,current);
-        *index=ATgetInt((ATermInt)term);
+        *index=((aterm_int)term).value();
         return *index!=NO_INT;
       }
     }
@@ -447,12 +450,12 @@ int HFdecodeIndex(BitStream* fp, HFtree* tree, long* index)
 
 /* Insert 'term' into tree */
 
-int HFencodeATerm(BitStream* bs, HFtree* tree, ATerm term)
+int HFencodeATerm(BitStream* bs, HFtree* tree, aterm term)
 {
   struct HFnode* tmp;
   long index;
 
-  if (term==NULL)
+  if (detail::address(term)==NULL)
   {
     term=NO_ATERM;
   }
@@ -490,11 +493,11 @@ int HFencodeATerm(BitStream* bs, HFtree* tree, ATerm term)
 int HFencodeIndex(BitStream* bs, HFtree* tree, long index)
 {
   struct HFnode* tmp;
-  ATerm term;
+  aterm term;
   long n;
 
 
-  term=(ATerm)ATmakeInt(index);
+  term=aterm_int(index);
 
   if (HTmember(tree->terms,term,&n)&&HTgetPtr(tree->terms,n))
   {
@@ -565,7 +568,7 @@ void HFwriteCode(BitStream* fp, struct HFnode* node)
 
 /* Add 'term' to 'tree' */
 
-static struct HFnode* HFadd(HFtree* tree, ATerm term)
+static struct HFnode* HFadd(HFtree* tree, aterm term)
 {
   struct HFnode* newNode, *tmp;
   long index;
@@ -580,13 +583,14 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
 
     /* Create a new sibling */
 
-    newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    // newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    newNode=new struct HFnode;
     newNode->high=NULL;
     newNode->low=NULL;
     newNode->parent=tmp->parent;
     newNode->frequency=0L;
     newNode->term=term;
-    ATprotect(&newNode->term);
+    // ATprotect(&newNode->term);
     tmp->parent->high=newNode;
 
     BLinsert(&tree->blockList, newNode);
@@ -608,11 +612,12 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
 
     /* Create new interior node */
 
-    newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    // newNode=(struct HFnode*)malloc(sizeof(struct HFnode));
+    newNode=new struct HFnode;
     newNode->parent=tmp->parent;
     newNode->frequency=tmp->frequency;
-    newNode->term=NULL;
-    ATprotect(&newNode->term);
+    newNode->term=aterm();
+    // ATprotect(&newNode->term);
     if (tmp->parent->low==tmp)
     {
       tmp->parent->low=newNode;
@@ -629,13 +634,14 @@ static struct HFnode* HFadd(HFtree* tree, ATerm term)
 
     /* Create new leaf that is high child of new interior node */
 
-    newNode->high=(struct HFnode*)malloc(sizeof(struct HFnode));
+    // newNode->high=(struct HFnode*)malloc(sizeof(struct HFnode));
+    newNode->high=new struct HFnode;
     newNode->high->high=NULL;
     newNode->high->low=NULL;
     newNode->high->parent=newNode;
     newNode->high->frequency=0L;
     newNode->high->term=term;
-    ATprotect(&newNode->high->term);
+    // ATprotect(&newNode->high->term);
 
     BLinsert(&tree->blockList, newNode);
     BLinsert(&tree->blockList, newNode->high);

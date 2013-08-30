@@ -56,7 +56,7 @@ struct node_t
 inline
 boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, std::string prefix = "X")
 {
-  atermpp::set<boolean_expression> v_prefixed;
+  std::set<boolean_expression> v_prefixed;
   for (std::set<identifier_t>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     std::stringstream id;
@@ -82,7 +82,7 @@ struct pg_actions: public core::default_parser_actions
 
   pg_actions(const core::parser_table& table_)
     : core::default_parser_actions(table_),
-      initial_node(0)
+      initial_node((std::numeric_limits<identifier_t>::max)())
   {}
 
   template <typename T, typename Function>
@@ -93,11 +93,10 @@ struct pg_actions: public core::default_parser_actions
     return result;
   }
 
-  template <typename Container>
-  void create_boolean_equation_system(boolean_equation_system<Container>& b, bool maxpg)
+  void create_boolean_equation_system(boolean_equation_system& b, bool maxpg)
   {
     // Build Boolean equation system. First we group equations by block
-    std::map<priority_t, atermpp::set<boolean_equation> > blocks;
+    std::map<priority_t, std::set<boolean_equation> > blocks;
     // Translation scheme:
     // prefix every id with X. Owner 0 means ||, owner 1 means &&
 
@@ -117,17 +116,17 @@ struct pg_actions: public core::default_parser_actions
       blocks[i->second.prio].insert(eqn);
     }
 
-    atermpp::vector<boolean_equation> eqns;
+    std::vector<boolean_equation> eqns;
     if(maxpg)
     {
-      for (std::map<priority_t, atermpp::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
+      for (std::map<priority_t, std::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
       {
         eqns.insert(eqns.end(), i->second.begin(), i->second.end());
       }
     }
     else
     {
-      for (std::map<priority_t, atermpp::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
+      for (std::map<priority_t, std::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
       {
         eqns.insert(eqns.end(), i->second.begin(), i->second.end());
       }
@@ -139,12 +138,20 @@ struct pg_actions: public core::default_parser_actions
     b.initial_state() = boolean_variable("X" + init_id.str());
   }
 
-  template <typename Container>
-  void parse_ParityGame(const core::parse_node& node, boolean_equation_system<Container>& result, bool maxpg)
+  void parse_ParityGame(const core::parse_node& node, boolean_equation_system& result, bool maxpg)
   {
+    if(node.child_count() == 5)
+    {
+
+      initial_node = parse_Id(node.child(3));
+    }
+    if(node.child_count() == 3 && node.child(0).string() == "start")
+    {
+      initial_node = parse_Id(node.child(1));
+    }
+
     game.clear();
-    initial_node = 0;
-    parse_NodeSpecList(node.child(1));
+    parse_NodeSpecList(node.child(node.child_count()-1));
     create_boolean_equation_system(result, maxpg);
   }
 
@@ -155,7 +162,7 @@ struct pg_actions: public core::default_parser_actions
     result.prio = parse_Priority(node.child(1));
     result.owner = parse_Owner(node.child(2));
     result.successors = parse_Successors(node.child(3));
-    if (game.empty())
+    if (game.empty() && initial_node == (std::numeric_limits<identifier_t>::max)())
     {
       initial_node = result.id;
     }
@@ -172,7 +179,7 @@ struct pg_actions: public core::default_parser_actions
     return parse_Number(node.child(0));
   }
 
-  identifier_t parse_Priority(const core::parse_node& node)
+  priority_t parse_Priority(const core::parse_node& node)
   {
     return parse_Number(node.child(0));
   }
@@ -199,12 +206,13 @@ struct pg_actions: public core::default_parser_actions
   }
 };
 
-#ifndef MCRL2_USE_OLD_PARSE_PGSOLVER
 /// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param text A string
 /// \param result A boolean equation system
-template <typename Container>
-void parse_pgsolver_string(const std::string& text, boolean_equation_system<Container>& result, bool maxpg = true)
+/// \param maxpg If true a max-parity game is generated in \a result, otherwise a min-parity
+///        game is obtained.
+inline
+void parse_pgsolver_string(const std::string& text, boolean_equation_system& result, bool maxpg = true)
 {
   core::parser p(parser_tables_pg);
   unsigned int start_symbol_index = p.start_symbol_index("ParityGame");
@@ -217,137 +225,18 @@ void parse_pgsolver_string(const std::string& text, boolean_equation_system<Cont
 /// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param from An input stream
 /// \param result A boolean equation system
-template <typename Container>
-void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& result, bool maxpg = true)
+/// \param maxpg If true a max-parity game is generated in \a result, otherwise a min-parity
+///        game is obtained.
+inline
+void parse_pgsolver(std::istream& from, boolean_equation_system& result, bool maxpg = true)
 {
   std::string text = utilities::read_text(from);
   parse_pgsolver_string(text, result, maxpg);
 }
 
-#else
-/// \brief Reads a parity game from an input stream, and stores it as a BES.
-/// \param from An input stream
-/// \param b A boolean equation system
-/// \return The input stream
-// EBNF:
-// <parity_game> ::= [parity <identifier> ;] <node_spec>+
-// <node_spec> ::= <identifier> <priority> <owner> <successors> [name] ;
-// <identifier> ::= N
-// <priority> ::= N
-// <owner> ::= 0 | 1
-// <successors> ::= <identifier> (, <identifier>)*
-// <name> ::= " ( any ASCII string not containing `"') "
-// In this N means a natural number.
-// There must be whitespace characters between the following pairs of tokens:
-// <identifier> and <priority>, <priority> and <owner>, <owner> and <identifier>
-template <typename Container>
-inline
-void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, bool maxpg = true)
-{
-  while (!isalnum(from.peek()))
-  {
-    from.ignore();
-  }
-
-  // We ignore parity line
-  if (from.peek() == 'p')
-  {
-    from.ignore(1024, '\n');
-  }
-
-  // Parse node specifications (store in map)
-  std::map<identifier_t, node_t> game;
-  bool init = false;
-  identifier_t initial_node = 0;
-
-  while (isalnum(from.peek()))
-  {
-    while (!isalnum(from.peek()))
-    {
-      from.ignore();
-    }
-    node_t node;
-    from >> node.id;
-    from >> node.prio;
-    from >> node.owner;
-
-    if (!init)
-    {
-      initial_node = node.id;
-      init = true;
-    }
-
-    std::string successors;
-    std::getline(from, successors);
-    // Rest of line. First remove comments
-    size_t index = successors.find('"');
-    if (index != std::string::npos)
-    {
-      successors = successors.substr(0, index);
-    }
-
-    successors = utilities::remove_whitespace(successors);
-    std::vector<std::string> v(utilities::split(successors,","));
-    for (std::vector<std::string>::const_iterator i = v.begin(); i != v.end(); ++i)
-    {
-      identifier_t id;
-      std::stringstream tmp;
-      tmp << *i;
-      tmp >> id;
-      node.successors.insert(id);
-    }
-
-    game[node.id] = node;
-  }
-
-  // Build Boolean equation system. First we group equations by block
-  std::map<priority_t, atermpp::set<boolean_equation> > blocks;
-  // Translation scheme:
-  // prefix every id with X. Owner 0 means ||, owner 1 means &&
-
-  for (std::map<identifier_t, node_t>::const_iterator i = game.begin(); i != game.end(); ++i)
-  {
-    std::stringstream id;
-    id << "X" << i->second.id;
-
-    fixpoint_symbol fp(fixpoint_symbol::mu());
-    if (i->second.prio % 2 == 0)
-    {
-      fp = fixpoint_symbol::nu();
-    }
-
-    boolean_equation eqn(fp, boolean_variable(id.str()), formula(i->second.successors, i->second.owner));
-
-    blocks[i->second.prio].insert(eqn);
-  }
-
-  atermpp::vector<boolean_equation> eqns;
-  if(maxpg)
-  {
-    for (std::map<priority_t, atermpp::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
-    {
-      eqns.insert(eqns.end(), i->second.begin(), i->second.end());
-    }
-  }
-  else
-  {
-    for (std::map<priority_t, atermpp::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
-    {
-      eqns.insert(eqns.end(), i->second.begin(), i->second.end());
-    }
-  }
-
-  b.equations() = eqns;
-  std::stringstream init_id;
-  init_id << initial_node;
-  b.initial_state() = boolean_variable("X" + init_id.str());
-}
-#endif // MCRL2_USE_OLD_PARSE_PGSOLVER
-
 /// \brief Parse parity game in PGSolver format from filename, and store the
 ///        resulting BES in b.
-template <typename Container>
-inline void parse_pgsolver(const std::string& filename, boolean_equation_system<Container>& b, bool maxpg = true)
+inline void parse_pgsolver(const std::string& filename, boolean_equation_system& b, bool maxpg = true)
 {
   if(filename == "-" || filename.empty())
   {

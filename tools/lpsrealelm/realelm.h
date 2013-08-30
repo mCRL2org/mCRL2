@@ -12,11 +12,7 @@
 #ifndef MCRL2_LPSREALELM_REALELM_H
 #define MCRL2_LPSREALELM_REALELM_H
 
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/vector.h"
-
 #include "mcrl2/data/rewriter.h"
-
 #include "mcrl2/lps/specification.h"
 
 #include "comp.h"
@@ -46,9 +42,6 @@ class real_representing_variable
      mcrl2::data::data_expression lb,
      mcrl2::data::data_expression ub)
     {
-      variable.protect();
-      lowerbound.protect();
-      upperbound.protect();
       variable=v;
       lowerbound=lb;
       upperbound=ub;
@@ -58,9 +51,6 @@ class real_representing_variable
     /*  The code below gives rise to garbage collection problems. */
     ~real_representing_variable()
     {
-      variable.unprotect();
-      lowerbound.unprotect();
-      upperbound.unprotect();
     }
 
     real_representing_variable& operator = (const real_representing_variable& other)
@@ -73,9 +63,6 @@ class real_representing_variable
 
     real_representing_variable(const real_representing_variable& other)
     {
-      variable.protect();
-      lowerbound.protect();
-      upperbound.protect();
       variable=other.variable;
       lowerbound=other.lowerbound;
       upperbound=other.upperbound;
@@ -104,11 +91,16 @@ class summand_information
 {
 
   private:
-    mcrl2::lps::deprecated::summand smd;
+    mcrl2::lps::summand_base m_smd;
+    bool m_is_delta_summand;
+    assignment_list m_assignments;
+    lps::multi_action m_multi_action;
+    lps::deadlock m_deadlock;
+    
     variable_list real_summation_variables;
     variable_list non_real_summation_variables;
     std::vector < linear_inequality > summand_real_conditions;
-    mutable_map_substitution< atermpp::map<variable, data_expression> > summand_real_nextstate_map;
+    mutable_map_substitution< std::map<variable, data_expression> > summand_real_nextstate_map;
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
     std::vector < std::vector < linear_inequality > > nextstate_context_combinations;
@@ -121,13 +113,21 @@ class summand_information
 
   public:
     summand_information(
-      const mcrl2::lps::deprecated::summand s,
-      variable_list rsv,
-      variable_list nrsv,
-      std::vector < linear_inequality > src,
-      mutable_map_substitution< atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> > srnm
+      const mcrl2::lps::summand_base &s,
+      bool  is_delta_summand,
+      const assignment_list &assignments,
+      const lps::multi_action &multi_action,
+      const lps::deadlock &deadlock,
+      const variable_list &rsv,
+      const variable_list &nrsv,
+      const std::vector < linear_inequality > &src,
+      const mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> > &srnm
     ):
-      smd(s),
+      m_smd(s),
+      m_is_delta_summand(is_delta_summand),
+      m_assignments(assignments),
+      m_multi_action(multi_action),
+      m_deadlock(deadlock),
       real_summation_variables(rsv),
       non_real_summation_variables(nrsv),
       summand_real_conditions(src),
@@ -140,18 +140,15 @@ class summand_information
       nextstate_context_combinations(1,src)
       // residual_inequalities(1,vector < linear_inequality >()),
     {
-      smd.protect();
-      real_summation_variables.protect();
-      non_real_summation_variables.protect();
-      // mCRL2log(debug) << "NEW REAL SUMMATION VARIABLES " << pp(rsv) << "\n";
     }
 
     summand_information(const summand_information& s)
     {
-      smd.protect();
-      real_summation_variables.protect();
-      non_real_summation_variables.protect();
-      smd=s.smd;
+      m_smd=s.m_smd;
+      m_is_delta_summand=s.m_is_delta_summand;
+      m_assignments=s.m_assignments;
+      m_multi_action=s.m_multi_action;
+      m_deadlock=s.m_deadlock;
       real_summation_variables=s.real_summation_variables;
       non_real_summation_variables=s.non_real_summation_variables;
       summand_real_conditions=s.summand_real_conditions;
@@ -162,15 +159,31 @@ class summand_information
 
     ~summand_information()
     {
-      smd.unprotect();
-      real_summation_variables.unprotect();
-      non_real_summation_variables.unprotect();
-
     }
 
-    mcrl2::lps::deprecated::summand get_summand() const
+    const mcrl2::lps::summand_base &get_summand() const
     {
-      return smd;
+      return m_smd;
+    }
+
+    const bool &is_delta_summand() const
+    {
+      return m_is_delta_summand;
+    }
+
+    const mcrl2::data::assignment_list &get_assignments() const
+    {
+      return m_assignments;
+    }
+
+    const mcrl2::lps::multi_action &get_multi_action() const
+    {
+      return m_multi_action;
+    }
+
+    const mcrl2::lps::deadlock &get_deadlock() const
+    {
+      return m_deadlock;
     }
 
     variable_list get_real_summation_variables() const
@@ -193,7 +206,7 @@ class summand_information
       return summand_real_conditions.end();
     }
 
-    mutable_map_substitution< atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> >
+    mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> >
                           &get_summand_real_nextstate_map()
     {
       return summand_real_nextstate_map;
@@ -255,7 +268,7 @@ class summand_information
       data_expression xi_u=new_xi_variable.get_upperbound();
       data_expression substituted_lowerbound = replace_free_variables(xi_t,summand_real_nextstate_map);
       data_expression substituted_upperbound = replace_free_variables(xi_u,summand_real_nextstate_map);
-      // mCRL2log(debug) << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
+      // mCRL2log(mcrl2::log::verbose) << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.
       // I do not know whether optimisation below is correct.
@@ -379,7 +392,7 @@ class summand_information
       }
       nextstate_context_combinations.swap(new_nextstate_context_combinations);
       // mCRL2log(debug) << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n"
-      //          << "IN summand " << pp(smd) << "\n";
+      //          << "IN summand " << pp(m_smd) << "\n";
     }
 };
 

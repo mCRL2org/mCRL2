@@ -22,9 +22,10 @@ namespace pbes_system
 
 /// \brief Returns true if the pbes expression is monotonous.
 /// \param f A pbes expression
+/// \param negated_variables The set of variables that occurs under an odd number of negations.
 /// \return True if the pbes expression is monotonous.
 inline
-bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& negated_variables)
+bool is_monotonous(pbes_expression f)
 {
   namespace p = pbes_expr;
   using namespace accessors;
@@ -47,31 +48,31 @@ bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& n
     }
     else if (is_not(f))
     {
-      return is_monotonous(arg(f), negated_variables);
+      return is_monotonous(arg(f));
     }
     else if (is_and(f))
     {
-      return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
+      return is_monotonous(p::not_(left(f))) && is_monotonous(p::not_(right(f)));
     }
     else if (is_or(f))
     {
-      return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
+      return is_monotonous(p::not_(left(f))) && is_monotonous(p::not_(right(f)));
     }
     else if (is_imp(f))
     {
-      return is_monotonous(left(f), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
+      return is_monotonous(left(f)) && is_monotonous(p::not_(right(f)));
     }
     else if (is_forall(f))
     {
-      return is_monotonous(p::not_(arg(f)), negated_variables);
+      return is_monotonous(p::not_(arg(f)));
     }
     else if (is_exists(f))
     {
-      return is_monotonous(p::not_(arg(f)), negated_variables);
+      return is_monotonous(p::not_(arg(f)));
     }
     else if (is_propositional_variable_instantiation(f))
     {
-      return negated_variables.find(name(f)) != negated_variables.end();
+      return false;
     }
   }
 
@@ -90,41 +91,31 @@ bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& n
   }
   else if (is_and(f))
   {
-    return is_monotonous(left(f), negated_variables) && is_monotonous(right(f), negated_variables);
+    return is_monotonous(left(f)) && is_monotonous(right(f));
   }
   else if (is_or(f))
   {
-    return is_monotonous(left(f), negated_variables) && is_monotonous(right(f), negated_variables);
+    return is_monotonous(left(f)) && is_monotonous(right(f));
   }
   else if (is_imp(f))
   {
-    return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(right(f), negated_variables);
+    return is_monotonous(p::not_(left(f))) && is_monotonous(right(f));
   }
   else if (is_forall(f))
   {
-    return is_monotonous(arg(f), negated_variables);
+    return is_monotonous(arg(f));
   }
   else if (is_exists(f))
   {
-    return is_monotonous(arg(f), negated_variables);
+    return is_monotonous(arg(f));
   }
   else if (is_propositional_variable_instantiation(f))
   {
-    return negated_variables.find(name(f)) == negated_variables.end();
+    return true;
   }
 
-  throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + f.to_string());
+  throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + to_string(f));
   return false;
-}
-
-/// \brief Returns true if the pbes expression is monotonous.
-/// \param f A pbes expression
-/// \return True if the pbes expression is monotonous.
-inline
-bool is_monotonous(pbes_expression f)
-{
-  std::set<core::identifier_string> negated_variables;
-  return is_monotonous(f, negated_variables);
 }
 
 /// \brief Returns true if the pbes equation is monotonous.
@@ -135,10 +126,10 @@ bool is_monotonous(const pbes_equation& e)
 }
 
 /// \brief Returns true if the pbes is monotonous.
-template <typename Container>
-bool is_monotonous(const pbes<Container>& p)
+inline
+bool is_monotonous(const pbes& p)
 {
-  for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     if (!is_monotonous(*i))
     {

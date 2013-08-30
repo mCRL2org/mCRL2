@@ -16,6 +16,7 @@
 #include <boost/xpressive/xpressive.hpp>
 #endif
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -167,7 +168,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
     x = data::sort_real::int2real(value);
     if (is_function_symbol(value))
     {
-      core::identifier_string name = atermpp::arg1(value);
+      core::identifier_string name = atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(value));
       if (utilities::is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_real::real_());
@@ -215,6 +216,35 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
   }
   //std::cout << "\n<reconstruct_numeric_expression-result>" << data::pp(x) << " " << x << std::endl;
   return x;
+}
+
+struct data_printer
+{
+  template <typename T>
+  std::string operator()(const T& x) const
+  {
+    return data::pp(x);
+  }
+};
+
+/// \brief Creates a string representation of a container.
+/// \param v A container
+/// \param message A string 
+/// \param print_index If true, an index is written in front of each term
+template <typename Container>
+std::string print_list(const Container& v, std::string message = "", bool print_index = false)
+{ 
+  return core::detail::print_list(v, data::detail::data_printer(), message, print_index);
+}
+
+/// \brief Creates a string representation of a container.
+/// \param v A container
+/// \param message A string
+/// \param print_index If true, an index is written in front of each term
+template <typename Container>
+std::string print_set(const Container& v, std::string message = "", bool print_index = false)
+{
+  return core::detail::print_set(v, data::detail::data_printer(), message, print_index);
 }
 
 } // namespace detail

@@ -1,0 +1,140 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{Gau\ss\ Elimination}
+
+A predicate formula $\varphi $ is defined by the following grammar:%
+\begin{equation*}
+\varphi ::=b|X(e)|\lnot \varphi |\varphi \wedge \varphi |\varphi \vee
+\varphi |\varphi \rightarrow \varphi |\forall d:D.\varphi |\exists
+d:D.\varphi |true |false
+\end{equation*}%
+where $b$ is a data term of sort $\mathbb{B}$, $X$ is a predicate variable, $%
+d$ is a data variable of sort $D$, $e$ is a data term, $true $ represents $%
+true$, and $false $ represents $false$.
+
+\begin{definition}
+(Predicate Variable Substitution) Let $\varphi ,\psi $ be predicate formulae
+and $X$ a predicate variable. Then we define $\psi \lbrack \varphi /X]$ as
+the result of applying the substitution $X:=\varphi $ to the formula $\psi $%
+. To make this more precise: suppose $X$ is declared as $X(d:D)$, then any
+occurrence $X(\overline{d})$ in $\psi $ is replaced by $\varphi \lbrack d:=%
+\overline{d}]$.
+\end{definition}
+
+\begin{lemma}
+(Substitution) Let $\mathcal{E}$ be an equation system for which $X,Y\notin
+bnd(\mathcal{E})$, then:%
+\begin{equation*}
+(\sigma X(d:D)=\varphi )\mathcal{E}(\sigma ^{\prime }Y(e:E)=\psi )\equiv
+(\sigma X(d:D)=\varphi )[\psi /Y]\mathcal{E}(\sigma ^{\prime }Y(e:E)=\psi )
+\end{equation*}
+\end{lemma}
+
+\begin{definition}
+(Approximation) Let $\varphi ,\psi $ be predicate formulae and $X$ a
+predicate variable. We inductively define $\psi \lbrack \varphi /X]^{k}$ as
+follows:%
+\begin{eqnarray*}
+&&\psi \lbrack \varphi /X]^{0}\overset{def}{=}\varphi \\
+&&\psi \lbrack \varphi /X]^{k+1}\overset{def}{=}\psi \lbrack \varphi /X]^{k}
+\end{eqnarray*}
+\end{definition}
+
+Thus, $\psi \lbrack \varphi /X]^{k}$ represents the result of recursively
+substituting $\varphi $ for $X$ in $\psi $.
+
+\begin{lemma}
+(Approximants as Solutions) Let $\varphi $ be a predicate formula and $k\in 
+\mathbb{N}$ be a natural number. Then%
+\begin{eqnarray*}
+(\mu X(d &:&D)=\varphi \lbrack false /X]^{k})\Rrightarrow (\mu
+X(d:D)=\varphi ) \\
+(\nu X(d &:&D)=\varphi )\Rrightarrow (\nu X(d:D)=\varphi \lbrack true
+/X]^{k})
+\end{eqnarray*}
+\end{lemma}
+
+\begin{lemma}
+(Stable Approximants as Solutions) Let $\varphi $ be a predicate formula and 
+$k\in \mathbb{N}$ be a natural number. Then%
+\begin{eqnarray*}
+\text{if }\varphi \lbrack false/X]^{k} &\longleftrightarrow &\varphi \lbrack
+false/X]^{k+1}\text{ then }(\mu X(d:D)=\varphi \lbrack false/X]^{k})\equiv
+(\mu X(d:D)=\varphi ) \\
+\text{if }\varphi \lbrack true/X]^{k} &\longleftrightarrow &\varphi \lbrack
+true/X]^{k+1}\text{ then }(\nu X(d:D)=\varphi \lbrack true/X]^{k})\equiv
+(\nu X(d:D)=\varphi )
+\end{eqnarray*}
+\end{lemma}
+
+\subsection{Gau\ss\ Elimination Algorithm}
+
+Let $\mathcal{E}$ be an equation system of the form%
+\begin{equation*}
+\mathcal{E=(}\sigma _{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots (\sigma
+_{n}X_{n}(d_{n}:D_{n})=\varphi _{n}),
+\end{equation*}%
+and let $r$ be a rewrite function that maps a pbes expression $\varphi $ to
+an equivalent expression $\varphi ^{\prime }$.
+
+Then we define%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Gau\textsc{\ss\ }Elimination(}}\mathcal{E},r,\text{\textsc{%
+solve)}} \\ 
+\mathcal{E}^{\prime }:=\varepsilon \\ 
+i:=n \\ 
+\text{\textbf{while} \textbf{not} }i=0 \\ 
+\text{\textbf{do}} \\ 
+\qquad \varphi _{i}:=\text{\textsc{solve(}}\sigma _{i}X_{i}=\varphi _{i}%
+\text{\textsc{)}} \\ 
+\qquad \mathcal{E}^{\prime }:=\mathcal{E}^{\prime }(\sigma _{i}X_{i}=\varphi
+_{i}) \\ 
+\qquad \text{\textbf{for }}k=1\text{ \textbf{to }}i-1\text{ \textbf{do }}%
+\varphi _{k}:=r(\varphi _{k}[\varphi _{i}/X_{i}])\text{ \textbf{od}} \\ 
+\qquad i:=i-1 \\ 
+\text{\textbf{od}} \\ 
+\text{\textbf{return }}\mathcal{E}^{^{\prime }}%
+\end{array}%
+\end{equation*}%
+Here \textsc{SolveEquation} is an algorithm that solves a pbes equation,
+such that the resulting equation has no reference to the predicate variable
+in its right hand side. An example of such a solve equation algorithm is 
+\textsc{Approximate}.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Approximate(}}\sigma X=\varphi ,\text{\textsc{compare)}} \\ 
+j:=0 \\ 
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true\text{ 
+\textbf{else} }\psi _{0}:=false \\ 
+\text{\textbf{repeat}} \\ 
+\qquad \psi _{j+1}:=\varphi \lbrack \psi _{j}/X] \\ 
+\qquad j:=j+1 \\ 
+\text{\textbf{until }\textsc{compare}}(\psi _{j},\psi _{j+1}) \\ 
+\text{\textbf{return }}\sigma X=\psi _{j}%
+\end{array}%
+\end{equation*}
+
+Also pattern matching algorithms exist for this. The \textsc{Gau\textsc{\ss\ 
+}Elimination} algorithm solves the equation system $\mathcal{E}$ for the
+predicate variable $X_{1}$. To solve the system $\mathcal{E}$ for all
+variables, the algorithm has to be applied repeatedly.
+
+\subsection{Solving a BES}
+
+If the equation system $\mathcal{E}$ is a BES (i.e. the predicate variables
+have no parameters), then the following simple approximate function can be
+used to solve it:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Approximate-BES(}}\sigma X=\varphi \text{\textsc{)}} \\ 
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true\text{ 
+\textbf{else} }\psi _{0}:=false \\ 
+\text{\textbf{return} \textsc{Simplify}(}\sigma X=\varphi \lbrack \psi
+_{0}/X]\text{)}%
+\end{array}%
+\end{equation*}
+
+\newpage 

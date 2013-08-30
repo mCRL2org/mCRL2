@@ -23,6 +23,8 @@
  */
 
 #include <cassert>
+#include <cerrno>
+#include <cstdio>
 #include <list>
 #include <string>
 #include <sstream>
@@ -44,7 +46,7 @@ public:
     {
       std::stringstream commandline;
       commandline << '"' << m_compile_script << "\" " << filename << " " << " 2>&1";
-
+      
       // Execute script.
       FILE* stream = popen(commandline.str().c_str(), "r");
       if (stream == NULL)
@@ -57,37 +59,47 @@ public:
       // library is unloaded.
       std::string files;
       char buf[1024];
-      while (fgets(buf, 1024, stream) != NULL)
-      {
-        std::string line(buf);
-        assert(*line.rbegin() == '\n');
-        line.erase(line.size() - 1);
-        // Check that reported file exists. If not, produce error message and
-        // flush script output to the log.
-        if (!mcrl2::utilities::file_exists(line))
+      while(!feof(stream))
+      {        
+        if(fgets(buf, sizeof(buf), stream) != NULL)
         {
-          mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
-          mCRL2log(mcrl2::log::error) << line << std::endl;
-          while (fgets(buf, 1024, stream) != NULL)
+          std::string line(buf);
+          assert(*line.rbegin() == '\n');
+          line.erase(line.size() - 1);
+          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "  Read line: " << line;
+          
+          // Check that reported file exists. If not, produce error message and
+          // flush script output to the log.
+          if (!mcrl2::utilities::file_exists(line))
           {
-            mCRL2log(mcrl2::log::error) << std::string(buf);
+            mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
+            mCRL2log(mcrl2::log::error) << line << std::endl;
+            while (fgets(buf, sizeof(buf), stream) != NULL)
+            {
+              mCRL2log(mcrl2::log::error) << std::string(buf);
+            }
+            pclose(stream);
+            throw std::runtime_error("Compile script failed.");
           }
-          pclose(stream);
-          throw std::runtime_error("Compile script failed.");
+          m_tempfiles.push_back(line);
         }
-        else
+        else if(ferror(stream) && errno == EINTR)
         {
-          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Temporary file '" << line << "' generated." << std::endl;
+            // On OSX, interrupts sometimes arrive during the call to read(), which
+            // is called by fgets. If an interrupt arrives, we just ignore it
+            // an clear the error status of the stream, and try again.
+            mCRL2log(mcrl2::log::debug, "uncompiled_library") << "Reading was interrupted. Clearing error status and retrying" << std::endl;
+            perror("Error according to errno");
+            clearerr(stream);
         }
-        m_tempfiles.push_back(line);
       }
-
+      
       if (ferror(stream))
       {
         pclose(stream);
         throw std::runtime_error("There was a problem reading the output of the compile script.");
       }
-
+      
       pclose(stream);
 
       m_filename = m_tempfiles.back();
@@ -117,6 +129,8 @@ public:
 
     virtual ~uncompiled_library()
     {
+#ifndef NDEBUG // In debug mode, the compiled rewriter has not been removed directly after loading, 
+               // and we still have to remove it.
       try
       {
         cleanup();
@@ -125,6 +139,7 @@ public:
       {
         mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
       }
+#endif
     }
 
 };

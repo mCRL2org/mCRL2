@@ -1,3 +1,5 @@
+.. _showcase:generic-driving-actuator:
+
 Generic Driving Actuator
 ========================
 
@@ -51,13 +53,5 @@ The requirements on the software of the Generic Driving Actuator were checked.
 Publications
 ------------
 
-.. [MDC07a] Safety-critical design of the generic driving actuator -
-   a hybrid approach. L.L.F. Merkx, H.M. Duringhof, and P.J.L.Cuijpers.
-   CS-Report 07-09, Technische Universiteit Eindhoven (2007).
-   `(PDF) <http://alexandria.tue.nl/repository/books/627278.pdf>`_
-
-.. [MDC07b] Algebraic Software Analysis and Embedded Simulation of a Driving Robot.
-   Leon Merkx, Hans-Martin Duringhof, Pieter Cuijpers.
-   2007 Summer Computer Simulation Conference (SCSC) in San Diego, CA.
-   `(DOI) <http://doi.acm.org/10.1145/1357910.1357985>`_
+[MDC07]_
 

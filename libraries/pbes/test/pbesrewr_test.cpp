@@ -18,15 +18,14 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -38,13 +37,12 @@ void test_pbesrewr1()
     "pbes mu X(n:Enum)=exists m1,m2:Enum.(X(m1) || X(m2)); \n"
     "init X(e1);                                           \n"
     ;
-  pbes<> p = txt2pbes(pbes_text);
+  pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
-  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<> datae(p.data(), datar, generator);
+  data::data_enumerator datae(p.data(), datar);
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
   // p.save("pbesrewr.pbes");
 }
@@ -54,15 +52,14 @@ void test_pbesrewr2()
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 
   data::rewriter datar(p.data(), data::jitty);
-  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<> datae(p.data(), datar, generator);
+  data::data_enumerator datae(p.data(), datar);
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
   BOOST_CHECK(p.is_well_typed());
 }
@@ -78,13 +75,12 @@ void test_pbesrewr3()
     "init X;\n"
     ;
 
-  pbes<> p = txt2pbes(pbes_text);
+  pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
-  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<> datae(p.data(), datar, generator);
+  data::data_enumerator datae(p.data(), datar);
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator> pbesr(datarv, datae, enumerate_infinite_sorts);
   try
   {
     pbes_rewrite(p, pbesr); // we expect that an exception is raised because of the type D that cannot be enumerated
@@ -99,8 +95,6 @@ void test_pbesrewr3()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_pbesrewr1();
   test_pbesrewr2();
   test_pbesrewr3();

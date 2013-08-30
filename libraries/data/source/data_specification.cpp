@@ -24,7 +24,13 @@ namespace detail
 {
 
 /**
- * \param[in] compatible whether the produced ATerm is compatible with the `format after type checking'
+ * \param[in/\<aterm\>/aterm/g
+ * :%s/\<aterm_int\>/aterm_int/g
+ * :%s/\<aterm_appl\>/aterm_appl/g
+ * :%s/\<aterm_list\>/aterm_list/g
+ * :%s/\<function_symbol\>/function_symbol/g
+ * :%s/\<atermpp\>/atermpp/g
+ *  compatible whether the produced aterm is compatible with the `format after type checking'
  *
  * The compatible transformation should eventually disappear, it is only
  * here for compatibility with the old parser, type checker and pretty
@@ -37,11 +43,11 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
   if (s.m_data_specification_is_type_checked)
   {
     return gsMakeDataSpec(
-             gsMakeSortSpec(atermpp::convert< atermpp::aterm_list >(s.m_sorts) +
-                            atermpp::convert< atermpp::aterm_list >(s.m_aliases)),
-             gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(s.m_constructors)),
-             gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(s.m_mappings)),
-             gsMakeDataEqnSpec(atermpp::convert< atermpp::aterm_list >(s.m_equations)));
+             gsMakeSortSpec(atermpp::aterm_list(s.m_sorts.begin(),s.m_sorts.end()) +
+                            atermpp::aterm_list(s.m_aliases.begin(),s.m_aliases.end())),
+             gsMakeConsSpec(atermpp::aterm_list(s.m_constructors.begin(),s.m_constructors.end())),
+             gsMakeMapSpec(atermpp::aterm_list(s.m_mappings.begin(),s.m_mappings.end())),
+             gsMakeDataEqnSpec(atermpp::aterm_list(s.m_equations.begin(),s.m_equations.end())));
   }
   else
   {
@@ -183,7 +189,7 @@ void data_specification::check_for_alias_loop(
   {
     if (sorts_already_seen.count(s)>0)
     {
-      throw mcrl2::runtime_error("Sort alias " + s.to_string() + " is defined in terms of itself.");
+      throw mcrl2::runtime_error("Sort alias " + to_string(s) + " is defined in terms of itself.");
     }
     for(alias_vector::const_iterator i = m_aliases.begin(); i != m_aliases.end(); ++i)
     {
@@ -245,13 +251,13 @@ void data_specification::check_for_alias_loop(
 static
 sort_expression find_normal_form(
   const sort_expression& e,
-  const atermpp::multimap< sort_expression, sort_expression >  &map1,
-  const atermpp::multimap< sort_expression, sort_expression >  &map2,
+  const std::multimap< sort_expression, sort_expression >  &map1,
+  const std::multimap< sort_expression, sort_expression >  &map2,
   std::set < sort_expression > sorts_already_seen = std::set < sort_expression >())
 {
   assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
-  assert(!is_unknown_sort(e));
-  assert(!is_multiple_possible_sorts(e));
+  assert(!is_untyped_sort(e));
+  assert(!is_untyped_possible_sorts(e));
 
   if (is_function_sort(e))
   {
@@ -263,8 +269,7 @@ sort_expression find_normal_form(
     for (sort_expression_list::const_iterator i=domain.begin();
          i!=domain.end(); ++i)
     {
-      normalised_domain=push_front(normalised_domain,
-                                   find_normal_form(*i,map1,map2,sorts_already_seen));
+      normalised_domain.push_front(find_normal_form(*i,map1,map2,sorts_already_seen));
     }
     return function_sort(reverse(normalised_domain),normalised_codomain);
   }
@@ -291,13 +296,11 @@ sort_expression find_normal_form(
       for (structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
            j!=ssca.end(); ++j)
       {
-        normalised_ssa=push_front(normalised_ssa,
-                                  structured_sort_constructor_argument(j->name(),
+        normalised_ssa.push_front(structured_sort_constructor_argument(j->name(),
                                       find_normal_form(j->sort(),map1,map2,sorts_already_seen)));
       }
 
-      normalised_constructors=push_front(
-                                normalised_constructors,
+      normalised_constructors.push_front(
                                 structured_sort_constructor(
                                   constructor.name(),
                                   reverse(normalised_ssa),
@@ -314,7 +317,7 @@ sort_expression find_normal_form(
 
 
   assert(is_basic_sort(result_sort) || is_structured_sort(result_sort));
-  const atermpp::multimap< sort_expression, sort_expression >::const_iterator i1=map1.find(result_sort);
+  const std::multimap< sort_expression, sort_expression >::const_iterator i1=map1.find(result_sort);
   if (i1!=map1.end()) // found
   {
 #ifndef NDEBUG
@@ -324,7 +327,7 @@ sort_expression find_normal_form(
                            ,sorts_already_seen
                           );
  }
- const atermpp::multimap< sort_expression, sort_expression >::const_iterator i2=map2.find(result_sort);
+ const std::multimap< sort_expression, sort_expression >::const_iterator i2=map2.find(result_sort);
  if (i2!=map2.end()) // found
  {
 #ifndef NDEBUG
@@ -359,7 +362,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
   // that structured sorts can be recursive, and therefore, they cannot be
   // rewritten from left to right, as this can cause sorts to be infinitely rewritten.
 
-  atermpp::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
+  std::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
   for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
   {
     if (is_structured_sort(i->reference()))
@@ -374,16 +377,16 @@ void data_specification::reconstruct_m_normalised_aliases() const
 
   // Apply Knuth-Bendix completion to the rules in m_normalised_aliases.
 
-  atermpp::multimap< sort_expression, sort_expression > resulting_normalized_sort_aliases;
+  std::multimap< sort_expression, sort_expression > resulting_normalized_sort_aliases;
 
   for (; !sort_aliases_to_be_investigated.empty() ;)
   {
-    const atermpp::multimap< sort_expression, sort_expression >::iterator p=sort_aliases_to_be_investigated.begin();
+    const std::multimap< sort_expression, sort_expression >::iterator p=sort_aliases_to_be_investigated.begin();
     const sort_expression lhs=p->first;
     const sort_expression rhs=p->second;
     sort_aliases_to_be_investigated.erase(p);
 
-    for (atermpp::multimap< sort_expression, sort_expression >::const_iterator
+    for (std::multimap< sort_expression, sort_expression >::const_iterator
          i=resulting_normalized_sort_aliases.begin();
          i!=resulting_normalized_sort_aliases.end(); ++i)
     {
@@ -396,7 +399,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
         // Choose the normal form on the basis of a lexicographical ordering. This guarantees
         // uniqueness of normal forms over different tools. Ordering on addresses (as used previously)
         // proved to be unstable over different tools.
-        const bool rhs_to_s1 = is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string();
+        const bool rhs_to_s1 = is_basic_sort(s1) && to_string(basic_sort(s1))<=to_string(rhs);
         const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
         const sort_expression pre_normal_form=(rhs_to_s1?s1:rhs);
         assert(is_basic_sort(pre_normal_form));
@@ -415,7 +418,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
           assert(is_basic_sort(i->second));
           // Choose the normal form on the basis of a lexicographical ordering. This guarantees
           // uniqueness of normal forms over different tools.
-          const bool i_second_to_s2 = is_basic_sort(s2) && basic_sort(s2).to_string()<=i->second.to_string();
+          const bool i_second_to_s2 = is_basic_sort(s2) && to_string(basic_sort(s2))<=to_string(i->second);
           const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
           const sort_expression pre_normal_form=(i_second_to_s2?s2:i->second);
           assert(is_basic_sort(pre_normal_form));
@@ -437,8 +440,8 @@ void data_specification::reconstruct_m_normalised_aliases() const
   // If there are rules with equal left hand side, only one is arbitrarily chosen. Rewrite the
   // right hand side to normal form.
 
-  const atermpp::multimap< sort_expression, sort_expression > empty_multimap;
-  for (atermpp::multimap< sort_expression, sort_expression >::const_iterator
+  const std::multimap< sort_expression, sort_expression > empty_multimap;
+  for (std::multimap< sort_expression, sort_expression >::const_iterator
        i=resulting_normalized_sort_aliases.begin();
        i!=resulting_normalized_sort_aliases.end(); ++i)
   {
@@ -476,7 +479,7 @@ bool data_specification::is_well_typed() const
 ///  - specification that includes all system defined information (legacy)
 /// The last type must eventually disappear but is unfortunately still in
 /// use in a substantial amount of source code.
-/// Note, all sorts with name prefix @legacy_ are eliminated
+/// Note, all sorts with name prefix \@legacy_ are eliminated
 void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
 {
   assert(core::detail::check_rule_DataSpec(term));
@@ -497,11 +500,11 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   {
     if (data::is_alias(*i)) // Compatibility with legacy code
     {
-      add_alias(*i);
+      add_alias(atermpp::aterm_cast<data::alias>(*i));
     }
     else
     {
-      add_sort(*i);
+      add_sort(atermpp::aterm_cast<const sort_expression>(*i));
     }
   }
 

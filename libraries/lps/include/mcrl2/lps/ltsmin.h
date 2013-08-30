@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -33,7 +34,6 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 
 // For backwards compatibility
 //using namespace mcrl2::log;
@@ -58,7 +58,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   v.push_back(x);
   for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(v, data::sort_bool::true_(), max_internal_variables); i != enumerator.end() ; ++i)
   {
-    result.push_back((*i)(x).to_string());
+    result.push_back(to_string((*i)(x)));
     if (result.size() >= max_size)
     {
       break;
@@ -221,7 +221,7 @@ class state_data_type: public pins_data_type
 
     data::data_expression index2expression(std::size_t i) const
     {
-      return m_generator.get_state_argument(m_indexed_set.get(i));
+      return m_generator.get_state_argument(static_cast<lps::next_state_generator::internal_state_argument_t>(m_indexed_set.get(i)));
     }
 
   public:
@@ -234,12 +234,12 @@ class state_data_type: public pins_data_type
 
     std::string serialize(int i) const
     {
-      return index2expression(i).to_string();
+      return to_string(index2expression(i));
     }
 
     std::size_t deserialize(const std::string& s)
     {
-      return expression2index(data::data_expression(atermpp::read_from_string(s)));
+      return expression2index(data::data_expression(atermpp::read_term_from_string(s)));
     }
 
     std::string print(int i) const
@@ -278,12 +278,12 @@ class action_label_data_type: public pins_data_type
 
     std::string serialize(int i) const
     {
-      return m_indexed_set.get(i).to_string();
+      return to_string(m_indexed_set.get(i));
     }
 
     std::size_t deserialize(const std::string& s)
     {
-      return m_indexed_set[atermpp::read_from_string(s)];
+      return m_indexed_set[atermpp::read_term_from_string(s)];
     }
 
     std::string print(int i) const
@@ -423,8 +423,8 @@ class pins
         {
           if(j->lhs() != j->rhs())
           {
-            data::find_variables(j->lhs(), std::inserter(used_write_variables, used_write_variables.end()));
-            data::find_variables(j->rhs(), std::inserter(used_read_variables, used_read_variables.end()));
+            data::find_all_variables(j->lhs(), std::inserter(used_write_variables, used_write_variables.end()));
+            data::find_all_variables(j->rhs(), std::inserter(used_read_variables, used_read_variables.end()));
           }
         }
 
@@ -453,7 +453,7 @@ class pins
           {
             m_read_group[i - summands.begin()].push_back(j - parameters_list.begin());
           }
-          if (!used_read_parameters.empty() && used_write_parameters.find(*j) != used_write_parameters.end())
+          if (!used_write_parameters.empty() && used_write_parameters.find(*j) != used_write_parameters.end())
           {
             m_write_group[i - summands.begin()].push_back(j - parameters_list.begin());
           }
@@ -525,7 +525,7 @@ class pins
 
       for (std::size_t i = 0; i < m_data_types.size(); i++)
       {
-      	std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
+        std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
         assert(j != m_unique_data_types.end());
         m_unique_data_type_index.push_back(j - m_unique_data_types.begin());
       }
@@ -617,7 +617,7 @@ class pins
       lps::next_state_generator::internal_state_t initial_state = m_generator.internal_initial_state();
       for (size_t i = 0; i < m_state_length; i++)
       {
-        s[i] = state_type_map(i)[initial_state(i)];
+        s[i] = state_type_map(i)[initial_state[i]];
       }
     }
 
@@ -635,28 +635,26 @@ class pins
     }
 
     /// \brief Iterates over the 'next states' of state src, and invokes a callback function for each discovered state.
+    ///
+    /// StateFunction is a callback function that must provide the function operator() with the following interface:
+    /// <code>void operator()(ltsmin_state_type const& next_state, int* const& edge_labels, int group=-1);</code>
+    /// where
+    /// - \a next_state is the target state of the transition
+    /// - \a edge_labels is an array of edge labels
+    /// - \a group is the number of the summand from which the next state was generated, or -1 if it is unknown which summand
+    ///
     /// \param src An LTSMin state
     /// \param f A 'callback' function object
     /// \param dest A destination state, which is modified and passed to the callback.  Must provide space for at least process_parameter_count() items.
     /// \param labels An array of labels, which is modified and passed to the callback.  Must provide space for at least edge_label_count() items.
-    ///
-    /// StateFunction is a callback function that must provide the function operator() with the following interface:
-    ///
-    /// \code
-    /// void operator()(ltsmin_state_type const& next_state, int* const& edge_labels, int group=-1);
-    /// \endcode
-    /// where
-    /// - next_state is the target state of the transition
-    /// - edge_labels is an array of edge labels
-    /// - group is the number of the summand from which the next state was generated, or -1 if it is unknown which summand
     template <typename StateFunction>
     void next_state_all(ltsmin_state_type const& src, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, lps::next_state_generator::internal_state_argument_t, nparams);
+      std::vector<lps::next_state_generator::internal_state_argument_t> state_arguments(nparams);
       for (size_t i = 0; i < nparams; i++)
       {
-        state_arguments[i] = state_type_map(i).get(src[i]);
+        state_arguments[i] = static_cast<lps::next_state_generator::internal_state_argument_t>(state_type_map(i).get(src[i]));
       }
       lps::next_state_generator::internal_state_t source = m_generator.get_internal_state(state_arguments);
 
@@ -665,7 +663,7 @@ class pins
         lps::next_state_generator::internal_state_t destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
-          dest[j] = state_type_map(j)[destination(j)];
+          dest[j] = state_type_map(j)[destination[j]];
         }
         labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
         f(dest, labels);
@@ -675,28 +673,28 @@ class pins
     /// \brief Iterates over the 'next states' of a particular summand
     /// of state src that are generated by a group of summands, and
     /// invokes a callback function for each discovered state.
-    /// \param src An LTSMin state
-    /// \param group the number of the summand, which
-    /// \param dest A destination state, which is modified and passed to the callback.  Must provide space for at least process_parameter_count() items.
-    /// \param labels An array of labels, which is modified and passed to the callback.  Must provide space for at least edge_label_count() items.
     ///
     /// StateFunction is a callback function that must provide the function operator() with the following interface:
-    ///
-    /// \code
-    /// void operator()(ltsmin_state_type const& next_state, int* const& edge_labels, int group);
-    /// \endcode
+    /// <code>void operator()(ltsmin_state_type const& next_state, int* const& edge_labels, int group);</code>
     /// where
     /// - next_state is the target state of the transition
     /// - edge_labels is an array of edge labels
     /// - group is the number of the summand from which the next state was generated, or -1 if it is unknown which summand
+    ///
+    /// \param src An LTSMin state
+    /// \param group the number of the summand, which
+    /// \param dest A destination state, which is modified and passed to the callback.
+    ///        Must provide space for at least process_parameter_count() items.
+    /// \param labels An array of labels, which is modified and passed to the callback.
+    ///        Must provide space for at least edge_label_count() items.
     template <typename StateFunction>
     void next_state_long(ltsmin_state_type const& src, std::size_t group, StateFunction& f, ltsmin_state_type const& dest, int* const& labels)
     {
       std::size_t nparams = process_parameter_count();
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_arguments, lps::next_state_generator::internal_state_argument_t, nparams);
+      std::vector<lps::next_state_generator::internal_state_argument_t> state_arguments(nparams);
       for (size_t i = 0; i < nparams; i++)
       {
-        state_arguments[i] = state_type_map(i).get(src[i]);
+        state_arguments[i] = static_cast<lps::next_state_generator::internal_state_argument_t>(state_type_map(i).get(src[i]));
       }
       lps::next_state_generator::internal_state_t source = m_generator.get_internal_state(state_arguments);
 
@@ -705,7 +703,7 @@ class pins
         lps::next_state_generator::internal_state_t destination = i->internal_state();
         for (size_t j = 0; j < nparams; j++)
         {
-          dest[j] = state_type_map(j)[destination(j)];
+          dest[j] = state_type_map(j)[destination[j]];
         }
         labels[0] = action_label_type_map()[detail::multi_action_to_aterm(i->action())];
         f(dest, labels);

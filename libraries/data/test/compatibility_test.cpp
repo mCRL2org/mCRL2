@@ -16,7 +16,6 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
@@ -36,7 +35,7 @@ void compatibility_test()
 
   std::string text = utilities::read_text(data_stream);
   atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm_data_spec(data::parse_data_specification_new(text));
-  if (data_spec_aterm == 0)
+  if (data_spec_aterm == atermpp::aterm())
   {
     throw mcrl2::runtime_error("Error while parsing data specification");
   }
@@ -56,8 +55,6 @@ void compatibility_test()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   compatibility_test();
 
   return EXIT_SUCCESS;

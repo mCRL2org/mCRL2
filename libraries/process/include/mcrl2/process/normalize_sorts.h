@@ -25,7 +25,7 @@ namespace process
 template <typename T>
 void normalize_sorts(T& x,
                      const data::data_specification& data_spec,
-                     typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                     typename boost::disable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                     )
 {
   core::make_update_apply_builder<process::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
@@ -34,7 +34,7 @@ void normalize_sorts(T& x,
 template <typename T>
 T normalize_sorts(const T& x,
                   const data::data_specification& data_spec,
-                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                  typename boost::enable_if<typename boost::is_base_of< atermpp::aterm, T>::type>::type* = 0
                  )
 {
   return core::make_update_apply_builder<process::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);

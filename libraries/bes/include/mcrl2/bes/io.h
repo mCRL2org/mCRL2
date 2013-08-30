@@ -163,12 +163,12 @@ std::string bes_expression2pgsolver(const Expression& p, const VariableMap& vari
   std::string result;
   if (tr::is_and(p))
   {
-    atermpp::set<Expression> expressions = split_and(p);
+    std::set<Expression> expressions = split_and(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
   else if (tr::is_or(p))
   {
-    atermpp::set<Expression> expressions = split_or(p);
+    std::set<Expression> expressions = split_or(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
   else if (tr::is_prop_var(p))
@@ -280,7 +280,7 @@ void bes2pgsolver(Iter first, Iter last, const std::string& outfilename)
 // Check that the initial equation has, as a left hand side, the variable that
 // has been designated as initial.
 static
-inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equation_system<>& bes_spec)
+inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equation_system& bes_spec)
 {
   if(is_boolean_variable(bes_spec.initial_state()))
   {
@@ -308,7 +308,7 @@ using pbes_system::pbes_file_unknown;
 /// \param aterm_ascii Determines, if output_format is bes, whether the file
 ///        is written is ascii format.
 inline
-void save_bes(const boolean_equation_system<>& bes_spec,
+void save_bes(const boolean_equation_system& bes_spec,
               const std::string& outfilename,
               const bes_file_format output_format,
               bool aterm_ascii = false)
@@ -319,12 +319,12 @@ void save_bes(const boolean_equation_system<>& bes_spec,
     {
       if (aterm_ascii)
       {
-        mCRL2log(log::verbose) << "Saving result in ATerm ascii format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in aterm ascii format..." << std::endl;
         bes_spec.save(outfilename, false);
       }
       else
       {
-        mCRL2log(log::verbose) << "Saving result in ATerm binary format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in aterm binary format..." << std::endl;
         bes_spec.save(outfilename, true);
       }
       break;
@@ -332,17 +332,59 @@ void save_bes(const boolean_equation_system<>& bes_spec,
     case pbes_file_cwi:
     {
       mCRL2log(log::verbose) << "Saving result in CWI format..." << std::endl;
+      // TODO: clean up the code below.
       if(!initial_bes_equation_corresponds_to_initial_state(bes_spec))
       {
-        throw mcrl2::runtime_error("The initial state " + bes::pp(bes_spec.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec.equations().begin()->variable()) + " do not correspond. Cannot save BES to CWI format.");
+        mCRL2log(log::warning) << "The initial state " + bes::pp(bes_spec.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec.equations().begin()->variable()) + " do not correspond." << std::endl;
+        // Determine whether the initial state is in the first block, if so,
+        // swap the two equations.
+        std::vector<boolean_equation> equations(bes_spec.equations().begin(), bes_spec.equations().end());
+        boolean_equation fst = *equations.begin();
+        size_t index = 0;
+        while(index < equations.size() && fst.symbol() == equations[index].symbol())
+        {
+          if(equations[index].variable() == boolean_variable(bes_spec.initial_state()))
+          {
+            break;
+          }
+          ++index;
+        }
+        if(fst.symbol() == equations[index].symbol())
+        {
+          // equation is in the first block, just swap the two
+          std::swap(equations[0], equations[index]);
+          mCRL2log(log::warning) << "Fixed up by swapping the equations for " << pp(equations[0].variable()) << " and " << pp(equations[index].variable()) << std::endl;
+        }
+        else
+        {
+          std::set<boolean_variable> occ = find_boolean_variables(bes_spec);
+          std::set<core::identifier_string> occ_ids;
+          for(std::set<boolean_variable>::const_iterator i = occ.begin(); i != occ.end(); ++i)
+          {
+            occ_ids.insert(i->name());
+          }
+
+          utilities::number_postfix_generator generator(occ_ids.begin(), occ_ids.end(), "X");
+          boolean_variable var = boolean_variable(generator());
+          boolean_equation eqn(fst.symbol(), var, bes_spec.initial_state());
+          equations.insert(equations.begin(), eqn);
+          // bes_spec.initial_state() = var; not used in output
+
+          mCRL2log(log::warning) << "Fixed up by introducing a new initial equation " << pp(eqn) << std::endl;
+        }
+
+        bes::bes2cwi(equations.begin(), equations.end(), outfilename);
       }
-      bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
+      else
+      {
+        bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
+      }
       break;
     }
     case pbes_file_pgsolver:
     {
       mCRL2log(log::verbose) << "Saving result in PGSolver format..." << std::endl;
-      boolean_equation_system<> bes_spec_standard_form(bes_spec);
+      boolean_equation_system bes_spec_standard_form(bes_spec);
       make_standard_form(bes_spec_standard_form, true);
       if(!initial_bes_equation_corresponds_to_initial_state(bes_spec_standard_form))
       {
@@ -368,9 +410,8 @@ void save_bes(const boolean_equation_system<>& bes_spec,
 /// \param b The bes to which the result is loaded.
 /// \param infilename The file from which to load the BES.
 /// \param f The format that should be assumed for the file in infilename.
-template <typename Container>
 inline
-void load_bes(boolean_equation_system<Container>& b,
+void load_bes(boolean_equation_system& b,
               const std::string& infilename,
               const bes_file_format f)
 {
@@ -393,7 +434,7 @@ void load_bes(boolean_equation_system<Container>& b,
     }
     case pbes_file_pbes:
     {
-      pbes_system::pbes<> p;
+      pbes_system::pbes p;
       p.load(infilename);
       if(!pbes_system::is_bes(p))
       {
@@ -414,9 +455,8 @@ void load_bes(boolean_equation_system<Container>& b,
 /// \param infilename The file from which to load the BES.
 ///
 /// The format of the file in infilename is guessed.
-template <typename Container>
 inline
-void load_bes(boolean_equation_system<Container>& b,
+void load_bes(boolean_equation_system& b,
               const std::string& infilename)
 {
   bes_file_format f = pbes_system::guess_format(infilename);

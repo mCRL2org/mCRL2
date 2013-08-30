@@ -19,12 +19,9 @@
 #ifndef _TRACE_H__
 #define _TRACE_H__
 
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/construction_utility.h"
@@ -47,7 +44,7 @@ namespace trace
 //
 /// \brief Formats in which traces can be saved on disk
 /// \details There are several formats for traces.
-/// The tfMcrl2 format saves a trace as an mCRL2 term in ATerm internal format.
+/// The tfMcrl2 format saves a trace as an mCRL2 term in aterm internal format.
 /// This is a compact but unreadable format.
 /// The tfPlain format is an ascii representation of the trace, which is
 /// human readable but only contains the actions and no time or state information.
@@ -57,7 +54,7 @@ namespace trace
 
 enum TraceFormat
 {
-  tfMcrl2,  /**< Format is stored as an ATerm */
+  tfMcrl2,  /**< Format is stored as an aterm */
   tfPlain,  /**< Format is stored in plain text. In this format there are only actions */
   tfUnknown /**< This value indicates that the format is unknown */
 };
@@ -76,20 +73,20 @@ enum TraceFormat
 /// a state can only be added once.
 ///
 /// States can be saved in two formats. A human readable ascii format containging only a
-/// sequence of untimed actions and a more compact ATerm format also containing time and
+/// sequence of untimed actions and a more compact aterm format also containing time and
 /// state information.
 class Trace
 {
   private:
-    // The number of states is always less then one plus the number of actions. 
+    // The number of states is always less then one plus the number of actions.
     // In case all states are there, then it is one more than the number of actions.
     // Otherwise there are less.  So, an invariant is actions.size()+1 >= states.size();
     // The states and actions are supposed to be contiguous,
     // in the sense that if a state, or action, at position n exists, then also the
     // states and actions at positions n'<n exist.
-    
+
     std::vector < mcrl2::lps::state > states;
-    atermpp::vector < mcrl2::lps::multi_action > actions;
+    std::vector < mcrl2::lps::multi_action > actions;
     size_t pos; // Invariant: pos <= actions.size().
 
     mcrl2::data::data_specification m_spec;
@@ -98,7 +95,7 @@ class Trace
 
     atermpp::function_symbol const& trace_pair() const
     {
-      static atermpp::function_symbol trace_pair = core::detail::initialise_static_expression(trace_pair, atermpp::function_symbol("pair",2,false));
+      static atermpp::function_symbol trace_pair = atermpp::function_symbol("pair",2);
       return trace_pair;
     }
 
@@ -112,7 +109,7 @@ class Trace
   public:
     /// \brief Default constructor for an empty trace.
     /// \details The current position
-    /// and length of trace are set to 0. 
+    /// and length of trace are set to 0.
     Trace()
       : m_data_specification_and_act_decls_are_defined(false)
     {
@@ -121,7 +118,7 @@ class Trace
 
     /// \brief Constructor for an empty trace.
     /// \details The current position
-    /// and length of trace are set to 0. 
+    /// and length of trace are set to 0.
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
     Trace(const mcrl2::data::data_specification &spec, const mcrl2::lps::action_label_list &act_decls)
@@ -161,9 +158,9 @@ class Trace
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
     /// \exception mcrl2::runtime_error message in case of failure
-    Trace(std::istream& is, 
-          const mcrl2::data::data_specification &spec, 
-          const mcrl2::lps::action_label_list &act_decls, 
+    Trace(std::istream& is,
+          const mcrl2::data::data_specification &spec,
+          const mcrl2::lps::action_label_list &act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
         m_act_decls(act_decls),
@@ -204,10 +201,12 @@ class Trace
     /// \details A trace is read from the input file. If the format is tfUnknown it
     /// is automatically determined what the format of the trace is.
     /// \param[in] filename The name of the file from which the trace is read.
+    /// \param[in] spec A data specification.
+    /// \param[in] act_decls A list of action declarations.
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
-    Trace(std::string const& filename, 
-          const mcrl2::data::data_specification &spec, 
+    Trace(std::string const& filename,
+          const mcrl2::data::data_specification &spec,
           const mcrl2::lps::action_label_list &act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
@@ -228,7 +227,7 @@ class Trace
     bool operator <(const Trace& t) const
     {
       return ((states<t.states) ||
-              (states==t.states && actions<t.actions));  
+              (states==t.states && actions<t.actions));
     }
 
     /// \brief Set the current position back to the beginning of the trace
@@ -240,7 +239,7 @@ class Trace
     }
 
     /// \brief Increase the current position by one, except if this brings one beyond the end of the trace.
-    /// \details The initial position corresponds to pos=0. 
+    /// \details The initial position corresponds to pos=0.
     void increasePosition()
     {
       if (pos < actions.size())
@@ -248,9 +247,9 @@ class Trace
         ++pos;
       }
     }
-    
+
     /// \brief Decrease the current position in the trace by one provided the largest position is larger than 0.
-    /// \details The initial position corresponds to pos=0. 
+    /// \details The initial position corresponds to pos=0.
     void decreasePosition()
     {
       if (pos >0)
@@ -350,22 +349,22 @@ class Trace
     /// \details This routine returns the action at the current position of the
     /// trace. It is not allowed to request an action if no action is available.
     /// \return An action_list representing the action at the current position of the
-    /// trace. 
+    /// trace.
     mcrl2::lps::multi_action currentAction()
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       assert(pos < actions.size());
       return actions[pos];
     }
-    
+
     /// \brief Get the time of the current state in the trace.
     /// \details This is the time at which
     /// the last action occurred (if any).
     /// \return A data_expression representing the current time, or a default data_expression if the time is not defined.
     mcrl2::data::data_expression currentTime()
-    { 
+    {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      return actions[pos].time(); 
+      return actions[pos].time();
     }
 
     /// \brief Truncates the trace at the current position.
@@ -376,7 +375,7 @@ class Trace
     {
       actions.resize(pos);
       if (pos+1<states.size())  // Only throw states away that exist.
-      { 
+      {
         states.resize(pos+1);
       }
     }
@@ -398,8 +397,7 @@ class Trace
     /// \brief Set the state at the current position.
     /// \details It is necessary that all states at earlier positions are also set.
     /// If not an mcrl2::runtime_error exception is thrown.
-    /// \param [in] state The new state.
-
+    /// \param [in] s The new state.
     void setState(const mcrl2::lps::state &s)
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
@@ -409,12 +407,12 @@ class Trace
         ss << "Setting a state in a trace at a position " << pos << " where there are no states at earlier positions";
         throw mcrl2::runtime_error(ss.str());
       }
-      
+
       if (states.size()==pos)
       {
         states.push_back(s);
       }
-      else 
+      else
       {
         states[pos] = s;
       }
@@ -556,14 +554,14 @@ class Trace
 
   private:
 
-    bool isTimedMAct(ATermAppl t)
+    bool isTimedMAct(const atermpp::aterm_appl &t)
     {
-      return ATgetType(t)==AT_APPL && ATgetAFun(t)==trace_pair();
+      return t.type_is_appl() && t.function()==trace_pair();
     }
 
-    ATermAppl makeTimedMAct(const mcrl2::lps::multi_action &ma)
+    atermpp::aterm_appl makeTimedMAct(const mcrl2::lps::multi_action &ma)
     {
-      return ATmakeAppl2(trace_pair(),(ATerm)(ATermList)ma.actions(), (ATerm)(ATermAppl)ma.time());
+      return atermpp::aterm_appl(trace_pair(),ma.actions(), ma.time());
     }
 
     void init()
@@ -598,48 +596,20 @@ class Trace
       return fmt;
     }
 
-    ATerm readATerm(std::istream& is)
+    atermpp::aterm readATerm(std::istream& is)
     {
-#define RAT_INIT_BUF_SIZE (64*1024)
-      size_t buf_size = RAT_INIT_BUF_SIZE;
-      char* buf = NULL;
-      std::streamsize len = 0;
-
-      while (!is.eof())
+      atermpp::aterm t = atermpp::read_term_from_binary_stream(is);
+      if (!t.defined())
       {
-        char* new_buf = (char*) realloc(buf,buf_size*sizeof(char));
-        if (new_buf == NULL)
-        {
-          free(buf);
-          throw runtime_error("not enough memory to read ATerm");
-        }
-        buf = new_buf;
-
-        is.read(buf+len,buf_size-len);
-        if (is.bad())
-        {
-          free(buf);
-          throw runtime_error("could not read ATerm from stream");
-        }
-
-        len+=is.gcount();
-        buf_size = buf_size * 2;
+        throw runtime_error("failed to read aterm from stream");
       }
-      is.clear();
-
-      ATerm t = ATreadFromBinaryString((unsigned char*) buf, static_cast< int >(len));
-      if (t == NULL)
-      {
-        throw runtime_error("failed to read ATerm from stream");
-      }
-
-      free(buf);
 
       return t;
     }
 
     void loadMcrl2(std::istream& is)
     {
+      using namespace atermpp;
       char buf[TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE];
       is.read(buf,TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE);
       if (is.bad() || strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE))
@@ -650,37 +620,37 @@ class Trace
 
       resetPosition();
       truncate();
-
-      ATermList trace = (ATermList) readATerm(is);
-      assert(ATgetType(trace) == AT_LIST);
-      for (; !ATisEmpty(trace); trace=ATgetNext(trace))
+      aterm_list trace(readATerm(is));
+      assert(trace.type_is_list());
+      for (; !trace.empty(); trace=trace.tail())
       {
         using namespace mcrl2::lps;
-        ATermAppl e = (ATermAppl) ATgetFirst(trace);
+        const aterm& e = trace.front();
 
-        if (core::detail::gsIsMultAct(e))   // To be compatible with old untimed version
+        if (e.type_is_appl() && lps::is_multi_action(aterm_cast<aterm_appl>(e)))   // To be compatible with old untimed version
         {
-          addAction(multi_action(action_list(e)));
+          addAction(multi_action(action_list(aterm_cast<aterm_appl>(e))));
         }
-        else if (isTimedMAct(e))
+        else if (e.type_is_appl() && isTimedMAct(aterm_cast<aterm_appl>(e)))
         {
-          if (core::detail::gsIsNil(ATAgetArgument(e,1)))
+          if (aterm_cast<aterm_appl>(e)[1]==data::data_expression())  // There is no time tag.
           {
-            addAction(multi_action(action_list(ATgetArgument(e,0))));
+            addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0])));
           }
           else
           {
-            addAction(multi_action(action_list(ATAgetArgument(e,0)),mcrl2::data::data_expression(ATAgetArgument(e,1))));
+            addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0]),
+                               mcrl2::data::data_expression(aterm_cast<aterm_appl>(e)[1])));
           }
         }
         else
         {
           // So, e is a list of data expressions.
-          ATermList l=(ATermList)(ATerm)e;
+          aterm_list l(e);
           mcrl2::lps::state s;
-          for( ; !ATisEmpty(l) ; l=ATgetNext(l))
+          for( ; !l.empty() ; l=l.tail())
           {
-            s.push_back(mcrl2::data::data_expression(ATgetFirst(l)));
+            s.push_back(mcrl2::data::data_expression(l.front()));
           }
           setState(s);
         }
@@ -715,7 +685,7 @@ class Trace
           {
             addAction(mcrl2::lps::parse_multi_action(buf,m_act_decls,m_spec));
           }
-          else  
+          else
           {
             addAction(mcrl2::lps::multi_action(mcrl2::lps::action(
                       mcrl2::lps::action_label(mcrl2::core::identifier_string(buf),mcrl2::data::sort_expression_list()),
@@ -731,7 +701,7 @@ class Trace
     void saveMcrl2(std::ostream& os)
     {
       assert(actions.size()+1 >= states.size());
-      ATermList trace = ATmakeList0();
+      atermpp::aterm_list trace;
 
       size_t i=actions.size()+1;
       while (i > 0)
@@ -740,19 +710,19 @@ class Trace
         if (i<actions.size())
         {
           assert(actions.size()>i);
-          trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i]));
+          trace.push_front(atermpp::aterm(makeTimedMAct(actions[i])));
         }
         if (states.size()>i)
         {
           using namespace mcrl2::lps;
-          // Translate the vector into a list of ATerms representing data expressions.
-          ATermList l=ATempty;
+          // Translate the vector into a list of aterms representing data expressions.
+          atermpp::aterm_list l;
           const state & s=states[i];
           for(mcrl2::lps::state::const_reverse_iterator j=s.rbegin(); j!=s.rend(); ++j)
           {
-            l=ATinsert(l,(ATerm)(ATermAppl)*j);
+            l.push_front(atermpp::aterm(*j));
           }
-          trace = ATinsert(trace,(ATerm) l);
+          trace.push_front(atermpp::aterm(l));
         }
       }
 
@@ -765,9 +735,8 @@ class Trace
       }
 
       // write trace
-      size_t len;
-      const char* bs = (const char*) ATwriteToBinaryString((ATerm) trace,&len);  //XXX no error handling?
-      os.write(bs,len);
+
+      atermpp::write_term_to_binary_stream(trace,os);
       if (os.bad())
       {
         throw runtime_error("could not write to stream");

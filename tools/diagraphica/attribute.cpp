@@ -18,6 +18,7 @@ Attribute::Attribute(
   QString name,
   QString type,
   const size_t& idx)
+    : QObject()
 {
   m_name  = name;
   m_type  = type;
@@ -26,6 +27,7 @@ Attribute::Attribute(
 
 
 Attribute::Attribute(const Attribute& attr)
+    : QObject()
 {
   index = attr.index;
   m_name  = attr.m_name;

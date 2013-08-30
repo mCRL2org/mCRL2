@@ -5,6 +5,8 @@ macro(flagvar FLAG FLAGNAME PREFIX)
   string(REPLACE "-" "_" RESULT "${FLAG}")
   string(REPLACE "/" "_" RESULT "${RESULT}")
   string(REPLACE "," "_" RESULT "${RESULT}")
+  string(REPLACE "=" "_" RESULT "${RESULT}")
+  string(REPLACE "+" "P" RESULT "${RESULT}")
   string(TOUPPER "${PREFIX}_ACCEPTS${RESULT}" ${FLAGNAME})
 endmacro(flagvar)
 

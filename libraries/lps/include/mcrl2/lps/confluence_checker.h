@@ -16,7 +16,6 @@
 #define CONFLUENCE_CHECKER_H
 
 #include <string>
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/bdd_prover.h"
@@ -136,22 +135,14 @@ namespace lps
 namespace detail
 {
 
-inline
-ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
-{
-  f=NULL;
-  ATprotectAppl(&f);
-  return v;
-}
-
 /**
  * \brief Creates an identifier for the for the ctau action
  **/
 inline action_label make_ctau_act_id()
 {
-  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, mcrl2::core::detail::gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, true)), ATmakeList0()));
+  static atermpp::aterm_appl ctau_act_id = mcrl2::core::detail::gsMakeActId(atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
 
-  assert(ctau_act_id);
+  assert(atermpp::detail::address(ctau_act_id));
 
   return action_label(ctau_act_id);
 }
@@ -161,9 +152,9 @@ inline action_label make_ctau_act_id()
  **/
 inline action make_ctau_action()
 {
-  static ATermAppl ctau_action = initAtermAppl(ctau_action, mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0()));
+  static atermpp::aterm_appl ctau_action = mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), atermpp::aterm_list());
 
-  assert(ctau_action);
+  assert(atermpp::detail::address(ctau_action));
 
   return action(ctau_action);
 }
@@ -188,7 +179,7 @@ class Confluence_Checker
     const mcrl2::lps::specification& f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
-    bool f_no_marking;
+    // bool f_no_marking;
 
     /// \brief Flag indicating whether or not the process of checking the confluence of a summand stops when
     /// \brief a summand is encountered that is not confluent with the tau summand at hand.
@@ -245,7 +236,6 @@ class Confluence_Checker
       bool a_path_eliminator = false,
       mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
       bool a_apply_induction = false,
-      bool a_no_marking = false,
       bool a_check_all = false,
       bool a_counter_example = false,
       bool a_generate_invariants = false,

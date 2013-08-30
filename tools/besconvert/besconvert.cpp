@@ -17,8 +17,6 @@
 #include "mcrl2/utilities/pbes_input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
-#include "mcrl2/atermpp/map.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/bes/detail/bes_algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -27,7 +25,6 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
@@ -41,8 +38,7 @@ namespace mcrl2
 namespace bes
 {
 
-template <typename Container = atermpp::vector<boolean_equation> >
-class bes_reduction_algorithm: public detail::bes_algorithm<Container>
+class bes_reduction_algorithm: public detail::bes_algorithm
 {
   public:
     enum equivalence_t
@@ -61,7 +57,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
     };
 
   protected:
-    typedef detail::bes_algorithm<Container> super;
+    typedef detail::bes_algorithm super;
     using super::m_bes; // Why doesn't the compiler see this by itself?
 
     equivalence_t m_equivalence;
@@ -90,10 +86,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       {
         return eq_stut;
       }
-      else
-      {
-        return eq_none;
-      }
+      return eq_none;
     }
 
     std::string string_for_equivalence(const equivalence_t& eq)
@@ -109,7 +102,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
     std::string allowed_equivalences()
     {
       std::set<std::string> tmp;
-      for (typename std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
+      for (std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
       {
         tmp.insert(string_for_equivalence(*i));
       }
@@ -119,6 +112,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
   protected:
     void initialise_allowed_eqs()
     {
+      m_allowed_equivalences.insert(eq_none);
       m_allowed_equivalences.insert(eq_bisim);
       m_allowed_equivalences.insert(eq_stut);
       m_equivalence_strings[eq_bisim] = "bisim";
@@ -211,7 +205,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       size_t index = 0;
       fixpoint_symbol sigma = fixpoint_symbol::nu();
       bool and_in_block = false;
-      for (typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         if (i->symbol() != sigma)
         {
@@ -242,14 +236,14 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
         ++statecount;
         transitioncount += m_bes.equations().size();
       }
-      unsigned int initial_state = indices[m_bes.initial_state()];
+      unsigned int initial_state = indices[mcrl2::bes::boolean_variable(m_bes.initial_state())];
 
       m_lts.set_num_states(statecount, false);
       m_lts.set_initial_state(initial_state);
 
       atermpp::indexed_set labs(100,50);
 
-      for (typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         std::pair<unsigned int, boolean_operand_t> info = statistics[i->variable()];
         // If variable, map to operand that was precomputed for variables.
@@ -267,7 +261,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
           label << "self:block(" << info.first << "),op(" << info.second << ")";
           lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
-          if (label_index == ATERM_NON_EXISTING_POSITION)
+          if (label_index == atermpp::npos)
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
@@ -325,7 +319,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
           size_t to = indices[*j];
           lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           size_t label_index = labs.index(t);
-          if (label_index == ATERM_NON_EXISTING_POSITION)
+          if (label_index == atermpp::npos)
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
@@ -404,11 +398,11 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       // Build formulas
       size_t cur_state = 0;
       std::vector<lts::transition>::const_iterator i = transitions.begin();
-      atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
+      std::map<size_t, std::vector<boolean_equation> > blocks;
 
       while (i != transitions.end())
       {
-        atermpp::vector<boolean_variable> variables;
+        std::vector<boolean_variable> variables;
         size_t block = 0;
         boolean_operand_t op = BOOL_VAR;
         cur_state = i->from();
@@ -491,10 +485,10 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
         blocks[block].push_back(eq);
       }
 
-      atermpp::vector<boolean_equation> eqns;
+      std::vector<boolean_equation> eqns;
       for (size_t i = 0; i <= blocks.size(); ++i)
       {
-        atermpp::map<size_t, atermpp::vector<boolean_equation> >::const_iterator j = blocks.find(i);
+        std::map<size_t, std::vector<boolean_equation> >::const_iterator j = blocks.find(i);
         if (j != blocks.end())
         {
           eqns.insert(eqns.end(), j->second.begin(), j->second.end());
@@ -508,8 +502,8 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
     }
 
   public:
-    bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut, const to_lts_translation_t translation = to_lts_selfloop, const std::string& lts_filename = "", const bool to_lts_only = false)
-      : detail::bes_algorithm<Container>(v_bes),
+    bes_reduction_algorithm(boolean_equation_system& v_bes, const equivalence_t equivalence=eq_stut, const to_lts_translation_t translation = to_lts_selfloop, const std::string& lts_filename = "", const bool to_lts_only = false)
+      : detail::bes_algorithm(v_bes),
         m_equivalence(equivalence),
         m_translation(translation),
         m_lts_filename(lts_filename),
@@ -562,9 +556,9 @@ typedef bes_input_output_tool<input_output_tool> super;
 class besconvert_tool: public super
 {
   protected:
-    bes_reduction_algorithm<>::equivalence_t equivalence;
+    bes_reduction_algorithm::equivalence_t equivalence;
     std::string m_lts_filename;
-    bes_reduction_algorithm<>::to_lts_translation_t m_translation;
+    bes_reduction_algorithm::to_lts_translation_t m_translation;
     bool m_no_reduction;
 
     void add_options(mcrl2::utilities::interface_description& desc)
@@ -575,8 +569,9 @@ class besconvert_tool: public super
 
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
                       "generate an equivalent BES, preserving equivalence NAME:"
+                      "  'none'  for no reduction (default),\n"
                       "  'bisim' for strong bisimulation,\n"
-                      "  'stuttering' for stuttering equivalence (default)", 'e');
+                      "  'stuttering' for stuttering equivalence", 'e');
       desc.add_option("intermediate", make_file_argument("FILE"),
                       "save the intermediate LTS to FILE", 'l');
       desc.add_option("translation", make_mandatory_argument("TRANSLATION"),
@@ -595,8 +590,8 @@ class besconvert_tool: public super
 
       if (parser.options.count("equivalence"))
       {
-        boolean_equation_system<> b; // TODO: build proper solution.
-        mcrl2::bes::bes_reduction_algorithm<> a(b);
+        boolean_equation_system b; // TODO: build proper solution.
+        mcrl2::bes::bes_reduction_algorithm a(b);
         equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
         if (a.allowed_eqs().count(equivalence) == 0)
         {
@@ -615,15 +610,15 @@ class besconvert_tool: public super
         std::string str_translation(parser.option_argument("translation"));
         if (str_translation == "deadlock")
         {
-          m_translation = bes_reduction_algorithm<>::to_lts_deadlock;
+          m_translation = bes_reduction_algorithm::to_lts_deadlock;
         }
         else if (str_translation == "selfloop")
         {
-          m_translation = bes_reduction_algorithm<>::to_lts_selfloop;
+          m_translation = bes_reduction_algorithm::to_lts_selfloop;
         }
         else if (str_translation == "successor")
         {
-          m_translation = bes_reduction_algorithm<>::to_lts_outgoing_transition;
+          m_translation = bes_reduction_algorithm::to_lts_outgoing_transition;
         }
         else
         {
@@ -631,7 +626,7 @@ class besconvert_tool: public super
         }
       }
 
-      if (equivalence != bes_reduction_algorithm<>::eq_bisim && m_translation == bes_reduction_algorithm<>::to_lts_outgoing_transition)
+      if (equivalence != bes_reduction_algorithm::eq_bisim && m_translation == bes_reduction_algorithm::to_lts_outgoing_transition)
       {
         parser.error("option --translation=successor can only be used with --equivalence=bisim");
       }
@@ -649,8 +644,8 @@ class besconvert_tool: public super
         "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
         "If INFILE is not "
         "present, stdin is used. If OUTFILE is not present, stdout is used."),
-      equivalence(bes_reduction_algorithm<>::eq_stut),
-      m_translation(bes_reduction_algorithm<>::to_lts_selfloop),
+      equivalence(bes_reduction_algorithm::eq_none),
+      m_translation(bes_reduction_algorithm::to_lts_selfloop),
       m_no_reduction(false)
     {}
 
@@ -659,19 +654,23 @@ class besconvert_tool: public super
       using namespace mcrl2::bes;
       using namespace mcrl2;
 
-      boolean_equation_system<> b;
+      boolean_equation_system b;
 
       mCRL2log(verbose) << "Loading BES from input file...";
       load_bes(b, input_filename(), bes_input_format());
 
-      bool reach = detail::bes_algorithm<>(b).remove_unreachable_equations();
-      if(!reach)
+      if(equivalence != bes_reduction_algorithm::eq_none)
       {
-        throw mcrl2::runtime_error("expect all equations to be reachable");
-      }
 
-      mCRL2log(verbose) << "done" << std::endl;
-      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
+        bool reach = detail::bes_algorithm(b).remove_unreachable_equations();
+        if(!reach)
+        {
+          throw mcrl2::runtime_error("expect all equations to be reachable");
+        }
+
+        mCRL2log(verbose) << "done" << std::endl;
+        bes_reduction_algorithm(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
+      }
       save_bes(b, output_filename(), bes_output_format());
 
       return true;
@@ -681,7 +680,5 @@ class besconvert_tool: public super
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return besconvert_tool().execute(argc, argv);
 }

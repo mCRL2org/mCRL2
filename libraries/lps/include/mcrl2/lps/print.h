@@ -207,6 +207,14 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().leave(x);
   }
 
+  void operator()(const lps::untyped_action& x)
+  {
+    derived().enter(x);
+    derived()(x.name());
+    print_list(x.arguments(), "(", ")", ", ");
+    derived().leave(x);
+  }
+
   void operator()(const lps::deadlock& x)
   {
     derived().enter(x);

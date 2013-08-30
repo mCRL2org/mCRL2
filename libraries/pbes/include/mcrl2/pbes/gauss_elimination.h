@@ -57,7 +57,7 @@ class gauss_elimination_algorithm
     /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
     /// \param first Start of a range of pbes equations
     /// \param last End of a range of pbes equations
-    /// \param solver An equation solver
+    /// \param solve An equation solver
 
     template <typename Iter, typename FixpointEquationSolver>
     void run(Iter first, Iter last, FixpointEquationSolver solve)
@@ -74,7 +74,7 @@ class gauss_elimination_algorithm
         --i;
         mCRL2log(log::verbose) << "solving equation\n  before: " << print_equation(*i);
         solve(*i);
-        mCRL2log(log::verbose) << "   after: " << print_equation(*i);
+        mCRL2log(log::verbose) << "   after: " << print_equation(*i) << "\n";
         for (Iter j = first; j != i; ++j)
         {
           j->formula() = ExpressionTraits::substitute(j->formula(), i->variable(), i->formula());

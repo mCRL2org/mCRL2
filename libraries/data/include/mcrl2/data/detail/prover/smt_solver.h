@@ -12,7 +12,6 @@
 #ifndef SMT_SOLVER_H
 #define SMT_SOLVER_H
 
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2
@@ -26,7 +25,7 @@ class SMT_Solver
 {
   public:
     virtual ~SMT_Solver() {};
-    virtual bool is_satisfiable(const data_expression_list a_formula) = 0;
+    virtual bool is_satisfiable(const data_expression_list &a_formula) = 0;
 };
 }
 }

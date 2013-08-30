@@ -76,19 +76,19 @@ make_find_propositional_variables_traverser(OutputIterator out)
 /// \param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \return All variables that occur in the term x
 template <typename T, typename OutputIterator>
-void find_variables(const T& x, OutputIterator o)
+void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_variables_traverser<pbes_system::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<pbes_system::variable_traverser>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
 /// \return All variables that occur in the object x
 template <typename T>
-std::set<data::variable> find_variables(const T& x)
+std::set<data::variable> find_all_variables(const T& x)
 {
   std::set<data::variable> result;
-  pbes_system::find_variables(x, std::inserter(result, result.end()));
+  pbes_system::find_all_variables(x, std::inserter(result, result.end()));
   return result;
 }
 
@@ -99,7 +99,7 @@ std::set<data::variable> find_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<pbes_system::variable_traverser, pbes_system::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<pbes_system::data_expression_traverser, pbes_system::add_data_variable_binding>(o)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -110,7 +110,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<pbes_system::variable_traverser, pbes_system::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<pbes_system::data_expression_traverser, pbes_system::add_data_variable_binding>(o, bound)(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -223,14 +223,13 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
 }
 
 /// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] container an expression or container with expressions
-/// \param[in] v an expression or container with expressions
-/// \param d A variable
+/// \param[in] x an expression in which to search
+/// \param[in] v the variable to search for
 /// \return True if the term has a given variable as subterm.
 template <typename T>
 bool search_variable(const T& x, const data::variable& v)
 {
-  std::set<data::variable> variables = pbes_system::find_variables(x);
+  std::set<data::variable> variables = pbes_system::find_all_variables(x);
   return variables.find(v) != variables.end();
 }
 

@@ -64,7 +64,7 @@ namespace mcrl2 {
 
         /// \brief Declaration for sort fset as structured sort
         /// \param s A sort expression
-        /// \ret The structured sort representing fset
+        /// \return The structured sort representing fset
         inline
         structured_sort fset_struct(const sort_expression& s)
         {
@@ -81,7 +81,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("@fset_empty"));
+        static core::identifier_string empty_name = core::identifier_string("@fset_empty");
         return empty_name;
       }
 
@@ -114,7 +114,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cons_name()
       {
-        static core::identifier_string cons_name = core::detail::initialise_static_expression(cons_name, core::identifier_string("@fset_cons"));
+        static core::identifier_string cons_name = core::identifier_string("@fset_cons");
         return cons_name;
       }
 
@@ -150,7 +150,7 @@ namespace mcrl2 {
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return cons_(s)(arg0, arg1);
+        return sort_fset::cons_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_cons
@@ -184,7 +184,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& insert_name()
       {
-        static core::identifier_string insert_name = core::detail::initialise_static_expression(insert_name, core::identifier_string("@fset_insert"));
+        static core::identifier_string insert_name = core::identifier_string("@fset_insert");
         return insert_name;
       }
 
@@ -220,7 +220,7 @@ namespace mcrl2 {
       inline
       application insert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return insert(s)(arg0, arg1);
+        return sort_fset::insert(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_insert
@@ -242,7 +242,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cinsert_name()
       {
-        static core::identifier_string cinsert_name = core::detail::initialise_static_expression(cinsert_name, core::identifier_string("@fset_cinsert"));
+        static core::identifier_string cinsert_name = core::identifier_string("@fset_cinsert");
         return cinsert_name;
       }
 
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return cinsert(s)(arg0, arg1, arg2);
+        return sort_fset::cinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_cinsert
@@ -301,7 +301,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("@fset_in"));
+        static core::identifier_string in_name = core::identifier_string("@fset_in");
         return in_name;
       }
 
@@ -337,7 +337,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_fset::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_in
@@ -359,7 +359,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& union_name()
       {
-        static core::identifier_string union_name = core::detail::initialise_static_expression(union_name, core::identifier_string("@fset_union"));
+        static core::identifier_string union_name = core::identifier_string("@fset_union");
         return union_name;
       }
 
@@ -397,7 +397,7 @@ namespace mcrl2 {
       inline
       application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return union_(s)(arg0, arg1, arg2, arg3);
+        return sort_fset::union_(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_union
@@ -419,7 +419,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& intersection_name()
       {
-        static core::identifier_string intersection_name = core::detail::initialise_static_expression(intersection_name, core::identifier_string("@fset_inter"));
+        static core::identifier_string intersection_name = core::identifier_string("@fset_inter");
         return intersection_name;
       }
 
@@ -457,7 +457,7 @@ namespace mcrl2 {
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return intersection(s)(arg0, arg1, arg2, arg3);
+        return sort_fset::intersection(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_inter
@@ -479,7 +479,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& difference_name()
       {
-        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("@fset_diff"));
+        static core::identifier_string difference_name = core::identifier_string("@fset_diff");
         return difference_name;
       }
 
@@ -515,7 +515,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return difference(s)(arg0, arg1);
+        return sort_fset::difference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_diff
@@ -539,12 +539,14 @@ namespace mcrl2 {
       function_symbol_vector fset_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(insert(s));
-        result.push_back(cinsert(s));
-        result.push_back(in(s));
-        result.push_back(union_(s));
-        result.push_back(intersection(s));
-        result.push_back(difference(s));
+        result.push_back(sort_fset::insert(s));
+        result.push_back(sort_fset::cinsert(s));
+        result.push_back(sort_fset::in(s));
+        result.push_back(sort_fset::union_(s));
+        result.push_back(sort_fset::intersection(s));
+        result.push_back(sort_fset::difference(s));
+        function_symbol_vector fset_mappings = detail::fset_struct(s).comparison_functions(fset(s));
+        result.insert(result.end(), fset_mappings.begin(), fset_mappings.end());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -556,7 +558,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -568,7 +570,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -580,7 +582,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -592,7 +594,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_cinsert_application(e) || is_union_application(e) || is_intersection_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -604,7 +606,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_union_application(e) || is_intersection_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 3);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 3);
       }
 
       ///\brief Function for projecting out argument
@@ -616,7 +618,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for fset
@@ -634,6 +636,8 @@ namespace mcrl2 {
 
         data_equation_vector result;
         data_equation_vector fset_equations = detail::fset_struct(s).constructor_equations(fset(s));
+        result.insert(result.end(), fset_equations.begin(), fset_equations.end());
+        fset_equations = detail::fset_struct(s).comparison_equations(fset(s));
         result.insert(result.end(), fset_equations.begin(), fset_equations.end());
         result.push_back(data_equation(atermpp::make_vector(vd), insert(s, vd, empty(s)), cons_(s, vd, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), insert(s, vd, cons_(s, vd, vs)), cons_(s, vd, vs)));

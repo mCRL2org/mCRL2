@@ -13,7 +13,6 @@
 #define MCRL2_DATA_FUNCTION_SYMBOL_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
@@ -37,10 +36,10 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    function_symbol(const atermpp::aterm_appl& term)
+    explicit function_symbol(const atermpp::aterm& term)
       : data_expression(term)
     {
-      assert(core::detail::check_term_OpId(m_term));
+      assert(core::detail::check_term_OpId(*this));
     }
 
     /// \brief Constructor.
@@ -53,14 +52,14 @@ class function_symbol: public data_expression
       : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
     {}
 
-    core::identifier_string name() const
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    sort_expression sort() const
+    const sort_expression& sort() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
 //--- end generated class function_symbol ---//
@@ -69,17 +68,27 @@ class function_symbol: public data_expression
 typedef atermpp::term_list< function_symbol > function_symbol_list;
 
 /// \brief vector of function symbols
-typedef atermpp::vector< function_symbol >    function_symbol_vector;
+typedef std::vector< function_symbol >    function_symbol_vector;
 
 // template function overloads
 std::string pp(const function_symbol& x);
 std::string pp(const function_symbol_list& x);
 std::string pp(const function_symbol_vector& x);
-std::set<data::variable> find_variables(const data::function_symbol& x);
+std::set<data::variable> find_all_variables(const data::function_symbol& x);
 
 } // namespace data
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::data::function_symbol& t1, mcrl2::data::function_symbol& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

@@ -14,10 +14,7 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-//#include "mcrl2/bes/find.h"
 #include "mcrl2/bes/parse.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/traverser.h"
 
 using namespace mcrl2;
@@ -49,10 +46,9 @@ void test_custom_traverser()
   boolean_equation eq;
   t(eq);
 
-  boolean_equation_system<> eqn;
+  boolean_equation_system eqn;
   t(eqn);
 
-  core::garbage_collect();
 }
 
 class traverser1: public boolean_variable_traverser<traverser1>
@@ -112,7 +108,7 @@ void test_traverser1()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -122,13 +118,10 @@ void test_traverser1()
   BOOST_CHECK(t2.expression_count == 7);
   BOOST_CHECK(t2.equation_count == 2);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_custom_traverser();
   test_traverser1();
 

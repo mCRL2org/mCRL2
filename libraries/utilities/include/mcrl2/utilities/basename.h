@@ -17,6 +17,10 @@
 #include <string>
 #include <iostream>
 
+#ifdef __linux
+#include <unistd.h>
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #endif //_WIN32

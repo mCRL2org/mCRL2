@@ -17,17 +17,16 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "mcrl2/aterm/aterm2.h"
 #include "boost/algorithm/string.hpp"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -48,7 +47,7 @@ struct sort_expression_actions: public core::default_parser_actions
   data::sort_expression parse_SortExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "SimpleSortExpr")) { return parse_SimpleSortExpr(node.child(0)); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ComplexSortExpr")) { return parse_ComplexSortExpr(node.child(0)); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "HashArgs") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SimpleSortExprList(node.child(0)), parse_SortExpr(node.child(2))); }
     report_unexpected_node(node);
     return data::sort_expression();
   }
@@ -70,21 +69,21 @@ struct sort_expression_actions: public core::default_parser_actions
     return data::sort_expression();
   }
 
-  data::sort_expression parse_ComplexSortExpr(const core::parse_node& node)
-  {
-    return function_sort(parse_SortExprList(node.child(0)), parse_SortExpr(node.child(2)));
-  }
-
   data::sort_expression_list parse_SortExprList(const core::parse_node& node)
   {
     return parse_list<data::sort_expression>(node, "SortExpr", boost::bind(&sort_expression_actions::parse_SortExpr, this, _1));
+  }
+
+  data::sort_expression_list parse_SimpleSortExprList(const core::parse_node& node)
+  {
+    return parse_list<data::sort_expression>(node, "SimpleSortExpr", boost::bind(&sort_expression_actions::parse_SimpleSortExpr, this, _1));
   }
 
   data::structured_sort_constructor parse_ConstrDecl(const core::parse_node& node)
   {
     core::identifier_string name = parse_Id(node.child(0));
     data::structured_sort_constructor_argument_list arguments;
-    core::identifier_string recogniser = no_identifier();
+    core::identifier_string recogniser = atermpp::empty_string();
     if (node.child(1))
     {
       arguments = parse_ProjDeclList(node.child(1));
@@ -107,7 +106,7 @@ struct sort_expression_actions: public core::default_parser_actions
 
   data::structured_sort_constructor_argument parse_ProjDecl(const core::parse_node& node)
   {
-    core::identifier_string name = no_identifier();
+    core::identifier_string name = atermpp::empty_string();
     sort_expression sort = parse_SortExpr(node.child(1));
     if (node.child(0).child(0))
     {
@@ -129,32 +128,36 @@ struct data_expression_actions: public sort_expression_actions
     : sort_expression_actions(table_)
   {}
 
-  data_expression make_set_or_bag_comprehension(const variable& v, const data_expression& x)
+  data_expression make_untyped_set_or_bag_comprehension(const variable& v, const data_expression& x)
   {
-    return abstraction(set_or_bag_comprehension_binder(), atermpp::make_list(v), x);
+    return abstraction(untyped_set_or_bag_comprehension_binder(), atermpp::make_list(v), x);
   }
 
   data_expression make_list_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    return application(identifier(sort_list::list_enumeration_name()), x);
+    // return application(untyped_identifier(sort_list::list_enumeration_name()), x); 
+    return sort_list::list_enumeration(untyped_sort(),x);
   }
 
   data_expression make_set_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    return application(identifier(sort_set::set_enumeration_name()), x);
+    // return application(untyped_identifier(sort_set::set_enumeration_name()), x); 
+    return sort_set::set_enumeration(untyped_sort(),x);
   }
 
   data_expression make_bag_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    return application(identifier(sort_bag::bag_enumeration_name()), x);
+    // return application(untyped_identifier(sort_bag::bag_enumeration_name()), x); 
+    return sort_bag::bag_enumeration(untyped_sort(),x);
   }
 
   data_expression make_function_update(const data_expression& x, const data_expression& y, const data_expression& z)
   {
-    return make_application(identifier(mcrl2::data::function_update_name()), x, y, z);
+    // return make_application(untyped_identifier(mcrl2::data::function_update_name()), x, y, z);
+    return make_application(function_symbol(mcrl2::data::function_update_name(),untyped_sort()), x, y, z);
   }
 
   template <typename ExpressionContainer>
@@ -198,45 +201,46 @@ struct data_expression_actions: public sort_expression_actions
   data::data_expression parse_DataExpr(const core::parse_node& node)
   {
     assert(symbol_name(node) == "DataExpr");
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return identifier(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return identifier(parse_Number(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return identifier(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return identifier(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "]")) { return identifier("[]"); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "}")) { return identifier("{}"); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return untyped_identifier(parse_Id(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return untyped_identifier(parse_Number(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return untyped_identifier(parse_Id(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return untyped_identifier(parse_Id(node.child(0))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "]")) { return untyped_identifier("[]"); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "}")) { return untyped_identifier("{}"); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == ":") && (symbol_name(node.child(2)) == "}")) { return untyped_identifier("{:}"); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "DataExprList") && (symbol_name(node.child(2)) == "]")) { return make_list_enumeration(parse_DataExprList(node.child(1))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "BagEnumEltList") && (symbol_name(node.child(2)) == "}")) { return make_bag_enumeration(parse_BagEnumEltList(node.child(1))); }
-    else if ((node.child_count() == 5) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "VarDecl") && (symbol_name(node.child(2)) == "|") && (symbol_name(node.child(3)) == "DataExpr") && (symbol_name(node.child(4)) == "}")) { return make_set_or_bag_comprehension(parse_VarDecl(node.child(1)), parse_DataExpr(node.child(3))); }
+    else if ((node.child_count() == 5) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "VarDecl") && (symbol_name(node.child(2)) == "|") && (symbol_name(node.child(3)) == "DataExpr") && (symbol_name(node.child(4)) == "}")) { return make_untyped_set_or_bag_comprehension(parse_VarDecl(node.child(1)), parse_DataExpr(node.child(3))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "DataExprList") && (symbol_name(node.child(2)) == "}")) { return make_set_enumeration(parse_DataExprList(node.child(1))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "DataExpr") && (symbol_name(node.child(2)) == ")")) { return parse_DataExpr(node.child(1)); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "[") && (symbol_name(node.child(2)) == "DataExpr") && (symbol_name(node.child(3)) == "->") && (symbol_name(node.child(4)) == "DataExpr") && (symbol_name(node.child(5)) == "]")) { return make_function_update(parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)), parse_DataExpr(node.child(4))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "DataExprList") && (symbol_name(node.child(3)) == ")")) { return application(parse_DataExpr(node.child(0)), parse_DataExprList(node.child(2))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(0))), parse_DataExpr(node.child(1))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(0))), parse_DataExpr(node.child(1))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(0))), parse_DataExpr(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(0))), parse_DataExpr(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(0))), parse_DataExpr(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(0))), parse_DataExpr(node.child(1))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return forall(parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return exists(parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "lambda") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return lambda(parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "=>") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "&&") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "==") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "!=") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<=") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">=") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "in") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "|>") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<|") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "++") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "-") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "/") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "div") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "mod") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "*") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "=>") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "&&") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "==") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "!=") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<=") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">=") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "in") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "|>") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<|") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "++") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "-") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "/") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "div") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "mod") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "*") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "whr") && (symbol_name(node.child(2)) == "AssignmentList") && (symbol_name(node.child(3)) == "end")) { return where_clause(parse_DataExpr(node.child(0)), parse_AssignmentList(node.child(2))); }
     report_unexpected_node(node);
     return data::data_expression();
@@ -244,15 +248,15 @@ struct data_expression_actions: public sort_expression_actions
 
   data::data_expression parse_DataExprUnit(const core::parse_node& node)
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return identifier(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return identifier(parse_Number(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return identifier(parse_Id(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return identifier(parse_Id(node.child(0))); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return untyped_identifier(parse_Id(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return untyped_identifier(parse_Number(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return untyped_identifier(parse_Id(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return untyped_identifier(parse_Id(node.child(0))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "DataExpr") && (symbol_name(node.child(2)) == ")")) { return parse_DataExpr(node.child(1)); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "DataExprList") && (symbol_name(node.child(3)) == ")")) { return application(parse_DataExprUnit(node.child(0)), parse_DataExprList(node.child(2))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "DataExprUnit")) { return make_application(identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExprUnit")) { return make_application(identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExprUnit")) { return make_application(identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "DataExprUnit")) { return make_application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExprUnit")) { return make_application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExprUnit")) { return make_application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
     report_unexpected_node(node);
     return data::data_expression();
   }
@@ -262,14 +266,14 @@ struct data_expression_actions: public sort_expression_actions
     return parse_DataExpr(node.child(2));
   }
 
-  data::identifier_assignment parse_Assignment(const core::parse_node& node)
+  data::untyped_identifier_assignment parse_Assignment(const core::parse_node& node)
   {
-    return identifier_assignment(parse_Id(node.child(0)), parse_DataExpr(node.child(2)));
+    return untyped_identifier_assignment(parse_Id(node.child(0)), parse_DataExpr(node.child(2)));
   }
 
-  data::identifier_assignment_list parse_AssignmentList(const core::parse_node& node)
+  data::untyped_identifier_assignment_list parse_AssignmentList(const core::parse_node& node)
   {
-    return parse_list<data::identifier_assignment>(node, "Assignment", boost::bind(&data_expression_actions::parse_Assignment, this, _1));
+    return parse_list<data::untyped_identifier_assignment>(node, "Assignment", boost::bind(&data_expression_actions::parse_Assignment, this, _1));
   }
 
   data::data_expression_list parse_DataExprList(const core::parse_node& node)
@@ -289,7 +293,7 @@ struct data_specification_actions: public data_expression_actions
     : data_expression_actions(table_)
   {}
 
-  bool callback_SortDecl(const core::parse_node& node, atermpp::vector<atermpp::aterm_appl>& result)
+  bool callback_SortDecl(const core::parse_node& node, std::vector<atermpp::aterm_appl>& result)
   {
     if (symbol_name(node) == "SortDecl")
     {
@@ -314,14 +318,14 @@ struct data_specification_actions: public data_expression_actions
     return false;
   };
 
-  atermpp::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node)
+  std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node)
   {
-    atermpp::vector<atermpp::aterm_appl> result;
+    std::vector<atermpp::aterm_appl> result;
     traverse(node, boost::bind(&data_specification_actions::callback_SortDecl, this, _1, boost::ref(result)));
     return result;
   }
 
-  atermpp::vector<atermpp::aterm_appl> parse_SortSpec(const core::parse_node& node)
+  std::vector<atermpp::aterm_appl> parse_SortSpec(const core::parse_node& node)
   {
     return parse_SortDeclList(node.child(1));
   }
@@ -402,8 +406,8 @@ struct data_specification_actions: public data_expression_actions
   {
     if (symbol_name(node) == "SortSpec")
     {
-      atermpp::vector<atermpp::aterm_appl> v = parse_SortSpec(node);
-      for (atermpp::vector<atermpp::aterm_appl>::iterator i = v.begin(); i != v.end(); ++i)
+      std::vector<atermpp::aterm_appl> v = parse_SortSpec(node);
+      for (std::vector<atermpp::aterm_appl>::iterator i = v.begin(); i != v.end(); ++i)
       {
         if (is_alias(*i))
         {
@@ -555,7 +559,7 @@ void complete_data_specification(data_specification& x)
 ///     eqn  y==zero -> plus(x,y)=x;
 ///          plus(x,succ(y))=succ(plus(x,y));
 ///    \endcode
-///  \param[in] text A textual description of the data specification.
+///  \param[in] in A input stream containing the data specification.
 ///  \return the data specification corresponding to text.
 inline
 data_specification parse_data_specification(std::istream& in)
@@ -601,8 +605,8 @@ data_specification parse_data_specification(const std::string& text)
 ///         variable_list l;
 ///         parse_variables("x:Nat; y:Pos", std::front_inserter(l));
 ///      \endcode
-/// \param[in] text A textual description of the variable declarations to be parsed.
-/// \param[out] i An input interator indicating where the parsed variables must be inserted.
+/// \param[in] in An input stream containing the variable declarations to be parsed.
+/// \param[out] o An output interator indicating where the parsed variables must be inserted.
 /// \param[in]  begin The start of a variable range against which the variables are checked
 ///             for double occurrences.
 /// \param[in]  end   The end of the variable range against which the parsed variables are checked.
@@ -618,20 +622,22 @@ void parse_variables(std::istream& in,
   // Parse the variables list.
   std::string text = utilities::read_text(in);
   variable_list data_vars = parse_variables_new(text);
-  aterm::ATermList temporary_data_vars = data_vars;
 
   // Type check the variable list.
   /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                       mcrl2::data::remove_all_system_defined(data_spec)); */
-  atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
+  // atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
 
-  temporary_data_vars = core::type_check_data_vars(data_vars, d);
+  atermpp::aterm_list temporary_data_vars = data_vars;
+  data_type_checker type_checker(data_spec);
+  // temporary_data_vars = core::type_check_data_vars(data_vars, d);
+  temporary_data_vars = type_checker(data_vars);
 
-  if (temporary_data_vars == 0)
+  if (temporary_data_vars == atermpp::aterm_list(atermpp::aterm()))
   {
     throw mcrl2::runtime_error("Error while type checking data variable declarations.");
   }
-  data_vars=temporary_data_vars;
+  data_vars=variable_list(temporary_data_vars);
 
   // Undo sort renamings for compatibility with type checker
   // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
@@ -722,7 +728,7 @@ inline
 variable parse_variable(const std::string& text,
                         const data_specification& data_spec = detail::default_specification())
 {
-  atermpp::vector < variable > variable_store;
+  std::vector < variable > variable_store;
 
   parse_variables(text + ";", std::back_inserter(variable_store),data_spec);
 
@@ -768,9 +774,9 @@ variable parse_variable(std::istream& text,
 ///     If a parse or type check error occurs this is reported using a mcrl2::runtime_error
 ///     exception. It is assumed that the input contains exactly one expression, and nothing
 ///     else.
-/// \param[in] text The input text containing a data expression.
-/// \param[in]  begin The start of a variables that can occur in the data expression.
-/// \param[in]  end   The end of the potentially free variables in the expression.
+/// \param[in] in The input stream containing a data expression.
+/// \param[in] first The start of a variables that can occur in the data expression.
+/// \param[in] last  The end of the potentially free variables in the expression.
 /// \param[in] data_spec The data specification that is used for type checking.
 
 template <typename Variable_iterator>
@@ -840,7 +846,7 @@ data_expression parse_data_expression(const std::string& text,
                                       const std::string& var_decl,
                                       const data_specification& data_spec = detail::default_specification())
 {
-  atermpp::vector < variable > variable_store;
+  std::vector < variable > variable_store;
   if (!var_decl.empty())
   {
     parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
@@ -850,7 +856,7 @@ data_expression parse_data_expression(const std::string& text,
 
 /// \brief Parses and type checks a sort expression.
 /// \details See parsing a sort expression from a string for details.
-/// \param[in] text The input text containing a sort expression.
+/// \param[in] in An input stream containing a sort expression.
 /// \param[in] data_spec The data specification that is used for type checking.
 inline
 sort_expression parse_sort_expression(std::istream& in,
@@ -955,7 +961,7 @@ std::pair<std::string, data_expression_list> parse_variable(std::string const& s
       variables.push_back(data::parse_variable(*i));
     }
   }
-  return std::make_pair(name, make_variable_list(variables));
+  return std::make_pair(name, data_expression_list(variables.begin(), variables.end()));
 }
 } // namespace detail
 /// \endcond

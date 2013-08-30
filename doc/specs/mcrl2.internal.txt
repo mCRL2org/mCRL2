@@ -1,4 +1,4 @@
-// Author(s): Aad Mathijssen
+// Author(s): Aad Mathijssen, Wieger Wesselink
 // $Date$
 //
 // Distributed under the Boost Software License, Version 1.0.
@@ -8,24 +8,10 @@
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
-//   tc : type checking
-//   di : data implementation
-//   rft: regular formula translation
-// - [+p]/[-p] at the end of a branch means that this branch is added/removed at
-//   the end of phase p
-// - [.p] at the end of a branch means that this branch is only used in phase p
-// - <String> is an arbitrary non-empty string excluding the keywords:
-//     sort cons map var eqn act proc init
-//     struct List Set Bag
-//     lambda whr end
-//     delta tau sum allow block hide rename comm
-//     val mu nu delay yaled nil
-//   Note that this is not as restrictive as user-defined identifiers, which
-//   also excludes the following keywords:
-//     Bool Pos Nat Int Real
-//     true false div mod in forall exists
+// - <String> is an arbitrary non-empty string excluding the mCRL2 keywords
+// - <StringOrEmpty> is a <String> or the empty string
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
-// - <String> and <NumberString> are represented by a quoted ATermAppl constant
+// - <String>, <StringOrEmpty> and <NumberString> are terminals
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
@@ -38,43 +24,38 @@
 
 //sort expression
 <SortExpr>    ::= <SortId>
-                | SortCons(<SortConsType>, <SortExpr>)                   
-                | SortStruct(<StructCons>+)                              
+                | SortCons(<SortConsType>, <SortExpr>)
+                | SortStruct(<StructCons>+)
                 | SortArrow(<SortExpr>+, <SortExpr>)
-                | SortUnknown                                            [. tc]
-                | SortsPossible(<SortExpr>+)                             [. tc]
+                | UntypedSortUnknown
+                | UntypedSortsPossible(<SortExpr>+)
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
 
 //sort constructor type
-<SortConsType> ::= SortList                                             
-                 | SortSet                                             
-                 | SortBag                                            
+<SortConsType> ::= SortList
+                 | SortSet
+                 | SortBag
                  | SortFSet
                  | SortFBag
 
 //constructor declaration of a structured sort
-<StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrNil>)
+<StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrEmpty>)
 
 //projection declaration of a structured sort
-<StructProj>   ::= StructProj(<StringOrNil>, <SortExpr>)
-
-//string or nil
-<StringOrNil>  ::= <String>
-                 | Nil
-
+<StructProj>   ::= StructProj(<StringOrEmpty>, <SortExpr>)
 
 //Data expressions
 //----------------
 
 //data expression
-<DataExpr>     ::= Id(<String>)                                          [- tc]
-                 | <DataVarId>                                           [+ tc]
-                 | <OpId>                                                [+ tc]
+<DataExpr>     ::= <DataVarId>
+                 | <OpId>
                  | DataAppl(<DataExpr>, <DataExpr>+)
-                 | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>) 
-                 | Whr(<DataExpr>, <WhrDecl>+)                        
+                 | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)
+                 | Whr(<DataExpr>, <WhrDecl>+)
+                 | UntypedIdentifier(<String>)
 
 //data variable identifier
 <DataVarId>    ::= DataVarId(<String>, <SortExpr>)
@@ -84,28 +65,27 @@
 
 //binding operator
 <BindingOperator>
-               ::= SetBagComp                                            [- tc]
-                 | SetComp                                               [+ tc]
-                 | BagComp                                               [+ tc]
-                 | Forall
+               ::= Forall
                  | Exists
+                 | SetComp
+                 | BagComp
                  | Lambda
+                 | UntypedSetBagComp
 
 //where clause declaration
-<WhrDecl>      ::= <IdInit>                                              [- tc]
-                 | <DataVarIdInit>                                       [+ tc]
+<WhrDecl>      ::= <DataVarIdInit>
+                 | <UntypedIdentifierAssignment>
 
 //data variable identifier and initialisation
 <DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
 
-<IdInit>       ::= IdInit(<String>, <DataExpr>)
+<UntypedIdentifierAssignment>       ::= UntypedIdentifierAssignment(<String>, <DataExpr>)
 
 //Data specifications
 //-------------------
 
 //data specification
-<DataSpec>     ::= DataSpec(<SortSpec>, <ConsSpec>,
-                     <MapSpec>, <DataEqnSpec>)
+<DataSpec>     ::= DataSpec(<SortSpec>, <ConsSpec>, <MapSpec>, <DataEqnSpec>)
 
 //sort specification
 <SortSpec>     ::= SortSpec(<SortDecl>*)
@@ -121,11 +101,10 @@
 
 //sort declaration
 <SortDecl>     ::= <SortId>
-                 | SortRef(<String>, <SortExpr>)                     
+                 | SortRef(<SortId>, <SortExpr>)
 
 //data equation
-<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>,
-                     <DataExpr>, <DataExpr>)
+<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>, <DataExpr>, <DataExpr>)
 
 //data expression or nil
 <DataExprOrNil>::= <DataExpr>
@@ -136,16 +115,16 @@
 //------------
 
 //multiaction
-<MultAct>      ::= MultAct(<ParamIdOrAction>*)
+<MultAct>      ::= MultAct(<Action>*)
 
-<ParamIdOrAction> ::= <ParamId>                                          [- tc]
-                    | <Action>                                           [+ tc]
-
-//parameterised id
-<ParamId>      ::= ParamId(<String>, <DataExpr>*)
+//untyped multiaction
+<UntypedMultAct> ::= UntypedMultAct(<UntypedAction>*)
 
 //Action
 <Action>       ::= Action(<ActId>, <DataExpr>*)
+
+//untyped action
+<UntypedAction> ::= UntypedAction(<String>, <DataExpr>*)
 
 //action identifier
 <ActId>        ::= ActId(<String>, <SortExpr>*)
@@ -155,11 +134,9 @@
 //-------------------
 
 //process expression
-<ProcExpr>     ::= <ParamId>                                             [- tc]
-                 | IdAssignment(<String>, <IdInit>*)                     [- tc]
-                 | <Action>                                              [+ tc]
-                 | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
-                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
+<ProcExpr>     ::= <Action>
+                 | Process(<ProcVarId>, <DataExpr>*)
+                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)
                  | Delta
                  | Tau
                  | Sum(<DataVarId>+, <ProcExpr>)
@@ -177,9 +154,11 @@
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
                  | Choice(<ProcExpr>, <ProcExpr>)
+                 | UntypedParamId(<String>, <DataExpr>*)
+                 | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
 
 //process identifier
-<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
+<ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*)
 
 //multiaction name
 <MultActName>  ::= MultActName(<String>+)
@@ -188,7 +167,7 @@
 <RenameExpr>   ::= RenameExpr(<String>, <String>)
 
 //communication expression
-<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
+<CommExpr>     ::= CommExpr(<MultActName>, <String>)
 
 
 //Process specifications
@@ -264,15 +243,14 @@
 
 //regular formula
 <RegFrm>       ::= <ActFrm>
-                 | RegNil                                                [-rft]
-                 | RegSeq(<RegFrm>, <RegFrm>)                            [-rft]
-                 | RegAlt(<RegFrm>, <RegFrm>)                            [-rft]
-                 | RegTrans(<RegFrm>)                                    [-rft]
-                 | RegTransOrNil(<RegFrm>)                               [-rft]
+                 | RegNil
+                 | RegSeq(<RegFrm>, <RegFrm>)
+                 | RegAlt(<RegFrm>, <RegFrm>)
+                 | RegTrans(<RegFrm>)
+                 | RegTransOrNil(<RegFrm>)
 
 //action formula
-<ActFrm>       ::= <MultAct>
-                 | <DataExpr>
+<ActFrm>       ::= <DataExpr>
                  | ActTrue
                  | ActFalse
                  | ActNot(<ActFrm>)
@@ -282,10 +260,14 @@
                  | ActForall(<DataVarId>+, <ActFrm>)
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
-
+                 | ActMultAct(<Action>*)
+                 | UntypedActMultAct(<UntypedAction>*)
 
 //LPS action rename specifications
 //--------------------------------
+
+<ParamIdOrAction> ::= <UntypedAction>
+                    | <Action>
 
 //Action rename rules
 <ActionRenameRules>
@@ -293,13 +275,12 @@
 
 //Action rename rule
 <ActionRenameRule>
-               ::= ActionRenameRule(<DataVarId>*, <DataExpr>,
-                     <ParamIdOrAction>, <ActionRenameRuleRHS>)
+               ::= ActionRenameRule(<DataVarId>*, <DataExpr>, <ParamIdOrAction>, <ActionRenameRuleRHS>)
 
 //Right-hand side of an action rename rule
 <ActionRenameRuleRHS>
-               ::= <ParamId>                                             [- tc]
-                 | <Action>                                              [+ tc]
+               ::= <UntypedAction>
+                 | <Action>
                  | Delta
                  | Tau
 

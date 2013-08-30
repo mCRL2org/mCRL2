@@ -13,11 +13,11 @@
 #define MCRL2_BES_DETAIL_STANDARD_FORM_TRAVERSER_H
 
 #include <iterator>
+#include <map>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/map.h"
 
 namespace mcrl2
 {
@@ -43,29 +43,6 @@ typedef std::pair<boolean_expression, standard_form_type> standard_form_pair;
 
 } // namespace mcrl2
 
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::bes::detail::standard_form_pair>
-{
-  static void protect(const mcrl2::bes::detail::standard_form_pair& t)
-  {
-    t.first.protect();
-  }
-
-  static void unprotect(const mcrl2::bes::detail::standard_form_pair& t)
-  {
-    t.first.unprotect();
-  }
-
-  static void mark(const mcrl2::bes::detail::standard_form_pair& t)
-  {
-    t.first.mark();
-  }
-};
-
-} // namespace atermpp
 
 namespace mcrl2
 {
@@ -106,16 +83,16 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     utilities::number_postfix_generator m_generator;
 
     /// \brief A stack containing sub-terms.
-    atermpp::vector<standard_form_pair> m_expression_stack;
+    std::vector<standard_form_pair> m_expression_stack;
 
     /// \brief A vector containing generated equations.
-    atermpp::vector<boolean_equation> m_equations;
+    std::vector<boolean_equation> m_equations;
 
     /// \brief A vector containing generated equations with new variables.
-    atermpp::vector<boolean_equation> m_equations2;
+    std::vector<boolean_equation> m_equations2;
 
     /// \brief Maps right hand sides of equations to their corresponding left hand side.
-    atermpp::map<boolean_expression, boolean_variable> m_table;
+    std::map<boolean_expression, boolean_variable> m_table;
 
     /// \brief The expression corresponding to true.
     boolean_expression m_true;
@@ -148,7 +125,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     /// \return The variable var.
     boolean_variable create_variable(const boolean_expression& expr, standard_form_type type, const std::string& hint)
     {
-      atermpp::map<boolean_expression, boolean_variable>::iterator i = m_table.find(expr);
+      std::map<boolean_expression, boolean_variable>::iterator i = m_table.find(expr);
       if (i != m_table.end())
       {
         return i->second;
@@ -192,7 +169,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     }
 
     /// \brief Returns the generated equations.
-    const atermpp::vector<boolean_equation>& equations() const
+    const std::vector<boolean_equation>& equations() const
     {
       return m_equations;
     }
@@ -281,22 +258,22 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     }
 
     /// \brief Enter a boolean equation system.
-    void enter(const boolean_equation_system<>& eqn)
+    void enter(const boolean_equation_system& eqn)
     {
       assert(!eqn.equations().empty());
-      for (atermpp::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
+      for (std::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
       {
         m_generator.add_identifier(std::string(i->variable().name()));
       }
     }
 
     /// \brief Leave a boolean equation system.
-    void leave(const boolean_equation_system<>&)
+    void leave(const boolean_equation_system&)
     {
       // set the fixpoint symbol for the added equations m_equations2, and move them to m_equations
       assert(!m_equations.empty());
       fixpoint_symbol sigma = m_equations.back().symbol();
-      for (atermpp::vector<boolean_equation>::iterator i = m_equations2.begin(); i != m_equations2.end(); ++i)
+      for (std::vector<boolean_equation>::iterator i = m_equations2.begin(); i != m_equations2.end(); ++i)
       {
         i->symbol() = sigma;
       }
@@ -307,11 +284,11 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       {
         if (m_has_true)
         {
-          m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), m_true, m_true));
+          m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), boolean_variable(m_true), m_true));
         }
         if (m_has_false)
         {
-          m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), m_false, m_false));
+          m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), boolean_variable(m_false), m_false));
         }
       }
     }

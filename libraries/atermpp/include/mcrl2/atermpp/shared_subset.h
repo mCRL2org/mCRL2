@@ -12,11 +12,13 @@
 #ifndef MCRL2_ATERMPP_SHARED_SUBSET_H
 #define MCRL2_ATERMPP_SHARED_SUBSET_H
 
+#include <algorithm>
+#include <iterator>
 #include <vector>
+#include <boost/signals2/detail/auto_buffer.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/construction_utility.h"
 
 static inline int highest_bit(size_t x)
@@ -39,23 +41,22 @@ namespace atermpp
 template <typename T>
 class shared_subset
 {
-  friend struct atermpp::aterm_traits<shared_subset>;
   protected:
     static atermpp::aterm_string &get_true()
     {
-      static atermpp::aterm_string true_ = mcrl2::core::detail::initialise_static_expression(true_, atermpp::aterm_string("true"));
+      static atermpp::aterm_string true_ = atermpp::aterm_string("true");
       return true_;
     }
 
     static atermpp::aterm_string &get_false()
     {
-      static atermpp::aterm_string false_ = mcrl2::core::detail::initialise_static_expression(false_, atermpp::aterm_string("false"));
+      static atermpp::aterm_string false_ = atermpp::aterm_string("false");
       return false_;
     }
 
     static atermpp::function_symbol &get_node()
     {
-      static atermpp::function_symbol node_ = mcrl2::core::detail::initialise_static_expression(node_, atermpp::function_symbol("node", 3));
+      static atermpp::function_symbol node_ = atermpp::function_symbol("node", 3);
       return node_;
     }
 
@@ -73,7 +74,7 @@ class shared_subset
           : atermpp::aterm_appl(value ? get_true() : get_false())
         {}
 
-        bdd_node(int bit, const bdd_node &true_node, const bdd_node &false_node)
+        bdd_node(size_t bit, const bdd_node &true_node, const bdd_node &false_node)
           : atermpp::aterm_appl(get_node(), atermpp::aterm_int(bit), true_node, false_node)
         {}
 
@@ -92,19 +93,19 @@ class shared_subset
           return function() == get_node();
         }
 
-        int bit()
+        size_t bit()
         {
-          return atermpp::aterm_int((*this)(0)).value();
+          return atermpp::aterm_int((*this)[0]).value();
         }
 
         bdd_node true_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)(1)));
+          return bdd_node(atermpp::aterm_appl((*this)[1]));
         }
 
         bdd_node false_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)(2)));
+          return bdd_node(atermpp::aterm_appl((*this)[2]));
         }
     };
 
@@ -122,8 +123,10 @@ class shared_subset
         size_t m_index;
 
       public:
+
         iterator()
-          : m_index(-1)
+          : m_subset(NULL),
+            m_index(-1)
         {
         }
 
@@ -165,13 +168,13 @@ class shared_subset
 
         void find_next_index()
         {
-          //bdd_node path_stack[m_subset->m_bits];
-          MCRL2_SYSTEM_SPECIFIC_ALLOCA(path_stack, bdd_node, m_subset->m_bits);
-          size_t path_stack_index = 0;
+          typedef boost::signals2::detail::auto_buffer<bdd_node, boost::signals2::detail::store_n_objects<64> > vector_t;
+          vector_t path_stack;
           bdd_node node = m_subset->m_bdd_root;
 
           while (true)
           {
+            assert(m_subset->m_set != NULL);
             if (m_index >= m_subset->m_set->size())
             {
               m_index = -1;
@@ -180,8 +183,8 @@ class shared_subset
 
             while (node.is_node())
             {
-              path_stack[path_stack_index++] = node;
-              node = (m_index & (1UL << node.bit())) ? node.true_node() : node.false_node();
+              path_stack.push_back(node);
+              node = (m_index & ((size_t)1 << node.bit())) ? node.true_node() : node.false_node();
             }
 
             if (node.is_true())
@@ -194,7 +197,7 @@ class shared_subset
               bdd_node start;
               size_t bit;
 
-              if (path_stack_index == 0)
+              if (path_stack.empty())
               {
                 start = m_subset->m_bdd_root;
                 bit = m_subset->m_bits;
@@ -202,7 +205,7 @@ class shared_subset
               else
               {
                 start = node;
-                bit = path_stack[path_stack_index - 1].bit();
+                bit = path_stack.back().bit();
               }
 
               if (!start.is_false())
@@ -211,10 +214,10 @@ class shared_subset
                 bool found = false;
                 for (size_t i = start.bit() + 1; i < bit; i++)
                 {
-                  if (!(m_index & (1UL << i)))
+                  if (!(m_index & ((size_t)1 << i)))
                   {
-                    m_index |= (1UL << i);
-                    m_index &= ~((1UL << i) - 1);
+                    m_index |= ((size_t)1 << i);
+                    m_index &= ~(((size_t)1 << i) - 1);
                     found = true;
                     break;
                   }
@@ -225,18 +228,19 @@ class shared_subset
                 }
               }
 
-              if (path_stack_index == 0)
+              if (path_stack.empty())
               {
                 m_index = -1;
                 return;
               }
               else
               {
-                node = path_stack[--path_stack_index];
-                if (!(m_index & (1UL << bit)) && !node.true_node().is_false())
+                node = path_stack.back();
+                path_stack.pop_back();
+                if (!(m_index & ((size_t)1 << bit)) && !node.true_node().is_false())
                 {
-                  m_index |= (1UL << bit);
-                  m_index &= ~((1UL << bit) - 1);
+                  m_index |= ((size_t)1 << bit);
+                  m_index &= ~(((size_t)1 << bit) - 1);
                   break;
                 }
               }
@@ -246,10 +250,10 @@ class shared_subset
     };
 
     shared_subset()
-      : m_bits(0),
+      : m_set(NULL),
+        m_bits(0),
         m_bdd_root(false)
-    {
-    }
+    {}
 
     /// \brief Constructor.
     shared_subset(std::vector<T> &set)
@@ -257,7 +261,7 @@ class shared_subset
         m_bdd_root(true)
     {
       m_bits = 0;
-      while (m_set->size() > (1UL << m_bits))
+      while (m_set->size() > ((size_t)1 << m_bits))
       {
         m_bits++;
       }
@@ -277,8 +281,9 @@ class shared_subset
       : m_set(set.m_set),
         m_bits(set.m_bits)
     {
-      //bdd_node trees[m_bits + 1];
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(trees, bdd_node, m_bits + 1);
+      typedef boost::signals2::detail::auto_buffer<bdd_node, boost::signals2::detail::store_n_objects<64> > vector_t;
+      vector_t trees;
+      std::fill_n(std::back_inserter(trees), m_bits + 1, bdd_node());
       size_t completed = 0;
       for (iterator i = set.begin(); i != set.end(); i++)
       {
@@ -288,14 +293,14 @@ class shared_subset
 
           for (int bit = highest_bit(target); bit >= 0; bit--)
           {
-            if ((target & (1UL << bit)) && !(completed & (1UL << bit)))
+            if ((target & ((size_t)1 << bit)) && !(completed & ((size_t)1 << bit)))
             {
               bdd_node tree(false);
               for (int j = 0; j < bit; j++)
               {
                 bdd_node true_node;
                 bdd_node false_node;
-                if (completed & (1UL << j))
+                if (completed & ((size_t)1 << j))
                 {
                   true_node = tree;
                   false_node = trees[j];
@@ -315,14 +320,14 @@ class shared_subset
                 }
               }
               trees[bit] = tree;
-              completed |= (1UL << bit);
-              completed &= ~((1UL << bit) - 1);
+              completed |= ((size_t)1 << bit);
+              completed &= ~(((size_t)1 << bit) - 1);
             }
           }
 
           bdd_node tree(true);
           size_t bit;
-          for (bit = 0; target & (1UL << bit); bit++)
+          for (bit = 0; target & ((size_t)1 << bit); bit++)
           {
             if (tree != trees[bit])
             {
@@ -334,14 +339,14 @@ class shared_subset
         }
       }
 
-      if (completed != (1UL << m_bits))
+      if (completed != ((size_t)1 << m_bits))
       {
         bdd_node tree(false);
         for (size_t j = 0; j < m_bits; j++)
         {
           bdd_node true_node;
           bdd_node false_node;
-          if (completed & (1UL << j))
+          if (completed & ((size_t)1 << j))
           {
             true_node = tree;
             false_node = trees[j];
@@ -395,14 +400,6 @@ class shared_subset
     {
       return iterator();
     }
-};
-
-template <typename T>
-struct aterm_traits<shared_subset<T> >
-{
-  static void protect(const shared_subset<T> &subset) { subset.m_bdd_root.protect(); }
-  static void unprotect(const shared_subset<T> &subset) { subset.m_bdd_root.unprotect(); }
-  static void mark(const shared_subset<T> &subset) { subset.m_bdd_root.mark(); }
 };
 
 } // namespace atermpp

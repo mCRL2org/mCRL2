@@ -24,7 +24,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -170,7 +169,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
 
         try
         {
-          mcrl2::pbes_system::pbes<> p;
+          mcrl2::pbes_system::pbes p;
           p.load(infilename);
           return p.data();
         }
@@ -227,6 +226,5 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc,argv)
   return formulacheck_tool().execute(argc, argv);
 }

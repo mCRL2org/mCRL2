@@ -13,8 +13,8 @@
 #define MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_TRAVERSER_H
 
 #include <stdexcept>
+#include <vector>
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/traverser.h"
@@ -144,7 +144,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \brief Visit tau node
   /// \return The result of visiting the node
   /// \param x A process expression
-  void leave(const tau& /* x */)
+  void leave(const process::tau& /* x */)
   {
     m_multi_action = lps::multi_action();
     m_multi_action_changed = true;
@@ -169,7 +169,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param v A sequence of data variables
   /// \param right A process expression
-  void leave(const sum& x)
+  void leave(const process::sum& x)
   {
     m_sum_variables = m_sum_variables + x.bound_variables();
 // std::cout << "adding sum variables\n" << data::pp(v) << std::endl;
@@ -180,7 +180,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param s A sequence of identifiers
   /// \param right A process expression
-  void leave(const block& x)
+  void leave(const process::block& x)
   {
     throw non_linear_process(x);
   }
@@ -190,7 +190,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param s A sequence of identifiers
   /// \param right A process expression
-  void leave(const hide& x)
+  void leave(const process::hide& x)
   {
     throw non_linear_process(x);
   }
@@ -200,7 +200,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param r A sequence of rename expressions
   /// \param right A process expression
-  void leave(const rename& x)
+  void leave(const process::rename& x)
   {
     throw non_linear_process(x);
   }
@@ -210,7 +210,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param c A sequence of communication expressions
   /// \param right A process expression
-  void leave(const comm& x)
+  void leave(const process::comm& x)
   {
     throw non_linear_process(x);
   }
@@ -220,7 +220,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param s A sequence of multi-action names
   /// \param right A process expression
-  void leave(const allow& x)
+  void leave(const process::allow& x)
   {
     throw non_linear_process(x);
   }
@@ -230,7 +230,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const sync& x)
+  void operator()(const process::sync& x)
   {
     (*this)(x.left());
     lps::multi_action l = m_multi_action;
@@ -246,7 +246,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param d A data expression
-  void leave(const at& x)
+  void leave(const process::at& x)
   {
     if (is_delta(x))
     {
@@ -265,14 +265,14 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const seq& x)
+  void operator()(const process::seq& x)
   {
     (*this)(x.left());
 
     // Check 1) The expression right must be a process instance or a process assignment
     if (is_process_instance(x.right()))
     {
-      process_instance p = x.right();
+      const process_instance& p = core::static_down_cast<const process_instance&>(x.right());
       // Check 2) The process equation and and the process instance must match
       if (!detail::check_process_instance(m_equation, p))
       {
@@ -284,7 +284,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     }
     else if (is_process_instance_assignment(x.right()))
     {
-      process_instance_assignment p = x.right();
+      const process_instance_assignment& p = core::static_down_cast<const process_instance_assignment&>(x.right());
       // Check 2) The process equation and and the process instance assignment must match
       if (!detail::check_process_instance_assignment(m_equation, p))
       {
@@ -308,7 +308,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param d A data expression
   /// \param right A process expression
-  void leave(const if_then& x)
+  void leave(const process::if_then& x)
   {
     m_condition = x.condition();
 // std::cout << "adding condition\n" << data::pp(m_condition) << std::endl;
@@ -320,7 +320,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param d A data expression
   /// \param left A process expression
   /// \param right A process expression
-  void leave(const if_then_else& x)
+  void leave(const process::if_then_else& x)
   {
     throw non_linear_process(x);
   }
@@ -330,7 +330,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void leave(const bounded_init& x)
+  void leave(const process::bounded_init& x)
   {
     throw non_linear_process(x);
   }
@@ -340,7 +340,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void leave(const merge& x)
+  void leave(const process::merge& x)
   {
     throw non_linear_process(x);
   }
@@ -350,7 +350,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void leave(const left_merge& x)
+  void leave(const process::left_merge& x)
   {
     throw non_linear_process(x);
   }
@@ -360,7 +360,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \param x A process expression
   /// \param left A process expression
   /// \param right A process expression
-  void operator()(const choice& x)
+  void operator()(const process::choice& x)
   {
     (*this)(x.left());
     if (!is_choice(x.left()))
@@ -408,7 +408,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
 
     if (is_process_instance(p.init()))
     {
-      process_instance init = p.init();
+      const process_instance& init = core::static_down_cast<const process_instance&>(p.init());
       if (!check_process_instance(m_equation, init))
       {
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: the initial process does not match the process equation");
@@ -417,7 +417,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     }
     else if (is_process_instance_assignment(p.init()))
     {
-      process_instance_assignment init = p.init();
+      const process_instance_assignment& init = core::static_down_cast<const process_instance_assignment&>(p.init());
       if (!check_process_instance_assignment(m_equation, init))
       {
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: the initial process does not match the process equation");

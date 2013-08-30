@@ -9,8 +9,6 @@
 /// \file mcrl2i.cpp
 
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "mcrl2i"
 #define AUTHORS "Muck van Weerdenburg; Jan Friso Groote"
 
@@ -36,9 +34,6 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
-
 
 using namespace std;
 using namespace mcrl2;
@@ -51,12 +46,12 @@ using mcrl2::utilities::tools::rewriter_tool;
 
 static bool check_whether_variable_string_is_in_use(
   const std::string& s,
-  const atermpp::set < variable > &varset)
+  const std::set < variable > &varset)
 {
-  for (atermpp::set < variable >::const_iterator i=varset.begin();
+  for (std::set < variable >::const_iterator i=varset.begin();
        i!=varset.end(); ++i)
   {
-    if (i->name()==s.c_str())
+    if (i->name().function().name()==s)
     {
       return true;
     }
@@ -88,8 +83,8 @@ static string trim_spaces(const string& str)
 
 static data_expression parse_term(const string& term_string,
                                   const data_specification& spec,
-                                  atermpp::set < variable > context_variables,
-                                  const atermpp::set < variable > &local_variables = atermpp::set < variable >())
+                                  std::set < variable > context_variables,
+                                  const std::set < variable > &local_variables = std::set < variable >())
 {
   context_variables.insert(local_variables.begin(),local_variables.end());
   return parse_data_expression(term_string,context_variables.begin(),context_variables.end(),spec);
@@ -97,7 +92,7 @@ static data_expression parse_term(const string& term_string,
 
 static void declare_variables(
   const string& vars,
-  atermpp::set <variable> &context_variables,
+  std::set <variable> &context_variables,
   data_specification& spec)
 {
   parse_variables(vars + ";",std::inserter(context_variables,context_variables.begin()),
@@ -115,6 +110,24 @@ static bool match_and_remove(string& s, const string& match)
     return true;
   }
   return false;
+}
+
+static bool add_context_sorts(const std::set<sort_expression> &new_sorts,
+                                    std::set<sort_expression> &context_sorts,
+                                    data_specification &spec)
+{
+  // Check whether new rewrite rules are required, and if so, reinitialise the rewriter with them.
+  bool reinitialise_rewriter=false;
+  for(auto i=new_sorts.begin(); i!=new_sorts.end(); ++i)
+  {
+     if (context_sorts.insert(*i).second)
+     {
+       // The sort was not yet present in the context sorts
+       reinitialise_rewriter=true;
+       spec.add_context_sort(*i);
+     }
+  }
+  return reinitialise_rewriter;
 }
 
 static const std::string help_text=
@@ -155,7 +168,10 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     /// Runs the algorithm.
     bool run()
     {
-      atermpp::set < variable > context_variables;
+      std::set < variable > context_variables;
+      std::set < sort_expression > context_sorts;
+      bool need_to_rebuild_rewriter=true;
+
       data_specification spec;
       if (!input_filename().empty())
       {
@@ -172,7 +188,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           try
           {
             // Try to read a pbes.
-            mcrl2::pbes_system::pbes <> p;
+            mcrl2::pbes_system::pbes p;
             p.load(input_filename());
             spec=p.data();
             context_variables = p.global_variables();
@@ -187,15 +203,12 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         }
       }
 
-      // Import all standard data types should be available even if they are
-      // not port of the loaded lps or pbes.
-      spec.add_context_sort(sort_real::real_());
 
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
-      rewriter rewr(spec,m_rewrite_strategy);
+      rewriter rewr; 
 
-      mutable_map_substitution < atermpp::map < variable, data_expression > > assignments;
+      mutable_map_substitution < std::map < variable, data_expression > > assignments;
 
       bool done = false;
       while (!done)
@@ -235,7 +248,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             if (new_strategy!=m_rewrite_strategy)
             {
               m_rewrite_strategy=new_strategy;
-              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=true;
             }
           }
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
@@ -250,21 +263,37 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
           {
             data_expression term = parse_term(s,spec,context_variables);
+            std::set<sort_expression> all_sorts=find_sort_expressions(term);
+            need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+            if (need_to_rebuild_rewriter)
+            {
+              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=false;
+            }
             cout << data::pp(rewr(term,assignments)) << "\n";
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
-            atermpp::set <variable> vars;
+            std::set <variable> vars;
             string::size_type dotpos=s.find(".");
             if (dotpos==string::npos)
             {
               throw mcrl2::runtime_error("Expect a `.' in the input.");
             }
             parse_variables(s.substr(0,dotpos)+";",std::inserter(vars,vars.begin()),spec);
+            std::set<sort_expression> all_sorts=find_sort_expressions(vars);
             data_expression term = parse_term(s.substr(dotpos+1),spec,context_variables,vars);
             if (term.sort()!=sort_bool::bool_())
             {
               throw mcrl2::runtime_error("expression is not of sort Bool.");
+            }
+            find_sort_expressions(term,std::inserter(all_sorts,all_sorts.end()));
+
+            need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+            if (need_to_rebuild_rewriter)
+            {
+              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=false;
             }
 
             term=rewr(term);
@@ -276,7 +305,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
                       i != enumerator.end() ; ++i)
             {
               cout << "[";
-              for (atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
+              for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
               {
                 cout << data::pp(*v) << " := " << data::pp((*i)(*v));
                 if (boost::next(v)!=vars.end())
@@ -303,6 +332,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             s = s.substr(assign_pos+1);
             data_expression term = parse_term(s,spec,context_variables);
             variable var(varname,term.sort());
+
+            std::set<sort_expression> all_sorts=find_sort_expressions(term);
+            need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+            if (need_to_rebuild_rewriter)
+            {
+              rewr=rewriter(spec,m_rewrite_strategy);
+              need_to_rebuild_rewriter=false;
+            }
             term = rewr(term,assignments);
             cout << data::pp(term) << "\n";
             assignments[var]=term;
@@ -323,18 +360,8 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     }
 };
 
-class mcrl2i_gui_tool: public mcrl2_gui_tool<mcrl2i_tool>
-{
-  public:
-    mcrl2i_gui_tool()
-    {
-      add_rewriter_widget();
-    }
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-  return mcrl2i_gui_tool().execute(argc, argv);
+  return mcrl2i_tool().execute(argc, argv);
 }
 

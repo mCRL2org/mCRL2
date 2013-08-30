@@ -11,10 +11,8 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 
@@ -24,12 +22,12 @@ using namespace mcrl2::pbes_system;
 
 void rewrite_bqnf_quantifier(std::string source_text, std::string target_text)
 {
-  pbes<> p = txt2pbes(source_text);
+  pbes p = txt2pbes(source_text);
   bqnf_rewriter pbesr;
   pbes_rewrite(p, pbesr);
   normalize(p);
   //std::clog << pp(p);
-  pbes<> target = txt2pbes(target_text);
+  pbes target = txt2pbes(target_text);
   normalize(target);
   BOOST_CHECK(p==target);
 }
@@ -58,11 +56,6 @@ void test_bqnf_quantifier_rewriter()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
-  //log::log_level_t log_level = log::debug2;
-  //log::mcrl2_logger::set_reporting_level(log_level);
-
   test_bqnf_quantifier_rewriter();
 
   return 0;

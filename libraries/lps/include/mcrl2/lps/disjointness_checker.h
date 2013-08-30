@@ -42,10 +42,10 @@ class Disjointness_Checker
     size_t f_number_of_summands;
 
     /// \brief A two dimensional array, indicating which parameters a summand uses, for each of the summands.
-    std::vector < atermpp::set < data::variable > > f_used_parameters_per_summand;
+    std::vector < std::set < data::variable > > f_used_parameters_per_summand;
 
     /// \brief A two dimensional array, indicating which parameters a summand changes, for each of the summands.
-    std::vector < atermpp::set < data::variable > > f_changed_parameters_per_summand;
+    std::vector < std::set < data::variable > > f_changed_parameters_per_summand;
 
     /// \brief Updates the array Disjointness_Checker::f_used_parameters_per_summand, given the expression a_expression.
     void process_data_expression(size_t a_summand_number, const data::data_expression a_expression);

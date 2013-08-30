@@ -15,9 +15,9 @@
 #include <set>
 #include <string>
 #include <utility>
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/bes/print.h"
 
 namespace mcrl2
 {
@@ -123,7 +123,7 @@ struct boolean_expr_builder
   /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e, Arg& /* arg */)
   {
-    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + atermpp::to_string(e));
     return term_type();
   }
 
@@ -201,7 +201,7 @@ struct boolean_expr_builder
     }
     else if (tr::is_variable(e))
     {
-      result = visit_var(e, e, arg1);
+      result = visit_var(e, variable_type(e), arg1);
       if (!is_finished(result))
       {
         result = e;
@@ -304,7 +304,7 @@ struct boolean_expr_builder<Term, void>
   /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e)
   {
-    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in boolean_expr_builder::visit() : unknown boolean expression ") + atermpp::to_string(e));
     return term_type();
   }
 

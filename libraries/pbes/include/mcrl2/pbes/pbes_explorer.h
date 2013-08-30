@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -41,7 +42,7 @@ namespace detail
 
 /// \brief
 class lts_type {
-	int state_length;
+  int state_length;
   std::vector<std::string> state_names;
   std::vector<std::string> state_types;
   std::vector<std::string> state_type_list;
@@ -53,46 +54,46 @@ class lts_type {
   std::vector<std::string> edge_label_types;
 
 public:
-	/// \brief Contructor.
-	/// \param state_length
+  /// \brief Contructor.
+  /// \param state_length
   lts_type(int state_length);
 
-	/// \brief Destructor.
-	~lts_type();
+  /// \brief Destructor.
+  ~lts_type();
 
-	/// \brief Returns the state length.
-	int get_state_length() const;
+  /// \brief Returns the state length.
+  int get_state_length() const;
 
-	/// \brief Returns the number of state types.
-	int get_number_of_state_types() const;
+  /// \brief Returns the number of state types.
+  int get_number_of_state_types() const;
 
-	/// \brief Returns the sequence of state part names.
-	const std::vector<std::string>& get_state_names() const;
+  /// \brief Returns the sequence of state part names.
+  const std::vector<std::string>& get_state_names() const;
 
-	/// \brief Returns the sequence of state part types.
-	const std::vector<std::string>& get_state_types() const;
+  /// \brief Returns the sequence of state part types.
+  const std::vector<std::string>& get_state_types() const;
 
-	/// \brief Returns the state type index for the state part <tt>part</tt>.
-	/// \param part the state part number.
-	int get_state_type_no(int part) const;
+  /// \brief Returns the state type index for the state part <tt>part</tt>.
+  /// \param part the state part number.
+  int get_state_type_no(int part) const;
 
-	/// \brief Returns the name of the state type with number <tt>type_no</tt>.
-	/// \param type_no the state type number.
-	std::string get_state_type_name(int type_no) const;
+  /// \brief Returns the name of the state type with number <tt>type_no</tt>.
+  /// \param type_no the state type number.
+  std::string get_state_type_name(int type_no) const;
 
-	/// \brief Returns the number of state labels.
-	size_t get_number_of_state_labels() const;
+  /// \brief Returns the number of state labels.
+  size_t get_number_of_state_labels() const;
 
-	/// \brief Returns the sequence of state labels.
-	const std::vector<std::string>& get_state_labels() const;
+  /// \brief Returns the sequence of state labels.
+  const std::vector<std::string>& get_state_labels() const;
 
-	/// \brief Returns the sequence of state label types.
-	const std::vector<std::string>& get_state_label_types() const;
+  /// \brief Returns the sequence of state label types.
+  const std::vector<std::string>& get_state_label_types() const;
 
-	/// \brief Returns the number of edge labels.
-	size_t get_number_of_edge_labels() const;
+  /// \brief Returns the number of edge labels.
+  size_t get_number_of_edge_labels() const;
 
-	/// \brief Returns the sequence of edge labels.
+  /// \brief Returns the sequence of edge labels.
   const std::vector<std::string>& get_edge_labels() const;
 
   /// \brief Returns the sequence of edge label types.
@@ -101,17 +102,17 @@ public:
   /// \brief Adds a state part of type <tt>type</tt> with name <tt>name</tt>.
   /// \param name the name of the state part.
   /// \param type the type of the state part.
-	void add_state(const std::string& name, const std::string& type);
+  void add_state(const std::string& name, const std::string& type);
 
   /// \brief Adds a state label of type <tt>type</tt> with name <tt>name</tt>.
   /// \param name the name of the state label.
   /// \param type the type of the state label.
-	void add_state_label(const std::string& name, const std::string& type);
+  void add_state_label(const std::string& name, const std::string& type);
 
   /// \brief Adds an edge label of type <tt>type</tt> with name <tt>name</tt>.
   /// \param name the name of the edge label.
   /// \param type the type of the edge label.
-	void add_edge_label(const std::string& name, const std::string& type);
+  void add_edge_label(const std::string& name, const std::string& type);
 };
 
 
@@ -133,7 +134,7 @@ private:
     int priority; // Priority (depends on fixpoint operator and equation order)
     std::string var; // Propositional variable name
     operation_type type; // player or type (And/Or, Abelard/Eloise, Odd/Even)
-    atermpp::vector<data_expression> param_values; // List of parameter values
+    std::vector<data_expression> param_values; // List of parameter values
 
 protected:
     /// \brief Constructor.
@@ -142,7 +143,7 @@ protected:
     ltsmin_state(const std::string& varname, const pbes_expression& e);
 
     /// \brief Returns the list of parameter values.
-    const atermpp::vector<data_expression>& get_parameter_values() const;
+    const std::vector<data_expression>& get_parameter_values() const;
 
     /// \brief Adds a parameter value to the list of parameter values.
     void add_parameter_value(const data_expression&);
@@ -179,7 +180,7 @@ public:
     //operation_type get_type() const;
 
     /// \brief Returns a string representation of the state.
-    std::string to_string() const;
+    std::string state_to_string() const;
 };
 
 
@@ -197,7 +198,7 @@ public:
     /// \brief The variable sequence type
     typedef parity_game_generator::operation_type operation_type;
 private:
-    pbes<>& p;
+    pbes& p;
     pbes_greybox_interface* pgg;
     bool reset_option;
     bool always_split_option;
@@ -206,23 +207,23 @@ private:
     std::map<int,std::vector<bool> > write_matrix;
     std::map<int,std::vector<bool> > matrix;
     std::map<std::string,int> param_index;
-    atermpp::vector<data_expression> param_default_values;
+    std::vector<data_expression> param_default_values;
     int number_of_groups;
-    atermpp::vector<pbes_expression> transition_expression;
-    atermpp::vector<pbes_expression> transition_expression_plain;
+    std::vector<pbes_expression> transition_expression;
+    std::vector<pbes_expression> transition_expression_plain;
     std::vector<std::string> transition_variable_name;
     std::vector<operation_type> transition_type;
-    atermpp::map<std::string, propositional_variable> variables;
+    std::map<std::string, propositional_variable> variables;
     std::map<std::string, operation_type> variable_type;
-    atermpp::map<std::string, fixpoint_symbol> variable_symbol;
+    std::map<std::string, fixpoint_symbol> variable_symbol;
     std::map<std::string, int> variable_priority;
-    atermpp::map<std::string, pbes_expression> variable_expression;
-    atermpp::map<std::string, data::variable_list> variable_parameters;
+    std::map<std::string, pbes_expression> variable_expression;
+    std::map<std::string, data::variable_list> variable_parameters;
     std::map<std::string, std::vector<std::string> > variable_parameter_signatures;
     std::map<std::string, std::vector<int> > variable_parameter_indices;
     std::map<std::string, std::map<int,int> > variable_parameter_index_positions;
 
-    static atermpp::map<variable,std::string> variable_signatures;
+    static std::map<variable,std::string> variable_signatures;
 
     /// \brief Counts the number of propositional variables in an expression.
     /// \returns the number of variable occurences or INT_MAX if a variable
@@ -240,7 +241,7 @@ private:
     /// \param current_priority the priority of the current equation for which the parts are computed
     /// \param current_type the operation type (AND/OR) of the current equation for which the parts are computed
     /// \param vars_stack used for detection of infinite recursion. Please, initialise to the empty set.
-    atermpp::vector<pbes_expression> split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type, std::set<std::string> vars_stack);
+    std::vector<pbes_expression> split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type, std::set<std::string> vars_stack);
 
     /// \brief Computes LTS Type from PBES.
     void compute_lts_type();
@@ -254,16 +255,16 @@ private:
 protected:
 
     /// \brief Returns the map from transition group number to the expression of the transition group.
-    const atermpp::vector<pbes_expression>& get_transition_expressions() const;
+    const std::vector<pbes_expression>& get_transition_expressions() const;
 
     /// \brief Returns the map from variable names to the variable object for the variable.
-    const atermpp::map<std::string, propositional_variable>& get_variables() const;
+    const std::map<std::string, propositional_variable>& get_variables() const;
 
     /// \brief Returns the map from variable names to the fixpoint operator of the equation for the variable.
-    const atermpp::map<std::string, fixpoint_symbol>& get_variable_symbols() const;
+    const std::map<std::string, fixpoint_symbol>& get_variable_symbols() const;
 
     /// \brief Returns the map from variable names to the sequence of parameters for the variable.
-    const atermpp::map<std::string, data::variable_list>& get_variable_parameters() const;
+    const std::map<std::string, data::variable_list>& get_variable_parameters() const;
 
     /// \brief Determines if the term phi contains a branch that directly results in
     /// <tt>true</tt> or <tt>false</tt> (not a variable).
@@ -280,8 +281,11 @@ protected:
 
     /// \brief Computes the free variables actually used, not only passed through, in an expression.
     /// \param expr
-    /// \param L
     std::set<std::string> used(const pbes_expression& expr);
+
+    /// \brief Computes the free variables actually used, not only passed through, in an expression.
+    /// \param expr
+    /// \param L
     std::set<std::string> used(const pbes_expression& expr, const std::set<std::string>& L);
 
     /// \brief Computes the set of parameters changed in the expression.
@@ -327,7 +331,7 @@ protected:
     /// \param pgg
     /// \param reset
     /// \param always_split
-    lts_info(pbes<>& p, pbes_greybox_interface* pgg, bool reset, bool always_split);
+    lts_info(pbes& p, pbes_greybox_interface* pgg, bool reset, bool always_split);
 
 public:
 
@@ -378,7 +382,7 @@ public:
 
     /// \brief Returns the index for a parameter signature in the list of parameter signatures
     /// for the system.
-    /// \param signature the parameter signature.
+    /// \param signaturePBES_State the parameter signature.
     int get_index(const std::string& signaturePBES_State);
 
     /// \brief Determines if <tt>group</tt> is read dependent on the propositional variable.
@@ -386,7 +390,7 @@ public:
     /// to the variable.
     /// \param group the number of the transition group.
     /// \return true.
-    bool is_read_dependent_propvar(int /* group */);
+    bool is_read_dependent_propvar(int group);
 
     /// \brief Determines if <tt>group</tt> is read dependent on part <tt>part</tt> of the state vector.
     /// Returns true if the parameter represented by <tt>part</tt> is in the set of parameters of the
@@ -413,7 +417,7 @@ public:
 
     /// \brief Returns a string representation for state <tt>state</tt>.
     /// \param state
-    std::string to_string(const ltsmin_state& state);
+    std::string state_to_string(const ltsmin_state& state);
 
     /// \brief Returns a signature using name and type of a parameter.
     /// \param paramname the parameter name.
@@ -435,12 +439,12 @@ public:
     typedef parity_game_generator::operation_type operation_type;
 
 private:
-    pbes<> p;
+    pbes p;
     lts_info* info;
     std::map<std::string,int> localmap_string2int;
     std::vector<std::string> localmap_int2string;
-    atermpp::vector<atermpp::map<data_expression,int> > localmaps_data2int;
-    atermpp::vector<atermpp::vector<data_expression> > localmaps_int2data;
+    std::vector<std::map<data_expression,int> > localmaps_data2int;
+    std::vector<std::vector<data_expression> > localmaps_int2data;
 
 protected:
     /// \brief Returns a PBES_State object for <tt>expr</tt>.
@@ -479,6 +483,7 @@ protected:
 public:
     /// \brief Constructor.
     /// \param filename the name of a PBES file.
+    /// \param rewrite_strategy the name of the data rewrite strategy to use.
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
     ///        if not set (default) the explorer assumes the pbes to be generated with lps2pbes -p and splits accordingly.
@@ -486,10 +491,11 @@ public:
 
     /// \brief Constructor.
     /// \param p a PBES.
+    /// \param rewrite_strategy String representing the rewrite strategy to use for the data rewriter.
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
     ///        if not set (default) the explorer assumes the pbes to be generated with lps2pbes -p and splits accordingly.
-    explorer(const pbes<>& p, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
+    explorer(const pbes& p, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
 
     /// \brief Destructor.
     ~explorer();
@@ -520,8 +526,7 @@ public:
     /// \brief Returns the index of <tt>s</tt> in the local store for string values.
     /// This store is reserved for the string representations of variable names.
     /// The value is added to the store if it is not already present.
-    /// \param type_no the number of the value type.
-    /// \param value the data value.
+    /// \param s The string for which the index needs to be retrieved.
     /// \return the index of <tt>s</tt> in the local store for string values.
     int get_string_index(const std::string& s);
 
@@ -622,7 +627,7 @@ public:
             std::vector<ltsmin_state> successors = this->get_successors(state, group);
             // int dst[state_length]; N.B. This is not portable C++
             MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);
-            for (atermpp::vector<ltsmin_state>::iterator succ = successors.begin(); succ
+            for (std::vector<ltsmin_state>::iterator succ = successors.begin(); succ
                     != successors.end(); ++succ) {
                 this->to_state_vector(*succ, dst, state, src);
                 cb(dst, group);

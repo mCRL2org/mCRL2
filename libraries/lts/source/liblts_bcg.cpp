@@ -12,7 +12,6 @@
 
 #include <string>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/utilities/exception.h"
 #include "bcg_user.h"

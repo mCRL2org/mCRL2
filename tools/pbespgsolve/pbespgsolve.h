@@ -206,26 +206,14 @@ class pbespgsolve_algorithm
       }
     }
 
-    template <typename Container>
-    bool run(pbes<Container>& p)
+    bool run(ParityGame& pg, const verti goal_v)
     {
-      m_timer.start("initialization");
-      mCRL2log(log::verbose) << "Generating parity game..."  << std::endl;
-      // Generate the game from a PBES:
-      verti goal_v;
-      ParityGame pg;
-
-      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
-
-      mCRL2log(log::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
-
       if (!m_options.only_generate)
       {
         mCRL2log(log::verbose) << "Solving..." << std::endl;
 
         // Create a solver:
         std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
-        m_timer.finish("initialization");
 
         // Solve the game:
         m_timer.start("solving");
@@ -248,6 +236,21 @@ class pbespgsolve_algorithm
         return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
       }
       return true;
+    }
+
+    bool run(pbes& p)
+    {
+      m_timer.start("initialization");
+      mCRL2log(log::verbose) << "Generating parity game..."  << std::endl;
+      // Generate the game from a PBES:
+      verti goal_v;
+      ParityGame pg;
+
+      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
+      mCRL2log(log::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
+      m_timer.finish("initialization");
+
+      return run(pg, goal_v);
     }
 };
 

@@ -21,8 +21,6 @@
 #include <set>
 #include <sstream>
 #include <functional>
-#include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
@@ -49,11 +47,11 @@ typedef std::pair<bool, data::variable_list> pfnf_traverser_quantifier;
 
 struct variable_variable_substitution: public std::unary_function<data::variable, data::variable>
 {
-  atermpp::map<data::variable, data::variable> sigma;
+  std::map<data::variable, data::variable> sigma;
 
   data::variable operator()(const data::variable& v) const
   {
-    atermpp::map<data::variable, data::variable>::const_iterator i = sigma.find(v);
+    std::map<data::variable, data::variable>::const_iterator i = sigma.find(v);
     if (i == sigma.end())
     {
       return v;
@@ -63,19 +61,19 @@ struct variable_variable_substitution: public std::unary_function<data::variable
 
   data::variable_list operator()(const data::variable_list& v) const
   {
-    atermpp::vector<data::variable> result;
+    std::vector<data::variable> result;
     for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
     {
       result.push_back((*this)(*i));
     }
-    return atermpp::convert<data::variable_list>(result);
+    return data::variable_list(result.begin(),result.end());
   }
 
   std::string to_string() const
   {
     std::ostringstream out;
     out << "[";
-    for (atermpp::map<data::variable, data::variable>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+    for (std::map<data::variable, data::variable>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
     {
       if (i != sigma.begin())
       {
@@ -109,9 +107,9 @@ struct variable_data_expression_substitution: public std::unary_function<data::v
 struct pfnf_traverser_implication
 {
   pbes_expression g;
-  atermpp::vector<propositional_variable_instantiation> rhs;
+  std::vector<propositional_variable_instantiation> rhs;
 
-  pfnf_traverser_implication(const atermpp::aterm_appl& g_, const atermpp::vector<propositional_variable_instantiation>& rhs_)
+  pfnf_traverser_implication(const atermpp::aterm_appl& g_, const std::vector<propositional_variable_instantiation>& rhs_)
     : g(g_),
       rhs(rhs_)
   {}
@@ -123,36 +121,22 @@ struct pfnf_traverser_implication
   // applies a substitution to variables
   void substitute(const variable_variable_substitution& sigma)
   {
-    for (atermpp::vector<propositional_variable_instantiation>::iterator i = rhs.begin(); i != rhs.end(); ++i)
+    for (std::vector<propositional_variable_instantiation>::iterator i = rhs.begin(); i != rhs.end(); ++i)
     {
       *i = pbes_system::replace_free_variables(*i, variable_data_expression_substitution(sigma));
     }
     g = pbes_system::replace_free_variables(g, variable_data_expression_substitution(sigma));
   }
 
-  void mark() const
-  {
-  	g.mark();
-  }
-
-  void protect() const
-  {
-  	g.protect();
-  }
-
-  void unprotect() const
-  {
-  	g.unprotect();
-  }
 };
 
 struct pfnf_traverser_expression
 {
 	pbes_expression expr;
-  atermpp::vector<pfnf_traverser_quantifier> quantifiers;
-  atermpp::vector<pfnf_traverser_implication> implications;
+  std::vector<pfnf_traverser_quantifier> quantifiers;
+  std::vector<pfnf_traverser_implication> implications;
 
-  pfnf_traverser_expression(const atermpp::aterm_appl& x, const atermpp::vector<pfnf_traverser_quantifier>& quantifiers_, const atermpp::vector<pfnf_traverser_implication>& implications_)
+  pfnf_traverser_expression(const atermpp::aterm_appl& x, const std::vector<pfnf_traverser_quantifier>& quantifiers_, const std::vector<pfnf_traverser_implication>& implications_)
     : expr(x),
       quantifiers(quantifiers_),
       implications(implications_)
@@ -165,30 +149,15 @@ struct pfnf_traverser_expression
   // applies a substitution to variables
   void substitute(const variable_variable_substitution& sigma)
   {
-    for (atermpp::vector<pfnf_traverser_quantifier>::iterator i = quantifiers.begin(); i != quantifiers.end(); ++i)
+    for (std::vector<pfnf_traverser_quantifier>::iterator i = quantifiers.begin(); i != quantifiers.end(); ++i)
     {
       i->second = sigma(i->second);
     }
-    for (atermpp::vector<pfnf_traverser_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
+    for (std::vector<pfnf_traverser_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
     {
       i->substitute(sigma);
     }
     expr = pbes_system::replace_free_variables(expr, variable_data_expression_substitution(sigma));
-  }
-
-  void mark() const
-  {
-  	expr.mark();
-  }
-
-  void protect() const
-  {
-  	expr.protect();
-  }
-
-  void unprotect() const
-  {
-  	expr.unprotect();
   }
 };
 
@@ -197,68 +166,6 @@ struct pfnf_traverser_expression
 } // namespace pbes_system
 
 } // namespace mcrl2
-
-namespace atermpp
-{
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_quantifier>
-{
-  static void protect(const mcrl2::pbes_system::detail::pfnf_traverser_quantifier& t)
-  {
-    t.second.protect();
-  }
-
-  static void unprotect(const mcrl2::pbes_system::detail::pfnf_traverser_quantifier& t)
-  {
-    t.second.unprotect();
-  }
-
-  static void mark(const mcrl2::pbes_system::detail::pfnf_traverser_quantifier& t)
-  {
-    t.second.mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_implication>
-{
-  static void protect(const mcrl2::pbes_system::detail::pfnf_traverser_implication& t)
-  {
-    t.protect();
-  }
-
-  static void unprotect(const mcrl2::pbes_system::detail::pfnf_traverser_implication& t)
-  {
-    t.unprotect();
-  }
-
-  static void mark(const mcrl2::pbes_system::detail::pfnf_traverser_implication& t)
-  {
-    t.mark();
-  }
-};
-
-template<>
-struct aterm_traits<mcrl2::pbes_system::detail::pfnf_traverser_expression>
-{
-  static void protect(const mcrl2::pbes_system::detail::pfnf_traverser_expression& t)
-  {
-    t.protect();
-  }
-
-  static void unprotect(const mcrl2::pbes_system::detail::pfnf_traverser_expression& t)
-  {
-    t.unprotect();
-  }
-
-  static void mark(const mcrl2::pbes_system::detail::pfnf_traverser_expression& t)
-  {
-    t.mark();
-  }
-};
-
-} // namespace atermpp
 
 namespace mcrl2
 {
@@ -300,11 +207,11 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
     std::set<data::variable> left_variables;
     std::set<data::variable> right_variables;
     std::set<data::variable> name_clashes;
-    for (atermpp::vector<pfnf_traverser_quantifier>::const_iterator i = left.quantifiers.begin(); i != left.quantifiers.end(); ++i)
+    for (std::vector<pfnf_traverser_quantifier>::const_iterator i = left.quantifiers.begin(); i != left.quantifiers.end(); ++i)
     {
       left_variables.insert(i->second.begin(), i->second.end());
     }
-    for (atermpp::vector<pfnf_traverser_quantifier>::const_iterator j = right.quantifiers.begin(); j != right.quantifiers.end(); ++j)
+    for (std::vector<pfnf_traverser_quantifier>::const_iterator j = right.quantifiers.begin(); j != right.quantifiers.end(); ++j)
     {
       const data::variable_list& rv = j->second;
       for (data::variable_list::const_iterator k = rv.begin(); k != rv.end(); ++k)
@@ -365,7 +272,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   }
 
   /// \brief A stack containing expressions in PFNF format.
-  atermpp::vector<pfnf_traverser_expression> expression_stack;
+  std::vector<pfnf_traverser_expression> expression_stack;
 
   /// \brief A stack containing quantifier variables.
   std::vector<data::variable_list> quantifier_stack;
@@ -376,17 +283,17 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   {
     assert(!expression_stack.empty());
     const pfnf_traverser_expression& expr = expression_stack.back();
-    const atermpp::vector<pfnf_traverser_quantifier>& q = expr.quantifiers;
+    const std::vector<pfnf_traverser_quantifier>& q = expr.quantifiers;
     pbes_expression h = expr.expr;
-    const atermpp::vector<pfnf_traverser_implication>& g = expr.implications;
+    const std::vector<pfnf_traverser_implication>& g = expr.implications;
     pbes_expression result = h;
     const pbes_expression F = false_();
-    for (atermpp::vector<pfnf_traverser_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
+    for (std::vector<pfnf_traverser_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
     {
       pbes_expression x = std::accumulate(i->rhs.begin(), i->rhs.end(), F, &utilities::optimized_or<pbes_expression>);
       result = utilities::optimized_and(result, utilities::optimized_imp(i->g, x));
     }
-    for (atermpp::vector<pfnf_traverser_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
+    for (std::vector<pfnf_traverser_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
     {
       if (i->first)
       {
@@ -404,15 +311,15 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   /// \param expr An expression
   void print_expression(const pfnf_traverser_expression& expr) const
   {
-    const atermpp::vector<pfnf_traverser_quantifier>& q = expr.quantifiers;
+    const std::vector<pfnf_traverser_quantifier>& q = expr.quantifiers;
     pbes_expression h = expr.expr;
-    const atermpp::vector<pfnf_traverser_implication>& g = expr.implications;
-    for (atermpp::vector<pfnf_traverser_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
+    const std::vector<pfnf_traverser_implication>& g = expr.implications;
+    for (std::vector<pfnf_traverser_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
     {
       std::cout << (i->first ? "forall " : "exists ") << data::pp(i->second) << " ";
     }
     std::cout << (q.empty() ? "" : " . ") << pbes_system::pp(h) << "\n";
-    for (atermpp::vector<pfnf_traverser_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
+    for (std::vector<pfnf_traverser_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
     {
       std::cout << " /\\ " << pbes_system::pp(i->g) << " => ";
       if (i->rhs.empty())
@@ -422,7 +329,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
       else
       {
         std::cout << "( ";
-        for (atermpp::vector<propositional_variable_instantiation>::const_iterator j = i->rhs.begin(); j != i->rhs.end(); ++j)
+        for (std::vector<propositional_variable_instantiation>::const_iterator j = i->rhs.begin(); j != i->rhs.end(); ++j)
         {
           if (j != i->rhs.begin())
           {
@@ -442,7 +349,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   void print(std::string msg = "") const
   {
     std::cout << "--- " << msg << std::endl;
-    for (atermpp::vector<pfnf_traverser_expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
+    for (std::vector<pfnf_traverser_expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
     {
       print_expression(*i);
     }
@@ -477,9 +384,9 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     pfnf_traverser_expression left  = expression_stack.back();
     expression_stack.pop_back();
     resolve_name_clashes(left, right);
-    atermpp::vector<pfnf_traverser_quantifier> q = concat(left.quantifiers, right.quantifiers);
+    std::vector<pfnf_traverser_quantifier> q = concat(left.quantifiers, right.quantifiers);
     pbes_expression h = make_and(left, right);
-    atermpp::vector<pfnf_traverser_implication> g = concat(left.implications, right.implications);
+    std::vector<pfnf_traverser_implication> g = concat(left.implications, right.implications);
 //std::cout << "AND RESULT\n"; print_expression(pfnf_traverser_expression(h, q, g));
     expression_stack.push_back(pfnf_traverser_expression(h, q, g));
   }
@@ -493,7 +400,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     expression_stack.pop_back();
     resolve_name_clashes(left, right);
 
-    atermpp::vector<pfnf_traverser_quantifier> q = concat(left.quantifiers, right.quantifiers);
+    std::vector<pfnf_traverser_quantifier> q = concat(left.quantifiers, right.quantifiers);
 
     pbes_expression h_phi = left.expr;
     pbes_expression h_psi = right.expr;
@@ -502,27 +409,27 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     pbes_expression not_h_phi = make_not(left.expr);
     pbes_expression not_h_psi = make_not(right.expr);
 
-    const atermpp::vector<pfnf_traverser_implication>& q_phi = left.implications;
-    const atermpp::vector<pfnf_traverser_implication>& q_psi = right.implications;
+    const std::vector<pfnf_traverser_implication>& q_phi = left.implications;
+    const std::vector<pfnf_traverser_implication>& q_psi = right.implications;
 
-    atermpp::vector<pfnf_traverser_implication> g;
+    std::vector<pfnf_traverser_implication> g;
 
     // first conjunction
-    for (atermpp::vector<pfnf_traverser_implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+    for (std::vector<pfnf_traverser_implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
     {
       g.push_back(pfnf_traverser_implication(make_and(not_h_psi, i->g), i->rhs));
     }
 
     // second conjunction
-    for (atermpp::vector<pfnf_traverser_implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
+    for (std::vector<pfnf_traverser_implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
     {
       g.push_back(pfnf_traverser_implication(make_and(not_h_phi, i->g), i->rhs));
     }
 
     // third conjunction
-    for (atermpp::vector<pfnf_traverser_implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+    for (std::vector<pfnf_traverser_implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
     {
-      for (atermpp::vector<pfnf_traverser_implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
+      for (std::vector<pfnf_traverser_implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
       {
         g.push_back(pfnf_traverser_implication(make_and(i->g, k->g), concat(i->rhs, k->rhs)));
       }
@@ -563,9 +470,9 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   void enter(const propositional_variable_instantiation& x)
   {
     // push the propositional variable on the expression stack
-    atermpp::vector<pfnf_traverser_quantifier> q;
+    std::vector<pfnf_traverser_quantifier> q;
     pbes_expression h = true_();
-    atermpp::vector<pfnf_traverser_implication> g(1, pfnf_traverser_implication(true_(), atermpp::vector<propositional_variable_instantiation>(1, x)));
+    std::vector<pfnf_traverser_implication> g(1, pfnf_traverser_implication(true_(), std::vector<propositional_variable_instantiation>(1, x)));
     expression_stack.push_back(pfnf_traverser_expression(h, q, g));
   }
 };

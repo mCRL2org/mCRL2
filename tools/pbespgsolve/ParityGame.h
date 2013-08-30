@@ -33,7 +33,7 @@
 struct ParityGameVertex
 {
     unsigned char   player;
-    compat_uint16_t priority;
+    size_t priority;
 };
 
 inline bool operator== (const ParityGameVertex &a, const ParityGameVertex &b)
@@ -149,7 +149,7 @@ public:
         Returns the sum of differences between old and new priority values
         for all vertices.
     */
-    long long propagate_priorities();
+    size_t propagate_priorities();
 
     /*! Read a game description in PGSolver format. */
     void read_pgsolver( std::istream &is,
@@ -181,20 +181,20 @@ public:
     size_t memory_use() const;
 
     /*! Return the priority limit d; all priorities must be in range [0:d) */
-    int d() const { return d_; }
+    size_t d() const { return d_; }
 
     /*! Return the game graph */
     const StaticGraph &graph() const { return graph_; }
 
     /*! Return the priority associated with vertex v */
-    int priority(verti v) const { return vertex_[v].priority; }
+    size_t priority(verti v) const { return vertex_[v].priority; }
 
     /*! Return the player associated with vertex v */
     Player player(verti v) const { return (Player)vertex_[v].player; }
 
     /*! Return the number of vertices with priority `p`.
         `p` must be between 0 and `d` (exclusive). */
-    verti cardinality(int p) const { return cardinality_[p]; }
+    verti cardinality(size_t p) const { return cardinality_[p]; }
 
     /*! Return the winner for vertex v according to strategy s. */
     template<class StrategyT>
@@ -214,16 +214,15 @@ public:
 
 #ifdef WITH_MCRL2
     /*! Generate a parity game from an mCRL2 PBES. */
-    template <typename Container>
     void assign_pbes(
-        mcrl2::pbes_system::pbes<Container> &pbes, verti *goal_vertex = 0,
+        mcrl2::pbes_system::pbes &pbes, verti *goal_vertex = 0,
         StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL, mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::jitty );
 #endif
 
 protected:
     /*! Re-allocate memory to store information on V vertices with priorities
         between 0 and `d` (exclusive). */
-    void reset(verti V, int d);
+    void reset(verti V, size_t d);
 
     /*! Recalculate cardinalities (priority frequencies) from the first
         `num_vertices` elements of `vertex_`. */
@@ -232,7 +231,7 @@ protected:
     /*! Helper function for ParityGame::propagate_priorities() that decreases
         the priority for `v' to the maximum of those in range [begin:end), if
         this is less than its current value, and returns the absolute change. */
-    int propagate_priority( verti v, StaticGraph::const_iterator begin,
+    size_t propagate_priority( verti v, StaticGraph::const_iterator begin,
                                      StaticGraph::const_iterator end );
 
 private:
@@ -240,7 +239,7 @@ private:
     ParityGame &operator=(const ParityGame &game);
 
 private:
-    int d_;                 /*!< priority limit (max. priority + 1) */
+    size_t d_;                 /*!< priority limit (max. priority + 1) */
     StaticGraph graph_;     /*!< game graph */
 
     /*! Assignment of players and priorities to vertices (size graph_.V()) */

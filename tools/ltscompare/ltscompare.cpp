@@ -12,12 +12,10 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/exception.h"
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/utilities/tool.h"
 
 #include "mcrl2/lts/lts_algorithm.h"
@@ -207,7 +205,7 @@ class ltscompare_tool : public ltscompare_base
           return lts_compare<lts_lts_t>();
         }
         case lts_none:
-          cerr << "No input format is specified. Assuming .aut format.\n";
+          mCRL2log(mcrl2::log::warning) << "No input format is specified. Assuming .aut format.\n";
         case lts_aut:
         {
           return lts_compare<lts_aut_t>();
@@ -373,43 +371,7 @@ class ltscompare_tool : public ltscompare_base
 
 };
 
-class ltscompare_gui_tool: public mcrl2_gui_tool<ltscompare_tool>
-{
-  public:
-    ltscompare_gui_tool()
-    {
-
-      std::vector<std::string> values;
-
-      m_gui_options["counter-example"] = create_checkbox_widget();
-
-      values.clear();
-      values.push_back("none");
-      values.push_back("bisim");
-      values.push_back("branching-bisim");
-      values.push_back("dpbranching-bisim");
-      values.push_back("sim");
-      values.push_back("trace");
-      values.push_back("weak-trace");
-      m_gui_options["equivalence"] = create_radiobox_widget(values);
-
-      values.clear();
-      values.push_back("none");
-      values.push_back("sim");
-      values.push_back("trace");
-      values.push_back("weak-trace");
-      m_gui_options["preorder"] = create_radiobox_widget(values);
-      m_gui_options["tau"] = create_textctrl_widget();
-
-      //-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
-      //-jFORMAT, --in2=FORMAT   use FORMAT as the format for INFILE2
-
-    }
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return ltscompare_gui_tool().execute(argc,argv);
+  return ltscompare_tool().execute(argc,argv);
 }

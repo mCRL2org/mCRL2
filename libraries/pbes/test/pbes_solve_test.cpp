@@ -10,11 +10,10 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -178,7 +177,7 @@ std::string test17 =
 
 void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::rewrite_strategy rewrite_strategy)
 {
-  pbes<> p = txt2pbes(pbes_spec);
+  pbes p = txt2pbes(pbes_spec);
   bool result = pbes2_bool_test(p, rewrite_strategy);
   if (result != expected_result)
   {
@@ -188,12 +187,11 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::re
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
   BOOST_CHECK(result == expected_result);
-  core::garbage_collect();
 }
 
 void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& options, bool expected_result)
 {
-  pbes<> p = txt2pbes(pbes_spec);
+  pbes p = txt2pbes(pbes_spec);
   bool result = pbespgsolve(p, options);
   if (result != expected_result)
   {
@@ -203,7 +201,6 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
   BOOST_CHECK(result == expected_result);
-  core::garbage_collect();
 }
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
@@ -273,10 +270,9 @@ void test_abp_frm(const std::string& FORMULA, bool expected_result)
   bool timed = false;
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
-  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   std::string abp_text = pbes_system::pp(p);
   test_pbes_solve(abp_text, expected_result);
-  core::garbage_collect();
 }
 
 void test_abp()
@@ -287,8 +283,6 @@ void test_abp()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_all();
   test_abp();
 

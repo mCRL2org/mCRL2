@@ -15,6 +15,10 @@
 #include "mcrl2/core/dparser.h"
 #include "mcrl2/utilities/exception.h"
 
+// prototypes
+struct D_ParseNode;
+struct D_Parser;
+
 namespace mcrl2 {
 
 namespace core {

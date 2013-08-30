@@ -12,8 +12,12 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PBES_H
 #define MCRL2_PBES_DETAIL_PFNF_PBES_H
 
+#include <cassert>
 #include <iostream>
 #include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -46,7 +50,7 @@ void split_pfnf_implication(const pbes_expression& x, pbes_expression& g, std::v
     for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
     {
       assert(is_propositional_variable_instantiation(*i));
-      Xij.push_back(*i);
+      Xij.push_back(core::static_down_cast<const propositional_variable_instantiation&>(*i));
     }
   }
 }
@@ -83,6 +87,12 @@ class pfnf_implication
     {
       return m_v;
     }
+
+    // convert to pbes_expression
+    pbes_expression convert() const
+    {
+      return imp(m_g, pbes_expr::join_or(m_v.begin(), m_v.end()));
+    }
 };
 
 inline
@@ -112,6 +122,19 @@ class pfnf_quantifier
     {
       return m_variables;
     }
+
+    // applies the quantifier to a pbes expression
+    pbes_expression apply(const pbes_expression& phi) const
+    {
+      if (m_is_forall)
+      {
+        return forall(m_variables, phi);
+      }
+      else
+      {
+        return exists(m_variables, phi);
+      }
+    }
 };
 
 // represents Qq: Q. h /\ implications
@@ -119,6 +142,7 @@ class pfnf_equation
 {
   protected:
     // left hand side
+    fixpoint_symbol m_symbol;
     propositional_variable m_X;
     std::vector<data::variable> m_parameters;
 
@@ -130,6 +154,7 @@ class pfnf_equation
   public:
     pfnf_equation(const pbes_equation& eqn)
     {
+      m_symbol = eqn.symbol();
       propositional_variable X = eqn.variable();
       pbes_expression phi = eqn.formula();
 
@@ -195,23 +220,78 @@ class pfnf_equation
     {
       return m_implications;
     }
+
+    // convert to pbes_equation
+    pbes_equation convert() const
+    {
+      std::vector<pbes_expression> v;
+      for (std::vector<pfnf_implication>::const_iterator i = m_implications.begin(); i != m_implications.end(); ++i)
+      {
+        v.push_back(i->convert());
+      }
+      pbes_expression phi = pbes_expr::join_and(v.begin(), v.end());
+
+      phi = and_(m_h, phi);
+
+      // apply quantifiers
+      for (std::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      {
+        phi = i->apply(phi);
+      }
+      return pbes_equation(m_symbol, m_X, phi);
+    }
+
+    // computes the equation with the implications replaced by new_implication
+    pbes_equation apply_implication(const pbes_expression& new_implications) const
+    {
+      pbes_expression phi = new_implications;
+      phi = and_(m_h, phi);
+
+      // apply quantifiers
+      for (std::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      {
+        phi = i->apply(phi);
+      }
+      return pbes_equation(m_symbol, m_X, phi);
+    }
 };
+
+} // namespace detail
+} // namespace pbes_system
+} // namespace mcrl2
+
+namespace mcrl2 {
+namespace pbes_system {
+namespace detail {
 
 // explicit representation of a pbes in PFNF format
 class pfnf_pbes
 {
   protected:
-    const pbes<>& m_pbes; // store a reference to the original pbes, to indicate that it should not be destroyed
+    data::data_specification m_data;
     std::vector<pfnf_equation> m_equations;
+    std::set<data::variable> m_global_variables;
+    pbes_expression m_initial_state;
 
   public:
+    pfnf_pbes()
+    {}
+
     /// \brief Constructor
     /// \pre The pbes p must be in PFNF format
-    pfnf_pbes(const pbes<>& p)
-      : m_pbes(p)
+    pfnf_pbes(const pbes& p)
+      : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
-      const atermpp::vector<pbes_equation>& equations = p.equations();
-      for (atermpp::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      pbes q = p;
+      if (!pbes_system::detail::is_pfnf(p))
+      {
+        mCRL2log(log::verbose) << "converting PBES into PFNF format... " << std::endl;
+        pfnf_rewriter R;
+        pbes_system::pbes_rewrite(q, R);
+        assert (is_pfnf(q));
+      }
+      const std::vector<pbes_equation>& equations = q.equations();
+      for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         m_equations.push_back(pfnf_equation(*i));
       }
@@ -227,14 +307,24 @@ class pfnf_pbes
       return m_equations;
     }
 
+    const std::set<data::variable>& global_variables() const
+    {
+      return m_global_variables;
+    }
+
+    std::set<data::variable>& global_variables()
+    {
+      return m_global_variables;
+    }
+
     const pbes_expression& initial_state() const
     {
-      return m_pbes.initial_state();
+      return m_initial_state;
     }
 
     const data::data_specification& data() const
     {
-      return m_pbes.data();
+      return m_data;
     }
 };
 

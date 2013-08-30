@@ -8,16 +8,12 @@
 //
 /// \file pbesabsint.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -96,23 +92,7 @@ class pbes_absinthe_tool: public input_output_tool
 
 };
 
-class pbes_absint_gui_tool: public mcrl2_gui_tool<pbes_absinthe_tool>
-{
-  public:
-    pbes_absint_gui_tool()
-    {
-      m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
-      std::vector<std::string> values;
-      values.clear();
-      values.push_back("over");
-      values.push_back("under");
-      // TODO: finish the GUI tool
-    }
-};
-
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-  pbes_absint_gui_tool tool;
-  return tool.execute(argc, argv);
+  return pbes_absinthe_tool().execute(argc, argv);
 }

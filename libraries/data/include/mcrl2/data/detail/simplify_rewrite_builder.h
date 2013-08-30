@@ -86,20 +86,20 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       }
       else if (is_and(x)) // x = y && z
       {
-        data_expression y = derived()(x.left());
-        data_expression z = derived()(x.right());
+        data_expression y = derived()(binary_left(x));
+        data_expression z = derived()(binary_right(x));
         result = utilities::optimized_and(y, z);
       }
       else if (is_or(x)) // x = y || z
       {
-        data_expression y = derived()(x.left());
-        data_expression z = derived()(x.right());
+        data_expression y = derived()(binary_left(x));
+        data_expression z = derived()(binary_right(x));
         result = utilities::optimized_or(y, z);
       }
       else if (is_imp(x)) // x = y => z
       {
-        data_expression y = derived()(x.left());
-        data_expression z = derived()(x.right());
+        data_expression y = derived()(binary_left(x));
+        data_expression z = derived()(binary_right(x));
         result = utilities::optimized_imp(y, z);
       }
       else
@@ -134,13 +134,13 @@ struct simplify_rewriter: public std::unary_function<data_expression, data_expre
 };
 
 template <typename T>
-void simplify(T& x, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0)
+void simplify(T& x, typename boost::disable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(detail::simplify_rewriter())(x);
 }
 
 template <typename T>
-T simplify(const T& x, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0)
+T simplify(const T& x, typename boost::enable_if<typename boost::is_base_of<atermpp::aterm, T>::type>::type* = 0)
 {
   T result = core::make_update_apply_builder<data::data_expression_builder>(detail::simplify_rewriter())(x);
   return result;

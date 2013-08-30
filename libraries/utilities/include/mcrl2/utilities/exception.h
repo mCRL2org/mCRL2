@@ -13,7 +13,7 @@
 #define __MCRL2_EXCEPTION_H__
 
 #include <stdexcept>
-#include <string>
+#include <sstream>
 #include <iostream>
 #include <cassert>
 
@@ -28,7 +28,7 @@ class runtime_error : public std::runtime_error
   public:
     /// \brief Constructor
     /// \param[in] message the exception message
-    runtime_error(std::string const& message) : std::runtime_error(message)
+    runtime_error(const std::string& message) : std::runtime_error(message)
     {
     }
 };
@@ -39,15 +39,23 @@ class runtime_error : public std::runtime_error
 class command_line_error : public runtime_error
 {
 private:
-  std::string m_name;
+  std::string m_msg;
 public:
   command_line_error(const std::string& name, const std::string& message) throw()
-    : runtime_error(message), m_name(name)
-  {}
+    : runtime_error("")
+  {
+    // We're storing the message in a separate string because we cannot
+    // alter the string that is used by std::runtime_error::what(). The
+    // inheritance relation between command_line_error and runtime_error
+    // is therefore only logical, not functional.
+    std::stringstream s;
+    s << name << ": " << message << "\n"
+      << "Try '" << name << " --help' for more information.";
+    m_msg = s.str();
+  }
   virtual const char* what() const throw()
   {
-    return (m_name + ": " + runtime_error::what() + "\n"
-            "Try '" + m_name + " --help' for more information.").c_str();
+    return m_msg.c_str();
   }
   virtual ~command_line_error() throw()
   {};

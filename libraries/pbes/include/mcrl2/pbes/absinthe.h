@@ -23,12 +23,9 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
@@ -37,7 +34,6 @@
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/logger.h"
@@ -55,7 +51,7 @@ namespace pbes_system {
   template <typename Term>
   std::string print_term(const Term& x)
   {
-    return data::pp(x) + " " + x.to_string();
+    return data::pp(x) + " " + to_string(x);
   }
 
   template <typename Term>
@@ -126,7 +122,7 @@ namespace detail {
       data::sort_expression s = i->reference();
       if (data::is_structured_sort(s))
       {
-        data::structured_sort ss = s;
+        const data::structured_sort& ss = core::static_down_cast<const data::structured_sort&>(s);
         data::function_symbol_vector v = ss.constructor_functions();
         for (data::function_symbol_vector::iterator j = v.begin(); j != v.end(); ++j)
         {
@@ -142,7 +138,7 @@ namespace detail {
   }
 
   inline
-  void print_used_function_symbols(const pbes<>& p)
+  void print_used_function_symbols(const pbes& p)
   {
     mCRL2log(log::debug, "absinthe") << "--- used function symbols ---" << std::endl;
     std::set<data::function_symbol> find_function_symbols = pbes_system::find_function_symbols(p);
@@ -162,7 +158,7 @@ namespace detail {
     }
     else if (data::is_function_sort(s))
     {
-      data::function_sort fs = s;
+      const data::function_sort& fs = core::static_down_cast<const data::function_sort&>(s);
       return fs.codomain();
     }
     else if (data::is_container_sort(s))
@@ -177,9 +173,9 @@ namespace detail {
 
 struct absinthe_algorithm
 {
-  typedef atermpp::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
-  typedef atermpp::map<data::function_symbol, data::function_symbol> function_symbol_substitution_map;
-  typedef atermpp::map<data::sort_expression, data::function_symbol> abstraction_map;
+  typedef std::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
+  typedef std::map<data::function_symbol, data::function_symbol> function_symbol_substitution_map;
+  typedef std::map<data::sort_expression, data::function_symbol> abstraction_map;
 
   struct absinthe_sort_expression_builder: public sort_expression_builder<absinthe_sort_expression_builder>
   {
@@ -245,7 +241,7 @@ struct absinthe_algorithm
     {
       if (data::is_variable(x.head()))
       {
-        data::variable v = x.head();
+        data::variable v = core::static_down_cast<const data::variable&>(x.head());
         v = data::variable(v.name(), super::operator()(v.sort()));
         return data::detail::create_finite_set(data::application(v, x.arguments()));
       }
@@ -288,7 +284,7 @@ struct absinthe_algorithm
       {
         // check if it is a "ground term", i.e. it does not contain any variables
         abstraction_map::const_iterator i = sigmaH.find(x.sort());
-        if (i != sigmaH.end() && data::find_variables(x).empty())
+        if (i != sigmaH.end() && data::find_all_variables(x).empty())
         {
           data::data_expression_list args = atermpp::make_list(x);
           result = data::detail::create_finite_set(data::application(i->second, args));
@@ -336,7 +332,7 @@ struct absinthe_algorithm
 
     data::variable_list make_variables(const data::data_expression_list& x, const std::string& hint, sort_function sigma) const
     {
-      atermpp::vector<data::variable> result;
+      std::vector<data::variable> result;
       unsigned int i = 0;
       for (data::data_expression_list::const_iterator j = x.begin(); j != x.end(); ++i, ++j)
       {
@@ -410,11 +406,11 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), variables)));
+        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::aterm_cast<data::data_expression_list>(variables))));
       }
       else
       {
-        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
+        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::aterm_cast<data::data_expression_list>(variables))));
       }
       return result;
     }
@@ -437,8 +433,7 @@ struct absinthe_algorithm
       x.formula() = super::operator()(x.formula());
     }
 
-    template <typename Container>
-    void operator()(pbes_system::pbes<Container>& x)
+    void operator()(pbes_system::pbes& x)
     {
       super::operator()(x.equations());
       pbes_expression kappa = (*this)(x.initial_state());
@@ -515,7 +510,7 @@ struct absinthe_algorithm
     const data::function_symbol_vector& m = dataspec.user_defined_mappings();
     for (data::function_symbol_vector::const_iterator i = m.begin(); i != m.end(); ++i)
     {
-      data::function_sort f = i->sort();
+      const data::function_sort& f = core::static_down_cast<const data::function_sort&>(i->sort());
       if (f.domain().size() != 1)
       {
         throw mcrl2::runtime_error("cannot abstract the function " + data::pp(*i) + " since the arity of the domain is not equal to one!");
@@ -622,7 +617,7 @@ struct absinthe_algorithm
         // Apply sigmaS recursively to s
         //   f:        tail:           List(Nat) -> List(Nat)
         //   result:   generated_tail: List(AbsNat) -> Set(List(AbsNat))
-        data::function_sort fs = sigma(s);
+        const data::function_sort& fs = core::static_down_cast<const data::function_sort&>(sigma(s));
         return data::function_symbol(name, data::function_sort(fs.domain(), make_set()(fs.codomain())));
       }
       else if (data::is_container_sort(s))
@@ -641,24 +636,26 @@ struct absinthe_algorithm
   {
     data::function_symbol operator()(const data::function_symbol& f) const
     {
+      using namespace data;
       //mCRL2log(log::debug, "absinthe") << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
       std::string name = "Lift" + boost::algorithm::trim_copy(std::string(f.name()));
-      data::sort_expression s = f.sort();
-      if (data::is_basic_sort(s))
+      const sort_expression &s = f.sort();
+      if (is_basic_sort(s))
       {
-        return data::function_symbol(name, make_set()(s));
+        return function_symbol(name, make_set()(s));
       }
-      else if (data::is_function_sort(s))
+      else if (is_function_sort(s))
       {
-        data::function_sort fs(s);
-        return data::function_symbol(name, data::function_sort(atermpp::apply(fs.domain(), make_set()), fs.codomain()));
+        const function_sort fs(s);
+        const sort_expression_list& sl=fs.domain();
+        return function_symbol(name,
+                 function_sort(sort_expression_list(sl.begin(),sl.end(), make_set()), fs.codomain()));
       }
-      else if (data::is_container_sort(s))
+      else if (is_container_sort(s))
       {
         return data::function_symbol(name, make_set()(s));
       }
       throw mcrl2::runtime_error("absinthe algorithm (lift): unsupported sort " + print_term(s) + " detected!");
-      return data::function_symbol();
     }
   };
 
@@ -668,9 +665,9 @@ struct absinthe_algorithm
     lift_equation_1_2()
     {}
 
-    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
+    std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
-      atermpp::vector<data::variable> result;
+      std::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
@@ -723,7 +720,7 @@ struct absinthe_algorithm
           throw std::runtime_error("can not generalize functions with abstraction sorts in the domain: " + data::pp(f1) + ": " + data::pp(s1));
         }
 
-        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
+        std::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
         variables = atermpp::convert<data::variable_list>(x);
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         data::application f_x(f1, data::data_expression_list(x.begin(), x.end()));
@@ -740,7 +737,7 @@ struct absinthe_algorithm
         else
         {
           data::function_symbol h = i->second;
-          rhs = create_finite_set(data::application(h, atermpp::make_list(f_x)));
+          rhs = data::detail::create_finite_set(data::application(h, atermpp::make_list(f_x)));
           //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
@@ -776,9 +773,9 @@ struct absinthe_algorithm
     lift_equation_2_3()
     {}
 
-    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
+    std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
-      atermpp::vector<data::variable> result;
+      std::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
@@ -790,11 +787,11 @@ struct absinthe_algorithm
     // Let x = [x1:D1, ..., xn:Dn] and X = [X1:Set(D1), ..., Xn:Set(Dn)]. Returns the expression
     //
     // (x1 in X1 /\ ... /\ xn in Xn)
-    data::data_expression enumerate_domain(const atermpp::vector<data::variable>& x, const atermpp::vector<data::variable>& X) const
+    data::data_expression enumerate_domain(const std::vector<data::variable>& x, const std::vector<data::variable>& X) const
     {
-      atermpp::vector<data::data_expression> a;
-      atermpp::vector<data::variable>::const_iterator i = x.begin();
-      atermpp::vector<data::variable>::const_iterator j = X.begin();
+      std::vector<data::data_expression> a;
+      std::vector<data::variable>::const_iterator i = x.begin();
+      std::vector<data::variable>::const_iterator j = X.begin();
       for (; i != x.end(); ++i, ++j)
       {
         a.push_back(data::detail::create_set_in(*i, *j));
@@ -824,12 +821,12 @@ struct absinthe_algorithm
         data::function_sort fs3(f3.sort());
 
         // TODO: generate these variables in a proper way
-        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
-        atermpp::vector<data::variable> X = make_variables(fs3.domain(), "X", sigma);
+        std::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
+        std::vector<data::variable> X = make_variables(fs3.domain(), "X", sigma);
 
         variables = data::variable_list(X.begin(), X.end());
         lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));
-        data::variable y("y", data::detail::get_set_sort(fs2.codomain()));
+        data::variable y("y", data::detail::get_set_sort(core::static_down_cast<const data::container_sort&>(fs2.codomain())));
         data::data_expression Y = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         data::data_expression body = data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y));
         rhs = data::detail::create_set_comprehension(y, data::exists(x, body));
@@ -905,7 +902,7 @@ struct absinthe_algorithm
   }
 
   // add lifted mappings and equations to the data specification
-  void lift_data_specification(const pbes<>& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
+  void lift_data_specification(const pbes& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
     sort_function sigma(sigmaH, sigmaS, sigmaF);
@@ -1002,7 +999,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
     log::mcrl2_logger::set_reporting_level(log::debug, "absinthe");
   }
 
-  void run(pbes<>& p, const std::string& abstraction_text, bool is_over_approximation)
+  void run(pbes& p, const std::string& abstraction_text, bool is_over_approximation)
   {
     // split the string abstraction_text into four different parts
     std::string function_symbol_mapping_text;
@@ -1073,7 +1070,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
     for (abstraction_map::const_iterator i = sigmaH.begin(); i != sigmaH.end(); ++i)
     {
       data::function_symbol f = i->second;
-      data::function_sort fs = f.sort();
+      const data::function_sort& fs = core::static_down_cast<const data::function_sort&>(f.sort());
       sigmaS[i->first] = fs.codomain();
     }
     mCRL2log(log::debug, "absinthe") << "\n--- sort expression mapping ---\n" << print_mapping(sigmaS) << std::endl;

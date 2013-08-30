@@ -7,11 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/identifier_string.h
-/// \brief ATerm representations of identifier strings.
+/// \brief aterm representations of identifier strings.
 
 #ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
 #define MCRL2_BASIC_IDENTIFIER_STRING_H
 
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 
 namespace mcrl2
@@ -30,7 +31,16 @@ typedef atermpp::aterm_string identifier_string;
 inline
 bool is_identifier_string(atermpp::aterm t)
 {
-  return t.type() == AT_APPL && atermpp::aterm_appl(t).size() == 0;
+  return t.type_is_appl() && atermpp::aterm_appl(t).size() == 0;
+}
+
+/// \brief Tests if a string is empty.
+/// \param t An identifier string
+/// \return Whether t is the empty string.
+inline
+identifier_string empty_identifier_string()
+{
+  return atermpp::empty_string();
 }
 
 /// \brief Read-only singly linked list of identifier strings

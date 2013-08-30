@@ -1,0 +1,127 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{Constant Parameter Detection and Elimination}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\varphi
+_{X_{1}})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\varphi
+_{X_{n}})$ be a PBES, and $\kappa $ an initial state and let $\mathsf{eval}$
+be an evaluator function on data expressions. We denote the $i$-th element
+of a vector $x$ as $x[i]$. Then we define the algorithm \textsc{PbesConstelm}
+as follows:$\qquad \qquad $%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
+}\text{\textsc{)}} \\ 
+\text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
+c_{X}:=\emptyset \\ 
+\text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
+do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
+todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}X\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X\} \\ 
+\qquad \text{\textbf{for }}Y(e)\in \mathsf{iocc}(\varphi _{X}\mathcal{)}%
+\text{ \textbf{do}} \\ 
+\qquad \qquad \text{\textbf{if }}\mathsf{eval}(needs\_update(Y(e),\varphi
+_{X})[d_{X}:=c_{X}])\neq false\text{ \textbf{then}} \\ 
+\qquad \qquad \qquad c_{Y}^{\prime }:=update(c_{Y},\mathsf{eval}%
+(e[d_{X}:=c_{X}])) \\ 
+\qquad \qquad \qquad \text{\textbf{if }}c_{Y}^{\prime }\neq c_{Y}\text{ 
+\textbf{then}} \\ 
+\qquad \qquad \qquad \qquad c_{Y}:=c_{Y}^{\prime } \\ 
+\qquad \qquad \qquad \qquad todo:=todo\cup \{Y\} \\ 
+\qquad \text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\varphi
+_{X_{i}}:=\varphi _{X_{i}}[d_{X_{i}}:=c_{X_{i}}] \\ 
+constant\_parameters:=\{(X,i)\ |\ c_{X}[i]=d_{X}[i]\} \\ 
+\text{\textbf{return }}constant\_parameters%
+\end{array}%
+\end{equation*}
+
+where $update_{X}$ is defined as follows:%
+\begin{equation*}
+update(c,e)=_{def}c^{\prime },\text{ with }c^{\prime }[i]=\left\{ 
+\begin{array}{ll}
+e[i] & \text{if }c=\emptyset \text{ and }e[i]\text{ is constant} \\ 
+c[i] & \text{if }e[i]=c[i] \\ 
+d_{X}[i] & \text{otherwise}%
+\end{array}%
+\right.
+\end{equation*}
+
+and where $needs\_update$ is a boolean function that determines whether an
+update should be performed. A safe choice for this function is the constant
+function $true$. In [Simon Janssen, 2008] the following alternative is
+proposed.
+
+Let $c_{T}$ and $c_{F}$ be defined as
+
+\begin{equation*}
+\begin{array}{lll}
+c_{T}(c) & = & c \\ 
+c_{F}(c) & = & \lnot c \\ 
+c_{T}(\lnot \varphi ) & = & c_{F}(\varphi ) \\ 
+c_{F}(\lnot \varphi ) & = & c_{T}(\varphi ) \\ 
+c_{\Gamma }(X(e)) & = & false \\ 
+c_{\Gamma }(\mathsf{Q}d:{D}.\varphi ) & = & \mathsf{Q}d:{D}.c_{\Gamma
+}(\varphi ) \\ 
+c_{T}(\varphi \wedge \psi ) & = & c_{T}(\varphi )\wedge c_{T}(\psi ) \\ 
+c_{T}(\varphi \vee \psi ) & = & c_{T}(\varphi )\vee c_{T}(\psi ) \\ 
+c_{T}(\varphi \Rightarrow \psi ) & = & c_{F}(\varphi )\vee c_{T}(\psi ) \\ 
+c_{F}(\varphi \wedge \psi ) & = & c_{F}(\varphi )\vee c_{F}(\psi ) \\ 
+c_{F}(\varphi \vee \psi ) & = & c_{F}(\varphi )\wedge c_{F}(\psi ) \\ 
+c_{F}(\varphi \Rightarrow \psi ) & = & c_{T}(\varphi )\wedge c_{F}(\psi )%
+\end{array}%
+\end{equation*}%
+and let the multi sets $cond_{T}$ and $cond_{F}$ be defined as%
+\begin{equation*}
+\begin{array}{lll}
+cond_{\Gamma }(X(e),c) & = & \emptyset \\ 
+cond_{\Gamma }(X(e),Y(f)) & = & \emptyset \\ 
+cond_{\Gamma }(X(e),\lnot \varphi ) & = & cond_{\Gamma }(X(e),\varphi ) \\ 
+cond_{\Gamma }(X(e),\varphi \oplus \psi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\varphi ) & 
+\text{if }X(e)\in \mathsf{iocc}(\varphi ) \\ 
+\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\psi ) & \text{%
+if }X(e)\in \mathsf{iocc}(\psi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\ 
+cond_{T}(X(e),\mathsf{Q}d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{T}(\mathsf{Q}d:{D}.\varphi )\}\cup \{\mathsf{Q}d:{D}.\theta \ |\ \theta
+\ \in cond_{\Gamma }(X(e),\varphi )\} & \text{if }X(e)\in \mathsf{iocc}%
+(\varphi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\ 
+cond_{T}(X(e),\mathsf{\forall }d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{F}(\mathsf{\forall }d:{D}.\varphi )\}\cup \{\mathsf{\exists }d:{D}%
+.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
+\mathsf{iocc}(\varphi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right. \\ 
+cond_{T}(X(e),\mathsf{\exists }d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{F}(\mathsf{\exists }d:{D}.\varphi )\}\cup \{\mathsf{\forall }d:{D}%
+.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
+\mathsf{iocc}(\varphi ) \\ 
+\emptyset & \text{otherwise}%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}%
+with $\Gamma \in \{T,F\}$. Then we define%
+\begin{equation*}
+needs\_update(X(e),\varphi )=\dbigwedge\limits_{c\in cond_{T}(X(e),\varphi
+)\cup cond_{F}(X(e),\varphi )}\lnot c
+\end{equation*}
+
+\begin{remark}
+Note that a direct implementation of this function is extremely inefficient.
+It is expected that a more suitable representation can be found.\newpage 
+\end{remark}

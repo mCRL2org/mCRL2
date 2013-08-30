@@ -8,11 +8,8 @@
 //
 /// \file pbesabstract.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
@@ -100,7 +97,6 @@ class pbes_abstract_tool: public input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
   pbes_abstract_tool tool;
   return tool.execute(argc, argv);
 }

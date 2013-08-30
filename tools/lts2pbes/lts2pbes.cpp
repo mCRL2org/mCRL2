@@ -9,26 +9,23 @@
 /// \file lts2pbes.cpp
 /// \brief This tool reads an LTS and translates it into a PBES.
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "lts2pbes"
 #define AUTHOR "Wieger Wesselink"
 
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/pbes/lts2pbes.h"
+#include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/lts2pbes.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -268,12 +265,12 @@ class lts2pbes_tool : public input_output_tool
     {
       action_summand_vector action_summands;
       const variable process_parameter("x", mcrl2::data::sort_pos::pos());
-      const variable_list process_parameters = push_back(variable_list(), process_parameter);
-      const atermpp::set<data::variable> global_variables;
+      const variable_list process_parameters = make_list(process_parameter);
+      const std::set<data::variable> global_variables;
       // Add a single delta.
       const deadlock_summand_vector deadlock_summands(1, deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
       const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
-      const process_initializer initial_process(push_back(assignment_list(), assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
+      const process_initializer initial_process(make_list(assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
       return lps::specification(l.data(),l.action_labels(),global_variables,lps,initial_process);
     }
 
@@ -295,10 +292,10 @@ class lts2pbes_tool : public input_output_tool
       {
         throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
       }
-      state_formulas::state_formula formula = state_formulas::parse_state_formula(from, spec);
+      state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(from, spec);
       from.close();
 
-      pbes_system::pbes<> result = pbes_system::lts2pbes(l, formula);
+      pbes_system::pbes result = pbes_system::lts2pbes(l, formula);
       //save the result
       if (output_filename().empty())
       {
@@ -313,21 +310,7 @@ class lts2pbes_tool : public input_output_tool
     }
 };
 
-class lts2pbes_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2pbes_tool>
-{
-  public:
-    lts2pbes_gui_tool()
-    {
-      m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
-      m_gui_options["lps"]  = create_filepicker_widget("LPS File (*.lps)|*.lps|All Files (*.*)|*.*");
-      m_gui_options["mcrl2"] = create_filepicker_widget("mCRL2 files (*.mcrl2)|*.mcrl2|Text Files (*.txt)|*.txt|All Files (*.*)|*.*");
-      m_gui_options["formula"] = create_filepicker_widget("modal mu-calculus files (*.mcf)|*.mcf|Text files(*.txt)|*.txt|All Files (*.*)|*.*");
-    }
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return lts2pbes_gui_tool().execute(argc, argv);
+  return lts2pbes_tool().execute(argc, argv);
 }

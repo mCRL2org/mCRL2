@@ -21,6 +21,7 @@
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
@@ -28,6 +29,7 @@
 #include "mcrl2/pbes/detail/lts2pbes_lts.h"
 #include "mcrl2/pbes/detail/lts2pbes_e.h"
 #include "mcrl2/utilities/progress_meter.h"
+#include "mcrl2/pbes/detail/term_traits_optimized.h"
 
 namespace mcrl2 {
 
@@ -54,14 +56,13 @@ class lts2pbes_algorithm
 
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula
-    /// \param spec A linear process specification
     /// \return The result of the translation
-    pbes<> run(const state_formulas::state_formula& formula)
+    pbes run(const state_formulas::state_formula& formula)
     {
       namespace sf = state_formulas;
       namespace af = state_formulas::detail::accessors;
 
-      if (!state_formulas::is_monotonous(formula))
+      if (!state_formulas::algorithms::is_monotonous(formula))
       {
         throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
@@ -69,9 +70,9 @@ class lts2pbes_algorithm
       f0 = formula;
 
       // remove occurrences of ! and =>
-      if (!state_formulas::is_normalized(f0))
+      if (!state_formulas::algorithms::is_normalized(f0))
       {
-        f0 = state_formulas::normalize(f0);
+        f0 = state_formulas::algorithms::normalize(f0);
       }
 
       // wrap the formula inside a 'nu' if needed
@@ -90,7 +91,7 @@ class lts2pbes_algorithm
       mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
-      atermpp::vector<pbes_equation> eqn = detail::E(f0, f0, lts0, lts1, m_progress_meter);
+      std::vector<pbes_equation> eqn = detail::E(f0, f0, lts0, lts1, m_progress_meter, core::term_traits_optimized<pbes_expression>());
 
       // compute the initial state
       state_type s0 = lts0.initial_state();
@@ -98,7 +99,7 @@ class lts2pbes_algorithm
       data::data_expression_list e = detail::mu_expressions(f0);
       propositional_variable_instantiation init(Xs0, e);
 
-      return pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);
+      return pbes(lts0.data(), eqn, std::set<data::variable>(), init);
     }
 };
 
@@ -107,7 +108,7 @@ class lts2pbes_algorithm
 /// \param l A labelled transition system
 /// \param f A modal formula
 inline
-pbes<> lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula& f)
+pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula& f)
 {
   lts2pbes_algorithm algorithm(l);
   return algorithm.run(f);

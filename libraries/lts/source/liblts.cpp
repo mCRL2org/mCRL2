@@ -18,9 +18,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/utilities/logger.h"
@@ -38,9 +35,6 @@ using namespace mcrl2::log;
 // #include <bcg_user.h>
 #endif
 
-#define ATisAppl(x) (ATgetType(x) == AT_APPL)
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-
 using namespace std;
 
 namespace mcrl2
@@ -50,9 +44,9 @@ namespace lts
 namespace detail
 {
 
-atermpp::vector < ATermAppl > state_label_lts::vector_templates;
+std::vector < atermpp::function_symbol > state_function_symbols;
 
-lts_type guess_format(string const& s)
+lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
 {
   string::size_type pos = s.find_last_of('.');
 
@@ -62,28 +56,43 @@ lts_type guess_format(string const& s)
 
     if (ext == "aut")
     {
-      mCRL2log(verbose) << "Detected Aldebaran extension.\n";
+      if (be_verbose) 
+      {
+        mCRL2log(verbose) << "Detected Aldebaran extension.\n";
+      }
       return lts_aut;
     }
     else if (ext == "lts")
     {
-      mCRL2log(verbose) << "Detected mCRL2 extension.\n";
+      if (be_verbose) 
+      {
+        mCRL2log(verbose) << "Detected mCRL2 extension.\n";
+      }
       return lts_lts;
     }
     else if (ext == "fsm")
     {
-      mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
+      if (be_verbose) 
+      {
+        mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
+      }
       return lts_fsm;
     }
     else if (ext == "dot")
     {
-      mCRL2log(verbose) << "Detected GraphViz extension.\n";
+      if (be_verbose) 
+      {
+        mCRL2log(verbose) << "Detected GraphViz extension.\n";
+      }
       return lts_dot;
 #ifdef USE_BCG
     }
     else if (ext == "bcg")
     {
-      mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
+      if (be_verbose) 
+      {
+        mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
+      }
       return lts_bcg;
 #endif
     }

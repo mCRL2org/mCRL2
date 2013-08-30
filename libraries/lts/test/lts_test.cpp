@@ -12,8 +12,6 @@
 #include <iostream>
 #include <sstream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_aut.h"
 
@@ -42,7 +40,6 @@ void test_lts(const std::string& test_description,
   {
     std::cout << "Expected # of transitions " << expected_transition_count << " Actual # " << l.num_transitions() << "\n";
   }
-  core::garbage_collect();
 }
 
 void test_abp()
@@ -205,8 +202,6 @@ void test_reachability()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_abp();
   test_reachability();
 

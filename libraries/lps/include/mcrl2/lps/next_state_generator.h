@@ -21,7 +21,6 @@
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/state.h"
-#include "mcrl2/atermpp/list.h"
 #include "mcrl2/atermpp/shared_subset.h"
 
 namespace mcrl2
@@ -32,50 +31,48 @@ namespace lps
 
 class next_state_generator
 {
-  protected:
+  public:
     // A rewriter_expression_t is a data expression in rewriter-internal format.
     typedef atermpp::aterm_appl rewriter_expression_t;
     typedef atermpp::term_list<rewriter_expression_t> valuation_t;
-    typedef atermpp::list<valuation_t> summand_enumeration_t;
+    typedef std::list<valuation_t> summand_enumeration_t;
     typedef atermpp::term_appl<rewriter_expression_t> condition_arguments_t;
 
     typedef data::detail::legacy_rewriter rewriter_t;
     typedef data::classic_enumerator<rewriter_t> enumerator_t;
 
-  public:
     typedef data::rewriter::internal_substitution_type substitution_t;
     typedef rewriter_expression_t internal_state_argument_t;
-    typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;
+    // typedef atermpp::term_appl<internal_state_argument_t> internal_state_t;
+    typedef std::vector<internal_state_argument_t> internal_state_t;
 
   protected:
     struct action_internal_t
     {
       lps::action_label label;
-      atermpp::vector<rewriter_expression_t> arguments;
+      std::vector<rewriter_expression_t> arguments;
     };
-    friend struct atermpp::aterm_traits<action_internal_t>;
 
     struct summand_t
     {
       action_summand *summand;
       data::variable_list variables;
       rewriter_expression_t condition;
-      atermpp::aterm_appl result_state;
-      atermpp::vector<action_internal_t> action_label;
+      // atermpp::aterm_appl result_state;
+      internal_state_t result_state;
+      std::vector<action_internal_t> action_label;
 
       std::vector<size_t> condition_parameters;
       atermpp::function_symbol condition_arguments_function;
       atermpp::aterm_appl condition_arguments_function_dummy;
-      atermpp::map<condition_arguments_t, summand_enumeration_t> enumeration_cache;
+      std::map<condition_arguments_t, summand_enumeration_t> enumeration_cache;
     };
-    friend struct atermpp::aterm_traits<summand_t>;
 
     struct pruning_tree_node_t
     {
       atermpp::shared_subset<summand_t> summand_subset;
-      atermpp::map<internal_state_argument_t, pruning_tree_node_t> children;
+      std::map<internal_state_argument_t, pruning_tree_node_t> children;
     };
-    friend struct atermpp::aterm_traits<pruning_tree_node_t>;
 
   public:
     class iterator;
@@ -106,15 +103,14 @@ class next_state_generator
         substitution_t m_pruning_substitution;
         rewriter_expression_t m_false;
 
-        static bool summand_set_contains(const atermpp::set<action_summand> &summand_set, const summand_t &summand);
+        static bool summand_set_contains(const std::set<action_summand> &summand_set, const summand_t &summand);
         void build_pruning_parameters(const action_summand_vector &summands);
-        bool is_not_false(summand_t &summand);
-        atermpp::shared_subset<summand_t>::iterator begin(internal_state_t state);
+        bool is_not_false(const summand_t &summand);
+        atermpp::shared_subset<summand_t>::iterator begin(const internal_state_t &state);
     };
 
     class transition_t
     {
-      friend struct atermpp::aterm_traits<transition_t>;
       friend class next_state_generator::iterator;
       private:
         next_state_generator *m_generator;
@@ -123,7 +119,11 @@ class next_state_generator
         size_t m_summand_index;
 
       public:
-        lps::state state() const { return m_generator->get_state(m_state); }
+        lps::state state() const
+        {
+          return m_generator->get_state(m_state);
+        }
+
         internal_state_t &internal_state() { return m_state; }
         const internal_state_t &internal_state() const { return m_state; }
         lps::multi_action &action() { return m_action; }
@@ -161,9 +161,9 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator *generator, internal_state_t state, substitution_t *substitution, summand_subset_t &summand_subset);
+        iterator(next_state_generator *generator, const internal_state_t &state, substitution_t *substitution, summand_subset_t &summand_subset);
 
-        iterator(next_state_generator *generator, internal_state_t state, substitution_t *substitution, size_t summand_index);
+        iterator(next_state_generator *generator, const internal_state_t &state, substitution_t *substitution, size_t summand_index);
 
         operator bool() const
         {
@@ -173,7 +173,7 @@ class next_state_generator
       private:
         friend class boost::iterator_core_access;
 
-        bool equal(iterator const& other) const
+        bool equal(const iterator &other) const
         {
           return (!(bool)*this && !(bool)other) || (this == &other);
         }
@@ -196,7 +196,7 @@ class next_state_generator
 
     data::variable_vector m_process_parameters;
     atermpp::function_symbol m_state_function;
-    atermpp::vector<summand_t> m_summands;
+    std::vector<summand_t> m_summands;
     internal_state_t m_initial_state;
 
     summand_subset_t m_all_summands;
@@ -204,48 +204,48 @@ class next_state_generator
   public:
     /// \brief Constructor
     /// \param specification The process specification
-    /// \param rewriter_strategy The rewriter strategy used
-    /// \param extra_function_symbols Additional function symbols the rewriter should not remove. Used by lts/exploration.
-    /// \param compute_action_labels If false, action labels for generated transitions are not computed.
+    /// \param rewriter The rewriter used
+    /// \param use_enumeration_caching Cache intermediate enumeration results
+    /// \param use_summand_pruning Preprocess summands using pruning strategy.
     next_state_generator(const specification& specification, const data::rewriter &rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
 
     ~next_state_generator();
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(state state, substitution_t *substitution)
+    iterator begin(const state &state, substitution_t *substitution)
     {
       return begin(get_internal_state(state), substitution);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(internal_state_t state, substitution_t *substitution)
+    iterator begin(const internal_state_t &state, substitution_t *substitution)
     {
       return iterator(this, state, substitution, m_all_summands);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors using summands from \a summand_subset are generated.
-    iterator begin(state state, substitution_t *substitution, summand_subset_t &summand_subset)
+    iterator begin(const state &state, substitution_t *substitution, summand_subset_t &summand_subset)
     {
       return begin(get_internal_state(state), substitution, summand_subset);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
-    iterator begin(internal_state_t state, substitution_t *substitution, summand_subset_t &summand_subset)
+    iterator begin(const internal_state_t &state, substitution_t *substitution, summand_subset_t &summand_subset)
     {
       return iterator(this, state, substitution, summand_subset);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(state state, substitution_t *substitution, size_t summand_index)
+    iterator begin(const state &state, substitution_t *substitution, size_t summand_index)
     {
       return begin(get_internal_state(state), substitution, summand_index);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(internal_state_t state, substitution_t *substitution, size_t summand_index)
+    iterator begin(const internal_state_t &state, substitution_t *substitution, size_t summand_index)
     {
       return iterator(this, state, substitution, summand_index);
     }
@@ -281,28 +281,29 @@ class next_state_generator
     }
 
     /// \brief Converts a state arguments to internal state arguments.
-    internal_state_argument_t get_internal_state_argument(data::data_expression argument) const
+    internal_state_argument_t get_internal_state_argument(const data::data_expression &argument) const
     {
       return m_rewriter.convert_to(argument);
     }
 
     /// \brief Converts a internal state arguments to state arguments.
-    data::data_expression get_state_argument(internal_state_argument_t internal_argument) const
+    data::data_expression get_state_argument(const internal_state_argument_t &internal_argument) const
     {
       return m_rewriter.convert_from(internal_argument);
     }
 
     /// \brief Constructs internal states out of internal state arguments.
-    internal_state_t get_internal_state(const internal_state_argument_t *internal_arguments) const
+    internal_state_t get_internal_state(const std::vector<internal_state_argument_t>& internal_arguments) const
     {
-      return internal_state_t(m_state_function, internal_arguments, internal_arguments + m_state_function.arity());
+      return internal_arguments;
+      // return internal_state_t(m_state_function, internal_arguments.begin(), internal_arguments.end());
     }
 
     /// \brief Converts states to internal states.
-    internal_state_t get_internal_state(state s) const;
+    internal_state_t get_internal_state(const state &s) const;
 
     /// \brief Converts internal states to states.
-    state get_state(internal_state_t internal_state) const;
+    state get_state(const internal_state_t &internal_state) const;
 
     /// \brief Returns the function symbol used to construct internal states.
     atermpp::function_symbol internal_state_function() const
@@ -323,33 +324,5 @@ class next_state_generator
 } // namespace lps
 
 } // namespace mcrl2
-
-namespace atermpp
-{
-  template<> struct aterm_traits<mcrl2::lps::next_state_generator::action_internal_t>
-  {
-    static void protect(const mcrl2::lps::next_state_generator::action_internal_t &action) { action.label.protect(); }
-    static void unprotect(const mcrl2::lps::next_state_generator::action_internal_t &action) { action.label.unprotect(); }
-    static void mark(const mcrl2::lps::next_state_generator::action_internal_t &action) { action.label.mark(); }
-  };
-  template<> struct aterm_traits<mcrl2::lps::next_state_generator::summand_t>
-  {
-    static void protect(mcrl2::lps::next_state_generator::summand_t &summand) { summand.condition.protect(); summand.result_state.protect(); summand.condition_arguments_function_dummy.protect(); }
-    static void unprotect(mcrl2::lps::next_state_generator::summand_t &summand) { summand.condition.unprotect(); summand.result_state.unprotect(); summand.condition_arguments_function_dummy.unprotect(); }
-    static void mark(mcrl2::lps::next_state_generator::summand_t &summand) { summand.condition.mark(); summand.result_state.mark(); summand.condition_arguments_function_dummy.mark(); }
-  };
-  template<> struct aterm_traits<mcrl2::lps::next_state_generator::transition_t>
-  {
-    static void protect(const mcrl2::lps::next_state_generator::transition_t &transition) { transition.m_state.protect(); aterm_traits<mcrl2::lps::multi_action>::protect(transition.m_action); }
-    static void unprotect(const mcrl2::lps::next_state_generator::transition_t &transition) { transition.m_state.unprotect(); aterm_traits<mcrl2::lps::multi_action>::unprotect(transition.m_action); }
-    static void mark(const mcrl2::lps::next_state_generator::transition_t &transition) { transition.m_state.mark(); aterm_traits<mcrl2::lps::multi_action>::mark(transition.m_action); }
-  };
-  template<> struct aterm_traits<mcrl2::lps::next_state_generator::pruning_tree_node_t>
-  {
-    static void protect(const mcrl2::lps::next_state_generator::pruning_tree_node_t &node) { aterm_traits<shared_subset<mcrl2::lps::next_state_generator::summand_t> >::protect(node.summand_subset); }
-    static void unprotect(const mcrl2::lps::next_state_generator::pruning_tree_node_t &node) { aterm_traits<shared_subset<mcrl2::lps::next_state_generator::summand_t> >::unprotect(node.summand_subset); }
-    static void mark(const mcrl2::lps::next_state_generator::pruning_tree_node_t &node) { aterm_traits<shared_subset<mcrl2::lps::next_state_generator::summand_t> >::mark(node.summand_subset); }
-  };
-}
 
 #endif // MCRL2_LPS_NEXT_STATE_GENERATOR_H

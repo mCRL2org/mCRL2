@@ -14,10 +14,8 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/find.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -65,7 +63,7 @@ void test_my_search()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -85,7 +83,6 @@ void test_my_search()
   BOOST_CHECK(search_boolean_variable(x, boolean_variable("X2")));
   BOOST_CHECK(!search_boolean_variable(x, boolean_variable("X3")));
 
-  core::garbage_collect();
 }
 
 void test_search()
@@ -98,7 +95,7 @@ void test_search()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -118,7 +115,6 @@ void test_search()
   BOOST_CHECK(search_boolean_variable(x, boolean_variable("X2")));
   BOOST_CHECK(!search_boolean_variable(x, boolean_variable("X3")));
 
-  core::garbage_collect();
 }
 
 void test_my_find()
@@ -131,7 +127,7 @@ void test_my_find()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -155,7 +151,6 @@ void test_my_find()
   BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
   BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
-  core::garbage_collect();
 }
 
 void test_find()
@@ -168,7 +163,7 @@ void test_find()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -192,7 +187,6 @@ void test_find()
   BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
   BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
-  core::garbage_collect();
 }
 
 void test_bnd_occ()
@@ -205,7 +199,7 @@ void test_bnd_occ()
     "                  \n"
     "init X1;          \n"
     ;
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
 
@@ -219,13 +213,10 @@ void test_bnd_occ()
   BOOST_CHECK(occ.find(boolean_variable("X1")) != occ.end());
   BOOST_CHECK(occ.find(boolean_variable("X2")) != occ.end());
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   test_my_find();
   test_find();
   test_my_search();

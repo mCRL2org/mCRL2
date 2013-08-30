@@ -1,0 +1,134 @@
+
+\documentclass{article}
+\usepackage{amsfonts}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, January 21, 2013 17:27:12}
+%TCIDATA{LastRevised=Monday, January 28, 2013 13:24:20}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{include/tcilatex}
+
+\begin{document}
+
+
+\section{Capture avoiding substitutions}
+
+This document specifies how capture avoiding substitutions are currently
+implemented in mCRL2.
+
+\subsection{Data expressions}
+
+mCRL2 data expressions $x$ are characterized by the following grammar:%
+\[
+x::=v\mid f\mid x(x)\mid x\text{ whr }v=x\mid \forall _{v}.x\mid \exists
+_{v}.x\mid \lambda _{v}.x, 
+\]%
+where $v$ is a variable and where $f$ is a function symbol\footnote{%
+For simplicity we use only single arguments in function applications, and
+single variables in binding expressions. It is straightforward to generalize
+this to multiple arguments and multiple variables.}.
+
+\subsection{Substitutions}
+
+A substitution $\sigma $ is a function that maps variables to expressions.
+It is assumed that $\sigma $ has finite support, in other words there is a
+finite number of variables $v$ for which $\sigma (v)\neq v$. We define the
+substitution update $\sigma \lbrack v:=v^{\prime }]$ as follows:%
+\[
+\sigma \lbrack v:=v^{\prime }](w)=\left\{ 
+\begin{array}{l}
+v^{\prime }\text{ if }w=v \\ 
+\sigma (w)\text{ otherwise}%
+\end{array}%
+\right. 
+\]
+
+\subsection{Capture avoiding substitutions}
+
+Let $\sigma $ be a substitution that maps variables to data expressions, and
+let $x$ be an arbitrary data expression. Let $FV(x)$ be the free variables
+in $x$, and let $FV(\sigma )$ be the free variables in the right hand side
+of $\sigma $. More precisely,%
+\[
+FV(\sigma )=\bigcup_{v\in domain(\sigma )}FV(\sigma (v))\setminus \{v\}.
+\]%
+We define a function $C$ that computes the capture avoiding substitution $%
+\sigma (x)$ using $C(x,\sigma ,FV(x)\cup FV(\sigma ))$. The function $C$ is
+recursively defined as follows:%
+\[
+\begin{array}{lll}
+C(v,\sigma ,V) & = & \sigma (v) \\ 
+C(f,\sigma ,V) & = & f \\ 
+C(x(x_{1}),\sigma ,V) & = & C(x,\sigma ,V)(C(x_{1},\sigma ,V)) \\ 
+&  &  \\ 
+C(x\text{ whr }v=x_{1},\sigma ,V) & = & \left\{ 
+\begin{array}{l}
+C(x,\sigma ,V\cup \{v\})\text{ whr }v=C(x_{1},\sigma ,V\cup \{v\})\text{ if }%
+\sigma (v)=v\text{ and }v\notin V \\ 
+C(x,\sigma ^{\prime },V\cup \{v^{\prime }\})\text{ whr }v^{\prime
+}=C(x_{1},\sigma ^{\prime },V\cup \{v^{\prime }\})\text{ otherwise}%
+\end{array}%
+\right.  \\ 
+&  &  \\ 
+C(\Lambda v.x,\sigma ,V) & = & \left\{ 
+\begin{array}{l}
+\Lambda v.C(x,\sigma ,V\cup \{v\})\text{ if }\sigma (v)=v\text{ and }v\notin
+V \\ 
+\Lambda v^{\prime }.C(x,\sigma ^{\prime },V\cup \{v^{\prime }\})\text{
+otherwise,}%
+\end{array}%
+\right. 
+\end{array}%
+\]%
+where $\Lambda \in \{\forall ,\exists ,\lambda \}$, where $v^{\prime }$ is
+an arbitrary variable such that $\sigma (v^{\prime })=v^{\prime }$ and $%
+v^{\prime }\notin V$, and where $\sigma ^{\prime }=\sigma \lbrack
+v:=v^{\prime }]$. The function $C$ can be extended to assignments as follows:%
+\[
+\begin{array}{lll}
+C(v=x,\sigma ,V) & = & \left\{ 
+\begin{array}{l}
+v=C(x,\sigma ,V\cup \{v\})\text{ if }\sigma (v)=v\text{ and }v\notin V \\ 
+v^{\prime }=C(x,\sigma ^{\prime },V\cup \{v^{\prime }\})\text{ otherwise}%
+\end{array}%
+\right. 
+\end{array}%
+\]
+
+\paragraph{Example}
+
+Let $x=\forall b:\mathbb{B}.b\Rightarrow \forall c:\mathbb{B}.c\Rightarrow d$
+and let $\sigma =[d:=b]$. Then $C(x,\sigma ,FV(x)\cup FV(\sigma ))=\forall
+b^{\prime }:\mathbb{B}.b^{\prime }\Rightarrow \forall c:\mathbb{B}%
+.c\Rightarrow b$.
+
+\end{document}

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #~ Copyright 2007 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
@@ -48,12 +50,11 @@ class Rule:
     def name(self):
         return self.lhs[1:-1]
 
-    # returns all functions in self.rhs with a phase not in ignored_phases
-    def functions(self, ignored_phases):
+    # returns all functions in self.rhs
+    def functions(self):
         result = []
         for f in self.rhs:
-            if not f.phase in ignored_phases:
-                result.append(f)
+            result.append(f)
         return result
 
     def __repr__(self):
@@ -122,7 +123,7 @@ class Function:
         params = self.parameters()
         t = []
         for i in range(len(params)):
-            t.append('(ATerm) %s' % (params[i]))
+            t.append('%s' % (params[i]))
         return string.join(t, ', ')
 
     def default_declaration(self):
@@ -130,7 +131,7 @@ class Function:
         types  = self.types()
         t = []
         for i in range(len(params)):
-            t.append('%s %s' % (types[i], params[i]))
+            t.append('const %s& %s' % (types[i], params[i]))
         return string.join(t, ', ')
 
 #---------------------------------------------------------------#
@@ -145,9 +146,9 @@ class Argument:
 
     def type(self):
         if self.repetitions == '*' or self.repetitions == '+':
-            return 'ATermList'
+            return 'aterm_list'
         else:
-            return 'ATermAppl'
+            return 'aterm_appl'
 
     def name(self):
         return self.expressions[0].name()

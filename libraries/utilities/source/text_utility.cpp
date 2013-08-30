@@ -19,6 +19,7 @@
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -75,7 +76,7 @@ std::string read_text(const std::string& filename, bool warn)
   {
     if (warn)
     {
-      std::cerr << "Could not open input file: " << filename << std::endl;
+      mCRL2log(log::warning) << "Could not open input file: " << filename << std::endl;
       return "";
     }
     else
@@ -153,7 +154,7 @@ std::vector<std::string> regex_split(const std::string& text, const std::string&
 }
 
 /// \brief Apply word wrapping to a text that doesn't contain newlines.
-/// \param text A string of text.
+/// \param line A string of text.
 /// \param max_line_length The maximum line length.
 /// \return The wrapped text.
 static
@@ -214,7 +215,9 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s)
 {
-  boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
+  // The static below prevents the regular expression recognizer to be compiled
+  // each time a string is matched, which is far too time consuming.
+  static boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
   return boost::xpressive::regex_match(s, re);
 }
 

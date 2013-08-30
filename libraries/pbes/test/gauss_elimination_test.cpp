@@ -16,14 +16,12 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/gauss_elimination.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
@@ -110,7 +108,7 @@ std::string BES10 =
 
 void test_bes(std::string bes_spec, bool expected_result)
 {
-  pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
+  pbes_system::pbes p = pbes_system::txt2pbes(bes_spec);
   int result = pbes_system::gauss_elimination(p);
   switch (result)
   {
@@ -129,7 +127,6 @@ void test_bes(std::string bes_spec, bool expected_result)
   // BOOST_CHECK(pbes2bool(p) == expected_result);
   // this gives assertion failures in pbes2bool
 
-  core::garbage_collect();
 }
 
 void test_bes_examples()
@@ -153,7 +150,7 @@ void test_abp()
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
 
-  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   int result = pbes_system::gauss_elimination(p);
   switch (result)
   {
@@ -168,7 +165,6 @@ void test_abp()
       break;
   }
 
-  core::garbage_collect();
 }
 
 void test_bes()
@@ -181,7 +177,7 @@ void test_bes()
   boolean_variable Y("Y");
 
   // empty boolean equation system
-  atermpp::vector<boolean_equation> empty;
+  std::vector<boolean_equation> empty;
 
   pbes_system::fixpoint_symbol mu = pbes_system::fixpoint_symbol::mu();
   pbes_system::fixpoint_symbol nu = pbes_system::fixpoint_symbol::nu();
@@ -190,14 +186,14 @@ void test_bes()
   //
   // init X;
   boolean_equation e1(mu, X, X);
-  boolean_equation_system<> bes1(empty, X);
+  boolean_equation_system bes1(empty, X);
   bes1.equations().push_back(e1);
 
   // pbes nu X = X;
   //
   // init X;
   boolean_equation e2(nu, X, X);
-  boolean_equation_system<> bes2(empty, X);
+  boolean_equation_system bes2(empty, X);
   bes2.equations().push_back(e2);
 
   // pbes mu X = Y;
@@ -206,7 +202,7 @@ void test_bes()
   // init X;
   boolean_equation e3(mu, X, Y);
   boolean_equation e4(nu, Y, X);
-  boolean_equation_system<> bes3(empty, X);
+  boolean_equation_system bes3(empty, X);
   bes3.equations().push_back(e3);
   bes3.equations().push_back(e4);
 
@@ -214,7 +210,7 @@ void test_bes()
   //      mu X = Y;
   //
   // init X;
-  boolean_equation_system<> bes4(empty, X);
+  boolean_equation_system bes4(empty, X);
   bes4.equations().push_back(e4);
   bes4.equations().push_back(e3);
 
@@ -223,7 +219,6 @@ void test_bes()
   BOOST_CHECK(gauss_elimination(bes3) == false);
   BOOST_CHECK(gauss_elimination(bes4) == true);
 
-  core::garbage_collect();
 }
 
 inline
@@ -240,7 +235,7 @@ void test_approximate()
   typedef core::term_traits<pbes_expression> tr;
 
   gauss_elimination_algorithm<pbes_traits> algorithm;
-  pbes_system::pbes<> p = pbes_system::txt2pbes(BES4);
+  pbes_system::pbes p = pbes_system::txt2pbes(BES4);
   algorithm.run(p.equations().begin(), p.equations().end(), approximate<pbes_traits, compare_function > (compare));
   if (tr::is_false(p.equations().front().formula()))
   {
@@ -254,7 +249,6 @@ void test_approximate()
   {
     std::cout << "UNKNOWN" << std::endl;
   }
-  core::garbage_collect();
 }
 
 // Used as an example in the quickbook documentation.
@@ -283,7 +277,7 @@ void tutorial1()
     "               \n"
     "init X;        \n"
     ;
-  pbes<> p = txt2pbes(txt);
+  pbes p = txt2pbes(txt);
   gauss_elimination_algorithm<pbes_traits> algorithm;
   algorithm.run(p.equations().begin(), p.equations().end(), fixpoint_equation_solver());
   //]
@@ -299,7 +293,7 @@ void tutorial2()
     "               \n"
     "init X;        \n"
     ;
-  pbes<> p = txt2pbes(txt);
+  pbes p = txt2pbes(txt);
   int solution = gauss_elimination(p);
   assert(solution == 0); // 0 indicates false
   //]
@@ -307,8 +301,6 @@ void tutorial2()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_bes();
   test_abp();
   test_bes_examples();

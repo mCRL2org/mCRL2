@@ -13,6 +13,7 @@
 #define MCRL2_PBES_PBES_EXPR_BUILDER_H
 
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
@@ -77,7 +78,6 @@ struct pbes_expr_builder
   { }
 
   /// \brief Visit data_expression node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_data_expression(const term_type& /* x */, const data_term_type& /* d */, Arg& /* arg */)
   {
@@ -85,7 +85,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit true node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& /* x */, Arg& /* arg */)
   {
@@ -93,7 +92,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit false node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& /* x */, Arg& /* arg */)
   {
@@ -101,7 +99,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit not node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& /* x */, const term_type& /* arg */, Arg& /* arg */)
   {
@@ -109,7 +106,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit and node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
@@ -117,7 +113,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit or node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
@@ -125,7 +120,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit imp node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
@@ -133,7 +127,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit forall node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_forall(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
@@ -141,7 +134,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit exists node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_exists(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
@@ -149,7 +141,6 @@ struct pbes_expr_builder
   }
 
   /// \brief Visit propositional_variable node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& /* v */, Arg& /* arg */)
   {
@@ -162,7 +153,7 @@ struct pbes_expr_builder
   /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e, Arg& /* arg */)
   {
-    throw mcrl2::runtime_error(std::string("error in pbes_expr_builder::visit() : unknown pbes expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in pbes_expr_builder::visit() : unknown pbes expression ") + atermpp::to_string(e));
     return term_type();
   }
 
@@ -178,7 +169,7 @@ struct pbes_expr_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-    std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
     pbes_expression_builder_increase_indent();
 #endif
 
@@ -269,7 +260,7 @@ struct pbes_expr_builder
     }
     else if (tr::is_prop_var(e))
     {
-      result = visit_propositional_variable(e, e, arg1);
+      result = visit_propositional_variable(e, tr::term2propvar(e), arg1);
       if (!is_finished(result))
       {
         result = e;
@@ -296,7 +287,7 @@ struct pbes_expr_builder
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
     pbes_expression_builder_decrease_indent();
-    std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -339,7 +330,6 @@ struct pbes_expr_builder<Term, void>
   { }
 
   /// \brief Visit data_expression node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_data_expression(const term_type& /* x */, const data_term_type& /* d */)
   {
@@ -347,7 +337,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit true node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& /* x */)
   {
@@ -355,7 +344,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit false node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& /* x */)
   {
@@ -363,7 +351,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit not node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& /* x */, const term_type& /* arg */)
   {
@@ -371,7 +358,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit and node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */)
   {
@@ -379,7 +365,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit or node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */)
   {
@@ -387,7 +372,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit imp node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */)
   {
@@ -395,7 +379,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit forall node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_forall(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
@@ -403,7 +386,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit exists node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_exists(const term_type& /* x */, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
@@ -411,7 +393,6 @@ struct pbes_expr_builder<Term, void>
   }
 
   /// \brief Visit propositional_variable node
-  /// \param x A term
   /// \return The result of visiting the node
   virtual term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& /* v */)
   {
@@ -424,7 +405,7 @@ struct pbes_expr_builder<Term, void>
   /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e)
   {
-    throw mcrl2::runtime_error(std::string("error in pbes_expr_builder::visit() : unknown pbes expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in pbes_expr_builder::visit() : unknown pbes expression ") + atermpp::to_string(e));
     return term_type();
   }
 
@@ -434,12 +415,12 @@ struct pbes_expr_builder<Term, void>
   /// value is used for rebuilding the expression.
   /// \param e A term
   /// \return The visit result
-  term_type visit(term_type e)
+  term_type visit(const term_type& e)
   {
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-    std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
     pbes_expression_builder_increase_indent();
 #endif
 
@@ -530,7 +511,7 @@ struct pbes_expr_builder<Term, void>
     }
     else if (tr::is_prop_var(e))
     {
-      result = visit_propositional_variable(e, e);
+      result = visit_propositional_variable(e, tr::term2propvar(e));
       if (!is_finished(result))
       {
         result = e;
@@ -557,7 +538,7 @@ struct pbes_expr_builder<Term, void>
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
     pbes_expression_builder_decrease_indent();
-    std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
+    mCRL2log(log::debug) << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;

@@ -1,4 +1,5 @@
 import os
+import sys
 from util import *
 
 os.chdir(builddir)
@@ -26,11 +27,14 @@ elif label in ["windows-x86", "windows-amd64"]:
   # As a workaround, we generate the package to C:\Temp\pkg.
   cpack_temp_path = "C:\Temp\pkg"
   cpack_options = ["-G", "NSIS", "-B", cpack_temp_path]
+elif label in ["macosx-x86", "macosx-amd64"]:
+  cpack_options = ["-G", "PackageMaker"] 
 
 cpack_command = ['cpack'] + cpack_options
 cpack_result = call('CPack', cpack_command)
 if cpack_result:
   log('CPack returned ' + str(cpack_result))
+  sys.exit(cpack_result)
 
 # Due to the workaround, we need to copy the generated package (.exe) from the
 # temporary path, and remove the generated package.
@@ -39,3 +43,4 @@ if label in ["windows-x86", "windows-amd64"]:
   shutil.rmtree(cpack_temp_path)
 
 os.chdir(workspace)
+

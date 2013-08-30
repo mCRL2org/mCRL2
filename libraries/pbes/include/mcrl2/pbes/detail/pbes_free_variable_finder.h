@@ -139,8 +139,7 @@ struct pbes_free_variable_finder
 
   /// \brief Traverses a PBES
   /// \param spec A PBES specification
-  template <typename Container>
-  void traverse(const pbes<Container>& p)
+  void traverse(const pbes& p)
   {
     add_bound_variables(p.global_variables());
     traverse_container(p.equations());

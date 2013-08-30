@@ -146,7 +146,7 @@ void ParityGame::read_pgsolver( std::istream &is,
 void ParityGame::write_pgsolver(std::ostream &os) const
 {
     // Get max priority and make it even so max_prio - p preserves parity:
-    int max_prio = d();
+    size_t max_prio = d();
     if (max_prio%2 == 1) --max_prio;
 
     // Write out graph
@@ -167,7 +167,7 @@ void ParityGame::read_pbes( const std::string &file_path, verti *goal_vertex,
                             StaticGraph::EdgeDirection edge_dir )
 {
 #ifdef WITH_MCRL2
-    mcrl2::pbes_system::pbes<> pbes;
+    mcrl2::pbes_system::pbes pbes;
     pbes.load(file_path);  // TODO: handle exceptions raised here?
     assign_pbes(pbes, goal_vertex, edge_dir);
 #else /* ifdef WITH_MCRL2 */

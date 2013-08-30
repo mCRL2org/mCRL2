@@ -48,9 +48,9 @@ SmallProgressMeasures::SmallProgressMeasures(
     len_ = (game_.d() + p_)/2;
     if (len_ < 1) len_ = 1;  // ensure Top is representable
     M_ = new verti[len_];
-    for (int n = 0; n < len_; ++n)
+    for (size_t n = 0; n < len_; ++n)
     {
-        int prio = 2*n + 1 - p_;
+        size_t prio = 2*n + 1 - p_;
         M_[n] = (prio < game.d()) ? game_.cardinality(prio) + 1 : 0;
     }
 
@@ -67,7 +67,7 @@ SmallProgressMeasures::SmallProgressMeasures(
     verti cnt = 0;
     for (verti v = 0; v < game_.graph().V(); ++v)
     {
-        if ( game_.priority(v)%2 == 1 - p_ &&
+        if ( static_cast<int>(game_.priority(v)%2) == 1 - p_ &&
              game_.graph().outdegree(v) == 1 &&
              *game_.graph().succ_begin(v) == v )
         {
@@ -170,12 +170,13 @@ bool SmallProgressMeasures::lift(verti v)
 
     /* Check if lifting is required */
     int d = vector_cmp(v, w, len(v));
-    bool carry = game_.priority(v)%2 != p_;
+    int carry = static_cast<int>(game_.priority(v)%2) != p_; // really a Boolean, but hey...
     if (d >= carry) return false;
 
     /* Assign successor */
-    for (int n = len(v) - 1; n >= 0; --n)
+    for (size_t m = len(v); m > 0; --m)
     {
+        size_t n = m - 1;
         vec(v)[n] = vec(w)[n] + carry;
         carry = (vec(v)[n] >= M_[n]);
         if (carry) vec(v)[n] = 0;
@@ -188,7 +189,7 @@ bool SmallProgressMeasures::lift(verti v)
 bool SmallProgressMeasures::lift_to(verti v, const verti vec2[])
 {
     verti *vec1 = vec(v);
-    int l = len(v);
+    size_t l = len(v);
     if (vector_cmp(vec1, vec2, l) >= 0) return false;
     if (is_top(vec2))
     {
@@ -196,7 +197,7 @@ bool SmallProgressMeasures::lift_to(verti v, const verti vec2[])
     }
     else
     {
-        for (int i = 0; i < l; ++i) vec1[i] = vec2[i];
+        for (size_t i = 0; i < l; ++i) vec1[i] = vec2[i];
     }
     ls_->lifted(v);
     return true;
@@ -204,37 +205,36 @@ bool SmallProgressMeasures::lift_to(verti v, const verti vec2[])
 
 void SmallProgressMeasures::debug_print(bool verify)
 {
-    printf("M =");
-    for (int p = 0; p < game_.d(); ++p)
+    mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << "M =";
+    for (size_t p = 0; p < game_.d(); ++p)
     {
-        printf(" %d", (p%2 == p_) ? 0 : M_[p/2]);
+      mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << " " << ((static_cast<int>(p%2) == p_) ? 0 : M_[p/2]);
     }
-    printf("\n");
+    mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << std::endl;
 
     for (verti v = 0; v < game_.graph().V(); ++v)
     {
-        printf ( "%6d %c p=%d:", (int)v,
-                 game_.player(v) == ParityGame::PLAYER_EVEN ? 'E' :
-                 game_.player(v) == ParityGame::PLAYER_ODD  ? 'O' : '?',
-                 (int)game_.priority(v) );
+      mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << v << " "
+        << (game_.player(v) == ParityGame::PLAYER_EVEN ? 'E' : game_.player(v) == ParityGame::PLAYER_ODD  ? 'O' : '?')
+        << "p=" << game_.priority(v) << ":";
         if (is_top(v))
         {
-            printf(" T");
+          mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << " T";
         }
         else
         {
-            for (int p = 0; p < game_.d(); ++p)
+            for (size_t p = 0; p < game_.d(); ++p)
             {
-                printf(" %d", (p%2 == p_) ? 0 : vec(v)[p/2]);
+              mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << " " << ((static_cast<int>(p%2) == p_) ? 0 : vec(v)[p/2]);
             }
         }
-        printf("\n");
+        mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << std::endl;
     }
 
     if (verify)
     {
-        printf( "Internal verification %s\n",
-                verify_solution() ? "succeeded." : "failed!" );
+        mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << "Internal verification "
+          << (verify_solution() ? "succeeded." : "failed!") << std::endl;
     }
 }
 
@@ -246,23 +246,23 @@ bool SmallProgressMeasures::verify_solution()
     {
         if (!is_top(v))
         {
-            for (int p = 0; p < game_.d(); ++p)
+            for (size_t p = 0; p < game_.d(); ++p)
             {
-                if (p%2 == p_) continue; /* this component is not stored */
+                if (static_cast<int>(p%2) == p_) continue; /* this component is not stored */
 
                 /* Ensure vector values satisfy bounds */
                 if (vec(v)[p/2] >= M_[p/2])
                 {
-                    printf( "%d-th component of SPM vector for vertex %d "
-                            "out of bounds!\n", p, (int)v );
-                    return false;
+                  mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << p << "-th"
+                    << " component of SPM vector for vertex " << v << " out of bounds!" << std::endl;
+                  return false;
                 }
 
                 if (p > game_.priority(v) && vec(v)[p/2] != 0)
                 {
-                    printf( "%d-th component of SPM vector for vertex %d "
-                            "should be zero!\n", p/2, (int)v );
-                    return false;
+                  mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << p/2 << "-th"
+                    << " component of SPM vector for vertex " << v << " should be zero!" << std::endl;
+                  return false;
                 }
             }
         }
@@ -272,18 +272,18 @@ bool SmallProgressMeasures::verify_solution()
               it != graph.succ_end(v); ++it )
         {
             bool ok = is_top(v) ||
-                vector_cmp(v, *it, len(v)) >= (game_.priority(v)%2 != p_);
+                vector_cmp(v, *it, len(v)) >= static_cast<int>(static_cast<int>(game_.priority(v)%2) != p_);
             one_ok = one_ok || ok;
             all_ok = all_ok && ok;
         }
 
         if (!(game_.player(v) == p_ ? one_ok : all_ok))
         {
-            printf( "order constraint not satisfied for vertex %d with "
-                    "priority %d and player %s!\n", v, game_.priority(v),
-                game_.player(v) == ParityGame::PLAYER_EVEN ? "even" :
-                game_.player(v) == ParityGame::PLAYER_ODD  ? "odd"  : "???" );
-            return false;
+          mCRL2log(mcrl2::log::debug, "SmallProgressMeasures") << "order constraint not satisfied for vertex "
+            << v << " with priority " << game_.priority(v) << " and player "
+            << (game_.player(v) == ParityGame::PLAYER_EVEN ? "even" : game_.player(v) == ParityGame::PLAYER_ODD  ? "odd"  : "???" )
+            << "!" << std::endl;
+          return false;
         }
     }
     return true;

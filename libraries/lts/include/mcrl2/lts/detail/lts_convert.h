@@ -43,7 +43,7 @@ inline void convert_core_lts(CONVERTOR& c,
                              LTS_OUT_TYPE& lts_out);
 
 /** \brief Convert LTSs to each other. The input lts is not usable afterwards.
-    \detail Converts the input lts into the output lts maintaining the nature
+    \details Converts the input lts into the output lts maintaining the nature
             of the lts as good as possible. If no translation can be provided
             because more information is required (such as data types), then
             a mcrl2::runtime error is thrown. This also happens if the particular
@@ -120,13 +120,13 @@ inline void lts_convert(
 class lts_fsm_convertor
 {
   private:
-    std::vector < atermpp::map <data::data_expression , size_t > > state_element_values_sets;
+    std::vector < std::map <data::data_expression , size_t > > state_element_values_sets;
     lts_fsm_t& lts_out;
 
   public:
     lts_fsm_convertor(size_t n, lts_fsm_t& l):
-      state_element_values_sets(std::vector < atermpp::map <data::data_expression , size_t > >
-                                (n,atermpp::map <data::data_expression , size_t >())),
+      state_element_values_sets(std::vector < std::map <data::data_expression , size_t > >
+                                (n,std::map <data::data_expression , size_t >())),
       lts_out(l)
     {
     }
@@ -143,7 +143,7 @@ class lts_fsm_convertor
       for (size_t i=0; i<l.size(); ++i)
       {
         const data::data_expression t=l[i];
-        atermpp::map <data::data_expression , size_t >::const_iterator index=state_element_values_sets[i].find(t);
+        std::map <data::data_expression , size_t >::const_iterator index=state_element_values_sets[i].find(t);
         if (index==state_element_values_sets[i].end())
         {
           const size_t element_index=state_element_values_sets[i].size();
@@ -357,7 +357,7 @@ class aut_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_data,m_action_labels);
+        al=parse_lts_action(l,m_data,atermpp::aterm_cast<lps::action_list>(m_action_labels));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -594,7 +594,7 @@ class fsm_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_lts_out.data(),m_lts_out.action_labels());
+        al=parse_lts_action(l,m_lts_out.data(),atermpp::aterm_cast<lps::action_list>(m_lts_out.action_labels()));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -606,7 +606,7 @@ class fsm_lts_convertor
     state_label_lts translate_state(const state_label_fsm& l) const
     {
       // If process_parameters are not empty, we use them to check that the sorts of its variables  match.
-      atermpp::vector < data::data_expression > state_label;
+      std::vector < data::data_expression > state_label;
       size_t idx=0;
       const data::variable_list& parameters=m_lts_out.process_parameters();
       data::variable_list::const_iterator parameter_iterator=parameters.begin();
@@ -1073,13 +1073,13 @@ inline void lts_convert(
 class dot_lts_convertor
 {
   private:
-    std::vector < atermpp::map <std::string , size_t > > state_element_values_sets;
+    std::vector < std::map <std::string , size_t > > state_element_values_sets;
     const lts_lts_t& lts_out;
 
   public:
     dot_lts_convertor(lts_lts_t& l):
-      state_element_values_sets(std::vector < atermpp::map <std::string , size_t > >
-                                (2,atermpp::map <std::string , size_t >())),
+      state_element_values_sets(std::vector < std::map <std::string , size_t > >
+                                (2,std::map <std::string , size_t >())),
       lts_out(l)
     {
     }
@@ -1098,7 +1098,7 @@ class dot_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,lts_out.data(),lts_out.action_labels());
+        al=parse_lts_action(l,lts_out.data(),atermpp::aterm_cast<lps::action_list>(lts_out.action_labels()));
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -1191,13 +1191,13 @@ inline void lts_convert(
 class dot_fsm_convertor
 {
   private:
-    std::vector < atermpp::map <std::string , size_t > > state_element_values_sets;
+    std::vector < std::map <std::string , size_t > > state_element_values_sets;
     lts_fsm_t& lts_out;
 
   public:
     dot_fsm_convertor(lts_fsm_t& l):
-      state_element_values_sets(std::vector < atermpp::map <std::string , size_t > >
-                                (2,atermpp::map <std::string , size_t >())),
+      state_element_values_sets(std::vector < std::map <std::string , size_t > >
+                                (2,std::map <std::string , size_t >())),
       lts_out(l)
     {
     }
@@ -1211,7 +1211,7 @@ class dot_fsm_convertor
     {
       std::vector < size_t > result;
       const std::string state=l.name();
-      atermpp::map <std::string , size_t >::const_iterator index=state_element_values_sets[0].find(state);
+      std::map <std::string , size_t >::const_iterator index=state_element_values_sets[0].find(state);
       if (index==state_element_values_sets[0].end())
       {
         const size_t element_index=state_element_values_sets[0].size();

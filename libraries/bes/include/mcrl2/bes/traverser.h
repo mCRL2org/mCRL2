@@ -41,8 +41,7 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const bes::boolean_equation_system<Container>& x)
+  void operator()(const bes::boolean_equation_system& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
@@ -108,31 +107,31 @@ struct add_traverser_boolean_expressions: public Traverser<Derived>
     bes::boolean_expression result;
     if (bes::is_true(x))
     {
-      static_cast<Derived&>(*this)(bes::true_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      static_cast<Derived&>(*this)(bes::false_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      static_cast<Derived&>(*this)(bes::not_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      static_cast<Derived&>(*this)(bes::and_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      static_cast<Derived&>(*this)(bes::or_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      static_cast<Derived&>(*this)(bes::imp(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      static_cast<Derived&>(*this)(bes::boolean_variable(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }
@@ -167,8 +166,7 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  template <typename Container>
-  void operator()(const bes::boolean_equation_system<Container>& x)
+  void operator()(const bes::boolean_equation_system& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.equations());
@@ -234,31 +232,31 @@ struct add_traverser_boolean_variables: public Traverser<Derived>
     bes::boolean_expression result;
     if (bes::is_true(x))
     {
-      static_cast<Derived&>(*this)(bes::true_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::true_>(x));
     }
     else if (bes::is_false(x))
     {
-      static_cast<Derived&>(*this)(bes::false_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::false_>(x));
     }
     else if (bes::is_not(x))
     {
-      static_cast<Derived&>(*this)(bes::not_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::not_>(x));
     }
     else if (bes::is_and(x))
     {
-      static_cast<Derived&>(*this)(bes::and_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::and_>(x));
     }
     else if (bes::is_or(x))
     {
-      static_cast<Derived&>(*this)(bes::or_(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::or_>(x));
     }
     else if (bes::is_imp(x))
     {
-      static_cast<Derived&>(*this)(bes::imp(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::imp>(x));
     }
     else if (bes::is_boolean_variable(x))
     {
-      static_cast<Derived&>(*this)(bes::boolean_variable(atermpp::aterm_appl(x)));
+      static_cast<Derived&>(*this)(atermpp::aterm_cast<bes::boolean_variable>(x));
     }
     static_cast<Derived&>(*this).leave(x);
   }

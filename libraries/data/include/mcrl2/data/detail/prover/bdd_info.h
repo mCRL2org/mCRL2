@@ -12,7 +12,7 @@
 #ifndef BDD_INFO_H
 #define BDD_INFO_H
 
-#include "mcrl2/aterm/aterm_ext.h"
+#include <iterator>
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard.h"
 
@@ -26,6 +26,14 @@ namespace detail
 /// \brief The class BDD_Info provides information about the structure of binary decision diagrams.
 class BDD_Info
 {
+  protected:
+    const mcrl2::data::data_expression& argument(const mcrl2::data::data_expression& x, std::size_t n) const
+    {
+      const mcrl2::data::application& a = atermpp::aterm_cast<mcrl2::data::application>(x);
+      mcrl2::data::application::const_iterator i = a.begin();
+      std::advance(i, n);
+      return *i;
+    }
 
   public:
 
@@ -34,7 +42,7 @@ class BDD_Info
     /// \return The guard at the root of the BDD.
     inline mcrl2::data::data_expression get_guard(const mcrl2::data::data_expression a_bdd)
     {
-      return application(a_bdd).argument(0);
+      return argument(a_bdd,0);
     }
 
     /// \brief Method that returns the true-branch of a BDD.
@@ -42,7 +50,7 @@ class BDD_Info
     /// \return The true-branch of the BDD.
     inline mcrl2::data::data_expression get_true_branch(const mcrl2::data::data_expression  a_bdd)
     {
-      return application(a_bdd).argument(1);  
+      return argument(a_bdd,1);
     }
 
     /// \brief Method that returns the false-branch of a BDD.
@@ -50,7 +58,7 @@ class BDD_Info
     /// \return The false-branch of the BDD.
     inline mcrl2::data::data_expression get_false_branch(const mcrl2::data::data_expression a_bdd)
     {
-      return application(a_bdd).argument(2);
+      return argument(a_bdd,2);
     }
 
     /// \brief Method that indicates whether or not a BDD equals true.

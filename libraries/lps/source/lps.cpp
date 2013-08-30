@@ -15,12 +15,7 @@
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/translate_user_notation.h"
-
-#include "mcrl2/modal_formula/find.h"
-#include "mcrl2/modal_formula/normalize_sorts.h"
-#include "mcrl2/modal_formula/print.h"
-#include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/modal_formula/translate_user_notation.h"
+#include "mcrl2/lps/detail/lps_well_typed_checker.h"
 
 namespace mcrl2
 {
@@ -37,6 +32,7 @@ std::string pp(const lps::action_vector& x) { return lps::pp< lps::action_vector
 std::string pp(const lps::action_label& x) { return lps::pp< lps::action_label >(x); }
 std::string pp(const lps::action_label_list& x) { return lps::pp< lps::action_label_list >(x); }
 std::string pp(const lps::action_label_vector& x) { return lps::pp< lps::action_label_vector >(x); }
+std::string pp(const lps::deadlock& x) { return lps::pp< lps::deadlock >(x); }
 std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
 std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
 std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
@@ -47,10 +43,11 @@ lps::action translate_user_notation(const lps::action& x) { return lps::translat
 void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x) { return lps::find_sort_expressions< lps::action_label_list >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x) { return lps::find_sort_expressions< lps::specification >(x); }
-std::set<data::variable> find_variables(const lps::linear_process& x) { return lps::find_variables< lps::linear_process >(x); }
-std::set<data::variable> find_variables(const lps::specification& x) { return lps::find_variables< lps::specification >(x); }
-std::set<data::variable> find_variables(const lps::deadlock& x) { return lps::find_variables< lps::deadlock >(x); }
-std::set<data::variable> find_variables(const lps::multi_action& x) { return lps::find_variables< lps::multi_action >(x); }
+std::set<data::variable> find_all_variables(const lps::linear_process& x) { return lps::find_all_variables< lps::linear_process >(x); }
+std::set<data::variable> find_all_variables(const lps::specification& x) { return lps::find_all_variables< lps::specification >(x); }
+std::set<data::variable> find_all_variables(const lps::deadlock& x) { return lps::find_all_variables< lps::deadlock >(x); }
+std::set<data::variable> find_all_variables(const lps::multi_action& x) { return lps::find_all_variables< lps::multi_action >(x); }
+std::set<data::variable> find_all_variables(const lps::action& x) { return lps::find_all_variables< lps::action >(x); }
 std::set<data::variable> find_free_variables(const lps::action& x) { return lps::find_free_variables< lps::action >(x); }
 std::set<data::variable> find_free_variables(const lps::linear_process& x) { return lps::find_free_variables< lps::linear_process >(x); }
 std::set<data::variable> find_free_variables(const lps::specification& x) { return lps::find_free_variables< lps::specification >(x); }
@@ -70,46 +67,20 @@ std::string pp_with_summand_numbers(const specification& x)
   return out.str();
 }
 
-// TODO: These should be removed when the ATerm code has been replaced.
-std::string pp(const atermpp::aterm& x) { return x.to_string(); }
-std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }
+bool is_well_typed(const linear_process& x)
+{
+  return lps::detail::is_well_typed(x);
+}
+
+bool is_well_typed(const specification& x)
+{
+  return lps::detail::is_well_typed(x);
+}
+
+// TODO: These should be removed when the aterm code has been replaced.
+std::string pp(const atermpp::aterm& x) { return to_string(x); }
+std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
 
 } // namespace lps
 
-namespace action_formulas
-{
-
-//--- start generated action_formulas overloads ---//
-std::string pp(const action_formulas::action_formula& x) { return action_formulas::pp< action_formulas::action_formula >(x); }
-std::set<data::variable> find_variables(const action_formulas::action_formula& x) { return action_formulas::find_variables< action_formulas::action_formula >(x); }
-//--- end generated action_formulas overloads ---//
-
-} // namespace action_formulas
-
-namespace regular_formulas
-{
-
-//--- start generated regular_formulas overloads ---//
-std::string pp(const regular_formulas::regular_formula& x) { return regular_formulas::pp< regular_formulas::regular_formula >(x); }
-//--- end generated regular_formulas overloads ---//
-
-} // namespace regular_formulas
-
-namespace state_formulas
-{
-
-//--- start generated state_formulas overloads ---//
-std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
-state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::data_specification& dataspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, dataspec); }
-state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x) { return state_formulas::translate_user_notation< state_formulas::state_formula >(x); }
-std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x) { return state_formulas::find_sort_expressions< state_formulas::state_formula >(x); }
-std::set<data::variable> find_variables(const state_formulas::state_formula& x) { return state_formulas::find_variables< state_formulas::state_formula >(x); }
-std::set<data::variable> find_free_variables(const state_formulas::state_formula& x) { return state_formulas::find_free_variables< state_formulas::state_formula >(x); }
-std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
-bool find_nil(const state_formulas::state_formula& x) { return state_formulas::find_nil< state_formulas::state_formula >(x); }
-//--- end generated state_formulas overloads ---//
-
-} // namespace state_formulas
-
 } // namespace mcrl2
-

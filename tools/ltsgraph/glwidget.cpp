@@ -10,6 +10,7 @@
 #include "glwidget.h"
 #include "springlayout.h"
 #include "ui_glwidget.h"
+#include "mcrl2/utilities/logger.h"
 
 #include <QtOpenGL>
 #include <map>
@@ -128,7 +129,7 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget *parent)
-  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false)
+  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false), m_paused(false)
 {
   m_scene = new GLScene(m_graph);
   QGLFormat fmt = format();
@@ -140,6 +141,19 @@ GLWidget::~GLWidget()
 {
   delete m_scene;
   delete m_ui;
+}
+
+void GLWidget::pause()
+{
+  m_paused = true;
+  m_selections.clear();
+  m_dragmode = dm_none;
+  m_dragnode = NULL;
+}
+
+void GLWidget::resume()
+{
+  m_paused = false;
 }
 
 inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
@@ -203,6 +217,7 @@ void GLWidget::initializeGL()
 {
   m_scene->init(Qt::white);
   resizeGL(width(), height());
+  emit initialized();
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -213,8 +228,15 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
-  updateSelection();
-  m_scene->render();
+  if (m_paused)
+  {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
+  else
+  {
+    updateSelection();
+    m_scene->render();
+  }
   if (m_scene->resizing())
     emit widgetResized(m_scene->size());
 }
@@ -418,43 +440,49 @@ void GLWidget::endPaint()
   m_painting = false;
 }
 
-void GLWidget::renderToFile(const QString &filename, const QString &filter, const int w, const int h)
+void GLWidget::saveVector(const QString &filename)
 {
-  if (filter.startsWith("PDF"))
+  QString lcfn = filename.toLower();
+  if (lcfn.endsWith(".pdf"))
   {
     m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PDF);
   }
   else
-    if (filter.startsWith("Postscript"))
-    {
-      m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PS);
-    }
-    else
-      if (filter.startsWith("Encapsulated Postscript"))
-      {
-        m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_EPS);
-      }
-      else
-        if (filter.startsWith("SVG"))
-        {
-          m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_SVG);
-        }
-        else
-          if (filter.startsWith("LaTeX"))
-          {
-            m_scene->renderLatexGraphics(filename);
-          }
-          else
-            if (filter.startsWith("PGF"))
-            {
-              m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PGF);
-            }
-            else
-            {
-              m_scene->resize(w, h);
-              renderPixmap(w, h).save(filename);
-              m_scene->resize(width(), height());
-            }
+  if (lcfn.endsWith(".ps"))
+  {
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PS);
+  }
+  else
+  if (lcfn.endsWith(".eps"))
+  {
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_EPS);
+  }
+  else
+  if (lcfn.endsWith(".svg"))
+  {
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_SVG);
+  }
+  else
+  if (lcfn.endsWith(".tex"))
+  {
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PGF);
+  }
+  else
+  {
+	mCRL2log(mcrl2::log::error) << "Unable to determine file type from extension." << std::endl;
+  }
+}
+
+void GLWidget::saveTikz(const QString& filename, float aspectRatio)
+{
+  m_scene->renderLatexGraphics(filename, aspectRatio);
+}
+
+void GLWidget::savePixmap(const QString &filename, const int w, const int h)
+{
+  m_scene->resize(w, h);
+  renderPixmap(w, h).save(filename);
+  m_scene->resize(width(), height());
 }
 
 GLWidgetUi* GLWidget::ui(QWidget *parent)
@@ -480,6 +508,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
   connect(m_ui.cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
   connect(m_ui.cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
   connect(m_ui.cbStateNumbers, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateNumbers(bool)));
+  connect(m_ui.cbSelfLoops, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleSelfLoops(bool)));
   connect(m_ui.cbInitial, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleInitialMarking(bool)));
   connect(m_ui.cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
   connect(m_ui.spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));

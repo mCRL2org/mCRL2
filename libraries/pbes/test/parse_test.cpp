@@ -13,8 +13,6 @@
 #include <sstream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -37,7 +35,7 @@ const std::string VARSPEC =
 
 void test_parse()
 {
-  pbes<> p;
+  pbes p;
   std::stringstream s(PBESSPEC);
   s >> p;
 
@@ -47,10 +45,7 @@ void test_parse()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_parse();
-  core::garbage_collect();
 
   return 0;
 }

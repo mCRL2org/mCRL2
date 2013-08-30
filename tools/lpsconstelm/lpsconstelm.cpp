@@ -8,14 +8,10 @@
 //
 /// \file ./lpsconstelm.cpp
 
-#include "boost.hpp" // precompiled headers
-
 //mCRL2
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -95,26 +91,8 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
 
 };
 
-class lpsconstelm_gui_tool: public mcrl2_gui_tool<lpsconstelm_tool>
-{
-  public:
-    lpsconstelm_gui_tool()
-    {
-      m_gui_options["ignore-conditions"] = create_checkbox_widget();
-      m_gui_options["instantiate-free-variables"] = create_checkbox_widget();
-
-      add_rewriter_widget();
-
-      m_gui_options["remove-singleton-sorts"] = create_checkbox_widget();
-      m_gui_options["remove-trivial-summands"] = create_checkbox_widget();
-    }
-};
-
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return lpsconstelm_gui_tool().execute(argc, argv);
+  return lpsconstelm_tool().execute(argc, argv);
 }
 

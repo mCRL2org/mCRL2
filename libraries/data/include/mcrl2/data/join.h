@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_JOIN_H
 #define MCRL2_DATA_JOIN_H
 
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/data/expression_traits.h"
 
@@ -51,11 +50,11 @@ namespace data
   /// \param expr A data expression
   /// \return A sequence of operands
   inline
-  atermpp::set<data_expression> split_or(const data_expression& expr)
+  std::set<data_expression> split_or(const data_expression& expr)
   {
     typedef core::term_traits<data::data_expression> tr;
-    atermpp::set<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<atermpp::set<data_expression> >(result, result.begin()), tr::is_or, tr::left, tr::right);
+    std::set<data_expression> result;
+    utilities::detail::split(expr, std::insert_iterator<std::set<data_expression> >(result, result.begin()), tr::is_or, tr::left, tr::right);
     return result;
   }
 
@@ -66,11 +65,11 @@ namespace data
   /// \param expr A data expression
   /// \return A sequence of operands
   inline
-  atermpp::set<data_expression> split_and(const data_expression& expr)
+  std::set<data_expression> split_and(const data_expression& expr)
   {
     typedef core::term_traits<data::data_expression> tr;
-    atermpp::set<data_expression> result;
-    utilities::detail::split(expr, std::insert_iterator<atermpp::set<data_expression> >(result, result.begin()), tr::is_and, tr::left, tr::right);
+    std::set<data_expression> result;
+    utilities::detail::split(expr, std::insert_iterator<std::set<data_expression> >(result, result.begin()), tr::is_and, tr::left, tr::right);
     return result;
   }
 

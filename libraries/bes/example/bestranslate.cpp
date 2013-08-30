@@ -8,14 +8,11 @@
 //
 /// \file bestranslate.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <string>
 #include <iostream>
 #include <fstream>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
@@ -58,9 +55,8 @@ pbes_file_format guess_file_format(std::string const& filename)
 
 /// \brief Load BES from input_filename. This guesses the file type of
 ///        input_filename based on the extension.
-template <typename Container>
 inline
-void load_bes(boolean_equation_system<Container>& bes, std::string const& input_filename)
+void load_bes(boolean_equation_system& bes, std::string const& input_filename)
 {
   pbes_file_format format = guess_file_format(input_filename);
   std::ifstream input; // Cannot declare in switch
@@ -84,9 +80,8 @@ void load_bes(boolean_equation_system<Container>& bes, std::string const& input_
 
 /// \brief Save BES to output_filename. The type is guessed based upon the
 ///        extension of output_filename
-template <typename Container>
 inline
-void save_bes(boolean_equation_system<Container> const& bes, std::string const& output_filename)
+void save_bes(boolean_equation_system const& bes, std::string const& output_filename)
 {
   pbes_file_format format = guess_file_format(output_filename);
   save_bes(bes, output_filename, format);
@@ -110,7 +105,7 @@ class bestranslate_tool: public input_output_tool
     bool run()
     {
       using namespace mcrl2::bes;
-      boolean_equation_system<> bes;
+      boolean_equation_system bes;
       ::load_bes(bes, input_filename());
       ::save_bes(bes, output_filename());
       return true;
@@ -120,8 +115,6 @@ class bestranslate_tool: public input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   if (argc < 3)
   {
     std::cout << "Usage: bestranslate INFILE OUTFILE" << std::endl;

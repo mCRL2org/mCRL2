@@ -18,7 +18,7 @@ struct CycleFinder
 {
     /*! Construct an instance for the subgame of `game' induced by `mapping',
         looking for cycles of dominant priority `prio'. */
-    CycleFinder( const ParityGame &game, int prio,
+    CycleFinder( const ParityGame &game, size_t prio,
                  const std::vector<verti> &mapping );
 
     /*! Search for minimum-priority cycles and vertices in their attractor sets,
@@ -33,7 +33,7 @@ struct CycleFinder
     size_t memory_use();
 
 private:
-    int                         prio_;          //!< selected priority
+    size_t                      prio_;          //!< selected priority
     const std::vector<verti>    &mapping_;      //!< priority induced vertex set
     ParityGame                  subgame_;       //!< priority induced subgame
     DenseSet<verti>             winning_set_;   //!< winning set of the subgame
@@ -42,7 +42,7 @@ private:
 };
 
 CycleFinder::CycleFinder( const ParityGame &game,
-                          int prio, const std::vector<verti> &mapping )
+                          size_t prio, const std::vector<verti> &mapping )
     : prio_(prio), mapping_(mapping), winning_set_(0, (verti)mapping.size()),
       winning_queue_(), substrat_(mapping.size(), NO_VERTEX)
 {
@@ -99,7 +99,7 @@ int CycleFinder::operator()(const verti *scc, size_t scc_size)
                 verti w = scc[j];
                 if (subgame_.graph().has_succ(v, w))
                 {
-                    if (subgame_.player(v) == prio_%2)
+                    if (subgame_.player(v) == static_cast<int>(prio_%2))
                     {
                         substrat_[v] = w;
                     }
@@ -139,7 +139,7 @@ ParityGame::Strategy DecycleSolver::solve()
                             solved_set.memory_use() + sizeof(*this);
 
     // Find owner-controlled cycles for every priority value:
-    for (int prio = 0; prio < game_.d(); ++prio)
+    for (size_t prio = 0; prio < game_.d(); ++prio)
     {
         verti old_size = solved_set.size();
 
@@ -149,7 +149,7 @@ ParityGame::Strategy DecycleSolver::solve()
         {
             if ( solved_set.count(v) == 0 &&
                  game_.priority(v) >= prio &&
-                 ( game_.player(v) == prio%2 ||
+                 ( game_.player(v) == static_cast<int>(prio%2) ||
                    game_.graph().outdegree(v) == 1 ) )
             {
                 mapping.push_back(v);

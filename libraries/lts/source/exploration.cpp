@@ -6,13 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/lts/detail/exploration.h"
+#include <time.h>
 
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/lps/resolve_name_clashes.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/trace/trace.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_balanced_tree.h"
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include <iomanip>
 
 using namespace mcrl2;
@@ -20,9 +22,9 @@ using namespace mcrl2::log;
 using namespace mcrl2::lps;
 using namespace mcrl2::lts;
 
-bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* options)
+bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *options)
 {
-  m_options = *options;
+  m_options=*options;
 
   assert(!(m_options.bithashing && m_options.outformat != lts_aut && m_options.outformat != lts_none));
 
@@ -43,6 +45,9 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
   m_maintain_traces = m_options.trace || m_options.save_error_trace;
   m_value_prioritize = (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized);
 
+  lps::specification specification(m_options.specification);
+  resolve_summand_variable_name_clashes(specification);
+
   if (m_options.outformat == lts_aut)
   {
     mCRL2log(verbose) << "writing state space in AUT format to '" << m_options.lts << "'." << std::endl;
@@ -61,16 +66,14 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
   {
     mCRL2log(verbose) << "writing state space in " << mcrl2::lts::detail::string_for_type(m_options.outformat)
                       << " format to '" << m_options.lts << "'." << std::endl;
-    m_output_lts.set_data(m_options.specification.data());
-    m_output_lts.set_process_parameters(m_options.specification.process().process_parameters());
-    m_output_lts.set_action_labels(m_options.specification.action_labels());
+    m_output_lts.set_data(specification.data());
+    m_output_lts.set_process_parameters(specification.process().process_parameters());
+    m_output_lts.set_action_labels(specification.action_labels());
   }
 
-  lps::specification specification(m_options.specification);
 
   if (m_options.usedummies)
   {
-    mCRL2log(verbose) << "replacing free variables with dummy values." << std::endl;
     lps::detail::instantiate_global_variables(specification);
   }
 
@@ -173,7 +176,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* option
 
   m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
 
-  if (!prioritised_summands.empty())
+  if (m_use_confluence_reduction)
   {
     m_nonprioritized_subset = next_state_generator::summand_subset_t(m_generator, nonprioritised_summands, m_options.use_summand_pruning);
     m_prioritized_subset = next_state_generator::summand_subset_t(m_generator, prioritised_summands, m_options.use_summand_pruning);
@@ -209,7 +212,7 @@ bool lps2lts_algorithm::generate_lts()
   if (m_options.bithashing)
   {
     const std::pair<size_t, bool> p=m_bit_hash_table.add_state(storage_state(initial_state));
-    m_initial_state_number=p.first; 
+    m_initial_state_number=p.first;
     assert(p.second); // The initial state is new.
   }
   else
@@ -262,7 +265,14 @@ bool lps2lts_algorithm::generate_lts()
   }
   else if (m_options.expl_strat == es_random || m_options.expl_strat == es_value_random_prioritized)
   {
-    srand((unsigned)time(NULL));
+    // In order to guarantee that time is different from a previous run to initialise
+    // the seed of a previous run and not get the same results, we wait until time gets
+    // a fresh value. It is better to replace this by c++11 random generators, as this
+    // is an awkward solution.
+    unsigned t=time(NULL);
+    for( ; t==time(NULL) ; ); // Wait until time changes.
+    srand((unsigned)time(NULL)); 
+
     generate_lts_random(initial_state);
 
     mCRL2log(verbose) << "done with random walk of "
@@ -333,24 +343,29 @@ bool lps2lts_algorithm::finalise_lts_generation()
   return true;
 }
 
-lps2lts_algorithm::generator_state_t lps2lts_algorithm::generator_state(lps2lts_algorithm::storage_state_t storage_state)
+lps2lts_algorithm::generator_state_t lps2lts_algorithm::generator_state(const lps2lts_algorithm::storage_state_t &storage_state)
 {
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
-    return storage_state;
+    // return aterm_cast<generator_state_t>(storage_state);
+    return generator_state_t(aterm_cast<aterm_appl>(storage_state).begin(),aterm_cast<aterm_appl>(storage_state).end());
   }
   else
   {
-    atermpp::term_balanced_tree<atermpp::aterm_appl> tree(storage_state);
-    return generator_state_t(m_generator->internal_state_function(), tree.begin(), tree.end());
+    const atermpp::term_balanced_tree<atermpp::aterm_appl> &tree=
+              atermpp::aterm_cast<atermpp::term_balanced_tree<atermpp::aterm_appl> >(storage_state);
+    // return generator_state_t(m_generator->internal_state_function(), tree.begin(), tree.end());
+    return generator_state_t(tree.begin(), tree.end());
   }
 }
 
-lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(lps2lts_algorithm::generator_state_t generator_state)
+lps2lts_algorithm::storage_state_t lps2lts_algorithm::storage_state(const lps2lts_algorithm::generator_state_t &generator_state)
 {
   if (m_options.stateformat == lps::GS_STATE_VECTOR)
   {
-    return generator_state;
+    // return generator_state;
+    // return aterm_appl(function_symbol("STATE",generator_state.size()),generator_state.begin(),generator_state.end());
+    return aterm_appl(m_generator->internal_state_function(),generator_state.begin(),generator_state.end());
   }
   else
   {
@@ -365,10 +380,11 @@ lps2lts_algorithm::generator_state_t lps2lts_algorithm::get_prioritised_represen
 {
   assert(m_use_confluence_reduction);
 
-  atermpp::map<generator_state_t, size_t> number;
-  atermpp::map<generator_state_t, size_t> low;
-  atermpp::map<generator_state_t, atermpp::list<generator_state_t> > next;
-  atermpp::map<generator_state_t, generator_state_t> back;
+  std::map<generator_state_t, size_t> number;
+  std::map<generator_state_t, size_t> low;
+  std::map<generator_state_t, std::list<generator_state_t> > next;
+  std::map<generator_state_t, generator_state_t> back;
+
   size_t count = 0;
   number[state] = 0;
 
@@ -380,7 +396,7 @@ lps2lts_algorithm::generator_state_t lps2lts_algorithm::get_prioritised_represen
       count++;
       number[state] = count;
       low[state] = count;
-      next[state] = atermpp::list<generator_state_t>();
+      next[state] = std::list<generator_state_t>();
 
       for (next_state_generator::iterator i = m_generator->begin(state, &m_substitution, m_prioritized_subset); i; i++)
       {
@@ -421,18 +437,18 @@ lps2lts_algorithm::generator_state_t lps2lts_algorithm::get_prioritised_represen
   }
 }
 
-void lps2lts_algorithm::value_prioritize(atermpp::list<next_state_generator::transition_t> &transitions)
+void lps2lts_algorithm::value_prioritize(std::list<next_state_generator::transition_t> &transitions)
 {
   data::data_expression lowest_value;
 
-  for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+  for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
   {
     if (i->action().actions().size() == 1 && i->action().actions().front().arguments().size() > 0)
     {
       const data::data_expression &argument = i->action().actions().front().arguments().front();
       if (mcrl2::data::sort_nat::is_nat(argument.sort()))
       {
-        if (lowest_value == data::data_expression())
+        if (!lowest_value.defined())
         {
           lowest_value = argument;
         }
@@ -453,7 +469,7 @@ void lps2lts_algorithm::value_prioritize(atermpp::list<next_state_generator::tra
     }
   }
 
-  for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end();)
+  for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end();)
   {
     if (i->action().actions().size() != 1)
     {
@@ -487,10 +503,11 @@ void lps2lts_algorithm::value_prioritize(atermpp::list<next_state_generator::tra
   }
 }
 
-bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, std::string filename)
+bool lps2lts_algorithm::save_trace(const lps2lts_algorithm::generator_state_t &state1, const std::string &filename)
 {
-  atermpp::deque<generator_state_t> states;
-  atermpp::map<storage_state_t, storage_state_t>::iterator source;
+  lps2lts_algorithm::generator_state_t state=state1;
+  std::deque<generator_state_t> states;
+  std::map<storage_state_t, storage_state_t>::iterator source;
   while ((source = m_backpointers.find(storage_state(state))) != m_backpointers.end())
   {
     states.push_front(state);
@@ -499,7 +516,7 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, s
 
   mcrl2::trace::Trace trace;
   trace.setState(m_generator->get_state(state));
-  for (atermpp::deque<generator_state_t>::iterator i = states.begin(); i != states.end(); i++)
+  for (std::deque<generator_state_t>::iterator i = states.begin(); i != states.end(); i++)
   {
     for (next_state_generator::iterator j = m_generator->begin(state, &m_substitution); j != m_generator->end(); j++)
     {
@@ -531,7 +548,7 @@ bool lps2lts_algorithm::save_trace(lps2lts_algorithm::generator_state_t state, s
   }
 }
 
-bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::generator_state_t state, std::set<lps2lts_algorithm::generator_state_t> &current_path, atermpp::set<lps2lts_algorithm::generator_state_t> &visited)
+bool lps2lts_algorithm::search_divergence(const lps2lts_algorithm::generator_state_t &state, std::set<lps2lts_algorithm::generator_state_t> &current_path, std::set<lps2lts_algorithm::generator_state_t> &visited)
 {
   current_path.insert(state);
 
@@ -562,9 +579,9 @@ bool lps2lts_algorithm::search_divergence(lps2lts_algorithm::generator_state_t s
   return false;
 }
 
-void lps2lts_algorithm::check_divergence(lps2lts_algorithm::generator_state_t state)
+void lps2lts_algorithm::check_divergence(const lps2lts_algorithm::generator_state_t &state)
 {
-  atermpp::set<generator_state_t> visited;
+  std::set<generator_state_t> visited;
   std::set<generator_state_t> current_path;
   visited.insert(state);
 
@@ -594,7 +611,7 @@ void lps2lts_algorithm::check_divergence(lps2lts_algorithm::generator_state_t st
   }
 }
 
-void lps2lts_algorithm::save_actions(lps2lts_algorithm::generator_state_t state, const next_state_generator::transition_t &transition)
+void lps2lts_algorithm::save_actions(const lps2lts_algorithm::generator_state_t &state, const next_state_generator::transition_t &transition)
 {
   size_t state_number = m_state_numbers.index(storage_state(state));
   mCRL2log(info) << "Detected action '" << pp(transition.action()) << "' (state index " << state_number << ")";
@@ -622,7 +639,7 @@ void lps2lts_algorithm::save_actions(lps2lts_algorithm::generator_state_t state,
   mCRL2log(info) << std::endl;
 }
 
-void lps2lts_algorithm::save_deadlock(lps2lts_algorithm::generator_state_t state)
+void lps2lts_algorithm::save_deadlock(const lps2lts_algorithm::generator_state_t &state)
 {
   size_t state_number = m_state_numbers.index(storage_state(state));
   if (m_options.trace && m_traces_saved < m_options.max_traces)
@@ -647,7 +664,7 @@ void lps2lts_algorithm::save_deadlock(lps2lts_algorithm::generator_state_t state
   }
 }
 
-void lps2lts_algorithm::save_error(lps2lts_algorithm::generator_state_t state)
+void lps2lts_algorithm::save_error(const lps2lts_algorithm::generator_state_t &state)
 {
   if (m_options.save_error_trace)
   {
@@ -663,7 +680,7 @@ void lps2lts_algorithm::save_error(lps2lts_algorithm::generator_state_t state)
   }
 }
 
-bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t state, const next_state_generator::transition_t &transition)
+bool lps2lts_algorithm::add_transition(const lps2lts_algorithm::generator_state_t &state, next_state_generator::transition_t &transition)
 {
   storage_state_t source = storage_state(state);
   storage_state_t destination = storage_state(transition.internal_state());
@@ -722,7 +739,7 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
 
   m_num_transitions++;
 
-  for (atermpp::set<lps::multi_action>::const_iterator ma = m_options.trace_multiactions.begin(); ma != m_options.trace_multiactions.end(); ++ma)
+  for (std::set<lps::multi_action>::const_iterator ma = m_options.trace_multiactions.begin(); ma != m_options.trace_multiactions.end(); ++ma)
   {
     if (*ma == transition.action())
     {
@@ -730,22 +747,20 @@ bool lps2lts_algorithm::add_transition(lps2lts_algorithm::generator_state_t stat
     }
   }
 
-  if (m_options.detect_action && m_detected_action_summands[transition.summand_index()])
-  {
-    save_actions(state, transition);
-  }
-
   return destination_state_number.second;
 }
 
-atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorithm::get_transitions(lps2lts_algorithm::generator_state_t state)
+// std::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_algorithm::get_transitions(const lps2lts_algorithm::generator_state_t &state)
+void lps2lts_algorithm::get_transitions(const lps2lts_algorithm::generator_state_t &state,
+                                        std::list<lps2lts_algorithm::next_state_generator::transition_t> &transitions)
 {
+  assert(transitions.empty());
   if (m_options.detect_divergence)
   {
     check_divergence(state);
   }
 
-  atermpp::list<next_state_generator::transition_t> transitions;
+  // std::list<next_state_generator::transition_t> transitions;
   try
   {
     next_state_generator::iterator it(m_generator->begin(state, &m_substitution, *m_main_subset));
@@ -756,7 +771,7 @@ atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_alg
   }
   catch (mcrl2::runtime_error& e)
   {
-    std::cerr << "Error while exploring state space: " << e.what() << "\n";
+    mCRL2log(error) << "Error while exploring state space: " << e.what() << "\n";
     save_error(state);
     exit(EXIT_FAILURE);
   }
@@ -773,13 +788,13 @@ atermpp::list<lps2lts_algorithm::next_state_generator::transition_t> lps2lts_alg
 
   if (m_use_confluence_reduction)
   {
-    for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+    for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
       i->internal_state() = get_prioritised_representative(i->internal_state());
     }
   }
 
-  return transitions;
+  // return transitions;
 }
 
 void lps2lts_algorithm::generate_lts_breadth()
@@ -789,12 +804,14 @@ void lps2lts_algorithm::generate_lts_breadth()
   size_t start_level_transitions = 0;
   time_t last_log_time = time(NULL) - 1, new_log_time;
 
-  while (!m_must_abort && (current_state < m_state_numbers.size()) && (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
+  while (!m_must_abort && (current_state < m_state_numbers.size()) && 
+         (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
     generator_state_t state = generator_state(m_state_numbers.get(current_state));
-    atermpp::list<next_state_generator::transition_t> transitions = get_transitions(state);
+    std::list<next_state_generator::transition_t> transitions;
+    get_transitions(state,transitions);
 
-    for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+    for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
       add_transition(state, *i);
     }
@@ -819,9 +836,14 @@ void lps2lts_algorithm::generate_lts_breadth()
                        << "tr.\n";
     }
   }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
+  }
 }
 
-void lps2lts_algorithm::generate_lts_breadth_bithashing(generator_state_t initial_state)
+void lps2lts_algorithm::generate_lts_breadth_bithashing(const generator_state_t &initial_state)
 {
   size_t current_state = 0;
 
@@ -837,9 +859,10 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(generator_state_t initia
   while (!m_must_abort && (state_queue.remaining() > 0) && (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
     generator_state_t state = generator_state(state_queue.get_from_queue());
-    atermpp::list<next_state_generator::transition_t> transitions = get_transitions(state);
+    std::list<next_state_generator::transition_t> transitions;
+    get_transitions(state,transitions);
 
-    for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+    for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
       if (add_transition(state, *i))
       {
@@ -883,11 +906,16 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(generator_state_t initia
       start_level_transitions = m_num_transitions;
     }
   }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
+  }
 }
 
-void lps2lts_algorithm::generate_lts_depth(generator_state_t initial_state)
+void lps2lts_algorithm::generate_lts_depth(const generator_state_t &initial_state)
 {
-  atermpp::list<storage_state_t> stack;
+  std::list<storage_state_t> stack;
   stack.push_back(storage_state(initial_state));
 
   size_t current_state = 0;
@@ -896,9 +924,10 @@ void lps2lts_algorithm::generate_lts_depth(generator_state_t initial_state)
   {
     generator_state_t state = generator_state(stack.back());
     stack.pop_back();
-    atermpp::list<next_state_generator::transition_t> transitions = get_transitions(state);
+    std::list<next_state_generator::transition_t> transitions;
+    get_transitions(state,transitions);
 
-    for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+    for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
       if (add_transition(state, *i) && (current_state + stack.size() < m_options.max_states) && (stack.size() < m_options.todo_max))
       {
@@ -915,9 +944,14 @@ void lps2lts_algorithm::generate_lts_depth(generator_state_t initial_state)
                         << " (stacksize is " << stack.size() << ")" << std::endl;
     }
   }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
+  }
 }
 
-void lps2lts_algorithm::generate_lts_random(generator_state_t initial_state)
+void lps2lts_algorithm::generate_lts_random(const generator_state_t &initial_state)
 {
   generator_state_t state = initial_state;
 
@@ -925,17 +959,18 @@ void lps2lts_algorithm::generate_lts_random(generator_state_t initial_state)
 
   while (!m_must_abort && current_state < m_options.max_states && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
-    atermpp::list<next_state_generator::transition_t> transitions = get_transitions(state);
+    std::list<next_state_generator::transition_t> transitions;
+    get_transitions(state,transitions);
 
     if (transitions.empty())
     {
       break;
     }
 
-    size_t index = rand() % transitions.size();
+    size_t index = rand() % transitions.size(); 
     generator_state_t new_state;
 
-    for (atermpp::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+    for (std::list<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
     {
       add_transition(state, *i);
 
@@ -954,5 +989,10 @@ void lps2lts_algorithm::generate_lts_random(generator_state_t initial_state)
                         << m_num_transitions << " transition" << ((m_num_transitions==1)?"":"s")
                         << " and encountered " << m_num_states << " unique state" << ((m_num_states==1)?"":"s") << std::endl;
     }
+  }
+
+  if (current_state == m_options.max_states)
+  {
+    mCRL2log(verbose) << "explored the maximum number (" << m_options.max_states << ") of states, terminating." << std::endl;
   }
 }

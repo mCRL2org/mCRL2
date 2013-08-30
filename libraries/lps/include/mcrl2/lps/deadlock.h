@@ -12,7 +12,6 @@
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H
 
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
@@ -24,40 +23,19 @@ namespace lps
 {
 
 /// \brief Represents a deadlock
-/// \detail A deadlock is 'delta' with an optional time tag.
+/// \details A deadlock is 'delta' with an optional time tag.
 class deadlock
 {
     friend class deadlock_summand;
-    friend struct atermpp::aterm_traits<deadlock>;
 
   protected:
     /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
     /// the multi action has no time.
     data::data_expression m_time;
 
-    /// \brief Protects the term from being freed during garbage collection.
-    void protect() const
-    {
-      m_time.protect();
-    }
-
-    /// \brief Unprotect the term.
-    /// Releases protection of the term which has previously been protected through a
-    /// call to protect.
-    void unprotect() const
-    {
-      m_time.unprotect();
-    }
-
-    /// \brief Mark the term for not being garbage collected.
-    void mark() const
-    {
-      m_time.mark();
-    }
-
   public:
     /// \brief Constructor
-    deadlock(data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
+    deadlock(data::data_expression time = data::data_expression())
       : m_time(time)
     {}
 
@@ -65,7 +43,7 @@ class deadlock
     /// \return True if time is available.
     bool has_time() const
     {
-      return m_time != core::detail::gsMakeNil();
+      return m_time != data::data_expression();
     }
 
     /// \brief Returns the time.
@@ -89,46 +67,26 @@ class deadlock
     }
 
     /// \brief Comparison operator
-    bool operator==(const deadlock& other)
+    bool operator==(const deadlock& other) const
     {
       return m_time == other.m_time;
     }
 
     /// \brief Comparison operator
-    bool operator!=(const deadlock& other)
+    bool operator!=(const deadlock& other) const
     {
       return !(*this == other);
     }
+
 };
 
 // template function overloads
-std::set<data::variable> find_variables(const lps::deadlock& x);
+std::set<data::variable> find_all_variables(const lps::deadlock& x);
 std::set<data::variable> find_free_variables(const lps::deadlock& x);
+std::string pp(const lps::deadlock& x);
 
 } // namespace lps
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-namespace atermpp
-{
-template<>
-struct aterm_traits<mcrl2::lps::deadlock>
-{
-  static void protect(const mcrl2::lps::deadlock& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const mcrl2::lps::deadlock& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const mcrl2::lps::deadlock& t)
-  {
-    t.mark();
-  }
-};
-} // namespace atermpp
-/// \endcond
 
 #endif // MCRL2_LPS_DEADLOCK_H

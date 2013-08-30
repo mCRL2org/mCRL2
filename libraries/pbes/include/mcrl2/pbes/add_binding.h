@@ -67,14 +67,12 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
     decrease_bind_count(x.variables());
   }
 
-  template <typename Container>
-  void enter(const pbes<Container>& x)
+  void enter(const pbes& x)
   {
     increase_bind_count(x.global_variables());
   }
 
-  template <typename Container>
-  void leave(const pbes<Container>& x)
+  void leave(const pbes& x)
   {
     increase_bind_count(x.global_variables());
   }

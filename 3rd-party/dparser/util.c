@@ -4,6 +4,13 @@
 
 #include "d.h"
 
+/* Silence some compiler warnings */
+#ifdef _MSC_VER
+#define close _close
+#define open _open
+#define read _read
+#endif
+
 uint d_prime2[] = {
   1, 3, 7, 13, 31, 61, 127, 251, 509, 1021, 2039, 4093, 8191,
   16381, 32749, 65521, 131071, 262139, 524287, 1048573, 2097143,
@@ -30,19 +37,22 @@ d_dup_pathname_str(const char *s) {
 
 char *
 dup_str(const char *s, const char *e) {
-  int l = e ? e-s : strlen(s);
-  char *ss = (char*)MALLOC(l+1);
+  size_t l;
+  char* ss;
+  assert(!e || e >= s);
+  l = e ? (size_t)(e-s) : strlen(s);
+  ss = (char*)MALLOC(l+1);
   memcpy(ss, s, l);
   ss[l] = 0;
   return ss;
 }
 
 uint
-strhashl(const char *s, int l) {
+strhashl(const char *s, size_t l) {
   uint h = 0, g;
-  int i = 0;
+  size_t i;
 
-  for (;i < l;i++,s++) {
+  for (i = 0; i < l; ++i, ++s) {
     h = (h << 4) + *s;
     if ((g = h & 0xf0000000))
       h = (h ^ (g >> 24)) ^ g;
@@ -53,8 +63,7 @@ strhashl(const char *s, int l) {
 int
 buf_read(const char *pathname, char **buf, int *len) {
   struct stat sb;
-  int fd;
-  size_t real_size;
+  int fd, real_size;
 
   *buf = 0;
   *len = 0;
@@ -145,7 +154,7 @@ vec_eq(void *v, void *vv) {
 
 void *
 stack_push_internal(AbstractStack *s, void *elem) {
-  int n = s->cur - s->start;
+  size_t n = s->cur - s->start;
   if (s->start == s->initial) {
     s->cur = (void**)MALLOC(n * 2 * sizeof(void*));
     memcpy(s->cur, s->start, n * sizeof(void*));
@@ -162,9 +171,8 @@ int
 set_find(void *av, void *t) {
   AbstractVec *v = (AbstractVec*)av;
   int j, n = v->n;
-  uint i;
   if (n) {
-    uint h = ((uintptr_t)t);
+    uintptr_t i, h = ((uintptr_t)t);
     h = h % n;
     for (i = h, j = 0; 
 	 i < v->n && j < SET_MAX_SEQUENTIAL; 
@@ -183,9 +191,8 @@ int
 set_add(void *av, void *t) {
   AbstractVec *v = (AbstractVec*)av, vv;
   int j, n = v->n;
-  uint i;
   if (n) {
-    uint h = ((uintptr_t)t);
+    uintptr_t i, h = ((uintptr_t)t);
     h = h % n;
     for (i = h, j = 0; 
 	 i < v->n && j < SET_MAX_SEQUENTIAL; 

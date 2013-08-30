@@ -35,7 +35,7 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
 
   const core::identifier_string& X;
   const data::variable_list& l;
-  atermpp::vector<data::variable_list> result_stack;
+  std::vector<data::variable_list> result_stack;
 
   par_traverser(const core::identifier_string& X_, const data::variable_list& l_)
     : X(X_), l(l_)

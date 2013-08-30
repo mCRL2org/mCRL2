@@ -24,12 +24,19 @@ namespace pbes_system {
 
 namespace detail {
 
-pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x, data::set_identifier_generator& id_generator);
+template <typename TermTraits>
+pbes_expression Sat(const lps::multi_action& a,
+                    const action_formulas::action_formula& x,
+                    data::set_identifier_generator& id_generator,
+                    TermTraits tr
+                   );
 
-template <typename Derived>
+template <typename Derived, typename TermTraits>
 struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 {
   typedef action_formulas::action_formula_traverser<Derived> super;
+  typedef TermTraits tr;
+
   using super::enter;
   using super::leave;
   using super::operator();
@@ -40,9 +47,9 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   const lps::multi_action& a;
   data::set_identifier_generator& id_generator;
-  atermpp::vector<pbes_expression> result_stack;
+  std::vector<pbes_expression> result_stack;
 
-  sat_traverser(const lps::multi_action& a_, data::set_identifier_generator& id_generator_)
+  sat_traverser(const lps::multi_action& a_, data::set_identifier_generator& id_generator_, TermTraits)
     : a(a_), id_generator(id_generator_)
   {}
 
@@ -73,9 +80,9 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     push(x);
   }
 
-  void leave(const lps::multi_action& x)
+  void leave(const action_formulas::multi_action& x)
   {
-    push(lps::equal_multi_actions(a, x));
+    push(lps::equal_multi_actions(a, lps::multi_action(x.actions())));
   }
 
   void leave(const action_formulas::true_&)
@@ -90,42 +97,46 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   void operator()(const action_formulas::not_& x)
   {
-    push(not_(Sat(a, x.operand(), id_generator)));
+    push(tr::not_(Sat(a, x.operand(), id_generator, TermTraits())));
   }
 
   void leave(const action_formulas::and_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
-    push(and_(left, right));
+    push(tr::and_(left, right));
   }
 
   void leave(const action_formulas::or_&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
-    push(or_(left, right));
+    push(tr::or_(left, right));
   }
 
   void leave(const action_formulas::imp&)
   {
     pbes_expression right = pop();
     pbes_expression left = pop();
-    push(imp(left, right));
+    push(tr::imp(left, right));
   }
 
   void operator()(const action_formulas::forall& x)
   {
-    data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
+    data::mutable_map_substitution<> sigma_x = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
+    std::set<data::variable> sigma_x_variables = data::substitution_variables(sigma_x);
     action_formulas::action_formula alpha = x.body();
-    push(forall(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)), id_generator)));
+    data::variable_list y = data::replace_variables(x.variables(), sigma_x);
+    push(tr::forall(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x, sigma_x_variables), id_generator, TermTraits())));
   }
 
   void operator()(const action_formulas::exists& x)
   {
-    data::variable_list y = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
+    data::mutable_map_substitution<> sigma_x = pbes_system::detail::make_fresh_variables(x.variables(), id_generator, false);
+    std::set<data::variable> sigma_x_variables = data::substitution_variables(sigma_x);
     action_formulas::action_formula alpha = x.body();
-    push(exists(y, Sat(a, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(x.variables(), y)), id_generator)));
+    data::variable_list y = data::replace_variables(x.variables(), sigma_x);
+    push(tr::exists(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x, sigma_x_variables), id_generator, TermTraits())));
   }
 
   void operator()(const action_formulas::at& x)
@@ -133,21 +144,21 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     data::data_expression t = a.time();
     action_formulas::action_formula alpha = x.operand();
     data::data_expression u = x.time_stamp();
-    push(and_(Sat(a, alpha, id_generator), data::equal_to(t, u)));
+    push(tr::and_(Sat(a, alpha, id_generator, TermTraits()), data::equal_to(t, u)));
   }
 };
 
-template <template <class> class Traverser>
-struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser> >
+template <template <class, class> class Traverser, typename TermTraits>
+struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits>
 {
-  typedef Traverser<apply_sat_traverser<Traverser> > super;
+  typedef Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits> super;
   using super::enter;
   using super::leave;
   using super::operator();
   using super::top;
 
-  apply_sat_traverser(const lps::multi_action& a, data::set_identifier_generator& id_generator)
-    : super(a, id_generator)
+  apply_sat_traverser(const lps::multi_action& a, data::set_identifier_generator& id_generator, TermTraits tr)
+    : super(a, id_generator, tr)
   {}
 
 #ifdef BOOST_MSVC
@@ -155,10 +166,14 @@ struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser> >
 #endif
 };
 
-inline
-pbes_expression Sat(const lps::multi_action& a, const action_formulas::action_formula& x, data::set_identifier_generator& id_generator)
+template <typename TermTraits>
+pbes_expression Sat(const lps::multi_action& a,
+                    const action_formulas::action_formula& x,
+                    data::set_identifier_generator& id_generator,
+                    TermTraits tr
+                   )
 {
-  apply_sat_traverser<sat_traverser> f(a, id_generator);
+  apply_sat_traverser<sat_traverser, TermTraits> f(a, id_generator, tr);
   f(x);
   return f.top();
 }

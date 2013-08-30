@@ -1,0 +1,4 @@
+% This formula expresses that sustained delivery of foodpackages is possible,
+% where no village will ever starve.
+
+nu X.<moveS||moveA||moveB||moveC>X && [starve]false

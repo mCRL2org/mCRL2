@@ -1,9 +1,11 @@
+#!/usr/bin/env python
+
 #~ Copyright 2009, 2010 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 # This file contains tables that are used to generate classes and traversal functions
-# for these classes. A prerequisite is that each class has a corresponding ATerm
+# for these classes. A prerequisite is that each class has a corresponding aterm
 # representation (the first column of each table). The second column contains the
 # constructor of the classes.
 
@@ -22,7 +24,8 @@ import string
 # X = it is an expression super class
 
 CORE_CLASSES = r'''
-identifier_string() : public atermpp::aterm_appl | SC | String | An identifier
+identifier_string() : public atermpp::aterm_string | SC | String | An identifier
+nil() : public atermpp::aterm_appl | C | Nil | The value nil
 '''
 
 CONTAINER_TYPES = r'''
@@ -35,56 +38,60 @@ fbag_container() : public data::container_type | EIO | SortFBag     | Container 
 '''
 
 STRUCTURED_SORT_ELEMENTS = r'''
-structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)                                                            : public atermpp::aterm_appl | SICU | StructProj | An argument of a constructor of a structured sort
-structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) : public atermpp::aterm_appl | SICU | StructCons | A constructor for a structured sort
+structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)                                                            : public atermpp::aterm_appl | ICUO | StructProj | An argument of a constructor of a structured sort
+structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) : public atermpp::aterm_appl | ICUO | StructCons | A constructor for a structured sort
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-sort_expression()                                                                         : public atermpp::aterm_appl   | SXIOCU | SortExpr      | A sort expression
-basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO     | SortId        | A basic sort
-container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO     | SortCons      | A container sort
-structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU   | SortStruct    | A structured sort
-function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO     | SortArrow     | A function sort
-unknown_sort()                                                                            : public data::sort_expression | EO     | SortUnknown   | Unknown sort expression
-multiple_possible_sorts(const sort_expression_list& sorts)                                : public data::sort_expression | EO     | SortsPossible | Multiple possible sorts
+sort_expression()                                                                         : public atermpp::aterm_appl   | XOCU | SortExpr             | A sort expression
+basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO   | SortId               | A basic sort
+container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO   | SortCons             | A container sort
+structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | CEOU | SortStruct           | A structured sort
+function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO   | SortArrow            | A function sort
+untyped_sort()                                                                            : public data::sort_expression | EO   | UntypedSortUnknown   | Unknown sort expression
+untyped_possible_sorts(const sort_expression_list& sorts)                                 : public data::sort_expression | EO   | UntypedSortsPossible | Multiple possible sorts
 '''
 
 BINDER_TYPES = r'''
-binder_type()                     : public atermpp::aterm_appl  | XCO | BindingOperator | Binder
-set_or_bag_comprehension_binder() : public data::binder_type    | EIO | SetBagComp      | Binder for set or bag comprehension
-set_comprehension_binder()        : public data::binder_type    | EIO | SetComp         | Binder for set comprehension
-bag_comprehension_binder()        : public data::binder_type    | EIO | BagComp         | Binder for bag comprehension
-forall_binder()                   : public data::binder_type    | EIO | Forall          | Binder for universal quantification
-exists_binder()                   : public data::binder_type    | EIO | Exists          | Binder for existential quantification
-lambda_binder()                   : public data::binder_type    | EIO | Lambda          | Binder for lambda abstraction
+binder_type()                             : public atermpp::aterm_appl  | XCO | BindingOperator   | Binder
+untyped_set_or_bag_comprehension_binder() : public data::binder_type    | EIO | UntypedSetBagComp | Binder for untyped set or bag comprehension
+set_comprehension_binder()                : public data::binder_type    | EIO | SetComp           | Binder for set comprehension
+bag_comprehension_binder()                : public data::binder_type    | EIO | BagComp           | Binder for bag comprehension
+forall_binder()                           : public data::binder_type    | EIO | Forall            | Binder for universal quantification
+exists_binder()                           : public data::binder_type    | EIO | Exists            | Binder for existential quantification
+lambda_binder()                           : public data::binder_type    | EIO | Lambda            | Binder for lambda abstraction
 '''
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
-assignment_expression()                                                               : public atermpp::aterm_appl         | SXIOC | WhrDecl       | Assignment expression
-assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression | EIOUC | DataVarIdInit | Assignment of a data expression to a variable
-identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | IdInit        | Assignment of a data expression to a string
+assignment_expression()                                                               : public atermpp::aterm_appl                 | XIOC  | WhrDecl                     | Assignment expression
+assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression         | EIOUC | DataVarIdInit               | Assignment of a data expression to a variable
+untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | UntypedIdentifierAssignment | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | SXC | DataExpr  | A data expression
-identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO  | Id        | An identifier
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId      | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | SEO | DataAppl  | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EO  | Whr       | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder    | An abstraction expression.
+data_expression()                                                                                             : public atermpp::aterm_appl   | XCU | DataExpr          | A data expression
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId         | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId              | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU | DataAppl          | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU | Whr               | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder            | An abstraction expression
+untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO  | UntypedIdentifier | An untyped identifier
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
-abstraction()                                                       : public data::data_expression | XE | None | Abstraction
-forall(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Universal quantification
-exists(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Existential quantification
-lambda(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Lambda abstraction
+abstraction()                                                                                 : public data::data_expression | XES | None | Abstraction
+forall(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Universal quantification
+exists(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Existential quantification
+lambda(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Lambda abstraction
+set_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | E   | None | Set comprehension
+bag_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | E   | None | Bag comprehension
+untyped_set_or_bag_comprehension(const variable_list& variables, const data_expression& body) : public data::abstraction     | E   | None | Untyped Set/Bag comprehension
 '''
 
 DATA_CLASSES = r'''
-data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl |   | DataEqn  | A data equation
-data_specification()                                                                                                                    : public atermpp::aterm_appl | S | DataSpec | A data specification
+alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | CIO  | SortRef  | A sort alias
+data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn  | A data equation
+data_specification()                                                                                                                    : public atermpp::aterm_appl | S   | DataSpec | A data specification
 '''
 
 STATE_FORMULA_CLASSES = r'''
@@ -118,68 +125,75 @@ trans_or_nil(const regular_formula& operand)                   : public regular_
 '''
 
 ACTION_FORMULA_CLASSES = r'''
-action_formula()                                                            : public atermpp::aterm_appl             | XICU | ActFrm    | An action formula
-true_()                                                                     : public action_formulas::action_formula | EI   | ActTrue   | The value true for action formulas
-false_()                                                                    : public action_formulas::action_formula | EI   | ActFalse  | The value false for action formulas
-not_(const action_formula& operand)                                         : public action_formulas::action_formula | EI   | ActNot    | The not operator for action formulas
-and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EI   | ActAnd    | The and operator for action formulas
-or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActOr     | The or operator for action formulas
-imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActImp    | The implication operator for action formulas
-forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActForall | The universal quantification operator for action formulas
-exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists | The existential quantification operator for action formulas
-at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt     | The at operator for action formulas
+action_formula()                                                            : public atermpp::aterm_appl             | XIC  | ActFrm            | An action formula
+true_()                                                                     : public action_formulas::action_formula | EI   | ActTrue           | The value true for action formulas
+false_()                                                                    : public action_formulas::action_formula | EI   | ActFalse          | The value false for action formulas
+not_(const action_formula& operand)                                         : public action_formulas::action_formula | EI   | ActNot            | The not operator for action formulas
+and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EI   | ActAnd            | The and operator for action formulas
+or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActOr             | The or operator for action formulas
+imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActImp            | The implication operator for action formulas
+forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActForall         | The universal quantification operator for action formulas
+exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists         | The existential quantification operator for action formulas
+at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt             | The at operator for action formulas
+multi_action(const lps::action_list& actions)                               : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
+untyped_multi_action(const lps::untyped_action_list& arguments)             : public action_formulas::action_formula | EI   | UntypedActMultAct | The multi action for action formulas (untyped)
 '''
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
-action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                                                                  : public atermpp::aterm_appl | CI  | ActId             | An action label
-action(const action_label& label, const data::data_expression_list& arguments)                                                                                                                                              : public atermpp::aterm_appl | CI  | Action            | An action
-deadlock(const data::data_expression& time)                                                                                                                                                                                                              | CMS | None              | A deadlock
-multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CMS | None              | A multi-action
-deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS | None              | A deadlock summand
-action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS | None              | An action summand
-process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | S   | LinearProcessInit | A process initializer
-linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS  | LinearProcess     | A linear process
-specification(const data::data_specification& data, const action_label_list& action_labels, const atermpp::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MS  | LinProcSpec       | A linear process specification
+action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                                                                  : public atermpp::aterm_appl | CI   | ActId             | An action label
+action(const action_label& label, const data::data_expression_list& arguments)                                                                                                                                              : public atermpp::aterm_appl | CI   | Action            | An action
+untyped_action(const core::identifier_string& name, const data::data_expression_list& arguments)                                                                                                                            : public atermpp::aterm_appl | CI   | UntypedAction     | An untyped action
+deadlock(const data::data_expression& time)                                                                                                                                                                                                              | CMS  | None              | A deadlock
+multi_action(const action_list& actions, const data::data_expression& time)                                                                                                                                                                              | CMS  | None              | A multi-action
+untyped_multi_action(const untyped_action_list& actions)                                                                                                                                                                                                 | CM   | UntypedMultAct    | An untyped multi-action
+deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS  | None              | A deadlock summand
+action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS  | None              | An action summand
+process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
+linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS   | LinearProcess     | A linear process
+specification(const data::data_specification& data, const action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                                  | MS   | LinProcSpec       | A linear process specification
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::set<data::variable>& global_variables, const atermpp::vector<process::process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : atermpp::aterm_appl | C | ProcVarId   | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : atermpp::aterm_appl | C | ProcEqn     | A process equation
-rename_expression(core::identifier_string source, core::identifier_string target)                                                                                                : atermpp::aterm_appl | C | RenameExpr  | A rename expression
-communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : atermpp::aterm_appl | C | CommExpr    | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : atermpp::aterm_appl | C | MultActName | A multi-action
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SM | ProcSpec    | A process specification
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
+%process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI  | ProcEqn     | A process equation
+rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI  | RenameExpr  | A rename expression
+communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI  | CommExpr    | A communication expression
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI  | MultActName | A multiset of action names
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
-process_expression()                                                                                                           : public atermpp::aterm_appl         | XIC | ProcExpr          | A process expression
-process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)                    : public process::process_expression | EI  | Process           | A process
-process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                    : public process::process_expression | EI  | ProcessAssignment | A process assignment
-delta()                                                                                                                        : public process::process_expression | EI  | Delta             | The value delta
-tau()                                                                                                                          : public process::process_expression | EI  | Tau               | The value tau
-sum(const data::variable_list& bound_variables, const process_expression& operand)                                             : public process::process_expression | EI  | Sum               | The sum operator
-block(const core::identifier_string_list& block_set, const process_expression& operand)                                        : public process::process_expression | EI  | Block             | The block operator
-hide(const core::identifier_string_list& hide_set, const process_expression& operand)                                          : public process::process_expression | EI  | Hide              | The hide operator
-rename(const rename_expression_list& rename_set, const process_expression& operand)                                            : public process::process_expression | EI  | Rename            | The rename operator
-comm(const communication_expression_list& comm_set, const process_expression& operand)                                         : public process::process_expression | EI  | Comm              | The communication operator
-allow(const action_name_multiset_list& allow_set, const process_expression& operand)                                           : public process::process_expression | EI  | Allow             | The allow operator
-sync(const process_expression& left, const process_expression& right)                                                          : public process::process_expression | EI  | Sync              | The synchronization operator
-at(const process_expression& operand, const data::data_expression& time_stamp)                                                 : public process::process_expression | EI  | AtTime            | The at operator
-seq(const process_expression& left, const process_expression& right)                                                           : public process::process_expression | EI  | Seq               | The sequential composition
-if_then(const data::data_expression& condition, const process_expression& then_case)                                           : public process::process_expression | EI  | IfThen            | The if-then operator
-if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case) : public process::process_expression | EI  | IfThenElse        | The if-then-else operator
-bounded_init(const process_expression& left, const process_expression& right)                                                  : public process::process_expression | EI  | BInit             | The bounded initialization
-merge(const process_expression& left, const process_expression& right)                                                         : public process::process_expression | EI  | Merge             | The merge operator
-left_merge(const process_expression& left, const process_expression& right)                                                    : public process::process_expression | EI  | LMerge            | The left merge operator
-choice(const process_expression& left, const process_expression& right)                                                        : public process::process_expression | EI  | Choice            | The choice operator
+process_expression()                                                                                                           : public atermpp::aterm_appl         | XIC | ProcExpr                 | A process expression
+process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)                    : public process::process_expression | EI  | Process                  | A process
+process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                    : public process::process_expression | EI  | ProcessAssignment        | A process assignment
+delta()                                                                                                                        : public process::process_expression | EI  | Delta                    | The value delta
+tau()                                                                                                                          : public process::process_expression | EI  | Tau                      | The value tau
+sum(const data::variable_list& bound_variables, const process_expression& operand)                                             : public process::process_expression | EI  | Sum                      | The sum operator
+block(const core::identifier_string_list& block_set, const process_expression& operand)                                        : public process::process_expression | EI  | Block                    | The block operator
+hide(const core::identifier_string_list& hide_set, const process_expression& operand)                                          : public process::process_expression | EI  | Hide                     | The hide operator
+rename(const rename_expression_list& rename_set, const process_expression& operand)                                            : public process::process_expression | EI  | Rename                   | The rename operator
+comm(const communication_expression_list& comm_set, const process_expression& operand)                                         : public process::process_expression | EI  | Comm                     | The communication operator
+allow(const action_name_multiset_list& allow_set, const process_expression& operand)                                           : public process::process_expression | EI  | Allow                    | The allow operator
+sync(const process_expression& left, const process_expression& right)                                                          : public process::process_expression | EI  | Sync                     | The synchronization operator
+at(const process_expression& operand, const data::data_expression& time_stamp)                                                 : public process::process_expression | EI  | AtTime                   | The at operator
+seq(const process_expression& left, const process_expression& right)                                                           : public process::process_expression | EI  | Seq                      | The sequential composition
+if_then(const data::data_expression& condition, const process_expression& then_case)                                           : public process::process_expression | EI  | IfThen                   | The if-then operator
+if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case) : public process::process_expression | EI  | IfThenElse               | The if-then-else operator
+bounded_init(const process_expression& left, const process_expression& right)                                                  : public process::process_expression | EI  | BInit                    | The bounded initialization
+merge(const process_expression& left, const process_expression& right)                                                         : public process::process_expression | EI  | Merge                    | The merge operator
+left_merge(const process_expression& left, const process_expression& right)                                                    : public process::process_expression | EI  | LMerge                   | The left merge operator
+choice(const process_expression& left, const process_expression& right)                                                        : public process::process_expression | EI  | Choice                   | The choice operator
+untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)                 : public process::process_expression | EI  | UntypedParamId           | An untyped parameter identifier
+untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)   : public process::process_expression | EI  | UntypedProcessAssignment | An untyped process assginment
 '''
 
 PBES_CLASSES = r'''
-fixpoint_symbol()                                                                                                                                                                                  : public atermpp::aterm_appl |   | FixPoint    | A fixpoint symbol
-propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                 : public atermpp::aterm_appl |   | PropVarDecl | A propositional variable declaration
-pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                            | M | PBEqn       | A PBES equation
-pbes<Container>(const data::data_specification& data, const Container& equations, const atermpp::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                              | M | PBES        | A PBES
+fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl | XCU | FixPoint    | A fixpoint symbol
+propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CIU | PropVarDecl | A propositional variable declaration
+pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SM  | PBEqn       | A PBES equation
+pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_equation>& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                         | SM  | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
@@ -197,7 +211,7 @@ exists(const data::variable_list& variables, const pbes_expression& body)       
 
 BOOLEAN_CLASSES = r'''
 boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl |   | BooleanEquation | A boolean equation
-boolean_equation_system<Container>(const Container& equations, const boolean_expression& initial_state)                                           | M | BES             | A boolean equation system
+boolean_equation_system(const std::vector<bes::boolean_equation>& equations, const boolean_expression& initial_state)                             | M | BES             | A boolean equation system
 '''
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
@@ -213,7 +227,7 @@ boolean_variable(const core::identifier_string& name)                 : public b
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'state_formulas::state_formula'     : [ 'data::data_expression' ],
-  'action_formulas::action_formula'   : [ 'data::data_expression', 'lps::multi_action' ],
+  'action_formulas::action_formula'   : [ 'data::data_expression' ],
   'regular_formulas::regular_formula' : [ 'action_formulas::action_formula' ],
   'process::process_expression'       : [ 'lps::action' ],
   'pbes_system::pbes_expression'      : [ 'data::data_expression' ],
@@ -238,7 +252,7 @@ def indent_text(text, indent):
 # const core::identifier_string& name
 #
 # self.modifiers: ['const', '&', '*'] etc.
-# self.aterm: The corresponding ATerm (default: None)
+# self.aterm: The corresponding aterm (default: None)
 class Parameter:
     def __init__(self, name, type, modifiers, namespace):
         self.name_ = name
@@ -254,7 +268,7 @@ class Parameter:
 
     # Returns true if the type is a list
     #
-    # TODO: make this test accurate using the ATerm grammar
+    # TODO: make this test accurate using the aterm grammar
     def is_list(self):
         return self.type(False).endswith('_list')
 
@@ -289,7 +303,7 @@ class Parameter:
     def name(self):
         return self.name_
 
-    # Returns the corresponding ATerm of the parameter, or None if no such term exists
+    # Returns the corresponding aterm of the parameter, or None if no such term exists
     #
     def aterm(self):
         return self.aterm_
@@ -394,27 +408,27 @@ class MemberFunction:
         self.arg  = arg
 
     def expand_text(self, text):
-        text = re.sub('<CLASSNAME>'          , self.classname          , text)
+        text = re.sub('<CLASSNAME>', self.classname, text)
         text = re.sub('<RETURN_TYPE>', self.return_type, text)
         text = re.sub('<NAME>', self.name, text)
         text = re.sub('<ARG>',  self.arg , text)
         return text
 
     def inline_definition(self):
-        text = '''    <RETURN_TYPE> <NAME>() const
+        text = '''    const <RETURN_TYPE>& <NAME>() const
     {
-      return atermpp::<ARG>(*this);
+      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
     }'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = '''    <RETURN_TYPE> <NAME>() const;'''
+        text = '''    const <RETURN_TYPE>& <NAME>() const;'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = '''    <INLINE><RETURN_TYPE> <CLASSNAME>::<NAME>() const
+        text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
     {
-      return atermpp::<ARG>(*this);
+      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -537,7 +551,44 @@ class OverloadedConstructor(Constructor):
             text = re.sub('<INLINE>', '', text)
         return self.expand_text(text)
 
-# Represents a class constructor taking an ATerm as argument
+# Represents a class constructor taking an additional class as argument
+class AdditionalConstructor(Constructor):
+    def __init__(self, classname, additional_classname, superclass, additional_class):
+        self.classname            = classname
+        self.additional_classname = additional_classname
+        self.superclass           = superclass
+
+    def inline_definition(self):
+        text = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
+      : <SUPERCLASS>(x)
+    {}'''
+        return self.expand_text(text)
+
+    def declaration(self):
+        text = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x);'''
+        return self.expand_text(text)
+
+    def expand_text(self, text):
+        text = re.sub('<CLASSNAME>', self.classname, text)
+        text = re.sub('<ADDITIONAL_CLASSNAME>', self.additional_classname, text)
+        text = re.sub('<SUPERCLASS>', self.superclass, text)
+        return text
+
+    def definition(self, inline = False):
+        text = r'''    /// \\\\brief Constructor.
+    /// \\param term A term
+    <INLINE><CLASSNAME>::<CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
+      : <SUPERCLASS>(x)
+    {}'''
+        if inline:
+            text = re.sub('<INLINE>',  'inline\n    ', text)
+        else:
+            text = re.sub('<INLINE>',  '', text)
+        return self.expand_text(text)
+
+# Represents a class constructor taking an aterm as argument
 class ATermConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
@@ -552,26 +603,26 @@ class ATermConstructor(Constructor):
     def inline_definition(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(const atermpp::aterm_appl& term)
+    explicit <CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
-      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));
+      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''
         return self.expand_text(text)
 
     def declaration(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(const atermpp::aterm_appl& term);'''
+    explicit <CLASSNAME>(const atermpp::aterm& term);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm_appl& term)
+    explicit <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
     {
-      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(m_term));
+      assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -585,7 +636,7 @@ class ATermConstructor(Constructor):
 #
 # ActTrue   | true_()  | The value true for action formulas
 #
-# self.aterm:       the name of the corresponding ATerm
+# self.aterm:       the name of the corresponding aterm
 # self.constructor: the constructor of the class
 # self.description: a string description of the class
 class Class:
@@ -696,7 +747,7 @@ class Class:
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
                 arguments2.append('typename atermpp::detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
-                parameters1.append('atermpp::convert<%s>(%s)' % (p.type(False), p.name()))
+                parameters1.append('%s(%s.begin(), %s.end())' % (p.type(False), p.name(),p.name()))
             else:
                 parameters1.append(p.name())
                 arguments1.append('%s %s' % (p.type(), p.name()))
@@ -721,7 +772,20 @@ class Class:
             constructors.append(Constructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
         if len(self.constructor.parameters()) > 0 and (add_string_overload_constructor or add_container_overload_constructor) and (parameters != parameters1):
             constructors.append(OverloadedConstructor(classname, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
+        if self.classname(True) in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES:
+            for additional_classname in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES[self.classname(True)]:
+                constructors.append(AdditionalConstructor(classname, additional_classname, superclass, additional_classname))
         return constructors
+
+    # Returns a specialization of the swap function for the std namespace
+    def swap_specialization(self):
+        text = '''template <>
+inline void swap(mcrl2::<NAMESPACE>::<CLASSNAME>& t1, mcrl2::<NAMESPACE>::<CLASSNAME>& t2)
+{
+  t1.swap(t2);
+}
+'''
+        return self.expand_text(text, parameters = '', constructors = '', member_functions = '', namespace = self.namespace())
 
     # Returns the member functions of the class
     def member_functions(self):
@@ -734,7 +798,7 @@ class Class:
             return_type = extract_type(p[0].strip())
             name = p[2].strip()
             arg = 'arg' + str(n)
-            # TODO: this check for a list is unsafe; the ATerm grammar should be used to make it precise
+            # TODO: this check for a list is unsafe; the aterm grammar should be used to make it precise
             if return_type.endswith('list'):
                 arg = 'list_' + arg
             result.append(MemberFunction(self.classname(), return_type, name, arg))
@@ -742,8 +806,6 @@ class Class:
 
     def expand_text(self, text, parameters, constructors, member_functions, namespace):
         superclass = self.superclass()
-        #if self.superclass_namespace() != self.namespace():
-        #    superclass = self.superclass_namespace() + '::' + superclass
         if superclass == None:
             superclass_declaration = ': public atermpp::aterm_appl'
         else:
@@ -771,27 +833,32 @@ class Class:
 typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 
 /// \\brief vector of <CLASSNAME>s
-typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
+typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;
 '''
         text = re.sub('<CLASSNAME>', self.classname(), text)
         return text
 
     # Returns an is_<classname> function
-    def is_function(self):
-        text = r'''/// \\brief Test for a %s expression
-/// \\param t A term
-/// \\return True if it is a %s expression
+    def is_function(self, all_classes):
+        text = r'''%s/// \\brief Test for a %s expression
+/// \\param x A term
+/// \\return True if \\a x is a %s expression
 inline
-bool is_%s(const %s& t)
+bool is_%s(const %s& x)
 {
-  return %s::detail::gsIs%s(t);
+  return %s;
 }
 '''
         name = self.name()
         if name[-1] == '_':
             name = name[:-1]
-        aterm = self.aterm
-        text = text % (name, name, name, self.superclass(), 'core', aterm)
+        if 'X' in self.modifiers():
+            prototypes = '// prototypes\n' + '\n'.join(['inline bool is_%s(const atermpp::aterm_appl& x);' % re.sub('_$', '', c.classname()) for c in self.derived_classes(all_classes) if c.namespace() == self.namespace()]) + '\n\n'
+            return_value = ' ||\n         '.join(['%s::is_%s(x)' % (c.namespace(), re.sub('_$', '', c.classname())) for c in self.derived_classes(all_classes)])
+        else:
+            prototypes = ''
+            return_value = '%s::detail::gsIs%s(x)' % ('core', self.aterm)
+        text = text % (prototypes, name, name, name, 'atermpp::aterm_appl', return_value)
         return text
 
     def is_function_name(self, include_namespace = True):
@@ -804,7 +871,7 @@ bool is_%s(const %s& t)
         return result
 
     # Returns the class definition
-    def class_inline_definition(self):
+    def class_inline_definition(self, all_classes):
         if 'S' in self.modifiers():
             return ''
 
@@ -827,12 +894,12 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = text + '\n\n' + self.container_typedefs()
 
         if 'I' in self.modifiers():
-            text = text + '\n\n' + self.is_function()
+            text = text + '\n\n' + self.is_function(all_classes)
 
         return text + '\n'
 
     # Returns the class declaration
-    def class_declaration(self, namespace = 'core'):
+    def class_declaration(self, all_classes, namespace = 'core'):
         ptext = ', '.join([p.name() for p in self.constructor.parameters()])
         ctext = '\n\n'.join([x.declaration() for x in self.constructors(namespace)])
         mtext = ''.join(['\n\n' + x.declaration() for x in self.member_functions()])
@@ -849,9 +916,15 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = text + '\n\n' + self.container_typedefs()
 
         if 'I' in self.modifiers():
-            text = text + '\n\n' + self.is_function()
+            text = text + '\n\n' + self.is_function(all_classes)
 
         return text + '\n'
+
+    def derived_classes(self, all_classes):
+        classes = [all_classes[name] for name in self.expression_classes()]
+        classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
+        classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
+        return classes
 
     # Returns the member function definitions
     def class_member_function_definitions(self, namespace = 'core'):
@@ -866,41 +939,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = re.sub('check_term', 'check_rule', text)
         return text + '\n'
 
-    def traverse_function(self, all_classes):
-        text = r'''void operator()(const QUALIFIED_NODE& x)
-{
-  static_cast<Derived&>(*this).enter(x);VISIT_FUNCTIONS
-  static_cast<Derived&>(*this).leave(x);
-}
-'''
-        if 'X' in self.modifiers():
-            qualified_node = self.classname(include_namespace = True)
-            text = re.sub('QUALIFIED_NODE', qualified_node, text)
-            classes = [all_classes[name] for name in self.expression_classes()]
-            classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
-            classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
-            visit_functions = []
-            for c in classes:
-                classname = c.classname(True)
-                is_function = c.is_function_name(True)
-                namespace = c.namespace()
-                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, classname))
-            vtext = '\n  ' + '\n  else '.join(visit_functions)
-            text = re.sub('VISIT_FUNCTIONS', vtext, text)
-            return text
-        else:
-            f = self.constructor
-            visit_functions = []
-            for p in f.parameters():
-                visit_functions.append('\n  static_cast<Derived&>(*this)(x.%s());' % p.name())
-            vtext = ''.join(visit_functions)
-            qualified_node = self.classname(include_namespace = True)
-            text = re.sub('QUALIFIED_NODE', qualified_node, text)
-            text = re.sub('VISIT_FUNCTIONS', vtext, text)
-            if f.is_template():
-                text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
-            return text
-
     def traverser_function(self, all_classes, dependencies):
         text = r'''void operator()(const <CLASS_NAME>& x)
 {
@@ -912,17 +950,18 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         visit_text = ''
         dependent = False
         if 'X' in self.modifiers():
-            classes = [all_classes[name] for name in self.expression_classes()]
-            classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
-            classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
-
+            classes = self.derived_classes(all_classes)
             updates = []
             for c in classes:
                 is_function = c.is_function_name(True)
+                if 'M' in c.modifiers():
+                    cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
+                else:
+                    cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
                 updates.append('''if (%s(x))
 {
-  static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x)));
-}''' % (is_function, c.classname(True)))
+  static_cast<Derived&>(*this)(%s);
+}''' % (is_function, cast))
             if len(updates) == 0:
                 visit_text = '// skip'
             else:
@@ -990,11 +1029,16 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             f = self.constructor
             for p in f.parameters():
                 ptype = p.type(include_modifiers = False, include_namespace = True, remove_templates = True)
+                pclass = None
+                if ptype in all_classes:
+                    pclass = all_classes[ptype]
                 qtype = p.type(include_modifiers = False, include_namespace = True)
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
                     if is_modifiable_type(qtype, modifiability_map):
                         updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
+                    elif pclass != None and 'E' in pclass.modifiers() and not 'X' in pclass.modifiers():
+                        updates.append('x.%s() = core::down_cast<%s>(static_cast<Derived&>(*this)(x.%s()));' % (p.name(), ptype, p.name()))
                     else:
                         updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s());' % (p.name(), p.name()))
                 else:
@@ -1005,28 +1049,18 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 visit_text = '// skip'
         else:
             if 'X' in self.modifiers():
-                classes = [all_classes[name] for name in self.expression_classes()]
-                classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
-                classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
-
+                classes = self.derived_classes(all_classes)
                 updates = []
                 for c in classes:
-                    #if not is_dependent_type(dependencies, c.classname(True)):
-                    #    continue
                     is_function = c.is_function_name(True)
-                    if is_modifiable_type(c.classname(True), modifiability_map):
-                      # this one applies to action_formula <-> multi_action, for which the conversion is problematic
-                      updates.append('''if (%s(x))
-{
-  %s y = x;
-  static_cast<Derived&>(*this)(y);
-  result = y;
-}''' % (is_function, c.classname(True)))
+                    if 'M' in c.modifiers():
+                        cast = '%s(atermpp::aterm_cast<atermpp::aterm_appl>(x))' % c.classname(True)
                     else:
-                      updates.append('''if (%s(x))
+                        cast = 'atermpp::aterm_cast<%s>(x)' % c.classname(True)
+                    updates.append('''if (%s(x))
 {
-  result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x)));
-}''' % (is_function, c.classname(True)))
+  result = static_cast<Derived&>(*this)(%s);
+}''' % (is_function, cast))
                 if len(updates) == 0:
                     visit_text = '// skip'
                     return_statement = 'return x;'
@@ -1038,9 +1072,15 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 f = self.constructor
                 for p in f.parameters():
                     ptype = p.type(include_modifiers = False, include_namespace = True)
+                    pclass = None
+                    if ptype in all_classes:
+                        pclass = all_classes[ptype]
                     if is_dependent_type(dependencies, ptype):
                         dependent = True
-                        updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                        if pclass != None and 'E' in pclass.modifiers() and not 'X' in pclass.modifiers():
+                            updates.append('core::static_down_cast<const %s&>(static_cast<Derived&>(*this)(x.%s()))' % (ptype, p.name()))
+                        else:
+                            updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
                     else:
                         updates.append('x.%s()' % p.name())
                 if dependent:
@@ -1128,10 +1168,7 @@ def print_dependencies(dependencies, message):
 def is_dependent_type(dependencies, type):
     if type in dependencies:
         return dependencies[type]
-    # TODO: handle template parameters
-    elif type.endswith('Container'):
-        return True
-    m = re.search('<(\w+)>', type)
+    m = re.search('<(.+)>', type)
     if m != None:
         return dependencies[m.group(1)]
     return False
@@ -1204,11 +1241,9 @@ def make_modifiability_map(all_classes):
 def is_modifiable_type(type, modifiability_map):
     if type in modifiability_map:
         return modifiability_map[type]
-    elif type.startswith('atermpp::vector<'):
+    elif type.startswith('std::vector<'):
         return True
-    elif type.startswith('atermpp::set<'):
-        return True
-    elif type.endswith('Container'): # TODO: handle containers properly
+    elif type.startswith('std::set<'):
         return True
     else:
         raise Exception('is_modifiable_type(' + type + ') is unknown')

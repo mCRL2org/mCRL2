@@ -40,9 +40,8 @@ struct boolean_variable_substitution: public std::unary_function<boolean_variabl
 };
 
 /// \brief Applies the substitution \p X := \p phi to the boolean expression \p t.
-/// \param t A boolean expression
-/// \param X A boolean variable
-/// \param phi A boolean expression
+/// \param x A boolean variable
+/// \param sigma A substitution
 /// \return The result of the substitution.
 template <typename Substitution>
 boolean_expression replace_boolean_variables(const boolean_expression& x, Substitution sigma)

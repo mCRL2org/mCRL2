@@ -13,13 +13,12 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -46,8 +45,6 @@ void test_replace()
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
   action_summand t = s;
-  lps::replace_variables(t, a);
-  core::garbage_collect();
 }
 
 std::string SPEC1a =
@@ -95,17 +92,16 @@ void test_lps_substituter()
   std::cerr << "-------------------------------------" << std::endl;
   std::cerr << lps::pp(spec2.process()) << std::endl;
   BOOST_CHECK(lps::pp(spec1.process()) == lps::pp(spec2.process()));
-  core::garbage_collect();
 }
 
 void test_lps_substitute()
 {
-  data::variable v("v", sort_pos::pos());
-  data::variable w("w", sort_pos::pos());
+  data::variable v("v", data::sort_bool::bool_());
+  data::data_expression w = data::sort_bool::true_();
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
-  lps::replace_free_variables(v, sigma);
-  core::garbage_collect();
+  data::data_expression e = v;
+  e = lps::replace_free_variables(e, sigma);
 }
 
 void test_replace_process_parameters()
@@ -121,9 +117,8 @@ void test_replace_process_parameters()
   data::variable b0("b0", data::sort_bool::bool_());
   sigma[b] = b0;
   lps::replace_process_parameters(spec, sigma);
-  std::set<data::variable> variables = lps::find_variables(spec);
+  std::set<data::variable> variables = lps::find_all_variables(spec);
   BOOST_CHECK(variables.find(b) == variables.end());
-  core::garbage_collect();
 }
 
 void test_replace_summand_variables()
@@ -140,20 +135,50 @@ void test_replace_summand_variables()
   sigma[c] = c0;
   lps::replace_summand_variables(spec, sigma);
   std::cout << lps::pp(spec) << std::endl;
-  std::set<data::variable> variables = lps::find_variables(spec);
+  std::set<data::variable> variables = lps::find_all_variables(spec);
   BOOST_CHECK(variables.find(c) == variables.end());
-  core::garbage_collect();
+}
+
+void test_action_list()
+{
+  sort_expression_list s;
+  s.push_front(sort_expression(sort_nat::nat()));
+  action_label label(core::identifier_string("a"), s);
+
+  variable b("b", data::sort_bool::bool_());
+  variable c("c", data::sort_bool::bool_());
+  data_expression_list e1;
+  e1.push_front(data_expression(sort_bool::and_(b, c)));
+  data_expression_list e2;
+  e2.push_front(data_expression(sort_bool::and_(c, c)));
+
+  action_list l1;
+  action a1(label, e1);
+  l1.push_front(a1);
+
+  action_list l2;
+  action a2(label, e2);
+  l2.push_front(a2);
+
+  data::mutable_map_substitution<> sigma;
+  sigma[b] = c;
+
+  l1 = lps::replace_variables_capture_avoiding(l1, sigma, data::substitution_variables(sigma));
+  BOOST_CHECK(l1 == l2);
+
+  std::set<data::variable> v;
+  l1 = lps::replace_variables(l1, sigma);
+  l1 = lps::replace_variables_capture_avoiding(l1, sigma, v);
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_replace();
   test_lps_substituter();
   test_lps_substitute();
   test_replace_process_parameters();
   test_replace_summand_variables();
+  test_action_list();
 
   return 0;
 }

@@ -8,8 +8,6 @@
 //
 /// \file sim.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #define NAME "lpssim"
 #define AUTHOR "Muck van Weerdenburg"
 
@@ -24,7 +22,6 @@
 #include <cassert>
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -72,18 +69,18 @@ class sim_tool : public rewriter_tool< input_tool >
 
   protected:
 
-    bool m_use_dummies;
+    bool m_do_not_use_dummies;
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
+      desc.add_option("nodummy", "do not replace global variables in the LPS with dummy values", 'y');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_use_dummies = 0 < parser.options.count("dummy");
+      m_do_not_use_dummies = 0 < parser.options.count("nodummy");
     }
 
   public:
@@ -95,7 +92,7 @@ class sim_tool : public rewriter_tool< input_tool >
         "command-line simulation of an LPS",
         "Simulate the LPS in INFILE via a text-based interface."
       ),
-      m_use_dummies(false)
+      m_do_not_use_dummies(false)
     {}
 
     bool run()
@@ -104,7 +101,7 @@ class sim_tool : public rewriter_tool< input_tool >
 
       lps_specification.load(m_input_filename);
 
-      if (m_use_dummies)
+      if (!m_do_not_use_dummies)
       {
         lps::detail::instantiate_global_variables(lps_specification);
       }
@@ -170,7 +167,8 @@ class sim_tool : public rewriter_tool< input_tool >
           else if (isdigit(s[0]))
           {
             size_t index;
-            sscanf(s.c_str(), "%zu", &index);
+            std::stringstream ss(s);
+            ss >> index;
             if (index < current_state.transitions.size())
             {
               simulation.truncate(state_index);
@@ -302,7 +300,5 @@ class sim_tool : public rewriter_tool< input_tool >
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return sim_tool().execute(argc, argv);
 }

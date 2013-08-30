@@ -19,9 +19,7 @@
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
-#include "mcrl2/atermpp/set.h"
 
 // utilities
 #include "mcrl2/atermpp/container_utility.h"
@@ -82,16 +80,6 @@ void insert(Container& container, Sequence sequence)
 
 template < typename Container, typename T >
 inline
-void insert_unique(Container& container, const T& t)
-{
-  if(std::find(container.begin(), container.end(), t) == container.end())
-  {
-    container.push_back(t);
-  }
-}
-
-template < typename Container, typename T >
-inline
 void remove(Container& container, const T& t)
 {
   typename Container::iterator i = std::find(container.begin(), container.end(), t);
@@ -115,7 +103,7 @@ class data_specification
     struct target_sort_to_function_map
     {
       bool _outdated;
-      atermpp::map<sort_expression, atermpp::vector<function_symbol> > _mapping;
+      std::map<sort_expression, std::vector<function_symbol> > _mapping;
 
       target_sort_to_function_map()
         : _outdated(true)
@@ -125,7 +113,7 @@ class data_specification
       /// \param [in,out] c container in which the functions are stored grouped by target sort.
       /// \param [in] functions a container with function symbols
       template <typename Container>
-      void group_functions_by_target_sort(atermpp::map<sort_expression, atermpp::vector<function_symbol> >& c, const Container& functions)
+      void group_functions_by_target_sort(std::map<sort_expression, std::vector<function_symbol> >& c, const Container& functions)
       {
         for (typename Container::const_iterator i = functions.begin(); i != functions.end(); ++i)
         {
@@ -153,7 +141,7 @@ class data_specification
         _outdated = true;
       }
 
-      atermpp::map<sort_expression, atermpp::vector<function_symbol> >& mapping()
+      std::map<sort_expression, std::vector<function_symbol> >& mapping()
       {
         assert(!_outdated);
         return _mapping;
@@ -212,7 +200,7 @@ class data_specification
     /// \brief The sorts that occur in the context of this data specification.
     /// The normalised sorts, constructors, mappings and equations are complete
     /// with respect to these sorts.
-    mutable atermpp::set< sort_expression >     m_sorts_in_context;
+    mutable std::set< sort_expression >     m_sorts_in_context;
 
     /// \brief The basic sorts and structured sorts in the specification.
     alias_vector                     m_aliases;
@@ -224,7 +212,7 @@ class data_specification
     function_symbol_vector             m_mappings;
 
     /// \brief The equations of the specification.
-    atermpp::vector< data_equation >       m_equations;
+    std::vector< data_equation >       m_equations;
 
     /// \brief Set containing all the sorts, including the system defined ones.
     mutable sort_expression_vector         m_normalised_sorts;
@@ -249,7 +237,7 @@ class data_specification
 
     /// \brief Table containing how sorts should be mapped to normalised sorts.
     // sort_normaliser               m_sort_normaliser;
-    mutable atermpp::map< sort_expression, sort_expression > m_normalised_aliases;
+    mutable std::map< sort_expression, sort_expression > m_normalised_aliases;
 
     void data_is_not_necessarily_normalised_anymore() const
     {
@@ -284,7 +272,8 @@ class data_specification
     inline
     void add_system_defined_constructor(const function_symbol& f) const
     {
-      detail::insert_unique(m_normalised_constructors,normalize_sorts(f,*this));
+      function_symbol g(normalize_sorts(f, *this));
+      m_normalised_constructors.push_back(g);
     }
 
     /// \brief Adds a mapping to this specification, and marks it as system
@@ -296,7 +285,8 @@ class data_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_system_defined_mapping(const function_symbol& f) const
     {
-      detail::insert_unique(m_normalised_mappings,normalize_sorts(f,*this));
+      function_symbol g(normalize_sorts(f, *this));
+      m_normalised_mappings.push_back(g);
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -326,12 +316,16 @@ class data_specification
       std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
       f = s_sort.recogniser_functions(sort);
       std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+      f = s_sort.comparison_functions(sort);
+      std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
 
       data_equation_vector e(s_sort.constructor_equations(sort));
       std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       e = s_sort.projection_equations(sort);
       std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       e = s_sort.recogniser_equations(sort);
+      std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+      e = s_sort.comparison_equations(sort);
       std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
     }
 
@@ -341,7 +335,7 @@ class data_specification
 
       for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
       {
-        detail::insert_unique(m_normalised_mappings,*i);
+        m_normalised_mappings.push_back(*i);
       }
 
       data_equation_vector equations(standard_generate_equations_code(sort));
@@ -355,11 +349,14 @@ class data_specification
   public:
 
     ///\brief Default constructor. Generate a data specification that contains
-    ///       only booleans.
+    ///       only booleans and positive numbers.
     data_specification()
       : m_data_specification_is_type_checked(true),
         m_normalised_data_is_up_to_date(false)
-    {}
+    {
+      add_context_sort(sort_bool::bool_());
+      add_context_sort(sort_pos::pos());
+    }
 
     ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.
@@ -369,6 +366,8 @@ class data_specification
       m_normalised_data_is_up_to_date(false)
     {
       m_non_typed_checked_data_spec=t;
+      add_context_sort(sort_bool::bool_());
+      add_context_sort(sort_pos::pos());
     }
 
     /// \brief Indicates that the data specification is type checked.
@@ -376,11 +375,13 @@ class data_specification
     ///  access to the data specification using all the utility functions.
     void declare_data_specification_to_be_type_checked()
     {
-      assert(!m_data_specification_is_type_checked); //A data specification can only be declared
       //type checked once.
-      m_data_specification_is_type_checked=true;
-      build_from_aterm(m_non_typed_checked_data_spec);
-      m_non_typed_checked_data_spec=atermpp::aterm_appl();
+      if (!m_data_specification_is_type_checked) //A data specification can only be declared
+      {
+        m_data_specification_is_type_checked=true;
+        build_from_aterm(m_non_typed_checked_data_spec);
+        m_non_typed_checked_data_spec=atermpp::aterm_appl();
+      }
     }
 
 
@@ -406,7 +407,6 @@ class data_specification
     inline
     const sort_expression_vector& user_defined_sorts() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_sorts;
     }
 
@@ -428,7 +428,6 @@ class data_specification
     inline
     const function_symbol_vector& user_defined_constructors() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_constructors;
     }
 
@@ -467,7 +466,6 @@ class data_specification
     inline
     const function_symbol_vector& user_defined_mappings() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_mappings;
     }
 
@@ -506,7 +504,6 @@ class data_specification
     inline
     const data_equation_vector& user_defined_equations() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_equations;
     }
 
@@ -515,7 +512,7 @@ class data_specification
     ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
     ///    for each sort. The normalisation mapping maps each sort to a unique representant.
     ///    Moreover, it is this unique sort that it provides in internal mappings.
-    const atermpp::map< sort_expression, sort_expression > &sort_alias_map() const
+    const std::map< sort_expression, sort_expression > &sort_alias_map() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
@@ -527,13 +524,12 @@ class data_specification
     inline
     const alias_vector& user_defined_aliases() const
     {
-      assert(m_data_specification_is_type_checked);
       return m_aliases;
     }
 
     /// \brief Return the user defined context sorts of the current specification.
     /// \details Time complexity is constant.
-    const atermpp::set<sort_expression>& context_sorts() const
+    const std::set<sort_expression>& context_sorts() const
     {
       return m_sorts_in_context;
     }
@@ -544,11 +540,8 @@ class data_specification
     void add_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
-      if (std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end())
-      {
-        m_sorts.push_back(s);
-        data_is_not_necessarily_normalised_anymore();
-      }
+      m_sorts.push_back(s);
+      data_is_not_necessarily_normalised_anymore();
     }
 
     /// \brief Adds an alias (new name for a sort) to this specification
@@ -560,7 +553,7 @@ class data_specification
     void add_alias(alias const& a)
     {
       assert(m_data_specification_is_type_checked);
-      detail::insert_unique(m_aliases, a);
+      m_aliases.push_back(a);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -572,7 +565,7 @@ class data_specification
     void add_constructor(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      detail::insert_unique(m_constructors, f);
+      m_constructors.push_back(f);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -584,7 +577,7 @@ class data_specification
     void add_mapping(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      detail::insert_unique(m_mappings, f);
+      m_mappings.push_back(f);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -596,7 +589,8 @@ class data_specification
     void add_equation(const data_equation& e)
     {
       assert(m_data_specification_is_type_checked);
-      m_equations.push_back(data::translate_user_notation(e));
+      // m_equations.push_back(data::translate_user_notation(e));
+      m_equations.push_back(e);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -644,14 +638,14 @@ class data_specification
       m_normalised_equations.clear();
       std::set < sort_expression > sorts_already_added_to_m_normalised_sorts;
       reconstruct_m_normalised_aliases();
-      for (atermpp::vector< sort_expression >::const_iterator i=m_sorts.begin();
+      for (std::vector< sort_expression >::const_iterator i=m_sorts.begin();
            i!=m_sorts.end(); ++i)
       {
         add_system_defined_sort(*i);
         import_system_defined_sort(*i,sorts_already_added_to_m_normalised_sorts);
       }
 
-      for (atermpp::set< sort_expression >::const_iterator i=m_sorts_in_context.begin();
+      for (std::set< sort_expression >::const_iterator i=m_sorts_in_context.begin();
            i!=m_sorts_in_context.end(); ++i)
       {
         import_system_defined_sort(*i,sorts_already_added_to_m_normalised_sorts);
@@ -661,16 +655,22 @@ class data_specification
       dependent_sorts.insert(sort_bool::bool_());
 
       // constructors
-      detail::insert(dependent_sorts, make_sort_range(m_constructors));
+      for (auto i = m_constructors.begin(); i != m_constructors.end(); ++i)
+      {
+        dependent_sorts.insert(i->sort());
+      }
 
       // mappings
-      detail::insert(dependent_sorts, make_sort_range(m_mappings));
+      for (auto i = m_mappings.begin(); i != m_mappings.end(); ++i)
+      {
+        dependent_sorts.insert(i->sort());
+      }
 
       // equations
-      for (atermpp::vector< data_equation >::const_iterator r(m_equations.begin()); r != m_equations.end(); ++r)
+      for (std::vector< data_equation >::const_iterator r(m_equations.begin()); r != m_equations.end(); ++r)
       {
         // make function sort in case of constants to add the corresponding sort as needed
-        detail::insert(dependent_sorts, find_sort_expressions(*r));
+        detail::insert(dependent_sorts, find_sort_expressions(data::translate_user_notation(*r)));
       }
 
       // aliases, with both left and right hand sides.
@@ -681,7 +681,7 @@ class data_specification
         detail::insert(dependent_sorts,find_sort_expressions(i->reference()));
       }
 
-      for (atermpp::set< sort_expression >::const_iterator i=dependent_sorts.begin();
+      for (std::set< sort_expression >::const_iterator i=dependent_sorts.begin();
            i!=dependent_sorts.end(); ++i)
       {
         add_system_defined_sort(*i);
@@ -703,9 +703,9 @@ class data_specification
            i!=m_constructors.end(); ++i)
       {
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        const function_symbol normalised_constructor=normalize_sorts(*i,*this);
+        function_symbol normalised_constructor(normalize_sorts(*i, *this));
 
-        detail::insert_unique(m_normalised_constructors, normalised_constructor);
+        m_normalised_constructors.push_back(normalised_constructor);
         add_system_defined_sort(normalised_sort);
       }
 
@@ -714,18 +714,18 @@ class data_specification
            i!=m_mappings.end(); ++i)
       {
         const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
-        const function_symbol normalised_mapping=normalize_sorts(*i,*this);
+        function_symbol normalised_mapping(normalize_sorts(*i, *this));
 
-        detail::insert_unique(m_normalised_mappings, normalised_mapping);
+        m_normalised_mappings.push_back(normalised_mapping);
 
         add_system_defined_sort(normalised_sort);
       }
 
       // Normalise the sorts of the expressions and variables in equations.
-      for (atermpp::vector< data_equation >::const_iterator i=m_equations.begin();
+      for (std::vector< data_equation >::const_iterator i=m_equations.begin();
            i!=m_equations.end(); ++i)
       {
-        add_system_defined_equation(*i);
+        add_system_defined_equation(data::translate_user_notation(*i));
       }
     }
 
@@ -770,6 +770,7 @@ class data_specification
         function_symbol_vector f(sort_bool::bool_generate_constructors_code());
         std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
         f = sort_bool::bool_generate_functions_code();
+
         std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
         data_equation_vector e(sort_bool::bool_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
@@ -870,7 +871,9 @@ class data_specification
         {
           // Add the function sort element_sort->Bool to the specification
           // const sort_expression_list l(element_sort);
-          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_bool::bool_()),
+          sort_expression_list element_sorts;
+          element_sorts.push_front(element_sort);
+          import_system_defined_sort(function_sort(element_sorts,sort_bool::bool_()),
                                      sorts_already_added_to_m_normalised_sorts);
 
           // Add a set to the specification.
@@ -898,7 +901,9 @@ class data_specification
           import_system_defined_sort(sort_set::set_(element_sort),sorts_already_added_to_m_normalised_sorts);
 
           // Add the function sort element_sort->Nat to the specification
-          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_nat::nat()),
+          sort_expression_list element_sorts;
+          element_sorts.push_front(element_sort);
+          import_system_defined_sort(function_sort(element_sorts,sort_nat::nat()),
                                      sorts_already_added_to_m_normalised_sorts);
 
           // Add a bag to the specification.
@@ -922,7 +927,7 @@ class data_specification
       }
       else if (is_structured_sort(sort))
       {
-        insert_mappings_constructors_for_structured_sort(sort);
+        insert_mappings_constructors_for_structured_sort(core::static_down_cast<const structured_sort&>(sort));
       }
       const sort_expression normalised_sort=normalize_sorts(sort,*this);
       add_standard_mappings_and_equations(normalised_sort);
@@ -938,12 +943,12 @@ class data_specification
     void remove_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
-      const atermpp::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), s);
+      const std::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), s);
       if(i != m_sorts.end())
       {
         m_sorts.erase(i);
       }
-      const atermpp::vector<sort_expression>::iterator j = std::find(m_normalised_sorts.begin(), m_normalised_sorts.end(), normalize_sorts(s, *this));
+      const std::vector<sort_expression>::iterator j = std::find(m_normalised_sorts.begin(), m_normalised_sorts.end(), normalize_sorts(s, *this));
       if(j != m_normalised_sorts.end())
       {
         m_normalised_sorts.erase(j);
@@ -955,7 +960,7 @@ class data_specification
     void remove_alias(alias const& a)
     {
       assert(m_data_specification_is_type_checked);
-      const atermpp::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), a.name());
+      const std::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), a.name());
       if(i != m_sorts.end())
       {
         m_sorts.erase(i);
@@ -1005,7 +1010,7 @@ class data_specification
       const data_equation e1=data::translate_user_notation(e);
 
       detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
-      detail::remove(m_equations, e1);
+      detail::remove(m_equations, e);
     }
 
     /// \brief Checks whether two sort expressions represent the same sort
@@ -1097,10 +1102,9 @@ class data_specification
 /// \brief Merges two data specifications into one.
 /// \details It is assumed that the two specs can be merged. I.e.
 ///          that the second is a safe extension of the first.
-/// \param spec1[in] One of the input specifications.
-/// \param spec2[in] The second input specification.
+/// \param[in] spec1 One of the input specifications.
+/// \param[in] spec2 The second input specification.
 /// \return A specification that is merged.
-
 inline data_specification operator +(data_specification spec1, const data_specification &spec2)
 {
   const sort_expression_vector sv=spec2.user_defined_sorts();
@@ -1109,12 +1113,12 @@ inline data_specification operator +(data_specification spec1, const data_specif
     spec1.add_sort(*i);
   }
 
-  const atermpp::set<sort_expression>& cs2=spec2.context_sorts();
-  for(atermpp::set<sort_expression>::const_iterator i=cs2.begin(); i!=cs2.end(); ++i)
+  const std::set<sort_expression>& cs2=spec2.context_sorts();
+  for(std::set<sort_expression>::const_iterator i=cs2.begin(); i!=cs2.end(); ++i)
   {
     spec1.add_context_sort(*i);
   }
- 
+
   const alias_vector av=spec2.user_defined_aliases();
   for(alias_vector::const_iterator i=av.begin(); i!=av.end(); ++i)
   {
@@ -1176,8 +1180,8 @@ function_symbol find_constructor(data_specification const& data, std::string con
 inline
 sort_expression find_sort(data_specification const& data, std::string const& s)
 {
-  const atermpp::vector<sort_expression> r(data.sorts());
-  const atermpp::vector<sort_expression>::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
+  const std::vector<sort_expression> r(data.sorts());
+  const std::vector<sort_expression>::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
   return (i == r.end()) ? sort_expression() : *i;
 }
 
@@ -1192,8 +1196,8 @@ inline
 data_equation_vector find_equations(data_specification const& specification, const data_expression& d)
 {
   data_equation_vector result;
-  const atermpp::vector< data_equation > equations(specification.equations());
-  for (atermpp::vector< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  const std::vector< data_equation > equations(specification.equations());
+  for (std::vector< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
   {
     if (i->lhs() == d || i->rhs() == d)
     {
@@ -1201,14 +1205,14 @@ data_equation_vector find_equations(data_specification const& specification, con
     }
     else if (is_application(i->lhs()))
     {
-      if (static_cast<application>(i->lhs()).head() == d)
+      if (atermpp::aterm_cast<application>(i->lhs()).head() == d)
       {
         result.push_back(*i);
       }
     }
     else if (is_application(i->rhs()))
     {
-      if (static_cast<application>(i->rhs()).head() == d)
+      if (atermpp::aterm_cast<application>(i->rhs()).head() == d)
       {
         result.push_back(*i);
       }

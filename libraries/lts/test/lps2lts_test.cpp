@@ -19,8 +19,6 @@
 #include <sstream>
 #include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/detail/exploration.h"
@@ -60,13 +58,9 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   LTS_TYPE result;
   options.outformat = result.type();
   lts::lps2lts_algorithm lps2lts;
-  core::garbage_collect();
   lps2lts.initialise_lts_generation(&options);
-  core::garbage_collect();
   lps2lts.generate_lts();
-  core::garbage_collect();
   lps2lts.finalise_lts_generation();
-  core::garbage_collect();
 
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
@@ -138,7 +132,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "AUT FORMAT\n";
         lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
@@ -147,7 +140,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "LTS FORMAT\n";
         lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
@@ -156,7 +148,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "FSM FORMAT\n";
         lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
@@ -165,7 +156,6 @@ static void check_lps2lts_specification(std::string const& specification,
         std::cerr << "DOT FORMAT\n";
         lts::lts_dot_t result4 = translate_lps_to_lts<lts::lts_dot_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result4.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result4.num_transitions(), expected_transitions);
@@ -188,7 +178,6 @@ static void check_lps2lts_specification(std::string const& specification,
  //          has_tau = has_tau || i->is_tau() ;
  //       }
 
-        core::garbage_collect();
 
         std::cerr << "BCG FORMAT\n";
         BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
@@ -276,6 +265,7 @@ BOOST_AUTO_TEST_CASE(test_abp)
     "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);\n"
   );
   check_lps2lts_specification(abp, 74, 92, 19);
+  check_lps2lts_specification(abp, 74, 92, 19, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_confluence)
@@ -444,7 +434,6 @@ BOOST_AUTO_TEST_CASE(test_well_typedness_of_length_of_list_of_numbers)
   check_lps2lts_specification(spec, 1, 1, 1);
 }
 
-#ifndef MCRL2_SKIP_LONG_TESTS
 #if 0 // This test has been disabled; it was decided not to fix this issue.
 // The following example illustrates that enumeration can sometimes need
 // a large stack depth.
@@ -469,14 +458,58 @@ BOOST_AUTO_TEST_CASE(test_deep_stack)
   check_lps2lts_specification(spec, 3, 524289, 2);
 }
 #endif // false
-#endif // MCRL2_SKIP_LONG_TESTS
+
+
+BOOST_AUTO_TEST_CASE(test_max_states)
+{
+  std::string spec(
+  "act a;\n"
+  "proc P(s: Pos) =\n"
+  "  (s <= 10) -> a . P(s+1);\n"
+  "init P(1);\n");
+
+  lps::specification specification = lps::parse_linear_process_specification(spec);
+
+  lts::lts_generation_options options;
+  options.trace_prefix = "lps2lts_test";
+  options.specification = specification;
+  options.lts = utilities::temporary_filename("lps2lts_test_file");
+  options.max_states = 5;
+
+  lts::lts_aut_t result;
+  options.outformat = result.type();
+  lts::lps2lts_algorithm lps2lts;
+  lps2lts.initialise_lts_generation(&options);
+  lps2lts.generate_lts();
+  lps2lts.finalise_lts_generation();
+  result.load(options.lts);
+  remove(options.lts.c_str()); // Clean up after ourselves
+
+  BOOST_CHECK_LT(result.num_states(), 10);
+}
+
+BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation1)
+{
+  std::string spec(
+    "proc B (i:Bool) = sum i:Bool.tau. B();\n"
+    "init B(true);\n"
+  );
+  check_lps2lts_specification(spec, 1, 2, 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation2)
+{
+  std::string spec(
+    "proc B (i:Bool) = sum i:Bool.tau. B(i=i);\n"
+    "init B(true);\n"
+  );
+  check_lps2lts_specification(spec, 2, 4, 1);
+}
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
  // Initialise random seed to allow parallel running with lps2lts_test_old
-  std::srand(time(NULL) * 13);
   return 0;
 }
 

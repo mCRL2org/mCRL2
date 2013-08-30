@@ -26,7 +26,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
   public:
-    MainWindow(mcrl2::data::rewrite_strategy strategy);
+    MainWindow(mcrl2::data::rewrite_strategy strategy,const bool do_not_use_dummies);
     ~MainWindow();
 
   protected slots:
@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow
     void truncateTrace(int state);
     void selectTransition(int transition);
     void animationStep();
+    void undoLast();
 
     /**
      * @brief Updates the statusbar with the latest log output
@@ -72,6 +73,7 @@ class MainWindow : public QMainWindow
     QTimer *m_animationTimer;
     bool m_randomAnimation;
     bool m_animationDisabled;
+    const bool m_do_not_use_dummies;
 
     mcrl2::utilities::qt::PersistentFileDialog m_fileDialog;
 };

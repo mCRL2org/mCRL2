@@ -14,24 +14,17 @@
 #include <memory>
 #include <utility>
 
-// copied from mcrl2/libraries/aterm/include/mcrl2/aterm/atypes.h
-#if defined(_MSC_VER) || defined(WIN32) || defined(WIN64)
-#if defined(ssize_t)
-#else
-#ifndef HAVE_SSIZE_T
-#if defined(WIN64) ||  defined(_WIN64) ||  defined(__WIN64__)
-/* int64 is not supported by all GCC */
+/* ssize_t is not defined on windows, define it here. */
+#ifdef _MSC_VER
+#if !defined(ssize_t) && !defined(HAVE_SSIZE_T)
+#ifdef _WIN64
 typedef __int64 ssize_t;
 #else
-#ifndef __MINGW32__
-typedef int ssize_t;
-#endif
-#endif
-/* prevent ssize_t redefinitions in other libraries */
+typedef _W64 int ssize_t;
+#endif // _WIN64
 #define HAVE_SSIZE_T
-#endif
-#endif
-#endif
+#endif // !defined(ssize_t) && !defined(HAVE_SSIZE_T)
+#endif // _MSC_VER
 
 // N.B. this class is far from finished!
 

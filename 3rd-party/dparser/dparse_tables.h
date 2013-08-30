@@ -39,7 +39,7 @@ typedef struct D_Reduction {
   int 			op_priority;
   int 			rule_priority;
   int			action_index;
-  int			npass_code;
+  unsigned int		npass_code;
   D_ReductionCode	*pass_code;
 } D_Reduction;
 
@@ -137,7 +137,7 @@ typedef struct D_State {
 typedef struct D_Symbol {
   unsigned int		kind;
   const char	        *name;
-  int			name_len;
+  size_t			name_len;
   int			start_symbol;
 } D_Symbol;
 
@@ -148,7 +148,7 @@ typedef struct D_Symbol {
 #define D_PASS_FOR_UNDEFINED	0x0010
 typedef struct D_Pass {
   char	        *name;
-  unsigned int	name_len;
+  size_t		name_len;
   unsigned int  kind;
   unsigned int	index;
 } D_Pass;

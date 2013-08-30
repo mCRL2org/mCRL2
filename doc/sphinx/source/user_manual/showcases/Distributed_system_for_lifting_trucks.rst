@@ -1,3 +1,5 @@
+.. _showcase:trucklift:
+
 Distributed system for lifting trucks
 =====================================
 
@@ -43,10 +45,8 @@ Two safety, two liveness properties and deadlock freedom were checked.
 
 Publications
 ------------
-.. [GPW03] Analysis of a distributed system for lifting trucks.
-   Jan Friso Groote, Jun Pang, and Arno Wouters.
-   Journal of Logic and Algebraic Programming, 55(1-2): 21-56, 2003.
-   `(DOI) <http://dx.doi.org/10.1016/S1567-8326(02)00038-3>`_
+
+[GPW03]_
 
 Links
 -----

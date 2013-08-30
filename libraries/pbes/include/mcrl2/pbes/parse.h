@@ -23,7 +23,6 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
@@ -86,19 +85,19 @@ struct pbes_actions: public data::data_specification_actions
     return pbes_equation(parse_FixedPointOperator(node.child(0)), parse_PropVarDecl(node.child(1)), parse_PbesExpr(node.child(3)));
   }
 
-  atermpp::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node)
+  std::vector<pbes_equation> parse_PbesEqnDeclList(const core::parse_node& node)
   {
     return parse_vector<pbes_equation>(node, "PbesEqnDecl", boost::bind(&pbes_actions::parse_PbesEqnDecl, this, _1));
   }
 
-  atermpp::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node)
+  std::vector<pbes_equation> parse_PbesEqnSpec(const core::parse_node& node)
   {
     return parse_PbesEqnDeclList(node.child(1));
   }
 
-  pbes_system::pbes<> parse_PbesSpec(const core::parse_node& node)
+  pbes_system::pbes parse_PbesSpec(const core::parse_node& node)
   {
-    return pbes<>(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<atermpp::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
+    return pbes(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<std::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
   }
 };
 
@@ -116,20 +115,20 @@ pbes_expression parse_pbes_expression_new(const std::string& text)
 }
 
 inline
-pbes<> parse_pbes_new(const std::string& text)
+pbes parse_pbes_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  pbes<> result = pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
+  pbes result = pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
   p.destroy_parse_node(node);
   return result;
 }
 
 inline
-void complete_pbes(pbes<>& x)
+void complete_pbes(pbes& x)
 {
   type_check(x);
   pbes_system::translate_user_notation(x);
@@ -138,10 +137,10 @@ void complete_pbes(pbes<>& x)
 }
 
 inline
-pbes<> parse_pbes(std::istream& in)
+pbes parse_pbes(std::istream& in)
 {
   std::string text = utilities::read_text(in);
-  pbes<> result = parse_pbes_new(text);
+  pbes result = parse_pbes_new(text);
   complete_pbes(result);
   return result;
 }
@@ -151,14 +150,14 @@ pbes<> parse_pbes(std::istream& in)
 /// \param result A PBES
 /// \return The input stream
 inline
-std::istream& operator>>(std::istream& from, pbes<>& result)
+std::istream& operator>>(std::istream& from, pbes& result)
 {
   result = parse_pbes(from);
   return from;
 }
 
 inline
-pbes<> parse_pbes(const std::string& text)
+pbes parse_pbes(const std::string& text)
 {
   std::istringstream in(text);
   return parse_pbes(in);
@@ -185,7 +184,7 @@ pbes<> parse_pbes(const std::string& text)
 /// for types like Pos and Nat are generated or not.
 /// \return The parsed expression and the data specification that was used.
 inline
-std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
+std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
 {
   std::string unique_prefix("UNIQUE_PREFIX");
   int unique_prefix_index = 0;
@@ -281,7 +280,7 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
   // add an initialization section to the pbes
   pbesspec = data_spec + (data_spec.empty() ? "" : "\n") + pbesspec + "\ninit dummy1;";
 
-  pbes<> p;
+  pbes p;
   std::stringstream in(pbesspec);
   try
   {
@@ -289,14 +288,14 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
   }
   catch (std::runtime_error e)
   {
-    std::cerr << "parse_pbes_expression: parse error detected in the generated specification\n"
-              << pbesspec
-              << std::endl;
+    mCRL2log(log::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
+                         << pbesspec
+                         << std::endl;
     throw e;
   }
 
-  atermpp::vector<pbes_expression> result;
-  for (pbes<>::container_type::iterator i = p.equations().end() - expressions.size(); i != p.equations().end(); ++i)
+  std::vector<pbes_expression> result;
+  for (auto i = p.equations().end() - expressions.size(); i != p.equations().end(); ++i)
   {
     result.push_back(i->formula());
   }
@@ -331,7 +330,7 @@ pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "
 template <typename SubstitutionFunction>
 void parse_substitutions(std::string text, data::data_specification const& data_spec, SubstitutionFunction& sigma)
 {
-  std::cerr << "SSSSWWW" << text << std::endl;
+  //mCRL2log(log::verbose) << "SSSSWWW" << text << std::endl;
   std::vector<std::string> substitutions = utilities::split(text, ";");
   for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
   {
@@ -353,7 +352,7 @@ void parse_substitutions(std::string text, data::data_specification const& data_
 /// \param sigma A substitution function
 /// \return The parsed expression
 template <typename SubstitutionFunction>
-pbes_expression parse_pbes_expression(std::string expr, std::string subst, const pbes<>& p, SubstitutionFunction& sigma)
+pbes_expression parse_pbes_expression(std::string expr, std::string subst, const pbes& p, SubstitutionFunction& sigma)
 {
   typedef core::term_traits<pbes_expression> tr;
 
@@ -366,8 +365,8 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
     datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + data::pp(v) + ": " + data::pp(v.sort());
   }
 
-  pbes<> q = p;
-  q.initial_state() = tr::true_();
+  pbes q = p;
+  q.initial_state() = core::static_down_cast<const propositional_variable_instantiation&>(tr::true_());
   std::string pbesspec = pbes_system::pp(q);
   std::string init("init");
   // remove the init declaration
@@ -396,9 +395,9 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
   }
   catch (std::runtime_error e)
   {
-    std::cerr << "parse_pbes_expression: parse error detected in the generated specification\n"
-              << pbesspec
-              << std::endl;
+    mCRL2log(log::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
+                         << pbesspec
+                         << std::endl;
     throw e;
   }
 

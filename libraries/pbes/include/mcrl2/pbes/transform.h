@@ -18,14 +18,14 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-template <typename Container>
-void pbes_transform(pbes<Container>& x, unsigned int iterations, bool mu_value = false, bool nu_value = false)
+inline
+void pbes_transform(pbes& x, unsigned int iterations, bool mu_value = false, bool nu_value = false)
 {
   propositional_variable_substitution sigma;
   propositional_variable_substitution sigma_final;
   typedef typename core::term_traits<pbes_expression> tr;
 
-  for (typename Container::iterator i = x.equations().begin(); i != x.equations().end(); ++i)
+  for (auto i = x.equations().begin(); i != x.equations().end(); ++i)
   {
     sigma[i->variable()] = i->formula();
     if (i->symbol().is_mu())
@@ -37,7 +37,7 @@ void pbes_transform(pbes<Container>& x, unsigned int iterations, bool mu_value =
       sigma_final[i->variable()] = nu_value ? tr::true_() : tr::false_();
     }
   }
-  
+
   for (unsigned int i = 0; i < iterations; i++)
   {
     pbes_system::replace_propositional_variables(x, sigma);

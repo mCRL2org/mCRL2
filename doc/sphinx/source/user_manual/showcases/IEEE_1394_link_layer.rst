@@ -1,3 +1,5 @@
+.. _showcase-ieee1394:
+
 IEEE 1394 link layer
 ====================
 
@@ -35,12 +37,5 @@ the documentation.
 Publications
 ------------
 
-.. [Lut97] Description and formal specification of the Link Layer of P1394.
-   S. P. Luttik. In: Ignac Lovrek, editor, Proceedings of the 2nd International
-   Workshop on Applied Formal Methods in System Design, University of Zagreb,
-   Croatia. Also available as [Lut97a]_
-   
-.. [Lut97a] Description and formal specification of the link layer of P1394.
-   Technical report SEN-R9706, CWI, The Netherlands.
-   `(PDF) <http://oai.cwi.nl/oai/asset/4758/04758D.pdf>`_
+[Lut97]_
 

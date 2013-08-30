@@ -10,12 +10,10 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/detail/print_utility.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
@@ -53,10 +51,10 @@ void test_find()
 
   pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1) && Y(m)", VARSPEC);
 
-  //--- find_variables ---//
+  //--- find_all_variables ---//
   data::variable m = nat("m");
   data::variable n = nat("n");
-  std::set<data::variable> v = pbes_system::find_variables(x);
+  std::set<data::variable> v = pbes_system::find_all_variables(x);
   BOOST_CHECK(v.find(m) != v.end());
   BOOST_CHECK(v.find(n) != v.end());
 
@@ -65,7 +63,6 @@ void test_find()
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) != e.end());
 
-  core::garbage_collect();
 }
 
 void test_free_variables()
@@ -86,7 +83,7 @@ void test_free_variables()
   data::variable n = nat("n");
 
   std::set<data::variable> free_variables = pbes_system::find_free_variables(x);
-  std::cout << "free variables: " << core::detail::print_set(free_variables, data::stream_printer()) << std::endl;
+  std::cout << "free variables: " << data::detail::print_set(free_variables) << std::endl;
   BOOST_CHECK(free_variables.find(m) == free_variables.end());
   BOOST_CHECK(free_variables.find(n) != free_variables.end());
 }
@@ -102,35 +99,32 @@ void test_find_free_variables()
     "init X(true, 0);                                                       \n"
     ;
 
-  pbes<> p = txt2pbes(test1);
+  pbes p = txt2pbes(test1);
 
   std::set<data::variable> v = find_free_variables(p);
-  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
+  std::cout << "variables: " << data::detail::print_set(v) << std::endl;
   BOOST_CHECK(v.size() == 0);
 
   v = find_free_variables(p.equations()[0]);
-  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
+  std::cout << "variables: " << data::detail::print_set(v) << std::endl;
   BOOST_CHECK(v.size() == 0);
 
   v = find_free_variables(p.equations()[1]);
-  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
+  std::cout << "variables: " << data::detail::print_set(v) << std::endl;
   BOOST_CHECK(v.size() == 0);
 
   v = find_free_variables(p.equations()[0].formula());
-  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
+  std::cout << "variables: " << data::detail::print_set(v) << std::endl;
   BOOST_CHECK(v.size() == 2);
 
   v = find_free_variables(p.equations()[1].formula());
-  std::cout << "variables: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
+  std::cout << "variables: " << data::detail::print_set(v) << std::endl;
   BOOST_CHECK(v.size() == 2);
 
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_find();
   test_free_variables();
   test_find_free_variables();

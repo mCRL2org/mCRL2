@@ -53,18 +53,13 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include/mcrl2/atermpp/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-
 
 target_link_libraries(mcrl2_${PROJECT_NAME}
   mcrl2_data
   mcrl2_pbes
   mcrl2_utilities
   mcrl2_syntax
-  dparser
 )
 
 target_link_libraries(${PROJECT_NAME}

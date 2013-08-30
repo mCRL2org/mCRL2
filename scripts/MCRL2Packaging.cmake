@@ -59,10 +59,12 @@ set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsvi
 
 # Branding image displayed inside the installer
 # Install icon for NSIS
+# Must be a .bmp file
 if( WIN32 )
   set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
 endif( WIN32 )
-# Install icon for DragNDrop 
+# Install icon for DragNDrop
+# Must be a .icns file 
 if( APPLE ) 
   set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/tools/mcrl2-gui/mcrl2-gui.icns")
 endif( APPLE )
@@ -193,7 +195,7 @@ endif(EXISTS /etc/debian_version )
 if(APPLE)
   set(CPACK_STRIP_FILES FALSE)
  
-  set(CPACK_SET_DESTDIR TRUE)
+  #set(CPACK_SET_DESTDIR TRUE)
   set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
 
   configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)

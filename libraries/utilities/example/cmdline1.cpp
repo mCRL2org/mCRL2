@@ -9,8 +9,6 @@
 /// \file cmdline1.cpp
 /// \brief CLI example
 
-#include "boost.hpp" // precompiled headers
-
 #include <stdexcept>
 #include <iostream>
 #include <string>

@@ -19,9 +19,6 @@
 #include "mcrl2/data/fset.h"
 #include "mcrl2/data/standard.h"
 
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
-
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -92,12 +89,13 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   /* Test 3*/
   data_expression t3d1 = parse_data_expression("forall x: Nat. exists y: Nat. y == x");
   data_expression t3d2 = parse_data_expression("true");
-  BOOST_CHECK(r(t3d1) == r(t3d2));
+  BOOST_CHECK(r(t3d1) == r(t3d2)); 
 
   /* Test 4*/
   data_expression t4d1 = parse_data_expression("exists s: S.( is_s1(s) && is_s2(s) )", specification);
   data_expression t4d2 = parse_data_expression("false");
   BOOST_CHECK(r(t4d1) == r(t4d2));
+ 
 
   /* Test 5*/
   data_expression t5d1 = parse_data_expression("exists s: S.( s == s2 && is_s2(s) )", specification);
@@ -183,10 +181,10 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   "     a, b: A;"
   " eqn PART( [] , func ) = func;"
   "     PART( a |> as , func ) = PART( as, func[ args(a) -> func(args(a)) + {first(a):1}]  );"
-  "     MAC( [] ) = {};"
+  "     MAC( [] ) = {:};"
   "     MAC( ca |> cal ) = {ca:1} + MAC(cal);"
   " "
-  "     COMM( cal, al, lsa ) = COMM( cal, al, lsa,  PART( lsa, lambda x: List(Bool). {} ), MAC(cal) );"
+  "     COMM( cal, al, lsa ) = COMM( cal, al, lsa,  PART( lsa, lambda x: List(Bool). {:} ), MAC(cal) );"
   "     COMM( cal, al, [] , func, m ) = [];"
   "     COMM( cal, al, a |> lsa, func, m ) = if( m <= func(args(a)), "
   "                                                      ELM( cal, al, a |> lsa, args(a) , cal ) , "
@@ -201,7 +199,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
 
   /* Test 17. */
   r = rewriter(spec_1, s);
-  data_expression t17d1 = parse_data_expression("exists x_0: List(A). x_0 == [ac( false, []), ac(true, []), ac(false, [])] && [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) ", spec_1);
+  data_expression t17d1 = parse_data_expression("exists x_0: List(A). x_0 == [ac( false, []), ac(true, []), ac(false, [])] && [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {:}), {false: 2}) ", spec_1);
   data_expression t17d2 = parse_data_expression("true");
   BOOST_CHECK(r(t17d1) == r(t17d2));
 
@@ -210,7 +208,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   */
   data_expression t18d1 = parse_data_expression(
        "exists x_0: List(A). [ac(true, []), ac(true, [])] == "
-       "        COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) &&  "
+       "        COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {:}), {false: 2}) &&  "
        "        x_0 == [ac( false, []), ac(true, []), ac(false, [])]", spec_1);
   data_expression t18d2 = parse_data_expression("true");
   BOOST_CHECK(r(t18d1) == r(t18d2));
@@ -237,14 +235,11 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << data::pp(*strat) << std::endl;
     quantifier_expression_test(*strat);
-    core::garbage_collect();
   }
 
   return EXIT_SUCCESS;

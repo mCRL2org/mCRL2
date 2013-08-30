@@ -12,11 +12,9 @@
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -65,7 +63,6 @@ std::string SPECIFICATION =
 
 void test_remove_unused_summand_variables()
 {
-  core::garbage_collect();
   specification spec = linearise(SPECIFICATION);
   lps::detail::lps_algorithm algorithm(spec);
   algorithm.remove_unused_summand_variables();
@@ -73,8 +70,6 @@ void test_remove_unused_summand_variables()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   test_remove_unused_summand_variables();
 
   return 0;

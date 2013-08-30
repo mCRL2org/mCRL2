@@ -17,7 +17,6 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/rewriter.h"
@@ -51,7 +50,7 @@ struct default_global_variable_solver
     data::data_expression r = R(g, sigma);
     if (is_variable(r))
     {
-      data::variable v = r;
+      const data::variable& v = core::static_down_cast<const data::variable&>(r);
       if (std::find(V.begin(), V.end(), v) != V.end())
       {
         result[v] = e;
@@ -138,16 +137,15 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     {}
 
     /// \brief Runs the constelm algorithm
-    /// \param p A linear process
-    /// \param e An initial value for the linear process p
-    /// \param R A data rewriter
     /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
     /// as a side effect
+    /// \param ignore_conditions If true, the algorithm is allowed to ignore the conditions in the LPS.
     void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
     {
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      data::data_expression_vector e = atermpp::convert<data::data_expression_vector>(m_spec.initial_process().state(m_spec.process().process_parameters()));
+      const data::data_expression_list &vl=m_spec.initial_process().state(m_spec.process().process_parameters());
+      data::data_expression_vector e(vl.begin(),vl.end());
 
       // essential: rewrite the initial state vector e to normal form. Essential
       // because this value is used in W below, and assigned to the right hand side of a substitution, which
@@ -155,7 +153,8 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       lps::rewrite(e, R);
 
       linear_process& p = m_spec.process();
-      data::variable_list V = atermpp::convert<data::variable_list>(m_spec.global_variables());
+      const std::set<data::variable>&global_vars=m_spec.global_variables();
+      data::variable_list V(global_vars.begin(),global_vars.end());
       const data::variable_list& d = p.process_parameters();
 
       // initialize m_index_of
@@ -208,7 +207,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                 {
                   for (data::mutable_map_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
                   {
-                    sigma[w->first] = w->second; 
+                    sigma[w->first] = w->second;
                     undo[d_j].insert(w->first);
                   }
                 }

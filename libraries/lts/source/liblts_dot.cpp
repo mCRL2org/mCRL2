@@ -74,11 +74,15 @@ void lts_dot_t::save(const string& filename) const
   if (!os.is_open())
   {
     throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
-    return;
   }
+  save(os);
+  os.close();
+}
 
+void lts_dot_t::save(std::ostream& os) const
+{
   // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
-  os << "digraph \"" << filename << "\" {" << endl;
+  os << "digraph G {" << endl;
   // os << "size=\"7,10.5\";" << endl;
   os << "center = TRUE;" << endl;
   os << "mclimit = 10.0;" << endl;
@@ -100,7 +104,11 @@ void lts_dot_t::save(const string& filename) const
     {
       if (has_state_info())
       {
-        os << state_label(i).name() << " [ label=\"" << state_label(i).label() << "\" ];" << endl;
+        const std::string& label = state_label(i).label();
+        if (!label.empty())
+        {
+          os << state_label(i).name() << " [label=\"" << label << "\"];" << endl;
+        }
       }
       else
       {
@@ -124,7 +132,6 @@ void lts_dot_t::save(const string& filename) const
   }
 
   os << "}" << endl;
-  os.close();
 }
 
 }

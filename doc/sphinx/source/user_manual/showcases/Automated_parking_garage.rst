@@ -1,3 +1,5 @@
+.. _showcase-garage:
+
 Automated parking garage
 ========================
 
@@ -62,11 +64,5 @@ Technical details
 Publications
 ------------
 
-.. [MP05] A. Mathijssen. Specification, Analysis and Verification of an Automated Parking Garage.
-   CS-Report 05-25, Technische Universiteit Eindhoven (2005).
-   `(PDF) <http://alexandria.tue.nl/extra1/wskrap/publichtml/200525.pdf>`_
-   
-.. [MP07] A. Mathijssen, A. J. Pretorius. Verified Design of an Automated
-   Parking Garage. Proc. FMICS and PDMC 2006. LNCS 4346 (2007), pp 165-180.
-   `(DOI) <http://dx.doi.org/10.1007/978-3-540-70952-7_11>`_
+[MP07]_
 

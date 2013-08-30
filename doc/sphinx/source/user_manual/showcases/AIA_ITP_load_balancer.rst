@@ -1,3 +1,5 @@
+.. _showcase-load-balancer:
+
 AIA ITP load-balancer
 =====================
 
@@ -58,14 +60,5 @@ layers were modeled in an abstract way.
 Publications
 ------------
 
-.. [EHSU07a] M. van Eekelen, S. ten Hoedt, R. Schreurs, and Y.S. Usenko.
-   "Modeling and verifying a Real-Life Industrial Session-Layer Protocol in mCRL2."
-   Technical report: +ICIS-R07014, June, Radboud University Nijmegen, 2007.
-   `(PDF) <http://repository.ubn.ru.nl/bitstream/2066/34449/1/34449.pdf>`_
-   
-.. [EHSU07b] M. van Eekelen, S. ten Hoedt, R. Schreurs, Y.S. Usenko,
-   "Analysis of a Session-Layer Protocol in mCRL2. Verification of a Real-Life Industrial Implementation."
-   Proc. 12th FMICS 2007. 1-2 July. Berlin. LNCS 4916.
-   `(DOI) <http://dx.doi.org/10.1007/978-3-540-79707-4_15>`_
-   Also appeared as a Radboud University Nijmegen Technical Report [EHSU07a]_.
+[EHSU07]_
 

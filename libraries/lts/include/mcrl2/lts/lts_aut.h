@@ -30,7 +30,7 @@ namespace mcrl2
 namespace lts
 {
 /** \brief A simple labelled transition format with only strings as action labels.
- *  \detail This lts format corresponds to the Ceasar/Aldebaran labelled transition
+ *  \details This lts format corresponds to the Ceasar/Aldebaran labelled transition
  *  system format. There are no state labels, only transition labels which are plain
  *  strings.
  */

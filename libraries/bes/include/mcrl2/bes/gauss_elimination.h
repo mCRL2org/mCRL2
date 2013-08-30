@@ -12,7 +12,7 @@
 #ifndef MCRL2_BES_GAUSS_ELIMINATION_H
 #define MCRL2_BES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/boolean_expression_rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
@@ -41,7 +41,8 @@ struct bes_traits
     static inline
     expression_type substitute(const expression_type& t, const variable_type& X, const expression_type& phi)
     {
-      return bes::replace_boolean_variables(t, boolean_variable_substitution(X, phi));
+      expression_type result=bes::replace_boolean_variables(t, boolean_variable_substitution(X, phi));
+      return result;
     }
 
     /// \brief Returns the value true
@@ -105,8 +106,7 @@ struct boolean_equation_solver
   /// \brief Solves the equation e
   void operator()(boolean_equation& e)
   {
-    e.formula() = bes_traits::substitute(e.formula(), e.variable(), sigma(e));
-    e.formula() = m_rewriter(e.formula());
+    e.formula() = m_rewriter(bes_traits::substitute(e.formula(), e.variable(), sigma(e)));
   }
 };
 
@@ -120,10 +120,10 @@ boolean_equation_solver<Rewriter> make_boolean_equation_solver(const Rewriter& r
 /// \brief Solves a boolean equation system using Gauss elimination.
 /// \param p A bes
 /// \return The solution of the system
-template <typename Container>
-bool gauss_elimination(boolean_equation_system<Container>& p)
+inline
+bool gauss_elimination(boolean_equation_system& p)
 {
-  typedef typename core::term_traits<boolean_expression> tr;
+  typedef core::term_traits<boolean_expression> tr;
   typedef pbes_system::boolean_expression_rewriter<boolean_expression> bes_rewriter;
 
   pbes_system::gauss_elimination_algorithm<bes_traits> algorithm;

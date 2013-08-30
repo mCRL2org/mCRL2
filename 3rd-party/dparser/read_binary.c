@@ -37,9 +37,9 @@ read_binary_tables_internal(FILE *fp, unsigned char *str,
     if (*intptr == -1) {
       *ptr = (void*)0;
     } else if (*intptr == -2) {
-      *ptr = (void*)spec_code;
+      *(D_ReductionCode*)ptr = spec_code;
     } else if (*intptr == -3) {
-      *ptr = (void*)final_code;
+      *(D_ReductionCode*)ptr = final_code;
     } else {
       *ptr = (void*)((uintptr_t)*ptr + (intptr_t)tables_buf);
     }

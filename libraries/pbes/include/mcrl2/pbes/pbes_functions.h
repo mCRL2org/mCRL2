@@ -19,7 +19,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \cond INTERNAL_DOCS
 /// \brief Visitor for printing the root node of a PBES.
 struct print_brief_traverser: public pbes_expression_traverser<print_brief_traverser>
 {
@@ -68,7 +67,6 @@ struct print_brief_traverser: public pbes_expression_traverser<print_brief_trave
     result = "equation " + std::string(x.variable().name());
   }
 };
-/// \endcond
 
 /// \brief Returns a string representation of the root node of a PBES.
 /// \param x a PBES object
@@ -142,20 +140,24 @@ namespace pbes_expr {
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
 /// function symbol.
 /// \param expr A PBES expression
+/// \param split_simple_expressions if true, pbes disjuncts are split, even if
+///        no proposition variables occur. If false, pbes disjuncts are only split
+///        if a proposition variable occurs somewhere in \a expr.
+/// \note This never splits data disjuncts.
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool split_simple_expr = false)
+std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool split_simple_expr = false)
 {
   using namespace accessors;
-  atermpp::vector<pbes_expression> result;
+  std::vector<pbes_expression> result;
 
   if (split_simple_expr)
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_or, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_or, left, right);
   }
   else
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_non_simple_disjunct, left, right);
   }
 
   return result;
@@ -166,20 +168,24 @@ atermpp::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bo
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
 /// function symbol.
 /// \param expr A PBES expression
+/// \param split_simple_expressions if true, pbes conjuncts are split, even if
+///        no proposition variables occur. If false, pbes conjuncts are only split
+///        if a proposition variable occurs somewhere in \a expr.
+/// \note This never splits data conjuncts.
 /// \return A sequence of operands
 inline
-atermpp::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool split_simple_expr = false)
+std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool split_simple_expr = false)
 {
   using namespace accessors;
-  atermpp::vector<pbes_expression> result;
+  std::vector<pbes_expression> result;
 
   if (split_simple_expr)
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_and, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_and, left, right);
   }
   else
   {
-    utilities::detail::split(expr, std::back_insert_iterator<atermpp::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
+    utilities::detail::split(expr, std::back_insert_iterator<std::vector<pbes_expression> >(result), is_non_simple_conjunct, left, right);
   }
 
   return result;

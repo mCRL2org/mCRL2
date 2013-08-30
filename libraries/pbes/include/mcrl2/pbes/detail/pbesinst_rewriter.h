@@ -13,7 +13,6 @@
 #define MCRL2_PBES_DETAIL_PBESINST_REWRITER_H
 
 #include <iostream>
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
@@ -31,7 +30,7 @@ namespace detail
 {
 
 /// \brief The substitution function used by the pbesinst rewriter.
-typedef data::mutable_map_substitution<atermpp::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
+typedef data::mutable_map_substitution<std::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
 
 /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// As a side effect propositional variable instantiations are being renamed
@@ -89,7 +88,7 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
         // }
         else
         {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + del_i->to_string());
+          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + to_string(*del_i));
         }
       }
     }
@@ -105,7 +104,8 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
   term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbesinst_substitution_function& sigma)
   {
     term_type y = super::visit_propositional_variable(x, v, sigma);
-    term_type result = term_type(rename(y), y.variables(), atermpp::make_list(atermpp::aterm_appl(y)));
+    term_type result = term_type(rename(y), y.variables(), 
+                                 atermpp::aterm_cast<propositional_variable_instantiation_list>(atermpp::make_list(atermpp::aterm_appl(y))));
     return result;
   }
 };
@@ -115,7 +115,6 @@ class pbesinst_rewriter
 {
   public:
     typedef pbes_expression_with_propositional_variables term_type;
-    typedef data::data_enumerator<utilities::number_postfix_generator> pbesinst_enumerator;
     typedef data::data_expression_with_variables data_term_type;
     typedef data::variable variable_type;
 
@@ -127,8 +126,7 @@ class pbesinst_rewriter
       :
       datar(data_spec, rewriter_strategy),
       datarv(data_spec),
-      name_generator("UNIQUE_PREFIX"),
-      datae(data_spec, datar, name_generator),
+      datae(data_spec, datar),
       m_print_rewriter_output(print_rewriter_output)
     {}
 
@@ -138,11 +136,11 @@ class pbesinst_rewriter
     term_type operator()(const term_type& x)
     {
       pbesinst_substitution_function sigma;
-      pbesinst_rewrite_builder<data::rewriter_with_variables, pbesinst_enumerator> r(datarv, datae);
+      pbesinst_rewrite_builder<data::rewriter_with_variables, data::data_enumerator> r(datarv, datae);
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << pbes_system::pp(x) << " [default]-> " << pbes_system::pp(result) << std::endl;
+        mCRL2log(log::info) << pbes_system::pp(x) << " [default]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }
@@ -153,11 +151,11 @@ class pbesinst_rewriter
     /// \return The rewrite result.
     term_type operator()(const term_type& x, pbesinst_substitution_function& sigma)
     {
-      pbesinst_rewrite_builder<data::rewriter_with_variables, pbesinst_enumerator> r(datarv, datae);
+      pbesinst_rewrite_builder<data::rewriter_with_variables, data::data_enumerator> r(datarv, datae);
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << pbes_system::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << pbes_system::pp(result) << std::endl;
+        mCRL2log(log::info) << pbes_system::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }
@@ -177,15 +175,14 @@ class pbesinst_rewriter
     /// \return A name that uniquely corresponds to the propositional variable.
     term_type rename(const term_type& v)
     {
-      pbesinst_rewrite_builder<data::rewriter_with_variables, pbesinst_enumerator> r(datarv, datae);
+      pbesinst_rewrite_builder<data::rewriter_with_variables, data::data_enumerator> r(datarv, datae);
       return r.rename(v);
     }
 
   protected:
     data::rewriter datar;
     data::rewriter_with_variables datarv;
-    utilities::number_postfix_generator name_generator;
-    pbesinst_enumerator datae;
+    data::data_enumerator datae;
     bool m_print_rewriter_output;
 };
 

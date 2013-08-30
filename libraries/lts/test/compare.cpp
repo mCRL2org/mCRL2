@@ -9,7 +9,6 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/test_utilities.h"
 
-#include <mcrl2/atermpp/aterm_init.h>
 #include <mcrl2/lts/lts_algorithm.h>
 #include <mcrl2/lts/lts_aut.h>
 
@@ -112,7 +111,5 @@ BOOST_AUTO_TEST_CASE(test_bisim_a_b)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }

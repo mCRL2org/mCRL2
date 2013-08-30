@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_PARSE_H
 #define MCRL2_PROCESS_PARSE_H
 
-//#define MCRL2_NEW_ALPHABET_REDUCE
+#define MCRL2_NEW_ALPHABET_REDUCE
 
 #include <iostream>
 #include <string>
@@ -64,7 +64,8 @@ struct process_actions: public lps::action_actions
   {
     core::identifier_string id = parse_Id(node.child(0));
     core::identifier_string_list ids = parse_IdList(node.child(2));
-    action_name_multiset lhs(atermpp::push_front(ids, id));
+    ids.push_front(id);
+    action_name_multiset lhs(ids);
     core::identifier_string rhs = parse_Id(node.child(4));
     return process::communication_expression(lhs, rhs);
   }
@@ -109,11 +110,16 @@ struct process_actions: public lps::action_actions
     return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 2) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "IfThen");
   }
 
-  // TODO: get rid of the gsMakeIdAssignment call
+  // override
+  untyped_parameter_identifier parse_Action(const core::parse_node& node)
+  {
+    return untyped_parameter_identifier(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+  }
+
   process::process_expression parse_ProcExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return atermpp::aterm_appl(core::detail::gsMakeIdAssignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
@@ -136,11 +142,10 @@ struct process_actions: public lps::action_actions
     return process::process_expression();
   }
 
-  // TODO: get rid of the gsMakeIdAssignment call
   process::process_expression parse_ProcExprNoIf(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return atermpp::aterm_appl(core::detail::gsMakeIdAssignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
@@ -166,16 +171,16 @@ struct process_actions: public lps::action_actions
   {
     core::identifier_string name = parse_Id(node.child(0));
     data::variable_list variables = parse_VarsDeclList(node.child(1));
-    process_identifier id(name, get_sorts(variables));
+    process_identifier id(name, variables);
     return process::process_equation(id, variables, parse_ProcExpr(node.child(3)));
   }
 
-  atermpp::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node)
+  std::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node)
   {
     return parse_vector<process::process_equation>(node, "ProcDecl", boost::bind(&process_actions::parse_ProcDecl, this, _1));
   }
 
-  atermpp::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node)
+  std::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node)
   {
     return parse_ProcDeclList(node.child(1));
   }
@@ -206,7 +211,7 @@ struct process_actions: public lps::action_actions
     else if (symbol_name(node) == "GlobVarSpec")
     {
       data::variable_list variables = parse_GlobVarSpec(node);
-      result.global_variables() = atermpp::set<data::variable>(variables.begin(), variables.end());
+      result.global_variables() = std::set<data::variable>(variables.begin(), variables.end());
       return true;
     }
     else if (symbol_name(node) == "ActSpec")
@@ -216,7 +221,7 @@ struct process_actions: public lps::action_actions
     }
     else if (symbol_name(node) == "ProcSpec")
     {
-      atermpp::vector<process::process_equation> eqn = parse_ProcSpec(node);
+      std::vector<process::process_equation> eqn = parse_ProcSpec(node);
       result.equations().insert(result.equations().end(), eqn.begin(), eqn.end());
       return true;
     }
@@ -323,7 +328,7 @@ process_expression parse_process_expression(const std::string& text,
 
 /// \brief Parses and type checks a process expression.
 /// \param[in] text The input text containing a process expression.
-/// \param[in] procspec A process specification used as context
+/// \param[in] procspec_text A textual version of a process specification used as context
 inline
 process_expression parse_process_expression(const std::string& text, const std::string& procspec_text)
 {

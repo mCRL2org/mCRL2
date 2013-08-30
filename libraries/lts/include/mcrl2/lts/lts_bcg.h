@@ -30,7 +30,7 @@ namespace lts
 {
 /** \brief This class contains labelled transition systemis corresponding to the BCG labelled transition system format
           used in the Ceasar/Aldebaran toolset developed at INRIA in Grenoble.
-   \detail In this lts format there are no state labels, and action labels are strings.
+   \details In this lts format there are no state labels, and action labels are strings.
 */
 class lts_bcg_t : public lts< detail::state_label_empty, detail::action_label_string >
 {

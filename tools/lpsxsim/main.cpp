@@ -6,8 +6,27 @@
 using namespace mcrl2::utilities;
 
 typedef qt::qt_tool<tools::rewriter_tool<tools::input_tool> > lpsxsim_base;
+
 class lpsxsim_tool : public lpsxsim_base
 {
+   
+  protected:
+
+    bool m_do_not_use_dummies;
+
+    void add_options(interface_description& desc)
+    {
+      lpsxsim_base::add_options(desc);
+      desc.add_option("nodummy", "do not replace global variables in the LPS with dummy values", 'y');
+    }
+
+    void parse_options(const command_line_parser& parser)
+    {
+      lpsxsim_base::parse_options(parser);
+      m_do_not_use_dummies = 0 < parser.options.count("nodummy");
+    }
+
+
   public:
     lpsxsim_tool():
       lpsxsim_base("LpsXSim",
@@ -22,7 +41,7 @@ class lpsxsim_tool : public lpsxsim_base
     {
       qRegisterMetaType<QSemaphore *>("QSemaphore *");
 
-      MainWindow *window = new MainWindow(rewrite_strategy());
+      MainWindow *window = new MainWindow(rewrite_strategy(),m_do_not_use_dummies);
 
       if (!m_input_filename.empty())
       {

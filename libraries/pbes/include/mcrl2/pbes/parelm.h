@@ -23,9 +23,9 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/remove_parameters.h"
 
 namespace mcrl2
 {
@@ -87,12 +87,12 @@ class pbes_parelm_algorithm
     template <typename Container>
     void print_container(const Container& v, std::string message = "<variables>") const
     {
-      std::cerr << message << std::endl;
-      for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+      mCRL2log(log::info) << message << std::endl;
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
-        std::cerr << *i << " ";
+        mCRL2log(log::info) << *i << " ";
       }
-      std::cerr << std::endl;
+      mCRL2log(log::info) << std::endl;
     }
 
     /// \brief Prints a map to standard error
@@ -101,12 +101,12 @@ class pbes_parelm_algorithm
     template <typename Container>
     void print_map(const Container& v, std::string message = "<variables>") const
     {
-      std::cerr << message << std::endl;
-      for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+      mCRL2log(log::info) << message << std::endl;
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
-        std::cerr << i->first << " -> " << i->second << std::endl;
+        mCRL2log(log::info) << i->first << " -> " << i->second << std::endl;
       }
-      std::cerr << std::endl;
+      mCRL2log(log::info) << std::endl;
     }
 
     /// \endcond
@@ -117,11 +117,10 @@ class pbes_parelm_algorithm
     /// \param p A pbes
     /// \param index A positive number
     /// \return The name of the predicate variable that corresponds with \p index
-    template <typename Container>
-    core::identifier_string find_predicate_variable(const pbes<Container>& p, size_t index) const
+    core::identifier_string find_predicate_variable(const pbes& p, size_t index) const
     {
       size_t offset = 0;
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         size_t size = i->variable().parameters().size();
         if (offset + size > index)
@@ -137,8 +136,7 @@ class pbes_parelm_algorithm
 
     /// \brief Runs the parelm algorithm. The pbes \p is modified by the algorithm
     /// \param p A pbes
-    template <typename Container>
-    void run(pbes<Container>& p) const
+    void run(pbes& p) const
     {
       data::variable_list fvars(p.global_variables().begin(), p.global_variables().end());
       std::vector<data::variable> predicate_variables;
@@ -146,7 +144,7 @@ class pbes_parelm_algorithm
       // compute a mapping from propositional variable names to offsets
       size_t offset = 0;
       std::map<core::identifier_string, size_t> propvar_offsets;
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         propvar_offsets[i->variable().name()] = offset;
         offset += i->variable().parameters().size();
@@ -157,7 +155,7 @@ class pbes_parelm_algorithm
       // compute the initial set v of significant variables
       std::set<size_t> v;
       offset = 0;
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         std::set<data::variable> uvars = unbound_variables(i->formula(), fvars);
         for (std::set<data::variable>::iterator j = uvars.begin(); j != uvars.end(); ++j)
@@ -165,7 +163,7 @@ class pbes_parelm_algorithm
           int k = variable_index(i->variable().parameters(), *j);
           if (k < 0)
           {
-            std::cerr << "<variable error>" << data::pp(*j) << std::endl;
+            mCRL2log(log::error) << "<variable error>" << data::pp(*j) << std::endl;
             continue;
           }
           v.insert(offset + k);
@@ -175,7 +173,7 @@ class pbes_parelm_algorithm
 
       // compute the dependency graph G
       graph G(N);
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         // left hand side (X)
         core::identifier_string X = i->variable().name();
@@ -191,7 +189,7 @@ class pbes_parelm_algorithm
           int Yindex = 0;
           for (data::data_expression_list::iterator y = Yparams.begin(); y != Yparams.end(); ++y)
           {
-            std::set<data::variable> vars = data::find_variables(*y);
+            std::set<data::variable> vars = data::find_all_variables(*y);
             for (std::set<data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
             {
               int Xindex = variable_index(Xparams, *k);
@@ -219,7 +217,7 @@ class pbes_parelm_algorithm
       std::map<core::identifier_string, std::vector<size_t> > removals;
       size_t index = 0;
       std::vector<size_t>::iterator sfirst = s.begin();
-      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         size_t maxindex = index + i->variable().parameters().size();
         std::vector<size_t>::iterator slast = std::find_if(sfirst, s.end(), boost::bind(std::greater_equal<size_t>(), _1, maxindex));
@@ -244,7 +242,7 @@ class pbes_parelm_algorithm
           mCRL2log(log::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
         }
         mCRL2log(log::debug) << "\ndependencies:" << std::endl;
-        typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
+        typedef boost::graph_traits<graph>::edge_iterator edge_iterator;
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
         edge_iterator last  = e.second;
@@ -280,7 +278,7 @@ class pbes_parelm_algorithm
       }
 
       // remove the parameters
-      remove_parameters(p, removals);
+      pbes_system::algorithms::remove_parameters(p, removals);
     }
 };
 

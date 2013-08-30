@@ -66,7 +66,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("[]"));
+        static core::identifier_string empty_name = core::identifier_string("[]");
         return empty_name;
       }
 
@@ -99,7 +99,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cons_name()
       {
-        static core::identifier_string cons_name = core::detail::initialise_static_expression(cons_name, core::identifier_string("|>"));
+        static core::identifier_string cons_name = core::identifier_string("|>");
         return cons_name;
       }
 
@@ -135,7 +135,7 @@ namespace mcrl2 {
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return cons_(s)(arg0, arg1);
+        return sort_list::cons_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of |>
@@ -159,8 +159,8 @@ namespace mcrl2 {
       function_symbol_vector list_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(empty(s));
-        result.push_back(cons_(s));
+        result.push_back(sort_list::empty(s));
+        result.push_back(sort_list::cons_(s));
 
         return result;
       }
@@ -169,7 +169,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("in"));
+        static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
       }
 
@@ -205,7 +205,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_list::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -227,7 +227,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& count_name()
       {
-        static core::identifier_string count_name = core::detail::initialise_static_expression(count_name, core::identifier_string("#"));
+        static core::identifier_string count_name = core::identifier_string("#");
         return count_name;
       }
 
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
-        return count(s)(arg0);
+        return sort_list::count(s)(arg0);
       }
 
       /// \brief Recogniser for application of #
@@ -284,7 +284,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& snoc_name()
       {
-        static core::identifier_string snoc_name = core::detail::initialise_static_expression(snoc_name, core::identifier_string("<|"));
+        static core::identifier_string snoc_name = core::identifier_string("<|");
         return snoc_name;
       }
 
@@ -320,7 +320,7 @@ namespace mcrl2 {
       inline
       application snoc(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return snoc(s)(arg0, arg1);
+        return sort_list::snoc(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of <|
@@ -342,7 +342,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& concat_name()
       {
-        static core::identifier_string concat_name = core::detail::initialise_static_expression(concat_name, core::identifier_string("++"));
+        static core::identifier_string concat_name = core::identifier_string("++");
         return concat_name;
       }
 
@@ -378,7 +378,7 @@ namespace mcrl2 {
       inline
       application concat(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return concat(s)(arg0, arg1);
+        return sort_list::concat(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of ++
@@ -400,7 +400,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& element_at_name()
       {
-        static core::identifier_string element_at_name = core::detail::initialise_static_expression(element_at_name, core::identifier_string("."));
+        static core::identifier_string element_at_name = core::identifier_string(".");
         return element_at_name;
       }
 
@@ -436,7 +436,7 @@ namespace mcrl2 {
       inline
       application element_at(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return element_at(s)(arg0, arg1);
+        return sort_list::element_at(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of .
@@ -458,7 +458,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& head_name()
       {
-        static core::identifier_string head_name = core::detail::initialise_static_expression(head_name, core::identifier_string("head"));
+        static core::identifier_string head_name = core::identifier_string("head");
         return head_name;
       }
 
@@ -493,7 +493,7 @@ namespace mcrl2 {
       inline
       application head(const sort_expression& s, const data_expression& arg0)
       {
-        return head(s)(arg0);
+        return sort_list::head(s)(arg0);
       }
 
       /// \brief Recogniser for application of head
@@ -515,7 +515,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& tail_name()
       {
-        static core::identifier_string tail_name = core::detail::initialise_static_expression(tail_name, core::identifier_string("tail"));
+        static core::identifier_string tail_name = core::identifier_string("tail");
         return tail_name;
       }
 
@@ -550,7 +550,7 @@ namespace mcrl2 {
       inline
       application tail(const sort_expression& s, const data_expression& arg0)
       {
-        return tail(s)(arg0);
+        return sort_list::tail(s)(arg0);
       }
 
       /// \brief Recogniser for application of tail
@@ -572,7 +572,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& rhead_name()
       {
-        static core::identifier_string rhead_name = core::detail::initialise_static_expression(rhead_name, core::identifier_string("rhead"));
+        static core::identifier_string rhead_name = core::identifier_string("rhead");
         return rhead_name;
       }
 
@@ -607,7 +607,7 @@ namespace mcrl2 {
       inline
       application rhead(const sort_expression& s, const data_expression& arg0)
       {
-        return rhead(s)(arg0);
+        return sort_list::rhead(s)(arg0);
       }
 
       /// \brief Recogniser for application of rhead
@@ -629,7 +629,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& rtail_name()
       {
-        static core::identifier_string rtail_name = core::detail::initialise_static_expression(rtail_name, core::identifier_string("rtail"));
+        static core::identifier_string rtail_name = core::identifier_string("rtail");
         return rtail_name;
       }
 
@@ -664,7 +664,7 @@ namespace mcrl2 {
       inline
       application rtail(const sort_expression& s, const data_expression& arg0)
       {
-        return rtail(s)(arg0);
+        return sort_list::rtail(s)(arg0);
       }
 
       /// \brief Recogniser for application of rtail
@@ -688,15 +688,15 @@ namespace mcrl2 {
       function_symbol_vector list_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(in(s));
-        result.push_back(count(s));
-        result.push_back(snoc(s));
-        result.push_back(concat(s));
-        result.push_back(element_at(s));
-        result.push_back(head(s));
-        result.push_back(tail(s));
-        result.push_back(rhead(s));
-        result.push_back(rtail(s));
+        result.push_back(sort_list::in(s));
+        result.push_back(sort_list::count(s));
+        result.push_back(sort_list::snoc(s));
+        result.push_back(sort_list::concat(s));
+        result.push_back(sort_list::element_at(s));
+        result.push_back(sort_list::head(s));
+        result.push_back(sort_list::tail(s));
+        result.push_back(sort_list::rhead(s));
+        result.push_back(sort_list::rtail(s));
         return result;
       }
       ///\brief Function for projecting out argument
@@ -708,7 +708,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -720,7 +720,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_count_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -732,7 +732,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_cons_application(e) || is_in_application(e) || is_snoc_application(e) || is_concat_application(e) || is_element_at_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for list

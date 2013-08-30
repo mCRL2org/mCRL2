@@ -21,6 +21,12 @@ class Primitive
   public:
     virtual ~Primitive() {}
     virtual void draw() = 0;
+
+    /// Reshape the primitive
+    /// \param[in] N The quality of the shape.
+    /// \param coss
+    /// \param sins
+    /// \pre N > 0
     virtual void reshape(int N,float* coss,float* sins) = 0;
 };
 

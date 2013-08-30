@@ -36,10 +36,10 @@ class action: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    action(const atermpp::aterm_appl& term)
+    explicit action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_Action(m_term));
+      assert(core::detail::check_term_Action(*this));
     }
 
     /// \brief Constructor.
@@ -47,14 +47,14 @@ class action: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments))
     {}
 
-    action_label label() const
+    const action_label& label() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const action_label>(atermpp::arg1(*this));
     }
 
-    data::data_expression_list arguments() const
+    const data::data_expression_list& arguments() const
     {
-      return atermpp::list_arg2(*this);
+      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
     }
 };
 
@@ -62,16 +62,16 @@ class action: public atermpp::aterm_appl
 typedef atermpp::term_list<action> action_list;
 
 /// \brief vector of actions
-typedef atermpp::vector<action>    action_vector;
+typedef std::vector<action>    action_vector;
 
 
 /// \brief Test for a action expression
-/// \param t A term
-/// \return True if it is a action expression
+/// \param x A term
+/// \return True if \a x is a action expression
 inline
-bool is_action(const atermpp::aterm_appl& t)
+bool is_action(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsAction(t);
+  return core::detail::gsIsAction(x);
 }
 
 //--- end generated class action ---//
@@ -82,6 +82,7 @@ std::string pp(const action_list& x);
 std::string pp(const action_vector& x);
 action normalize_sorts(const action& x, const data::data_specification& dataspec);
 lps::action translate_user_notation(const lps::action& x);
+std::set<data::variable> find_all_variables(const lps::action& x);
 std::set<data::variable> find_free_variables(const lps::action& x);
 
 /// \brief Compares the signatures of two actions
@@ -111,5 +112,15 @@ bool equal_signatures(const action& a, const action& b)
 } // namespace lps
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::lps::action& t1, mcrl2::lps::action& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_LPS_ACTION_H

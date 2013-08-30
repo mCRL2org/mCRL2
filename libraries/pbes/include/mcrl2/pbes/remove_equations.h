@@ -14,7 +14,6 @@
 
 #include <map>
 #include <set>
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
@@ -24,11 +23,11 @@ namespace pbes_system {
 namespace detail {
 
 inline
-std::string print_removed_equations(const atermpp::vector<propositional_variable>& removed)
+std::string print_removed_equations(const std::vector<propositional_variable>& removed)
 {
   std::ostringstream out;
   out << "\nremoved the following equations:" << std::endl;
-  for (atermpp::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
+  for (std::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
   {
     out << "  " << pbes_system::pp(*i) << std::endl;
   }
@@ -37,16 +36,19 @@ std::string print_removed_equations(const atermpp::vector<propositional_variable
 
 } // namespace detail
 
-template <typename Container>
-std::set<propositional_variable> reachable_variables(const pbes<Container>& p)
+inline
+std::set<propositional_variable> reachable_variables(const pbes& p)
 {
-  typedef typename Container::const_iterator iterator;
+  typedef std::vector<pbes_equation>::const_iterator iterator;
 
   // create a mapping from variable names to iterators
   std::map<core::identifier_string, iterator> index;
   for (iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
-    index[i->variable().name()] = i;
+    // index[i->variable().name()] = i;  <-- This leads to a attempt to copy-
+    //                                       construct an iterator from a singular iterator when the toolset
+    //                                       is compiled in maintainer mode.
+    index.insert(std::pair<core::identifier_string, iterator>(i->variable().name(),i));
   }
 
   std::set<core::identifier_string> visited;
@@ -78,14 +80,14 @@ std::set<propositional_variable> reachable_variables(const pbes<Container>& p)
 
 /// \brief Removes equations that are not (syntactically) reachable from the initial state of a PBES.
 /// \return The removed variables
-template <typename Container>
-atermpp::vector<propositional_variable> remove_unreachable_variables(pbes<Container>& p)
+inline
+std::vector<propositional_variable> remove_unreachable_variables(pbes& p)
 {
-  atermpp::vector<propositional_variable> result;
+  std::vector<propositional_variable> result;
 
   std::set<propositional_variable> V = reachable_variables(p);
-  Container eqn;
-  for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  std::vector<pbes_equation> eqn;
+  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     if (V.find(i->variable()) != V.end())
     {

@@ -12,10 +12,11 @@
 #ifndef MCRL2_LPS_TYPECHECK_H
 #define MCRL2_LPS_TYPECHECK_H
 
-#include "mcrl2/core/detail/struct_core.h"  // gsMakeMultAct
-#include "mcrl2/core/detail/pp_deprecated.h"
-#include "mcrl2/core/typecheck.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/action_rename.h"
+#include "mcrl2/lps/untyped_action.h"
+#include "mcrl2/lps/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -23,60 +24,80 @@ namespace mcrl2
 namespace lps
 {
 
-/** \brief     Type check a multi action
- *  Throws an exception if something went wrong.
- *  \param[in] mult_act A multi action that has not been type checked.
- *  \post      mult_action is type checked and sorts have been added when necessary.
- **/
-inline
-void type_check(
-  multi_action& mult_act,
-  const data::data_specification& data_spec,
-  const action_label_list& action_decls)
+
+class action_type_checker:public data::data_type_checker
 {
-  // TODO: replace all this nonsense code by a proper type check implementation
-  ATermAppl t = core::type_check_mult_act(
-                  core::detail::gsMakeMultAct(mult_act.actions()),
-                  data::detail::data_specification_to_aterm_data_spec(data_spec),
-                  (ATermList)action_decls);
-  if (!t)
-  {
-    throw mcrl2::runtime_error("could not type check multi action " + core::pp_deprecated(lps::detail::multi_action_to_aterm(mult_act)));
-  }
-  mult_act = multi_action(t);
-}
+  protected:
+    std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
+
+  public:
+    /** \brief     make an action type checker.
+    *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
+    *  \param[in] data_spec A data specification that does not need to have been type checked.
+    *  \param[in] action_decls A list of action declarations
+    *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+    **/
+    action_type_checker(const data::data_specification &data_spec, const action_label_list& action_decls);
+
+    /** \brief     Type check a multi action.
+    *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+    *  \param[in] ma A multi action that has not been type checked.
+    *  \return    a multi action where all untyped identifiers have been replace by typed ones.
+    **/
+    multi_action operator()(const untyped_multi_action &ma);
+
+    /** \brief     Type check a action_rename_specification;
+    *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+    *  \param[in] ars An action rename specification that has not been type checked.
+    *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
+    **/
+    action_rename_specification operator()(const action_rename_specification &ars);
+
+  protected:
+    void ReadInActs(const lps::action_label_list &Acts);
+    action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const lps::untyped_action &ma);
+    action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const lps::untyped_action &ma);
+};
 
 
 /** \brief     Type check a multi action
  *  Throws an exception if something went wrong.
  *  \param[in] mult_act A multi action that has not been type checked.
+ *  \param[in] data_spec A data specification to use as context.
+ *  \param[in] action_decls A list of action declarations to use as context.
  *  \post      mult_action is type checked and sorts have been added when necessary.
  **/
 inline
-void type_check(
-  atermpp::vector<multi_action>& mult_actions,
+multi_action type_check(
+  untyped_multi_action& mult_act,
   const data::data_specification& data_spec,
   const action_label_list& action_decls)
 {
-  // TODO: replace all this nonsense code by a proper type check implementation
-  // Bleh; do conversions...
-  ATermList l=ATempty;
-  for (atermpp::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
-       i!=mult_actions.end(); ++i)
+  multi_action result;
+  action_type_checker type_checker(data_spec,action_decls);
+  try
   {
-    l=ATinsert(l,(ATerm)(ATermList)i->actions());
+   result=type_checker(mult_act);
   }
-  l=core::type_check_mult_actions(
-      ATreverse(l),
-      data::detail::data_specification_to_aterm_data_spec(data_spec),
-      (ATermList)action_decls);
-  // And convert back...
-  mult_actions.clear();
-  for (; !ATisEmpty(l) ; l=ATgetNext(l))
+  catch (mcrl2::runtime_error &e)
   {
-    mult_actions.push_back(multi_action((action_list)ATgetFirst(l)));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check multi action " + pp(mult_act));
   }
+  return result;
 }
+
+/// \brief Type checks an action rename specification.
+/// \param ar_spec An action rename specifition.
+/// \param spec A linear process specification, used for the datatypes and action declarations.
+/// \return A type checked rename specification.
+
+inline
+action_rename_specification type_check_action_rename_specification(const action_rename_specification &ar_spec, const lps::specification &spec)
+{
+  lps::action_type_checker type_checker(spec.data(),spec.action_labels());
+  return type_checker(ar_spec);
+}
+
 
 } // namespace lps
 

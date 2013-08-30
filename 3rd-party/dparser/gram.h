@@ -135,7 +135,7 @@ typedef struct Term {
   AssocKind		op_assoc;
   int			op_priority;
   char			*string;
-  int			string_len;
+  size_t		string_len;
   uint			scan_kind:3;
   uint			ignore_case:1;
   uint			trailing_context:1;
@@ -161,7 +161,7 @@ typedef enum InternalKind {
 
 typedef struct Production {
   char			*name;
-  uint			name_len;
+  size_t		name_len;
   Vec(Rule *)		rules;
   uint			index;
   uint			regex:1;
@@ -190,8 +190,8 @@ typedef struct Elem {
     Term	*term;
     void	*term_or_nterm;
     struct Unresolved {
-      char	*string;
-      uint	len;
+      char		*string;
+      size_t	len;
     } unresolved;
   } e;
 } Elem;
@@ -204,7 +204,7 @@ typedef struct Grammar {
   Vec(Action *)		actions;
   Code			scanner;
   Code			*code;
-  int			ncode;
+  uint			ncode;
   Vec(Declaration *)	declarations;
   Vec(D_Pass *)		passes;
   Vec(char *)		all_pathnames;
@@ -219,7 +219,7 @@ typedef struct Grammar {
   int			save_parse_tree;
   /* grammar writing options */
   char			grammar_ident[256];
-  int			scanner_blocks;
+  uint			scanner_blocks;
   int			scanner_block_size;
   int			write_line_directives;
   int			write_header;
@@ -249,7 +249,7 @@ void print_rdebug_grammar(Grammar *g, char *pathname);
 void print_states(Grammar *g);
 void print_rule(Rule *r);
 void print_term(Term *t);
-Production *lookup_production(Grammar *g, char *name, int len);
+Production *lookup_production(Grammar *g, char *name, size_t len);
 
 /* for creating grammars */
 #define last_elem(_r) ((_r)->elems.v[(_r)->elems.n-1])
@@ -277,6 +277,6 @@ void plus_EBNF(Grammar *g); /* ditto */
 void rep_EBNF(Grammar *g, int minimum, int maximum);
 void initialize_productions(Grammar *g);
 void finalize_productions(Grammar *g);
-int state_for_declaration(Grammar *g, int iproduction);
+int state_for_declaration(Grammar *g, uint iproduction);
 
 #endif

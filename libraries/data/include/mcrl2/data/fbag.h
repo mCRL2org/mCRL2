@@ -67,7 +67,7 @@ namespace mcrl2 {
 
         /// \brief Declaration for sort fbag as structured sort
         /// \param s A sort expression
-        /// \ret The structured sort representing fbag
+        /// \return The structured sort representing fbag
         inline
         structured_sort fbag_struct(const sort_expression& s)
         {
@@ -84,7 +84,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& empty_name()
       {
-        static core::identifier_string empty_name = core::detail::initialise_static_expression(empty_name, core::identifier_string("@fbag_empty"));
+        static core::identifier_string empty_name = core::identifier_string("@fbag_empty");
         return empty_name;
       }
 
@@ -117,7 +117,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cons_name()
       {
-        static core::identifier_string cons_name = core::detail::initialise_static_expression(cons_name, core::identifier_string("@fbag_cons"));
+        static core::identifier_string cons_name = core::identifier_string("@fbag_cons");
         return cons_name;
       }
 
@@ -154,7 +154,7 @@ namespace mcrl2 {
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return cons_(s)(arg0, arg1, arg2);
+        return sort_fbag::cons_(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_cons
@@ -188,7 +188,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& insert_name()
       {
-        static core::identifier_string insert_name = core::detail::initialise_static_expression(insert_name, core::identifier_string("@fbag_insert"));
+        static core::identifier_string insert_name = core::identifier_string("@fbag_insert");
         return insert_name;
       }
 
@@ -225,7 +225,7 @@ namespace mcrl2 {
       inline
       application insert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return insert(s)(arg0, arg1, arg2);
+        return sort_fbag::insert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_insert
@@ -247,7 +247,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& cinsert_name()
       {
-        static core::identifier_string cinsert_name = core::detail::initialise_static_expression(cinsert_name, core::identifier_string("@fbag_cinsert"));
+        static core::identifier_string cinsert_name = core::identifier_string("@fbag_cinsert");
         return cinsert_name;
       }
 
@@ -284,7 +284,7 @@ namespace mcrl2 {
       inline
       application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return cinsert(s)(arg0, arg1, arg2);
+        return sort_fbag::cinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_cinsert
@@ -306,7 +306,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& count_name()
       {
-        static core::identifier_string count_name = core::detail::initialise_static_expression(count_name, core::identifier_string("@fbag_count"));
+        static core::identifier_string count_name = core::identifier_string("@fbag_count");
         return count_name;
       }
 
@@ -342,7 +342,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return count(s)(arg0, arg1);
+        return sort_fbag::count(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag_count
@@ -364,7 +364,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& in_name()
       {
-        static core::identifier_string in_name = core::detail::initialise_static_expression(in_name, core::identifier_string("@fbag_in"));
+        static core::identifier_string in_name = core::identifier_string("@fbag_in");
         return in_name;
       }
 
@@ -400,7 +400,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return in(s)(arg0, arg1);
+        return sort_fbag::in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag_in
@@ -422,7 +422,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& join_name()
       {
-        static core::identifier_string join_name = core::detail::initialise_static_expression(join_name, core::identifier_string("@fbag_join"));
+        static core::identifier_string join_name = core::identifier_string("@fbag_join");
         return join_name;
       }
 
@@ -460,7 +460,7 @@ namespace mcrl2 {
       inline
       application join(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return join(s)(arg0, arg1, arg2, arg3);
+        return sort_fbag::join(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_join
@@ -482,7 +482,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& intersect_name()
       {
-        static core::identifier_string intersect_name = core::detail::initialise_static_expression(intersect_name, core::identifier_string("@fbag_inter"));
+        static core::identifier_string intersect_name = core::identifier_string("@fbag_inter");
         return intersect_name;
       }
 
@@ -520,7 +520,7 @@ namespace mcrl2 {
       inline
       application intersect(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return intersect(s)(arg0, arg1, arg2, arg3);
+        return sort_fbag::intersect(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_inter
@@ -542,7 +542,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& difference_name()
       {
-        static core::identifier_string difference_name = core::detail::initialise_static_expression(difference_name, core::identifier_string("@fbag_diff"));
+        static core::identifier_string difference_name = core::identifier_string("@fbag_diff");
         return difference_name;
       }
 
@@ -580,7 +580,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return difference(s)(arg0, arg1, arg2, arg3);
+        return sort_fbag::difference(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_diff
@@ -602,7 +602,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbag2fset_name()
       {
-        static core::identifier_string fbag2fset_name = core::detail::initialise_static_expression(fbag2fset_name, core::identifier_string("@fbag2fset"));
+        static core::identifier_string fbag2fset_name = core::identifier_string("@fbag2fset");
         return fbag2fset_name;
       }
 
@@ -638,7 +638,7 @@ namespace mcrl2 {
       inline
       application fbag2fset(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return fbag2fset(s)(arg0, arg1);
+        return sort_fbag::fbag2fset(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag2fset
@@ -660,7 +660,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fset2fbag_name()
       {
-        static core::identifier_string fset2fbag_name = core::detail::initialise_static_expression(fset2fbag_name, core::identifier_string("@fset2fbag"));
+        static core::identifier_string fset2fbag_name = core::identifier_string("@fset2fbag");
         return fset2fbag_name;
       }
 
@@ -695,7 +695,7 @@ namespace mcrl2 {
       inline
       application fset2fbag(const sort_expression& s, const data_expression& arg0)
       {
-        return fset2fbag(s)(arg0);
+        return sort_fbag::fset2fbag(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@fset2fbag
@@ -719,15 +719,17 @@ namespace mcrl2 {
       function_symbol_vector fbag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(insert(s));
-        result.push_back(cinsert(s));
-        result.push_back(count(s));
-        result.push_back(in(s));
-        result.push_back(join(s));
-        result.push_back(intersect(s));
-        result.push_back(difference(s));
-        result.push_back(fbag2fset(s));
-        result.push_back(fset2fbag(s));
+        result.push_back(sort_fbag::insert(s));
+        result.push_back(sort_fbag::cinsert(s));
+        result.push_back(sort_fbag::count(s));
+        result.push_back(sort_fbag::in(s));
+        result.push_back(sort_fbag::join(s));
+        result.push_back(sort_fbag::intersect(s));
+        result.push_back(sort_fbag::difference(s));
+        result.push_back(sort_fbag::fbag2fset(s));
+        result.push_back(sort_fbag::fset2fbag(s));
+        function_symbol_vector fbag_mappings = detail::fbag_struct(s).comparison_functions(fbag(s));
+        result.insert(result.end(), fbag_mappings.begin(), fbag_mappings.end());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -739,7 +741,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_count_application(e) || is_in_application(e) || is_fbag2fset_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -751,7 +753,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_intersect_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -763,7 +765,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_intersect_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -775,7 +777,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_intersect_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -787,7 +789,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_join_application(e) || is_intersect_application(e) || is_difference_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 3);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 3);
       }
 
       ///\brief Function for projecting out argument
@@ -799,7 +801,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_fset2fbag_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -811,7 +813,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_count_application(e) || is_in_application(e) || is_fbag2fset_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+        return *boost::next(atermpp::aterm_cast<const application >(e).begin(), 0);
       }
 
       /// \brief Give all system defined equations for fbag
@@ -832,6 +834,8 @@ namespace mcrl2 {
 
         data_equation_vector result;
         data_equation_vector fbag_equations = detail::fbag_struct(s).constructor_equations(fbag(s));
+        result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
+        fbag_equations = detail::fbag_struct(s).comparison_equations(fbag(s));
         result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
         result.push_back(data_equation(atermpp::make_vector(vd, vp), insert(s, vd, vp, empty(s)), cons_(s, vd, vp, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, vp, vq), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, sort_nat::plus(vp, vq), vb)));

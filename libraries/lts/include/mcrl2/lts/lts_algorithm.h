@@ -28,8 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <boost/bind.hpp>
-#include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
@@ -58,10 +56,10 @@ static bool lts_named_cmp(std::string N[], T a, T b)
 
 
 /** \brief Applies a reduction algorithm to this LTS.
+ * \param[in] l A labelled transition system that must be reduced.
  * \param[in] eq The equivalence with respect to which the LTS will be
  * reduced.
  **/
-
 template <class LTS_TYPE>
 void reduce(LTS_TYPE& l, lts_equivalence eq);
 
@@ -160,10 +158,11 @@ bool destructive_compare(LTS_TYPE& l1,
  * \details The input labelled transition systems are duplicated in memory to carry
  *          out the comparison. When space efficiency is a concern, one can consider
  *          to use destructive_compare.
- * \param[in] l The LTS to which this LTS will be compared.
+ * \param[in] l1 The first LTS to compare.
+ * \param[in] l2 The second LTS to compare.
  * \param[in] eq The equivalence with respect to which the LTSs will be
  * compared.
- * \param[in] generate_counter_example If true counter examples are written to file.
+ * \param[in] generate_counter_examples If true counter examples are written to file.
  * \retval true if the LTSs are found to be equivalent.
  * \retval false otherwise.
  */
@@ -175,11 +174,11 @@ bool compare(const LTS_TYPE& l1,
 
 /** \brief Checks whether this LTS is smaller than another LTS according
  * to a preorder.
- * \param[in] l The LTS to which this LTS will be compared.
+ * \param[in] l1 The first LTS to be compared.
+ * \param[in] l2 The second LTS to be compared.
  * \param[in] pre The preorder with respect to which the LTSs will be
  * compared.
- * \param[in] opts The options that will be used for the comparison.
- * \retval true if this LTS is smaller than LTS \a l according to
+ * \retval true if LTS \a l1 is smaller than LTS \a l2 according to
  * preorder \a pre.
  * \retval false otherwise.
  * \warning This function alters the internal data structure of
@@ -196,7 +195,8 @@ bool destructive_compare(LTS_TYPE& l1,
 
 /** \brief Checks whether this LTS is smaller than another LTS according
  * to a preorder.
- * \param[in] l The LTS to which this LTS will be compared.
+ * \param[in] l1 The first LTS to be compared.
+ * \param[in] l2 The second LTS to be compared.
  * \param[in] pre The preorder with respect to which the LTSs will be
  * compared.
  * \retval true if this LTS is smaller than LTS \a l according to
@@ -214,7 +214,8 @@ void determinise(LTS_TYPE& l);
 
 /** \brief Checks whether all states in this LTS are reachable
  * from the initial state and remove unreachable states if required.
- * \details Runs in O(\ref num_states * \ref num_transitions) time.
+ * \details Runs in O(num_states * num_transitions) time.
+ * \param[in] l The LTS on which reachability is checked.
  * \param[in] remove_unreachable Indicates whether all unreachable states
  *            should be removed from the LTS. This option does not
  *            influence the return value; the return value is with
@@ -324,26 +325,14 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
 template <class LTS_TYPE>
 bool is_deterministic(const LTS_TYPE& l);
 
-/** \brief Removes tau cycles by mapping all the states on a cycle to one state.
- *  \details This routine is linear in the number of states and transitions.
- *  \param[in] l Transition system to be reduced.
- *  \param[in] preserve_divergence_loops If true leave a self loop on states that resided on a tau
- *            cycle in the original transition system.
- */
-/*
- * Is already defined in liblts_scc.h, which is included here.
-template <class LTS_TYPE>
-void scc_reduce(LTS_TYPE &l,const bool preserve_divergence_loops=false);
- */
-
 /** \brief Merge the second lts into the first lts.
-    \param[in/out] l1 The transition system in which l2 is merged.
+    \param[in,out] l1 The transition system in which l2 is merged.
     \param[in] l2 The second transition system, which remains unchanged
  */
 template <class LTS_TYPE>
-void merge(LTS_TYPE& l1, const LTS_TYPE& l)
+void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
 {
-  detail::merge(l1,l);
+  detail::merge(l1,l2);
 }
 
 

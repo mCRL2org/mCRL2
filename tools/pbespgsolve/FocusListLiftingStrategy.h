@@ -40,7 +40,7 @@ public:
     verti next();
     size_t memory_use() const;
     bool backward() const { return lls_.backward(); }
-    bool max_size() const { return focus_list_.capacity(); }
+    bool max_size() const { return focus_list_.capacity() != 0; }
 
 protected:
     verti phase1();
@@ -49,9 +49,9 @@ protected:
 private:
     typedef std::vector<std::pair<verti, unsigned> > focus_list;
 
-    long long max_lift_attempts_;       //!< maximum lift attempts per list
+    compat_uint64_t max_lift_attempts_;       //!< maximum lift attempts per list
     int phase_;                         //!< current phase
-    long long num_lift_attempts_;       //!< number of consecutive lift attempts
+    compat_uint64_t num_lift_attempts_;       //!< number of consecutive lift attempts
     bool prev_lifted_;                  //!< whether previous vertex was lifted
 
     // For phase 1:

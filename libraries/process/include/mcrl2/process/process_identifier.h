@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_PROCESS_IDENTIFIER_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -26,60 +25,62 @@ namespace mcrl2
 namespace process
 {
 
-/// \brief Process identifier
-//<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
+//--- start generated class process_identifier ---//
+/// \brief A process identifier
 class process_identifier: public atermpp::aterm_appl
 {
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     process_identifier()
       : atermpp::aterm_appl(core::detail::constructProcVarId())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    process_identifier(atermpp::aterm_appl term)
+    explicit process_identifier(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_term_ProcVarId(m_term));
+      assert(core::detail::check_term_ProcVarId(*this));
     }
 
     /// \brief Constructor.
-    process_identifier(core::identifier_string name, data::sort_expression_list sorts)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list<data::sort_expression>(sorts.begin(), sorts.end())))
+    process_identifier(const core::identifier_string& name, const data::variable_list& variables)
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, variables))
     {}
 
-    /// \brief Returns the name of the process identifier
-    /// \return The name of the process identifier
-    core::identifier_string name() const
+    /// \brief Constructor.
+    process_identifier(const std::string& name, const data::variable_list& variables)
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(core::identifier_string(name), variables))
+    {}
+
+    const core::identifier_string& name() const
     {
-      return atermpp::arg1(*this);
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 
-    /// \brief Returns the sorts of the process identifier
-    /// \return The sorts of the process identifier
-    data::sort_expression_list sorts() const
+    const data::variable_list& variables() const
     {
-      return data::sort_expression_list(
-               atermpp::term_list_iterator<data::sort_expression>(atermpp::list_arg2(*this)),
-               atermpp::term_list_iterator<data::sort_expression>());
+      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
     }
 };
 
-/// \brief list of process identifierss
+/// \brief list of process_identifiers
 typedef atermpp::term_list<process_identifier> process_identifier_list;
 
 /// \brief vector of process_identifiers
-typedef atermpp::vector<process_identifier>    process_identifier_vector;
+typedef std::vector<process_identifier>    process_identifier_vector;
+
 
 /// \brief Test for a process_identifier expression
-/// \param t A term
-/// \return True if it is a process_identifier expression
+/// \param x A term
+/// \return True if \a x is a process_identifier expression
 inline
-bool is_process_identifier(const atermpp::aterm_appl& t)
+bool is_process_identifier(const atermpp::aterm_appl& x)
 {
-  return core::detail::gsIsProcVarId(t);
+  return core::detail::gsIsProcVarId(x);
 }
+
+//--- end generated class process_identifier ---//
 
 // template function overloads
 std::string pp(const process_identifier& x);
@@ -90,5 +91,15 @@ void normalize_sorts(process_identifier_vector& x, const data::data_specificatio
 } // namespace process
 
 } // namespace mcrl2
+
+namespace std {
+//--- start generated swap functions ---//
+template <>
+inline void swap(mcrl2::process::process_identifier& t1, mcrl2::process::process_identifier& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated swap functions ---//
+} // namespace std
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

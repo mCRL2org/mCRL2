@@ -8,13 +8,11 @@
 //
 /// \file mcrl2/lts/bithashtable.h
 
-#include "boost.hpp" // for precompiled headers
-
 #ifndef MCRL2_LTS_DETAIL_BITHASHTABLE_H
 #define MCRL2_LTS_DETAIL_BITHASHTABLE_H
 
 #include <vector>
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
@@ -22,7 +20,7 @@ namespace mcrl2
 namespace lts
 {
 
-using namespace aterm;
+using namespace atermpp;
 
 class bit_hash_table
 {
@@ -82,37 +80,38 @@ class bit_hash_table
       }
     }
 
-    void calc_hash_aterm(ATerm t,
+    void calc_hash_aterm(aterm t,
                          size_t& sh_a,
                          size_t& sh_b,
                          size_t& sh_c,
                          size_t& sh_i)
     {
-      switch (ATgetType(t))
+      if (t.type_is_appl())
       {
-        case AT_APPL:
-          calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
+        calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
+        {
+          size_t len = aterm_cast<aterm_appl>(t).function().arity();
+          for (size_t i=0; i<len; i++)
           {
-            size_t len = ATgetArity(ATgetAFun((ATermAppl) t));
-            for (size_t i=0; i<len; i++)
-            {
-              calc_hash_aterm(ATgetArgument((ATermAppl) t, i),sh_a,sh_b,sh_c,sh_i);
-            }
+            calc_hash_aterm(((aterm_appl) t)[i],sh_a,sh_b,sh_c,sh_i);
           }
-          break;
-        case AT_LIST:
-          calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
-          for (ATermList l=(ATermList) t; !ATisEmpty(l); l=ATgetNext(l))
-          {
-            calc_hash_aterm(ATgetFirst(l),sh_a,sh_b,sh_c,sh_i);
-          }
-          break;
-        case AT_INT:
-          calc_hash_add(ATgetInt((ATermInt) t),sh_a,sh_b,sh_c,sh_i);
-          break;
-        default:
-          calc_hash_add(0xaa143f06,sh_a,sh_b,sh_c,sh_i);
-          break;
+        }
+      }
+      else if (t.type_is_list())
+      {
+        calc_hash_add(0x7eb9cdba,sh_a,sh_b,sh_c,sh_i);
+        for (aterm_list l=(aterm_list) t; !l.empty(); l=l.tail())
+        {
+          calc_hash_aterm(l.front(),sh_a,sh_b,sh_c,sh_i);
+        }
+      }
+      else if (t.type_is_int())
+      {
+        calc_hash_add(((aterm_int) t).value(),sh_a,sh_b,sh_c,sh_i);
+      }
+      else
+      {
+        calc_hash_add(0xaa143f06,sh_a,sh_b,sh_c,sh_i);
       }
     }
 
@@ -131,7 +130,7 @@ class bit_hash_table
              ((sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff));
     }
 
-    size_t calc_hash(ATerm state)
+    size_t calc_hash(aterm state)
     {
       assert(m_bit_hash_table.size()>0);
       size_t sh_a = 0x9e3779b9;
@@ -144,18 +143,18 @@ class bit_hash_table
     }
 
   public:
-    void remove_state_from_bithash(const ATerm state)
+    void remove_state_from_bithash(const aterm state)
     {
       size_t i = calc_hash(state);
       m_bit_hash_table[i] = false;
     }
 
-    void remove_state_from_bithash(atermpp::aterm state)
+    /* void remove_state_from_bithash(atermpp::aterm state)
     {
-      remove_state_from_bithash((const ATerm)state);
-    }
+      remove_state_from_bithash((const aterm)state);
+    } */
 
-    size_t add_state(ATerm state, bool& is_new)
+    size_t add_state(aterm state, bool& is_new)
     {
       size_t i = calc_hash(state);
       is_new = !m_bit_hash_table[i];
@@ -170,7 +169,7 @@ class bit_hash_table
       return output;
     }
 
-    size_t state_index(ATerm state)
+    size_t state_index(aterm state)
     {
       assert(m_bit_hash_table[calc_hash(state)]);
       return calc_hash(state);

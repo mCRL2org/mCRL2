@@ -21,8 +21,6 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 
 using namespace mcrl2;
@@ -75,10 +73,13 @@ void test_normalize1()
   x = data::variable("x", data::sort_bool::bool_());
   y = data::variable("y", data::sort_bool::bool_());
   z = data::variable("z", data::sort_bool::bool_());
+  const data::data_expression& x1 = atermpp::aterm_cast<data::data_expression>(x);
+  const data::data_expression& y1 = atermpp::aterm_cast<data::data_expression>(y);
+  const data::data_expression& z1 = atermpp::aterm_cast<data::data_expression>(z);
 
   f  = not_(x);
   f1 = pbes_system::normalize(f);
-  f2 = data::sort_bool::not_(x);
+  f2 = data::sort_bool::not_(x1);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -86,7 +87,7 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = pbes_system::normalize(f);
-  f2 = p::or_(p::or_(data::sort_bool::not_(x), data::sort_bool::not_(y)), z);
+  f2 = p::or_(p::or_(data::sort_bool::not_(x1), data::sort_bool::not_(y1)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -105,7 +106,6 @@ void test_normalize1()
   z = pbes_system::normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
-  core::garbage_collect();
 }
 
 void test_normalize2()
@@ -114,9 +114,8 @@ void test_normalize2()
   lps::specification spec       = lps::linearise("init tau + tau;");
   state_formulas::state_formula formula  = state_formulas::parse_state_formula("nu X. [true]X", spec);
   bool timed = false;
-  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   pbes_system::normalize(p);
-  core::garbage_collect();
 }
 
 void test_normalize3()
@@ -128,9 +127,8 @@ void test_normalize3()
                             );
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
-  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
   pbes_system::normalize(p);
-  core::garbage_collect();
 }
 
 const std::string VARIABLE_SPECIFICATION =
@@ -189,12 +187,12 @@ std::string printer(const pbes_expression& x)
 inline
 pbes_expression norm(const pbes_expression& x)
 {
-  return detail::normalize_and_or(x);
+  return pbes_system::detail::normalize_and_or(x);
 }
 
 void test_normalize_and_or_equality(std::string expr1, std::string expr2)
 {
-  utilities::detail::test_operation(
+  BOOST_CHECK(utilities::detail::test_operation(
     expr1,
     expr2,
     parse,
@@ -204,7 +202,7 @@ void test_normalize_and_or_equality(std::string expr1, std::string expr2)
     "normalize_and_or",
     norm,
     "normalize_and_or"
-  );
+  ));
 }
 
 void test_normalize_and_or()
@@ -212,13 +210,10 @@ void test_normalize_and_or()
   test_normalize_and_or_equality("X && Y", "Y && X");
   test_normalize_and_or_equality("X && X && Y", "X && Y && X");
   test_normalize_and_or_equality("X && X && Y", "Y && X && X");
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_normalize1();
   test_normalize2();
   test_normalize3();

@@ -10,8 +10,6 @@
 /// \brief This tool reads a mcrl2 specification of a linear process,
 /// and translates it directly into LPS format.
 
-#include "boost.hpp" // precompiled headers
-
 #define TOOLNAME "lts2lps"
 #define AUTHOR "Frank Stappers"
 
@@ -19,10 +17,8 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include "mcrl2/data/parse.h"
 // #include "mcrl2/data/detail/internal_format_conversion.h"
@@ -242,13 +238,12 @@ class lts2lps_tool : public input_output_tool
 
       action_summand_vector action_summands;
       const variable process_parameter("x",mcrl2::data::sort_pos::pos());
-      const variable_list process_parameters=push_back(variable_list(),process_parameter);
-      const atermpp::set< data::variable> global_variables;
+      const variable_list process_parameters=make_list(process_parameter);
+      const std::set< data::variable> global_variables;
       // Add a single delta.
       const deadlock_summand_vector deadlock_summands(1,deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
       const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
-      const process_initializer initial_process(push_back(assignment_list(),
-          assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
+      const process_initializer initial_process(make_list(assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
       const lps::specification spec(l.data(),l.action_labels(),global_variables,lps,initial_process);
 
       const std::vector<transition> &trans=l.get_transitions();
@@ -317,22 +312,7 @@ class lts2lps_tool : public input_output_tool
     }
 };
 
-class lts2lps_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2lps_tool>
-{
-  public:
-    lts2lps_gui_tool()
-    {
-
-      m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
-      m_gui_options["lps"]  = create_filepicker_widget("LPS File (*.lps)|*.lps|All Files (*.*)|*.*");
-      m_gui_options["mcrl2"] = create_filepicker_widget("mCRL2 files (*.mcrl2)|*.mcrl2|Text Files (*.txt)|*.txt|All Files (*.*)|*.*");
-
-    }
-};
-
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
-  return lts2lps_gui_tool().execute(argc, argv);
+  return lts2lps_tool().execute(argc, argv);
 }

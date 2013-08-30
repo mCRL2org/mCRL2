@@ -23,6 +23,11 @@
 #include <string>
 #include "toolset_version.h"
 
+#if defined(_WIN32)
+#include <iostream>
+#include <fstream>
+#endif // defined(_WIN32)
+
 namespace mcrl2
 {
 namespace utilities
@@ -42,6 +47,19 @@ class QtToolBase : public QObject
     QMainWindow *m_window;
 
   protected:
+
+#if defined(_WIN32) 
+	std::streambuf	*_cinbuf;
+	std::streambuf	*_coutbuf;
+	std::streambuf	*_cerrbuf;
+	std::ifstream	_console_cin;
+	std::ofstream	_console_cout;
+	std::ofstream	_console_cerr;
+    
+    void attachConsole();
+    void releaseConsole();
+#endif // _WIN32
+
     bool show_main_window(QMainWindow *window)
     {
       m_window = window;
@@ -91,7 +109,8 @@ class QtToolBase : public QObject
       m_author(author),
       m_description(description),
       m_manualUrl(manualUrl)
-    {}
+    {
+    }
 };
 
 template <typename Tool>
@@ -114,10 +133,17 @@ class qt_tool: public Tool, public QtToolBase
       : Tool(name, author, what_is, tool_description, known_issues),
         QtToolBase(QString::fromStdString(name), QString::fromStdString(author), QString::fromStdString(about_description), QString::fromStdString(manual_url)),
         m_application(NULL)
-    {}
+    {
+#if defined(_WIN32)
+      attachConsole();
+#endif
+    }
 
     virtual bool pre_run()
     {
+#if defined(_WIN32)
+      releaseConsole();
+#endif
       m_application = new QApplication(m_argc, m_argv);
       qsrand(QDateTime::currentDateTime().toTime_t());
       return true;

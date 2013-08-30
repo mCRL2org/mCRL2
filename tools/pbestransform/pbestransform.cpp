@@ -14,7 +14,6 @@
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/transform.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -23,7 +22,7 @@ using namespace mcrl2::utilities::tools;
 //[pbes_transform_tool
 class pbes_transform_tool: public input_output_tool
 {
-  protected: 
+  protected:
     typedef input_output_tool super;
 
     unsigned int m_iterations;
@@ -59,7 +58,7 @@ class pbes_transform_tool: public input_output_tool
 
     bool run()
     {
-      pbes_system::pbes<> p;
+      pbes_system::pbes p;
       load_pbes(p, input_filename());
       pbes_system::pbes_transform(p, m_iterations, m_mu_value, m_nu_value);
       p.save(output_filename());
@@ -75,8 +74,6 @@ class pbes_transform_gui_tool: public mcrl2_gui_tool<pbes_transform_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   pbes_transform_gui_tool tool;
   return tool.execute(argc, argv);
 }

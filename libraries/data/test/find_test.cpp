@@ -14,15 +14,10 @@
 #include <set>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/data_specification.h"
-// #include "mcrl2/data/sort_expression.h"
-// #include "mcrl2/data/data_expression.h"
-// #include "mcrl2/data/variable.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_sort.h"
-#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -46,10 +41,31 @@ variable bool_(std::string name)
   return variable(identifier_string(name), sort_bool::bool_());
 }
 
+void test_search_variable()
+{
+  variable b = bool_("b");
+  variable c = bool_("c");
+  data::variable_vector v;
+  v.push_back(b);
+  v.push_back(c);
+  std::set<variable> s = data::find_all_variables(v);
+  BOOST_CHECK(s.size() == 2);
+  BOOST_CHECK(s.find(b) != s.end());
+  BOOST_CHECK(s.find(c) != s.end());
+  BOOST_CHECK(data::search_variable(v, b));
+  BOOST_CHECK(data::search_variable(v, c));
+
+  data::variable_list l(v.begin(), v.end());
+  s = data::find_all_variables(l);
+  BOOST_CHECK(s.size() == 2);
+  BOOST_CHECK(s.find(b) != s.end());
+  BOOST_CHECK(s.find(c) != s.end());
+  BOOST_CHECK(data::search_variable(v, b));
+  BOOST_CHECK(data::search_variable(v, c));
+}
+
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   variable n1 = nat("n1");
   variable n2 = nat("n2");
   variable n3 = nat("n3");
@@ -92,17 +108,24 @@ int test_main(int argc, char* argv[])
   BOOST_CHECK(search_variable(V, n1));
   BOOST_CHECK(!search_variable(V, n2));
 
-  core::garbage_collect();
 
-  //--- find_variables ---//
-  std::set<variable> v = find_variables(x);
+  //--- find_all_variables ---//
+  std::set<variable> v = find_all_variables(x);
   BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
   BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
   BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
 
-  std::set<variable> vS = find_variables(S);
-  std::set<variable> vV = find_variables(V);
+  std::set<variable> vS = find_all_variables(S);
+  std::set<variable> vV = find_all_variables(V);
   BOOST_CHECK(vS == vV);
+
+  //--- find_free_variables ---//
+  v = find_free_variables(x);
+  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
+  BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
+  BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
+  v = find_free_variables(data_expression(n1));
+  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
 
   //--- find_sort_expressions ---//
   std::set<sort_expression> e = find_sort_expressions(q1);
@@ -119,7 +142,7 @@ int test_main(int argc, char* argv[])
   find_sort_expressions(q1, std::inserter(Z, Z.end()));
   find_sort_expressions(S, std::inserter(Z, Z.end()));
 
-  core::garbage_collect();
+  test_search_variable();
 
   //--- data_specification ---//
   // TODO: discuss whether this test should fail or not

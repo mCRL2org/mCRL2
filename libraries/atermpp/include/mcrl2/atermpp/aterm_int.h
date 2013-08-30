@@ -12,85 +12,76 @@
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
 
+#include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
-/// \brief Term containing an integer.
-class aterm_int: public aterm_base
+
+class aterm_int:public aterm
 {
+  protected:
+    /// \brief Constructor
+    aterm_int(detail::_aterm_int *t):aterm(reinterpret_cast<detail::_aterm*>(t))
+    {
+    } 
+
   public:
-    /// \brief Constructor.
+
+    /// \brief Default constructor.
     aterm_int()
     {}
 
-    /// \brief Constructor.
-    /// \param t An integer term
-    aterm_int(ATermInt t)
-      : aterm_base(t)
-    {}
-
-    /// Allow construction from an aterm. The aterm must be of the right type.
-    /// \param t A term.
-    aterm_int(aterm t)
-      : aterm_base(t)
+    /// \brief Construct an aterm_int from an aterm.
+    /// \details The aterm must be of type AT_INT.
+    explicit aterm_int(const aterm &t):aterm(t) 
     {
-      assert(type() == AT_INT);
+      assert(t.type_is_int());
     }
-
+    
     /// \brief Constructor.
     /// \param value An integer value.
-    aterm_int(int value)
-      : aterm_base(ATmakeInt(value))
-    {}
-
-    /// \brief Conversion operator
-    /// \return The wrapped ATermInt pointer
-    operator ATermInt() const
+    explicit aterm_int(size_t value):aterm(detail::aterm_int(value))
     {
-      return reinterpret_cast<ATermInt>(m_term);
     }
 
     /// \brief Assignment operator.
-    /// \param t A term.
-    aterm_int& operator=(aterm_base t)
+    /// \param t A term representing an integer.
+    aterm_int &operator=(const aterm_int &t)
     {
-      assert(t.type() == AT_INT);
-      m_term = aterm_traits<aterm_base>::term(t);
+      copy_term(t);
       return *this;
     }
 
     /// \brief Get the integer value of the aterm_int.
     /// \return The value of the term.
-    int value() const
+    size_t value() const
     {
-      return ATgetInt(reinterpret_cast<ATermInt>(m_term));
+      return reinterpret_cast<const detail::_aterm_int*>(m_term)->value;
     }
 };
 
-/// \cond INTERNAL_DOCS
-template <>
-struct aterm_traits<aterm_int>
-{
-  static void protect(const aterm_int& t)
-  {
-    t.protect();
-  }
-  static void unprotect(const aterm_int& t)
-  {
-    t.unprotect();
-  }
-  static void mark(const aterm_int& t)
-  {
-    t.mark();
-  }
-  static ATerm term(const aterm_int& t)
-  {
-    return t.term();
-  }
-};
-/// \endcond
-
 } // namespace atermpp
+
+namespace std
+{
+
+/// \brief Swaps two aterm_ints.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+///          In order to be used in the standard containers, the declaration must
+///          be preceded by an empty template declaration.
+/// \param t1 The first term
+/// \param t2 The second term
+
+template <>
+inline void swap(atermpp::aterm_int &t1, atermpp::aterm_int &t2)
+{
+  t1.swap(t2);
+}
+} // namespace std 
+
+#include "mcrl2/atermpp/detail/aterm_int.h"
+#include "mcrl2/atermpp/detail/aterm_int_implementation.h"
 
 #endif // MCRL2_ATERMPP_ATERM_INT_H

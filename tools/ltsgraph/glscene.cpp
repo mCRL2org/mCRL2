@@ -18,6 +18,7 @@
 #include <GL/glu.h> // Needed for compilation on Ubuntu 12.04
 #endif
 #include "mcrl2/utilities/workarounds.h"
+#include "mcrl2/utilities/logger.h"
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
@@ -688,6 +689,8 @@ void GLScene::renderEdge(size_t i)
   // them in x-y direction.
   if (edge.from == edge.to)
   {
+    if (!m_drawselfloops)
+      return;
     Coord3D diff = ctrl[1] - ctrl[0];
     diff = diff.cross(Coord3D(0, 0, 1));
     diff = diff * ((via - from).size() / (diff.size() * 2.0));
@@ -760,6 +763,9 @@ void GLScene::renderNode(size_t i)
 
 void GLScene::renderTransitionLabel(size_t i)
 {
+  Graph::Edge edge = m_graph.edge(i);
+  if (edge.from == edge.to && !m_drawselfloops)
+    return;
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   if (!m_graph.transitionLabelstring(label.labelindex).isEmpty()) {
     glStartName(so_label, i);
@@ -810,6 +816,7 @@ void GLScene::renderStateLabel(size_t i)
       glPushMatrix();
 
       m_camera->billboard_cylindrical(label.pos);
+      glTranslatef(0, 0, m_size_node * m_camera->pixelsize * 1.01); // Position state label above state number
       drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex);
 
       glPopMatrix();
@@ -837,7 +844,7 @@ void GLScene::renderStateNumber(size_t i)
 
     glColor3f(node.selected, 0.0, 0.0);
     m_camera->billboard_spherical(node.pos);
-    glTranslatef(0, 0, m_size_node*m_camera->pixelsize);
+    glTranslatef(0, 0, m_size_node * m_camera->pixelsize);
     drawNumber(*m_vertexdata, *m_texturedata, i);
 
     glPopMatrix();
@@ -876,7 +883,7 @@ void GLScene::renderHandle(size_t i)
 
 GLScene::GLScene(Graph::Graph &g)
   : m_graph(g),
-    m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawinitialmarking(true),
+    m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(1000.0)
 {
   m_camera = new CameraAnimation();
@@ -1124,7 +1131,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
 {
   FILE* outfile = fopen(filename, "wb+");
   GLint viewport[4];
-  GLint buffersize = 0, state = GL2PS_OVERFLOW;
+  GLint buffersize = 1024*1024, state = GL2PS_OVERFLOW;
 
   while( state == GL2PS_OVERFLOW ){
     buffersize += 1024*1024;
@@ -1135,6 +1142,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
                    GL2PS_BSP_SORT,
                    GL2PS_SILENT |
                    GL2PS_USE_CURRENT_VIEWPORT |
+				   GL2PS_OCCLUSION_CULL |
                    GL2PS_BEST_ROOT |
                    GL2PS_COMPRESS,
                    GL_RGBA,
@@ -1148,7 +1156,14 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
     render();
     state = gl2psEndPage();
   }
-  fclose(outfile);
+  if (state != GL2PS_SUCCESS)
+  {
+	mCRL2log(mcrl2::log::error) << "Could not save file (gl2ps error)." << std::endl;
+  }
+  if (outfile)
+  {
+    fclose(outfile);
+  }
 }
 
 void GLScene::renderLatexGraphics(QString filename, float aspectRatio)

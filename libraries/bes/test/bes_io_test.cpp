@@ -12,8 +12,6 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/io.h"
@@ -34,7 +32,7 @@ std::string bes1 =
 
 void test_parse_bes()
 {
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream from(bes1);
   from >> b;
   std::cout << "b = \n" << bes::pp(b) << std::endl;
@@ -44,48 +42,42 @@ void test_parse_bes()
   std::stringstream from2(bes1);
   from2 >> b;
 
-  core::garbage_collect();
 }
 
 void test_bes()
 {
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream bes_stream(bes1);
   bes_stream >> b;
 
   std::stringstream out;
   bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
-  core::garbage_collect();
 }
 
 void test_pbes()
 {
-  pbes_system::pbes<> b;
+  pbes_system::pbes b;
   std::stringstream bes_stream(bes1);
   bes_stream >> b;
 
   std::stringstream out;
   bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
-  core::garbage_collect();
 }
 
 void test_pgsolver()
 {
-  boolean_equation_system<> b;
+  boolean_equation_system b;
   std::stringstream bes_stream(bes1);
   bes_stream >> b;
 
   std::stringstream out;
   bes::bes2pgsolver(b.equations().begin(), b.equations().end(), out);
-  core::garbage_collect();
 
   std::clog << out.str() << std::endl;
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-
   test_parse_bes();
   test_bes();
   test_pbes();

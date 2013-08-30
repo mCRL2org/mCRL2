@@ -38,13 +38,13 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \brief A map from variable name prefix to the last suffix that has been added.
     std::map<std::string,int> variable_name_suffix;
     /// \brief The sequence of equations resulting from the transformation.
-    atermpp::vector<equation_type> equations;
+    std::vector<equation_type> equations;
 
     /// \brief Constructor.
     /// \param p The PBES of which the equation is part. Used to avoid name clashes when introducing new variables.
-    bqnf2ppg_rewriter(const pbes<>& p)
+    bqnf2ppg_rewriter(const pbes& p)
     {
-      for (atermpp::vector<equation_type>::const_iterator eqn = p.equations().begin(); eqn != p.equations().end(); ++eqn) {
+      for (std::vector<equation_type>::const_iterator eqn = p.equations().begin(); eqn != p.equations().end(); ++eqn) {
         equation_type e = (*eqn);
         propositional_variable var = e.variable();
         variable_names.insert(core::pp(var.name()));
@@ -53,7 +53,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
 
     /// \brief Returns the result of the transformation.
     /// \return the sequence of equations resulting from the transformation.
-    virtual atermpp::vector<equation_type> result() {
+    virtual std::vector<equation_type> result() {
       return equations;
     }
 
@@ -119,12 +119,12 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         } else if (!qvars.empty() || !(tr::is_or(qexpr) ? tr::is_true(phi) : tr::is_false(phi))) {
           std::string fresh_varname = fresh_variable_name(var.name());
 
-          data::variable_list variable_parameters = (data::variable_list)tr::param(var) + qvars;
+          data::variable_list variable_parameters = var.parameters() + qvars;
           // Create fresh propositional variable.
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, variable_parameters);
+              propositional_variable_instantiation(fresh_varname, atermpp::aterm_cast<data::data_expression_list>(variable_parameters));
           term_type expr;
           if (tr::is_or(qexpr)) {
             if (tr::is_true(phi)) {
@@ -230,12 +230,12 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           //std::clog << "visit_inner_and: phi /\\ psi. psi is propvar." << std::endl;
         } else if (!qvars.empty() || !tr::is_true(phi)) {
           std::string fresh_varname = fresh_variable_name(var.name());
-          data::variable_list variable_parameters = (data::variable_list)tr::param(var) + qvars;
+          data::variable_list variable_parameters = var.parameters() + qvars;
           // Create fresh propositional variable.
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, variable_parameters);
+              propositional_variable_instantiation(fresh_varname, atermpp::aterm_cast<data::data_expression_list>(variable_parameters));
           term_type expr;
           if (tr::is_true(phi)) {
             expr = fresh_var_instantiation;
@@ -340,7 +340,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, variable_parameters);
+              propositional_variable_instantiation(fresh_varname, atermpp::aterm_cast<data::data_expression_list>(variable_parameters));
           // expr = forall (qvars) . phi => fresh_X(d+qvars).
           if (tr::is_or(qexpr)) {
             if (tr::is_true(phi)) {
@@ -379,9 +379,9 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       //indent(); std::clog << "visit_and: " << print_brief(e) << std::endl;
       equation_type dummy;
       term_type conjunction = tr::true_();
-      atermpp::vector<equation_type> new_eqns;
-      atermpp::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
-      for (atermpp::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+      std::vector<equation_type> new_eqns;
+      std::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
+      for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
         term_type expr = *c;
         std::pair<term_type,equation_type> p = rewrite_inner_bounded_forall(sigma, var, expr, dummy);
         if (tr::is_true(conjunction)) {
@@ -396,7 +396,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       // Add conjunction with simplified terms.
       equation_type eqn = equation_type(sigma, var, conjunction);
       equations.push_back(eqn);
-      for (atermpp::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
+      for (std::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
         // Rewrite new equation.
         visit_bqnf_equation(*new_eqn);
       }
@@ -452,7 +452,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, variable_parameters);
+              propositional_variable_instantiation(fresh_varname, atermpp::aterm_cast<data::data_expression_list>(variable_parameters));
           // expr = forall (qvars) . phi => fresh_X(d+qvars).
           if (tr::is_true(phi)) {
             expr = fresh_var_instantiation;
@@ -483,9 +483,9 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       //indent(); std::clog << "visit_or: " << print_brief(e) << std::endl;
       equation_type dummy;
       term_type disjunction = tr::false_();
-      atermpp::vector<equation_type> new_eqns;
-      atermpp::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
-      for (atermpp::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
+      std::vector<equation_type> new_eqns;
+      std::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
+      for (std::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
         term_type expr = *d;
         std::pair<term_type,equation_type> p = rewrite_inner_bounded_exists(sigma, var, expr, dummy);
         if (tr::is_false(disjunction)) {
@@ -500,7 +500,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       // Add disjunction with simplified terms.
       equation_type eqn = equation_type(sigma, var, disjunction);
       equations.push_back(eqn);
-      for (atermpp::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
+      for (std::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
         // Rewrite new equation.
         visit_bqnf_equation(*new_eqn);
       }

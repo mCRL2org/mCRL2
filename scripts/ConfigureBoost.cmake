@@ -11,41 +11,31 @@ set(Boost_USE_MULTITHREADED ON)
 # Use static libraries when compiled static
 if( NOT BUILD_SHARED_LIBS )
   set(Boost_USE_STATIC_LIBS ON)
-endif( NOT BUILD_SHARED_LIBS)
+endif()
 
-if(MSVC)
-  SET (Boost_USE_STATIC_LIBS ON)
-
-  ##----------------------------------------------------------
-  ## Boost System libraries are only required for test targets
-  ##----------------------------------------------------------
-
-  find_package(Boost ${MCRL2_BOOST_MINIMUM_VERSION} COMPONENTS system REQUIRED)
-     # Disable boost::regex and use sregex instead.
-     # using MSVC 2010, BoostPro 1.44, results in following link error:
-     # mcrl2_utilities.lib(command_line_interface.obj) :
-     # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z)
-     add_definitions( -DMCRL2_DISABLE_BOOST_REGEX )
-else(MSVC)
-  find_package(Boost ${MCRL2_BOOST_MINIMUM_VERSION} COMPONENTS system REQUIRED)
-endif(MSVC)
+##----------------------------------------------------------
+## Boost header files
+##----------------------------------------------------------
+find_package(Boost ${MCRL2_BOOST_MINIMUM_VERSION})
 
 if(NOT Boost_FOUND)
-  message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.35 or higher." )
-  message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
+  message( STATUS "The mCRL2 toolset requires the installation of Boost version ${MCRL2_BOOST_MINIMUM_VERSION} or higher." )
+  message( STATUS "See http://www.mcrl2.org/release/user_manual/build_instructions/index.html for" )
   message( FATAL_ERROR "instructions on building mCRL2 with an external version of boost.")
-endif(NOT Boost_FOUND)
+endif()
 
-if (Boost_FOUND)
-   include_directories(${Boost_INCLUDE_DIRS})
-   link_directories(${Boost_LIBRARY_DIRS})
-endif (Boost_FOUND)
+# From this point on we assume that Boost_FOUND!
+##----------------------------------------------
+# Boost libraries are available for inclusion globally
+include_directories(${Boost_INCLUDE_DIRS})
 
+# We only use header-only libraries, so no need to add the link directories
+#link_directories(${Boost_LIBRARY_DIRS})
 
 ## Print additional warnings
-if( Boost_FOUND AND APPLE AND BUILD_SHARED_LIBS )
-  message( STATUS "")
-  message( STATUS "Warning: Ensure that \"${Boost_LIBRARY_DIRS}\" is included in DYLD_LIBRARY_PATH.")
-  message( STATUS "")
-endif( Boost_FOUND AND APPLE AND BUILD_SHARED_LIBS )
+#if( APPLE AND BUILD_SHARED_LIBS )
+#  message( STATUS "")
+#  message( STATUS "Warning: Ensure that \"${Boost_LIBRARY_DIRS}\" is included in DYLD_LIBRARY_PATH.")
+#  message( STATUS "")
+#endif()
 

@@ -12,7 +12,6 @@
 #ifndef INFO_H
 #define INFO_H
 
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/utilities.h"
@@ -51,15 +50,21 @@ class InternalFormatInfo
     /// \brief equation, when determining the order of expressions.
     bool f_reverse;
 
-    Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2)
+    Compare_Result lexico(
+              const Compare_Result &a_result1, 
+              const Compare_Result &a_result2)
     {
       return (a_result1 != compare_result_equal) ? a_result1 : a_result2;
     }
 
-    Compare_Result compare_address(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    Compare_Result compare_address(
+              const atermpp::aterm &a_term1, 
+              const atermpp::aterm &a_term2)
     {
-      long v_address1 = reinterpret_cast < long >((ATermAppl)a_term1);
-      long v_address2 = reinterpret_cast < long >((ATermAppl)a_term2);
+      // The code below does not seem to need to use explicit adresses. Code can
+      // directly use <, >, == on aterms, which also compares adresses.
+      long v_address1 = reinterpret_cast < long >(atermpp::detail::address(a_term1));
+      long v_address2 = reinterpret_cast < long >(atermpp::detail::address(a_term2));
 
       if (v_address1 < v_address2)
       {
@@ -72,7 +77,7 @@ class InternalFormatInfo
       return compare_result_equal;
     }
 
-    bool alpha1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2, size_t a_number)
+    bool alpha1(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2, size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -85,7 +90,7 @@ class InternalFormatInfo
       }
     }
 
-    bool beta1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    bool beta1(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2)
     {
       const atermpp::aterm v_operator_1 = get_operator(a_term1);
       const atermpp::aterm v_operator_2 = get_operator(a_term2);
@@ -99,22 +104,22 @@ class InternalFormatInfo
 
       public:
         // constructor
-        equals(const atermpp::aterm_appl t1):
+        equals(const atermpp::aterm_appl &t1):
           m_t(t1)
         {}
 
-        bool operator()(const atermpp::aterm_appl t) const
+        bool operator()(const atermpp::aterm_appl &t) const
         {
           return (t==m_t);
         }
     };
 
-    static bool occurs(const atermpp::aterm_appl t1, const atermpp::aterm_appl t2)
+    static bool occurs(const atermpp::aterm_appl &t1, const atermpp::aterm_appl &t2)
     {
       return atermpp::find_if(t1,equals(t2))!=atermpp::aterm_appl();
     }
 
-    bool gamma1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    bool gamma1(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2)
     {
       const atermpp::aterm v_operator_1 = get_operator(a_term1);
       const atermpp::aterm v_operator_2 = get_operator(a_term2);
@@ -126,7 +131,7 @@ class InternalFormatInfo
       return occurs(a_term2, a_term1);
     } */
 
-    bool majo1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2, size_t a_number)
+    bool majo1(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2, size_t a_number)
     {
       if (get_number_of_arguments(a_term2) == a_number)
       {
@@ -139,7 +144,7 @@ class InternalFormatInfo
       }
     }
 
-    bool lex1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2, size_t a_number)
+    bool lex1(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2, size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -161,7 +166,7 @@ class InternalFormatInfo
     }
 
     /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c a_guard.
-    int get_guard_structure(atermpp::aterm_appl a_guard)
+    int get_guard_structure(const atermpp::aterm_appl &a_guard)
     {
       if (is_variable(a_guard))
       {
@@ -183,7 +188,7 @@ class InternalFormatInfo
     }
 
     /// \brief Compares the structure of two guards.
-    Compare_Result compare_guard_structure(const atermpp::aterm_appl a_guard1, const atermpp::aterm_appl a_guard2)
+    Compare_Result compare_guard_structure(const atermpp::aterm_appl &a_guard1, const atermpp::aterm_appl &a_guard2)
     {
       if (get_guard_structure(a_guard1) < get_guard_structure(a_guard2))
       {
@@ -197,7 +202,7 @@ class InternalFormatInfo
     }
 
     /// \brief Compares two guards by their arguments.
-    Compare_Result compare_guard_equality(const atermpp::aterm_appl a_guard1, const atermpp::aterm_appl a_guard2)
+    Compare_Result compare_guard_equality(const atermpp::aterm_appl &a_guard1, const atermpp::aterm_appl &a_guard2)
     {
       if (f_full && is_equality(a_guard1) && is_equality(a_guard2))
       {
@@ -220,7 +225,7 @@ class InternalFormatInfo
     }
 
     /// \brief Compares terms by their type.
-    Compare_Result compare_term_type(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    Compare_Result compare_term_type(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2)
     {
       if (is_variable(a_term1) && !is_variable(a_term2))
       {
@@ -234,7 +239,7 @@ class InternalFormatInfo
     }
 
     /// \brief Compares terms by checking whether one is a part of the other.
-    Compare_Result compare_term_occurs(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    Compare_Result compare_term_occurs(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2)
     {
       if (occurs(a_term1, a_term2))
       {
@@ -252,7 +257,7 @@ class InternalFormatInfo
     InternalFormatInfo(boost::shared_ptr<detail::Rewriter> a_rewriter)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else_bool = (f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
+      f_if_then_else_bool = atermpp::aterm_int((f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))[0]);
     }
 
     /// \brief Destructor with no particular functionality.
@@ -272,7 +277,7 @@ class InternalFormatInfo
     }
 
     /// \brief Compares two guards.
-    Compare_Result compare_guard(const atermpp::aterm_appl a_guard1, const atermpp::aterm_appl a_guard2)
+    Compare_Result compare_guard(const atermpp::aterm_appl &a_guard1, const atermpp::aterm_appl &a_guard2)
     {
       return lexico(
                lexico(
@@ -284,7 +289,7 @@ class InternalFormatInfo
     }
 
     /// \brief Compares two terms.
-    Compare_Result compare_term(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    Compare_Result compare_term(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2)
     {
       return lexico(
                lexico(
@@ -296,7 +301,7 @@ class InternalFormatInfo
     }
 
     /// \brief Compares two terms using lpo.
-    bool lpo1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
+    bool lpo1(const atermpp::aterm_appl &a_term1, const atermpp::aterm_appl &a_term2)
     {
       if (is_variable(a_term1) && is_variable(a_term2))
       {
@@ -318,12 +323,12 @@ class InternalFormatInfo
 
     /// \brief Indicates whether or not a term has type bool.
     /// \brief Indicates whether or not a term has type bool.
-    bool has_type_bool(const data_expression a_term)
+    bool has_type_bool(const data_expression &a_term)
     {
       return a_term.sort()==sort_bool::bool_();
     }
 
-    bool has_type_bool(const atermpp::aterm_appl a_term)
+    bool has_type_bool(const atermpp::aterm_appl &a_term)
     {
       return f_rewriter->fromRewriteFormat(a_term).sort()==sort_bool::bool_();
     }
@@ -332,7 +337,7 @@ class InternalFormatInfo
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    size_t get_number_of_arguments(const atermpp::aterm_appl a_term)
+    size_t get_number_of_arguments(const atermpp::aterm_appl &a_term)
     {
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term))
       {
@@ -345,45 +350,45 @@ class InternalFormatInfo
     }
 
     /// \brief Returns the main operator of the term \c a_term;
-    atermpp::aterm get_operator(const atermpp::aterm_appl a_term) 
+    atermpp::aterm get_operator(const atermpp::aterm_appl &a_term) 
     {
-      return a_term(0);
+      return a_term[0];
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    atermpp::aterm_appl get_argument(const atermpp::aterm_appl a_term, const size_t a_number)
+    atermpp::aterm_appl get_argument(const atermpp::aterm_appl &a_term, const size_t a_number)
     {
-      return a_term(a_number + 1);
+      return atermpp::aterm_appl(a_term[a_number + 1]);
     }
 
     /// \brief Indicates whether or not a term is equal to \c true.
-    bool is_true(const atermpp::aterm_appl a_term)
+    bool is_true(const atermpp::aterm_appl &a_term)
     {
       return a_term==f_rewriter->internal_true;
     }
 
     /// \brief Indicates whether or not a term is equal to \c false.
-    bool is_false(const atermpp::aterm_appl a_term)
+    bool is_false(const atermpp::aterm_appl &a_term)
     {
       return a_term == f_rewriter->internal_false;
     }
 
     /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function
     /// \brief with type Bool -> Bool -> Bool -> Bool.
-    bool is_if_then_else_bool(const atermpp::aterm_appl a_term)
+    bool is_if_then_else_bool(const atermpp::aterm_appl &a_term)
     {
-      atermpp::aterm v_function = a_term(0);
+      atermpp::aterm v_function = a_term[0];
       return (v_function == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
     }
 
     /// \brief Indicates whether or not a term is a single variable.
-    virtual bool is_variable(const atermpp::aterm_appl a_term)
+    virtual bool is_variable(const atermpp::aterm_appl &a_term)
     {
       return mcrl2::data::is_variable(a_term);
     } 
 
     /// \brief Indicates whether or not a term is an equality.
-    virtual bool is_equality(atermpp::aterm_appl a_term)
+    virtual bool is_equality(const atermpp::aterm_appl &a_term)
     {
       if (get_number_of_arguments(a_term) == 2)
       {

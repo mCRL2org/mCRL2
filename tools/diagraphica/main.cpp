@@ -1,4 +1,3 @@
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/qt_tool.h"
 #include "mainwindow.h"
@@ -38,7 +37,5 @@ class diagraphica_tool : public diagraphica_base
 
 int main(int argc, char *argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return diagraphica_tool().execute(argc, argv);
 }

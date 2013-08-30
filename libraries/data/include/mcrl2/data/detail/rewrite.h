@@ -11,13 +11,11 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
-#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/rewrite_strategy.h"
-// #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
@@ -27,7 +25,7 @@ namespace data
 namespace detail
 {
 
-atermpp::aterm_appl toInner(const data_expression term, const bool add_opids);
+atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids);
 
 /**
  * \brief Rewriter interface class.
@@ -49,8 +47,8 @@ class Rewriter
   public:
     data::set_identifier_generator generator;  //name for variables.
 
-    typedef mutable_indexed_substitution<data::variable, atermpp::vector< atermpp::aterm_appl > > internal_substitution_type;
-    typedef mutable_indexed_substitution<data::variable, atermpp::vector< data::data_expression > > substitution_type;
+    typedef mutable_indexed_substitution<data::variable, std::vector< atermpp::aterm_appl > > internal_substitution_type;
+    typedef mutable_indexed_substitution<data::variable, std::vector< data::data_expression > > substitution_type;
 
     atermpp::aterm_appl internal_true;
     atermpp::aterm_appl internal_false;
@@ -67,26 +65,16 @@ class Rewriter
      **/
     Rewriter()
     {
-      internal_true.protect();
       internal_true=toInner(sort_bool::true_(),true);
-      internal_false.protect();
       internal_false=toInner(sort_bool::false_(),true);
-      internal_not.protect();
-      internal_not=toInner(sort_bool::not_(),true)(0);
-      internal_and.protect();
-      internal_and=toInner(sort_bool::and_(),true)(0);
-      internal_or.protect();
-      internal_or=toInner(sort_bool::or_(),true)(0);
+      internal_not=toInner(sort_bool::not_(),true)[0];
+      internal_and=toInner(sort_bool::and_(),true)[0];
+      internal_or=toInner(sort_bool::or_(),true)[0];
     }
 
     /** \brief Destructor. */
     virtual ~Rewriter()
     {
-      internal_true.unprotect();
-      internal_false.unprotect();
-      internal_not.unprotect();
-      internal_and.unprotect();
-      internal_or.unprotect();
     }
 
     /**
@@ -101,7 +89,7 @@ class Rewriter
      * \return The normal form of Term.
      **/
 
-    virtual data_expression rewrite(const data_expression term, substitution_type &sigma) = 0;
+    virtual data_expression rewrite(const data_expression &term, substitution_type &sigma) = 0;
 
     /**
      * \brief Rewrite a list of mCRL2 data terms.
@@ -110,7 +98,7 @@ class Rewriter
      * \return The list Terms where each element is replaced by its
      *         normal form.
      **/
-    virtual data_expression_list rewrite_list(const data_expression_list Terms, substitution_type &sigma);
+    virtual data_expression_list rewrite_list(const data_expression_list &Terms, substitution_type &sigma);
 
     /**
      * \brief Convert an mCRL2 data term to a term in the internal
@@ -118,14 +106,14 @@ class Rewriter
      * \param Term A mCRL2 data term.
      * \return The term Term in the internal rewriter format.
      **/
-    virtual atermpp::aterm_appl toRewriteFormat(const data_expression Term);
+    virtual atermpp::aterm_appl toRewriteFormat(const data_expression &Term);
     /**
      * \brief Convert a term in the internal rewriter format to a
      *        mCRL2 data term.
      * \param Term A term in the internal rewriter format.
      * \return The term Term as an mCRL2 data term.
      **/
-    data_expression fromRewriteFormat(const atermpp::aterm_appl Term);
+    data_expression fromRewriteFormat(const atermpp::aterm_appl &Term);
     /**
      * \brief Rewrite a term in the internal rewriter format.
      * \param Term The term to be rewritten. This term should be
@@ -133,7 +121,7 @@ class Rewriter
      * \return The normal form of Term.
      **/
     virtual atermpp::aterm_appl rewrite_internal(
-                     const atermpp::aterm_appl Term,
+                     const atermpp::aterm_appl &Term,
                      internal_substitution_type &sigma);
     /**
      * \brief Rewrite a list of terms in the internal rewriter
@@ -144,7 +132,7 @@ class Rewriter
      *         normal form.
      **/
     virtual atermpp::term_list < atermpp::aterm_appl > rewrite_internal_list(
-                     const atermpp::term_list < atermpp::aterm_appl > Terms,
+                     const atermpp::term_list < atermpp::aterm_appl > &Terms,
                      internal_substitution_type &sigma);
 
     /**
@@ -154,7 +142,7 @@ class Rewriter
      *         that some rewriters do not support adding of rewrite
      *         rules altogether and will always return false.
      **/
-    virtual bool addRewriteRule(const data_equation rule);
+    virtual bool addRewriteRule(const data_equation &rule);
     /**
      * \brief Remove a rewrite rule from this rewriter (if present).
      * \param Rule A mCRL2 rewrite rule (DataEqn).
@@ -163,7 +151,7 @@ class Rewriter
      *         rewrite rules altogether and will always return
      *         false.
      **/
-    virtual bool removeRewriteRule(const data_equation rule);
+    virtual bool removeRewriteRule(const data_equation &rule);
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
@@ -171,11 +159,11 @@ class Rewriter
          const atermpp::aterm_appl termInInnerFormat,
          internal_substitution_type &sigma); */
     atermpp::aterm_appl internal_existential_quantifier_enumeration(
-         const atermpp::aterm_appl termInInnerFormat,
+         const atermpp::aterm_appl &termInInnerFormat,
          internal_substitution_type &sigma);
     atermpp::aterm_appl internal_existential_quantifier_enumeration(
-         const variable_list vl,
-         const atermpp::aterm_appl t1,
+         const variable_list &vl,
+         const atermpp::aterm_appl &t1,
          const bool t1_is_normal_form,
          internal_substitution_type &sigma);
 
@@ -183,18 +171,18 @@ class Rewriter
          const atermpp::aterm_appl termInInnerFormat,
          internal_substitution_type &sigma); */
     atermpp::aterm_appl internal_universal_quantifier_enumeration(
-         const atermpp::aterm_appl termInInnerFormat,
+         const atermpp::aterm_appl &termInInnerFormat,
          internal_substitution_type &sigma);
     atermpp::aterm_appl internal_universal_quantifier_enumeration(
-         const variable_list vl,
-         const atermpp::aterm_appl t1,
+         const variable_list &vl,
+         const atermpp::aterm_appl &t1,
          const bool t1_is_normal_form,
          internal_substitution_type &sigma);
 
     // Rewrite a where expression where the subdataexpressions are in internal format.
     // It yields a term without a where expression.
     atermpp::aterm_appl rewrite_where(
-                      const atermpp::aterm_appl term,
+                      const atermpp::aterm_appl &term,
                       internal_substitution_type &sigma);
 
     // Rewrite an expression with a lambda as outermost symbol. The expression is in internal format.
@@ -202,14 +190,14 @@ class Rewriter
     // of sigma.
 
     atermpp::aterm_appl rewrite_single_lambda(
-                      const variable_list vl,
-                      const atermpp::aterm_appl body,
+                      const variable_list &vl,
+                      const atermpp::aterm_appl &body,
                       const bool body_in_normal_form,
                       internal_substitution_type &sigma);
 
     atermpp::aterm_appl rewrite_lambda_application(
-                      const atermpp::aterm_appl lambda_term,
-                      const atermpp::aterm_appl body,
+                      const atermpp::aterm_appl &lambda_term,
+                      const atermpp::aterm_appl &body,
                       internal_substitution_type &sigma);
 
 
@@ -217,7 +205,7 @@ class Rewriter
 
     mcrl2::data::data_specification m_data_specification_for_enumeration;
     atermpp::aterm_appl internal_quantifier_enumeration(
-         const atermpp::aterm_appl termInInnerFormat,
+         const atermpp::aterm_appl &termInInnerFormat,
          internal_substitution_type &sigma);
 
 };
@@ -239,30 +227,40 @@ Rewriter* createRewriter(
  * \param DataEqn The mCRL2 data equation to be checked.
  * \throw std::runtime_error containing a reason why DataEqn is not a valid rewrite rule.
  **/
-void CheckRewriteRule(const data_equation dataeqn);
+void CheckRewriteRule(const data_equation &dataeqn);
 
 /**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.
  * \param DataEqn The mCRL2 data equation to be checked.
  * \return Whether or not DataEqn is a valid rewrite rule.
  **/
-bool isValidRewriteRule(const data_equation dataeqn);
+bool isValidRewriteRule(const data_equation &dataeqn);
 
-// extern size_t num_apples;
-extern std::vector <AFun> apples;
+extern std::vector <atermpp::function_symbol> apples;
 
-/** \brief Get the AFun number of the internal application symbol with given arity. */
-inline AFun get_appl_afun_value(size_t arity)
+inline void extend_appl_afun_values(const size_t arity)
+{
+  for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
+  {
+    assert(old_num==apples.size());
+    apples.push_back(atermpp::function_symbol("#REWR#",old_num));
+  }
+}
+
+/** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
+inline const atermpp::function_symbol& get_appl_afun_value(const size_t arity)
 {
   if (arity >= apples.size())
   {
-    for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
-    {
-      assert(old_num==apples.size());
-      apples.push_back(ATmakeAFun("#REWR#",old_num,false));
-      ATprotectAFun(apples[old_num]);
-    }
+    extend_appl_afun_values(arity);
   }
+  assert(arity<apples.size());
+  return apples[arity];
+}
+
+/** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
+inline const atermpp::function_symbol& get_appl_afun_value_no_check(const size_t arity)
+{
   assert(arity<apples.size());
   return apples[arity];
 }
@@ -273,64 +271,64 @@ inline AFun get_appl_afun_value(size_t arity)
  *        of Apply and ApplyArray the first element of the list
  *        or array is the function symbol.
  **/
-inline atermpp::aterm_appl Apply(const atermpp::term_list < atermpp::aterm > l)
+// inline atermpp::aterm_appl Apply(const atermpp::term_list < atermpp::aterm > &l)
+// {
+//   return atermpp::aterm_appl(get_appl_afun_value(l.size()),l.begin(),l.end());
+// }
+
+/** \brief See Apply. */
+template <class Iterator>
+inline atermpp::aterm_appl ApplyArray(const size_t size, const Iterator begin, const Iterator end)
 {
-  return ATmakeApplList(get_appl_afun_value(l.size()),l);
+  return atermpp::aterm_appl(get_appl_afun_value(size), begin, end);
 }
 
 /** \brief See Apply. */
-inline atermpp::aterm_appl ApplyArray(const size_t size, const atermpp::aterm *l)
+template <class Iterator, class Function>
+inline atermpp::aterm_appl ApplyArray(const size_t size, const Iterator begin, const Iterator end, Function f)
 {
-  return ATmakeApplArray(get_appl_afun_value(size), (ATerm*)l);
+  return atermpp::aterm_appl(get_appl_afun_value(size), begin, end, f);
 }
 
 
 /** \brief See Apply. */
-inline atermpp::aterm_appl Apply0(const atermpp::aterm head)
+inline atermpp::aterm_appl Apply0(const atermpp::aterm &head)
 {
- return ATmakeAppl1(get_appl_afun_value(1),(ATerm)head);
+  return atermpp::aterm_appl(get_appl_afun_value(1),head);
 }
 
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply1(
-         const atermpp::aterm head,
-         const atermpp::aterm_appl arg1)
+         const atermpp::aterm &head,
+         const atermpp::aterm_appl &arg1)
 {
- return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,(ATerm)(ATermAppl)arg1);
+  return atermpp::aterm_appl(get_appl_afun_value(2),head,arg1);
 }
 
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply2(
-         const atermpp::aterm head,
-         const atermpp::aterm_appl arg1,
-         const atermpp::aterm_appl arg2)
+         const atermpp::aterm &head,
+         const atermpp::aterm_appl &arg1,
+         const atermpp::aterm_appl &arg2)
 {
- return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,(ATerm)(ATermAppl)arg1,(ATerm)(ATermAppl)arg2);
+  return atermpp::aterm_appl(get_appl_afun_value(3),head,arg1,arg2);
 }
 
 /** \brief See Apply. */
 inline atermpp::aterm_appl Apply3(
-         const atermpp::aterm head,
-         const atermpp::aterm_appl arg1,
-         const atermpp::aterm_appl arg2,
-         const atermpp::aterm_appl arg3)
+         const atermpp::aterm &head,
+         const atermpp::aterm_appl &arg1,
+         const atermpp::aterm_appl &arg2,
+         const atermpp::aterm_appl &arg3)
 {
- return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,(ATerm)(ATermAppl)arg1,(ATerm)(ATermAppl)arg2,(ATerm)(ATermAppl)arg3);
+  return atermpp::aterm_appl(get_appl_afun_value(4),head,arg1, arg2,arg3);
 }
 
 /** The functions below are used for fromInner and toInner(c). */
 
-size_t get_num_opids();
-
-function_symbol get_int2term(const size_t n);
-
-atermpp::map< function_symbol, atermpp::aterm_int >::const_iterator term2int_begin();
-
-atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end();
-
-inline size_t getArity(const data::function_symbol op)
+inline size_t getArity(const data::function_symbol &op)
 {
   // This function calculates the cumulated length of all
   // potential function arguments.
@@ -347,12 +345,43 @@ inline size_t getArity(const data::function_symbol op)
   return arity;
 }
 
+extern std::map< function_symbol, atermpp::aterm_int > term2int;
+extern std::vector < data::function_symbol > int2term;
 
-atermpp::aterm_int OpId2Int(const function_symbol);
+inline size_t get_num_opids()
+{
+  return int2term.size();
+}
 
-data_expression fromInner(const atermpp::aterm_appl term);
+inline function_symbol &get_int2term(const size_t n)
+{
+  assert(n<int2term.size());
+  return int2term[n];
+}
 
-atermpp::aterm_appl toInner(const data_expression Term, const bool add_opids);
+inline const atermpp::aterm_int &OpId2Int_aux(const function_symbol &term)
+{
+  const size_t num_opids=get_num_opids();
+  atermpp::aterm_int i(num_opids);
+  term2int[term] =  i;
+  assert(int2term.size()==num_opids);
+  int2term.push_back(term);
+  return term2int[term];
+}
+
+inline const atermpp::aterm_int &OpId2Int(const function_symbol &term)
+{
+  std::map< function_symbol, atermpp::aterm_int >::const_iterator f = term2int.find(term);
+  if (f == term2int.end())
+  {
+    return OpId2Int_aux(term);
+  }
+  return f->second;
+}
+
+data_expression fromInner(const atermpp::aterm_appl &term);
+
+atermpp::aterm_appl toInner(const data_expression &Term, const bool add_opids);
 
 }
 }
