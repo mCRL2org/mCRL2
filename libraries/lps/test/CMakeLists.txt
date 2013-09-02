@@ -15,6 +15,8 @@ cmake_minimum_required(VERSION 2.6)
 set(PREFIX "lps")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include )
@@ -32,6 +34,7 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_core
      mcrl2_data
      mcrl2_lps
+     mcrl2_lts
      mcrl2_syntax
   )
 
