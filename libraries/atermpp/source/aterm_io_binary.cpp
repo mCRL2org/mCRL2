@@ -1,10 +1,9 @@
 /* includes */
 
 #include <cstdio>
-#include <stdlib.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cassert>
 #include <stdexcept>
-#include <iomanip>
 
 #ifdef WIN32
 #include <fcntl.h>
@@ -318,7 +317,7 @@ static size_t readString(istream &is)
     text_buffer = (char*) realloc(text_buffer, text_buffer_size);
     if (!text_buffer)
     {
-      throw std::runtime_error("out of memory in readString (" + to_string(text_buffer_size) + ")");
+      throw aterm_io_error("out of memory in readString (" + to_string(text_buffer_size) + ")");
     }
   }
 
@@ -364,7 +363,7 @@ static sym_entry* get_top_symbol(const aterm &t, const std::vector<size_t> &inde
   }
   else
   {
-    throw std::runtime_error("get_top_symbol: illegal term (" + to_string(t) + ")");
+    throw aterm_io_error("get_top_symbol: illegal term (" + to_string(t) + ")");
   }
   return &sym_entries[index[sym.number()]];
 }
@@ -412,7 +411,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
                   sizeof(top_symbol*));
   if (!tss->toptable)
   {
-    throw std::runtime_error("build_arg_tables: out of memory (table_size: " + to_string(tss->toptable_size) + ")");
+    throw aterm_io_error("build_arg_tables: out of memory (table_size: " + to_string(tss->toptable_size) + ")");
   }
 
   index = 0;
@@ -479,7 +478,7 @@ static void build_arg_tables(const std::vector<size_t> &index)
         }
         else
         {
-          throw std::runtime_error("build_arg_tables: illegal term");
+          throw aterm_io_error("build_arg_tables: illegal term");
         }
         topsym = get_top_symbol(arg,index);
         if (!topsym->nr_times_top++)
@@ -741,7 +740,7 @@ write_baf(const aterm &t, ostream &os)
                                  sizeof(trm_bucket*));
       if (!sym_entries[cur].termtable)
       {
-        throw std::runtime_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
+        throw aterm_io_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
       }
 
       index[lcv] = cur;
@@ -796,7 +795,7 @@ void write_term_to_binary_stream(const aterm &t, std::ostream &os)
 
   if (!write_baf(t, os))
   {
-    throw std::runtime_error("Fail to write term to string");
+    throw aterm_io_error("Fail to write term to string");
   }
 }
 
@@ -867,17 +866,17 @@ static bool read_all_symbols(istream &is)
     {
       read_symbols[i].nr_topsyms = (size_t*)calloc(arity, sizeof(size_t));
       if (!read_symbols[i].nr_topsyms)
-        throw std::runtime_error("read_all_symbols: out of memory trying to allocate "
+        throw aterm_io_error("read_all_symbols: out of memory trying to allocate "
                            "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].sym_width = (size_t*)calloc(arity, sizeof(size_t));
       if (!read_symbols[i].sym_width)
-        throw std::runtime_error("read_all_symbols: out of memory trying to allocate "
+        throw aterm_io_error("read_all_symbols: out of memory trying to allocate "
                            "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].topsyms = (size_t**)calloc(arity, sizeof(size_t*));
       if (!read_symbols[i].topsyms)
-        throw std::runtime_error("read_all_symbols: out of memory trying to allocate "
+        throw aterm_io_error("read_all_symbols: out of memory trying to allocate "
                            "space for " + to_string(arity) + " arguments.");
     }
 
@@ -889,7 +888,7 @@ static bool read_all_symbols(istream &is)
       read_symbols[i].topsyms[j] = (size_t*)calloc(val, sizeof(size_t));
       if (!read_symbols[i].topsyms[j])
       {
-        throw std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " top symbols.");
+        throw aterm_io_error("read_symbols: could not allocate space for " + to_string(val) + " top symbols.");
       }
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
@@ -1035,18 +1034,13 @@ aterm read_baf(istream &is)
   }
   if (val != BAF_MAGIC)
   {
-    throw std::runtime_error("read_baf: error reading BAF_MAGIC!");
+    throw aterm_io_error("read_baf: error reading BAF_MAGIC!");
   }
 
   std::size_t version = readInt(is);
   if (version != BAF_VERSION)
   {
-    std::ostringstream ss;
-    ss << std::showbase // show the 0x prefix
-       << std::internal // fill between the prefix and the number
-       << std::setfill('0'); // fill with 0s
-    ss << std::hex << std::setw(4) << version;
-    throw mcrl2::runtime_error("wrong version number " + ss.str());
+    throw baf_version_error("wrong BAF version number ", version, BAF_VERSION);
   }
 
   nr_unique_symbols = readInt(is);
@@ -1057,7 +1051,7 @@ aterm read_baf(istream &is)
 
   if (!read_all_symbols(is))
   {
-    throw std::runtime_error("read_baf: failed to read all symbols!");
+    throw aterm_io_error("read_baf: failed to read all symbols!");
   }
 
   val = readInt(is);
@@ -1072,7 +1066,7 @@ aterm read_term_from_binary_stream(istream &is)
   aterm result=read_baf(is);
   if (!result.defined())
   {
-    throw std::runtime_error("Failed to read term from binary file.");
+    throw aterm_io_error("Failed to read term from binary file.");
   }
   return result;
 }

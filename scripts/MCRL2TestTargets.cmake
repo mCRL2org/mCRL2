@@ -207,7 +207,7 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2"				 "lts2lps;lts2pbes")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2"				 "lpsparunfold;lpsrealelm")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps;lts2pbes")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps;lts2pbes;lps2lts;ltsinfo;ltsconvert;ltscompare;pbes2bool;pbes2bes;pbesinst;besconvert;bespp;besinfo;txt2bes;bessolve;pbespgsolve") #lps2lts and pbes2bool because they cause timeouts on most platforms, ltsinfo, ltsconvert and ltscompare because they depend on the lts.
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2"			 "lpsparunfold")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm;lps2lts;ltsinfo;ltsconvert;ltscompare")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")

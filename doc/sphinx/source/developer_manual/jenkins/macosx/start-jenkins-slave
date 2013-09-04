@@ -1,0 +1,15 @@
+#!/bin/bash
+cd /scratch
+
+jenkinshost=`basename $HOSTNAME .win.tue.nl`
+
+delay=1
+ret=1
+while [ "$ret" != "0" ]
+do
+  sleep $delay
+  wget --retry-connrefused -t0 -Oslave.jar http://mcrl2build1.win.tue.nl:8080/jnlpJars/slave.jar
+  ret=$?
+  delay=$delay * 2
+done
+exec java -jar slave.jar -jnlpUrl http://mcrl2build1.win.tue.nl:8080/computer/${jenkinshost}/slave-agent.jnlp -secret 393b02f67d25133a91d7cd3ac24751522bbda6b22c6ed9d883b04c47cf1d6e11

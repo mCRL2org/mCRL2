@@ -1,0 +1,41 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:        jenkins-slave
+# Required-Start:  $networking
+# Required-Stop:   $networking
+# Default-Start:   3 5
+# Default-Stop:    0 1 2 6
+# Description:     Start Jenkins slave.
+### END INIT INFO
+
+# chkconfig: 345 91 19
+# description: Jenkins slave
+
+# chckconfig --add /etc/init.d/jenkins-slave
+# ntsysv
+# service jenkins-slave start
+
+OWNER="jenkins"
+
+case "$1" in
+  start)
+    echo -n "Starting Jenkins slave: "
+    PID=`su - $OWNER /usr/local/bin/start-jenkins-slave > /dev/null & echo $!`
+    echo $PID > /var/lock/jenkins-slave
+    echo "OK"
+    ;;
+  stop)
+    echo -n "Stopping Jenkins slave: "
+    kill $(cat /var/lock/jenkins-slave)
+    rm -f /var/lock/jenkins-slave
+    echo "OK"
+    ;;
+  reload|restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 start|stop|restart|reload"
+    exit 1
+esac
+exit 0

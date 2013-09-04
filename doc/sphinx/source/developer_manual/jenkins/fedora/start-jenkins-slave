@@ -1,0 +1,13 @@
+#!/bin/bash
+cd /scratch
+
+delay=1
+ret=1
+while [ "$ret" != "0" ]
+do
+  sleep $delay
+  wget --retry-connrefused -t0 -Oslave.jar http://mcrl2build1.win.tue.nl:8080/jnlpJars/slave.jar
+  ret=$?
+  delay=$delay * 2
+done
+exec java -jar slave.jar -jnlpUrl http://mcrl2build1.win.tue.nl:8080/computer/`hostname`/slave-agent.jnlp -secret df50eed25990889a60872d9e0ba1b0ca756f0a1e3d7b4b1ce76e4b1fcf02faf8

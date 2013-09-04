@@ -5019,19 +5019,29 @@ class specification_basic_type:public boost::noncopyable
     };
     /************** Merge summands using enumerated type ***********************/
 
+    /* The function below returns true if the variable var could be mapped 
+       on an existing variable v' in matchinglist. The pars and args form pair
+       form a substitution that will be extended with the pair [var,v']. i
+       It returns false if the variable is new.
 
+       If var is added (and not mapped on some other variable in the matchinglist/aka v)  
+       it is checked whether var occurs in  v or in the process_parameters,
+       in which case var is renamed to a fresh variable. The renaming is added
+       to the substitution encoded in pars/args.
+    */
+       
+       
     bool mergeoccursin(
       variable& var,
       const variable_list &v,
       variable_list& matchinglist,
       variable_list& pars,
-      data_expression_list& args)
+      data_expression_list& args,
+      const variable_list &process_parameters)
     {
       variable_list auxmatchinglist;
 
-      bool result=false;
-
-      /* First find out whether var:sort can be matched on a
+      /* First find out whether var:sort can be matched to a
          term in the matching list */
 
       /* first find out whether the variable occurs in the matching
@@ -5044,7 +5054,6 @@ class specification_basic_type:public boost::noncopyable
         if (var.sort()==var1.sort())
         {
           /* sorts match, so, we join the variables */
-          result=true;
           if (var!=var1)
           {
             pars.push_front(var);
@@ -5055,7 +5064,8 @@ class specification_basic_type:public boost::noncopyable
           {
             auxmatchinglist.push_front(*i);
           }
-          break;
+          matchinglist=reverse(auxmatchinglist);
+          return true;
         }
         else
         {
@@ -5063,31 +5073,43 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      /* turn auxmatchinglist back in normal order, and put result
+      /* turn auxmatchinglist back in normal order, and put the result
          in *matchinglist */
 
       matchinglist=reverse(auxmatchinglist);
 
-      if (!result)
+      /* in this case no matching argument has been found.
+      So, we must find out whether *var is an allowed variable, not
+      occuring in the variablelist v.
+      But if so, we must replace it by a new one. */
+      for (variable_list::const_iterator i=v.begin() ; i!=v.end() ; ++i)
       {
-        /* in this case no matching argument has been found.
-        So, we must find out whether *var is an allowed variable, not
-        occuring in the variablelist v.
-        But if so, we must replace it by a new one. */
-        for (variable_list::const_iterator i=v.begin() ; i!=v.end() ; ++i)
+        variable var1=*i;
+        if (var.name()==var1.name())
         {
-          variable var1=*i;
-          if (var.name()==var1.name())
-          {
-            pars.push_front(var);
-            var=get_fresh_variable(var.name(),var.sort());
-            args.push_front(data_expression(var));
-            break;
-          }
+          pars.push_front(var);
+          var=get_fresh_variable(var.name(),var.sort());
+          args.push_front(data_expression(var));
+          return false;
         }
       }
 
-      return result;
+      /* Check whether the variable occurs in the prcoess parameter list, in which case
+         it also needs to be renamed */
+      for (variable_list::const_iterator i=process_parameters.begin() ; i!=process_parameters.end() ; ++i)
+      {
+        variable var1=*i;
+        if (var.name()==var1.name())
+        {
+          pars.push_front(var);
+          var=get_fresh_variable(var.name(),var.sort());
+          args.push_front(data_expression(var));
+          return false;
+        }
+      }
+      
+
+      return false;
     }
 
     data_expression_list extend(const data_expression &c, const data_expression_list &cl)
@@ -5138,14 +5160,17 @@ class specification_basic_type:public boost::noncopyable
 /* Join the variables of v1 to v2 and rename the variables in v1
  * if needed. The conditionlist gives conditions to restrain variables
  * that did not occur in the other list. renaming pars and args give
- * renamings to be applied if variables in v1 had to be renamed */
+ * renamings to be applied if variables in v1 had to be renamed. It
+ * is not allowed to rename to names already occurring in the parameter
+ * list. */
 
    variable_list merge_var(
       const variable_list &v1,
       const variable_list &v2,
       std::vector < variable_list> &renamings_pars,
       std::vector < data_expression_list> &renamings_args,
-      data_expression_list& conditionlist)
+      data_expression_list& conditionlist,
+      const variable_list &process_parameters)
     {
       data_expression_list renamingargs;
       variable_list renamingpars;
@@ -5162,7 +5187,7 @@ class specification_basic_type:public boost::noncopyable
       {
         variable v=*i1;
         if (!mergeoccursin(v,v2,
-                           matchinglist,renamingpars,renamingargs))
+                           matchinglist,renamingpars,renamingargs,process_parameters))
         {
           result.push_front(v);
           conditionlist=extend_conditions(v,conditionlist);
@@ -5345,7 +5370,7 @@ class specification_basic_type:public boost::noncopyable
       for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
       {
         const variable_list sumvars=walker->summation_variables();
-        resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist);
+        resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
       }
 
       if (options.binary)
@@ -5688,7 +5713,6 @@ class specification_basic_type:public boost::noncopyable
         for (action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
         {
           const assignment_list nextstate=walker->assignments();
-
           assert(auxrename_list_pars!=rename_list_pars.end());
           assert(auxrename_list_args!=rename_list_args.end());
           const variable_list auxpars= *auxrename_list_pars;
@@ -5782,7 +5806,7 @@ class specification_basic_type:public boost::noncopyable
       const enumtype& e,
       size_t n,
       const deadlock_summand_vector &deadlock_summands,
-      const variable_list & /* parameters */)
+      const variable_list & parameters)
     {
       /* This function gets a list of summands, with
          the same multiaction and time
@@ -5806,7 +5830,7 @@ class specification_basic_type:public boost::noncopyable
       for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end() ; ++walker)
       {
         const variable_list sumvars=walker->summation_variables();
-        resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist);
+        resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
       }
 
       if (options.binary)
@@ -7538,7 +7562,8 @@ class specification_basic_type:public boost::noncopyable
                                              existentially_quantified_variables,
                                              renamings_pars,
                                              renamings_args,
-                                             condition_list);
+                                             condition_list,
+                                             variable_list());
         results.push_front(ult_del_condition);
       }
 
@@ -7560,7 +7585,8 @@ class specification_basic_type:public boost::noncopyable
                                              existentially_quantified_variables,
                                              renamings_pars,
                                              renamings_args,
-                                             condition_list);
+                                             condition_list,
+                                             variable_list());
         results.push_front(ult_del_condition);
       }
 

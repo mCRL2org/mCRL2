@@ -34,5 +34,4 @@ target_link_libraries( ${PROJECT_NAME}
   mcrl2_utilities
 )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
