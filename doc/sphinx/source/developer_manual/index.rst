@@ -28,7 +28,7 @@ Contents
    - :doc:`cronjobs`
    - :doc:`packaging`
    - `Bug tracker <https://svn.win.tue.nl/trac/MCRL2/timeline>`_
-   - `Regression test results <http://mcrl2build1.win.tue.nl:8080>`_
+   - :doc:`testing`
    - :doc:`performance/index`
 ..   - `Performance measurements <http://www.mcrl2.org/performance>`_
 
@@ -40,4 +40,5 @@ Contents
    code_generation
    cronjobs
    packaging
+   testing
    performance/index

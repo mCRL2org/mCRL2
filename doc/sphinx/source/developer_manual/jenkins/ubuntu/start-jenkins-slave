@@ -1,0 +1,11 @@
+#!/bin/bash
+cd /scratch
+ret=1
+delay=1
+while [ "$ret" != "0" ]
+do
+  sleep $delay
+  wget http://mcrl2build1.win.tue.nl:8080/jnlpJars/slave.jar -Oslave.jar
+  ret=$?
+done
+exec java -jar slave.jar -jnlpUrl http://mcrl2build1.win.tue.nl:8080/computer/`hostname`/slave-agent.jnlp -secret 349b7c1b0fb822ad7b1bbaa9a0bb417e645fe65779b700d96b3ee1f026914e0c
