@@ -3,7 +3,7 @@
 ##---------------------------------------------------
 
 # Set minimum version of Boost
-set(MCRL2_BOOST_MINIMUM_VERSION 1.35.0)
+set(MCRL2_BOOST_MINIMUM_VERSION 1.44.0)
 
 # Use multithreaded
 set(Boost_USE_MULTITHREADED ON)
