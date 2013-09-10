@@ -61,6 +61,14 @@ The following tool has become deprecated as of this release:
 ===============================================================================
 Changes between toolset releases 201210.0 and 201210.1:
 ===============================================================================
+Features:
+  - Dropped support for .dot files as input format. Output is still supported.
+  - New ATerm library which uses reference counting rather than mark & sweep
+    to do garbage collection.
+
+===============================================================================
+Changes between toolset releases 201210.0 and 201210.1:
+===============================================================================
 
 Fixed bugs:
   - #1096 Allow filepicker to open file in mcrl2-gui

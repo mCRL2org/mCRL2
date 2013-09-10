@@ -14,7 +14,6 @@
 #include <vector>
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/parse.h"
-#include "liblts_dotparser.h"
 
 using namespace mcrl2::core;
 
@@ -24,49 +23,6 @@ namespace mcrl2
 {
 namespace lts
 {
-
-void lts_dot_t::load(const string& filename)
-{
-  if (filename=="")
-  {
-    parse_dot(cin,*this);
-  }
-  else
-  {
-    std::ifstream is(filename.c_str());
-
-    if (!is.is_open())
-    {
-      throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for reading.");
-    }
-    parse_dot(is,*this);
-    is.close();
-  }
-  set_initial_state(0);
-
-}
-
-void lts_dot_t::loadnew(const std::string& filename)
-{
-  if (filename.empty())
-  {
-    parse_dot_specification(std::cin, *this);
-  }
-  else
-  {
-    std::ifstream in(filename.c_str());
-    if (!in)
-    {
-      throw mcrl2::runtime_error("Cannot open .dot file " + filename + ".");
-    }
-    parse_dot_specification(in, *this);
-  }
-  if (num_states() == 0)
-  {
-    add_state();
-  }
-  set_initial_state(0);
-}
 
 void lts_dot_t::save(const string& filename) const
 {
