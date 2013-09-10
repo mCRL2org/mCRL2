@@ -27,11 +27,14 @@ if(MCRL2_ENABLE_CADP_SUPPORT )
 
   if( MCRL2_CADP_ARCHITECTURE )
 
-    message( STATUS "---------------------------------------------------------------------------")
-    message( STATUS "Make sure that:")
-    message( STATUS " * the build architecture matches the ${MCRL2_CADP_ARCHITECTURE}-architecture detected by CADP")                  
-    message( STATUS " * the variable BUILD_SHARED_LIBS = OFF ")
-    message( STATUS "---------------------------------------------------------------------------")
+    if ( BUILD_SHARED_LIBS )
+      message( FATAL_ERROR "CADP integration is only supported when using static linking (configure BUILD_SHARED_LIBS=OFF)." )
+    endif ()
+
+    message( STATUS "--------------------------------------------------------")
+    message( STATUS "Please make sure that the build architecture matches the")
+    message( STATUS "${MCRL2_CADP_ARCHITECTURE}-architecture detected by CADP")                  
+    message( STATUS "--------------------------------------------------------")
 
     set(USE_BCG "")
     add_definitions( "-DUSE_BCG" )

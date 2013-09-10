@@ -24,7 +24,10 @@ Libraries:
   - Implemented capture avoiding substitutions, such that variables do not
     need to be renamed a-priori.
   - Improved one-point rule elimination in rewriters.
-  - Extend parser of PGSolver format to accept games produced by MLSolver (r11637).
+  - Extend parser of PGSolver format to accept games produced by MLSolver 
+    (r11637).
+  - Support for loading labelled transition systems from files in the DOT
+    file format was dropped.
   - Typechecker now rejects redeclaration of built-in functions (r11689).
   - Fix normalisation of modal mu-calculus formulae (r11696).
   - Fix compiler warnings in the included DParser library.
@@ -35,10 +38,9 @@ Libraries:
     anymore (#1176).
 
 Build:
-  - Require C++11 support of the C++ compiler. We tested using
+  - Requires C++11 support of the C++ compiler. We tested using
     GCC 4.4, 4.5, 4.6, 4.7 and Clang 3.2 on Linux, MSVC 2010 on Windows,
     and Clang 3.2 on Mac OS X.
-
 
 Tool changes:
   - Fix handling of command line arguments with spaces for all tools (r11388).
