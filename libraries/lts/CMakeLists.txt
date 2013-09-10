@@ -31,8 +31,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmparser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dotparser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dotlexer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_aut.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_lts.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/sim_hashtable.cpp
@@ -60,31 +58,13 @@ add_custom_command(
   DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/fsm-syntax.g
 )
 
-add_custom_command(
-  OUTPUT ${CMAKE_BINARY_DIR}/libraries/lts/source/dot_syntax.c
-  COMMAND make_dparser -A -H0 -idot -o${CMAKE_BINARY_DIR}/libraries/lts/source/dot_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/dot-syntax.g
-  DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/dot-syntax.g
-)
-
 include_directories(
   ${CMAKE_SOURCE_DIR}/3rd-party/dparser
-)
-
-add_library(dot_syntax
-  ${CMAKE_BINARY_DIR}/libraries/lts/source/dot_syntax.c
 )
 
 add_library(fsm_syntax
   ${CMAKE_BINARY_DIR}/libraries/lts/source/fsm_syntax.c
 )
-
-target_link_libraries(dot_syntax
-  fsm_syntax
-  dparser
-)
-
-# add install target:
-install(TARGETS dot_syntax fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 # ##### End generate parser tables ######
 
@@ -93,7 +73,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_lps
   mcrl2_syntax
-  dot_syntax
   fsm_syntax
 )
 

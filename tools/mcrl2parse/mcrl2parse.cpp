@@ -32,7 +32,6 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/typecheck.h"
-#include "mcrl2/lts/parse.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/pbes/parse.h"
@@ -405,8 +404,6 @@ class mcrl2parse_tool : public input_tool
       aterm_format   = 0 < parser.options.count("aterm-format");
       warn           = 0 < parser.options.count("warn");
       text = parser.option_argument("expression");
-
-      dot = parser.options.count("dot") > 0;
     }
 
     std::string read_text(std::istream& from)
@@ -418,100 +415,6 @@ class mcrl2parse_tool : public input_tool
         out << s << std::endl;
       }
       return out.str();
-    }
-
-    bool load_dot_file()
-    {
-      if (dot && !input_filename().empty())
-      {
-        bool fail = false;
-        lts::lts_dot_t dot1;
-        lts::lts_dot_t dot2;
-        mCRL2log(log::info) << "Start parsing." << std::endl;
-        timer().start("old");
-        try
-        {
-          dot1.load(input_filename());
-          mCRL2log(log::info) << "Parsed using old parser." << std::endl;
-        }
-        catch(...)
-        {
-          fail = !fail;
-        }
-        timer().finish("old");
-        timer().start("new");
-        try
-        {
-          dot2.loadnew(input_filename());
-          mCRL2log(log::info) << "Parsed using new parser." << std::endl;
-        }
-        catch(...)
-        {
-          fail = !fail;
-        }
-        timer().finish("new");
-        if (fail)
-        {
-          throw mcrl2::runtime_error("One parser failed (but not both).");
-        }
-
-        if (log::mcrl2_logger().get_reporting_level() == log::verbose)
-        {
-          dot1.save(std::cout);
-          dot2.save(std::cout);
-        }
-
-        mCRL2log(log::info) << "Checking equality of parsed structures." << std::endl;
-        if (dot1.num_states() != dot2.num_states())
-        {
-          mCRL2log(log::verbose) << "old: " << dot1.num_states() << std::endl;
-          mCRL2log(log::verbose) << "new: " << dot2.num_states() << std::endl;
-          throw mcrl2::runtime_error("Not the same amount of states.");
-        }
-        if (dot1.num_state_labels() != dot2.num_state_labels())
-        {
-          mCRL2log(log::verbose) << "old: " << dot1.num_state_labels() << std::endl;
-          mCRL2log(log::verbose) << "new: " << dot2.num_state_labels() << std::endl;
-          throw mcrl2::runtime_error("Not the same amount of state labels.");
-        }
-        if (dot1.initial_state() != dot2.initial_state())
-        {
-          mCRL2log(log::verbose) << "old: " << dot1.initial_state() << std::endl;
-          mCRL2log(log::verbose) << "new: " << dot2.initial_state() << std::endl;
-          throw mcrl2::runtime_error("Not the same initial state.");
-        }
-        for (auto it1 = dot1.get_transitions().begin(), it2 = dot2.get_transitions().begin();
-             it1 != dot1.get_transitions().end(); ++it1, ++it2)
-        {
-          if (it1->from() != it2->from() || it1->to() != it2->to() || it1->label() != it2->label())
-          {
-            throw mcrl2::runtime_error("Transition lists not identical.");
-          }
-        }
-        for (size_t i = 0; i < dot1.num_action_labels(); ++i)
-        {
-          if (dot1.action_label(i) != dot2.action_label(i))
-          {
-            throw mcrl2::runtime_error("Action label lists not identical.");
-          }
-        }
-        for (size_t i = 0; i < dot1.num_state_labels(); ++i)
-        {
-          if (dot1.state_label(i) != dot2.state_label(i)) 
-          {
-            throw mcrl2::runtime_error("State label lists not identical.");
-          }
-        }
-        for (size_t i = 0; i < dot1.get_transitions().size(); ++i)
-        {
-          if (dot1.is_tau(i) != dot2.is_tau(i))
-          {
-            throw mcrl2::runtime_error("Tau lists not identical.");
-          }
-        }
-        return true;
-      }
-      return false;
     }
 
   public:
@@ -526,11 +429,6 @@ class mcrl2parse_tool : public input_tool
 
     bool run()
     {
-      if (load_dot_file())
-      {
-        return true;
-      }
-
       if (text.empty())
       {
         if (input_filename().empty())
