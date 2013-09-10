@@ -358,6 +358,10 @@ class aut_lts_convertor
       try
       {
         al=parse_lts_action(l,m_data,atermpp::aterm_cast<lps::action_list>(m_action_labels));
+
+
+
+
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -858,7 +862,7 @@ class bcg_lts_convertor
 
       try
       {
-        al=parse_lts_action(l,m_data,m_action_labels);
+        al=parse_lts_action(l,m_data,atermpp::aterm_cast<lps::action_list>(m_action_labels));
       }
       catch (mcrl2::runtime_error& e)
       {
