@@ -33,8 +33,28 @@ elif label in ["macosx-x86", "macosx-amd64"]:
 cpack_command = ['cpack'] + cpack_options
 cpack_result = call('CPack', cpack_command)
 if cpack_result:
-  log('CPack returned ' + str(cpack_result))
-  sys.exit(cpack_result)
+  if label in ["macosx-x86", "macosx-amd64"]:
+    # Workaround: currently, CPack may fail because of the following error:
+    #   CPack Error: Problem running hdiutil command
+    # This seems to be a bug in hdiutil or CPack, see:
+    #   https://discussions.apple.com/thread/4712306
+    # The fix proposed there is to add -stretch 1g to the hdiutil command line.
+    # This is a command run by CPack, so we only have the option to let the
+    # original command fail, and then re-run it with this extra parameter.
+    try:
+      cpackdir = os.path.join(os.getcwd(), '_CPack_Packages')
+      buildname = [f for f in os.listdir(cpackdir) if not f.startswith('.')][0]
+      packagemakerdir = os.path.join(cpackdir, buildname, 'PackageMaker')
+      pkgdir = [f for f in os.listdir(packagemakerdir) if f.endswith('.pkg')][0]
+      pkgdir = os.path.join(packagemakerdir, pkgdir)
+      dmgfile = os.path.join(packagemakerdir, os.path.splitext(pkgdir)[0] + '.dmg')
+      call('hdiutil (dirty fix)', ['/usr/bin/hidutil', 'create', '-ov', '-format', 'UDZO', '-stretch', '1g', '-srcfolder', pkgdir, dmgfile])
+    except:
+      log('CPack returned ' + str(cpack_result) + ' and MacOS dirty fix did not work.')
+      sys.exit(cpack_result)
+  else:
+    log('CPack returned ' + str(cpack_result))
+    sys.exit(cpack_result)
 
 # Due to the workaround, we need to copy the generated package (.exe) from the
 # temporary path, and remove the generated package.
