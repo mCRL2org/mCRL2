@@ -48,7 +48,7 @@ if cpack_result:
       pkgdir = [f for f in os.listdir(packagemakerdir) if f.endswith('.pkg')][0]
       pkgdir = os.path.join(packagemakerdir, pkgdir)
       dmgfile = os.path.join(packagemakerdir, os.path.splitext(pkgdir)[0] + '.dmg')
-      call('hdiutil (dirty fix)', ['/usr/bin/hidutil', 'create', '-ov', '-format', 'UDZO', '-stretch', '1g', '-srcfolder', pkgdir, dmgfile])
+      call('hdiutil (dirty fix)', ['/usr/bin/hdiutil', 'create', '-ov', '-format', 'UDZO', '-stretch', '1g', '-srcfolder', pkgdir, dmgfile])
     except:
       log('CPack returned ' + str(cpack_result) + ' and MacOS dirty fix did not work.')
       sys.exit(cpack_result)
