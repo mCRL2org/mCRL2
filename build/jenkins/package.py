@@ -49,6 +49,7 @@ if cpack_result:
       pkgdir = os.path.join(packagemakerdir, pkgdir)
       dmgfile = os.path.join(packagemakerdir, os.path.splitext(pkgdir)[0] + '.dmg')
       call('hdiutil (dirty fix)', ['/usr/bin/hdiutil', 'create', '-ov', '-format', 'UDZO', '-stretch', '1g', '-srcfolder', pkgdir, dmgfile])
+      os.rename(dmgfile, os.path.join(builddir, os.path.basename(dmgfile)))
     except:
       log('CPack returned ' + str(cpack_result) + ' and MacOS dirty fix did not work.')
       sys.exit(cpack_result)
@@ -56,8 +57,8 @@ if cpack_result:
     log('CPack returned ' + str(cpack_result))
     sys.exit(cpack_result)
 
-# Due to the workaround, we need to copy the generated package (.exe) from the
-# temporary path, and remove the generated package.
+# Due to the Windows workaround, we need to copy the generated package (.exe) 
+# from the temporary path, and remove the generated package.
 if label in ["windows-x86", "windows-amd64"]:
   copy_files("{0}\*.exe".format(cpack_temp_path), builddir)
   shutil.rmtree(cpack_temp_path)
