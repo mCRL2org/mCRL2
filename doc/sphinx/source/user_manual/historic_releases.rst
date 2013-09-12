@@ -7,6 +7,33 @@ Previous releases of mCRL2
 
 This page shows a list of historic releases of mCRL2.
 
+Release 201210.1
+----------------
+
+.. |bin_w32_201210.1| replace:: Windows Installer (32-bit)
+.. _bin_w32_201210.1: http://www.mcrl2.org/download/release/mcrl2-201210.1_x86.exe
+
+.. |bin_w64_201210.1| replace:: Windows Installer (64-bit)
+.. _bin_w64_201210.1: http://www.mcrl2.org/download/release/mcrl2-201210.1_x86_64.exe
+
+.. |bin_ppa_201210.1| replace:: PPA release
+.. _bin_ppa_201210.1: https://launchpad.net/~mcrl2/+archive/release-ppa
+
+.. |src_tgz_201210.1| replace:: GZipped Tarball
+.. _src_tgz_201210.1: http://www.mcrl2.org/download/release/mcrl2-201210.1.tar.gz
+
+  +------------------------+------------------------------------------+
+  |Operating system        |Release (201210.1)                        |
+  +========================+==========================================+
+  |Windows                 ||bin_w32_201210.1|_                       |
+  |                        +------------------------------------------+
+  |                        ||bin_w64_201210.1|_                       |
+  +------------------------+------------------------------------------+
+  |Linux                   ||ubuntu|_                                 |
+  +------------------------+------------------------------------------+
+  |Source                  ||src_tgz_201210.1|_                       |
+  +------------------------+------------------------------------------+
+
 Release 201210.0
 ----------------
 
