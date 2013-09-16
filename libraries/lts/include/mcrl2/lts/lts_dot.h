@@ -126,7 +126,7 @@ class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_stri
      *  \details If the filename is empty, the result is read from stdin.
      *  \param[in] filename Name of the file from which this lts is read.
      */
-    void load(const std::string& filename)
+    void load(const std::string&)
     {
       throw mcrl2::runtime_error("The DOT file format is no longer supported as input file format.");
     }
