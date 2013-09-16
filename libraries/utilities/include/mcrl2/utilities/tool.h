@@ -21,6 +21,11 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/execution_timer.h"
 
+#ifdef _MSC_VER
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 namespace mcrl2
 {
 
@@ -154,7 +159,16 @@ class tool
         m_timing_filename(""),
         m_timer(name),
         m_timing_enabled(false)
-    {}
+    {
+#ifdef _MSC_VER
+	  // All tools expect their std::cin and std::cout to be binary
+	  // streams. In MSVC, this is the way to guarantee this.
+      if (_setmode(_fileno(stdin), _O_BINARY) == -1)
+        throw std::runtime_error("Cannot set stdin to binary mode");
+      if (_setmode(_fileno(stdout), _O_BINARY) == -1)
+        throw std::runtime_error("Cannot set stdout to binary mode");
+#endif
+	}
 
     /// \brief Destructor.
     virtual ~tool()
