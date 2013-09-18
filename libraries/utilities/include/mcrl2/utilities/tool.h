@@ -21,7 +21,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/execution_timer.h"
 
-#ifdef _MSC_VER
+#ifdef WIN32
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -159,16 +159,7 @@ class tool
         m_timing_filename(""),
         m_timer(name),
         m_timing_enabled(false)
-    {
-#ifdef _MSC_VER
-	  // All tools expect their std::cin and std::cout to be binary
-	  // streams. In MSVC, this is the way to guarantee this.
-      if (_setmode(_fileno(stdin), _O_BINARY) == -1)
-        throw std::runtime_error("Cannot set stdin to binary mode");
-      if (_setmode(_fileno(stdout), _O_BINARY) == -1)
-        throw std::runtime_error("Cannot set stdout to binary mode");
-#endif
-	}
+    {}
 
     /// \brief Destructor.
     virtual ~tool()
@@ -197,6 +188,16 @@ class tool
     /// \post If timing was enabled, timer().report() has been called
     int execute(int argc, char* argv[])
     {
+#ifdef WIN32
+	  // All tools expect their std::cin to be binary streams. In Windows, 
+      // this is the way to guarantee this. In applications that do not have
+      // a standard input attached (Windows-mode applications for instance),
+      // _fileno(stdin) returns a value less than 0.
+      if (_fileno(stdin) >= 0 && _setmode(_fileno(stdin), _O_BINARY) == -1)
+      {
+        throw std::runtime_error("Cannot set stdin to binary mode");
+      }
+#endif
       try
       {
         interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description, m_known_issues);
