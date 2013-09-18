@@ -11,11 +11,6 @@
 #include <fstream>
 #include <sstream>
 
-#ifdef WIN32
-#include <fcntl.h>
-#include <io.h>
-#endif
-
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -37,40 +32,19 @@ static const size_t MAX_ERROR_SIZE = 64;
 /* Prototypes */
 static aterm fparse_term(int* c, istream &is);
 
-
-
 static void aterm_io_init()
 {
   static bool initialized = false;
-  if (initialized)
+  if (!initialized)
   {
-    return;
+    /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
+    /* This check might break on perfectly valid architectures */
+    /* that have char == 2 bytes, and sizeof(header_type) == 2 */
+    assert(sizeof(size_t) == sizeof(aterm*));
+    assert(sizeof(size_t) >= 4);
+    initialized = true;
   }
-
-  /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
-  /* This check might break on perfectly valid architectures */
-  /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-  assert(sizeof(size_t) == sizeof(aterm*));
-  assert(sizeof(size_t) >= 4);
-
-#ifdef WIN32
-  if (_setmode(_fileno(stdin), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set inputstream to binary mode.");
-  }
-  if (_setmode(_fileno(stdout), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set outputstream to binary mode.");
-  }
-  if (_setmode(_fileno(stderr), _O_BINARY) == -1)
-  {
-    perror("Warning: Cannot set errorstream to binary mode.");
-  }
-#endif
-
-  initialized = true;
 }
-
 
 static void write_string_with_escape_symbols(const std::string &s, std::ostream& os)
 {

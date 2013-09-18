@@ -6,8 +6,8 @@
 #include <stdexcept>
 
 #ifdef WIN32
-#include <fcntl.h>
 #include <io.h>
+#include <fcntl.h>
 #endif
 
 #include "mcrl2/atermpp/aterm.h"
@@ -29,6 +29,41 @@ using detail::writeInt;
  */
 
 using namespace std;
+
+static void aterm_io_init(std::basic_ios<char>& s)
+{
+  /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
+  /* This check might break on perfectly valid architectures */
+  /* that have char == 2 bytes, and sizeof(header_type) == 2 */
+  assert(sizeof(size_t) == sizeof(aterm*));
+  assert(sizeof(size_t) >= 4);
+#ifdef WIN32
+  if (s.rdbuf() == std::cout.rdbuf())
+  {
+    fflush(stdout);
+    if (_setmode(_fileno(stdout), _O_BINARY) == -1)
+    {
+      mCRL2log(mcrl2::log::warning) << "Cannot set stdout to binary mode.\n";
+    }
+    else
+    {
+      mCRL2log(mcrl2::log::debug) << "Converted stdout to binary mode.\n";
+    }
+  }
+  if (s.rdbuf() == std::cerr.rdbuf())
+  {
+    fflush(stderr);
+    if (_setmode(_fileno(stderr), _O_BINARY) == -1)
+    {
+      mCRL2log(mcrl2::log::warning) << "Cannot set stderr to binary mode.\n";
+    }
+    else
+    {
+      mCRL2log(mcrl2::log::debug) << "Converted stderr to binary mode.\n";
+    }
+  }
+#endif
+}
 
 static size_t calcUniqueAFuns(
                   const aterm &t,
@@ -792,7 +827,7 @@ write_baf(const aterm &t, ostream &os)
 
 void write_term_to_binary_stream(const aterm &t, std::ostream &os)
 {
-
+  aterm_io_init(os);
   if (!write_baf(t, os))
   {
     throw aterm_io_error("Fail to write term to string");
@@ -897,7 +932,6 @@ static bool read_all_symbols(istream &is)
         read_symbols[i].topsyms[j][k] = val;
       }
     }
-
   }
 
   return true;
@@ -910,7 +944,7 @@ static aterm read_term(sym_read_entry* sym, istream &is)
   aterm result;
   size_t value;
   std::stack<read_todo> stack;
-
+  
   read_todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, NULL };
   stack.push(item);
 
@@ -1063,6 +1097,7 @@ aterm read_baf(istream &is)
 
 aterm read_term_from_binary_stream(istream &is)
 {
+  aterm_io_init(is);
   aterm result=read_baf(is);
   if (!result.defined())
   {
