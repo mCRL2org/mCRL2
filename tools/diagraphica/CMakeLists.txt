@@ -21,10 +21,7 @@ else(APPLE)
 endif(APPLE)
 
 # ########## Create MacOSX Bundle Information #########
-include(MCRL2MacOSXBundleInformation)
-IF (APPLE)
- SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-ENDIF (APPLE)
+macosx_set_packaging_info("mcrl2-orange" Resources)
 
 # ######### General setup ##########
 set(DIAGRAPHICA_RCC_SRCS icons.qrc)

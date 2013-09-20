@@ -153,6 +153,9 @@ include(MCRL2CADPSupport)
 ## Determine latest SVN revision
 include(MCRL2Version)
 
+## Define macro used for OSX bundle generation
+include(MCRL2MacOSXBundleInformation)
+
 ##---------------------------------------------------
 ## Print additional configuration information
 ##---------------------------------------------------

@@ -20,11 +20,8 @@ else(APPLE)
   set(MCRL2gl ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
 endif(APPLE)
 
-# ########## Create MacOSX Bundle Information #########
-include(MCRL2MacOSXBundleInformation)
-IF (APPLE)
- SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-ENDIF (APPLE)
+# ########## Create MacOSX Bundle Information ######### 
+macosx_set_packaging_info("mcrl2-orange" Resources)
 
 # ######### General setup ##########
 set(LTSGRAPH_RCC_SRCS ltsgraph.qrc)
