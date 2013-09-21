@@ -61,7 +61,7 @@ set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsvi
 # Install icon for NSIS
 # Must be a .bmp file
 if( WIN32 )
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\installer\\\\mcrl2-install-logo.bmp")
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/build/packaging/mcrl2-install-logo.bmp")
 endif( WIN32 )
 # Install icon for DragNDrop
 # Must be a .icns file 
