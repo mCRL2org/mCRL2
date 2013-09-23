@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
-<tool name="besconvert"         input_format="bes"   output_format="bes"  category="Transformation"/> 
-<tool name="besinfo"            input_format="bes"                        category="Analysis"/>
+<!-- tool name="besconvert"         input_format="bes"   output_format="bes"  category="Transformation" //--> 
+<!-- tool name="besinfo"            input_format="bes"                        category="Analysis" //-->
 <tool name="bespp"              input_format="bes"   output_format="txt"  category="Analysis"/>
-<tool name="bessolve"           input_format="bes"                        category="Analysis"/>
 
 <tool name="diagraphica"        input_format="lts"                        category="Analysis"       gui="true" />
 

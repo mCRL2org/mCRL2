@@ -11,10 +11,7 @@ project(ltsview)
 cmake_minimum_required(VERSION 2.6)
 
 # ########## Create MacOSX Bundle Information #########
-include(MCRL2MacOSXBundleInformation)
-IF (APPLE)
- SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-ENDIF (APPLE)
+macosx_set_packaging_info("mcrl2-orange" Resources)
 
 # ######### General setup ##########
 set(LTSVIEW_RCC_SRCS ltsview.qrc)
