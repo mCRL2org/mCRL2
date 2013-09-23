@@ -175,7 +175,7 @@ for name, C in variants.iteritems():
   for size in sizes:
     iconpath = os.path.join(hicolordir, '{0}x{0}'.format(size), 'apps')
     if not os.path.exists(iconpath):
-      os.mkdir(iconpath)
+      os.makedirs(iconpath)
     pngname = os.path.join(iconpath, 'mcrl2-{0}.png'.format(name))
     xpmname = os.path.join(iconpath, 'mcrl2-{0}.xpm'.format(name))
     lo = btmlo
