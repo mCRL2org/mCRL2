@@ -62,9 +62,11 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/3rd-party/dparser
 )
 
-add_library(fsm_syntax
+add_library(mcrl2_fsm_syntax
   ${CMAKE_BINARY_DIR}/libraries/lts/source/fsm_syntax.c
 )
+
+install(TARGETS mcrl2_fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
 
 # ##### End generate parser tables ######
 
@@ -73,7 +75,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_lps
   mcrl2_syntax
-  fsm_syntax
+  mcrl2_fsm_syntax
 )
 
 if( USE_BCG STREQUAL "" )
