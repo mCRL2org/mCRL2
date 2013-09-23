@@ -173,7 +173,7 @@ for name, C in variants.iteritems():
   pngfiles = []
   icnsfiles = []
   for size in sizes:
-    iconpath = os.path.join(hicolordir, '{0}x{0}'.format(size))
+    iconpath = os.path.join(hicolordir, '{0}x{0}'.format(size), 'apps')
     if not os.path.exists(iconpath):
       os.mkdir(iconpath)
     pngname = os.path.join(iconpath, 'mcrl2-{0}.png'.format(name))
