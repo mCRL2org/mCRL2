@@ -29,5 +29,10 @@ endif(MCRL2_ENABLE_PROFILING)
 option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" ON)
 message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
 
+##---------------------------------------------------
+## Install application icons
+##---------------------------------------------------
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/build/packaging/icons/hicolor DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons)
 
 set(MCRL2_BIN_DIR "bin")

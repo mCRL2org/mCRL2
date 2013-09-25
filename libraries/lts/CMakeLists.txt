@@ -87,4 +87,4 @@ if( USE_BCG STREQUAL "" )
 endif( USE_BCG STREQUAL "" )
 
 # add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
+install(TARGETS ${PROJECT_NAME} mcrl2_fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
