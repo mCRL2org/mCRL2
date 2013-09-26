@@ -184,6 +184,18 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     return static_cast<Derived&>(*this);
   }
 
+  // convert !val(d) to val(!d)
+  pbes_expression operator()(const not_& x)
+  {
+    if (is_data(x.operand()))
+    {
+      const data::data_expression& d = atermpp::aterm_cast<data::data_expression>(x.operand());
+      data::detail::one_point_rule_preprocessor R;
+      return R(data::sort_bool::not_(d));
+    }
+    return x;
+  }
+
   pbes_expression operator()(const imp& x)
   {
     pbes_expression result = derived()(or_(not_(x.left()), x.right()));
