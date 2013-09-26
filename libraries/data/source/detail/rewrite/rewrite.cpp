@@ -198,7 +198,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
     {
       const variable v= *it;
-      if (variables_in_sigma.find(v) != variables_in_sigma.end())
+      if (variables_in_sigma.find(v) != variables_in_sigma.end() || sigma(v) != v)
       {
         number_of_renamed_variables++;
         new_variables[count]=data::variable(generator("y_"), v.sort());
