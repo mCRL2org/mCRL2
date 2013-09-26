@@ -43,6 +43,7 @@ if (NOT APPLE)
     # We need to add the proper flag to the linker before we try:
      set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
      try_add_c_flag(-fsanitize=address       MAINTAINER)
+     try_add_c_flag(-fno-omit-frame-pointer  MAINTAINER)
   endif()
 endif()
 
