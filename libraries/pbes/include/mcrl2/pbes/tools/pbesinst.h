@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
+#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/logger.h"
@@ -44,7 +45,7 @@ bool pbesinst(const std::string& input_filename,
     return false;
   }
 
-  if (m_strategy == pbesinst_lazy)
+  if (m_strategy == pbesinst_lazy_strategy)
   {
     // TODO: let pbesinst handle ! and => properly
     if (!is_normalized(p))
@@ -55,9 +56,16 @@ bool pbesinst(const std::string& input_filename,
     algorithm.run(p);
     p = algorithm.get_result();
   }
-  else if (m_strategy == pbesinst_finite)
+  else if (m_strategy == pbesinst_finite_strategy)
   {
-    pbes_system::algorithms::pbesinst_finite(p, rewrite_strategy, finite_parameter_selection);
+    try
+    {
+      pbes_system::algorithms::pbesinst_finite(p, rewrite_strategy, finite_parameter_selection);
+    }
+    catch (const empty_parameter_selection&)
+    {
+      throw mcrl2::runtime_error("No parameters were selected with the -f option!");
+    }
   }
 
   if (log::mcrl2_logger::get_reporting_level() >= log::verbose)

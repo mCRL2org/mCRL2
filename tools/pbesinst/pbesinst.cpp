@@ -76,8 +76,8 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       desc.
       add_option("strategy",
                  make_enum_argument<pbesinst_strategy>("NAME")
-                 .add_value(pbesinst_lazy, true)
-                 .add_value(pbesinst_finite),
+                 .add_value(pbesinst_lazy_strategy, true)
+                 .add_value(pbesinst_finite_strategy),
                  "compute the BES using strategy NAME:", 's').
       add_option("select",
                  make_optional_argument("PARAMS", ""),
@@ -109,7 +109,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         "  'bes'  for the mCRL2 BES format,\n"
         "  'cwi'  for the CWI BES format\n"
       ),
-      m_strategy(pbesinst_lazy),
+      m_strategy(pbesinst_lazy_strategy),
       m_aterm_ascii(false)
     {}
 
@@ -124,6 +124,10 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       mCRL2log(verbose) << "  strategy:           " << m_strategy << std::endl;
       mCRL2log(verbose) << "  output format:      " << pbes_system::file_format_to_string(pbes_output_format()) << std::endl;
       mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
+      if (m_strategy == pbesinst_finite_strategy)
+      {
+        mCRL2log(verbose) << "  parameter selection: " << m_finite_parameter_selection << std::endl;
+      }
 
       return pbesinst(input_filename(),
               output_filename(),
