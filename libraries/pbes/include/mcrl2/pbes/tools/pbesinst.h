@@ -13,6 +13,7 @@
 #define MCRL2_PBES_TOOLS_PBESINST_H
 
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/tools.h"
@@ -45,6 +46,11 @@ bool pbesinst(const std::string& input_filename,
 
   if (m_strategy == pbesinst_lazy)
   {
+    // TODO: let pbesinst handle ! and => properly
+    if (!is_normalized(p))
+    {
+      pbes_system::normalize(p);
+    }
     pbesinst_algorithm algorithm(p.data(), rewrite_strategy, false, false);
     algorithm.run(p);
     p = algorithm.get_result();
