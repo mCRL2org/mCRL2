@@ -60,6 +60,8 @@ if label.startswith('macosx') and package in ['nightly', 'official-release']:
 testflags = []
 if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
+else:
+  testflags += ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
 
 #
 # If we are building the mCRL2-release job, run all tests
