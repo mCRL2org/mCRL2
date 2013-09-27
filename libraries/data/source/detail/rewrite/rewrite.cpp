@@ -189,10 +189,10 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   size_t number_of_renamed_variables=0;
   size_t count=0;
-  std::vector <variable> new_variables(vl.size());
+  std::vector<variable> new_variables(vl.size());
   {
     //std::set < variable > variables_in_sigma(get_free_variables(sigma));
-    std::set < variable > variables_in_sigma(sigma.variables_in_rhs());
+    const std::set<variable>& variables_in_sigma(sigma.variables_in_rhs());
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
@@ -202,6 +202,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
       {
         number_of_renamed_variables++;
         new_variables[count]=data::variable(generator("y_"), v.sort());
+        assert(occur_check(v, atermpp::aterm_appl(new_variables[count])));
       }
       else new_variables[count]=v;
     }
@@ -213,46 +214,50 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
     return a;
   }
 
-  std::vector <atermpp::aterm_appl> saved_substitutions;
-  count=0;
-  for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
+  atermpp::aterm_appl result;
+  variable_list::const_iterator v;
+  if (body_in_normal_form)
   {
-    assert(count<new_variables.size());
-    const variable v= *it;
-    if (v!=new_variables[count])
+    // If the body is already in normal form, a simple replacement of the old variables
+    // by the new ones will do
+    mutable_map_substitution<std::map<atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+    for(v = vl.begin(), count = 0; v != vl.end(); ++v, ++count)
     {
-      saved_substitutions.push_back(sigma(v));
-      assert(occur_check(v,atermpp::aterm_appl(new_variables[count])));
-      sigma[v]=atermpp::aterm_appl(new_variables[count]);
+      if (*v != new_variables[count])
+      {
+        variable_renaming[*v] = atermpp::aterm_appl(new_variables[count]);
+      }
+    }
+    result = atermpp::replace(body, variable_renaming);
+  }
+  else
+  {
+    // If the body is not in normal form, then we have to rewrite with an updated sigma.
+    // We first change sigma and save the values in sigma we overwrote...
+    std::vector<atermpp::aterm_appl> saved_substitutions;
+    for(v = vl.begin(), count = 0; v != vl.end(); ++v, ++count)
+    {
+      if (*v != new_variables[count])
+      {
+        saved_substitutions.push_back(sigma(*v));
+        sigma[*v] = atermpp::aterm_appl(new_variables[count]);
+      }
+    }
+    // ... then we rewrite with the new sigma ...
+    result = rewrite_internal(body,sigma);
+    // ... and then we restore sigma to its old state.
+    size_t new_variable_count = 0;
+    for(v = vl.begin(), count = 0; v != vl.end(); ++v, ++count)
+    {
+      if (*v != new_variables[count])
+      {
+        sigma[*v] = saved_substitutions[new_variable_count++];
+      }
     }
   }
-  const atermpp::aterm_appl result=(body_in_normal_form?body:rewrite_internal(body,sigma));
 
-  // restore saved substitutions;
-
-  count=0;
-  size_t new_variable_count=0;
-  for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
-  {
-    assert(count<vl.size());
-    const variable v= *it;
-    if (v!=new_variables[count])
-    {
-      assert(new_variable_count<saved_substitutions.size());
-      assert(occur_check(v,saved_substitutions[new_variable_count]));
-      sigma[v]=saved_substitutions[new_variable_count];
-      new_variable_count++;
-    }
-  }
-
-  variable_list new_variable_list;
-
-  for(std::vector <variable>::reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
-  {
-    new_variable_list.push_front(*it);
-  }
-  const atermpp::aterm_appl a=gsMakeBinder(gsMakeLambda(),new_variable_list,result);
-  return a;
+  variable_list new_variable_list(new_variables.rbegin(), new_variables.rend());
+  return gsMakeBinder(gsMakeLambda(),new_variable_list,result);
 }
 
 
