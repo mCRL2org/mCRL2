@@ -795,7 +795,7 @@ public:
     return *this;
   }
 
-  std::set<variable>& variables_in_rhs()
+  const std::set<variable>& variables_in_rhs()
   {
     if (!m_variables_in_rhs_set_is_defined)
     {
