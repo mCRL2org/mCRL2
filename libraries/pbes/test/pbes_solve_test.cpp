@@ -156,6 +156,74 @@ std::string test17 =
   "init X;                          \n"
   ;
 
+// Regression test 1 for #1215
+std::string test18 =
+  "map  Generated_or: Bool # Bool -> Set(Bool);                 \n"
+  "     Generated_and: Bool # Bool -> Set(Bool);                \n"
+  "     LiftGenerated_or: Set(Bool) # Set(Bool) -> Set(Bool);   \n"
+  "     LiftGenerated_and: Set(Bool) # Set(Bool) -> Set(Bool);  \n"
+  "                                                             \n"
+  "var x0,x1: Bool;                                             \n"
+  "eqn Generated_or(x0, x1)  =  {x0 || x1};                     \n"
+  "                                                             \n"
+  "var  x0,x1: Bool;                                            \n"
+  "     X0,X1: Set(Bool);                                       \n"
+  "eqn  Generated_and(x0, x1)  =  {x0 && x1};                   \n"
+  "     LiftGenerated_or(X0, X1)  =  { y: Bool | exists x0,x1: Bool. x0 in X0 && x1 in X1 && y in Generated_or(x0, x1) };\n"
+  "var  X0,X1: Set(Bool);                                       \n"
+  "eqn  LiftGenerated_and(X0, X1)  =  { y: Bool | exists x0,x1: Bool. x0 in X0 && x1 in X1 && y in Generated_and(x0, x1) };\n"
+  "                                                             \n"
+  "pbes nu Z = val(true in LiftGenerated_and(LiftGenerated_and({false}, LiftGenerated_or({true,false}, {true,false})), {false}));\n"
+  "                                                             \n"
+  "init Z;                                                      \n";
+
+// Regression test 2 for #1215
+std::string test19 =
+  "sort Enum5 = struct e4_5 | e3_5 | e2_5 | e1_5 | e0_5;        \n"
+  "     AbsNat = struct nul | meer;                             \n"
+  "                                                             \n"
+  "map                                                          \n"
+  "     absplus: AbsNat # AbsNat -> Set(AbsNat);                \n"
+  "     abslt: AbsNat # AbsNat -> Set(Bool);                    \n"
+  "     abseqn: AbsNat # AbsNat -> Set(Bool);                   \n"
+  "     Generated_and: Bool # Bool -> Set(Bool);                \n"
+  "     Liftabsplus: Set(AbsNat) # Set(AbsNat) -> Set(AbsNat);  \n"
+  "     Liftabslt: Set(AbsNat) # Set(AbsNat) -> Set(Bool);      \n"
+  "     Liftabseqn: Set(AbsNat) # Set(AbsNat) -> Set(Bool);     \n"
+  "     LiftGenerated_and: Set(Bool) # Set(Bool) -> Set(Bool);  \n"
+  "                                                             \n"
+  "var  an,an': AbsNat;                                         \n"
+  "eqn  absplus(nul, nul)  =  { nul };                          \n"
+  "     absplus(meer, meer)  =  { meer };                       \n"
+  "     absplus(meer, nul)  =  { meer };                        \n"
+  "     absplus(nul, meer)  =  { meer };                        \n"
+  "     abslt(nul, meer)  =  { true };                          \n"
+  "     abslt(meer, meer)  =  { false, true };                  \n"
+  "     abslt(an, nul)  =  { false };                           \n"
+  "     abseqn(nul, nul)  =  { true };                          \n"
+  "     an != an'  ->  abseqn(an, an')  =  { false };           \n"
+  "     abseqn(meer, meer)  =  { false, true };                 \n"
+  "                                                             \n"
+  "var  x0,x1: Bool;                                            \n"
+  "eqn  Generated_and(x0, x1)  =  {x0 && x1};                   \n"
+  "                                                             \n"
+  "var  X0,X1: Set(AbsNat);                                     \n"
+  "eqn  Liftabsplus(X0, X1)  =  { y: AbsNat | exists a0,a1: AbsNat. a0 in X0 && a1 in X1 && y in absplus(a0, a1) };\n"
+  "     Liftabslt(X0, X1)  =  { y: Bool | exists b0,b1: AbsNat. b0 in X0 && b1 in X1 && y in abslt(b0, b1) };\n"
+  "                                                             \n"
+  "var  X0,X1: Set(AbsNat);                                     \n"
+  "eqn  Liftabseqn(X0, X1)  =  { y: Bool | exists c0,c1: AbsNat. c0 in X0 && c1 in X1 && y in abseqn(c0, c1) };\n"
+  "                                                             \n"
+  "var  X0,X1: Set(Bool);                                       \n"
+  "eqn  LiftGenerated_and(X0, X1)  =  { y: Bool | exists d0,d1: Bool. d0 in X0 && d1 in X1 && y in Generated_and(d0, d1) };\n"
+  "                                                             \n"
+  "pbes nu Z = (                                                \n"
+  "   val(!(false in LiftGenerated_and({false}, {true})) ||     \n"
+  "   !(false in Liftabslt({nul}, Liftabsplus({nul}, {meer})))) \n"
+  " );                                                          \n"
+  "                                                             \n"
+  "init Z;                                                      \n";
+
 // N.B. The test cases below should not terminate, since they correspond
 // to infinite BESs.
 // TODO: Test that no solution for these cases is found within a certain number of steps.
@@ -222,9 +290,26 @@ void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
   }
 }
 
+std::string frm_nodeadlock = "[true*]<true*>true";
+std::string frm_nolivelock = "[true*]mu X.[tau]X";
 
+void test_abp_frm(const std::string& FORMULA, bool expected_result)
+{
+  bool timed = false;
+  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
+  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
+  std::string abp_text = pbes_system::pp(p);
+  test_pbes_solve(abp_text, expected_result);
+}
 
-void test_all()
+void test_abp()
+{
+  test_abp_frm(frm_nodeadlock, true);
+  test_abp_frm(frm_nolivelock, true);
+}
+
+int test_main(int argc, char** argv)
 {
   std::cerr << "Test01\n";
   test_pbes_solve(test01, false);
@@ -260,30 +345,11 @@ void test_all()
   test_pbes_solve(test16, false);
   std::cerr << "Test17\n";
   test_pbes_solve(test17, false);
-}
-
-std::string frm_nodeadlock = "[true*]<true*>true";
-std::string frm_nolivelock = "[true*]mu X.[tau]X";
-
-void test_abp_frm(const std::string& FORMULA, bool expected_result)
-{
-  bool timed = false;
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
-  pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
-  std::string abp_text = pbes_system::pp(p);
-  test_pbes_solve(abp_text, expected_result);
-}
-
-void test_abp()
-{
-  test_abp_frm(frm_nodeadlock, true);
-  test_abp_frm(frm_nolivelock, true);
-}
-
-int test_main(int argc, char** argv)
-{
-  test_all();
+  std::cerr << "Test18\n";
+  test_pbes_solve(test18, false);
+  std::cerr << "Test19\n";
+  test_pbes_solve(test19, true);
+  std::cerr << "Test ABP\n";
   test_abp();
 
   return 0;
