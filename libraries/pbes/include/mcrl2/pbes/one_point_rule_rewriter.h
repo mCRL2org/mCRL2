@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/detail/print_utility.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -358,7 +359,7 @@ class one_point_rule_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>()(detail::data2pbes(x));
+      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>()(detail::data2pbes(normalize(x)));
     }
 };
 
