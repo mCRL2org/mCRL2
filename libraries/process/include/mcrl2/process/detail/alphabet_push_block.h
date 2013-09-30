@@ -16,6 +16,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/utility.h"
+#include "mcrl2/process/detail/print_utility.h"
 
 namespace mcrl2 {
 
@@ -51,8 +52,16 @@ std::set<core::identifier_string> rename_inverse(const rename_expression_list& R
   std::set<core::identifier_string> result;
   for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
   {
-    std::vector<core::identifier_string> s = Rinverse[*i];
-    result.insert(s.begin(), s.end());
+    auto j = Rinverse.find(*i);
+    if (j != Rinverse.end())
+    {
+      std::vector<core::identifier_string> s = Rinverse[*i];
+      result.insert(s.begin(), s.end());
+    }
+    else
+    {
+      result.insert(*i);
+    }
   }
   return result;
 }
@@ -179,7 +188,10 @@ struct push_block_builder: public process_expression_builder<Derived>
   process::process_expression operator()(const process::rename& x)
   {
     rename_expression_list R = x.rename_set();
-    return process::rename(R, push_block(block_operations::rename_inverse(R, B), x.operand(), equations, W, id_generator));
+    std::set<core::identifier_string> Binverse = block_operations::rename_inverse(R, B);
+    mCRL2log(log::debug) << "push_block(" << detail::print_set(B) << ", rename(" << detail::print_set(R) << ", " << process::pp(x.operand()) << ")) = "
+                         << "rename(" << detail::print_set(R) << ", push_block(" << detail::print_set(Binverse) << ", " << process::pp(x.operand()) << "))" << std::endl;
+    return process::rename(R, push_block(Binverse, x.operand(), equations, W, id_generator));
   }
 
   bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
