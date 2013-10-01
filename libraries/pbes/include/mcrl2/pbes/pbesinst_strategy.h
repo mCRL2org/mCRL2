@@ -22,8 +22,8 @@ namespace pbes_system {
 /// \brief pbesinst transformation strategies
 enum pbesinst_strategy
 {
-  pbesinst_lazy,
-  pbesinst_finite
+  pbesinst_lazy_strategy,
+  pbesinst_finite_strategy
 };
 
 /// \brief Parse a pbesinst transformation strategy.
@@ -32,11 +32,11 @@ pbesinst_strategy parse_pbesinst_strategy(const std::string& s)
 {
   if (s == "finite")
   {
-    return pbesinst_finite;
+    return pbesinst_finite_strategy;
   }
   else if (s == "lazy")
   {
-    return pbesinst_lazy;
+    return pbesinst_lazy_strategy;
   }
   else
   {
@@ -64,11 +64,11 @@ std::istream& operator>>(std::istream& is, pbesinst_strategy& s)
 inline
 std::string print_pbesinst_strategy(const pbesinst_strategy strategy)
 {
-  if (strategy == pbesinst_finite)
+  if (strategy == pbesinst_finite_strategy)
   {
     return "finite";
   }
-  else if (strategy == pbesinst_lazy)
+  else if (strategy == pbesinst_lazy_strategy)
   {
     return "lazy";
   }
@@ -86,11 +86,11 @@ std::ostream& operator<<(std::ostream& os, const pbesinst_strategy strategy)
 inline
 std::string description(const pbesinst_strategy strategy)
 {
-  if (strategy == pbesinst_finite)
+  if (strategy == pbesinst_finite_strategy)
   {
     return "for computing all possible boolean equations";
   }
-  else if (strategy == pbesinst_lazy)
+  else if (strategy == pbesinst_lazy_strategy)
   {
     return "for computing only boolean equations which can be reached from the initial state";
   }

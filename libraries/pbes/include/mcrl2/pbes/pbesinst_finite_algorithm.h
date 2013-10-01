@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -54,6 +55,14 @@ struct pbesinst_finite_rename
     }
     return core::identifier_string(out.str());
   }
+};
+
+/// \brief Exception that is used to signal an empty parameter selection
+struct empty_parameter_selection: public mcrl2::runtime_error
+{
+  empty_parameter_selection(const std::string& msg)
+    : mcrl2::runtime_error(msg)
+  {}
 };
 
 namespace detail
@@ -408,9 +417,30 @@ class pbesinst_finite_algorithm
 inline
 void pbesinst_finite(pbes& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
 {
+  if (finite_parameter_selection.empty())
+  {
+    throw empty_parameter_selection("no finite parameters were selected!");
+  }
   pbesinst_finite_algorithm algorithm(rewrite_strategy);
   pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, finite_parameter_selection);
-  algorithm.run(p, parameter_map);
+
+  bool is_empty = true;
+  for (auto i = parameter_map.begin(); i != parameter_map.end(); ++i)
+  {
+    if (!((i->second).empty()))
+    {
+      is_empty = false;
+      break;
+    }
+  }
+  if (is_empty)
+  {
+    mCRL2log(log::verbose) << "Warning: no parameters were found that match the string \"" + finite_parameter_selection + "\"" << std::endl;
+  }
+  else
+  {
+    algorithm.run(p, parameter_map);
+  }
 }
 
 } // namespace pbes_system

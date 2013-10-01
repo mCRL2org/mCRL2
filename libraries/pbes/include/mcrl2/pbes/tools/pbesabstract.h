@@ -14,6 +14,7 @@
 
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
@@ -30,6 +31,12 @@ void pbesabstract(const std::string& input_filename,
   // load the pbes
   pbes p;
   pbes_system::algorithms::load_pbes(p, input_filename);
+
+  // TODO: let pbesabstract handle ! and => properly
+  if (!is_normalized(p))
+  {
+    pbes_system::normalize(p);
+  }
 
   // run the algorithm
   pbes_abstract_algorithm algorithm;

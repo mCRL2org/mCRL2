@@ -81,7 +81,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 
     // @pre: (X0, p0) is in must_graph
-    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const control_flow_graph& Vk)
+    std::map<core::identifier_string, std::set<data::variable> > compute_belongs(const core::identifier_string& X0, std::size_t p0, const control_flow_graph& /* Vk unused. */ )
     {
       mCRL2log(log::debug, "stategraph") << "--- compute belongs (" << core::pp(X0) << ", " << p0 << ")" << std::endl;
 

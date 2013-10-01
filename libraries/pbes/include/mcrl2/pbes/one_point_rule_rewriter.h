@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/detail/print_utility.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -182,6 +183,18 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
+  }
+
+  // convert !val(d) to val(!d)
+  pbes_expression operator()(const not_& x)
+  {
+    if (is_data(x.operand()))
+    {
+      const data::data_expression& d = atermpp::aterm_cast<data::data_expression>(x.operand());
+      data::detail::one_point_rule_preprocessor R;
+      return R(data::sort_bool::not_(d));
+    }
+    return x;
   }
 
   pbes_expression operator()(const imp& x)
@@ -346,7 +359,7 @@ class one_point_rule_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>()(detail::data2pbes(x));
+      return core::make_apply_builder<detail::one_point_rule_rewrite_builder>()(detail::data2pbes(normalize(x)));
     }
 };
 

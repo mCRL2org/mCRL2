@@ -198,6 +198,33 @@ bool is_source(const rename_expression_list& R, const core::identifier_string& x
 
 typedef std::map<core::identifier_string, std::vector<core::identifier_string> > rename_inverse_map;
 
+inline
+std::string print_rename_inverse_map(const rename_inverse_map& m)
+{
+  std::ostringstream out;
+  out << "{ ";
+  for (auto i = m.begin(); i != m.end(); ++i)
+  {
+    if (i != m.begin())
+    {
+      out << ", ";
+    }
+    out << core::pp(i->first) << " -> [";
+    const std::vector<core::identifier_string>& v = i->second;
+    for (auto j = v.begin(); j != v.end(); ++j)
+    {
+      if (j != v.begin())
+      {
+        out << ", ";
+      }
+      out << core::pp(*j);
+    }
+    out << "]";
+  }
+  out << " }";
+  return out.str();
+}
+
 // Example: R = {b -> c}, then rename_inverse(R) = {b -> [], c -> [b, c]}
 inline
 rename_inverse_map rename_inverse(const rename_expression_list& R)

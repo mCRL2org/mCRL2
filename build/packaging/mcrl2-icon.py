@@ -23,9 +23,12 @@ ICON = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
    height="400"
    id="svg2"
    version="1.1">
+
+   <rect x="0" y="0" rx="40" ry="40" width="400" height="400"
+         style="fill:white" />
+
     {0}
 
-   <!-- g transform="matrix(1.25,0,0,-1.25,0,39.999951)" id="g10" //-->
    <g transform="translate(260,161)" id="g12">
    <g transform="scale({1},{1})" id="text14">
      <path

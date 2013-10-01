@@ -79,36 +79,32 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
       // Parse string argument to [NUM] (a set of indices)
       if (0 < parser.options.count("index"))
       {
-        std::string  m_string_index;
+        std::string indices_str(parser.option_argument_as<std::string>("index"));
+        std::stringstream indices(indices_str);
 
-        m_string_index = parser.option_argument_as< std::string  >("index");
-
-        size_t s_index = m_string_index.find_first_of(",");
-        size_t s_old_index=0;
-        char* p;
-
-        while (s_index != std::string::npos)
+        size_t index;
+        char comma;
+        while (indices.good())
         {
-          errno = 0;
-          long val = strtol(m_string_index.substr(s_old_index, s_index - s_old_index).c_str(), &p ,10);
-          /* Check for various possible errors */
-          if (errno != 0 || *p != '\0')
+          indices >> index;
+          if (indices.bad())
           {
-            throw parser.error("Parsed an invalid index value");
+            throw mcrl2::runtime_error("Not a valid comma-separated list of indices: " + indices_str);
           }
-          m_set_index.insert(val);
-          s_old_index = s_index+1;
-          s_index = m_string_index.find_first_of(",",s_old_index);
+          m_set_index.insert(index);
+          if (indices.good())
+          {
+            indices >> comma;
+            if (comma != ',')
+            {
+              throw mcrl2::runtime_error("Not a valid comma-separated list of indices: " + indices_str);
+            }
+          }
         }
-
-        errno =0;
-        long val = strtol(m_string_index.substr(s_old_index, s_index - s_old_index).c_str(), &p ,10);
-        /* Check for various possible errors */
-        if (errno != 0 || *p != '\0')
+        if (!indices.eof())
         {
-          throw parser.error("Parsed an invalid index value");
+          throw mcrl2::runtime_error("Not a valid comma-separated list of indices: " + indices_str);
         }
-        m_set_index.insert(val);
       }
 
       // Parse string argument NAME for sort argument
