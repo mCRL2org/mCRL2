@@ -46,7 +46,10 @@ def set_mcrl2_tooldir(tooldir):
 
 def add_tool_dir(toolname):
     if mcrl2_tool_options.tooldir != '':
-        return path(mcrl2_tool_options.tooldir) / toolname / toolname
+        guess = path(mcrl2_tool_options.tooldir) / toolname / toolname
+        if os.path.isfile(guess):
+          return guess
+        return path(mcrl2_tool_options.tooldir) / 'bin' / toolname
     return toolname
 
 def run_program(program, options, redirect = None):
