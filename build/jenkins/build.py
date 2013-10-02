@@ -42,6 +42,13 @@ if compiler != 'default':
     sys.exit(1)
 
 #
+# Include experimental and deprecated tools when not building a redistributable
+# package.
+#
+targetflags = []
+if package not in ['nightly', 'official-release']:
+  targetflags += ['-DMCRL2_ENABLE_EXPERIMENTAL=ON', '-DMCRL2_ENABLE_DEPRECATED=ON']
+#
 # Package for a proper mCRL2 release
 #
 packageflags = []
@@ -77,13 +84,14 @@ if jobname.split('/')[0].lower().find("release") <> -1:
 if not os.path.exists(builddir):
   os.mkdir(builddir)
 os.chdir(builddir)
-cmake_command = ['cmake', \
-                 srcdir, \
-                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), \
+cmake_command = ['cmake', 
+                 srcdir, 
+                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), 
                  '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)] \
+                 + targetflags \
                  + compilerflags \
                  + testflags \
-                 + packageflags
+                 + packageflags 
 if call('CMake', cmake_command):
   log('CMake failed.')
   sys.exit(1)
