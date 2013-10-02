@@ -188,7 +188,7 @@ Check out the Debian packaging files for mCRL2 and get the mCRL2 sources::
   $ svn checkout https://svn.win.tue.nl/repos/MCRL2/packaging
   $ cd packaging/mcrl2
   $ wget http://www.mcrl2.org/download/release/mcrl2-VERSION.tar.gz
-  $ cp mcrl2-VERSION.tar.gz mcrl2_VERSION.orig.tar.gz
+  $ mv mcrl2-VERSION.tar.gz mcrl2_VERSION.orig.tar.gz
   $ cd trunk
 
 Check whether the build instructions in ``debian/rules`` are up to date, and
@@ -196,18 +196,48 @@ generate a version number (e.g. for an Ubuntu Oneiric PPA build)::
 
   $ dch -v VERSION-0ubuntu0+1~oneiric -D oneiric
   
+.. note::
+
+   It is assumed that the e-mail address listed in the ``dch`` changelog has an
+   associated PGP key, that is used to sign the package with ``debuild``. This key
+   also needs to be registered with LaunchPad if you want to upload to the PPA.
+
+.. note::
+
+   The changes are saved in the changelog in the MCRL2/packaging repository. To
+   save the changelog for a next release, commit the changes to the repository 
+   after running ``dch -v VERSION -D unstable``.
+
 Build the source package::
 
   $ debuild -S -sa
-  
-Build the ``.deb`` locally::
+
+Build the ``.deb`` locally (the ``--buildresult .`` argument makes sure that the
+resulting ``.deb`` file is stored in the current directory, omitting it should make
+``pbuilder-dist`` put it in ``/var/cache/pbuilder/result``, but on some systems the
+file simply disappears::
 
   $ cd ..
-  $ pbuilder-dist oneiric build mcrl2-VERSION-0ubuntu0+1~oneiric.dsc
-  
+  $ pbuilder-dist oneiric build mcrl2_VERSION-0ubuntu0+1~oneiric.dsc --buildresult .
+
+.. note::
+
+   To use ``pbuilder-dist``, it has to be set up for each distribution you want to
+   build for. This can be done by executing::
+
+     $ pbuilder create --debootstrapopts --variant=buildd
+
 Check the generated debian package::
 
   $ lintian -i mcrl2_VERSION-0ubuntu0+1~oneiric_amd64.deb
+
+Test the generated package by installing it and running some executables. See whether
+the graphical applications run correctly and display the right icons. When you have
+convinced yourself that the package is good to be distributed, run ``dch`` and 
+``debuild`` for every Ubuntu release that is still supported, thus generating a number
+of ``.changes`` files. Then upload them to the PPA as follows::
+
+  $ dput ppa:mcrl2/release-ppa mcrl2_VERSION-1ubuntu1ppa1~RELEASENAME.changes
 
 Windows installer
 ^^^^^^^^^^^^^^^^^
