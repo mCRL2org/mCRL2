@@ -277,182 +277,184 @@ Release March 2011 (SVN revision 9030)
   |Source                  ||src_tgz_201103|_                         |
   +------------------------+------------------------------------------+
 
-Release September 2010 (SVN revision 8071 + bugfixes)
------------------------------------------------------
+.. Not available because of disk usage on www:
 
-.. |bin_w32_201009| replace:: Windows Installer (32-bit)
-.. _bin_w32_201009: http://www.mcrl2.org/download/release/mcrl2-201009-win32.exe
+    Release September 2010 (SVN revision 8071 + bugfixes)
+    -----------------------------------------------------
 
-.. |ubuntu_32_201009| replace:: Ubuntu 9.10 package (32-bit)
-.. _ubuntu_32_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_9.10_(i686).deb
+    .. |bin_w32_201009| replace:: Windows Installer (32-bit)
+    .. _bin_w32_201009: http://www.mcrl2.org/download/release/mcrl2-201009-win32.exe
 
-.. |ubuntu_64_201009| replace:: Ubuntu 10.4.1 package (64-bit)
-.. _ubuntu_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_10.04.1_LTS(x86_64).deb
+    .. |ubuntu_32_201009| replace:: Ubuntu 9.10 package (32-bit)
+    .. _ubuntu_32_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_9.10_(i686).deb
 
-.. |suse_64_201009| replace:: OpenSUSE 11.3 package (64-bit)
-.. _suse_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-openSUSE_11.3_(x86_64).rpm
+    .. |ubuntu_64_201009| replace:: Ubuntu 10.4.1 package (64-bit)
+    .. _ubuntu_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Ubuntu_10.04.1_LTS(x86_64).deb
 
-.. |bin_osx_201009| replace:: Darwin package (32-bit)
-.. _bin_osx_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Darwin.dmg
+    .. |suse_64_201009| replace:: OpenSUSE 11.3 package (64-bit)
+    .. _suse_64_201009: http://www.mcrl2.org/download/release/mcrl2-201009-openSUSE_11.3_(x86_64).rpm
 
-.. |src_tgz_201009| replace:: GZipped Tarball
-.. _src_tgz_201009: http://www.mcrl2.org/download/release/mcrl2-201009-src.tar.gz
+    .. |bin_osx_201009| replace:: Darwin package (32-bit)
+    .. _bin_osx_201009: http://www.mcrl2.org/download/release/mcrl2-201009-Darwin.dmg
 
-  +------------------------+------------------------------------------+
-  |Operating system        |Release (201009)                          |
-  +========================+==========================================+
-  |Windows                 ||bin_w32_201009|_                         |
-  +------------------------+------------------------------------------+
-  |Linux                   ||ubuntu_32_201009|_                       |
-  |                        +------------------------------------------+
-  |                        ||ubuntu_64_201009|_                       |
-  |                        +------------------------------------------+  
-  |                        ||suse_64_201009|_                         |
-  +------------------------+------------------------------------------+
-  |Mac OS X (Darwin)       | |bin_osx_201009|_                        |
-  +------------------------+------------------------------------------+
-  |Source                  ||src_tgz_201009|_                         |
-  +------------------------+------------------------------------------+
+    .. |src_tgz_201009| replace:: GZipped Tarball
+    .. _src_tgz_201009: http://www.mcrl2.org/download/release/mcrl2-201009-src.tar.gz
 
-Release July 2010 (SVN revision 8071)
--------------------------------------
+      +------------------------+------------------------------------------+
+      |Operating system        |Release (201009)                          |
+      +========================+==========================================+
+      |Windows                 ||bin_w32_201009|_                         |
+      +------------------------+------------------------------------------+
+      |Linux                   ||ubuntu_32_201009|_                       |
+      |                        +------------------------------------------+
+      |                        ||ubuntu_64_201009|_                       |
+      |                        +------------------------------------------+  
+      |                        ||suse_64_201009|_                         |
+      +------------------------+------------------------------------------+
+      |Mac OS X (Darwin)       | |bin_osx_201009|_                        |
+      +------------------------+------------------------------------------+
+      |Source                  ||src_tgz_201009|_                         |
+      +------------------------+------------------------------------------+
 
-.. |bin_w32_201007| replace:: Windows Installer (32-bit)
-.. _bin_w32_201007: http://www.mcrl2.org/download/release/mcrl2-201007-win32.exe
+    Release July 2010 (SVN revision 8071)
+    -------------------------------------
 
-.. |ubuntu_32_201007| replace:: Ubuntu 10.4 package (32-bit)
-.. _ubuntu_32_201007: http://www.mcrl2.org/download/release/mcrl2-201007-Ubuntu_10.04_(i686).deb
+    .. |bin_w32_201007| replace:: Windows Installer (32-bit)
+    .. _bin_w32_201007: http://www.mcrl2.org/download/release/mcrl2-201007-win32.exe
 
-.. |ubuntu_64_201007| replace:: Ubuntu 10.4 package (64-bit)
-.. _ubuntu_64_201007: http://www.mcrl2.org/download/release/mcrl2-201007-Ubuntu_10.04_(x86_64).deb
+    .. |ubuntu_32_201007| replace:: Ubuntu 10.4 package (32-bit)
+    .. _ubuntu_32_201007: http://www.mcrl2.org/download/release/mcrl2-201007-Ubuntu_10.04_(i686).deb
 
-.. |suse_64_201007| replace:: OpenSUSE 11.3 package (64-bit)
-.. _suse_64_201007: http://www.mcrl2.org/download/release/mcrl2-201007-OpenSuSE_11.3_(x86_64).rpm
+    .. |ubuntu_64_201007| replace:: Ubuntu 10.4 package (64-bit)
+    .. _ubuntu_64_201007: http://www.mcrl2.org/download/release/mcrl2-201007-Ubuntu_10.04_(x86_64).deb
 
-.. |bin_osx_201007| replace:: Darwin package (32-bit)
-.. _bin_osx_201007: http://www.mcrl2.org/download/release/mcrl2-201007-Darwin.dmg
+    .. |suse_64_201007| replace:: OpenSUSE 11.3 package (64-bit)
+    .. _suse_64_201007: http://www.mcrl2.org/download/release/mcrl2-201007-OpenSuSE_11.3_(x86_64).rpm
 
-.. |src_tgz_201007| replace:: GZipped Tarball
-.. _src_tgz_201007: http://www.mcrl2.org/download/release/mcrl2-201007-src.tar.gz
+    .. |bin_osx_201007| replace:: Darwin package (32-bit)
+    .. _bin_osx_201007: http://www.mcrl2.org/download/release/mcrl2-201007-Darwin.dmg
 
-  +------------------------+------------------------------------------+
-  |Operating system        |Release (201007)                          |
-  +========================+==========================================+
-  |Windows                 ||bin_w32_201007|_                         |
-  +------------------------+------------------------------------------+
-  |Linux                   ||ubuntu_32_201007|_                       |
-  |                        +------------------------------------------+
-  |                        ||ubuntu_64_201007|_                       |
-  |                        +------------------------------------------+  
-  |                        ||suse_64_201007|_                         |
-  +------------------------+------------------------------------------+
-  |Mac OS X (Darwin)       | |bin_osx_201007|_                        |
-  +------------------------+------------------------------------------+
-  |Source                  ||src_tgz_201007|_                         |
-  +------------------------+------------------------------------------+
+    .. |src_tgz_201007| replace:: GZipped Tarball
+    .. _src_tgz_201007: http://www.mcrl2.org/download/release/mcrl2-201007-src.tar.gz
 
-Release January 2010 (SVN revision 7424)
-----------------------------------------
+      +------------------------+------------------------------------------+
+      |Operating system        |Release (201007)                          |
+      +========================+==========================================+
+      |Windows                 ||bin_w32_201007|_                         |
+      +------------------------+------------------------------------------+
+      |Linux                   ||ubuntu_32_201007|_                       |
+      |                        +------------------------------------------+
+      |                        ||ubuntu_64_201007|_                       |
+      |                        +------------------------------------------+  
+      |                        ||suse_64_201007|_                         |
+      +------------------------+------------------------------------------+
+      |Mac OS X (Darwin)       | |bin_osx_201007|_                        |
+      +------------------------+------------------------------------------+
+      |Source                  ||src_tgz_201007|_                         |
+      +------------------------+------------------------------------------+
 
-.. |bin_w32_201001| replace:: Windows Installer (32-bit)
-.. _bin_w32_201001: http://www.mcrl2.org/download/release/mcrl2-201001-win32.exe
+    Release January 2010 (SVN revision 7424)
+    ----------------------------------------
 
-.. |ubuntu_32_201001| replace:: Ubuntu 9.10 package (32-bit)
-.. _ubuntu_32_201001: http://www.mcrl2.org/download/release/mcrl2-201001-Ubuntu_9.10_(i686).deb
+    .. |bin_w32_201001| replace:: Windows Installer (32-bit)
+    .. _bin_w32_201001: http://www.mcrl2.org/download/release/mcrl2-201001-win32.exe
 
-.. |ubuntu_64_201001| replace:: Ubuntu 9.10 package (64-bit)
-.. _ubuntu_64_201001: http://www.mcrl2.org/download/release/mcrl2-201001-Ubuntu_9.10_(x86_64).deb
+    .. |ubuntu_32_201001| replace:: Ubuntu 9.10 package (32-bit)
+    .. _ubuntu_32_201001: http://www.mcrl2.org/download/release/mcrl2-201001-Ubuntu_9.10_(i686).deb
 
-.. |suse_64_201001| replace:: OpenSUSE 11.2 package (64-bit)
-.. _suse_64_201001: http://www.mcrl2.org/download/release/mcrl2-201001-openSUSE_11.2_(x86_64).rpm
+    .. |ubuntu_64_201001| replace:: Ubuntu 9.10 package (64-bit)
+    .. _ubuntu_64_201001: http://www.mcrl2.org/download/release/mcrl2-201001-Ubuntu_9.10_(x86_64).deb
 
-.. |src_tgz_201001| replace:: BZipped Tarball
-.. _src_tgz_201001: http://www.mcrl2.org/download/release/mcrl2-201001-src.tar.bz2
+    .. |suse_64_201001| replace:: OpenSUSE 11.2 package (64-bit)
+    .. _suse_64_201001: http://www.mcrl2.org/download/release/mcrl2-201001-openSUSE_11.2_(x86_64).rpm
 
-  +------------------------+------------------------------------------+
-  |Operating system        |Release (201001)                          |
-  +========================+==========================================+
-  |Windows                 ||bin_w32_201001|_                         |
-  +------------------------+------------------------------------------+
-  |Linux                   ||ubuntu_32_201001|_                       |
-  |                        +------------------------------------------+
-  |                        ||ubuntu_64_201001|_                       |
-  |                        +------------------------------------------+  
-  |                        ||suse_64_201001|_                         |
-  +------------------------+------------------------------------------+
-  |Source                  ||src_tgz_201001|_                         |
-  +------------------------+------------------------------------------+
+    .. |src_tgz_201001| replace:: BZipped Tarball
+    .. _src_tgz_201001: http://www.mcrl2.org/download/release/mcrl2-201001-src.tar.bz2
 
-Release January 2009 (SVN revision 5546)
-----------------------------------------
+      +------------------------+------------------------------------------+
+      |Operating system        |Release (201001)                          |
+      +========================+==========================================+
+      |Windows                 ||bin_w32_201001|_                         |
+      +------------------------+------------------------------------------+
+      |Linux                   ||ubuntu_32_201001|_                       |
+      |                        +------------------------------------------+
+      |                        ||ubuntu_64_201001|_                       |
+      |                        +------------------------------------------+  
+      |                        ||suse_64_201001|_                         |
+      +------------------------+------------------------------------------+
+      |Source                  ||src_tgz_201001|_                         |
+      +------------------------+------------------------------------------+
 
-.. |zip_w32_200901| replace:: Windows Installer (32-bit)
-.. _zip_w32_200901: http://www.mcrl2.org/download/release/mcrl2-200901-bin-mingw32.exe
+    Release January 2009 (SVN revision 5546)
+    ----------------------------------------
 
-.. |src_tgz_200901| replace:: BZipped Tarball
-.. _src_tgz_200901: http://www.mcrl2.org/download/release/mcrl2-200901-src.tar.bz2
+    .. |zip_w32_200901| replace:: Windows Installer (32-bit)
+    .. _zip_w32_200901: http://www.mcrl2.org/download/release/mcrl2-200901-bin-mingw32.exe
 
-  +------------------------+--------------------------------------+
-  |Operating system        |Release (200901)                      |
-  +========================+======================================+
-  |Windows                 ||zip_w32_200901|_                     |
-  +------------------------+--------------------------------------+
-  |Source                  ||src_tgz_200901|_                     |
-  +------------------------+--------------------------------------+ 
+    .. |src_tgz_200901| replace:: BZipped Tarball
+    .. _src_tgz_200901: http://www.mcrl2.org/download/release/mcrl2-200901-src.tar.bz2
 
-Release July 2008 (SVN revision 4838)
--------------------------------------
+      +------------------------+--------------------------------------+
+      |Operating system        |Release (200901)                      |
+      +========================+======================================+
+      |Windows                 ||zip_w32_200901|_                     |
+      +------------------------+--------------------------------------+
+      |Source                  ||src_tgz_200901|_                     |
+      +------------------------+--------------------------------------+ 
 
-.. |bin_w32_200807| replace:: Windows Installer (32-bit)
-.. _bin_w32_200807: http://www.mcrl2.org/download/release/mcrl2-200807.msi
+    Release July 2008 (SVN revision 4838)
+    -------------------------------------
 
-.. |zip_w32_200807| replace:: Self-extracting ZIP file (32-bit)
-.. _zip_w32_200807: http://www.mcrl2.org/download/release/mcrl2-200807-bin-mingw32.exe
+    .. |bin_w32_200807| replace:: Windows Installer (32-bit)
+    .. _bin_w32_200807: http://www.mcrl2.org/download/release/mcrl2-200807.msi
 
-.. |src_tgz_200807| replace:: BZipped Tarball
-.. _src_tgz_200807: http://www.mcrl2.org/download/release/mcrl2-200807-1.src.tar.bz2
+    .. |zip_w32_200807| replace:: Self-extracting ZIP file (32-bit)
+    .. _zip_w32_200807: http://www.mcrl2.org/download/release/mcrl2-200807-bin-mingw32.exe
 
-  +------------------------+--------------------------------------+
-  |Operating system        |Release (200807)                      |
-  +========================+======================================+
-  |Windows                 ||zip_w32_200807|_                     |
-  |                        +--------------------------------------+
-  |                        ||bin_w32_200807|_                     |
-  +------------------------+--------------------------------------+
-  |Source                  ||src_tgz_200807|_                     |
-  +------------------------+--------------------------------------+ 
+    .. |src_tgz_200807| replace:: BZipped Tarball
+    .. _src_tgz_200807: http://www.mcrl2.org/download/release/mcrl2-200807-1.src.tar.bz2
 
-Release January 2008 (SVN revision 4041)
-----------------------------------------
+      +------------------------+--------------------------------------+
+      |Operating system        |Release (200807)                      |
+      +========================+======================================+
+      |Windows                 ||zip_w32_200807|_                     |
+      |                        +--------------------------------------+
+      |                        ||bin_w32_200807|_                     |
+      +------------------------+--------------------------------------+
+      |Source                  ||src_tgz_200807|_                     |
+      +------------------------+--------------------------------------+ 
 
-.. |zip_w32_200801| replace:: Self-extracting ZIP file (32-bit)
-.. _zip_w32_200801: http://www.mcrl2.org/download/release/mcrl2-200801-bin-mingw32.exe
+    Release January 2008 (SVN revision 4041)
+    ----------------------------------------
 
-.. |src_tgz_200801| replace:: BZipped Tarball
-.. _src_tgz_200801: http://www.mcrl2.org/download/release/mcrl2-200801-src.tar.bz2
+    .. |zip_w32_200801| replace:: Self-extracting ZIP file (32-bit)
+    .. _zip_w32_200801: http://www.mcrl2.org/download/release/mcrl2-200801-bin-mingw32.exe
 
-  +------------------------+--------------------------------------+
-  |Operating system        |Release (200801)                      |
-  +========================+======================================+
-  |Windows                 ||zip_w32_200801|_                     |
-  +------------------------+--------------------------------------+
-  |Source                  ||src_tgz_200801|_                     |
-  +------------------------+--------------------------------------+ 
+    .. |src_tgz_200801| replace:: BZipped Tarball
+    .. _src_tgz_200801: http://www.mcrl2.org/download/release/mcrl2-200801-src.tar.bz2
 
-Release July 2007 (SVN revision 3196)
--------------------------------------
+      +------------------------+--------------------------------------+
+      |Operating system        |Release (200801)                      |
+      +========================+======================================+
+      |Windows                 ||zip_w32_200801|_                     |
+      +------------------------+--------------------------------------+
+      |Source                  ||src_tgz_200801|_                     |
+      +------------------------+--------------------------------------+ 
 
-.. |zip_w32_200707| replace:: Self-extracting ZIP file (32-bit)
-.. _zip_w32_200707: http://www.mcrl2.org/download/release/mcrl2-200707-bin-mingw32.exe
+    Release July 2007 (SVN revision 3196)
+    -------------------------------------
 
-.. |src_tgz_200707| replace:: BZipped Tarball
-.. _src_tgz_200707: http://www.mcrl2.org/download/release/mcrl2-200707-src.tar.bz2
+    .. |zip_w32_200707| replace:: Self-extracting ZIP file (32-bit)
+    .. _zip_w32_200707: http://www.mcrl2.org/download/release/mcrl2-200707-bin-mingw32.exe
 
-  +------------------------+--------------------------------------+
-  |Operating system        |Release (200707)                      |
-  +========================+======================================+
-  |Windows                 ||zip_w32_200707|_                     |
-  +------------------------+--------------------------------------+
-  |Source                  ||src_tgz_200707|_                     |
-  +------------------------+--------------------------------------+
+    .. |src_tgz_200707| replace:: BZipped Tarball
+    .. _src_tgz_200707: http://www.mcrl2.org/download/release/mcrl2-200707-src.tar.bz2
+
+      +------------------------+--------------------------------------+
+      |Operating system        |Release (200707)                      |
+      +========================+======================================+
+      |Windows                 ||zip_w32_200707|_                     |
+      +------------------------+--------------------------------------+
+      |Source                  ||src_tgz_200707|_                     |
+      +------------------------+--------------------------------------+
 

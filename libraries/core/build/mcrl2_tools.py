@@ -49,7 +49,7 @@ def add_tool_dir(toolname):
         guess = path(mcrl2_tool_options.tooldir) / toolname / toolname
         if os.path.isfile(guess):
           return guess
-        return path(mcrl2_tool_options.tooldir) / 'stage' / 'bin' / toolname
+        return path(mcrl2_tool_options.tooldir) / 'bin' / toolname
     return toolname
 
 def run_program(program, options, redirect = None):
