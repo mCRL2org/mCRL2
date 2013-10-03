@@ -905,7 +905,16 @@ BOOST_AUTO_TEST_CASE(unguarded_recursion_with_parallel_operator)
   run_linearisation_test_case(spec,false);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(The_unreachability_of_tau_is_not_properly_recognized)
+{
+  const std::string spec =
+     "init (true -> delta <> delta) . tau;";
+
+  run_linearisation_test_case(spec,true);
+}
+
+
+boost::unit_test::test_suite* init_unit_test_suite(int , char* )
 {
   return 0;
 }

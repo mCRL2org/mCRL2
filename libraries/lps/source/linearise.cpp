@@ -2390,6 +2390,11 @@ class specification_basic_type:public boost::noncopyable
         if (s<=seq_state)
         {
           body1=bodytovarheadGNF(body1,name_state,freevars,v,variables_bound_in_sum);
+          if (!canterminatebody(body1))
+          { 
+            /* In this case there is no need to investigate body2, as it cannot be reached. */
+            return body1;
+          }
           if ((is_if_then(body2)) && (s<=sum_state))
           {
             /* Here we check whether the process body has the form
@@ -4647,7 +4652,6 @@ class specification_basic_type:public boost::noncopyable
       }
 
       /* There is a single initial multiaction or deadlock, possibly timed*/
-
       if (is_at(summandterm))
       {
         atTime=at(summandterm).time_stamp();
@@ -8705,17 +8709,17 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_action(t))
       {
-        return 1;
+        return true;
       }
 
       if (is_delta(t))
       {
-        return 0;
+        return false;
       }
 
       if (is_tau(t))
       {
-        return 1;
+        return true;
       }
 
       if (is_at(t))
