@@ -369,10 +369,10 @@ class stategraph_local_algorithm: public stategraph_algorithm
       super::run();
       compute_control_flow_index();
       print_control_flow_index();
-      compute_belongs();
-      print_belongs();
-      compute_control_flow_marking();
-      print_control_flow_marking();
+//      compute_belongs();
+//      print_belongs();
+//      compute_control_flow_marking();
+//      print_control_flow_marking();
     }
 };
 

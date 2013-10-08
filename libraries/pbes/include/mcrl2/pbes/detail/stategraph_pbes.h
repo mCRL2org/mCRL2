@@ -398,7 +398,7 @@ class stategraph_pbes
 };
 
 inline
-std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_pbes& p, const core::identifier_string& X)
+std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_pbes& p, const core::identifier_string& X, bool warn = true)
 {
   const std::vector<stategraph_equation>& equations = p.equations();
   for (std::vector<stategraph_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
@@ -407,6 +407,10 @@ std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_
     {
       return i;
     }
+  }
+  if (warn)
+  {
+    mCRL2log(log::debug, "stategraph") << "find_equation: could not find predicate variable " << core::pp(X) << std::endl;
   }
   return equations.end();
 }

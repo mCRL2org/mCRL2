@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
 
 #include <sstream>
+#include <boost/bind.hpp>
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/utilities/sequence.h"
@@ -601,6 +602,14 @@ class stategraph_algorithm
       return out.str();
     }
 
+    void print_connected_components() const
+    {
+      for (auto i = m_connected_components.begin(); i != m_connected_components.end(); ++i)
+      {
+        mCRL2log(log::debug, "stategraph") << print_connected_component(*i) << std::endl;
+      }
+    }
+
     // compute the connected component belonging to the vertex m_control_flow_graph_vertices[i]
     std::set<std::size_t> compute_connected_component(std::size_t i, std::vector<bool>& done) const
     {
@@ -647,6 +656,67 @@ class stategraph_algorithm
         m_connected_components.push_back(component);
         mCRL2log(log::debug, "stategraph") << print_connected_component(component) << std::endl;
       }
+    }
+
+    // removes the connected components V for which !is_valid_connected_component(V)
+    void remove_invalid_connected_components()
+    {
+      m_connected_components.erase(std::remove_if(m_connected_components.begin(), m_connected_components.end(),
+         !boost::bind(&stategraph_algorithm::is_valid_connected_component, this, _1)));
+      mCRL2log(log::debug, "stategraph") << "Removed invalid connected components. The remaining components are:" << std::endl;
+      print_connected_components();
+    }
+
+    // Returns true if dX[m] is not only copied.
+    //
+    // A CFP dX[m] is not only copied if dest(Y, i, m) is defined for some i such that pred(phi_Y , i) = X, or source(Y, i, m) is defined
+    bool is_not_only_copied(const core::identifier_string& X, std::size_t m) const
+    {
+      const std::vector<stategraph_equation>& equations = m_pbes.equations();
+      for (auto k = equations.begin(); k != equations.end(); ++k)
+      {
+        const core::identifier_string& X = k->variable().name();
+        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<predicate_variable>& predvars = k->predicate_variables();
+        for (auto i = predvars.begin(); i != predvars.end(); ++i)
+        {
+          const predicate_variable& PVI_X_i = *i;
+          auto Y = PVI_X_i.X.name();
+          if (Y == X)
+          {
+            if (!is_undefined(PVI_X_i.source, m) || !is_undefined(PVI_X_i.dest, m))
+            {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    // Returns true if all CFPs in component are 'only copied'
+    bool has_only_copied_CFPs(const std::set<std::size_t>& component) const
+    {
+      for (auto i = component.begin(); i != component.end(); ++i)
+      {
+        const control_flow_graph_vertex& u = m_control_flow_graph_vertices[*i];
+        auto X = u.name();
+        auto m = u.index();
+        if (is_not_only_copied(X, m))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Removes the connected components V that consist of CFPs that are only copied.
+    void remove_only_copy_components()
+    {
+      m_connected_components.erase(std::remove_if(m_connected_components.begin(), m_connected_components.end(),
+         boost::bind(&stategraph_algorithm::has_only_copied_CFPs, this, _1)));
+      mCRL2log(log::debug, "stategraph") << "Removed only copy components. The remaining components are:" << std::endl;
+      print_connected_components();
     }
 
     const std::vector<bool>& stategraph_values(const core::identifier_string& X) const
@@ -850,6 +920,8 @@ class stategraph_algorithm
       m_pbes.compute_source_dest_copy();
       mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
       compute_control_flow_parameters();
+      remove_invalid_connected_components();
+      remove_only_copy_components();
       compute_control_flow_graphs();
     }
 
