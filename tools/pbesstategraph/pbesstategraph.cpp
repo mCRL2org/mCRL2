@@ -40,7 +40,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       m_use_local_variant = parser.option_argument_as<bool>("use-local-variant");
       m_print_influence_graph = parser.option_argument_as<bool>("print-influence-graph");
       m_use_marking_optimization = parser.option_argument_as<bool>("use-marking-optimization");
-      m_use_alternative_lcfp_criterion = parser.option_argument_as<bool>("use-alternative-cfp-criterion");
+      m_use_alternative_lcfp_criterion = parser.option_argument_as<bool>("use-alternative-lcfp-criterion");
       m_use_alternative_gcfp_relation = parser.option_argument_as<bool>("use-alternative-gcfp-relation");
       m_use_alternative_gcfp_consistency = parser.option_argument_as<bool>("use-alternative-gcfp-consistency");
     }
