@@ -836,6 +836,7 @@ def get_includes(input):
     lines = string.split(input, '\n')
     includes = []
     for line in lines:
+        line = line.strip()
         if re.match('#include.*', line):
             includes.append(line.replace('#include ',''))
     return includes

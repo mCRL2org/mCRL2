@@ -5,11 +5,29 @@
 import string
 import copy
 import re
+import logging
 
 # The following lists identifiers that must be
 # escaped by a namespace when the corresponding function
 # is called, to work around a bug in GCC 4.4
 IDS_WITH_NAMESPACE = ['set_comprehension', 'bag_comprehension']
+
+LOG = logging.getLogger("data")
+# Uncomment to add lots of debug information
+#LOG.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+CH = logging.StreamHandler()
+
+LOG.addHandler(CH)
+
+def indent(n):
+  result = ""
+  i = 0
+  while i < n:
+    result += " "
+    i += 1
+  return result
 
 def add_namespace(function_symbol_name, function_symbol_namespace, other_namespace = "undefined"):
   global IDS_WITH_NAMESPACE
@@ -798,7 +816,8 @@ class data_application(data_expression):
   def __str__(self):
     return "{0}({1})".format(self.head, self.arguments)
 
-  def code(self, spec, function_spec, variable_spec):
+  def code(self, spec, function_spec, variable_spec, indentlog = 0):
+    LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
     if isinstance(self.head, function_symbol):
       # FIXME: Extremely ugly workaround for set complement
       if self.head.id == "!" and len(self.arguments.elements) == 1 and isinstance(self.arguments.elements[0], data_application) and isinstance(self.arguments.elements[0].head, data_variable):
@@ -807,11 +826,11 @@ class data_application(data_expression):
       elif self.head.id == "+" and len(self.arguments.elements) == 2 and isinstance(self.arguments.elements[0], data_application) and isinstance(self.arguments.elements[0].head, data_variable):
         head_code = "sort_nat::plus"
       else:
-        head_code = self.head.code(spec, function_spec, variable_spec, len(self.arguments.elements))
+        head_code = self.head.code(spec, function_spec, variable_spec, indentlog + 2, len(self.arguments.elements))
         # make generated code a bit more readable 
         head_code = head_code[:head_code.find("(")]
     else:
-      head_code = self.head.code(spec, function_spec, variable_spec)
+      head_code = self.head.code(spec, function_spec, variable_spec, indentlog + 2)
       
     sort_parameters_code = []
 
@@ -820,9 +839,11 @@ class data_application(data_expression):
       sort_parameters = self.head.sort_parameters(spec, function_spec, variable_spec)
       for s in sort_parameters:
         sort_parameters_code += [s.code(spec)]
-    sort_parameters_code += [self.arguments.code(spec, function_spec, variable_spec)]
+    sort_parameters_code += [self.arguments.code(spec, function_spec, variable_spec, indentlog + 2)]
 
-    return "%s(%s)" % (head_code, string.join(sort_parameters_code, ", "))
+    result = "%s(%s)" % (head_code, string.join(sort_parameters_code, ", "))
+    LOG.debug(indent(indentlog) + "Yields {0}".format(result))
+    return result
 
 class data_variable_or_function_symbol(data_expression):
   def __init__(self, identifier):
@@ -868,8 +889,11 @@ class data_variable(data_expression):
   def __str__(self):
     return str(self.id)
 
-  def code(self, spec, function_spec, variable_spec):
-    return "v{0}".format(self.id)
+  def code(self, spec, function_spec, variable_spec, indentlog = 0):
+    LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
+    result = "v{0}".format(self.id)
+    LOG.debug(indent(indentlog) + "Yields {0}".format(result))
+    return result
 
 class function_symbol(data_expression):
   def __init__(self, id):
@@ -892,10 +916,13 @@ class function_symbol(data_expression):
   def __str__(self):
     return str(self.id)
 
-  def code(self, spec, function_spec, variable_spec, argumentcount = -1):
+  def code(self, spec, function_spec, variable_spec, indentlog=0, argumentcount = -1):
+    LOG.debug(indent(indentlog) + "Generating code for {0} with argumentcount {1} and indent {2}".format(self, argumentcount, indentlog))
     f = function_spec.find_function(self, argumentcount)
     sort_parameters_code = [s.code(spec) for s in f.sort_parameters(spec)]
-    return "%s(%s)" % (add_namespace(f.label, f.namespace, function_spec.namespace), string.join(sort_parameters_code, ", "))
+    result = "%s(%s)" % (add_namespace(f.label, f.namespace, function_spec.namespace), string.join(sort_parameters_code, ", "))
+    LOG.debug(indent(indentlog) + "Yields {0}".format(result))
+    return result
 
 class lambda_abstraction(data_expression):
   def __init__(self, var_declaration, expression):
@@ -929,8 +956,11 @@ class lambda_abstraction(data_expression):
   def __str__(self):
     return "lambda({0}, {1})".format(self.variable_declaration, self.expression)
 
-  def code(self, spec, function_spec, variable_spec):
-    return "lambda(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec), self.expression.code(spec, function_spec, variable_spec))
+  def code(self, spec, function_spec, variable_spec, indentlog = 0):
+    LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
+    result = "lambda(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
+    LOG.debug(indent(indentlog) + "Yields {0}".format(result))
+    return result
 
 class forall(data_expression):
   def __init__(self, var_declaration, expression):
@@ -964,8 +994,11 @@ class forall(data_expression):
   def __str__(self):
     return "forall({0}, {1})".format(self.variable_declaration, self.expression)
 
-  def code(self, spec, function_spec, variable_spec):
-    return "forall(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec), self.expression.code(spec, function_spec, variable_spec))
+  def code(self, spec, function_spec, variable_spec, indentlog = 0):
+    LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
+    result = "forall(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
+    LOG.debug(indent(indentlog) + "Yields {0}".format(result))
+    return result
 
 class exists(data_expression):
   def __init__(self, var_declaration, expression):
@@ -999,8 +1032,11 @@ class exists(data_expression):
   def __str__(self):
     return "exists({0}, {1})".format(self.variable_declaration, self.expression)
 
-  def code(self, spec, function_spec, variable_spec):
-    return "exists(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec), self.expression.code(spec, function_spec, variable_spec))
+  def code(self, spec, function_spec, variable_spec, indentlog=0):
+    LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
+    result = "exists(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
+    LOG.debug(indent(indentlog) + "Yields {0}".format(result))
+    return result
 
 class data_expression_list():
   def __init__(self, elements):
@@ -1038,8 +1074,8 @@ class data_expression_list():
   def __str__(self):
     return ", ".join([str(e) for e in self.elements])
 
-  def code(self, spec, function_spec, variable_spec):
-    return ", ".join([e.code(spec, function_spec, variable_spec) for e in self.elements])
+  def code(self, spec, function_spec, variable_spec, indentlog):
+    return ", ".join([e.code(spec, function_spec, variable_spec, indentlog+2) for e in self.elements])
 
 class sort_expression_list():
   def __init__(self, elements):
