@@ -914,7 +914,9 @@ BOOST_AUTO_TEST_CASE(The_unreachability_of_tau_is_not_properly_recognized)
 }
 
 
-boost::unit_test::test_suite* init_unit_test_suite(int , char* )
+// Arguments argc and argv must not be removed, despite compiler warnings,
+// as this will cause this test to fail.
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[]) 
 {
   return 0;
 }
