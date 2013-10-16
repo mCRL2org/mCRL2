@@ -133,8 +133,8 @@ namespace mcrl2 {
 
         return result;
       }
-      /// \brief Generate identifier {}
-      /// \return Identifier {}
+      /// \brief Generate identifier {:}
+      /// \return Identifier {:}
       inline
       core::identifier_string const& empty_name()
       {
@@ -142,7 +142,7 @@ namespace mcrl2 {
         return empty_name;
       }
 
-      /// \brief Constructor for function symbol {}
+      /// \brief Constructor for function symbol {:}
       /// \param s A sort expression
       /// \return Function symbol empty
       inline
@@ -153,9 +153,9 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Recogniser for function {}
+      /// \brief Recogniser for function {:}
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching {}
+      /// \return true iff e is the function symbol matching {:}
       inline
       bool is_empty_function_symbol(const atermpp::aterm_appl& e)
       {

@@ -53,7 +53,7 @@ current_file = ""
 # Verbose printing of message
 def printVerbose(string, object):
   if verbose:
-    print("%s: %s" % (string, object.to_string()))
+    print("%s: %s" % (string, str(object)))
 
 #===============================================================================
 # Tokens/precedences. 
@@ -146,9 +146,8 @@ class TokenID(Parsing.Token):
         Parsing.Token.__init__(self, parser)
         self.data = identifier(s)
 
-    # string representation
-    def to_string(self):
-        return self.data.to_string()
+    def __str__():
+        return str(self.data)
 
 #===============================================================================
 # Nonterminals, with associated productions.  In traditional BNF, the following
@@ -332,8 +331,6 @@ class Subtype(Parsing.Nonterm):
         "%reduce supertypeof id"
         self.data = subtype(id.data)
         printVerbose("Subtype", self.data)
-
-
 
 # Spec ::= SortSpec FunctionSpec VarSpec EqnSpec
 class Spec(Parsing.Nonterm):
@@ -761,9 +758,11 @@ class Parser(Parsing.Lr):
 
         # First make sure the needed separators are surrounded by spaces
         # Some parts always need to get extra whitespace
-        input = re.sub('(->|[():;,])', r" \1 ", input)
-        # # needs to get whitespace if it is not followed by "include"
+        input = re.sub('(->|[();,])', r" \1 ", input)
+        # needs to get whitespace if it is not followed by "include"
         input = re.sub('(#)(?!(include|using|supertypeof))', r" \1 ", input)
+        # surround : with whitespace except if preceded by { (for {:})
+        input = re.sub(r'([^{])(\:)', r"\1 \2 ", input)
         # < needs to get whitespace if it starts a label
         input = re.sub('(<\")(?=\w)', r"\1 ", input)
         # > needs to get whitespace if it ends a label

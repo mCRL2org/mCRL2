@@ -16,7 +16,7 @@
 sort Bag(S) <"bag">;
 
 cons @bag <"constructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
-map {} <"empty">: Bag(S);
+map {:} <"empty">: Bag(S);
     @bagfbag <"bag_fbag">: FBag(S) <"arg"> -> Bag(S);
     @bagcomp <"bag_comprehension">: (S -> Nat) <"arg"> -> Bag(S);
     count <"count">: S <"left"> # Bag(S) <"right"> -> Nat;
@@ -44,7 +44,7 @@ var b: FBag(S);
     x: Bag(S);
     y: Bag(S);
 
-eqn {}  =  @bag(@zero_, @fbag_empty);
+eqn {:}  =  @bag(@zero_, @fbag_empty);
     @bagfbag(b)  =  @bag(@zero_, b);
     @bagcomp(f)  =  @bag(f, @fbag_empty);
     count(e, @bag(f, b))  =  @swap_zero(f(e), @fbag_count(e, b));

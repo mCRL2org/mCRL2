@@ -1784,7 +1784,7 @@ class function_specification():
     return result
 
   def __str__(self):
-    return "{0}\n{1}" % (self.constructor_specification, self.mapping_specification)
+    return "{0}\n{1}".format(self.constructor_specification, self.mapping_specification)
 
   def code(self, spec):
     assert(isinstance(spec, specification))

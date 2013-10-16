@@ -660,22 +660,10 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, vg(vd), intersection(s, vf, vg, vs, cons_(s, ve, vt)))));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), intersection(s, vf, vg, cons_(s, vd, vs), vt))));
         result.push_back(data_equation(atermpp::make_vector(vs), difference(s, vs, empty(s)), vs));
-        result.push_back(data_equation(atermpp::make_vector(vt), difference(s, empty(s), vt), vt));
+        result.push_back(data_equation(atermpp::make_vector(vt), difference(s, empty(s), vt), empty(s)));
         result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), difference(s, cons_(s, vd, vs), cons_(s, vd, vt)), difference(s, vs, vt)));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(vd, ve), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, vd, difference(s, vs, cons_(s, ve, vt)))));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, ve, difference(s, cons_(s, vd, vs), vt))));
-        result.push_back(data_equation(variable_list(), equal_to(empty(s), empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(empty(s), cons_(s, ve, vs)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(cons_(s, ve, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(cons_(s, ve, vt), cons_(s, vd, vs)), sort_bool::and_(equal_to(ve, vd), equal_to(vt, vs))));
-        result.push_back(data_equation(variable_list(), less(empty(s), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(empty(s), cons_(s, ve, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(cons_(s, ve, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(cons_(s, ve, vt), cons_(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less(vt, vs)))));
-        result.push_back(data_equation(variable_list(), less_equal(empty(s), empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(empty(s), cons_(s, ve, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(cons_(s, ve, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(cons_(s, ve, vt), cons_(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less_equal(vt, vs)))));
         return result;
       }
 
