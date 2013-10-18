@@ -787,7 +787,7 @@ int test_main(int, char**)
   test_significant_variables();
 //  test_constraints();
 //  test_local_stategraph();
-  test_cfp();
+//  test_cfp();
 
   return 0;
 }
