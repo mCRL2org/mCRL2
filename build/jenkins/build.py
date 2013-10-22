@@ -86,8 +86,10 @@ if not os.path.exists(builddir):
 os.chdir(builddir)
 cmake_command = ['cmake', 
                  srcdir, 
-                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), 
-                 '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)] \
+                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype)] \ 
+# Using a stage dir breaks packaging for MacOSX. Ideally, we'd have a stage
+# dir though, for easy debugging when something goes wrong during testing.
+#                '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)] \
                  + targetflags \
                  + compilerflags \
                  + testflags \
