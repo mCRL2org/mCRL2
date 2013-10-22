@@ -137,7 +137,10 @@ ctest_command = ['ctest', \
                  '--output-on-failure', \
                  '--no-compress-output', \
                  '-j{0}'.format(buildthreads)]
-ctest_result = call('CTest', ctest_command)
+env = {}
+env.update(os.environ)
+env['MCRL2_COMPILEREWRITER'] = os.path.abspath(os.path.join('.', 'mcrl2compilerewriter'))
+ctest_result = call('CTest', ctest_command, env=env)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))
 
