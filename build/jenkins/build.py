@@ -121,7 +121,7 @@ if package == 'official-release-doc':
 #
 
 extraoptions = []
-if platform.system() == 'Linux':
+if label not in ["windows-x86", "windows-amd64"]:
   extraoptions =  ['-j{0}'.format(buildthreads)]
 make_command = ['cmake', '--build', builddir, '--'] + extraoptions
 if call('CMake --build', make_command):
