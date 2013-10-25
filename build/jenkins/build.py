@@ -84,14 +84,20 @@ if jobname.split('/')[0].lower().find("release") <> -1:
 if not os.path.exists(builddir):
   os.mkdir(builddir)
 os.chdir(builddir)
+
+# Using a stage dir breaks packaging for MacOSX. Ideally, we'd have a stage
+# dir though, for easy debugging when something goes wrong during testing.
+# To do so, re-add the following option:
+#
+# '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)
+
 cmake_command = ['cmake', 
                  srcdir, 
-                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype), 
-                 '-DMCRL2_STAGE_ROOTDIR={0}/stage'.format(builddir)] \
-                 + targetflags \
-                 + compilerflags \
-                 + testflags \
-                 + packageflags 
+                 '-DCMAKE_BUILD_TYPE={0}'.format(buildtype)] \
+                + targetflags \
+                + compilerflags \
+                + testflags \
+                + packageflags 
 if call('CMake', cmake_command):
   log('CMake failed.')
   sys.exit(1)
@@ -115,7 +121,7 @@ if package == 'official-release-doc':
 #
 
 extraoptions = []
-if platform.system() == 'Linux':
+if label not in ["windows-x86", "windows-amd64"]:
   extraoptions =  ['-j{0}'.format(buildthreads)]
 make_command = ['cmake', '--build', builddir, '--'] + extraoptions
 if call('CMake --build', make_command):
@@ -131,7 +137,10 @@ ctest_command = ['ctest', \
                  '--output-on-failure', \
                  '--no-compress-output', \
                  '-j{0}'.format(buildthreads)]
-ctest_result = call('CTest', ctest_command)
+env = {}
+env.update(os.environ)
+env['MCRL2_COMPILEREWRITER'] = os.path.abspath(os.path.join('.', 'mcrl2compilerewriter_ctest'))
+ctest_result = call('CTest', ctest_command, env=env)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))
 
