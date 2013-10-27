@@ -199,6 +199,7 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
   }
 
   assert(0); // Unexpected data_expression.
+  return true;
 }
 
 } // namespace data
@@ -648,8 +649,8 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
   // If NeededType and Type are both container types, try to upcast the argument.
   if (is_container_sort(NeededType) && is_container_sort(Type))
   { 
-    const container_sort& needed_container_type(NeededType);
-    const container_sort& container_type(Type);
+    const container_sort needed_container_type(NeededType);
+    const container_sort container_type(Type);
     sort_expression needed_argument_type=needed_container_type.element_sort();
     const sort_expression& argument_type=container_type.element_sort();
     if (is_untyped_sort(needed_argument_type))
