@@ -51,7 +51,7 @@ void list_expression_test()
   test_data_expression("1 in l", v, is_in_application);
   test_data_expression("10 |> l", v, is_cons_application);
   test_data_expression("l <| 10", v, is_snoc_application);
-  test_data_expression("#l", v, is_count_application);
+  test_data_expression("#l", v, is_count_application); 
   test_data_expression("l ++ [10]", v, is_concat_application);
   test_data_expression("l.1", v, is_element_at_application);
   test_data_expression("head(l)", v, is_head_application);
@@ -60,7 +60,7 @@ void list_expression_test()
   test_data_expression("rtail(l)", v, is_rtail_application);
 
   data_expression e = parse_data_expression("[10]", v.begin(), v.end());
-  BOOST_CHECK(is_cons_application(normaliser(e)));
+  BOOST_CHECK(is_cons_application(normaliser(e))); 
 
 }
 

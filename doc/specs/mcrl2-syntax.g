@@ -23,6 +23,8 @@ SimpleSortExpr
   | 'List' '(' SortExpr ')'                                      // List sort
   | 'Set' '(' SortExpr ')'                                       // Set sort
   | 'Bag' '(' SortExpr ')'                                       // Bag sort
+  | 'FSet' '(' SortExpr ')'                                      // Finite set sort
+  | 'FBag' '(' SortExpr ')'                                      // Finite bag sort
   | Id                                                           // Sort reference
   | '(' SortExpr ')'                                             // Sort expression with parentheses
   | 'struct' ConstrDeclList                                      // Structured sort

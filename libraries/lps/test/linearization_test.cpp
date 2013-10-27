@@ -913,6 +913,15 @@ BOOST_AUTO_TEST_CASE(The_unreachability_of_tau_is_not_properly_recognized)
   run_linearisation_test_case(spec,true);
 }
 
+BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
+{
+  const std::string spec =
+     "sort  State = struct S;\n"
+     "proc X = ((lambda x: Nat. S)(3) == S)->tau.X;\n"
+     "init X;\n";
+
+  run_linearisation_test_case(spec,true);
+}
 
 // Arguments argc and argv must not be removed, despite compiler warnings,
 // as this will cause this test to fail.

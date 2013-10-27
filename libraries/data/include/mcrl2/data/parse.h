@@ -61,7 +61,9 @@ struct sort_expression_actions: public core::default_parser_actions
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Real")) { return sort_real::real_(); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "List") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ")")) { return sort_list::list(parse_SortExpr(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Set") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ")")) { return sort_set::set_(parse_SortExpr(node.child(2))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "FSet") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ")")) { return sort_fset::fset(parse_SortExpr(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Bag") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ")")) { return sort_bag::bag(parse_SortExpr(node.child(2))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "FBag") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ")")) { return sort_fbag::fbag(parse_SortExpr(node.child(2))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return basic_sort(parse_Id(node.child(0))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "SortExpr") && (symbol_name(node.child(2)) == ")")) { return parse_SortExpr(node.child(1)); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "struct") && (symbol_name(node.child(1)) == "ConstrDeclList")) { return structured_sort(parse_ConstrDeclList(node.child(1))); }
@@ -136,27 +138,23 @@ struct data_expression_actions: public sort_expression_actions
   data_expression make_list_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    // return application(untyped_identifier(sort_list::list_enumeration_name()), x); 
     return sort_list::list_enumeration(untyped_sort(),x);
   }
 
   data_expression make_set_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    // return application(untyped_identifier(sort_set::set_enumeration_name()), x); 
     return sort_set::set_enumeration(untyped_sort(),x);
   }
 
   data_expression make_bag_enumeration(const data_expression_list& x)
   {
     assert(!x.empty());
-    // return application(untyped_identifier(sort_bag::bag_enumeration_name()), x); 
     return sort_bag::bag_enumeration(untyped_sort(),x);
   }
 
   data_expression make_function_update(const data_expression& x, const data_expression& y, const data_expression& z)
   {
-    // return make_application(untyped_identifier(mcrl2::data::function_update_name()), x, y, z);
     return make_application(function_symbol(mcrl2::data::function_update_name(),untyped_sort()), x, y, z);
   }
 

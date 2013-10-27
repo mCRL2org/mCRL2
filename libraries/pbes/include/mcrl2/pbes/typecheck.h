@@ -402,7 +402,8 @@ class pbes_type_checker:public data::data_type_checker
             sort_expression CastedNewPosType;
             try
             {
-              CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par);
+              std::map<core::identifier_string,sort_expression> dummy_table;
+              CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par,Vars,Vars,dummy_table,false);
             }
             catch (mcrl2::runtime_error &e)
             {

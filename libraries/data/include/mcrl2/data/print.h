@@ -105,7 +105,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       (name == data::sort_real::minus_name())         ||
       (name == data::sort_set::union_name())     ||
       (name == data::sort_set::difference_name())      ||
-      (name == data::sort_bag::join_name())      ||
+      (name == data::sort_bag::union_name())      ||
       (name == data::sort_bag::difference_name())      ||
       (name == data::sort_int::div_name())          ||
       (name == data::sort_int::mod_name())          ||
@@ -1064,14 +1064,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::fset_container& x)
   {
     derived().enter(x);
-    derived().print("@FSet");
+    derived().print("FSet");
     derived().leave(x);
   }
 
   void operator()(const data::fbag_container& x)
   {
     derived().enter(x);
-    derived().print("@FBag");
+    derived().print("FBag");
     derived().leave(x);
   }
 
@@ -1117,7 +1117,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::untyped_possible_sorts& x)
   {
     derived().enter(x);
+    derived().print("@untyped_possible_sorts[");
     derived()(x.sorts());
+    derived().print("]");
     derived().leave(x);
   }
 
@@ -1561,11 +1563,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_fset_cons_list(x);
       }
-      else if (sort_fset::is_union_application(x))
+      else if (sort_fset::is_in_application(x))
+      {
+        derived()(sort_fset::left(x));
+        derived().print(" in ");
+        derived()(sort_fset::right(x));
+      }
+      else if (sort_fset::is_fset_union_application(x))
       {
         print_fset_set_operation(x, " + ");
       }
-      else if (sort_fset::is_intersection_application(x))
+      else if (sort_fset::is_fset_intersection_application(x))
       {
         print_fset_set_operation(x, " * ");
       }
@@ -1574,6 +1582,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived()(sort_fset::arg1(x));
         derived().print(" - ");
         derived()(sort_fset::arg2(x));
+      }
+      else if (sort_fset::is_union_application(x))
+      {
+        derived()(sort_fset::left(x));
+        derived().print(" + ");
+        derived()(sort_fset::right(x));
+      }
+      else if (sort_fset::is_intersection_application(x))
+      {
+        derived()(sort_fset::left(x));
+        derived().print(" * ");
+        derived()(sort_fset::right(x));
+      }
+      else if (sort_fset::is_count_application(x))
+      {
+        derived().print("#");
+        derived()(sort_fset::arg(x));
       }
       else
       {
@@ -1586,7 +1611,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (sort_bag::is_bag(x.sort()))
     {
-      if (sort_bag::is_join_application(x))
+      if (sort_bag::is_union_application(x))
       {
         print_binary_operation(x, " + ");
       }

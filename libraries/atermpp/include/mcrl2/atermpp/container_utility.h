@@ -30,7 +30,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-// #include "mcrl2/atermpp/aterm_list_iterator.h"
 
 namespace atermpp
 {

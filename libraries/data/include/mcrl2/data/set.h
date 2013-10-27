@@ -131,39 +131,6 @@ namespace mcrl2 {
 
         return result;
       }
-      /// \brief Generate identifier {}
-      /// \return Identifier {}
-      inline
-      core::identifier_string const& empty_name()
-      {
-        static core::identifier_string empty_name = core::identifier_string("{}");
-        return empty_name;
-      }
-
-      /// \brief Constructor for function symbol {}
-      /// \param s A sort expression
-      /// \return Function symbol empty
-      inline
-      function_symbol empty(const sort_expression& s)
-      {
-        function_symbol empty(empty_name(), set_(s));
-        return empty;
-      }
-
-
-      /// \brief Recogniser for function {}
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching {}
-      inline
-      bool is_empty_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e).name() == empty_name();
-        }
-        return false;
-      }
-
       /// \brief Generate identifier \@setfset
       /// \return Identifier \@setfset
       inline
@@ -287,16 +254,19 @@ namespace mcrl2 {
         return in_name;
       }
 
-      /// \brief Constructor for function symbol in
-      /// \param s A sort expression
-      /// \return Function symbol in
+      ///\brief Constructor for function symbol in
+       /// \param s A sort expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol in
       inline
-      function_symbol in(const sort_expression& s)
+      function_symbol in(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol in(in_name(), make_function_sort(s, set_(s), sort_bool::bool_()));
+        sort_expression target_sort(sort_bool::bool_());
+
+        function_symbol in(in_name(), make_function_sort(s0, s1, target_sort));
         return in;
       }
-
 
       /// \brief Recogniser for function in
       /// \param e A data expression
@@ -306,7 +276,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == in_name();
+          function_symbol f(e);
+          return f.name() == in_name();
         }
         return false;
       }
@@ -319,7 +290,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_set::in(s)(arg0, arg1);
+        return sort_set::in(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -402,16 +373,31 @@ namespace mcrl2 {
         return union_name;
       }
 
-      /// \brief Constructor for function symbol +
-      /// \param s A sort expression
-      /// \return Function symbol union_
+      ///\brief Constructor for function symbol +
+       /// \param s A sort expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol union_
       inline
-      function_symbol union_(const sort_expression& s)
+      function_symbol union_(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol union_(union_name(), make_function_sort(set_(s), set_(s), set_(s)));
+        sort_expression target_sort;
+        if (s0 == set_(s) && s1 == set_(s))
+        {
+          target_sort = set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
+        {
+          target_sort = sort_fset::fset(s);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for union_ with domain sorts " + to_string(s0) + ", " + to_string(s1));
+        }
+
+        function_symbol union_(union_name(), make_function_sort(s0, s1, target_sort));
         return union_;
       }
-
 
       /// \brief Recogniser for function +
       /// \param e A data expression
@@ -421,7 +407,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == union_name();
+          function_symbol f(e);
+          return f.name() == union_name();
         }
         return false;
       }
@@ -434,7 +421,7 @@ namespace mcrl2 {
       inline
       application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_set::union_(s)(arg0, arg1);
+        return sort_set::union_(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -460,16 +447,31 @@ namespace mcrl2 {
         return intersection_name;
       }
 
-      /// \brief Constructor for function symbol *
-      /// \param s A sort expression
-      /// \return Function symbol intersection
+      ///\brief Constructor for function symbol *
+       /// \param s A sort expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol intersection
       inline
-      function_symbol intersection(const sort_expression& s)
+      function_symbol intersection(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol intersection(intersection_name(), make_function_sort(set_(s), set_(s), set_(s)));
+        sort_expression target_sort;
+        if (s0 == set_(s) && s1 == set_(s))
+        {
+          target_sort = set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
+        {
+          target_sort = sort_fset::fset(s);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for intersection with domain sorts " + to_string(s0) + ", " + to_string(s1));
+        }
+
+        function_symbol intersection(intersection_name(), make_function_sort(s0, s1, target_sort));
         return intersection;
       }
-
 
       /// \brief Recogniser for function *
       /// \param e A data expression
@@ -479,7 +481,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == intersection_name();
+          function_symbol f(e);
+          return f.name() == intersection_name();
         }
         return false;
       }
@@ -492,7 +495,7 @@ namespace mcrl2 {
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_set::intersection(s)(arg0, arg1);
+        return sort_set::intersection(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -518,16 +521,31 @@ namespace mcrl2 {
         return difference_name;
       }
 
-      /// \brief Constructor for function symbol -
-      /// \param s A sort expression
-      /// \return Function symbol difference
+      ///\brief Constructor for function symbol -
+       /// \param s A sort expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
+      ///\return Function symbol difference
       inline
-      function_symbol difference(const sort_expression& s)
+      function_symbol difference(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
-        function_symbol difference(difference_name(), make_function_sort(set_(s), set_(s), set_(s)));
+        sort_expression target_sort;
+        if (s0 == set_(s) && s1 == set_(s))
+        {
+          target_sort = set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
+        {
+          target_sort = sort_fset::fset(s);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for difference with domain sorts " + to_string(s0) + ", " + to_string(s1));
+        }
+
+        function_symbol difference(difference_name(), make_function_sort(s0, s1, target_sort));
         return difference;
       }
-
 
       /// \brief Recogniser for function -
       /// \param e A data expression
@@ -537,7 +555,8 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == difference_name();
+          function_symbol f(e);
+          return f.name() == difference_name();
         }
         return false;
       }
@@ -550,7 +569,7 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_set::difference(s)(arg0, arg1);
+        return sort_set::difference(s, arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -861,14 +880,13 @@ namespace mcrl2 {
       function_symbol_vector set_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(sort_set::empty(s));
         result.push_back(sort_set::set_fset(s));
         result.push_back(sort_set::set_comprehension(s));
-        result.push_back(sort_set::in(s));
+        result.push_back(sort_set::in(s, s, set_(s)));
         result.push_back(sort_set::complement(s));
-        result.push_back(sort_set::union_(s));
-        result.push_back(sort_set::intersection(s));
-        result.push_back(sort_set::difference(s));
+        result.push_back(sort_set::union_(s, set_(s), set_(s)));
+        result.push_back(sort_set::intersection(s, set_(s), set_(s)));
+        result.push_back(sort_set::difference(s, set_(s), set_(s)));
         result.push_back(sort_set::false_function(s));
         result.push_back(sort_set::true_function(s));
         result.push_back(sort_set::not_function(s));
@@ -928,11 +946,10 @@ namespace mcrl2 {
         variable vc("c",s);
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list(), empty(s), constructor(s, false_function(s), sort_fset::empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vs), set_fset(s, vs), constructor(s, false_function(s), vs)));
         result.push_back(data_equation(atermpp::make_vector(vf), sort_set::set_comprehension(s, vf), constructor(s, vf, sort_fset::empty(s))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vs), in(s, ve, constructor(s, vf, vs)), not_equal_to(vf(ve), sort_fset::in(s, ve, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(constructor(s, vf, vs), constructor(s, vg, vt)), forall(atermpp::make_vector(vc), not_equal_to(equal_to(vf(vc), vg(vc)), sort_fset::in(s, vc, sort_fset::difference(s, vs, vt))))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vs), in(s, ve, constructor(s, vf, vs)), not_equal_to(vf(ve), in(s, ve, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(constructor(s, vf, vs), constructor(s, vg, vt)), forall(atermpp::make_vector(vc), not_equal_to(equal_to(vf(vc), vg(vc)), in(s, vc, difference(s, vs, vt))))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
         result.push_back(data_equation(atermpp::make_vector(vf, vs), complement(s, constructor(s, vf, vs)), constructor(s, not_function(s, vf), vs)));
@@ -941,13 +958,13 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, vx, union_(s, vy, vx)), union_(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vx, vy), vx), union_(s, vx, vy)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vy, vx), vx), union_(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), union_(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, or_function(s, vf, vg), sort_fset::union_(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), union_(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, or_function(s, vf, vg), sort_fset::fset_union(s, vf, vg, vs, vt))));
         result.push_back(data_equation(atermpp::make_vector(vx), intersection(s, vx, vx), vx));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), intersection(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, and_function(s, vf, vg), sort_fset::intersection(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), intersection(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, and_function(s, vf, vg), sort_fset::fset_intersection(s, vf, vg, vs, vt))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), difference(s, vx, vy), intersection(s, vx, complement(s, vy))));
         result.push_back(data_equation(atermpp::make_vector(ve), false_function(s, ve), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(ve), true_function(s, ve), sort_bool::true_()));

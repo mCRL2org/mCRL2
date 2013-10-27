@@ -202,13 +202,13 @@ data_expression set_enumeration(const sort_expression& s,
 {
   if (range.empty())
   {
-    return set_enumeration(s);
+    return set_enumeration(sort_fset::fset(s));
   }
   else
   {
     sort_expression_vector v(range.size(), range.begin()->sort());
 
-    return application(set_enumeration(function_sort(v,s)), range);
+    return application(set_enumeration(function_sort(v,sort_fset::fset(s))), range);
   }
 }
 
@@ -222,13 +222,13 @@ data_expression set_enumeration(const sort_expression& s,
 {
   if (range.empty())
   {
-    return set_enumeration(s);
+    return set_enumeration(sort_fset::fset(s));
   }
   else
   {
     sort_expression_vector v(range.size(), range.begin()->sort());
 
-    return application(set_enumeration(function_sort(v,s)), range);
+    return application(set_enumeration(function_sort(v,sort_fset::fset(s))), range);
   }
 }
 
@@ -338,7 +338,7 @@ data_expression bag_enumeration(const sort_expression& s,
 {
   if (range.empty())
   {
-    return bag_enumeration(s);
+    return bag_enumeration(sort_fbag::fbag(s));
   }
   else
   {
@@ -353,7 +353,7 @@ data_expression bag_enumeration(const sort_expression& s,
       v.push_back(sort_nat::nat());
     }
 
-    return application(bag_enumeration(function_sort(v,s)), range);
+    return application(bag_enumeration(function_sort(v,sort_fbag::fbag(s))), range);
   }
 }
 
@@ -367,7 +367,7 @@ data_expression bag_enumeration(const sort_expression& s,
 {
   if (range.empty())
   {
-    return bag_enumeration(s);
+    return bag_enumeration(sort_fbag::fbag(s));
   }
   else
   {
@@ -381,7 +381,7 @@ data_expression bag_enumeration(const sort_expression& s,
       v.push_back(sort_nat::nat());
     }
 
-    return application(bag_enumeration(function_sort(v,s)), range);
+    return application(bag_enumeration(function_sort(v,sort_fbag::fbag(s))), range);
   }
 }
 

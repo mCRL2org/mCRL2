@@ -409,7 +409,9 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
 
     sort_expression set_nat(sort_set::set_(sort_nat::nat()));
 
-    data_expression empty(R(normalize_sorts(sort_set::empty(sort_nat::nat()),specification)));
+    data_expression empty_fset(R(normalize_sorts(sort_fset::empty(sort_nat::nat()),specification)));
+    data_expression empty_set(R(normalize_sorts(sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()),
+                                                          sort_fset::empty(sort_nat::nat())),specification)));
 
     data_expression p0(sort_nat::nat(0));
     data_expression p1(sort_nat::nat(1));
@@ -424,10 +426,13 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification)));
     data_expression s(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat())))),specification)));
 
-    data_expression empty_complement(normalize_sorts(sort_set::complement(sort_nat::nat(),sort_set::empty(sort_nat::nat())),specification));
-    data_expression intersection(normalize_sorts(sort_set::intersection(sort_nat::nat(),sort_set::complement(sort_nat::nat(),sort_set::empty(sort_nat::nat())),sort_set::empty(sort_nat::nat())),specification));
+    data_expression empty_complement(normalize_sorts(sort_set::complement(sort_nat::nat(),
+                       sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()),sort_fset::empty(sort_nat::nat()))),specification));
+    data_expression intersection(normalize_sorts(sort_set::intersection(sort_nat::nat(),sort_set::complement(sort_nat::nat(),
+                  sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()), sort_fset::empty(sort_nat::nat()))),
+                  sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()),sort_fset::empty(sort_nat::nat()))),specification));
     //data_rewrite_test(R, normalize_sorts(less_equal(empty_complement,empty),specification), false_());
-    data_rewrite_test(R, normalize_sorts(less_equal(empty,empty_complement),specification), sort_bool::true_());
+    data_rewrite_test(R, normalize_sorts(less_equal(empty_set,empty_complement),specification), sort_bool::true_());
     //data_rewrite_test(R, normalize_sorts(equal_to(intersection, empty_complement),specification), true_());
     //data_rewrite_test(R, normalize_sorts(equal_to(empty_complement, intersection),specification), true_());
 
@@ -435,14 +440,14 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p1, s),specification), sort_bool::true_());
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_());
 
-    data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s, empty_set),specification), s);
     data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s1, s2),specification), s);
 
-    data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, empty),specification), empty);
+    data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, empty_set),specification), empty_set);
     data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, s1),specification), s1);
     data_rewrite_test(R, normalize_sorts(sort_set::intersection(sort_nat::nat(), s, s2),specification), s2);
 
-    data_rewrite_test(R, normalize_sorts(sort_set::difference(sort_nat::nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_set::difference(sort_nat::nat(), s, empty_set),specification), s);
     data_rewrite_test(R, normalize_sorts(sort_set::difference(sort_nat::nat(), s, s1),specification), s2);
     data_rewrite_test(R, normalize_sorts(sort_set::difference(sort_nat::nat(), s, s2),specification), s1);
 
@@ -487,7 +492,9 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
 
     sort_expression bag_nat(sort_bag::bag(nat()));
 
-    data_expression empty(R(normalize_sorts(sort_bag::empty(nat()),specification)));
+    data_expression empty_fbag(R(normalize_sorts(sort_fbag::empty(nat()),specification)));
+    data_expression empty_bag(R(normalize_sorts(
+                    sort_bag::constructor(nat(),sort_bag::zero_function(nat()),sort_fbag::empty(nat())),specification)));
 
     data_expression p0(nat(0));
     data_expression p1(nat(1));
@@ -505,14 +512,14 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
     data_rewrite_test(R, normalize_sorts(sort_bag::count(nat(), p1, s),specification), p1);
     data_rewrite_test(R, normalize_sorts(sort_bag::count(nat(), p2, s),specification), p2);
 
-    data_rewrite_test(R, normalize_sorts(sort_bag::join(nat(), s, empty),specification), s);
-    data_rewrite_test(R, normalize_sorts(sort_bag::join(nat(), s1, s2),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_bag::union_(nat(), s, empty_bag),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_bag::union_(nat(), s1, s2),specification), s);
 
-    data_rewrite_test(R, normalize_sorts(sort_bag::intersection(nat(), s, empty),specification), empty);
+    data_rewrite_test(R, normalize_sorts(sort_bag::intersection(nat(), s, empty_bag),specification), empty_bag);
     data_rewrite_test(R, normalize_sorts(sort_bag::intersection(nat(), s, s1),specification), s1);
     data_rewrite_test(R, normalize_sorts(sort_bag::intersection(nat(), s, s2),specification), s2);
 
-    data_rewrite_test(R, normalize_sorts(sort_bag::difference(nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(sort_bag::difference(nat(), s, empty_bag),specification), s);
     data_rewrite_test(R, normalize_sorts(sort_bag::difference(nat(), s, s1),specification), s2);
     data_rewrite_test(R, normalize_sorts(sort_bag::difference(nat(), s, s2),specification), s1);
 

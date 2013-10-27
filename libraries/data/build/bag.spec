@@ -7,21 +7,22 @@
 % http://www.boost.org/LICENSE_1_0.txt)
 %
 % Specification of the Bag data sort.
+
 #using S
 #include nat.spec
 #include fbag.spec
 #include fset.spec
 #include set.spec
+#supertypeof FBag
 
 sort Bag(S) <"bag">;
 
 cons @bag <"constructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
-map {:} <"empty">: Bag(S);
-    @bagfbag <"bag_fbag">: FBag(S) <"arg"> -> Bag(S);
+map @bagfbag <"bag_fbag">: FBag(S) <"arg"> -> Bag(S);
     @bagcomp <"bag_comprehension">: (S -> Nat) <"arg"> -> Bag(S);
     count <"count">: S <"left"> # Bag(S) <"right"> -> Nat;
     in <"in">: S <"left"> # Bag(S) <"right"> -> Bool;
-    + <"join">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    + <"union_">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
     * <"intersection">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
     - <"difference">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
     Bag2Set <"bag2set">: Bag(S) <"arg"> -> Set(S);
@@ -44,10 +45,9 @@ var b: FBag(S);
     x: Bag(S);
     y: Bag(S);
 
-eqn {:}  =  @bag(@zero_, @fbag_empty);
-    @bagfbag(b)  =  @bag(@zero_, b);
-    @bagcomp(f)  =  @bag(f, @fbag_empty);
-    count(e, @bag(f, b))  =  @swap_zero(f(e), @fbag_count(e, b));
+eqn @bagfbag(b)  =  @bag(@zero_, b);
+    @bagcomp(f)  =  @bag(f, {:});
+    count(e, @bag(f, b))  =  @swap_zero(f(e), count(e, b));
     in(e, x)  =  >(count(e, x), @c0);
     ==(@bag(f, b), @bag(g, c))  = if( ==(f,g), ==(b,c), forall(d:S, ==(count(d, @bag(f,b)), count(d, @bag(g,c)))));
     <(x, y)  =  &&(<=(x, y), !=(x, y));

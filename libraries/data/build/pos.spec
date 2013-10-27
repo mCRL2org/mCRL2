@@ -22,6 +22,7 @@ map max <"maximum">:Pos <"left"> #Pos <"right">->Pos;
     + <"plus">:Pos <"left"> #Pos <"right">->Pos;
     @addc <"add_with_carry">:Bool <"arg1"> #Pos <"arg2"> #Pos <"arg3">->Pos;
     * <"times">:Pos <"left"> #Pos <"right">->Pos;
+    @monusc <"monus_with_carry">:Bool <"arg1"> #Pos <"arg2"> #Pos <"arg3">->Pos;
 
 var b:Bool;
     c:Bool;
@@ -70,3 +71,10 @@ eqn ==(@c1, @cDub(b,p)) = false;
     *(@cDub(false,p),q) = @cDub(false,*(p,q));
     *(p,@cDub(false,q)) = @cDub(false,*(p,q));
     *(@cDub(true,p),@cDub(true,q)) = @cDub(true,@addc(false,p,@addc(false,q,@cDub(false,*(p,q)))));
+    @monusc(b,@c1,p) = @c1;
+    @monusc(false,@cDub(false,p),@c1) = @cDub(true,@monusc(false,p,@c1));
+    @monusc(false,@cDub(true,p),@c1) = @cDub(false,p);
+    @monusc(true,@cDub(b,p),@c1) = @cDub(b,@monusc(false,p,@c1));
+    @monusc(b,@cDub(c,p),@cDub(c,q)) = @cDub(b,@monusc(b,p,q));
+    @monusc(b,@cDub(false,p),@cDub(true,q)) = @cDub(!(b), @monusc(true,p,q));
+    @monusc(b,@cDub(true,p),@cDub(false,q)) = @cDub(!(b), @monusc(false,p,q));

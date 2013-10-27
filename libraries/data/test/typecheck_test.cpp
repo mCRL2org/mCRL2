@@ -341,12 +341,12 @@ BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset_reverse)
 
 BOOST_AUTO_TEST_CASE(test_set_true_false)
 {
-  test_data_expression("{true, false}", true, "Set(Bool)");
+  test_data_expression("{true, false}", true, "FSet(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_numbers)
 {
-  test_data_expression("{1, 2, -7}", true, "Set(Int)");
+  test_data_expression("{1, 2, -7}", true, "FSet(Int)");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_comprehension)
@@ -365,12 +365,12 @@ BOOST_AUTO_TEST_CASE(test_emptybag_complement)
 }
 BOOST_AUTO_TEST_CASE(test_bag_true_false)
 {
-  test_data_expression("{true: 1, false: 2}", true, "Bag(Bool)");
+  test_data_expression("{true: 1, false: 2}", true, "FBag(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_numbers)
 {
-  test_data_expression("{1: 1, 2: 2, -8: 8}", true, "Bag(Int)");
+  test_data_expression("{1: 1, 2: 2, -8: 8}", true, "FBag(Int)");
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_comprehension)
@@ -1455,7 +1455,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive3)
     "     f: Pos -> Nat;\n"
     "     f,g: Int -> Int;\n",
     v.begin(), v.end(),
-    true,
+    false,
     "Bool"
   );
 }

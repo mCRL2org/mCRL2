@@ -117,7 +117,7 @@ namespace detail {
   inline
   bool is_bag_join(const application& x)
   {
-    return sort_bag::is_join_application(x);
+    return sort_bag::is_union_application(x);
   }
 
   inline

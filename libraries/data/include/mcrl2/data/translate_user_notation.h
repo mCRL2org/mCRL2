@@ -89,13 +89,15 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
           // convert to finite set
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
 
-          return sort_set::set_fset(element_sort, sort_fset::fset(element_sort, static_cast<Derived&>(*this)(x.arguments())));
+          // return sort_set::set_fset(element_sort, sort_fset::fset(element_sort, static_cast<Derived&>(*this)(x.arguments())));
+          return sort_fset::fset(element_sort, static_cast<Derived&>(*this)(x.arguments()));
         }
         else if (head.name() == sort_bag::bag_enumeration_name())
         {
           // convert to finite bag
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
-          return sort_bag::bag_fbag(element_sort, sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments())));
+          // return sort_bag::bag_fbag(element_sort, sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments())));
+          return sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments()));
         }
       }
       data_expression result = application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));

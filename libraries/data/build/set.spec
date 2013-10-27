@@ -11,14 +11,15 @@
 #using S
 #include bool.spec
 #include fset.spec
+#supertypeof FSet
 
 sort Set(S) <"set_">;
 
 cons @set <"constructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
-map {} <"empty"> : Set(S);
+% map {} <"empty"> : Set(S); Move this to FSet(S);
 % I think that @setfset and @setcomp should not be part of the rewrite system, but
 % become part of the internal generation of set representations. JFG
-    @setfset <"set_fset"> : FSet(S) <"arg"> -> Set(S);
+map @setfset <"set_fset"> : FSet(S) <"arg"> -> Set(S);
     @setcomp <"set_comprehension"> : (S -> Bool) <"arg"> -> Set(S);
     in <"in"> : S <"left"> # Set(S) <"right"> -> Bool;
     ! <"complement"> : Set(S) <"arg"> -> Set(S);
@@ -38,11 +39,11 @@ var e : S;
     g : S->Bool;
     x : Set(S);
     y : Set(S);
-eqn {}  =  @set(@false_, @fset_empty);
-    @setfset(s)  =  @set(@false_, s);
-    @setcomp(f)  =  @set(f, @fset_empty);
-    in(e, @set(f, s))  =  !=(f(e), @fset_in(e, s));
-    ==(@set(f, s), @set(g, t))  =  forall(c:S, !=(==(f(c),g(c)),@fset_in(c,@fset_diff(s,t))));
+% eqn {}  =  @set(@false_, {});
+eqn @setfset(s)  =  @set(@false_, s);
+    @setcomp(f)  =  @set(f, {});
+    in(e, @set(f, s))  =  !=(f(e), in(e, s));
+    ==(@set(f, s), @set(g, t))  =  forall(c:S, !=(==(f(c),g(c)),in(c,-(s,t))));
     <(x, y)  =  &&(<=(x, y), !=(x, y));
     <=(x,y) = ==(*(x,y),x);
     !(@set(f, s))  =  @set(@not_(f), s);

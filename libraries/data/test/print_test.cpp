@@ -307,12 +307,12 @@ BOOST_AUTO_TEST_CASE(test_set_print)
 {
   using namespace sort_bool;
 
-  data_expression set_empty = sort_set::empty(bool_());
+  data_expression set_empty = sort_fset::empty(bool_());
   data_expression set_false = sort_set::set_fset(bool_(), sort_fset::cons_(bool_(), false_(), sort_fset::empty(bool_())));
   data_expression set_true = sort_set::set_fset(bool_(), sort_fset::cons_(bool_(), true_(), sort_fset::empty(bool_())));
 
   // Using all operations
-  BOOST_CHECK(print_check(sort_set::empty(bool_()), "{}"));
+  BOOST_CHECK(print_check(sort_fset::empty(bool_()), "{}"));
   BOOST_CHECK(print_check(sort_set::set_fset(bool_(), sort_fset::empty(bool_())), "{}"));
   BOOST_CHECK(print_check(sort_set::constructor(bool_(), sort_set::false_function(bool_()), sort_fset::empty(bool_())), "{}"));
   BOOST_CHECK(print_check(sort_set::in(bool_(), false_(), set_empty), "false in {}"));
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(test_set_print)
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat. y == 0)(x) }"), "{ x: Nat | (lambda y: Nat. y == 0)(x) }"));
 
   // Some types
-  BOOST_CHECK(print_check(sort_fset::fset(bool_()), "@FSet(Bool)"));
+  BOOST_CHECK(print_check(sort_fset::fset(bool_()), "FSet(Bool)"));
   BOOST_CHECK(print_check(parse_sort_expression("Set(Nat)"), "Set(Nat)"));
 }
 
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(test_bag_print)
   using namespace sort_bool;
   using namespace sort_nat;
 
-  data_expression bag_empty(sort_bag::empty(bool_()));
+  data_expression bag_empty(sort_fbag::empty(bool_()));
   data_expression fbag_empty_(sort_fbag::empty(bool_()));
   data_expression bag_false = sort_bag::bag_fbag(bool_(), sort_fbag::cons_(bool_(), false_(), number(sort_pos::pos(), "1"), fbag_empty_));
   data_expression bag_true = sort_bag::bag_fbag(bool_(), sort_fbag::cons_(bool_(), true_(), number(sort_pos::pos(), "1"), fbag_empty_));
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE(test_bag_print)
   BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_empty), "false in {:}"));
   BOOST_CHECK(print_check(sort_bag::in(bool_(), false_(), bag_false), "false in {false: 1}"));
   BOOST_CHECK(print_check(sort_bag::count(bool_(), false_(), bag_true), "count(false, {true: 1})"));
-  BOOST_CHECK(print_check(sort_bag::join(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));
+  BOOST_CHECK(print_check(sort_bag::union_(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));
   BOOST_CHECK(print_check(sort_bag::intersection(bool_(), bag_false, bag_true), "{false: 1} * {true: 1}"));
   BOOST_CHECK(print_check(sort_bag::difference(bool_(), bag_false, bag_true), "{false: 1} - {true: 1}"));
 
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE(test_bag_print)
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat. y * y)(x) }"), "{ x: Nat | (lambda y: Nat. y * y)(x) }"));
 
   // Some types
-  BOOST_CHECK(print_check(sort_fbag::fbag(bool_()), "@FBag(Bool)"));
+  BOOST_CHECK(print_check(sort_fbag::fbag(bool_()), "FBag(Bool)"));
   BOOST_CHECK(print_check(parse_sort_expression("Bag(Nat)"), "Bag(Nat)"));
 }
 
@@ -510,8 +510,8 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   data_expression false_ = sort_set::false_function(s);
   data_expression true_ = sort_set::true_function(s);
 
-  data_expression xy_union = sort_fset::union_(s, false_, false_, x, y);
-  data_expression xy_intersection = sort_fset::intersection(s, false_, false_, x, y);
+  data_expression xy_union = sort_fset::fset_union(s, false_, false_, x, y);
+  data_expression xy_intersection = sort_fset::fset_intersection(s, false_, false_, x, y);
   data_expression xy_difference = sort_fset::difference(s, x, y);
   data_expression xy_in = sort_fset::in(s, one, x);
 
@@ -520,13 +520,13 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   BOOST_CHECK_EQUAL(data::pp(xy_difference)  , "{1, 2} - {3}");
   BOOST_CHECK_EQUAL(data::pp(xy_in)          , "1 in {1, 2}");
 
-  xy_union = sort_fset::union_(s, f, false_, x, y);
-  xy_intersection = sort_fset::intersection(s, f, false_, x, y);
+  xy_union = sort_fset::fset_union(s, f, false_, x, y);
+  xy_intersection = sort_fset::fset_intersection(s, f, false_, x, y);
   BOOST_CHECK_EQUAL(data::pp(xy_union)       , "{1, 2} + { x: Pos | !f(x) && x in {3} }");
   BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{1, 2} * { x: Pos | !f(x) && x in {3} }");
 
-  xy_union = sort_fset::union_(s, f, g, x, y);
-  xy_intersection = sort_fset::intersection(s, f, g, x, y);
+  xy_union = sort_fset::fset_union(s, f, g, x, y);
+  xy_intersection = sort_fset::fset_intersection(s, f, g, x, y);
   BOOST_CHECK_EQUAL(data::pp(xy_union)       , "{ x: Pos | !g(x) && x in {1, 2} } + { x: Pos | !f(x) && x in {3} }");
   BOOST_CHECK_EQUAL(data::pp(xy_intersection), "{ x: Pos | !g(x) && x in {1, 2} } * { x: Pos | !f(x) && x in {3} }");
 }

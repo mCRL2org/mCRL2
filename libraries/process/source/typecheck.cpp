@@ -399,7 +399,8 @@ process_expression mcrl2::process::process_type_checker::RewrActProc(
       sort_expression CastedNewPosType;
       try
       {
-        CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par);
+        std::map<core::identifier_string,sort_expression> dummy_table;
+        CastedNewPosType=UpCastNumericType(PosType,NewPosType,Par,Vars,Vars,dummy_table,false);
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -870,7 +871,8 @@ process_expression mcrl2::process::process_type_checker::TraverseActProcVarConst
       sort_expression CastedNewType;
       try
       {
-        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
+        std::map<core::identifier_string,sort_expression> dummy_table;
+        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
       }
       catch (mcrl2::runtime_error &e)
       {

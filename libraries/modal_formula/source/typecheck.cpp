@@ -140,7 +140,8 @@ action_formulas::action_formula mcrl2::state_formulas::state_formula_type_checke
       sort_expression CastedNewType;
       try
       {
-        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
+        std::map<core::identifier_string,sort_expression> dummy_table;
+        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -258,7 +259,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       sort_expression CastedNewType;
       try
       {
-        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
+        std::map<core::identifier_string,sort_expression> dummy_table;
+        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -281,7 +283,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
       sort_expression CastedNewType;
       try
       {
-        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time);
+        std::map<core::identifier_string,sort_expression> dummy_table;
+        CastedNewType=UpCastNumericType(sort_real::real_(),NewType,Time,Vars,Vars,dummy_table,false);
       }
       catch (mcrl2::runtime_error &e)
       {
@@ -330,7 +333,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
         //upcasting
         try
         {
-          NewParType=UpCastNumericType(ParType,NewParType,Par);
+          std::map<core::identifier_string,sort_expression> dummy_table;
+          NewParType=UpCastNumericType(ParType,NewParType,Par,Vars,Vars,dummy_table,false);
         }
         catch (mcrl2::runtime_error &e)
         {
@@ -393,7 +397,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
         //upcasting
         try
         {
-          VarInitType=UpCastNumericType(VarType,VarInitType,VarInit);
+          std::map<core::identifier_string,sort_expression> dummy_table;
+          VarInitType=UpCastNumericType(VarType,VarInitType,VarInit,Vars,Vars,dummy_table,false);
         }
         catch (mcrl2::runtime_error &e)
         {
@@ -469,7 +474,8 @@ state_formula mcrl2::state_formulas::state_formula_type_checker::TraverseStateFr
         //upcasting
         try
         {
-          VarInitType=UpCastNumericType(VarType,VarInitType,VarInit);
+          std::map<core::identifier_string,sort_expression> dummy_table;
+          VarInitType=UpCastNumericType(VarType,VarInitType,VarInit,Vars,Vars,dummy_table,false);
         }
         catch (mcrl2::runtime_error &e)
         {
