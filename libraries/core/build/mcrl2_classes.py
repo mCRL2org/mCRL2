@@ -71,7 +71,7 @@ untyped_identifier_assignment(const core::identifier_string& lhs, const data_exp
 DATA_EXPRESSION_CLASSES = r'''
 data_expression()                                                                                             : public atermpp::aterm_appl   | XCU | DataExpr          | A data expression
 variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId         | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId              | A function symbol
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOC | OpId              | A function symbol
 application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOU | DataAppl          | An application of a data expression to a number of arguments
 where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU | Whr               | A where expression
 abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder            | An abstraction expression

@@ -18,12 +18,17 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/sort_expression.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/data/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
 namespace data
 {
 
+#ifndef MCRL2_USE_INDEX_TRAITS
 //--- start generated class function_symbol ---//
 /// \brief A function symbol
 class function_symbol: public data_expression
@@ -62,13 +67,78 @@ class function_symbol: public data_expression
       return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
+
+/// \brief list of function_symbols
+typedef atermpp::term_list<function_symbol> function_symbol_list;
+
+/// \brief vector of function_symbols
+typedef std::vector<function_symbol>    function_symbol_vector;
+
 //--- end generated class function_symbol ---//
 
-/// \brief list of function symbols
-typedef atermpp::term_list< function_symbol > function_symbol_list;
+#else
 
-/// \brief vector of function symbols
-typedef std::vector< function_symbol >    function_symbol_vector;
+/// \brief A function symbol
+class function_symbol: public data_expression
+{
+  public:
+    /// \brief Default constructor.
+    function_symbol()
+      : data_expression(core::detail::constructOpId())
+    {
+      data::index_traits<data::function_symbol>::insert(*this);
+    }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit function_symbol(const atermpp::aterm& term)
+      : data_expression(term)
+    {
+      assert(core::detail::check_term_OpId(*this));
+      data::index_traits<data::function_symbol>::insert(*this);
+    }
+
+    /// \brief Constructor.
+    function_symbol(const core::identifier_string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeOpId(name, sort))
+    {
+      data::index_traits<data::function_symbol>::insert(*this);
+    }
+
+    /// \brief Constructor.
+    function_symbol(const std::string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
+    {
+      data::index_traits<data::function_symbol>::insert(*this);
+    }
+
+    /// \brief Destructor.
+    ~function_symbol()
+    {
+      if (atermpp::detail::address(*this)->reference_count_is_zero())
+      {
+        data::index_traits<data::function_symbol>::erase(*this);
+      }
+    }
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+    }
+};
+
+/// \brief list of function_symbols
+typedef atermpp::term_list<function_symbol> function_symbol_list;
+
+/// \brief vector of function_symbols
+typedef std::vector<function_symbol>    function_symbol_vector;
+
+#endif // MCRL2_USE_INDEX_TRAITS
 
 // template function overloads
 std::string pp(const function_symbol& x);

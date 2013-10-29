@@ -10,6 +10,7 @@
 /// \brief Test for index_traits.
 
 #define BOOST_TEST_MODULE index_traits
+#define MCRL2_USE_INDEX_TRAITS
 
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>
@@ -21,23 +22,30 @@ using namespace mcrl2;
 
 BOOST_AUTO_TEST_CASE(test_index)
 {
+  // data::variable
   data::variable b("b", data::sort_bool::bool_());
-  data::index_traits<data::variable>::insert(b); // should be done in the constructor of b
-  data::index_traits<data::variable>::print("1");
   BOOST_CHECK(data::index_traits<data::variable>::index(b) == 0);
   BOOST_CHECK(data::index_traits<data::variable>::max_index() == 0);
 
   data::variable c("c", data::sort_bool::bool_());
-  std::size_t index = data::index_traits<data::variable>::insert(c); // should be done in the constructor of b
-  data::index_traits<data::variable>::print("2");
-  BOOST_CHECK(index == 1);
   BOOST_CHECK(data::index_traits<data::variable>::index(c) == 1);
   BOOST_CHECK_EQUAL(data::index_traits<data::variable>::max_index(), 1);
 
   data::variable d = b;
-  data::index_traits<data::variable>::insert(d); // should be done in the constructor of b
-  data::index_traits<data::variable>::print("3");
   BOOST_CHECK(data::index_traits<data::variable>::index(d) == 0);
   BOOST_CHECK_EQUAL(data::index_traits<data::variable>::max_index(), 1);
+
+  // data::function_symbol
+  data::function_symbol f("f", data::sort_bool::bool_());
+  BOOST_CHECK(data::index_traits<data::function_symbol>::index(f) == 0);
+  BOOST_CHECK(data::index_traits<data::function_symbol>::max_index() == 0);
+
+  data::function_symbol g("g", data::sort_bool::bool_());
+  BOOST_CHECK(data::index_traits<data::function_symbol>::index(g) == 1);
+  BOOST_CHECK_EQUAL(data::index_traits<data::function_symbol>::max_index(), 1);
+
+  data::function_symbol h = f;
+  BOOST_CHECK(data::index_traits<data::function_symbol>::index(h) == 0);
+  BOOST_CHECK_EQUAL(data::index_traits<data::function_symbol>::max_index(), 1);
 }
 

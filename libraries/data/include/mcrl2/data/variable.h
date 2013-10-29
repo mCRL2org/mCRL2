@@ -21,12 +21,17 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/data/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
 namespace data
 {
 
+#ifndef MCRL2_USE_INDEX_TRAITS
 //--- start generated class variable ---//
 /// \brief A data variable
 class variable: public data_expression
@@ -73,6 +78,69 @@ typedef atermpp::term_list<variable> variable_list;
 typedef std::vector<variable>    variable_vector;
 
 //--- end generated class variable ---//
+#else
+
+/// \brief A data variable
+class variable: public data_expression
+{
+  public:
+    /// \brief Default constructor.
+    variable()
+      : data_expression(core::detail::constructDataVarId())
+    {
+      data::index_traits<data::variable>::insert(*this);
+    }
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit variable(const atermpp::aterm& term)
+      : data_expression(term)
+    {
+      assert(core::detail::check_term_DataVarId(*this));
+      data::index_traits<data::variable>::insert(*this);
+    }
+
+    /// \brief Constructor.
+    variable(const core::identifier_string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeDataVarId(name, sort))
+    {
+      data::index_traits<data::variable>::insert(*this);
+    }
+
+    /// \brief Constructor.
+    variable(const std::string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
+    {
+      data::index_traits<data::variable>::insert(*this);
+    }
+
+    /// \brief Destructor.
+    ~variable()
+    {
+      if (atermpp::detail::address(*this)->reference_count_is_zero())
+      {
+        data::index_traits<data::variable>::erase(*this);
+      }
+    }
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+    }
+};
+
+/// \brief list of variables
+typedef atermpp::term_list<variable> variable_list;
+
+/// \brief vector of variables
+typedef std::vector<variable>    variable_vector;
+
+#endif // MCRL2_USE_INDEX_TRAITS
 
 // template function overloads
 std::string pp(const variable& x);
