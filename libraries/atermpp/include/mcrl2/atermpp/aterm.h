@@ -16,7 +16,6 @@
 #include <iostream>
 #include <cassert>
 #include <vector>
-#include <assert.h>
 
 #include "boost/type_traits/is_base_of.hpp"
 #include "boost/static_assert.hpp"

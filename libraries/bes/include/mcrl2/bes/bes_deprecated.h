@@ -2706,7 +2706,6 @@ class boolean_equation_system
   public:
     void print_counter_example(const std::string filename)
     {
-      std::ofstream f;
       std::vector <bool> already_printed(nr_of_variables()+1,false);
       if (filename.empty())
       {
@@ -2714,24 +2713,19 @@ class boolean_equation_system
         std::cout << "Below the justification for this outcome is listed\n1: ";
         print_counter_example_rec(2,"  ",already_printed,std::cout);
       }
-      if (f!=NULL)
+      try
       {
-        try
-        {
-          std::ofstream f(filename.c_str());
-          f << "Below the justification for this outcome is listed\n1: ";
-          print_counter_example_rec(2,"  ",already_printed,f);
-          f.close();
-        }
-        catch (std::exception& e)
-        {
-          mCRL2log(mcrl2::log::warning) << "Fail to write counterexample to " << filename <<
-                    "(" << e.what() << ")" << std::endl;
-        }
+        std::ofstream f(filename.c_str());
+        f << "Below the justification for this outcome is listed\n1: ";
+        print_counter_example_rec(2,"  ",already_printed,f);
+        f.close();
+      }
+      catch (std::exception& e)
+      {
+        mCRL2log(mcrl2::log::warning) << "Fail to write counterexample to " << filename <<
+                  "(" << e.what() << ")" << std::endl;
       }
     }
-
-
 };
 
 
