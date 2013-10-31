@@ -233,6 +233,18 @@ private:
     friend class EdgeIterator;
 };
 
+#if (__apple_build_version__ >= 5000279)  // Hack, as code below does not compile on MacOsX.9
+
+namespace std
+{
+    inline void swap(StaticGraph &a, StaticGraph &b)
+    {
+        a.swap(b);
+    }
+}
+
+
+#else
 namespace std
 {
     template<> inline void swap<StaticGraph>(StaticGraph &a, StaticGraph &b)
@@ -240,6 +252,7 @@ namespace std
         a.swap(b);
     }
 }
+#endif
 
 #include "Graph_impl.h"
 

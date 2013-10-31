@@ -62,7 +62,12 @@ int compat_strcasecmp(const char *s1, const char *s2);
 int compat_strncasecmp(const char *s1, const char *s2, size_t n);
 
 /* Figure out which hashtable implementation to use: */
-#if (__cplusplus > 199711L || __GNUC__ >= 4)  /* C++ TR1 supported (GCC 4) */
+#if (__clang_major__ >= 5 && __apple_build_version__ >= 5000279)
+#include <unordered_set>
+#include <unordered_map>
+#define HASH_SET(k) std::unordered_set<k>
+#define HASH_MAP(k,v) std::unordered_map<k, v>
+#elif (__cplusplus > 199711L || __GNUC__ >= 4)  /* C++ TR1 supported (GCC 4) */
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
 #define HASH_SET(k) std::tr1::unordered_set<k>

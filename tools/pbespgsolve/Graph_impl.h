@@ -9,6 +9,9 @@
 
 // Don't include this directly; include Graph.h instead!
 
+#ifndef GRAPH_IMPL_H
+#define GRAPH_IMPL_H
+
 #include "DenseMap.h"
 #include <algorithm>
 #include <iterator>
@@ -134,3 +137,5 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
         predecessor_index_[v] = e;
     }
 }
+
+#endif // #define GRAPH_IMPL_H
