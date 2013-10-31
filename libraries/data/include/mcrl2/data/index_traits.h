@@ -16,6 +16,8 @@
 #include <map>
 #include <stdexcept>
 
+#include "mcrl2/utilities/logger.h"
+
 namespace mcrl2 {
 
 namespace data {
@@ -76,6 +78,7 @@ struct index_traits
   static inline
   std::size_t insert(const Variable& x)
   {
+    mCRL2log(log::debug) << "insert " << x << std::endl;
     auto& m = variable_index_map<Variable>();
     auto i = m.find(x);
     if (i == m.end())
@@ -102,6 +105,7 @@ struct index_traits
   static inline
   void erase(const Variable& x)
   {
+    mCRL2log(log::debug) << "erase " << x << std::endl;
     auto& m = variable_index_map<Variable>();
     auto& s = variable_map_free_numbers<Variable>();
     auto i = m.find(x);
