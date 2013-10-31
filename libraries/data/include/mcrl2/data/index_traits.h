@@ -28,6 +28,13 @@ std::map<Variable, std::size_t>& variable_index_map()
   return m;
 }
 
+template <typename Variable>
+std::stack<std::size_t>& variable_map_free_numbers()
+{
+  static std::stack<std::size_t> s;
+  return s;
+}
+
 /// \brief For several expressions in mCRL2 an implicit mapping of these expressions
 /// to integers is available. This is done for efficiency reasons. Examples are:
 ///
@@ -38,8 +45,6 @@ std::map<Variable, std::size_t>& variable_index_map()
 template <class Variable>
 struct index_traits
 {
-  static std::map<Variable, std::size_t> m;
-
   /// \brief Returns the index of the variable.
   static inline
   std::size_t index(const Variable& x)
@@ -75,7 +80,17 @@ struct index_traits
     auto i = m.find(x);
     if (i == m.end())
     {
-      std::size_t value = m.size();
+      auto& s = variable_map_free_numbers<Variable>();
+      std::size_t value;
+      if (s.empty())
+      {
+        value = m.size();
+      }
+      else
+      {
+        value = s.top();
+        s.pop();
+      }
       m[x] = value;
       return value;
     }
@@ -88,11 +103,10 @@ struct index_traits
   void erase(const Variable& x)
   {
     auto& m = variable_index_map<Variable>();
+    auto& s = variable_map_free_numbers<Variable>();
     auto i = m.find(x);
-    if (i == m.end())
-    {
-      throw std::runtime_error("error: could not find element " + data::pp(x));
-    }
+    assert(i != m.end());
+    s.push(i->second);
     m.erase(i);
   }
 
@@ -101,7 +115,7 @@ struct index_traits
   static inline
   std::size_t size()
   {
-    auto m = variable_index_map<Variable>();
+    auto& m = variable_index_map<Variable>();
     return m.size();
   }
 };
