@@ -89,7 +89,6 @@ typedef atermpp::term_list<structured_sort_constructor_argument> structured_sort
 /// \brief vector of structured_sort_constructor_arguments
 typedef std::vector<structured_sort_constructor_argument>    structured_sort_constructor_argument_vector;
 
-
 /// \brief Test for a structured_sort_constructor_argument expression
 /// \param x A term
 /// \return True if \a x is a structured_sort_constructor_argument expression
@@ -99,21 +98,17 @@ bool is_structured_sort_constructor_argument(const atermpp::aterm_appl& x)
   return core::detail::gsIsStructProj(x);
 }
 
+/// \brief swap overload
+inline void swap(structured_sort_constructor_argument& t1, structured_sort_constructor_argument& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class structured_sort_constructor_argument ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::structured_sort_constructor_argument& t1, mcrl2::data::structured_sort_constructor_argument& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_ARGUMENT_H
 

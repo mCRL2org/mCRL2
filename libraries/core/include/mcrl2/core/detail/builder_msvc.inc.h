@@ -57,5 +57,6 @@ void operator()(std::set<T>& x)
   {
     result.insert(update_copy(*i));
   }
-  std::swap(x, result);
+  using std::swap;
+  swap(x, result);
 }

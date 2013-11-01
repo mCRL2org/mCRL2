@@ -186,7 +186,8 @@ class function_symbol
     /// \param f The function symbol with which the swap takes place.
     void swap(function_symbol &f)
     {
-      std::swap(f.m_function_symbol,m_function_symbol);
+      using std::swap;
+      swap(f.m_function_symbol,m_function_symbol);
     }
 };
 

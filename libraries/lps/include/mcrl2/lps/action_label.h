@@ -71,7 +71,6 @@ typedef atermpp::term_list<action_label> action_label_list;
 /// \brief vector of action_labels
 typedef std::vector<action_label>    action_label_vector;
 
-
 /// \brief Test for a action_label expression
 /// \param x A term
 /// \return True if \a x is a action_label expression
@@ -79,6 +78,12 @@ inline
 bool is_action_label(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActId(x);
+}
+
+/// \brief swap overload
+inline void swap(action_label& t1, action_label& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class action_label ---//
@@ -97,15 +102,5 @@ std::string pp(const atermpp::aterm_appl& x);
 } // namespace lps
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::lps::action_label& t1, mcrl2::lps::action_label& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_LPS_ACTION_LABEL_H

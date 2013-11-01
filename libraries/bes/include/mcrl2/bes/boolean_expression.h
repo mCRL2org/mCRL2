@@ -65,6 +65,12 @@ typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 /// \brief vector of boolean_expressions
 typedef std::vector<boolean_expression>    boolean_expression_vector;
 
+/// \brief swap overload
+inline void swap(boolean_expression& t1, boolean_expression& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value true for boolean expressions
 class true_: public boolean_expression
@@ -93,6 +99,12 @@ bool is_true(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanTrue(x);
 }
 
+/// \brief swap overload
+inline void swap(true_& t1, true_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value false for boolean expressions
 class false_: public boolean_expression
@@ -119,6 +131,12 @@ inline
 bool is_false(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanFalse(x);
+}
+
+/// \brief swap overload
+inline void swap(false_& t1, false_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -157,6 +175,12 @@ inline
 bool is_not(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanNot(x);
+}
+
+/// \brief swap overload
+inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -202,6 +226,12 @@ bool is_and(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanAnd(x);
 }
 
+/// \brief swap overload
+inline void swap(and_& t1, and_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The or operator for boolean expressions
 class or_: public boolean_expression
@@ -243,6 +273,12 @@ inline
 bool is_or(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanOr(x);
+}
+
+/// \brief swap overload
+inline void swap(or_& t1, or_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -288,6 +324,12 @@ bool is_imp(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanImp(x);
 }
 
+/// \brief swap overload
+inline void swap(imp& t1, imp& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief A boolean variable
 class boolean_variable: public boolean_expression
@@ -329,6 +371,12 @@ inline
 bool is_boolean_variable(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanVariable(x);
+}
+
+/// \brief swap overload
+inline void swap(boolean_variable& t1, boolean_variable& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated classes ---//
@@ -725,57 +773,5 @@ std::set<boolean_expression> split_and(const boolean_expression& expr)
 } // namespace bes
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::bes::boolean_expression& t1, mcrl2::bes::boolean_expression& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::bes::true_& t1, mcrl2::bes::true_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::bes::false_& t1, mcrl2::bes::false_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::bes::not_& t1, mcrl2::bes::not_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::bes::and_& t1, mcrl2::bes::and_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::bes::or_& t1, mcrl2::bes::or_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::bes::imp& t1, mcrl2::bes::imp& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::bes::boolean_variable& t1, mcrl2::bes::boolean_variable& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_BES_BOOLEAN_EXPRESSION_H

@@ -234,6 +234,12 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 /// \brief vector of data_expressions
 typedef std::vector<data_expression>    data_expression_vector;
 
+/// \brief swap overload
+inline void swap(data_expression& t1, data_expression& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class data_expression ---//
 
 /// \brief Test for a data_expression expression
@@ -325,16 +331,6 @@ application data_expression::operator()(const data_expression& e1, const data_ex
 
 }
 }
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::data_expression& t1, mcrl2::data::data_expression& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_H
 

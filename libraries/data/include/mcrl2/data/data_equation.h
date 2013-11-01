@@ -118,6 +118,12 @@ typedef atermpp::term_list<data_equation> data_equation_list;
 /// \brief vector of data_equations
 typedef std::vector<data_equation>    data_equation_vector;
 
+/// \brief swap overload
+inline void swap(data_equation& t1, data_equation& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class data_equation ---//
 
 /*
@@ -240,16 +246,6 @@ std::set<data::function_symbol> find_function_symbols(const data::data_equation&
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::data_equation& t1, mcrl2::data::data_equation& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_DATA_EQUATION_H
 

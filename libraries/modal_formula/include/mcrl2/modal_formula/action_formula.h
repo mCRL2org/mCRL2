@@ -59,7 +59,6 @@ typedef atermpp::term_list<action_formula> action_formula_list;
 /// \brief vector of action_formulas
 typedef std::vector<action_formula>    action_formula_vector;
 
-
 // prototypes
 inline bool is_true(const atermpp::aterm_appl& x);
 inline bool is_false(const atermpp::aterm_appl& x);
@@ -93,6 +92,12 @@ bool is_action_formula(const atermpp::aterm_appl& x)
          action_formulas::is_untyped_multi_action(x);
 }
 
+/// \brief swap overload
+inline void swap(action_formula& t1, action_formula& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value true for action formulas
 class true_: public action_formula
@@ -121,6 +126,12 @@ bool is_true(const atermpp::aterm_appl& x)
   return core::detail::gsIsActTrue(x);
 }
 
+/// \brief swap overload
+inline void swap(true_& t1, true_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value false for action formulas
 class false_: public action_formula
@@ -147,6 +158,12 @@ inline
 bool is_false(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActFalse(x);
+}
+
+/// \brief swap overload
+inline void swap(false_& t1, false_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -185,6 +202,12 @@ inline
 bool is_not(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActNot(x);
+}
+
+/// \brief swap overload
+inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -230,6 +253,12 @@ bool is_and(const atermpp::aterm_appl& x)
   return core::detail::gsIsActAnd(x);
 }
 
+/// \brief swap overload
+inline void swap(and_& t1, and_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The or operator for action formulas
 class or_: public action_formula
@@ -271,6 +300,12 @@ inline
 bool is_or(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActOr(x);
+}
+
+/// \brief swap overload
+inline void swap(or_& t1, or_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -316,6 +351,12 @@ bool is_imp(const atermpp::aterm_appl& x)
   return core::detail::gsIsActImp(x);
 }
 
+/// \brief swap overload
+inline void swap(imp& t1, imp& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The universal quantification operator for action formulas
 class forall: public action_formula
@@ -357,6 +398,12 @@ inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActForall(x);
+}
+
+/// \brief swap overload
+inline void swap(forall& t1, forall& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -402,6 +449,12 @@ bool is_exists(const atermpp::aterm_appl& x)
   return core::detail::gsIsActExists(x);
 }
 
+/// \brief swap overload
+inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The at operator for action formulas
 class at: public action_formula
@@ -445,6 +498,12 @@ bool is_at(const atermpp::aterm_appl& x)
   return core::detail::gsIsActAt(x);
 }
 
+/// \brief swap overload
+inline void swap(at& t1, at& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The multi action for action formulas
 class multi_action: public action_formula
@@ -483,6 +542,12 @@ bool is_multi_action(const atermpp::aterm_appl& x)
   return core::detail::gsIsActMultAct(x);
 }
 
+/// \brief swap overload
+inline void swap(multi_action& t1, multi_action& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The multi action for action formulas (untyped)
 class untyped_multi_action: public action_formula
@@ -519,6 +584,12 @@ inline
 bool is_untyped_multi_action(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedActMultAct(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated classes ---//
@@ -578,69 +649,5 @@ std::set<data::variable> find_all_variables(const action_formulas::action_formul
 } // namespace action_formulas
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::action_formulas::action_formula& t1, mcrl2::action_formulas::action_formula& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::true_& t1, mcrl2::action_formulas::true_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::false_& t1, mcrl2::action_formulas::false_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::not_& t1, mcrl2::action_formulas::not_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::and_& t1, mcrl2::action_formulas::and_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::or_& t1, mcrl2::action_formulas::or_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::imp& t1, mcrl2::action_formulas::imp& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::forall& t1, mcrl2::action_formulas::forall& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::exists& t1, mcrl2::action_formulas::exists& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::action_formulas::at& t1, mcrl2::action_formulas::at& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_MODAL_ACTION_FORMULA_H

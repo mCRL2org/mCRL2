@@ -51,6 +51,13 @@ class untyped_identifier: public data_expression
       return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(untyped_identifier& t1, untyped_identifier& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class untyped_identifier ---//
 
 } // namespace data

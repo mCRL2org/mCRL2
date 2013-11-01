@@ -67,21 +67,18 @@ class where_clause: public data_expression
     }
 //--- end user section where_clause ---//
 };
+
+/// \brief swap overload
+inline void swap(where_clause& t1, where_clause& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class where_clause ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::where_clause& t1, mcrl2::data::where_clause& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_WHERE_CLAUSE_H
 

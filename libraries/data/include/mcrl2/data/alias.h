@@ -63,7 +63,6 @@ typedef atermpp::term_list<alias> alias_list;
 /// \brief vector of aliass
 typedef std::vector<alias>    alias_vector;
 
-
 /// \brief Test for a alias expression
 /// \param x A term
 /// \return True if \a x is a alias expression
@@ -73,21 +72,17 @@ bool is_alias(const atermpp::aterm_appl& x)
   return core::detail::gsIsSortRef(x);
 }
 
+/// \brief swap overload
+inline void swap(alias& t1, alias& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class alias ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::alias& t1, mcrl2::data::alias& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

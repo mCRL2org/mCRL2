@@ -64,7 +64,6 @@ typedef atermpp::term_list<action> action_list;
 /// \brief vector of actions
 typedef std::vector<action>    action_vector;
 
-
 /// \brief Test for a action expression
 /// \param x A term
 /// \return True if \a x is a action expression
@@ -72,6 +71,12 @@ inline
 bool is_action(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsAction(x);
+}
+
+/// \brief swap overload
+inline void swap(action& t1, action& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class action ---//
@@ -112,15 +117,5 @@ bool equal_signatures(const action& a, const action& b)
 } // namespace lps
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::lps::action& t1, mcrl2::lps::action& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_LPS_ACTION_H

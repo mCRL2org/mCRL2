@@ -69,7 +69,6 @@ typedef atermpp::term_list<communication_expression> communication_expression_li
 /// \brief vector of communication_expressions
 typedef std::vector<communication_expression>    communication_expression_vector;
 
-
 /// \brief Test for a communication_expression expression
 /// \param x A term
 /// \return True if \a x is a communication_expression expression
@@ -79,20 +78,16 @@ bool is_communication_expression(const atermpp::aterm_appl& x)
   return core::detail::gsIsCommExpr(x);
 }
 
+/// \brief swap overload
+inline void swap(communication_expression& t1, communication_expression& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class communication_expression ---//
 
 } // namespace process
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::communication_expression& t1, mcrl2::process::communication_expression& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PROCESS_COMMUNICATION_EXPRESSION_H

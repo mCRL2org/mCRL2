@@ -131,16 +131,16 @@ class structured_sort_constructor: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), structured_sort_constructor_argument_list(), core::empty_identifier_string()))
     {}
 
-    /// \brief Constructor 
-    /// 
-    /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string 
-    template < typename Container, size_t S, size_t S0 > 
-    structured_sort_constructor(const char(&name)[S], 
-                                const Container& arguments, 
-                                const char(&recogniser)[S0], 
-                                typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0) 
+    /// \brief Constructor
+    ///
+    /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
+    template < typename Container, size_t S, size_t S0 >
+    structured_sort_constructor(const char(&name)[S],
+                                const Container& arguments,
+                                const char(&recogniser)[S0],
+                                typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
       : atermpp::aterm_appl(core::detail::gsMakeStructCons(core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser)))
-    {} 
+    {}
 
     /// \brief Returns the constructor function for this constructor,
     ///        assuming it is internally represented with sort s.
@@ -194,7 +194,6 @@ typedef atermpp::term_list<structured_sort_constructor> structured_sort_construc
 /// \brief vector of structured_sort_constructors
 typedef std::vector<structured_sort_constructor>    structured_sort_constructor_vector;
 
-
 /// \brief Test for a structured_sort_constructor expression
 /// \param x A term
 /// \return True if \a x is a structured_sort_constructor expression
@@ -202,6 +201,12 @@ inline
 bool is_structured_sort_constructor(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStructCons(x);
+}
+
+/// \brief swap overload
+inline void swap(structured_sort_constructor& t1, structured_sort_constructor& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class structured_sort_constructor ---//
@@ -214,15 +219,5 @@ std::string pp(const structured_sort_constructor_vector& x);
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::structured_sort_constructor& t1, mcrl2::data::structured_sort_constructor& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_H

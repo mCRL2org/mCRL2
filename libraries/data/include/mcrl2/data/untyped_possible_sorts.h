@@ -54,6 +54,13 @@ class untyped_possible_sorts: public sort_expression
       return atermpp::aterm_cast<const sort_expression_list>(atermpp::list_arg1(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(untyped_possible_sorts& t1, untyped_possible_sorts& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class untyped_possible_sorts ---//
 
 } // namespace data

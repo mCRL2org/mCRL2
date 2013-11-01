@@ -66,7 +66,6 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 /// \brief vector of state_formulas
 typedef std::vector<state_formula>    state_formula_vector;
 
-
 // prototypes
 inline bool is_true(const atermpp::aterm_appl& x);
 inline bool is_false(const atermpp::aterm_appl& x);
@@ -112,6 +111,12 @@ bool is_state_formula(const atermpp::aterm_appl& x)
          state_formulas::is_mu(x);
 }
 
+/// \brief swap overload
+inline void swap(state_formula& t1, state_formula& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value true for state formulas
 class true_: public state_formula
@@ -140,6 +145,12 @@ bool is_true(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateTrue(x);
 }
 
+/// \brief swap overload
+inline void swap(true_& t1, true_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value false for state formulas
 class false_: public state_formula
@@ -166,6 +177,12 @@ inline
 bool is_false(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateFalse(x);
+}
+
+/// \brief swap overload
+inline void swap(false_& t1, false_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -204,6 +221,12 @@ inline
 bool is_not(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateNot(x);
+}
+
+/// \brief swap overload
+inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -249,6 +272,12 @@ bool is_and(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateAnd(x);
 }
 
+/// \brief swap overload
+inline void swap(and_& t1, and_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The or operator for state formulas
 class or_: public state_formula
@@ -290,6 +319,12 @@ inline
 bool is_or(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateOr(x);
+}
+
+/// \brief swap overload
+inline void swap(or_& t1, or_& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -335,6 +370,12 @@ bool is_imp(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateImp(x);
 }
 
+/// \brief swap overload
+inline void swap(imp& t1, imp& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The universal quantification operator for state formulas
 class forall: public state_formula
@@ -376,6 +417,12 @@ inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateForall(x);
+}
+
+/// \brief swap overload
+inline void swap(forall& t1, forall& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -421,6 +468,12 @@ bool is_exists(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateExists(x);
 }
 
+/// \brief swap overload
+inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The must operator for state formulas
 class must: public state_formula
@@ -462,6 +515,12 @@ inline
 bool is_must(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateMust(x);
+}
+
+/// \brief swap overload
+inline void swap(must& t1, must& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -507,6 +566,12 @@ bool is_may(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateMay(x);
 }
 
+/// \brief swap overload
+inline void swap(may& t1, may& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The yaled operator for state formulas
 class yaled: public state_formula
@@ -533,6 +598,12 @@ inline
 bool is_yaled(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateYaled(x);
+}
+
+/// \brief swap overload
+inline void swap(yaled& t1, yaled& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -573,6 +644,12 @@ bool is_yaled_timed(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateYaledTimed(x);
 }
 
+/// \brief swap overload
+inline void swap(yaled_timed& t1, yaled_timed& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The delay operator for state formulas
 class delay: public state_formula
@@ -599,6 +676,12 @@ inline
 bool is_delay(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateDelay(x);
+}
+
+/// \brief swap overload
+inline void swap(delay& t1, delay& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -637,6 +720,12 @@ inline
 bool is_delay_timed(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateDelayTimed(x);
+}
+
+/// \brief swap overload
+inline void swap(delay_timed& t1, delay_timed& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -685,6 +774,12 @@ inline
 bool is_variable(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateVar(x);
+}
+
+/// \brief swap overload
+inline void swap(variable& t1, variable& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -740,6 +835,12 @@ bool is_nu(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateNu(x);
 }
 
+/// \brief swap overload
+inline void swap(nu& t1, nu& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The mu operator for state formulas
 class mu: public state_formula
@@ -791,6 +892,12 @@ inline
 bool is_mu(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateMu(x);
+}
+
+/// \brief swap overload
+inline void swap(mu& t1, mu& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated classes ---//
@@ -937,117 +1044,5 @@ bool find_nil(const state_formulas::state_formula& x);
 } // namespace state_formulas
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::state_formulas::state_formula& t1, mcrl2::state_formulas::state_formula& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::true_& t1, mcrl2::state_formulas::true_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::false_& t1, mcrl2::state_formulas::false_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::not_& t1, mcrl2::state_formulas::not_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::and_& t1, mcrl2::state_formulas::and_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::or_& t1, mcrl2::state_formulas::or_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::imp& t1, mcrl2::state_formulas::imp& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::forall& t1, mcrl2::state_formulas::forall& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::exists& t1, mcrl2::state_formulas::exists& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::must& t1, mcrl2::state_formulas::must& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::may& t1, mcrl2::state_formulas::may& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::yaled& t1, mcrl2::state_formulas::yaled& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::yaled_timed& t1, mcrl2::state_formulas::yaled_timed& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::delay& t1, mcrl2::state_formulas::delay& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::delay_timed& t1, mcrl2::state_formulas::delay_timed& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::variable& t1, mcrl2::state_formulas::variable& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::nu& t1, mcrl2::state_formulas::nu& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::state_formulas::mu& t1, mcrl2::state_formulas::mu& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

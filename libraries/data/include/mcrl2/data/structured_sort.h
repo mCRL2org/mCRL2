@@ -444,21 +444,17 @@ typedef atermpp::term_list<structured_sort> structured_sort_list;
 /// \brief vector of structured_sorts
 typedef std::vector<structured_sort>    structured_sort_vector;
 
+/// \brief swap overload
+inline void swap(structured_sort& t1, structured_sort& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class structured_sort ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::structured_sort& t1, mcrl2::data::structured_sort& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
 

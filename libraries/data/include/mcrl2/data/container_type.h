@@ -47,6 +47,12 @@ typedef atermpp::term_list<container_type> container_type_list;
 /// \brief vector of container_types
 typedef std::vector<container_type>    container_type_vector;
 
+/// \brief swap overload
+inline void swap(container_type& t1, container_type& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Container type for lists
 class list_container: public container_type
@@ -73,6 +79,12 @@ inline
 bool is_list_container(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsSortList(x);
+}
+
+/// \brief swap overload
+inline void swap(list_container& t1, list_container& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -103,6 +115,12 @@ bool is_set_container(const atermpp::aterm_appl& x)
   return core::detail::gsIsSortSet(x);
 }
 
+/// \brief swap overload
+inline void swap(set_container& t1, set_container& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Container type for bags
 class bag_container: public container_type
@@ -129,6 +147,12 @@ inline
 bool is_bag_container(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsSortBag(x);
+}
+
+/// \brief swap overload
+inline void swap(bag_container& t1, bag_container& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -159,6 +183,12 @@ bool is_fset_container(const atermpp::aterm_appl& x)
   return core::detail::gsIsSortFSet(x);
 }
 
+/// \brief swap overload
+inline void swap(fset_container& t1, fset_container& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Container type for finite bags
 class fbag_container: public container_type
@@ -187,50 +217,16 @@ bool is_fbag_container(const atermpp::aterm_appl& x)
   return core::detail::gsIsSortFBag(x);
 }
 
+/// \brief swap overload
+inline void swap(fbag_container& t1, fbag_container& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated classes ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::container_type& t1, mcrl2::data::container_type& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::list_container& t1, mcrl2::data::list_container& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::set_container& t1, mcrl2::data::set_container& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::bag_container& t1, mcrl2::data::bag_container& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::fset_container& t1, mcrl2::data::fset_container& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::fbag_container& t1, mcrl2::data::fbag_container& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_CONTAINER_TYPE_H

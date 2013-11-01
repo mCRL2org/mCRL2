@@ -46,6 +46,12 @@ typedef atermpp::term_list<nil> nil_list;
 /// \brief vector of nils
 typedef std::vector<nil>    nil_vector;
 
+/// \brief swap overload
+inline void swap(nil& t1, nil& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class nil ---//
 
 } // namespace core

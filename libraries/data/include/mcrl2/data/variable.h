@@ -77,6 +77,12 @@ typedef atermpp::term_list<variable> variable_list;
 /// \brief vector of variables
 typedef std::vector<variable>    variable_vector;
 
+/// \brief swap overload
+inline void swap(variable& t1, variable& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class variable ---//
 #else
 
@@ -155,16 +161,6 @@ std::set<core::identifier_string> find_identifiers(const data::variable_list& x)
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::variable& t1, mcrl2::data::variable& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_VARIABLE_H
 

@@ -127,6 +127,13 @@ class application: public data_expression
 */
 //--- end user section application ---//
 };
+
+/// \brief swap overload
+inline void swap(application& t1, application& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class application ---//
 
 /// \brief Apply data expression to a data expression
@@ -225,15 +232,5 @@ const data_expression& binary_right1(const data_expression & x)
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::application& t1, mcrl2::data::application& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_APPLICATION_H

@@ -52,7 +52,6 @@ typedef atermpp::term_list<assignment_expression> assignment_expression_list;
 /// \brief vector of assignment_expressions
 typedef std::vector<assignment_expression>    assignment_expression_vector;
 
-
 // prototypes
 inline bool is_assignment(const atermpp::aterm_appl& x);
 inline bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x);
@@ -65,6 +64,12 @@ bool is_assignment_expression(const atermpp::aterm_appl& x)
 {
   return data::is_assignment(x) ||
          data::is_untyped_identifier_assignment(x);
+}
+
+/// \brief swap overload
+inline void swap(assignment_expression& t1, assignment_expression& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -125,7 +130,6 @@ typedef atermpp::term_list<assignment> assignment_list;
 /// \brief vector of assignments
 typedef std::vector<assignment>    assignment_vector;
 
-
 /// \brief Test for a assignment expression
 /// \param x A term
 /// \return True if \a x is a assignment expression
@@ -133,6 +137,12 @@ inline
 bool is_assignment(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsDataVarIdInit(x);
+}
+
+/// \brief swap overload
+inline void swap(assignment& t1, assignment& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -189,7 +199,6 @@ typedef atermpp::term_list<untyped_identifier_assignment> untyped_identifier_ass
 /// \brief vector of untyped_identifier_assignments
 typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignment_vector;
 
-
 /// \brief Test for a untyped_identifier_assignment expression
 /// \param x A term
 /// \return True if \a x is a untyped_identifier_assignment expression
@@ -197,6 +206,12 @@ inline
 bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedIdentifierAssignment(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignment& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated classes ---//
@@ -271,28 +286,6 @@ std::string pp(const assignment_vector& x);
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::assignment_expression& t1, mcrl2::data::assignment_expression& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::assignment& t1, mcrl2::data::assignment& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::untyped_identifier_assignment& t1, mcrl2::data::untyped_identifier_assignment& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_ASSIGNMENT_H
 

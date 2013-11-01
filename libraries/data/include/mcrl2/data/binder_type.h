@@ -47,6 +47,12 @@ typedef atermpp::term_list<binder_type> binder_type_list;
 /// \brief vector of binder_types
 typedef std::vector<binder_type>    binder_type_vector;
 
+/// \brief swap overload
+inline void swap(binder_type& t1, binder_type& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Binder for untyped set or bag comprehension
 class untyped_set_or_bag_comprehension_binder: public binder_type
@@ -73,6 +79,12 @@ inline
 bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedSetBagComp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_set_or_bag_comprehension_binder& t1, untyped_set_or_bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -103,6 +115,12 @@ bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
   return core::detail::gsIsSetComp(x);
 }
 
+/// \brief swap overload
+inline void swap(set_comprehension_binder& t1, set_comprehension_binder& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Binder for bag comprehension
 class bag_comprehension_binder: public binder_type
@@ -129,6 +147,12 @@ inline
 bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBagComp(x);
+}
+
+/// \brief swap overload
+inline void swap(bag_comprehension_binder& t1, bag_comprehension_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -159,6 +183,12 @@ bool is_forall_binder(const atermpp::aterm_appl& x)
   return core::detail::gsIsForall(x);
 }
 
+/// \brief swap overload
+inline void swap(forall_binder& t1, forall_binder& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief Binder for existential quantification
 class exists_binder: public binder_type
@@ -185,6 +215,12 @@ inline
 bool is_exists_binder(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsExists(x);
+}
+
+/// \brief swap overload
+inline void swap(exists_binder& t1, exists_binder& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -215,56 +251,16 @@ bool is_lambda_binder(const atermpp::aterm_appl& x)
   return core::detail::gsIsLambda(x);
 }
 
+/// \brief swap overload
+inline void swap(lambda_binder& t1, lambda_binder& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated classes ---//
 
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::binder_type& t1, mcrl2::data::binder_type& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::untyped_set_or_bag_comprehension_binder& t1, mcrl2::data::untyped_set_or_bag_comprehension_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::set_comprehension_binder& t1, mcrl2::data::set_comprehension_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::bag_comprehension_binder& t1, mcrl2::data::bag_comprehension_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::forall_binder& t1, mcrl2::data::forall_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::exists_binder& t1, mcrl2::data::exists_binder& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::data::lambda_binder& t1, mcrl2::data::lambda_binder& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_BINDER_TYPE_H

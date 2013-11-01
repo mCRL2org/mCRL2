@@ -204,14 +204,4 @@ std::string pp(const propositional_variable_vector& x);
 
 } // namespace mcrl2
 
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::pbes_system::propositional_variable& t1, mcrl2::pbes_system::propositional_variable& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
-
 #endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

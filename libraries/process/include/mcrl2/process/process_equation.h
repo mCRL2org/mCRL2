@@ -72,7 +72,6 @@ typedef atermpp::term_list<process_equation> process_equation_list;
 /// \brief vector of process_equations
 typedef std::vector<process_equation>    process_equation_vector;
 
-
 /// \brief Test for a process_equation expression
 /// \param x A term
 /// \return True if \a x is a process_equation expression
@@ -80,6 +79,12 @@ inline
 bool is_process_equation(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsProcEqn(x);
+}
+
+/// \brief swap overload
+inline void swap(process_equation& t1, process_equation& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class process_equation ---//

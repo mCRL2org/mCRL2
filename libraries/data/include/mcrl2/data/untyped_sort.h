@@ -37,6 +37,13 @@ class untyped_sort: public sort_expression
       assert(core::detail::check_term_UntypedSortUnknown(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(untyped_sort& t1, untyped_sort& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class untyped_sort ---//
 
 } // namespace data

@@ -60,7 +60,6 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 /// \brief vector of regular_formulas
 typedef std::vector<regular_formula>    regular_formula_vector;
 
-
 // prototypes
 inline bool is_nil(const atermpp::aterm_appl& x);
 inline bool is_seq(const atermpp::aterm_appl& x);
@@ -80,6 +79,12 @@ bool is_regular_formula(const atermpp::aterm_appl& x)
          regular_formulas::is_alt(x) ||
          regular_formulas::is_trans(x) ||
          regular_formulas::is_trans_or_nil(x);
+}
+
+/// \brief swap overload
+inline void swap(regular_formula& t1, regular_formula& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -108,6 +113,12 @@ inline
 bool is_nil(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsRegNil(x);
+}
+
+/// \brief swap overload
+inline void swap(nil& t1, nil& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -153,6 +164,12 @@ bool is_seq(const atermpp::aterm_appl& x)
   return core::detail::gsIsRegSeq(x);
 }
 
+/// \brief swap overload
+inline void swap(seq& t1, seq& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The alt operator for regular formulas
 class alt: public regular_formula
@@ -196,6 +213,12 @@ bool is_alt(const atermpp::aterm_appl& x)
   return core::detail::gsIsRegAlt(x);
 }
 
+/// \brief swap overload
+inline void swap(alt& t1, alt& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The trans operator for regular formulas
 class trans: public regular_formula
@@ -234,6 +257,12 @@ bool is_trans(const atermpp::aterm_appl& x)
   return core::detail::gsIsRegTrans(x);
 }
 
+/// \brief swap overload
+inline void swap(trans& t1, trans& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The 'trans or nil' operator for regular formulas
 class trans_or_nil: public regular_formula
@@ -270,6 +299,12 @@ inline
 bool is_trans_or_nil(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsRegTransOrNil(x);
+}
+
+/// \brief swap overload
+inline void swap(trans_or_nil& t1, trans_or_nil& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated classes ---//
@@ -311,45 +346,5 @@ std::string pp(const regular_formula& x);
 } // namespace regular_formulas
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::regular_formulas::regular_formula& t1, mcrl2::regular_formulas::regular_formula& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::nil& t1, mcrl2::regular_formulas::nil& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::seq& t1, mcrl2::regular_formulas::seq& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::alt& t1, mcrl2::regular_formulas::alt& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::trans& t1, mcrl2::regular_formulas::trans& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::regular_formulas::trans_or_nil& t1, mcrl2::regular_formulas::trans_or_nil& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

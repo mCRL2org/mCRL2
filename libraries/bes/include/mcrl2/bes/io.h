@@ -352,7 +352,8 @@ void save_bes(const boolean_equation_system& bes_spec,
         if(fst.symbol() == equations[index].symbol())
         {
           // equation is in the first block, just swap the two
-          std::swap(equations[0], equations[index]);
+          using std::swap;
+          swap(equations[0], equations[index]);
           mCRL2log(log::warning) << "Fixed up by swapping the equations for " << pp(equations[0].variable()) << " and " << pp(equations[index].variable()) << std::endl;
         }
         else

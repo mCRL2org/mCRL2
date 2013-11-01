@@ -53,6 +53,12 @@ typedef atermpp::term_list<untyped_multi_action> untyped_multi_action_list;
 /// \brief vector of untyped_multi_actions
 typedef std::vector<untyped_multi_action>    untyped_multi_action_vector;
 
+/// \brief swap overload
+inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class untyped_multi_action ---//
 
 } // namespace lps

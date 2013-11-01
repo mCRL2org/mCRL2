@@ -74,6 +74,12 @@ typedef atermpp::term_list<function_symbol> function_symbol_list;
 /// \brief vector of function_symbols
 typedef std::vector<function_symbol>    function_symbol_vector;
 
+/// \brief swap overload
+inline void swap(function_symbol& t1, function_symbol& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class function_symbol ---//
 
 #else
@@ -149,16 +155,6 @@ std::set<data::variable> find_all_variables(const data::function_symbol& x);
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::function_symbol& t1, mcrl2::data::function_symbol& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

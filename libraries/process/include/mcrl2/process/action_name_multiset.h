@@ -61,7 +61,6 @@ typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
 /// \brief vector of action_name_multisets
 typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 
-
 /// \brief Test for a action_name_multiset expression
 /// \param x A term
 /// \return True if \a x is a action_name_multiset expression
@@ -69,6 +68,12 @@ inline
 bool is_action_name_multiset(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsMultActName(x);
+}
+
+/// \brief swap overload
+inline void swap(action_name_multiset& t1, action_name_multiset& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class action_name_multiset ---//
@@ -123,15 +128,5 @@ std::string pp(const action_name_multiset& x);
 } // namespace process
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::action_name_multiset& t1, mcrl2::process::action_name_multiset& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PROCESS_ACTION_NAME_MULTISET_H

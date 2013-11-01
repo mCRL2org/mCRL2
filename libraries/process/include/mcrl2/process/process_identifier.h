@@ -70,7 +70,6 @@ typedef atermpp::term_list<process_identifier> process_identifier_list;
 /// \brief vector of process_identifiers
 typedef std::vector<process_identifier>    process_identifier_vector;
 
-
 /// \brief Test for a process_identifier expression
 /// \param x A term
 /// \return True if \a x is a process_identifier expression
@@ -78,6 +77,12 @@ inline
 bool is_process_identifier(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsProcVarId(x);
+}
+
+/// \brief swap overload
+inline void swap(process_identifier& t1, process_identifier& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class process_identifier ---//
@@ -91,15 +96,5 @@ void normalize_sorts(process_identifier_vector& x, const data::data_specificatio
 } // namespace process
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::process_identifier& t1, mcrl2::process::process_identifier& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

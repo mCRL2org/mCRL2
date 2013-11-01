@@ -778,9 +778,9 @@ class Class:
         return constructors
 
     # Returns a specialization of the swap function for the std namespace
-    def swap_specialization(self):
-        text = '''template <>
-inline void swap(mcrl2::<NAMESPACE>::<CLASSNAME>& t1, mcrl2::<NAMESPACE>::<CLASSNAME>& t2)
+    # TODO: deal with template classes
+    def swap_overload(self):
+        text = r'''/// \\brief swap overload\ninline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2)
 {
   t1.swap(t2);
 }
@@ -833,8 +833,7 @@ inline void swap(mcrl2::<NAMESPACE>::<CLASSNAME>& t1, mcrl2::<NAMESPACE>::<CLASS
 typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 
 /// \\brief vector of <CLASSNAME>s
-typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;
-'''
+typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;'''
         text = re.sub('<CLASSNAME>', self.classname(), text)
         return text
 
@@ -847,8 +846,7 @@ inline
 bool is_%s(const %s& x)
 {
   return %s;
-}
-'''
+}'''
         name = self.name()
         if name[-1] == '_':
             name = name[:-1]
@@ -896,6 +894,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         if 'I' in self.modifiers():
             text = text + '\n\n' + self.is_function(all_classes)
 
+        text = text + '\n\n' + self.swap_overload()
+
         return text + '\n'
 
     # Returns the class declaration
@@ -917,6 +917,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
         if 'I' in self.modifiers():
             text = text + '\n\n' + self.is_function(all_classes)
+
+        text = text + '\n\n' + self.swap_overload()
 
         return text + '\n'
 

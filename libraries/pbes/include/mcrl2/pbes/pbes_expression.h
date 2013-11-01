@@ -68,6 +68,12 @@ typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 /// \brief vector of pbes_expressions
 typedef std::vector<pbes_expression>    pbes_expression_vector;
 
+/// \brief swap overload
+inline void swap(pbes_expression& t1, pbes_expression& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief A propositional variable instantiation
 class propositional_variable_instantiation: public pbes_expression
@@ -127,6 +133,12 @@ typedef atermpp::term_list<propositional_variable_instantiation> propositional_v
 /// \brief vector of propositional_variable_instantiations
 typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
 
+/// \brief swap overload
+inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value true for pbes expressions
 class true_: public pbes_expression
@@ -146,6 +158,13 @@ class true_: public pbes_expression
     }
 };
 
+/// \brief swap overload
+inline void swap(true_& t1, true_& t2)
+{
+  t1.swap(t2);
+}
+
+
 /// \brief The value false for pbes expressions
 class false_: public pbes_expression
 {
@@ -163,6 +182,13 @@ class false_: public pbes_expression
       assert(core::detail::check_term_PBESFalse(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(false_& t1, false_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The not operator for pbes expressions
 class not_: public pbes_expression
@@ -191,6 +217,13 @@ class not_: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>(atermpp::arg1(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The and operator for pbes expressions
 class and_: public pbes_expression
@@ -225,6 +258,13 @@ class and_: public pbes_expression
     }
 };
 
+/// \brief swap overload
+inline void swap(and_& t1, and_& t2)
+{
+  t1.swap(t2);
+}
+
+
 /// \brief The or operator for pbes expressions
 class or_: public pbes_expression
 {
@@ -257,6 +297,13 @@ class or_: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(or_& t1, or_& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The implication operator for pbes expressions
 class imp: public pbes_expression
@@ -291,6 +338,13 @@ class imp: public pbes_expression
     }
 };
 
+/// \brief swap overload
+inline void swap(imp& t1, imp& t2)
+{
+  t1.swap(t2);
+}
+
+
 /// \brief The universal quantification operator for pbes expressions
 class forall: public pbes_expression
 {
@@ -324,6 +378,13 @@ class forall: public pbes_expression
     }
 };
 
+/// \brief swap overload
+inline void swap(forall& t1, forall& t2)
+{
+  t1.swap(t2);
+}
+
+
 /// \brief The existential quantification operator for pbes expressions
 class exists: public pbes_expression
 {
@@ -356,6 +417,13 @@ class exists: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>(atermpp::arg2(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated classes ---//
 
 // template function overloads
@@ -1562,69 +1630,5 @@ struct term_traits<pbes_system::pbes_expression>
 } // namespace core
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::pbes_system::pbes_expression& t1, mcrl2::pbes_system::pbes_expression& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::propositional_variable_instantiation& t1, mcrl2::pbes_system::propositional_variable_instantiation& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::true_& t1, mcrl2::pbes_system::true_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::false_& t1, mcrl2::pbes_system::false_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::not_& t1, mcrl2::pbes_system::not_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::and_& t1, mcrl2::pbes_system::and_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::or_& t1, mcrl2::pbes_system::or_& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::imp& t1, mcrl2::pbes_system::imp& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::forall& t1, mcrl2::pbes_system::forall& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::pbes_system::exists& t1, mcrl2::pbes_system::exists& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

@@ -154,14 +154,4 @@ std::string pp(const fixpoint_symbol& x);
 
 } // namespace mcrl2
 
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::pbes_system::fixpoint_symbol& t1, mcrl2::pbes_system::fixpoint_symbol& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
-
 #endif // MCRL2_PBES_FIXPOINT_SYMBOL_H

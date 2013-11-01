@@ -63,7 +63,6 @@ typedef atermpp::term_list<untyped_action> untyped_action_list;
 /// \brief vector of untyped_actions
 typedef std::vector<untyped_action>    untyped_action_vector;
 
-
 /// \brief Test for a untyped_action expression
 /// \param x A term
 /// \return True if \a x is a untyped_action expression
@@ -71,6 +70,12 @@ inline
 bool is_untyped_action(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedAction(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_action& t1, untyped_action& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class untyped_action ---//

@@ -74,7 +74,6 @@ typedef atermpp::term_list<process_initializer> process_initializer_list;
 /// \brief vector of process_initializers
 typedef std::vector<process_initializer>    process_initializer_vector;
 
-
 /// \brief Test for a process_initializer expression
 /// \param x A term
 /// \return True if \a x is a process_initializer expression
@@ -82,6 +81,12 @@ inline
 bool is_process_initializer(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsLinearProcessInit(x);
+}
+
+/// \brief swap overload
+inline void swap(process_initializer& t1, process_initializer& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class process_initializer ---//
@@ -93,15 +98,5 @@ std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 } // namespace lps
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::lps::process_initializer& t1, mcrl2::lps::process_initializer& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_LPS_PROCESS_INITIALIZER_H

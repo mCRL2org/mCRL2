@@ -71,6 +71,13 @@ class function_sort: public sort_expression
       return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
     }
 };
+
+/// \brief swap overload
+inline void swap(function_sort& t1, function_sort& t2)
+{
+  t1.swap(t2);
+}
+
 //--- end generated class function_sort ---//
 
 /// \brief list of function sorts
@@ -137,16 +144,6 @@ inline function_sort make_function_sort(const sort_expression& dom1,
 } // namespace data
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::data::function_sort& t1, mcrl2::data::function_sort& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_DATA_FUNCTION_SORT_H
 

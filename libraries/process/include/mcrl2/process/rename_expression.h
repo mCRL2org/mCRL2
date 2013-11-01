@@ -70,7 +70,6 @@ typedef atermpp::term_list<rename_expression> rename_expression_list;
 /// \brief vector of rename_expressions
 typedef std::vector<rename_expression>    rename_expression_vector;
 
-
 /// \brief Test for a rename_expression expression
 /// \param x A term
 /// \return True if \a x is a rename_expression expression
@@ -78,6 +77,12 @@ inline
 bool is_rename_expression(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsRenameExpr(x);
+}
+
+/// \brief swap overload
+inline void swap(rename_expression& t1, rename_expression& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated class rename_expression ---//
@@ -137,15 +142,5 @@ typedef atermpp::term_list<rename_expression> rename_expression_list;
 } // namespace process
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::rename_expression& t1, mcrl2::process::rename_expression& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PROCESS_RENAME_EXPRESSION_H

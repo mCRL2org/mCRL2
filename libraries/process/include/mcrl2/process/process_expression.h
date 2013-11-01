@@ -73,7 +73,6 @@ typedef atermpp::term_list<process_expression> process_expression_list;
 /// \brief vector of process_expressions
 typedef std::vector<process_expression>    process_expression_vector;
 
-
 // prototypes
 inline bool is_process_instance(const atermpp::aterm_appl& x);
 inline bool is_process_instance_assignment(const atermpp::aterm_appl& x);
@@ -127,6 +126,12 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          lps::is_action(x);
 }
 
+/// \brief swap overload
+inline void swap(process_expression& t1, process_expression& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief A process
 class process_instance: public process_expression
@@ -168,6 +173,12 @@ inline
 bool is_process_instance(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsProcess(x);
+}
+
+/// \brief swap overload
+inline void swap(process_instance& t1, process_instance& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -213,6 +224,12 @@ bool is_process_instance_assignment(const atermpp::aterm_appl& x)
   return core::detail::gsIsProcessAssignment(x);
 }
 
+/// \brief swap overload
+inline void swap(process_instance_assignment& t1, process_instance_assignment& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value delta
 class delta: public process_expression
@@ -241,6 +258,12 @@ bool is_delta(const atermpp::aterm_appl& x)
   return core::detail::gsIsDelta(x);
 }
 
+/// \brief swap overload
+inline void swap(delta& t1, delta& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The value tau
 class tau: public process_expression
@@ -267,6 +290,12 @@ inline
 bool is_tau(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsTau(x);
+}
+
+/// \brief swap overload
+inline void swap(tau& t1, tau& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -312,6 +341,12 @@ bool is_sum(const atermpp::aterm_appl& x)
   return core::detail::gsIsSum(x);
 }
 
+/// \brief swap overload
+inline void swap(sum& t1, sum& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The block operator
 class block: public process_expression
@@ -353,6 +388,12 @@ inline
 bool is_block(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBlock(x);
+}
+
+/// \brief swap overload
+inline void swap(block& t1, block& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -398,6 +439,12 @@ bool is_hide(const atermpp::aterm_appl& x)
   return core::detail::gsIsHide(x);
 }
 
+/// \brief swap overload
+inline void swap(hide& t1, hide& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The rename operator
 class rename: public process_expression
@@ -439,6 +486,12 @@ inline
 bool is_rename(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsRename(x);
+}
+
+/// \brief swap overload
+inline void swap(rename& t1, rename& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -484,6 +537,12 @@ bool is_comm(const atermpp::aterm_appl& x)
   return core::detail::gsIsComm(x);
 }
 
+/// \brief swap overload
+inline void swap(comm& t1, comm& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The allow operator
 class allow: public process_expression
@@ -525,6 +584,12 @@ inline
 bool is_allow(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsAllow(x);
+}
+
+/// \brief swap overload
+inline void swap(allow& t1, allow& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -570,6 +635,12 @@ bool is_sync(const atermpp::aterm_appl& x)
   return core::detail::gsIsSync(x);
 }
 
+/// \brief swap overload
+inline void swap(sync& t1, sync& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The at operator
 class at: public process_expression
@@ -611,6 +682,12 @@ inline
 bool is_at(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsAtTime(x);
+}
+
+/// \brief swap overload
+inline void swap(at& t1, at& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -656,6 +733,12 @@ bool is_seq(const atermpp::aterm_appl& x)
   return core::detail::gsIsSeq(x);
 }
 
+/// \brief swap overload
+inline void swap(seq& t1, seq& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The if-then operator
 class if_then: public process_expression
@@ -697,6 +780,12 @@ inline
 bool is_if_then(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsIfThen(x);
+}
+
+/// \brief swap overload
+inline void swap(if_then& t1, if_then& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -747,6 +836,12 @@ bool is_if_then_else(const atermpp::aterm_appl& x)
   return core::detail::gsIsIfThenElse(x);
 }
 
+/// \brief swap overload
+inline void swap(if_then_else& t1, if_then_else& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The bounded initialization
 class bounded_init: public process_expression
@@ -788,6 +883,12 @@ inline
 bool is_bounded_init(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBInit(x);
+}
+
+/// \brief swap overload
+inline void swap(bounded_init& t1, bounded_init& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -833,6 +934,12 @@ bool is_merge(const atermpp::aterm_appl& x)
   return core::detail::gsIsMerge(x);
 }
 
+/// \brief swap overload
+inline void swap(merge& t1, merge& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The left merge operator
 class left_merge: public process_expression
@@ -876,6 +983,12 @@ bool is_left_merge(const atermpp::aterm_appl& x)
   return core::detail::gsIsLMerge(x);
 }
 
+/// \brief swap overload
+inline void swap(left_merge& t1, left_merge& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief The choice operator
 class choice: public process_expression
@@ -917,6 +1030,12 @@ inline
 bool is_choice(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsChoice(x);
+}
+
+/// \brief swap overload
+inline void swap(choice& t1, choice& t2)
+{
+  t1.swap(t2);
 }
 
 
@@ -967,6 +1086,12 @@ bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
   return core::detail::gsIsUntypedParamId(x);
 }
 
+/// \brief swap overload
+inline void swap(untyped_parameter_identifier& t1, untyped_parameter_identifier& t2)
+{
+  t1.swap(t2);
+}
+
 
 /// \brief An untyped process assginment
 class untyped_process_assignment: public process_expression
@@ -1013,6 +1138,12 @@ inline
 bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedProcessAssignment(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
+{
+  t1.swap(t2);
 }
 
 //--- end generated classes ---//
@@ -1129,129 +1260,5 @@ std::string pp(const atermpp::aterm_appl& x);
 } // namespace process
 
 } // namespace mcrl2
-
-namespace std {
-//--- start generated swap functions ---//
-template <>
-inline void swap(mcrl2::process::process_expression& t1, mcrl2::process::process_expression& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::process_instance& t1, mcrl2::process::process_instance& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::process_instance_assignment& t1, mcrl2::process::process_instance_assignment& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::delta& t1, mcrl2::process::delta& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::tau& t1, mcrl2::process::tau& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::sum& t1, mcrl2::process::sum& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::block& t1, mcrl2::process::block& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::hide& t1, mcrl2::process::hide& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::rename& t1, mcrl2::process::rename& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::comm& t1, mcrl2::process::comm& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::allow& t1, mcrl2::process::allow& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::sync& t1, mcrl2::process::sync& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::at& t1, mcrl2::process::at& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::seq& t1, mcrl2::process::seq& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::if_then& t1, mcrl2::process::if_then& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::if_then_else& t1, mcrl2::process::if_then_else& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::bounded_init& t1, mcrl2::process::bounded_init& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::merge& t1, mcrl2::process::merge& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::left_merge& t1, mcrl2::process::left_merge& t2)
-{
-  t1.swap(t2);
-}
-
-template <>
-inline void swap(mcrl2::process::choice& t1, mcrl2::process::choice& t2)
-{
-  t1.swap(t2);
-}
-//--- end generated swap functions ---//
-} // namespace std
 
 #endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H
