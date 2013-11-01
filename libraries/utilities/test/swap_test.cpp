@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jeroen Keiren, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -21,11 +21,11 @@ class swappable
 {
 protected:
   int val_;
-  
+
 public:
   swappable(int x) : val_(x)
   {}
-  
+
   void swap(swappable& other)
   {
     std::cerr << "swap method called" << std::endl;
@@ -33,13 +33,13 @@ public:
     other.val_ = val_;
     val_ = tmp;
   }
-  
+
   int val() const
   {
     return val_;
   }
 };
-  
+
   inline bool operator<(const swappable& x, const swappable& y)
   {
     return x.val() < y.val();
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(swapping_element)
   BOOST_CHECK(y.val() == 1);
 }
 
-// This test case checks wheter, if a vector is sorted and
+// This test case checks whether, if a vector is sorted and
 // swap is called internally, then nsp::swap is called through
 // argument dependent lookup (ADL) instead of std::swap.
 // if nsp::swap is called, a message to this effect is printed.
@@ -94,6 +94,57 @@ BOOST_AUTO_TEST_CASE(swapping_vector)
   v.push_back(y);
   v.push_back(x);
   std::sort(v.begin(),v.end());
+}
+
+namespace nA {
+  template <typename T>
+  class A
+  {
+    protected:
+      T val_;
+
+    public:
+      A(T x) : val_(x)
+      {}
+
+      void swap(A<T>& other)
+      {
+        std::cerr << "swap method called" << std::endl;
+        T tmp = other.val_;
+        other.val_ = val_;
+        val_ = tmp;
+      }
+
+      T val() const
+      {
+        return val_;
+      }
+  };
+
+  template <typename T>
+  inline bool operator<(const A<T>& x, const A<T>& y)
+  {
+    return x.val() < y.val();
+  }
+
+  template <typename T>
+  void swap(A<T>& x, A<T>& y)
+  {
+    std::cerr << "nA::swap overload" << std::endl;
+    x.swap(y);
+  }
+} // namespace nA
+
+// This test case checks whether ADL works if std::swap is applied to a template class.
+BOOST_AUTO_TEST_CASE(template_class_swap)
+{
+  using std::swap;
+  using namespace nA;
+  A<int> x(1);
+  A<int> y(2);
+  swap(x, y);
+  BOOST_CHECK(x.val() == 2);
+  BOOST_CHECK(y.val() == 1);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
