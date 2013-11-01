@@ -250,17 +250,11 @@ private:
     verti *cardinality_;
 };
 
-#if (__apple_build_version__ >= 5000279)  // Hack, as code below does not compile on MacOsX.9
-#else
-
-namespace std
+inline
+void swap(ParityGame &a, ParityGame &b)
 {
-    template<> inline void swap<ParityGame>(ParityGame &a, ParityGame &b)
-    {
-        a.swap(b);
-    }
+    a.swap(b);
 }
-#endif
 
 #ifdef WITH_MCRL2
 #include "ParityGame_pbes.h"

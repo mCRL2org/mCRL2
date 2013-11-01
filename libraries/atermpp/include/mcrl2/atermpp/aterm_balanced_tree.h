@@ -338,23 +338,17 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 /// \brief A term_balanced_tree with elements of type aterm.
 typedef term_balanced_tree<aterm> aterm_balanced_tree;
 
-} // namespace atermpp
-
-
-namespace std
-{
-
 /// \brief Swaps two balanced trees.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term
 /// \param t2 The second term
-
 template <class T>
 inline void swap(atermpp::term_balanced_tree<T> &t1, atermpp::term_balanced_tree<T> &t2)
 {
   t1.swap(t2);
 }
-} // namespace std
+
+} // namespace atermpp
 
 #endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

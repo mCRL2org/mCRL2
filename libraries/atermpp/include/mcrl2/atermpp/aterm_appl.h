@@ -269,24 +269,18 @@ class term_appl:public aterm
 
 typedef term_appl<aterm> aterm_appl;
 
-} // namespace atermpp
-
-
-namespace std
-{
-
 /// \brief Swaps two term_applss.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term
 /// \param t2 The second term
-
 template <class T>
 inline void swap(atermpp::term_appl<T> &t1, atermpp::term_appl<T> &t2)
 {
   t1.swap(t2);
 }
-} // namespace std
+
+} // namespace atermpp
 
 #include "mcrl2/atermpp/detail/aterm_appl_implementation.h"
 

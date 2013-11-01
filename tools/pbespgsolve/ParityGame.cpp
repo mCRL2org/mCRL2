@@ -290,8 +290,9 @@ bool ParityGame::proper() const
 
 void ParityGame::swap(ParityGame &pg)
 {
-    std::swap(d_, pg.d_);
-    std::swap(graph_, pg.graph_);
-    std::swap(vertex_, pg.vertex_);
-    std::swap(cardinality_, pg.cardinality_);
+    using std::swap;
+    swap(d_, pg.d_);
+    swap(graph_, pg.graph_);
+    swap(vertex_, pg.vertex_);
+    swap(cardinality_, pg.cardinality_);
 }

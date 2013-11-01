@@ -298,24 +298,18 @@ template <typename Term>
 inline
 term_list<Term> push_back(const term_list<Term> &l, const Term &el);
 
-} // namespace atermpp
-
-
-namespace std
-{
-
 /// \brief Swaps two term_lists.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term
 /// \param t2 The second term
-
 template <class T>
 inline void swap(atermpp::term_list<T> &t1, atermpp::term_list<T> &t2)
 {
   t1.swap(t2);
 }
-} // namespace std
+
+} // namespace atermpp
 
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
 
