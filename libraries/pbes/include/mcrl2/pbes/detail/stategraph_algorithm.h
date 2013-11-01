@@ -182,6 +182,7 @@ class stategraph_algorithm
       return propositional_variable();
     }
 
+  public:
     std::string print_control_flow_parameters()
     {
       std::ostringstream out;
@@ -582,6 +583,22 @@ class stategraph_algorithm
       }
     }
 
+    // a connected component is valid if it does not contain two nodes (X, n) and (Y, m) with X == Y
+    bool is_valid_connected_component(const std::set<std::size_t>& component) const
+    {
+      std::set<core::identifier_string> V;
+      for (auto i = component.begin(); i != component.end(); ++i)
+      {
+        const core::identifier_string& X = m_control_flow_graph_vertices[*i].name();
+        if (V.find(X) != V.end())
+        {
+          return false;
+        }
+        V.insert(X);
+      }
+      return true;
+    }
+
     std::string print_connected_component(const std::set<std::size_t>& component) const
     {
       std::ostringstream out;
@@ -669,25 +686,32 @@ class stategraph_algorithm
 
     // Returns true if dX[m] is not only copied.
     //
-    // A CFP dX[m] is not only copied if dest(Y, i, m) is defined for some i such that pred(phi_Y , i) = X, or source(Y, i, m) is defined
+    // A CFP dX[m] is not only copied if
+    //    (1) for some i    : source(X, i, m) is defined
+    // or (2) for some Y, i : pred(phi_Y , i) = X and dest(Y, i, m) is defined
     bool is_not_only_copied(const core::identifier_string& X, std::size_t m) const
     {
+      // check (1)
+      const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+      const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+      for (auto i = predvars.begin(); i != predvars.end(); ++i)
+      {
+        if (!is_undefined(i->source, m))
+        {
+          return true;
+        }
+      }
+
+      // check (2)
       const std::vector<stategraph_equation>& equations = m_pbes.equations();
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
-        const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& d_X = k->parameters();
         const std::vector<predicate_variable>& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          const predicate_variable& PVI_X_i = *i;
-          auto Y = PVI_X_i.X.name();
-          if (Y == X)
+          if (i->X.name() == X && !is_undefined(i->dest, m))
           {
-            if (!is_undefined(PVI_X_i.source, m) || !is_undefined(PVI_X_i.dest, m))
-            {
-              return true;
-            }
+            return true;
           }
         }
       }
@@ -865,8 +889,6 @@ class stategraph_algorithm
       // print_control_flow_graphs();
     }
 
-  public:
-
     stategraph_algorithm(const pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty,
                          bool use_alternative_lcfp_criterion = false,
                          bool use_alternative_gcfp_relation = false,
@@ -888,22 +910,6 @@ class stategraph_algorithm
     const std::vector<std::set<std::size_t> >& connected_components() const
     {
       return m_connected_components;
-    }
-
-    // a connected component is valid if it does not contain two nodes (X, n) and (Y, m) with X == Y
-    bool is_valid_connected_component(const std::set<std::size_t>& component) const
-    {
-      std::set<core::identifier_string> V;
-      for (auto i = component.begin(); i != component.end(); ++i)
-      {
-        const core::identifier_string& X = m_control_flow_graph_vertices[*i].name();
-        if (V.find(X) != V.end())
-        {
-          return false;
-        }
-        V.insert(X);
-      }
-      return true;
     }
 
     std::string print(const control_flow_graph_vertex& u) const

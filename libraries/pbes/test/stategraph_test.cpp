@@ -782,10 +782,7 @@ int test_main(int, char**)
 {
 //  log::mcrl2_logger::set_reporting_level(log::debug, "stategraph");
   test_guard();
-//  test_parse();
-//  test_remove_may_transitions();
   test_significant_variables();
-//  test_constraints();
 //  test_local_stategraph();
 //  test_cfp();
 
