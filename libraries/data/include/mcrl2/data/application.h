@@ -58,12 +58,12 @@ class application: public data_expression
 
     const data_expression& head() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[0]);
     }
 
     const data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data_expression_list>((*this)[1]);
     }
 //--- start user section application ---//
   private:

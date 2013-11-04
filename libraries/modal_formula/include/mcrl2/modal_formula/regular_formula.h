@@ -16,7 +16,6 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/precedence.h"
@@ -146,12 +145,12 @@ class seq: public regular_formula
 
     const regular_formula& left() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const regular_formula>((*this)[1]);
     }
 };
 
@@ -195,12 +194,12 @@ class alt: public regular_formula
 
     const regular_formula& left() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const regular_formula>((*this)[1]);
     }
 };
 
@@ -244,7 +243,7 @@ class trans: public regular_formula
 
     const regular_formula& operand() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
     }
 };
 
@@ -288,7 +287,7 @@ class trans_or_nil: public regular_formula
 
     const regular_formula& operand() const
     {
-      return atermpp::aterm_cast<const regular_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const regular_formula>((*this)[0]);
     }
 };
 

@@ -13,7 +13,6 @@
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
 #include "mcrl2/atermpp/detail/utility.h"
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -41,42 +40,42 @@ inline bool is_abstraction(const atermpp::aterm_appl &p)
 inline bool is_lambda(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
-         core::detail::gsIsLambda(atermpp::arg1(p));
+         core::detail::gsIsLambda(atermpp::aterm_cast<const atermpp::aterm_appl>(p[0]));
 }
 
 /// \brief Returns true if the term t is a universal quantification
 inline bool is_forall(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
-         core::detail::gsIsForall(atermpp::arg1(p));
+         core::detail::gsIsForall(atermpp::aterm_cast<const atermpp::aterm_appl>(p[0]));
 }
 
 /// \brief Returns true if the term t is an existential quantification
 inline bool is_exists(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
-         core::detail::gsIsExists(atermpp::arg1(p));
+         core::detail::gsIsExists(atermpp::aterm_cast<const atermpp::aterm_appl>(p[0]));
 }
 
 /// \brief Returns true if the term t is a set comprehension
 inline bool is_set_comprehension(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
-         core::detail::gsIsSetComp(atermpp::arg1(p));
+         core::detail::gsIsSetComp(atermpp::aterm_cast<const atermpp::aterm_appl>(p[0]));
 }
 
 /// \brief Returns true if the term t is a bag comprehension
 inline bool is_bag_comprehension(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
-         core::detail::gsIsBagComp(atermpp::arg1(p));
+         core::detail::gsIsBagComp(atermpp::aterm_cast<const atermpp::aterm_appl>(p[0]));
 }
 
 /// \brief Returns true if the term t is a set/bag comprehension.
 inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl &p)
 {
   return core::detail::gsIsBinder(p) &&
-         core::detail::gsIsUntypedSetBagComp(atermpp::arg1(p));
+         core::detail::gsIsUntypedSetBagComp(atermpp::aterm_cast<const atermpp::aterm_appl>(p[0]));
 }
 
 /// \brief Returns true if the term t is a function symbol

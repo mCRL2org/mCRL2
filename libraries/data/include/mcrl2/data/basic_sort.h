@@ -13,7 +13,6 @@
 #define MCRL2_DATA_BASIC_SORT_H
 
 #include <string>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -57,7 +56,7 @@ class basic_sort: public sort_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
     }
 };
 

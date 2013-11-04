@@ -43,7 +43,7 @@ class untyped_multi_action: public atermpp::aterm_appl
 
     const untyped_action_list& actions() const
     {
-      return atermpp::aterm_cast<const untyped_action_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const untyped_action_list>((*this)[0]);
     }
 };
 

@@ -490,13 +490,13 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   // specification cannot deal properly.
 
   // Note backwards compatibility measure: alias is no longer a sort_expression
-  atermpp::term_list< atermpp::aterm_appl >  term_sorts(atermpp::list_arg1(atermpp::arg1(term)));
-  atermpp::term_list< function_symbol >      term_constructors(atermpp::list_arg1(atermpp::arg2(term)));
-  atermpp::term_list< function_symbol >      term_mappings(atermpp::list_arg1(atermpp::arg3(term)));
-  atermpp::term_list< data_equation >        term_equations(atermpp::list_arg1(atermpp::arg4(term)));
+  atermpp::term_list<atermpp::aterm_appl> term_sorts(atermpp::aterm_cast<atermpp::aterm_appl>(term[0])[0]);
+  data::function_symbol_list              term_constructors(atermpp::aterm_cast<atermpp::aterm_appl>(term[1])[0]);
+  data::function_symbol_list              term_mappings(atermpp::aterm_cast<atermpp::aterm_appl>(term[2])[0]);
+  data::data_equation_list                term_equations(atermpp::aterm_cast<atermpp::aterm_appl>(term[3])[0]);
 
   // Store the sorts and aliases.
-  for (atermpp::term_list_iterator< atermpp::aterm_appl > i = term_sorts.begin(); i != term_sorts.end(); ++i)
+  for (auto i = term_sorts.begin(); i != term_sorts.end(); ++i)
   {
     if (data::is_alias(*i)) // Compatibility with legacy code
     {
@@ -509,19 +509,19 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   }
 
   // Store the constructors.
-  for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
+  for (auto i = term_constructors.begin(); i != term_constructors.end(); ++i)
   {
     add_constructor(*i);
   }
 
   // Store the mappings.
-  for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
+  for (auto i = term_mappings.begin(); i != term_mappings.end(); ++i)
   {
     add_mapping(*i);
   }
 
   // Store the equations.
-  for (atermpp::term_list_iterator< data_equation > i = term_equations.begin(); i != term_equations.end(); ++i)
+  for (auto i = term_equations.begin(); i != term_equations.end(); ++i)
   {
     add_equation(*i);
   }

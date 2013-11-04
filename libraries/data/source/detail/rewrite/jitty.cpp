@@ -23,7 +23,6 @@
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct_core.h"
 
 using namespace mcrl2::log;

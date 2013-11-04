@@ -23,7 +23,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"
@@ -250,9 +249,9 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       std::set<data::variable>               declared_free_variables = spec.global_variables();
       std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
       const data::variable_list& pars=spec.process().process_parameters();
-      std::set<data::variable>               process_parameters(pars.begin(),pars.end()); 
-      const action_label_list& action_labels=spec.action_labels();   
-      std::set<action_label>                 declared_action_labels(action_labels.begin(),action_labels.end()); 
+      std::set<data::variable>               process_parameters(pars.begin(),pars.end());
+      const action_label_list& action_labels=spec.action_labels();
+      std::set<action_label>                 declared_action_labels(action_labels.begin(),action_labels.end());
       std::set<action_label>                 used_action_labels      = compute_used_action_labels(spec);
       std::set<std::multiset<action_label> > used_multi_actions      = compute_used_multi_actions(spec);
 

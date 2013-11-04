@@ -15,7 +15,6 @@
 #ifdef MCRL2_USE_BOOST_EXPRESSIVE
 #include <boost/xpressive/xpressive.hpp>
 #endif
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/bool.h"
@@ -168,7 +167,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
     x = data::sort_real::int2real(value);
     if (is_function_symbol(value))
     {
-      core::identifier_string name = atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(value));
+      core::identifier_string name = atermpp::aterm_cast<core::identifier_string>(value[0]);
       if (utilities::is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_real::real_());
@@ -229,11 +228,11 @@ struct data_printer
 
 /// \brief Creates a string representation of a container.
 /// \param v A container
-/// \param message A string 
+/// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container>
 std::string print_list(const Container& v, std::string message = "", bool print_index = false)
-{ 
+{
   return core::detail::print_list(v, data::detail::data_printer(), message, print_index);
 }
 

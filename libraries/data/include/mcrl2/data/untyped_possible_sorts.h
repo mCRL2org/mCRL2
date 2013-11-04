@@ -51,7 +51,7 @@ class untyped_possible_sorts: public sort_expression
 
     const sort_expression_list& sorts() const
     {
-      return atermpp::aterm_cast<const sort_expression_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const sort_expression_list>((*this)[0]);
     }
 };
 

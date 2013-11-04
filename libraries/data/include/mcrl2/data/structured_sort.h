@@ -14,7 +14,6 @@
 
 #include <string>
 #include <iterator>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/container_utility.h"
@@ -97,7 +96,7 @@ class structured_sort: public sort_expression
 
     const structured_sort_constructor_list& constructors() const
     {
-      return atermpp::aterm_cast<const structured_sort_constructor_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const structured_sort_constructor_list>((*this)[0]);
     }
 //--- start user section structured_sort ---//
 

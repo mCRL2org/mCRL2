@@ -15,7 +15,6 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
@@ -88,7 +87,7 @@ class sort_expression: public atermpp::aterm_appl
     {
       if (is_function_sort(*this))
       {
-        return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+        return atermpp::aterm_cast<const sort_expression>((*this)[1]);
       }
       else
       {

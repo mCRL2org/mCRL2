@@ -15,7 +15,6 @@
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
 
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/identifier_string.h"
@@ -63,12 +62,12 @@ class function_sort: public sort_expression
 
     const sort_expression_list& domain() const
     {
-      return atermpp::aterm_cast<const sort_expression_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const sort_expression_list>((*this)[0]);
     }
 
     const sort_expression& codomain() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
     }
 };
 

@@ -49,12 +49,12 @@ class action: public atermpp::aterm_appl
 
     const action_label& label() const
     {
-      return atermpp::aterm_cast<const action_label>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const action_label>((*this)[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::aterm_cast<const data::data_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
     }
 };
 

@@ -53,17 +53,17 @@ class where_clause: public data_expression
 
     const data_expression& body() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[0]);
     }
 
     const assignment_expression_list& declarations() const
     {
-      return atermpp::aterm_cast<const assignment_expression_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const assignment_expression_list>((*this)[1]);
     }
 //--- start user section where_clause ---//
     const assignment_list& assignments() const
     {
-      return atermpp::aterm_cast<const assignment_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const assignment_list>((*this)[1]);
     }
 //--- end user section where_clause ---//
 };

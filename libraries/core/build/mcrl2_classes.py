@@ -416,7 +416,7 @@ class MemberFunction:
     def inline_definition(self):
         text = '''    const <RETURN_TYPE>& <NAME>() const
     {
-      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
+      return atermpp::aterm_cast<const <RETURN_TYPE>>((*this)[<ARG>]);
     }'''
         return self.expand_text(text)
 
@@ -427,7 +427,7 @@ class MemberFunction:
     def definition(self, inline = False):
         text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
     {
-      return atermpp::aterm_cast<const <RETURN_TYPE>>(atermpp::<ARG>(*this));
+      return atermpp::aterm_cast<const <RETURN_TYPE>>((*this)[<ARG>]);
     }'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -796,10 +796,7 @@ class Class:
             p = arg.rpartition(' ')
             return_type = extract_type(p[0].strip())
             name = p[2].strip()
-            arg = 'arg' + str(n)
-            # TODO: this check for a list is unsafe; the aterm grammar should be used to make it precise
-            if return_type.endswith('list'):
-                arg = 'list_' + arg
+            arg = str(n - 1)
             result.append(MemberFunction(self.classname(), return_type, name, arg))
         return result
 

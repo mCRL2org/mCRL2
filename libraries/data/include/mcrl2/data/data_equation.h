@@ -64,22 +64,22 @@ class data_equation: public atermpp::aterm_appl
 
     const variable_list& variables() const
     {
-      return atermpp::aterm_cast<const variable_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const variable_list>((*this)[0]);
     }
 
     const data_expression& condition() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[1]);
     }
 
     const data_expression& lhs() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg3(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[2]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg4(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[3]);
     }
 //--- start user section data_equation ---//
     /// \brief Constructor
@@ -125,115 +125,6 @@ inline void swap(data_equation& t1, data_equation& t2)
 }
 
 //--- end generated class data_equation ---//
-
-/*
-/// \brief data data_equation.
-///
-class data_equation: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Constructor.
-    ///
-    data_equation()
-      : atermpp::aterm_appl(core::detail::constructDataEqn())
-    {}
-
-    /// \brief Constructor
-    ///
-    /// \param[in] a An aterm adhering to the internal format.
-    data_equation(const aterm& a)
-      : atermpp::aterm_appl(a)
-    { }
-
-    /// \brief Constructor
-    ///
-    /// \param[in] variables The free variables of the data_equation.
-    /// \param[in] condition The condition of the data_equation.
-    /// \param[in] lhs The left hand side of the data_equation.
-    /// \param[in] rhs The right hand side of the data_equation.
-    template < typename Container >
-    data_equation(const Container& variables,
-                  const data_expression& condition,
-                  const data_expression& lhs,
-                  const data_expression& rhs,
-                  typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              variable_list(variables.begin(),variables.end()), condition, lhs, rhs))
-    {}
-
-    /// \brief Constructor
-    ///
-    /// \param[in] variables The free variables of the data_equation.
-    /// \param[in] lhs The left hand side of the data_equation.
-    /// \param[in] rhs The right hand side of the data_equation.
-    /// \post this is the data equation representing the input, with
-    ///       condition true
-    template < typename Container >
-    data_equation(const Container& variables,
-                  const data_expression& lhs,
-                  const data_expression& rhs,
-                  typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs))
-    {}
-
-    /// \brief Constructor
-    ///
-    /// \param[in] condition The condition of the data equation.
-    /// \param[in] lhs The left hand side of the data equation.
-    /// \param[in] rhs The right hand side of the data equation.
-    /// \post this is the data equations representing the input, without
-    ///       variables, and condition true
-    data_equation(const data_expression& condition,
-                  const data_expression& lhs,
-                  const data_expression& rhs)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              variable_list(), condition, lhs, rhs))
-    {}
-
-    /// \brief Constructor
-    ///
-    /// \param[in] lhs The left hand side of the data equation.
-    /// \param[in] rhs The right hand side of the data equation.
-    /// \post this is the data equations representing the input, without
-    ///       variables, and condition true
-    data_equation(const data_expression& lhs,
-                  const data_expression& rhs)
-      : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                              variable_list(), sort_bool::true_(), lhs, rhs))
-    {}
-
-    /// \brief Returns the variables of the data equation.
-    const variable_list &variables() const
-    {
-      return atermpp::aterm_cast<const variable_list>(atermpp::list_arg1(*this));
-    }
-
-    /// \brief Returns the condition of the data equation.
-    const data_expression &condition() const
-    {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
-    }
-
-    /// \brief Returns the left hand side of the data equation.
-    const data_expression& lhs() const
-    {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg3(*this));
-    }
-
-    /// \brief Returns the right hand side of the data equation.
-    const data_expression& rhs() const
-    {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg4(*this));
-    }
-}; // class data_equation
-
-/// \brief list of data_equations
-typedef atermpp::term_list< data_equation >    data_equation_list;
-
-/// \brief list of data_equations
-typedef std::vector< data_equation >       data_equation_vector;
-*/
 
 // template function overloads
 std::string pp(const data_equation& x);

@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_PROCESS_EQUATION_H
 #define MCRL2_PROCESS_PROCESS_EQUATION_H
 
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -52,17 +51,17 @@ class process_equation: public atermpp::aterm_appl
 
     const process_identifier& identifier() const
     {
-      return atermpp::aterm_cast<const process_identifier>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const process_identifier>((*this)[0]);
     }
 
     const data::variable_list& formal_parameters() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
     }
 
     const process_expression& expression() const
     {
-      return atermpp::aterm_cast<const process_expression>(atermpp::arg3(*this));
+      return atermpp::aterm_cast<const process_expression>((*this)[2]);
     }
 };
 

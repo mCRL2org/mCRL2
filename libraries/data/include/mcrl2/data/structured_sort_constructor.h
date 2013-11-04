@@ -14,7 +14,6 @@
 
 #include <string>
 #include <iterator>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/bool.h"
@@ -59,17 +58,17 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
     }
 
     const structured_sort_constructor_argument_list& arguments() const
     {
-      return atermpp::aterm_cast<const structured_sort_constructor_argument_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const structured_sort_constructor_argument_list>((*this)[1]);
     }
 
     const core::identifier_string& recogniser() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg3(*this));
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[2]);
     }
 //--- start user section structured_sort_constructor ---//
     friend class structured_sort;

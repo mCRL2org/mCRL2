@@ -108,7 +108,7 @@ const core::identifier_string& name(const state_formula& t)
          state_formulas::is_mu(t)  ||
          state_formulas::is_nu(t)
         );
-  return atermpp::aterm_cast<core::identifier_string>(atermpp::arg1(t));
+  return atermpp::aterm_cast<core::identifier_string>(t[0]);
 }
 
 /// \brief Returns the parameters of a variable expression

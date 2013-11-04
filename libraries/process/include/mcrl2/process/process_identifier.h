@@ -55,12 +55,12 @@ class process_identifier: public atermpp::aterm_appl
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
     }
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
     }
 };
 

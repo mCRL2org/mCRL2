@@ -26,7 +26,6 @@
 #include <cassert>
 #include <sstream>
 #include <sys/stat.h>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/basename.h"

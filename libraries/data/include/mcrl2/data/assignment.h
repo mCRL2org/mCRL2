@@ -97,12 +97,12 @@ class assignment: public assignment_expression
 
     const variable& lhs() const
     {
-      return atermpp::aterm_cast<const variable>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const variable>((*this)[0]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[1]);
     }
 //--- start user section assignment ---//
     /// \brief Applies the assignment to a variable
@@ -175,12 +175,12 @@ class untyped_identifier_assignment: public assignment_expression
 
     const core::identifier_string& lhs() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
     }
 
     const data_expression& rhs() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[1]);
     }
 //--- start user section untyped_identifier_assignment ---//
     /// \brief Applies the assignment to a variable

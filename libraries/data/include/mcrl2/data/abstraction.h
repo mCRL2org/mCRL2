@@ -56,17 +56,17 @@ class abstraction: public data_expression
 
     const binder_type& binding_operator() const
     {
-      return atermpp::aterm_cast<const binder_type>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const binder_type>((*this)[0]);
     }
 
     const variable_list& variables() const
     {
-      return atermpp::aterm_cast<const variable_list>(atermpp::list_arg2(*this));
+      return atermpp::aterm_cast<const variable_list>((*this)[1]);
     }
 
     const data_expression& body() const
     {
-      return atermpp::aterm_cast<const data_expression>(atermpp::arg3(*this));
+      return atermpp::aterm_cast<const data_expression>((*this)[2]);
     }
 };
 //--- end generated class abstraction ---//

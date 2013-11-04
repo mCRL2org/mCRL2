@@ -191,7 +191,7 @@ class not_: public action_formula
 
     const action_formula& operand() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[0]);
     }
 };
 
@@ -235,12 +235,12 @@ class and_: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[1]);
     }
 };
 
@@ -284,12 +284,12 @@ class or_: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[1]);
     }
 };
 
@@ -333,12 +333,12 @@ class imp: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[1]);
     }
 };
 
@@ -382,12 +382,12 @@ class forall: public action_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
     }
 
     const action_formula& body() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[1]);
     }
 };
 
@@ -431,12 +431,12 @@ class exists: public action_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::aterm_cast<const data::variable_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const data::variable_list>((*this)[0]);
     }
 
     const action_formula& body() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[1]);
     }
 };
 
@@ -480,12 +480,12 @@ class at: public action_formula
 
     const action_formula& operand() const
     {
-      return atermpp::aterm_cast<const action_formula>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const action_formula>((*this)[0]);
     }
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::aterm_cast<const data::data_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const data::data_expression>((*this)[1]);
     }
 };
 
@@ -529,7 +529,7 @@ class multi_action: public action_formula
 
     const lps::action_list& actions() const
     {
-      return atermpp::aterm_cast<const lps::action_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const lps::action_list>((*this)[0]);
     }
 };
 
@@ -573,7 +573,7 @@ class untyped_multi_action: public action_formula
 
     const lps::untyped_action_list& arguments() const
     {
-      return atermpp::aterm_cast<const lps::untyped_action_list>(atermpp::list_arg1(*this));
+      return atermpp::aterm_cast<const lps::untyped_action_list>((*this)[0]);
     }
 };
 

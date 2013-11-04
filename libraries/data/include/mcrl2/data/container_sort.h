@@ -14,7 +14,6 @@
 
 #include <iostream>
 
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/container_type.h"
@@ -51,12 +50,12 @@ class container_sort: public sort_expression
 
     const container_type& container_name() const
     {
-      return atermpp::aterm_cast<const container_type>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const container_type>((*this)[0]);
     }
 
     const sort_expression& element_sort() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
     }
 };
 

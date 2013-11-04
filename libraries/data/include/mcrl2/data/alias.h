@@ -13,7 +13,6 @@
 #define MCRL2_DATA_ALIAS_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/basic_sort.h"
 
@@ -48,12 +47,12 @@ class alias: public atermpp::aterm_appl
 
     const basic_sort& name() const
     {
-      return atermpp::aterm_cast<const basic_sort>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const basic_sort>((*this)[0]);
     }
 
     const sort_expression& reference() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
     }
 };
 

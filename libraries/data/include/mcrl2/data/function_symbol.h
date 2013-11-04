@@ -59,12 +59,12 @@ class function_symbol: public data_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
     }
 
     const sort_expression& sort() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
     }
 };
 
@@ -129,12 +129,12 @@ class function_symbol: public data_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::aterm_cast<const core::identifier_string>(atermpp::arg1(*this));
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
     }
 
     const sort_expression& sort() const
     {
-      return atermpp::aterm_cast<const sort_expression>(atermpp::arg2(*this));
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
     }
 };
 

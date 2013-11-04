@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <iterator>
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"

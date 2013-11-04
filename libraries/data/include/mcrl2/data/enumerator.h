@@ -15,7 +15,6 @@
 #include <functional>
 #include <utility>
 #include <boost/shared_ptr.hpp>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/utilities/sequence.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"

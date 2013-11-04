@@ -24,7 +24,6 @@
 #include <boost/bind.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"

@@ -38,16 +38,14 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
 
     data_expression operator()(const abstraction& x)
     {
-      //variable_list bound_variables = atermpp::convert<variable_list>((*this)(x.variables()));
       variable_list bound_variables = x.variables();
 
-      if (atermpp::function_symbol(atermpp::arg1(x).function()).name() == "SetComp")
+      if (is_set_comprehension(x))
       {
-        //sort_expression element_sort((*this)(x.variables().begin()->sort()));
         sort_expression element_sort(x.variables().begin()->sort());
         return sort_set::constructor(element_sort, lambda(bound_variables, static_cast<Derived&>(*this)(x.body())),sort_fset::empty(element_sort));
       }
-      else if (atermpp::function_symbol(atermpp::arg1(x).function()).name() == "BagComp")
+      else if (is_bag_comprehension(x))
       {
         sort_expression element_sort(x.variables().begin()->sort());
 
@@ -77,7 +75,7 @@ class translate_user_notation_builder: public data_expression_builder<Derived>
       {
         function_symbol head(x.head());
 
-        if (head.name() == sort_list::list_enumeration_name()) 
+        if (head.name() == sort_list::list_enumeration_name())
         {
           // convert to snoc list
           sort_expression element_sort(*function_sort(head.sort()).domain().begin());
