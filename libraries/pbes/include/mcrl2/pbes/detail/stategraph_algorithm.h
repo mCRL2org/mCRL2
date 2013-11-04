@@ -14,8 +14,10 @@
 
 #include <sstream>
 #include <boost/bind.hpp>
+#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
+#include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
@@ -155,7 +157,7 @@ class stategraph_algorithm
     // the vertices of the control flow graph
     std::vector<control_flow_graph_vertex> m_control_flow_graph_vertices;
 
-    // the connected components in the control flow graph
+    // the connected components in the control flow graph; a component contains the indices in the vector m_control_flow_graph_vertices
     std::vector<std::set<std::size_t> > m_connected_components;
 
     // the control flow graph(s)
@@ -926,6 +928,83 @@ class stategraph_algorithm
       return out.str();
     }
 
+    /// \brief Computes the values that the CFPs in component can attain.
+    std::set<data::data_expression> compute_values(const std::set<std::size_t>& component)
+    {
+      std::set<data::data_expression> result;
+
+      // search for a node that corresponds to a variable in the init of the PBES
+      const propositional_variable_instantiation& init = m_pbes.initial_state();
+      const core::identifier_string& X = init.name();
+      const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+      std::size_t N = eq_X.parameters().size();
+      auto j =  m_control_flow_graph_vertices.end(); // the node that corresponds to a variable in the init of the PBES
+      for (std::size_t n = 0; n < N; n++)
+      {
+        j = find_vertex(X, n);
+        if (j != m_control_flow_graph_vertices.end())
+        {
+          result.insert(nth_element(init.parameters(), n));
+          break;
+        }
+      }
+
+      if (j != m_control_flow_graph_vertices.end())
+      {
+        // source(X, i, k) = v
+        for (auto p = component.begin(); p != component.end(); ++p)
+        {
+          const control_flow_graph_vertex& u = m_control_flow_graph_vertices[*p];
+          const core::identifier_string& X = u.name();
+          std::size_t k = u.index();
+          const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+          const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+          for (auto i = predvars.begin(); i != predvars.end(); ++i)
+          {
+            auto q = i->source.find(k);
+            if (q != i->source.end())
+            {
+              const data::data_expression& v = q->second;
+              result.insert(v);
+            }
+          }
+        }
+
+        // dest(X, i, k) = v
+        for (auto p = component.begin(); p != component.end(); ++p)
+        {
+          const control_flow_graph_vertex& u = m_control_flow_graph_vertices[*p];
+          const core::identifier_string& Y = u.name();
+          std::size_t k = u.index();
+          const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+          const std::vector<predicate_variable>& predvars = eq_Y.predicate_variables();
+          for (auto i = predvars.begin(); i != predvars.end(); ++i)
+          {
+            if (i->X.name() != Y)
+            {
+              continue;
+            }
+            auto q = i->dest.find(k);
+            if (q != i->dest.end())
+            {
+              const data::data_expression& v = q->second;
+              result.insert(v);
+            }
+          }
+        }
+      }
+      return result;
+    }
+
+    void compute_values()
+    {
+      for (auto i = m_connected_components.begin(); i != m_connected_components.end(); ++i)
+      {
+        std::set<data::data_expression> values = compute_values(*i);
+        mCRL2log(log::debug, "stategraph") << print_connected_component(*i) << " values = " << data::detail::print_set(values) << std::endl;
+      }
+    }
+
     /// \brief Computes the control flow graph
     void run()
     {
@@ -935,7 +1014,7 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
-      compute_control_flow_graphs();
+      compute_values();
     }
 
     const stategraph_pbes& get_pbes() const
