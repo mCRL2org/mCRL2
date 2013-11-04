@@ -338,8 +338,8 @@ RegFrm
   : ActFrm                                     $left 20          // Action formula
   | '(' RegFrm ')'                             $left 21          // Brackets
   | 'nil'                                                        // Empty regular formula
-  | RegFrm ('.' $binary_op_right 1) RegFrm                       // Sequential composition
-  | RegFrm ('+' $binary_op_left 2) RegFrm                        // Alternative composition
+  | RegFrm ('+' $binary_op_left 1) RegFrm                        // Alternative composition
+  | RegFrm ('.' $binary_op_right 2) RegFrm                       // Sequential composition
   | RegFrm '*'                                 $unary_right  3   // Iteration
   | RegFrm '+'                                 $unary_right  3   // Non-empty iteration
   ;
