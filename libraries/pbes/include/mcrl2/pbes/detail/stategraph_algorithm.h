@@ -27,40 +27,46 @@ namespace detail {
 class control_flow_graph_vertex
 {
   protected:
-    core::identifier_string name_;
-    std::size_t index_;
-    std::set<control_flow_graph_vertex*> neighbors_;
+    core::identifier_string m_name;
+    std::size_t m_index;
+    data::variable m_variable;
+    std::set<control_flow_graph_vertex*> m_neighbors;
 
   public:
-    control_flow_graph_vertex(const core::identifier_string& name, std::size_t index)
-      : name_(name), index_(index)
+    control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable)
+      : m_name(name), m_index(index), m_variable(variable)
     {}
 
     const core::identifier_string& name() const
     {
-      return name_;
+      return m_name;
     }
 
     std::size_t index() const
     {
-      return index_;
+      return m_index;
+    }
+
+    const data::variable& variable() const
+    {
+      return m_variable;
     }
 
     const std::set<control_flow_graph_vertex*>& neighbors() const
     {
-      return neighbors_;
+      return m_neighbors;
     }
 
     std::set<control_flow_graph_vertex*>& neighbors()
     {
-      return neighbors_;
+      return m_neighbors;
     }
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const control_flow_graph_vertex& u)
 {
-  return out << '(' << u.name() << ", " << u.index() << ')';
+  return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << ')';
 }
 
 /// \brief Algorithm class for the computation of the stategraph graph
@@ -191,7 +197,7 @@ class stategraph_algorithm
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<data::variable>& dX = k->parameters();
         const std::vector<bool>& cf = m_is_control_flow[X.name()];
 
         out << core::pp(X.name()) << " ";
@@ -199,7 +205,7 @@ class stategraph_algorithm
         {
           if (cf[i])
           {
-            out << data::pp(d_X[i]) << " ";
+            out << data::pp(dX[i]) << " ";
           }
         }
         out << std::endl;
@@ -260,7 +266,7 @@ class stategraph_algorithm
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<data::variable>& dX = k->parameters();
         const std::vector<bool>& cf = m_is_LCFP[X.name()];
 
         out << core::pp(X.name()) << " ";
@@ -268,7 +274,7 @@ class stategraph_algorithm
         {
           if (cf[i])
           {
-            out << data::pp(d_X[i]) << " ";
+            out << data::pp(dX[i]) << " ";
           }
         }
         out << std::endl;
@@ -313,21 +319,21 @@ class stategraph_algorithm
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& d_X = k->parameters();
-        m_is_LCFP[X] = std::vector<bool>(d_X.size(), true);
+        const std::vector<data::variable>& dX = k->parameters();
+        m_is_LCFP[X] = std::vector<bool>(dX.size(), true);
       }
 
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
-        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<data::variable>& dX = k->parameters();
         const std::vector<predicate_variable>& predvars = k->predicate_variables();
         for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
           const predicate_variable& PVI_X_i = *i;
           if (PVI_X_i.X.name() == X)
           {
-            for (std::size_t n = 0; n < d_X.size(); n++)
+            for (std::size_t n = 0; n < dX.size(); n++)
             {
               if (m_use_alternative_lcfp_criterion)
               {
@@ -376,7 +382,7 @@ class stategraph_algorithm
       for (std::vector<stategraph_equation>::const_iterator k = equations.begin(); k != equations.end(); ++k)
       {
         propositional_variable X = k->variable();
-        const std::vector<data::variable>& d_X = k->parameters();
+        const std::vector<data::variable>& dX = k->parameters();
         const std::vector<bool>& cf = m_is_GCFP[X.name()];
 
         out << core::pp(X.name()) << " ";
@@ -384,7 +390,7 @@ class stategraph_algorithm
         {
           if (cf[i])
           {
-            out << data::pp(d_X[i]) << " ";
+            out << data::pp(dX[i]) << " ";
           }
         }
         out << std::endl;
@@ -441,8 +447,8 @@ class stategraph_algorithm
           {
             const core::identifier_string& X = k->variable().name();
             const std::vector<predicate_variable>& predvars = k->predicate_variables();
-            const std::vector<data::variable>& d_X = k->parameters();
-            std::size_t M = d_X.size();
+            const std::vector<data::variable>& dX = k->parameters();
+            std::size_t M = dX.size();
 
             for (auto i = predvars.begin(); i != predvars.end(); ++i)
             {
@@ -459,7 +465,7 @@ class stategraph_algorithm
                 std::set<data::variable> V = data::find_free_variables(*ei);
                 for (std::size_t m = 0; m < M; m++)
                 {
-                  if (m_is_GCFP[X][m] && !m_is_GCFP[Y][n] && (V.find(d_X[m]) != V.end()))
+                  if (m_is_GCFP[X][m] && !m_is_GCFP[Y][n] && (V.find(dX[m]) != V.end()))
                   {
                     m_is_GCFP[X][m] = false;
                     changed = true;
@@ -535,11 +541,12 @@ class stategraph_algorithm
       for (auto k = equations.begin(); k != equations.end(); ++k)
       {
         const core::identifier_string& X = k->variable().name();
-        for (std::size_t n = 0; n < k->variable().parameters().size(); n++)
+        const std::vector<data::variable>& dX = k->parameters();
+        for (std::size_t n = 0; n < dX.size(); n++)
         {
           if (is_global_control_flow_parameter(X, n))
           {
-            m_control_flow_graph_vertices.push_back(control_flow_graph_vertex(X, n));
+            m_control_flow_graph_vertices.push_back(control_flow_graph_vertex(X, n, dX[n]));
           }
         }
       }
@@ -772,8 +779,8 @@ class stategraph_algorithm
     {
       std::vector<std::size_t> result;
       const stategraph_equation& eqn = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& d_X = eqn.parameters();
-      for (std::size_t k = 0; k < d_X.size(); k++)
+      const std::vector<data::variable>& dX = eqn.parameters();
+      for (std::size_t k = 0; k < dX.size(); k++)
       {
         if (is_control_flow_parameter(X, k))
         {
@@ -787,8 +794,8 @@ class stategraph_algorithm
     {
       std::vector<std::size_t> result;
       const stategraph_equation& eqn = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& d_X = eqn.parameters();
-      for (std::size_t k = 0; k < d_X.size(); k++)
+      const std::vector<data::variable>& dX = eqn.parameters();
+      for (std::size_t k = 0; k < dX.size(); k++)
       {
         if (!is_control_flow_parameter(X, k))
         {
@@ -810,11 +817,11 @@ class stategraph_algorithm
     propositional_variable_instantiation project(const propositional_variable_instantiation& x) const
     {
       core::identifier_string X = x.name();
-      data::data_expression_list d_X = x.parameters();
+      data::data_expression_list dX = x.parameters();
       const std::vector<bool>& b = stategraph_values(X);
       std::size_t index = 0;
       std::vector<data::data_expression> d;
-      for (data::data_expression_list::iterator i = d_X.begin(); i != d_X.end(); ++i, index++)
+      for (data::data_expression_list::iterator i = dX.begin(); i != dX.end(); ++i, index++)
       {
         assert(index < b.size());
         if (b[index])
@@ -829,11 +836,11 @@ class stategraph_algorithm
     propositional_variable project_variable(const propositional_variable& x) const
     {
       core::identifier_string X = x.name();
-      data::variable_list d_X = x.parameters();
+      data::variable_list dX = x.parameters();
       const std::vector<bool>& b = stategraph_values(X);
       std::size_t index = 0;
       std::vector<data::variable> d;
-      for (data::variable_list::iterator i = d_X.begin(); i != d_X.end(); ++i, index++)
+      for (data::variable_list::iterator i = dX.begin(); i != dX.end(); ++i, index++)
       {
         if (b[index])
         {
@@ -849,12 +856,12 @@ class stategraph_algorithm
       propositional_variable_instantiation X_init = m_pbes.initial_state();
       const core::identifier_string& X = X_init.name();
       const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-      const std::vector<data::variable>& d_X = eq_X.parameters();
+      const std::vector<data::variable>& dX = eq_X.parameters();
       std::vector<std::size_t> CFP = control_flow_parameter_indices(X);
       for (std::size_t i = 0; i < CFP.size(); i++)
       {
         std::size_t p = CFP[i];
-        mCRL2log(log::debug, "stategraph") << "--- graph for control flow parameter " << data::pp(d_X[p]) << " ---" << std::endl;
+        mCRL2log(log::debug, "stategraph") << "--- graph for control flow parameter " << data::pp(dX[p]) << " ---" << std::endl;
         // mCRL2log(log::debug, "stategraph") << m_control_flow_graphs[i].print(print_map(X, p)) << std::endl;
       }
     }
