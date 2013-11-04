@@ -55,6 +55,12 @@ class exists: public abstraction
 
 }; // class exists
 
+/// \brief swap overload
+inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
+
 } // namespace data
 
 } // namespace mcrl2

@@ -78,7 +78,19 @@ class deadlock
       return !(*this == other);
     }
 
+    /// \brief Swaps the contents
+    void swap(deadlock& other)
+    {
+      using std::swap;
+      swap(m_time, other.m_time);
+    }
 };
+
+/// \brief swap overload
+inline void swap(deadlock& t1, deadlock& t2)
+{
+  t1.swap(t2);
+}
 
 // template function overloads
 std::set<data::variable> find_all_variables(const lps::deadlock& x);

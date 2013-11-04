@@ -53,6 +53,12 @@ class set_comprehension: public abstraction
 
 }; // class set_comprehension
 
+/// \brief swap overload
+inline void swap(set_comprehension& t1, set_comprehension& t2)
+{
+  t1.swap(t2);
+}
+
 } // namespace data
 
 } // namespace mcrl2

@@ -94,7 +94,7 @@ class pbes_equation
 
     /// \brief Constructor.
     /// \param t A term
-    pbes_equation(atermpp::aterm_appl t)
+    pbes_equation(const atermpp::aterm_appl& t)
     {
       assert(core::detail::check_rule_PBEqn(t));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -105,7 +105,7 @@ class pbes_equation
 
     /// \brief Constructor.
     /// \param t1 A term
-    explicit pbes_equation(const atermpp::aterm & t1)
+    explicit pbes_equation(const atermpp::aterm& t1)
     {
       atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_PBEqn(t));
@@ -176,6 +176,15 @@ class pbes_equation
     {
       return !detail::has_propositional_variables(formula());
     }
+
+    /// \brief Swaps the contents
+    void swap(pbes_equation& other)
+    {
+      using std::swap;
+      swap(m_symbol, other.m_symbol);
+      swap(m_variable, other.m_variable);
+      swap(m_formula, other.m_formula);
+    }
 };
 
 inline bool
@@ -200,8 +209,14 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
   return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
-/// \brief vector of process equations
+/// \brief vector of PBES equations
 typedef std::vector<pbes_equation> pbes_equation_vector;
+
+/// \brief swap overload
+inline void swap(pbes_equation& t1, pbes_equation& t2)
+{
+  t1.swap(t2);
+}
 
 // template function overloads
 std::string pp(const pbes_equation& x);

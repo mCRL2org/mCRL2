@@ -142,7 +142,21 @@ class multi_action
     {
       return m_actions < other.m_actions || (m_actions == other.m_actions && m_time < other.m_time);
     }
+
+    /// \brief Swaps the contents
+    void swap(multi_action& other)
+    {
+      using std::swap;
+      swap(m_actions, other.m_actions);
+      swap(m_time, other.m_time);
+    }
 };
+
+/// \brief swap overload
+inline void swap(multi_action& t1, multi_action& t2)
+{
+  t1.swap(t2);
+}
 
 /// \brief Returns true if the term t is a multi action
 inline

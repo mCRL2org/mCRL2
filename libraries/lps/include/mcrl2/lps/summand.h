@@ -85,6 +85,13 @@ class summand_base
       return m_condition;
     }
 
+    /// \brief Swaps the contents
+    void swap(summand_base& other)
+    {
+      using std::swap;
+      swap(m_summation_variables, other.m_summation_variables);
+      swap(m_condition, other.m_condition);
+    }
 };
 
 /// \brief LPS summand containing a deadlock.
@@ -127,10 +134,24 @@ class deadlock_summand: public summand_base
     {
       return m_deadlock;
     }
+
+    /// \brief Swaps the contents
+    void swap(deadlock_summand& other)
+    {
+      summand_base::swap(other);
+      using std::swap;
+      swap(m_deadlock, other.m_deadlock);
+    }
 };
 
 /// \brief Vector of deadlock summands
 typedef std::vector<deadlock_summand> deadlock_summand_vector;
+
+/// \brief swap overload
+inline void swap(deadlock_summand& t1, deadlock_summand& t2)
+{
+  t1.swap(t2);
+}
 
 /// \brief Conversion to atermappl.
 /// \return The deadlock summand converted to aterm format.
@@ -226,6 +247,14 @@ class action_summand: public summand_base
       return data::replace_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
 
+    /// \brief Swaps the contents
+    void swap(action_summand& other)
+    {
+      summand_base::swap(other);
+      using std::swap;
+      swap(m_multi_action, other.m_multi_action);
+      swap(m_assignments, other.m_assignments);
+    }
 };
 
 /// \brief Comparison operator for action summands.
@@ -255,6 +284,12 @@ inline
 bool operator==(const action_summand& x, const action_summand& y)
 {
   return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
+}
+
+/// \brief swap overload
+inline void swap(action_summand& t1, action_summand& t2)
+{
+  t1.swap(t2);
 }
 
 /// \brief Conversion to atermAppl.

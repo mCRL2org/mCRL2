@@ -66,6 +66,12 @@ class lambda: public abstraction
 
 }; // class lambda
 
+/// \brief swap overload
+inline void swap(lambda& t1, lambda& t2)
+{
+  t1.swap(t2);
+}
+
 } // namespace data
 
 } // namespace mcrl2

@@ -53,6 +53,12 @@ class bag_comprehension: public abstraction
 
 }; // class bag_comprehension
 
+/// \brief swap overload
+inline void swap(bag_comprehension& t1, bag_comprehension& t2)
+{
+  t1.swap(t2);
+}
+
 } // namespace data
 
 } // namespace mcrl2

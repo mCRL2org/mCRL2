@@ -137,8 +137,27 @@ class boolean_equation
     {
       return m_formula;
     }
+
+    /// \brief Swaps the contents
+    void swap(boolean_equation& other)
+    {
+      using std::swap;
+      swap(m_symbol, other.m_symbol);
+      swap(m_variable, other.m_variable);
+      swap(m_formula, other.m_formula);
+    }
 };
 
+/// \brief vector of boolean equations
+typedef std::vector<boolean_equation> boolean_equation_vector;
+
+/// \brief swap overload
+inline void swap(boolean_equation& t1, boolean_equation& t2)
+{
+  t1.swap(t2);
+}
+
+/// \brief equality operator
 inline bool
 operator==(const boolean_equation& x, const boolean_equation& y)
 {
@@ -147,12 +166,14 @@ operator==(const boolean_equation& x, const boolean_equation& y)
          x.formula() == y.formula();
 }
 
+/// \brief inequality operator
 inline bool
 operator!=(const boolean_equation& x, const boolean_equation& y)
 {
   return !(x == y);
 }
 
+/// \brief less operator
 inline bool
 operator<(const boolean_equation& x, const boolean_equation& y)
 {

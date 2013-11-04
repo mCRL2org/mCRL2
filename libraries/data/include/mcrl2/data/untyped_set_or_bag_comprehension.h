@@ -53,6 +53,12 @@ class untyped_set_or_bag_comprehension: public abstraction
 
 }; // class untyped_set_or_bag_comprehension
 
+/// \brief swap overload
+inline void swap(untyped_set_or_bag_comprehension& t1, untyped_set_or_bag_comprehension& t2)
+{
+  t1.swap(t2);
+}
+
 } // namespace data
 
 } // namespace mcrl2

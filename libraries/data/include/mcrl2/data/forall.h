@@ -55,6 +55,12 @@ class forall: public abstraction
 
 }; // class forall
 
+/// \brief swap overload
+inline void swap(forall& t1, forall& t2)
+{
+  t1.swap(t2);
+}
+
 } // namespace data
 
 } // namespace mcrl2
