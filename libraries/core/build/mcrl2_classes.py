@@ -80,12 +80,12 @@ untyped_identifier(const core::identifier_string& name)                         
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
 abstraction()                                                                                 : public data::data_expression | XES | None | Abstraction
-forall(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Universal quantification
-exists(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Existential quantification
-lambda(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | E   | None | Lambda abstraction
-set_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | E   | None | Set comprehension
-bag_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | E   | None | Bag comprehension
-untyped_set_or_bag_comprehension(const variable_list& variables, const data_expression& body) : public data::abstraction     | E   | None | Untyped Set/Bag comprehension
+forall(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | ES  | None | Universal quantification
+exists(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | ES  | None | Existential quantification
+lambda(const variable_list& variables, const data_expression& body)                           : public data::abstraction     | ES  | None | Lambda abstraction
+set_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | ES  | None | Set comprehension
+bag_comprehension(const variable_list& variables, const data_expression& body)                : public data::abstraction     | ES  | None | Bag comprehension
+untyped_set_or_bag_comprehension(const variable_list& variables, const data_expression& body) : public data::abstraction     | ES  | None | Untyped Set/Bag comprehension
 '''
 
 DATA_CLASSES = r'''
