@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <map>
+#include <stack>
 #include <stdexcept>
 
 #include "mcrl2/utilities/logger.h"
@@ -21,6 +22,9 @@
 namespace mcrl2 {
 
 namespace data {
+
+// prototype declaration
+template <typename T> std::string pp(const T&);
 
 //--- very naive implementation of index mapping for variables ---//
 template <typename Variable>
