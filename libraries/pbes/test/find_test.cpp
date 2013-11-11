@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes_solve_test.cpp
+/// \file find_test.cpp
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>

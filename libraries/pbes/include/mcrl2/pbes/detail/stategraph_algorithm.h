@@ -26,16 +26,15 @@ namespace pbes_system {
 
 namespace detail {
 
-class control_flow_graph_vertex
+class control_flow_graph_vertex_base
 {
   protected:
     core::identifier_string m_name;
     std::size_t m_index;
     data::variable m_variable;
-    std::set<control_flow_graph_vertex*> m_neighbors;
 
   public:
-    control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable)
+    control_flow_graph_vertex_base(const core::identifier_string& name, std::size_t index, const data::variable& variable)
       : m_name(name), m_index(index), m_variable(variable)
     {}
 
@@ -53,6 +52,23 @@ class control_flow_graph_vertex
     {
       return m_variable;
     }
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const control_flow_graph_vertex_base& u)
+{
+  return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << ')';
+}
+
+class control_flow_graph_vertex: public control_flow_graph_vertex_base
+{
+  protected:
+    std::set<control_flow_graph_vertex*> m_neighbors;
+
+  public:
+    control_flow_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable)
+      : control_flow_graph_vertex_base(name, index, variable)
+    {}
 
     const std::set<control_flow_graph_vertex*>& neighbors() const
     {
@@ -65,11 +81,52 @@ class control_flow_graph_vertex
     }
 };
 
-inline
-std::ostream& operator<<(std::ostream& out, const control_flow_graph_vertex& u)
+class value_graph_vertex: public control_flow_graph_vertex_base
 {
-  return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << ')';
-}
+  protected:
+    data::data_expression m_value;
+    std::set<value_graph_vertex*> m_neighbors;
+
+    const data::variable& undefined_variable()
+    {
+      static data::variable v("@undefined", data::sort_expression());
+      return v;
+    }
+
+    std::size_t undefined_index()
+    {
+      return std::size_t(-1);
+    }
+
+  public:
+    value_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
+      : control_flow_graph_vertex_base(name, index, variable), m_value(value)
+    {}
+
+    value_graph_vertex(const core::identifier_string& name, const data::data_expression& value)
+      : control_flow_graph_vertex_base(name, undefined_index(), undefined_variable()), m_value(value)
+    {}
+
+    bool has_variable()
+    {
+      return m_index != undefined_index();
+    }
+
+    const data::data_expression& value() const
+    {
+      return m_value;
+    }
+
+    const std::set<value_graph_vertex*>& neighbors() const
+    {
+      return m_neighbors;
+    }
+
+    std::set<value_graph_vertex*>& neighbors()
+    {
+      return m_neighbors;
+    }
+};
 
 /// \brief Algorithm class for the computation of the stategraph graph
 class stategraph_algorithm
@@ -1002,6 +1059,18 @@ class stategraph_algorithm
       {
         std::set<data::data_expression> values = compute_values(*i);
         mCRL2log(log::debug, "stategraph") << print_connected_component(*i) << " values = " << data::detail::print_set(values) << std::endl;
+      }
+    }
+
+    void compute_value_graph(const std::set<std::size_t>& component)
+    {
+    }
+
+    void compute_value_graphs()
+    {
+      for (auto i = m_connected_components.begin(); i != m_connected_components.end(); ++i)
+      {
+        compute_value_graph(*i);
       }
     }
 

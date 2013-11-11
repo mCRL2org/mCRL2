@@ -20,8 +20,6 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
-#include "mcrl2/pbes/pbespgsolve.h"
-
 
 using namespace mcrl2;
 using namespace mcrl2::data;
