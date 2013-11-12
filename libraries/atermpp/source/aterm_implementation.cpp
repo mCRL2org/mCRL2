@@ -63,8 +63,8 @@ static const size_t INITIAL_TERM_TABLE_SIZE = 1<<17;  // Must be a power of 2.
 static const size_t INITIAL_MAX_TERM_SIZE = 16;
 
 size_t aterm_table_size=INITIAL_TERM_TABLE_SIZE;
-size_t aterm_table_mask=INITIAL_TERM_TABLE_SIZE-1;           
-const _aterm* * aterm_hashtable;  
+size_t aterm_table_mask=INITIAL_TERM_TABLE_SIZE-1;
+const _aterm* * aterm_hashtable;
 
 aterm static_undefined_aterm;
 aterm static_empty_aterm_list(aterm_appl(detail::function_adm.AS_EMPTY_LIST));
@@ -76,7 +76,6 @@ TermInfo *terminfo;
 
 size_t total_nodes = 0;
 
-inline
 void call_creation_hook(const detail::_aterm* term)
 {
   const function_symbol& sym = term->function();
@@ -89,7 +88,6 @@ void call_creation_hook(const detail::_aterm* term)
   }
 }
 
-inline
 void call_deletion_hook(const detail::_aterm* term)
 {
   const function_symbol& sym = term->function();
@@ -102,7 +100,7 @@ void call_deletion_hook(const detail::_aterm* term)
   }
 }
 
-void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed) 
+void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed)
 {
   assert(t->reference_count()==0);
 
@@ -127,10 +125,10 @@ void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_r
       {
         remove_from_hashtable(a.m_term);
         a.m_term->set_next(terms_to_be_removed);
-        terms_to_be_removed=a.m_term; 
-      } 
+        terms_to_be_removed=a.m_term;
+      }
     }
-  } 
+  }
 
   f.~function_symbol();
 }
@@ -165,22 +163,22 @@ void resize_aterm_hashtable()
   }
   const size_t old_size=aterm_table_size;
   aterm_table_size <<=1; // Double the size.
-  // Intentionally do not throw the old hashtable away before allocating the new one. 
+  // Intentionally do not throw the old hashtable away before allocating the new one.
   // It is better when the extra memory is used for blocks of aterms, than for increasing the
-  // hashtable. 
+  // hashtable.
   const _aterm* * new_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
-  
+
   if (new_hashtable==NULL)
   {
-    resizing_aterm_hashtable_has_failed=true; 
-    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to size " << aterm_table_size << ". "; 
+    resizing_aterm_hashtable_has_failed=true;
+    mCRL2log(mcrl2::log::warning) << "could not resize hashtable to size " << aterm_table_size << ". ";
     aterm_table_size = old_size;
     return;
   }
   aterm_table_mask = aterm_table_size-1;
-  
+
   /*  Rehash all old elements */
-  for (size_t p=0; p<old_size; ++p) 
+  for (size_t p=0; p<old_size; ++p)
   {
     const _aterm* aterm_walker=aterm_hashtable[p];
 
@@ -201,10 +199,10 @@ void resize_aterm_hashtable()
 
 void collect_terms_with_reference_count_0()
 {
-  // This function puts all with reference count==0 in the freelist, in the reverse order as 
+  // This function puts all with reference count==0 in the freelist, in the reverse order as
   // the sequence of blocks.
-  
-  
+
+
   // First put all terms with reference count 0 in the freelist.
   for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
@@ -225,7 +223,7 @@ void collect_terms_with_reference_count_0()
   }
 
   // Reconstruct the freelists for all terms, freeing empty blocks.
-  size_t number_of_blocks=0; 
+  size_t number_of_blocks=0;
   for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
     TermInfo &ti=terminfo[size];
@@ -251,9 +249,9 @@ void collect_terms_with_reference_count_0()
         }
       }
 
-      if (block_is_empty_up_till_now)  
+      if (block_is_empty_up_till_now)
       {
-        ti.at_freelist=freelist_of_previous_block;  
+        ti.at_freelist=freelist_of_previous_block;
         if (previous_block==NULL)
         {
           ti.at_block=next_block;
@@ -272,7 +270,7 @@ void collect_terms_with_reference_count_0()
       b=next_block;
     }
   }
-  garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/(sizeof(size_t)*16)); 
+  garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/(sizeof(size_t)*16));
 }
 
 
@@ -306,22 +304,22 @@ static void check_that_all_objects_are_free()
           std::cerr << "Func: " << p1->function().name() << ". Arity: " << p1->function().arity() << ".\n";
           result=false;
         }
-        
+
       }
     }
   }
 
   // Check the function symbols. The first four function symbols
   // can be constructed twice in the same spot (function_symbol_constants.h)
-  // and only destroyed once and therefore their reference counts can be 1 at 
+  // and only destroyed once and therefore their reference counts can be 1 at
   // termination. The function symbols with number 0 and 3 even can have reference
   // count 2, because the terms containing may still exist as they are also constructed
   // in a nonderministic fashion using a placement new. So, they can be constructed
   // without properly being destroyed, increasing the reference count of the function
   // symbols in it by 1.
-  for(size_t i=0; i<function_symbol_index_table_number_of_elements; ++i) 
+  for(size_t i=0; i<function_symbol_index_table_number_of_elements; ++i)
   {
-    for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j) 
+    for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j)
     {
       if (!(function_symbol_index_table[i][j].reference_count==0 ||
             (i==0 && function_symbol_index_table[i][j].reference_count<=2) || //AS_DEFAULT
@@ -335,7 +333,7 @@ static void check_that_all_objects_are_free()
       }
       if (function_symbol_index_table[i][j].number!=i+j*FUNCTION_SYMBOL_BLOCK_SIZE)
       {
-        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has incorrect index " << i << 
+        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has incorrect index " << i <<
                           ". This should be " << i+j*FUNCTION_SYMBOL_BLOCK_SIZE << ".\n";
         result=false;
       }
@@ -373,15 +371,15 @@ void initialise_aterm_administration()
   }
 
   new (&detail::static_undefined_aterm) aterm(detail::term_appl0(detail::function_adm.AS_DEFAULT)); // Use placement new as static_undefined_aterm
-                                                                                // may not have initialised when this is called, 
+                                                                                // may not have initialised when this is called,
                                                                                 // causing a problem with reference counting.
-    
+
   new (&detail::static_empty_aterm_list) aterm(detail::term_appl0(detail::function_adm.AS_EMPTY_LIST)); // Use placement new as static_empty_atermlist
-                                                                                 // may not have initialised when this is called, 
+                                                                                 // may not have initialised when this is called,
                                                                                  // causing a problem with reference counting.
-  
+
 // Check at exit that all function symbols and terms have been cleaned up properly.
-// TODO: on windows it turns out that the reference counts do not reduce to 0. 
+// TODO: on windows it turns out that the reference counts do not reduce to 0.
 //       The reason for it is unclear. It could either be due to an unforeseen sequence
 //       of destroying static and global variables, in relation to the execution of the
 //       exit function defined below. Or it could be that on windows global variables
@@ -389,7 +387,7 @@ void initialise_aterm_administration()
 #if !(defined(_WIN32) || defined(_WIN64))
   assert(!atexit(check_that_all_objects_are_free)); // zero is returned when registering is successful.
 #endif
-  
+
 }
 
 /* allocate a block of memory to contain terms consisting of `size' objects
@@ -413,7 +411,7 @@ void allocate_block(const size_t size)
   newblock->end = newblock->data + number_of_terms_in_data_block*size;
 
   // Put new terms in the block in the freelist.
-  
+
   for(size_t *p=newblock->data; p<newblock->end; p=p+size)
   {
     _aterm* p1=reinterpret_cast<_aterm*>(p);
