@@ -135,7 +135,7 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
         assert(sort_list::is_list(s));
         const sort_expression s1=container_sort(s).element_sort();
 
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           strict_type_check(*i);
           assert(i->sort()==s1);
@@ -149,7 +149,7 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
         assert(sort_fset::is_fset(s));
         const sort_expression s1=container_sort(s).element_sort();
 
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           strict_type_check(*i);
           assert(i->sort()==s1);
@@ -163,7 +163,7 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
         assert(sort_fbag::is_fbag(s));
         const sort_expression s1=container_sort(s).element_sort();
 
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           strict_type_check(*i);
           assert(i->sort()==s1);
@@ -3121,7 +3121,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         //First time to determine the common type only!
         data_expression_list NewArguments;
         bool Type_is_stable=true;
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           data_expression Argument= *i;
           sort_expression Type0;
@@ -3145,7 +3145,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         if (!Type_is_stable)
         {
           NewArguments=data_expression_list();
-          for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+          for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
           {
             data_expression Argument= *i;
             sort_expression Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
@@ -3169,7 +3169,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         //First time to determine the common type only (which will be NewType)!
         bool NewTypeDefined=false;
         sort_expression NewType;
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           data_expression Argument= *i;
           sort_expression Type0;
@@ -3208,7 +3208,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
         //Second time to do the real work.
         data_expression_list NewArguments;
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           data_expression Argument= *i;
           sort_expression Type0;
@@ -3244,7 +3244,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         //First time to determine the common type only!
         sort_expression NewType;
         bool NewTypeDefined=false;
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           data_expression Argument0= *i;
           ++i;
@@ -3299,7 +3299,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
         //Second time to do the real work.
         data_expression_list NewArguments;
-        for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
         {
           data_expression Argument0= *i;
           ++i;
@@ -3353,7 +3353,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     sort_expression_list NewArgumentTypes;
     data_expression_list NewArguments;
     sort_expression_list argument_sorts;
-    for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+    for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
     {
       data_expression Arg= *i;
       sort_expression Type=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,data::untyped_sort(),FreeVars,false,warn_upcasting,print_cast_error);

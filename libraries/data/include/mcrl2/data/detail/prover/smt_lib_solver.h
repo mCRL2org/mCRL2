@@ -661,7 +661,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (data::is_application(a_clause))
       {
         const data::application &a = atermpp::aterm_cast<data::application>(a_clause);
-        for (data_expression_list::iterator i = a.begin(); i != a.end(); ++i)
+        for (application::const_iterator i = a.begin(); i != a.end(); ++i)
         {
           f_formula = f_formula + " ";
           translate_clause(*i, false);

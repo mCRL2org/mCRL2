@@ -71,7 +71,7 @@ class Induction
       else if (is_application(a_expression))
       {
         const data::application &a = atermpp::aterm_cast<const data::application>(a_expression);
-        for (data_expression_list::const_iterator i = a.begin(); i != a.end(); ++i)
+        for (application::const_iterator i = a.begin(); i != a.end(); ++i)
         {
           recurse_expression_for_lists(*i);
         }

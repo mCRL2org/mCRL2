@@ -459,7 +459,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_bag_enumeration(const application& x)
   {
     derived().print("{ ");
-    data_expression_list::const_iterator i = x.begin();
+    application::const_iterator i = x.begin();
     while (i != x.end())
     {
       if (i != x.begin())

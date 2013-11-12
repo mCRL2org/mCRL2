@@ -37,6 +37,30 @@ bool operator==(const size_t x, const atermpp::function_symbol& y)
 
 //Global precondition: the aterm library has been initialised
 
+// DataAppl
+inline std::vector<atermpp::function_symbol>& function_symbols_DataAppl()
+{
+  static std::vector<atermpp::function_symbol> function_symbols_DataAppl;
+  return function_symbols_DataAppl;
+}
+
+inline
+const atermpp::function_symbol& function_symbol_DataAppl(size_t i)
+{
+  std::vector<atermpp::function_symbol>& syms = function_symbols_DataAppl();
+  while (i >= syms.size())
+  {
+    syms.push_back(atermpp::function_symbol("DataAppl", syms.size()));
+  }
+  return syms[i];
+}
+
+inline
+bool gsIsDataAppl(const atermpp::aterm_appl& Term)
+{
+  return Term.function() == function_symbol_DataAppl(Term.function().arity());
+}
+
 //--- start generated code ---//
 // ActAnd
 inline
@@ -526,20 +550,6 @@ inline
 bool gsIsConsSpec(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_ConsSpec();
-}
-
-// DataAppl
-inline
-const atermpp::function_symbol& function_symbol_DataAppl()
-{
-  static atermpp::function_symbol function_symbol_DataAppl = atermpp::function_symbol("DataAppl", 2);
-  return function_symbol_DataAppl;
-}
-
-inline
-bool gsIsDataAppl(const atermpp::aterm_appl& Term)
-{
-  return Term.function() == function_symbol_DataAppl();
 }
 
 // DataEqn
@@ -2150,12 +2160,6 @@ inline
 aterm_appl gsMakeConsSpec(const aterm_list& OpId_0)
 {
   return term_appl<aterm>(function_symbol_ConsSpec(), OpId_0);
-}
-
-inline
-aterm_appl gsMakeDataAppl(const aterm_appl& DataExpr_0, const aterm_list& DataExpr_1)
-{
-  return term_appl<aterm>(function_symbol_DataAppl(), DataExpr_0, DataExpr_1);
 }
 
 inline

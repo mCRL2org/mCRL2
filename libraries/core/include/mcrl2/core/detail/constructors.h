@@ -127,7 +127,6 @@ const atermpp::aterm_appl& constructPBESForall();
 const atermpp::aterm_appl& constructStateTrue();
 const atermpp::aterm_appl& constructBInit();
 const atermpp::aterm_appl& constructUntypedSortUnknown();
-const atermpp::aterm_appl& constructDataAppl();
 const atermpp::aterm_appl& constructRegTrans();
 const atermpp::aterm_appl& constructStateDelayTimed();
 const atermpp::aterm_appl& constructNu();
@@ -790,14 +789,6 @@ inline
 const atermpp::aterm_appl& constructUntypedSortUnknown()
 {
   static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_UntypedSortUnknown()));
-  return t;
-}
-
-// DataAppl
-inline
-const atermpp::aterm_appl& constructDataAppl()
-{
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_DataAppl(), constructDataExpr(), constructList(constructDataExpr())));
   return t;
 }
 

@@ -555,14 +555,14 @@ Rewriter* createRewriter(
 //Prototype
 static void check_vars(const data_expression &expr, const std::set <variable> &vars, std::set <variable> &used_vars);
 
-static void check_vars(const data_expression_list::const_iterator begin, 
-                       const data_expression_list::const_iterator end, 
+static void check_vars(application::const_iterator begin,
+                       const application::const_iterator& end,
                        const std::set <variable> &vars, 
                        std::set <variable> &used_vars)
 {
-  for (data_expression_list::const_iterator i=begin; i!=end; ++i)
+  while (begin != end)
   {
-    check_vars(*i,vars,used_vars);
+    check_vars(*begin++, vars, used_vars);
   }
 }
 
@@ -589,12 +589,12 @@ static void check_vars(const data_expression &expr, const std::set <variable> &v
 //Prototype
 static void checkPattern(const data_expression &p);
 
-static void checkPattern(const data_expression_list::const_iterator begin, 
-                         const data_expression_list::const_iterator end)
+static void checkPattern(application::const_iterator begin,
+                         const application::const_iterator& end)
 {
-  for (data_expression_list::const_iterator i=begin; i!=end; ++i)
+  while (begin != end)
   {
-    checkPattern(*i);
+    checkPattern(*begin++);
   }
 }
 
@@ -721,7 +721,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
       }
     }
 
-    for (data_expression_list::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+    for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
     {
       result.push_back(toInner(*i,add_opids));
     }

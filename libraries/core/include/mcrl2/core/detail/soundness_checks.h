@@ -3681,27 +3681,19 @@ bool check_term_DataAppl(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = atermpp::aterm_cast<atermpp::aterm_appl>(term);
   if (!gsIsDataAppl(a))
   {
     return false;
   }
-
-  // check the children
-  if (a.size() != 2)
-  {
-    return false;
-  }
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a[0], check_rule_DataExpr<atermpp::aterm>))
+  for (atermpp::aterm_appl::const_iterator child = a.begin(); child != a.end(); ++child)
   {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
-  }
-  if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 1))
-  {
-    mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-    return false;
+    if (!check_term_argument(*child, check_rule_DataExpr<atermpp::aterm>))
+    {
+      mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+      return false;
+    }
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 

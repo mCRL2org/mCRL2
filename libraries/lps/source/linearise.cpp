@@ -1280,15 +1280,16 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
+    template <typename Iterator>
     void filter_vars_by_termlist(
-      const data_expression_list::const_iterator begin,
-      const data_expression_list::const_iterator end,
+      Iterator begin,
+      const Iterator& end,
       const std::set < variable > &vars_set,
       std::set < variable > &vars_result_set)
     {
-      for (data_expression_list::const_iterator l=begin; l!=end; ++l)
+      for (; begin != end; ++begin)
       {
-        filter_vars_by_term(*l,vars_set,vars_result_set);
+        filter_vars_by_term(*begin,vars_set,vars_result_set);
       }
     }
 
@@ -4093,17 +4094,17 @@ class specification_basic_type:public boost::noncopyable
       return t;   // in case of non-debug mode, try to return something as decent as possible.
     }
 
-    inline
+    template <typename Iterator>
     data_expression_vector adapt_termlist_to_stack(
-      const data_expression_list::const_iterator begin,
-      const data_expression_list::const_iterator end,
+      Iterator begin,
+      const Iterator& end,
       const stacklisttype& stack,
       const variable_list& vars)
     {
       data_expression_vector result;
-      for (data_expression_list::const_iterator i = begin; i != end; ++i)
+      for (; begin != end; ++begin)
       {
-        result.push_back(adapt_term_to_stack(*i,stack, vars));
+        result.push_back(adapt_term_to_stack(*begin,stack, vars));
       }
       return result;
     }

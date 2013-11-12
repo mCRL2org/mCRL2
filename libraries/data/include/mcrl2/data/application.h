@@ -27,14 +27,71 @@ namespace mcrl2
 namespace data
 {
 
-//--- start generated class application ---//
+/// \brief Iterator for term_appl which prepends a single term to the list.
+template <typename Term, typename ForwardIterator>
+class term_appl_prepend_iterator: public boost::iterator_facade<
+  term_appl_prepend_iterator<Term, ForwardIterator>, // Derived
+  Term,                                              // Value
+  boost::forward_traversal_tag,                      // CategoryOrTraversal
+  Term&                                              // Reference
+  >
+{
+  public:
+
+    /// \brief Constructor.
+    /// \param t A term
+    term_appl_prepend_iterator(ForwardIterator it, const Term* prepend = NULL)
+      : m_it(it), m_prepend(prepend)
+    {}
+
+  private:
+    friend class boost::iterator_core_access;
+
+    /// \brief Equality check
+    /// \param other An iterator
+    /// \return True if the iterators are equal
+    bool equal(term_appl_prepend_iterator const& other) const
+    {
+      return this->m_prepend == other.m_prepend && this->m_it == other.m_it;
+    }
+
+    /// \brief Dereference operator
+    /// \return The value that the iterator references
+    const Term &dereference() const
+    {
+      if (m_prepend)
+      {
+        return *m_prepend;
+      }
+      return *m_it;
+    }
+
+    /// \brief Increments the iterator
+    void increment()
+    {
+      if (m_prepend)
+      {
+        m_prepend = nullptr;
+      }
+      else
+      {
+        ++m_it;
+      }
+    }
+
+    ForwardIterator m_it;
+    const Term *m_prepend;
+};
+
 /// \brief An application of a data expression to a number of arguments
 class application: public data_expression
 {
   public:
     /// \brief Default constructor.
     application()
-      : data_expression(core::detail::constructDataAppl())
+      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(1),
+                                         term_appl_prepend_iterator<const term_appl<aterm>, data_expression*>(nullptr, &core::detail::constructDataExpr()),
+                                         term_appl_prepend_iterator<const term_appl<aterm>, data_expression*>(nullptr)))
     {}
 
     /// \brief Constructor.
@@ -47,13 +104,17 @@ class application: public data_expression
 
     /// \brief Constructor.
     application(const data_expression& head, const data_expression_list& arguments)
-      : data_expression(core::detail::gsMakeDataAppl(head, arguments))
+      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
+                                         term_appl_prepend_iterator<const data_expression, data_expression_list::const_iterator>(arguments.begin(), &head),
+                                         term_appl_prepend_iterator<const data_expression, data_expression_list::const_iterator>(arguments.end())))
     {}
 
     /// \brief Constructor.
     template <typename Container>
     application(const data_expression& head, const Container& arguments, typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
-      : data_expression(core::detail::gsMakeDataAppl(head, data_expression_list(arguments.begin(), arguments.end())))
+      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
+                                         term_appl_prepend_iterator<const data_expression, typename Container::const_iterator>(arguments.begin(), &head),
+                                         term_appl_prepend_iterator<const data_expression, typename Container::const_iterator>(arguments.end())))
     {}
 
     const data_expression& head() const
@@ -61,40 +122,57 @@ class application: public data_expression
       return atermpp::aterm_cast<const data_expression>((*this)[0]);
     }
 
-    const data_expression_list& arguments() const
+    data_expression_list arguments() const
     {
-      return atermpp::aterm_cast<const data_expression_list>((*this)[1]);
+      return data_expression_list(begin(), end());
     }
-//--- start user section application ---//
   private:
     // forbid the use of iterator, which is silently inherited from
     // aterm_appl. Modifying the arguments of an application through the iterator
     // is not allowed!
-    typedef data_expression_list::iterator iterator;
+    typedef data_expression::iterator iterator;
 
   public:
-    typedef data_expression_list::const_iterator const_iterator;
+    class const_iterator : public boost::iterator_adaptor<
+            const_iterator                     // Derived
+          , data_expression::const_iterator    // Base
+          , const data_expression              // Value
+          , boost::random_access_traversal_tag // CategoryOrTraversal
+        >
+    {
+    public:
+      explicit const_iterator(const data_expression::const_iterator& p)
+        : const_iterator::iterator_adaptor_(p) {}
+    private:
+      friend class boost::iterator_core_access;
+      reference dereference() const
+      {
+        return atermpp::aterm_cast<const data_expression>(*base_reference());
+      }
+    };
 
     /// \brief Constructor.
     template <typename FwdIter>
     application(const data_expression& head,
                 FwdIter first,
                 FwdIter last)
-      : data_expression(core::detail::gsMakeDataAppl(head, data_expression_list(first, last)))
+      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+                                         term_appl_prepend_iterator<const data_expression, FwdIter>(first, &head),
+                                         term_appl_prepend_iterator<const data_expression, FwdIter>(last)))
     {}
 
     /// \brief Returns an iterator pointing to the first argument of the
     ///        application.
     const_iterator begin() const
     {
-      return arguments().begin();
+      return ++const_iterator(data_expression::begin());
     }
 
     /// \brief Returns an iterator pointing past the last argument of the
     ///        application.
     const_iterator end() const
     {
-      return arguments().end();
+      return const_iterator(data_expression::end());
     }
 
     /// \brief Returns an iterator pointing past the last argument of the
@@ -125,7 +203,6 @@ class application: public data_expression
       return *(++(begin()));
     }
 */
-//--- end user section application ---//
 };
 
 /// \brief swap overload
