@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/convert.h"
+#include "mcrl2/utilities/workarounds.h" // for nullptr on older compilers
 
 namespace mcrl2
 {
@@ -89,9 +90,9 @@ class application: public data_expression
   public:
     /// \brief Default constructor.
     application()
-      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(1),
-                                         term_appl_prepend_iterator<const term_appl<aterm>, data_expression*>(nullptr, &core::detail::constructDataExpr()),
-                                         term_appl_prepend_iterator<const term_appl<aterm>, data_expression*>(nullptr)))
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(1),
+                                         term_appl_prepend_iterator<const atermpp::term_appl<aterm>, data_expression*>(nullptr, &core::detail::constructDataExpr()),
+                                         term_appl_prepend_iterator<const atermpp::term_appl<aterm>, data_expression*>(nullptr)))
     {}
 
     /// \brief Constructor.
@@ -104,7 +105,7 @@ class application: public data_expression
 
     /// \brief Constructor.
     application(const data_expression& head, const data_expression_list& arguments)
-      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
                                          term_appl_prepend_iterator<const data_expression, data_expression_list::const_iterator>(arguments.begin(), &head),
                                          term_appl_prepend_iterator<const data_expression, data_expression_list::const_iterator>(arguments.end())))
     {}
@@ -112,7 +113,7 @@ class application: public data_expression
     /// \brief Constructor.
     template <typename Container>
     application(const data_expression& head, const Container& arguments, typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
-      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
                                          term_appl_prepend_iterator<const data_expression, typename Container::const_iterator>(arguments.begin(), &head),
                                          term_appl_prepend_iterator<const data_expression, typename Container::const_iterator>(arguments.end())))
     {}
@@ -156,7 +157,7 @@ class application: public data_expression
     application(const data_expression& head,
                 FwdIter first,
                 FwdIter last)
-      : data_expression(term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                          term_appl_prepend_iterator<const data_expression, FwdIter>(first, &head),
                                          term_appl_prepend_iterator<const data_expression, FwdIter>(last)))
     {}
