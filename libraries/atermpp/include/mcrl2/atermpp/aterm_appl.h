@@ -125,7 +125,8 @@ class term_appl:public aterm
 
     /// \brief Constructor.
     /// \param sym A function symbol.
-    term_appl(const function_symbol &sym):aterm(sym)
+    term_appl(const function_symbol &sym)
+         :aterm(detail::term_appl0(sym))
     {
       BOOST_STATIC_ASSERT((boost::is_base_of<aterm, Term>::value));
       BOOST_STATIC_ASSERT(sizeof(Term)==sizeof(size_t));

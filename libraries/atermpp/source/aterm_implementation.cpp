@@ -23,6 +23,35 @@
 namespace atermpp
 {
 
+typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table;
+hook_table creation_hooks;
+hook_table deletion_hooks;
+
+void add_creation_hook(const function_symbol& sym, term_callback callback)
+{
+#ifndef NDEBUG
+  // The code handling the hooks is currently assuming that there is only one
+  // hook per function symbol. If more hooks are allowed, then this code
+  // should be changed.
+  for (hook_table::const_iterator it = creation_hooks.begin(); it != creation_hooks.end(); ++it)
+  {
+    assert(it->first != &sym);
+  }
+#endif
+  creation_hooks.push_back(std::make_pair(&sym, callback));
+}
+
+void add_deletion_hook(const function_symbol& sym, term_callback callback)
+{
+#ifndef NDEBUG
+  // See the comments at add_creation_hook.
+  for (hook_table::const_iterator it = deletion_hooks.begin(); it != deletion_hooks.end(); ++it)
+  {
+    assert(it->first != &sym);
+  }
+#endif
+  deletion_hooks.push_back(std::make_pair(&sym, callback));
+}
 
 namespace detail
 {
@@ -47,9 +76,37 @@ TermInfo *terminfo;
 
 size_t total_nodes = 0;
 
+inline
+void call_creation_hook(const detail::_aterm* term)
+{
+  const function_symbol& sym = term->function();
+  for (hook_table::const_iterator it = creation_hooks.begin(); it != creation_hooks.end(); ++it)
+  {
+    if (*it->first == sym)
+    {
+      it->second(aterm(term));
+    }
+  }
+}
+
+inline
+void call_deletion_hook(const detail::_aterm* term)
+{
+  const function_symbol& sym = term->function();
+  for (hook_table::const_iterator it = deletion_hooks.begin(); it != deletion_hooks.end(); ++it)
+  {
+    if (*it->first == sym)
+    {
+      it->second(aterm(term));
+    }
+  }
+}
+
 void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed) 
 {
   assert(t->reference_count()==0);
+
+  call_deletion_hook(t);
 
   const function_symbol &f=t->function();
   const size_t arity=f.arity();
@@ -315,11 +372,11 @@ void initialise_aterm_administration()
     new (&terminfo[i]) TermInfo();
   }
 
-  new (&detail::static_undefined_aterm) aterm(detail::function_adm.AS_DEFAULT); // Use placement new as static_undefined_aterm
+  new (&detail::static_undefined_aterm) aterm(detail::term_appl0(detail::function_adm.AS_DEFAULT)); // Use placement new as static_undefined_aterm
                                                                                 // may not have initialised when this is called, 
                                                                                 // causing a problem with reference counting.
     
-  new (&detail::static_empty_aterm_list) aterm(detail::function_adm.AS_EMPTY_LIST); // Use placement new as static_empty_atermlist
+  new (&detail::static_empty_aterm_list) aterm(detail::term_appl0(detail::function_adm.AS_EMPTY_LIST)); // Use placement new as static_empty_atermlist
                                                                                  // may not have initialised when this is called, 
                                                                                  // causing a problem with reference counting.
   

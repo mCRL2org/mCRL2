@@ -35,7 +35,6 @@ inline const _aterm* aterm_int(size_t val)
 
   cur->set_next(aterm_hashtable[hnr]);
   aterm_hashtable[hnr] = cur;
-  
 
   assert((hnr & aterm_table_mask) == (hash_number(cur) & aterm_table_mask));
   return cur;

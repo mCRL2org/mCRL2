@@ -54,7 +54,7 @@ class term_balanced_tree: public aterm_appl
 
     static const aterm_appl &empty_tree()
     {
-      static const aterm_appl empty_term(detail::aterm0(tree_empty_function()));
+      static const aterm_appl empty_term(tree_empty_function());
       return empty_term;
     }
 

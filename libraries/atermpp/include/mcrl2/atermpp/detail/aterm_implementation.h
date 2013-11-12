@@ -70,6 +70,9 @@ void resize_aterm_hashtable();
 void allocate_block(const size_t size);
 void collect_terms_with_reference_count_0();
 
+void call_creation_hook(const _aterm*);
+void call_deletion_hook(const _aterm*);
+
 inline size_t SHIFT(const size_t w)
 {
   return w>>4;
@@ -200,35 +203,6 @@ inline void remove_from_hashtable(const _aterm *t)
   }
   while (((prev=cur), (cur=cur->next())));
   assert(0);
-}
-
-
-inline const _aterm* aterm0(const function_symbol &sym)
-{
-  assert(sym.arity()==0);
-
-  HashNumber hnr = SHIFT(addressf(sym));
-
-  const detail::_aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
-
-  while (cur)
-  {
-    if (cur->function()==sym)
-    {
-      return cur;
-    }
-    cur = cur->next();
-  }
-
-  cur = detail::allocate_term(detail::TERM_SIZE);
-  /* Delay masking until after allocate */
-  hnr &= detail::aterm_table_mask;
-  new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
-
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
-
-  return cur;
 }
 
 inline const _aterm* address(const aterm &t)

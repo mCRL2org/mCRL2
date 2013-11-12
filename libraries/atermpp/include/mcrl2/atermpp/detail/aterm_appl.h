@@ -45,6 +45,9 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
 template <class Term, class InputIterator, class ATermConverter>
 const _aterm* local_term_appl_with_converter(const function_symbol &sym, const InputIterator begin, const InputIterator end, const ATermConverter &convert_to_aterm);
 
+inline
+const _aterm* term_appl0(const function_symbol &sym);
+
 template <class Term>
 const _aterm* term_appl1(const function_symbol &sym, const Term &t1);
 

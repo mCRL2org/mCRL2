@@ -26,6 +26,11 @@
 namespace atermpp
 {
 
+typedef void(*term_callback)(const aterm&);
+
+void add_creation_hook(const function_symbol&, term_callback);
+void add_deletion_hook(const function_symbol&, term_callback);
+
 class aterm
 {
   public:
@@ -82,15 +87,6 @@ class aterm
       return m_term->function();
     }
 
-    /// \brief Constructor.
-    /// \details The function symbol must have arity 0. This function
-    /// is for internal use only. Use term_appl(sym) in applications.
-    /// \param sym A function symbol.
-    aterm(const function_symbol &sym):m_term(detail::aterm0(sym))
-    {
-      increase_reference_count<false>();
-    }
-
   public: // Should be protected, but this cannot yet be done due to a problem
           // in the compiling rewriter.
     aterm (const detail::_aterm *t):m_term(t)
@@ -119,6 +115,14 @@ class aterm
     aterm &operator=(const aterm &t)
     {
       copy_term(t);
+      return *this;
+    }
+
+    /// \brief Move assignment operator.
+    /// \param t a term to be assigned.
+    aterm& operator=(aterm &&t)
+    {
+      swap(t);
       return *this;
     }
 
