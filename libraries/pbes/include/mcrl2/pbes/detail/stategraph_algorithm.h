@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
 
+#include <algorithm>
 #include <sstream>
 #include <boost/bind.hpp>
 #include "mcrl2/data/detail/print_utility.h"
@@ -25,6 +26,16 @@ namespace mcrl2 {
 namespace pbes_system {
 
 namespace detail {
+
+// Remove an element from v, and return it.
+template <typename Container>
+typename Container::value_type pick_element(Container& v)
+{
+  auto i = v.begin();
+  typename Container::value_type result = *i;
+  v.erase(i);
+  return result;
+}
 
 class control_flow_graph_vertex_base
 {
@@ -81,17 +92,18 @@ class control_flow_graph_vertex: public control_flow_graph_vertex_base
     }
 };
 
+inline
+const data::variable& undefined_variable()
+{
+  static data::variable v("@undefined", data::sort_expression());
+  return v;
+}
+
 class value_graph_vertex: public control_flow_graph_vertex_base
 {
   protected:
     data::data_expression m_value;
     std::set<value_graph_vertex*> m_neighbors;
-
-    const data::variable& undefined_variable()
-    {
-      static data::variable v("@undefined", data::sort_expression());
-      return v;
-    }
 
     std::size_t undefined_index()
     {
@@ -125,6 +137,11 @@ class value_graph_vertex: public control_flow_graph_vertex_base
     std::set<value_graph_vertex*>& neighbors()
     {
       return m_neighbors;
+    }
+
+    bool operator==(const value_graph_vertex& other) const
+    {
+      return m_name == other.m_name && m_index == other.m_index && m_value == other.m_value;
     }
 };
 
@@ -341,6 +358,13 @@ class stategraph_algorithm
       return out.str();
     }
 
+    // returns a data expression that corresponds to 'undefined'
+    inline
+    const data::data_expression& undefined_data_expression()
+    {
+      return undefined_variable();
+    }
+
     // returns true if m is not a key in the map
     template <typename Map>
     bool is_undefined(const Map& m, const typename Map::key_type& key) const
@@ -348,12 +372,24 @@ class stategraph_algorithm
       return m.find(key) == m.end();
     }
 
-    // returns true if m does not map key to value
+    // returns true if the mapping m maps key to value
     template <typename Map>
     bool is_mapped_to(const Map& m, const typename Map::key_type& key, const typename Map::mapped_type& value) const
     {
       auto i = m.find(key);
       return i != m.end() && i->second == value;
+    }
+
+    // if key is in m, the corresponding value is returned, otherwise undefined_value
+    template <typename Map>
+    typename Map::mapped_type mapped_value(const Map& m, const typename Map::key_type& key, const typename Map::mapped_type& undefined_value) const
+    {
+      auto i = m.find(key);
+      if (i != m.end())
+      {
+        return i->second;
+      }
+      return undefined_value;
     }
 
     bool maps_to_and_is_GFCP(const std::map<std::size_t, std::size_t>& m, std::size_t value, const core::identifier_string& X)
@@ -744,8 +780,8 @@ class stategraph_algorithm
     // removes the connected components V for which !is_valid_connected_component(V)
     void remove_invalid_connected_components()
     {
-      m_connected_components.erase(std::remove_if(m_connected_components.begin(), m_connected_components.end(),
-         !boost::bind(&stategraph_algorithm::is_valid_connected_component, this, _1)));
+      auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(), !boost::bind(&stategraph_algorithm::is_valid_connected_component, this, _1));
+      m_connected_components.erase(i, m_connected_components.end());
       mCRL2log(log::debug, "stategraph") << "Removed invalid connected components. The remaining components are:" << std::endl;
       print_connected_components();
     }
@@ -803,8 +839,8 @@ class stategraph_algorithm
     // Removes the connected components V that consist of CFPs that are only copied.
     void remove_only_copy_components()
     {
-      m_connected_components.erase(std::remove_if(m_connected_components.begin(), m_connected_components.end(),
-         boost::bind(&stategraph_algorithm::has_only_copied_CFPs, this, _1)));
+      auto i = std::remove_if(m_connected_components.begin(), m_connected_components.end(), boost::bind(&stategraph_algorithm::has_only_copied_CFPs, this, _1));
+      m_connected_components.erase(i, m_connected_components.end());
       mCRL2log(log::debug, "stategraph") << "Removed only copy components. The remaining components are:" << std::endl;
       print_connected_components();
     }
@@ -1058,8 +1094,101 @@ class stategraph_algorithm
       }
     }
 
+    void insert_value_graph_edge(std::vector<value_graph_vertex>& V,
+                                 std::set<std::size_t>& todo,
+                                 const core::identifier_string& Y,
+                                 value_graph_vertex& u,
+                                 std::size_t k1,
+                                 const data::data_expression& e1
+                                )
+    {
+      if (e1 != undefined_data_expression())
+      {
+        const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+        const data::variable& d1 = eq_Y.parameters()[k1];
+        value_graph_vertex v_(Y, k1, d1, e1);
+        std::vector<value_graph_vertex>::iterator j = std::find(V.begin(), V.end(), v_);
+        if (j == V.end())
+        {
+          V.push_back(v_);
+          std::size_t index = V.size() - 1;
+          todo.insert(index);
+          j = V.begin() + index;
+        }
+        // add edge (u, v)
+        value_graph_vertex& v = *j;
+        mCRL2log(log::debug, "stategraph") << "--- insert edge --- u = " << u << " v = " << v << std::endl;
+        u.neighbors().insert(&v);
+        v.neighbors().insert(&u);
+      }
+    }
+
     void compute_value_graph(const std::set<std::size_t>& component)
     {
+      mCRL2log(log::debug, "stategraph") << "Compute value graph for component " << pbes_system::detail::print_set(component) << std::endl;
+      std::vector<value_graph_vertex> V;
+      std::set<std::size_t> todo;
+
+      const propositional_variable_instantiation& init = m_pbes.initial_state();
+      const core::identifier_string& Xinit = init.name();
+
+      // preprocessing
+      std::map<core::identifier_string, std::size_t> component_index;
+      for (auto p = component.begin(); p != component.end(); ++p)
+      {
+        const control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
+        component_index[w.name()] = w.index();
+      }
+
+      for (auto p = component.begin(); p != component.end(); ++p)
+      {
+        const control_flow_graph_vertex& w = m_control_flow_graph_vertices[*p];
+        const core::identifier_string& X = w.name();
+        if (X == Xinit)
+        {
+          std::size_t j = w.index();
+          data::data_expression e_j = nth_element(init.parameters(), j);
+          value_graph_vertex u(X, j, w.variable(), e_j);
+          V.push_back(u);
+          todo.insert(V.size() - 1);
+        }
+        while (!todo.empty())
+        {
+          value_graph_vertex u = V[pick_element(todo)];
+          const core::identifier_string& X = u.name();
+          const data::data_expression& e = u.value();
+          std::size_t k = u.index();
+          const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+          const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+          for (auto i = predvars.begin(); i != predvars.end(); ++i)
+          {
+            const core::identifier_string& Y = i->X.name();
+            auto q = component_index.find(Y);
+            if (q != component_index.end()) // (Y, k1) in C
+            {
+              std::size_t k1 = q->second;
+              data::data_expression e1 = undefined_data_expression();
+
+              if (is_mapped_to(i->source, k, e))
+              {
+                // source(X, i, k) = e && dest(X, i, k1) = e1
+                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                insert_value_graph_edge(V, todo, Y, u, k1, e1);
+              }
+              else if (Y != X && is_undefined(i->source, k))
+              {
+                // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
+                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                insert_value_graph_edge(V, todo, Y, u, k1, e1);
+
+                // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
+                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                insert_value_graph_edge(V, todo, Y, u, k1, e1);
+              }
+            }
+          }
+        }
+      }
     }
 
     void compute_value_graphs()
@@ -1080,6 +1209,7 @@ class stategraph_algorithm
       remove_invalid_connected_components();
       remove_only_copy_components();
       compute_values();
+      compute_value_graphs();
     }
 
     const stategraph_pbes& get_pbes() const
