@@ -92,6 +92,7 @@ class control_flow_graph_vertex: public control_flow_graph_vertex_base
     }
 };
 
+// returns a data variable that corresponds to 'undefined'
 inline
 const data::variable& undefined_variable()
 {
@@ -99,16 +100,25 @@ const data::variable& undefined_variable()
   return v;
 }
 
+// returns a data expression that corresponds to 'undefined'
+inline
+const data::data_expression& undefined_data_expression()
+{
+  return undefined_variable();
+}
+
+// returns an index that corresponds to 'undefined'
+inline
+std::size_t undefined_index()
+{
+  return std::size_t(-1);
+}
+
 class value_graph_vertex: public control_flow_graph_vertex_base
 {
   protected:
     data::data_expression m_value;
     std::set<value_graph_vertex*> m_neighbors;
-
-    std::size_t undefined_index()
-    {
-      return std::size_t(-1);
-    }
 
   public:
     value_graph_vertex(const core::identifier_string& name, std::size_t index, const data::variable& variable, const data::data_expression& value)
@@ -144,6 +154,12 @@ class value_graph_vertex: public control_flow_graph_vertex_base
       return m_name == other.m_name && m_index == other.m_index && m_value == other.m_value;
     }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const value_graph_vertex& u)
+{
+  return out << '(' << u.name() << ", " << u.index() << ") " << data::pp(u.variable()) << " = " << data::pp(u.value());
+}
 
 /// \brief Algorithm class for the computation of the stategraph graph
 class stategraph_algorithm
@@ -356,13 +372,6 @@ class stategraph_algorithm
         out << std::endl;
       }
       return out.str();
-    }
-
-    // returns a data expression that corresponds to 'undefined'
-    inline
-    const data::data_expression& undefined_data_expression()
-    {
-      return undefined_variable();
     }
 
     // returns true if m is not a key in the map
@@ -1105,8 +1114,10 @@ class stategraph_algorithm
       if (e1 != undefined_data_expression())
       {
         const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-        const data::variable& d1 = eq_Y.parameters()[k1];
+        const data::variable& d1 = (k1 == undefined_index() ? undefined_variable() : eq_Y.parameters()[k1]);
         value_graph_vertex v_(Y, k1, d1, e1);
+
+        // check if v_ already exists in V; if not it is added
         std::vector<value_graph_vertex>::iterator j = std::find(V.begin(), V.end(), v_);
         if (j == V.end())
         {
@@ -1115,9 +1126,13 @@ class stategraph_algorithm
           todo.insert(index);
           j = V.begin() + index;
         }
+        value_graph_vertex& v = *j; // v == v_, and v is an element of the array V
+
         // add edge (u, v)
-        value_graph_vertex& v = *j;
-        mCRL2log(log::debug, "stategraph") << "--- insert edge --- u = " << u << " v = " << v << std::endl;
+        if (u.neighbors().find(&v) != u.neighbors().end())
+        {
+          mCRL2log(log::debug, "stategraph") << " edge " << u << " -> " << v << std::endl;
+        }
         u.neighbors().insert(&v);
         v.neighbors().insert(&u);
       }
@@ -1125,7 +1140,7 @@ class stategraph_algorithm
 
     void compute_value_graph(const std::set<std::size_t>& component)
     {
-      mCRL2log(log::debug, "stategraph") << "Compute value graph for component " << pbes_system::detail::print_set(component) << std::endl;
+      mCRL2log(log::debug, "stategraph") << "Compute local control flow graph for component " << pbes_system::detail::print_set(component) << std::endl;
       std::vector<value_graph_vertex> V;
       std::set<std::size_t> todo;
 
@@ -1160,30 +1175,60 @@ class stategraph_algorithm
           std::size_t k = u.index();
           const stategraph_equation& eq_X = *find_equation(m_pbes, X);
           const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+
           for (auto i = predvars.begin(); i != predvars.end(); ++i)
           {
             const core::identifier_string& Y = i->X.name();
             auto q = component_index.find(Y);
-            if (q != component_index.end()) // (Y, k1) in C
-            {
-              std::size_t k1 = q->second;
-              data::data_expression e1 = undefined_data_expression();
+            data::data_expression e1 = undefined_data_expression();
 
-              if (is_mapped_to(i->source, k, e))
+            if (k != undefined_index())
+            {
+              // case 1: (X, d, e) -> (Y, d1, e1)
+              if (q != component_index.end()) // (Y, k1) in C
               {
-                // source(X, i, k) = e && dest(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                std::size_t k1 = q->second;
+                if (is_mapped_to(i->source, k, e))
+                {
+                  // source(X, i, k) = e && dest(X, i, k1) = e1
+                  e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                  insert_value_graph_edge(V, todo, Y, u, k1, e1);
+                }
+                else if (Y != X && is_undefined(i->source, k))
+                {
+                  // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
+                  e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                  insert_value_graph_edge(V, todo, Y, u, k1, e1);
+
+                  // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
+                  e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                  insert_value_graph_edge(V, todo, Y, u, k1, e1);
+                }
+              }
+              // case 2: (X, d, e) -> (Y, e)
+              else
+              {
+                e1 = e;
+                std::size_t k1 = undefined_index();
                 insert_value_graph_edge(V, todo, Y, u, k1, e1);
               }
-              else if (Y != X && is_undefined(i->source, k))
+            }
+            else
+            {
+              // case 3: (X, e) -> (Y, d1, e)
+              if (q != component_index.end()) // (Y, k1) in C
               {
-                // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, undefined_data_expression());
-                insert_value_graph_edge(V, todo, Y, u, k1, e1);
-
-                // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, undefined_data_expression());
-                insert_value_graph_edge(V, todo, Y, u, k1, e1);
+                if (Y == X)
+                {
+                  std::size_t k1 = q->second;
+                  insert_value_graph_edge(V, todo, Y, u, k1, e);
+                }
+              }
+              // case 4: (X, e) -> (Y, e)
+              else
+              {
+                std::size_t k1 = undefined_index();
+                insert_value_graph_edge(V, todo, Y, u, k1, e);
               }
             }
           }
