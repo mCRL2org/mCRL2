@@ -1167,69 +1167,67 @@ class stategraph_algorithm
           V.push_back(u);
           todo.insert(V.size() - 1);
         }
-        while (!todo.empty())
+      }
+
+      while (!todo.empty())
+      {
+        value_graph_vertex u = V[pick_element(todo)];
+        const core::identifier_string& X = u.name();
+        const data::data_expression& e = u.value();
+        std::size_t k = u.index();
+        const stategraph_equation& eq_X = *find_equation(m_pbes, X);
+        const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+
+        for (auto i = predvars.begin(); i != predvars.end(); ++i)
         {
-          value_graph_vertex u = V[pick_element(todo)];
-          const core::identifier_string& X = u.name();
-          const data::data_expression& e = u.value();
-          std::size_t k = u.index();
-          const stategraph_equation& eq_X = *find_equation(m_pbes, X);
-          const std::vector<predicate_variable>& predvars = eq_X.predicate_variables();
+          const core::identifier_string& Y = i->X.name();
+          auto q = component_index.find(Y);
+          data::data_expression e1 = undefined_data_expression();
 
-          for (auto i = predvars.begin(); i != predvars.end(); ++i)
+          if (k == undefined_index())
           {
-            const core::identifier_string& Y = i->X.name();
-            auto q = component_index.find(Y);
-            data::data_expression e1 = undefined_data_expression();
-
-            if (k != undefined_index())
+            // case 1: (X, e) -> (Y, d1, e)
+            if (q != component_index.end()) // (Y, k1) in C
             {
-              // case 1: (X, d, e) -> (Y, d1, e1)
-              if (q != component_index.end()) // (Y, k1) in C
+              std::size_t k1 = q->second;
+              insert_value_graph_edge(V, todo, Y, u, k1, e);
+            }
+            // case 2: (X, e) -> (Y, e)
+            else
+            {
+              std::size_t k1 = undefined_index();
+              insert_value_graph_edge(V, todo, Y, u, k1, e);
+            }
+          }
+          else
+          {
+            // case 3: (X, d, e) -> (Y, d1, e1)
+            if (q != component_index.end()) // (Y, k1) in C
+            {
+              std::size_t k1 = q->second;
+              if (is_mapped_to(i->source, k, e))
               {
-                std::size_t k1 = q->second;
-                if (is_mapped_to(i->source, k, e))
-                {
-                  // source(X, i, k) = e && dest(X, i, k1) = e1
-                  e1 = mapped_value(i->dest, k1, undefined_data_expression());
-                  insert_value_graph_edge(V, todo, Y, u, k1, e1);
-                }
-                else if (Y != X && is_undefined(i->source, k))
-                {
-                  // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
-                  e1 = mapped_value(i->dest, k1, undefined_data_expression());
-                  insert_value_graph_edge(V, todo, Y, u, k1, e1);
-
-                  // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
-                  e1 = mapped_value(i->dest, k1, undefined_data_expression());
-                  insert_value_graph_edge(V, todo, Y, u, k1, e1);
-                }
+                // source(X, i, k) = e && dest(X, i, k1) = e1
+                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                insert_value_graph_edge(V, todo, Y, u, k1, e1);
               }
-              // case 2: (X, d, e) -> (Y, e)
-              else
+              else if (Y != X && is_undefined(i->source, k))
               {
-                e1 = e;
-                std::size_t k1 = undefined_index();
+                // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
+                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                insert_value_graph_edge(V, todo, Y, u, k1, e1);
+
+                // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
+                e1 = mapped_value(i->dest, k1, undefined_data_expression());
                 insert_value_graph_edge(V, todo, Y, u, k1, e1);
               }
             }
+            // case 4: (X, d, e) -> (Y, e)
             else
             {
-              // case 3: (X, e) -> (Y, d1, e)
-              if (q != component_index.end()) // (Y, k1) in C
-              {
-                if (Y == X)
-                {
-                  std::size_t k1 = q->second;
-                  insert_value_graph_edge(V, todo, Y, u, k1, e);
-                }
-              }
-              // case 4: (X, e) -> (Y, e)
-              else
-              {
-                std::size_t k1 = undefined_index();
-                insert_value_graph_edge(V, todo, Y, u, k1, e);
-              }
+              e1 = e;
+              std::size_t k1 = undefined_index();
+              insert_value_graph_edge(V, todo, Y, u, k1, e1);
             }
           }
         }

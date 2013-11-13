@@ -491,4 +491,81 @@ $\qquad B_{k}:=B_{k}\cup \{(X,d_{X}[j])\mid j\in belongs\}$ \\
 \textbf{return} $B_{k}$%
 \end{tabular}%
 \end{equation*}%
-\newpage
+\newpage 
+
+\subsection{Compute values}
+
+Let $C$ be a component containing related CFPs.
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeValues(}$\mathcal{E}$, $X_{init}(e_{init}),C$\textsc{)} \\ 
+$result:=$ $\emptyset $ \\ 
+$\text{\textbf{for }}(X,j)\in C$ \textbf{do} \\ 
+$\qquad $\textbf{if} $(X=X_{init})$\textbf{\ then} $result:=result\cup
+\{e_{init}[j]\}$ \\ 
+\textbf{for} $(X,k)\in C$ \textbf{do} \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{X})\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\mathrm{source}(X,i,k)=v$\textbf{\ then} $%
+result:=result\cup \{v\}$ \\ 
+\textbf{for} $(Y,k)\in C$ \textbf{do} \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{Y})\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{Y},i)=Y\wedge 
+\mathrm{dest}(Y,i,k)=v$\textbf{\ then} $result:=result\cup \{v\}$ \\ 
+\textbf{return} $result$%
+\end{tabular}%
+\end{equation*}
+
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{ComputeLocalControlFlowGraph(}$\mathcal{E}$, $X_{init}(e_{init}),C$%
+\textsc{)} \\ 
+$V,E:=\emptyset ,\emptyset $ \\ 
+$\text{\textbf{for }}(X,j)\in C$ \textbf{do} \\ 
+$\qquad $\textbf{if} $(X=X_{init})$\textbf{\ then} \\ 
+$\qquad \qquad \text{\textbf{\ }}V,todo:=V\cup \{u\},todo\cup \{u\}$, where $%
+u=(X,d_{X}[j],e_{init}[j])$ \\ 
+\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
+$\qquad \text{\textbf{choose }}u=(X,d,e)\in todo$ \\ 
+$\qquad todo:=todo\setminus \{u\}$ \\ 
+$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{X})\text{ 
+\textbf{do}}$ \\ 
+$\qquad \qquad \text{\textbf{let }}Y=$ $\mathrm{pred}(\varphi _{X},i)$ \\ 
+$\qquad \qquad \text{\textbf{if }}d=\bot $ $\text{\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
+k^{\prime }$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad v:=(Y,d_{Y}[k^{\prime }],e)$ \\ 
+$\qquad \qquad \qquad \qquad insert(V,E,todo,u,v)$ \\ 
+$\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \qquad v:=(Y,\bot ,e)$ \\ 
+$\qquad \qquad \qquad \qquad insert(V,E,todo,u,v)$ \\ 
+$\qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
+k^{\prime }$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}\left( \mathrm{source}%
+(X,i,k)=e\mathbf{\ }\wedge \mathrm{dest}(X,i,k^{\prime })=e^{\prime }\right) 
+$ \\ 
+$\qquad \qquad \qquad \qquad \vee \left( Y\neq X\wedge \mathrm{source}%
+(X,i,k)=\bot \mathbf{\ }\wedge \mathrm{dest}(X,i,k^{\prime })=e^{\prime
+}\right) $ \\ 
+$\qquad \qquad \qquad \qquad \vee \left( Y\neq X\wedge \mathrm{source}%
+(X,i,k)=\bot \mathbf{\ }\wedge \mathrm{copy}(X,i,k)=e^{\prime }\right) $ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \qquad v:=(Y,d_{Y}[k^{\prime }],e^{\prime })$
+\\ 
+$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,v)\qquad $ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad v:=(Y,\bot ,e)$ \\ 
+$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,v)\qquad $ \\ 
+\textbf{return} $(V,E),$%
+\end{tabular}%
+\end{equation*}%
+where $insert(V,E,todo,u,v)$ is shorthand for the statements%
+\begin{eqnarray*}
+\text{\textbf{if} }v &\notin &todo\text{ \textbf{then} }todo:=todo\cup \{v\}
+\\
+V &:&=V\cup \{v\} \\
+E &:&=E\cup \{(u,v)\}
+\end{eqnarray*}
