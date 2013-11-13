@@ -180,8 +180,8 @@ static const data_expression &else_part(const data_expression &e)
 
 
 /// \brief Splits a condition in expressions ranging over reals and the others
-/// \details Conceptually, the condition is first transformed to conjunctive
-///          normalform. For each conjunct, there will be an entry in both
+/// \details Conceptually, the condition is first transformed to dicjunctive
+///          normal form. For each disjunct, there will be an entry in both
 ///          resulting std::vectors, where the real conditions are in "real_conditions",
 ///          and the others in non_real_conditions. If there are conjuncts with
 ///          both real and non-real variables an exception is thrown. If negate
