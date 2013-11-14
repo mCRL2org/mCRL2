@@ -31,7 +31,6 @@ namespace mcrl2
 namespace data
 {
 
-#ifndef MCRL2_USE_INDEX_TRAITS
 //--- start generated class variable ---//
 /// \brief A data variable
 class variable: public data_expression
@@ -84,67 +83,27 @@ inline void swap(variable& t1, variable& t2)
 }
 
 //--- end generated class variable ---//
-#else
 
-/// \brief A data variable
-class variable: public data_expression
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+inline
+void on_create_variable(const atermpp::aterm& t)
 {
-  public:
-    /// \brief Default constructor.
-    variable()
-      : data_expression(core::detail::constructDataVarId())
-    {
-      data::index_traits<data::variable>::insert(*this);
-    }
+  data::index_traits<variable>::insert(static_cast<const variable&>(t));
+}
 
-    /// \brief Constructor.
-    /// \param term A term
-    explicit variable(const atermpp::aterm& term)
-      : data_expression(term)
-    {
-      assert(core::detail::check_term_DataVarId(*this));
-      data::index_traits<data::variable>::insert(*this);
-    }
+inline
+void on_delete_variable(const atermpp::aterm& t)
+{
+  data::index_traits<variable>::erase(static_cast<const variable&>(t));
+}
 
-    /// \brief Constructor.
-    variable(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(name, sort))
-    {
-      data::index_traits<data::variable>::insert(*this);
-    }
-
-    /// \brief Constructor.
-    variable(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
-    {
-      data::index_traits<data::variable>::insert(*this);
-    }
-
-    /// \brief Destructor.
-    ~variable()
-    {
-      if (atermpp::detail::address(*this)->reference_count_is_zero())
-      {
-        data::index_traits<data::variable>::erase(*this);
-      }
-    }
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const sort_expression& sort() const
-    {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
-    }
-};
-
-/// \brief list of variables
-typedef atermpp::term_list<variable> variable_list;
-
-/// \brief vector of variables
-typedef std::vector<variable>    variable_vector;
+inline
+void register_variable_hooks()
+{
+  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
+  add_deletion_hook(core::detail::function_symbol_DataVarId(), on_delete_variable);
+}
 
 #endif // MCRL2_USE_INDEX_TRAITS
 

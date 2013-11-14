@@ -20,8 +20,16 @@
 
 using namespace mcrl2;
 
+void f()
+{
+  data::variable x("x", data::sort_bool::bool_());
+}
+
 BOOST_AUTO_TEST_CASE(test_index)
 {
+  data::register_function_symbol_hooks();
+  data::register_variable_hooks();
+
   // data::variable
   data::variable b("b", data::sort_bool::bool_());
   BOOST_CHECK(data::index_traits<data::variable>::index(b) == 0);
