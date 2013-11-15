@@ -121,5 +121,21 @@ std::set<core::identifier_string> find_identifiers(const data::variable_list& x)
 
 } // namespace mcrl2
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+namespace std {
+
+template<>
+struct hash<mcrl2::data::variable>
+{
+  size_t operator()(const mcrl2::data::variable & x) const
+  {
+    return mcrl2::core::hash_value(x.name(), x.sort());
+  }
+};
+
+}
+#endif
+
 #endif // MCRL2_DATA_VARIABLE_H
 

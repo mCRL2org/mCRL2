@@ -124,4 +124,20 @@ void register_process_identifier_hooks()
 
 } // namespace mcrl2
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+namespace std {
+
+template<>
+struct hash<mcrl2::process::process_identifier>
+{
+  std::size_t operator()(const mcrl2::process::process_identifier& x) const
+  {
+    return mcrl2::core::hash_value(x.name(), x.variables());
+  }
+};
+
+}
+#endif
+
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

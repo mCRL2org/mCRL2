@@ -800,4 +800,20 @@ void register_boolean_variable_hooks()
 
 } // namespace mcrl2
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+namespace std {
+
+template<>
+struct hash<mcrl2::bes::boolean_variable>
+{
+  std::size_t operator()(const mcrl2::mcrl2::bes::boolean_variable& x) const
+  {
+    return mcrl2::core::hash_value(x.name());
+  }
+};
+
+}
+#endif
+
 #endif // MCRL2_BES_BOOLEAN_EXPRESSION_H

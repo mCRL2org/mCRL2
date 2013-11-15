@@ -114,5 +114,21 @@ std::set<data::variable> find_all_variables(const data::function_symbol& x);
 
 } // namespace mcrl2
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+namespace std {
+
+template<>
+struct hash<mcrl2::data::function_symbol>
+{
+  size_t operator()(const mcrl2::data::function_symbol & x) const
+  {
+    return mcrl2::core::hash_value(x.name(), x.sort());
+  }
+};
+
+}
+#endif
+
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

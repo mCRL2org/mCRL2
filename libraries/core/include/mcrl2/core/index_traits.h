@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+
+
 /// \file mcrl2/core/index_traits.h
 /// \brief add your file description here.
 
@@ -13,18 +15,47 @@
 #define MCRL2_CORE_INDEX_TRAITS_H
 
 #include <iostream>
-#include <map>
 #include <stack>
 #include <sstream>
 #include <stdexcept>
-
 #include "mcrl2/utilities/logger.h"
+
+#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+#include <boost/functional/hash.hpp>
+#include <unordered_map>
+#include <utility>
+#include "mcrl2/atermpp/aterm.h"
+#else
+#include <map>
+#endif
 
 namespace mcrl2 {
 
 namespace core {
 
-//--- very naive implementation of index mapping for variables ---//
+#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+
+template <typename Variable>
+std::unordered_map<Variable, std::size_t>& variable_index_map()
+{
+  static std::unordered_map<Variable, std::size_t> m;
+  return m;
+}
+
+inline
+std::size_t hash_value(const atermpp::aterm& x)
+{
+  return atermpp::detail::hash_number(atermpp::detail::address(x));
+}
+
+inline
+std::size_t hash_value(const atermpp::aterm& x1, const atermpp::aterm& x2)
+{
+  return boost::hash_value(std::make_pair(atermpp::detail::hash_number(atermpp::detail::address(x1)), atermpp::detail::hash_number(atermpp::detail::address(x2))));
+}
+
+#else
+
 template <typename Variable>
 std::map<Variable, std::size_t>& variable_index_map()
 {
@@ -32,10 +63,19 @@ std::map<Variable, std::size_t>& variable_index_map()
   return m;
 }
 
+#endif // MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+
 template <typename Variable>
 std::stack<std::size_t>& variable_map_free_numbers()
 {
   static std::stack<std::size_t> s;
+  return s;
+}
+
+template <typename Variable>
+std::size_t& variable_map_max_index()
+{
+  static std::size_t s;
   return s;
 }
 
@@ -64,17 +104,11 @@ struct index_traits
     return i->second;
   }
 
-  /// \brief Returns the largest index of a variable that is currently in use.
+  /// \brief Returns an upper bound for the largest index of a variable that is currently in use.
   static inline
   std::size_t max_index()
   {
-    auto& m = variable_index_map<Variable>();
-    auto i = std::min_element(m.begin(), m.end(), m.value_comp());
-    if (i == m.end())
-    {
-      throw std::runtime_error("error: empty map");
-    }
-    return i->second;
+    return variable_map_max_index<Variable>();
   }
 
   /// \brief Note: intended for internal use only!
@@ -92,6 +126,7 @@ struct index_traits
       if (s.empty())
       {
         value = m.size();
+        variable_map_max_index<Variable>() = value;
       }
       else
       {
