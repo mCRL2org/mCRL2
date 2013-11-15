@@ -19,7 +19,7 @@
 #include "mcrl2/data/sort_expression.h"
 
 #ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
+#include "mcrl2/core/index_traits.h"
 #endif
 
 namespace mcrl2
@@ -86,13 +86,13 @@ inline void swap(function_symbol& t1, function_symbol& t2)
 inline
 void on_create_function_symbol(const atermpp::aterm& t)
 {
-  data::index_traits<function_symbol>::insert(static_cast<const function_symbol&>(t));
+  core::index_traits<function_symbol>::insert(static_cast<const function_symbol&>(t));
 }
 
 inline
 void on_delete_function_symbol(const atermpp::aterm& t)
 {
-  data::index_traits<function_symbol>::erase(static_cast<const function_symbol&>(t));
+  core::index_traits<function_symbol>::erase(static_cast<const function_symbol&>(t));
 }
 
 inline

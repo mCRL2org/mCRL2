@@ -19,6 +19,10 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/action_name_multiset.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/core/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
@@ -92,6 +96,29 @@ std::string pp(const process_identifier& x);
 std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
 void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
+
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+inline
+void on_create_process_identifier(const atermpp::aterm& t)
+{
+  core::index_traits<process_identifier>::insert(static_cast<const process_identifier&>(t));
+}
+
+inline
+void on_delete_process_identifier(const atermpp::aterm& t)
+{
+  core::index_traits<process_identifier>::erase(static_cast<const process_identifier&>(t));
+}
+
+inline
+void register_process_identifier_hooks()
+{
+  add_creation_hook(core::detail::function_symbol_ProcVarId(), on_create_process_identifier);
+  add_deletion_hook(core::detail::function_symbol_ProcVarId(), on_delete_process_identifier);
+}
+
+#endif // MCRL2_USE_INDEX_TRAITS
 
 } // namespace process
 

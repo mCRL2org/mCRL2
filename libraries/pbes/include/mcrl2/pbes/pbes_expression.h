@@ -29,6 +29,10 @@
 #include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/core/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
@@ -1176,6 +1180,29 @@ pbes_expression right(const pbes_expression& t)
 }
 
 }; // namespace pbes_data
+
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+inline
+void on_create_propositional_variable_instantiation(const atermpp::aterm& t)
+{
+  core::index_traits<propositional_variable_instantiation>::insert(static_cast<const propositional_variable_instantiation&>(t));
+}
+
+inline
+void on_delete_propositional_variable_instantiation(const atermpp::aterm& t)
+{
+  core::index_traits<propositional_variable_instantiation>::erase(static_cast<const propositional_variable_instantiation&>(t));
+}
+
+inline
+void register_propositional_variable_instantiation_hooks()
+{
+  add_creation_hook(core::detail::function_symbol_PropVarInst(), on_create_propositional_variable_instantiation);
+  add_deletion_hook(core::detail::function_symbol_PropVarInst(), on_delete_propositional_variable_instantiation);
+}
+
+#endif // MCRL2_USE_INDEX_TRAITS
 
 } // namespace pbes_system
 

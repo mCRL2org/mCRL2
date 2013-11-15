@@ -29,6 +29,10 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/text_utility.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/core/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
@@ -768,6 +772,29 @@ std::set<boolean_expression> split_and(const boolean_expression& expr)
   utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_and, left, right);
   return result;
 }
+
+#ifdef MCRL2_USE_INDEX_TRAITS
+
+inline
+void on_create_boolean_variable(const atermpp::aterm& t)
+{
+  core::index_traits<boolean_variable>::insert(static_cast<const boolean_variable&>(t));
+}
+
+inline
+void on_delete_boolean_variable(const atermpp::aterm& t)
+{
+  core::index_traits<boolean_variable>::erase(static_cast<const boolean_variable&>(t));
+}
+
+inline
+void register_boolean_variable_hooks()
+{
+  add_creation_hook(core::detail::function_symbol_BooleanVariable(), on_create_boolean_variable);
+  add_deletion_hook(core::detail::function_symbol_BooleanVariable(), on_delete_boolean_variable);
+}
+
+#endif // MCRL2_USE_INDEX_TRAITS
 
 } // namespace bes
 

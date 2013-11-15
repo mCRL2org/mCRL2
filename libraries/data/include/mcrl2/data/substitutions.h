@@ -689,7 +689,7 @@ public:
 #ifndef MCRL2_USE_INDEX_TRAITS
       size_t i = m_variable.name().function().number();
 #else
-      size_t i = data::index_traits<data::variable>::index(m_variable);
+      size_t i = core::index_traits<data::variable>::index(m_variable);
 #endif
       if (e != m_variable)
       {
@@ -754,7 +754,7 @@ public:
 #ifndef MCRL2_USE_INDEX_TRAITS
     const size_t i = v.name().function().number();
 #else
-    const size_t i = data::index_traits<data::variable>::index(v);
+    const size_t i = core::index_traits<data::variable>::index(v);
 #endif
     if (i < m_index_table.size())
     {

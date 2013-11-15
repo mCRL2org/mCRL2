@@ -6,25 +6,23 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/index_traits.h
+/// \file mcrl2/core/index_traits.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_INDEX_TRAITS_H
-#define MCRL2_DATA_INDEX_TRAITS_H
+#ifndef MCRL2_CORE_INDEX_TRAITS_H
+#define MCRL2_CORE_INDEX_TRAITS_H
 
 #include <iostream>
 #include <map>
 #include <stack>
+#include <sstream>
 #include <stdexcept>
 
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
-namespace data {
-
-// prototype declaration
-template <typename T> std::string pp(const T&);
+namespace core {
 
 //--- very naive implementation of index mapping for variables ---//
 template <typename Variable>
@@ -59,7 +57,9 @@ struct index_traits
     auto i = m.find(x);
     if (i == m.end())
     {
-      throw std::runtime_error("error: could not find element " + data::pp(x));
+      std::ostringstream out;
+      out << "error: could not find element " << x;
+      throw std::runtime_error(out.str());
     }
     return i->second;
   }
@@ -128,8 +128,8 @@ struct index_traits
   }
 };
 
-} // namespace data
+} // namespace core
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_INDEX_TRAITS_H
+#endif // MCRL2_CORE_INDEX_TRAITS_H

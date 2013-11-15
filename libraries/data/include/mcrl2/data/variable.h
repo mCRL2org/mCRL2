@@ -22,7 +22,7 @@
 #include "mcrl2/data/application.h"
 
 #ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
+#include "mcrl2/core/index_traits.h"
 #endif
 
 namespace mcrl2
@@ -89,13 +89,13 @@ inline void swap(variable& t1, variable& t2)
 inline
 void on_create_variable(const atermpp::aterm& t)
 {
-  data::index_traits<variable>::insert(static_cast<const variable&>(t));
+  core::index_traits<variable>::insert(static_cast<const variable&>(t));
 }
 
 inline
 void on_delete_variable(const atermpp::aterm& t)
 {
-  data::index_traits<variable>::erase(static_cast<const variable&>(t));
+  core::index_traits<variable>::erase(static_cast<const variable&>(t));
 }
 
 inline
