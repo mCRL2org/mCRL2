@@ -234,6 +234,7 @@ add_subdirectory ( libraries/utilities )
 add_subdirectory ( tools/besinfo )
 add_subdirectory ( tools/bespp )
 add_subdirectory ( tools/lps2lts )
+add_subdirectory ( tools/lts2mathematica )    # developer tool for JFG, with as only purpose to solve the Royal Game of Goose.
 add_subdirectory ( tools/lps2pbes )
 add_subdirectory ( tools/lps2torx )
 add_subdirectory ( tools/lpsactionrename )

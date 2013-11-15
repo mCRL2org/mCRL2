@@ -28,10 +28,12 @@ namespace data
 namespace detail
 {
 
-RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector):
-  Rewriter()
+RewriterProver::RewriterProver(const data_specification& data_spec, 
+                               mcrl2::data::rewriter::strategy strat, 
+                               const used_data_equation_selector& equations_selector):
+  Rewriter(data_spec, equations_selector)
 {
-  prover_obj = new BDD_Prover(DataSpec, equations_selector, strat);
+  prover_obj = new BDD_Prover(data_spec, equations_selector, strat);
   rewr_obj = prover_obj->get_rewriter();
 }
 

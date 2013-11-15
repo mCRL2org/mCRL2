@@ -52,9 +52,9 @@ class Rewriter
 
     atermpp::aterm_appl internal_true;
     atermpp::aterm_appl internal_false;
-    atermpp::aterm internal_not;
-    atermpp::aterm internal_and;
-    atermpp::aterm internal_or;
+    atermpp::aterm_appl internal_not;
+    atermpp::aterm_appl internal_and;
+    atermpp::aterm_appl internal_or;
 
 
     used_data_equation_selector data_equation_selector;
@@ -63,13 +63,15 @@ class Rewriter
      *        function instead.
      * \sa createRewriter()
      **/
-    Rewriter()
+    Rewriter(const data_specification& data_spec, const used_data_equation_selector& eq_selector):
+          data_equation_selector(eq_selector),
+          m_data_specification_for_enumeration(data_spec)
     {
       internal_true=toInner(sort_bool::true_(),true);
       internal_false=toInner(sort_bool::false_(),true);
-      internal_not=toInner(sort_bool::not_(),true)[0];
-      internal_and=toInner(sort_bool::and_(),true)[0];
-      internal_or=toInner(sort_bool::or_(),true)[0];
+      internal_not=toInner(sort_bool::not_(),true);
+      internal_and=toInner(sort_bool::and_(),true);
+      internal_or=toInner(sort_bool::or_(),true);
     }
 
     /** \brief Destructor. */
@@ -203,7 +205,7 @@ class Rewriter
 
   protected:
 
-    mcrl2::data::data_specification m_data_specification_for_enumeration;
+    const mcrl2::data::data_specification m_data_specification_for_enumeration;
     atermpp::aterm_appl internal_quantifier_enumeration(
          const atermpp::aterm_appl &termInInnerFormat,
          internal_substitution_type &sigma);
@@ -345,7 +347,7 @@ inline size_t getArity(const data::function_symbol &op)
   return arity;
 }
 
-extern std::map< function_symbol, atermpp::aterm_int > term2int;
+extern std::map< data::function_symbol, atermpp::aterm_int > term2int;
 extern std::vector < data::function_symbol > int2term;
 
 inline size_t get_num_opids()
@@ -353,25 +355,26 @@ inline size_t get_num_opids()
   return int2term.size();
 }
 
-inline function_symbol &get_int2term(const size_t n)
+inline data::function_symbol &get_int2term(const size_t n)
 {
   assert(n<int2term.size());
   return int2term[n];
 }
 
-inline const atermpp::aterm_int &OpId2Int_aux(const function_symbol &term)
+inline const atermpp::aterm_int &OpId2Int_aux(const data::function_symbol& term)
 {
+  assert(is_function_symbol(term));
   const size_t num_opids=get_num_opids();
   atermpp::aterm_int i(num_opids);
-  term2int[term] =  i;
+  term2int[term]=i;
   assert(int2term.size()==num_opids);
   int2term.push_back(term);
   return term2int[term];
 }
 
-inline const atermpp::aterm_int &OpId2Int(const function_symbol &term)
+inline const atermpp::aterm_int &OpId2Int(const data::function_symbol &term)
 {
-  std::map< function_symbol, atermpp::aterm_int >::const_iterator f = term2int.find(term);
+  std::map< data::function_symbol, atermpp::aterm_int >::const_iterator f = term2int.find(term);
   if (f == term2int.end())
   {
     return OpId2Int_aux(term);

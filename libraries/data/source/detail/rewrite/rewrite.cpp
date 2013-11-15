@@ -708,18 +708,7 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
     const application& appl=aterm_cast<application>(term); 
     atermpp::aterm_appl arg0 = toInner(appl.head(), add_opids);
     // Reflect the way of encoding the other arguments!
-    if (is_variable(arg0) || is_abstraction(arg0) || is_where_clause(arg0))
-    {
-      result.push_back(arg0);
-    }
-    else
-    {
-      size_t arity = arg0.size();
-      for (size_t i = 0; i < arity; ++i)
-      {
-        result.push_back(arg0[i]);
-      }
-    }
+    result.push_back(arg0);
 
     for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
     {
@@ -730,7 +719,9 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 
   if (is_function_symbol(term))
   {
-    return Apply0(OpId2Int(atermpp::aterm_cast<function_symbol>(term)));
+    // Create a number for the function symbol. 
+    OpId2Int(atermpp::aterm_cast<function_symbol>(term));
+    return term; 
   }
 
   if (is_where_clause(term))
@@ -753,8 +744,14 @@ atermpp::aterm_appl toInner(const data_expression &term, const bool add_opids)
 
 data_expression fromInner(const atermpp::aterm_appl &term)
 {
+std::cerr << "Frominner: " << term << "  " << atermpp::detail::address(term) << "\n";
   using namespace atermpp;
   if (is_variable(term))
+  {
+    return aterm_cast<data_expression>(term);
+  }
+
+  if (is_function_symbol(term))
   {
     return aterm_cast<data_expression>(term);
   }
@@ -778,36 +775,16 @@ data_expression fromInner(const atermpp::aterm_appl &term)
     return abstraction(binder_type(aterm_cast<const aterm_appl>(term[0])),variable_list(term[1]),fromInner(aterm_cast<const aterm_appl>(term[2])));
   }
 
-  size_t arity = term.size();
-  const atermpp::aterm &t = term[0];
-  data_expression a;
+  // So term has the shape #REWR#(t,t1,...,tn)
 
-  if (t.type_is_int())
-  {
-    a = get_int2term(aterm_cast<const aterm_int>(t).value());
-  }
-  else
-  {
-    a = fromInner(aterm_cast<const aterm_appl>(t));
-  }
+  const data_expression head=fromInner(aterm_cast<aterm_appl>(term[0]));
 
-  size_t i = 1;
-  sort_expression sort = a.sort();
-  while (is_function_sort(sort) && (i < arity))
+  data_expression_vector arguments;
+  for(size_t i=1; i<term.size(); i++)
   {
-    sort_expression_list sort_dom = aterm_cast<function_sort>(sort).domain();
-    data_expression_vector list;
-    while (!sort_dom.empty())
-    {
-      assert(i < arity);
-      list.push_back(fromInner(aterm_cast<const atermpp::aterm_appl>(term[i])));
-      sort_dom.pop_front();
-      ++i;
-    }
-    a = application(a, list.begin(),list.end());
-    sort = aterm_cast<function_sort>(sort).codomain();
+    arguments.push_back(fromInner(aterm_cast<aterm_appl>(term[i])));
   }
-  return a;
+  return application(head,arguments.begin(),arguments.end());
 }
 
 

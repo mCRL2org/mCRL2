@@ -44,14 +44,14 @@ class RewriterJitty: public Rewriter
     size_t max_vars;
     bool need_rebuild;
 
-    std::map< atermpp::aterm_int, data_equation_list > jitty_eqns;
+    std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector < atermpp::aterm_list >  jitty_strat;
     size_t MAX_LEN; 
     atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl &term, internal_substitution_type &sigma);
     void build_strategies();
 
     atermpp::aterm_appl rewrite_aux_function_symbol(
-                      const atermpp::aterm_int &op,
+                      const function_symbol &op,
                       const atermpp::aterm_appl &term,
                       internal_substitution_type &sigma);
 
@@ -59,6 +59,7 @@ class RewriterJitty: public Rewriter
        to access element i */
     void make_jitty_strat_sufficiently_larger(const size_t i);
     atermpp::aterm_list create_strategy(const data_equation_list& rules1);
+    void rebuild_strategy();
 
 };
 }

@@ -39,7 +39,7 @@ class InternalFormatInfo
     boost::shared_ptr<detail::Rewriter> f_rewriter;
 
     /// \brief aterm_appl representing the internal \c if \c then \c else function with type Bool -> Bool -> Bool -> Bool.
-    atermpp::aterm_int f_if_then_else_bool;
+    function_symbol f_if_then_else_bool;
 
     /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
     /// \brief when determining the order of expressions.
@@ -257,7 +257,7 @@ class InternalFormatInfo
     InternalFormatInfo(boost::shared_ptr<detail::Rewriter> a_rewriter)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else_bool = atermpp::aterm_int((f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))[0]);
+      f_if_then_else_bool = function_symbol(f_rewriter->toRewriteFormat(if_(sort_bool::bool_())));
     }
 
     /// \brief Destructor with no particular functionality.
@@ -339,7 +339,7 @@ class InternalFormatInfo
     ///         The number of arguments of the main operator, otherwise.
     size_t get_number_of_arguments(const atermpp::aterm_appl &a_term)
     {
-      if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term))
+      if (!is_variable(a_term) && !is_function_symbol(a_term))
       {
         return a_term.size() - 1;
       }
@@ -377,8 +377,7 @@ class InternalFormatInfo
     /// \brief with type Bool -> Bool -> Bool -> Bool.
     bool is_if_then_else_bool(const atermpp::aterm_appl &a_term)
     {
-      atermpp::aterm v_function = a_term[0];
-      return (v_function == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
+      return (a_term == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
     }
 
     /// \brief Indicates whether or not a term is a single variable.

@@ -42,7 +42,7 @@ class InternalFormatManipulator
     std::map < atermpp::aterm_appl, atermpp::aterm_appl> f_orient;
 
     /// \brief aterm representing the \c if \c then \c else function in one of the internal formats of the rewriter.
-    atermpp::aterm f_if_then_else;
+    function_symbol f_if_then_else;
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
@@ -61,9 +61,7 @@ class InternalFormatManipulator
         return f_rewriter->internal_true;
       }
 
-      bool v_is_equality;
-
-      v_is_equality = f_info.is_equality(a_guard);
+      bool v_is_equality = f_info.is_equality(a_guard);
       if (v_is_equality && a_guard[2] == a_formula)
       {
         return atermpp::aterm_appl(a_guard[1]);
@@ -159,7 +157,7 @@ class InternalFormatManipulator
       f_info(a_info)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else = static_cast<atermpp::aterm_appl>(a_rewriter->toRewriteFormat(if_(sort_bool::bool_())))[0];
+      f_if_then_else = static_cast<function_symbol>(a_rewriter->toRewriteFormat(if_(sort_bool::bool_())));
     }
 
     /// \brief Destructor with no particular functionality.

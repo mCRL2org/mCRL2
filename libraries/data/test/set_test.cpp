@@ -85,10 +85,10 @@ void set_expression_test()
 
   data_expression t3d1 = parse_data_expression("({1,2} != {2,3})");
   data_expression t3d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2));
+  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2)); 
 
   data_expression t4d1 = parse_data_expression("(!{1,2}) == {1,2}");
-  data_expression t4d2 = parse_data_expression("false");
+  data_expression t4d2 = parse_data_expression("false"); 
   BOOST_CHECK(normaliser(t4d1) == normaliser(t4d2));
 
   data_expression t5d1 = parse_data_expression("(!!{1,2}) == {2,1}");
@@ -100,7 +100,7 @@ void set_expression_test()
   BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));
 
   e = parse_data_expression("{20, 30, 40}", v.begin(), v.end());
-  BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));  
+  BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));   
 }
 
 int test_main(int argc, char** argv)

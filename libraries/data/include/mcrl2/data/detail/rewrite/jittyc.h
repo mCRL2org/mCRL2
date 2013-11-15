@@ -90,18 +90,18 @@ class RewriterCompilingJitty: public Rewriter
     bool need_rebuild;
     bool made_files;
 
-    atermpp::aterm_int true_inner;
-    size_t true_num;
+    function_symbol true_inner;
+    // size_t true_num;
 
     std::vector < data_equation_list >  jittyc_eqns;
 
     std::map <size_t,size_t> int2ar_idx;
     size_t ar_size;
     std::vector<atermpp::aterm_appl> ar;
-    atermpp::aterm_appl build_ar_expr(const atermpp::aterm &expr, const atermpp::aterm_appl &var);
-    atermpp::aterm_appl build_ar_expr_aux(const data_equation &eqn, const size_t arg, const size_t arity);
-    atermpp::aterm_appl build_ar_expr(const data_equation_list &eqns, const size_t arg, const size_t arity);
-    bool always_rewrite_argument(const atermpp::aterm_int &opid, const size_t arity, const size_t arg);
+    atermpp::aterm_appl build_ar_expr_internal(const atermpp::aterm_appl& expr, const variable& var);
+    atermpp::aterm_appl build_ar_expr_aux(const data_equation& eqn, const size_t arg, const size_t arity);
+    atermpp::aterm_appl build_ar_expr(const data_equation_list& eqns, const size_t arg, const size_t arity);
+    bool always_rewrite_argument(const function_symbol& opid, const size_t arity, const size_t arg);
     bool calc_ar(const atermpp::aterm_appl &expr);
     void fill_always_rewrite_array();
 
@@ -111,14 +111,15 @@ class RewriterCompilingJitty: public Rewriter
     void (*so_rewr_cleanup)();
     atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl&);
 
-    void add_base_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
-    void extend_nfs(nfs_array &a, const atermpp::aterm_int &opid, size_t arity);
-    bool opid_is_nf(const atermpp::aterm_int &opid, size_t num_args);
+    void add_base_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
+    void extend_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
+    bool opid_is_nf(const function_symbol &opid, size_t num_args);
     void calc_nfs_list(nfs_array &a, size_t arity, atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars);
-    bool calc_nfs(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars);
+    bool calc_nfs(const atermpp::aterm_appl& t, int startarg, atermpp::aterm_list nnfvars);
     std::string calc_inner_terms(nfs_array &nfs, size_t arity,atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
-    std::pair<bool,std::string> calc_inner_term(atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
-    void calcTerm(FILE* f, atermpp::aterm t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
+    std::pair<bool,std::string> calc_inner_term(const atermpp::aterm_appl &t, 
+                int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
+    void calcTerm(FILE* f, const atermpp::aterm_appl& t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
     void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
                const std::vector<bool> &used, atermpp::aterm_list nnfvars);
     void implement_tree(FILE* f, atermpp::aterm_appl tree, const size_t arity, size_t d, size_t opid, const std::vector<bool> &used);

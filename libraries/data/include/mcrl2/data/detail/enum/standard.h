@@ -118,7 +118,7 @@ class EnumeratorStandard
   public:
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
-    std::set< atermpp::aterm_int > eqs;
+    std::set< function_symbol > eqs; // contains function symbols that represent equalities.
   
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
     ~EnumeratorStandard();

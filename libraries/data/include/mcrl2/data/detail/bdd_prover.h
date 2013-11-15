@@ -197,16 +197,14 @@ class BDD_Prover: public Prover
         mCRL2log(log::debug) << a_indent << "Smallest guard: " << data::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
       }
 
-      aterm_appl v_term1, v_term2;
-
-      v_term1 = f_manipulator.set_true(a_formula, v_guard);
+      aterm_appl v_term1 = f_manipulator.set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewrite_internal(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
       mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
 
-      v_term2 = f_manipulator.set_false(a_formula, v_guard);
+      aterm_appl v_term2 = f_manipulator.set_false(a_formula, v_guard);
       v_term2 = m_rewriter->rewrite_internal(aterm_appl(v_term2),bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
