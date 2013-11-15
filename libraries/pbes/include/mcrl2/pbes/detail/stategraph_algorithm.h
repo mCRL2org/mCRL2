@@ -1171,8 +1171,10 @@ class stategraph_algorithm
 
       while (!todo.empty())
       {
+        // u = (X, d, e)
         value_graph_vertex u = V[pick_element(todo)];
         const core::identifier_string& X = u.name();
+        const data::variable& d = u.variable();
         const data::data_expression& e = u.value();
         std::size_t k = u.index();
         const stategraph_equation& eq_X = *find_equation(m_pbes, X);
@@ -1182,9 +1184,8 @@ class stategraph_algorithm
         {
           const core::identifier_string& Y = i->X.name();
           auto q = component_index.find(Y);
-          data::data_expression e1 = undefined_data_expression();
 
-          if (k == undefined_index())
+          if (d == undefined_variable())
           {
             // case 1: (X, e) -> (Y, d1, e)
             if (q != component_index.end()) // (Y, k1) in C
@@ -1205,6 +1206,7 @@ class stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
+              data::data_expression e1;
               if (is_mapped_to(i->source, k, e))
               {
                 // source(X, i, k) = e && dest(X, i, k1) = e1
@@ -1225,9 +1227,8 @@ class stategraph_algorithm
             // case 4: (X, d, e) -> (Y, e)
             else
             {
-              e1 = e;
               std::size_t k1 = undefined_index();
-              insert_value_graph_edge(V, todo, Y, u, k1, e1);
+              insert_value_graph_edge(V, todo, Y, u, k1, e);
             }
           }
         }
