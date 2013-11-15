@@ -1417,7 +1417,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const bool rewr,
                   const size_t total_arity)
 {
-std::cerr << "CALC_INNER_TERM " << t << "\n";
   if (is_function_symbol(t))
   {
     stringstream ss;
@@ -1849,7 +1848,6 @@ std::cerr << "CALC_INNER_TERM " << t << "\n";
       ss << calc_inner_appl_head(arity) << " " << head.second << ",";
       if (c)
       {
-std::cerr << "CALC_INNER_TERMXXXX " << t << "\n";
         tail_first.clear(arity);
         nfs_array rewrall(arity);
         rewrall.fill(arity);
@@ -1880,7 +1878,6 @@ static aterm_appl add_args(const aterm_appl& a, size_t num)
   }
   else
   {
-std::cerr << "ADD ARGS " << num << "  " << a << "\n";
     // For the time being we add nothing. 
 
     return a;
@@ -2006,7 +2003,6 @@ void RewriterCompilingJitty::implement_tree_aux(
 // arity     Arity of the head symbol of the expression where are
 //           matching (for construction of return values)
 {
-std::cerr << "IMPLEMENT TREE AUX " << level << "   " << tree << "\n";
   if (isS(tree))
   {
     if (level == 0)
@@ -2154,7 +2150,6 @@ void RewriterCompilingJitty::implement_tree(
             size_t /* opid */,
             const std::vector<bool> &used)
 {
-std::cerr << "IMPLEMENT TREE " << tree << "\n";
   size_t l = 0;
 
   aterm_list nnfvars;
@@ -2932,7 +2927,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   for (size_t j=0; j < get_num_opids(); j++)
   {
     const data::function_symbol fs=get_int2term(j);
-std::cerr << "IMPLEMENT FUNCTION_SYMBOL " << fs << "\n";
     const size_t arity = getArity(fs);
 
     if (data_equation_selector(fs))
@@ -2969,17 +2963,17 @@ std::cerr << "IMPLEMENT FUNCTION_SYMBOL " << fs << "\n";
             fprintf(f,  ")\n"
                     "{\n"
                    );
-for (size_t i=0; i<a; i++)
-{
-  if (((nfs >> i) & 1) ==1) // nfs indicates in binary form which arguments are in normal form.
-  {
-    fprintf(f, "  std::cerr << \"ARG\%zu \"  << arg%zu << \"\\n\";\n",i,i);
-  }
-  else
-  {
-    fprintf(f, "  std::cerr << \"ARg\%zu \" << arg_not_nf%zu << \"\\n\";\n",i,i);
-  }
-}
+//for (size_t i=0; i<a; i++)
+//{
+//  if (((nfs >> i) & 1) ==1) // nfs indicates in binary form which arguments are in normal form.
+//  {
+//    fprintf(f, "  std::cerr << \"ARG\%zu \"  << arg%zu << \"\\n\";\n",i,i);
+//  }
+//  else
+//  {
+//    fprintf(f, "  std::cerr << \"ARg\%zu \" << arg_not_nf%zu << \"\\n\";\n",i,i);
+//  }
+//}
             if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
             {
             // Implement strategy
@@ -3232,7 +3226,6 @@ for (size_t i=0; i<a; i++)
       "  // Term t does not have the shape #REWR#(t1,...,tn)\n"
       "  if (mcrl2::data::is_variable(t))\n"
       "  {\n"
-"std::cerr << \"SUBSTITUTE \" << t << \" --> \" << (*(this_rewriter->global_sigma))(atermpp::aterm_cast<const mcrl2::data::variable>(t)) << \"\\n\";"
       "    return (*(this_rewriter->global_sigma))(atermpp::aterm_cast<const mcrl2::data::variable>(t));\n"
       "  }\n"
       "  if (mcrl2::data::is_abstraction(t))\n"
@@ -3262,7 +3255,6 @@ for (size_t i=0; i<a; i++)
   fprintf(f,
       "static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t)\n"
       "{\n"
-"std::cerr << \"REWRITE COMPILE \" << t << \"\\n\";\n"
       "  using namespace mcrl2::core::detail;\n"
       "  if (mcrl2::data::is_function_symbol(t))\n"
       "  {\n"
@@ -3384,7 +3376,6 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression &term,
      substitution_type &sigma)
 {
-std::cerr << "REWRITE " << pp(term) << "\n";
   internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterCompilingJitty::toRewriteFormat, this, _1));
   // Code below is not accepted by all compilers.
   // internal_substitution_type internal_sigma = apply(sigma, [this](const data_expression& t){return this->toRewriteFormat(t);});
@@ -3399,7 +3390,6 @@ atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
   {
     BuildRewriteSystem();
   }
-std::cerr << "REWRITE INTERNAL " << pp(term) <<  "    " << pp(atermpp::detail::address(term)) << "\n";
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
   internal_substitution_type *saved_sigma=global_sigma;
