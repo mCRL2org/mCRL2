@@ -224,7 +224,7 @@ void assign_variables_in_tree(
     if (opt_precompile_pbes)
     {
       // rewriter.set_internally_associated_value(*var_iter,(atermpp::aterm_appl)t);
-      sigma_internal[*var_iter]=atermpp::aterm_appl(t);
+      sigma_internal[*var_iter]=atermpp::aterm_cast<mcrl2::data::data_expression>(t);
     }
     else
     {
@@ -2155,7 +2155,7 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::data::pp(Mucks_rewriter.convert_from(p)));
+                                   mcrl2::data::pp(Mucks_rewriter.convert_from(mcrl2::data::data_expression(p))));
       }
       else
       {
@@ -2399,7 +2399,7 @@ class boolean_equation_system
               if (opt_precompile_pbes)
               {
                 // Mucks_rewriter.set_internally_associated_value(*vlist,(atermpp::aterm)*elist);
-                sigma_internal[*vlist]=atermpp::aterm_appl(*elist);
+                sigma_internal[*vlist]=*elist;
               }
               else
               {
@@ -2464,7 +2464,7 @@ class boolean_equation_system
             // Mucks_rewriter.clear_internally_associated_value(*vlist);
             if (opt_precompile_pbes)
             {
-              sigma_internal[*vlist]=atermpp::aterm_appl(*vlist);
+              sigma_internal[*vlist]=*vlist;
             }
             else
             {
@@ -2622,14 +2622,14 @@ class boolean_equation_system
       }
       else
       {
+        data_expression t1(t);
         if (opt_precompile_pbes)
         {
-          data_expression t1(Mucks_rewriter.convert_from(atermpp::aterm_appl(t)));
-          f << c << mcrl2::data::pp(t1);
+          data_expression t2(Mucks_rewriter.convert_from(t1));
+          f << c << mcrl2::data::pp(t2);
         }
         else
         {
-          data_expression t1(t);
           f << c << mcrl2::data::pp(t1);
         }
       }
@@ -2671,7 +2671,7 @@ class boolean_equation_system
           f << ((t==tl.begin())?"(":",");
           if (opt_precompile_pbes)
           {
-            const atermpp::aterm_appl term=*t;
+            const data_expression term=*t;
             f << mcrl2::data::pp(Mucks_rewriter.convert_from(term));
           }
           else

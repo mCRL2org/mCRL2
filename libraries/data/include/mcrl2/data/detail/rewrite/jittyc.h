@@ -44,12 +44,12 @@ class RewriterCompilingJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    atermpp::aterm_appl rewrite_internal(
-         const atermpp::aterm_appl &term,
+    data_expression rewrite_internal(
+         const data_expression &term,
          internal_substitution_type &sigma);
 
-    atermpp::aterm_appl toRewriteFormat(const data_expression &term);
-    // data_expression fromRewriteFormat(const atermpp::aterm_appl term);
+    data_expression toRewriteFormat(const data_expression &term);
+    // data_expression fromRewriteFormat(const data_expression term);
     bool addRewriteRule(const data_equation &rule);
     bool removeRewriteRule(const data_equation &rule);
     internal_substitution_type *global_sigma;
@@ -109,17 +109,17 @@ class RewriterCompilingJitty: public Rewriter
     uncompiled_library *rewriter_so;
 
     void (*so_rewr_cleanup)();
-    atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl&);
+    data_expression(*so_rewr)(const data_expression&);
 
     void add_base_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     void extend_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
     bool opid_is_nf(const function_symbol &opid, size_t num_args);
-    void calc_nfs_list(nfs_array &a, size_t arity, atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars);
-    bool calc_nfs(const atermpp::aterm_appl& t, int startarg, atermpp::aterm_list nnfvars);
-    std::string calc_inner_terms(nfs_array &nfs, size_t arity,atermpp::aterm_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
-    std::pair<bool,std::string> calc_inner_term(const atermpp::aterm_appl &t, 
+    void calc_nfs_list(nfs_array &a, size_t arity, data_expression_list args, int startarg, atermpp::aterm_list nnfvars);
+    bool calc_nfs(const data_expression& t, int startarg, atermpp::aterm_list nnfvars);
+    std::string calc_inner_terms(nfs_array &nfs, size_t arity,data_expression_list args, int startarg, atermpp::aterm_list nnfvars, nfs_array *rewr);
+    std::pair<bool,std::string> calc_inner_term(const data_expression &t, 
                 int startarg, atermpp::aterm_list nnfvars, const bool rewr, const size_t total_arity);
-    void calcTerm(FILE* f, const atermpp::aterm_appl& t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
+    void calcTerm(FILE* f, const data_expression& t, int startarg, atermpp::aterm_list nnfvars, bool rewr = true);
     void implement_tree_aux(FILE* f, atermpp::aterm_appl tree, size_t cur_arg, size_t parent, size_t level, size_t cnt, size_t d, const size_t arity, 
                const std::vector<bool> &used, atermpp::aterm_list nnfvars);
     void implement_tree(FILE* f, atermpp::aterm_appl tree, const size_t arity, size_t d, size_t opid, const std::vector<bool> &used);
@@ -136,7 +136,7 @@ struct rewriter_interface
   std::string caller_toolset_version;
   std::string status;
   RewriterCompilingJitty* rewriter;
-  atermpp::aterm_appl (*rewrite_external)(const atermpp::aterm_appl &t);
+  data_expression (*rewrite_external)(const data_expression &t);
   void (*rewrite_cleanup)();
 };
 

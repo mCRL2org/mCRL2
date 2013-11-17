@@ -28,21 +28,32 @@ namespace mcrl2
 namespace data
 {
 
+class default_converter
+{
+  public:
+    const data_expression& operator()(const data_expression& t) const
+    {
+      return t;
+    }
+};
+
 /// \brief Iterator for term_appl which prepends a single term to the list.
-template <typename Term, typename ForwardIterator>
+template <typename ForwardIterator, class ArgumentConverter=default_converter >
 class term_appl_prepend_iterator: public boost::iterator_facade<
-  term_appl_prepend_iterator<Term, ForwardIterator>, // Derived
-  Term,                                              // Value
-  boost::forward_traversal_tag,                      // CategoryOrTraversal
-  Term&                                              // Reference
+  term_appl_prepend_iterator<ForwardIterator, ArgumentConverter>, // Derived
+  data_expression,                                                // Value
+  boost::forward_traversal_tag,                                   // CategoryOrTraversal
+  const data_expression&                                          // Reference
   >
 {
   public:
 
     /// \brief Constructor.
     /// \param t A term
-    term_appl_prepend_iterator(ForwardIterator it, const Term* prepend = NULL)
-      : m_it(it), m_prepend(prepend)
+    term_appl_prepend_iterator(ForwardIterator it, 
+                               const data_expression* prepend=nullptr, 
+                               const ArgumentConverter arg_convert=default_converter())
+      : m_it(it), m_prepend(prepend), m_argument_converter(arg_convert)
     {}
 
   private:
@@ -58,13 +69,15 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    const Term &dereference() const
+    const data_expression &dereference() const  // TODO HERE AN UNNESSARY COPY IS MADE. SHOULD RETURN A REFERENCE
     {
       if (m_prepend)
       {
         return *m_prepend;
       }
-      return *m_it;
+      
+      m_stable_store=m_argument_converter(*m_it);
+      return m_stable_store;
     }
 
     /// \brief Increments the iterator
@@ -80,8 +93,10 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
       }
     }
 
+    mutable data_expression m_stable_store;
     ForwardIterator m_it;
-    const Term *m_prepend;
+    const data_expression *m_prepend;
+    ArgumentConverter m_argument_converter;
 };
 
 /// \brief An application of a data expression to a number of arguments
@@ -90,10 +105,42 @@ class application: public data_expression
   public:
     /// \brief Default constructor.
     application()
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(1),
-                                         term_appl_prepend_iterator<const atermpp::term_appl<aterm>, data_expression*>(nullptr, &core::detail::constructDataExpr()),
-                                         term_appl_prepend_iterator<const atermpp::term_appl<aterm>, data_expression*>(nullptr)))
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(0)))
     {}
+
+    /// \brief Constructor.
+    application(const data_expression& head,
+                const data_expression& arg1)
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(2),head,arg1))
+    {
+    }
+
+    /// \brief Constructor.
+    application(const data_expression& head,
+                const data_expression& arg1,
+                const data_expression& arg2)
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(3),head,arg1,arg2))
+    {
+    }
+
+    /// \brief Constructor.
+    application(const data_expression& head,
+                const data_expression& arg1,
+                const data_expression& arg2,
+                const data_expression& arg3)
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(4),head,arg1,arg2,arg3))
+    {
+    }
+
+    /// \brief Constructor.
+    application(const data_expression& head,
+                const data_expression& arg1,
+                const data_expression& arg2,
+                const data_expression& arg3,
+                const data_expression& arg4)
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(5),head,arg1,arg2,arg3,arg4))
+    {
+    }
 
     /// \brief Constructor.
     /// \param term A term
@@ -104,19 +151,16 @@ class application: public data_expression
     }
 
     /// \brief Constructor.
-    application(const data_expression& head, const data_expression_list& arguments)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
-                                         term_appl_prepend_iterator<const data_expression, data_expression_list::const_iterator>(arguments.begin(), &head),
-                                         term_appl_prepend_iterator<const data_expression, data_expression_list::const_iterator>(arguments.end())))
-    {}
-
-    /// \brief Constructor.
     template <typename Container>
-    application(const data_expression& head, const Container& arguments, typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
+    application(const data_expression& head, 
+                const Container& arguments, 
+                typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
-                                         term_appl_prepend_iterator<const data_expression, typename Container::const_iterator>(arguments.begin(), &head),
-                                         term_appl_prepend_iterator<const data_expression, typename Container::const_iterator>(arguments.end())))
-    {}
+                                         term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
+                                         term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
+    { 
+      assert(arguments.size()>0);
+    }
 
     const data_expression& head() const
     {
@@ -127,6 +171,7 @@ class application: public data_expression
     {
       return data_expression_list(begin(), end());
     }
+
   private:
     // forbid the use of iterator, which is silently inherited from
     // aterm_appl. Modifying the arguments of an application through the iterator
@@ -134,6 +179,7 @@ class application: public data_expression
     typedef data_expression::iterator iterator;
 
   public:
+
     class const_iterator : public boost::iterator_adaptor<
             const_iterator                     // Derived
           , data_expression::const_iterator    // Base
@@ -141,26 +187,60 @@ class application: public data_expression
           , boost::random_access_traversal_tag // CategoryOrTraversal
         >
     {
-    public:
-      explicit const_iterator(const data_expression::const_iterator& p)
-        : const_iterator::iterator_adaptor_(p) {}
-    private:
-      friend class boost::iterator_core_access;
-      reference dereference() const
-      {
-        return atermpp::aterm_cast<const data_expression>(*base_reference());
-      }
+      public:
+        explicit const_iterator(const data_expression::const_iterator& p)
+          : const_iterator::iterator_adaptor_(p) {}
+      private:
+        friend class boost::iterator_core_access;
+        reference dereference() const
+        {
+          return atermpp::aterm_cast<const data_expression>(*base_reference());
+        }
     };
 
     /// \brief Constructor.
     template <typename FwdIter>
     application(const data_expression& head,
                 FwdIter first,
-                FwdIter last)
+                FwdIter last,
+                typename boost::disable_if<typename boost::is_base_of<data_expression, FwdIter>::type>::type* = 0)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                         term_appl_prepend_iterator<const data_expression, FwdIter>(first, &head),
-                                         term_appl_prepend_iterator<const data_expression, FwdIter>(last)))
-    {}
+                                         term_appl_prepend_iterator<FwdIter>(first, &head),
+                                         term_appl_prepend_iterator<FwdIter>(last)))
+    {
+      assert(first!=last);
+    }
+
+    /// \brief Constructor.
+    template <typename FwdIter>
+    application(const size_t arity,
+                const data_expression& head,
+                FwdIter first,
+                FwdIter last,
+                typename boost::disable_if<typename boost::is_base_of<data_expression, FwdIter>::type>::type* = 0)
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arity + 1),
+                                         term_appl_prepend_iterator<FwdIter>(first, &head),
+                                         term_appl_prepend_iterator<FwdIter>(last)))
+    { 
+      assert(arity>0);
+      assert(std::distance(first, last)==arity);
+    }
+
+
+    /// \brief Constructor.
+    template <typename FwdIter, class ArgumentConverter>
+    application(const data_expression& head,
+                FwdIter first,
+                FwdIter last,
+                ArgumentConverter convert_arguments,
+                typename boost::disable_if<typename boost::is_base_of<data_expression, FwdIter>::type>::type* = 0,
+                typename boost::disable_if<typename boost::is_base_of<data_expression, ArgumentConverter>::type>::type* = 0)
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+                                         term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
+                                         term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,NULL,convert_arguments)))
+    {
+      assert(first!=last);
+    }
 
     /// \brief Returns an iterator pointing to the first argument of the
     ///        application.
@@ -182,28 +262,6 @@ class application: public data_expression
     {
       return arguments().size();
     }
-
-/*
-    /// \brief Returns the first argument of the application
-    /// \pre head() is a binary operator
-    /// \return arguments()[0]
-    inline
-    const data_expression& left() const
-    {
-      assert(size() == 2);
-      return *(begin());
-    }
-
-    /// \brief Returns the second argument of the application
-    /// \pre head() is a binary operator
-    /// \return arguments()[1]
-    inline
-    const data_expression& right() const
-    {
-      assert(size() == 2);
-      return *(++(begin()));
-    }
-*/
 };
 
 /// \brief swap overload
@@ -213,53 +271,6 @@ inline void swap(application& t1, application& t2)
 }
 
 //--- end generated class application ---//
-
-/// \brief Apply data expression to a data expression
-inline application make_application(data_expression const& head,
-                                    data_expression const& e0)
-{
-  // Due to sort aliasing, the asserts below are not necessarily
-  // valid anymore.
-  // assert(is_function_sort(head.sort()));
-  // assert(function_sort(head.sort()).domain().size() == 1);
-  return application(head, atermpp::make_list(e0));
-}
-
-/// \brief Apply data expression to two data expression
-inline application make_application(data_expression const& head,
-                                    data_expression const& e0,
-                                    data_expression const& e1)
-{
-  // See above for the reason to outcomment the asserts below
-  // assert(is_function_sort(head.sort()));
-  // assert(function_sort(head.sort()).domain().size() == 2);
-  return application(head, atermpp::make_list(e0, e1));
-}
-
-/// \brief Apply data expression to three data expression
-inline application make_application(data_expression const& head,
-                                    data_expression const& e0,
-                                    data_expression const& e1,
-                                    data_expression const& e2)
-{
-  // See above for the reason to outcomment the asserts below
-  // assert(is_function_sort(head.sort()));
-  // assert(function_sort(head.sort()).domain().size() == 3);
-  return application(head, atermpp::make_list(e0, e1, e2));
-}
-
-/// \brief Apply data expression to four data expression
-inline application make_application(data_expression const& head,
-                                    data_expression const& e0,
-                                    data_expression const& e1,
-                                    data_expression const& e2,
-                                    data_expression const& e3)
-{
-  // See above for the reason to outcomment the asserts below
-  // assert(is_function_sort(head.sort()));
-  // assert(function_sort(head.sort()).domain().size() == 4);
-  return application(head, atermpp::make_list(e0, e1, e2, e3));
-}
 
 // The precedence function must be declared here. Unfortunately this cannot be done using the include below.
 // #include "mcrl2/data/precedence.h"

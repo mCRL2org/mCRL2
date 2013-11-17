@@ -31,23 +31,23 @@ namespace detail
 class ss_solution
 {
   protected:
-    atermpp::term_list< atermpp::aterm_appl > m_solution;  // A list containing the solution of a condition in internal format.
-    atermpp::aterm_appl m_evaluated_condition;             // The condition after substituting the solution, in internal format.
+    data_expression_list m_solution;  // A list containing the solution of a condition in internal format.
+    data_expression m_evaluated_condition;             // The condition after substituting the solution, in internal format.
 
   public:
 
     // Constructor.
-    ss_solution(const atermpp::term_list< atermpp::aterm_appl > &solution, const atermpp::aterm_appl evaluated_condition) :
+    ss_solution(const data_expression_list& solution, const data_expression evaluated_condition) :
       m_solution(solution),
       m_evaluated_condition(evaluated_condition)
     {} 
    
-    atermpp::aterm_appl evaluated_condition() const
+    data_expression evaluated_condition() const
     { 
       return m_evaluated_condition;
     }
 
-    atermpp::term_list< atermpp::aterm_appl > solution() const
+    data_expression_list solution() const
     {
       return m_solution; 
     }
@@ -59,9 +59,9 @@ class fs_expr
     variable_list m_vars;                              // The vars over which enumeration must take place.
     variable_list m_substituted_vars;                  // Variables for which a substitution exist. The substituted
                                                        // values are given in m_vals;
-    atermpp::term_list< atermpp::aterm_appl > m_vals;  // Data expressions in internal format that are to be substituted
+    data_expression_list m_vals;  // Data expressions in internal format that are to be substituted
                                                        // in the variables in m_substituted_vars.
-    atermpp::aterm_appl m_expr;                        // data_expression in internal format to which internal variables
+    data_expression m_expr;                        // data_expression in internal format to which internal variables
                                                        // must adhere.
 
   public:
@@ -71,30 +71,30 @@ class fs_expr
 
     // Constructor
     fs_expr(
-        const variable_list &vars, 
-        const variable_list &substituted_vars, 
-        const atermpp::term_list< atermpp::aterm_appl > &vals, 
-        const atermpp::aterm_appl &expr):
+        const variable_list& vars, 
+        const variable_list& substituted_vars, 
+        const data_expression_list& vals, 
+        const data_expression& expr):
        m_vars(vars), m_substituted_vars(substituted_vars),m_vals(vals), m_expr(expr)
     {
     }
 
-    const variable_list &vars() const
+    const variable_list& vars() const
     {
       return m_vars;
     }
 
-    const variable_list &substituted_vars() const
+    const variable_list& substituted_vars() const
     {
       return m_substituted_vars;
     }
 
-    const atermpp::term_list< atermpp::aterm_appl > &vals() const
+    const data_expression_list& vals() const
     {
       return m_vals;
     }
 
-    const atermpp::aterm_appl &expr() const
+    const data_expression& expr() const
     {
       return m_expr;
     }
@@ -116,7 +116,7 @@ class EnumeratorSolutionsStandard;
 class EnumeratorStandard 
 {
   public:
-    const mcrl2::data::data_specification &m_data_spec;
+    const mcrl2::data::data_specification& m_data_spec;
     Rewriter* rewr_obj;
     std::set< function_symbol > eqs; // contains function symbols that represent equalities.
   
@@ -142,13 +142,13 @@ class EnumeratorSolutionsStandard
   protected:
 
     detail::EnumeratorStandard *m_enclosing_enumerator;
-/*    atermpp::aterm_appl desired_truth_value;    // We search for solutions for the condition enum_expr that are not
-    atermpp::aterm_appl forbidden_truth_value;  // equal to the forbidden truth value, and if the output matches the
+/*    data_expression desired_truth_value;    // We search for solutions for the condition enum_expr that are not
+    data_expression forbidden_truth_value;  // equal to the forbidden truth value, and if the output matches the
                                                 // desired truth value, then the variable solution_is_exact is set. */
 
     variable_list enum_vars;                    // The variables over which a solution is searched.
-    atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
-    internal_substitution_type &enum_sigma;
+    data_expression enum_expr;              // Condition to be satisfied in internal format.
+    internal_substitution_type& enum_sigma;
 
     std::deque < fs_expr> fs_stack;
     std::vector< ss_solution > ss_stack;
@@ -157,7 +157,7 @@ class EnumeratorSolutionsStandard
     size_t max_vars;
     size_t m_max_internal_variables;
 
-    internal_substitution_type &default_sigma()
+    internal_substitution_type& default_sigma()
     {
       static internal_substitution_type default_sigma;
       return default_sigma;
@@ -196,9 +196,9 @@ class EnumeratorSolutionsStandard
     //                                 a case rewriting can be avoided.
 
     EnumeratorSolutionsStandard(
-                   const variable_list &vars, 
-                   const atermpp::aterm_appl &expr, 
-                   internal_substitution_type &sigma,
+                   const variable_list& vars, 
+                   const data_expression& expr, 
+                   internal_substitution_type& sigma,
                    const bool not_equal_to_false, 
                    detail::EnumeratorStandard *enclosing_enumerator,
                    const size_t max_internal_variables=0,
@@ -244,75 +244,75 @@ class EnumeratorSolutionsStandard
     *
     **/
 
-    bool next(atermpp::aterm_appl &evaluated_condition,
-              atermpp::term_list<atermpp::aterm_appl> &solution, 
-              bool &solution_possible);
+    bool next(data_expression& evaluated_condition,
+              atermpp::term_list<data_expression>& solution, 
+              bool& solution_possible);
 
   /** \brief Get next solution as a term_list in internal format.
    **/
-    bool next(atermpp::term_list<atermpp::aterm_appl> &solution);
+    bool next(atermpp::term_list<data_expression>& solution);
 
   /** \brief Get next solution as a term_list in internal format.
    **/
-    bool next(atermpp::aterm_appl &evaluated_condition,
-              atermpp::term_list<atermpp::aterm_appl> &solution);
+    bool next(data_expression& evaluated_condition,
+              atermpp::term_list<data_expression>& solution);
 
   /** \brief Get next solution as a term_list in internal format.
    **/
-    bool next(atermpp::term_list<atermpp::aterm_appl> &solution, 
-              bool &solution_possible);
+    bool next(atermpp::term_list<data_expression>& solution, 
+              bool& solution_possible);
 
 
   private:
     void reset(const bool not_equal_to_false, const bool expr_is_normal_form); 
 
-    bool find_equality(const atermpp::aterm_appl &T, 
-                            const mcrl2::data::variable_list &vars, 
-                            mcrl2::data::variable &v, 
-                            atermpp::aterm_appl &e); 
+    bool find_equality(const data_expression& T, 
+                            const mcrl2::data::variable_list& vars, 
+                            mcrl2::data::variable& v, 
+                            data_expression& e); 
 
-    void EliminateVars(fs_expr &e);
+    void EliminateVars(fs_expr& e);
 
-    atermpp::aterm_appl build_solution_single(
-                 const atermpp::aterm_appl &t,
+    data_expression build_solution_single(
+                 const data_expression& t,
                  variable_list substituted_vars,
-                 atermpp::term_list < atermpp::aterm_appl> exprs) const;
+                 data_expression_list exprs) const;
 
-    atermpp::term_list < atermpp::aterm_appl> build_solution(
-                 const variable_list &vars,
-                 const variable_list &substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const;
+    data_expression_list build_solution(
+                 const variable_list& vars,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& exprs) const;
 
-    atermpp::term_list < atermpp::aterm_appl> build_solution2(
-                 const variable_list &vars,
-                 const variable_list &substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const;
-    atermpp::aterm_appl build_solution_aux(
-                 const atermpp::aterm_appl &t,
-                 const variable_list &substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const;
-    atermpp::aterm_appl add_negations(
-                 const atermpp::aterm_appl &condition,
-                 const atermpp::term_list< atermpp::aterm_appl > &negation_term_list,
+    atermpp::term_list < data_expression> build_solution2(
+                 const variable_list& vars,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& exprs) const;
+    data_expression build_solution_aux(
+                 const data_expression& t,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& exprs) const;
+    data_expression add_negations(
+                 const data_expression& condition,
+                 const data_expression_list& negation_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or(
-                 std::deque < fs_expr> &fs_stack,
-                 const variable_list &var_list,
-                 const variable_list &substituted_vars,
-                 const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
-                 const atermpp::aterm_appl &condition,
-                 const atermpp::term_list< atermpp::aterm_appl > &negated_term_list,
+                 std::deque < fs_expr>& fs_stack,
+                 const variable_list& var_list,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& substitution_terms,
+                 const data_expression& condition,
+                 const data_expression_list& negated_term_list,
                  const bool negated) const;
     void push_on_fs_stack_and_split_or_without_rewriting(
-                 std::deque < fs_expr> &fs_stack,
-                 const variable_list &var_list,
-                 const variable_list &substituted_vars,
-                 const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
-                 const atermpp::aterm_appl &condition,
-                 const atermpp::term_list< atermpp::aterm_appl > &negated_term_list,
+                 std::deque < fs_expr>& fs_stack,
+                 const variable_list& var_list,
+                 const variable_list& substituted_vars,
+                 const data_expression_list& substitution_terms,
+                 const data_expression& condition,
+                 const data_expression_list& negated_term_list,
                  const bool negated) const;
-    atermpp::term_list< atermpp::aterm_appl > negate(
-                 const atermpp::term_list< atermpp::aterm_appl > &l) const;
+    data_expression_list negate(
+                 const data_expression_list& l) const;
 };
 }
 }

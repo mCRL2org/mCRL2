@@ -677,7 +677,7 @@ static void add_summand(summand_information& summand_info,
         if (negate)
         {
           nextstate.push_front(assignment(c_complete->get_variable(),
-                               make_application(negate_function_symbol(cs.sort()),c->get_variable())));
+                               application(negate_function_symbol(cs.sort()),c->get_variable())));
         }
         else
         {
@@ -838,17 +838,17 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   ds.add_equation(data_equation(  // negate(larger)=smaller;
                     std::vector <variable>(),
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),c.larger()),
+                    application(negate_function_symbol(c.sort()),c.larger()),
                     c.smaller()));
   ds.add_equation(data_equation(  // negate(smaller)=larger;
                     std::vector <variable>(),
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),c.smaller()),
+                    application(negate_function_symbol(c.sort()),c.smaller()),
                     c.larger()));
   ds.add_equation(data_equation(  // negate(equal)=equal;
                     std::vector <variable>(),
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),c.equal()),
+                    application(negate_function_symbol(c.sort()),c.equal()),
                     c.equal()));
   variable v("x",c.sort());
   std::vector <variable> vars;
@@ -856,7 +856,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   ds.add_equation(data_equation(  // negate(negate(x))=x;
                     vars,
                     sort_bool::true_(),
-                    make_application(negate_function_symbol(c.sort()),make_application(negate_function_symbol(c.sort()),v)),
+                    application(negate_function_symbol(c.sort()),application(negate_function_symbol(c.sort()),v)),
                     v));
 
   s.data() = ds;

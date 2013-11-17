@@ -53,7 +53,7 @@ class basic_rewriter
     /// \details This function is needed to allow the conversion of substitutions
     ///          to the internal format.
     /// \deprecated
-    atermpp::aterm_appl convert_expression_to(const data_expression &t) const
+    data_expression convert_expression_to(const data_expression &t) const
     {
       return m_rewriter->toRewriteFormat(t);
     }
@@ -64,10 +64,10 @@ class basic_rewriter
     ///          format if the internal details of the legacy rewriters are used.
     ///          This function should be removed.
     /// \deprecated
-    internal_substitution_type convert_substitution_to(const substitution_type &sigma) const
+    /* internal_substitution_type convert_substitution_to(const substitution_type &sigma) const
     {
       return apply(sigma, boost::bind(&basic_rewriter<Term>::convert_expression_to, this, _1));
-    }
+    } */
 
   public:
 
@@ -133,15 +133,15 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     typedef core::term_traits< expression_type >::variable_type variable_type;
 
 
-    typedef basic_rewriter< atermpp::aterm >::substitution_type substitution_type;
-    typedef basic_rewriter< atermpp::aterm >::internal_substitution_type internal_substitution_type;
+    typedef basic_rewriter< data_expression >::substitution_type substitution_type;
+    typedef basic_rewriter< data_expression >::internal_substitution_type internal_substitution_type;
 
   protected:
 
     /// \brief Copy constructor for conversion between derived types
     template < typename CompatibleExpression >
     basic_rewriter(const basic_rewriter< CompatibleExpression > & other) :
-      basic_rewriter< atermpp::aterm >(other)
+      basic_rewriter< data_expression >(other)
     { }
 
   public:
@@ -175,7 +175,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     {
       return m_rewriter->addRewriteRule(equation);
     }
-};
+}; 
 
 /// \brief Rewriter that operates on data expressions.
 //

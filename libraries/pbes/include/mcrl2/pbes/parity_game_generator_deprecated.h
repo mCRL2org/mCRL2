@@ -82,7 +82,7 @@ public:
         data::data_expression_vector pretty_args;
         for(tr::data_term_sequence_type::const_iterator i = args.begin(); i != args.end(); ++i)
         {
-          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+          pretty_args.push_back(datar_internal.convert_from(*i));
         }
         result = tr::prop_var(tr::name(e), pretty_args.begin(), pretty_args.end());
       }
@@ -92,7 +92,7 @@ public:
         data::variable_vector pretty_args;
         for(auto i = params.begin(); i != params.end(); ++i)
         {
-          data::data_expression d = datar_internal.convert_from((atermpp::aterm_appl)*i);
+          data::data_expression d = datar_internal.convert_from(*i);
           const data::variable& vd = core::static_down_cast<const data::variable&>(d);
           pretty_args.push_back(vd);
         }
@@ -105,7 +105,7 @@ public:
         data::variable_vector pretty_args;
         for(auto i = params.begin(); i != params.end(); ++i)
         {
-          data::data_expression d = datar_internal.convert_from((atermpp::aterm_appl)*i);
+          data::data_expression d = datar_internal.convert_from(*i);
           const data::variable& vd = core::static_down_cast<const data::variable&>(d);
           pretty_args.push_back(vd);
         }
@@ -114,7 +114,7 @@ public:
       }
       else
       {
-        result = datar_internal.convert_from((atermpp::aterm_appl)e);
+        result = datar_internal.convert_from(atermpp::aterm_cast<data::data_expression>(e));
       }
       return result;
     }

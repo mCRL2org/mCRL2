@@ -53,28 +53,28 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     {
     }
 
-    atermpp::aterm_appl convert_to(const data_expression &t) const
+    data_expression convert_to(const data_expression &t) const
     {
       return convert_expression_to(t);
     } 
 
     internal_substitution_type convert_to(const substitution_type& sigma) const
     {
-      return convert_substitution_to(sigma);
+      return sigma;
     }
 
-    data_expression convert_from(const atermpp::aterm_appl t) const
+    data_expression convert_from(const data_expression t) const
     {
       return m_rewriter->fromRewriteFormat(t);
     } 
   
-    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl &t, internal_substitution_type &sigma) const
+    data_expression rewrite_internal(const data_expression &t, internal_substitution_type &sigma) const
     {
       return m_rewriter->rewrite_internal(t,sigma);
     } 
   
-    atermpp::term_list <atermpp::aterm_appl> rewrite_internal_list(
-         const atermpp::term_list<atermpp::aterm_appl> & t,
+    data_expression_list rewrite_internal_list(
+         const data_expression_list &t,
          internal_substitution_type &sigma) const
     {
       return m_rewriter->rewrite_internal_list(t,sigma);

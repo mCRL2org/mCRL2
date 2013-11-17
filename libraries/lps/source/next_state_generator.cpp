@@ -399,7 +399,7 @@ struct action_argument_converter
         m_substitution(substitution)
   {}
 
-  data_expression operator()(const atermpp::aterm_appl &t) const
+  data_expression operator()(const data_expression &t) const
   {
     return atermpp::aterm_cast<data_expression>(m_rewriter.convert_from(m_rewriter.rewrite_internal(t, *m_substitution)));
   }
@@ -418,7 +418,7 @@ struct state_argument_rewriter
   next_state_generator::internal_state_argument_t operator()(const atermpp::aterm &t) const
   {
     return atermpp::aterm_cast<next_state_generator::internal_state_argument_t>(
-                m_rewriter.rewrite_internal(atermpp::aterm_cast<atermpp::aterm_appl>(t), *m_substitution));
+                m_rewriter.rewrite_internal(atermpp::aterm_cast<data_expression>(t), *m_substitution));
   }
 };
 

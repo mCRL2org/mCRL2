@@ -250,7 +250,7 @@ void lpsparunfold::create_data_equations(
 
     if (is_basic_sort(i -> sort()))
     {
-      data_expression lhs = make_application(determine_function, *i);
+      data_expression lhs = application(determine_function, *i);
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_all_variables(lhs);
       set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
@@ -276,7 +276,7 @@ void lpsparunfold::create_data_equations(
         sort_index[*j] = sort_index[*j]+1;
         dal.push_back(y);
       }
-      data_expression lhs = make_application(determine_function , application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
+      data_expression lhs = application(determine_function , application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_all_variables(lhs);
       set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
@@ -288,7 +288,7 @@ void lpsparunfold::create_data_equations(
 
       while (!pi.empty() && f < static_cast<size_t>(std::distance(dal.begin(), dal.end())))
       {
-        data_expression lhs = make_application(pi.front(), application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
+        data_expression lhs = application(pi.front(), application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
         mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, dal[f])) << std::endl;
         set< variable > vars = find_all_variables(lhs);
         set< variable > tmp_var = find_all_variables(dal[f]);
@@ -325,7 +325,7 @@ void lpsparunfold::create_data_equations(
     if (is_structured_sort(i -> sort())) // This case seems to be identical to the basic sort.
     {
 
-      data_expression lhs = make_application(determine_function , *i);
+      data_expression lhs = application(determine_function , *i);
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > vars = find_all_variables(lhs);
       set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
@@ -351,7 +351,7 @@ void lpsparunfold::create_data_equations(
       data_expression lhs, rhs;
       if (cs.container_name() == list_container())
       {
-        lhs = make_application(determine_function , sort_list::empty(element_sort));
+        lhs = application(determine_function , sort_list::empty(element_sort));
       }
       else
       {
@@ -704,11 +704,11 @@ mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor(data_expres
     data_expression_vector new_ass;
 
     /* Det function */
-    new_ass.push_back(make_application(determine_function, de)) ;
+    new_ass.push_back(application(determine_function, de)) ;
 
     for (function_symbol_vector::iterator i = pi.begin(); i != pi.end(); ++i)
     {
-      new_ass.push_back(make_application(*i, de)) ;
+      new_ass.push_back(application(*i, de)) ;
     }
 
     result = new_ass;
@@ -784,7 +784,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
     variables_used.push_back(v);
   }
 
-  data_expression lhs(make_application(function_for_distribution, application(case_function, variables_used)));
+  data_expression lhs(application(function_for_distribution, application(case_function, variables_used)));
   data_expression_vector rw_data_expressions;
   sort_expression_vector rw_sort_expressions;
   for (variable_vector::iterator i = variables_used.begin();
@@ -798,7 +798,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
     }
     else
     {
-      rw_data_expressions.push_back(make_application(function_for_distribution, *i));
+      rw_data_expressions.push_back(application(function_for_distribution, *i));
       rw_sort_expressions.push_back(function_sort(function_for_distribution.sort()).codomain());
     }
   }

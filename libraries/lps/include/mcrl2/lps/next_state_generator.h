@@ -33,7 +33,7 @@ class next_state_generator
 {
   public:
     // A rewriter_expression_t is a data expression in rewriter-internal format.
-    typedef atermpp::aterm_appl rewriter_expression_t;
+    typedef data::data_expression rewriter_expression_t;
     typedef atermpp::term_list<rewriter_expression_t> valuation_t;
     typedef std::list<valuation_t> summand_enumeration_t;
     typedef atermpp::term_appl<rewriter_expression_t> condition_arguments_t;

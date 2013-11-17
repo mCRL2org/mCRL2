@@ -113,7 +113,7 @@ static void finalise_common()
 #define is_ar_var(x) (x.function()==afunARvar)
 
 // Prototype
-// static aterm toInner_list_odd(const data_expression &t);
+// static aterm toInner_list_odd(const data_expression& t);
 
 static aterm_appl make_ar_true()
 {
@@ -125,7 +125,7 @@ static aterm_appl make_ar_false()
   return ar_false;
 }
 
-static aterm_appl make_ar_and(const aterm_appl &x, const aterm_appl &y)
+static aterm_appl make_ar_and(const aterm_appl& x, const aterm_appl& y)
 {
   if (is_ar_true(x))
   {
@@ -192,7 +192,7 @@ static const atermpp::detail::_aterm* get_int2aterm_value(size_t i)
   return int2aterms[i];
 }
 
-static const atermpp::detail::_aterm* get_int2aterm_value(const function_symbol &i)
+static const atermpp::detail::_aterm* get_int2aterm_value(const function_symbol& i)
 {
   return get_int2aterm_value(OpId2Int(i).value());
 } */
@@ -213,11 +213,11 @@ static aterm_appl get_rewrappl_value(const size_t i)
   return rewr_appls[i];
 } */
 
-atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expression &t)
+data_expression RewriterCompilingJitty::toRewriteFormat(const data_expression& t)
 {
   size_t old_opids = get_num_opids();
 
-  atermpp::aterm_appl r = toInner(t,true);
+  data_expression r = toInner(t,true);
 
   if (old_opids != get_num_opids())
   {
@@ -227,7 +227,7 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
   return r;
 } 
 
-/* data_expression RewriterCompilingJitty::fromRewriteFormat(const atermpp::aterm_appl t)
+/* data_expression RewriterCompilingJitty::fromRewriteFormat(const data_expression t)
 {
   return fromInner(t);
 } */
@@ -317,12 +317,12 @@ static void term2seq(const aterm_appl& t, aterm_list* s, size_t *var_cnt)
 
 }
 
-static void get_used_vars_aux(const aterm_appl& t, aterm_list &vars)
+static void get_used_vars_aux(const aterm_appl& t, aterm_list& vars)
 {
   using namespace atermpp;
   /* if (t.type_is_list())
   {
-    const atermpp::aterm_list &l=atermpp::aterm_cast<const aterm_list>(t);
+    const atermpp::aterm_list& l=atermpp::aterm_cast<const aterm_list>(t);
     for (aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
     {
       get_used_vars_aux(*i,vars);
@@ -415,7 +415,7 @@ static void initialise_build_pars(build_pars* p)
   p->upstack = aterm_list();
 }
 
-static aterm_list add_to_stack(const aterm_list &stack, aterm_list seqs, aterm_appl* r, aterm_list* cr)
+static aterm_list add_to_stack(const aterm_list& stack, aterm_list seqs, aterm_appl* r, aterm_list* cr)
 {
   if (stack.empty())
   {
@@ -496,8 +496,8 @@ static aterm_appl createFreshVar(const aterm_appl& sort, size_t* i)
   return data::variable(tree_var_str, atermpp::aterm_cast<const sort_expression>(sort));
 }
 
-// static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &new_val, const aterm &num, const aterm_list &substs)
-static aterm_list subst_var(aterm_list l, const aterm_appl &old, const aterm &new_val, const aterm &num, const substitution &substs)
+// static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& new_val, const aterm& num, const aterm_list& substs)
+static aterm_list subst_var(aterm_list l, const aterm_appl& old, const aterm& new_val, const aterm& num, const substitution& substs)
 {
   if (l.empty())
   {
@@ -802,7 +802,7 @@ static aterm_appl build_tree(build_pars pars, size_t i)
   }
 }
 
-static aterm_appl create_tree(const data_equation_list &rules, size_t /*opid*/, size_t /*arity*/, const aterm_appl& true_inner)
+static aterm_appl create_tree(const data_equation_list& rules, size_t /*opid*/, size_t /*arity*/, const aterm_appl& true_inner)
 // Create a match tree for OpId int2term[opid] and update the value of
 // *max_vars accordingly.
 //
@@ -861,7 +861,7 @@ struct auxiliary_count_variables_class: public Traverser < auxiliary_count_varia
 
   std::map <variable,size_t> m_map;
 
-  void operator ()(const variable &v)
+  void operator ()(const variable& v)
   {
     if (m_map.count(v)==0)
     {
@@ -879,7 +879,7 @@ struct auxiliary_count_variables_class: public Traverser < auxiliary_count_varia
   }
 };
 
-static variable_list get_doubles(const data_expression &t)
+static variable_list get_doubles(const data_expression& t)
 {
   typedef std::map <variable,size_t> t_variable_map;
   auxiliary_count_variables_class<data::variable_traverser> acvc;
@@ -898,7 +898,7 @@ static variable_list get_doubles(const data_expression &t)
 }
 
 
-/* static variable_list get_vars(const data_expression &t)
+/* static variable_list get_vars(const data_expression& t)
 {
   std::set < variable > s=find_free_variables(t);
   variable_list result;
@@ -910,7 +910,7 @@ static variable_list get_doubles(const data_expression &t)
 }
 
 
-static variable_list get_vars(const aterm_appl &a)
+static variable_list get_vars(const aterm_appl& a)
 {
   if (is_function_symbol(aterm_cast<aterm_appl>(a)))
   {
@@ -942,7 +942,7 @@ static variable_list get_vars(const aterm_appl &a)
   }
 } */
 
-static variable_list dep_vars(const data_equation &eqn)
+static variable_list dep_vars(const data_equation& eqn)
 {
   size_t rule_arity = toInner(eqn.lhs(),true).function().arity()-1;
   std::vector < bool > bs(rule_arity);
@@ -966,7 +966,7 @@ static variable_list dep_vars(const data_equation &eqn)
     {
       // Argument is not a variable, so it needs to be rewritten
       bs[i] = true;
-      aterm_list evars = get_vars(aterm_cast<aterm_appl>(lhs_internal[i+1]));
+      aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
       for (; !evars.empty(); evars=evars.tail())
       {
         int j=i-1; // vars.tail().size()-1
@@ -1007,13 +1007,13 @@ static variable_list dep_vars(const data_equation &eqn)
       }
     }
     // Add vars used in expression
-    vars.push_front(get_vars(aterm_cast<aterm_appl>(lhs_internal[i+1])));
+    vars.push_front(get_vars(aterm_cast<data_expression>(lhs_internal[i+1])));
   }
 
   variable_list deps;
   for (size_t i = 0; i < rule_arity; i++)
   {
-    if (bs[i] && is_variable(aterm_cast<aterm_appl>(lhs_internal[i+1])))
+    if (bs[i] && is_variable(aterm_cast<data_expression>(lhs_internal[i+1])))
     {
       deps.push_front(aterm_cast<variable>(lhs_internal[i+1]));
     }
@@ -1063,7 +1063,7 @@ static aterm_list create_strategy(
         const size_t opid,
         const size_t arity,
         nfs_array &nfs,
-        const aterm_appl& true_inner)
+        const data_expression& true_inner)
 {
   aterm_list strat;
   // Array to keep note of the used parameters
@@ -1086,7 +1086,7 @@ static aterm_list create_strategy(
       continue;
     }
 
-    aterm_appl lhs_internal = toInner(it->lhs(),true);  
+    data_expression lhs_internal = toInner(it->lhs(),true);  
     aterm_list vars = make_list<aterm>( get_doubles(it->rhs())+ get_vars(it->condition())
                                  ); // List of variables occurring in each argument of the lhs
                                      // (except the first element which contains variables from the
@@ -1101,11 +1101,11 @@ static aterm_list create_strategy(
     // Check all arguments
     for (size_t i = 0; i < rule_arity; i++)
     {
-      if (!is_variable(aterm_cast<aterm_appl>(lhs_internal[i+1])))
+      if (!is_variable(aterm_cast<data_expression>(lhs_internal[i+1])))
       {
         // Argument is not a variable, so it needs to be rewritten
         bs[i] = true;
-        aterm_list evars = get_vars(aterm_cast<aterm_appl>(lhs_internal[i+1]));
+        aterm_list evars = get_vars(aterm_cast<data_expression>(lhs_internal[i+1]));
         for (; !evars.empty(); evars=evars.tail())
         {
           int j=i-1;
@@ -1146,7 +1146,7 @@ static aterm_list create_strategy(
         }
       }
       // Add vars used in expression
-      vars.push_front(get_vars(aterm_cast<aterm_appl>(lhs_internal[i+1])));
+      vars.push_front(get_vars(aterm_cast<data_expression>(lhs_internal[i+1])));
     }
 
     // Create dependency list for this rule
@@ -1295,28 +1295,18 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   return true;
 }
 
-static aterm_list arguments(const aterm_appl t)
-{
-  // t has the shape #REWR#(head,t1,...,tn). Return the list of
-  // arguments [t1,...,tn].
-  assert(t.size()>0);
-  aterm_appl::const_iterator start=t.begin();
-  start++;
-  return aterm_list(start,t.end());
-}
-
-void RewriterCompilingJitty::calc_nfs_list(nfs_array &nfs, size_t arity, aterm_list args, int startarg, aterm_list nnfvars)
+void RewriterCompilingJitty::calc_nfs_list(nfs_array &nfs, size_t arity, data_expression_list args, int startarg, aterm_list nnfvars)
 {
   if (args.empty())
   {
     return;
   }
 
-  nfs.set(arity-args.size(),calc_nfs(static_cast<aterm_appl>(args.front()),startarg,nnfvars));
+  nfs.set(arity-args.size(),calc_nfs(static_cast<data_expression>(args.front()),startarg,nnfvars));
   calc_nfs_list(nfs,arity,args.tail(),startarg+1,nnfvars);
 }
 
-bool RewriterCompilingJitty::calc_nfs(const aterm_appl& t, int startarg, aterm_list nnfvars)
+bool RewriterCompilingJitty::calc_nfs(const data_expression& t, int startarg, aterm_list nnfvars)
 {
   if (is_function_symbol(t))
   {
@@ -1324,6 +1314,7 @@ bool RewriterCompilingJitty::calc_nfs(const aterm_appl& t, int startarg, aterm_l
   }
   else if (is_nil((aterm_appl) t))
   {
+    assert(0);
     // assert(startarg>=0); This value may be negative.
     return (nnfvars==aterm_list(aterm())) || (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) == nnfvars.end());
   }
@@ -1343,15 +1334,16 @@ bool RewriterCompilingJitty::calc_nfs(const aterm_appl& t, int startarg, aterm_l
   }
   
   // t has the shape #REWR#(head,t1,...,tn)
-  int arity = t.size()-1;
-  const aterm_appl head(t[0]);
+  const application& ta(t);
+  int arity = ta.size();
+  const data_expression& head=ta.head();
   if (is_function_symbol(head))    // XXXXXX This function symbol can also be burried deeper in the term
                                    // for higher order functions.
   {
     if (opid_is_nf(aterm_cast<function_symbol>(head),arity) && arity != 0)
     {
       nfs_array args(arity);
-      calc_nfs_list(args,arity,arguments(t),startarg,nnfvars);
+      calc_nfs_list(args,arity,ta.arguments(),startarg,nnfvars);
       bool b = args.is_filled(arity);
       return b;
     }
@@ -1371,14 +1363,14 @@ bool RewriterCompilingJitty::calc_nfs(const aterm_appl& t, int startarg, aterm_l
   }
 }
 
-string RewriterCompilingJitty::calc_inner_terms(nfs_array &nfs, size_t arity, aterm_list args, int startarg, aterm_list nnfvars, nfs_array *rewr)
+string RewriterCompilingJitty::calc_inner_terms(nfs_array &nfs, size_t arity, data_expression_list args, int startarg, aterm_list nnfvars, nfs_array *rewr)
 {
   if (args.empty())
   {
     return "";
   }
 
-  pair<bool,string> head = calc_inner_term(aterm_cast<aterm_appl>(args.front()),
+  pair<bool,string> head = calc_inner_term(args.front(),
                        startarg,nnfvars,rewr?(rewr->get(arity-args.size())):false,arity);
   nfs.set(arity-args.size(),head.first);
   string tail = calc_inner_terms(nfs,arity,args.tail(),startarg+1,nnfvars,rewr);
@@ -1411,7 +1403,7 @@ static string calc_inner_appl_head(size_t arity)
 
 // if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type aterm_appl is generated.
 pair<bool,string> RewriterCompilingJitty::calc_inner_term(
-                  const aterm_appl& t,
+                  const data_expression& t,
                   int startarg,
                   aterm_list nnfvars,
                   const bool rewr,
@@ -1496,96 +1488,95 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (is_abstraction(t))
   {
+    const abstraction& ta(t);
     stringstream ss;
-    if ((t)[0]==gsMakeLambda())
+    if (is_lambda(ta.binding_operator()))
     {
       if (rewr)
       {
         // The resulting term must be rewritten.
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(t[2]),startarg,nnfvars,true,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,true,total_arity);
         ss << "this_rewriter->rewrite_single_lambda(" <<
-               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(t[1])) << ")," <<
+               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << ",*(this_rewriter->global_sigma))";
         return pair<bool,string>(true,ss.str());
       }
       else
       {
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(t[2]),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
         ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeLambda()," <<
-               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(t[1])) << ")," <<
+               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
       }
     }
-    else if (((aterm_appl)t)[0]==gsMakeForall())
+    else if (is_forall(ta.binding_operator()))
     {
       if (rewr)
       {
         // A result in normal form is requested.
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(t[2]),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
         ss << "this_rewriter->internal_universal_quantifier_enumeration(" <<
-               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(t[1])) << ")," <<
+               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << "," << "*(this_rewriter->global_sigma))";
         return pair<bool,string>(true,ss.str());
       }
       else
       {
         // A result which is not a normal form is requested.
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(t[2]),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
         ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeForall()," <<
-               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(t[1])) << ")," <<
+               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
       }
     }
-    else if (((aterm_appl)t)[0]==gsMakeExists())
+    else if (is_exists(ta.binding_operator()))
     {
       if (rewr)
       {
         // A result in normal form is requested.
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(t[2]),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
         ss << "this_rewriter->internal_existential_quantifier_enumeration(" <<
-               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(t[1])) << ")," <<
+               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << "," << r.first << "," << "*(this_rewriter->global_sigma))";
         return pair<bool,string>(true,ss.str());
       }
       else
       {
         // A result which is not a normal form is requested.
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(t[2]),startarg,nnfvars,false,total_arity);
+        pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
         ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeExists()," <<
-               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(variable_list(t[1])) << ")," <<
+               "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
       }
     }
   }
-  else if (is_where_clause(atermpp::aterm_appl(t)))
+  else if (is_where_clause(t))
   {
 
     stringstream ss;
-    const aterm_appl w=(aterm_appl)t; // w is the where clause
+    const where_clause& w(t); // w is the where clause
 
     if (rewr)
     {
       // A rewritten result is expected.
-      pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(w[0]),startarg,nnfvars,true,total_arity);
+      pair<bool,string> r=calc_inner_term(w.body(),startarg,nnfvars,true,total_arity);
 
-      // TODO REMOVE gsMakeWhr.
-      ss << "this_rewriter->rewrite_where(mcrl2::core::detail::gsMakeWhr(" << r.second << ",";
+      ss << "this_rewriter->rewrite_where(mcrl2::data::where_clause(" << r.second << ",";
 
-      aterm_list assignments=aterm_cast<aterm_list>(w[1]);
+      const assignment_list& assignments(w.assignments());
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
       {
         ss << "jittyc_local_push_front(";
       }
       ss << "aterm_list()";
-      for( ; !assignments.empty() ; assignments=assignments.tail())
+      for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
-        aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(assignment[1]),startarg,nnfvars,true,total_arity);
-        ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
-                 "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment[0])) << ")," <<
+        pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
+        ss << ",mcrl2::data::assignment(" <<
+                 "this_rewriter->bound_variable_get(" << bound_variable_index(i->lhs()) << ")," <<
                  r.second << "))";
       }
 
@@ -1596,21 +1587,20 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     else
     {
       // The result does not need to be rewritten.
-      pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(w[0]),startarg,nnfvars,false,total_arity);
-      ss << "mcrl2::core::detail::gsMakeWhr(" << r.second << ",";
+      pair<bool,string> r=calc_inner_term(w.body(),startarg,nnfvars,false,total_arity);
+      ss << "mcrl2::data::where_clause(" << r.second << ",";
 
-      aterm_list assignments=aterm_cast<aterm_list>(w[1]);
+      const assignment_list& assignments(w.assignments());
       for( size_t no_opening_brackets=assignments.size(); no_opening_brackets>0 ; no_opening_brackets--)
       {
         ss << "jittyc_local_push_front(";
       }
       ss << "aterm_list()";
-      for( ; !assignments.empty() ; assignments=assignments.tail())
+      for(assignment_list::const_iterator i=assignments.begin() ; i!=assignments.end(); ++i)
       {
-        aterm_appl assignment=aterm_cast<aterm_appl>(assignments.front());
-        pair<bool,string> r=calc_inner_term(aterm_cast<aterm_appl>(assignment[1]),startarg,nnfvars,true,total_arity);
-        ss << ",mcrl2::core::detail::gsMakeDataVarIdInit(" <<
-                 "this_rewriter->bound_variable_get(" << bound_variable_index(variable(assignment[0])) << ")," <<
+        pair<bool,string> r=calc_inner_term(i->rhs(),startarg,nnfvars,true,total_arity);
+        ss << ",mcrl2::data::assignment(" <<
+                 "this_rewriter->bound_variable_get(" << bound_variable_index(i->lhs()) << ")," <<
                  r.second << "))";
       }
 
@@ -1621,10 +1611,11 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
 
   // t has the shape #REWR#(head,t1,...,tn)
+  const application& ta(t);
   stringstream ss;
   bool b;
-  size_t arity = t.size()-1;
-  const aterm_appl head=aterm_cast<aterm_appl>(t[0]);  
+  size_t arity = ta.size();
+  const data_expression& head=ta.head();
 
 
   if (is_function_symbol(head))  // Most likely one wants to know also whether the nested symbol on top is
@@ -1657,7 +1648,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       // arity != 0
       nfs_array args_nfs(arity);
-      calc_nfs_list(args_nfs,arity,arguments(t),startarg,nnfvars);
+      calc_nfs_list(args_nfs,arity,ta.arguments(),startarg,nnfvars);
       if (!(b || !rewr))
       {
         /* if (arity<=5)
@@ -1698,7 +1689,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           const size_t index=OpId2Int(headfs).value();
           const data::function_symbol old_head=get_int2term(index);
           std::stringstream new_name;
-          new_name << "@_rewr" << "_" << index << "_" << t.size()-1 << "_" << args_nfs.get_value(arity)
+          new_name << "@_rewr" << "_" << index << "_" << ta.size() << "_" << args_nfs.get_value(arity)
                                << "_term";
           const data::function_symbol f(new_name.str(),old_head.sort());
           if (partially_rewritten_functions.count(f)==0)
@@ -1737,7 +1728,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         args_nfs.fill(arity);
       }
-      string args_second = calc_inner_terms(args_first,arity,arguments(t),startarg,nnfvars,&args_nfs);
+      string args_second = calc_inner_terms(args_first,arity,ta.arguments(),startarg,nnfvars,&args_nfs);
       // The assert is not valid anymore, bcause lambda are sometimes returned in normal form, although not strictly
       // asked for...
       assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first.equals(args_nfs,arity));
@@ -1772,19 +1763,16 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     // ((aterm_list) t).front().type()!=AT_INT). So the first element of this list is
     // either a variable, or a lambda term. It cannot be a forall or exists, because in
     // that case there would be a type error.
-    if (arity == 0)
+    assert(arity > 0);
+
+    if (is_abstraction(ta.head()))
     {
-      assert(false);
-      // return calc_inner_term(((aterm_list) t).front(), startarg, nnfvars,true,total_arity);
-    }
-    if (is_abstraction(atermpp::aterm_appl(t[0])))
-    {
-      atermpp::aterm_appl lambda_term(t[0]);
-      assert(lambda_term[0]==gsMakeLambda());
+      const abstraction& ta1(ta.head());
+      assert(is_lambda(ta1.binding_operator()));
 
       b = rewr;
       nfs_array args_nfs(arity);
-      calc_nfs_list(args_nfs,arity,((aterm_list) t).tail(),startarg,nnfvars);
+      calc_nfs_list(args_nfs,arity,ta.arguments(),startarg,nnfvars);
       if (arity > NF_MAX_ARITY)
       {
         args_nfs.clear(arity);
@@ -1796,7 +1784,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         args_nfs.fill(arity);
       }
 
-      pair<bool,string> head = calc_inner_term(lambda_term,startarg,nnfvars,false,arity);
+      pair<bool,string> head = calc_inner_term(ta1,startarg,nnfvars,false,arity);
 
       if (rewr)
       {
@@ -1804,7 +1792,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
 
       ss << calc_inner_appl_head(arity) << head.second << "," <<
-               calc_inner_terms(args_first,arity,((aterm_list) t).tail(),startarg,nnfvars,&args_nfs) << ")";
+               calc_inner_terms(args_first,arity,ta.arguments(),startarg,nnfvars,&args_nfs) << ")";
       if (rewr)
       {
         ss << ")";
@@ -1814,11 +1802,11 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     else
     {
       // So, the first element of t must be a single variable.
-      assert(is_variable(t[0]));
+      assert(is_variable(ta.head()));
       b = rewr;
-      pair<bool,string> head = calc_inner_term(aterm_cast<aterm_appl>(t[0]),startarg,nnfvars,false,arity);
+      pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false,arity);
       nfs_array tail_first(arity);
-      string tail_second = calc_inner_terms(tail_first,arity,arguments(t),startarg,nnfvars,NULL);
+      string tail_second = calc_inner_terms(tail_first,arity,ta.arguments(),startarg,nnfvars,NULL);
       /* if (arity>5)
       {
         ss << "(aterm_appl)";
@@ -1851,7 +1839,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         tail_first.clear(arity);
         nfs_array rewrall(arity);
         rewrall.fill(arity);
-        tail_second = calc_inner_terms(tail_first,arity,aterm_list(t.begin(),t.end()).tail(),startarg,nnfvars,&rewrall);
+        tail_second = calc_inner_terms(tail_first,arity,ta.arguments(),startarg,nnfvars,&rewrall);
       }
       ss << tail_second << ")";
       {
@@ -1863,14 +1851,14 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   return pair<bool,string>(b,ss.str());
 }
 
-void RewriterCompilingJitty::calcTerm(FILE* f, const aterm_appl& t, int startarg, aterm_list nnfvars, bool rewr)
+void RewriterCompilingJitty::calcTerm(FILE* f, const data_expression& t, int startarg, aterm_list nnfvars, bool rewr)
 {
   pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
   fprintf(f,"%s",p.second.c_str());
   return;
 }
 
-static aterm_appl add_args(const aterm_appl& a, size_t num)
+static data_expression add_args(const data_expression& a, size_t num)
 {
   if (num == 0)
   {
@@ -2110,7 +2098,7 @@ void RewriterCompilingJitty::implement_tree_aux(
   else if (isC(tree))
   {
     fprintf(f,"%sif (",whitespace(d*2));
-    calcTerm(f,aterm_cast<aterm_appl>(tree[0]),0,nnfvars);
+    calcTerm(f,aterm_cast<data_expression>(tree[0]),0,nnfvars);
 
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n",
@@ -2132,7 +2120,7 @@ void RewriterCompilingJitty::implement_tree_aux(
       //cur_arg = peekn_st(level);
       cur_arg = peekn_st(2*level-1);
     }
-    calcTerm(f,add_args(aterm_cast<aterm_appl>(tree[0]),arity-cur_arg-1),get_startarg(tree[0],cur_arg+1),nnfvars);
+    calcTerm(f,add_args(aterm_cast<data_expression>(tree[0]),arity-cur_arg-1),get_startarg(tree[0],cur_arg+1),nnfvars);
     fprintf(f,"; // R1\n");
     return;
   }
@@ -2164,7 +2152,7 @@ void RewriterCompilingJitty::implement_tree(
   while (isC(tree))
   {
     fprintf(f,"%sif (",whitespace(d*2));
-    calcTerm(f,aterm_cast<aterm_appl>(tree[0]),0,aterm_list());
+    calcTerm(f,aterm_cast<data_expression>(tree[0]),0,aterm_list());
 
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n"
@@ -2175,7 +2163,7 @@ void RewriterCompilingJitty::implement_tree(
            );
 
     assert(isR(aterm_cast<aterm_appl>(tree[1])));
-    calcTerm(f,add_args(aterm_cast<aterm_appl>((aterm_cast<aterm_appl>(tree[1]))[0]),arity),
+    calcTerm(f,add_args(aterm_cast<data_expression>((aterm_cast<aterm_appl>(tree[1]))[0]),arity),
                  get_startarg(aterm_cast<aterm_appl>(tree[1])[0],0),nnfvars);
     fprintf(f,";\n"
             "%s}\n%selse\n%s{\n", whitespace(d*2),whitespace(d*2),whitespace(d*2)
@@ -2189,7 +2177,7 @@ void RewriterCompilingJitty::implement_tree(
     if (arity==0)
     { // return a reference to an aterm_appl
       fprintf(f,"%sstatic aterm_appl static_term(rewrite(",whitespace(d*2));
-      calcTerm(f,add_args(aterm_cast<aterm_appl>(tree[0]),arity),get_startarg(tree[0],0),nnfvars);
+      calcTerm(f,add_args(aterm_cast<data_expression>(tree[0]),arity),get_startarg(tree[0],0),nnfvars);
       fprintf(f,")); \n");
       fprintf(f,"%sreturn static_term",whitespace(d*2));
       fprintf(f,"; // R2a\n");
@@ -2197,7 +2185,7 @@ void RewriterCompilingJitty::implement_tree(
     else
     { // arity>0
       fprintf(f,"%sreturn ",whitespace(d*2));
-      calcTerm(f,add_args(aterm_cast<aterm_appl>(tree[0]),arity),get_startarg(tree[0],0),nnfvars);
+      calcTerm(f,add_args(aterm_cast<data_expression>(tree[0]),arity),get_startarg(tree[0],0),nnfvars);
       fprintf(f,"; // R2b\n");
     }
   }
@@ -2316,12 +2304,13 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const aterm_appl& expr
   }
 
   // expr has shape #REWR#(t,t1,...,tn);
+  const application& expra(expr);
   function_symbol head;
-  if (!head_is_function_symbol(expr,head))
+  if (!head_is_function_symbol(expra,head))
   {
-    if (head_is_variable(expr))
+    if (head_is_variable(expra))
     {
-      if (get_variable_of_head(expr)==var)
+      if (get_variable_of_head(expra)==var)
       {
         return make_ar_true();
       }
@@ -2331,11 +2320,11 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const aterm_appl& expr
 
   aterm_appl result = make_ar_false();
 
-  size_t arity = recursive_number_of_args(expr);
+  size_t arity = recursive_number_of_args(expra);
   for (size_t i=0; i<arity; i++)
   {
     const size_t idx = int2ar_idx[OpId2Int(head).value()] + ((arity-1)*arity)/2 + i;
-    aterm_appl t = build_ar_expr_internal(get_argument_of_higher_order_term(expr,i),var);
+    aterm_appl t = build_ar_expr_internal(get_argument_of_higher_order_term(expra,i),var);
     result = make_ar_or(result,make_ar_and(make_ar_var(idx),t));
   }
 
@@ -2354,7 +2343,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
   if (eqn_arity <= arg)
   {
     // aterm rhs = toInner_list_odd(eqn.rhs());  // rhs in special internal list format.
-    aterm_appl rhs = toInner(eqn.rhs(),true);  // rhs in special internal list format.
+    const data_expression rhs = toInner(eqn.rhs(),true);  // rhs in special internal list format.
     function_symbol head;
     if (is_function_symbol(rhs))
     {
@@ -3124,15 +3113,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (mcrl2::data::is_abstraction(head))\n"
       "  {\n"
       "    const aterm_appl binder(head[0]);\n"
-      "    if (binder==gsMakeLambda())\n"
+      "    if (is_lambda(binder))\n"
       "    {\n"
       "      return this_rewriter->rewrite_lambda_application(head,t,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeExists())\n"
+      "    if (is_exists(binder))\n"
       "    {\n"
       "      return this_rewriter->internal_existential_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeForall())\n"
+      "    if (is_forall(binder)))\n"
       "    {\n"
       "      return this_rewriter->internal_universal_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
       "    }\n"
@@ -3231,15 +3220,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (mcrl2::data::is_abstraction(t))\n"
       "  {\n"
       "    atermpp::aterm_appl binder(t[0]);\n"
-      "    if (binder==gsMakeExists())\n"
+      "    if (is_exists(binder))\n"
       "    {\n"
       "      return this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeForall())\n"
+      "    if (is_forall(binder))\n"
       "    {\n"
       "      return this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (binder==gsMakeLambda())\n"
+      "    if (is_lambda(binder))\n"
       "    {\n"
       "      return this_rewriter->rewrite_single_lambda(\n"
       "               atermpp::aterm_cast<const mcrl2::data::variable_list>(t[1]),\n"
@@ -3382,9 +3371,9 @@ data_expression RewriterCompilingJitty::rewrite(
   return fromRewriteFormat(rewrite_internal(toRewriteFormat(term),internal_sigma));
 }
 
-atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
-     const atermpp::aterm_appl &term,
-     internal_substitution_type &sigma)
+data_expression RewriterCompilingJitty::rewrite_internal(
+     const data_expression& term,
+     internal_substitution_type& sigma)
 {
   if (need_rebuild)
   {
@@ -3394,7 +3383,7 @@ atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
   // substitutions, due to the enumerator.
   internal_substitution_type *saved_sigma=global_sigma;
   global_sigma= &sigma;
-  const atermpp::aterm_appl result=so_rewr(term);
+  const data_expression result=so_rewr(term);
   global_sigma=saved_sigma;
   return result;
 }

@@ -32,21 +32,21 @@ namespace detail
 // Ugly add hoc class. Ought to be replaced when lambda notation can be used.
 class test_equal
 {
-  const atermpp::aterm_appl &m_term;
+  const aterm_appl &m_term;
 
   public:
-    test_equal(const atermpp::aterm_appl &t) : m_term(t)
+    test_equal(const data_expression &t) : m_term(t)
     {}
 
-    bool operator ()(const atermpp::aterm_appl &other) const
+    bool operator ()(const aterm_appl &other) const
     {
       return m_term==other;
     }
 };
 
-atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
-                                const atermpp::aterm_appl &condition,
-                                const atermpp::term_list< atermpp::aterm_appl > &negation_term_list,
+data_expression EnumeratorSolutionsStandard::add_negations(
+                                const data_expression& condition,
+                                const data_expression_list& negation_term_list,
                                 const bool negated) const
 { /* If negation_term_list is [t1,...,tn], generate an expression of the form
      condition /\ !t1 /\ !t2 /\ ... /\ !tn in internal format. Using ad hoc
@@ -67,15 +67,15 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
       }
       else if (condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
       {
-        return aterm_cast<const atermpp::aterm_appl>(condition[1]);
+        return aterm_cast<const data_expression>(condition[1]);
       }
       return Apply1(m_enclosing_enumerator->rewr_obj->internal_not, condition);
     }
     return condition;
   }
 
-  const atermpp::aterm_appl first_argument=add_negations(condition,negation_term_list.tail(),negated);
-  atermpp::aterm_appl second_argument= negation_term_list.front();
+  const data_expression first_argument=add_negations(condition,negation_term_list.tail(),negated);
+  data_expression second_argument= negation_term_list.front();
   if (!negated)
   {
     if (second_argument == m_enclosing_enumerator->rewr_obj->internal_true)
@@ -88,7 +88,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
     }
     else if (second_argument[0] == m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      second_argument=aterm_cast<const atermpp::aterm_appl>(second_argument[1]);
+      second_argument=aterm_cast<const data_expression>(second_argument[1]);
     }
     else
     {
@@ -120,13 +120,13 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
   }
 }
 
-atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(const atermpp::term_list< atermpp::aterm_appl > &l) const
+data_expression_list EnumeratorSolutionsStandard::negate(const data_expression_list& l) const
 {
   if (l.empty())
   {
     return l;
   }
-  atermpp::term_list< atermpp::aterm_appl > result=negate(l.tail());
+  data_expression_list result=negate(l.tail());
   result.push_front(Apply1(m_enclosing_enumerator->rewr_obj->internal_not,l.front()));
   return result;
 }
@@ -135,9 +135,9 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
                                 std::deque < fs_expr> &fs_stack,
                                 const variable_list &var_list,
                                 const variable_list &substituted_vars,
-                                const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
-                                const atermpp::aterm_appl &condition,
-                                const atermpp::term_list< atermpp::aterm_appl > &negated_term_list,
+                                const data_expression_list &substitution_terms,
+                                const data_expression &condition,
+                                const data_expression_list &negated_term_list,
                                 const bool negated) const
 {
   /* If the negated_term_list equals t1,...,tn, store condition /\ !t1 /\ !t2 /\ ... /\ !tn
@@ -148,23 +148,23 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
   {
     if (condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition[1]),negate(negated_term_list),!negated);
+      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const data_expression>(condition[1]),negate(negated_term_list),!negated);
       return;
     }
     if ((negated && condition[0] == m_enclosing_enumerator->rewr_obj->internal_and) ||
              (!negated && condition[0] == m_enclosing_enumerator->rewr_obj->internal_or))
     {
       assert(condition.size()==3);
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition[1]),negated_term_list,negated);
-      atermpp::term_list< atermpp::aterm_appl > temp=negated_term_list;
-      temp.push_front(aterm_cast<const atermpp::aterm_appl>(condition[1]));
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const atermpp::aterm_appl>(condition[2]),
+      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const data_expression>(condition[1]),negated_term_list,negated);
+      data_expression_list temp=negated_term_list;
+      temp.push_front(aterm_cast<const data_expression>(condition[1]));
+      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const data_expression>(condition[2]),
                              temp,negated);
       return;
     }
   }
   
-  const atermpp::aterm_appl new_expr = add_negations(condition,negated_term_list,negated);
+  const data_expression new_expr = add_negations(condition,negated_term_list,negated);
 
   if (new_expr!=m_enclosing_enumerator->rewr_obj->internal_false)
   {
@@ -188,9 +188,9 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
                                 std::deque < fs_expr> &fs_stack,
                                 const variable_list &var_list,
                                 const variable_list &substituted_vars,
-                                const atermpp::term_list< atermpp::aterm_appl > &substitution_terms,
-                                const atermpp::aterm_appl &condition,
-                                const atermpp::term_list< atermpp::aterm_appl > &negated_term_list,
+                                const data_expression_list &substitution_terms,
+                                const data_expression &condition,
+                                const data_expression_list &negated_term_list,
                                 const bool negated) const
 {
   EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewriting(
@@ -204,10 +204,10 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
 }
 
 bool EnumeratorSolutionsStandard::find_equality(
-                        const atermpp::aterm_appl &t,
+                        const data_expression &t,
                         const mcrl2::data::variable_list &vars,
                         mcrl2::data::variable &v,
-                        atermpp::aterm_appl &e)
+                        data_expression &e)
 {
   if (is_variable(t))
   {
@@ -220,31 +220,32 @@ bool EnumeratorSolutionsStandard::find_equality(
     return false;
   }
 
-  if (is_function_symbol(aterm_cast<const atermpp::aterm_appl>(t[0])))
+  if (is_function_symbol(aterm_cast<const data_expression>(t[0])))
   {
     const function_symbol& f(t[0]);
     if (t[0] == m_enclosing_enumerator->rewr_obj->internal_and)
     {
       assert(t.size()==3);
-      return find_equality(aterm_cast<const atermpp::aterm_appl>(t[1]),vars,v,e) || 
-             find_equality(aterm_cast<const atermpp::aterm_appl>(t[2]),vars,v,e);
+      return find_equality(aterm_cast<const data_expression>(t[1]),vars,v,e) || 
+             find_equality(aterm_cast<const data_expression>(t[2]),vars,v,e);
     }
     else if (m_enclosing_enumerator->eqs.find(f) !=
                         m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
     {
-      const atermpp::aterm_appl &a1 = aterm_cast<const atermpp::aterm_appl>(t[1]);
-      const atermpp::aterm_appl &a2 = aterm_cast<const atermpp::aterm_appl>(t[2]);
+      // TODO CODE BELOW MUST BE OPTIMIZED.
+      const data_expression &a1 = aterm_cast<const data_expression>(t[1]);
+      const data_expression &a2 = aterm_cast<const data_expression>(t[2]);
       if (a1!=a2)
       {
-        if (is_variable(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) &&
-                                 (atermpp::find_if(a2,test_equal(a1))==atermpp::aterm_appl()))        // true if a1 does not occur in a2.
+        if (is_variable(a1) && (find(vars.begin(),vars.end(),variable(a1))!=vars.end()) &&
+                                 (atermpp::find_if(static_cast<const aterm_appl&>(a2),test_equal(a1))==data_expression()))        // true if a1 does not occur in a2.
         {
           v = aterm_cast<variable>(a1);
           e = aterm_cast<variable>(a2);
           return true;
         }
-        if (is_variable(a2) && (find(vars.begin(),vars.end(),a2)!=vars.end()) &&
-                                 (atermpp::find_if(a1,test_equal(a2))==atermpp::aterm_appl()))        // true if a2 does not occur in a1.
+        if (is_variable(a2) && (find(vars.begin(),vars.end(),variable(a2))!=vars.end()) &&
+                                 (atermpp::find_if(a1,test_equal(a2))==data_expression()))        // true if a2 does not occur in a1.
         {
           v = aterm_cast<variable>(a2);
           e = aterm_cast<variable>(a1);
@@ -261,11 +262,11 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
 {
   variable_list vars = e.vars();
   variable_list substituted_vars = e.substituted_vars();
-  atermpp::term_list< atermpp::aterm_appl > vals = e.vals();
-  atermpp::aterm_appl expr = e.expr();
+  data_expression_list vals = e.vals();
+  data_expression expr = e.expr();
 
   variable var;
-  atermpp::aterm_appl val;
+  data_expression val;
 
   while (!vars.empty() && find_equality(expr,vars,var,val))
   {
@@ -275,7 +276,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
 
     // Use a rewrite here to remove occurrences of subexpressions the form t==t caused by
     // replacing in x==t the variable x by t.
-    const atermpp::aterm_appl old_val=enum_sigma(var);
+    const data_expression old_val=enum_sigma(var);
     enum_sigma[var]=val;
     expr = m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,enum_sigma);
     enum_sigma[var]=old_val;
@@ -294,10 +295,10 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   e=fs_expr(vars,substituted_vars,vals,expr);
 }
 
-atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_single(
-                 const atermpp::aterm_appl &t,
+data_expression EnumeratorSolutionsStandard::build_solution_single(
+                 const data_expression &t,
                  variable_list substituted_vars,
-                 atermpp::term_list < atermpp::aterm_appl> exprs) const
+                 data_expression_list exprs) const
 {
   assert(substituted_vars.size()==exprs.size());
   while (!substituted_vars.empty() && t!=substituted_vars.front())
@@ -316,10 +317,10 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_single(
   }
 }
 
-atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
-                 const atermpp::aterm_appl &t,
+data_expression EnumeratorSolutionsStandard::build_solution_aux(
+                 const data_expression &t,
                  const variable_list &substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const
+                 const data_expression_list &exprs) const
 {
   if (is_variable(t))
   {
@@ -332,11 +333,11 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
   }
   else if (is_abstraction(t))
   {
-    const atermpp::aterm_appl &t1=t;
-    const atermpp::aterm_appl &binder=aterm_cast<const atermpp::aterm_appl>(t1[0]);
+    const data_expression &t1=t;
+    const binder_type &binder=aterm_cast<const binder_type>(t1[0]);
     const variable_list &bound_variables=aterm_cast<const variable_list>(t1[1]);
-    const atermpp::aterm_appl &body=build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t1[2]),substituted_vars,exprs);
-    return gsMakeBinder(binder,bound_variables,body);
+    const data_expression &body=build_solution_aux(aterm_cast<const data_expression>(t1[2]),substituted_vars,exprs);
+    return abstraction(binder,bound_variables,body);
   }
   else if (is_function_symbol(t))
   {
@@ -345,84 +346,55 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
   else
   {
     // t has the shape #REWR#(u1,...,un)
-
-    atermpp::aterm_appl head = aterm_cast<const aterm_appl>(t[0]);
-    size_t arity = t.size();
-    size_t extra_arity = 0;
-
+    const application t_appl(t); 
+    data_expression head = t_appl.head(); 
+   
     if (!is_function_symbol(head))
     {
       head = build_solution_single(head,substituted_vars,exprs);
-      if (!is_variable(head))
-      {
-        extra_arity = head.size()-1;
-      }
     }
 
-    typedef boost::signals2::detail::auto_buffer<atermpp::aterm_appl, boost::signals2::detail::store_n_objects<64> > args_vector_t;
-    args_vector_t args;
-    args.reserve(arity+extra_arity);
-    
-    
-    size_t k = 1;
-
-    args.push_back(aterm_appl()); // First put a dummy element. Replace it later.
-    if (!is_function_symbol(head) && !is_variable(head))
+    data_expression_vector args;
+    for (application::const_iterator i=t_appl.begin(); i!=t_appl.end(); i++)
     {
-      k = extra_arity+1;
-      for (size_t i=1; i<k; i++)
-      {
-        // new (&args[i])  atermpp::aterm(aterm_cast<const atermpp::aterm_appl>(head)[i]);
-        args.push_back(aterm_cast<const atermpp::aterm_appl>(head[i]));
-      }
-      head = aterm_cast<const atermpp::aterm_appl>(head[0]);
-    }
-    args[0]=head;
-
-    for (size_t i=1; i<arity; i++)
-    {
-      args.push_back(build_solution_aux(aterm_cast<const atermpp::aterm_appl>(t[i]),substituted_vars,exprs));
+      args.push_back(build_solution_aux(*i,substituted_vars,exprs));
     }
 
-    atermpp::aterm_appl r = ApplyArray(arity+extra_arity,args.begin(),args.end());
-
-    return r;
+    return application(head,args);
   }
 }
 
-atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_solution2(
+data_expression_list EnumeratorSolutionsStandard::build_solution2(
                  const variable_list &vars,
                  const variable_list &substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const
+                 const data_expression_list &exprs) const
 {
   if (vars.empty())
   {
-    return atermpp::term_list < atermpp::aterm_appl>();
+    return data_expression_list();
   }
   else
   {
-    atermpp::term_list < atermpp::aterm_appl> result=build_solution2(vars.tail(),substituted_vars,exprs);
+    data_expression_list result=build_solution2(vars.tail(),substituted_vars,exprs);
     result.push_front(m_enclosing_enumerator->rewr_obj->rewrite_internal(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
     return result;
   }
 }
 
-atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_solution(
+data_expression_list EnumeratorSolutionsStandard::build_solution(
                  const variable_list &vars,
                  const variable_list &substituted_vars,
-                 const atermpp::term_list < atermpp::aterm_appl> &exprs) const
+                 const data_expression_list &exprs) const
 {
   return build_solution2(vars,reverse(substituted_vars),reverse(exprs));
 }
 
 bool EnumeratorSolutionsStandard::next(
-              atermpp::aterm_appl &evaluated_condition,
-              atermpp::term_list<atermpp::aterm_appl> &solution,
+              data_expression &evaluated_condition,
+              data_expression_list &solution,
               bool &solution_possible)
 {
-  typedef boost::signals2::detail::auto_buffer<atermpp::aterm_appl, boost::signals2::detail::store_n_objects<64> > vector_t;
-  vector_t var_array;
-  var_array.reserve(32);
+  data_expression_vector var_array; // TODO: locating var_array on stack is most likely more efficient.
 
   while (ss_stack.empty() && !fs_stack.empty())
   {
@@ -535,7 +507,7 @@ bool EnumeratorSolutionsStandard::next(
             variable_list var_list;
             assert(var_array.size()==0);
             // var_array.push_back(OpId2Int(*it));
-            var_array.push_back(*it);
+            // var_array.push_back(*it);
 
             for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
             {
@@ -588,16 +560,17 @@ bool EnumeratorSolutionsStandard::next(
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
-            const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(ApplyArray(domain_sorts.size()+1,var_array.begin(), var_array.end()),enum_sigma);
+            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(
+                       application(*it,var_array),enum_sigma);
             var_array.clear();
 
-            const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
+            const data_expression old_substituted_value=enum_sigma(var);
             enum_sigma[var]=term_rf;
-            const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
+            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
             enum_sigma[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);
-            atermpp::term_list<atermpp::aterm_appl> templist2=e.vals();
+            data_expression_list templist2=e.vals();
             templist2.push_front(term_rf);
             push_on_fs_stack_and_split_or_without_rewriting(
                                     fs_stack,
@@ -605,7 +578,7 @@ bool EnumeratorSolutionsStandard::next(
                                     templist1,
                                     templist2,
                                     rewritten_expr,
-                                    atermpp::term_list < atermpp::aterm_appl > (),
+                                    data_expression_list(),
                                     false);
           }
           else 
@@ -617,16 +590,16 @@ bool EnumeratorSolutionsStandard::next(
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
-            // const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
-            const atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(*it,enum_sigma);
+            // const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
+            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(*it,enum_sigma);
 
-            const atermpp::aterm_appl old_substituted_value=enum_sigma(var);
+            const data_expression old_substituted_value=enum_sigma(var);
             enum_sigma[var]=term_rf;
-            const atermpp::aterm_appl rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
+            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
             enum_sigma[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);
-            atermpp::term_list<atermpp::aterm_appl> templist2=e.vals();
+            data_expression_list templist2=e.vals();
             templist2.push_front(term_rf);
             push_on_fs_stack_and_split_or_without_rewriting(
                                     fs_stack,
@@ -634,7 +607,7 @@ bool EnumeratorSolutionsStandard::next(
                                     templist1,
                                     templist2,
                                     rewritten_expr,
-                                    atermpp::term_list < atermpp::aterm_appl > (),
+                                    data_expression_list(),
                                     false);
           }
         }
@@ -654,15 +627,15 @@ bool EnumeratorSolutionsStandard::next(
   }
 }
 
-bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution)
+bool EnumeratorSolutionsStandard::next(data_expression_list &solution)
 {
-  atermpp::aterm_appl dummy_evaluated_condition;
+  data_expression dummy_evaluated_condition;
   return next(dummy_evaluated_condition,solution);
 }
 
 bool EnumeratorSolutionsStandard::next(
-          atermpp::aterm_appl &evaluated_condition,
-          atermpp::term_list<atermpp::aterm_appl> &solution)
+          data_expression &evaluated_condition,
+          data_expression_list &solution)
 {
   bool dummy_solution_possible=false;
   return next(evaluated_condition,solution,dummy_solution_possible);
@@ -670,10 +643,10 @@ bool EnumeratorSolutionsStandard::next(
 }
 
 bool EnumeratorSolutionsStandard::next(
-          atermpp::term_list<atermpp::aterm_appl> &solution,
+          data_expression_list &solution,
           bool &solution_possible)
 {
-  atermpp::aterm_appl dummy_evaluated_condition;
+  data_expression dummy_evaluated_condition;
   return next(dummy_evaluated_condition,solution,solution_possible);
 }
 
@@ -684,9 +657,9 @@ void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false,const bool
     push_on_fs_stack_and_split_or_without_rewriting(fs_stack,
                                   enum_vars,
                                   variable_list(),
-                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  data_expression_list(),
                                   enum_expr,
-                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  data_expression_list(),
                                   !not_equal_to_false);
   }
   else
@@ -694,9 +667,9 @@ void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false,const bool
     push_on_fs_stack_and_split_or(fs_stack,
                                   enum_vars,
                                   variable_list(),
-                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  data_expression_list(),
                                   enum_expr,
-                                  atermpp::term_list< atermpp::aterm_appl>(),
+                                  data_expression_list(),
                                   !not_equal_to_false);
   }
 }
@@ -711,8 +684,8 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   {
     if (to_string(i->name()) == "==")
     {
-      // atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
-      // eqs.insert(atermpp::aterm_cast<atermpp::aterm_appl>(t[0]));
+      // data_expression t=rewr_obj->toRewriteFormat(*i);
+      // eqs.insert(atermpp::aterm_cast<data_expression>(t[0]));
       eqs.insert(*i);
     }
   }

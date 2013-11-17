@@ -21,7 +21,7 @@ namespace data
 namespace detail
 {
 
-inline variable_list get_vars(const atermpp::aterm_appl &a)
+inline variable_list get_vars(const data_expression &a)
 {
   if (is_variable(a))
   {
@@ -30,11 +30,11 @@ inline variable_list get_vars(const atermpp::aterm_appl &a)
   else
   {
     variable_list l;
-    for(atermpp::aterm_appl::const_iterator arg=a.begin(); arg!=a.end(); ++arg)
+    for(data_expression::const_iterator arg=a.begin(); arg!=a.end(); ++arg)
     {
-      if (!is_function_symbol(atermpp::aterm_cast<const atermpp::aterm_appl>(*arg)))
+      if (!is_function_symbol(atermpp::aterm_cast<const data_expression>(*arg)))
       {
-        l= get_vars(atermpp::aterm_cast<const atermpp::aterm_appl>(*arg))+l;
+        l= get_vars(atermpp::aterm_cast<const data_expression>(*arg))+l;
       }
     }
     return l;
@@ -59,29 +59,29 @@ inline sort_expression residual_sort(const sort_expression &s, size_t no_initial
 
 }
 
-inline bool get_argument_of_higher_order_term_helper(const atermpp::aterm_appl& t, size_t& i, atermpp::aterm_appl& result)
+inline bool get_argument_of_higher_order_term_helper(const data_expression& t, size_t& i, data_expression& result)
 {
   // t has the shape t #REWR#(....)
-  if (is_function_symbol(atermpp::aterm_cast<const atermpp::aterm_appl>(t[0])))
+  if (is_function_symbol(atermpp::aterm_cast<const data_expression>(t[0])))
   {
     const size_t arity = t.function().arity();
     if (arity>i)
     {
-      result=atermpp::aterm_cast<atermpp::aterm_appl>(t[i]);
+      result=atermpp::aterm_cast<data_expression>(t[i]);
       return true;
     }
     // arity <=i
     i=i-arity+1;
     return false;
   }
-  if (get_argument_of_higher_order_term_helper(atermpp::aterm_cast<atermpp::aterm_appl>(t[0]),i,result))
+  if (get_argument_of_higher_order_term_helper(atermpp::aterm_cast<data_expression>(t[0]),i,result))
   {
     return true;
   }
   const size_t arity = t.function().arity();
   if (arity>i)
   {
-    result=atermpp::aterm_cast<atermpp::aterm_appl>(t[i]);
+    result=atermpp::aterm_cast<data_expression>(t[i]);
     return true;
   }
   // arity <=i
@@ -89,33 +89,33 @@ inline bool get_argument_of_higher_order_term_helper(const atermpp::aterm_appl& 
   return false;
 }
 
-inline atermpp::aterm_appl get_argument_of_higher_order_term(const atermpp::aterm_appl& t, size_t i)
+inline data_expression get_argument_of_higher_order_term(const data_expression& t, size_t i)
 {
   // t is a aterm of the shape #REWR#(#REWR#(...#REWR(f,t1,...tn),tn+1....),tm...). 
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
   
   assert(!is_function_symbol(t));
-  atermpp::aterm_appl result;
+  data_expression result;
   bool b=get_argument_of_higher_order_term_helper(t,i,result);
   assert(b);
   return result;
 }
 
-inline size_t recursive_number_of_args(const atermpp::aterm_appl &t)
+inline size_t recursive_number_of_args(const data_expression &t)
 {
   if (is_function_symbol(t))
   {
     return 0;
   }
 
-  const atermpp::aterm_appl& t0(t[0]);
+  const data_expression& t0(t[0]);
   const size_t result=t.function().arity()+recursive_number_of_args(t0)-1;
   return result;
 }
 
 
 // Assume that the expression t is an application, and return its leading function symbol.
-inline const function_symbol& get_function_symbol_of_head(const atermpp::aterm_appl &t)
+inline const function_symbol& get_function_symbol_of_head(const data_expression &t)
 {
   if (is_function_symbol(t))
   {
@@ -123,11 +123,11 @@ inline const function_symbol& get_function_symbol_of_head(const atermpp::aterm_a
   }
   assert(t.type_is_appl());
 
-  return get_function_symbol_of_head(atermpp::aterm_cast<atermpp::aterm_appl>(t[0]));
+  return get_function_symbol_of_head(atermpp::aterm_cast<data_expression>(t[0]));
 }
 
 // Assume that the expression t is an application, and return its leading variable.
-inline const variable& get_variable_of_head(const atermpp::aterm_appl &t)
+inline const variable& get_variable_of_head(const data_expression &t)
 {
   if (is_variable(t))
   {
@@ -135,10 +135,10 @@ inline const variable& get_variable_of_head(const atermpp::aterm_appl &t)
   }
   assert(t.type_is_appl());
 
-  return get_variable_of_head(atermpp::aterm_cast<atermpp::aterm_appl>(t[0]));
+  return get_variable_of_head(atermpp::aterm_cast<data_expression>(t[0]));
 }
 
-inline bool head_is_variable(const atermpp::aterm_appl& t)
+inline bool head_is_variable(const data_expression& t)
 {
   assert(!is_where_clause(t));
 
@@ -156,11 +156,12 @@ inline bool head_is_variable(const atermpp::aterm_appl& t)
     return false;
   }
   // shape is #REWR#(t1,...,tn)
-  return head_is_variable(atermpp::aterm_cast<const atermpp::aterm_appl>(t[0]));
+  const application& ta(t);
+  return head_is_variable(ta.head());
 }
 
 
-inline bool head_is_function_symbol(const atermpp::aterm_appl& t, function_symbol& head)
+inline bool head_is_function_symbol(const data_expression& t, function_symbol& head)
 {
   assert(!is_where_clause(t));
 
@@ -178,7 +179,8 @@ inline bool head_is_function_symbol(const atermpp::aterm_appl& t, function_symbo
     return false;
   }
   // shape is #REWR#(t1,...,tn)
-  return head_is_function_symbol(atermpp::aterm_cast<const atermpp::aterm_appl>(t[0]),head);
+  const application& ta(t);
+  return head_is_function_symbol(ta.head(),head);
 }
 
 }
