@@ -27,8 +27,9 @@ void f()
 
 BOOST_AUTO_TEST_CASE(test_index)
 {
-  data::register_function_symbol_hooks();
-  data::register_variable_hooks();
+  /* Hooks are now registered automatically.
+     data::register_function_symbol_hooks();
+     data::register_variable_hooks(); */
 
   // data::variable
   data::variable b("b", data::sort_bool::bool_());

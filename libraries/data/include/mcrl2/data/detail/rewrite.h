@@ -357,7 +357,7 @@ inline size_t getArity(const data::function_symbol& op)
   return arity;
 }
 
-extern std::map< data::function_symbol, atermpp::aterm_int > term2int;
+/* extern std::map< data::function_symbol, atermpp::aterm_int > term2int;
 extern std::vector < data::function_symbol > int2term;
 
 inline size_t get_num_opids()
@@ -390,7 +390,7 @@ inline const atermpp::aterm_int& OpId2Int(const data::function_symbol& term)
     return OpId2Int_aux(term);
   }
   return f->second;
-}
+} */
 
 data_expression fromInner(const data_expression& term);
 

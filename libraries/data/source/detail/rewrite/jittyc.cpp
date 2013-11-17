@@ -215,11 +215,11 @@ static aterm_appl get_rewrappl_value(const size_t i)
 
 data_expression RewriterCompilingJitty::toRewriteFormat(const data_expression& t)
 {
-  size_t old_opids = get_num_opids();
+  size_t old_opids = data::index_traits<data::function_symbol>::max_index()+1;
 
   data_expression r = toInner(t,true);
 
-  if (old_opids != get_num_opids())
+  if (old_opids != data::index_traits<data::function_symbol>::max_index()+1)
   {
     need_rebuild = true;
   }
@@ -1248,14 +1248,15 @@ void RewriterCompilingJitty::add_base_nfs(nfs_array &nfs, const function_symbol&
 
 void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const function_symbol& opid, size_t arity)
 {
-  data_equation_list eqns = (size_t(OpId2Int(opid).value())<jittyc_eqns.size()
-                                ?jittyc_eqns[OpId2Int(opid).value()]:data_equation_list());
+  data_equation_list eqns = (size_t(data::index_traits<data::function_symbol>::index(opid))<jittyc_eqns.size()
+                                ?jittyc_eqns[data::index_traits<data::function_symbol>::index(opid)]:data_equation_list());
   if (eqns.empty())
   {
     nfs.fill(arity);
     return;
   }
-  aterm_list strat = create_strategy(eqns,OpId2Int(opid).value(),arity,nfs,true_inner);
+  // aterm_list strat = create_strategy(eqns,OpId2Int(opid).value(),arity,nfs,true_inner);
+  aterm_list strat = create_strategy(eqns,data::index_traits<data::function_symbol>::index(opid),arity,nfs,true_inner);
   while (!strat.empty() && strat.front().type_is_int())
   {
     nfs.set(aterm_cast<aterm_int>(strat.front()).value());
@@ -1276,8 +1277,8 @@ bool RewriterCompilingJitty::opid_is_nf(const function_symbol& opid, size_t num_
   } */
 
   // Otherwise check whether there are applicable rewrite rules.
-  data_equation_list l = (size_t(OpId2Int(opid).value())<jittyc_eqns.size()
-                                        ?jittyc_eqns[OpId2Int(opid).value()]:data_equation_list());
+  data_equation_list l = (size_t(data::index_traits<data::function_symbol>::index(opid))<jittyc_eqns.size()
+                                        ?jittyc_eqns[data::index_traits<data::function_symbol>::index(opid)]:data_equation_list());
 
   if (l.empty())
   {
@@ -1425,7 +1426,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     {
       // set_rewrappl_value(OpId2Int(static_cast<function_symbol>(t)).value());
       ss << "atermpp::aterm_cast<const atermpp::aterm_appl>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" <<
-                    atermpp::detail::address(mcrl2::data::detail::get_int2term(OpId2Int(aterm_cast<function_symbol>(t)).value())) << ")))";
+                    atermpp::detail::address(t) << ")))";
+                    // atermpp::detail::address(mcrl2::data::detail::get_int2term(data::index_traits<data::function_symbol>::index(aterm_cast<function_symbol>(t)))) << ")))";
                     // atermpp::detail::address(mcrl2::data::detail::get_rewrappl_value_without_check(OpId2Int(aterm_cast<function_symbol>(t)).value())) << ")))";
     }
     return pair<bool,string>(
@@ -1641,7 +1643,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
       else
       {
-        ss << "rewr_" << OpId2Int(headfs).value() << "_0_0()";
+        ss << "rewr_" << data::index_traits<data::function_symbol>::index(headfs) << "_0_0()";
       }
     }
     else
@@ -1680,21 +1682,21 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           } */
         }
         else
-          ss << OpId2Int(headfs).value();
+          ss << data::index_traits<data::function_symbol>::index(headfs);
       }
       else
       {
         if (b || !rewr)
         {
-          const size_t index=OpId2Int(headfs).value();
-          const data::function_symbol old_head=get_int2term(index);
+          const size_t index=data::index_traits<data::function_symbol>::index(headfs);
+          const data::function_symbol old_head=headfs;
           std::stringstream new_name;
           new_name << "@_rewr" << "_" << index << "_" << ta.size() << "_" << args_nfs.get_value(arity)
                                << "_term";
           const data::function_symbol f(new_name.str(),old_head.sort());
           if (partially_rewritten_functions.count(f)==0)
           {
-            OpId2Int(f);
+            // OpId2Int(f); NOTE THAT AT THIS PLACE A FUNCTION SYMBOL CAN BE ADDED TO THE SYSTEM. POSSIBLY NASTY.
             partially_rewritten_functions.insert(f);
           }
           /* if (arity<=5)
@@ -1720,7 +1722,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         {
           // QUE?! Dit stond er vroeger // Sjoerd
           //   ss << (((aterm_int) ((aterm_list) t).front()).value()+((1 << arity)-arity-1)+args_nfs);
-          ss << (OpId2Int(headfs).value()+((1 << arity)-arity-1)+args_nfs.getraw(0));
+          ss << (data::index_traits<data::function_symbol>::index(headfs)+((1 << arity)-arity-1)+args_nfs.getraw(0));
         }
       }
       nfs_array args_first(arity);
@@ -2053,7 +2055,6 @@ void RewriterCompilingJitty::implement_tree_aux(
               cur_arg,
               cur_arg,
               cur_arg,
-              // (void*)atermpp::detail::address(get_int2term(OpId2Int(aterm_cast<function_symbol>(tree[0])).value())),
               (void*)atermpp::detail::address(tree[0]),
               whitespace(d*2)
              );
@@ -2102,7 +2103,7 @@ void RewriterCompilingJitty::implement_tree_aux(
 
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n",
-            (void*)atermpp::detail::address(get_int2term(OpId2Int(true_inner).value())),
+            (void*)atermpp::detail::address(true_inner),
             whitespace(d*2)
            );
 
@@ -2135,7 +2136,7 @@ void RewriterCompilingJitty::implement_tree(
             aterm_appl tree,
             const size_t arity,
             size_t d,
-            size_t /* opid */,
+            const mcrl2::data::function_symbol& /* opid */,
             const std::vector<bool> &used)
 {
   size_t l = 0;
@@ -2157,7 +2158,7 @@ void RewriterCompilingJitty::implement_tree(
     fprintf(f,"==atermpp::aterm_appl((const atermpp::detail::_aterm*) %p)) // C\n"
             "%s{\n"
             "%sreturn ",
-            (void*)atermpp::detail::address(get_int2term(OpId2Int(true_inner).value())),
+            (void*)atermpp::detail::address(true_inner),
             whitespace(d*2),
             whitespace(d*2)
            );
@@ -2202,13 +2203,16 @@ void RewriterCompilingJitty::implement_tree(
   }
 }
 
-static void finish_function(FILE* f, size_t arity, size_t opid, const std::vector<bool> &used)
+static void finish_function(FILE* f, 
+                            size_t arity, 
+                            const data::function_symbol& opid, 
+                            const std::vector<bool> &used)
 {
   if (arity == 0)
   {
     // set_rewrappl_value(opid);
     // fprintf(f,  "  return mcrl2::data::detail::get_rewrappl_value_without_check(%lu", opid);
-    fprintf(f,  "  return mcrl2::data::detail::get_int2term(%lu", opid);
+    fprintf(f,  "  return (const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
   }
   else
   {
@@ -2219,7 +2223,7 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
               "(const atermpp::detail::_aterm*)%p",
               arity+1,
               // (void*)get_int2aterm_value(opid)
-              (void*)atermpp::detail::address(get_int2term(opid))
+              (void*)atermpp::detail::address(opid)
              );
     }
     else
@@ -2227,7 +2231,7 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
       fprintf(f,  "  return atermpp::aterm_appl(get_appl_afun_value_no_check(%lu),"
               "(const atermpp::detail::_aterm*) %p",
               arity+1,
-              (void*)atermpp::detail::address(get_int2term(opid))
+              (void*)atermpp::detail::address(opid)
              );
     }
   }
@@ -2245,7 +2249,9 @@ static void finish_function(FILE* f, size_t arity, size_t opid, const std::vecto
   fprintf(f,                 ");\n");
 }
 
-void RewriterCompilingJitty::implement_strategy(FILE* f, aterm_list strat, size_t arity, size_t d, size_t opid, size_t nf_args)
+void RewriterCompilingJitty::implement_strategy(
+               FILE* f, aterm_list strat, size_t arity, size_t d, 
+               const function_symbol& opid, size_t nf_args)
 {
   std::vector<bool> used;
   for (size_t i=0; i<arity; i++)
@@ -2323,7 +2329,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_internal(const aterm_appl& expr
   size_t arity = recursive_number_of_args(expra);
   for (size_t i=0; i<arity; i++)
   {
-    const size_t idx = int2ar_idx[OpId2Int(head).value()] + ((arity-1)*arity)/2 + i;
+    const size_t idx = int2ar_idx[head] + ((arity-1)*arity)/2 + i;
     aterm_appl t = build_ar_expr_internal(get_argument_of_higher_order_term(expra,i),var);
     result = make_ar_or(result,make_ar_and(make_ar_var(idx),t));
   }
@@ -2347,7 +2353,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
     function_symbol head;
     if (is_function_symbol(rhs))
     {
-      const size_t idx = int2ar_idx[OpId2Int(aterm_cast<function_symbol>(rhs)).value()] + ((arity-1)*arity)/2 + arg;
+      const size_t idx = int2ar_idx[aterm_cast<function_symbol>(rhs)] + ((arity-1)*arity)/2 + arg;
       return make_ar_var(idx);
     }
     else if (head_is_function_symbol(rhs,head))
@@ -2355,7 +2361,7 @@ aterm_appl RewriterCompilingJitty::build_ar_expr_aux(const data_equation &eqn, c
       int rhs_arity = recursive_number_of_args(rhs)-1;
       size_t diff_arity = arity-eqn_arity;
       int rhs_new_arity = rhs_arity+diff_arity;
-      size_t idx = int2ar_idx[OpId2Int(head).value()] +
+      size_t idx = int2ar_idx[head] +
                          ((rhs_new_arity-1)*rhs_new_arity)/2 + (arg - eqn_arity + rhs_arity);
       return make_ar_var(idx);
     }
@@ -2399,7 +2405,7 @@ bool RewriterCompilingJitty::always_rewrite_argument(
      const size_t arity,
      const size_t arg)
 {
-  return !is_ar_false(ar[int2ar_idx[OpId2Int(opid).value()]+((arity-1)*arity)/2+arg]);
+  return !is_ar_false(ar[int2ar_idx[opid]+((arity-1)*arity)/2+arg]);
 }
 
 bool RewriterCompilingJitty::calc_ar(const aterm_appl &expr)
@@ -2429,10 +2435,11 @@ bool RewriterCompilingJitty::calc_ar(const aterm_appl &expr)
 void RewriterCompilingJitty::fill_always_rewrite_array()
 {
   ar=std::vector <aterm_appl> (ar_size);
-  for(std::map <size_t,size_t> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
+  for(std::map <data::function_symbol,size_t> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
-    size_t arity = getArity(get_int2term(it->first));
-    data_equation_list eqns = (size_t(it->first)<jittyc_eqns.size()?jittyc_eqns[it->first]:data_equation_list());
+    size_t arity = getArity(it->first);
+    data_equation_list eqns = (data::index_traits<data::function_symbol>::index(it->first)<jittyc_eqns.size()
+                                   ?jittyc_eqns[data::index_traits<data::function_symbol>::index(it->first)]:data_equation_list());
     size_t idx = it->second;
     for (size_t i=1; i<=arity; i++)
     {
@@ -2561,7 +2568,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
 
   true_inner = aterm_cast<function_symbol>(toInner(sort_bool::true_(),true));
 
-  for (function_symbol_vector::const_iterator it=DataSpec.mappings().begin(); it!=DataSpec.mappings().end(); ++it)
+/*  for (function_symbol_vector::const_iterator it=DataSpec.mappings().begin(); it!=DataSpec.mappings().end(); ++it)
   {
     OpId2Int(*it);
   }
@@ -2570,6 +2577,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   {
     OpId2Int(*it);
   }
+*/
 
   const data_equation_vector l=DataSpec.equations();
   for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
@@ -2660,18 +2668,18 @@ static bool arity_is_allowed(
 }
 
 static bool arity_is_allowed(
-                     const size_t func_index,
+                     const data::function_symbol& func,
                      const size_t a)
 {
-  return arity_is_allowed(get_int2term(func_index).sort(),a);
+  return arity_is_allowed(func.sort(),a);
 }
 
 inline
-void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity)
+void declare_rewr_functions(FILE* f, const data::function_symbol& func, const size_t arity)
 {
   for (size_t a=0; a<=arity; a++)
   {
-    if (arity_is_allowed(func_index,a))
+    if (arity_is_allowed(func,a))
     {
       const size_t b = (a<=NF_MAX_ARITY)?a:0;
       for (size_t nfs=0; (nfs >> b) == 0; nfs++)
@@ -2679,11 +2687,11 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
         if (a==0)
         {
           // This is a constant function; result can be derived by reference.
-          fprintf(f,  "static inline const atermpp::aterm_appl &rewr_%zu_%zu_%zu(",func_index,a,nfs);
+          fprintf(f,  "static inline const atermpp::aterm_appl &rewr_%zu_%zu_%zu(",data::index_traits<data::function_symbol>::index(func),a,nfs);
         }
         else
         {
-          fprintf(f,  "static inline atermpp::aterm_appl rewr_%zu_%zu_%zu(",func_index,a,nfs);
+          fprintf(f,  "static inline atermpp::aterm_appl rewr_%zu_%zu_%zu(",data::index_traits<data::function_symbol>::index(func),a,nfs);
         }
         for (size_t i=0; i<a; i++)
         {
@@ -2698,7 +2706,7 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
         }
         fprintf(f,  ");\n");
 
-        fprintf(f,  "static inline atermpp::aterm_appl rewr_%zu_%zu_%zu_term(const atermpp::aterm_appl &t) { return rewr_%zu_%zu_%zu(", func_index, a, nfs,func_index, a,nfs);
+        fprintf(f,  "static inline atermpp::aterm_appl rewr_%zu_%zu_%zu_term(const atermpp::aterm_appl &t) { return rewr_%zu_%zu_%zu(", data::index_traits<data::function_symbol>::index(func), a, nfs,data::index_traits<data::function_symbol>::index(func), a,nfs);
         for(size_t i = 1; i <= a; ++i)
         {
           fprintf(f,  "%satermpp::aterm_cast<const atermpp::aterm_appl>(t[%zu])", (i == 1?"":", "), i);
@@ -2746,22 +2754,27 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ar_size = 0;
   int2ar_idx.clear();
 
-  for(std::map< data::function_symbol, atermpp::aterm_int >::const_iterator l = term2int.begin()
-        ; l != term2int.end()
+  function_symbol_vector all_function_symbols=m_data_specification_for_enumeration.constructors();
+  all_function_symbols.insert(all_function_symbols.begin(),
+                              m_data_specification_for_enumeration.mappings().begin(),
+                              m_data_specification_for_enumeration.mappings().end());
+
+  for(function_symbol_vector::const_iterator l = all_function_symbols.begin()
+        ; l != all_function_symbols.end()
         ; ++l)
   {
-    size_t i = l->second.value();
-    if (int2ar_idx.count(i) == 0)
+    if (int2ar_idx.count(*l) == 0)
     {
-      size_t arity = getArity(l->first);
-      int2ar_idx[i]=ar_size;
+      size_t arity = getArity(*l);
+      int2ar_idx[*l]=ar_size;
       ar_size += (arity*(arity+1))/2;
     }
   }
+  
   for(std::set < data_equation >::const_iterator it=rewrite_rules.begin();
                    it!=rewrite_rules.end(); ++it)
   {
-    size_t main_op_id_index=OpId2Int(get_function_symbol_of_head(it->lhs())).value(); // main symbol of equation.
+    size_t main_op_id_index=data::index_traits<data::function_symbol>::index(get_function_symbol_of_head(it->lhs())); // main symbol of equation.
     if (main_op_id_index>=jittyc_eqns.size())
     {
       jittyc_eqns.resize(main_op_id_index+1);
@@ -2800,9 +2813,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // - Forward declarations of rewr_* functions
   //
   size_t max_arity = 0;
-  for (size_t j=0; j < get_num_opids(); ++j)
+  for(function_symbol_vector::const_iterator l = all_function_symbols.begin()
+        ; l != all_function_symbols.end()
+        ; ++l)
   {
-    const data::function_symbol fs=get_int2term(j);
+    const data::function_symbol fs=*l;
     size_t arity = getArity(fs);
     if (arity > max_arity)
     {
@@ -2810,9 +2825,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
     if (data_equation_selector(fs))
     {
-      declare_rewr_functions(f, j, arity);
+      declare_rewr_functions(f, fs, arity);
     }
   }
+  
   fprintf(f,  "\n\n");
 
   //
@@ -2913,9 +2929,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   // Implement the equations of every operation.
   //
-  for (size_t j=0; j < get_num_opids(); j++)
+  for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
+              j!=all_function_symbols.end(); ++j) 
   {
-    const data::function_symbol fs=get_int2term(j);
+    const data::function_symbol fs=*j;
     const size_t arity = getArity(fs);
 
     if (data_equation_selector(fs))
@@ -2924,7 +2941,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
       for (size_t a=0; a<=arity; a++)
       {
-        if (arity_is_allowed(j,a))
+        if (arity_is_allowed(fs,a))
         {
           nfs_array nfs_a(a);
           int b = (a<=NF_MAX_ARITY)?a:0;
@@ -2932,11 +2949,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           {
             if (a==0)
             {
-              fprintf(f,  "static const atermpp::aterm_appl &rewr_%zu_%zu_%zu(",j,a,nfs);
+              fprintf(f,  "static const atermpp::aterm_appl &rewr_%zu_%zu_%zu(",data::index_traits<data::function_symbol>::index(fs),a,nfs);
             }
             else
             {
-              fprintf(f,  "static atermpp::aterm_appl rewr_%zu_%zu_%zu(",j,a,nfs);
+              fprintf(f,  "static atermpp::aterm_appl rewr_%zu_%zu_%zu(",data::index_traits<data::function_symbol>::index(fs),a,nfs);
             }
             for (size_t i=0; i<a; i++)
             {
@@ -2963,14 +2980,16 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 //    fprintf(f, "  std::cerr << \"ARg\%zu \" << arg_not_nf%zu << \"\\n\";\n",i,i);
 //  }
 //}
-            if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
+            if (data::index_traits<data::function_symbol>::index(fs)<jittyc_eqns.size() && !jittyc_eqns[data::index_traits<data::function_symbol>::index(fs)].empty() )
             {
             // Implement strategy
               if (0 < a)
               {
                 nfs_a.set_value(nfs);
               }
-              implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs);
+              implement_strategy(f,create_strategy(jittyc_eqns[data::index_traits<data::function_symbol>::index(fs)],
+                                    data::index_traits<data::function_symbol>::index(fs),
+                                    a,nfs_a,true_inner),a,1,fs,nfs);
             }
             else
             {
@@ -2979,7 +2998,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
               {
                 used.push_back((nfs & ((size_t)1 << k)) != 0);
               }
-              finish_function(f,a,j,used);
+              finish_function(f,a,fs,used);
             }
 
             fprintf(f,                 "}\n");
@@ -3008,53 +3027,60 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Generate the entries for int2func.
   for (size_t i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,get_num_opids());
-    for (size_t j=0; j < get_num_opids(); j++)
+    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,data::index_traits<data::function_symbol>::max_index()+1);
+    for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
+                        j!=all_function_symbols.end(); ++j)
     {
-      const data::function_symbol fs=get_int2term(j);
+      const data::function_symbol fs=*j;
 
       if (partially_rewritten_functions.count(fs)>0)
       {
-        if (arity_is_allowed(j,i))
+        if (arity_is_allowed(fs,i))
         {
           // We are dealing with a partially rewritten function here. Remove the "@_" at
           // the beginning of the string.
           const string c_function_name=pp(fs.name());
-          fprintf(f,  "  int2func[%zu][%zu] = %s;\n",i+1,j,c_function_name.substr(2,c_function_name.size()-2).c_str());
+          fprintf(f,  "  int2func[%zu][%zu] = %s;\n",i+1,data::index_traits<data::function_symbol>::index(fs),
+                                         c_function_name.substr(2,c_function_name.size()-2).c_str());
         }
       }
-      else if (data_equation_selector(fs) && arity_is_allowed(j,i))
+      else if (data_equation_selector(fs) && arity_is_allowed(fs,i))
       {
-        fprintf(f,  "  int2func[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i+1,j,j,i);
+        fprintf(f,  "  int2func[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i+1,data::index_traits<data::function_symbol>::index(fs),data::index_traits<data::function_symbol>::index(fs),i);
       }
     }
   }
   // Generate the entries for int2func_head_in_nf. Entries for constants (with arity 0) are not required.
   for (size_t i=1; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,get_num_opids());
-    for (size_t j=0; j < get_num_opids(); j++)
+    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,data::index_traits<data::function_symbol>::max_index()+1);
+    for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
+                        j!=all_function_symbols.end(); ++j)
     {
-      const data::function_symbol fs=get_int2term(j);
+      const data::function_symbol fs=*j;
 
       if (partially_rewritten_functions.count(fs)>0)
       {
-        if (arity_is_allowed(j,i))
+        if (arity_is_allowed(fs,i))
         {
           // We are dealing with a partially rewritten function here.
           // This cannot be invoked for any normal function.
         }
       }
-      else if (data_equation_selector(fs) && arity_is_allowed(j,i))
+      else if (data_equation_selector(fs) && arity_is_allowed(fs,i))
       {
         if (i<=NF_MAX_ARITY)
         {
-          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_1_term;\n",i+1,j,j,i);
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_1_term;\n",i+1,
+                        data::index_traits<data::function_symbol>::index(fs),
+                        data::index_traits<data::function_symbol>::index(fs),i);
         }
         else
         {
           // If i>NF_MAX_ARITY no compiled rewrite function where the head is already in nf is available.
-          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i+1,j,j,i);
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = rewr_%zu_%zu_0_term;\n",i+1,
+                                data::index_traits<data::function_symbol>::index(fs),
+                                data::index_traits<data::function_symbol>::index(fs),i);
         }
       }
     }
@@ -3196,7 +3222,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    return result;\n"
       "  }\n"
       "}\n\n",
-      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),get_num_opids(), max_arity+1
+      atermpp::detail::addressf(atermpp::detail::function_adm.AS_INT),data::index_traits<data::function_symbol>::max_index()+1, max_arity+1
       );
 
   fprintf(f,
@@ -3248,7 +3274,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (mcrl2::data::is_function_symbol(t))\n"
       "  {\n"
       "    // Term t is a function_symbol\n"
-      "    const size_t function_index = mcrl2::data::detail::OpId2Int(aterm_cast<mcrl2::data::function_symbol>(t)).value();\n"
+      "    const size_t function_index = mcrl2::data::index_traits<data::function_symbol>::index(aterm_cast<mcrl2::data::function_symbol>(t));\n"
       "    if (function_index < %zu )\n"
       "    {\n"
       "      const size_t arity=1;\n"
@@ -3268,7 +3294,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    mcrl2::data::function_symbol head;\n"
       "    if (mcrl2::data::detail::head_is_function_symbol(t,head))\n"
       "    {\n"
-      "      const size_t function_index = mcrl2::data::detail::OpId2Int(head).value();\n"
+      "      const size_t function_index = mcrl2::data::index_traits<data::function_symbol>::index(head);\n"
       "      if (function_index < %zu )\n"
       "      {\n"
       "        assert(arity <= %zu);\n"
@@ -3288,7 +3314,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  \n"
       "  return rewrite_aux(t);\n"
       "}\n",
-      get_num_opids(), get_num_opids(), max_arity+1);
+      data::index_traits<data::function_symbol>::max_index()+1, 
+      data::index_traits<data::function_symbol>::max_index()+1, 
+      max_arity+1);
 
 
   fclose(f);

@@ -23,34 +23,45 @@
 namespace atermpp
 {
 
+// The hook_tables are pointers, which allows to explicitly initialise them at
+// first use. Otherwise the compiler initialises these variables, possibly after
+// some callbacks have been registered, loosing information.
+// Note that the hook_tables are not destroyed before stopping the program.
 typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table;
-hook_table creation_hooks;
-hook_table deletion_hooks;
+static bool hook_tables_are_initialised=false;
+static hook_table* creation_hooks;
+static hook_table* deletion_hooks;
 
 void add_creation_hook(const function_symbol& sym, term_callback callback)
 {
+  if (!hook_tables_are_initialised)
+  {
+    creation_hooks=new hook_table();
+    deletion_hooks=new hook_table();
+    hook_tables_are_initialised=true;
+  }
 #ifndef NDEBUG
   // The code handling the hooks is currently assuming that there is only one
   // hook per function symbol. If more hooks are allowed, then this code
   // should be changed.
-  for (hook_table::const_iterator it = creation_hooks.begin(); it != creation_hooks.end(); ++it)
+  for (hook_table::const_iterator it = creation_hooks->begin(); it != creation_hooks->end(); ++it)
   {
     assert(it->first != &sym);
   }
 #endif
-  creation_hooks.push_back(std::make_pair(&sym, callback));
+  creation_hooks->push_back(std::make_pair(&sym, callback));
 }
 
 void add_deletion_hook(const function_symbol& sym, term_callback callback)
 {
 #ifndef NDEBUG
   // See the comments at add_creation_hook.
-  for (hook_table::const_iterator it = deletion_hooks.begin(); it != deletion_hooks.end(); ++it)
+  for (hook_table::const_iterator it = deletion_hooks->begin(); it != deletion_hooks->end(); ++it)
   {
     assert(it->first != &sym);
   }
 #endif
-  deletion_hooks.push_back(std::make_pair(&sym, callback));
+  deletion_hooks->push_back(std::make_pair(&sym, callback));
 }
 
 namespace detail
@@ -78,12 +89,15 @@ size_t total_nodes = 0;
 
 void call_creation_hook(const detail::_aterm* term)
 {
-  const function_symbol& sym = term->function();
-  for (hook_table::const_iterator it = creation_hooks.begin(); it != creation_hooks.end(); ++it)
+  if (hook_tables_are_initialised)
   {
-    if (*it->first == sym)
+    const function_symbol& sym = term->function();
+    for (hook_table::const_iterator it = creation_hooks->begin(); it != creation_hooks->end(); ++it)
     {
-      it->second(aterm(term));
+      if (*it->first == sym)
+      {
+        it->second(aterm(term));
+      }
     }
   }
 }
@@ -91,7 +105,7 @@ void call_creation_hook(const detail::_aterm* term)
 void call_deletion_hook(const detail::_aterm* term)
 {
   const function_symbol& sym = term->function();
-  for (hook_table::const_iterator it = deletion_hooks.begin(); it != deletion_hooks.end(); ++it)
+  for (hook_table::const_iterator it = deletion_hooks->begin(); it != deletion_hooks->end(); ++it)
   {
     if (*it->first == sym)
     {

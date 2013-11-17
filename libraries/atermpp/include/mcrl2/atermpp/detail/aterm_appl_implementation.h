@@ -87,6 +87,7 @@ const _aterm* local_term_appl_with_converter(const function_symbol &sym,
   new_term->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = new_term;
   new_term->reset_reference_count(false); // Remove temporary protection of this term.
+// std::cerr << "Insert in hashtableI " << new_term << "  " <<  new_term->function() << "   " << hnr << "\n";
 
   call_creation_hook(new_term);
 
@@ -109,8 +110,10 @@ inline const _aterm* ADDRESS(const aterm &a)
 template <class Term, class ForwardIterator>
 const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator begin, const ForwardIterator end)
 {
+// std::cerr << "START HASHNUMBER \n";
   const size_t arity = sym.arity();
   HashNumber hnr = SHIFT(addressf(sym)); 
+// std::cerr << "FUNCTION " << addressf(sym) << "\n";
 
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
@@ -118,8 +121,10 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
     assert(j<arity);
     CHECK_TERM(*i);
     hnr = COMBINE(hnr, reinterpret_cast<size_t>(ADDRESS(*i)));
+// std::cerr << "TERM " << *i << "\n";
   }
   assert(j==arity);
+// std::cerr << "HASHNUMBER " << hnr << "\n";
 
   const detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -145,18 +150,24 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
   }
 
   assert(cur==NULL);
+// std::cerr << "START ALLOCATE ";
   cur = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
+// std::cerr << "END ALLOCATE \n";
   /* Delay masking until after allocate_term */
   hnr &= detail::aterm_table_mask;
   new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
-  
+// std::cerr << "HIER1\n";  
   ForwardIterator i=begin;
   for (size_t j=0; j<arity; ++i, ++j)
   {
+// std::cerr << "HIERx " << j << "\n";  
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[j])) Term(*i);
   }
+// std::cerr << "HIER2\n";  
   cur->set_next(detail::aterm_hashtable[hnr]);
+// std::cerr << "HIER3\n";  
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableII " << cur << "  " <<  cur->function() << "  arity " << cur->function().arity() << "   " << hnr << "  " << detail::aterm_table_mask << "\n";
 
   call_creation_hook(cur);
   
@@ -187,6 +198,7 @@ inline const _aterm* term_appl0(const function_symbol &sym)
 
   cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableIII " << cur << "  " <<  cur->function() << "   " << hnr << "\n";
 
   call_creation_hook(cur);
 
@@ -220,6 +232,7 @@ const _aterm* term_appl1(const function_symbol &sym, const Term &arg0)
   new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[0])) Term(arg0);
   cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableVI " << cur << "  " <<  cur->function() << "   " << hnr << "\n";
 
   call_creation_hook(cur);
 
@@ -256,6 +269,7 @@ const _aterm* term_appl2(const function_symbol &sym, const Term &arg0, const Ter
 
   cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableV " << cur << "  " <<  cur->function() << "   " << hnr << "\n";
 
   call_creation_hook(cur);
 
@@ -296,6 +310,7 @@ const _aterm* term_appl3(const function_symbol &sym, const Term &arg0, const Ter
 
   cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableVI " << cur << "  " <<  cur->function() << "   " << hnr << "\n";
 
   call_creation_hook(cur);
 
@@ -340,6 +355,7 @@ const _aterm *term_appl4(const function_symbol &sym, const Term &arg0, const Ter
 
   cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableVII " << cur << "  " <<  cur->function() << "   " << hnr << "\n";
 
   call_creation_hook(cur);
 
@@ -389,6 +405,7 @@ const _aterm* term_appl5(const function_symbol &sym, const Term &arg0, const Ter
 
   cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableVIIa " << cur << "  " <<  cur->function() << "   " << hnr << "\n";
 
   call_creation_hook(cur);
 
@@ -441,6 +458,7 @@ const _aterm *term_appl6(const function_symbol &sym, const Term &arg0, const Ter
 
   cur->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = cur;
+// std::cerr << "Insert in hashtableIX " << cur << "  " <<  cur->function() << "   " << hnr << "\n";
 
   call_creation_hook(cur);
 

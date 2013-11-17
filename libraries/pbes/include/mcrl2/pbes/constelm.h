@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 

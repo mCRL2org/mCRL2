@@ -679,12 +679,14 @@ std::vector <atermpp::function_symbol> apples;
 /*************  Below the functions toInner and fromInner are being defined *********************/
 
 
-std::map< function_symbol, atermpp::aterm_int > term2int;
-std::vector < data::function_symbol > int2term;
+// std::map< function_symbol, atermpp::aterm_int > term2int;
+// std::vector < data::function_symbol > int2term;
 
-data_expression toInner(const data_expression& term, const bool add_opids)
+data_expression toInner(const data_expression& term, const bool /* add_opids */)
 {
-  if (is_variable(term))
+  return term;
+
+/*  if (is_variable(term))
   {
     return term;
   }
@@ -725,7 +727,7 @@ data_expression toInner(const data_expression& term, const bool add_opids)
   assert(is_abstraction(term));
 
   const abstraction& t=term;
-  return abstraction(t.binding_operator(),t.variables(),toInner(t.body(),add_opids));
+  return abstraction(t.binding_operator(),t.variables(),toInner(t.body(),add_opids)); */
 }
 
 data_expression fromInner(const data_expression& term)

@@ -69,7 +69,7 @@ class term_appl_prepend_iterator: public boost::iterator_facade<
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
-    const data_expression &dereference() const  // TODO HERE AN UNNESSARY COPY IS MADE. SHOULD RETURN A REFERENCE
+    const data_expression &dereference() const  
     {
       if (m_prepend)
       {

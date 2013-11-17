@@ -21,6 +21,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"

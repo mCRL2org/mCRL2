@@ -229,7 +229,8 @@ void RewriterJitty::rebuild_strategy()
   jitty_strat.clear();
   for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
   {
-    const size_t i=OpId2Int(l->first).value();
+    // const size_t i=OpId2Int(l->first).value();
+    const size_t i=data::index_traits<data::function_symbol>::index(l->first);
     make_jitty_strat_sufficiently_larger(i);
       jitty_strat[i] = create_strategy(reverse(l->second));
   }
@@ -299,7 +300,7 @@ bool RewriterJitty::addRewriteRule(const data_equation &rule)
   }
 
   const function_symbol& f=get_function_symbol_of_head(rule.lhs());
-  atermpp::aterm_int lhs_head_index=OpId2Int(f);
+  // atermpp::aterm_int lhs_head_index=OpId2Int(f);
   data_equation_list n;
   std::map< data::function_symbol, data_equation_list >::iterator it = jitty_eqns.find(f);
   if (it != jitty_eqns.end())
@@ -323,7 +324,7 @@ bool RewriterJitty::addRewriteRule(const data_equation &rule)
 bool RewriterJitty::removeRewriteRule(const data_equation &rule)
 {
   const function_symbol &f=get_function_symbol_of_head(rule.lhs());
-  atermpp::aterm_int lhs_head_index=OpId2Int(get_function_symbol_of_head(rule.lhs()));
+  size_t lhs_head_index=data::index_traits<data::function_symbol>::index(get_function_symbol_of_head(rule.lhs()));
 
   data_equation_list n;
   const std::map< function_symbol, data_equation_list >::iterator it = jitty_eqns.find(f);
@@ -334,7 +335,7 @@ bool RewriterJitty::removeRewriteRule(const data_equation &rule)
 
   n = remove_one_element(n,rule);
 
-  make_jitty_strat_sufficiently_larger(lhs_head_index.value());
+  make_jitty_strat_sufficiently_larger(lhs_head_index);
   if (n.empty())
   {
     jitty_eqns.erase( it );
@@ -638,7 +639,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   }
 
   // const size_t op_value=op.value();
-  const size_t op_value=OpId2Int(op).value();
+  const size_t op_value=data::index_traits<data::function_symbol>::index(op);
   if (op_value>=jitty_strat.size())
   {
     make_jitty_strat_sufficiently_larger(op_value);
