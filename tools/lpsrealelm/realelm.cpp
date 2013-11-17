@@ -575,7 +575,7 @@ static void add_inequalities_to_context_postponed(
     data_expression right;
     i->typical_pair(left,right,r);
 
-    //if (left!=real_zero())
+    if (left!=real_zero())
     {
       bool pair_is_new(true);
       for (context_type::const_iterator c=context.begin() ; c!=context.end() && pair_is_new; ++c)
@@ -614,10 +614,10 @@ static void add_inequalities_to_context_postponed(
         }
       }
     }
-    //else
-    //{
-    //  ++i;
-    //}
+    else
+    {
+      ++i;
+    }
   }
 }
 
