@@ -20,7 +20,7 @@
 #include "mcrl2/process/action_name_multiset.h"
 
 #ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/core/index_traits.h"
+#include "mcrl2/data/index_traits.h"
 #endif
 
 namespace mcrl2
@@ -99,16 +99,20 @@ void normalize_sorts(process_identifier_vector& x, const data::data_specificatio
 
 #ifdef MCRL2_USE_INDEX_TRAITS
 
+typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
+
 inline
 void on_create_process_identifier(const atermpp::aterm& t)
 {
-  core::index_traits<process_identifier>::insert(static_cast<const process_identifier&>(t));
+  const process_identifier& p = atermpp::aterm_cast<const process_identifier>(t);
+  core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(t.name(), t.variables()));
 }
 
 inline
 void on_delete_process_identifier(const atermpp::aterm& t)
 {
-  core::index_traits<process_identifier>::erase(static_cast<const process_identifier&>(t));
+  const process_identifier& p = atermpp::aterm_cast<const process_identifier>(t);
+  core::index_traits<process_identifier, process_identifier_key_type>::erase(std::make_pair(t.name(), t.variables()));
 }
 
 inline
@@ -123,21 +127,5 @@ void register_process_identifier_hooks()
 } // namespace process
 
 } // namespace mcrl2
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-namespace std {
-
-template<>
-struct hash<mcrl2::process::process_identifier>
-{
-  std::size_t operator()(const mcrl2::process::process_identifier& x) const
-  {
-    return mcrl2::core::hash_value(x.name(), x.variables());
-  }
-};
-
-}
-#endif
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

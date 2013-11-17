@@ -778,13 +778,13 @@ std::set<boolean_expression> split_and(const boolean_expression& expr)
 inline
 void on_create_boolean_variable(const atermpp::aterm& t)
 {
-  core::index_traits<boolean_variable>::insert(static_cast<const boolean_variable&>(t));
+  core::index_traits<boolean_variable, core::identifier_string>::insert(static_cast<const boolean_variable&>(t));
 }
 
 inline
 void on_delete_boolean_variable(const atermpp::aterm& t)
 {
-  core::index_traits<boolean_variable>::erase(static_cast<const boolean_variable&>(t));
+  core::index_traits<boolean_variable, core::identifier_string>::erase(static_cast<const boolean_variable&>(t));
 }
 
 inline
@@ -799,21 +799,5 @@ void register_boolean_variable_hooks()
 } // namespace bes
 
 } // namespace mcrl2
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-namespace std {
-
-template<>
-struct hash<mcrl2::bes::boolean_variable>
-{
-  std::size_t operator()(const mcrl2::mcrl2::bes::boolean_variable& x) const
-  {
-    return mcrl2::core::hash_value(x.name());
-  }
-};
-
-}
-#endif
 
 #endif // MCRL2_BES_BOOLEAN_EXPRESSION_H

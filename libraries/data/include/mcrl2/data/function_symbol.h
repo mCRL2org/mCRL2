@@ -19,7 +19,7 @@
 #include "mcrl2/data/sort_expression.h"
 
 #ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/core/index_traits.h"
+#include "mcrl2/data/index_traits.h"
 #endif
 
 namespace mcrl2
@@ -83,16 +83,20 @@ inline void swap(function_symbol& t1, function_symbol& t2)
 
 #ifdef MCRL2_USE_INDEX_TRAITS
 
+typedef std::pair<core::identifier_string, data::sort_expression> function_symbol_key_type;
+
 inline
 void on_create_function_symbol(const atermpp::aterm& t)
 {
-  core::index_traits<function_symbol>::insert(static_cast<const function_symbol&>(t));
+  const function_symbol& v = atermpp::aterm_cast<const function_symbol>(t);
+  core::index_traits<function_symbol, function_symbol_key_type>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_delete_function_symbol(const atermpp::aterm& t)
 {
-  core::index_traits<function_symbol>::erase(static_cast<const function_symbol&>(t));
+  const function_symbol& v = atermpp::aterm_cast<const function_symbol>(t);
+  core::index_traits<function_symbol, function_symbol_key_type>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
@@ -113,22 +117,6 @@ std::set<data::variable> find_all_variables(const data::function_symbol& x);
 } // namespace data
 
 } // namespace mcrl2
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-namespace std {
-
-template<>
-struct hash<mcrl2::data::function_symbol>
-{
-  size_t operator()(const mcrl2::data::function_symbol & x) const
-  {
-    return mcrl2::core::hash_value(x.name(), x.sort());
-  }
-};
-
-}
-#endif
 
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

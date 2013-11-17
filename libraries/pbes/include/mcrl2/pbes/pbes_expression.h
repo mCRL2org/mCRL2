@@ -30,7 +30,7 @@
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 
 #ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/core/index_traits.h"
+#include "mcrl2/data/index_traits.h"
 #endif
 
 namespace mcrl2
@@ -1183,16 +1183,18 @@ pbes_expression right(const pbes_expression& t)
 
 #ifdef MCRL2_USE_INDEX_TRAITS
 
+typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
+
 inline
 void on_create_propositional_variable_instantiation(const atermpp::aterm& t)
 {
-  core::index_traits<propositional_variable_instantiation>::insert(static_cast<const propositional_variable_instantiation&>(t));
+  core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(static_cast<const propositional_variable_instantiation&>(t));
 }
 
 inline
 void on_delete_propositional_variable_instantiation(const atermpp::aterm& t)
 {
-  core::index_traits<propositional_variable_instantiation>::erase(static_cast<const propositional_variable_instantiation&>(t));
+  core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::erase(static_cast<const propositional_variable_instantiation&>(t));
 }
 
 inline

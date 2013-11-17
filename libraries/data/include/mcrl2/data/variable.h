@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_VARIABLE_H
 #define MCRL2_DATA_VARIABLE_H
 
-#include "boost/range/iterator_range.hpp"
-
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -22,7 +20,7 @@
 #include "mcrl2/data/application.h"
 
 #ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/core/index_traits.h"
+#include "mcrl2/data/index_traits.h"
 #endif
 
 namespace mcrl2
@@ -86,16 +84,20 @@ inline void swap(variable& t1, variable& t2)
 
 #ifdef MCRL2_USE_INDEX_TRAITS
 
+typedef std::pair<core::identifier_string, data::sort_expression> variable_key_type;
+
 inline
 void on_create_variable(const atermpp::aterm& t)
 {
-  core::index_traits<variable>::insert(static_cast<const variable&>(t));
+  const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
+  core::index_traits<variable, variable_key_type>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_delete_variable(const atermpp::aterm& t)
 {
-  core::index_traits<variable>::erase(static_cast<const variable&>(t));
+  const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
+  core::index_traits<variable, variable_key_type>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
@@ -120,22 +122,6 @@ std::set<core::identifier_string> find_identifiers(const data::variable_list& x)
 } // namespace data
 
 } // namespace mcrl2
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-namespace std {
-
-template<>
-struct hash<mcrl2::data::variable>
-{
-  size_t operator()(const mcrl2::data::variable & x) const
-  {
-    return mcrl2::core::hash_value(x.name(), x.sort());
-  }
-};
-
-}
-#endif
 
 #endif // MCRL2_DATA_VARIABLE_H
 
