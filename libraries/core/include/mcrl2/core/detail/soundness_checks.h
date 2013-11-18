@@ -21,7 +21,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-
+#include "mcrl2/atermpp/aterm_string.h"
 
 namespace mcrl2
 {

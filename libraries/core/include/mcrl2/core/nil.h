@@ -46,6 +46,15 @@ typedef atermpp::term_list<nil> nil_list;
 /// \brief vector of nils
 typedef std::vector<nil>    nil_vector;
 
+/// \brief Test for a nil expression
+/// \param x A term
+/// \return True if \a x is a nil expression
+inline
+bool is_nil(const atermpp::aterm_appl& x)
+{
+  return core::detail::gsIsNil(x);
+}
+
 // prototype declaration
 std::string pp(const nil& x);
 
@@ -63,7 +72,6 @@ inline void swap(nil& t1, nil& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class nil ---//
 
 } // namespace core

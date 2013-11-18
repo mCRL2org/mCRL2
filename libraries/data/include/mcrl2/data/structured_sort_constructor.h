@@ -219,7 +219,6 @@ inline void swap(structured_sort_constructor& t1, structured_sort_constructor& t
 {
   t1.swap(t2);
 }
-
 //--- end generated class structured_sort_constructor ---//
 
 // template function overloads

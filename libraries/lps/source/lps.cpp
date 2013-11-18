@@ -62,6 +62,11 @@ std::set<data::function_symbol> find_function_symbols(const lps::specification& 
 std::set<core::identifier_string> find_identifiers(const lps::specification& x) { return lps::find_identifiers< lps::specification >(x); }
 //--- end generated lps overloads ---//
 
+data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const
+{
+  return data::replace_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+}
+
 std::string pp_with_summand_numbers(const specification& x)
 {
   std::ostringstream out;

@@ -86,7 +86,6 @@ inline void swap(action_name_multiset& t1, action_name_multiset& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class action_name_multiset ---//
 
 } // namespace process

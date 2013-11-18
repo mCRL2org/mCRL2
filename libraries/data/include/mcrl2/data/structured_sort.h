@@ -460,7 +460,6 @@ inline void swap(structured_sort& t1, structured_sort& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class structured_sort ---//
 
 } // namespace data

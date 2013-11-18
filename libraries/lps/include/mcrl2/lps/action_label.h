@@ -97,7 +97,6 @@ inline void swap(action_label& t1, action_label& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class action_label ---//
 
 // template function overloads

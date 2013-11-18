@@ -250,7 +250,6 @@ inline void swap(data_expression& t1, data_expression& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class data_expression ---//
 
 /// \brief Test for a data_expression expression

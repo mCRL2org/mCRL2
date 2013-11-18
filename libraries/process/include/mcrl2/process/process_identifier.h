@@ -100,7 +100,6 @@ inline void swap(process_identifier& t1, process_identifier& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class process_identifier ---//
 
 // template function overloads

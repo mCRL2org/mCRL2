@@ -90,7 +90,6 @@ inline void swap(function_symbol& t1, function_symbol& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class function_symbol ---//
 
 #ifdef MCRL2_USE_INDEX_TRAITS

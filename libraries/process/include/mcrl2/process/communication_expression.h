@@ -95,7 +95,6 @@ inline void swap(communication_expression& t1, communication_expression& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class communication_expression ---//
 
 } // namespace process

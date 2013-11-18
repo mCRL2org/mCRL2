@@ -97,7 +97,6 @@ inline void swap(process_equation& t1, process_equation& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class process_equation ---//
 
 // template function overloads

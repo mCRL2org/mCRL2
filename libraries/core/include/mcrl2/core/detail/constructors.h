@@ -12,6 +12,7 @@
 #ifndef LPS_DETAIL_CONSTRUCTORS
 #define LPS_DETAIL_CONSTRUCTORS
 
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h" // gsString2ATermAppl
 
 namespace mcrl2

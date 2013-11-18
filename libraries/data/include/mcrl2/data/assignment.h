@@ -249,7 +249,6 @@ inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignmen
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 /// \brief Selects the right-hand side of an assignment

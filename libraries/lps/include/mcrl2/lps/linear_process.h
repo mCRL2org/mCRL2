@@ -19,7 +19,8 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/summand.h"
+#include "mcrl2/lps/action_summand.h"
+#include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/process_initializer.h"
 
 namespace mcrl2
@@ -86,7 +87,7 @@ class linear_process
       {
         assert(core::detail::check_rule_LinearProcessSummand(*j));
         atermpp::aterm_appl t = atermpp::aterm_cast<atermpp::aterm_appl>(*j);
-        
+
         data::variable_list summation_variables(atermpp::aterm_cast<atermpp::aterm_list>(t[0]));
         data::data_expression condition         = data::data_expression(t[1]);
         data::data_expression time              = data::data_expression(t[3]);
@@ -203,8 +204,21 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
          );
 }
 
-// template function overloads
+//--- start generated class linear_process ---//
+// prototype declaration
 std::string pp(const linear_process& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const linear_process& x)
+{
+  return out << lps::pp(x);
+}
+//--- end generated class linear_process ---//
+
+// template function overloads
 std::set<data::variable> find_all_variables(const lps::linear_process& x);
 std::set<data::variable> find_free_variables(const lps::linear_process& x);
 

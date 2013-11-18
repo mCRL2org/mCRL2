@@ -294,7 +294,6 @@ inline void swap(fbag_container& t1, fbag_container& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 } // namespace data

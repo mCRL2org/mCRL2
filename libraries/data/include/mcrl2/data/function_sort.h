@@ -88,7 +88,6 @@ inline void swap(function_sort& t1, function_sort& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class function_sort ---//
 
 /// \brief list of function sorts

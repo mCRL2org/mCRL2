@@ -89,7 +89,6 @@ inline void swap(untyped_action& t1, untyped_action& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class untyped_action ---//
 
 } // namespace lps

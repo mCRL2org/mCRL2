@@ -95,7 +95,6 @@ inline void swap(rename_expression& t1, rename_expression& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class rename_expression ---//
 
 } // namespace process

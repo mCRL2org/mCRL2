@@ -77,7 +77,6 @@ inline void swap(basic_sort& t1, basic_sort& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class basic_sort ---//
 
 /// \brief list of basic sorts

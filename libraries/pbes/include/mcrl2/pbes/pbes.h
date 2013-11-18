@@ -386,6 +386,20 @@ class pbes
     }
 };
 
+//--- start generated class pbes ---//
+// prototype declaration
+std::string pp(const pbes& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes& x)
+{
+  return out << pbes_system::pp(x);
+}
+//--- end generated class pbes ---//
+
 /// \brief Conversion to atermappl.
 /// \return The PBES converted to aterm format.
 inline
@@ -430,15 +444,6 @@ inline
 bool operator==(const pbes& p1, const pbes& p2)
 {
   return pbes_to_aterm(p1) == pbes_to_aterm(p2);
-}
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const pbes& x)
-{
-  return out << pbes_system::pp(x);
 }
 
 } // namespace pbes_system

@@ -72,7 +72,6 @@ inline void swap(untyped_possible_sorts& t1, untyped_possible_sorts& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class untyped_possible_sorts ---//
 
 } // namespace data

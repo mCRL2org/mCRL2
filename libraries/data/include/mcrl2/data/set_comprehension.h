@@ -53,11 +53,25 @@ class set_comprehension: public abstraction
 
 }; // class set_comprehension
 
+//--- start generated class set_comprehension ---//
+// prototype declaration
+std::string pp(const set_comprehension& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const set_comprehension& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(set_comprehension& t1, set_comprehension& t2)
 {
   t1.swap(t2);
 }
+//--- end generated class set_comprehension ---//
 
 } // namespace data
 

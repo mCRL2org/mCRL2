@@ -152,11 +152,31 @@ class multi_action
     }
 };
 
+//--- start generated class multi_action ---//
+/// \brief list of multi_actions
+typedef atermpp::term_list<multi_action> multi_action_list;
+
+/// \brief vector of multi_actions
+typedef std::vector<multi_action>    multi_action_vector;
+
+// prototype declaration
+std::string pp(const multi_action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const multi_action& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(multi_action& t1, multi_action& t2)
 {
   t1.swap(t2);
 }
+//--- end generated class multi_action ---//
 
 /// \brief Returns true if the term t is a multi action
 inline
@@ -166,7 +186,6 @@ bool is_multi_action(const atermpp::aterm_appl& t)
 }
 
 // template function overloads
-std::string pp(const multi_action& x);
 void normalize_sorts(multi_action& x, const data::data_specification& dataspec);
 void translate_user_notation(lps::multi_action& x);
 std::set<data::variable> find_all_variables(const lps::multi_action& x);

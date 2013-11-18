@@ -135,7 +135,6 @@ inline void swap(data_equation& t1, data_equation& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class data_equation ---//
 
 // template function overloads

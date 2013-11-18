@@ -85,7 +85,6 @@ inline void swap(where_clause& t1, where_clause& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class where_clause ---//
 
 } // namespace data

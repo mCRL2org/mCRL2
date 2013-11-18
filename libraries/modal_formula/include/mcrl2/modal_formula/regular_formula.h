@@ -377,7 +377,6 @@ inline void swap(trans_or_nil& t1, trans_or_nil& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 inline

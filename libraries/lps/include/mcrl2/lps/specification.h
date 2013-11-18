@@ -248,8 +248,21 @@ class specification
     }
 };
 
-// template function overloads
+//--- start generated class specification ---//
+// prototype declaration
 std::string pp(const specification& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const specification& x)
+{
+  return out << lps::pp(x);
+}
+//--- end generated class specification ---//
+
+// template function overloads
 std::string pp_with_summand_numbers(const specification& x);
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x);
 std::set<data::variable> find_all_variables(const lps::specification& x);

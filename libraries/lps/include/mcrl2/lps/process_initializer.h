@@ -100,7 +100,6 @@ inline void swap(process_initializer& t1, process_initializer& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class process_initializer ---//
 
 // template function overloads

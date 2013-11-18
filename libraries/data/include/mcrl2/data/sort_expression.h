@@ -120,7 +120,6 @@ inline void swap(sort_expression& t1, sort_expression& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class sort_expression ---//
 
 /// \brief Test for a sort_expression expression

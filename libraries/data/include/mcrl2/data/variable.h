@@ -91,7 +91,6 @@ inline void swap(variable& t1, variable& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class variable ---//
 
 #ifdef MCRL2_USE_INDEX_TRAITS

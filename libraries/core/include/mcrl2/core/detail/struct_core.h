@@ -17,6 +17,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include "mcrl2/atermpp/aterm_list.h"
 
 namespace mcrl2
 {

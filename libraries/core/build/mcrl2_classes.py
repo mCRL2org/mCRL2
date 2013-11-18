@@ -22,10 +22,11 @@ import string
 # S = skip class generation
 # U = generate user section
 # X = it is an expression super class
+# W = do not generate swap overload
 
 CORE_CLASSES = r'''
 identifier_string() : public atermpp::aterm_string | SC | String | An identifier
-nil() : public atermpp::aterm_appl | C | Nil | The value nil
+nil() : public atermpp::aterm_appl | CI | Nil | The value nil
 '''
 
 CONTAINER_TYPES = r'''
@@ -69,13 +70,13 @@ untyped_identifier_assignment(const core::identifier_string& lhs, const data_exp
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | XCU  | DataExpr          | A data expression
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC  | DataVarId         | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOC  | OpId              | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUS | DataAppl          | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU  | Whr               | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO   | Binder            | An abstraction expression
-untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO   | UntypedIdentifier | An untyped identifier
+data_expression()                                                                                             : public atermpp::aterm_appl   | XCU   | DataExpr          | A data expression
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC   | DataVarId         | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOC   | OpId              | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW | DataAppl          | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU   | Whr               | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO    | Binder            | An abstraction expression
+untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO    | UntypedIdentifier | An untyped identifier
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
@@ -91,7 +92,7 @@ untyped_set_or_bag_comprehension(const variable_list& variables, const data_expr
 DATA_CLASSES = r'''
 alias(const basic_sort& name, const sort_expression& reference)                                                                         : public atermpp::aterm_appl | CIO  | SortRef  | A sort alias
 data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) : public atermpp::aterm_appl | COU | DataEqn  | A data equation
-data_specification()                                                                                                                    : public atermpp::aterm_appl | S   | DataSpec | A data specification
+data_specification()                                                                                                                    : public atermpp::aterm_appl | SW  | DataSpec | A data specification
 '''
 
 STATE_FORMULA_CLASSES = r'''
@@ -150,12 +151,12 @@ untyped_multi_action(const untyped_action_list& actions)                        
 deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                  | CMS  | None              | A deadlock summand
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                  | CMS  | None              | An action summand
 process_initializer(const data::assignment_list& assignments)                                                                                                                                                               : public atermpp::aterm_appl | CIU  | LinearProcessInit | A process initializer
-linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MS   | LinearProcess     | A linear process
-specification(const data::data_specification& data, const action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                                  | MS   | LinProcSpec       | A linear process specification
+linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                            | MSW  | LinearProcess     | A linear process
+specification(const data::data_specification& data, const action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                                  | MSW  | LinProcSpec       | A linear process specification
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SM | ProcSpec    | A process specification
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
 process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI  | ProcEqn     | A process equation
 rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI  | RenameExpr  | A rename expression
@@ -191,8 +192,8 @@ untyped_process_assignment(const core::identifier_string& name, const data::unty
 PBES_CLASSES = r'''
 fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm_appl | XCU | FixPoint    | A fixpoint symbol
 propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CIU | PropVarDecl | A propositional variable declaration
-pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SM  | PBEqn       | A PBES equation
-pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_equation>& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                         | SM  | PBES        | A PBES
+pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SMC | PBEqn       | A PBES equation
+pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_equation>& equations, const std::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state)                                         | SMW | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
@@ -209,8 +210,8 @@ exists(const data::variable_list& variables, const pbes_expression& body)       
 '''
 
 BOOLEAN_CLASSES = r'''
-boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl | S  | BooleanEquation | A boolean equation
-boolean_equation_system(const std::vector<bes::boolean_equation>& equations, const boolean_expression& initial_state)                             | MS | BES             | A boolean equation system
+boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl | S   | BooleanEquation | A boolean equation
+boolean_equation_system(const std::vector<bes::boolean_equation>& equations, const boolean_expression& initial_state)                             | MSW | BES             | A boolean equation system
 '''
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
@@ -868,32 +869,33 @@ bool is_%s(const %s& x)
 
     # Returns the class definition
     def class_inline_definition(self, all_classes):
-        if 'S' in self.modifiers():
-            return ''
+        text = ''
 
-        ptext = ', '.join([p.name() for p in self.constructor.parameters()])
-        ctext = '\n\n'.join([x.inline_definition() for x in self.constructors()])
-        mtext = ''.join(['\n\n' + x.inline_definition() for x in self.member_functions()])
+        # generate the class definition
+        if not 'S' in self.modifiers():
+            ptext = ', '.join([p.name() for p in self.constructor.parameters()])
+            ctext = '\n\n'.join([x.inline_definition() for x in self.constructors()])
+            mtext = ''.join(['\n\n' + x.inline_definition() for x in self.member_functions()])
 
-        text = r'''/// \\brief <DESCRIPTION>
+            text = r'''/// \\brief <DESCRIPTION>
 class <CLASSNAME><SUPERCLASS_DECLARATION>
 {
   public:
 <CONSTRUCTORS><MEMBER_FUNCTIONS><USER_SECTION>
 };'''
-        text = self.expand_text(text = text, parameters = ptext, constructors = ctext, member_functions = mtext, namespace = self.namespace())
+            text = self.expand_text(text = text, parameters = ptext, constructors = ctext, member_functions = mtext, namespace = self.namespace())
 
-        if 'X' in self.modifiers():
-            text = re.sub('check_term', 'check_rule', text)
+            if 'X' in self.modifiers():
+                text = re.sub('check_term', 'check_rule', text)
 
+        # generate additional functions
         if 'C' in self.modifiers():
             text = text + '\n\n' + self.container_typedefs()
-
         if 'I' in self.modifiers():
             text = text + '\n\n' + self.is_function(all_classes)
-
         text = text + '\n\n' + self.ostream_overload()
-        text = text + '\n\n' + self.swap_overload()
+        if not 'W' in self.modifiers():
+            text = text + '\n\n' + self.swap_overload()
 
         return text + '\n'
 
@@ -929,12 +931,11 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
         if 'C' in self.modifiers():
             text = text + '\n\n' + self.container_typedefs()
-
         if 'I' in self.modifiers():
             text = text + '\n\n' + self.is_function(all_classes)
-
         text = text + '\n\n' + self.ostream_overload()
-        text = text + '\n\n' + self.swap_overload()
+        if not 'W' in self.modifiers():
+            text = text + '\n\n' + self.swap_overload()
 
         return text + '\n'
 

@@ -546,7 +546,6 @@ inline void swap(exists& t1, exists& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 // template function overloads

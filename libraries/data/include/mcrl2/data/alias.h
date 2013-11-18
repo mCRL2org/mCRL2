@@ -88,7 +88,6 @@ inline void swap(alias& t1, alias& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class alias ---//
 
 } // namespace data

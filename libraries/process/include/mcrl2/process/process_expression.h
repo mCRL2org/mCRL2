@@ -1408,7 +1408,6 @@ inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 // From the documentation:

@@ -191,6 +191,20 @@ class boolean_equation_system
     }
 };
 
+//--- start generated class boolean_equation_system ---//
+// prototype declaration
+std::string pp(const boolean_equation_system& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_equation_system& x)
+{
+  return out << bes::pp(x);
+}
+//--- end generated class boolean_equation_system ---//
+
 inline
 bool operator==(const boolean_equation_system& x, const boolean_equation_system& y)
 {

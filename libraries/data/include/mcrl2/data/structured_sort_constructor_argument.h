@@ -114,7 +114,6 @@ inline void swap(structured_sort_constructor_argument& t1, structured_sort_const
 {
   t1.swap(t2);
 }
-
 //--- end generated class structured_sort_constructor_argument ---//
 
 } // namespace data

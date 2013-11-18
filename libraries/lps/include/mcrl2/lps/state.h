@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/summand.h
+/// \file mcrl2/lps/state.h
 /// \brief The class summand.
 
 #ifndef MCRL2_LPS_STATE_H
@@ -22,8 +22,8 @@ namespace lps
 
 
 /// \brief A state type of fixed length in which data expressions can be stored.
-//         The length is determined at runtime. 
-class state: public std::vector < mcrl2::data::data_expression > 
+//         The length is determined at runtime.
+class state: public std::vector < mcrl2::data::data_expression >
 {
   public:
     state()

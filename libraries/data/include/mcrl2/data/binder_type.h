@@ -340,7 +340,6 @@ inline void swap(lambda_binder& t1, lambda_binder& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 } // namespace data

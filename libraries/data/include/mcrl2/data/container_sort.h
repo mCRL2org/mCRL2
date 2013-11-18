@@ -76,7 +76,6 @@ inline void swap(container_sort& t1, container_sort& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class container_sort ---//
 
 /// \brief list of function sorts

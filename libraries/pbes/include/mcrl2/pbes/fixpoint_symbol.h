@@ -97,7 +97,6 @@ inline void swap(fixpoint_symbol& t1, fixpoint_symbol& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class fixpoint_symbol ---//
 
 } // namespace pbes_system

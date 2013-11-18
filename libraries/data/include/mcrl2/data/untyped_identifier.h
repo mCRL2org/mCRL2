@@ -69,7 +69,6 @@ inline void swap(untyped_identifier& t1, untyped_identifier& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class untyped_identifier ---//
 
 } // namespace data

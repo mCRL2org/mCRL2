@@ -114,7 +114,6 @@ inline void swap(propositional_variable& t1, propositional_variable& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class propositional_variable ---//
 
 // template function overloads

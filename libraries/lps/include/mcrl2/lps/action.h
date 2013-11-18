@@ -90,7 +90,6 @@ inline void swap(action& t1, action& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class action ---//
 
 // template function overloads

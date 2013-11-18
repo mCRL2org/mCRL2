@@ -1114,7 +1114,6 @@ inline void swap(mu& t1, mu& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 inline
