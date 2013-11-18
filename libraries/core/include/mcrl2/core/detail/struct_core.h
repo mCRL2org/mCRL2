@@ -17,7 +17,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "mcrl2/core/detail/construction_utility.h"
 
 namespace mcrl2
 {
