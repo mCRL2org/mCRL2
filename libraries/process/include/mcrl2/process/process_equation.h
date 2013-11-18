@@ -80,6 +80,18 @@ bool is_process_equation(const atermpp::aterm_appl& x)
   return core::detail::gsIsProcEqn(x);
 }
 
+// prototype declaration
+std::string pp(const process_equation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_equation& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(process_equation& t1, process_equation& t2)
 {
@@ -89,7 +101,6 @@ inline void swap(process_equation& t1, process_equation& t2)
 //--- end generated class process_equation ---//
 
 // template function overloads
-std::string pp(const process_equation& x);
 std::string pp(const process_equation_list& x);
 std::string pp(const process_equation_vector& x);
 void normalize_sorts(process_equation_vector& x, const data::data_specification& dataspec);

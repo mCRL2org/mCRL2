@@ -110,6 +110,18 @@ bool is_state_formula(const atermpp::aterm_appl& x)
          state_formulas::is_mu(x);
 }
 
+// prototype declaration
+std::string pp(const state_formula& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const state_formula& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(state_formula& t1, state_formula& t2)
 {
@@ -144,6 +156,18 @@ bool is_true(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateTrue(x);
 }
 
+// prototype declaration
+std::string pp(const true_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const true_& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
@@ -176,6 +200,18 @@ inline
 bool is_false(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateFalse(x);
+}
+
+// prototype declaration
+std::string pp(const false_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const false_& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -220,6 +256,18 @@ inline
 bool is_not(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateNot(x);
+}
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -271,6 +319,18 @@ bool is_and(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateAnd(x);
 }
 
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
@@ -318,6 +378,18 @@ inline
 bool is_or(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateOr(x);
+}
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -369,6 +441,18 @@ bool is_imp(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateImp(x);
 }
 
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
@@ -416,6 +500,18 @@ inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateForall(x);
+}
+
+// prototype declaration
+std::string pp(const forall& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -467,6 +563,18 @@ bool is_exists(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateExists(x);
 }
 
+// prototype declaration
+std::string pp(const exists& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(exists& t1, exists& t2)
 {
@@ -514,6 +622,18 @@ inline
 bool is_must(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateMust(x);
+}
+
+// prototype declaration
+std::string pp(const must& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const must& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -565,6 +685,18 @@ bool is_may(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateMay(x);
 }
 
+// prototype declaration
+std::string pp(const may& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const may& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(may& t1, may& t2)
 {
@@ -597,6 +729,18 @@ inline
 bool is_yaled(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateYaled(x);
+}
+
+// prototype declaration
+std::string pp(const yaled& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const yaled& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -643,6 +787,18 @@ bool is_yaled_timed(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateYaledTimed(x);
 }
 
+// prototype declaration
+std::string pp(const yaled_timed& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const yaled_timed& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(yaled_timed& t1, yaled_timed& t2)
 {
@@ -675,6 +831,18 @@ inline
 bool is_delay(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateDelay(x);
+}
+
+// prototype declaration
+std::string pp(const delay& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const delay& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -719,6 +887,18 @@ inline
 bool is_delay_timed(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateDelayTimed(x);
+}
+
+// prototype declaration
+std::string pp(const delay_timed& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const delay_timed& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -773,6 +953,18 @@ inline
 bool is_variable(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateVar(x);
+}
+
+// prototype declaration
+std::string pp(const variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const variable& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -834,6 +1026,18 @@ bool is_nu(const atermpp::aterm_appl& x)
   return core::detail::gsIsStateNu(x);
 }
 
+// prototype declaration
+std::string pp(const nu& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const nu& x)
+{
+  return out << state_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(nu& t1, nu& t2)
 {
@@ -891,6 +1095,18 @@ inline
 bool is_mu(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsStateMu(x);
+}
+
+// prototype declaration
+std::string pp(const mu& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const mu& x)
+{
+  return out << state_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -1031,7 +1247,6 @@ bool state_formula::has_time() const
 }
 
 // template function overloads
-std::string pp(const state_formula& x);
 state_formula normalize_sorts(const state_formula& x, const data::data_specification& dataspec);
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x);
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x);

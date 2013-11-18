@@ -432,6 +432,15 @@ bool operator==(const pbes& p1, const pbes& p2)
   return pbes_to_aterm(p1) == pbes_to_aterm(p2);
 }
 
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes& x)
+{
+  return out << pbes_system::pp(x);
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

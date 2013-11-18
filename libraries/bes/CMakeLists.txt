@@ -24,12 +24,17 @@ add_custom_command(
   DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/pg-syntax.g
 )
 
-include_directories(
-  ${CMAKE_SOURCE_DIR}/3rd-party/dparser
-)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 add_library(${PROJECT_NAME}
   ${CMAKE_BINARY_DIR}/libraries/bes/source/pg_syntax.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/bes.cpp
 )
 
 target_link_libraries(

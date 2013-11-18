@@ -97,6 +97,18 @@ bool is_structured_sort_constructor_argument(const atermpp::aterm_appl& x)
   return core::detail::gsIsStructProj(x);
 }
 
+// prototype declaration
+std::string pp(const structured_sort_constructor_argument& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const structured_sort_constructor_argument& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(structured_sort_constructor_argument& t1, structured_sort_constructor_argument& t2)
 {

@@ -12,8 +12,12 @@
 #ifndef MCRL2_DATA_IO_H
 #define MCRL2_DATA_IO_H
 
+#define MCRL2_USE_INDEX_TRAITS
+
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/index_traits.h"
 
 namespace mcrl2 {

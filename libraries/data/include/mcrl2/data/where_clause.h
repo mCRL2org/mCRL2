@@ -68,6 +68,18 @@ class where_clause: public data_expression
 //--- end user section where_clause ---//
 };
 
+// prototype declaration
+std::string pp(const where_clause& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const where_clause& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(where_clause& t1, where_clause& t2)
 {

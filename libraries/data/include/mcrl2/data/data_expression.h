@@ -233,6 +233,18 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 /// \brief vector of data_expressions
 typedef std::vector<data_expression>    data_expression_vector;
 
+// prototype declaration
+std::string pp(const data_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const data_expression& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(data_expression& t1, data_expression& t2)
 {
@@ -268,7 +280,6 @@ inline data_expression_list make_data_expression_list(Container const& r, typena
 class variable;
 
 // template function overloads
-std::string pp(const data_expression& x);
 std::string pp(const data_expression_list& x);
 std::string pp(const data_expression_vector& x);
 data::data_expression translate_user_notation(const data::data_expression& x);

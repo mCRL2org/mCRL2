@@ -47,6 +47,18 @@ typedef atermpp::term_list<container_type> container_type_list;
 /// \brief vector of container_types
 typedef std::vector<container_type>    container_type_vector;
 
+// prototype declaration
+std::string pp(const container_type& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const container_type& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(container_type& t1, container_type& t2)
 {
@@ -79,6 +91,18 @@ inline
 bool is_list_container(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsSortList(x);
+}
+
+// prototype declaration
+std::string pp(const list_container& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const list_container& x)
+{
+  return out << data::pp(x);
 }
 
 /// \brief swap overload
@@ -115,6 +139,18 @@ bool is_set_container(const atermpp::aterm_appl& x)
   return core::detail::gsIsSortSet(x);
 }
 
+// prototype declaration
+std::string pp(const set_container& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const set_container& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(set_container& t1, set_container& t2)
 {
@@ -147,6 +183,18 @@ inline
 bool is_bag_container(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsSortBag(x);
+}
+
+// prototype declaration
+std::string pp(const bag_container& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const bag_container& x)
+{
+  return out << data::pp(x);
 }
 
 /// \brief swap overload
@@ -183,6 +231,18 @@ bool is_fset_container(const atermpp::aterm_appl& x)
   return core::detail::gsIsSortFSet(x);
 }
 
+// prototype declaration
+std::string pp(const fset_container& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const fset_container& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(fset_container& t1, fset_container& t2)
 {
@@ -215,6 +275,18 @@ inline
 bool is_fbag_container(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsSortFBag(x);
+}
+
+// prototype declaration
+std::string pp(const fbag_container& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const fbag_container& x)
+{
+  return out << data::pp(x);
 }
 
 /// \brief swap overload

@@ -78,6 +78,18 @@ bool is_communication_expression(const atermpp::aterm_appl& x)
   return core::detail::gsIsCommExpr(x);
 }
 
+// prototype declaration
+std::string pp(const communication_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const communication_expression& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(communication_expression& t1, communication_expression& t2)
 {

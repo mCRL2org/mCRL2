@@ -73,6 +73,18 @@ typedef atermpp::term_list<function_symbol> function_symbol_list;
 /// \brief vector of function_symbols
 typedef std::vector<function_symbol>    function_symbol_vector;
 
+// prototype declaration
+std::string pp(const function_symbol& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const function_symbol& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(function_symbol& t1, function_symbol& t2)
 {
@@ -109,7 +121,6 @@ void register_function_symbol_hooks()
 #endif // MCRL2_USE_INDEX_TRAITS
 
 // template function overloads
-std::string pp(const function_symbol& x);
 std::string pp(const function_symbol_list& x);
 std::string pp(const function_symbol_vector& x);
 std::set<data::variable> find_all_variables(const data::function_symbol& x);

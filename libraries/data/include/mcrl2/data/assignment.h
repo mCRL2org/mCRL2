@@ -66,6 +66,18 @@ bool is_assignment_expression(const atermpp::aterm_appl& x)
          data::is_untyped_identifier_assignment(x);
 }
 
+// prototype declaration
+std::string pp(const assignment_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const assignment_expression& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(assignment_expression& t1, assignment_expression& t2)
 {
@@ -139,6 +151,18 @@ bool is_assignment(const atermpp::aterm_appl& x)
   return core::detail::gsIsDataVarIdInit(x);
 }
 
+// prototype declaration
+std::string pp(const assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const assignment& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(assignment& t1, assignment& t2)
 {
@@ -206,6 +230,18 @@ inline
 bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedIdentifierAssignment(x);
+}
+
+// prototype declaration
+std::string pp(const untyped_identifier_assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_identifier_assignment& x)
+{
+  return out << data::pp(x);
 }
 
 /// \brief swap overload
@@ -279,7 +315,6 @@ variable_list left_hand_sides(const assignment_list& x)
 }
 
 // template function overloads
-std::string pp(const assignment& x);
 std::string pp(const assignment_list& x);
 std::string pp(const assignment_vector& x);
 

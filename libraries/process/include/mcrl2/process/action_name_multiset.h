@@ -69,6 +69,18 @@ bool is_action_name_multiset(const atermpp::aterm_appl& x)
   return core::detail::gsIsMultActName(x);
 }
 
+// prototype declaration
+std::string pp(const action_name_multiset& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const action_name_multiset& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(action_name_multiset& t1, action_name_multiset& t2)
 {
@@ -76,9 +88,6 @@ inline void swap(action_name_multiset& t1, action_name_multiset& t2)
 }
 
 //--- end generated class action_name_multiset ---//
-
-// template function overloads
-std::string pp(const action_name_multiset& x);
 
 } // namespace process
 

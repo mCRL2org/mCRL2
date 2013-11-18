@@ -46,6 +46,18 @@ typedef atermpp::term_list<nil> nil_list;
 /// \brief vector of nils
 typedef std::vector<nil>    nil_vector;
 
+// prototype declaration
+std::string pp(const nil& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const nil& x)
+{
+  return out << core::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(nil& t1, nil& t2)
 {

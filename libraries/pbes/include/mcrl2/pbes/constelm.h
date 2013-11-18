@@ -474,7 +474,7 @@ class pbes_constelm_algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << pbes_system::pp(m_target) << "  condition = " << mcrl2::data::pp(condition());
+          out << "(" << m_source.name() << ", " << m_target.name() << ")  label = " << m_target << "  condition = " << condition();
           return out.str();
         }
 
@@ -714,14 +714,14 @@ class pbes_constelm_algorithm
     std::string print_condition(const edge& e, const vertex& u, const term_type& value)
     {
       std::ostringstream out;
-      out << "\nEvaluated condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << data::pp(value) << std::endl;
+      out << "\nEvaluated condition " << pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints())) << " to " << value << std::endl;
       return out.str();
     }
 
     std::string print_evaluation_failure(const edge& e, const vertex& u)
     {
       std::ostringstream out;
-      out << "\nCould not evaluate condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+      out << "\nCould not evaluate condition " << pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints())) << " to true or false";
       return out.str();
     }
 

@@ -73,8 +73,7 @@ void test_bes2pbes()
 
   pbes_system::pbes q = bes2pbes(p);
   std::cout << "----------------" << std::endl;
-  std::cout << pbes_system::pp(q) << std::endl;
-
+  std::cout << q << std::endl;
 }
 
 void test_precedence()

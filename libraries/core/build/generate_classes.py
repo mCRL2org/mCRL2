@@ -42,22 +42,23 @@ if __name__ == "__main__":
     modifiability_map = make_modifiability_map(all_classes)
 
     result = True
-    result = make_classes(all_classes, '../../core/include/mcrl2/core',                            CORE_CLASSES                     , namespace = 'core'            ) and result
-    result = make_classes(all_classes, '../../bes/include/mcrl2/bes/boolean_expression.h',         BOOLEAN_EXPRESSION_CLASSES       , namespace = 'bes'             ) and result
-    result = make_classes(all_classes, '../../bes/include/mcrl2/bes',                              BOOLEAN_CLASSES                  , namespace = 'bes'             ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data/assignment.h',               ASSIGNMENT_EXPRESSION_CLASSES    , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data/binder_type.h',              BINDER_TYPES                     , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data/container_type.h',           CONTAINER_TYPES                  , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../modal_formula/include/mcrl2/modal_formula/state_formula.h',    STATE_FORMULA_CLASSES  , namespace = 'state_formulas'  ) and result
-    result = make_classes(all_classes, '../../modal_formula/include/mcrl2/modal_formula/regular_formula.h',  REGULAR_FORMULA_CLASSES, namespace = 'regular_formulas') and result
-    result = make_classes(all_classes, '../../modal_formula/include/mcrl2/modal_formula/action_formula.h',   ACTION_FORMULA_CLASSES , namespace = 'action_formulas' ) and result
-    result = make_classes(all_classes, '../../pbes/include/mcrl2/pbes/pbes_expression.h',          PBES_EXPRESSION_CLASSES          , namespace = 'pbes_system'     ) and result
-    result = make_classes(all_classes, '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES       , namespace = 'process'         ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data',                            DATA_EXPRESSION_CLASSES          , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data',                            ABSTRACTION_EXPRESSION_CLASSES   , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data',                            SORT_EXPRESSION_CLASSES          , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data',                            STRUCTURED_SORT_ELEMENTS         , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../data/include/mcrl2/data',                            DATA_CLASSES                     , namespace = 'data'            ) and result
-    result = make_classes(all_classes, '../../lps/include/mcrl2/lps',                              LPS_CLASSES                      , namespace = 'lps'             ) and result
-    result = make_classes(all_classes, '../../process/include/mcrl2/process',                      PROCESS_CLASSES                  , namespace = 'process'         ) and result
+    result = make_classes(all_classes, '../../core/include/mcrl2/core',                                      CORE_CLASSES                     , namespace = 'core'            ) and result
+    result = make_classes(all_classes, '../../bes/include/mcrl2/bes/boolean_expression.h',                   BOOLEAN_EXPRESSION_CLASSES       , namespace = 'bes'             ) and result
+    result = make_classes(all_classes, '../../bes/include/mcrl2/bes',                                        BOOLEAN_CLASSES                  , namespace = 'bes'             ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data/assignment.h',                         ASSIGNMENT_EXPRESSION_CLASSES    , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data/binder_type.h',                        BINDER_TYPES                     , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data/container_type.h',                     CONTAINER_TYPES                  , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../modal_formula/include/mcrl2/modal_formula/state_formula.h',    STATE_FORMULA_CLASSES            , namespace = 'state_formulas'  ) and result
+    result = make_classes(all_classes, '../../modal_formula/include/mcrl2/modal_formula/regular_formula.h',  REGULAR_FORMULA_CLASSES          , namespace = 'regular_formulas') and result
+    result = make_classes(all_classes, '../../modal_formula/include/mcrl2/modal_formula/action_formula.h',   ACTION_FORMULA_CLASSES           , namespace = 'action_formulas' ) and result
+    result = make_classes(all_classes, '../../pbes/include/mcrl2/pbes/pbes_expression.h',                    PBES_EXPRESSION_CLASSES          , namespace = 'pbes_system'     ) and result
+    result = make_classes(all_classes, '../../pbes/include/mcrl2/pbes',                                      PBES_CLASSES                     , namespace = 'pbes_system'     ) and result
+    result = make_classes(all_classes, '../../process/include/mcrl2/process/process_expression.h',           PROCESS_EXPRESSION_CLASSES       , namespace = 'process'         ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data',                                      DATA_EXPRESSION_CLASSES          , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data',                                      ABSTRACTION_EXPRESSION_CLASSES   , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data',                                      SORT_EXPRESSION_CLASSES          , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data',                                      STRUCTURED_SORT_ELEMENTS         , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../data/include/mcrl2/data',                                      DATA_CLASSES                     , namespace = 'data'            ) and result
+    result = make_classes(all_classes, '../../lps/include/mcrl2/lps',                                        LPS_CLASSES                      , namespace = 'lps'             ) and result
+    result = make_classes(all_classes, '../../process/include/mcrl2/process',                                PROCESS_CLASSES                  , namespace = 'process'         ) and result
     sys.exit(not result) # 0 result indicates successful execution

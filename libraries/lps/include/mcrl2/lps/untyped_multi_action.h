@@ -53,6 +53,18 @@ typedef atermpp::term_list<untyped_multi_action> untyped_multi_action_list;
 /// \brief vector of untyped_multi_actions
 typedef std::vector<untyped_multi_action>    untyped_multi_action_vector;
 
+// prototype declaration
+std::string pp(const untyped_multi_action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_multi_action& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
 {

@@ -52,6 +52,18 @@ class untyped_identifier: public data_expression
     }
 };
 
+// prototype declaration
+std::string pp(const untyped_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_identifier& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(untyped_identifier& t1, untyped_identifier& t2)
 {

@@ -92,6 +92,18 @@ bool is_action_formula(const atermpp::aterm_appl& x)
          action_formulas::is_untyped_multi_action(x);
 }
 
+// prototype declaration
+std::string pp(const action_formula& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const action_formula& x)
+{
+  return out << action_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(action_formula& t1, action_formula& t2)
 {
@@ -126,6 +138,18 @@ bool is_true(const atermpp::aterm_appl& x)
   return core::detail::gsIsActTrue(x);
 }
 
+// prototype declaration
+std::string pp(const true_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const true_& x)
+{
+  return out << action_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
@@ -158,6 +182,18 @@ inline
 bool is_false(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActFalse(x);
+}
+
+// prototype declaration
+std::string pp(const false_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const false_& x)
+{
+  return out << action_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -202,6 +238,18 @@ inline
 bool is_not(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActNot(x);
+}
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << action_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -253,6 +301,18 @@ bool is_and(const atermpp::aterm_appl& x)
   return core::detail::gsIsActAnd(x);
 }
 
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << action_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
@@ -300,6 +360,18 @@ inline
 bool is_or(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActOr(x);
+}
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << action_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -351,6 +423,18 @@ bool is_imp(const atermpp::aterm_appl& x)
   return core::detail::gsIsActImp(x);
 }
 
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << action_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
@@ -398,6 +482,18 @@ inline
 bool is_forall(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsActForall(x);
+}
+
+// prototype declaration
+std::string pp(const forall& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall& x)
+{
+  return out << action_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -449,6 +545,18 @@ bool is_exists(const atermpp::aterm_appl& x)
   return core::detail::gsIsActExists(x);
 }
 
+// prototype declaration
+std::string pp(const exists& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists& x)
+{
+  return out << action_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(exists& t1, exists& t2)
 {
@@ -498,6 +606,18 @@ bool is_at(const atermpp::aterm_appl& x)
   return core::detail::gsIsActAt(x);
 }
 
+// prototype declaration
+std::string pp(const at& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const at& x)
+{
+  return out << action_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(at& t1, at& t2)
 {
@@ -542,6 +662,18 @@ bool is_multi_action(const atermpp::aterm_appl& x)
   return core::detail::gsIsActMultAct(x);
 }
 
+// prototype declaration
+std::string pp(const multi_action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const multi_action& x)
+{
+  return out << action_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(multi_action& t1, multi_action& t2)
 {
@@ -584,6 +716,18 @@ inline
 bool is_untyped_multi_action(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedActMultAct(x);
+}
+
+// prototype declaration
+std::string pp(const untyped_multi_action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_multi_action& x)
+{
+  return out << action_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -643,7 +787,6 @@ inline const action_formula& binary_left(const imp& x)    { return x.left(); }
 inline const action_formula& binary_right(const imp& x)   { return x.right(); }
 
 // template function overloads
-std::string pp(const action_formula& x);
 std::set<data::variable> find_all_variables(const action_formulas::action_formula& x);
 
 } // namespace action_formulas

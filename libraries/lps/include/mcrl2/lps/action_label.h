@@ -80,6 +80,18 @@ bool is_action_label(const atermpp::aterm_appl& x)
   return core::detail::gsIsActId(x);
 }
 
+// prototype declaration
+std::string pp(const action_label& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const action_label& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(action_label& t1, action_label& t2)
 {
@@ -89,7 +101,6 @@ inline void swap(action_label& t1, action_label& t2)
 //--- end generated class action_label ---//
 
 // template function overloads
-std::string pp(const action_label& x);
 std::string pp(const action_label_list& x);
 std::string pp(const action_label_vector& x);
 action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);

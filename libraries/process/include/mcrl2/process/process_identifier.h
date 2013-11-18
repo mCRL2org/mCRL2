@@ -83,6 +83,18 @@ bool is_process_identifier(const atermpp::aterm_appl& x)
   return core::detail::gsIsProcVarId(x);
 }
 
+// prototype declaration
+std::string pp(const process_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_identifier& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(process_identifier& t1, process_identifier& t2)
 {
@@ -92,7 +104,6 @@ inline void swap(process_identifier& t1, process_identifier& t2)
 //--- end generated class process_identifier ---//
 
 // template function overloads
-std::string pp(const process_identifier& x);
 std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
 void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);

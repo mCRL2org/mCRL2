@@ -60,6 +60,18 @@ class basic_sort: public sort_expression
     }
 };
 
+// prototype declaration
+std::string pp(const basic_sort& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const basic_sort& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(basic_sort& t1, basic_sort& t2)
 {

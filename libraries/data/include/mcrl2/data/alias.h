@@ -71,6 +71,18 @@ bool is_alias(const atermpp::aterm_appl& x)
   return core::detail::gsIsSortRef(x);
 }
 
+// prototype declaration
+std::string pp(const alias& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const alias& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(alias& t1, alias& t2)
 {

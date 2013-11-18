@@ -74,6 +74,18 @@ typedef atermpp::term_list<variable> variable_list;
 /// \brief vector of variables
 typedef std::vector<variable>    variable_vector;
 
+// prototype declaration
+std::string pp(const variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const variable& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(variable& t1, variable& t2)
 {
@@ -110,7 +122,6 @@ void register_variable_hooks()
 #endif // MCRL2_USE_INDEX_TRAITS
 
 // template function overloads
-std::string pp(const variable& x);
 std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
 std::string pp(const std::set<variable>& x);

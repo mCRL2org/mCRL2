@@ -800,7 +800,7 @@ class Class:
             result.append(MemberFunction(self.classname(), return_type, name, arg))
         return result
 
-    def expand_text(self, text, parameters, constructors, member_functions, namespace):
+    def expand_text(self, text, parameters = '', constructors = '', member_functions = '', namespace = None):
         superclass = self.superclass()
         if superclass == None:
             superclass_declaration = ': public atermpp::aterm_appl'
@@ -810,6 +810,8 @@ class Class:
             user_section = '\n//--- start user section %s ---//\n//--- end user section %s ---//' % (self.classname(), self.classname())
         else:
             user_section = ''
+        if namespace == None:
+            namespace = self.namespace()
         text = re.sub('<SUPERCLASS_DECLARATION>', superclass_declaration, text)
         text = re.sub('<DESCRIPTION>'     , self.description, text)
         text = re.sub('<CLASSNAME>'       , self.classname(), text)
@@ -890,9 +892,26 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         if 'I' in self.modifiers():
             text = text + '\n\n' + self.is_function(all_classes)
 
+        text = text + '\n\n' + self.ostream_overload()
         text = text + '\n\n' + self.swap_overload()
 
         return text + '\n'
+
+    # Returns an overload of operator<<(ostream&)
+    def ostream_overload(self):
+        text = r'''// prototype declaration
+std::string pp(const <CLASSNAME>& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const <CLASSNAME>& x)
+{
+  return out << <NAMESPACE>::pp(x);
+}'''
+        text = self.expand_text(text)
+        return text
 
     # Returns the class declaration
     def class_declaration(self, all_classes, namespace = 'core'):
@@ -914,6 +933,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         if 'I' in self.modifiers():
             text = text + '\n\n' + self.is_function(all_classes)
 
+        text = text + '\n\n' + self.ostream_overload()
         text = text + '\n\n' + self.swap_overload()
 
         return text + '\n'

@@ -10,6 +10,7 @@ modifiability_map = make_modifiability_map(all_classes)
 
 file_map = {
   'action_formulas' : '../../modal_formula/source/modal_formula.cpp',
+  'bes' : '../../bes/source/bes.cpp',
   'core' : '../../core/source/core.cpp',
   'data' : '../../data/source/data.cpp',
   'lps' : '../../lps/source/lps.cpp',
@@ -20,90 +21,38 @@ file_map = {
 }
 
 PP_CLASSNAMES = '''
-core::identifier_string
-core::nil
-data::sort_expression
 data::sort_expression_list
 data::sort_expression_vector
-data::data_expression
 data::data_expression_list
 data::data_expression_vector
-data::assignment
 data::assignment_list
 data::assignment_vector
-data::variable
 data::variable_list
 data::variable_vector
-data::function_symbol
 data::function_symbol_list
 data::function_symbol_vector
-data::structured_sort_constructor
 data::structured_sort_constructor_list
 data::structured_sort_constructor_vector
-data::data_equation
 data::data_equation_list
 data::data_equation_vector
-data::data_specification
-lps::specification
-lps::linear_process
-lps::action
 lps::action_list
 lps::action_vector
-lps::action_label
 lps::action_label_list
 lps::action_label_vector
-lps::deadlock
-lps::multi_action
-lps::process_initializer
 lps::state
-pbes_system::fixpoint_symbol
-pbes_system::pbes
-pbes_system::pbes_equation
 pbes_system::pbes_equation_vector
-pbes_system::pbes_expression
 pbes_system::pbes_expression_list
 pbes_system::pbes_expression_vector
-pbes_system::propositional_variable
 pbes_system::propositional_variable_list
 pbes_system::propositional_variable_vector
-pbes_system::propositional_variable_instantiation
 pbes_system::propositional_variable_instantiation_list
 pbes_system::propositional_variable_instantiation_vector
-process::action_name_multiset
-process::process_identifier
 process::process_identifier_list
 process::process_identifier_vector
-process::process_specification
-process::process_expression
 process::process_expression_list
 process::process_expression_vector
-process::process_equation
 process::process_equation_list
 process::process_equation_vector
-process::process_instance
-process::process_instance_assignment
-process::delta
-process::tau
-process::sum
-process::block
-process::hide
-process::rename
-process::comm
-process::allow
-process::sync
-process::at
-process::seq
-process::if_then
-process::if_then_else
-process::bounded_init
-process::merge
-process::left_merge
-process::choice
-process::untyped_process_assignment
-process::untyped_parameter_identifier
-action_formulas::action_formula
-regular_formulas::regular_formula
-state_formulas::state_formula
 '''
 
 NORMALIZE_SORTS_CLASSNAMES = '''
@@ -261,6 +210,11 @@ def generate_normalize_sorts_overloads(classnames, code_map):
 code_map = {}
 for namespace in file_map:
     code_map[namespace] = []
+
+# add pp overloads for all known classes
+for name in sorted(all_classes):
+    c = all_classes[name]
+    PP_CLASSNAMES = PP_CLASSNAMES + '\n%s::%s' % (c.namespace(), c.classname())
 
 classnames = PP_CLASSNAMES.strip().split()
 generate_traverser_overloads(classnames, 'pp', 'std::string', code_map)

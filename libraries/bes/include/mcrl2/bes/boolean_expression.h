@@ -68,6 +68,18 @@ typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 /// \brief vector of boolean_expressions
 typedef std::vector<boolean_expression>    boolean_expression_vector;
 
+// prototype declaration
+std::string pp(const boolean_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_expression& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(boolean_expression& t1, boolean_expression& t2)
 {
@@ -102,6 +114,18 @@ bool is_true(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanTrue(x);
 }
 
+// prototype declaration
+std::string pp(const true_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const true_& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
@@ -134,6 +158,18 @@ inline
 bool is_false(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanFalse(x);
+}
+
+// prototype declaration
+std::string pp(const false_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const false_& x)
+{
+  return out << bes::pp(x);
 }
 
 /// \brief swap overload
@@ -178,6 +214,18 @@ inline
 bool is_not(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanNot(x);
+}
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << bes::pp(x);
 }
 
 /// \brief swap overload
@@ -229,6 +277,18 @@ bool is_and(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanAnd(x);
 }
 
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
@@ -276,6 +336,18 @@ inline
 bool is_or(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanOr(x);
+}
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << bes::pp(x);
 }
 
 /// \brief swap overload
@@ -327,6 +399,18 @@ bool is_imp(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanImp(x);
 }
 
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
@@ -374,6 +458,18 @@ inline
 bool is_boolean_variable(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanVariable(x);
+}
+
+// prototype declaration
+std::string pp(const boolean_variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_variable& x)
+{
+  return out << bes::pp(x);
 }
 
 /// \brief swap overload

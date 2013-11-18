@@ -73,6 +73,18 @@ bool is_action(const atermpp::aterm_appl& x)
   return core::detail::gsIsAction(x);
 }
 
+// prototype declaration
+std::string pp(const action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const action& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(action& t1, action& t2)
 {
@@ -82,7 +94,6 @@ inline void swap(action& t1, action& t2)
 //--- end generated class action ---//
 
 // template function overloads
-std::string pp(const action& x);
 std::string pp(const action_list& x);
 std::string pp(const action_vector& x);
 action normalize_sorts(const action& x, const data::data_specification& dataspec);

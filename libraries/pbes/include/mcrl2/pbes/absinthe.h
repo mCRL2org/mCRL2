@@ -1090,14 +1090,14 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(f1) <
 
     mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
 
-    mCRL2log(log::debug, "absinthe") << "--- pbes before ---\n" << pbes_system::pp(p) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- pbes before ---\n" << p << std::endl;
 
     p.data() = dataspec;
 
     // then transform the data expressions and the propositional variable instantiations
     absinthe_data_expression_builder(sigmaH, sigmaS, sigmaF, is_over_approximation)(p);
 
-    mCRL2log(log::debug, "absinthe") << "--- pbes after ---\n" << pbes_system::pp(p) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- pbes after ---\n" << p << std::endl;
   }
 };
 

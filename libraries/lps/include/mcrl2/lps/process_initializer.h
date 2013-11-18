@@ -83,6 +83,18 @@ bool is_process_initializer(const atermpp::aterm_appl& x)
   return core::detail::gsIsLinearProcessInit(x);
 }
 
+// prototype declaration
+std::string pp(const process_initializer& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_initializer& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(process_initializer& t1, process_initializer& t2)
 {
@@ -92,7 +104,6 @@ inline void swap(process_initializer& t1, process_initializer& t2)
 //--- end generated class process_initializer ---//
 
 // template function overloads
-std::string pp(const process_initializer& x);
 std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 
 } // namespace lps

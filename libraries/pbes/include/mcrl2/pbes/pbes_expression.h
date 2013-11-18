@@ -71,6 +71,18 @@ typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 /// \brief vector of pbes_expressions
 typedef std::vector<pbes_expression>    pbes_expression_vector;
 
+// prototype declaration
+std::string pp(const pbes_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes_expression& x)
+{
+  return out << pbes_system::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(pbes_expression& t1, pbes_expression& t2)
 {
@@ -136,6 +148,18 @@ typedef atermpp::term_list<propositional_variable_instantiation> propositional_v
 /// \brief vector of propositional_variable_instantiations
 typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
 
+// prototype declaration
+std::string pp(const propositional_variable_instantiation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const propositional_variable_instantiation& x)
+{
+  return out << pbes_system::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
 {
@@ -161,6 +185,18 @@ class true_: public pbes_expression
     }
 };
 
+// prototype declaration
+std::string pp(const true_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const true_& x)
+{
+  return out << pbes_system::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
@@ -185,6 +221,18 @@ class false_: public pbes_expression
       assert(core::detail::check_term_PBESFalse(*this));
     }
 };
+
+// prototype declaration
+std::string pp(const false_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const false_& x)
+{
+  return out << pbes_system::pp(x);
+}
 
 /// \brief swap overload
 inline void swap(false_& t1, false_& t2)
@@ -220,6 +268,18 @@ class not_: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>((*this)[0]);
     }
 };
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << pbes_system::pp(x);
+}
 
 /// \brief swap overload
 inline void swap(not_& t1, not_& t2)
@@ -261,6 +321,18 @@ class and_: public pbes_expression
     }
 };
 
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << pbes_system::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
@@ -300,6 +372,18 @@ class or_: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
     }
 };
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << pbes_system::pp(x);
+}
 
 /// \brief swap overload
 inline void swap(or_& t1, or_& t2)
@@ -341,6 +425,18 @@ class imp: public pbes_expression
     }
 };
 
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << pbes_system::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
@@ -380,6 +476,18 @@ class forall: public pbes_expression
       return atermpp::aterm_cast<const pbes_expression>((*this)[1]);
     }
 };
+
+// prototype declaration
+std::string pp(const forall& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall& x)
+{
+  return out << pbes_system::pp(x);
+}
 
 /// \brief swap overload
 inline void swap(forall& t1, forall& t2)
@@ -421,6 +529,18 @@ class exists: public pbes_expression
     }
 };
 
+// prototype declaration
+std::string pp(const exists& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists& x)
+{
+  return out << pbes_system::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(exists& t1, exists& t2)
 {
@@ -430,11 +550,8 @@ inline void swap(exists& t1, exists& t2)
 //--- end generated classes ---//
 
 // template function overloads
-std::string pp(const core::identifier_string& x);
-std::string pp(const pbes_expression& x);
 std::string pp(const pbes_expression_list& x);
 std::string pp(const pbes_expression_vector& x);
-std::string pp(const propositional_variable_instantiation& x);
 std::string pp(const propositional_variable_instantiation_list& x);
 std::string pp(const propositional_variable_instantiation_vector& x);
 std::set<pbes_system::propositional_variable_instantiation> find_propositional_variable_instantiations(const pbes_system::pbes_expression& x);
