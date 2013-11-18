@@ -19,7 +19,7 @@ using namespace atermpp;
 
 void rewrite_init(RewriterCompilingJitty*);
 void rewrite_cleanup();
-atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl&);
+mcrl2::data::data_expression rewrite_external(const mcrl2::data::data_expression&);
 
 extern "C" {
   DLLEXPORT bool init(rewriter_interface* i);
@@ -39,12 +39,12 @@ bool init(rewriter_interface* i)
   return true;
 }
 
-static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t);
+static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl& t);
 
-static inline atermpp::aterm_appl makeAppl1(const atermpp::function_symbol &a, const atermpp::aterm &h, const atermpp::aterm_appl &t1) 
-              { return atermpp::aterm_appl(a,h,reinterpret_cast<const atermpp::aterm &>(t1)); } 
-static inline atermpp::aterm_appl makeAppl2(const atermpp::function_symbol &a, const atermpp::aterm &h, const atermpp::aterm_appl &t1, 
-                            const atermpp::aterm_appl &t2) 
+static inline atermpp::aterm_appl makeAppl1(const atermpp::function_symbol& a, const atermpp::aterm& h, const atermpp::aterm_appl& t1) 
+              { return atermpp::aterm_appl(a,h,reinterpret_cast<const atermpp::aterm& >(t1)); } 
+static inline atermpp::aterm_appl makeAppl2(const atermpp::function_symbol& a, const atermpp::aterm& h, const atermpp::aterm_appl& t1, 
+                            const atermpp::aterm_appl& t2) 
               { return atermpp::aterm_appl(a,h,t1, t2); }
 
 

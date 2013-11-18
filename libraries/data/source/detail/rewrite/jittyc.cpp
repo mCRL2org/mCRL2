@@ -1506,7 +1506,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       else
       {
         pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
-        ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeLambda()," <<
+        ss << "abstraction(lambda_binder()," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
@@ -1527,7 +1527,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // A result which is not a normal form is requested.
         pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
-        ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeForall()," <<
+        ss << "abstraction(forall_binder()," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
@@ -1548,7 +1548,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         // A result which is not a normal form is requested.
         pair<bool,string> r=calc_inner_term(ta.body(),startarg,nnfvars,false,total_arity);
-        ss << "mcrl2::core::detail::gsMakeBinder(mcrl2::core::detail::gsMakeExists()," <<
+        ss << "abstraction(exists_binder()," <<
                "this_rewriter->binding_variable_list_get(" << binding_variable_list_index(ta.variables()) << ")," <<
                r.second << ")";
         return pair<bool,string>(false,ss.str());
@@ -2212,7 +2212,7 @@ static void finish_function(FILE* f,
   {
     // set_rewrappl_value(opid);
     // fprintf(f,  "  return mcrl2::data::detail::get_rewrappl_value_without_check(%lu", opid);
-    fprintf(f,  "  return (const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
+    fprintf(f,  "  return atermpp::aterm_appl((const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
   }
   else
   {
@@ -2802,6 +2802,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "\n", atermpp::detail::addressf(data::variable("x",data::sort_bool::bool_()).function())
          );
 
+  fprintf(f,
+          "using mcrl2::data;\n"
+         );
+
   // Make a functional push_front to be used in the where clause.
   fprintf(f,"static aterm_list jittyc_local_push_front(aterm_list l, const aterm &e)\n"
             "{\n"
@@ -3108,16 +3112,16 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  argument_rewriter_struct()\n"
       "  {}\n"
       "\n"
-      "  atermpp::aterm_appl operator()(const atermpp::aterm &arg) const\n"
+      "  data_expression operator()(const data_expression& arg) const\n"
       "  {\n"
-      "    return rewrite(aterm_cast<const atermpp::aterm_appl >(arg));\n"
+      "    return rewrite(arg);\n"
       "  }\n"
       "};\n"
       "\n"
-      "atermpp::aterm_appl rewrite_int_aux(const atermpp::aterm_appl &t)\n"
+      "data_expression rewrite_int_aux(const application& t)\n"
       "{\n"
       "  const argument_rewriter_struct argument_rewriter;\n"
-      "  return atermpp::aterm_appl(t.function(),t.begin(),t.end(),argument_rewriter);\n"
+      "  return atermpp::aterm_appl(t.head(),t.begin(),t.end(),argument_rewriter);\n" // TODO REWRITE HEAD OOK.
       "}\n\n");
 
   fprintf(f,
@@ -3139,7 +3143,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  if (mcrl2::data::is_abstraction(head))\n"
       "  {\n"
       "    const aterm_appl binder(head[0]);\n"
-      "    if (is_lambda(binder))\n"
+      "    if (mcrl2::lambda::is_lambda(binder))\n"
       "    {\n"
       "      return this_rewriter->rewrite_lambda_application(head,t,*(this_rewriter->global_sigma));\n"
       "    }\n"
@@ -3254,7 +3258,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    {\n"
       "      return this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
-      "    if (is_lambda(binder))\n"
+      "    if (mcrl2::data::is_lambda(binder))\n"
       "    {\n"
       "      return this_rewriter->rewrite_single_lambda(\n"
       "               atermpp::aterm_cast<const mcrl2::data::variable_list>(t[1]),\n"
@@ -3268,7 +3272,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "}\n");
 
   fprintf(f,
-      "static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl &t)\n"
+      "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
       "  if (mcrl2::data::is_function_symbol(t))\n"
@@ -3288,9 +3292,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  }\n"
       "  const function_symbol &fun=t.function();\n"
       "  const size_t arity=fun.arity();\n"
-      "  if (fun==apples[arity])\n"
+      "  if (is_application(t))\n"
       "  {\n"
-      "    // Term t has the shape #REWR#(t1,...,tn)\n"
+      "    const application& ta(t);\n"
       "    mcrl2::data::function_symbol head;\n"
       "    if (mcrl2::data::detail::head_is_function_symbol(t,head))\n"
       "    {\n"
