@@ -23,6 +23,7 @@
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/data/detail/simplify_rewrite_builder.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;

@@ -24,6 +24,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
