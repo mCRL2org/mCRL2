@@ -30,7 +30,7 @@ hook_table& creation_hooks()
 	return creation_hooks;
 }
 
-hook_table deletion_hooks()
+hook_table& deletion_hooks()
 {
 	static hook_table deletion_hooks;
 	return deletion_hooks;
