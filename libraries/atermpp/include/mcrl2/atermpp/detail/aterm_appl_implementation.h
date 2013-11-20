@@ -111,26 +111,34 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
 {
   const size_t arity = sym.arity();
   HashNumber hnr = SHIFT(addressf(sym)); 
+  
+  const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
+  new_term->increase_reference_count();  // Protect against premature garbage collection.
 
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
     assert(j<arity);
-    CHECK_TERM(*i);
-    hnr = COMBINE(hnr, reinterpret_cast<size_t>(ADDRESS(*i)));
+    new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[j])) Term(*i); //Note that the * can represent a complex computation.
+    const aterm &arg = reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[j];
+    CHECK_TERM(arg);
+    // hnr = COMBINE(hnr, reinterpret_cast<size_t>(ADDRESS(*i)));
+    hnr = COMBINE(hnr, arg);
   }
   assert(j==arity);
 
-  const detail::_aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
+  hnr &= detail::aterm_table_mask;
+  const detail::_aterm* cur = detail::aterm_hashtable[hnr];
   while (cur)
   {
     if (cur->function()==sym)
     {
       bool found = true;
-      ForwardIterator i=begin;
-      for (size_t j=0; j<arity; ++i,++j)
+      for (size_t i=0; i<arity; ++i)
       {
-        if (address(reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[j]) != detail::ADDRESS(*i)) 
+        if (reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[i] !=
+                  reinterpret_cast<const detail::_aterm_appl<Term>*>(new_term)->arg[i])
+//if (address(reinterpret_cast<const detail::_aterm_appl<Term>*>(cur)->arg[j]) != detail::ADDRESS(*i)) 
         {
           found = false;
           break;
@@ -138,6 +146,7 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
       }
       if (found)
       {
+        simple_free_term(new_term,arity);
         return cur;
       }
     }
@@ -145,22 +154,13 @@ const _aterm* local_term_appl(const function_symbol &sym, const ForwardIterator 
   }
 
   assert(cur==NULL);
-  cur = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
-  /* Delay masking until after allocate_term */
-  hnr &= detail::aterm_table_mask;
-  new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
-  
-  ForwardIterator i=begin;
-  for (size_t j=0; j<arity; ++i, ++j)
-  {
-    new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(cur))->arg[j])) Term(*i);
-  }
-  cur->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = cur;
+  new (&const_cast<detail::_aterm*>(const_cast<detail::_aterm*>(new_term))->function()) function_symbol(sym);
+  new_term->set_next(detail::aterm_hashtable[hnr]);
+  detail::aterm_hashtable[hnr] = new_term;
 
-  call_creation_hook(cur);
+  call_creation_hook(new_term);
   
-  return cur;
+  return new_term;
 }
 
 inline const _aterm* term_appl0(const function_symbol &sym)

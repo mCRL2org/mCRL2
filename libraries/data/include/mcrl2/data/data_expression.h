@@ -314,28 +314,28 @@ namespace data
 inline
 application data_expression::operator()(const data_expression& e) const
 {
-  return make_application(*this, e);
+  return application(*this, e);
 }
 
 /// \brief Apply data expression to two data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2) const
 {
-  return make_application(*this, e1, e2);
+  return application(*this, e1, e2);
 }
 
 /// \brief Apply data expression to three data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3) const
 {
-  return make_application(*this, e1, e2, e3);
+  return application(*this, e1, e2, e3);
 }
 
 /// \brief Apply data expression to four data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4) const
 {
-  return make_application(*this, e1, e2, e3, e4);
+  return application(*this, e1, e2, e3, e4);
 }
 
 }

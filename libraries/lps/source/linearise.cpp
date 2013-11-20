@@ -3856,7 +3856,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (*walker==var)
         {
-          return make_application(*getmappings,stack.stackvar);
+          return application(*getmappings,stack.stackvar);
         }
         assert(getmappings!=stack.opns->get.end());
       }
@@ -3984,7 +3984,7 @@ class specification_basic_type:public boost::noncopyable
           return equal_to(stack.stackvar, processencoding(i,assignment_list(),stack).front().rhs());
         }
         return equal_to(
-                 make_application(stack.opns->getstate,stack.stackvar),
+                 application(stack.opns->getstate,stack.stackvar),
                  processencoding(i,assignment_list(),stack).front().rhs());
       }
 
@@ -3998,7 +3998,7 @@ class specification_basic_type:public boost::noncopyable
                           processencoding(i,assignment_list(),stack).front().rhs());
         }
         return equal_to(
-                 make_application(stack.opns->getstate, stack.stackvar),
+                 application(stack.opns->getstate, stack.stackvar),
                  processencoding(i,assignment_list(),stack).front().rhs());
       }
 
@@ -4344,7 +4344,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return push_stack(procId,
                             t1,
-                            make_list(data_expression(make_application(stack.opns->pop,stack.stackvar))),
+                            make_list(data_expression(application(stack.opns->pop,stack.stackvar))),
                             stack,
                             pcrlprcs,
                             vars);
@@ -4705,7 +4705,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
-      assignment_list procargs=make_list(assignment(stack.stackvar,make_application(stack.opns->pop,stack.stackvar)));
+      assignment_list procargs=make_list(assignment(stack.stackvar,application(stack.opns->pop,stack.stackvar)));
 
       insert_summand(
                 action_summands,deadlock_summands,
@@ -5264,7 +5264,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return t;
       }
-      return make_application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
+      return application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
     }
 
     template <class T>

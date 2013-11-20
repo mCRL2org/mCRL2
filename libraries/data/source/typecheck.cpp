@@ -555,7 +555,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-      Par=make_application(sort_nat::cnat(),Par);
+      Par=application(sort_nat::cnat(),Par);
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -575,7 +575,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-      Par=make_application(sort_int::cint(),make_application(sort_nat::cnat(),Par));
+      Par=application(sort_int::cint(),application(sort_nat::cnat(),Par));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -586,7 +586,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_nat::nat(),temp))
     {
       data_expression OldPar=Par;
-      Par=make_application(sort_int::cint(),Par);
+      Par=application(sort_int::cint(),Par);
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -606,8 +606,8 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-      Par=make_application(sort_real::creal(),
-                              make_application(sort_int::cint(), make_application(sort_nat::cnat(),Par)),
+      Par=application(sort_real::creal(),
+                              application(sort_int::cint(), application(sort_nat::cnat(),Par)),
                               sort_pos::c1());
       if (warn_upcasting)
       {
@@ -619,8 +619,8 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_nat::nat(),temp))
     {
       data_expression OldPar=Par;
-      Par=make_application(sort_real::creal(),
-                             make_application(sort_int::cint(),Par),
+      Par=application(sort_real::creal(),
+                             application(sort_int::cint(),Par),
                              sort_pos::c1());
       if (warn_upcasting)
       {
@@ -632,7 +632,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_int::int_(),temp))
     {
       data_expression OldPar=Par;
-      Par=make_application(sort_real::creal(),Par, sort_pos::c1());
+      Par=application(sort_real::creal(),Par, sort_pos::c1());
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -2965,7 +2965,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       else if (TypeMatchA(sort_pos::pos(),ResType,temp))
       {
         NewType=sort_bag::bag(sort_expression(NewType));
-        Data=make_application(sort_nat::cnat(),Data);
+        Data=application(sort_nat::cnat(),Data);
         DataTerm = abstraction(bag_comprehension_binder(),VarDecls,Data);
       }
       else

@@ -104,16 +104,20 @@ t
 
 inline HashNumber hash_number(const detail::_aterm *t)
 {
+// std::cerr << "START HASHNUMBER \n";
   const function_symbol &f=t->function();
   HashNumber hnr = SHIFT(addressf(f));
+// std::cerr << "FUNCTION " << addressf(f) << "\n";
 
   const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
   const size_t* end=begin+f.arity();
   for (const size_t* i=begin; i!=end; ++i)
   {
     hnr = COMBINE(hnr, *i);
+// std::cerr << "TERM " << *i << "\n";
   }
 
+// std::cerr << "HASHNUMBER " << hnr << "\n";
   return hnr;
 }
 
@@ -182,9 +186,11 @@ inline void remove_from_hashtable(const _aterm *t)
   const _aterm *prev=NULL;
   const HashNumber hnr = hash_number(t) & aterm_table_mask;
   const _aterm *cur = aterm_hashtable[hnr];
+// std::cerr << "Remove from hashtable " << t << "  " <<  t->function() << "  arity " << t->function().arity() <<  "    " << hnr << "    " << aterm_table_mask << "\n";
 
   do
   {
+// std::cerr << "LOOP\n";
     assert(cur!=NULL); /* This only occurs if the hashtable is in error. */
     if (cur == t)
     {
@@ -197,6 +203,7 @@ inline void remove_from_hashtable(const _aterm *t)
         aterm_hashtable[hnr] = cur->next();
       }
       /* Put the node in the appropriate free list */
+// std::cerr << "KLAAR\n";
       total_nodes--;
       return;
     }

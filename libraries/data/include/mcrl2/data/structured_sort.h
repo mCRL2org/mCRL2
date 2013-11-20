@@ -252,9 +252,9 @@ class structured_sort: public sort_expression
                                                  sort_bool::and_(equal_to(*k, *l), right_smaller_equal));
           }
 
-          application left_equal = make_application(equal_arguments_function(s), instance1, instance2);
-          application left_smaller = make_application(smaller_arguments_function(s), instance1, instance2);
-          application left_smaller_equal = make_application(smaller_equal_arguments_function(s), instance1, instance2);
+          application left_equal = application(equal_arguments_function(s), instance1, instance2);
+          application left_smaller = application(smaller_arguments_function(s), instance1, instance2);
+          application left_smaller_equal = application(smaller_equal_arguments_function(s), instance1, instance2);
           variables1.insert(variables1.end(),variables2.begin(),variables2.end());
           result.push_back(data_equation(variables1, sort_bool::true_(),left_equal, right_equal));
           result.push_back(data_equation(variables1, sort_bool::true_(),left_smaller, right_smaller));
@@ -271,11 +271,11 @@ class structured_sort: public sort_expression
       variable x("x", s);
       variable y("y", s);
       variable_list xy = make_list(x,y);
-      application to_pos_x = make_application(to_pos_function(s), x);
-      application to_pos_y = make_application(to_pos_function(s), y);
-      application equal_arguments_xy         = make_application(equal_arguments_function(s), x, y);
-      application smaller_arguments_xy       = make_application(smaller_arguments_function(s), x, y);
-      application smaller_equal_arguments_xy = make_application(smaller_equal_arguments_function(s), x, y);
+      application to_pos_x = application(to_pos_function(s), x);
+      application to_pos_y = application(to_pos_function(s), y);
+      application equal_arguments_xy         = application(equal_arguments_function(s), x, y);
+      application smaller_arguments_xy       = application(smaller_arguments_function(s), x, y);
+      application smaller_equal_arguments_xy = application(smaller_equal_arguments_function(s), x, y);
       result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     equal_to(x,y), equal_arguments_xy));
       result.push_back(data_equation(xy, not_equal_to(to_pos_x, to_pos_y), equal_to(x,y), sort_bool::false_()));
       result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less(x,y), sort_bool::true_()));
