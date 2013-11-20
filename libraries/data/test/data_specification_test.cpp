@@ -244,7 +244,7 @@ void test_constructors()
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
-  BOOST_CHECK(spec.constructors() != spec1.constructors());
+  BOOST_CHECK(spec.constructors() == spec1.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
   BOOST_CHECK(spec.constructors(s0) == hl);
   BOOST_CHECK(spec1.constructors(s) == fgl);

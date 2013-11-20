@@ -108,8 +108,13 @@ inline size_t recursive_number_of_args(const data_expression &t)
     return 0;
   }
 
-  const data_expression& t0(t[0]);
-  const size_t result=t.function().arity()+recursive_number_of_args(t0)-1;
+  if (is_variable(t))
+  {
+    return 0;
+  }
+
+  const application& ta(t);
+  const size_t result=ta.size()+recursive_number_of_args(ta.head());
   return result;
 }
 

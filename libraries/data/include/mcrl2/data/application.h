@@ -162,16 +162,6 @@ class application: public data_expression
       assert(arguments.size()>0);
     }
 
-    const data_expression& head() const
-    {
-      return atermpp::aterm_cast<const data_expression>((*this)[0]);
-    }
-
-    data_expression_list arguments() const
-    {
-      return data_expression_list(begin(), end());
-    }
-
   private:
     // forbid the use of iterator, which is silently inherited from
     // aterm_appl. Modifying the arguments of an application through the iterator
@@ -242,6 +232,29 @@ class application: public data_expression
       assert(first!=last);
     }
 
+    /// \brief Get the function at the head of this expression.
+    const data_expression& head() const
+    {
+      return atermpp::aterm_cast<const data_expression>(static_cast<atermpp::aterm_appl>(*this)[0]);
+    }
+
+    /// \brief Get the arguments of this expression.
+    /// \deprecated
+    /// \details This function is quite inefficient. It is
+    ///          linear in the number of arguments, and requires
+    ///          the relatively expensive construction of an data_expression_list.
+    data_expression_list arguments() const
+    {
+      return data_expression_list(begin(), end());
+    }
+
+    /// \brief Get the i-th argument of this expression.
+    const data_expression& operator[](size_t index) const
+    {
+      assert(index<size());
+      return atermpp::aterm_cast<const data_expression>((*this)[index+1]);
+    }
+
     /// \brief Returns an iterator pointing to the first argument of the
     ///        application.
     const_iterator begin() const
@@ -260,7 +273,8 @@ class application: public data_expression
     ///        application.
     size_t size() const
     {
-      return arguments().size();
+      using namespace atermpp;
+      return aterm_cast<aterm_appl>(*this).size()-1; 
     }
 };
 
