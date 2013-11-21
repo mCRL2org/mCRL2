@@ -45,40 +45,40 @@ BOOST_AUTO_TEST_CASE(test_index)
 
   // data::variable
   data::variable b("b", data::sort_bool::bool_());
-  value = core::index_traits<data::variable, data::variable_key_type>::index(key(b));
+  value = data::variable_index_traits::index(key(b));
   BOOST_CHECK(value == 0);
-  value = core::index_traits<data::variable, data::variable_key_type>::max_index();
+  value = data::variable_index_traits::max_index();
   BOOST_CHECK(value == 0);
 
   data::variable c("c", data::sort_bool::bool_());
-  value = core::index_traits<data::variable, data::variable_key_type>::index(key(c));
+  value = data::variable_index_traits::index(key(c));
   BOOST_CHECK(value == 1);
-  value = core::index_traits<data::variable, data::variable_key_type>::max_index();
+  value = data::variable_index_traits::max_index();
   BOOST_CHECK(value == 1);
 
   data::variable d = b;
-  value = core::index_traits<data::variable, data::variable_key_type>::index(key(d));
+  value = data::variable_index_traits::index(key(d));
   BOOST_CHECK(value == 0);
-  value = core::index_traits<data::variable, data::variable_key_type>::max_index();
+  value = data::variable_index_traits::max_index();
   BOOST_CHECK(value == 1);
 
   // data::function_symbol
   data::function_symbol f("f", data::sort_bool::bool_());
-  value = core::index_traits<data::function_symbol, data::function_symbol_key_type>::index(key(f));
+  value = data::function_symbol_index_traits::index(key(f));
   BOOST_CHECK(value == 0);
-  value = core::index_traits<data::function_symbol, data::function_symbol_key_type>::max_index();
+  value = data::function_symbol_index_traits::max_index();
   BOOST_CHECK(value == 0);
 
   data::function_symbol g("g", data::sort_bool::bool_());
-  value = core::index_traits<data::function_symbol, data::function_symbol_key_type>::index(key(g));
+  value = data::function_symbol_index_traits::index(key(g));
   BOOST_CHECK(value == 1);
-  value = core::index_traits<data::function_symbol, data::function_symbol_key_type>::max_index();
+  value = data::function_symbol_index_traits::max_index();
   BOOST_CHECK(value == 1);
 
   data::function_symbol h = f;
-  value = core::index_traits<data::function_symbol, data::function_symbol_key_type>::index(key(h));
+  value = data::function_symbol_index_traits::index(key(h));
   BOOST_CHECK(value == 0);
-  value = core::index_traits<data::function_symbol, data::function_symbol_key_type>::max_index();
+  value = data::function_symbol_index_traits::max_index();
   BOOST_CHECK(value == 1);
 }
 
@@ -86,8 +86,8 @@ BOOST_AUTO_TEST_CASE(test_io)
 {
   data::variable b("b", data::sort_bool::bool_());
   data::variable c("c", data::sort_bool::bool_());
-  std::size_t b_index = core::index_traits<data::variable, data::variable_key_type>::index(key(b));
-  std::size_t c_index = core::index_traits<data::variable, data::variable_key_type>::index(key(c));
+  std::size_t b_index = data::variable_index_traits::index(key(b));
+  std::size_t c_index = data::variable_index_traits::index(key(c));
   data::data_expression b_and_c = data::sort_bool::and_(b, c);
   atermpp::aterm t1 = data::add_index(b_and_c);
   std::cout << t1 << std::endl;

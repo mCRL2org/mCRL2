@@ -80,7 +80,7 @@ std::size_t& variable_map_max_index()
 /// \brief For several expressions in mCRL2 an implicit mapping of these expressions
 /// to integers is available. This is done for efficiency reasons. Examples are:
 ///
-/// Variable, process::process_identifier
+/// data::variable, process::process_identifier
 ///
 /// The class index_traits is used to implement this mapping. By this, the public
 /// interface of the expression classes is not polluted with.
