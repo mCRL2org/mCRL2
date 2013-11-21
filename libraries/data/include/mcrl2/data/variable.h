@@ -19,10 +19,6 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
-#endif
-
 namespace mcrl2
 {
 
@@ -92,33 +88,6 @@ inline void swap(variable& t1, variable& t2)
   t1.swap(t2);
 }
 //--- end generated class variable ---//
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-typedef std::pair<core::identifier_string, data::sort_expression> variable_key_type;
-
-inline
-void on_create_variable(const atermpp::aterm& t)
-{
-  const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
-  core::index_traits<variable, variable_key_type>::insert(std::make_pair(v.name(), v.sort()));
-}
-
-inline
-void on_delete_variable(const atermpp::aterm& t)
-{
-  const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
-  core::index_traits<variable, variable_key_type>::erase(std::make_pair(v.name(), v.sort()));
-}
-
-inline
-void register_variable_hooks()
-{
-  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
-  add_deletion_hook(core::detail::function_symbol_DataVarId(), on_delete_variable);
-}
-
-#endif // MCRL2_USE_INDEX_TRAITS
 
 // template function overloads
 std::string pp(const variable_list& x);

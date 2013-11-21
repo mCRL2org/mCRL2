@@ -19,10 +19,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/action_name_multiset.h"
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
-#endif
-
 namespace mcrl2
 {
 
@@ -107,35 +103,12 @@ std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
 void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
-
-inline
-void on_create_process_identifier(const atermpp::aterm& t)
-{
-  const process_identifier& p = atermpp::aterm_cast<const process_identifier>(t);
-  core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(t.name(), t.variables()));
-}
-
-inline
-void on_delete_process_identifier(const atermpp::aterm& t)
-{
-  const process_identifier& p = atermpp::aterm_cast<const process_identifier>(t);
-  core::index_traits<process_identifier, process_identifier_key_type>::erase(std::make_pair(t.name(), t.variables()));
-}
-
-inline
-void register_process_identifier_hooks()
-{
-  add_creation_hook(core::detail::function_symbol_ProcVarId(), on_create_process_identifier);
-  add_deletion_hook(core::detail::function_symbol_ProcVarId(), on_delete_process_identifier);
-}
-
-#endif // MCRL2_USE_INDEX_TRAITS
-
 } // namespace process
 
 } // namespace mcrl2
+
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/process/index_traits.h"
+#endif
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

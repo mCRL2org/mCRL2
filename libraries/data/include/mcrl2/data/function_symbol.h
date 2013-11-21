@@ -18,10 +18,6 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/sort_expression.h"
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
-#endif
-
 namespace mcrl2
 {
 
@@ -91,33 +87,6 @@ inline void swap(function_symbol& t1, function_symbol& t2)
   t1.swap(t2);
 }
 //--- end generated class function_symbol ---//
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-typedef std::pair<core::identifier_string, data::sort_expression> function_symbol_key_type;
-
-inline
-void on_create_function_symbol(const atermpp::aterm& t)
-{
-  const function_symbol& v = atermpp::aterm_cast<const function_symbol>(t);
-  core::index_traits<function_symbol, function_symbol_key_type>::insert(std::make_pair(v.name(), v.sort()));
-}
-
-inline
-void on_delete_function_symbol(const atermpp::aterm& t)
-{
-  const function_symbol& v = atermpp::aterm_cast<const function_symbol>(t);
-  core::index_traits<function_symbol, function_symbol_key_type>::erase(std::make_pair(v.name(), v.sort()));
-}
-
-inline
-void register_function_symbol_hooks()
-{
-  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
-  add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
-}
-
-#endif // MCRL2_USE_INDEX_TRAITS
 
 // template function overloads
 std::string pp(const function_symbol_list& x);

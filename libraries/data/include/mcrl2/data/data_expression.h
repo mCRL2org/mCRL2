@@ -341,5 +341,9 @@ application data_expression::operator()(const data_expression& e1, const data_ex
 }
 }
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/data/index_traits.h"
+#endif // MCRL2_USE_INDEX_TRAITS
+
 #endif // MCRL2_DATA_DATA_EXPRESSION_H
 

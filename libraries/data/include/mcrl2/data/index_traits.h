@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "mcrl2/core/index_traits.h"
+#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/variable.h"
 
 #ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
@@ -52,13 +53,58 @@ struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::data_expressi
   }
 };
 
-}
+} // namespace std
 
 #endif
 
 namespace mcrl2 {
 
 namespace data {
+
+typedef std::pair<core::identifier_string, data::sort_expression> function_symbol_key_type;
+typedef std::pair<core::identifier_string, data::sort_expression> variable_key_type;
+
+inline
+void on_create_function_symbol(const atermpp::aterm& t)
+{
+  const data::function_symbol& v = atermpp::aterm_cast<const data::function_symbol>(t);
+  core::index_traits<data::function_symbol, function_symbol_key_type>::insert(std::make_pair(v.name(), v.sort()));
+}
+
+inline
+void on_delete_function_symbol(const atermpp::aterm& t)
+{
+  const data::function_symbol& v = atermpp::aterm_cast<const data::function_symbol>(t);
+  core::index_traits<function_symbol, function_symbol_key_type>::erase(std::make_pair(v.name(), v.sort()));
+}
+
+inline
+void on_create_variable(const atermpp::aterm& t)
+{
+  const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
+  core::index_traits<variable, variable_key_type>::insert(std::make_pair(v.name(), v.sort()));
+}
+
+inline
+void on_delete_variable(const atermpp::aterm& t)
+{
+  const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
+  core::index_traits<variable, variable_key_type>::erase(std::make_pair(v.name(), v.sort()));
+}
+
+inline
+void register_function_symbol_hooks()
+{
+  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
+  add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
+}
+
+inline
+void register_variable_hooks()
+{
+  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
+  add_deletion_hook(core::detail::function_symbol_DataVarId(), on_delete_variable);
+}
 
 } // namespace data
 
