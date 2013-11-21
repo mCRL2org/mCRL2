@@ -15,6 +15,10 @@
 #include "mcrl2/process/replace.h"
 #include "mcrl2/process/translate_user_notation.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/process/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
@@ -68,6 +72,15 @@ std::set<core::identifier_string> find_identifiers(const process::process_specif
 // TODO: These should be removed when the aterm code has been replaced.
 std::string pp(const atermpp::aterm& x) { return to_string(x); }
 std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
+
+#ifdef MCRL2_USE_INDEX_TRAITS
+static bool register_hooks()
+{
+  register_process_identifier_hooks();
+  return true;
+}
+static bool mcrl2_register_process(register_hooks());
+#endif
 
 } // namespace process
 

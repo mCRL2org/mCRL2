@@ -61,6 +61,46 @@ bool gsIsDataAppl(const atermpp::aterm_appl& Term)
   return Term.function() == function_symbol_DataAppl(Term.function().arity());
 }
 
+// DataVarIdNoIndex
+inline
+const atermpp::function_symbol& function_symbol_DataVarIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("DataVarIdNoIndex", 2);
+  return f;
+}
+
+// OpIdIndex
+inline
+const atermpp::function_symbol& function_symbol_OpIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("OpIdNoIndex", 2);
+  return f;
+}
+
+// ProcVarIdNoIndex
+inline
+const atermpp::function_symbol& function_symbol_ProcVarIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("ProcVarIdNoIndex", 2);
+  return f;
+}
+
+// BooleanVariableNoIndex
+inline
+const atermpp::function_symbol& function_symbol_BooleanVariableNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("BooleanVariableNoIndex", 1);
+  return f;
+}
+
+// PropVarInstNoIndex
+inline
+const atermpp::function_symbol& function_symbol_PropVarInstNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("PropVarInstNoIndex", 2);
+  return f;
+}
+
 //--- start generated code ---//
 // ActAnd
 inline

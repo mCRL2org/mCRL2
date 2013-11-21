@@ -20,9 +20,12 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/index_traits.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/bes/pg_parse.h"
 #include "mcrl2/pbes/file_formats.h"
@@ -37,6 +40,51 @@ namespace mcrl2
 
 namespace bes
 {
+
+namespace detail
+{
+
+// transforms BooleanVariable to BooleanVariableNoIndex
+struct index_remover
+{
+  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  {
+    if (x.function() == core::detail::function_symbol_BooleanVariable())
+    {
+      return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariableNoIndex(), x.begin(), --x.end());
+    }
+    return x;
+  }
+};
+
+// transforms BooleanVariableNoIndex to BooleanVariable
+struct index_adder
+{
+  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  {
+    if (x.function() == core::detail::function_symbol_BooleanVariableNoIndex())
+    {
+      const bes::boolean_variable& y = atermpp::aterm_cast<const bes::boolean_variable>(x);
+      std::size_t index = core::index_traits<bes::boolean_variable, bes::boolean_variable_key_type>::index(y);
+      return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariable(), x[0], atermpp::aterm_int(index));
+    }
+    return x;
+  }
+};
+
+} // namespace detail
+
+inline
+atermpp::aterm add_index(const atermpp::aterm& x)
+{
+  return atermpp::replace(x, detail::index_adder());
+}
+
+inline
+atermpp::aterm remove_index(const atermpp::aterm& x)
+{
+  return atermpp::replace(x, detail::index_remover());
+}
 
 /// \brief Convert a BES expression to cwi format.
 template <typename Expression, typename VariableMap>

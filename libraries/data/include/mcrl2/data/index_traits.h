@@ -64,68 +64,32 @@ namespace data {
 typedef std::pair<core::identifier_string, data::sort_expression> function_symbol_key_type;
 typedef std::pair<core::identifier_string, data::sort_expression> variable_key_type;
 
-struct function_symbol_index_traits: public core::index_traits<data::function_symbol, data::function_symbol_key_type>
-{
-  /// \brief Returns the index of the variable.
-  static inline
-  std::size_t index(const data::function_symbol_key_type& x)
-  {
-    auto& m = core::variable_index_map<data::function_symbol, data::function_symbol_key_type>();
-    auto i = m.find(x);
-    if (i == m.end())
-    {
-      std::ostringstream out;
-      out << "error: could not find element";
-      throw std::runtime_error(out.str());
-    }
-    return i->second;
-  }
-};
-
-struct variable_index_traits: public core::index_traits<data::variable, data::variable_key_type>
-{
-  /// \brief Returns the index of the variable.
-  static inline
-  std::size_t index(const data::variable_key_type& x)
-  {
-    auto& m = core::variable_index_map<data::variable, data::variable_key_type>();
-    auto i = m.find(x);
-    if (i == m.end())
-    {
-      std::ostringstream out;
-      out << "error: could not find element";
-      throw std::runtime_error(out.str());
-    }
-    return i->second;
-  }
-};
-
 inline
 void on_create_function_symbol(const atermpp::aterm& t)
 {
   const data::function_symbol& v = atermpp::aterm_cast<const data::function_symbol>(t);
-  function_symbol_index_traits::insert(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::function_symbol, function_symbol_key_type>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_delete_function_symbol(const atermpp::aterm& t)
 {
   const data::function_symbol& v = atermpp::aterm_cast<const data::function_symbol>(t);
-  function_symbol_index_traits::erase(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::function_symbol, function_symbol_key_type>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_create_variable(const atermpp::aterm& t)
 {
   const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
-  variable_index_traits::insert(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::variable, variable_key_type>::insert(std::make_pair(v.name(), v.sort()));
 }
 
 inline
 void on_delete_variable(const atermpp::aterm& t)
 {
   const data::variable& v = atermpp::aterm_cast<const data::variable>(t);
-  variable_index_traits::erase(std::make_pair(v.name(), v.sort()));
+  core::index_traits<data::variable, variable_key_type>::erase(std::make_pair(v.name(), v.sort()));
 }
 
 inline

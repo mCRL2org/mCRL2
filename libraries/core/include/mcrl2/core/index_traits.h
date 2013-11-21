@@ -89,7 +89,20 @@ struct index_traits
 {
   /// \brief Returns the index of the variable.
   static inline
-  std::size_t index(const KeyType& x)
+  std::size_t index(const Variable& x)
+  {
+#ifdef MCRL2_VARIABLES_WITH_INDEX
+    // N.B. We assume that the index is the last element of the aterm_appl x.
+    const atermpp::aterm_int& i = atermpp::aterm_cast<const atermpp::aterm_int>(x[x.size() - 1]);
+    return i.value();
+#else
+    return 0;
+#endif
+  }
+
+  /// \brief Returns the index of the key.
+  static inline
+  std::size_t key_index(const KeyType& x)
   {
     auto& m = variable_index_map<Variable, KeyType>();
     auto i = m.find(x);

@@ -126,6 +126,9 @@ class boolean_equation_system
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
+#ifdef MCRL2_WITH_VARIABLE_INDEX
+      t = bes::add_index(t);
+#endif
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
@@ -150,6 +153,9 @@ class boolean_equation_system
         throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
       }
       atermpp::aterm_appl t = boolean_equation_system_to_aterm(*this);
+#ifdef MCRL2_WITH_VARIABLE_INDEX
+      t = bes::remove_index(t);
+#endif
       core::detail::save_aterm(t, filename, binary);
     }
 

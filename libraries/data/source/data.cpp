@@ -15,6 +15,10 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/translate_user_notation.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/data/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
@@ -105,6 +109,16 @@ std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable
 // TODO: These should be removed when the aterm code has been replaced.
 std::string pp(const atermpp::aterm& x) { return to_string(x); }
 std::string pp(const atermpp::aterm_appl& x) { return to_string(x); }
+
+#ifdef MCRL2_USE_INDEX_TRAITS
+static bool register_hooks()
+{
+  register_function_symbol_hooks();
+  register_variable_hooks();
+  return true;
+}
+static bool mcrl2_register_data(register_hooks());
+#endif
 
 } // namespace data
 

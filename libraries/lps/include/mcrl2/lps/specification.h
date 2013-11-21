@@ -143,6 +143,9 @@ class specification
     {
       using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
+#ifdef MCRL2_WITH_VARIABLE_INDEX
+      t = lps::add_index(t);
+#endif
       if (!t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
@@ -167,8 +170,11 @@ class specification
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time
       assert(is_well_typed(*this));
-      specification tmp(*this);
-      core::detail::save_aterm(specification_to_aterm(tmp), filename, binary);
+      atermpp::aterm_appl t = specification_to_aterm(*this);
+#ifdef MCRL2_WITH_VARIABLE_INDEX
+      t = lps::remove_index(t);
+#endif
+      core::detail::save_aterm(t, filename, binary);
     }
 
     /// \brief Returns the linear process of the specification.

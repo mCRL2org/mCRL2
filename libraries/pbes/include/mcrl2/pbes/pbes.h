@@ -252,6 +252,9 @@ class pbes
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
+#ifdef MCRL2_WITH_VARIABLE_INDEX
+      t = pbes_system::add_index(t);
+#endif
       if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
@@ -287,6 +290,9 @@ class pbes
       pbes tmp(*this);
       // tmp.data() = data::remove_all_system_defined(tmp.data());
       atermpp::aterm_appl t = pbes_to_aterm(tmp);
+#ifdef MCRL2_WITH_VARIABLE_INDEX
+      t = pbes_system::remove_index(t);
+#endif
       core::detail::save_aterm(t, filename, binary);
     }
 
