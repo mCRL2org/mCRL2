@@ -589,7 +589,7 @@ class data_specification
     void add_mapping(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      if (std::find(m_mappings.begin(),m_mappings.end(),f)==m_mappings.end());
+      if (std::find(m_mappings.begin(),m_mappings.end(),f)==m_mappings.end())
       { 
         m_mappings.push_back(f);
         data_is_not_necessarily_normalised_anymore();

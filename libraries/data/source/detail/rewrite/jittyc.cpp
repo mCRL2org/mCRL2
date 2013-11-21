@@ -3128,7 +3128,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "data_expression rewrite_int_aux(const application& t)\n"
       "{\n"
       "  const argument_rewriter_struct argument_rewriter;\n"
-      "  return applicataion(t.head(),t.begin(),t.end(),argument_rewriter);\n" // TODO REWRITE HEAD OOK.
+      "  return application(t.head(),t.begin(),t.end(),argument_rewriter);\n" // TODO REWRITE HEAD OOK.
       "}\n\n");
 
   fprintf(f,
@@ -3139,7 +3139,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "       (mcrl2::data::is_variable(head0)?\n"
       "            (*(this_rewriter->global_sigma))(aterm_cast<const mcrl2::data::variable>(head0)):\n"
       "       (mcrl2::data::is_where_clause(head0)?\n"
-      "            this_rewriter->rewrite_where(head0,*(this_rewriter->global_sigma)):\n"
+      "            this_rewriter->rewrite_where(atermpp::aterm_cast<mcrl2::data::where_clause>(head0),*(this_rewriter->global_sigma)):\n"
       "             head0));\n"
       "  \n"
       "  // Here head has the shape\n"
