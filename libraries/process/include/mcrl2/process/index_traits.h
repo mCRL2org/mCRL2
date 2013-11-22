@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_INDEX_TRAITS_H
 #define MCRL2_PROCESS_INDEX_TRAITS_H
 
-#include "mcrl2/core/index_traits.h"
+#include "mcrl2/data/index_traits.h"
 #include "mcrl2/process/process_identifier.h"
 
 namespace mcrl2 {

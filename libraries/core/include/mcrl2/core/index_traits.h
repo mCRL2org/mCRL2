@@ -45,18 +45,6 @@ std::unordered_map<KeyType, std::size_t>& variable_index_map()
   return m;
 }
 
-inline
-std::size_t hash_value(const atermpp::aterm& x)
-{
-  return atermpp::detail::hash_number(atermpp::detail::address(x));
-}
-
-inline
-std::size_t hash_value(const atermpp::aterm& x1, const atermpp::aterm& x2)
-{
-  return boost::hash_value(std::make_pair(atermpp::detail::hash_number(atermpp::detail::address(x1)), atermpp::detail::hash_number(atermpp::detail::address(x2))));
-}
-
 #else
 
 template <typename Variable, typename KeyType>
@@ -180,22 +168,5 @@ struct index_traits
 } // namespace core
 
 } // namespace mcrl2
-
-#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-
-namespace std {
-
-template<>
-struct hash<mcrl2::core::identifier_string>
-{
-  std::size_t operator()(const mcrl2::core::identifier_string& x) const
-  {
-    return mcrl2::core::hash_value(x);
-  }
-};
-
-}
-
-#endif
 
 #endif // MCRL2_CORE_INDEX_TRAITS_H

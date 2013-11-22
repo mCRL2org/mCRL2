@@ -13,26 +13,12 @@
 #define MCRL2_PBES_INDEX_TRAITS_H
 
 #include "mcrl2/core/index_traits.h"
+#include "mcrl2/data/hash.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
-
-#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-namespace std {
-
-template<>
-struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
-{
-  std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
-  {
-    return mcrl2::core::hash_value(x.name(), x.variables());
-  }
-};
-
-}
-#endif // MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
 typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
 

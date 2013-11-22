@@ -12,50 +12,10 @@
 #ifndef MCRL2_DATA_INDEX_TRAITS_H
 #define MCRL2_DATA_INDEX_TRAITS_H
 
-#include <functional>
-#include <utility>
-
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/variable.h"
-
-#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-
-namespace std {
-
-/// \brief hash specialization
-template<>
-struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::sort_expression> >
-{
-  std::size_t operator()(const std::pair<mcrl2::core::identifier_string, mcrl2::data::sort_expression>& x) const
-  {
-    return mcrl2::core::hash_value(x.first, x.second);
-  }
-};
-
-/// \brief hash specialization
-template<>
-struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::variable_list> >
-{
-  std::size_t operator()(const std::pair<mcrl2::core::identifier_string, mcrl2::data::variable_list>& x) const
-  {
-    return mcrl2::core::hash_value(x.first, x.second);
-  }
-};
-
-/// \brief hash specialization
-template<>
-struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::data_expression_list> >
-{
-  std::size_t operator()(const std::pair<mcrl2::core::identifier_string, mcrl2::data::data_expression_list>& x) const
-  {
-    return mcrl2::core::hash_value(x.first, x.second);
-  }
-};
-
-} // namespace std
-
-#endif
+#include "mcrl2/data/hash.h"
 
 namespace mcrl2 {
 

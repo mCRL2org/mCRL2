@@ -13,6 +13,7 @@
 #define MCRL2_BES_INDEX_TRAITS_H
 
 #include "mcrl2/core/index_traits.h"
+#include "mcrl2/core/hash.h"
 #include "mcrl2/bes/boolean_expression.h"
 
 namespace mcrl2 {

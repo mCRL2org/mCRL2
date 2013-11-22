@@ -12,7 +12,9 @@
 #ifndef MCRL2_PROCESS_IO_H
 #define MCRL2_PROCESS_IO_H
 
+#include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/io.h"
+#include "mcrl2/process/process_identifier.h"
 
 namespace mcrl2 {
 
@@ -55,19 +57,19 @@ struct index_adder
     if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
     {
       const data::variable& y = atermpp::aterm_cast<const data::variable>(x);
-      std::size_t index = data::variable_index_traits::index(y);
+      std::size_t index = core::index_traits<data::variable, data::variable_key_type>::index(y);
       return atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), x[0], x[1], atermpp::aterm_int(index));
     }
     else if (x.function() == core::detail::function_symbol_OpIdNoIndex())
     {
       const data::function_symbol& y = atermpp::aterm_cast<const data::function_symbol>(x);
-      std::size_t index = data::function_symbol_index_traits::index(y);
+      std::size_t index = core::index_traits<data::function_symbol, data::function_symbol_key_type>::index(y);
       return atermpp::aterm_appl(core::detail::function_symbol_OpId(), x[0], x[1], atermpp::aterm_int(index));
     }
     else if (x.function() == core::detail::function_symbol_ProcVarIdNoIndex())
     {
       const process::process_identifier& y = atermpp::aterm_cast<const process::process_identifier>(x);
-      std::size_t index = process::process_identifier_index_traits::index(y);
+      std::size_t index = core::index_traits<process::process_identifier, process::process_identifier_key_type>::index(y);
       return atermpp::aterm_appl(core::detail::function_symbol_ProcVarId(), x[0], x[1], atermpp::aterm_int(index));
     }
     return x;
