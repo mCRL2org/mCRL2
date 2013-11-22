@@ -197,6 +197,11 @@ class Rewriter
                       const bool body_in_normal_form,
                       internal_substitution_type& sigma);
 
+    /// Rewrite t, assuming that the headsymbol of t, which can be nested, is a lambda term.
+    data_expression rewrite_lambda_application(
+                      const data_expression& t,
+                      internal_substitution_type& sigma);
+
     data_expression rewrite_lambda_application(
                       const abstraction& lambda_term,
                       const data_expression& body,

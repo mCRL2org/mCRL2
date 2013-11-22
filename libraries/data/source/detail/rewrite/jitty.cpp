@@ -542,7 +542,7 @@ data_expression RewriterJitty::rewrite_aux(
   // in rewrite_aux_function_symbol.
   function_symbol head;
   data_expression t(term[0]);
-  if (head_is_function_symbol(t,head))
+  if (detail::head_is_function_symbol(t,head))
   {
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.

@@ -21,6 +21,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
+#include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #ifdef MCRL2_JITTYC_AVAILABLE
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif
@@ -259,6 +260,33 @@ abstraction Rewriter::rewrite_single_lambda(
 }
 
 
+// The function rewrite_lambda_application assumes that t has the shape
+// application(...application(lambda x:D...., arg1,...,argn),argn+1,...,argN).
+// It applies the lambda term to its arguments, and rewrites the result to
+// normal form.
+
+data_expression Rewriter::rewrite_lambda_application(
+                      const data_expression& t,
+                      internal_substitution_type& sigma)
+{
+  if (is_lambda(t))
+  {
+    const abstraction& ta(t);
+    return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
+  }
+
+  const application ta(t);
+  if (is_lambda(ta.head()))
+  {
+    return rewrite_lambda_application(ta.head(),ta,sigma);
+  }
+
+  const data_expression new_t=detail::replace_nested_head(ta,rewrite_lambda_application(ta.head(),sigma));
+  return rewrite(new_t,sigma);
+}
+
+
+
 // The function rewrite_lambda_application rewrites a lambda term to a set of
 // arguments which are the arguments 1,...,n of t. If t has the shape
 // #REWR#(t0,t1,....,tn) and the lambda term is L, we calculate the normal form
@@ -271,12 +299,12 @@ data_expression Rewriter::rewrite_lambda_application(
                       internal_substitution_type& sigma)
 {
   using namespace atermpp;
-  assert(lambda_term[0]==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
+  assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
   const data_expression lambda_body=rewrite_internal(lambda_term.body(),sigma);
   size_t arity=t.size();
   assert(arity>0);
-  if (arity==1) // The term has shape #REWR(lambda d..:D...t), i.e. without arguments.
+  if (arity==1) // The term has shape application(lambda d..:D...t), i.e. without arguments.
   {
     return rewrite_single_lambda(vl, lambda_body, true, sigma);
   }

@@ -21,6 +21,17 @@ namespace data
 namespace detail
 {
 
+/* struct argument_rewriter_struct
+{
+  argument_rewriter_struct()
+  {}
+  
+  data_expression operator()(const data_expression& arg) const
+  {
+     return rewrite(arg);
+  }
+}; */
+
 inline variable_list get_vars(const data_expression &a)
 {
   if (is_variable(a))
@@ -95,8 +106,11 @@ inline data_expression get_argument_of_higher_order_term(const data_expression& 
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
   
   assert(!is_function_symbol(t));
-  data_expression result;
-  bool b=get_argument_of_higher_order_term_helper(t,i,result);
+  data_expression result; 
+#ifndef NDEBUG // avoid a warning.
+  bool b=
+#endif
+          get_argument_of_higher_order_term_helper(t,i,result);
   assert(b);
   return result;
 }
@@ -118,7 +132,6 @@ inline size_t recursive_number_of_args(const data_expression &t)
   return result;
 }
 
-
 // Assume that the expression t is an application, and return its leading function symbol.
 inline const function_symbol& get_function_symbol_of_head(const data_expression &t)
 {
@@ -128,7 +141,45 @@ inline const function_symbol& get_function_symbol_of_head(const data_expression 
   }
   assert(t.type_is_appl());
 
-  return get_function_symbol_of_head(atermpp::aterm_cast<data_expression>(t[0]));
+  const application& ta(t);
+  return get_function_symbol_of_head(ta.head());
+}
+
+// Return the head symbol, nested within applications.
+inline const data_expression& get_nested_head(const data_expression &t)
+{
+  if (is_application(t))
+  {
+    const application& ta(t);
+    return get_nested_head(ta.head());
+  }
+  
+  return t;
+}
+
+// Replace the recursively nested head symbol in t by head.
+inline const data_expression replace_nested_head(const data_expression &t, const data_expression& head)
+{
+  if (is_application(t))
+  {
+    const application& ta(t);
+    return application(replace_nested_head(ta.head(),head),ta.begin(),ta.end());
+  }
+  
+  return head;
+}
+
+// Replace the recursively nested head symbol in t by head.
+template <class ARGUMENT_REWRITER>
+inline const data_expression rewrite_all_arguments(const data_expression &t, const ARGUMENT_REWRITER rewriter)
+{
+  if (is_application(t))
+  {
+    const application& ta(t);
+    return application(ta.head(),ta.begin(),ta.end(),rewriter);
+  }
+  
+  return t;
 }
 
 // Assume that the expression t is an application, and return its leading variable.
@@ -160,7 +211,7 @@ inline bool head_is_variable(const data_expression& t)
   {
     return false;
   }
-  // shape is #REWR#(t1,...,tn)
+  // shape is application(t1,...,tn)
   const application& ta(t);
   return head_is_variable(ta.head());
 }
