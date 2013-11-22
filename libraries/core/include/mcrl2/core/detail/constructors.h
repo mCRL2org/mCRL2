@@ -1414,7 +1414,6 @@ const atermpp::aterm_appl& constructBooleanExpression()
 {
   return constructBooleanTrue();
 }
-
 //--- end generated code ---//
 
 

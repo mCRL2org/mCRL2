@@ -119,6 +119,39 @@ bool check_rule_NumberString(Term t)
   return true;
 }
 
+template <typename Term> bool check_rule_DataExpr(Term t);
+
+// DataAppl(DataExpr, DataExpr+)
+template <typename Term>
+bool check_term_DataAppl(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::aterm_cast<atermpp::aterm_appl>(term);
+  if (!gsIsDataAppl(a))
+  {
+    return false;
+  }
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  for (atermpp::aterm_appl::const_iterator child = a.begin(); child != a.end(); ++child)
+  {
+    if (!check_term_argument(*child, check_rule_DataExpr<atermpp::aterm>))
+    {
+      mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+      return false;
+    }
+  }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 //--- start generated code ---//
 template <typename Term> bool check_rule_SortExpr(Term t);
 template <typename Term> bool check_rule_SortId(Term t);
@@ -254,7 +287,6 @@ template <typename Term> bool check_term_PBESForall(Term t);
 template <typename Term> bool check_term_StateTrue(Term t);
 template <typename Term> bool check_term_BInit(Term t);
 template <typename Term> bool check_term_UntypedSortUnknown(Term t);
-template <typename Term> bool check_term_DataAppl(Term t);
 template <typename Term> bool check_term_RegTrans(Term t);
 template <typename Term> bool check_term_StateDelayTimed(Term t);
 template <typename Term> bool check_term_Nu(Term t);
@@ -3665,37 +3697,6 @@ bool check_term_UntypedSortUnknown(Term t)
   {
     return false;
   }
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// DataAppl(DataExpr, DataExpr+)
-template <typename Term>
-bool check_term_DataAppl(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  const atermpp::aterm_appl& a = atermpp::aterm_cast<atermpp::aterm_appl>(term);
-  if (!gsIsDataAppl(a))
-  {
-    return false;
-  }
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  for (atermpp::aterm_appl::const_iterator child = a.begin(); child != a.end(); ++child)
-  {
-    if (!check_term_argument(*child, check_rule_DataExpr<atermpp::aterm>))
-    {
-      mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
-      return false;
-    }
-  }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
