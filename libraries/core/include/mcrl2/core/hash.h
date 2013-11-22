@@ -51,8 +51,9 @@ struct hash<mcrl2::core::identifier_string>
   }
 };
 
-#endif MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-
 }
+
+#endif // MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+
 
 #endif // MCRL2_CORE_HASH_H
