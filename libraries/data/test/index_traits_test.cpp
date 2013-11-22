@@ -11,7 +11,6 @@
 
 #define BOOST_TEST_MODULE index_traits
 #define MCRL2_USE_INDEX_TRAITS
-#define MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>

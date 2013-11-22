@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_HASH_H
 #define MCRL2_DATA_HASH_H
 
+#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+
 #include "mcrl2/core/hash.h"
 #include "mcrl2/data/variable.h"
 
@@ -48,5 +50,7 @@ struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::data_expressi
 };
 
 } // namespace std
+
+#endif // MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
 #endif // MCRL2_DATA_HASH_H

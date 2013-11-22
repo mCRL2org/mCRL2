@@ -12,6 +12,8 @@
 #ifndef MCRL2_CORE_HASH_H
 #define MCRL2_CORE_HASH_H
 
+#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+
 #include <functional>
 #include <utility>
 #include <boost/functional/hash.hpp>
@@ -48,6 +50,8 @@ struct hash<mcrl2::core::identifier_string>
     return mcrl2::core::hash_value(x);
   }
 };
+
+#endif MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
 }
 
