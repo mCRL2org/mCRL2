@@ -16,7 +16,12 @@
 #include <stack>
 #include <sstream>
 #include <stdexcept>
+#include <boost/config.hpp>
 #include "mcrl2/core/identifier_string.h"
+
+#ifndef BOOST_NO_CXX11_HDR_UNORDERED_MAP
+#define MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+#endif
 
 #ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 #include <boost/functional/hash.hpp>
