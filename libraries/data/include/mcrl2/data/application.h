@@ -142,6 +142,17 @@ class application: public data_expression
     {
     }
 
+    /// \brief Constructor
+    application(const data_expression& head,
+                const data_expression& arg1,
+                const data_expression& arg2,
+                const data_expression& arg3,
+                const data_expression& arg4,
+                const data_expression& arg5)
+      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(6),head,arg1,arg2,arg3,arg4,arg5))
+    {
+    }
+
     /// \brief Constructor.
     /// \param term A term
     explicit application(const atermpp::aterm& term)
