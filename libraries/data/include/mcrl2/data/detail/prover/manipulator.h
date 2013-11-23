@@ -144,7 +144,7 @@ class InternalFormatManipulator
                const data_expression& a_high, 
                const data_expression& a_low)
     {
-      return (data_expression)Apply3(f_if_then_else, a_expr, a_high, a_low);
+      return application(f_if_then_else, a_expr, a_high, a_low);
     }
 
   public:

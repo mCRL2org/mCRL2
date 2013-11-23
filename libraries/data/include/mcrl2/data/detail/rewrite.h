@@ -243,105 +243,6 @@ void CheckRewriteRule(const data_equation& dataeqn);
  **/
 bool isValidRewriteRule(const data_equation& dataeqn);
 
-extern std::vector <atermpp::function_symbol> apples;
-
-inline void extend_appl_afun_values(const size_t arity)
-{
-  for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
-  {
-    assert(old_num==apples.size());
-    apples.push_back(atermpp::function_symbol("#REWR#",old_num));
-  }
-}
-
-/** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
-inline const atermpp::function_symbol& get_appl_afun_value(const size_t arity)
-{
-  if (arity >= apples.size())
-  {
-    extend_appl_afun_values(arity);
-  }
-  assert(arity<apples.size());
-  return apples[arity];
-}
-
-/** \brief Get the atermpp::function_symbol number of the internal application symbol with given arity. */
-inline const atermpp::function_symbol& get_appl_afun_value_no_check(const size_t arity)
-{
-  assert(arity<apples.size());
-  return apples[arity];
-}
-
-/**
- * \brief The apply functions below takes terms in internal format,
- *        and transform them into a function application. In case
- *        of Apply and ApplyArray the first element of the list
- *        or array is the function symbol.
- **/
-// inline data_expression Apply(const atermpp::term_list < atermpp::aterm >& l)
-// {
-//   return data_expression(get_appl_afun_value(l.size()),l.begin(),l.end());
-// }
-
-/** \brief See Apply. */
-/* template <class Iterator>
-inline data_expression ApplyArray(const size_t size, const Iterator begin, const Iterator end)
-{
-  assert(begin!=end);
-  return application(size, *begin, begin+1, end);
-} */
-
-/** \brief See Apply. */
-template <class Iterator, class Function>
-inline data_expression ApplyArray(const size_t size, const Iterator begin, const Iterator end, Function f)
-{
-  return data_expression(get_appl_afun_value(size), begin, end, f);
-}
-
-
-/** \brief See Apply. */
-inline data_expression Apply0(const data_expression& head)
-{
-  data_expression_vector args;
-  return application(head,args);
-}
-
-
-/** \brief See Apply. */
-inline data_expression Apply1(
-         const data_expression& head,
-         const data_expression& arg1)
-{
-  data_expression_vector args(1,arg1);
-  return application(head,args);
-}
-
-
-/** \brief See Apply. */
-inline data_expression Apply2(
-         const data_expression& head,
-         const data_expression& arg1,
-         const data_expression& arg2)
-{
-  data_expression_vector args; // TODO: NOT VERY EFFICIENT.
-  args.push_back(arg1);
-  args.push_back(arg2);
-  return application(head,args);
-}
-
-/** \brief See Apply. */
-inline data_expression Apply3(
-         const data_expression& head,
-         const data_expression& arg1,
-         const data_expression& arg2,
-         const data_expression& arg3)
-{
-  data_expression_vector args; // TODO: NOT VERY EFFICIENT.
-  args.push_back(arg1);
-  args.push_back(arg2);
-  args.push_back(arg3);
-  return application(head,args);
-}
 
 /** The functions below are used for fromInner and toInner(c). */
 
@@ -360,42 +261,7 @@ inline size_t getArity(const data::function_symbol& op)
     sort = fsort.codomain();
   }
   return arity;
-}
-
-/* extern std::map< data::function_symbol, atermpp::aterm_int > term2int;
-extern std::vector < data::function_symbol > int2term;
-
-inline size_t get_num_opids()
-{
-  return int2term.size();
-}
-
-inline data::function_symbol& get_int2term(const size_t n)
-{
-  assert(n<int2term.size());
-  return int2term[n];
-}
-
-inline const atermpp::aterm_int& OpId2Int_aux(const data::function_symbol& term)
-{
-  assert(is_function_symbol(term));
-  const size_t num_opids=get_num_opids();
-  atermpp::aterm_int i(num_opids);
-  term2int[term]=i;
-  assert(int2term.size()==num_opids);
-  int2term.push_back(term);
-  return term2int[term];
-}
-
-inline const atermpp::aterm_int& OpId2Int(const data::function_symbol& term)
-{
-  std::map< data::function_symbol, atermpp::aterm_int >::const_iterator f = term2int.find(term);
-  if (f == term2int.end())
-  {
-    return OpId2Int_aux(term);
-  }
-  return f->second;
-} */
+} 
 
 data_expression fromInner(const data_expression& term);
 

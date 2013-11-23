@@ -1398,8 +1398,6 @@ static string calc_inner_appl_head(size_t arity) // arity is one if there is a s
   {
     ss << "make_term_with_many_arguments(";
   }
-  // ss << "(get_appl_afun_value_no_check(" << arity+1 << "),";    // YYYY
-  // extend_appl_afun_values(arity+1);
   return ss.str();
 }
 
@@ -2142,25 +2140,20 @@ static void finish_function(FILE* f,
 {
   if (arity == 0)
   {
-    // set_rewrappl_value(opid);
-    // fprintf(f,  "  return mcrl2::data::detail::get_rewrappl_value_without_check(%lu", opid);
     fprintf(f,  "  return data_expression((const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
   }
   else
   {
-    extend_appl_afun_values(arity+1);
     if (arity > 5)
     {
       fprintf(f,  "  return make_term_with_many_arguments("
-              "(const atermpp::detail::_aterm*)%p",
-              // arity+1,
-              // (void*)get_int2aterm_value(opid)
+              "atermpp::aterm_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)%p))",
               (void*)atermpp::detail::address(opid)
              );
     }
     else
     {
-      fprintf(f,  "  return application(data_expression((const atermpp::detail::_aterm*) %p)",
+      fprintf(f,  "  return application(atermpp::aterm_cast<const data_expression>(aterm((const atermpp::detail::_aterm*)%p))",
               (void*)atermpp::detail::address(opid)
              );
     }
@@ -2954,15 +2947,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
   }
 
-  extend_appl_afun_values(max_arity+1);
   fprintf(f,
           "void rewrite_init(RewriterCompilingJitty *r)\n"
           "{\n"
           "  this_rewriter=r;\n"
-          "  mcrl2::data::detail::get_appl_afun_value_no_check(%zu);\n"
           "  assert(this_rewriter->rewriter_binding_variable_lists.size()==%zu);\n"
           "  assert(this_rewriter->rewriter_bound_variables.size()==%zu);\n",
-          max_arity+1,rewriter_binding_variable_lists.size(),rewriter_bound_variables.size()
+          rewriter_binding_variable_lists.size(),rewriter_bound_variables.size()
          );
   fprintf(f,  "\n");
 

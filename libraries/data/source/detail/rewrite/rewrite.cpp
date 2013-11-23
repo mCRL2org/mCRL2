@@ -421,7 +421,7 @@ data_expression Rewriter::internal_existential_quantifier_enumeration(
     }
     else
     {
-      partial_result=Apply2(internal_or, partial_result,evaluated_condition);
+      partial_result=application(internal_or, partial_result,evaluated_condition);
     }
     loop_upperbound--;
   }
@@ -517,7 +517,7 @@ data_expression Rewriter::internal_universal_quantifier_enumeration(
     }
     else
     {
-      evaluated_condition=Apply1(internal_not, evaluated_condition);
+      evaluated_condition=application(internal_not, evaluated_condition);
     }
 
 
@@ -531,7 +531,7 @@ data_expression Rewriter::internal_universal_quantifier_enumeration(
     }
     else
     {
-      partial_result=Apply2(internal_and, partial_result, evaluated_condition);
+      partial_result=application(internal_and, partial_result, evaluated_condition);
     }
     loop_upperbound--;
   }
