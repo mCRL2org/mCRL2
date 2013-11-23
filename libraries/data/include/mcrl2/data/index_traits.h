@@ -69,7 +69,7 @@ struct index_traits
   std::size_t max_index()
   {
     auto& m = variable_index_map<Variable>();
-    auto i = std::min_element(m.begin(), m.end(), m.value_comp());
+    auto i = std::min_element(m.begin(), m.end(), m.value_comp());  // Caveat: min_element provides the maximum here.
     if (i == m.end())
     {
       throw std::runtime_error("error: empty map");

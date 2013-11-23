@@ -1379,7 +1379,7 @@ string RewriterCompilingJitty::calc_inner_terms(nfs_array& nfs, size_t arity, da
   return head.second+(args.tail().empty()?"":",")+tail;
 }
 
-static string calc_inner_appl_head(size_t arity)
+static string calc_inner_appl_head(size_t arity) // arity is one if there is a single head. Arity is two is there is a head and one argument, etc.
 {
   stringstream ss;
   if (arity == 1)
@@ -1411,62 +1411,25 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
                   const bool rewr,
                   const size_t total_arity)
 {
+  stringstream ss;
   if (is_function_symbol(t))
   {
     const function_symbol& f(t);
-    stringstream ss;
     bool b = opid_is_nf(f,0);
-    /* if (total_arity>5)
-    {
-      ss << "(aterm_appl)";
-    } */
+
     if (rewr && !b)
     {
       ss << "rewr_" << data::index_traits<data::function_symbol>::index(f) << "_0_0()";
     }
     else
     {
-      // set_rewrappl_value(OpId2Int(static_cast<function_symbol>(t)).value());
-      ss << "atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" <<
-                    atermpp::detail::address(t) << ")))";
-                    // atermpp::detail::address(mcrl2::data::detail::get_int2term(data::index_traits<data::function_symbol>::index(aterm_cast<function_symbol>(t)))) << ")))";
-                    // atermpp::detail::address(mcrl2::data::detail::get_rewrappl_value_without_check(OpId2Int(aterm_cast<function_symbol>(t)).value())) << ")))";
+      ss << "atermpp::aterm_cast<const data_expression>(aterm(reinterpret_cast<const atermpp::detail::_aterm*>(" << atermpp::detail::address(t) << ")))";
     }
-    return pair<bool,string>(
-             rewr || b,
-             ss.str()
-           );
-
-  }
-  else if (gsIsNil((aterm_appl) t))
-  {
-    assert(0);
-    stringstream ss;
-    assert(nnfvars!=aterm_list(aterm()));
-    // assert(startarg>=0); This may be negative.
-    bool b = (std::find(nnfvars.begin(),nnfvars.end(), aterm_int(startarg)) != nnfvars.end());
-    if (rewr && b)
-    {
-      ss << "rewrite(arg_not_nf" << startarg << ")";
-    }
-    else if (b)
-    {
-      ss << "arg_not_nf" << startarg;
-    }
-    else
-    {
-      ss << "arg" << startarg;
-    }
-    return pair<bool,string>(rewr || !b, ss.str());
+    return pair<bool,string>(rewr || b, ss.str());
 
   }
   else if (is_variable(t))
   {
-    stringstream ss;
-    /* if (total_arity>5)
-    {
-      ss << "(aterm_appl)";
-    } */
     const bool b = (nnfvars!=aterm_list(aterm())) && (std::find(nnfvars.begin(),nnfvars.end(),t) != nnfvars.end());
     const variable& v(t);
     const string variable_name=v.name();
@@ -1492,7 +1455,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   else if (is_abstraction(t))
   {
     const abstraction& ta(t);
-    stringstream ss;
     if (is_lambda_binder(ta.binding_operator()))
     {
       if (rewr)
@@ -1558,8 +1520,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else if (is_where_clause(t))
   {
-
-    stringstream ss;
     const where_clause& w(t); // w is the where clause
 
     if (rewr)
@@ -1613,17 +1573,16 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
     }
   }
 
-  // t has the shape #REWR#(head,t1,...,tn)
+  // t has the shape application(head,t1,...,tn)
   const application& ta(t);
-  stringstream ss;
   bool b;
   size_t arity = ta.size();
-  function_symbol headfs;
 
-  if (head_is_function_symbol(ta,headfs))  // Determine whether the topmost symbol is a function symbol.
+  if (is_function_symbol(ta.head()))  // Determine whether the topmost symbol is a function symbol.
   {
-    size_t cumulative_arity = detail::recursive_number_of_args(ta);
-    b = opid_is_nf(headfs,cumulative_arity+1);
+    const function_symbol& headfs(ta.head());
+    size_t cumulative_arity = ta.size();
+    b = opid_is_nf(headfs,cumulative_arity+1); // b indicates that headfs is in normal form.
 
     if (b || !rewr)
     {
@@ -1650,14 +1609,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       calc_nfs_list(args_nfs,arity,ta.arguments(),startarg,nnfvars);
       if (!(b || !rewr))
       {
-        /* if (arity<=5)
-        {
-          ss << "/ *" << arity <<  "* / rewr_";
-        }
-        else */
-        {
-          ss << "rewr_";
-        }
+        ss << "rewr_";
         add_base_nfs(args_nfs,headfs,arity);
         extend_nfs(args_nfs,headfs,arity);
       }
@@ -1669,17 +1621,13 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         if (b || !rewr)
         {
-          /* if (arity<=5)
-          { */
-            ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(headfs) << "))";
-          /* }
-          else
-          {
-            ss << "(aterm_appl)(atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(headfs);
-          } */
+          ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(headfs) << "))";
         }
         else
+        {
+          // ss << "rewr_" << data::index_traits<data::function_symbol>::index(headfs) << "_0_0()";
           ss << data::index_traits<data::function_symbol>::index(headfs);
+        }
       }
       else
       {
@@ -1693,27 +1641,15 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           const data::function_symbol f(new_name.str(),old_head.sort());
           if (partially_rewritten_functions.count(f)==0)
           {
-            // OpId2Int(f); NOTE THAT AT THIS PLACE A FUNCTION SYMBOL CAN BE ADDED TO THE SYSTEM. POSSIBLY NASTY.
             partially_rewritten_functions.insert(f);
           }
-          /* if (arity<=5)
-          { */
-            /* Exclude adding an extra increase of the OpId index, which refers to an OpId that is not available.
-               The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
-               which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
-               to recalculate the normal form. TODO: this needs to be reconstructed. */
-            /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((aterm_int) ((aterm_list) t).front()).value()
+          /* Exclude adding an extra increase of the OpId index, which refers to an OpId that is not available.
+             The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
+             which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
+             to recalculate the normal form. TODO: this needs to be reconstructed. */
+          /* ss << "atermpp::aterm( " << (void*) get_int2aterm_value(((aterm_int) ((aterm_list) t).front()).value()
                              + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ")"; */
-            ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
-          /* }
-          else
-          {
-            / * See the remark above. * /
-            / * ss << "(aterm_appl) " << (void*) get_int2aterm_value(((aterm_int) ((aterm_list) t).front()).value()
-                               + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ""; * /
-            ss << "(aterm_appl)(atermpp::detail::_aterm*) " << (void*) get_int2aterm_value(OpId2Int(f)).value()) << "";
-          } */
-
+          ss << "atermpp::aterm_cast<data_expression>(atermpp::aterm((const atermpp::detail::_aterm*) " << (void*) atermpp::detail::address(f) << "))";
         }
         else
         {
@@ -1728,7 +1664,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         args_nfs.fill(arity);
       }
       string args_second = calc_inner_terms(args_first,arity,ta.arguments(),startarg,nnfvars,&args_nfs);
-      // The assert is not valid anymore, bcause lambda are sometimes returned in normal form, although not strictly
+      // The assert is not valid anymore, because lambdas are sometimes returned in normal form, although not strictly
       // asked for...
       assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first.equals(args_nfs,arity));
       if (rewr && !b)
@@ -1759,8 +1695,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
   }
   else
   {
-    // ((aterm_list) t).front().type()!=AT_INT). So the first element of this list is
-    // either a variable, or a lambda term. It cannot be a forall or exists, because in
+    // ta.head() is not function symbol. So the first element of this list is
+    // either an application, variable, or a lambda term. It cannot be a forall or exists, because in
     // that case there would be a type error.
     assert(arity > 0);
 
@@ -1798,24 +1734,25 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       }
 
     }
-    else
+    else if (is_application(ta.head()))
+    {
+      ss << "TODO: " << pp(ta) << "\n";
+    }
+    else // headfs is a single variable.
     {
       // So, the first element of t must be a single variable.
       assert(is_variable(ta.head()));
+      const size_t arity=ta.size();
       b = rewr;
       pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false,arity);
       nfs_array tail_first(arity);
       string tail_second = calc_inner_terms(tail_first,arity,ta.arguments(),startarg,nnfvars,NULL);
-      /* if (arity>5)
-      {
-        ss << "(aterm_appl)";
-      } */
       ss << "isAppl(" << head.second << ")?";
       if (rewr)
       {
           ss << "rewrite(";
       }
-      ss << calc_inner_appl_head(arity) << "(" << head.second << "," << tail_second << ")";
+      ss << calc_inner_appl_head(arity+1) << head.second << "," << tail_second << ")";
       if (rewr)
       {
         ss << ")";
@@ -1832,7 +1769,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       {
         ss << "pass_on(";
       }
-      ss << calc_inner_appl_head(arity) << " " << head.second << ",";
+      ss << calc_inner_appl_head(arity+1) << head.second << ",";
       if (c)
       {
         tail_first.clear(arity);
@@ -1841,9 +1778,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         tail_second = calc_inner_terms(tail_first,arity,ta.arguments(),startarg,nnfvars,&rewrall);
       }
       ss << tail_second << ")";
-      {
-        ss << ")";
-      }
+      ss << ")";
     }
   }
 
@@ -2709,9 +2644,9 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
             data::index_traits<data::function_symbol>::index(func), 
             a,
             nfs);
-        for(size_t i = 1; i <= a; ++i)
+        for(size_t i = 0; i < a; ++i)
         {
-          fprintf(f,  "%st[%zu]", (i == 1?"":", "), i);
+          fprintf(f,  "%st[%zu]", (i == 0?"":", "), i);
         }
         fprintf(f,  "); }\n");
       }
@@ -2760,7 +2695,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   all_function_symbols.insert(all_function_symbols.begin(),
                               m_data_specification_for_enumeration.mappings().begin(),
                               m_data_specification_for_enumeration.mappings().end());
-
   for(function_symbol_vector::const_iterator l = all_function_symbols.begin()
         ; l != all_function_symbols.end()
         ; ++l)
@@ -2841,8 +2775,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Declare function types
   //
   fprintf(f,  "typedef data_expression (*func_type)(const data_expression& );\n");
-  fprintf(f,  "func_type* int2func[%zu];\n", max_arity+2);
-  fprintf(f,  "func_type* int2func_head_in_nf[%zu];\n", max_arity+2);
+  fprintf(f,  "func_type* int2func[%zu];\n", max_arity+1);
+  fprintf(f,  "func_type* int2func_head_in_nf[%zu];\n", max_arity+1);
 
   // Set this rewriter, to use its functions.
   fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
@@ -2865,11 +2799,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f, ")\n"
             "{\n");
     fprintf(f,
-      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const atermpp::detail::_aterm*,%ld);\n",i);
+      "MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer, data_expression,%ld);\n",i);
 
     for (size_t j=0; j<i; ++j)
     {
-      fprintf(f, "buffer[%zu] = atermpp::detail::address(arg%zu);\n",j,j+1);
+      fprintf(f, "buffer[%zu] = arg%zu;\n",j,j+1);
     }
 
     fprintf(f, "return application(head,buffer,buffer+%ld);\n",i);
@@ -2948,7 +2882,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     if (data_equation_selector(fs))
     {
-      fprintf(f,  "// %s\n",to_string(fs).c_str());
+      fprintf(f,  "// %ld %s\n",data::index_traits<data::function_symbol>::index(fs),to_string(fs).c_str());
 
       for (size_t a=0; a<=arity; a++)
       {
@@ -3032,13 +2966,18 @@ void RewriterCompilingJitty::BuildRewriteSystem()
          );
   fprintf(f,  "\n");
 
+  // Also add the created function symbols that represent partly rewritten functions.
+  all_function_symbols.insert(all_function_symbols.begin(),
+                              partially_rewritten_functions.begin(),
+                              partially_rewritten_functions.end());
+
   /* put the functions that start the rewriting in the array int2func */
   fprintf(f,  "\n");
   fprintf(f,  "\n");
   // Generate the entries for int2func.
   for (size_t i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,data::index_traits<data::function_symbol>::max_index()+1);
+    fprintf(f,  "  int2func[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,data::index_traits<data::function_symbol>::max_index()+1);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
     {
@@ -3051,25 +2990,24 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           // We are dealing with a partially rewritten function here. Remove the "@_" at
           // the beginning of the string.
           const string c_function_name=pp(fs.name());
-          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",i+1,data::index_traits<data::function_symbol>::index(fs),
+          fprintf(f,  "  int2func[%zu][%zu] = (func_type)%s;\n",i,data::index_traits<data::function_symbol>::index(fs),
                                          c_function_name.substr(2,c_function_name.size()-2).c_str());
         }
       }
       else if (data_equation_selector(fs) && arity_is_allowed(fs,i))
       {
-        fprintf(f,  "  int2func[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i+1,data::index_traits<data::function_symbol>::index(fs),data::index_traits<data::function_symbol>::index(fs),i);
+        fprintf(f,  "  int2func[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i,data::index_traits<data::function_symbol>::index(fs),data::index_traits<data::function_symbol>::index(fs),i);
       }
     }
   }
   // Generate the entries for int2func_head_in_nf. Entries for constants (with arity 0) are not required.
   for (size_t i=1; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i+1,data::index_traits<data::function_symbol>::max_index()+1);
+    fprintf(f,  "  int2func_head_in_nf[%zu] = (func_type *) malloc(%zu*sizeof(func_type));\n",i,data::index_traits<data::function_symbol>::max_index()+1);
     for (function_symbol_vector::const_iterator j=all_function_symbols.begin();
                         j!=all_function_symbols.end(); ++j)
     {
       const data::function_symbol fs=*j;
-
       if (partially_rewritten_functions.count(fs)>0)
       {
         if (arity_is_allowed(fs,i))
@@ -3082,14 +3020,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       {
         if (i<=NF_MAX_ARITY)
         {
-          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_1_term;\n",i+1,
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_1_term;\n",i,
                         data::index_traits<data::function_symbol>::index(fs),
                         data::index_traits<data::function_symbol>::index(fs),i);
         }
         else
         {
           // If i>NF_MAX_ARITY no compiled rewrite function where the head is already in nf is available.
-          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i+1,
+          fprintf(f,  "  int2func_head_in_nf[%zu][%zu] = (func_type)rewr_%zu_%zu_0_term;\n",i,
                                 data::index_traits<data::function_symbol>::index(fs),
                                 data::index_traits<data::function_symbol>::index(fs),i);
         }
@@ -3105,8 +3043,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,  "\n");
   for (size_t i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  free(int2func[%zu]);\n",i+1);
-    fprintf(f,  "  free(int2func_head_in_nf[%zu]);\n",i+1);
+    fprintf(f,  "  free(int2func[%zu]);\n",i);
+    fprintf(f,  "  free(int2func_head_in_nf[%zu]);\n",i);
   }
   fprintf(f,  "}\n"
           "\n"
@@ -3174,8 +3112,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  const size_t function_index = index_traits<mcrl2::data::function_symbol>::index(f);\n"
       "  assert(function_index < %zu);\n"
       "  const size_t total_arity=recursive_number_of_args(t1);\n"
-      "  assert(int2func[total_arity][function_index] != NULL);\n"
-      "  return int2func[total_arity][function_index](t);\n"
+      "  assert( int2func_head_in_nf[total_arity][function_index] != NULL);\n"
+      "  return  int2func_head_in_nf[total_arity][function_index](t);\n"
       "}\n\n",
       data::index_traits<data::function_symbol>::max_index()+1
       );
@@ -3223,6 +3161,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
+// "std::cerr << \"Internal rewrite \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
       "  if (is_function_symbol(t))\n"
       "  {\n"
@@ -3230,7 +3169,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    const mcrl2::data::function_symbol& f(t);\n"
       "    const size_t function_index = index_traits<mcrl2::data::function_symbol>::index(f);\n"
       "    assert(function_index < %zu);\n"
-      "    const size_t arity=1;\n"
+      "    const size_t arity=0;\n"
       "    assert(int2func[arity][function_index] != NULL);\n"
       "    return int2func[arity][function_index](t);\n"
       "  }\n"
@@ -3246,7 +3185,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      assert(function_index < %zu);\n"
       "      assert(total_arity < %zu);\n"
       "      assert(int2func[total_arity][function_index] != NULL);\n"
-      "      return int2func[total_arity+1][function_index](t);\n"
+      "      return int2func[total_arity][function_index](t);\n"
       "    }\n"
       "    else\n"
       "    {\n"

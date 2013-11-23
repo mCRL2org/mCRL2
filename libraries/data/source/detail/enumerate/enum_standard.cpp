@@ -65,11 +65,15 @@ data_expression EnumeratorSolutionsStandard::add_negations(
       {
         return m_enclosing_enumerator->rewr_obj->internal_true;
       }
-      else if (condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
+      else if (is_application(condition))
       {
-        return aterm_cast<const data_expression>(condition[1]);
+        const application& ca(condition);
+        if (ca.head() == m_enclosing_enumerator->rewr_obj->internal_not)
+        {
+          return ca[0];
+        }
       }
-      return Apply1(m_enclosing_enumerator->rewr_obj->internal_not, condition);
+      return application(m_enclosing_enumerator->rewr_obj->internal_not, condition);
     }
     return condition;
   }
@@ -86,13 +90,13 @@ data_expression EnumeratorSolutionsStandard::add_negations(
     {
       return m_enclosing_enumerator->rewr_obj->internal_true;
     }
-    else if (second_argument[0] == m_enclosing_enumerator->rewr_obj->internal_not)
+    else if (is_application(second_argument) && aterm_cast<const application>(second_argument).head()== m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      second_argument=aterm_cast<const data_expression>(second_argument[1]);
+      second_argument=aterm_cast<const application>(second_argument)[0];
     }
     else
     {
-      second_argument=Apply1(m_enclosing_enumerator->rewr_obj->internal_not,second_argument);
+      second_argument=application(m_enclosing_enumerator->rewr_obj->internal_not,second_argument);
     }
   }
 
@@ -114,7 +118,7 @@ data_expression EnumeratorSolutionsStandard::add_negations(
   }
   else
   {
-    return  Apply2(m_enclosing_enumerator->rewr_obj->internal_and,
+    return application(m_enclosing_enumerator->rewr_obj->internal_and,
                 first_argument,
                 second_argument);
   }
@@ -127,7 +131,7 @@ data_expression_list EnumeratorSolutionsStandard::negate(const data_expression_l
     return l;
   }
   data_expression_list result=negate(l.tail());
-  result.push_front(Apply1(m_enclosing_enumerator->rewr_obj->internal_not,l.front()));
+  result.push_front(application(m_enclosing_enumerator->rewr_obj->internal_not,l.front()));
   return result;
 }
 
@@ -144,22 +148,22 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
      on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
      store phi and psi /\ !phi separately. This allows the equality eliminator to remove
      more equalities and therefore be more effective. */
-  if (!is_function_symbol(condition))
+  if (is_application(condition))
   {
-    if (condition[0] == m_enclosing_enumerator->rewr_obj->internal_not)
+    const application& ca(condition);
+    if (ca.head() == m_enclosing_enumerator->rewr_obj->internal_not)
     {
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const data_expression>(condition[1]),negate(negated_term_list),!negated);
+      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negate(negated_term_list),!negated);
       return;
     }
-    if ((negated && condition[0] == m_enclosing_enumerator->rewr_obj->internal_and) ||
-             (!negated && condition[0] == m_enclosing_enumerator->rewr_obj->internal_or))
+    if ((negated && ca.head() == m_enclosing_enumerator->rewr_obj->internal_and) ||
+             (!negated && ca.head() == m_enclosing_enumerator->rewr_obj->internal_or))
     {
       assert(condition.size()==3);
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const data_expression>(condition[1]),negated_term_list,negated);
+      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[0],negated_term_list,negated);
       data_expression_list temp=negated_term_list;
-      temp.push_front(aterm_cast<const data_expression>(condition[1]));
-      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,aterm_cast<const data_expression>(condition[2]),
-                             temp,negated);
+      temp.push_front(ca[1]);
+      push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,ca[1], temp,negated);
       return;
     }
   }
@@ -220,35 +224,40 @@ bool EnumeratorSolutionsStandard::find_equality(
     return false;
   }
 
-  if (is_function_symbol(aterm_cast<const data_expression>(t[0])))
+  if (is_function_symbol(t))
   {
-    const function_symbol& f(t[0]);
-    if (t[0] == m_enclosing_enumerator->rewr_obj->internal_and)
+    assert(data::function_symbol(t).sort()==sort_bool::bool_());
+    return false;
+  }
+  
+  const application& ta(t);
+  
+  if (is_function_symbol(ta.head()))
+  {
+    const function_symbol& f(ta.head());
+    if (f == m_enclosing_enumerator->rewr_obj->internal_and)
     {
-      assert(t.size()==3);
-      return find_equality(aterm_cast<const data_expression>(t[1]),vars,v,e) || 
-             find_equality(aterm_cast<const data_expression>(t[2]),vars,v,e);
+      assert(ta.size()==2);
+      return find_equality(ta[0],vars,v,e) || find_equality(ta[1],vars,v,e);
     }
-    else if (m_enclosing_enumerator->eqs.find(f) !=
-                        m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
+    else if (to_string(f.name()) == "==")
     {
-      // TODO CODE BELOW MUST BE OPTIMIZED.
-      const data_expression &a1 = aterm_cast<const data_expression>(t[1]);
-      const data_expression &a2 = aterm_cast<const data_expression>(t[2]);
+      const data_expression& a1 = ta[0];
+      const data_expression& a2 = ta[1];
       if (a1!=a2)
       {
         if (is_variable(a1) && (find(vars.begin(),vars.end(),variable(a1))!=vars.end()) &&
-                                 (atermpp::find_if(static_cast<const aterm_appl&>(a2),test_equal(a1))==data_expression()))        // true if a1 does not occur in a2.
+                          (atermpp::find_if(static_cast<const aterm_appl&>(a2),test_equal(a1))==aterm_appl()))        // true if a1 does not occur in a2.
         {
           v = aterm_cast<variable>(a1);
-          e = aterm_cast<variable>(a2);
+          e = a2;
           return true;
         }
         if (is_variable(a2) && (find(vars.begin(),vars.end(),variable(a2))!=vars.end()) &&
-                                 (atermpp::find_if(a1,test_equal(a2))==data_expression()))        // true if a2 does not occur in a1.
+                                 (atermpp::find_if(a1,test_equal(a2))==aterm_appl()))        // true if a2 does not occur in a1.
         {
           v = aterm_cast<variable>(a2);
-          e = aterm_cast<variable>(a1);
+          e = a1;
           return true;
         }
       }
@@ -678,17 +687,6 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   m_data_spec(data_spec)
 {
   rewr_obj = r;
-
-  const function_symbol_vector& mappings=data_spec.mappings();
-  for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
-  {
-    if (to_string(i->name()) == "==")
-    {
-      // data_expression t=rewr_obj->toRewriteFormat(*i);
-      // eqs.insert(atermpp::aterm_cast<data_expression>(t[0]));
-      eqs.insert(*i);
-    }
-  }
 }
 
 EnumeratorStandard::~EnumeratorStandard()

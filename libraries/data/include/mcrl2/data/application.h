@@ -252,7 +252,7 @@ class application: public data_expression
     const data_expression& operator[](size_t index) const
     {
       assert(index<size());
-      return atermpp::aterm_cast<const data_expression>((*this)[index+1]);
+      return atermpp::aterm_cast<const data_expression>(static_cast<const atermpp::aterm_appl&>(*this)[index+1]);
     }
 
     /// \brief Returns an iterator pointing to the first argument of the
