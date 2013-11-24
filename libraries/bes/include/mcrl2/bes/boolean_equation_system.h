@@ -127,9 +127,7 @@ class boolean_equation_system
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-std::cout << "--- load 1 ---- ------------------------------------------------------------\n" << t << std::endl;
       t = bes::detail::add_index(t);
-std::cout << "--- load 2 ---- ------------------------------------------------------------\n" << t << std::endl;
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
@@ -154,9 +152,7 @@ std::cout << "--- load 2 ---- --------------------------------------------------
         throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
       }
       atermpp::aterm t = boolean_equation_system_to_aterm(*this);
-std::cout << "--- save 1 ---- ------------------------------------------------------------\n" << t << std::endl;
       t = bes::detail::remove_index(t);
-std::cout << "--- save 2 ---- ------------------------------------------------------------\n" << t << std::endl;
       core::detail::save_aterm(t, filename, binary);
     }
 
