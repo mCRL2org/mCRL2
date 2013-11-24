@@ -6,28 +6,24 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/io.h
+/// \file mcrl2/pbes/detail/io.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_IO_H
-#define MCRL2_DATA_IO_H
+#ifndef MCRL2_PBES_DETAIL_IO_H
+#define MCRL2_PBES_DETAIL_IO_H
 
-#define MCRL2_USE_INDEX_TRAITS
-
-#include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/data/index_traits.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/variable.h"
+#include "mcrl2/data/io.h"
+#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 
-namespace data {
+namespace pbes_system {
 
 namespace detail {
 
 // transforms DataVarId to DataVarIdNoIndex
 // transforms OpId to OpIdNoIndex
+// transforms PropVarInst to PropVarInstNoIndex
 struct index_remover
 {
   atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
@@ -40,12 +36,17 @@ struct index_remover
     {
       return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
     }
+    else if (x.function() == core::detail::function_symbol_PropVarInst())
+    {
+      return atermpp::aterm_appl(core::detail::function_symbol_PropVarInstNoIndex(), x.begin(), --x.end());
+    }
     return x;
   }
 };
 
 // transforms DataVarIdNoIndex to DataVarId
 // transforms OpIdNoIndex to OpId
+// transforms PropVarInstNoIndex to PropVarInst
 struct index_adder
 {
   atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
@@ -62,26 +63,32 @@ struct index_adder
       std::size_t index = core::index_traits<data::function_symbol, data::function_symbol_key_type>::insert(std::make_pair(y.name(), y.sort()));
       return atermpp::aterm_appl(core::detail::function_symbol_OpId(), x[0], x[1], atermpp::aterm_int(index));
     }
+    else if (x.function() == core::detail::function_symbol_PropVarInstNoIndex())
+    {
+      const pbes_system::propositional_variable_instantiation& y = atermpp::aterm_cast<const pbes_system::propositional_variable_instantiation>(x);
+      std::size_t index = core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(y.name(), y.parameters()));
+      return atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(), x[0], x[1], atermpp::aterm_int(index));
+    }
     return x;
   }
 };
 
-} // namespace detail
-
 inline
 atermpp::aterm add_index(const atermpp::aterm& x)
 {
-  return atermpp::bottom_up_replace(x, detail::index_adder());
+  return atermpp::bottom_up_replace(x, index_adder());
 }
 
 inline
 atermpp::aterm remove_index(const atermpp::aterm& x)
 {
-  return atermpp::bottom_up_replace(x, detail::index_remover());
+  return atermpp::bottom_up_replace(x, index_remover());
 }
 
-} // namespace data
+} // namespace detail
+
+} // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_IO_H
+#endif // MCRL2_PBES_DETAIL_IO_H

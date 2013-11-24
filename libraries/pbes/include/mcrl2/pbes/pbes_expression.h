@@ -17,12 +17,14 @@
 #include <iterator>
 #include <stdexcept>
 #include "mcrl2/core/down_cast.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/expression_traits.h"
+#include "mcrl2/data/hash.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
@@ -34,6 +36,8 @@ namespace mcrl2
 
 namespace pbes_system
 {
+
+typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
 
 using namespace core::detail::precedences;
 
@@ -85,82 +89,6 @@ inline void swap(pbes_expression& t1, pbes_expression& t2)
   t1.swap(t2);
 }
 
-
-/// \brief A propositional variable instantiation
-class propositional_variable_instantiation: public pbes_expression
-{
-  public:
-    /// \brief Default constructor.
-    propositional_variable_instantiation()
-      : pbes_expression(core::detail::constructPropVarInst())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit propositional_variable_instantiation(const atermpp::aterm& term)
-      : pbes_expression(term)
-    {
-      assert(core::detail::check_term_PropVarInst(*this));
-    }
-
-    /// \brief Constructor.
-    propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
-      : pbes_expression(core::detail::gsMakePropVarInst(name, parameters))
-    {}
-
-    /// \brief Constructor.
-    propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
-      : pbes_expression(core::detail::gsMakePropVarInst(core::identifier_string(name), parameters))
-    {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const data::data_expression_list& parameters() const
-    {
-      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
-    }
-//--- start user section propositional_variable_instantiation ---//
-    /// \brief Type of the parameters.
-    typedef data::data_expression parameter_type;
-
-    /// \brief Constructor.
-    /// \param s A string
-    propositional_variable_instantiation(std::string const& s)
-    {
-      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
-      core::identifier_string name(p.first);
-      data::variable_list parameters = atermpp::convert<data::variable_list>(p.second);
-      copy_term(core::detail::gsMakePropVarInst(name, parameters));
-    }
-//--- end user section propositional_variable_instantiation ---//
-};
-
-/// \brief list of propositional_variable_instantiations
-typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
-
-/// \brief vector of propositional_variable_instantiations
-typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
-
-// prototype declaration
-std::string pp(const propositional_variable_instantiation& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const propositional_variable_instantiation& x)
-{
-  return out << pbes_system::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
-{
-  t1.swap(t2);
-}
 
 
 /// \brief The value true for pbes expressions
@@ -543,6 +471,94 @@ inline void swap(exists& t1, exists& t2)
   t1.swap(t2);
 }
 //--- end generated classes ---//
+
+/// \brief A propositional variable instantiation
+class propositional_variable_instantiation: public pbes_expression
+{
+  public:
+    /// \brief Default constructor.
+    propositional_variable_instantiation()
+      : pbes_expression(core::detail::constructPropVarInst())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit propositional_variable_instantiation(const atermpp::aterm& term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PropVarInst(*this));
+    }
+
+    /// \brief Constructor.
+    propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
+      : pbes_expression(core::detail::gsMakePropVarInst(
+          name,
+          parameters,
+          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(name, parameters)))
+       ))
+    {}
+
+    /// \brief Constructor.
+    propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
+      : pbes_expression(core::detail::gsMakePropVarInst(
+          core::identifier_string(name),
+          parameters,
+          atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(name, parameters)))
+        ))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+
+    const data::data_expression_list& parameters() const
+    {
+      return atermpp::aterm_cast<const data::data_expression_list>((*this)[1]);
+    }
+//--- start user section propositional_variable_instantiation ---//
+    /// \brief Type of the parameters.
+    typedef data::data_expression parameter_type;
+
+    /// \brief Constructor.
+    /// \param s A string
+    propositional_variable_instantiation(std::string const& s)
+    {
+      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
+      core::identifier_string name(p.first);
+      data::data_expression_list parameters = atermpp::convert<data::data_expression_list>(p.second);
+      copy_term(core::detail::gsMakePropVarInst(
+        name,
+        parameters,
+        atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type>::insert(std::make_pair(name, parameters)))
+      ));
+    }
+//--- end user section propositional_variable_instantiation ---//
+};
+
+/// \brief list of propositional_variable_instantiations
+typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
+
+/// \brief vector of propositional_variable_instantiations
+typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
+
+// prototype declaration
+std::string pp(const propositional_variable_instantiation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const propositional_variable_instantiation& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
+{
+  t1.swap(t2);
+}
 
 // template function overloads
 std::string pp(const pbes_expression_list& x);

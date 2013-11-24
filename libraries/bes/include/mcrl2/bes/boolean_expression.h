@@ -24,20 +24,20 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/hash.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/text_utility.h"
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/core/index_traits.h"
-#endif
 
 namespace mcrl2
 {
 
 namespace bes
 {
+
+typedef core::identifier_string boolean_variable_key_type;
 
 template <typename T> std::string pp(const T& t);
 
@@ -417,6 +417,7 @@ inline void swap(imp& t1, imp& t2)
   t1.swap(t2);
 }
 
+//--- end generated classes ---//
 
 /// \brief A boolean variable
 class boolean_variable: public boolean_expression
@@ -437,12 +438,18 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     boolean_variable(const core::identifier_string& name)
-      : boolean_expression(core::detail::gsMakeBooleanVariable(name))
+      : boolean_expression(core::detail::gsMakeBooleanVariable(
+          name,
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type>::insert(name))
+        ))
     {}
 
     /// \brief Constructor.
     boolean_variable(const std::string& name)
-      : boolean_expression(core::detail::gsMakeBooleanVariable(core::identifier_string(name)))
+      : boolean_expression(core::detail::gsMakeBooleanVariable(
+          core::identifier_string(name),
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type>::insert(name))
+        ))
     {}
 
     const core::identifier_string& name() const
@@ -477,7 +484,6 @@ inline void swap(boolean_variable& t1, boolean_variable& t2)
 {
   t1.swap(t2);
 }
-//--- end generated classes ---//
 
 // From the documentation:
 // The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>".

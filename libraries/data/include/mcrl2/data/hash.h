@@ -21,16 +21,6 @@ namespace std {
 
 /// \brief hash specialization
 template<>
-struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::sort_expression> >
-{
-  std::size_t operator()(const std::pair<mcrl2::core::identifier_string, mcrl2::data::sort_expression>& x) const
-  {
-    return mcrl2::core::hash_value(x.first, x.second);
-  }
-};
-
-/// \brief hash specialization
-template<>
 struct hash<std::pair<mcrl2::core::identifier_string, mcrl2::data::variable_list> >
 {
   std::size_t operator()(const std::pair<mcrl2::core::identifier_string, mcrl2::data::variable_list>& x) const

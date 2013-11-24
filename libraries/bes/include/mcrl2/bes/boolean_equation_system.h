@@ -19,13 +19,14 @@
 #include <sstream>
 #include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/bes/boolean_equation.h"
+#include "mcrl2/bes/detail/io.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/bes/boolean_equation.h"
 
 namespace mcrl2
 {
@@ -126,9 +127,9 @@ class boolean_equation_system
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-#ifdef MCRL2_WITH_VARIABLE_INDEX
-      t = bes::add_index(t);
-#endif
+std::cout << "--- load 1 ---- ------------------------------------------------------------\n" << t << std::endl;
+      t = bes::detail::add_index(t);
+std::cout << "--- load 2 ---- ------------------------------------------------------------\n" << t << std::endl;
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
@@ -152,10 +153,10 @@ class boolean_equation_system
       {
         throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
       }
-      atermpp::aterm_appl t = boolean_equation_system_to_aterm(*this);
-#ifdef MCRL2_WITH_VARIABLE_INDEX
-      t = bes::remove_index(t);
-#endif
+      atermpp::aterm t = boolean_equation_system_to_aterm(*this);
+std::cout << "--- save 1 ---- ------------------------------------------------------------\n" << t << std::endl;
+      t = bes::detail::remove_index(t);
+std::cout << "--- save 2 ---- ------------------------------------------------------------\n" << t << std::endl;
       core::detail::save_aterm(t, filename, binary);
     }
 

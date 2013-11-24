@@ -12,6 +12,7 @@
 #ifndef LPS_DETAIL_CONSTRUCTORS
 #define LPS_DETAIL_CONSTRUCTORS
 
+#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h" // gsString2ATermAppl
 
@@ -23,6 +24,13 @@ namespace core
 
 namespace detail
 {
+
+inline
+const atermpp::aterm_int& constructNumber()
+{
+  static atermpp::aterm_int t = atermpp::aterm_int(std::size_t(0));
+  return t;
+}
 
 inline
 const atermpp::aterm_appl& constructString()
@@ -501,7 +509,7 @@ const atermpp::aterm_appl& constructSum()
 inline
 const atermpp::aterm_appl& constructDataVarId()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_DataVarId(), constructString(), constructSortExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_DataVarId(), constructString(), constructSortExpr(), constructNumber()));
   return t;
 }
 
@@ -509,7 +517,7 @@ const atermpp::aterm_appl& constructDataVarId()
 inline
 const atermpp::aterm_appl& constructProcVarId()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ProcVarId(), constructString(), constructList()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_ProcVarId(), constructString(), constructList(), constructNumber()));
   return t;
 }
 
@@ -605,7 +613,7 @@ const atermpp::aterm_appl& constructMultAct()
 inline
 const atermpp::aterm_appl& constructPropVarInst()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PropVarInst(), constructString(), constructList()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_PropVarInst(), constructString(), constructList(), constructNumber()));
   return t;
 }
 
@@ -933,7 +941,7 @@ const atermpp::aterm_appl& constructActSpec()
 inline
 const atermpp::aterm_appl& constructBooleanVariable()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_BooleanVariable(), constructString()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_BooleanVariable(), constructString(), constructNumber()));
   return t;
 }
 
@@ -1157,7 +1165,7 @@ const atermpp::aterm_appl& constructWhr()
 inline
 const atermpp::aterm_appl& constructOpId()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_OpId(), constructString(), constructSortExpr()));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_OpId(), constructString(), constructSortExpr(), constructNumber()));
   return t;
 }
 

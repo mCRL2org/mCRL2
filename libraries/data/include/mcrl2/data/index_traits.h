@@ -15,14 +15,10 @@
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/hash.h"
 
 namespace mcrl2 {
 
 namespace data {
-
-typedef std::pair<core::identifier_string, data::sort_expression> function_symbol_key_type;
-typedef std::pair<core::identifier_string, data::sort_expression> variable_key_type;
 
 inline
 void on_create_function_symbol(const atermpp::aterm& t)

@@ -119,6 +119,8 @@ std::string random1 =
 
 int test_main(int argc, char** argv)
 {
+  log::mcrl2_logger::set_reporting_level(log::debug);
+
   bool compute_conditions = false;
   bool remove_equations = true;
   test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");

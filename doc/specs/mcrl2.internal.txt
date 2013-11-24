@@ -58,10 +58,10 @@
                  | UntypedIdentifier(<String>)
 
 //data variable identifier
-<DataVarId>    ::= DataVarId(<String>, <SortExpr>)
+<DataVarId>    ::= DataVarId(<String>, <SortExpr>, <Number>)
 
 //operation identifier
-<OpId>         ::= OpId(<String>, <SortExpr>)
+<OpId>         ::= OpId(<String>, <SortExpr>, <Number>)
 
 //binding operator
 <BindingOperator>
@@ -158,7 +158,7 @@
                  | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
 
 //process identifier
-<ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*)
+<ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*, <Number>)
 
 //multiaction name
 <MultActName>  ::= MultActName(<String>+)
@@ -324,7 +324,7 @@
                  | <PropVarInst>
 
 //propositional variable instantiation
-<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*, <Number>)
 
 //Boolean expressions
 //-------------------
@@ -336,7 +336,7 @@
 <BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
 
 // boolean variable
-<BooleanVariable>   ::= BooleanVariable(<String>)
+<BooleanVariable>   ::= BooleanVariable(<String>, <Number>)
 
 // boolean expression
 <BooleanExpression> ::= BooleanTrue

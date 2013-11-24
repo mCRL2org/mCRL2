@@ -16,7 +16,9 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/hash.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2
@@ -25,7 +27,8 @@ namespace mcrl2
 namespace process
 {
 
-//--- start generated class process_identifier ---//
+typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
+
 /// \brief A process identifier
 class process_identifier: public atermpp::aterm_appl
 {
@@ -45,12 +48,20 @@ class process_identifier: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_identifier(const core::identifier_string& name, const data::variable_list& variables)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, variables))
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(
+          name,
+          variables,
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(name, variables)))
+        ))
     {}
 
     /// \brief Constructor.
     process_identifier(const std::string& name, const data::variable_list& variables)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(core::identifier_string(name), variables))
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(
+          core::identifier_string(name),
+          variables,
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(name, variables)))
+        ))
     {}
 
     const core::identifier_string& name() const
@@ -63,6 +74,8 @@ class process_identifier: public atermpp::aterm_appl
       return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
     }
 };
+
+//--- start generated class process_identifier ---//
 
 /// \brief list of process_identifiers
 typedef atermpp::term_list<process_identifier> process_identifier_list;

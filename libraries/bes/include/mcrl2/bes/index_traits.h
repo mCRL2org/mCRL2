@@ -20,8 +20,6 @@ namespace mcrl2 {
 
 namespace bes {
 
-typedef core::identifier_string boolean_variable_key_type;
-
 inline
 void on_create_boolean_variable(const atermpp::aterm& t)
 {

@@ -17,11 +17,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <boost/config.hpp>
+#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/core/identifier_string.h"
-
-#ifndef BOOST_NO_CXX11_HDR_UNORDERED_MAP
-#define MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-#endif
+#include "mcrl2/core/hash.h"
 
 #ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 #include <boost/functional/hash.hpp>
@@ -84,13 +82,9 @@ struct index_traits
   static inline
   std::size_t index(const Variable& x)
   {
-#ifdef MCRL2_VARIABLES_WITH_INDEX
     // N.B. We assume that the index is the last element of the aterm_appl x.
     const atermpp::aterm_int& i = atermpp::aterm_cast<const atermpp::aterm_int>(x[x.size() - 1]);
     return i.value();
-#else
-    return 0;
-#endif
   }
 
   /// \brief Returns the index of the key.

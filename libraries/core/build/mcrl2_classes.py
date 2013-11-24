@@ -71,8 +71,8 @@ untyped_identifier_assignment(const core::identifier_string& lhs, const data_exp
 
 DATA_EXPRESSION_CLASSES = r'''
 data_expression()                                                                                             : public atermpp::aterm_appl   | XCU   | DataExpr          | A data expression
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC   | DataVarId         | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOC   | OpId              | A function symbol
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCS  | DataVarId         | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOCS  | OpId              | A function symbol
 application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW | DataAppl          | An application of a data expression to a number of arguments
 where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU   | Whr               | A where expression
 abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO    | Binder            | An abstraction expression
@@ -157,11 +157,11 @@ specification(const data::data_specification& data, const action_label_list& act
 
 PROCESS_CLASSES = r'''
 process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CI  | ProcVarId   | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI  | ProcEqn     | A process equation
-rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI  | RenameExpr  | A rename expression
-communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI  | CommExpr    | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI  | MultActName | A multiset of action names
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm_appl | CIS  | ProcVarId   | A process identifier
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm_appl | CI   | ProcEqn     | A process equation
+rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm_appl | CI   | RenameExpr  | A rename expression
+communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr    | A communication expression
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI   | MultActName | A multiset of action names
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
@@ -197,16 +197,16 @@ pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_e
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XC  | PBExpr            | A pbes expression
-propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECU | PropVarInst       | A propositional variable instantiation
-true_()                                                                                                                 : public pbes_system::pbes_expression | E   | PBESTrue          | The value true for pbes expressions
-false_()                                                                                                                : public pbes_system::pbes_expression | E   | PBESFalse         | The value false for pbes expressions
-not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | E   | PBESNot           | The not operator for pbes expressions
-and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | E   | PBESAnd           | The and operator for pbes expressions
-or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | E   | PBESOr            | The or operator for pbes expressions
-imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | E   | PBESImp           | The implication operator for pbes expressions
-forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | E   | PBESForall        | The universal quantification operator for pbes expressions
-exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | E   | PBESExists        | The existential quantification operator for pbes expressions
+pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XC   | PBExpr            | A pbes expression
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUS | PropVarInst       | A propositional variable instantiation
+true_()                                                                                                                 : public pbes_system::pbes_expression | E    | PBESTrue          | The value true for pbes expressions
+false_()                                                                                                                : public pbes_system::pbes_expression | E    | PBESFalse         | The value false for pbes expressions
+not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | E    | PBESNot           | The not operator for pbes expressions
+and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | E    | PBESAnd           | The and operator for pbes expressions
+or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | E    | PBESOr            | The or operator for pbes expressions
+imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | E    | PBESImp           | The implication operator for pbes expressions
+forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | E    | PBESForall        | The universal quantification operator for pbes expressions
+exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | E    | PBESExists        | The existential quantification operator for pbes expressions
 '''
 
 BOOLEAN_CLASSES = r'''
@@ -215,14 +215,14 @@ boolean_equation_system(const std::vector<bes::boolean_equation>& equations, con
 '''
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
-boolean_expression()                                                  : public atermpp::aterm_appl     | XC  | BooleanExpression    | A boolean expression
-true_()                                                               : public bes::boolean_expression | EI  | BooleanTrue          | The value true for boolean expressions
-false_()                                                              : public bes::boolean_expression | EI  | BooleanFalse         | The value false for boolean expressions
-not_(const boolean_expression& operand)                               : public bes::boolean_expression | EI  | BooleanNot           | The not operator for boolean expressions
-and_(const boolean_expression& left, const boolean_expression& right) : public bes::boolean_expression | EI  | BooleanAnd           | The and operator for boolean expressions
-or_(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI  | BooleanOr            | The or operator for boolean expressions
-imp(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI  | BooleanImp           | The implication operator for boolean expressions
-boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EI  | BooleanVariable      | A boolean variable
+boolean_expression()                                                  : public atermpp::aterm_appl     | XC   | BooleanExpression    | A boolean expression
+true_()                                                               : public bes::boolean_expression | EI   | BooleanTrue          | The value true for boolean expressions
+false_()                                                              : public bes::boolean_expression | EI   | BooleanFalse         | The value false for boolean expressions
+not_(const boolean_expression& operand)                               : public bes::boolean_expression | EI   | BooleanNot           | The not operator for boolean expressions
+and_(const boolean_expression& left, const boolean_expression& right) : public bes::boolean_expression | EI   | BooleanAnd           | The and operator for boolean expressions
+or_(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanOr            | The or operator for boolean expressions
+imp(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanImp           | The implication operator for boolean expressions
+boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIS  | BooleanVariable      | A boolean variable
 '''
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {

@@ -16,8 +16,9 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/hash.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/application.h"
 
 namespace mcrl2
 {
@@ -25,7 +26,8 @@ namespace mcrl2
 namespace data
 {
 
-//--- start generated class variable ---//
+typedef std::pair<atermpp::aterm, atermpp::aterm> variable_key_type;
+
 /// \brief A data variable
 class variable: public data_expression
 {
@@ -45,12 +47,20 @@ class variable: public data_expression
 
     /// \brief Constructor.
     variable(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(name, sort))
+      : data_expression(core::detail::gsMakeDataVarId(
+          name,
+          sort,
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type>::insert(std::make_pair(name, sort)))
+        ))
     {}
 
     /// \brief Constructor.
     variable(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
+      : data_expression(core::detail::gsMakeDataVarId(
+          core::identifier_string(name),
+          sort,
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type>::insert(std::make_pair(core::identifier_string(name), sort)))
+        ))
     {}
 
     const core::identifier_string& name() const
@@ -63,6 +73,8 @@ class variable: public data_expression
       return atermpp::aterm_cast<const sort_expression>((*this)[1]);
     }
 };
+
+//--- start generated class variable ---//
 
 /// \brief list of variables
 typedef atermpp::term_list<variable> variable_list;

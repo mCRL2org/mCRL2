@@ -17,6 +17,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
 namespace mcrl2
@@ -526,7 +527,7 @@ bool gsIsBooleanTrue(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanVariable()
 {
-  static atermpp::function_symbol function_symbol_BooleanVariable = atermpp::function_symbol("BooleanVariable", 1);
+  static atermpp::function_symbol function_symbol_BooleanVariable = atermpp::function_symbol("BooleanVariable", 2);
   return function_symbol_BooleanVariable;
 }
 
@@ -638,7 +639,7 @@ bool gsIsDataSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataVarId()
 {
-  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 2);
+  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
   return function_symbol_DataVarId;
 }
 
@@ -946,7 +947,7 @@ bool gsIsNu(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_OpId()
 {
-  static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 2);
+  static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 3);
   return function_symbol_OpId;
 }
 
@@ -1170,7 +1171,7 @@ bool gsIsProcSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcVarId()
 {
-  static atermpp::function_symbol function_symbol_ProcVarId = atermpp::function_symbol("ProcVarId", 2);
+  static atermpp::function_symbol function_symbol_ProcVarId = atermpp::function_symbol("ProcVarId", 3);
   return function_symbol_ProcVarId;
 }
 
@@ -1240,7 +1241,7 @@ bool gsIsPropVarDecl(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PropVarInst()
 {
-  static atermpp::function_symbol function_symbol_PropVarInst = atermpp::function_symbol("PropVarInst", 2);
+  static atermpp::function_symbol function_symbol_PropVarInst = atermpp::function_symbol("PropVarInst", 3);
   return function_symbol_PropVarInst;
 }
 
@@ -2173,9 +2174,9 @@ aterm_appl gsMakeBooleanTrue()
 }
 
 inline
-aterm_appl gsMakeBooleanVariable(const aterm_appl& String_0)
+aterm_appl gsMakeBooleanVariable(const aterm_appl& String_0, const aterm_int& Number_1)
 {
-  return term_appl<aterm>(function_symbol_BooleanVariable(), String_0);
+  return term_appl<aterm>(function_symbol_BooleanVariable(), String_0, Number_1);
 }
 
 inline
@@ -2221,9 +2222,9 @@ aterm_appl gsMakeDataSpec(const aterm_appl& SortSpec_0, const aterm_appl& ConsSp
 }
 
 inline
-aterm_appl gsMakeDataVarId(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeDataVarId(const aterm_appl& String_0, const aterm_appl& SortExpr_1, const aterm& Number_2)
 {
-  return term_appl<aterm>(function_symbol_DataVarId(), String_0, SortExpr_1);
+  return term_appl<aterm>(function_symbol_DataVarId(), String_0, SortExpr_1, Number_2);
 }
 
 inline
@@ -2353,9 +2354,9 @@ aterm_appl gsMakeNu()
 }
 
 inline
-aterm_appl gsMakeOpId(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeOpId(const aterm_appl& String_0, const aterm_appl& SortExpr_1, const aterm& Number_2)
 {
-  return term_appl<aterm>(function_symbol_OpId(), String_0, SortExpr_1);
+  return term_appl<aterm>(function_symbol_OpId(), String_0, SortExpr_1, Number_2);
 }
 
 inline
@@ -2449,9 +2450,9 @@ aterm_appl gsMakeProcSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpe
 }
 
 inline
-aterm_appl gsMakeProcVarId(const aterm_appl& String_0, const aterm_list& DataVarId_1)
+aterm_appl gsMakeProcVarId(const aterm_appl& String_0, const aterm_list& DataVarId_1, const aterm_int& Number_2)
 {
-  return term_appl<aterm>(function_symbol_ProcVarId(), String_0, DataVarId_1);
+  return term_appl<aterm>(function_symbol_ProcVarId(), String_0, DataVarId_1, Number_2);
 }
 
 inline
@@ -2479,9 +2480,9 @@ aterm_appl gsMakePropVarDecl(const aterm_appl& String_0, const aterm_list& DataV
 }
 
 inline
-aterm_appl gsMakePropVarInst(const aterm_appl& String_0, const aterm_list& DataExpr_1)
+aterm_appl gsMakePropVarInst(const aterm_appl& String_0, const aterm_list& DataExpr_1, const aterm_int& Number_2)
 {
-  return term_appl<aterm>(function_symbol_PropVarInst(), String_0, DataExpr_1);
+  return term_appl<aterm>(function_symbol_PropVarInst(), String_0, DataExpr_1, Number_2);
 }
 
 inline

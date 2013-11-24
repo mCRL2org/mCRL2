@@ -104,19 +104,10 @@ bool check_rule_StringOrEmpty(Term t)
 }
 
 template <typename Term>
-bool check_rule_NumberString(Term t)
+bool check_rule_Number(Term t)
 {
   atermpp::aterm term(t);
-  if (!term.type_is_appl())
-  {
-    return false;
-  }
-  atermpp::aterm_appl a(term);
-  if (a.size() > 0)
-  {
-    return false;
-  }
-  return true;
+  return term.type_is_int();
 }
 
 template <typename Term> bool check_rule_DataExpr(Term t);
@@ -2384,7 +2375,7 @@ bool check_term_Sum(Term t)
   return true;
 }
 
-// DataVarId(String, SortExpr)
+// DataVarId(String, SortExpr, Number)
 template <typename Term>
 bool check_term_DataVarId(Term t)
 {
@@ -2402,7 +2393,7 @@ bool check_term_DataVarId(Term t)
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -2417,13 +2408,18 @@ bool check_term_DataVarId(Term t)
     mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
     return false;
   }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
+    return false;
+  }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
 }
 
-// ProcVarId(String, DataVarId*)
+// ProcVarId(String, DataVarId*, Number)
 template <typename Term>
 bool check_term_ProcVarId(Term t)
 {
@@ -2441,7 +2437,7 @@ bool check_term_ProcVarId(Term t)
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -2454,6 +2450,11 @@ bool check_term_ProcVarId(Term t)
   if (!check_list_argument(a[1], check_rule_DataVarId<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2869,7 +2870,7 @@ bool check_term_MultAct(Term t)
   return true;
 }
 
-// PropVarInst(String, DataExpr*)
+// PropVarInst(String, DataExpr*, Number)
 template <typename Term>
 bool check_term_PropVarInst(Term t)
 {
@@ -2887,7 +2888,7 @@ bool check_term_PropVarInst(Term t)
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -2900,6 +2901,11 @@ bool check_term_PropVarInst(Term t)
   if (!check_list_argument(a[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4299,7 +4305,7 @@ bool check_term_ActSpec(Term t)
   return true;
 }
 
-// BooleanVariable(String)
+// BooleanVariable(String, Number)
 template <typename Term>
 bool check_term_BooleanVariable(Term t)
 {
@@ -4317,7 +4323,7 @@ bool check_term_BooleanVariable(Term t)
   }
 
   // check the children
-  if (a.size() != 1)
+  if (a.size() != 2)
   {
     return false;
   }
@@ -4325,6 +4331,11 @@ bool check_term_BooleanVariable(Term t)
   if (!check_term_argument(a[0], check_rule_String<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_String" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5390,7 +5401,7 @@ bool check_term_Whr(Term t)
   return true;
 }
 
-// OpId(String, SortExpr)
+// OpId(String, SortExpr, Number)
 template <typename Term>
 bool check_term_OpId(Term t)
 {
@@ -5408,7 +5419,7 @@ bool check_term_OpId(Term t)
   }
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
   {
     return false;
   }
@@ -5421,6 +5432,11 @@ bool check_term_OpId(Term t)
   if (!check_term_argument(a[1], check_rule_SortExpr<atermpp::aterm>))
   {
     mCRL2log(log::debug, "soundness_checks") << "check_rule_SortExpr" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[2], check_rule_Number<atermpp::aterm>))
+  {
+    mCRL2log(log::debug, "soundness_checks") << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

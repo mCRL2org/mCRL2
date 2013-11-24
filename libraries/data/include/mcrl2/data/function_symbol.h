@@ -14,6 +14,8 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/index_traits.h"
+#include "mcrl2/core/hash.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/sort_expression.h"
@@ -24,7 +26,8 @@ namespace mcrl2
 namespace data
 {
 
-//--- start generated class function_symbol ---//
+typedef std::pair<atermpp::aterm, atermpp::aterm> function_symbol_key_type;
+
 /// \brief A function symbol
 class function_symbol: public data_expression
 {
@@ -44,12 +47,12 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     function_symbol(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(name, sort))
+      : data_expression(core::detail::gsMakeOpId(name, sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type>::insert(std::make_pair(name, sort)))))
     {}
 
     /// \brief Constructor.
     function_symbol(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
+      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type>::insert(std::make_pair(core::identifier_string(name), sort)))))
     {}
 
     const core::identifier_string& name() const
@@ -62,6 +65,8 @@ class function_symbol: public data_expression
       return atermpp::aterm_cast<const sort_expression>((*this)[1]);
     }
 };
+
+//--- start generated class function_symbol ---//
 
 /// \brief list of function_symbols
 typedef atermpp::term_list<function_symbol> function_symbol_list;

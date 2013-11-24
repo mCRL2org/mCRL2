@@ -12,6 +12,10 @@
 #ifndef MCRL2_CORE_HASH_H
 #define MCRL2_CORE_HASH_H
 
+#ifndef BOOST_NO_CXX11_HDR_UNORDERED_MAP
+#define MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
+#endif
+
 #ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
 #include <functional>
@@ -51,9 +55,18 @@ struct hash<mcrl2::core::identifier_string>
   }
 };
 
-}
+/// \brief hash specialization
+template<>
+struct hash<std::pair<atermpp::aterm, atermpp::aterm> >
+{
+  std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
+  {
+    return mcrl2::core::hash_value(x.first, x.second);
+  }
+};
+
+} // namespace std
 
 #endif // MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-
 
 #endif // MCRL2_CORE_HASH_H

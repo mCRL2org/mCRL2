@@ -20,8 +20,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-typedef std::pair<core::identifier_string, data::data_expression_list> propositional_variable_key_type;
-
 inline
 void on_create_propositional_variable_instantiation(const atermpp::aterm& t)
 {
