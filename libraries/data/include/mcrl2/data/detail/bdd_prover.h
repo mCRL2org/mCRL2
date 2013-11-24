@@ -172,11 +172,11 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      if (f_info.is_true(a_formula))
+      if (a_formula==sort_bool::true_())
       {
         return a_formula;
       }
-      if (f_info.is_false(a_formula))
+      if (a_formula==sort_bool::false_())
       {
         return a_formula;
       }
@@ -309,9 +309,9 @@ class BDD_Prover: public Prover
     /// \brief Returns the smallest guard in the formula a_formula.
     data_expression smallest(data_expression a_formula)
     {
-      if (f_info.is_variable(a_formula))
+      if (is_variable(a_formula))
       {
-        if (f_info.has_type_bool(a_formula))
+        if (a_formula.sort()==sort_bool::bool_())
         {
           return a_formula;
         }
@@ -320,7 +320,7 @@ class BDD_Prover: public Prover
           return data_expression();
         }
       }
-      if (f_info.is_true(a_formula) || f_info.is_false(a_formula))
+      if (a_formula==sort_bool::true_() || a_formula==sort_bool::false_())
       {
         return data_expression();
       }
@@ -331,15 +331,13 @@ class BDD_Prover: public Prover
         return i->second;
       }
 
-      size_t s;
-      size_t v_length;
-      data_expression v_small,v_result;
+      data_expression v_result;
 
-      v_length = f_info.get_number_of_arguments(a_formula);
+      size_t v_length = f_info.get_number_of_arguments(a_formula);
 
-      for (s = 0; s < v_length; s++)
+      for (size_t s = 0; s < v_length; s++)
       {
-        v_small = smallest(f_info.get_argument(a_formula, s));
+        const data_expression v_small = smallest(f_info.get_argument(a_formula, s));
         if (v_small!=data_expression())
         {
           if (v_result!=data_expression())
@@ -355,7 +353,7 @@ class BDD_Prover: public Prover
           }
         }
       }
-      if (v_result==data_expression() && f_info.has_type_bool(a_formula))
+      if (v_result==data_expression() && a_formula.sort()==sort_bool::bool_())
       {
         v_result = a_formula;
       }

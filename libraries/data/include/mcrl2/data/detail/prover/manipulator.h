@@ -52,26 +52,31 @@ class InternalFormatManipulator
                 const data_expression& a_guard,
                 std::map < data_expression, data_expression >& f_set_true)
     {
-      if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
+      if (is_function_symbol(a_formula))
       {
         return a_formula;
       }
+
+      /* if (a_formula == sort_bool::true_() || a_formula == sort_bool::false_())
+      {
+        return a_formula;
+      } */
+
       if (a_formula == a_guard)
       {
-        return f_rewriter->internal_true;
+        return sort_bool::true_();
       }
 
-      bool v_is_equality = f_info.is_equality(a_guard);
-      if (v_is_equality && a_guard[2] == a_formula)
+      if (f_info.is_equality(a_guard))
       {
-        return data_expression(a_guard[1]);
-      }
-      if (f_info.is_variable(a_formula))
-      {
-        return a_formula;
+        const application& a(a_guard);
+        if (a[1]==a_formula)
+        { 
+           return a[0];
+        }
       }
 
-      if (is_function_symbol(a_formula))
+      if (is_variable(a_formula))
       {
         return a_formula;
       }
@@ -100,20 +105,22 @@ class InternalFormatManipulator
               const data_expression& a_guard,
               std::map < data_expression, data_expression >& f_set_false)
     {
-      if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
-      {
-        return a_formula;
-      }
-      if (a_formula == a_guard)
-      {
-        return f_rewriter->internal_false;
-      }
-      if (f_info.is_variable(a_formula))
+      if (is_function_symbol(a_formula))
       {
         return a_formula;
       }
 
-      if (is_function_symbol(a_formula))
+      /* if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
+      {
+        return a_formula;
+      } */
+
+      if (a_formula == a_guard)
+      {
+        return sort_bool::false_();
+      }
+
+      if (is_variable(a_formula))
       {
         return a_formula;
       }
@@ -132,7 +139,6 @@ class InternalFormatManipulator
       }
       data_expression v_result = application(set_false_auxiliary(t.head(), a_guard,f_set_false), v_parts);
       f_set_false[a_formula]=v_result;
-
       return v_result;
     }
 
@@ -193,33 +199,31 @@ class InternalFormatManipulator
         return a_term;
       } 
 
-      // v_result is NULL if not found; Therefore type aterm.
       std::map < data_expression, data_expression> :: const_iterator it=f_orient.find(a_term); 
-
       if (it!=f_orient.end())   // found
       {
         return it->second;
       }
 
-
-      const atermpp::function_symbol& v_symbol = a_term.function();
+      const application& a(a_term);
+      /*const atermpp::function_symbol& v_symbol = a_term.function();
       const data::function_symbol& v_function = atermpp::aterm_cast<data::function_symbol>(a_term[0]);
-      size_t v_arity = v_symbol.arity();
+      size_t v_arity = v_symbol.arity(); */
 
       data_expression_vector v_parts;
-      for (size_t i = 1; i < v_arity; i++)
+      for (auto i = a.begin(); i !=a.end(); ++i)
       {
-        v_parts.push_back(orient(data_expression(a_term[i])));
+        v_parts.push_back(orient(data_expression(*i)));
       }
-      data_expression v_result = application(v_function, v_parts);
+      application v_result(orient(a.head()), v_parts);
 
       if (f_info.is_equality(v_result))
       {
-        data_expression v_term1 = atermpp::aterm_cast<data_expression>(v_result[1]);
-        data_expression v_term2 = atermpp::aterm_cast<data_expression>(v_result[2]);
+        const data_expression& v_term1(v_result[0]);
+        const data_expression& v_term2(v_result[1]);
         if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
         {
-          v_result = application(data_expression(v_function), v_term2, v_term1);
+          v_result = application(v_result.head(), v_term2, v_term1);
         }
       }
       f_orient[a_term]=v_result;
@@ -246,7 +250,7 @@ class InternalFormatManipulator
       std::map < data_expression, data_expression > f_set_false;
       return set_false_auxiliary(a_formula, a_guard,f_set_false);
     }
-}; 
+};  
 
 }
 }

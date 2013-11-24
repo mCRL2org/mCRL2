@@ -86,7 +86,6 @@ struct index_traits
   static inline
   std::size_t insert(const Variable& x)
   {
-    mCRL2log(log::debug) << "insert " << x << std::endl;
     auto& m = variable_index_map<Variable>();
     auto i = m.find(x);
     if (i == m.end())

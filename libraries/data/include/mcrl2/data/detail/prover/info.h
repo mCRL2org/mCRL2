@@ -116,7 +116,7 @@ class InternalFormatInfo
 
     static bool occurs(const data_expression& t1, const data_expression& t2)
     {
-      return atermpp::find_if(t1,equals(t2))!=data_expression();
+      return atermpp::find_if(t1,equals(t2))!=atermpp::aterm_appl();
     }
 
     bool gamma1(const data_expression& a_term1, const data_expression& a_term2)
@@ -125,11 +125,6 @@ class InternalFormatInfo
       const atermpp::aterm v_operator_2 = get_operator(a_term2);
       return (v_operator_1 == v_operator_2) && lex1(a_term1, a_term2, 0) && majo1(a_term1, a_term2, 0);
     }
-
-    /* bool delta1(data_expression a_term1, data_expression a_term2)
-    {
-      return occurs(a_term2, a_term1);
-    } */
 
     bool majo1(const data_expression& a_term1, const data_expression& a_term2, size_t a_number)
     {
@@ -323,10 +318,10 @@ class InternalFormatInfo
 
     /// \brief Indicates whether or not a term has type bool.
     /// \brief Indicates whether or not a term has type bool.
-    bool has_type_bool(const data_expression& a_term)
+    /* bool has_type_bool(const data_expression& a_term)
     {
       return a_term.sort()==sort_bool::bool_();
-    }
+    } */
 
     /// \brief Returns the number of arguments of the main operator of a term.
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
@@ -345,54 +340,47 @@ class InternalFormatInfo
     }
 
     /// \brief Returns the main operator of the term \c a_term;
-    atermpp::aterm get_operator(const data_expression& a_term) 
+    data_expression get_operator(const data_expression& a_term) 
     {
-      return a_term[0];
+      if (is_function_symbol(a_term))
+      { 
+         return a_term;
+      }
+      const application& a(a_term);
+      return get_operator(a.head());
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
     data_expression get_argument(const data_expression& a_term, const size_t a_number)
     {
       return data_expression(a_term[a_number + 1]);
-    }
-
-    /// \brief Indicates whether or not a term is equal to \c true.
-    bool is_true(const data_expression& a_term)
-    {
-      return a_term==f_rewriter->internal_true;
-    }
-
-    /// \brief Indicates whether or not a term is equal to \c false.
-    bool is_false(const data_expression& a_term)
-    {
-      return a_term == f_rewriter->internal_false;
-    }
-
-    /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function
-    /// \brief with type Bool -> Bool -> Bool -> Bool.
-    bool is_if_then_else_bool(const data_expression& a_term)
-    {
-      return (a_term == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
-    }
-
-    /// \brief Indicates whether or not a term is a single variable.
-    virtual bool is_variable(const data_expression& a_term)
-    {
-      return mcrl2::data::is_variable(a_term);
     } 
 
     /// \brief Indicates whether or not a term is an equality.
     virtual bool is_equality(const data_expression& a_term)
     {
-      if (get_number_of_arguments(a_term) == 2)
+      if (!is_application(a_term))
       {
-        const data_expression d_term = f_rewriter->fromRewriteFormat(a_term);
-        return detail::equal_symbol().is_application(d_term);
+         return false;
       }
-      else
+
+      const application& a(a_term);
+      if (a.size() != 2)
       {
         return false;
       }
+      
+      if (!is_function_symbol(a.head()))
+      {
+        return false;
+      }
+
+      const data::function_symbol& f(a.head());
+      if (pp(f.name())=="==")
+      {
+        return true;
+      }
+      return false;
     }
 };
 
