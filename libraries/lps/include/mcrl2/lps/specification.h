@@ -24,10 +24,11 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/aterm_io.h"
+#include "mcrl2/data/io.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/process_initializer.h"
-#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -143,9 +144,7 @@ class specification
     {
       using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
-#ifdef MCRL2_WITH_VARIABLE_INDEX
-      t = lps::add_index(t);
-#endif
+      t = data::add_index(t);
       if (!t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
@@ -170,10 +169,8 @@ class specification
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time
       assert(is_well_typed(*this));
-      atermpp::aterm_appl t = specification_to_aterm(*this);
-#ifdef MCRL2_WITH_VARIABLE_INDEX
-      t = lps::remove_index(t);
-#endif
+      atermpp::aterm t = specification_to_aterm(*this);
+      t = data::remove_index(t);
       core::detail::save_aterm(t, filename, binary);
     }
 
