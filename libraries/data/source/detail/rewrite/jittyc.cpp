@@ -2597,6 +2597,36 @@ static bool arity_is_allowed(
   return arity_is_allowed(func.sort(),a);
 }
 
+static std::string get_heads(const sort_expression& s, const std::string& base_string)
+{
+  std::stringstream ss;
+  if (is_function_sort(s))
+  {
+    ss << "atermpp::aterm_cast<const application>(" << get_heads(function_sort(s).codomain(),base_string) << ").head()";
+    return ss.str();
+  }
+  return base_string;
+}
+
+static std::string get_recursive_argument(const sort_expression& s, const size_t index, const std::string& base_string)
+{
+  /* This function provides the index-th argument of an expression provided in base_string, given that its head
+     symbol has type s. Example: if f:D->E->F and index is 0, base_string is "t", base_string is set to 
+     "atermpp::aterm_cast<application>(t[0])[0] */
+  assert(is_function_sort(s));
+
+  std::stringstream ss;
+  const function_sort& fs(s);
+  const sort_expression_list& source_type=fs.domain();
+  const sort_expression& target_type=fs.codomain();
+  if (index>=source_type.size())
+  {
+    return get_recursive_argument(target_type, index-source_type.size(), base_string);
+  }
+  ss << "atermpp::aterm_cast<const application>(" << get_heads(target_type,base_string) << ")[" << index << "]";
+  return ss.str();
+} 
+
 inline
 void declare_rewr_functions(FILE* f, const data::function_symbol& func, const size_t arity)
 {
@@ -2639,7 +2669,8 @@ void declare_rewr_functions(FILE* f, const data::function_symbol& func, const si
             nfs);
         for(size_t i = 0; i < a; ++i)
         {
-          fprintf(f,  "%st[%zu]", (i == 0?"":", "), i);
+          // fprintf(f,  "%st[%zu]", (i == 0?"":", "), i);
+          fprintf(f,  "%s%s", (i == 0?"":", "), get_recursive_argument(func.sort(),i,"t").c_str());
         }
         fprintf(f,  "); }\n");
       }
@@ -3121,6 +3152,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "data_expression rewrite_aux(const data_expression& t)\n"
       "{\n"
+//  "std::cerr << \"Internal rewrite AUX \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
       "  // Term t does not have the shape application(t1,...,tn)\n"
       "  if (is_variable(t))\n"
@@ -3152,17 +3184,23 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
-// "std::cerr << \"Internal rewrite \" << t << \"\\n\";"
+//  "std::cerr << \"Internal rewrite \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
       "  if (is_function_symbol(t))\n"
       "  {\n"
       "    // Term t is a function_symbol\n"
       "    const mcrl2::data::function_symbol& f(t);\n"
       "    const size_t function_index = index_traits<mcrl2::data::function_symbol>::index(f);\n"
-      "    assert(function_index < %zu);\n"
-      "    const size_t arity=0;\n"
-      "    assert(int2func[arity][function_index] != NULL);\n"
-      "    return int2func[arity][function_index](t);\n"
+      "    if (function_index < %zu)\n"
+      "    {\n"
+      "      const size_t arity=0;\n"
+      "      assert(int2func[arity][function_index] != NULL);\n"
+      "      return int2func[arity][function_index](t);\n"
+      "    }\n"
+      "    else\n"
+      "    {\n"
+      "      return t;\n"
+      "    }\n"
       "  }\n"
       "  \n"
       "  if (is_application(t))\n"
@@ -3173,10 +3211,17 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    {\n"
       "      const size_t function_index = mcrl2::data::index_traits<mcrl2::data::function_symbol>::index(head);\n"
       "      const size_t total_arity=recursive_number_of_args(ta);\n"
-      "      assert(function_index < %zu);\n"
-      "      assert(total_arity < %zu);\n"
-      "      assert(int2func[total_arity][function_index] != NULL);\n"
-      "      return int2func[total_arity][function_index](t);\n"
+      "      if (function_index < %zu)\n"
+      "      {\n"
+      "        assert(total_arity < %zu);\n"
+      "        assert(int2func[total_arity][function_index] != NULL);\n"
+      "        return int2func[total_arity][function_index](t);\n"
+      "      }\n"
+      "      else\n"
+      "      {\n"
+      "        const argument_rewriter_struct argument_rewriter;\n"
+      "        return mcrl2::data::application(rewrite(ta.head()),ta.begin(),ta.end(),argument_rewriter);\n"
+      "      }\n"
       "    }\n"
       "    else\n"
       "    {\n"

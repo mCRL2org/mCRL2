@@ -189,12 +189,7 @@ class InternalFormatManipulator
     /// \brief replaced by t2 == t1 if t1 > t2.
     data_expression orient(const data_expression& a_term)
     {
-      if (is_variable(a_term))
-      {
-        return a_term;
-      } 
-
-      if (is_function_symbol(a_term))
+      if (is_variable(a_term) || is_function_symbol(a_term) || is_abstraction(a_term) || is_where_clause(a_term))
       {
         return a_term;
       } 
