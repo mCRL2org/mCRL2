@@ -68,13 +68,13 @@ std::size_t& variable_map_max_index()
   return s;
 }
 
-/// \brief For several expressions in mCRL2 an implicit mapping of these expressions
+/// \brief For several variable types in mCRL2 an implicit mapping of these variables
 /// to integers is available. This is done for efficiency reasons. Examples are:
 ///
 /// data::variable, process::process_identifier
 ///
-/// The class index_traits is used to implement this mapping. By this, the public
-/// interface of the expression classes is not polluted with.
+/// The class index_traits is used to implement this mapping. A traits class was chosen to
+/// prevent pollution of the public interface of the classes that represent these variables.
 template <typename Variable, typename KeyType>
 struct index_traits
 {
@@ -85,21 +85,6 @@ struct index_traits
     // N.B. We assume that the index is the last element of the aterm_appl x.
     const atermpp::aterm_int& i = atermpp::aterm_cast<const atermpp::aterm_int>(x[x.size() - 1]);
     return i.value();
-  }
-
-  /// \brief Returns the index of the key.
-  static inline
-  std::size_t key_index(const KeyType& x)
-  {
-    auto& m = variable_index_map<Variable, KeyType>();
-    auto i = m.find(x);
-    if (i == m.end())
-    {
-      std::ostringstream out;
-      out << "error: could not find element";
-      throw std::runtime_error(out.str());
-    }
-    return i->second;
   }
 
   /// \brief Returns an upper bound for the largest index of a variable that is currently in use.
