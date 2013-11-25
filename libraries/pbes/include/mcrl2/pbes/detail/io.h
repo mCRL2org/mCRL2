@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_IO_H
 #define MCRL2_PBES_DETAIL_IO_H
 
-#include "mcrl2/data/io.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {

@@ -6,13 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/io.h
+/// \file mcrl2/data/detail/io.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_IO_H
-#define MCRL2_DATA_IO_H
-
-#define MCRL2_USE_INDEX_TRAITS
+#ifndef MCRL2_DATA_DETAIL_IO_H
+#define MCRL2_DATA_DETAIL_IO_H
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -66,8 +64,6 @@ struct index_adder
   }
 };
 
-} // namespace detail
-
 inline
 atermpp::aterm add_index(const atermpp::aterm& x)
 {
@@ -80,8 +76,10 @@ atermpp::aterm remove_index(const atermpp::aterm& x)
   return atermpp::bottom_up_replace(x, detail::index_remover());
 }
 
+} // namespace detail
+
 } // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_IO_H
+#endif // MCRL2_DATA_DETAIL_IO_H

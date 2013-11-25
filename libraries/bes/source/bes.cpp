@@ -11,10 +11,6 @@
 
 #include "mcrl2/bes/print.h"
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/bes/index_traits.h"
-#endif
-
 namespace mcrl2
 {
 

@@ -256,9 +256,7 @@ void test_dependency_matrix()
 
 int test_main(int, char**)
 {
-#ifdef MCRL2_USE_INDEX_TRAITS
   log::mcrl2_logger::set_reporting_level(log::debug);
-#endif
 
   test_dependency_matrix();
   test_ltsmin("jitty");

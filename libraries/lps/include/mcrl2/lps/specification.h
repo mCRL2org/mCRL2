@@ -24,7 +24,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/data/io.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/action.h"
@@ -144,7 +144,7 @@ class specification
     {
       using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
-      t = data::add_index(t);
+      t = data::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
@@ -170,7 +170,7 @@ class specification
       // LPSs it takes too much time
       assert(is_well_typed(*this));
       atermpp::aterm t = specification_to_aterm(*this);
-      t = data::remove_index(t);
+      t = data::detail::remove_index(t);
       core::detail::save_aterm(t, filename, binary);
     }
 

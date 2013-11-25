@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_IO_H
 
 #include "mcrl2/data/index_traits.h"
-#include "mcrl2/data/io.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/process/process_identifier.h"
 
 namespace mcrl2 {

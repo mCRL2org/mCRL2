@@ -120,8 +120,6 @@ void normalize_sorts(process_identifier_vector& x, const data::data_specificatio
 
 } // namespace mcrl2
 
-#ifdef MCRL2_USE_INDEX_TRAITS
 #include "mcrl2/process/index_traits.h"
-#endif
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

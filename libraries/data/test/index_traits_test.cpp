@@ -10,14 +10,13 @@
 /// \brief Test for index_traits.
 
 #define BOOST_TEST_MODULE index_traits
-#define MCRL2_USE_INDEX_TRAITS
 
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/io.h"
+#include "mcrl2/data/detail/io.h"
 
 using namespace mcrl2;
 

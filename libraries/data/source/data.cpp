@@ -10,14 +10,11 @@
 /// \brief
 
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/translate_user_notation.h"
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
-#endif
 
 namespace mcrl2
 {

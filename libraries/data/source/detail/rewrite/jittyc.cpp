@@ -2728,10 +2728,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   f = MakeTempFiles();
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-  fprintf(f, "#define MCRL2_USE_INDEX_TRAITS\n");
-#endif
-
   //
   //  Print includes
   //
