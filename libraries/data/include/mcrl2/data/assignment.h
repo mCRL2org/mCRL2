@@ -18,6 +18,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/data/untyped_identifier.h"
 #include "mcrl2/data/variable.h"
 
@@ -131,7 +132,7 @@ class assignment: public assignment_expression
     data_expression operator()(const Expression& /*x*/) const
     {
       throw std::runtime_error("data::assignment::operator(const Expression&) is a deprecated interface!");
-      return data_expression();
+      return data::undefined_data_expression();
     }
 //--- end user section assignment ---//
 };

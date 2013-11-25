@@ -15,6 +15,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/undefined.h"
 
 namespace mcrl2
 {
@@ -29,13 +30,13 @@ class deadlock
     friend class deadlock_summand;
 
   protected:
-    /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
+    /// \brief The time of the deadlock. If <tt>m_time == data::undefined_real()</tt>
     /// the multi action has no time.
     data::data_expression m_time;
 
   public:
     /// \brief Constructor
-    deadlock(data::data_expression time = data::data_expression())
+    deadlock(data::data_expression time = data::undefined_real())
       : m_time(time)
     {}
 
@@ -43,7 +44,7 @@ class deadlock
     /// \return True if time is available.
     bool has_time() const
     {
-      return m_time != data::data_expression();
+      return m_time != data::undefined_real();
     }
 
     /// \brief Returns the time.

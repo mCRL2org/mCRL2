@@ -25,6 +25,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/construction_utility.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/state.h"
@@ -603,6 +604,7 @@ class Trace
       {
         throw runtime_error("failed to read aterm from stream");
       }
+      t = mcrl2::data::detail::add_index(t);
 
       return t;
     }
@@ -633,7 +635,7 @@ class Trace
         }
         else if (e.type_is_appl() && isTimedMAct(aterm_cast<aterm_appl>(e)))
         {
-          if (aterm_cast<aterm_appl>(e)[1]==data::data_expression())  // There is no time tag.
+          if (aterm_cast<aterm_appl>(e)[1]==data::undefined_real())  // There is no time tag.
           {
             addAction(multi_action(action_list(aterm_cast<aterm_appl>(e)[0])));
           }
@@ -735,8 +737,8 @@ class Trace
       }
 
       // write trace
-
-      atermpp::write_term_to_binary_stream(trace,os);
+      atermpp::aterm t = mcrl2::data::detail::remove_index(trace);
+      atermpp::write_term_to_binary_stream(t, os);
       if (os.bad())
       {
         throw runtime_error("could not write to stream");

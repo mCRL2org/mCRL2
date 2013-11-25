@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include "svc/svc.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/atermpp/aterm_int.h"
 
@@ -133,6 +134,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
         try
 	{
 	  aterm data=read_term_from_binary_stream(g);
+          data = mcrl2::data::detail::add_index(data);
           data::data_specification data_spec(atermpp::aterm_appl(((aterm_appl)data)[0]));
           data_spec.declare_data_specification_to_be_type_checked(); // We can assume that this data spec is well typed.
           l.set_data(data::data_specification(data_spec));
@@ -188,6 +190,7 @@ static void add_extra_mcrl2_lts_data(
   aterm arg2 = (aterm)(has_params?aterm_appl(function_symbol("ParamSpec",1),(aterm) params):gsMakeNil());
   aterm arg3 = (aterm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
   aterm data = (aterm) aterm_appl(function_symbol("mCRL2LTS1",3),arg1,arg2,arg3);
+  data = mcrl2::data::detail::remove_index(data);
 
   /* Determine the position at which the additional information starts.
      Due to the way in which file operations are implemented on Windows, we need to

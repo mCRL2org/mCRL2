@@ -366,7 +366,7 @@ class stategraph_pbes
       data::data_expression x = sigma(d_n);
       if (x == d_n)
       {
-        return data::data_expression();
+        return data::undefined_data_expression();
       }
       else
       {

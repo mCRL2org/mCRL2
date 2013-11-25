@@ -18,6 +18,12 @@ void test_next_action(Trace& t, const char* s)
   {
     string action(pp(a));
     BOOST_CHECK(action == s);
+    if (action != s)
+    {
+      std::cout << "--- error detected ---\n";
+      std::cout << "result         : " << action << std::endl;
+      std::cout << "expected result: " << s << std::endl;
+    }
   }
 }
 
@@ -36,9 +42,9 @@ int test_main(int argc, char** argv)
   act_decls.push_front(action_label(identifier_string("c"),sort_expression_list()));
   
   Trace t(data_spec, act_decls);
-  t.addAction(parse_action("a",act_decls,data_spec));
-  t.addAction(parse_action("b(1,true)",act_decls,data_spec));
-  t.addAction(parse_action("c",act_decls,data_spec));
+  t.addAction(parse_multi_action("a",act_decls,data_spec));
+  t.addAction(parse_multi_action("b(1,true)",act_decls,data_spec));
+  t.addAction(parse_multi_action("c",act_decls,data_spec));
 
   stringstream trace_data;
   t.save(trace_data);

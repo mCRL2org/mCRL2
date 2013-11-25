@@ -226,7 +226,7 @@ struct absinthe_algorithm
         return i->second;
       }
       throw mcrl2::runtime_error("function symbol " + print_symbol(x) + " not present in the function symbol mapping!");
-      return data::data_expression();
+      return data::undefined_data_expression();
     }
 
     //data::data_expression operator()(const data::variable& x)
@@ -253,7 +253,7 @@ struct absinthe_algorithm
       {
         throw mcrl2::runtime_error("don't know how to handle arbitrary expression as head: " + data::pp(x));
       }
-      return data::data_expression();
+      return data::undefined_data_expression();
     }
 
     data::data_expression operator()(const data::lambda& x)

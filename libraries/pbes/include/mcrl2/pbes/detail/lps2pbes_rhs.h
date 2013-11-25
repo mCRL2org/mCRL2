@@ -111,7 +111,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   bool is_timed() const
   {
-    return T != data::variable();
+    return T != data::undefined_real_variable();
   }
 
   void leave(const data::data_expression& x)
@@ -208,6 +208,8 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
         data::mutable_map_substitution<> sigma_ti;
         sigma_ti[T] = ti;
         rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
+std::cout << "ti = " << atermpp::aterm_cast<atermpp::aterm>(ti) << std::endl;
+std::cout << "T  = " << atermpp::aterm_cast<atermpp::aterm>(T) << std::endl;
         p = tr::and_(p, data::greater(ti, T));
       }
       data::variable_list y = data::replace_variables(yi, sigma_yi);

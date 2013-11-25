@@ -17,6 +17,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/data/is_simple_substitution.h"
 
 namespace mcrl2 {
@@ -225,7 +226,7 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
   expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::sequence_sequence_substitution::operator(const Expression&) is a deprecated interface!");
-    return data_expression();
+    return data::undefined_data_expression();
   }
 
   std::string to_string() const
@@ -299,7 +300,7 @@ struct pair_sequence_substitution: public std::unary_function<typename Container
   expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::pair_sequence_substitution::operator(const Expression&) is a deprecated interface!");
-    return data_expression();
+    return data::undefined_data_expression();
   }
 };
 
@@ -357,7 +358,7 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
   expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::map_substitution::operator(const Expression&) is a deprecated interface!");
-    return data_expression();
+    return data::undefined_data_expression();
   }
 
   std::string to_string() const
@@ -1003,7 +1004,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     expression_type operator()(const Expression&) const
     {
       throw std::runtime_error("data::mutable_substitution_composer::operator(const Expression&) is a deprecated interface!");
-      return data_expression();
+      return data::undefined_data_expression();
     }
 
     assignment operator[](variable_type const& v)
@@ -1060,7 +1061,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     expression_type operator()(const Expression&) const
     {
       throw std::runtime_error("data::mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
-      return data_expression();
+      return data::undefined_data_expression();
     }
 
     assignment operator[](variable_type const& v)
