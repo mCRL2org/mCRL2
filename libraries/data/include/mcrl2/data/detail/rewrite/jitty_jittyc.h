@@ -23,27 +23,8 @@ namespace detail
 
 inline variable_list get_vars(const data_expression &a)
 {
-  if (is_variable(a))
-  {
-    const variable& v(a);
-    return make_list(v);
-  }
-  if (is_function_symbol(a))
-  {
-    return variable_list();
-  }
-  assert(is_application(a));
-  
-  const application& aa(a);
-  variable_list l=get_vars(aa.head());
-  for(application::const_iterator arg=aa.begin(); arg!=aa.end(); ++arg)
-  {
-    if (!is_function_symbol(atermpp::aterm_cast<const data_expression>(*arg)))
-    {
-      l= get_vars(*arg)+l;
-    }
-  }
-  return l;
+  const std::set<variable> s=find_free_variables(a);
+  return variable_list(s.begin(),s.end());
 }
 
 inline sort_expression residual_sort(const sort_expression &s, size_t no_of_initial_arguments)
@@ -95,7 +76,7 @@ inline bool get_argument_of_higher_order_term_helper(const data_expression& t, s
 
 inline data_expression get_argument_of_higher_order_term(const data_expression& t, size_t i)
 {
-  // t is a aterm of the shape #REWR#(#REWR#(...#REWR(f,t1,...tn),tn+1....),tm...). 
+  // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...). 
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
   
   assert(!is_function_symbol(t));
@@ -227,7 +208,7 @@ inline bool head_is_function_symbol(const data_expression& t, function_symbol& h
   {
     return false;
   }
-  // shape is #REWR#(t1,...,tn)
+  // shape is application(t1,...,tn)
   const application& ta(t);
   return head_is_function_symbol(ta.head(),head);
 }
