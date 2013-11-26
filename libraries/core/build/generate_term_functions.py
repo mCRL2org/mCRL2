@@ -30,7 +30,7 @@ bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 LIBSTRUCT_MAKE_FUNCTION = '''inline
 aterm_appl gsMake%(name)s(%(parameters)s)
 {
-  return term_appl<aterm>(function_symbol_%(name)s()%(arguments)s);
+  return aterm_appl(function_symbol_%(name)s()%(arguments)s);
 }
 
 '''
@@ -117,7 +117,7 @@ CHECK_TERM_TYPE = '''  // check the type of the term
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIs%(name)s(a))
   {
     return false;
@@ -200,7 +200,7 @@ CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
 const atermpp::aterm_appl& construct%(name)s()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_%(name)s()%(arguments)s));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_%(name)s()%(arguments)s);
   return t;
 }
 
@@ -356,7 +356,7 @@ aterm_appl gsMakeProcess(aterm_appl ProcVarId_0, aterm_list DataExpr_1)
   // Could be replaced by at test for equal types.
 
   assert(ATgetLength((aterm_list)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  return term_appl<aterm>(gsAFunProcess(), (aterm) ProcVarId_0, (aterm) DataExpr_1);
+  return aterm_appl(gsAFunProcess(), (aterm) ProcVarId_0, (aterm) DataExpr_1);
 }
 '''
     text = path(filename).text()

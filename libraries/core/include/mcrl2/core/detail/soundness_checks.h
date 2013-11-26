@@ -1059,7 +1059,7 @@ bool check_term_BooleanOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanOr(a))
   {
     return false;
@@ -1098,7 +1098,7 @@ bool check_term_StateOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateOr(a))
   {
     return false;
@@ -1137,7 +1137,7 @@ bool check_term_Hide(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsHide(a))
   {
     return false;
@@ -1176,7 +1176,7 @@ bool check_term_SortArrow(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortArrow(a))
   {
     return false;
@@ -1215,7 +1215,7 @@ bool check_term_ProcessAssignment(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsProcessAssignment(a))
   {
     return false;
@@ -1254,7 +1254,7 @@ bool check_term_Forall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsForall(a))
   {
     return false;
@@ -1281,7 +1281,7 @@ bool check_term_CommExpr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsCommExpr(a))
   {
     return false;
@@ -1320,7 +1320,7 @@ bool check_term_StateNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateNot(a))
   {
     return false;
@@ -1354,7 +1354,7 @@ bool check_term_UntypedSetBagComp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedSetBagComp(a))
   {
     return false;
@@ -1381,7 +1381,7 @@ bool check_term_SortFSet(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortFSet(a))
   {
     return false;
@@ -1408,7 +1408,7 @@ bool check_term_StateImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateImp(a))
   {
     return false;
@@ -1447,7 +1447,7 @@ bool check_term_PBESExists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESExists(a))
   {
     return false;
@@ -1486,7 +1486,7 @@ bool check_term_PBESImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESImp(a))
   {
     return false;
@@ -1525,7 +1525,7 @@ bool check_term_Binder(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBinder(a))
   {
     return false;
@@ -1569,7 +1569,7 @@ bool check_term_SortRef(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortRef(a))
   {
     return false;
@@ -1608,7 +1608,7 @@ bool check_term_ProcEqnSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsProcEqnSpec(a))
   {
     return false;
@@ -1642,7 +1642,7 @@ bool check_term_StateForall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateForall(a))
   {
     return false;
@@ -1681,7 +1681,7 @@ bool check_term_BooleanImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanImp(a))
   {
     return false;
@@ -1720,7 +1720,7 @@ bool check_term_SortId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortId(a))
   {
     return false;
@@ -1754,7 +1754,7 @@ bool check_term_UntypedAction(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedAction(a))
   {
     return false;
@@ -1793,7 +1793,7 @@ bool check_term_StateNu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateNu(a))
   {
     return false;
@@ -1837,7 +1837,7 @@ bool check_term_RegNil(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsRegNil(a))
   {
     return false;
@@ -1864,7 +1864,7 @@ bool check_term_DataSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsDataSpec(a))
   {
     return false;
@@ -1913,7 +1913,7 @@ bool check_term_UntypedActMultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedActMultAct(a))
   {
     return false;
@@ -1947,7 +1947,7 @@ bool check_term_Tau(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsTau(a))
   {
     return false;
@@ -1974,7 +1974,7 @@ bool check_term_StateYaledTimed(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateYaledTimed(a))
   {
     return false;
@@ -2008,7 +2008,7 @@ bool check_term_SortCons(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortCons(a))
   {
     return false;
@@ -2047,7 +2047,7 @@ bool check_term_DataEqnSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsDataEqnSpec(a))
   {
     return false;
@@ -2081,7 +2081,7 @@ bool check_term_LinearProcessSummand(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsLinearProcessSummand(a))
   {
     return false;
@@ -2135,7 +2135,7 @@ bool check_term_SortSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortSpec(a))
   {
     return false;
@@ -2169,7 +2169,7 @@ bool check_term_ActionRenameRules(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActionRenameRules(a))
   {
     return false;
@@ -2203,7 +2203,7 @@ bool check_term_UntypedParamId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedParamId(a))
   {
     return false;
@@ -2242,7 +2242,7 @@ bool check_term_BooleanEquation(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanEquation(a))
   {
     return false;
@@ -2286,7 +2286,7 @@ bool check_term_ConsSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsConsSpec(a))
   {
     return false;
@@ -2320,7 +2320,7 @@ bool check_term_SortList(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortList(a))
   {
     return false;
@@ -2347,7 +2347,7 @@ bool check_term_Sum(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSum(a))
   {
     return false;
@@ -2386,7 +2386,7 @@ bool check_term_DataVarId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsDataVarId(a))
   {
     return false;
@@ -2430,7 +2430,7 @@ bool check_term_ProcVarId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsProcVarId(a))
   {
     return false;
@@ -2474,7 +2474,7 @@ bool check_term_ProcessInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsProcessInit(a))
   {
     return false;
@@ -2508,7 +2508,7 @@ bool check_term_UntypedIdentifier(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedIdentifier(a))
   {
     return false;
@@ -2542,7 +2542,7 @@ bool check_term_BooleanFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanFalse(a))
   {
     return false;
@@ -2569,7 +2569,7 @@ bool check_term_BES(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBES(a))
   {
     return false;
@@ -2608,7 +2608,7 @@ bool check_term_MapSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsMapSpec(a))
   {
     return false;
@@ -2642,7 +2642,7 @@ bool check_term_IfThen(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsIfThen(a))
   {
     return false;
@@ -2681,7 +2681,7 @@ bool check_term_BooleanAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanAnd(a))
   {
     return false;
@@ -2720,7 +2720,7 @@ bool check_term_LinProcSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsLinProcSpec(a))
   {
     return false;
@@ -2774,7 +2774,7 @@ bool check_term_Choice(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsChoice(a))
   {
     return false;
@@ -2813,7 +2813,7 @@ bool check_term_LinearProcessInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsLinearProcessInit(a))
   {
     return false;
@@ -2847,7 +2847,7 @@ bool check_term_MultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsMultAct(a))
   {
     return false;
@@ -2881,7 +2881,7 @@ bool check_term_PropVarInst(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPropVarInst(a))
   {
     return false;
@@ -2925,7 +2925,7 @@ bool check_term_BagComp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBagComp(a))
   {
     return false;
@@ -2952,7 +2952,7 @@ bool check_term_StateDelay(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateDelay(a))
   {
     return false;
@@ -2979,7 +2979,7 @@ bool check_term_RegAlt(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsRegAlt(a))
   {
     return false;
@@ -3018,7 +3018,7 @@ bool check_term_UntypedMultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedMultAct(a))
   {
     return false;
@@ -3052,7 +3052,7 @@ bool check_term_StructCons(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStructCons(a))
   {
     return false;
@@ -3096,7 +3096,7 @@ bool check_term_Mu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsMu(a))
   {
     return false;
@@ -3123,7 +3123,7 @@ bool check_term_PBEqnSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBEqnSpec(a))
   {
     return false;
@@ -3157,7 +3157,7 @@ bool check_term_ActNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActNot(a))
   {
     return false;
@@ -3191,7 +3191,7 @@ bool check_term_BooleanTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanTrue(a))
   {
     return false;
@@ -3218,7 +3218,7 @@ bool check_term_Block(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBlock(a))
   {
     return false;
@@ -3257,7 +3257,7 @@ bool check_term_Rename(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsRename(a))
   {
     return false;
@@ -3296,7 +3296,7 @@ bool check_term_Exists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsExists(a))
   {
     return false;
@@ -3323,7 +3323,7 @@ bool check_term_Sync(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSync(a))
   {
     return false;
@@ -3362,7 +3362,7 @@ bool check_term_ActExists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActExists(a))
   {
     return false;
@@ -3401,7 +3401,7 @@ bool check_term_ProcSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsProcSpec(a))
   {
     return false;
@@ -3455,7 +3455,7 @@ bool check_term_UntypedSortsPossible(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedSortsPossible(a))
   {
     return false;
@@ -3489,7 +3489,7 @@ bool check_term_StateMu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateMu(a))
   {
     return false;
@@ -3533,7 +3533,7 @@ bool check_term_StateFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateFalse(a))
   {
     return false;
@@ -3560,7 +3560,7 @@ bool check_term_PBESFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESFalse(a))
   {
     return false;
@@ -3587,7 +3587,7 @@ bool check_term_PBESForall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESForall(a))
   {
     return false;
@@ -3626,7 +3626,7 @@ bool check_term_StateTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateTrue(a))
   {
     return false;
@@ -3653,7 +3653,7 @@ bool check_term_BInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBInit(a))
   {
     return false;
@@ -3692,7 +3692,7 @@ bool check_term_UntypedSortUnknown(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedSortUnknown(a))
   {
     return false;
@@ -3719,7 +3719,7 @@ bool check_term_RegTrans(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsRegTrans(a))
   {
     return false;
@@ -3753,7 +3753,7 @@ bool check_term_StateDelayTimed(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateDelayTimed(a))
   {
     return false;
@@ -3787,7 +3787,7 @@ bool check_term_Nu(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsNu(a))
   {
     return false;
@@ -3814,7 +3814,7 @@ bool check_term_SortStruct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortStruct(a))
   {
     return false;
@@ -3848,7 +3848,7 @@ bool check_term_AtTime(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsAtTime(a))
   {
     return false;
@@ -3887,7 +3887,7 @@ bool check_term_ActOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActOr(a))
   {
     return false;
@@ -3926,7 +3926,7 @@ bool check_term_Comm(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsComm(a))
   {
     return false;
@@ -3965,7 +3965,7 @@ bool check_term_BooleanNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanNot(a))
   {
     return false;
@@ -3999,7 +3999,7 @@ bool check_term_Delta(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsDelta(a))
   {
     return false;
@@ -4026,7 +4026,7 @@ bool check_term_ActMultAct(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActMultAct(a))
   {
     return false;
@@ -4060,7 +4060,7 @@ bool check_term_StateAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateAnd(a))
   {
     return false;
@@ -4099,7 +4099,7 @@ bool check_term_LMerge(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsLMerge(a))
   {
     return false;
@@ -4138,7 +4138,7 @@ bool check_term_SetComp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSetComp(a))
   {
     return false;
@@ -4165,7 +4165,7 @@ bool check_term_ActForall(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActForall(a))
   {
     return false;
@@ -4204,7 +4204,7 @@ bool check_term_RenameExpr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsRenameExpr(a))
   {
     return false;
@@ -4243,7 +4243,7 @@ bool check_term_Merge(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsMerge(a))
   {
     return false;
@@ -4282,7 +4282,7 @@ bool check_term_ActSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActSpec(a))
   {
     return false;
@@ -4316,7 +4316,7 @@ bool check_term_BooleanVariable(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsBooleanVariable(a))
   {
     return false;
@@ -4355,7 +4355,7 @@ bool check_term_Action(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsAction(a))
   {
     return false;
@@ -4394,7 +4394,7 @@ bool check_term_PBESAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESAnd(a))
   {
     return false;
@@ -4433,7 +4433,7 @@ bool check_term_Lambda(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsLambda(a))
   {
     return false;
@@ -4460,7 +4460,7 @@ bool check_term_StateMust(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateMust(a))
   {
     return false;
@@ -4499,7 +4499,7 @@ bool check_term_Seq(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSeq(a))
   {
     return false;
@@ -4538,7 +4538,7 @@ bool check_term_DataVarIdInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsDataVarIdInit(a))
   {
     return false;
@@ -4577,7 +4577,7 @@ bool check_term_Process(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsProcess(a))
   {
     return false;
@@ -4616,7 +4616,7 @@ bool check_term_ActAnd(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActAnd(a))
   {
     return false;
@@ -4655,7 +4655,7 @@ bool check_term_ActionRenameSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActionRenameSpec(a))
   {
     return false;
@@ -4699,7 +4699,7 @@ bool check_term_PBES(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBES(a))
   {
     return false;
@@ -4748,7 +4748,7 @@ bool check_term_StateVar(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateVar(a))
   {
     return false;
@@ -4787,7 +4787,7 @@ bool check_term_ActionRenameRule(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActionRenameRule(a))
   {
     return false;
@@ -4836,7 +4836,7 @@ bool check_term_RegSeq(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsRegSeq(a))
   {
     return false;
@@ -4875,7 +4875,7 @@ bool check_term_LinearProcess(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsLinearProcess(a))
   {
     return false;
@@ -4914,7 +4914,7 @@ bool check_term_ActAt(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActAt(a))
   {
     return false;
@@ -4953,7 +4953,7 @@ bool check_term_DataEqn(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsDataEqn(a))
   {
     return false;
@@ -5002,7 +5002,7 @@ bool check_term_PBESNot(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESNot(a))
   {
     return false;
@@ -5036,7 +5036,7 @@ bool check_term_StateExists(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateExists(a))
   {
     return false;
@@ -5075,7 +5075,7 @@ bool check_term_StateMay(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateMay(a))
   {
     return false;
@@ -5114,7 +5114,7 @@ bool check_term_PBESTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESTrue(a))
   {
     return false;
@@ -5141,7 +5141,7 @@ bool check_term_MultActName(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsMultActName(a))
   {
     return false;
@@ -5175,7 +5175,7 @@ bool check_term_IfThenElse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsIfThenElse(a))
   {
     return false;
@@ -5219,7 +5219,7 @@ bool check_term_Nil(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsNil(a))
   {
     return false;
@@ -5246,7 +5246,7 @@ bool check_term_ProcEqn(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsProcEqn(a))
   {
     return false;
@@ -5290,7 +5290,7 @@ bool check_term_StructProj(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStructProj(a))
   {
     return false;
@@ -5329,7 +5329,7 @@ bool check_term_PBEqn(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBEqn(a))
   {
     return false;
@@ -5373,7 +5373,7 @@ bool check_term_Whr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsWhr(a))
   {
     return false;
@@ -5412,7 +5412,7 @@ bool check_term_OpId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsOpId(a))
   {
     return false;
@@ -5456,7 +5456,7 @@ bool check_term_SortSet(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortSet(a))
   {
     return false;
@@ -5483,7 +5483,7 @@ bool check_term_ActFalse(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActFalse(a))
   {
     return false;
@@ -5510,7 +5510,7 @@ bool check_term_ActId(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActId(a))
   {
     return false;
@@ -5549,7 +5549,7 @@ bool check_term_StateYaled(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsStateYaled(a))
   {
     return false;
@@ -5576,7 +5576,7 @@ bool check_term_PBESOr(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBESOr(a))
   {
     return false;
@@ -5615,7 +5615,7 @@ bool check_term_UntypedProcessAssignment(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedProcessAssignment(a))
   {
     return false;
@@ -5654,7 +5654,7 @@ bool check_term_SortFBag(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortFBag(a))
   {
     return false;
@@ -5681,7 +5681,7 @@ bool check_term_Allow(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsAllow(a))
   {
     return false;
@@ -5720,7 +5720,7 @@ bool check_term_PropVarDecl(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPropVarDecl(a))
   {
     return false;
@@ -5759,7 +5759,7 @@ bool check_term_ActImp(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActImp(a))
   {
     return false;
@@ -5798,7 +5798,7 @@ bool check_term_SortBag(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsSortBag(a))
   {
     return false;
@@ -5825,7 +5825,7 @@ bool check_term_PBInit(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsPBInit(a))
   {
     return false;
@@ -5859,7 +5859,7 @@ bool check_term_ActTrue(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsActTrue(a))
   {
     return false;
@@ -5886,7 +5886,7 @@ bool check_term_RegTransOrNil(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsRegTransOrNil(a))
   {
     return false;
@@ -5920,7 +5920,7 @@ bool check_term_GlobVarSpec(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsGlobVarSpec(a))
   {
     return false;
@@ -5954,7 +5954,7 @@ bool check_term_UntypedIdentifierAssignment(Term t)
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIsUntypedIdentifierAssignment(a))
   {
     return false;
