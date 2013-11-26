@@ -28,10 +28,23 @@ namespace data
 
 typedef std::pair<atermpp::aterm, atermpp::aterm> function_symbol_key_type;
 
+//--- start generated class function_symbol ---//
 /// \brief A function symbol
 class function_symbol: public data_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+    }
+//--- start user section function_symbol ---//
     /// \brief Default constructor.
     function_symbol()
       : data_expression(core::detail::constructOpId())
@@ -54,19 +67,8 @@ class function_symbol: public data_expression
     function_symbol(const std::string& name, const sort_expression& sort)
       : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type>::insert(std::make_pair(core::identifier_string(name), sort)))))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const sort_expression& sort() const
-    {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
-    }
+//--- end user section function_symbol ---//
 };
-
-//--- start generated class function_symbol ---//
 
 /// \brief list of function_symbols
 typedef atermpp::term_list<function_symbol> function_symbol_list;

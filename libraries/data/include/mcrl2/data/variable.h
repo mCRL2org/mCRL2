@@ -28,10 +28,23 @@ namespace data
 
 typedef std::pair<atermpp::aterm, atermpp::aterm> variable_key_type;
 
+//--- start generated class variable ---//
 /// \brief A data variable
 class variable: public data_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+    }
+//--- start user section variable ---//
     /// \brief Default constructor.
     variable()
       : data_expression(core::detail::constructDataVarId())
@@ -62,19 +75,8 @@ class variable: public data_expression
           atermpp::aterm_int(core::index_traits<variable, variable_key_type>::insert(std::make_pair(core::identifier_string(name), sort)))
         ))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const sort_expression& sort() const
-    {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
-    }
+//--- end user section variable ---//
 };
-
-//--- start generated class variable ---//
 
 /// \brief list of variables
 typedef atermpp::term_list<variable> variable_list;

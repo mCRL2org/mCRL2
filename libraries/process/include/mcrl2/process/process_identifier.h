@@ -29,10 +29,23 @@ namespace process
 
 typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
 
+//--- start generated class process_identifier ---//
 /// \brief A process identifier
 class process_identifier: public atermpp::aterm_appl
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
+    }
+//--- start user section process_identifier ---//
     /// \brief Default constructor.
     process_identifier()
       : atermpp::aterm_appl(core::detail::constructProcVarId())
@@ -63,19 +76,8 @@ class process_identifier: public atermpp::aterm_appl
           atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(name, variables)))
         ))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const data::variable_list& variables() const
-    {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
-    }
+//--- end user section process_identifier ---//
 };
-
-//--- start generated class process_identifier ---//
 
 /// \brief list of process_identifiers
 typedef atermpp::term_list<process_identifier> process_identifier_list;

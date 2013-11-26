@@ -417,12 +417,18 @@ inline void swap(imp& t1, imp& t2)
   t1.swap(t2);
 }
 
-//--- end generated classes ---//
 
 /// \brief A boolean variable
 class boolean_variable: public boolean_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+//--- start user section boolean_variable ---//
     /// \brief Default constructor.
     boolean_variable()
       : boolean_expression(core::detail::constructBooleanVariable())
@@ -451,11 +457,7 @@ class boolean_variable: public boolean_expression
           atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type>::insert(name))
         ))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
+//--- end user section boolean_variable ---//
 };
 
 /// \brief Test for a boolean_variable expression
@@ -484,6 +486,7 @@ inline void swap(boolean_variable& t1, boolean_variable& t2)
 {
   t1.swap(t2);
 }
+//--- end generated classes ---//
 
 // From the documentation:
 // The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>".
