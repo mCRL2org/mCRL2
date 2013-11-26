@@ -140,7 +140,7 @@ std::ostream& operator<<(std::ostream& out, const value_graph_vertex& u)
   if (u.index() == data::undefined_index())
   {
     return out << '(' << u.name() << ", ?, ?=" << data::pp(u.value()) << ')';
-    assert(u.value() = data::undefined_data_expression());
+    assert(u.value() == data::undefined_data_expression());
   }
   return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << "=" << data::pp(u.value()) << ')';
 }
