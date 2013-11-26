@@ -1745,7 +1745,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
       pair<bool,string> head = calc_inner_term(ta.head(),startarg,nnfvars,false,arity);
       nfs_array tail_first(arity);
       string tail_second = calc_inner_terms(tail_first,arity,ta.arguments(),startarg,nnfvars,NULL);
-      ss << "isAppl(" << head.second << ")?";
+      ss << "is_application(atermpp::aterm_cast<atermpp::aterm_appl>(" << head.second << "))?";
       if (rewr)
       {
           ss << "rewrite(";
@@ -1988,19 +1988,37 @@ void RewriterCompilingJitty::implement_tree_aux(
               (void*)atermpp::detail::address(tree[0]),
               whitespace(d*2)
              );
+//      fprintf(f,"std::cerr << \"SELECT F1 \\n\";\n");
     }
     else
     {
-      fprintf(f,"%sif (isAppl(%s%lu[%lu]) && atermpp::detail::address(aterm_cast<const atermpp::aterm_appl >(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2\n"
+      if (!is_function_sort(aterm_cast<data::function_symbol>(tree[0]).sort()))  // tree[0] contains a constant, which is represented as a function_symbol.
+      {
+
+        fprintf(f,"%sif (is_function_symbol(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu]))==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2a %s\n"
               "%s{\n"
-              "%s  atermpp::aterm_appl t%lu (%s%lu[%lu]);\n",
+              "%s  const data_expression& t%lu(%s%lu[%lu]);\n",  // Should be a function symbol, not a data expression, but this has consequences elsewhere.
               whitespace(d*2),
               (level==1)?"arg":"t",parent,cur_arg,
               (level==1)?"arg":"t",parent,cur_arg,
-              (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),
+              (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),pp(aterm_cast<data::function_symbol>(tree[0]).name()).c_str(),
               whitespace(d*2),
               whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
              );
+      }
+      else 
+      { fprintf(f,"%sif (is_application(atermpp::aterm_cast<atermpp::aterm_appl>(%s%lu[%lu])) && atermpp::detail::address(aterm_cast<const data_expression>(%s%lu[%lu])[0])==reinterpret_cast<const atermpp::detail::_aterm*>(%p)) // F2b %s\n"
+              "%s{\n"
+              "%s  const data_expression& t%lu(%s%lu[%lu]);\n",  // Should be an application, not a data expression, but this has consequences elsewhere.
+              whitespace(d*2),
+              (level==1)?"arg":"t",parent,cur_arg,
+              (level==1)?"arg":"t",parent,cur_arg,
+              (void*)atermpp::detail::address(aterm_cast<function_symbol>(tree[0])),pp(aterm_cast<data::function_symbol>(tree[0]).name()).c_str(),
+              whitespace(d*2),
+              whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
+             );
+      }
+      //fprintf(f,"std::cerr  << \"HIER %s\\n\";\n",pp(aterm_cast<data::function_symbol>(tree[0]).name()).c_str());
     }
     push_st(cur_arg);
     push_st(parent);
@@ -2138,6 +2156,7 @@ static void finish_function(FILE* f,
                             const data::function_symbol& opid, 
                             const std::vector<bool>& used)
 {
+  //fprintf(f, "std::cerr << \"Finish function %s\\n\";\n",pp(opid).c_str());
   if (arity == 0)
   {
     fprintf(f,  "  return data_expression((const atermpp::detail::_aterm*)%p", (void*)atermpp::detail::address(opid));
@@ -2194,6 +2213,7 @@ void RewriterCompilingJitty::implement_strategy(
         used[arg] = true;
       }
       fprintf(f,"// Considering argument  %ld\n",arg);
+      //fprintf(f,"std::cerr << \"ARG \" << arg%lu << \"\\n\";",arg);
     }
     else
     {
@@ -2757,10 +2777,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   // Print defs
   //
-  fprintf(f,
-          "#define isAppl(x) (atermpp::detail::addressf(atermpp::aterm_cast<atermpp::aterm_appl>(x).function()) != %li)\n"
-          "\n", atermpp::detail::addressf(data::variable("x",data::sort_bool::bool_()).function())
-         );
 
   fprintf(f,
           "using namespace mcrl2::data;\n"
@@ -2938,17 +2954,17 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             fprintf(f,  ")\n"
                     "{\n"
                    );
-//for (size_t i=0; i<a; i++)
-//{
-//  if (((nfs >> i) & 1) ==1) // nfs indicates in binary form which arguments are in normal form.
-//  {
-//    fprintf(f, "  std::cerr << \"ARG\%zu \"  << arg%zu << \"\\n\";\n",i,i);
-//  }
-//  else
-//  {
-//    fprintf(f, "  std::cerr << \"ARg\%zu \" << arg_not_nf%zu << \"\\n\";\n",i,i);
-//  }
-//}
+// for (size_t i=0; i<a; i++)
+// {
+//   if (((nfs >> i) & 1) ==1) // nfs indicates in binary form which arguments are in normal form.
+//   {
+//     fprintf(f, "  std::cerr << \"ARG\%zu \"  << arg%zu << \"\\n\";\n",i,i);
+//   }
+//   else
+//   {
+//     fprintf(f, "  std::cerr << \"ARg\%zu \" << arg_not_nf%zu << \"\\n\";\n",i,i);
+//   }
+// }
             if (data::index_traits<data::function_symbol>::index(fs)<jittyc_eqns.size() && !jittyc_eqns[data::index_traits<data::function_symbol>::index(fs)].empty() )
             {
             // Implement strategy
@@ -3152,7 +3168,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "data_expression rewrite_aux(const data_expression& t)\n"
       "{\n"
-//  "std::cerr << \"Internal rewrite AUX \" << t << \"\\n\";"
+// "std::cerr << \"Internal rewrite AUX \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
       "  // Term t does not have the shape application(t1,...,tn)\n"
       "  if (is_variable(t))\n"
@@ -3184,7 +3200,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "static inline data_expression rewrite(const data_expression& t)\n"
       "{\n"
-//  "std::cerr << \"Internal rewrite \" << t << \"\\n\";"
+  //"std::cerr << \"Internal rewrite \" << t << \"\\n\";"
       "  using namespace mcrl2::data;\n"
       "  if (is_function_symbol(t))\n"
       "  {\n"
@@ -3213,6 +3229,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      const size_t total_arity=recursive_number_of_args(ta);\n"
       "      if (function_index < %zu)\n"
       "      {\n"
+//"std::cerr << \"TA \" << total_arity << \" FI \" << function_index << \" HEAD \" << head << \" Point \" << atermpp::detail::address(head) << \"\\n\";\n"
       "        assert(total_arity < %zu);\n"
       "        assert(int2func[total_arity][function_index] != NULL);\n"
       "        return int2func[total_arity][function_index](t);\n"
