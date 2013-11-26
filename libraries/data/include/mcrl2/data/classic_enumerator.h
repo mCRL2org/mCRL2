@@ -102,7 +102,7 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_solution_possible(do_not_throw_exceptions)
         {
-          const data_expression rewritten_condition=e->m_evaluator.rewrite_internal(condition,sigma);
+          const data_expression rewritten_condition=e->m_evaluator(condition,sigma);
           if ((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false) ||
               (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true))
           {
@@ -311,9 +311,9 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_vars(atermpp::convert<variable_list,Container>(variables)),
           m_solution_possible(do_not_throw_exceptions),
-          internal_sigma(m_enclosing_enumerator->m_evaluator.convert_to(sigma)),
+          internal_sigma(sigma),
           m_generator(m_vars,
-                      m_enclosing_enumerator->m_evaluator.convert_to(condition),
+                      condition,
                       internal_sigma,
                       not_equal_to_false,
                       &(m_enclosing_enumerator->m_enumerator),
@@ -371,11 +371,9 @@ class classic_enumerator
             for (data_expression_list::const_iterator i=assignment_list.begin();
                  i != assignment_list.end(); ++i,++j)
             {
-              assert(static_cast< variable_type >(*j).sort() ==
-                              m_enclosing_enumerator->m_evaluator.convert_from(*i).sort());
+              assert(static_cast< variable_type >(*j).sort() == i->sort());
 
-              m_substitution[static_cast< variable_type >(*j)] =
-                              data_expression(m_enclosing_enumerator->m_evaluator.convert_from(*i));
+              m_substitution[static_cast< variable_type >(*j)] = *i;
             }
 
           }

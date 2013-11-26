@@ -174,7 +174,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
   {
 #ifndef NDEBUG
     // Check that substituted variables do not occur in the expression expr.
-    std::set <variable> s=data::find_free_variables(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(new_expr));
+    std::set <variable> s=data::find_free_variables(new_expr);
     for(std::set <variable>::const_iterator it=s.begin(); it!=s.end(); ++it)
     {
       assert(std::find(substituted_vars.begin(),substituted_vars.end(),*it)==substituted_vars.end());
@@ -202,7 +202,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
                                 var_list,
                                 substituted_vars,
                                 substitution_terms,
-                                m_enclosing_enumerator->rewr_obj->rewrite_internal(condition,enum_sigma),
+                                m_enclosing_enumerator->rewr_obj->rewrite(condition,enum_sigma),
                                 negated_term_list,
                                 negated);
 }
@@ -287,14 +287,14 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
     // replacing in x==t the variable x by t.
     const data_expression old_val=enum_sigma(var);
     enum_sigma[var]=val;
-    expr = m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,enum_sigma);
+    expr = m_enclosing_enumerator->rewr_obj->rewrite(expr,enum_sigma);
     enum_sigma[var]=old_val;
   }
 
 #ifndef NDEBUG
   // Check that substituted variables do not occur in the expression expr.
 
-  std::set <variable> s=data::find_free_variables(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(expr));
+  std::set <variable> s=data::find_free_variables(expr);
   for(std::set <variable>::const_iterator it=s.begin(); it!=s.end(); ++it)
   {
     assert(std::find(substituted_vars.begin(),substituted_vars.end(),*it)==substituted_vars.end());
@@ -354,7 +354,7 @@ data_expression EnumeratorSolutionsStandard::build_solution_aux(
   }
   else
   {
-    // t has the shape #REWR#(u1,...,un)
+    // t has the shape application(u1,...,un)
     const application t_appl(t); 
     data_expression head = t_appl.head(); 
    
@@ -385,7 +385,7 @@ data_expression_list EnumeratorSolutionsStandard::build_solution2(
   else
   {
     data_expression_list result=build_solution2(vars.tail(),substituted_vars,exprs);
-    result.push_front(m_enclosing_enumerator->rewr_obj->rewrite_internal(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
+    result.push_front(m_enclosing_enumerator->rewr_obj->rewrite(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
     return result;
   }
 }
@@ -529,7 +529,7 @@ bool EnumeratorSolutionsStandard::next(
               {
                 if (solution_possible && max_vars != 0)
                 {
-                  mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << std::endl;
+                  mCRL2log(log::debug)   << "Enumerating expression: "<< data::pp(enum_expr) << std::endl;
                   mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used.\n";
                   solution_possible=false;
                   return false;
@@ -547,7 +547,7 @@ bool EnumeratorSolutionsStandard::next(
                     }
                     exception_message << data::pp(*k) << ":" << data::pp(k->sort());
                   }
-                  exception_message << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr));
+                  exception_message << " that satisfy " << data::pp(enum_expr);
                   throw mcrl2::runtime_error(exception_message.str());
                 }
               }
@@ -562,20 +562,20 @@ bool EnumeratorSolutionsStandard::next(
                   }
                   mCRL2log(log::info) << data::pp(*k) << ":" << data::pp(k->sort());
                 }
-                mCRL2log(log::info) << " that satisfy " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
+                mCRL2log(log::info) << " that satisfy " << data::pp(enum_expr) << endl;
                 max_vars *= MAX_VARS_FACTOR;
               }
             }
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
-            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(
+            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(
                        application(*it,var_array),enum_sigma);
             var_array.clear();
 
             const data_expression old_substituted_value=enum_sigma(var);
             enum_sigma[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
+            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite(e.expr(),enum_sigma);
             enum_sigma[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);
@@ -599,12 +599,12 @@ bool EnumeratorSolutionsStandard::next(
             // Substitutions must contain normal forms.  term_rf is almost always a normal form, but this is
             // not guaranteed and must be guaranteed by rewriting it explicitly. In the line below enum_sigma has no effect, but
             // using it is much cheaper than using a default substitution.
-            // const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
-            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(*it,enum_sigma);
+            // const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(aterm_appl(get_appl_afun_value(1),OpId2Int(*it)),enum_sigma);
+            const data_expression term_rf = m_enclosing_enumerator->rewr_obj->rewrite(*it,enum_sigma);
 
             const data_expression old_substituted_value=enum_sigma(var);
             enum_sigma[var]=term_rf;
-            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite_internal(e.expr(),enum_sigma);
+            const data_expression rewritten_expr=m_enclosing_enumerator->rewr_obj->rewrite(e.expr(),enum_sigma);
             enum_sigma[var]=old_substituted_value;
             variable_list templist1=e.substituted_vars();
             templist1.push_front(var);

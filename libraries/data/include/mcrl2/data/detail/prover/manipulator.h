@@ -159,7 +159,7 @@ class InternalFormatManipulator
       f_info(a_info)
     {
       f_rewriter = a_rewriter;
-      f_if_then_else = static_cast<function_symbol>(a_rewriter->toRewriteFormat(if_(sort_bool::bool_())));
+      f_if_then_else = if_(sort_bool::bool_());
     }
 
     /// \brief Destructor with no particular functionality.

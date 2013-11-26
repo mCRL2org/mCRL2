@@ -166,72 +166,6 @@ static aterm_appl make_ar_var(size_t var)
   return atermpp::aterm_appl(afunARvar,atermpp::aterm_int(var));
 }
 
-/* static size_t num_int2aterms = 0;
-static const atermpp::detail::_aterm** int2aterms = NULL; // An array with prepared aterm_int's.
-static const atermpp::detail::_aterm* get_int2aterm_value(size_t i)
-{
-  if (((size_t) i) >= num_int2aterms)
-  {
-    size_t old_num = num_int2aterms;
-    num_int2aterms = i+1;
-
-    int2aterms = (const atermpp::detail::_aterm**) realloc(int2aterms,num_int2aterms*sizeof(aterm));
-    if (int2aterms == NULL)
-    {
-      throw mcrl2::runtime_error("Cannot allocate enough memory.");
-    }
-    for (size_t j=old_num; j < num_int2aterms; j++)
-    {
-      int2aterms[j] = NULL;
-    }
-    for (; old_num < num_int2aterms; old_num++)
-    {
-      int2aterms[old_num] = reinterpret_cast<const atermpp::detail::_aterm*>(atermpp::detail::address(atermpp::aterm_int(old_num)));
-    }
-  }
-  return int2aterms[i];
-}
-
-static const atermpp::detail::_aterm* get_int2aterm_value(const function_symbol& i)
-{
-  return get_int2aterm_value(OpId2Int(i).value());
-} */
-
-/* std::vector <aterm_appl> rewr_appls;
-
-static void set_rewrappl_value(const size_t i)
-{
-  while (rewr_appls.size()<i+1)
-  {
-    rewr_appls.push_back(Apply0(atermpp::aterm_int(rewr_appls.size())));
-  }
-}
-
-static aterm_appl get_rewrappl_value(const size_t i)
-{
-  set_rewrappl_value(i);
-  return rewr_appls[i];
-} */
-
-data_expression RewriterCompilingJitty::toRewriteFormat(const data_expression& t)
-{
-  size_t old_opids = core::index_traits<data::function_symbol, function_symbol_key_type>::max_index()+1;
-
-  data_expression r = toInner(t,true);
-
-  if (old_opids != core::index_traits<data::function_symbol, function_symbol_key_type>::max_index()+1)
-  {
-    need_rebuild = true;
-  }
-
-  return r;
-} 
-
-/* data_expression RewriterCompilingJitty::fromRewriteFormat(const data_expression t)
-{
-  return fromInner(t);
-} */
-
 static char* whitespace_str = NULL;
 static size_t whitespace_len;
 static size_t whitespace_pos;
@@ -2480,10 +2414,6 @@ bool RewriterCompilingJitty::addRewriteRule(const data_equation& rule1)
   if (rewrite_rules.insert(rule).second)
   {
     // The equation has been added as a rewrite rule, otherwise the equation was already present.
-    // Add and number new OpIds, if so required.
-    toRewriteFormat(rule.condition());
-    toRewriteFormat(rule.lhs());
-    toRewriteFormat(rule.rhs());
     data_equation_selector.add_function_symbols(rule.lhs());
     need_rebuild = true;
   }
@@ -3320,16 +3250,6 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
 }
 
 data_expression RewriterCompilingJitty::rewrite(
-     const data_expression& term,
-     substitution_type& sigma)
-{
-  internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterCompilingJitty::toRewriteFormat, this, _1));
-  // Code below is not accepted by all compilers.
-  // internal_substitution_type internal_sigma = apply(sigma, [this](const data_expression& t){return this->toRewriteFormat(t);});
-  return fromRewriteFormat(rewrite_internal(toRewriteFormat(term),internal_sigma));
-}
-
-data_expression RewriterCompilingJitty::rewrite_internal(
      const data_expression& term,
      internal_substitution_type& sigma)
 {

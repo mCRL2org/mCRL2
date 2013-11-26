@@ -68,35 +68,6 @@ data_expression RewriterProver::rewrite(
   }
 }
 
-data_expression RewriterProver::rewrite_internal(
-            const data_expression& Term,
-            internal_substitution_type& sigma)
-{
-  // Code below is not very efficient, due to the translation to and from internal
-  // rewrite format. This requires further investigation...
-  const data_expression t=rewr_obj->fromRewriteFormat(Term);
-  if (t.sort() == mcrl2::data::sort_bool::bool_())
-  {
-    prover_obj->set_substitution_internal(sigma);
-    prover_obj->set_formula(t);
-    return rewr_obj->toRewriteFormat(prover_obj->get_bdd());
-  }
-  else
-  {
-    return rewr_obj->rewrite_internal(Term,sigma);
-  }
-}
-
-data_expression RewriterProver::toRewriteFormat(const data_expression& Term)
-{
-  return rewr_obj->toRewriteFormat(Term);
-}
-
-/* data_expression RewriterProver::fromRewriteFormat(const data_expression Term)
-{
-  return rewr_obj->fromRewriteFormat(Term);
-} */
-
 rewrite_strategy RewriterProver::getStrategy()
 {
   switch (rewr_obj->getStrategy())

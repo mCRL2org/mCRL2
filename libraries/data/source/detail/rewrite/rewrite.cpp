@@ -94,50 +94,6 @@ data_expression_list Rewriter::rewrite_list(
   return data_expression_list(terms.begin(),terms.end(),r);
 }
 
-data_expression Rewriter::toRewriteFormat(const data_expression& /*Term*/)
-{
-  assert(0);
-  return data_expression();
-}
-
-data_expression Rewriter::fromRewriteFormat(const data_expression& t)
-{
-  return fromInner(t);
-}
-
-data_expression Rewriter::rewrite_internal(
-     const data_expression& /*Term*/,
-     internal_substitution_type&  /*sigma*/)
-{
-  assert(0);
-  return data_expression();
-}
-
-template <class Rewriter>
-struct rewrite_list_rewriter_internal
-{
-  typename Rewriter::internal_substitution_type& m_sigma;
-  Rewriter& m_rewr;
-
-  rewrite_list_rewriter_internal(typename Rewriter::internal_substitution_type& sigma, Rewriter& rewr):m_sigma(sigma),m_rewr(rewr)
-  {}
-
-  const data_expression operator() (const data_expression& t) const
-  {
-    return m_rewr.rewrite_internal(t,m_sigma);
-  }
-};
-
-
-
-data_expression_list Rewriter::rewrite_internal_list(
-    const data_expression_list& terms,
-    internal_substitution_type& sigma)
-{
-  rewrite_list_rewriter_internal<Rewriter> r(sigma,*this);
-  return data_expression_list(terms.begin(),terms.end(),r);
-}
-
 bool Rewriter::addRewriteRule(const data_equation& /*Rule*/)
 {
   assert(0);
@@ -163,9 +119,9 @@ data_expression Rewriter::rewrite_where(
     const variable& v=i->lhs();
     const variable v_fresh(generator("whr_"), v.sort());
     variable_renaming[v]=v_fresh;
-    sigma[v_fresh]=rewrite_internal(i->rhs(),sigma);
+    sigma[v_fresh]=rewrite(i->rhs(),sigma);
   }
-  const data_expression result=rewrite_internal(replace_variables(body,variable_renaming),sigma);
+  const data_expression result=rewrite(replace_variables(body,variable_renaming),sigma);
 
   // Reset variables in sigma
   for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
@@ -211,7 +167,7 @@ abstraction Rewriter::rewrite_single_lambda(
 
   if (number_of_renamed_variables==0)
   {
-    return abstraction(lambda_binder(),vl,(body_in_normal_form?body:rewrite_internal(body,sigma)));
+    return abstraction(lambda_binder(),vl,(body_in_normal_form?body:rewrite(body,sigma)));
   }
 
   data_expression result;
@@ -244,7 +200,7 @@ abstraction Rewriter::rewrite_single_lambda(
       }
     }
     // ... then we rewrite with the new sigma ...
-    result = rewrite_internal(body,sigma);
+    result = rewrite(body,sigma);
     // ... and then we restore sigma to its old state.
     size_t new_variable_count = 0;
     for(v = vl.begin(), count = 0; v != vl.end(); ++v, ++count)
@@ -301,7 +257,7 @@ data_expression Rewriter::rewrite_lambda_application(
   using namespace atermpp;
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
-  const data_expression lambda_body=rewrite_internal(lambda_term.body(),sigma);
+  const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
   size_t arity=t.size();
   assert(arity>0);
   if (arity==1) // The term has shape application(lambda d..:D...t), i.e. without arguments.
@@ -317,10 +273,10 @@ data_expression Rewriter::rewrite_lambda_application(
     const variable v= (*i);
     const variable v_fresh(generator("x_"), v.sort());
     variable_renaming[v]=v_fresh;
-    sigma[v_fresh]=rewrite_internal(data_expression(t[count]),sigma);
+    sigma[v_fresh]=rewrite(data_expression(t[count]),sigma);
   }
 
-  const data_expression result=rewrite_internal(replace_variables(lambda_body,variable_renaming),sigma);
+  const data_expression result=rewrite(replace_variables(lambda_body,variable_renaming),sigma);
 
   // Reset variables in sigma
   for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
@@ -341,7 +297,7 @@ data_expression Rewriter::rewrite_lambda_application(
     args.push_back(atermpp::aterm_cast<data_expression>(t[vl.size()+i]));
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
-  return rewrite_internal(application(result, args.begin(), args.end()),sigma);
+  return rewrite(application(result, args.begin(), args.end()),sigma);
 }
 
 data_expression Rewriter::internal_existential_quantifier_enumeration(
@@ -368,7 +324,7 @@ data_expression Rewriter::internal_existential_quantifier_enumeration(
 
   variable_list vl_new;
 
-  const data_expression t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
+  const data_expression t2=(t1_is_normal_form?t1:rewrite(t1,sigma));
   std::set < variable > free_variables;
   // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
   get_free_variables(t2,free_variables);
@@ -431,7 +387,7 @@ data_expression Rewriter::internal_existential_quantifier_enumeration(
     return partial_result;
   }
 
-  return abstraction(exists_binder(),vl,rewrite_internal(t1,sigma));
+  return abstraction(exists_binder(),vl,rewrite(t1,sigma));
 }
 
 
@@ -456,7 +412,7 @@ data_expression Rewriter::internal_universal_quantifier_enumeration(
 
   variable_list vl_new;
 
-  const data_expression t2=(t1_is_normal_form?t1:rewrite_internal(t1,sigma));
+  const data_expression t2=(t1_is_normal_form?t1:rewrite(t1,sigma));
   std::set < variable > free_variables;
   // find_all_if(t2,is_a_variable(),std::inserter(free_variables,free_variables.begin()));
   get_free_variables(t2,free_variables);
@@ -541,7 +497,7 @@ data_expression Rewriter::internal_universal_quantifier_enumeration(
     return partial_result;
   }
 
-  return abstraction(forall_binder(),vl,rewrite_internal(t1,sigma));
+  return abstraction(forall_binder(),vl,rewrite(t1,sigma));
 }
 
 

@@ -103,41 +103,6 @@ class Rewriter
     virtual data_expression_list rewrite_list(const data_expression_list& Terms, substitution_type& sigma);
 
     /**
-     * \brief Convert an mCRL2 data term to a term in the internal
-     *        rewriter format.
-     * \param Term A mCRL2 data term.
-     * \return The term Term in the internal rewriter format.
-     **/
-    virtual data_expression toRewriteFormat(const data_expression& Term);
-    /**
-     * \brief Convert a term in the internal rewriter format to a
-     *        mCRL2 data term.
-     * \param Term A term in the internal rewriter format.
-     * \return The term Term as an mCRL2 data term.
-     **/
-    data_expression fromRewriteFormat(const data_expression& Term);
-    /**
-     * \brief Rewrite a term in the internal rewriter format.
-     * \param Term The term to be rewritten. This term should be
-     *             in the internal rewriter format.
-     * \return The normal form of Term.
-     **/
-    virtual data_expression rewrite_internal(
-                     const data_expression& Term,
-                     internal_substitution_type& sigma);
-    /**
-     * \brief Rewrite a list of terms in the internal rewriter
-     *        format.
-     * \param Terms The list of terms to be rewritten. These terms
-     *              should be in the internal rewriter format.
-     * \return The list Terms where each element is replaced by its
-     *         normal form.
-     **/
-    virtual data_expression_list rewrite_internal_list(
-                     const data_expression_list& Terms,
-                     internal_substitution_type& sigma);
-
-    /**
      * \brief Add a rewrite rule to this rewriter.
      * \param Rule A mCRL2 rewrite rule (DataEqn).
      * \return Whether or not the rule was succesfully added. Note

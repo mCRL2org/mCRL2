@@ -42,7 +42,7 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
   size_t max_arity = 0;
   for (data_equation_list::const_iterator l=rules1.begin(); l!=rules1.end(); ++l)
   {
-    const size_t current_arity=toRewriteFormat(l->lhs()).size();
+    const size_t current_arity=l->lhs().size();
     if (current_arity > max_arity + 1)
     {
       max_arity = current_arity-1;
@@ -55,9 +55,9 @@ aterm_list RewriterJitty::create_strategy(const data_equation_list &rules1)
   {
     const aterm list_representing_rewrite_rule=make_list<aterm>(
                                          aterm_cast<const aterm_list>(j->variables()),
-                                         toRewriteFormat(j->condition()),
-                                         toRewriteFormat(j->lhs()),
-                                         toRewriteFormat(j->rhs()));
+                                         j->condition(),
+                                         j->lhs(),
+                                         j->rhs());
     rules.push_front(list_representing_rewrite_rule);
   }
   rules = reverse(rules);
@@ -814,19 +814,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   return result;
 }
 
-data_expression RewriterJitty::toRewriteFormat(const data_expression &term)
-{
-  return toInner(term,true);
-}
-
-data_expression RewriterJitty::rewrite(const data_expression& term, substitution_type& sigma)
-{
-  internal_substitution_type internal_sigma = apply(sigma, boost::bind(&RewriterJitty::toRewriteFormat, this, _1));
-  data_expression result=fromRewriteFormat(rewrite_internal(toRewriteFormat(term), internal_sigma));
-  return result;
-}
-
-data_expression RewriterJitty::rewrite_internal(
+data_expression RewriterJitty::rewrite(
      const data_expression& term,
      internal_substitution_type& sigma)
 {
@@ -836,9 +824,7 @@ data_expression RewriterJitty::rewrite_internal(
     need_rebuild = false;
   }
 
-// std::cerr << "REWRITE INTERNAL " << term << "\n" << pp(term) << "\n";
   const data_expression result=rewrite_aux(term, sigma);
-// std::cerr << "REWRITE RESULT   " << pp(result) << "\n" << pp(term) << "\n";
   return result;
   
 }

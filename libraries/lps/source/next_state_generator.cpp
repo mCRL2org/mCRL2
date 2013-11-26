@@ -44,7 +44,7 @@ next_state_generator::next_state_generator(
     summand_t summand;
     summand.summand = &(*i);
     summand.variables = i->summation_variables();
-    summand.condition = m_rewriter.convert_to(i->condition());
+    summand.condition = i->condition();
     // summand.result_state = atermpp::aterm_cast<atermpp::aterm_appl>(get_internal_state(i->next_state(m_specification.process().process_parameters())));
     summand.result_state = get_internal_state(i->next_state(m_specification.process().process_parameters()));
 
@@ -55,7 +55,7 @@ next_state_generator::next_state_generator(
 
       for (data_expression_list::iterator k = j->arguments().begin(); k != j->arguments().end(); k++)
       {
-        action_label.arguments.push_back(m_rewriter.convert_to(*k));
+        action_label.arguments.push_back(*k);
       }
 
       summand.action_label.push_back(action_label);
@@ -110,17 +110,17 @@ void next_state_generator::declare_constructors()
   for (std::set<sort_expression>::const_iterator i = bounded_sorts.begin(); i != bounded_sorts.end(); i++)
   {
     const function_symbol_vector constructors(m_specification.data().constructors(*i));
-    for (function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); j++)
+    /* for (function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); j++)
     {
-      m_rewriter.convert_to(data_expression(*j));
-    }
+      data_expression(*j);
+    } */
   }
 
-  const function_symbol_vector constructors(m_specification.data().constructors());
+  /* const function_symbol_vector constructors(m_specification.data().constructors());
   for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); i++)
   {
-    m_rewriter.convert_to(data_expression(*i));
-  }
+    data_expression(*i);
+  } */
 }
 
 next_state_generator::internal_state_t next_state_generator::get_internal_state(const state &s) const
@@ -152,7 +152,7 @@ next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *g
   : m_generator(generator),
     m_use_summand_pruning(use_summand_pruning)
 {
-  m_false = m_generator->m_rewriter.convert_to(data::sort_bool::false_());
+  m_false = data::sort_bool::false_();
 
   if (m_use_summand_pruning)
   {
@@ -177,7 +177,7 @@ next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *g
   : m_generator(generator),
     m_use_summand_pruning(use_summand_pruning)
 {
-  m_false = m_generator->m_rewriter.convert_to(data::sort_bool::false_());
+  m_false = data::sort_bool::false_();
 
   std::set<action_summand> summand_set;
   for (action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); i++)
@@ -302,7 +302,7 @@ void next_state_generator::summand_subset_t::build_pruning_parameters(const acti
 
 bool next_state_generator::summand_subset_t::is_not_false(const next_state_generator::summand_t &summand)
 {
-  return m_generator->m_rewriter.rewrite_internal(summand.condition, m_pruning_substitution) != m_false;
+  return m_generator->m_rewriter(summand.condition, m_pruning_substitution) != m_false;
 }
 
 atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const internal_state_t &state)
@@ -401,7 +401,7 @@ struct action_argument_converter
 
   data_expression operator()(const data_expression &t) const
   {
-    return atermpp::aterm_cast<data_expression>(m_rewriter.convert_from(m_rewriter.rewrite_internal(t, *m_substitution)));
+    return atermpp::aterm_cast<data_expression>(m_rewriter(t, *m_substitution));
   }
 };
 
@@ -418,7 +418,7 @@ struct state_argument_rewriter
   next_state_generator::internal_state_argument_t operator()(const atermpp::aterm &t) const
   {
     return atermpp::aterm_cast<next_state_generator::internal_state_argument_t>(
-                m_rewriter.rewrite_internal(atermpp::aterm_cast<data_expression>(t), *m_substitution));
+                m_rewriter(atermpp::aterm_cast<data_expression>(t), *m_substitution));
   }
 };
 
@@ -535,10 +535,10 @@ void next_state_generator::iterator::increment()
       }
 
       // Reduce condition as much as possible, and give a hint of the original condition in the error message.
-      rewriter_expression_t reduced_condition(m_generator->m_rewriter.rewrite_internal(m_summand->condition, *m_substitution));
-      std::string printed_condition(data::pp(m_generator->m_rewriter.convert_from(m_summand->condition)).substr(0, 300));
+      rewriter_expression_t reduced_condition(m_generator->m_rewriter(m_summand->condition, *m_substitution));
+      std::string printed_condition(data::pp(m_summand->condition).substr(0, 300));
 
-      throw mcrl2::runtime_error("Expression " + data::pp(m_generator->m_rewriter.convert_from(reduced_condition)) +
+      throw mcrl2::runtime_error("Expression " + data::pp(reduced_condition) +
                                  " does not rewrite to true or false in the condition "
                                  + printed_condition
                                  + (printed_condition.size() >= 300?"...":""));
@@ -577,7 +577,7 @@ void next_state_generator::iterator::increment()
     arguments.resize(m_summand->action_label[i].arguments.size());
     for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
     {
-      arguments[j] = m_generator->m_rewriter.convert_from(m_generator->m_rewriter.rewrite_internal(m_summand->action_label[i].arguments[j], *m_substitution));
+      arguments[j] = m_generator->m_rewriter(m_summand->action_label[i].arguments[j], *m_substitution);
     }
     actions[i] = action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }

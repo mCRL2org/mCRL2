@@ -1365,7 +1365,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     {
       parameters.push_front(
                 ((opt_precompile_pbes?
-                       data::data_expression(R.rewrite_internal(R.convert_to(*l),sigma_internal)):
+                       data::data_expression(R(*l,sigma_internal)):
                        R(*l,sigma))));
     }
     parameters = atermpp::reverse(parameters);
@@ -1378,7 +1378,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
 
     if (opt_precompile_pbes)
     {
-      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(dp),sigma_internal);
+      atermpp::aterm_appl d = R(dp,sigma_internal);
       result = core::static_down_cast<const pbes_expression&>(d);
 
       if (convert_data_to_pbes)
@@ -2155,7 +2155,7 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::data::pp(Mucks_rewriter.convert_from(mcrl2::data::data_expression(p))));
+                                   mcrl2::data::pp(mcrl2::data::data_expression(p)));
       }
       else
       {
@@ -2222,11 +2222,11 @@ class boolean_equation_system
       }
       for(std::set < sort_expression > :: const_iterator i=bounded_sorts.begin(); i!=bounded_sorts.end(); ++i)
       {
-        const function_symbol_vector constructors(pbes_spec.data().constructors(*i));
+        /* const function_symbol_vector constructors(pbes_spec.data().constructors(*i));
         for (function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
         {
           Mucks_rewriter.convert_to(*j);
-        }
+        } */
       }
 
       // Variables in which the result is stored
@@ -2448,7 +2448,7 @@ class boolean_equation_system
               data_expression_list resulting_pars;
               for(data_expression_list::const_iterator it=pars.begin(); it!=pars.end(); ++it)
               {
-                resulting_pars.push_front(Mucks_rewriter.convert_from(*it));
+                resulting_pars.push_front(*it);
               }
               prop_var=propositional_variable_instantiation(prop_var.name(),reverse(resulting_pars));
             }
@@ -2625,7 +2625,7 @@ class boolean_equation_system
         data_expression t1(t);
         if (opt_precompile_pbes)
         {
-          data_expression t2(Mucks_rewriter.convert_from(t1));
+          data_expression t2(t1);
           f << c << mcrl2::data::pp(t2);
         }
         else
@@ -2672,7 +2672,7 @@ class boolean_equation_system
           if (opt_precompile_pbes)
           {
             const data_expression term=*t;
-            f << mcrl2::data::pp(Mucks_rewriter.convert_from(term));
+            f << mcrl2::data::pp(term);
           }
           else
           {

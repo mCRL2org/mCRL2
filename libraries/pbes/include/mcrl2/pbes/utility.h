@@ -402,7 +402,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         data::data_expression d;
         if (use_internal_rewrite_format)
         {
-          d=r.rewrite_internal(*i,sigma_internal);
+          d=r(*i,sigma_internal);
         }
         else
         {
@@ -505,7 +505,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   // r.set_internally_associated_value(*i,d);
                   if (use_internal_rewrite_format)
                   {
-                    sigma_internal[*i]= r.rewrite_internal(r.convert_to(d),sigma_internal);
+                    sigma_internal[*i]= r(d,sigma_internal);
                   }
                   else
                   {
@@ -583,7 +583,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         data::data_expression d;
         if (use_internal_rewrite_format)
         {
-          d=r.rewrite_internal(*i,sigma_internal);
+          d=r(*i,sigma_internal);
         }
         else
         {
@@ -682,7 +682,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   // sigma[*i]=d;
                   if (use_internal_rewrite_format)
                   {
-                    sigma_internal[*i]=r.rewrite_internal(r.convert_to(d),sigma_internal);
+                    sigma_internal[*i]=r(d,sigma_internal);
                   }
                   else
                   {
@@ -742,21 +742,21 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     core::identifier_string name = propvar.name();
     data::data_expression_list current_parameters(propvar.parameters());
     data::data_expression_list parameters;
-    if (use_internal_rewrite_format)
+    /* if (use_internal_rewrite_format)
     {
-      atermpp::term_list< data::data_expression > expressions(r.rewrite_internal_list(
+      atermpp::term_list< data::data_expression > expressions(r.rewrite_list(
             data::data_expression_list(current_parameters.begin(), current_parameters.end()),sigma_internal));
       parameters=data::data_expression_list(expressions.begin(), expressions.end());
     }
     else
-    {
+    { */
       for (data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
         parameters.push_front(atermpp::aterm_cast<data::data_expression>(r(*l,sigma)));
       }
       parameters = atermpp::reverse(parameters);
-    }
+    // }
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
   }
   else
@@ -765,7 +765,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     const data::data_expression& dp = atermpp::aterm_cast<const data::data_expression>(p);
     if (use_internal_rewrite_format)
     {
-      data::data_expression d = (data::data_expression)r.rewrite_internal(dp,sigma_internal);
+      data::data_expression d = (data::data_expression)r(dp,sigma_internal);
       if (d==r.get_rewriter().internal_true)
       {
         result = pbes_expr::true_();

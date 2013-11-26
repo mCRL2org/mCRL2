@@ -53,33 +53,6 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     {
     }
 
-    data_expression convert_to(const data_expression &t) const
-    {
-      return convert_expression_to(t);
-    } 
-
-    internal_substitution_type convert_to(const substitution_type& sigma) const
-    {
-      return sigma;
-    }
-
-    data_expression convert_from(const data_expression t) const
-    {
-      return m_rewriter->fromRewriteFormat(t);
-    } 
-  
-    data_expression rewrite_internal(const data_expression &t, internal_substitution_type &sigma) const
-    {
-      return m_rewriter->rewrite_internal(t,sigma);
-    } 
-  
-    data_expression_list rewrite_internal_list(
-         const data_expression_list &t,
-         internal_substitution_type &sigma) const
-    {
-      return m_rewriter->rewrite_internal_list(t,sigma);
-    } 
-  
     mcrl2::data::detail::Rewriter& get_rewriter() const
     {
       return *const_cast< mcrl2::data::detail::Rewriter* >(m_rewriter.get());

@@ -49,26 +49,6 @@ class basic_rewriter
     /// \brief The wrapped Rewriter.
     boost::shared_ptr<detail::Rewriter> m_rewriter;
 
-    /// \brief Convert a data expression to an expression in internal format
-    /// \details This function is needed to allow the conversion of substitutions
-    ///          to the internal format.
-    /// \deprecated
-    data_expression convert_expression_to(const data_expression &t) const
-    {
-      return m_rewriter->toRewriteFormat(t);
-    }
-
-    /// \brief Convert a substitution to a substitution with right hand sides
-    ///        in internal format.
-    /// \details This function is needed to convert substitutions to the internal
-    ///          format if the internal details of the legacy rewriters are used.
-    ///          This function should be removed.
-    /// \deprecated
-    /* internal_substitution_type convert_substitution_to(const substitution_type &sigma) const
-    {
-      return apply(sigma, boost::bind(&basic_rewriter<Term>::convert_expression_to, this, _1));
-    } */
-
   public:
 
     /// \brief The term type of the rewriter.

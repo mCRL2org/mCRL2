@@ -34,9 +34,6 @@ class RewriterJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
-    data_expression toRewriteFormat(const data_expression& term);
-    data_expression rewrite_internal(const data_expression& term, internal_substitution_type &sigma);
-
     bool addRewriteRule(const data_equation &Rule);
     bool removeRewriteRule(const data_equation &Rule);
 

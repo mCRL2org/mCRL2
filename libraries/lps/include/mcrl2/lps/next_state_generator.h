@@ -283,13 +283,13 @@ class next_state_generator
     /// \brief Converts a state arguments to internal state arguments.
     internal_state_argument_t get_internal_state_argument(const data::data_expression &argument) const
     {
-      return m_rewriter.convert_to(argument);
+      return argument;
     }
 
     /// \brief Converts a internal state arguments to state arguments.
     data::data_expression get_state_argument(const internal_state_argument_t &internal_argument) const
     {
-      return m_rewriter.convert_from(internal_argument);
+      return internal_argument;
     }
 
     /// \brief Constructs internal states out of internal state arguments.
