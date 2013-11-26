@@ -24,18 +24,22 @@ namespace lps
 {
 
 //--- start generated lps overloads ---//
-std::string pp(const lps::specification& x) { return lps::pp< lps::specification >(x); }
-std::string pp(const lps::linear_process& x) { return lps::pp< lps::linear_process >(x); }
-std::string pp(const lps::action& x) { return lps::pp< lps::action >(x); }
 std::string pp(const lps::action_list& x) { return lps::pp< lps::action_list >(x); }
 std::string pp(const lps::action_vector& x) { return lps::pp< lps::action_vector >(x); }
-std::string pp(const lps::action_label& x) { return lps::pp< lps::action_label >(x); }
 std::string pp(const lps::action_label_list& x) { return lps::pp< lps::action_label_list >(x); }
 std::string pp(const lps::action_label_vector& x) { return lps::pp< lps::action_label_vector >(x); }
+std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
+std::string pp(const lps::action& x) { return lps::pp< lps::action >(x); }
+std::string pp(const lps::action_label& x) { return lps::pp< lps::action_label >(x); }
+std::string pp(const lps::action_summand& x) { return lps::pp< lps::action_summand >(x); }
 std::string pp(const lps::deadlock& x) { return lps::pp< lps::deadlock >(x); }
+std::string pp(const lps::deadlock_summand& x) { return lps::pp< lps::deadlock_summand >(x); }
+std::string pp(const lps::linear_process& x) { return lps::pp< lps::linear_process >(x); }
 std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
 std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
-std::string pp(const lps::state& x) { return lps::pp< lps::state >(x); }
+std::string pp(const lps::specification& x) { return lps::pp< lps::specification >(x); }
+std::string pp(const lps::untyped_action& x) { return lps::pp< lps::untyped_action >(x); }
+std::string pp(const lps::untyped_multi_action& x) { return lps::pp< lps::untyped_multi_action >(x); }
 lps::action normalize_sorts(const lps::action& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action >(x, dataspec); }
 lps::action_label_list normalize_sorts(const lps::action_label_list& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action_label_list >(x, dataspec); }
 void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }
@@ -57,6 +61,11 @@ std::set<data::variable> find_free_variables(const lps::process_initializer& x) 
 std::set<data::function_symbol> find_function_symbols(const lps::specification& x) { return lps::find_function_symbols< lps::specification >(x); }
 std::set<core::identifier_string> find_identifiers(const lps::specification& x) { return lps::find_identifiers< lps::specification >(x); }
 //--- end generated lps overloads ---//
+
+data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const
+{
+  return data::replace_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+}
 
 std::string pp_with_summand_numbers(const specification& x)
 {

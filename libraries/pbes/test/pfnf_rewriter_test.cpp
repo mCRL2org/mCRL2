@@ -146,6 +146,7 @@ void test_pfnf_rewriter2(const std::string& text)
 #else
   bool result1 = pbes2_bool_test(p);
 #endif
+
   pfnf_rewriter R;
   pbes_rewrite(p, R);
 

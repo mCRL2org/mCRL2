@@ -55,12 +55,23 @@ class untyped_possible_sorts: public sort_expression
     }
 };
 
+// prototype declaration
+std::string pp(const untyped_possible_sorts& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_possible_sorts& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(untyped_possible_sorts& t1, untyped_possible_sorts& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class untyped_possible_sorts ---//
 
 } // namespace data

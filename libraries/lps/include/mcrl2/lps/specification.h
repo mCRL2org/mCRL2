@@ -24,10 +24,11 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/aterm_io.h"
+#include "mcrl2/data/detail/io.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/process_initializer.h"
-#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -143,6 +144,7 @@ class specification
     {
       using namespace atermpp;
       atermpp::aterm t = core::detail::load_aterm(filename);
+      t = data::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
@@ -167,8 +169,9 @@ class specification
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time
       assert(is_well_typed(*this));
-      specification tmp(*this);
-      core::detail::save_aterm(specification_to_aterm(tmp), filename, binary);
+      atermpp::aterm t = specification_to_aterm(*this);
+      t = data::detail::remove_index(t);
+      core::detail::save_aterm(t, filename, binary);
     }
 
     /// \brief Returns the linear process of the specification.
@@ -248,8 +251,21 @@ class specification
     }
 };
 
-// template function overloads
+//--- start generated class specification ---//
+// prototype declaration
 std::string pp(const specification& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const specification& x)
+{
+  return out << lps::pp(x);
+}
+//--- end generated class specification ---//
+
+// template function overloads
 std::string pp_with_summand_numbers(const specification& x);
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x);
 std::set<data::variable> find_all_variables(const lps::specification& x);

@@ -78,12 +78,23 @@ bool is_rename_expression(const atermpp::aterm_appl& x)
   return core::detail::gsIsRenameExpr(x);
 }
 
+// prototype declaration
+std::string pp(const rename_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const rename_expression& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(rename_expression& t1, rename_expression& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class rename_expression ---//
 
 } // namespace process

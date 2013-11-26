@@ -21,58 +21,51 @@ namespace data
 namespace detail
 {
 
-/* struct argument_rewriter_struct
-{
-  argument_rewriter_struct()
-  {}
-  
-  data_expression operator()(const data_expression& arg) const
-  {
-     return rewrite(arg);
-  }
-}; */
-
 inline variable_list get_vars(const data_expression &a)
 {
   if (is_variable(a))
   {
-    return make_list(atermpp::aterm_cast<variable>(a));
+    const variable& v(a);
+    return make_list(v);
   }
-  else
+  if (is_function_symbol(a))
   {
-    variable_list l;
-    for(data_expression::const_iterator arg=a.begin(); arg!=a.end(); ++arg)
-    {
-      if (!is_function_symbol(atermpp::aterm_cast<const data_expression>(*arg)))
-      {
-        l= get_vars(atermpp::aterm_cast<const data_expression>(*arg))+l;
-      }
-    }
-    return l;
+    return variable_list();
   }
+  assert(is_application(a));
+  
+  const application& aa(a);
+  variable_list l=get_vars(aa.head());
+  for(application::const_iterator arg=aa.begin(); arg!=aa.end(); ++arg)
+  {
+    if (!is_function_symbol(atermpp::aterm_cast<const data_expression>(*arg)))
+    {
+      l= get_vars(*arg)+l;
+    }
+  }
+  return l;
 }
 
-inline sort_expression residual_sort(const sort_expression &s, size_t no_initial_arguments)
+inline sort_expression residual_sort(const sort_expression &s, size_t no_of_initial_arguments)
 {
-  // Remove no_initial_arguments sort from sort s.
+  // Remove no_of_initial_arguments sort from sort s.
 
   sort_expression result=s;
-  for( ;  no_initial_arguments>0 ; )
+  for( ;  no_of_initial_arguments>0 ; )
   {
     assert(is_function_sort(result));
     const function_sort& sf(result);
     result=sf.codomain();
-    assert(sf.domain().size()<=no_initial_arguments);
-    no_initial_arguments=no_initial_arguments-sf.domain().size();
+    assert(sf.domain().size()<=no_of_initial_arguments);
+    no_of_initial_arguments=no_of_initial_arguments-sf.domain().size();
   }
 
   return result;
-
 }
 
 inline bool get_argument_of_higher_order_term_helper(const data_expression& t, size_t& i, data_expression& result)
 {
-  // t has the shape t #REWR#(....)
+  // t has the shape t application(....)
   if (is_function_symbol(atermpp::aterm_cast<const data_expression>(t[0])))
   {
     const size_t arity = t.function().arity();

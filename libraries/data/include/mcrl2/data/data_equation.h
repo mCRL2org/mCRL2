@@ -118,16 +118,26 @@ typedef atermpp::term_list<data_equation> data_equation_list;
 /// \brief vector of data_equations
 typedef std::vector<data_equation>    data_equation_vector;
 
+// prototype declaration
+std::string pp(const data_equation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const data_equation& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(data_equation& t1, data_equation& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class data_equation ---//
 
 // template function overloads
-std::string pp(const data_equation& x);
 std::string pp(const data_equation_list& x);
 std::string pp(const data_equation_vector& x);
 data::data_equation translate_user_notation(const data::data_equation& x);

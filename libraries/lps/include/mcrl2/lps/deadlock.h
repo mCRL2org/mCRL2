@@ -15,6 +15,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/undefined.h"
 
 namespace mcrl2
 {
@@ -29,13 +30,13 @@ class deadlock
     friend class deadlock_summand;
 
   protected:
-    /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
+    /// \brief The time of the deadlock. If <tt>m_time == data::undefined_real()</tt>
     /// the multi action has no time.
     data::data_expression m_time;
 
   public:
     /// \brief Constructor
-    deadlock(data::data_expression time = data::data_expression())
+    deadlock(data::data_expression time = data::undefined_real())
       : m_time(time)
     {}
 
@@ -43,7 +44,7 @@ class deadlock
     /// \return True if time is available.
     bool has_time() const
     {
-      return m_time != data::data_expression();
+      return m_time != data::undefined_real();
     }
 
     /// \brief Returns the time.
@@ -86,11 +87,31 @@ class deadlock
     }
 };
 
+//--- start generated class deadlock ---//
+/// \brief list of deadlocks
+typedef atermpp::term_list<deadlock> deadlock_list;
+
+/// \brief vector of deadlocks
+typedef std::vector<deadlock>    deadlock_vector;
+
+// prototype declaration
+std::string pp(const deadlock& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const deadlock& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(deadlock& t1, deadlock& t2)
 {
   t1.swap(t2);
 }
+//--- end generated class deadlock ---//
 
 // template function overloads
 std::set<data::variable> find_all_variables(const lps::deadlock& x);

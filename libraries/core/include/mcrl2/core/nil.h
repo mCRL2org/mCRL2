@@ -46,12 +46,32 @@ typedef atermpp::term_list<nil> nil_list;
 /// \brief vector of nils
 typedef std::vector<nil>    nil_vector;
 
+/// \brief Test for a nil expression
+/// \param x A term
+/// \return True if \a x is a nil expression
+inline
+bool is_nil(const atermpp::aterm_appl& x)
+{
+  return core::detail::gsIsNil(x);
+}
+
+// prototype declaration
+std::string pp(const nil& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const nil& x)
+{
+  return out << core::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(nil& t1, nil& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class nil ---//
 
 } // namespace core

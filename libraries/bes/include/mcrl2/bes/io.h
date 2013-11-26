@@ -20,6 +20,8 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/bes2pbes.h"

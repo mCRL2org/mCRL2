@@ -36,14 +36,13 @@ def insert_user_sections(text, labels, user_sections):
     return text
 
 def insert_text_in_file(filename, text, label, handle_user_sections = False):
-    if text[-1] != '\n':
-        text = text + '\n'
+    text = '\n' + text.strip() + '\n'
     """
     Replaces the text between the strings '//--- start %s ---//' % label and '//--- end %s ---//' % label
     with text in the file named filename.
     """
     src = r'//--- start %s ---//.*//--- end %s ---//' % (label, label)
-    dest = ('//--- start %s ---//\n' + text + '//--- end %s ---//') % (label, label)
+    dest = ('//--- start %s ---//' + text + '//--- end %s ---//') % (label, label)
     try:
         old_text = path(filename).text()
         new_text = re.compile(src, re.S).sub(dest, old_text)

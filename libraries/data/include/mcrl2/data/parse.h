@@ -27,6 +27,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/standard_container_utility.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -241,7 +242,7 @@ struct data_expression_actions: public sort_expression_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "DataExpr")) { return application(untyped_identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "whr") && (symbol_name(node.child(2)) == "AssignmentList") && (symbol_name(node.child(3)) == "end")) { return where_clause(parse_DataExpr(node.child(0)), parse_AssignmentList(node.child(2))); }
     report_unexpected_node(node);
-    return data::data_expression();
+    return data::undefined_data_expression();
   }
 
   data::data_expression parse_DataExprUnit(const core::parse_node& node)
@@ -256,7 +257,7 @@ struct data_expression_actions: public sort_expression_actions
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExprUnit")) { return application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExprUnit")) { return application(untyped_identifier(parse_Id(node.child(0))), parse_DataExprUnit(node.child(1))); }
     report_unexpected_node(node);
-    return data::data_expression();
+    return data::undefined_data_expression();
   }
 
   data::data_expression parse_DataValExpr(const core::parse_node& node)

@@ -17,7 +17,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "mcrl2/core/detail/construction_utility.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 namespace mcrl2
 {
@@ -59,6 +60,46 @@ inline
 bool gsIsDataAppl(const atermpp::aterm_appl& Term)
 {
   return Term.function() == function_symbol_DataAppl(Term.function().arity());
+}
+
+// DataVarIdNoIndex
+inline
+const atermpp::function_symbol& function_symbol_DataVarIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("DataVarIdNoIndex", 2);
+  return f;
+}
+
+// OpIdIndex
+inline
+const atermpp::function_symbol& function_symbol_OpIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("OpIdNoIndex", 2);
+  return f;
+}
+
+// ProcVarIdNoIndex
+inline
+const atermpp::function_symbol& function_symbol_ProcVarIdNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("ProcVarIdNoIndex", 2);
+  return f;
+}
+
+// BooleanVariableNoIndex
+inline
+const atermpp::function_symbol& function_symbol_BooleanVariableNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("BooleanVariableNoIndex", 1);
+  return f;
+}
+
+// PropVarInstNoIndex
+inline
+const atermpp::function_symbol& function_symbol_PropVarInstNoIndex()
+{
+  static atermpp::function_symbol f = atermpp::function_symbol("PropVarInstNoIndex", 2);
+  return f;
 }
 
 //--- start generated code ---//
@@ -486,7 +527,7 @@ bool gsIsBooleanTrue(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_BooleanVariable()
 {
-  static atermpp::function_symbol function_symbol_BooleanVariable = atermpp::function_symbol("BooleanVariable", 1);
+  static atermpp::function_symbol function_symbol_BooleanVariable = atermpp::function_symbol("BooleanVariable", 2);
   return function_symbol_BooleanVariable;
 }
 
@@ -598,7 +639,7 @@ bool gsIsDataSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_DataVarId()
 {
-  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 2);
+  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
   return function_symbol_DataVarId;
 }
 
@@ -906,7 +947,7 @@ bool gsIsNu(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_OpId()
 {
-  static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 2);
+  static atermpp::function_symbol function_symbol_OpId = atermpp::function_symbol("OpId", 3);
   return function_symbol_OpId;
 }
 
@@ -1130,7 +1171,7 @@ bool gsIsProcSpec(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_ProcVarId()
 {
-  static atermpp::function_symbol function_symbol_ProcVarId = atermpp::function_symbol("ProcVarId", 2);
+  static atermpp::function_symbol function_symbol_ProcVarId = atermpp::function_symbol("ProcVarId", 3);
   return function_symbol_ProcVarId;
 }
 
@@ -1200,7 +1241,7 @@ bool gsIsPropVarDecl(const atermpp::aterm_appl& Term)
 inline
 const atermpp::function_symbol& function_symbol_PropVarInst()
 {
-  static atermpp::function_symbol function_symbol_PropVarInst = atermpp::function_symbol("PropVarInst", 2);
+  static atermpp::function_symbol function_symbol_PropVarInst = atermpp::function_symbol("PropVarInst", 3);
   return function_symbol_PropVarInst;
 }
 
@@ -1953,813 +1994,813 @@ bool gsIsWhr(const atermpp::aterm_appl& Term)
 }
 
 inline
-aterm_appl gsMakeActAnd(const aterm_appl& ActFrm_0, const aterm_appl& ActFrm_1)
+aterm_appl gsMakeActAnd(const aterm& ActFrm_0, const aterm& ActFrm_1)
 {
-  return term_appl<aterm>(function_symbol_ActAnd(), ActFrm_0, ActFrm_1);
+  return aterm_appl(function_symbol_ActAnd(), ActFrm_0, ActFrm_1);
 }
 
 inline
-aterm_appl gsMakeActAt(const aterm_appl& ActFrm_0, const aterm_appl& DataExpr_1)
+aterm_appl gsMakeActAt(const aterm& ActFrm_0, const aterm& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_ActAt(), ActFrm_0, DataExpr_1);
+  return aterm_appl(function_symbol_ActAt(), ActFrm_0, DataExpr_1);
 }
 
 inline
-aterm_appl gsMakeActExists(const aterm_list& DataVarId_0, const aterm_appl& ActFrm_1)
+aterm_appl gsMakeActExists(const aterm_list& DataVarId_0, const aterm& ActFrm_1)
 {
-  return term_appl<aterm>(function_symbol_ActExists(), DataVarId_0, ActFrm_1);
+  return aterm_appl(function_symbol_ActExists(), DataVarId_0, ActFrm_1);
 }
 
 inline
 aterm_appl gsMakeActFalse()
 {
-  return term_appl<aterm>(function_symbol_ActFalse());
+  return aterm_appl(function_symbol_ActFalse());
 }
 
 inline
-aterm_appl gsMakeActForall(const aterm_list& DataVarId_0, const aterm_appl& ActFrm_1)
+aterm_appl gsMakeActForall(const aterm_list& DataVarId_0, const aterm& ActFrm_1)
 {
-  return term_appl<aterm>(function_symbol_ActForall(), DataVarId_0, ActFrm_1);
+  return aterm_appl(function_symbol_ActForall(), DataVarId_0, ActFrm_1);
 }
 
 inline
-aterm_appl gsMakeActId(const aterm_appl& String_0, const aterm_list& SortExpr_1)
+aterm_appl gsMakeActId(const aterm& String_0, const aterm_list& SortExpr_1)
 {
-  return term_appl<aterm>(function_symbol_ActId(), String_0, SortExpr_1);
+  return aterm_appl(function_symbol_ActId(), String_0, SortExpr_1);
 }
 
 inline
-aterm_appl gsMakeActImp(const aterm_appl& ActFrm_0, const aterm_appl& ActFrm_1)
+aterm_appl gsMakeActImp(const aterm& ActFrm_0, const aterm& ActFrm_1)
 {
-  return term_appl<aterm>(function_symbol_ActImp(), ActFrm_0, ActFrm_1);
+  return aterm_appl(function_symbol_ActImp(), ActFrm_0, ActFrm_1);
 }
 
 inline
 aterm_appl gsMakeActMultAct(const aterm_list& Action_0)
 {
-  return term_appl<aterm>(function_symbol_ActMultAct(), Action_0);
+  return aterm_appl(function_symbol_ActMultAct(), Action_0);
 }
 
 inline
-aterm_appl gsMakeActNot(const aterm_appl& ActFrm_0)
+aterm_appl gsMakeActNot(const aterm& ActFrm_0)
 {
-  return term_appl<aterm>(function_symbol_ActNot(), ActFrm_0);
+  return aterm_appl(function_symbol_ActNot(), ActFrm_0);
 }
 
 inline
-aterm_appl gsMakeActOr(const aterm_appl& ActFrm_0, const aterm_appl& ActFrm_1)
+aterm_appl gsMakeActOr(const aterm& ActFrm_0, const aterm& ActFrm_1)
 {
-  return term_appl<aterm>(function_symbol_ActOr(), ActFrm_0, ActFrm_1);
+  return aterm_appl(function_symbol_ActOr(), ActFrm_0, ActFrm_1);
 }
 
 inline
 aterm_appl gsMakeActSpec(const aterm_list& ActId_0)
 {
-  return term_appl<aterm>(function_symbol_ActSpec(), ActId_0);
+  return aterm_appl(function_symbol_ActSpec(), ActId_0);
 }
 
 inline
 aterm_appl gsMakeActTrue()
 {
-  return term_appl<aterm>(function_symbol_ActTrue());
+  return aterm_appl(function_symbol_ActTrue());
 }
 
 inline
-aterm_appl gsMakeAction(const aterm_appl& ActId_0, const aterm_list& DataExpr_1)
+aterm_appl gsMakeAction(const aterm& ActId_0, const aterm_list& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Action(), ActId_0, DataExpr_1);
+  return aterm_appl(function_symbol_Action(), ActId_0, DataExpr_1);
 }
 
 inline
-aterm_appl gsMakeActionRenameRule(const aterm_list& DataVarId_0, const aterm_appl& DataExpr_1, const aterm_appl& ParamIdOrAction_2, const aterm_appl& ActionRenameRuleRHS_3)
+aterm_appl gsMakeActionRenameRule(const aterm_list& DataVarId_0, const aterm& DataExpr_1, const aterm& ParamIdOrAction_2, const aterm& ActionRenameRuleRHS_3)
 {
-  return term_appl<aterm>(function_symbol_ActionRenameRule(), DataVarId_0, DataExpr_1, ParamIdOrAction_2, ActionRenameRuleRHS_3);
+  return aterm_appl(function_symbol_ActionRenameRule(), DataVarId_0, DataExpr_1, ParamIdOrAction_2, ActionRenameRuleRHS_3);
 }
 
 inline
 aterm_appl gsMakeActionRenameRules(const aterm_list& ActionRenameRule_0)
 {
-  return term_appl<aterm>(function_symbol_ActionRenameRules(), ActionRenameRule_0);
+  return aterm_appl(function_symbol_ActionRenameRules(), ActionRenameRule_0);
 }
 
 inline
-aterm_appl gsMakeActionRenameSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpec_1, const aterm_appl& ActionRenameRules_2)
+aterm_appl gsMakeActionRenameSpec(const aterm& DataSpec_0, const aterm& ActSpec_1, const aterm& ActionRenameRules_2)
 {
-  return term_appl<aterm>(function_symbol_ActionRenameSpec(), DataSpec_0, ActSpec_1, ActionRenameRules_2);
+  return aterm_appl(function_symbol_ActionRenameSpec(), DataSpec_0, ActSpec_1, ActionRenameRules_2);
 }
 
 inline
-aterm_appl gsMakeAllow(const aterm_list& MultActName_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeAllow(const aterm_list& MultActName_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Allow(), MultActName_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Allow(), MultActName_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeAtTime(const aterm_appl& ProcExpr_0, const aterm_appl& DataExpr_1)
+aterm_appl gsMakeAtTime(const aterm& ProcExpr_0, const aterm& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_AtTime(), ProcExpr_0, DataExpr_1);
+  return aterm_appl(function_symbol_AtTime(), ProcExpr_0, DataExpr_1);
 }
 
 inline
-aterm_appl gsMakeBES(const aterm_list& BooleanEquation_0, const aterm_appl& BooleanExpression_1)
+aterm_appl gsMakeBES(const aterm_list& BooleanEquation_0, const aterm& BooleanExpression_1)
 {
-  return term_appl<aterm>(function_symbol_BES(), BooleanEquation_0, BooleanExpression_1);
+  return aterm_appl(function_symbol_BES(), BooleanEquation_0, BooleanExpression_1);
 }
 
 inline
-aterm_appl gsMakeBInit(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeBInit(const aterm& ProcExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_BInit(), ProcExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_BInit(), ProcExpr_0, ProcExpr_1);
 }
 
 inline
 aterm_appl gsMakeBagComp()
 {
-  return term_appl<aterm>(function_symbol_BagComp());
+  return aterm_appl(function_symbol_BagComp());
 }
 
 inline
-aterm_appl gsMakeBinder(const aterm_appl& BindingOperator_0, const aterm_list& DataVarId_1, const aterm_appl& DataExpr_2)
+aterm_appl gsMakeBinder(const aterm& BindingOperator_0, const aterm_list& DataVarId_1, const aterm& DataExpr_2)
 {
-  return term_appl<aterm>(function_symbol_Binder(), BindingOperator_0, DataVarId_1, DataExpr_2);
+  return aterm_appl(function_symbol_Binder(), BindingOperator_0, DataVarId_1, DataExpr_2);
 }
 
 inline
-aterm_appl gsMakeBlock(const aterm_list& String_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeBlock(const aterm_list& String_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Block(), String_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Block(), String_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeBooleanAnd(const aterm_appl& BooleanExpression_0, const aterm_appl& BooleanExpression_1)
+aterm_appl gsMakeBooleanAnd(const aterm& BooleanExpression_0, const aterm& BooleanExpression_1)
 {
-  return term_appl<aterm>(function_symbol_BooleanAnd(), BooleanExpression_0, BooleanExpression_1);
+  return aterm_appl(function_symbol_BooleanAnd(), BooleanExpression_0, BooleanExpression_1);
 }
 
 inline
-aterm_appl gsMakeBooleanEquation(const aterm_appl& FixPoint_0, const aterm_appl& BooleanVariable_1, const aterm_appl& BooleanExpression_2)
+aterm_appl gsMakeBooleanEquation(const aterm& FixPoint_0, const aterm& BooleanVariable_1, const aterm& BooleanExpression_2)
 {
-  return term_appl<aterm>(function_symbol_BooleanEquation(), FixPoint_0, BooleanVariable_1, BooleanExpression_2);
+  return aterm_appl(function_symbol_BooleanEquation(), FixPoint_0, BooleanVariable_1, BooleanExpression_2);
 }
 
 inline
 aterm_appl gsMakeBooleanFalse()
 {
-  return term_appl<aterm>(function_symbol_BooleanFalse());
+  return aterm_appl(function_symbol_BooleanFalse());
 }
 
 inline
-aterm_appl gsMakeBooleanImp(const aterm_appl& BooleanExpression_0, const aterm_appl& BooleanExpression_1)
+aterm_appl gsMakeBooleanImp(const aterm& BooleanExpression_0, const aterm& BooleanExpression_1)
 {
-  return term_appl<aterm>(function_symbol_BooleanImp(), BooleanExpression_0, BooleanExpression_1);
+  return aterm_appl(function_symbol_BooleanImp(), BooleanExpression_0, BooleanExpression_1);
 }
 
 inline
-aterm_appl gsMakeBooleanNot(const aterm_appl& BooleanExpression_0)
+aterm_appl gsMakeBooleanNot(const aterm& BooleanExpression_0)
 {
-  return term_appl<aterm>(function_symbol_BooleanNot(), BooleanExpression_0);
+  return aterm_appl(function_symbol_BooleanNot(), BooleanExpression_0);
 }
 
 inline
-aterm_appl gsMakeBooleanOr(const aterm_appl& BooleanExpression_0, const aterm_appl& BooleanExpression_1)
+aterm_appl gsMakeBooleanOr(const aterm& BooleanExpression_0, const aterm& BooleanExpression_1)
 {
-  return term_appl<aterm>(function_symbol_BooleanOr(), BooleanExpression_0, BooleanExpression_1);
+  return aterm_appl(function_symbol_BooleanOr(), BooleanExpression_0, BooleanExpression_1);
 }
 
 inline
 aterm_appl gsMakeBooleanTrue()
 {
-  return term_appl<aterm>(function_symbol_BooleanTrue());
+  return aterm_appl(function_symbol_BooleanTrue());
 }
 
 inline
-aterm_appl gsMakeBooleanVariable(const aterm_appl& String_0)
+aterm_appl gsMakeBooleanVariable(const aterm& String_0, const aterm& Number_1)
 {
-  return term_appl<aterm>(function_symbol_BooleanVariable(), String_0);
+  return aterm_appl(function_symbol_BooleanVariable(), String_0, Number_1);
 }
 
 inline
-aterm_appl gsMakeChoice(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeChoice(const aterm& ProcExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Choice(), ProcExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Choice(), ProcExpr_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeComm(const aterm_list& CommExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeComm(const aterm_list& CommExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Comm(), CommExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Comm(), CommExpr_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeCommExpr(const aterm_appl& MultActName_0, const aterm_appl& String_1)
+aterm_appl gsMakeCommExpr(const aterm& MultActName_0, const aterm& String_1)
 {
-  return term_appl<aterm>(function_symbol_CommExpr(), MultActName_0, String_1);
+  return aterm_appl(function_symbol_CommExpr(), MultActName_0, String_1);
 }
 
 inline
 aterm_appl gsMakeConsSpec(const aterm_list& OpId_0)
 {
-  return term_appl<aterm>(function_symbol_ConsSpec(), OpId_0);
+  return aterm_appl(function_symbol_ConsSpec(), OpId_0);
 }
 
 inline
-aterm_appl gsMakeDataEqn(const aterm_list& DataVarId_0, const aterm_appl& DataExpr_1, const aterm_appl& DataExpr_2, const aterm_appl& DataExpr_3)
+aterm_appl gsMakeDataEqn(const aterm_list& DataVarId_0, const aterm& DataExpr_1, const aterm& DataExpr_2, const aterm& DataExpr_3)
 {
-  return term_appl<aterm>(function_symbol_DataEqn(), DataVarId_0, DataExpr_1, DataExpr_2, DataExpr_3);
+  return aterm_appl(function_symbol_DataEqn(), DataVarId_0, DataExpr_1, DataExpr_2, DataExpr_3);
 }
 
 inline
 aterm_appl gsMakeDataEqnSpec(const aterm_list& DataEqn_0)
 {
-  return term_appl<aterm>(function_symbol_DataEqnSpec(), DataEqn_0);
+  return aterm_appl(function_symbol_DataEqnSpec(), DataEqn_0);
 }
 
 inline
-aterm_appl gsMakeDataSpec(const aterm_appl& SortSpec_0, const aterm_appl& ConsSpec_1, const aterm_appl& MapSpec_2, const aterm_appl& DataEqnSpec_3)
+aterm_appl gsMakeDataSpec(const aterm& SortSpec_0, const aterm& ConsSpec_1, const aterm& MapSpec_2, const aterm& DataEqnSpec_3)
 {
-  return term_appl<aterm>(function_symbol_DataSpec(), SortSpec_0, ConsSpec_1, MapSpec_2, DataEqnSpec_3);
+  return aterm_appl(function_symbol_DataSpec(), SortSpec_0, ConsSpec_1, MapSpec_2, DataEqnSpec_3);
 }
 
 inline
-aterm_appl gsMakeDataVarId(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeDataVarId(const aterm& String_0, const aterm& SortExpr_1, const aterm& Number_2)
 {
-  return term_appl<aterm>(function_symbol_DataVarId(), String_0, SortExpr_1);
+  return aterm_appl(function_symbol_DataVarId(), String_0, SortExpr_1, Number_2);
 }
 
 inline
-aterm_appl gsMakeDataVarIdInit(const aterm_appl& DataVarId_0, const aterm_appl& DataExpr_1)
+aterm_appl gsMakeDataVarIdInit(const aterm& DataVarId_0, const aterm& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_DataVarIdInit(), DataVarId_0, DataExpr_1);
+  return aterm_appl(function_symbol_DataVarIdInit(), DataVarId_0, DataExpr_1);
 }
 
 inline
 aterm_appl gsMakeDelta()
 {
-  return term_appl<aterm>(function_symbol_Delta());
+  return aterm_appl(function_symbol_Delta());
 }
 
 inline
 aterm_appl gsMakeExists()
 {
-  return term_appl<aterm>(function_symbol_Exists());
+  return aterm_appl(function_symbol_Exists());
 }
 
 inline
 aterm_appl gsMakeForall()
 {
-  return term_appl<aterm>(function_symbol_Forall());
+  return aterm_appl(function_symbol_Forall());
 }
 
 inline
 aterm_appl gsMakeGlobVarSpec(const aterm_list& DataVarId_0)
 {
-  return term_appl<aterm>(function_symbol_GlobVarSpec(), DataVarId_0);
+  return aterm_appl(function_symbol_GlobVarSpec(), DataVarId_0);
 }
 
 inline
-aterm_appl gsMakeHide(const aterm_list& String_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeHide(const aterm_list& String_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Hide(), String_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Hide(), String_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeIfThen(const aterm_appl& DataExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeIfThen(const aterm& DataExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_IfThen(), DataExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_IfThen(), DataExpr_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeIfThenElse(const aterm_appl& DataExpr_0, const aterm_appl& ProcExpr_1, const aterm_appl& ProcExpr_2)
+aterm_appl gsMakeIfThenElse(const aterm& DataExpr_0, const aterm& ProcExpr_1, const aterm& ProcExpr_2)
 {
-  return term_appl<aterm>(function_symbol_IfThenElse(), DataExpr_0, ProcExpr_1, ProcExpr_2);
+  return aterm_appl(function_symbol_IfThenElse(), DataExpr_0, ProcExpr_1, ProcExpr_2);
 }
 
 inline
-aterm_appl gsMakeLMerge(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeLMerge(const aterm& ProcExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_LMerge(), ProcExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_LMerge(), ProcExpr_0, ProcExpr_1);
 }
 
 inline
 aterm_appl gsMakeLambda()
 {
-  return term_appl<aterm>(function_symbol_Lambda());
+  return aterm_appl(function_symbol_Lambda());
 }
 
 inline
-aterm_appl gsMakeLinProcSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpec_1, const aterm_appl& GlobVarSpec_2, const aterm_appl& LinearProcess_3, const aterm_appl& LinearProcessInit_4)
+aterm_appl gsMakeLinProcSpec(const aterm& DataSpec_0, const aterm& ActSpec_1, const aterm& GlobVarSpec_2, const aterm& LinearProcess_3, const aterm& LinearProcessInit_4)
 {
-  return term_appl<aterm>(function_symbol_LinProcSpec(), DataSpec_0, ActSpec_1, GlobVarSpec_2, LinearProcess_3, LinearProcessInit_4);
+  return aterm_appl(function_symbol_LinProcSpec(), DataSpec_0, ActSpec_1, GlobVarSpec_2, LinearProcess_3, LinearProcessInit_4);
 }
 
 inline
 aterm_appl gsMakeLinearProcess(const aterm_list& DataVarId_0, const aterm_list& LinearProcessSummand_1)
 {
-  return term_appl<aterm>(function_symbol_LinearProcess(), DataVarId_0, LinearProcessSummand_1);
+  return aterm_appl(function_symbol_LinearProcess(), DataVarId_0, LinearProcessSummand_1);
 }
 
 inline
 aterm_appl gsMakeLinearProcessInit(const aterm_list& DataVarIdInit_0)
 {
-  return term_appl<aterm>(function_symbol_LinearProcessInit(), DataVarIdInit_0);
+  return aterm_appl(function_symbol_LinearProcessInit(), DataVarIdInit_0);
 }
 
 inline
-aterm_appl gsMakeLinearProcessSummand(const aterm_list& DataVarId_0, const aterm_appl& DataExpr_1, const aterm_appl& MultActOrDelta_2, const aterm_appl& DataExprOrNil_3, const aterm_list& DataVarIdInit_4)
+aterm_appl gsMakeLinearProcessSummand(const aterm_list& DataVarId_0, const aterm& DataExpr_1, const aterm& MultActOrDelta_2, const aterm& DataExprOrNil_3, const aterm_list& DataVarIdInit_4)
 {
-  return term_appl<aterm>(function_symbol_LinearProcessSummand(), DataVarId_0, DataExpr_1, MultActOrDelta_2, DataExprOrNil_3, DataVarIdInit_4);
+  return aterm_appl(function_symbol_LinearProcessSummand(), DataVarId_0, DataExpr_1, MultActOrDelta_2, DataExprOrNil_3, DataVarIdInit_4);
 }
 
 inline
 aterm_appl gsMakeMapSpec(const aterm_list& OpId_0)
 {
-  return term_appl<aterm>(function_symbol_MapSpec(), OpId_0);
+  return aterm_appl(function_symbol_MapSpec(), OpId_0);
 }
 
 inline
-aterm_appl gsMakeMerge(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeMerge(const aterm& ProcExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Merge(), ProcExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Merge(), ProcExpr_0, ProcExpr_1);
 }
 
 inline
 aterm_appl gsMakeMu()
 {
-  return term_appl<aterm>(function_symbol_Mu());
+  return aterm_appl(function_symbol_Mu());
 }
 
 inline
 aterm_appl gsMakeMultAct(const aterm_list& Action_0)
 {
-  return term_appl<aterm>(function_symbol_MultAct(), Action_0);
+  return aterm_appl(function_symbol_MultAct(), Action_0);
 }
 
 inline
 aterm_appl gsMakeMultActName(const aterm_list& String_0)
 {
-  return term_appl<aterm>(function_symbol_MultActName(), String_0);
+  return aterm_appl(function_symbol_MultActName(), String_0);
 }
 
 inline
 aterm_appl gsMakeNil()
 {
-  return term_appl<aterm>(function_symbol_Nil());
+  return aterm_appl(function_symbol_Nil());
 }
 
 inline
 aterm_appl gsMakeNu()
 {
-  return term_appl<aterm>(function_symbol_Nu());
+  return aterm_appl(function_symbol_Nu());
 }
 
 inline
-aterm_appl gsMakeOpId(const aterm_appl& String_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeOpId(const aterm& String_0, const aterm& SortExpr_1, const aterm& Number_2)
 {
-  return term_appl<aterm>(function_symbol_OpId(), String_0, SortExpr_1);
+  return aterm_appl(function_symbol_OpId(), String_0, SortExpr_1, Number_2);
 }
 
 inline
-aterm_appl gsMakePBES(const aterm_appl& DataSpec_0, const aterm_appl& GlobVarSpec_1, const aterm_appl& PBEqnSpec_2, const aterm_appl& PBInit_3)
+aterm_appl gsMakePBES(const aterm& DataSpec_0, const aterm& GlobVarSpec_1, const aterm& PBEqnSpec_2, const aterm& PBInit_3)
 {
-  return term_appl<aterm>(function_symbol_PBES(), DataSpec_0, GlobVarSpec_1, PBEqnSpec_2, PBInit_3);
+  return aterm_appl(function_symbol_PBES(), DataSpec_0, GlobVarSpec_1, PBEqnSpec_2, PBInit_3);
 }
 
 inline
-aterm_appl gsMakePBESAnd(const aterm_appl& PBExpr_0, const aterm_appl& PBExpr_1)
+aterm_appl gsMakePBESAnd(const aterm& PBExpr_0, const aterm& PBExpr_1)
 {
-  return term_appl<aterm>(function_symbol_PBESAnd(), PBExpr_0, PBExpr_1);
+  return aterm_appl(function_symbol_PBESAnd(), PBExpr_0, PBExpr_1);
 }
 
 inline
-aterm_appl gsMakePBESExists(const aterm_list& DataVarId_0, const aterm_appl& PBExpr_1)
+aterm_appl gsMakePBESExists(const aterm_list& DataVarId_0, const aterm& PBExpr_1)
 {
-  return term_appl<aterm>(function_symbol_PBESExists(), DataVarId_0, PBExpr_1);
+  return aterm_appl(function_symbol_PBESExists(), DataVarId_0, PBExpr_1);
 }
 
 inline
 aterm_appl gsMakePBESFalse()
 {
-  return term_appl<aterm>(function_symbol_PBESFalse());
+  return aterm_appl(function_symbol_PBESFalse());
 }
 
 inline
-aterm_appl gsMakePBESForall(const aterm_list& DataVarId_0, const aterm_appl& PBExpr_1)
+aterm_appl gsMakePBESForall(const aterm_list& DataVarId_0, const aterm& PBExpr_1)
 {
-  return term_appl<aterm>(function_symbol_PBESForall(), DataVarId_0, PBExpr_1);
+  return aterm_appl(function_symbol_PBESForall(), DataVarId_0, PBExpr_1);
 }
 
 inline
-aterm_appl gsMakePBESImp(const aterm_appl& PBExpr_0, const aterm_appl& PBExpr_1)
+aterm_appl gsMakePBESImp(const aterm& PBExpr_0, const aterm& PBExpr_1)
 {
-  return term_appl<aterm>(function_symbol_PBESImp(), PBExpr_0, PBExpr_1);
+  return aterm_appl(function_symbol_PBESImp(), PBExpr_0, PBExpr_1);
 }
 
 inline
-aterm_appl gsMakePBESNot(const aterm_appl& PBExpr_0)
+aterm_appl gsMakePBESNot(const aterm& PBExpr_0)
 {
-  return term_appl<aterm>(function_symbol_PBESNot(), PBExpr_0);
+  return aterm_appl(function_symbol_PBESNot(), PBExpr_0);
 }
 
 inline
-aterm_appl gsMakePBESOr(const aterm_appl& PBExpr_0, const aterm_appl& PBExpr_1)
+aterm_appl gsMakePBESOr(const aterm& PBExpr_0, const aterm& PBExpr_1)
 {
-  return term_appl<aterm>(function_symbol_PBESOr(), PBExpr_0, PBExpr_1);
+  return aterm_appl(function_symbol_PBESOr(), PBExpr_0, PBExpr_1);
 }
 
 inline
 aterm_appl gsMakePBESTrue()
 {
-  return term_appl<aterm>(function_symbol_PBESTrue());
+  return aterm_appl(function_symbol_PBESTrue());
 }
 
 inline
-aterm_appl gsMakePBEqn(const aterm_appl& FixPoint_0, const aterm_appl& PropVarDecl_1, const aterm_appl& PBExpr_2)
+aterm_appl gsMakePBEqn(const aterm& FixPoint_0, const aterm& PropVarDecl_1, const aterm& PBExpr_2)
 {
-  return term_appl<aterm>(function_symbol_PBEqn(), FixPoint_0, PropVarDecl_1, PBExpr_2);
+  return aterm_appl(function_symbol_PBEqn(), FixPoint_0, PropVarDecl_1, PBExpr_2);
 }
 
 inline
 aterm_appl gsMakePBEqnSpec(const aterm_list& PBEqn_0)
 {
-  return term_appl<aterm>(function_symbol_PBEqnSpec(), PBEqn_0);
+  return aterm_appl(function_symbol_PBEqnSpec(), PBEqn_0);
 }
 
 inline
-aterm_appl gsMakePBInit(const aterm_appl& PropVarInst_0)
+aterm_appl gsMakePBInit(const aterm& PropVarInst_0)
 {
-  return term_appl<aterm>(function_symbol_PBInit(), PropVarInst_0);
+  return aterm_appl(function_symbol_PBInit(), PropVarInst_0);
 }
 
 inline
-aterm_appl gsMakeProcEqn(const aterm_appl& ProcVarId_0, const aterm_list& DataVarId_1, const aterm_appl& ProcExpr_2)
+aterm_appl gsMakeProcEqn(const aterm& ProcVarId_0, const aterm_list& DataVarId_1, const aterm& ProcExpr_2)
 {
-  return term_appl<aterm>(function_symbol_ProcEqn(), ProcVarId_0, DataVarId_1, ProcExpr_2);
+  return aterm_appl(function_symbol_ProcEqn(), ProcVarId_0, DataVarId_1, ProcExpr_2);
 }
 
 inline
 aterm_appl gsMakeProcEqnSpec(const aterm_list& ProcEqn_0)
 {
-  return term_appl<aterm>(function_symbol_ProcEqnSpec(), ProcEqn_0);
+  return aterm_appl(function_symbol_ProcEqnSpec(), ProcEqn_0);
 }
 
 inline
-aterm_appl gsMakeProcSpec(const aterm_appl& DataSpec_0, const aterm_appl& ActSpec_1, const aterm_appl& GlobVarSpec_2, const aterm_appl& ProcEqnSpec_3, const aterm_appl& ProcInit_4)
+aterm_appl gsMakeProcSpec(const aterm& DataSpec_0, const aterm& ActSpec_1, const aterm& GlobVarSpec_2, const aterm& ProcEqnSpec_3, const aterm& ProcInit_4)
 {
-  return term_appl<aterm>(function_symbol_ProcSpec(), DataSpec_0, ActSpec_1, GlobVarSpec_2, ProcEqnSpec_3, ProcInit_4);
+  return aterm_appl(function_symbol_ProcSpec(), DataSpec_0, ActSpec_1, GlobVarSpec_2, ProcEqnSpec_3, ProcInit_4);
 }
 
 inline
-aterm_appl gsMakeProcVarId(const aterm_appl& String_0, const aterm_list& DataVarId_1)
+aterm_appl gsMakeProcVarId(const aterm& String_0, const aterm_list& DataVarId_1, const aterm& Number_2)
 {
-  return term_appl<aterm>(function_symbol_ProcVarId(), String_0, DataVarId_1);
+  return aterm_appl(function_symbol_ProcVarId(), String_0, DataVarId_1, Number_2);
 }
 
 inline
-aterm_appl gsMakeProcess(const aterm_appl& ProcVarId_0, const aterm_list& DataExpr_1)
+aterm_appl gsMakeProcess(const aterm& ProcVarId_0, const aterm_list& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Process(), ProcVarId_0, DataExpr_1);
+  return aterm_appl(function_symbol_Process(), ProcVarId_0, DataExpr_1);
 }
 
 inline
-aterm_appl gsMakeProcessAssignment(const aterm_appl& ProcVarId_0, const aterm_list& DataVarIdInit_1)
+aterm_appl gsMakeProcessAssignment(const aterm& ProcVarId_0, const aterm_list& DataVarIdInit_1)
 {
-  return term_appl<aterm>(function_symbol_ProcessAssignment(), ProcVarId_0, DataVarIdInit_1);
+  return aterm_appl(function_symbol_ProcessAssignment(), ProcVarId_0, DataVarIdInit_1);
 }
 
 inline
-aterm_appl gsMakeProcessInit(const aterm_appl& ProcExpr_0)
+aterm_appl gsMakeProcessInit(const aterm& ProcExpr_0)
 {
-  return term_appl<aterm>(function_symbol_ProcessInit(), ProcExpr_0);
+  return aterm_appl(function_symbol_ProcessInit(), ProcExpr_0);
 }
 
 inline
-aterm_appl gsMakePropVarDecl(const aterm_appl& String_0, const aterm_list& DataVarId_1)
+aterm_appl gsMakePropVarDecl(const aterm& String_0, const aterm_list& DataVarId_1)
 {
-  return term_appl<aterm>(function_symbol_PropVarDecl(), String_0, DataVarId_1);
+  return aterm_appl(function_symbol_PropVarDecl(), String_0, DataVarId_1);
 }
 
 inline
-aterm_appl gsMakePropVarInst(const aterm_appl& String_0, const aterm_list& DataExpr_1)
+aterm_appl gsMakePropVarInst(const aterm& String_0, const aterm_list& DataExpr_1, const aterm& Number_2)
 {
-  return term_appl<aterm>(function_symbol_PropVarInst(), String_0, DataExpr_1);
+  return aterm_appl(function_symbol_PropVarInst(), String_0, DataExpr_1, Number_2);
 }
 
 inline
-aterm_appl gsMakeRegAlt(const aterm_appl& RegFrm_0, const aterm_appl& RegFrm_1)
+aterm_appl gsMakeRegAlt(const aterm& RegFrm_0, const aterm& RegFrm_1)
 {
-  return term_appl<aterm>(function_symbol_RegAlt(), RegFrm_0, RegFrm_1);
+  return aterm_appl(function_symbol_RegAlt(), RegFrm_0, RegFrm_1);
 }
 
 inline
 aterm_appl gsMakeRegNil()
 {
-  return term_appl<aterm>(function_symbol_RegNil());
+  return aterm_appl(function_symbol_RegNil());
 }
 
 inline
-aterm_appl gsMakeRegSeq(const aterm_appl& RegFrm_0, const aterm_appl& RegFrm_1)
+aterm_appl gsMakeRegSeq(const aterm& RegFrm_0, const aterm& RegFrm_1)
 {
-  return term_appl<aterm>(function_symbol_RegSeq(), RegFrm_0, RegFrm_1);
+  return aterm_appl(function_symbol_RegSeq(), RegFrm_0, RegFrm_1);
 }
 
 inline
-aterm_appl gsMakeRegTrans(const aterm_appl& RegFrm_0)
+aterm_appl gsMakeRegTrans(const aterm& RegFrm_0)
 {
-  return term_appl<aterm>(function_symbol_RegTrans(), RegFrm_0);
+  return aterm_appl(function_symbol_RegTrans(), RegFrm_0);
 }
 
 inline
-aterm_appl gsMakeRegTransOrNil(const aterm_appl& RegFrm_0)
+aterm_appl gsMakeRegTransOrNil(const aterm& RegFrm_0)
 {
-  return term_appl<aterm>(function_symbol_RegTransOrNil(), RegFrm_0);
+  return aterm_appl(function_symbol_RegTransOrNil(), RegFrm_0);
 }
 
 inline
-aterm_appl gsMakeRename(const aterm_list& RenameExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeRename(const aterm_list& RenameExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Rename(), RenameExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Rename(), RenameExpr_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeRenameExpr(const aterm_appl& String_0, const aterm_appl& String_1)
+aterm_appl gsMakeRenameExpr(const aterm& String_0, const aterm& String_1)
 {
-  return term_appl<aterm>(function_symbol_RenameExpr(), String_0, String_1);
+  return aterm_appl(function_symbol_RenameExpr(), String_0, String_1);
 }
 
 inline
-aterm_appl gsMakeSeq(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeSeq(const aterm& ProcExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Seq(), ProcExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Seq(), ProcExpr_0, ProcExpr_1);
 }
 
 inline
 aterm_appl gsMakeSetComp()
 {
-  return term_appl<aterm>(function_symbol_SetComp());
+  return aterm_appl(function_symbol_SetComp());
 }
 
 inline
-aterm_appl gsMakeSortArrow(const aterm_list& SortExpr_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeSortArrow(const aterm_list& SortExpr_0, const aterm& SortExpr_1)
 {
-  return term_appl<aterm>(function_symbol_SortArrow(), SortExpr_0, SortExpr_1);
+  return aterm_appl(function_symbol_SortArrow(), SortExpr_0, SortExpr_1);
 }
 
 inline
 aterm_appl gsMakeSortBag()
 {
-  return term_appl<aterm>(function_symbol_SortBag());
+  return aterm_appl(function_symbol_SortBag());
 }
 
 inline
-aterm_appl gsMakeSortCons(const aterm_appl& SortConsType_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeSortCons(const aterm& SortConsType_0, const aterm& SortExpr_1)
 {
-  return term_appl<aterm>(function_symbol_SortCons(), SortConsType_0, SortExpr_1);
+  return aterm_appl(function_symbol_SortCons(), SortConsType_0, SortExpr_1);
 }
 
 inline
 aterm_appl gsMakeSortFBag()
 {
-  return term_appl<aterm>(function_symbol_SortFBag());
+  return aterm_appl(function_symbol_SortFBag());
 }
 
 inline
 aterm_appl gsMakeSortFSet()
 {
-  return term_appl<aterm>(function_symbol_SortFSet());
+  return aterm_appl(function_symbol_SortFSet());
 }
 
 inline
-aterm_appl gsMakeSortId(const aterm_appl& String_0)
+aterm_appl gsMakeSortId(const aterm& String_0)
 {
-  return term_appl<aterm>(function_symbol_SortId(), String_0);
+  return aterm_appl(function_symbol_SortId(), String_0);
 }
 
 inline
 aterm_appl gsMakeSortList()
 {
-  return term_appl<aterm>(function_symbol_SortList());
+  return aterm_appl(function_symbol_SortList());
 }
 
 inline
-aterm_appl gsMakeSortRef(const aterm_appl& SortId_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeSortRef(const aterm& SortId_0, const aterm& SortExpr_1)
 {
-  return term_appl<aterm>(function_symbol_SortRef(), SortId_0, SortExpr_1);
+  return aterm_appl(function_symbol_SortRef(), SortId_0, SortExpr_1);
 }
 
 inline
 aterm_appl gsMakeSortSet()
 {
-  return term_appl<aterm>(function_symbol_SortSet());
+  return aterm_appl(function_symbol_SortSet());
 }
 
 inline
 aterm_appl gsMakeSortSpec(const aterm_list& SortDecl_0)
 {
-  return term_appl<aterm>(function_symbol_SortSpec(), SortDecl_0);
+  return aterm_appl(function_symbol_SortSpec(), SortDecl_0);
 }
 
 inline
 aterm_appl gsMakeSortStruct(const aterm_list& StructCons_0)
 {
-  return term_appl<aterm>(function_symbol_SortStruct(), StructCons_0);
+  return aterm_appl(function_symbol_SortStruct(), StructCons_0);
 }
 
 inline
-aterm_appl gsMakeStateAnd(const aterm_appl& StateFrm_0, const aterm_appl& StateFrm_1)
+aterm_appl gsMakeStateAnd(const aterm& StateFrm_0, const aterm& StateFrm_1)
 {
-  return term_appl<aterm>(function_symbol_StateAnd(), StateFrm_0, StateFrm_1);
+  return aterm_appl(function_symbol_StateAnd(), StateFrm_0, StateFrm_1);
 }
 
 inline
 aterm_appl gsMakeStateDelay()
 {
-  return term_appl<aterm>(function_symbol_StateDelay());
+  return aterm_appl(function_symbol_StateDelay());
 }
 
 inline
-aterm_appl gsMakeStateDelayTimed(const aterm_appl& DataExpr_0)
+aterm_appl gsMakeStateDelayTimed(const aterm& DataExpr_0)
 {
-  return term_appl<aterm>(function_symbol_StateDelayTimed(), DataExpr_0);
+  return aterm_appl(function_symbol_StateDelayTimed(), DataExpr_0);
 }
 
 inline
-aterm_appl gsMakeStateExists(const aterm_list& DataVarId_0, const aterm_appl& StateFrm_1)
+aterm_appl gsMakeStateExists(const aterm_list& DataVarId_0, const aterm& StateFrm_1)
 {
-  return term_appl<aterm>(function_symbol_StateExists(), DataVarId_0, StateFrm_1);
+  return aterm_appl(function_symbol_StateExists(), DataVarId_0, StateFrm_1);
 }
 
 inline
 aterm_appl gsMakeStateFalse()
 {
-  return term_appl<aterm>(function_symbol_StateFalse());
+  return aterm_appl(function_symbol_StateFalse());
 }
 
 inline
-aterm_appl gsMakeStateForall(const aterm_list& DataVarId_0, const aterm_appl& StateFrm_1)
+aterm_appl gsMakeStateForall(const aterm_list& DataVarId_0, const aterm& StateFrm_1)
 {
-  return term_appl<aterm>(function_symbol_StateForall(), DataVarId_0, StateFrm_1);
+  return aterm_appl(function_symbol_StateForall(), DataVarId_0, StateFrm_1);
 }
 
 inline
-aterm_appl gsMakeStateImp(const aterm_appl& StateFrm_0, const aterm_appl& StateFrm_1)
+aterm_appl gsMakeStateImp(const aterm& StateFrm_0, const aterm& StateFrm_1)
 {
-  return term_appl<aterm>(function_symbol_StateImp(), StateFrm_0, StateFrm_1);
+  return aterm_appl(function_symbol_StateImp(), StateFrm_0, StateFrm_1);
 }
 
 inline
-aterm_appl gsMakeStateMay(const aterm_appl& RegFrm_0, const aterm_appl& StateFrm_1)
+aterm_appl gsMakeStateMay(const aterm& RegFrm_0, const aterm& StateFrm_1)
 {
-  return term_appl<aterm>(function_symbol_StateMay(), RegFrm_0, StateFrm_1);
+  return aterm_appl(function_symbol_StateMay(), RegFrm_0, StateFrm_1);
 }
 
 inline
-aterm_appl gsMakeStateMu(const aterm_appl& String_0, const aterm_list& DataVarIdInit_1, const aterm_appl& StateFrm_2)
+aterm_appl gsMakeStateMu(const aterm& String_0, const aterm_list& DataVarIdInit_1, const aterm& StateFrm_2)
 {
-  return term_appl<aterm>(function_symbol_StateMu(), String_0, DataVarIdInit_1, StateFrm_2);
+  return aterm_appl(function_symbol_StateMu(), String_0, DataVarIdInit_1, StateFrm_2);
 }
 
 inline
-aterm_appl gsMakeStateMust(const aterm_appl& RegFrm_0, const aterm_appl& StateFrm_1)
+aterm_appl gsMakeStateMust(const aterm& RegFrm_0, const aterm& StateFrm_1)
 {
-  return term_appl<aterm>(function_symbol_StateMust(), RegFrm_0, StateFrm_1);
+  return aterm_appl(function_symbol_StateMust(), RegFrm_0, StateFrm_1);
 }
 
 inline
-aterm_appl gsMakeStateNot(const aterm_appl& StateFrm_0)
+aterm_appl gsMakeStateNot(const aterm& StateFrm_0)
 {
-  return term_appl<aterm>(function_symbol_StateNot(), StateFrm_0);
+  return aterm_appl(function_symbol_StateNot(), StateFrm_0);
 }
 
 inline
-aterm_appl gsMakeStateNu(const aterm_appl& String_0, const aterm_list& DataVarIdInit_1, const aterm_appl& StateFrm_2)
+aterm_appl gsMakeStateNu(const aterm& String_0, const aterm_list& DataVarIdInit_1, const aterm& StateFrm_2)
 {
-  return term_appl<aterm>(function_symbol_StateNu(), String_0, DataVarIdInit_1, StateFrm_2);
+  return aterm_appl(function_symbol_StateNu(), String_0, DataVarIdInit_1, StateFrm_2);
 }
 
 inline
-aterm_appl gsMakeStateOr(const aterm_appl& StateFrm_0, const aterm_appl& StateFrm_1)
+aterm_appl gsMakeStateOr(const aterm& StateFrm_0, const aterm& StateFrm_1)
 {
-  return term_appl<aterm>(function_symbol_StateOr(), StateFrm_0, StateFrm_1);
+  return aterm_appl(function_symbol_StateOr(), StateFrm_0, StateFrm_1);
 }
 
 inline
 aterm_appl gsMakeStateTrue()
 {
-  return term_appl<aterm>(function_symbol_StateTrue());
+  return aterm_appl(function_symbol_StateTrue());
 }
 
 inline
-aterm_appl gsMakeStateVar(const aterm_appl& String_0, const aterm_list& DataExpr_1)
+aterm_appl gsMakeStateVar(const aterm& String_0, const aterm_list& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_StateVar(), String_0, DataExpr_1);
+  return aterm_appl(function_symbol_StateVar(), String_0, DataExpr_1);
 }
 
 inline
 aterm_appl gsMakeStateYaled()
 {
-  return term_appl<aterm>(function_symbol_StateYaled());
+  return aterm_appl(function_symbol_StateYaled());
 }
 
 inline
-aterm_appl gsMakeStateYaledTimed(const aterm_appl& DataExpr_0)
+aterm_appl gsMakeStateYaledTimed(const aterm& DataExpr_0)
 {
-  return term_appl<aterm>(function_symbol_StateYaledTimed(), DataExpr_0);
+  return aterm_appl(function_symbol_StateYaledTimed(), DataExpr_0);
 }
 
 inline
-aterm_appl gsMakeStructCons(const aterm_appl& String_0, const aterm_list& StructProj_1, const aterm_appl& StringOrEmpty_2)
+aterm_appl gsMakeStructCons(const aterm& String_0, const aterm_list& StructProj_1, const aterm& StringOrEmpty_2)
 {
-  return term_appl<aterm>(function_symbol_StructCons(), String_0, StructProj_1, StringOrEmpty_2);
+  return aterm_appl(function_symbol_StructCons(), String_0, StructProj_1, StringOrEmpty_2);
 }
 
 inline
-aterm_appl gsMakeStructProj(const aterm_appl& StringOrEmpty_0, const aterm_appl& SortExpr_1)
+aterm_appl gsMakeStructProj(const aterm& StringOrEmpty_0, const aterm& SortExpr_1)
 {
-  return term_appl<aterm>(function_symbol_StructProj(), StringOrEmpty_0, SortExpr_1);
+  return aterm_appl(function_symbol_StructProj(), StringOrEmpty_0, SortExpr_1);
 }
 
 inline
-aterm_appl gsMakeSum(const aterm_list& DataVarId_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeSum(const aterm_list& DataVarId_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Sum(), DataVarId_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Sum(), DataVarId_0, ProcExpr_1);
 }
 
 inline
-aterm_appl gsMakeSync(const aterm_appl& ProcExpr_0, const aterm_appl& ProcExpr_1)
+aterm_appl gsMakeSync(const aterm& ProcExpr_0, const aterm& ProcExpr_1)
 {
-  return term_appl<aterm>(function_symbol_Sync(), ProcExpr_0, ProcExpr_1);
+  return aterm_appl(function_symbol_Sync(), ProcExpr_0, ProcExpr_1);
 }
 
 inline
 aterm_appl gsMakeTau()
 {
-  return term_appl<aterm>(function_symbol_Tau());
+  return aterm_appl(function_symbol_Tau());
 }
 
 inline
 aterm_appl gsMakeUntypedActMultAct(const aterm_list& UntypedAction_0)
 {
-  return term_appl<aterm>(function_symbol_UntypedActMultAct(), UntypedAction_0);
+  return aterm_appl(function_symbol_UntypedActMultAct(), UntypedAction_0);
 }
 
 inline
-aterm_appl gsMakeUntypedAction(const aterm_appl& String_0, const aterm_list& DataExpr_1)
+aterm_appl gsMakeUntypedAction(const aterm& String_0, const aterm_list& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_UntypedAction(), String_0, DataExpr_1);
+  return aterm_appl(function_symbol_UntypedAction(), String_0, DataExpr_1);
 }
 
 inline
-aterm_appl gsMakeUntypedIdentifier(const aterm_appl& String_0)
+aterm_appl gsMakeUntypedIdentifier(const aterm& String_0)
 {
-  return term_appl<aterm>(function_symbol_UntypedIdentifier(), String_0);
+  return aterm_appl(function_symbol_UntypedIdentifier(), String_0);
 }
 
 inline
-aterm_appl gsMakeUntypedIdentifierAssignment(const aterm_appl& String_0, const aterm_appl& DataExpr_1)
+aterm_appl gsMakeUntypedIdentifierAssignment(const aterm& String_0, const aterm& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_UntypedIdentifierAssignment(), String_0, DataExpr_1);
+  return aterm_appl(function_symbol_UntypedIdentifierAssignment(), String_0, DataExpr_1);
 }
 
 inline
 aterm_appl gsMakeUntypedMultAct(const aterm_list& UntypedAction_0)
 {
-  return term_appl<aterm>(function_symbol_UntypedMultAct(), UntypedAction_0);
+  return aterm_appl(function_symbol_UntypedMultAct(), UntypedAction_0);
 }
 
 inline
-aterm_appl gsMakeUntypedParamId(const aterm_appl& String_0, const aterm_list& DataExpr_1)
+aterm_appl gsMakeUntypedParamId(const aterm& String_0, const aterm_list& DataExpr_1)
 {
-  return term_appl<aterm>(function_symbol_UntypedParamId(), String_0, DataExpr_1);
+  return aterm_appl(function_symbol_UntypedParamId(), String_0, DataExpr_1);
 }
 
 inline
-aterm_appl gsMakeUntypedProcessAssignment(const aterm_appl& String_0, const aterm_list& UntypedIdentifierAssignment_1)
+aterm_appl gsMakeUntypedProcessAssignment(const aterm& String_0, const aterm_list& UntypedIdentifierAssignment_1)
 {
-  return term_appl<aterm>(function_symbol_UntypedProcessAssignment(), String_0, UntypedIdentifierAssignment_1);
+  return aterm_appl(function_symbol_UntypedProcessAssignment(), String_0, UntypedIdentifierAssignment_1);
 }
 
 inline
 aterm_appl gsMakeUntypedSetBagComp()
 {
-  return term_appl<aterm>(function_symbol_UntypedSetBagComp());
+  return aterm_appl(function_symbol_UntypedSetBagComp());
 }
 
 inline
 aterm_appl gsMakeUntypedSortUnknown()
 {
-  return term_appl<aterm>(function_symbol_UntypedSortUnknown());
+  return aterm_appl(function_symbol_UntypedSortUnknown());
 }
 
 inline
 aterm_appl gsMakeUntypedSortsPossible(const aterm_list& SortExpr_0)
 {
-  return term_appl<aterm>(function_symbol_UntypedSortsPossible(), SortExpr_0);
+  return aterm_appl(function_symbol_UntypedSortsPossible(), SortExpr_0);
 }
 
 inline
-aterm_appl gsMakeWhr(const aterm_appl& DataExpr_0, const aterm_list& WhrDecl_1)
+aterm_appl gsMakeWhr(const aterm& DataExpr_0, const aterm_list& WhrDecl_1)
 {
-  return term_appl<aterm>(function_symbol_Whr(), DataExpr_0, WhrDecl_1);
+  return aterm_appl(function_symbol_Whr(), DataExpr_0, WhrDecl_1);
 }
 //--- end generated code ---//
 

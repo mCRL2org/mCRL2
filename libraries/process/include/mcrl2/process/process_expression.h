@@ -125,6 +125,18 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          lps::is_action(x);
 }
 
+// prototype declaration
+std::string pp(const process_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_expression& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(process_expression& t1, process_expression& t2)
 {
@@ -172,6 +184,18 @@ inline
 bool is_process_instance(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsProcess(x);
+}
+
+// prototype declaration
+std::string pp(const process_instance& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_instance& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -223,6 +247,18 @@ bool is_process_instance_assignment(const atermpp::aterm_appl& x)
   return core::detail::gsIsProcessAssignment(x);
 }
 
+// prototype declaration
+std::string pp(const process_instance_assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_instance_assignment& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(process_instance_assignment& t1, process_instance_assignment& t2)
 {
@@ -257,6 +293,18 @@ bool is_delta(const atermpp::aterm_appl& x)
   return core::detail::gsIsDelta(x);
 }
 
+// prototype declaration
+std::string pp(const delta& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const delta& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(delta& t1, delta& t2)
 {
@@ -289,6 +337,18 @@ inline
 bool is_tau(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsTau(x);
+}
+
+// prototype declaration
+std::string pp(const tau& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const tau& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -340,6 +400,18 @@ bool is_sum(const atermpp::aterm_appl& x)
   return core::detail::gsIsSum(x);
 }
 
+// prototype declaration
+std::string pp(const sum& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const sum& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(sum& t1, sum& t2)
 {
@@ -387,6 +459,18 @@ inline
 bool is_block(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBlock(x);
+}
+
+// prototype declaration
+std::string pp(const block& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const block& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -438,6 +522,18 @@ bool is_hide(const atermpp::aterm_appl& x)
   return core::detail::gsIsHide(x);
 }
 
+// prototype declaration
+std::string pp(const hide& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const hide& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(hide& t1, hide& t2)
 {
@@ -485,6 +581,18 @@ inline
 bool is_rename(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsRename(x);
+}
+
+// prototype declaration
+std::string pp(const rename& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const rename& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -536,6 +644,18 @@ bool is_comm(const atermpp::aterm_appl& x)
   return core::detail::gsIsComm(x);
 }
 
+// prototype declaration
+std::string pp(const comm& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const comm& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(comm& t1, comm& t2)
 {
@@ -583,6 +703,18 @@ inline
 bool is_allow(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsAllow(x);
+}
+
+// prototype declaration
+std::string pp(const allow& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const allow& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -634,6 +766,18 @@ bool is_sync(const atermpp::aterm_appl& x)
   return core::detail::gsIsSync(x);
 }
 
+// prototype declaration
+std::string pp(const sync& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const sync& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(sync& t1, sync& t2)
 {
@@ -681,6 +825,18 @@ inline
 bool is_at(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsAtTime(x);
+}
+
+// prototype declaration
+std::string pp(const at& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const at& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -732,6 +888,18 @@ bool is_seq(const atermpp::aterm_appl& x)
   return core::detail::gsIsSeq(x);
 }
 
+// prototype declaration
+std::string pp(const seq& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const seq& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(seq& t1, seq& t2)
 {
@@ -779,6 +947,18 @@ inline
 bool is_if_then(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsIfThen(x);
+}
+
+// prototype declaration
+std::string pp(const if_then& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const if_then& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -835,6 +1015,18 @@ bool is_if_then_else(const atermpp::aterm_appl& x)
   return core::detail::gsIsIfThenElse(x);
 }
 
+// prototype declaration
+std::string pp(const if_then_else& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const if_then_else& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(if_then_else& t1, if_then_else& t2)
 {
@@ -882,6 +1074,18 @@ inline
 bool is_bounded_init(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBInit(x);
+}
+
+// prototype declaration
+std::string pp(const bounded_init& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const bounded_init& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -933,6 +1137,18 @@ bool is_merge(const atermpp::aterm_appl& x)
   return core::detail::gsIsMerge(x);
 }
 
+// prototype declaration
+std::string pp(const merge& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const merge& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(merge& t1, merge& t2)
 {
@@ -982,6 +1198,18 @@ bool is_left_merge(const atermpp::aterm_appl& x)
   return core::detail::gsIsLMerge(x);
 }
 
+// prototype declaration
+std::string pp(const left_merge& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const left_merge& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(left_merge& t1, left_merge& t2)
 {
@@ -1029,6 +1257,18 @@ inline
 bool is_choice(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsChoice(x);
+}
+
+// prototype declaration
+std::string pp(const choice& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const choice& x)
+{
+  return out << process::pp(x);
 }
 
 /// \brief swap overload
@@ -1085,6 +1325,18 @@ bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
   return core::detail::gsIsUntypedParamId(x);
 }
 
+// prototype declaration
+std::string pp(const untyped_parameter_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_parameter_identifier& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(untyped_parameter_identifier& t1, untyped_parameter_identifier& t2)
 {
@@ -1139,12 +1391,23 @@ bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
   return core::detail::gsIsUntypedProcessAssignment(x);
 }
 
+// prototype declaration
+std::string pp(const untyped_process_assignment& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_process_assignment& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 // From the documentation:
@@ -1226,30 +1489,8 @@ inline const process_expression& binary_left(const left_merge& x)    { return x.
 inline const process_expression& binary_right(const left_merge& x)   { return x.right(); }
 
 // template function overloads
-std::string pp(const process_expression& x);
 std::string pp(const process_expression_list& x);
 std::string pp(const process_expression_vector& x);
-std::string pp(const process_instance& x);
-std::string pp(const process_instance_assignment& x);
-std::string pp(const delta& x);
-std::string pp(const tau& x);
-std::string pp(const sum& x);
-std::string pp(const block& x);
-std::string pp(const hide& x);
-std::string pp(const rename& x);
-std::string pp(const comm& x);
-std::string pp(const allow& x);
-std::string pp(const sync& x);
-std::string pp(const at& x);
-std::string pp(const seq& x);
-std::string pp(const if_then& x);
-std::string pp(const if_then_else& x);
-std::string pp(const bounded_init& x);
-std::string pp(const merge& x);
-std::string pp(const left_merge& x);
-std::string pp(const choice& x);
-std::string pp(const process::untyped_process_assignment& x);
-std::string pp(const process::untyped_parameter_identifier& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 
 // TODO: These should be removed when the aterm code has been replaced.

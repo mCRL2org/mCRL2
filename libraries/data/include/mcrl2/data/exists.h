@@ -55,11 +55,25 @@ class exists: public abstraction
 
 }; // class exists
 
+//--- start generated class exists ---//
+// prototype declaration
+std::string pp(const exists& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(exists& t1, exists& t2)
 {
   t1.swap(t2);
 }
+//--- end generated class exists ---//
 
 } // namespace data
 

@@ -19,13 +19,14 @@
 #include <sstream>
 #include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/bes/boolean_equation.h"
+#include "mcrl2/bes/detail/io.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/bes/boolean_equation.h"
 
 namespace mcrl2
 {
@@ -126,6 +127,7 @@ class boolean_equation_system
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
+      t = bes::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a boolean equation system");
@@ -149,7 +151,8 @@ class boolean_equation_system
       {
         throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
       }
-      atermpp::aterm_appl t = boolean_equation_system_to_aterm(*this);
+      atermpp::aterm t = boolean_equation_system_to_aterm(*this);
+      t = bes::detail::remove_index(t);
       core::detail::save_aterm(t, filename, binary);
     }
 
@@ -190,6 +193,20 @@ class boolean_equation_system
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(boolean_variable(initial_state())) != bnd.end();
     }
 };
+
+//--- start generated class boolean_equation_system ---//
+// prototype declaration
+std::string pp(const boolean_equation_system& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_equation_system& x)
+{
+  return out << bes::pp(x);
+}
+//--- end generated class boolean_equation_system ---//
 
 inline
 bool operator==(const boolean_equation_system& x, const boolean_equation_system& y)

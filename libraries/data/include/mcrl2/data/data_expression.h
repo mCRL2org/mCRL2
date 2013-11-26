@@ -18,12 +18,14 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
+#include "mcrl2/core/hash.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/utilities/exception.h"
+
 namespace mcrl2
 {
 
@@ -233,12 +235,23 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 /// \brief vector of data_expressions
 typedef std::vector<data_expression>    data_expression_vector;
 
+// prototype declaration
+std::string pp(const data_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const data_expression& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(data_expression& t1, data_expression& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class data_expression ---//
 
 /// \brief Test for a data_expression expression
@@ -268,7 +281,6 @@ inline data_expression_list make_data_expression_list(Container const& r, typena
 class variable;
 
 // template function overloads
-std::string pp(const data_expression& x);
 std::string pp(const data_expression_list& x);
 std::string pp(const data_expression_vector& x);
 data::data_expression translate_user_notation(const data::data_expression& x);

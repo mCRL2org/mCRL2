@@ -14,13 +14,11 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/index_traits.h"
+#include "mcrl2/core/hash.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/sort_expression.h"
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
-#endif
 
 
 namespace mcrl2
@@ -29,11 +27,25 @@ namespace mcrl2
 namespace data
 {
 
+typedef std::pair<atermpp::aterm, atermpp::aterm> function_symbol_key_type;
+
 //--- start generated class function_symbol ---//
 /// \brief A function symbol
 class function_symbol: public data_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+    }
+//--- start user section function_symbol ---//
     /// \brief Default constructor.
     function_symbol()
       : data_expression(core::detail::constructOpId())
@@ -49,23 +61,14 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     function_symbol(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(name, sort))
+      : data_expression(core::detail::gsMakeOpId(name, sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type>::insert(std::make_pair(name, sort)))))
     {}
 
     /// \brief Constructor.
     function_symbol(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
+      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort, atermpp::aterm_int(core::index_traits<function_symbol, function_symbol_key_type>::insert(std::make_pair(core::identifier_string(name), sort)))))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const sort_expression& sort() const
-    {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
-    }
+//--- end user section function_symbol ---//
 };
 
 /// \brief list of function_symbols
@@ -74,39 +77,26 @@ typedef atermpp::term_list<function_symbol> function_symbol_list;
 /// \brief vector of function_symbols
 typedef std::vector<function_symbol>    function_symbol_vector;
 
+// prototype declaration
+std::string pp(const function_symbol& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const function_symbol& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(function_symbol& t1, function_symbol& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class function_symbol ---//
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-inline
-void on_create_function_symbol(const atermpp::aterm& t)
-{
-  data::index_traits<function_symbol>::insert(static_cast<const function_symbol&>(t));
-}
-
-inline
-void on_delete_function_symbol(const atermpp::aterm& t)
-{
-  data::index_traits<function_symbol>::erase(static_cast<const function_symbol&>(t));
-}
-
-inline
-void register_function_symbol_hooks()
-{
-  add_creation_hook(core::detail::function_symbol_OpId(), on_create_function_symbol);
-  add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
-}
-
-#endif // MCRL2_USE_INDEX_TRAITS
-
 // template function overloads
-std::string pp(const function_symbol& x);
 std::string pp(const function_symbol_list& x);
 std::string pp(const function_symbol_vector& x);
 std::set<data::variable> find_all_variables(const data::function_symbol& x);

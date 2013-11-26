@@ -16,7 +16,9 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/hash.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2
@@ -25,11 +27,25 @@ namespace mcrl2
 namespace process
 {
 
+typedef std::pair<core::identifier_string, data::variable_list> process_identifier_key_type;
+
 //--- start generated class process_identifier ---//
 /// \brief A process identifier
 class process_identifier: public atermpp::aterm_appl
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
+    }
+//--- start user section process_identifier ---//
     /// \brief Default constructor.
     process_identifier()
       : atermpp::aterm_appl(core::detail::constructProcVarId())
@@ -45,23 +61,22 @@ class process_identifier: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_identifier(const core::identifier_string& name, const data::variable_list& variables)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, variables))
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(
+          name,
+          variables,
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(name, variables)))
+        ))
     {}
 
     /// \brief Constructor.
     process_identifier(const std::string& name, const data::variable_list& variables)
-      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(core::identifier_string(name), variables))
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(
+          core::identifier_string(name),
+          variables,
+          atermpp::aterm_int(core::index_traits<process_identifier, process_identifier_key_type>::insert(std::make_pair(name, variables)))
+        ))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const data::variable_list& variables() const
-    {
-      return atermpp::aterm_cast<const data::variable_list>((*this)[1]);
-    }
+//--- end user section process_identifier ---//
 };
 
 /// \brief list of process_identifiers
@@ -79,16 +94,26 @@ bool is_process_identifier(const atermpp::aterm_appl& x)
   return core::detail::gsIsProcVarId(x);
 }
 
+// prototype declaration
+std::string pp(const process_identifier& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_identifier& x)
+{
+  return out << process::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(process_identifier& t1, process_identifier& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class process_identifier ---//
 
 // template function overloads
-std::string pp(const process_identifier& x);
 std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
 void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
@@ -96,5 +121,7 @@ void normalize_sorts(process_identifier_vector& x, const data::data_specificatio
 } // namespace process
 
 } // namespace mcrl2
+
+#include "mcrl2/process/index_traits.h"
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

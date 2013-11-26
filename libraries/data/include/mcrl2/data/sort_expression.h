@@ -103,12 +103,23 @@ typedef atermpp::term_list<sort_expression> sort_expression_list;
 /// \brief vector of sort_expressions
 typedef std::vector<sort_expression>    sort_expression_vector;
 
+// prototype declaration
+std::string pp(const sort_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const sort_expression& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(sort_expression& t1, sort_expression& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class sort_expression ---//
 
 /// \brief Test for a sort_expression expression
@@ -126,7 +137,6 @@ bool is_sort_expression(const atermpp::aterm_appl& x)
 }
 
 // template function overloads
-std::string pp(const sort_expression& x);
 std::string pp(const sort_expression_list& x);
 std::string pp(const sort_expression_vector& x);
 std::set<data::sort_expression> find_sort_expressions(const data::sort_expression& x);

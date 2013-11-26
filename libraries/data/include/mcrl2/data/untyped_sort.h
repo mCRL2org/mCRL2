@@ -38,12 +38,23 @@ class untyped_sort: public sort_expression
     }
 };
 
+// prototype declaration
+std::string pp(const untyped_sort& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_sort& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(untyped_sort& t1, untyped_sort& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class untyped_sort ---//
 
 } // namespace data

@@ -17,6 +17,7 @@
 #include <sstream>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/lps/action.h"
 #include "mcrl2/core/print.h"
@@ -37,25 +38,32 @@ class multi_action
     /// \brief The actions of the summand
     action_list m_actions;
 
-    /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
+    /// \brief The time of the summand. If <tt>m_time == data::undefined_real()</tt>
     /// the multi action has no time.
     data::data_expression m_time;
 
   public:
     /// \brief Constructor
-    multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression())
+    multi_action(action_list actions = action_list(), data::data_expression time = data::undefined_real())
       : m_actions(actions), m_time(time)
-    {}
-
-    /// \brief Constructor
-    multi_action(const atermpp::aterm_appl& t) : m_time()
     {
-      assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
-      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
+      assert(data::sort_real::is_real(m_time.sort()));
     }
 
+/*
     /// \brief Constructor
-    explicit multi_action(const atermpp::aterm& t1) : m_time()
+    multi_action(const atermpp::aterm_appl& t)
+      : m_time(data::undefined_real())
+    {
+      assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
+      assert(data::sort_real::is_real(m_time));
+      m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t[0]);
+    }
+*/
+
+    /// \brief Constructor
+    explicit multi_action(const atermpp::aterm& t1)
+      : m_time(data::undefined_real())
     {
       const atermpp::aterm_appl t(t1);
       assert(core::detail::gsIsAction(t) || core::detail::gsIsMultAct(t));
@@ -65,14 +73,14 @@ class multi_action
     /// \brief Constructor
     multi_action(const action& l)
       : m_actions(atermpp::make_list<action>(l)),
-        m_time()
+        m_time(data::undefined_real())
     {}
 
     /// \brief Returns true if time is available.
     /// \return True if time is available.
     bool has_time() const
     {
-      return m_time != data::data_expression();
+      return m_time != data::undefined_real();
     }
 
     /// \brief Returns the sequence of actions.
@@ -152,11 +160,31 @@ class multi_action
     }
 };
 
+//--- start generated class multi_action ---//
+/// \brief list of multi_actions
+typedef atermpp::term_list<multi_action> multi_action_list;
+
+/// \brief vector of multi_actions
+typedef std::vector<multi_action>    multi_action_vector;
+
+// prototype declaration
+std::string pp(const multi_action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const multi_action& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(multi_action& t1, multi_action& t2)
 {
   t1.swap(t2);
 }
+//--- end generated class multi_action ---//
 
 /// \brief Returns true if the term t is a multi action
 inline
@@ -166,7 +194,6 @@ bool is_multi_action(const atermpp::aterm_appl& t)
 }
 
 // template function overloads
-std::string pp(const multi_action& x);
 void normalize_sorts(multi_action& x, const data::data_specification& dataspec);
 void translate_user_notation(lps::multi_action& x);
 std::set<data::variable> find_all_variables(const lps::multi_action& x);

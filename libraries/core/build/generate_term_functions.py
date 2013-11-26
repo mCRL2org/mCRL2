@@ -30,7 +30,7 @@ bool gsIs%(name)s(const atermpp::aterm_appl& Term)
 LIBSTRUCT_MAKE_FUNCTION = '''inline
 aterm_appl gsMake%(name)s(%(parameters)s)
 {
-  return term_appl<aterm>(function_symbol_%(name)s()%(arguments)s);
+  return aterm_appl(function_symbol_%(name)s()%(arguments)s);
 }
 
 '''
@@ -40,7 +40,7 @@ aterm_appl gsMake%(name)s(%(parameters)s)
 #---------------------------------------------------------------#
 # generates C++ code for libstruct functions
 #
-def generate_libstruct_functions(rules, filename):
+def generate_libstruct_functions(rules, filename, skip_list):
     names = {}
     calls = {}
     decls = {}
@@ -59,6 +59,8 @@ def generate_libstruct_functions(rules, filename):
     name_keys = names.keys()
     name_keys.sort()
     for name in name_keys:
+        if name in skip_list:
+            continue
         arity = names[name]
         text = text + LIBSTRUCT_SYMBOL_FUNCTIONS % {
             'name'  : name,
@@ -115,7 +117,7 @@ CHECK_TERM_TYPE = '''  // check the type of the term
   {
     return false;
   }
-  atermpp::aterm_appl a(term);
+  const atermpp::aterm_appl& a = aterm_cast<aterm_appl>(term);
   if (!gsIs%(name)s(a))
   {
     return false;
@@ -135,7 +137,7 @@ CHECK_TERM_CHILDREN = '''  // check the children
 #---------------------------------------------------------------#
 # generates C++ code for checking if terms are in the right format
 #
-def generate_soundness_check_functions(rules, filename):
+def generate_soundness_check_functions(rules, filename, skip_list):
     text  = '' # function definitions
     ptext = '' # function declarations (prototypes)
 
@@ -143,6 +145,8 @@ def generate_soundness_check_functions(rules, filename):
 
     for rule in rules:
         name = rule.name()
+        if name in skip_list:
+            continue
         rhs_functions = rule.functions()
         body = '  return ' + '\n         || '.join(map(lambda x: x.check_name() + '(t)', rhs_functions)) + ';'
         text = text + CHECK_RULE % {
@@ -152,8 +156,10 @@ def generate_soundness_check_functions(rules, filename):
         ptext = ptext + 'template <typename Term> bool check_rule_%s(Term t);\n' % rule.name()
 
     for f in functions:
-        arguments = ', '.join(map(lambda x: x.full_name(), f.arguments))
         name = f.name()
+        if name in skip_list:
+            continue
+        arguments = ', '.join(map(lambda x: x.full_name(), f.arguments))
         arity = len(f.arguments)
 
         body = CHECK_TERM_TYPE % {
@@ -194,7 +200,7 @@ CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
 const atermpp::aterm_appl& construct%(name)s()
 {
-  static atermpp::aterm_appl t = atermpp::aterm_appl(atermpp::term_appl<aterm>(function_symbol_%(name)s()%(arguments)s));
+  static atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_%(name)s()%(arguments)s);
   return t;
 }
 
@@ -214,15 +220,17 @@ const atermpp::aterm_appl& construct%(name)s()
 #---------------------------------------------------------------#
 # generates C++ code for constructor functions
 #
-def generate_constructor_functions(rules, filename):
+def generate_constructor_functions(rules, filename, skip_list):
     text  = ''
     ptext = '' # function declarations (prototypes)
 
     functions = find_functions(rules)
 
     for f in functions:
-        ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
         name  = f.name()
+        if name in skip_list:
+            continue
+        ptext = ptext + 'const atermpp::aterm_appl& construct%s();\n' % f.name()
         arity = f.arity()
         args = []
         for x in f.arguments:
@@ -251,6 +259,8 @@ def generate_constructor_functions(rules, filename):
     for rule in rules:
         if not rule.name() in function_names:
             name = rule.name()
+            if name in skip_list:
+                continue
             for f in rule.rhs:
                 if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
                     fname = f.name()
@@ -346,7 +356,7 @@ aterm_appl gsMakeProcess(aterm_appl ProcVarId_0, aterm_list DataExpr_1)
   // Could be replaced by at test for equal types.
 
   assert(ATgetLength((aterm_list)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  return term_appl<aterm>(gsAFunProcess(), (aterm) ProcVarId_0, (aterm) DataExpr_1);
+  return aterm_appl(gsAFunProcess(), (aterm) ProcVarId_0, (aterm) DataExpr_1);
 }
 '''
     text = path(filename).text()
@@ -373,18 +383,21 @@ def main():
         options.libstruct = True
         options.constructors = True
 
+    # elements in this list are skipped during generation
+    skip_list = ['DataAppl']
+
     if options.soundness_checks:
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
-        result = generate_soundness_check_functions(rules, filename) and result
+        result = generate_soundness_check_functions(rules, filename, skip_list) and result
 
     if options.libstruct:
         filename = '../include/mcrl2/core/detail/struct_core.h'
-        result = generate_libstruct_functions(rules, filename) and result
+        result = generate_libstruct_functions(rules, filename, skip_list) and result
         postprocess_libstruct(filename)
 
     if options.constructors:
         filename = '../include/mcrl2/core/detail/constructors.h'
-        result = generate_constructor_functions(rules, filename) and result
+        result = generate_constructor_functions(rules, filename, skip_list) and result
 
     return result
 

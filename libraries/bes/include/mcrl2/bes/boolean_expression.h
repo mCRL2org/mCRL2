@@ -24,6 +24,8 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/hash.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/print.h"
@@ -34,6 +36,8 @@ namespace mcrl2
 
 namespace bes
 {
+
+typedef core::identifier_string boolean_variable_key_type;
 
 template <typename T> std::string pp(const T& t);
 
@@ -63,6 +67,18 @@ typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
 /// \brief vector of boolean_expressions
 typedef std::vector<boolean_expression>    boolean_expression_vector;
+
+// prototype declaration
+std::string pp(const boolean_expression& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_expression& x)
+{
+  return out << bes::pp(x);
+}
 
 /// \brief swap overload
 inline void swap(boolean_expression& t1, boolean_expression& t2)
@@ -98,6 +114,18 @@ bool is_true(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanTrue(x);
 }
 
+// prototype declaration
+std::string pp(const true_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const true_& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(true_& t1, true_& t2)
 {
@@ -130,6 +158,18 @@ inline
 bool is_false(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanFalse(x);
+}
+
+// prototype declaration
+std::string pp(const false_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const false_& x)
+{
+  return out << bes::pp(x);
 }
 
 /// \brief swap overload
@@ -174,6 +214,18 @@ inline
 bool is_not(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanNot(x);
+}
+
+// prototype declaration
+std::string pp(const not_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const not_& x)
+{
+  return out << bes::pp(x);
 }
 
 /// \brief swap overload
@@ -225,6 +277,18 @@ bool is_and(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanAnd(x);
 }
 
+// prototype declaration
+std::string pp(const and_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const and_& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(and_& t1, and_& t2)
 {
@@ -272,6 +336,18 @@ inline
 bool is_or(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBooleanOr(x);
+}
+
+// prototype declaration
+std::string pp(const or_& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const or_& x)
+{
+  return out << bes::pp(x);
 }
 
 /// \brief swap overload
@@ -323,6 +399,18 @@ bool is_imp(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanImp(x);
 }
 
+// prototype declaration
+std::string pp(const imp& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const imp& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(imp& t1, imp& t2)
 {
@@ -334,6 +422,13 @@ inline void swap(imp& t1, imp& t2)
 class boolean_variable: public boolean_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+//--- start user section boolean_variable ---//
     /// \brief Default constructor.
     boolean_variable()
       : boolean_expression(core::detail::constructBooleanVariable())
@@ -349,18 +444,20 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     boolean_variable(const core::identifier_string& name)
-      : boolean_expression(core::detail::gsMakeBooleanVariable(name))
+      : boolean_expression(core::detail::gsMakeBooleanVariable(
+          name,
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type>::insert(name))
+        ))
     {}
 
     /// \brief Constructor.
     boolean_variable(const std::string& name)
-      : boolean_expression(core::detail::gsMakeBooleanVariable(core::identifier_string(name)))
+      : boolean_expression(core::detail::gsMakeBooleanVariable(
+          core::identifier_string(name),
+          atermpp::aterm_int(core::index_traits<boolean_variable, boolean_variable_key_type>::insert(name))
+        ))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
+//--- end user section boolean_variable ---//
 };
 
 /// \brief Test for a boolean_variable expression
@@ -372,12 +469,23 @@ bool is_boolean_variable(const atermpp::aterm_appl& x)
   return core::detail::gsIsBooleanVariable(x);
 }
 
+// prototype declaration
+std::string pp(const boolean_variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const boolean_variable& x)
+{
+  return out << bes::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(boolean_variable& t1, boolean_variable& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 // From the documentation:

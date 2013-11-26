@@ -48,12 +48,6 @@ inline bool is_boolean_constant(data_expression const& b)
 }
 }
 
-/// \brief Returns true if the term t is equal to nil
-inline bool is_nil(const atermpp::aterm_appl &t)
-{
-  return t == core::detail::gsMakeNil();
-}
-
 /// \brief Returns true iff the expression represents a standard sort.
 /// \param[in] s a sort expression.
 inline

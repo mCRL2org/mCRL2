@@ -142,7 +142,7 @@ class application: public data_expression
     {
     }
 
-    /// \brief Constructor.
+    /// \brief Constructor
     application(const data_expression& head,
                 const data_expression& arg1,
                 const data_expression& arg2,
@@ -295,6 +295,18 @@ inline void swap(application& t1, application& t2)
   t1.swap(t2);
 }
 
+//--- start generated class application ---//
+// prototype declaration
+std::string pp(const application& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const application& x)
+{
+  return out << data::pp(x);
+}
 //--- end generated class application ---//
 
 // The precedence function must be declared here. Unfortunately this cannot be done using the include below.

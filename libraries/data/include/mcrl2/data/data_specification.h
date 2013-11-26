@@ -1119,6 +1119,19 @@ class data_specification
 
 }; // class data_specification
 
+//--- start generated class data_specification ---//
+// prototype declaration
+std::string pp(const data_specification& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const data_specification& x)
+{
+  return out << data::pp(x);
+}
+//--- end generated class data_specification ---//
 
 /// \brief Merges two data specifications into one.
 /// \details It is assumed that the two specs can be merged. I.e.

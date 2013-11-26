@@ -188,6 +188,20 @@ class process_specification
     }
 };
 
+//--- start generated class process_specification ---//
+// prototype declaration
+std::string pp(const process_specification& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const process_specification& x)
+{
+  return out << process::pp(x);
+}
+//--- end generated class process_specification ---//
+
 /// \brief Adds all sorts that appear in the process specification spec
 ///  to the data specification of spec.
 /// \param spec A process specification

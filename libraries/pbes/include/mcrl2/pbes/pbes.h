@@ -21,6 +21,7 @@
 #include "mcrl2/core/down_cast.h"
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/pbes/detail/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
 namespace mcrl2
@@ -252,6 +253,7 @@ class pbes
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
+      t = pbes_system::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
@@ -285,8 +287,8 @@ class pbes
       assert(no_well_typedness_check || is_well_typed());
 
       pbes tmp(*this);
-      // tmp.data() = data::remove_all_system_defined(tmp.data());
-      atermpp::aterm_appl t = pbes_to_aterm(tmp);
+      atermpp::aterm t = pbes_to_aterm(tmp);
+      t = pbes_system::detail::remove_index(t);
       core::detail::save_aterm(t, filename, binary);
     }
 
@@ -385,6 +387,20 @@ class pbes
       return true;
     }
 };
+
+//--- start generated class pbes ---//
+// prototype declaration
+std::string pp(const pbes& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes& x)
+{
+  return out << pbes_system::pp(x);
+}
+//--- end generated class pbes ---//
 
 /// \brief Conversion to atermappl.
 /// \return The PBES converted to aterm format.

@@ -202,16 +202,26 @@ bool is_structured_sort_constructor(const atermpp::aterm_appl& x)
   return core::detail::gsIsStructCons(x);
 }
 
+// prototype declaration
+std::string pp(const structured_sort_constructor& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const structured_sort_constructor& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(structured_sort_constructor& t1, structured_sort_constructor& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class structured_sort_constructor ---//
 
 // template function overloads
-std::string pp(const structured_sort_constructor& x);
 std::string pp(const structured_sort_constructor_list& x);
 std::string pp(const structured_sort_constructor_vector& x);
 

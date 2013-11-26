@@ -12,18 +12,13 @@
 #ifndef MCRL2_DATA_VARIABLE_H
 #define MCRL2_DATA_VARIABLE_H
 
-#include "boost/range/iterator_range.hpp"
-
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/hash.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/application.h"
-
-#ifdef MCRL2_USE_INDEX_TRAITS
-#include "mcrl2/data/index_traits.h"
-#endif
 
 namespace mcrl2
 {
@@ -31,11 +26,25 @@ namespace mcrl2
 namespace data
 {
 
+typedef std::pair<atermpp::aterm, atermpp::aterm> variable_key_type;
+
 //--- start generated class variable ---//
 /// \brief A data variable
 class variable: public data_expression
 {
   public:
+
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
+    }
+
+    const sort_expression& sort() const
+    {
+      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
+    }
+//--- start user section variable ---//
     /// \brief Default constructor.
     variable()
       : data_expression(core::detail::constructDataVarId())
@@ -51,23 +60,22 @@ class variable: public data_expression
 
     /// \brief Constructor.
     variable(const core::identifier_string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(name, sort))
+      : data_expression(core::detail::gsMakeDataVarId(
+          name,
+          sort,
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type>::insert(std::make_pair(name, sort)))
+        ))
     {}
 
     /// \brief Constructor.
     variable(const std::string& name, const sort_expression& sort)
-      : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
+      : data_expression(core::detail::gsMakeDataVarId(
+          core::identifier_string(name),
+          sort,
+          atermpp::aterm_int(core::index_traits<variable, variable_key_type>::insert(std::make_pair(core::identifier_string(name), sort)))
+        ))
     {}
-
-    const core::identifier_string& name() const
-    {
-      return atermpp::aterm_cast<const core::identifier_string>((*this)[0]);
-    }
-
-    const sort_expression& sort() const
-    {
-      return atermpp::aterm_cast<const sort_expression>((*this)[1]);
-    }
+//--- end user section variable ---//
 };
 
 /// \brief list of variables
@@ -76,39 +84,26 @@ typedef atermpp::term_list<variable> variable_list;
 /// \brief vector of variables
 typedef std::vector<variable>    variable_vector;
 
+// prototype declaration
+std::string pp(const variable& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const variable& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(variable& t1, variable& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class variable ---//
 
-#ifdef MCRL2_USE_INDEX_TRAITS
-
-inline
-void on_create_variable(const atermpp::aterm& t)
-{
-  data::index_traits<variable>::insert(static_cast<const variable&>(t));
-}
-
-inline
-void on_delete_variable(const atermpp::aterm& t)
-{
-  data::index_traits<variable>::erase(static_cast<const variable&>(t));
-}
-
-inline
-void register_variable_hooks()
-{
-  add_creation_hook(core::detail::function_symbol_DataVarId(), on_create_variable);
-  add_deletion_hook(core::detail::function_symbol_DataVarId(), on_delete_variable);
-}
-
-#endif // MCRL2_USE_INDEX_TRAITS
-
 // template function overloads
-std::string pp(const variable& x);
 std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
 std::string pp(const std::set<variable>& x);

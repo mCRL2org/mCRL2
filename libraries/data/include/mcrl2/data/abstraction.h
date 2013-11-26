@@ -25,7 +25,6 @@ namespace mcrl2
 namespace data
 {
 
-//--- start generated class abstraction ---//
 /// \brief An abstraction expression.
 class abstraction: public data_expression
 {
@@ -69,6 +68,25 @@ class abstraction: public data_expression
       return atermpp::aterm_cast<const data_expression>((*this)[2]);
     }
 };
+
+//--- start generated class abstraction ---//
+// prototype declaration
+std::string pp(const abstraction& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const abstraction& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(abstraction& t1, abstraction& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated class abstraction ---//
 
 } // namespace data

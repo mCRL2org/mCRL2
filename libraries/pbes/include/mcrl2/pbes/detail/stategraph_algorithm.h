@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <sstream>
 #include <boost/bind.hpp>
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
@@ -92,28 +93,6 @@ class control_flow_graph_vertex: public control_flow_graph_vertex_base
     }
 };
 
-// returns a data variable that corresponds to 'undefined'
-inline
-const data::variable& undefined_variable()
-{
-  static data::variable v("@undefined", data::sort_expression());
-  return v;
-}
-
-// returns a data expression that corresponds to 'undefined'
-inline
-const data::data_expression& undefined_data_expression()
-{
-  return undefined_variable();
-}
-
-// returns an index that corresponds to 'undefined'
-inline
-std::size_t undefined_index()
-{
-  return std::size_t(-1);
-}
-
 class value_graph_vertex: public control_flow_graph_vertex_base
 {
   protected:
@@ -126,12 +105,12 @@ class value_graph_vertex: public control_flow_graph_vertex_base
     {}
 
     value_graph_vertex(const core::identifier_string& name, const data::data_expression& value)
-      : control_flow_graph_vertex_base(name, undefined_index(), undefined_variable()), m_value(value)
+      : control_flow_graph_vertex_base(name, data::undefined_index(), data::undefined_variable()), m_value(value)
     {}
 
     bool has_variable()
     {
-      return m_index != undefined_index();
+      return m_index != data::undefined_index();
     }
 
     const data::data_expression& value() const
@@ -158,7 +137,12 @@ class value_graph_vertex: public control_flow_graph_vertex_base
 inline
 std::ostream& operator<<(std::ostream& out, const value_graph_vertex& u)
 {
-  return out << '(' << u.name() << ", " << u.index() << ") " << data::pp(u.variable()) << " = " << data::pp(u.value());
+  if (u.index() == data::undefined_index())
+  {
+    return out << '(' << u.name() << ", ?, ?=" << data::pp(u.value()) << ')';
+    assert(u.value() == data::undefined_data_expression());
+  }
+  return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << "=" << data::pp(u.value()) << ')';
 }
 
 /// \brief Algorithm class for the computation of the stategraph graph
@@ -1111,10 +1095,10 @@ class stategraph_algorithm
                                  const data::data_expression& e1
                                 )
     {
-      if (e1 != undefined_data_expression())
+      if (e1 != data::undefined_data_expression())
       {
         const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-        const data::variable& d1 = (k1 == undefined_index() ? undefined_variable() : eq_Y.parameters()[k1]);
+        const data::variable& d1 = (k1 == data::undefined_index() ? data::undefined_variable() : eq_Y.parameters()[k1]);
         value_graph_vertex v_(Y, k1, d1, e1);
 
         // check if v_ already exists in V; if not it is added
@@ -1171,8 +1155,10 @@ class stategraph_algorithm
 
       while (!todo.empty())
       {
+        // u = (X, d, e)
         value_graph_vertex u = V[pick_element(todo)];
         const core::identifier_string& X = u.name();
+        const data::variable& d = u.variable();
         const data::data_expression& e = u.value();
         std::size_t k = u.index();
         const stategraph_equation& eq_X = *find_equation(m_pbes, X);
@@ -1182,9 +1168,8 @@ class stategraph_algorithm
         {
           const core::identifier_string& Y = i->X.name();
           auto q = component_index.find(Y);
-          data::data_expression e1 = undefined_data_expression();
 
-          if (k == undefined_index())
+          if (d == data::undefined_variable())
           {
             // case 1: (X, e) -> (Y, d1, e)
             if (q != component_index.end()) // (Y, k1) in C
@@ -1195,7 +1180,7 @@ class stategraph_algorithm
             // case 2: (X, e) -> (Y, e)
             else
             {
-              std::size_t k1 = undefined_index();
+              std::size_t k1 = data::undefined_index();
               insert_value_graph_edge(V, todo, Y, u, k1, e);
             }
           }
@@ -1205,29 +1190,29 @@ class stategraph_algorithm
             if (q != component_index.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
+              data::data_expression e1;
               if (is_mapped_to(i->source, k, e))
               {
                 // source(X, i, k) = e && dest(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
                 insert_value_graph_edge(V, todo, Y, u, k1, e1);
               }
               else if (Y != X && is_undefined(i->source, k))
               {
                 // Y != X && undefined(source(X, i, k)) && dest(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
                 insert_value_graph_edge(V, todo, Y, u, k1, e1);
 
                 // Y != X && undefined(source(X, i, k)) && copy(X, i, k1) = e1
-                e1 = mapped_value(i->dest, k1, undefined_data_expression());
+                e1 = mapped_value(i->dest, k1, data::undefined_data_expression());
                 insert_value_graph_edge(V, todo, Y, u, k1, e1);
               }
             }
             // case 4: (X, d, e) -> (Y, e)
             else
             {
-              e1 = e;
-              std::size_t k1 = undefined_index();
-              insert_value_graph_edge(V, todo, Y, u, k1, e1);
+              std::size_t k1 = data::undefined_index();
+              insert_value_graph_edge(V, todo, Y, u, k1, e);
             }
           }
         }

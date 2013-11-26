@@ -13,7 +13,7 @@ def test_pfnf_rewriter(p, filename):
     path(txtfile).write_text('%s' % p)
     pbesfile1 = filename + 'a.pbes'
     pbesfile2 = filename + 'b.pbes'
-    run_txt2pbes(txtfile, pbesfile1)
+    run_txt2pbes(txtfile, pbesfile1, '-n')
     run_program('pbesrewr', '-ppfnf %s %s' % (pbesfile1, pbesfile2))
     answer1 = run_pbes2bool(pbesfile1)
     answer2 = run_pbes2bool(pbesfile2)

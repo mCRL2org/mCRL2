@@ -72,12 +72,23 @@ bool is_untyped_action(const atermpp::aterm_appl& x)
   return core::detail::gsIsUntypedAction(x);
 }
 
+// prototype declaration
+std::string pp(const untyped_action& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_action& x)
+{
+  return out << lps::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(untyped_action& t1, untyped_action& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class untyped_action ---//
 
 } // namespace lps

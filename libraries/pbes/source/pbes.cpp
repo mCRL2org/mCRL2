@@ -19,6 +19,10 @@
 #include "mcrl2/pbes/detail/is_well_typed.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 
+#ifdef MCRL2_USE_INDEX_TRAITS
+#include "mcrl2/pbes/index_traits.h"
+#endif
+
 namespace mcrl2
 {
 
@@ -26,19 +30,27 @@ namespace pbes_system
 {
 
 //--- start generated pbes_system overloads ---//
-std::string pp(const pbes_system::fixpoint_symbol& x) { return pbes_system::pp< pbes_system::fixpoint_symbol >(x); }
-std::string pp(const pbes_system::pbes& x) { return pbes_system::pp< pbes_system::pbes >(x); }
-std::string pp(const pbes_system::pbes_equation& x) { return pbes_system::pp< pbes_system::pbes_equation >(x); }
 std::string pp(const pbes_system::pbes_equation_vector& x) { return pbes_system::pp< pbes_system::pbes_equation_vector >(x); }
-std::string pp(const pbes_system::pbes_expression& x) { return pbes_system::pp< pbes_system::pbes_expression >(x); }
 std::string pp(const pbes_system::pbes_expression_list& x) { return pbes_system::pp< pbes_system::pbes_expression_list >(x); }
 std::string pp(const pbes_system::pbes_expression_vector& x) { return pbes_system::pp< pbes_system::pbes_expression_vector >(x); }
-std::string pp(const pbes_system::propositional_variable& x) { return pbes_system::pp< pbes_system::propositional_variable >(x); }
 std::string pp(const pbes_system::propositional_variable_list& x) { return pbes_system::pp< pbes_system::propositional_variable_list >(x); }
 std::string pp(const pbes_system::propositional_variable_vector& x) { return pbes_system::pp< pbes_system::propositional_variable_vector >(x); }
-std::string pp(const pbes_system::propositional_variable_instantiation& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation >(x); }
 std::string pp(const pbes_system::propositional_variable_instantiation_list& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_list >(x); }
 std::string pp(const pbes_system::propositional_variable_instantiation_vector& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_vector >(x); }
+std::string pp(const pbes_system::and_& x) { return pbes_system::pp< pbes_system::and_ >(x); }
+std::string pp(const pbes_system::exists& x) { return pbes_system::pp< pbes_system::exists >(x); }
+std::string pp(const pbes_system::false_& x) { return pbes_system::pp< pbes_system::false_ >(x); }
+std::string pp(const pbes_system::fixpoint_symbol& x) { return pbes_system::pp< pbes_system::fixpoint_symbol >(x); }
+std::string pp(const pbes_system::forall& x) { return pbes_system::pp< pbes_system::forall >(x); }
+std::string pp(const pbes_system::imp& x) { return pbes_system::pp< pbes_system::imp >(x); }
+std::string pp(const pbes_system::not_& x) { return pbes_system::pp< pbes_system::not_ >(x); }
+std::string pp(const pbes_system::or_& x) { return pbes_system::pp< pbes_system::or_ >(x); }
+std::string pp(const pbes_system::pbes& x) { return pbes_system::pp< pbes_system::pbes >(x); }
+std::string pp(const pbes_system::pbes_equation& x) { return pbes_system::pp< pbes_system::pbes_equation >(x); }
+std::string pp(const pbes_system::pbes_expression& x) { return pbes_system::pp< pbes_system::pbes_expression >(x); }
+std::string pp(const pbes_system::propositional_variable& x) { return pbes_system::pp< pbes_system::propositional_variable >(x); }
+std::string pp(const pbes_system::propositional_variable_instantiation& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation >(x); }
+std::string pp(const pbes_system::true_& x) { return pbes_system::pp< pbes_system::true_ >(x); }
 void normalize_sorts(pbes_system::pbes_equation_vector& x, const data::data_specification& dataspec) { pbes_system::normalize_sorts< pbes_system::pbes_equation_vector >(x, dataspec); }
 void normalize_sorts(pbes_system::pbes& x, const data::data_specification& /* dataspec */) { pbes_system::normalize_sorts< pbes_system::pbes >(x, x.data()); }
 void translate_user_notation(pbes_system::pbes& x) { pbes_system::translate_user_notation< pbes_system::pbes >(x); }
@@ -124,6 +136,15 @@ std::set<propositional_variable_instantiation> pbes::occurring_variable_instanti
   }
   return result;
 }
+
+#ifdef MCRL2_USE_INDEX_TRAITS
+static bool register_hooks()
+{
+  register_propositional_variable_instantiation_hooks();
+  return true;
+}
+static bool mcrl2_register_pbes(register_hooks());
+#endif
 
 } // namespace pbes_system
 

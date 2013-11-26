@@ -146,10 +146,11 @@ static const size_t BAF_MAGIC = 0xbaf;
 //
 // History:
 //
-// before 2013    : version 0x0300
-// 29 August 2013 : version changed to 0x0301
+// before 2013      : version 0x0300
+// 29 August 2013   : version changed to 0x0301
+// 23 November 2013 : version changed to 0x0302 (introduction of index for variable types)
 
-static const size_t BAF_VERSION = 0x0301;
+static const size_t BAF_VERSION = 0x0302;
 
 static const size_t BAF_DEFAULT_TABLE_SIZE = 1024;
 

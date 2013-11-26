@@ -187,6 +187,32 @@ class pbes_equation
     }
 };
 
+//--- start generated class pbes_equation ---//
+/// \brief list of pbes_equations
+typedef atermpp::term_list<pbes_equation> pbes_equation_list;
+
+/// \brief vector of pbes_equations
+typedef std::vector<pbes_equation>    pbes_equation_vector;
+
+// prototype declaration
+std::string pp(const pbes_equation& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const pbes_equation& x)
+{
+  return out << pbes_system::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(pbes_equation& t1, pbes_equation& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class pbes_equation ---//
+
 inline bool
 operator==(const pbes_equation& x, const pbes_equation& y)
 {
@@ -209,17 +235,7 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
   return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
-/// \brief vector of PBES equations
-typedef std::vector<pbes_equation> pbes_equation_vector;
-
-/// \brief swap overload
-inline void swap(pbes_equation& t1, pbes_equation& t2)
-{
-  t1.swap(t2);
-}
-
 // template function overloads
-std::string pp(const pbes_equation& x);
 std::string pp(const pbes_equation_vector& x);
 void normalize_sorts(pbes_equation_vector& x, const data::data_specification& dataspec);
 std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x);

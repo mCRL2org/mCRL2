@@ -80,6 +80,18 @@ bool is_regular_formula(const atermpp::aterm_appl& x)
          regular_formulas::is_trans_or_nil(x);
 }
 
+// prototype declaration
+std::string pp(const regular_formula& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const regular_formula& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(regular_formula& t1, regular_formula& t2)
 {
@@ -112,6 +124,18 @@ inline
 bool is_nil(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsRegNil(x);
+}
+
+// prototype declaration
+std::string pp(const nil& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const nil& x)
+{
+  return out << regular_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -163,6 +187,18 @@ bool is_seq(const atermpp::aterm_appl& x)
   return core::detail::gsIsRegSeq(x);
 }
 
+// prototype declaration
+std::string pp(const seq& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const seq& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(seq& t1, seq& t2)
 {
@@ -212,6 +248,18 @@ bool is_alt(const atermpp::aterm_appl& x)
   return core::detail::gsIsRegAlt(x);
 }
 
+// prototype declaration
+std::string pp(const alt& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const alt& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(alt& t1, alt& t2)
 {
@@ -254,6 +302,18 @@ inline
 bool is_trans(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsRegTrans(x);
+}
+
+// prototype declaration
+std::string pp(const trans& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const trans& x)
+{
+  return out << regular_formulas::pp(x);
 }
 
 /// \brief swap overload
@@ -300,12 +360,23 @@ bool is_trans_or_nil(const atermpp::aterm_appl& x)
   return core::detail::gsIsRegTransOrNil(x);
 }
 
+// prototype declaration
+std::string pp(const trans_or_nil& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(trans_or_nil& t1, trans_or_nil& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 inline
@@ -338,9 +409,6 @@ inline const regular_formula& binary_left(const seq& x)            { return x.le
 inline const regular_formula& binary_right(const seq& x)           { return x.right(); }
 inline const regular_formula& binary_left(const alt& x)            { return x.left(); }
 inline const regular_formula& binary_right(const alt& x)           { return x.right(); }
-
-// template function overloads
-std::string pp(const regular_formula& x);
 
 } // namespace regular_formulas
 

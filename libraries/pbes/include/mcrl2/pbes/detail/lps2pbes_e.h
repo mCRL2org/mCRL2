@@ -87,7 +87,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 
   bool is_timed() const
   {
-    return T != data::variable();
+    return T != data::undefined_real_variable();
   }
 
   // the empty equation list

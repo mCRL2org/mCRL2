@@ -480,7 +480,9 @@ class parity_game_generator
       }
       else
       {
-        throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + print(psi) + "\n" + to_string(psi)));
+        std::ostringstream out;
+        out << "Error in parity_game_generator: unexpected expression " << psi << "\n" << atermpp::aterm(psi);
+        throw(std::runtime_error(out.str()));
       }
       mCRL2log(log::debug, "parity_game_generator") << print_bes_equation(index, result);
       return result;
@@ -498,7 +500,7 @@ class parity_game_generator
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        mCRL2log(log::info) << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
+        mCRL2log(log::info) << std::setw(4) << i->first << " " << i->second << std::endl;
       }
       mCRL2log(log::info) << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)

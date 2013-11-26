@@ -17,6 +17,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/data/is_simple_substitution.h"
 
 namespace mcrl2 {
@@ -230,7 +231,7 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
   expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::sequence_sequence_substitution::operator(const Expression&) is a deprecated interface!");
-    return data_expression();
+    return data::undefined_data_expression();
   }
 
   std::string to_string() const
@@ -304,7 +305,7 @@ struct pair_sequence_substitution: public std::unary_function<typename Container
   expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::pair_sequence_substitution::operator(const Expression&) is a deprecated interface!");
-    return data_expression();
+    return data::undefined_data_expression();
   }
 };
 
@@ -362,7 +363,7 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
   expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::map_substitution::operator(const Expression&) is a deprecated interface!");
-    return data_expression();
+    return data::undefined_data_expression();
   }
 
   std::string to_string() const
@@ -691,11 +692,8 @@ public:
       mCRL2log(log::debug2, "substitutions") << "Setting " << data::pp(m_variable) << " := " << e << std::endl;
       assert(e.defined());
 
-#ifndef MCRL2_USE_INDEX_TRAITS
-      size_t i = m_variable.name().function().number();
-#else
-      size_t i = data::index_traits<data::variable>::index(m_variable);
-#endif
+      size_t i = core::index_traits<data::variable, data::variable_key_type>::index(m_variable);
+
       if (e != m_variable)
       {
         // Set a new variable;
@@ -756,11 +754,8 @@ public:
   /// \brief Application operator; applies substitution to v.
   const expression_type& operator()(const variable_type& v) const
   {
-#ifndef MCRL2_USE_INDEX_TRAITS
-    const size_t i = v.name().function().number();
-#else
-    const size_t i = data::index_traits<data::variable>::index(v);
-#endif
+    const size_t i = core::index_traits<data::variable, data::variable_key_type>::index(v);
+
     if (i < m_index_table.size())
     {
       const size_t j = m_index_table[i];
@@ -1014,7 +1009,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     expression_type operator()(const Expression&) const
     {
       throw std::runtime_error("data::mutable_substitution_composer::operator(const Expression&) is a deprecated interface!");
-      return data_expression();
+      return data::undefined_data_expression();
     }
 
     assignment operator[](variable_type const& v)
@@ -1071,7 +1066,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     expression_type operator()(const Expression&) const
     {
       throw std::runtime_error("data::mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
-      return data_expression();
+      return data::undefined_data_expression();
     }
 
     assignment operator[](variable_type const& v)

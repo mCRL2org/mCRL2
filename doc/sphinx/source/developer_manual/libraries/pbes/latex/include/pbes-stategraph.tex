@@ -556,16 +556,17 @@ $\qquad \qquad \qquad \qquad \vee \left( Y\neq X\wedge \mathrm{source}%
 $\qquad \qquad \qquad \qquad \qquad v:=(Y,d_{Y}[k^{\prime }],e^{\prime })$
 \\ 
 $\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,v)\qquad $ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{else}}$ \\ 
-$\qquad \qquad \qquad \qquad \qquad v:=(Y,\bot ,e)$ \\ 
-$\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,v)\qquad $ \\ 
+$\qquad \qquad \qquad \text{\textbf{else}}$ \\ 
+$\qquad \qquad \qquad \qquad v:=(Y,\bot ,e)$ \\ 
+$\qquad \qquad \qquad \qquad insert(V,E,todo,u,v)\qquad $ \\ 
 \textbf{return} $(V,E),$%
 \end{tabular}%
 \end{equation*}%
 where $insert(V,E,todo,u,v)$ is shorthand for the statements%
-\begin{eqnarray*}
-\text{\textbf{if} }v &\notin &todo\text{ \textbf{then} }todo:=todo\cup \{v\}
-\\
-V &:&=V\cup \{v\} \\
-E &:&=E\cup \{(u,v)\}
-\end{eqnarray*}
+\begin{equation*}
+\begin{array}{l}
+\text{\textbf{if} }v\notin todo\text{ \textbf{then} }todo:=todo\cup \{v\} \\ 
+V:=V\cup \{v\} \\ 
+E:=E\cup \{(u,v)\}%
+\end{array}%
+\end{equation*}

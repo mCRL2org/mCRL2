@@ -47,6 +47,18 @@ typedef atermpp::term_list<binder_type> binder_type_list;
 /// \brief vector of binder_types
 typedef std::vector<binder_type>    binder_type_vector;
 
+// prototype declaration
+std::string pp(const binder_type& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const binder_type& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(binder_type& t1, binder_type& t2)
 {
@@ -79,6 +91,18 @@ inline
 bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsUntypedSetBagComp(x);
+}
+
+// prototype declaration
+std::string pp(const untyped_set_or_bag_comprehension_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_set_or_bag_comprehension_binder& x)
+{
+  return out << data::pp(x);
 }
 
 /// \brief swap overload
@@ -115,6 +139,18 @@ bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
   return core::detail::gsIsSetComp(x);
 }
 
+// prototype declaration
+std::string pp(const set_comprehension_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const set_comprehension_binder& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(set_comprehension_binder& t1, set_comprehension_binder& t2)
 {
@@ -147,6 +183,18 @@ inline
 bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsBagComp(x);
+}
+
+// prototype declaration
+std::string pp(const bag_comprehension_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const bag_comprehension_binder& x)
+{
+  return out << data::pp(x);
 }
 
 /// \brief swap overload
@@ -183,6 +231,18 @@ bool is_forall_binder(const atermpp::aterm_appl& x)
   return core::detail::gsIsForall(x);
 }
 
+// prototype declaration
+std::string pp(const forall_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const forall_binder& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(forall_binder& t1, forall_binder& t2)
 {
@@ -215,6 +275,18 @@ inline
 bool is_exists_binder(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsExists(x);
+}
+
+// prototype declaration
+std::string pp(const exists_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const exists_binder& x)
+{
+  return out << data::pp(x);
 }
 
 /// \brief swap overload
@@ -251,12 +323,23 @@ bool is_lambda_binder(const atermpp::aterm_appl& x)
   return core::detail::gsIsLambda(x);
 }
 
+// prototype declaration
+std::string pp(const lambda_binder& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const lambda_binder& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(lambda_binder& t1, lambda_binder& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated classes ---//
 
 } // namespace data

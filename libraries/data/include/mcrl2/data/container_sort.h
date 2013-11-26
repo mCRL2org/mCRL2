@@ -59,12 +59,23 @@ class container_sort: public sort_expression
     }
 };
 
+// prototype declaration
+std::string pp(const container_sort& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const container_sort& x)
+{
+  return out << data::pp(x);
+}
+
 /// \brief swap overload
 inline void swap(container_sort& t1, container_sort& t2)
 {
   t1.swap(t2);
 }
-
 //--- end generated class container_sort ---//
 
 /// \brief list of function sorts
