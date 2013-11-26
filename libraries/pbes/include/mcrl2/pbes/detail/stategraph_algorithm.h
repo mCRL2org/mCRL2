@@ -137,7 +137,12 @@ class value_graph_vertex: public control_flow_graph_vertex_base
 inline
 std::ostream& operator<<(std::ostream& out, const value_graph_vertex& u)
 {
-  return out << '(' << u.name() << ", " << u.index() << ") " << data::pp(u.variable()) << " = " << data::pp(u.value());
+  if (u.index() == data::undefined_index())
+  {
+    return out << '(' << u.name() << ", ?, ?=" << data::pp(u.value()) << ')';
+    assert(u.value() = data::undefined_data_expression());
+  }
+  return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << "=" << data::pp(u.value()) << ')';
 }
 
 /// \brief Algorithm class for the computation of the stategraph graph
